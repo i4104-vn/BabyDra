@@ -68,7 +68,7 @@ scrolledwindow {
     padding: 8px;
 }
 
-button.launcher-grid-item {
+.launcher-grid-item {
     background-color: transparent;
     background-image: none;
     border: none;
@@ -79,7 +79,7 @@ button.launcher-grid-item {
     min-width: 84px;
 }
 
-button.launcher-grid-item:hover {
+.launcher-grid-item:hover {
     background-color: rgba(124, 58, 237, 0.12) !important;
     background-image: none !important;
     color: #1c1c1e;
@@ -88,7 +88,7 @@ button.launcher-grid-item:hover {
     cursor: pointer;
 }
 
-button.launcher-grid-item:active {
+.launcher-grid-item:active {
     background-color: rgba(124, 58, 237, 0.10);
     transform: scale(0.98) translateY(0);
 }
@@ -101,7 +101,7 @@ button.launcher-grid-item:active {
     color: rgba(28, 28, 30, 0.82);
 }
 
-button.launcher-grid-item:hover .launcher-grid-label {
+.launcher-grid-item:hover .launcher-grid-label {
     color: #1c1c1e;
 }
 
@@ -123,7 +123,7 @@ button.launcher-grid-item:hover .launcher-grid-label {
     color: rgba(28, 28, 30, 0.9);
 }
 
-button.launcher-power-btn {
+.launcher-power-btn {
     background-color: rgba(0, 0, 0, 0.04);
     background-image: none;
     border: 1px solid rgba(0, 0, 0, 0.05);
@@ -133,7 +133,7 @@ button.launcher-power-btn {
     box-shadow: none;
 }
 
-button.launcher-power-btn:hover {
+.launcher-power-btn:hover {
     background-color: rgba(239, 68, 68, 0.12);
     border-color: rgba(239, 68, 68, 0.25);
     color: #dc2626;
@@ -168,7 +168,7 @@ popover>contents {
     padding: 0;
 }
 
-button.launcher-menu-item-btn {
+.launcher-menu-item-btn {
     background-color: transparent;
     background-image: none;
     border: none;
@@ -182,7 +182,7 @@ button.launcher-menu-item-btn {
     transition: all 150ms ease;
 }
 
-button.launcher-menu-item-btn:hover {
+.launcher-menu-item-btn:hover {
     background-color: rgba(0, 0, 0, 0.05);
     color: #1c1c1e;
 }
@@ -202,7 +202,7 @@ button.launcher-menu-item-btn:hover {
     padding-left: 12px;
 }
 
-button.launcher-list-item {
+.launcher-list-item {
     background-color: transparent;
     background-image: none;
     border: none;
@@ -214,14 +214,14 @@ button.launcher-list-item {
     min-height: 38px;
 }
 
-button.launcher-list-item:hover {
+.launcher-list-item:hover {
     background-color: rgba(124, 58, 237, 0.15) !important;
     background-image: none !important;
     color: #7c3aed !important;
     transform: none;
 }
 
-button.launcher-list-item:active {
+.launcher-list-item:active {
     background-color: rgba(124, 58, 237, 0.14) !important;
 }
 
@@ -241,7 +241,7 @@ button.launcher-list-item:active {
     margin-top: 10px;
 }
 
-button.launcher-browser-search-row {
+.launcher-browser-search-row {
     /* Flat style */
     background-color: rgba(124, 58, 237, 0.04);
     background-image: none;
@@ -253,7 +253,7 @@ button.launcher-browser-search-row {
     color: #7c3aed;
 }
 
-button.launcher-browser-search-row:hover {
+.launcher-browser-search-row:hover {
     background-color: rgba(124, 58, 237, 0.12) !important;
     background-image: none !important;
     border-color: transparent;
@@ -262,11 +262,11 @@ button.launcher-browser-search-row:hover {
     box-shadow: none;
 }
 
-button.launcher-browser-search-row:active {
+.launcher-browser-search-row:active {
     background-color: rgba(124, 58, 237, 0.16);
 }
 
-button.launcher-file-item {
+.launcher-file-item {
     background-color: transparent;
     background-image: none;
     border: none;
@@ -277,7 +277,7 @@ button.launcher-file-item {
     transition: all 150ms ease;
 }
 
-button.launcher-file-item:hover {
+.launcher-file-item:hover {
     background-color: rgba(124, 58, 237, 0.15) !important;
     background-image: none !important;
     color: #7c3aed !important;
@@ -289,14 +289,14 @@ button.launcher-file-item:hover {
 }
 
 /* Style for keyboard navigation focus - Youthful violet focus state */
-button.launcher-list-item:focus,
-button.launcher-list-item.selected,
-button.launcher-file-item:focus,
-button.launcher-file-item.selected,
-button.launcher-browser-search-row:focus,
-button.launcher-browser-search-row.selected,
-button.launcher-toggle-btn:focus,
-button.launcher-toggle-btn.selected {
+.launcher-list-item:focus,
+.launcher-list-item.selected,
+.launcher-file-item:focus,
+.launcher-file-item.selected,
+.launcher-browser-search-row:focus,
+.launcher-browser-search-row.selected,
+.launcher-toggle-btn:focus,
+.launcher-toggle-btn.selected {
     background-color: rgba(124, 58, 237, 0.20) !important;
     background-image: none !important;
     border: none !important;
@@ -304,16 +304,16 @@ button.launcher-toggle-btn.selected {
     outline: none;
 }
 
-button.launcher-list-item,
-button.launcher-file-item,
-button.launcher-toggle-btn,
-button.launcher-browser-search-row,
-button.launcher-grid-item,
-button.launcher-power-btn {
+.launcher-list-item,
+.launcher-file-item,
+.launcher-toggle-btn,
+.launcher-browser-search-row,
+.launcher-grid-item,
+.launcher-power-btn {
     cursor: pointer;
 }
 
-button.launcher-toggle-btn {
+.launcher-toggle-btn {
     background-color: transparent;
     background-image: none;
     border: none;
@@ -330,7 +330,7 @@ button.launcher-toggle-btn {
     letter-spacing: 0.8px;
 }
 
-button.launcher-toggle-btn:hover {
+.launcher-toggle-btn:hover {
     background-color: rgba(124, 58, 237, 0.12) !important;
     background-image: none !important;
     color: #7c3aed;
