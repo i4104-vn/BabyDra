@@ -44,7 +44,7 @@ button.taskbar-app-btn.active:hover {
 }
 
 popover.taskbar-popover {
-    background-color: rgb(20, 20, 26);
+    background-color: transparent;
     padding: 0;
     margin: 0;
     border: none;
@@ -52,16 +52,9 @@ popover.taskbar-popover {
 }
 
 popover.taskbar-popover>contents {
-    background-color: #14141c !important;
-    background-image: none !important;
-    -gtk-background-blur: none !important;
-    border: none !important;
-    border-radius: 12px !important;
-    padding: 8px !important;
-    box-shadow: none !important;
-    min-width: 200px !important;
-    max-width: 200px !important;
-    opacity: 1.0 !important;
+    padding: 8px;
+    min-width: 200px;
+    max-width: 200px;
 }
 
 .taskbar-previews-header-label {
