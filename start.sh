@@ -13,6 +13,7 @@ RC_FILE="$HOME/.config/labwc/rc.xml"
 echo "Stopping any running shell processes..."
 killall babydra-panel || true
 killall babydra-menu || true
+killall babydra-launcher || true
 killall dunst || true
 killall mako || true
 killall fnott || true
@@ -22,13 +23,13 @@ killall xfce4-notifyd || true
 mkdir -p "$HOME/.config/babydra"
 cp wallpaper.png "$HOME/.config/babydra/wallpaper.png"
 
-# Setup default autostart and rc.xml by copying them from configs/
+# Setup default autostart and rc.xml by copying them from configs/labwc/
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cp "$SCRIPT_DIR/configs/autostart" "$AUTOSTART_FILE"
+cp "$SCRIPT_DIR/configs/labwc/autostart" "$AUTOSTART_FILE"
 chmod +x "$AUTOSTART_FILE"
 echo "Configured labwc autostart at $AUTOSTART_FILE"
 
-cp "$SCRIPT_DIR/configs/rc.xml" "$RC_FILE"
+cp "$SCRIPT_DIR/configs/labwc/rc.xml" "$RC_FILE"
 echo "Configured labwc rc.xml at $RC_FILE"
 
 # Commented out software rendering to allow GPU hardware acceleration for 120 FPS.
