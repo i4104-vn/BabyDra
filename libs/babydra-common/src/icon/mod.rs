@@ -128,8 +128,37 @@ pub fn get_icon_colored(name: &str, size: i32, _color_hex: &str) -> gtk4::Image 
     get_icon(name, size)
 }
 
+pub fn get_logo_png(size: i32) -> gtk4::Image {
+    const PNG_BYTES: &[u8] = include_bytes!("../theme/logo.png");
+    let bytes = glib::Bytes::from(PNG_BYTES);
+    let stream = gio::MemoryInputStream::from_bytes(&bytes);
+    
+    let pixbuf = Pixbuf::from_stream_at_scale(
+        &stream,
+        size,
+        size,
+        true,
+        gio::Cancellable::NONE
+    );
+
+    match pixbuf {
+        Ok(pb) => {
+            let texture = Texture::for_pixbuf(&pb);
+            let img = gtk4::Image::from_paintable(Some(&texture));
+            img.set_pixel_size(size);
+            img
+        }
+        Err(_) => {
+            gtk4::Image::from_icon_name("image-missing")
+        }
+    }
+}
+
 /// Helper function to retrieve an SVG icon widget by name. Defaults to white in dark mode and dark gray in light mode.
 pub fn get_icon(name: &str, size: i32) -> gtk4::Image {
+    if name == "logo" {
+        return get_logo_png(size);
+    }
     let is_dark = is_dark_mode();
     let use_light_folder = !is_dark;
 
