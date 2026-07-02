@@ -40,8 +40,8 @@ entry.launcher-search>text {
 
 entry.launcher-search:focus {
     background-color: rgba(0, 0, 0, 0.05);
-    /* Youthful violet focus border */
-    border-color: rgba(124, 58, 237, 0.40);
+    /* Clean frosted black focus border */
+    border-color: rgba(0, 0, 0, 0.20);
     box-shadow: none;
     background-image: none;
 }
@@ -80,7 +80,7 @@ scrolledwindow {
 }
 
 .launcher-grid-item:hover {
-    background-color: rgba(124, 58, 237, 0.12);
+    background-color: rgba(0, 0, 0, 0.08);
     background-image: none;
     color: #1c1c1e;
     transform: scale(1.03) translateY(-1px);
@@ -88,7 +88,7 @@ scrolledwindow {
 }
 
 .launcher-grid-item:active {
-    background-color: rgba(124, 58, 237, 0.10);
+    background-color: rgba(0, 0, 0, 0.06);
     transform: scale(0.98) translateY(0);
 }
 
@@ -214,14 +214,14 @@ popover>contents {
 }
 
 .launcher-list-item:hover {
-    background-color: rgba(124, 58, 237, 0.15);
+    background-color: rgba(0, 0, 0, 0.08);
     background-image: none;
-    color: #7c3aed;
+    color: #1c1c1e;
     transform: none;
 }
 
 .launcher-list-item:active {
-    background-color: rgba(124, 58, 237, 0.14);
+    background-color: rgba(0, 0, 0, 0.06);
 }
 
 .launcher-list-label {
@@ -234,26 +234,26 @@ popover>contents {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    /* Youthful violet section header */
-    color: rgba(109, 40, 217, 0.8);
+    /* Clean frosted black section header */
+    color: rgba(0, 0, 0, 0.5);
     margin-bottom: 6px;
     margin-top: 10px;
 }
 
 .launcher-browser-search-row {
     /* Flat style */
-    background-color: rgba(124, 58, 237, 0.04);
+    background-color: rgba(0, 0, 0, 0.02);
     background-image: none;
-    border: 1px solid rgba(124, 58, 237, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 10px;
     padding: 8px 12px;
     margin-top: 12px;
     transition: all 180ms ease;
-    color: #7c3aed;
+    color: rgba(0, 0, 0, 0.7);
 }
 
 .launcher-browser-search-row:hover {
-    background-color: rgba(124, 58, 237, 0.12);
+    background-color: rgba(0, 0, 0, 0.08);
     background-image: none;
     border-color: transparent;
     color: #1c1c1e;
@@ -262,7 +262,7 @@ popover>contents {
 }
 
 .launcher-browser-search-row:active {
-    background-color: rgba(124, 58, 237, 0.16);
+    background-color: rgba(0, 0, 0, 0.06);
 }
 
 .launcher-file-item {
@@ -277,9 +277,9 @@ popover>contents {
 }
 
 .launcher-file-item:hover {
-    background-color: rgba(124, 58, 237, 0.15);
+    background-color: rgba(0, 0, 0, 0.08);
     background-image: none;
-    color: #7c3aed;
+    color: #1c1c1e;
 }
 
 .launcher-file-label {
@@ -287,7 +287,7 @@ popover>contents {
     font-weight: 500;
 }
 
-/* Style for keyboard navigation focus - Youthful violet focus state */
+/* Style for keyboard navigation focus - Clean frosted focus state */
 .launcher-list-item:focus,
 .launcher-list-item.selected,
 .launcher-file-item:focus,
@@ -296,7 +296,7 @@ popover>contents {
 .launcher-browser-search-row.selected,
 .launcher-toggle-btn:focus,
 .launcher-toggle-btn.selected {
-    background-color: rgba(124, 58, 237, 0.20);
+    background-color: rgba(0, 0, 0, 0.12);
     background-image: none;
     border: none;
     color: #1c1c1e;
@@ -311,8 +311,8 @@ popover>contents {
     padding: 6px 12px;
     margin: 8px 0 2px 0;
     transition: all 180ms ease;
-    /* Match section header violet coloring */
-    color: rgba(109, 40, 217, 0.8);
+    /* Match section header frosted black coloring */
+    color: rgba(0, 0, 0, 0.5);
     min-height: 38px;
     font-size: 10px;
     font-weight: 700;
@@ -321,7 +321,7 @@ popover>contents {
 }
 
 .launcher-toggle-btn:hover {
-    background-color: rgba(124, 58, 237, 0.12);
+    background-color: rgba(0, 0, 0, 0.08);
     background-image: none;
-    color: #7c3aed;
+    color: rgba(0, 0, 0, 0.8);
 }
