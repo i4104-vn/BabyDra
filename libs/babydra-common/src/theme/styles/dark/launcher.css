@@ -253,7 +253,7 @@ button.launcher-browser-search-row {
 
 button.launcher-browser-search-row:hover {
     background-color: rgba(139, 92, 246, 0.14);
-    border-color: rgba(139, 92, 246, 0.35);
+    border-color: transparent;
     color: #ffffff;
     transform: none;
     box-shadow: none;
@@ -294,9 +294,18 @@ button.launcher-browser-search-row.selected,
 button.launcher-toggle-btn:focus,
 button.launcher-toggle-btn.selected {
     background-color: rgba(139, 92, 246, 0.18) !important;
-    border: 1px solid rgba(139, 92, 246, 0.40) !important;
+    border: none !important;
     color: #ffffff !important;
     outline: none;
+}
+
+button.launcher-list-item,
+button.launcher-file-item,
+button.launcher-toggle-btn,
+button.launcher-browser-search-row,
+button.launcher-grid-item,
+button.launcher-power-btn {
+    cursor: pointer;
 }
 
 button.launcher-toggle-btn {
