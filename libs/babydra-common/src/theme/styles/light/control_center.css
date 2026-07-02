@@ -592,17 +592,15 @@ scrollbar,
 scrollbar button,
 scrollbar trough,
 scrollbar slider {
-    background: transparent !important;
-    background-color: transparent !important;
-    border: none !important;
-    border-color: transparent !important;
-    box-shadow: none !important;
-    outline: none !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    width: 0 !important;
-    height: 0 !important;
-    opacity: 0 !important;
+    background: transparent;
+    background-color: transparent;
+    border: none;
+    border-color: transparent;
+    box-shadow: none;
+    outline: none;
+    min-width: 0;
+    min-height: 0;
+    opacity: 0;
 }
 
 listbox,
@@ -611,23 +609,23 @@ listrow:hover,
 listrow:focus,
 listrow:active,
 listrow:selected {
-    background-color: transparent !important;
-    border: none !important;
-    border-color: transparent !important;
-    box-shadow: none !important;
-    outline: none !important;
-    outline-color: transparent !important;
+    background-color: transparent;
+    border: none;
+    border-color: transparent;
+    box-shadow: none;
+    outline: none;
+    outline-color: transparent;
 }
 
 popover,
 popover.taskbar-popover {
-    background-color: transparent !important;
-    background-image: none !important;
-    border: none !important;
-    box-shadow: none !important;
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
 }
 
 popover > arrow {
-    background-color: transparent !important;
-    border: none !important;
+    background-color: transparent;
+    border: none;
 }
