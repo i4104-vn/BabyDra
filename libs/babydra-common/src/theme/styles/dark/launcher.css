@@ -276,10 +276,33 @@ button.launcher-list-item.selected,
 button.launcher-file-item:focus,
 button.launcher-file-item.selected,
 button.launcher-browser-search-row:focus,
-button.launcher-browser-search-row.selected {
+button.launcher-browser-search-row.selected,
+button.launcher-toggle-btn:focus,
+button.launcher-toggle-btn.selected {
     background-color: rgba(255, 255, 255, 0.12) !important;
     border: 1px solid rgba(96, 165, 250, 0.40) !important;
     color: #ffffff !important;
     outline: none;
+}
+
+button.launcher-toggle-btn {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    border-radius: 12px;
+    padding: 6px 12px;
+    margin: 8px 0 2px 0;
+    transition: all 180ms ease;
+    color: rgba(96, 165, 250, 0.75);
+    min-height: 38px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+button.launcher-toggle-btn:hover {
+    background-color: rgba(96, 165, 250, 0.08);
+    color: #93c5fd;
 }
 
