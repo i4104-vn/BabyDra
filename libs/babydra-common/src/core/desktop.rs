@@ -15,6 +15,9 @@ pub struct DesktopApp {
     pub exec: String,
     /// System icon theme name or filepath.
     pub icon: Option<String>,
+    /// Whether this app was installed as a dependency / system helper.
+    #[serde(default)]
+    pub is_dependency: bool,
     /// Unique Wayland application ID if this app is currently running.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app_id: Option<String>,
@@ -97,15 +100,33 @@ fn scan_desktop_apps_from_filesystem() -> Vec<DesktopApp> {
             .join("applications"),
     ];
 
+    let explicit_packages = get_explicitly_installed_packages();
+
     for path in paths {
         if !path.exists() {
             continue;
         }
-        if let Ok(entries) = std::fs::read_dir(path) {
+        let is_system_dir = path.to_string_lossy().contains("/usr/share");
+        if let Ok(entries) = std::fs::read_dir(&path) {
             for entry in entries.flatten() {
                 let entry_path = entry.path();
                 if entry_path.extension().map(|e| e == "desktop").unwrap_or(false) {
-                    if let Some(app) = parse_desktop_file(&entry_path) {
+                    if let Some(mut app) = parse_desktop_file(&entry_path) {
+                        let filename = entry_path.file_name().and_then(|f| f.to_str()).unwrap_or("");
+                        let mut is_dep = false;
+                        if is_system_dir {
+                            let mut pacman_success = false;
+                            if !explicit_packages.is_empty() {
+                                if let Some(owner) = get_package_owner(&entry_path) {
+                                    pacman_success = true;
+                                    is_dep = !explicit_packages.contains(&owner);
+                                }
+                            }
+                            if !pacman_success {
+                                is_dep = is_dependency_heuristic(filename, &app.name, &app.exec);
+                            }
+                        }
+                        app.is_dependency = is_dep;
                         apps.push(app);
                     }
                 }
@@ -213,7 +234,7 @@ fn parse_desktop_file(path: &Path) -> Option<DesktopApp> {
     }
 
     match (name, exec) {
-        (Some(n), Some(e)) => Some(DesktopApp { name: n, exec: e, icon, app_id: None, window_title: None }),
+        (Some(n), Some(e)) => Some(DesktopApp { name: n, exec: e, icon, is_dependency: false, app_id: None, window_title: None }),
         _ => None,
     }
 }
@@ -234,6 +255,62 @@ impl DesktopApp {
         let title = self.window_title.as_deref().unwrap_or("");
         Some(get_window_hash(app_id, title))
     }
+}
+
+fn get_explicitly_installed_packages() -> std::collections::HashSet<String> {
+    let mut set = std::collections::HashSet::new();
+    if let Ok(output) = std::process::Command::new("pacman").args(&["-Qqe"]).output() {
+        if output.status.success() {
+            for line in String::from_utf8_lossy(&output.stdout).lines() {
+                set.insert(line.trim().to_string());
+            }
+        }
+    }
+    set
+}
+
+fn get_package_owner(path: &Path) -> Option<String> {
+    let output = std::process::Command::new("pacman")
+        .args(&["-Qqo", path.to_str()?])
+        .output()
+        .ok()?;
+    if output.status.success() {
+        Some(String::from_utf8_lossy(&output.stdout).trim().to_string())
+    } else {
+        None
+    }
+}
+
+fn is_dependency_heuristic(filename: &str, _name: &str, exec: &str) -> bool {
+    let filename_lower = filename.to_lowercase();
+    let exec_lower = exec.to_lowercase();
+
+    let known_deps = [
+        "avahi-discover", "bssh", "bvnc", "qv4l2", "qvidcap", 
+        "gcr-prompter", "gcr-viewer", "xdg-desktop-portal",
+        "footclient", "foot-server", "kitty-open", "ktelnetservice",
+        "pinentry", "xwayland", "fcitx5-wayland-launcher"
+    ];
+
+    for dep in &known_deps {
+        if filename_lower.contains(dep) || exec_lower.contains(dep) {
+            return true;
+        }
+    }
+
+    if filename_lower.starts_with("kcm_") || filename_lower.starts_with("org.kde.kiod") || filename_lower.starts_with("org.kde.knewstuff") || filename_lower.starts_with("org.kde.ksecretd") {
+        return true;
+    }
+
+    if filename_lower.contains("geo-handler") {
+        return true;
+    }
+
+    if filename_lower.starts_with("org.fcitx.fcitx5-") && !filename_lower.contains("config") {
+        return true;
+    }
+
+    false
 }
 
 

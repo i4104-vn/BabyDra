@@ -25,6 +25,7 @@ pub fn build_footer_layout() -> (
 
     let power_btn = gtk4::Button::new();
     power_btn.add_css_class("launcher-power-btn");
+    power_btn.set_cursor_from_name(Some("pointer"));
     let power_icon = babydra_common::icon::get_icon_colored("power", 20, "#ff5555");
     power_btn.set_child(Some(&power_icon));
 
@@ -37,12 +38,15 @@ pub fn build_footer_layout() -> (
 
     let shutdown_btn = gtk4::Button::with_label(&babydra_common::i18n::t("launcher.shutdown"));
     shutdown_btn.add_css_class("launcher-menu-item-btn");
+    shutdown_btn.set_cursor_from_name(Some("pointer"));
 
     let reboot_btn = gtk4::Button::with_label(&babydra_common::i18n::t("launcher.restart"));
     reboot_btn.add_css_class("launcher-menu-item-btn");
+    reboot_btn.set_cursor_from_name(Some("pointer"));
 
     let suspend_btn = gtk4::Button::with_label(&babydra_common::i18n::t("launcher.suspend"));
     suspend_btn.add_css_class("launcher-menu-item-btn");
+    suspend_btn.set_cursor_from_name(Some("pointer"));
 
     power_menu.append(&shutdown_btn);
     power_menu.append(&reboot_btn);

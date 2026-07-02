@@ -35,6 +35,13 @@ pub fn populate_search_results(
             win_to_close.close();
         });
 
+        let motion = gtk4::EventControllerMotion::new();
+        let btn_clone = browser_btn.clone();
+        motion.connect_enter(move |_, _, _| {
+            btn_clone.grab_focus();
+        });
+        browser_btn.add_controller(motion);
+
         right_content.append(&browser_btn);
         right_scroll.set_child(Some(&right_content));
 

@@ -63,12 +63,58 @@ pub fn build_launcher_ui(
     let apps = find_desktop_apps();
     let apps_rc = Rc::new(apps);
 
+    let toggle_btn = gtk4::Button::new();
+    toggle_btn.add_css_class("launcher-toggle-btn");
+    toggle_btn.set_cursor_from_name(Some("pointer"));
+    let toggle_label_text_expanded = format!("{}  ▼", babydra_common::i18n::t("launcher.other_apps"));
+    let toggle_label_text_collapsed = format!("{}  ▶", babydra_common::i18n::t("launcher.other_apps"));
+    toggle_btn.set_label(&toggle_label_text_collapsed);
+
     let mut app_widgets = Vec::new();
+    let mut installed_widgets = Vec::new();
+    let mut dep_widgets = Vec::new();
+
     for app in apps_rc.iter() {
         let btn = create_list_app_widget(app, &window);
-        left_list_box.append(&btn);
-        app_widgets.push((app.clone(), btn));
+        app_widgets.push((app.clone(), btn.clone()));
+        if app.is_dependency {
+            dep_widgets.push((app.clone(), btn));
+        } else {
+            installed_widgets.push((app.clone(), btn));
+        }
     }
+
+    for (_, btn) in &installed_widgets {
+        left_list_box.append(btn);
+    }
+
+    left_list_box.append(&toggle_btn);
+
+    for (_, btn) in &dep_widgets {
+        left_list_box.append(btn);
+        btn.set_visible(false);
+    }
+
+    let expanded = Rc::new(RefCell::new(false));
+    let expanded_clone = expanded.clone();
+    let dep_widgets_clone = dep_widgets.clone();
+    let toggle_btn_clone = toggle_btn.clone();
+    let toggle_label_text_expanded_clone = toggle_label_text_expanded.clone();
+    let toggle_label_text_collapsed_clone = toggle_label_text_collapsed.clone();
+
+    toggle_btn.connect_clicked(move |_| {
+        let mut exp = expanded_clone.borrow_mut();
+        *exp = !*exp;
+        if *exp {
+            toggle_btn_clone.set_label(&toggle_label_text_expanded_clone);
+        } else {
+            toggle_btn_clone.set_label(&toggle_label_text_collapsed_clone);
+        }
+        for (_, btn) in &dep_widgets_clone {
+            btn.set_visible(*exp);
+        }
+    });
+
     let app_widgets_rc = Rc::new(app_widgets);
     left_scroll.set_child(Some(&left_list_box));
 
@@ -85,13 +131,28 @@ pub fn build_launcher_ui(
         let app_widgets = app_widgets_rc.clone();
         let right_scroll = right_scroll.clone();
         let window = window.clone();
+        let toggle_btn = toggle_btn.clone();
+        let expanded = expanded.clone();
+        let dep_count = dep_widgets.len();
 
         move || {
             let query = current_query.borrow().trim().to_lowercase();
 
-            for (app, btn) in app_widgets.iter() {
-                let matches = query.is_empty() || app.name.to_lowercase().contains(&query);
-                btn.set_visible(matches);
+            if query.is_empty() {
+                toggle_btn.set_visible(dep_count > 0);
+                for (app, btn) in app_widgets.iter() {
+                    if app.is_dependency {
+                        btn.set_visible(*expanded.borrow());
+                    } else {
+                        btn.set_visible(true);
+                    }
+                }
+            } else {
+                toggle_btn.set_visible(false);
+                for (app, btn) in app_widgets.iter() {
+                    let matches = app.name.to_lowercase().contains(&query);
+                    btn.set_visible(matches);
+                }
             }
 
             populate_search_results(
@@ -277,6 +338,20 @@ pub fn build_launcher_ui(
         40,
         450,
     );
+
+    let left_list_box_focus_change = left_list_box.clone();
+    let right_scroll_focus_change = right_scroll.clone();
+    let selected_index_focus_change = selected_index.clone();
+
+    window.connect_focus_widget_notify(move |win| {
+        if let Some(focus_widget) = gtk4::prelude::RootExt::focus(win) {
+            let buttons = get_visible_selectable_buttons(&left_list_box_focus_change, &right_scroll_focus_change);
+            if let Some(pos) = buttons.iter().position(|b| b.clone().upcast::<gtk4::Widget>() == focus_widget) {
+                *selected_index_focus_change.borrow_mut() = Some(pos);
+                update_highlight(&left_list_box_focus_change, &right_scroll_focus_change, Some(pos));
+            }
+        }
+    });
 
     let left_list_box_focus = left_list_box.clone();
     let right_scroll_focus = right_scroll.clone();

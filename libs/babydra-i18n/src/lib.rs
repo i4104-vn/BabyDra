@@ -63,6 +63,7 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("launcher.search_placeholder", "Search apps or files...");
             map.insert("launcher.welcome", "Type keywords to search apps and files...");
             map.insert("launcher.apps", "Applications");
+            map.insert("launcher.other_apps", "Other Applications");
             map.insert("launcher.files", "Files");
             map.insert("launcher.no_results", "No matching results found");
             map.insert("launcher.google_search", "Search Google for \"{}\"");
@@ -172,6 +173,7 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("launcher.search_placeholder", "Tìm ứng dụng hoặc tệp tin...");
             map.insert("launcher.welcome", "Nhập từ khóa để tìm kiếm ứng dụng và tệp tin...");
             map.insert("launcher.apps", "Ứng dụng");
+            map.insert("launcher.other_apps", "Ứng dụng khác");
             map.insert("launcher.files", "Tập tin");
             map.insert("launcher.no_results", "Không tìm thấy kết quả phù hợp");
             map.insert("launcher.google_search", "Tìm trên Google cho \"{}\"");

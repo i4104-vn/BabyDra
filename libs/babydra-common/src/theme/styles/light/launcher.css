@@ -4,45 +4,59 @@
 }
 
 .launcher-box {
+    /* Solid flat light theme background with modern borders */
     background-color: rgba(255, 255, 255, 0.98);
-    background-image: linear-gradient(160deg, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.15) 100%);
+    background-image: none;
     -gtk-background-blur: 24;
     border: 1px solid rgba(0, 0, 0, 0.08);
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
-    border-radius: 24px;
+    border-radius: 20px;
     color: #1c1c1e;
     padding: 0px;
     overflow: hidden;
     box-shadow: none;
 }
 
-entry.launcher-search,
-entry.launcher-search>text {
-    background-color: rgba(255, 255, 255, 0.98);
+entry.launcher-search {
+    /* Flat background, larger text */
+    background-color: rgba(0, 0, 0, 0.03);
     background-image: none;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    border-radius: 12px;
     color: #1c1c1e;
-    padding: 12px 16px;
-    font-size: 13px;
+    padding: 14px 18px;
+    font-size: 14px;
     font-weight: 500;
-    transition: all 200ms ease;
+    transition: all 180ms ease;
     box-shadow: none;
 }
 
-entry.launcher-search:focus,
-entry.launcher-search:focus>text {
-    background-color: rgba(255, 255, 255, 0.09);
-    border-color: rgba(96, 165, 250, 0.40);
-    border-top-color: rgba(147, 197, 253, 0.55);
+entry.launcher-search>text {
+    background: transparent;
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+}
+
+entry.launcher-search:focus {
+    background-color: rgba(0, 0, 0, 0.05);
+    /* Clean frosted black focus border */
+    border-color: rgba(0, 0, 0, 0.20);
     box-shadow: none;
     background-image: none;
+}
+
+entry.launcher-search:focus>text {
+    background: transparent;
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
 }
 
 entry.launcher-search placeholder,
 entry.launcher-search>text>placeholder {
-    color: rgba(28, 28, 30, 0.35);
+    color: rgba(28, 28, 30, 0.38);
     opacity: 1.0;
 }
 
@@ -54,27 +68,27 @@ scrolledwindow {
     padding: 8px;
 }
 
-button.launcher-grid-item {
+.launcher-grid-item {
     background-color: transparent;
     background-image: none;
     border: none;
-    border-radius: 16px;
+    border-radius: 14px;
     padding: 12px 6px;
-    transition: all 200ms ease;
+    transition: all 180ms ease;
     color: rgba(28, 28, 30, 0.78);
     min-width: 84px;
 }
 
-button.launcher-grid-item:hover {
-    background-color: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+.launcher-grid-item:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    background-image: none;
     color: #1c1c1e;
-    transform: scale(1.05) translateY(-2px);
+    transform: scale(1.03) translateY(-1px);
     box-shadow: none;
 }
 
-button.launcher-grid-item:active {
-    background-color: rgba(0, 0, 0, 0.08);
+.launcher-grid-item:active {
+    background-color: rgba(0, 0, 0, 0.06);
     transform: scale(0.98) translateY(0);
 }
 
@@ -86,20 +100,20 @@ button.launcher-grid-item:active {
     color: rgba(28, 28, 30, 0.82);
 }
 
-button.launcher-grid-item:hover .launcher-grid-label {
+.launcher-grid-item:hover .launcher-grid-label {
     color: #1c1c1e;
 }
 
 .launcher-footer-separator {
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: rgba(0, 0, 0, 0.06);
     margin: 14px 0 8px 0;
 }
 
 .launcher-footer-box {
     padding: 6px 12px;
-    background-color: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    border-radius: 14px;
+    background-color: rgba(0, 0, 0, 0.01);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    border-radius: 12px;
 }
 
 .launcher-profile-label {
@@ -108,19 +122,20 @@ button.launcher-grid-item:hover .launcher-grid-label {
     color: rgba(28, 28, 30, 0.9);
 }
 
-button.launcher-power-btn {
+.launcher-power-btn {
     background-color: rgba(0, 0, 0, 0.04);
     background-image: none;
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
     padding: 6px;
     transition: all 180ms ease;
     box-shadow: none;
 }
 
-button.launcher-power-btn:hover {
+.launcher-power-btn:hover {
     background-color: rgba(239, 68, 68, 0.12);
     border-color: rgba(239, 68, 68, 0.25);
+    color: #dc2626;
     box-shadow: none;
 }
 
@@ -140,11 +155,10 @@ popover {
 }
 
 popover>contents {
-    background-color: rgba(255, 255, 255, 0.07);
-    background-image: linear-gradient(160deg, rgba(0, 0, 0, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
-    border-radius: 14px;
+    background-color: rgba(255, 255, 255, 0.95);
+    background-image: none;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
     padding: 4px;
     box-shadow: none;
 }
@@ -153,7 +167,7 @@ popover>contents {
     padding: 0;
 }
 
-button.launcher-menu-item-btn {
+.launcher-menu-item-btn {
     background-color: transparent;
     background-image: none;
     border: none;
@@ -167,8 +181,8 @@ button.launcher-menu-item-btn {
     transition: all 150ms ease;
 }
 
-button.launcher-menu-item-btn:hover {
-    background-color: rgba(0, 0, 0, 0.08);
+.launcher-menu-item-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
     color: #1c1c1e;
 }
 
@@ -178,7 +192,8 @@ button.launcher-menu-item-btn:hover {
 
 .launcher-left-column {
     background-color: transparent;
-    border-right: 1px solid rgba(0, 0, 0, 0.05);
+    /* Flat split - remove the hard column border separator */
+    border-right: none;
     padding-right: 12px;
 }
 
@@ -186,28 +201,27 @@ button.launcher-menu-item-btn:hover {
     padding-left: 12px;
 }
 
-button.launcher-list-item {
+.launcher-list-item {
     background-color: transparent;
     background-image: none;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     padding: 6px 12px;
     margin: 2px 0;
     transition: all 180ms ease;
-    color: rgba(28, 28, 30, 0.75);
+    color: rgba(28, 28, 30, 0.70);
     min-height: 38px;
 }
 
-button.launcher-list-item:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.05);
+.launcher-list-item:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    background-image: none;
     color: #1c1c1e;
-    transform: scale(1.02);
+    transform: none;
 }
 
-button.launcher-list-item:active {
-    background-color: rgba(255, 255, 255, 0.09);
-    transform: scale(0.98);
+.launcher-list-item:active {
+    background-color: rgba(0, 0, 0, 0.06);
 }
 
 .launcher-list-label {
@@ -220,49 +234,52 @@ button.launcher-list-item:active {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    color: rgba(96, 165, 250, 0.55);
+    /* Clean frosted black section header */
+    color: rgba(0, 0, 0, 0.5);
     margin-bottom: 6px;
     margin-top: 10px;
 }
 
-button.launcher-browser-search-row {
-    background-color: rgba(59, 130, 246, 0.06);
+.launcher-browser-search-row {
+    /* Flat style */
+    background-color: rgba(0, 0, 0, 0.02);
     background-image: none;
-    border: 1px dashed rgba(96, 165, 250, 0.20);
-    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
     padding: 8px 12px;
     margin-top: 12px;
     transition: all 180ms ease;
-    color: #93c5fd;
+    color: rgba(0, 0, 0, 0.7);
 }
 
-button.launcher-browser-search-row:hover {
-    background-color: rgba(0, 122, 255, 0.12);
-    border-color: rgba(96, 165, 250, 0.40);
+.launcher-browser-search-row:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    background-image: none;
+    border-color: transparent;
     color: #1c1c1e;
-    transform: scale(1.01);
+    transform: none;
     box-shadow: none;
 }
 
-button.launcher-browser-search-row:active {
-    transform: scale(0.99);
+.launcher-browser-search-row:active {
+    background-color: rgba(0, 0, 0, 0.06);
 }
 
-button.launcher-file-item {
+.launcher-file-item {
     background-color: transparent;
     background-image: none;
     border: none;
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 6px 12px;
     margin: 1px 0;
-    color: rgba(28, 28, 30, 0.68);
+    color: rgba(28, 28, 30, 0.65);
     transition: all 150ms ease;
 }
 
-button.launcher-file-item:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+.launcher-file-item:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    background-image: none;
     color: #1c1c1e;
-    transform: scale(1.01);
 }
 
 .launcher-file-label {
@@ -270,15 +287,41 @@ button.launcher-file-item:hover {
     font-weight: 500;
 }
 
-/* Style for keyboard navigation focus */
-button.launcher-list-item:focus,
-button.launcher-list-item.selected,
-button.launcher-file-item:focus,
-button.launcher-file-item.selected,
-button.launcher-browser-search-row:focus,
-button.launcher-browser-search-row.selected {
-    background-color: rgba(255, 255, 255, 0.12) !important;
-    border: 1px solid rgba(96, 165, 250, 0.40) !important;
-    color: #1c1c1e !important;
+/* Style for keyboard navigation focus - Clean frosted focus state */
+.launcher-list-item:focus,
+.launcher-list-item.selected,
+.launcher-file-item:focus,
+.launcher-file-item.selected,
+.launcher-browser-search-row:focus,
+.launcher-browser-search-row.selected,
+.launcher-toggle-btn:focus,
+.launcher-toggle-btn.selected {
+    background-color: rgba(0, 0, 0, 0.12);
+    background-image: none;
+    border: none;
+    color: #1c1c1e;
     outline: none;
+}
+
+.launcher-toggle-btn {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    border-radius: 10px;
+    padding: 6px 12px;
+    margin: 8px 0 2px 0;
+    transition: all 180ms ease;
+    /* Match section header frosted black coloring */
+    color: rgba(0, 0, 0, 0.5);
+    min-height: 38px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.launcher-toggle-btn:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    background-image: none;
+    color: rgba(0, 0, 0, 0.8);
 }
