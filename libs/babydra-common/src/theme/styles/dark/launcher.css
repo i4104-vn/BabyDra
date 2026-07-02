@@ -4,12 +4,13 @@
 }
 
 .launcher-box {
-    background-color: rgba(14, 14, 18, 0.96);
-    background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(0, 0, 0, 0.15) 100%);
+    /* Flat dark theme with no linear gradients and extremely subtle transparency */
+    background-color: rgba(18, 18, 24, 0.96);
+    background-image: none;
     -gtk-background-blur: 24;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-top: 1px solid rgba(255, 255, 255, 0.28);
-    border-radius: 24px;
+    /* Ultra-thin border */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
     color: #ffffff;
     padding: 0px;
     overflow: hidden;
@@ -18,24 +19,24 @@
 
 entry.launcher-search,
 entry.launcher-search > text {
-    background-color: rgba(255, 255, 255, 0.05);
+    /* Cleaner search input background, larger text */
+    background-color: rgba(255, 255, 255, 0.04);
     background-image: none;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-top: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
     color: #ffffff;
-    padding: 12px 16px;
-    font-size: 13px;
+    padding: 14px 18px;
+    font-size: 14px;
     font-weight: 500;
-    transition: all 200ms ease;
+    transition: all 180ms ease;
     box-shadow: none;
 }
 
 entry.launcher-search:focus,
 entry.launcher-search:focus > text {
-    background-color: rgba(255, 255, 255, 0.09);
-    border-color: rgba(96, 165, 250, 0.40);
-    border-top-color: rgba(147, 197, 253, 0.55);
+    background-color: rgba(255, 255, 255, 0.06);
+    /* Modern, youthful violet focus ring */
+    border-color: rgba(139, 92, 246, 0.50);
     box-shadow: none;
     background-image: none;
 }
@@ -58,23 +59,22 @@ button.launcher-grid-item {
     background-color: transparent;
     background-image: none;
     border: none;
-    border-radius: 16px;
+    border-radius: 14px;
     padding: 12px 6px;
-    transition: all 200ms ease;
+    transition: all 180ms ease;
     color: rgba(255, 255, 255, 0.78);
     min-width: 84px;
 }
 
 button.launcher-grid-item:hover {
-    background-color: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: rgba(139, 92, 246, 0.08);
     color: #ffffff;
-    transform: scale(1.05) translateY(-2px);
+    transform: scale(1.03) translateY(-1px);
     box-shadow: none;
 }
 
 button.launcher-grid-item:active {
-    background-color: rgba(255, 255, 255, 0.10);
+    background-color: rgba(139, 92, 246, 0.12);
     transform: scale(0.98) translateY(0);
 }
 
@@ -97,9 +97,9 @@ button.launcher-grid-item:hover .launcher-grid-label {
 
 .launcher-footer-box {
     padding: 6px 12px;
-    background-color: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 14px;
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 12px;
 }
 
 .launcher-profile-label {
@@ -111,21 +111,22 @@ button.launcher-grid-item:hover .launcher-grid-label {
 button.launcher-power-btn {
     background-color: rgba(255, 255, 255, 0.04);
     background-image: none;
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
     padding: 6px;
     transition: all 180ms ease;
     box-shadow: none;
 }
 
 button.launcher-power-btn:hover {
-    background-color: rgba(239, 68, 68, 0.12);
-    border-color: rgba(239, 68, 68, 0.25);
+    background-color: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.30);
+    color: #f87171;
     box-shadow: none;
 }
 
 .launcher-no-results {
-    color: rgba(255, 255, 255, 0.38);
+    color: rgba(255, 255, 255, 0.35);
     font-size: 12px;
     font-weight: 600;
     margin: 40px 0;
@@ -140,11 +141,10 @@ popover {
 }
 
 popover > contents {
-    background-color: rgba(255, 255, 255, 0.07);
-    background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-top: 1px solid rgba(255, 255, 255, 0.20);
-    border-radius: 14px;
+    background-color: rgba(255, 255, 255, 0.05);
+    background-image: none;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
     padding: 4px;
     box-shadow: none;
 }
@@ -168,7 +168,7 @@ button.launcher-menu-item-btn {
 }
 
 button.launcher-menu-item-btn:hover {
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: rgba(255, 255, 255, 0.06);
     color: #ffffff;
 }
 
@@ -178,7 +178,8 @@ button.launcher-menu-item-btn:hover {
 
 .launcher-left-column {
     background-color: transparent;
-    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    /* Flat split - remove the hard column border separator */
+    border-right: none;
     padding-right: 12px;
 }
 
@@ -190,24 +191,22 @@ button.launcher-list-item {
     background-color: transparent;
     background-image: none;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     padding: 6px 12px;
     margin: 2px 0;
     transition: all 180ms ease;
-    color: rgba(255, 255, 255, 0.75);
+    color: rgba(255, 255, 255, 0.70);
     min-height: 38px;
 }
 
 button.launcher-list-item:hover {
-    background-color: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    color: #ffffff;
-    transform: scale(1.02);
+    background-color: rgba(139, 92, 246, 0.12) !important;
+    color: #c084fc !important;
+    transform: none;
 }
 
 button.launcher-list-item:active {
-    background-color: rgba(255, 255, 255, 0.09);
-    transform: scale(0.98);
+    background-color: rgba(139, 92, 246, 0.18) !important;
 }
 
 .launcher-list-label {
@@ -220,49 +219,50 @@ button.launcher-list-item:active {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    color: rgba(96, 165, 250, 0.55);
+    /* Youthful violet section header */
+    color: rgba(167, 139, 250, 0.8);
     margin-bottom: 6px;
     margin-top: 10px;
 }
 
 button.launcher-browser-search-row {
-    background-color: rgba(59, 130, 246, 0.06);
+    /* Flat blue/violet search box style */
+    background-color: rgba(139, 92, 246, 0.06);
     background-image: none;
-    border: 1px dashed rgba(96, 165, 250, 0.20);
-    border-radius: 12px;
+    border: 1px solid rgba(139, 92, 246, 0.16);
+    border-radius: 10px;
     padding: 8px 12px;
     margin-top: 12px;
     transition: all 180ms ease;
-    color: #93c5fd;
+    color: #c084fc;
 }
 
 button.launcher-browser-search-row:hover {
-    background-color: rgba(59, 130, 246, 0.12);
-    border-color: rgba(96, 165, 250, 0.40);
+    background-color: rgba(139, 92, 246, 0.14);
+    border-color: rgba(139, 92, 246, 0.35);
     color: #ffffff;
-    transform: scale(1.01);
+    transform: none;
     box-shadow: none;
 }
 
 button.launcher-browser-search-row:active {
-    transform: scale(0.99);
+    background-color: rgba(139, 92, 246, 0.20);
 }
 
 button.launcher-file-item {
     background-color: transparent;
     background-image: none;
     border: none;
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 6px 12px;
     margin: 1px 0;
-    color: rgba(255, 255, 255, 0.68);
+    color: rgba(255, 255, 255, 0.65);
     transition: all 150ms ease;
 }
 
 button.launcher-file-item:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #ffffff;
-    transform: scale(1.01);
+    background-color: rgba(139, 92, 246, 0.12) !important;
+    color: #c084fc !important;
 }
 
 .launcher-file-label {
@@ -270,7 +270,7 @@ button.launcher-file-item:hover {
     font-weight: 500;
 }
 
-/* Style for keyboard navigation focus */
+/* Style for keyboard navigation focus - Youthful violet focus state */
 button.launcher-list-item:focus,
 button.launcher-list-item.selected,
 button.launcher-file-item:focus,
@@ -279,8 +279,8 @@ button.launcher-browser-search-row:focus,
 button.launcher-browser-search-row.selected,
 button.launcher-toggle-btn:focus,
 button.launcher-toggle-btn.selected {
-    background-color: rgba(255, 255, 255, 0.12) !important;
-    border: 1px solid rgba(96, 165, 250, 0.40) !important;
+    background-color: rgba(139, 92, 246, 0.18) !important;
+    border: 1px solid rgba(139, 92, 246, 0.40) !important;
     color: #ffffff !important;
     outline: none;
 }
@@ -289,11 +289,12 @@ button.launcher-toggle-btn {
     background-color: transparent;
     background-image: none;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     padding: 6px 12px;
     margin: 8px 0 2px 0;
     transition: all 180ms ease;
-    color: rgba(96, 165, 250, 0.75);
+    /* Match section header violet coloring */
+    color: rgba(167, 139, 250, 0.8);
     min-height: 38px;
     font-size: 10px;
     font-weight: 700;
@@ -302,7 +303,6 @@ button.launcher-toggle-btn {
 }
 
 button.launcher-toggle-btn:hover {
-    background-color: rgba(96, 165, 250, 0.08);
-    color: #93c5fd;
+    background-color: rgba(139, 92, 246, 0.08);
+    color: #c084fc;
 }
-
