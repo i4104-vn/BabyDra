@@ -15,23 +15,8 @@
     border-color: rgba(255, 255, 255, 0.14);
 }
 
-popover.sys-monitor-popover {
-    background-color: transparent;
-    padding: 0;
-    margin: 0;
-    border: none;
-    box-shadow: none;
-}
-
 popover.sys-monitor-popover>contents {
-    background-color: rgba(14, 14, 18, 0.96);
-    background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(0, 0, 0, 0.15) 100%);
-    -gtk-background-blur: 24;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-top: 1px solid rgba(255, 255, 255, 0.28);
-    border-radius: 20px;
     padding: 14px;
-    box-shadow: none;
 }
 
 popover.sys-monitor-popover progressbar trough {

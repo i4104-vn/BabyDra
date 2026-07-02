@@ -62,22 +62,22 @@ button.quick-tile:hover {
 }
 
 button.quick-tile.active {
-    background-color: rgba(0, 122, 255, 0.70);
-    background-image: linear-gradient(135deg, rgba(147, 197, 253, 0.30) 0%, rgba(37, 99, 235, 0.60) 100%);
-    border: 1px solid rgba(147, 197, 253, 0.25);
-    border-top: 1px solid rgba(147, 197, 253, 0.45);
+    background-color: rgba(0, 0, 0, 0.12);
+    background-image: none;
+    border: 1px solid rgba(0, 0, 0, 0.18);
+    border-top: 1px solid rgba(0, 0, 0, 0.26);
     box-shadow: none;
 }
 
 button.quick-tile.active label,
 button.quick-tile.active .tile-title,
 button.quick-tile.active .tile-subtitle {
-    color: #ffffff !important;
+    color: #1c1c1e !important;
 }
 
 button.quick-tile.active:hover {
-    background-color: rgba(0, 122, 255, 0.80);
-    background-image: linear-gradient(135deg, rgba(147, 197, 253, 0.35) 0%, rgba(37, 99, 235, 0.72) 100%);
+    background-color: rgba(0, 0, 0, 0.18);
+    background-image: none;
     box-shadow: none;
     transform: translateY(-1px);
 }
@@ -202,9 +202,9 @@ button.control-tile-row:hover {
 }
 
 .control-icon-circle.active {
-    background-color: #007aff;
-    background-image: linear-gradient(135deg, #3498db 0%, #007aff 100%);
-    border-color: rgba(147, 197, 253, 0.30);
+    background-color: rgba(0, 0, 0, 0.14);
+    background-image: none;
+    border-color: rgba(0, 0, 0, 0.22);
     box-shadow: none;
 }
 
@@ -227,15 +227,15 @@ button.control-dnd-tile:hover {
 }
 
 button.control-dnd-tile.active {
-    background-color: rgba(0, 122, 255, 0.12);
+    background-color: rgba(0, 0, 0, 0.06);
     background-image: none;
-    border-color: rgba(59, 130, 246, 0.22);
+    border-color: rgba(0, 0, 0, 0.12);
 }
 
 button.control-dnd-tile.active .control-icon-circle {
-    background-color: #007aff;
-    background-image: linear-gradient(135deg, #3498db 0%, #007aff 100%);
-    border-color: rgba(147, 197, 253, 0.30);
+    background-color: rgba(0, 0, 0, 0.14);
+    background-image: none;
+    border-color: rgba(0, 0, 0, 0.22);
     box-shadow: none;
 }
 
@@ -258,9 +258,9 @@ button.control-square-tile:hover {
 }
 
 button.control-square-tile.active {
-    background-color: rgba(0, 122, 255, 0.12);
+    background-color: rgba(0, 0, 0, 0.06);
     background-image: none;
-    border-color: rgba(59, 130, 246, 0.22);
+    border-color: rgba(0, 0, 0, 0.12);
 }
 
 button.control-square-tile.active image {
@@ -415,8 +415,8 @@ button.audio-menu-item-btn.active label {
 /* WiFi Split Tile and Popover Input Forms */
 .control-tile-container {
     background-color: transparent;
-    border: none !important;
-    box-shadow: none !important;
+    border: none;
+    box-shadow: none;
     border-radius: 12px;
     margin: 2px 0;
     transition: all 150ms ease;
@@ -426,12 +426,12 @@ button.audio-menu-item-btn.active label {
 button.control-tile-left-btn {
     background-color: transparent;
     background-image: none;
-    border: none !important;
+    border: none;
     border-radius: 12px 0 0 12px;
     padding: 8px 10px;
     color: #1c1c1e;
-    box-shadow: none !important;
-    outline: none !important;
+    box-shadow: none;
+    outline: none;
     transition: all 150ms ease;
 }
 
@@ -440,21 +440,21 @@ button.control-tile-left-btn:focus,
 button.control-tile-left-btn:active {
     background-color: rgba(0, 0, 0, 0.04);
     background-image: none;
-    border: none !important;
-    box-shadow: none !important;
-    outline: none !important;
+    border: none;
+    box-shadow: none;
+    outline: none;
 }
 
 button.control-tile-right-btn {
     background-color: transparent;
     background-image: none;
-    border: none !important;
-    border-left: none !important;
+    border: none;
+    border-left: none;
     border-radius: 0 12px 12px 0;
     padding: 8px 12px;
     color: #1c1c1e;
-    box-shadow: none !important;
-    outline: none !important;
+    box-shadow: none;
+    outline: none;
     transition: all 150ms ease;
 }
 
@@ -463,10 +463,10 @@ button.control-tile-right-btn:focus,
 button.control-tile-right-btn:active {
     background-color: rgba(0, 0, 0, 0.08);
     background-image: none;
-    border: none !important;
-    border-left: none !important;
-    box-shadow: none !important;
-    outline: none !important;
+    border: none;
+    border-left: none;
+    box-shadow: none;
+    outline: none;
 }
 
 .wifi-popover-box {
@@ -500,17 +500,17 @@ button.control-tile-right-btn:active {
 .wifi-network-item:active {
     background-color: rgba(0, 0, 0, 0.06);
     color: #1c1c1e;
-    border: none !important;
-    box-shadow: none !important;
-    outline: none !important;
+    border: none;
+    box-shadow: none;
+    outline: none;
 }
 
 .wifi-network-item.active {
     background-color: rgba(0, 122, 255, 0.15);
-    border: 1px solid rgba(0, 122, 255, 0.3) !important;
+    border: 1px solid rgba(0, 122, 255, 0.3);
     color: #007aff;
-    box-shadow: none !important;
-    outline: none !important;
+    box-shadow: none;
+    outline: none;
 }
 
 .wifi-network-item.active label {
@@ -585,49 +585,65 @@ button.control-tile-right-btn:active {
     outline: none !important;
 }
 
-scrolledwindow,
+scrolledwindow {
+    background: transparent;
+    background-color: transparent;
+    border: none;
+    border-color: transparent;
+    box-shadow: none;
+    outline: none;
+}
+
 scrolledwindow trough,
 scrolledwindow slider,
 scrollbar,
 scrollbar button,
 scrollbar trough,
 scrollbar slider {
-    background: transparent !important;
-    background-color: transparent !important;
-    border: none !important;
-    border-color: transparent !important;
-    box-shadow: none !important;
-    outline: none !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    width: 0 !important;
-    height: 0 !important;
-    opacity: 0 !important;
+    background: transparent;
+    background-color: transparent;
+    border: none;
+    border-color: transparent;
+    box-shadow: none;
+    outline: none;
+    min-width: 0;
+    min-height: 0;
+    opacity: 0;
 }
 
 listbox,
 listrow,
+list,
+row,
+popover list,
+popover row,
+popover scrolledwindow,
 listrow:hover,
 listrow:focus,
 listrow:active,
-listrow:selected {
-    background-color: transparent !important;
-    border: none !important;
-    border-color: transparent !important;
-    box-shadow: none !important;
-    outline: none !important;
-    outline-color: transparent !important;
+listrow:selected,
+row:hover,
+row:focus,
+row:active,
+row:selected {
+    background-color: transparent;
+    background: transparent;
+    border: none;
+    border-color: transparent;
+    box-shadow: none;
+    outline: none;
+    outline-color: transparent;
 }
 
 popover,
 popover.taskbar-popover {
-    background-color: transparent !important;
-    background-image: none !important;
-    border: none !important;
-    box-shadow: none !important;
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
 }
 
 popover > arrow {
-    background-color: transparent !important;
-    border: none !important;
+    background-color: transparent;
+    border: none;
 }
