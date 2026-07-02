@@ -81,7 +81,8 @@ button.launcher-grid-item {
 }
 
 button.launcher-grid-item:hover {
-    background-color: rgba(139, 92, 246, 0.08);
+    background-color: rgba(139, 92, 246, 0.15) !important;
+    background-image: none !important;
     color: #ffffff;
     transform: scale(1.03) translateY(-1px);
     box-shadow: none;
@@ -214,7 +215,8 @@ button.launcher-list-item {
 }
 
 button.launcher-list-item:hover {
-    background-color: rgba(139, 92, 246, 0.12) !important;
+    background-color: rgba(139, 92, 246, 0.20) !important;
+    background-image: none !important;
     color: #c084fc !important;
     transform: none;
 }
@@ -252,7 +254,8 @@ button.launcher-browser-search-row {
 }
 
 button.launcher-browser-search-row:hover {
-    background-color: rgba(139, 92, 246, 0.14);
+    background-color: rgba(139, 92, 246, 0.14) !important;
+    background-image: none !important;
     border-color: transparent;
     color: #ffffff;
     transform: none;
@@ -275,7 +278,8 @@ button.launcher-file-item {
 }
 
 button.launcher-file-item:hover {
-    background-color: rgba(139, 92, 246, 0.12) !important;
+    background-color: rgba(139, 92, 246, 0.20) !important;
+    background-image: none !important;
     color: #c084fc !important;
 }
 
@@ -293,7 +297,8 @@ button.launcher-browser-search-row:focus,
 button.launcher-browser-search-row.selected,
 button.launcher-toggle-btn:focus,
 button.launcher-toggle-btn.selected {
-    background-color: rgba(139, 92, 246, 0.18) !important;
+    background-color: rgba(139, 92, 246, 0.25) !important;
+    background-image: none !important;
     border: none !important;
     color: #ffffff !important;
     outline: none;
@@ -326,6 +331,7 @@ button.launcher-toggle-btn {
 }
 
 button.launcher-toggle-btn:hover {
-    background-color: rgba(139, 92, 246, 0.08);
+    background-color: rgba(139, 92, 246, 0.15) !important;
+    background-image: none !important;
     color: #c084fc;
 }
