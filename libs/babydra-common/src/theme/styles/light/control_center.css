@@ -62,22 +62,22 @@ button.quick-tile:hover {
 }
 
 button.quick-tile.active {
-    background-color: rgba(0, 122, 255, 0.70);
-    background-image: linear-gradient(135deg, rgba(147, 197, 253, 0.30) 0%, rgba(37, 99, 235, 0.60) 100%);
-    border: 1px solid rgba(147, 197, 253, 0.25);
-    border-top: 1px solid rgba(147, 197, 253, 0.45);
+    background-color: rgba(0, 0, 0, 0.12);
+    background-image: none;
+    border: 1px solid rgba(0, 0, 0, 0.18);
+    border-top: 1px solid rgba(0, 0, 0, 0.26);
     box-shadow: none;
 }
 
 button.quick-tile.active label,
 button.quick-tile.active .tile-title,
 button.quick-tile.active .tile-subtitle {
-    color: #ffffff !important;
+    color: #1c1c1e !important;
 }
 
 button.quick-tile.active:hover {
-    background-color: rgba(0, 122, 255, 0.80);
-    background-image: linear-gradient(135deg, rgba(147, 197, 253, 0.35) 0%, rgba(37, 99, 235, 0.72) 100%);
+    background-color: rgba(0, 0, 0, 0.18);
+    background-image: none;
     box-shadow: none;
     transform: translateY(-1px);
 }
@@ -202,9 +202,9 @@ button.control-tile-row:hover {
 }
 
 .control-icon-circle.active {
-    background-color: #007aff;
-    background-image: linear-gradient(135deg, #3498db 0%, #007aff 100%);
-    border-color: rgba(147, 197, 253, 0.30);
+    background-color: rgba(0, 0, 0, 0.14);
+    background-image: none;
+    border-color: rgba(0, 0, 0, 0.22);
     box-shadow: none;
 }
 
@@ -227,15 +227,15 @@ button.control-dnd-tile:hover {
 }
 
 button.control-dnd-tile.active {
-    background-color: rgba(0, 122, 255, 0.12);
+    background-color: rgba(0, 0, 0, 0.06);
     background-image: none;
-    border-color: rgba(59, 130, 246, 0.22);
+    border-color: rgba(0, 0, 0, 0.12);
 }
 
 button.control-dnd-tile.active .control-icon-circle {
-    background-color: #007aff;
-    background-image: linear-gradient(135deg, #3498db 0%, #007aff 100%);
-    border-color: rgba(147, 197, 253, 0.30);
+    background-color: rgba(0, 0, 0, 0.14);
+    background-image: none;
+    border-color: rgba(0, 0, 0, 0.22);
     box-shadow: none;
 }
 
@@ -258,9 +258,9 @@ button.control-square-tile:hover {
 }
 
 button.control-square-tile.active {
-    background-color: rgba(0, 122, 255, 0.12);
+    background-color: rgba(0, 0, 0, 0.06);
     background-image: none;
-    border-color: rgba(59, 130, 246, 0.22);
+    border-color: rgba(0, 0, 0, 0.12);
 }
 
 button.control-square-tile.active image {
