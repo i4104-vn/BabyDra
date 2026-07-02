@@ -585,7 +585,15 @@ button.control-tile-right-btn:active {
     outline: none !important;
 }
 
-scrolledwindow,
+scrolledwindow {
+    background: transparent;
+    background-color: transparent;
+    border: none;
+    border-color: transparent;
+    box-shadow: none;
+    outline: none;
+}
+
 scrolledwindow trough,
 scrolledwindow slider,
 scrollbar,
@@ -605,11 +613,21 @@ scrollbar slider {
 
 listbox,
 listrow,
+list,
+row,
+popover list,
+popover row,
+popover scrolledwindow,
 listrow:hover,
 listrow:focus,
 listrow:active,
-listrow:selected {
+listrow:selected,
+row:hover,
+row:focus,
+row:active,
+row:selected {
     background-color: transparent;
+    background: transparent;
     border: none;
     border-color: transparent;
     box-shadow: none;
