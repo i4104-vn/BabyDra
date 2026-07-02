@@ -65,6 +65,7 @@ pub fn build_launcher_ui(
 
     let toggle_btn = gtk4::Button::new();
     toggle_btn.add_css_class("launcher-toggle-btn");
+    toggle_btn.set_cursor_from_name(Some("pointer"));
     let toggle_label_text_expanded = format!("{}  ▼", babydra_common::i18n::t("launcher.other_apps"));
     let toggle_label_text_collapsed = format!("{}  ▶", babydra_common::i18n::t("launcher.other_apps"));
     toggle_btn.set_label(&toggle_label_text_collapsed);
@@ -337,6 +338,20 @@ pub fn build_launcher_ui(
         40,
         450,
     );
+
+    let left_list_box_focus_change = left_list_box.clone();
+    let right_scroll_focus_change = right_scroll.clone();
+    let selected_index_focus_change = selected_index.clone();
+
+    window.connect_focus_widget_notify(move |win| {
+        if let Some(focus_widget) = gtk4::prelude::RootExt::focus(win) {
+            let buttons = get_visible_selectable_buttons(&left_list_box_focus_change, &right_scroll_focus_change);
+            if let Some(pos) = buttons.iter().position(|b| b.clone().upcast::<gtk4::Widget>() == focus_widget) {
+                *selected_index_focus_change.borrow_mut() = Some(pos);
+                update_highlight(&left_list_box_focus_change, &right_scroll_focus_change, Some(pos));
+            }
+        }
+    });
 
     let left_list_box_focus = left_list_box.clone();
     let right_scroll_focus = right_scroll.clone();

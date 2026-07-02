@@ -8,6 +8,7 @@ pub fn build_grid_app_ui(app: &DesktopApp) -> (gtk4::Button, gtk4::Box, gtk4::La
     let btn = gtk4::Button::new();
     btn.add_css_class("launcher-grid-item");
     btn.set_tooltip_text(Some(&app.name));
+    btn.set_cursor_from_name(Some("pointer"));
 
     let content_box = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
     content_box.set_halign(gtk4::Align::Center);
@@ -37,6 +38,7 @@ pub fn build_list_app_ui(app: &DesktopApp) -> (gtk4::Button, gtk4::Box, gtk4::La
     let btn = gtk4::Button::new();
     btn.add_css_class("launcher-list-item");
     btn.set_tooltip_text(Some(&app.name));
+    btn.set_cursor_from_name(Some("pointer"));
 
     let content_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
     content_box.set_valign(gtk4::Align::Center);

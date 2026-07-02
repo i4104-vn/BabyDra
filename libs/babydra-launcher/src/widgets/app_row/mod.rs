@@ -29,6 +29,13 @@ pub fn create_grid_app_widget(
         win_to_close.close();
     });
 
+    let motion = gtk4::EventControllerMotion::new();
+    let btn_clone = btn.clone();
+    motion.connect_enter(move |_, _, _| {
+        btn_clone.grab_focus();
+    });
+    btn.add_controller(motion);
+
     btn
 }
 
@@ -54,6 +61,13 @@ pub fn create_list_app_widget(
 
         win_to_close.close();
     });
+
+    let motion = gtk4::EventControllerMotion::new();
+    let btn_clone = btn.clone();
+    motion.connect_enter(move |_, _, _| {
+        btn_clone.grab_focus();
+    });
+    btn.add_controller(motion);
 
     btn
 }

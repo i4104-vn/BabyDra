@@ -7,6 +7,7 @@ use std::path::Path;
 pub fn build_file_row_ui(path: &Path) -> (gtk4::Button, gtk4::Box, gtk4::Label) {
     let btn = gtk4::Button::new();
     btn.add_css_class("launcher-file-item");
+    btn.set_cursor_from_name(Some("pointer"));
     
     let path_str = path.to_string_lossy().to_string();
     btn.set_tooltip_text(Some(&path_str));

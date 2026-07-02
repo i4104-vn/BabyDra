@@ -23,6 +23,7 @@ pub fn build_welcome_layout() -> gtk4::Box {
 pub fn build_browser_search_button(query: &str) -> (gtk4::Button, gtk4::Label) {
     let browser_btn = gtk4::Button::new();
     browser_btn.add_css_class("launcher-browser-search-row");
+    browser_btn.set_cursor_from_name(Some("pointer"));
 
     let browser_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
     browser_box.set_valign(gtk4::Align::Center);

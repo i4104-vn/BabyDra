@@ -80,12 +80,11 @@ scrolledwindow {
 }
 
 .launcher-grid-item:hover {
-    background-color: rgba(124, 58, 237, 0.12) !important;
-    background-image: none !important;
+    background-color: rgba(124, 58, 237, 0.12);
+    background-image: none;
     color: #1c1c1e;
     transform: scale(1.03) translateY(-1px);
     box-shadow: none;
-    cursor: pointer;
 }
 
 .launcher-grid-item:active {
@@ -215,14 +214,14 @@ popover>contents {
 }
 
 .launcher-list-item:hover {
-    background-color: rgba(124, 58, 237, 0.15) !important;
-    background-image: none !important;
-    color: #7c3aed !important;
+    background-color: rgba(124, 58, 237, 0.15);
+    background-image: none;
+    color: #7c3aed;
     transform: none;
 }
 
 .launcher-list-item:active {
-    background-color: rgba(124, 58, 237, 0.14) !important;
+    background-color: rgba(124, 58, 237, 0.14);
 }
 
 .launcher-list-label {
@@ -254,8 +253,8 @@ popover>contents {
 }
 
 .launcher-browser-search-row:hover {
-    background-color: rgba(124, 58, 237, 0.12) !important;
-    background-image: none !important;
+    background-color: rgba(124, 58, 237, 0.12);
+    background-image: none;
     border-color: transparent;
     color: #1c1c1e;
     transform: none;
@@ -278,9 +277,9 @@ popover>contents {
 }
 
 .launcher-file-item:hover {
-    background-color: rgba(124, 58, 237, 0.15) !important;
-    background-image: none !important;
-    color: #7c3aed !important;
+    background-color: rgba(124, 58, 237, 0.15);
+    background-image: none;
+    color: #7c3aed;
 }
 
 .launcher-file-label {
@@ -297,20 +296,11 @@ popover>contents {
 .launcher-browser-search-row.selected,
 .launcher-toggle-btn:focus,
 .launcher-toggle-btn.selected {
-    background-color: rgba(124, 58, 237, 0.20) !important;
-    background-image: none !important;
-    border: none !important;
-    color: #1c1c1e !important;
+    background-color: rgba(124, 58, 237, 0.20);
+    background-image: none;
+    border: none;
+    color: #1c1c1e;
     outline: none;
-}
-
-.launcher-list-item,
-.launcher-file-item,
-.launcher-toggle-btn,
-.launcher-browser-search-row,
-.launcher-grid-item,
-.launcher-power-btn {
-    cursor: pointer;
 }
 
 .launcher-toggle-btn {
@@ -331,7 +321,7 @@ popover>contents {
 }
 
 .launcher-toggle-btn:hover {
-    background-color: rgba(124, 58, 237, 0.12) !important;
-    background-image: none !important;
+    background-color: rgba(124, 58, 237, 0.12);
+    background-image: none;
     color: #7c3aed;
 }

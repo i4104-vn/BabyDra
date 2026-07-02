@@ -70,6 +70,13 @@ pub fn create_file_row(path: &Path, window: &gtk4::ApplicationWindow) -> gtk4::B
         win_to_close.close();
     });
     
+    let motion = gtk4::EventControllerMotion::new();
+    let btn_clone = btn.clone();
+    motion.connect_enter(move |_, _, _| {
+        btn_clone.grab_focus();
+    });
+    btn.add_controller(motion);
+    
     btn
 }
 
