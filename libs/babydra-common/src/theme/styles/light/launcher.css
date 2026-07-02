@@ -16,8 +16,7 @@
     box-shadow: none;
 }
 
-entry.launcher-search,
-entry.launcher-search>text {
+entry.launcher-search {
     /* Flat background, larger text */
     background-color: rgba(0, 0, 0, 0.03);
     background-image: none;
@@ -31,13 +30,28 @@ entry.launcher-search>text {
     box-shadow: none;
 }
 
-entry.launcher-search:focus,
-entry.launcher-search:focus>text {
+entry.launcher-search>text {
+    background: transparent;
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+}
+
+entry.launcher-search:focus {
     background-color: rgba(0, 0, 0, 0.05);
     /* Youthful violet focus border */
     border-color: rgba(124, 58, 237, 0.40);
     box-shadow: none;
     background-image: none;
+}
+
+entry.launcher-search:focus>text {
+    background: transparent;
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
 }
 
 entry.launcher-search placeholder,

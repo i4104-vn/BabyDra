@@ -17,8 +17,7 @@
     box-shadow: none;
 }
 
-entry.launcher-search,
-entry.launcher-search > text {
+entry.launcher-search {
     /* Cleaner search input background, larger text */
     background-color: rgba(255, 255, 255, 0.04);
     background-image: none;
@@ -32,13 +31,28 @@ entry.launcher-search > text {
     box-shadow: none;
 }
 
-entry.launcher-search:focus,
-entry.launcher-search:focus > text {
+entry.launcher-search > text {
+    background: transparent;
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+}
+
+entry.launcher-search:focus {
     background-color: rgba(255, 255, 255, 0.06);
     /* Modern, youthful violet focus ring */
     border-color: rgba(139, 92, 246, 0.50);
     box-shadow: none;
     background-image: none;
+}
+
+entry.launcher-search:focus > text {
+    background: transparent;
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
 }
 
 entry.launcher-search placeholder,
