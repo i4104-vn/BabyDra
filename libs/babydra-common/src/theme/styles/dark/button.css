@@ -1,0 +1,22 @@
+button.circle-btn {
+    background-color: rgba(255, 255, 255, 0.07);
+    background-image: none;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    border-radius: 9999px;
+    min-width: 34px;
+    min-height: 34px;
+    padding: 0;
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: none;
+}
+
+button.circle-btn:hover {
+    background-color: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.18);
+    border-top-color: rgba(255, 255, 255, 0.26);
+    box-shadow: none;
+}
+

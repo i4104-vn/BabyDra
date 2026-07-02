@@ -1,0 +1,182 @@
+/* Grouped Taskbar Styles */
+.taskbar-parent-box {
+    background-color: rgba(255, 255, 255, 0.98);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 9999px;
+    padding: 3px 6px;
+    min-height: 24px;
+    box-shadow: none;
+}
+
+.taskbar-apps-box {
+    margin-left: 6px;
+    padding: 0;
+}
+
+button.taskbar-app-btn {
+    background-color: rgba(255, 255, 255, 0.98);
+    background-image: none;
+    border: none;
+    border-radius: 5px;
+    padding: 2px 5px;
+    margin: 0 2px;
+    min-width: 18px;
+    min-height: 18px;
+    -gtk-icon-size: 14px;
+    transition: all 200ms ease;
+    box-shadow: none;
+}
+
+button.taskbar-app-btn:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    border-bottom: 2px solid #007aff;
+}
+
+button.taskbar-app-btn.active {
+    background-color: rgba(0, 0, 0, 0.08);
+    border-bottom: 2px solid #007aff;
+}
+
+button.taskbar-app-btn.active:hover {
+    background-color: rgba(0, 0, 0, 0.12);
+    border-bottom: 2px solid #3498db;
+}
+
+popover.taskbar-popover {
+    background-color: rgba(255, 255, 255, 0.98);
+    padding: 0;
+    margin: 0;
+    border: none;
+    box-shadow: none;
+}
+
+popover.taskbar-popover>contents {
+    background-color: rgba(255, 255, 255, 0.98) !important;
+    background-image: none !important;
+    -gtk-background-blur: none !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 8px !important;
+    box-shadow: none !important;
+    min-width: 200px !important;
+    max-width: 200px !important;
+    opacity: 1.0 !important;
+}
+
+.taskbar-previews-header-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(28, 28, 30, 0.95);
+    margin: 10px;
+}
+
+/* Previews popup container */
+.taskbar-previews-container {
+    padding: 2px;
+}
+
+.taskbar-preview-list-item-box {
+    margin: 2px 0;
+}
+
+button.taskbar-preview-list-btn {
+    background-image: none;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    transition: all 150ms ease;
+    box-shadow: none;
+    text-align: left;
+}
+
+button.taskbar-preview-list-btn:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+.taskbar-preview-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(28, 28, 30, 0.95);
+    text-shadow: none;
+    margin: 0;
+}
+
+.taskbar-popover-header-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(28, 28, 30, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 4px;
+}
+
+button.taskbar-popover-close-btn {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    border-radius: 4px;
+    padding: 2px;
+    color: rgba(28, 28, 30, 0.5);
+    transition: all 150ms ease;
+}
+
+button.taskbar-popover-close-btn:hover {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+button.taskbar-preview-list-kill-btn {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    border-radius: 6px;
+    padding: 4px 8px;
+    color: rgba(28, 28, 30, 0.4);
+    transition: all 150ms ease;
+}
+
+button.taskbar-preview-list-kill-btn:hover {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+/* Taskbar Popover action elements (Close all, launch new) */
+.taskbar-preview-separator {
+    background-color: rgba(0, 0, 0, 0.08);
+    margin: 6px 4px;
+    min-height: 1px;
+}
+
+.taskbar-preview-action-icon {
+    color: red;
+}
+
+button.taskbar-preview-action-btn {
+    background-image: none;
+    background-color: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 8px;
+    transition: all 150ms ease;
+    box-shadow: none;
+    text-align: left;
+    margin: 2px 0;
+}
+
+button.taskbar-preview-action-btn:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.taskbar-preview-action-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(28, 28, 30, 0.85);
+    text-shadow: none;
+}
+
+button.taskbar-preview-action-btn:hover .taskbar-preview-action-label {
+    color: #1c1c1e;
+}

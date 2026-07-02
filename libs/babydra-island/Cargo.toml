@@ -1,0 +1,22 @@
+[package]
+name = "babydra-island"
+version.workspace = true
+edition = "2021"
+
+
+
+[dependencies]
+babydra-common = { workspace = true }
+
+# GUI & Layer Shell
+gtk4 = { version = "0.9", features = ["v4_10"] }
+gtk4-layer-shell = "0.4.0"
+
+# Async & utilities
+tokio = { version = "1.0", features = ["full"] }
+tracing = "0.1"
+chrono = "0.4"
+glib = "0.20"
+gdk-pixbuf = "0.20"
+gdk4 = "0.9"
+zbus = "4.0"

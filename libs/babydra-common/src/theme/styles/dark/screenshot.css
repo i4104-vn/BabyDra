@@ -1,0 +1,133 @@
+/* Screenshot Window - Fully transparent */
+window.screenshot-window,
+window.screenshot-window.background {
+    background-color: transparent;
+    background-image: none;
+    box-shadow: none;
+    border: none;
+}
+
+/* Screenshot Toolbar (Compact & Sleek Capsule) */
+box.screenshot-toolbar {
+    background-color: rgba(14, 14, 18, 0.94);
+    background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(0, 0, 0, 0.15) 100%);
+    -gtk-background-blur: 24;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 9999px;
+    padding: 4px 12px;
+    box-shadow: none;
+}
+
+/* Toolbar Buttons - element+class selector to beat Adwaita specificity */
+button.screenshot-toolbar-btn {
+    background-color: rgba(255, 255, 255, 0.06);
+    background-image: none;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 9999px;
+    padding: 5px 10px;
+    margin: 2px;
+    color: rgba(255, 255, 255, 0.85);
+    transition: all 200ms ease;
+    min-height: 24px;
+    box-shadow: none;
+}
+
+button.screenshot-toolbar-btn:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    background-image: none;
+    border-color: rgba(255, 255, 255, 0.14);
+    border-top-color: rgba(255, 255, 255, 0.20);
+    color: #ffffff;
+    box-shadow: none;
+}
+
+button.screenshot-toolbar-btn:active {
+    background-color: rgba(255, 255, 255, 0.16);
+    background-image: none;
+    box-shadow: none;
+}
+
+button.screenshot-toolbar-btn.selected {
+    background-color: rgba(59, 130, 246, 0.70);
+    background-image: linear-gradient(135deg, rgba(147, 197, 253, 0.30) 0%, rgba(37, 99, 235, 0.60) 100%);
+    border: 1px solid rgba(147, 197, 253, 0.25);
+    border-top: 1px solid rgba(147, 197, 253, 0.45);
+    color: #ffffff;
+    box-shadow: none;
+}
+
+/* Separator between tool groups */
+label.capsule-separator {
+    color: rgba(255, 255, 255, 0.14);
+    font-size: 11px;
+    margin: 0 2px;
+}
+
+/* Color Dot Indicator on toolbar color picker button */
+box.color-dot-indicator {
+    border-radius: 9999px;
+    min-width: 14px;
+    min-height: 14px;
+    max-width: 14px;
+    max-height: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: none;
+}
+
+/* Color Picker Popover */
+popover.screenshot-color-popover {
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+    border: none;
+    box-shadow: none;
+}
+
+popover.screenshot-color-popover > contents {
+    background-color: rgba(14, 14, 18, 0.96);
+    background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(0, 0, 0, 0.15) 100%);
+    -gtk-background-blur: 24;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 12px;
+    padding: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Color Dot Buttons inside Popover */
+button.color-dot-btn {
+    border-radius: 9999px;
+    min-width: 16px;
+    min-height: 16px;
+    max-width: 16px;
+    max-height: 16px;
+    margin: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0;
+    background-image: none;
+    box-shadow: none;
+    transition: all 150ms ease;
+}
+
+button.color-dot-btn:hover {
+    transform: scale(1.2);
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: none;
+}
+
+button.color-dot-btn.color-active {
+    border: 2px solid #ffffff;
+    transform: scale(1.1);
+}
+
+/* Color Palette - each must explicitly clear background-image */
+button.color-dot-btn.color-dot-red { background-color: #ef4444; background-image: none; }
+button.color-dot-btn.color-dot-orange { background-color: #f97316; background-image: none; }
+button.color-dot-btn.color-dot-yellow { background-color: #eab308; background-image: none; }
+button.color-dot-btn.color-dot-green { background-color: #22c55e; background-image: none; }
+button.color-dot-btn.color-dot-blue { background-color: #3b82f6; background-image: none; }
+button.color-dot-btn.color-dot-purple { background-color: #a855f7; background-image: none; }
+button.color-dot-btn.color-dot-white { background-color: #ffffff; background-image: none; }
+button.color-dot-btn.color-dot-black { background-color: #000000; background-image: none; }

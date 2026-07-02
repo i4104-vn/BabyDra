@@ -1,0 +1,42 @@
+.menu-fullscreen {
+    background-color: transparent;
+    background-image: none;
+}
+
+.menu-box {
+    background-color: rgba(255, 255, 255, 0.98);
+    background-image: none;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    
+    
+    border-radius: 20px;
+    color: rgba(28, 28, 30, 0.95);
+    padding: 8px;
+    overflow: hidden;
+    box-shadow: none;
+}
+
+.menu-item {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 18px;
+    color: rgba(28, 28, 30, 0.85);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.menu-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    background-image: none;
+    color: #1c1c1e;
+    box-shadow: none;
+}
+
+.menu-item-separator {
+    background-color: rgba(0, 0, 0, 0.08);
+    min-height: 1px;
+    margin: 6px 8px;
+}
+

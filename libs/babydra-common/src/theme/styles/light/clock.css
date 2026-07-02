@@ -1,0 +1,21 @@
+.panel-clock {
+    font-weight: 600;
+    font-size: 11px;
+    color: #1c1c1e;
+    text-shadow: none;
+}
+
+button.panel-clock-btn {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    color: #1c1c1e;
+    padding: 2px 10px;
+    box-shadow: none;
+    min-height: 20px;
+    border-radius: 9999px;
+}
+
+button.panel-clock-btn:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+}

@@ -1,0 +1,205 @@
+.panel-notch {
+    background-color: transparent;
+    border: none;
+    min-width: 0;
+    min-height: 0;
+    margin: 0 auto;
+    padding: 0;
+    box-shadow: none;
+    transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+}
+
+.panel-notch.active-music {
+    background-color: rgba(255, 255, 255, 0.98);
+    background-image: linear-gradient(160deg, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.15) 100%);
+    -gtk-background-blur: 24;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 9999px;
+    min-width: 0;
+    min-height: 0;
+    padding: 3px 10px;
+    margin-top: 4px;
+    box-shadow: none;
+}
+
+.notch-content {
+    opacity: 1.0;
+    min-width: 0;
+    min-height: 0;
+}
+
+.notch-player-text {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(28, 28, 30, 0.90);
+    margin: 0 2px;
+}
+
+.notch-album-art {
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.notch-visualizer {
+    margin-left: 4px;
+}
+
+.visualizer-bar {
+    background-color: #3498db;
+    background-image: linear-gradient(180deg, #3498db 0%, #007aff 100%);
+    border-radius: 9999px;
+    transition: all 100ms ease;
+}
+
+.island-badge {
+    background-color: rgba(255, 255, 255, 0.98);
+    background-image: none;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 16px;
+    padding: 8px 14px;
+    min-width: 220px;
+    max-width: 240px;
+    box-shadow: none;
+}
+
+.badge-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: #3498db;
+}
+
+.badge-desc {
+    font-size: 9px;
+    font-weight: 600;
+    color: rgba(28, 28, 30, 0.80);
+}
+
+.panel-notch.active-music:not(.popover-open):hover {
+    transform: scale(1.04);
+    background-color: rgba(255, 255, 255, 1.0);
+    box-shadow: none;
+}
+
+popover.media-popover {
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+    border: none;
+}
+
+popover.media-popover>contents {
+    background-color: rgba(255, 255, 255, 0.98);
+    background-image: linear-gradient(160deg, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.15) 100%);
+    -gtk-background-blur: 24;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow: none;
+}
+
+.media-popover-box {
+    padding: 0;
+    min-width: 240px;
+    max-width: 260px;
+}
+
+.media-popover-header {
+    margin-bottom: 12px;
+}
+
+.media-popover-app-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(28, 28, 30, 0.55);
+}
+
+.media-popover-art {
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    margin-bottom: 14px;
+    box-shadow: none;
+}
+
+.media-popover-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1c1c1e;
+    margin-bottom: 6px;
+}
+
+.media-popover-artist {
+    font-size: 10px;
+    font-weight: 500;
+    color: rgba(28, 28, 30, 0.55);
+    margin-bottom: 8px;
+}
+
+.media-popover-controls {
+    margin-top: 0;
+}
+
+.media-control-btn {
+    background-color: rgba(0, 0, 0, 0.05);
+    background-image: none;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 50%;
+    color: #1c1c1e;
+    padding: 8px;
+    min-width: 32px;
+    min-height: 32px;
+    box-shadow: none;
+    transition: all 150ms ease;
+}
+
+.media-control-btn:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.10);
+    box-shadow: none;
+}
+
+.media-timeline-box {
+    margin: 0 4px;
+    padding: 0;
+}
+
+scale.media-timeline-scale trough {
+    min-height: 4px;
+    border-radius: 2px;
+    background-color: rgba(0, 0, 0, 0.08);
+    border: none;
+}
+
+scale.media-timeline-scale trough highlight {
+    border-radius: 2px;
+    background-color: #007aff;
+    background-image: none;
+    min-height: 4px;
+}
+
+scale.media-timeline-scale slider {
+    min-width: 10px;
+    min-height: 10px;
+    margin: -3px;
+    border-radius: 5px;
+    background-color: #007aff;
+    box-shadow: none;
+    border: none;
+    opacity: 0;
+    transition: opacity 150ms ease;
+}
+
+scale.media-timeline-scale:hover slider {
+    opacity: 1;
+}
+
+.media-time-label {
+    font-size: 9px;
+    font-weight: 500;
+    color: rgba(28, 28, 30, 0.40);
+    margin: 0 2px;
+}

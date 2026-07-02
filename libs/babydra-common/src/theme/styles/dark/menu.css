@@ -1,0 +1,42 @@
+.menu-fullscreen {
+    background-color: transparent;
+    background-image: none;
+}
+
+.menu-box {
+    background-color: rgba(20, 20, 22, 0.92);
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(20, 20, 22, 0.94) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    border-left: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 20px;
+    color: rgba(255, 255, 255, 0.95);
+    padding: 8px;
+    overflow: hidden;
+    box-shadow: none;
+}
+
+.menu-item {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 18px;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.07);
+    background-image: none;
+    color: #ffffff;
+    box-shadow: none;
+}
+
+.menu-item-separator {
+    background-color: rgba(255, 255, 255, 0.08);
+    min-height: 1px;
+    margin: 6px 8px;
+}
+

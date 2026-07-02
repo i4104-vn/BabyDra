@@ -1,0 +1,16 @@
+[package]
+name = "babydra-menu"
+version.workspace = true
+edition = "2021"
+
+
+
+[dependencies]
+babydra-common = { workspace = true }
+babydra-wallpaper = { workspace = true }
+
+# GUI & Layer Shell
+gtk4 = { version = "0.9", features = ["v4_10"] }
+gtk4-layer-shell = "0.4.0"
+glib = "0.20"
+gio = "0.20"

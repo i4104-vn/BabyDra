@@ -1,0 +1,7 @@
+button.circle-btn.power-btn:hover {
+    background-color: rgba(220, 38, 38, 0.65);
+    background-image: linear-gradient(135deg, rgba(220, 38, 38, 0.70) 0%, rgba(239, 68, 68, 0.55) 100%);
+    border-color: rgba(239, 68, 68, 0.45);
+    box-shadow: none;
+}
+

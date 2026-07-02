@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<labwc_config>
+  <keyboard>
+    <default />
+    <!-- Override Alt-Tab with custom babydra-switcher -->
+    <keybind key="A-Tab">
+      <action name="Execute" command="~/.local/bin/babydra-switcher" />
+    </keybind>
+    <keybind key="W-q">
+      <action name="Execute" command="~/.local/bin/babydra-launcher" />
+    </keybind>
+    <!-- Take screenshot with Win+F12 or Print key -->
+    <keybind key="W-F12">
+      <action name="Execute" command="~/.local/bin/babydra-screenshot" />
+    </keybind>
+    <keybind key="Print">
+      <action name="Execute" command="~/.local/bin/babydra-screenshot" />
+    </keybind>
+    <!-- Lock screen with Win+L -->
+    <keybind key="W-l">
+      <action name="Execute" command="~/.local/bin/babydra-lock" />
+    </keybind>
+  </keyboard>
+  <mouse>
+    <default />
+    <!-- Custom context menu for desktop right-click -->
+    <context name="Root">
+      <mousebind button="Right" action="Press">
+        <action name="Execute" command="~/.local/bin/babydra-menu" />
+      </mousebind>
+    </context>
+  </mouse>
+</labwc_config>
