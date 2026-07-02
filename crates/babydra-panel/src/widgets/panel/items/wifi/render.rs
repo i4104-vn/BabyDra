@@ -6,11 +6,11 @@ use super::{get_wifi_state, scan_networks, known_networks, connect_wifi_async};
 pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) -> gtk4::Box {
     let container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     container.add_css_class("control-tile-container");
-    container.set_hexpand(true);
+    container.set_hexpand(false);
     
     let left_btn = gtk4::Button::new();
     left_btn.add_css_class("control-tile-left-btn");
-    left_btn.set_hexpand(true);
+    left_btn.set_hexpand(false);
     
     let main_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
     main_box.set_valign(gtk4::Align::Center);

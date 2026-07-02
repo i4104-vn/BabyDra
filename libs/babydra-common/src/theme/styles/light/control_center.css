@@ -415,8 +415,8 @@ button.audio-menu-item-btn.active label {
 /* WiFi Split Tile and Popover Input Forms */
 .control-tile-container {
     background-color: transparent;
-    border: none !important;
-    box-shadow: none !important;
+    border: none;
+    box-shadow: none;
     border-radius: 12px;
     margin: 2px 0;
     transition: all 150ms ease;
@@ -426,12 +426,12 @@ button.audio-menu-item-btn.active label {
 button.control-tile-left-btn {
     background-color: transparent;
     background-image: none;
-    border: none !important;
+    border: none;
     border-radius: 12px 0 0 12px;
     padding: 8px 10px;
     color: #1c1c1e;
-    box-shadow: none !important;
-    outline: none !important;
+    box-shadow: none;
+    outline: none;
     transition: all 150ms ease;
 }
 
@@ -440,21 +440,21 @@ button.control-tile-left-btn:focus,
 button.control-tile-left-btn:active {
     background-color: rgba(0, 0, 0, 0.04);
     background-image: none;
-    border: none !important;
-    box-shadow: none !important;
-    outline: none !important;
+    border: none;
+    box-shadow: none;
+    outline: none;
 }
 
 button.control-tile-right-btn {
     background-color: transparent;
     background-image: none;
-    border: none !important;
-    border-left: none !important;
+    border: none;
+    border-left: none;
     border-radius: 0 12px 12px 0;
     padding: 8px 12px;
     color: #1c1c1e;
-    box-shadow: none !important;
-    outline: none !important;
+    box-shadow: none;
+    outline: none;
     transition: all 150ms ease;
 }
 
@@ -463,10 +463,10 @@ button.control-tile-right-btn:focus,
 button.control-tile-right-btn:active {
     background-color: rgba(0, 0, 0, 0.08);
     background-image: none;
-    border: none !important;
-    border-left: none !important;
-    box-shadow: none !important;
-    outline: none !important;
+    border: none;
+    border-left: none;
+    box-shadow: none;
+    outline: none;
 }
 
 .wifi-popover-box {
@@ -500,17 +500,17 @@ button.control-tile-right-btn:active {
 .wifi-network-item:active {
     background-color: rgba(0, 0, 0, 0.06);
     color: #1c1c1e;
-    border: none !important;
-    box-shadow: none !important;
-    outline: none !important;
+    border: none;
+    box-shadow: none;
+    outline: none;
 }
 
 .wifi-network-item.active {
     background-color: rgba(0, 122, 255, 0.15);
-    border: 1px solid rgba(0, 122, 255, 0.3) !important;
+    border: 1px solid rgba(0, 122, 255, 0.3);
     color: #007aff;
-    box-shadow: none !important;
-    outline: none !important;
+    box-shadow: none;
+    outline: none;
 }
 
 .wifi-network-item.active label {

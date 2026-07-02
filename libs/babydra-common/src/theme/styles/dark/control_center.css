@@ -161,7 +161,7 @@ scale slider:hover {
 
 .control-left-toggles-box {
     background-color: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: none !important;
     border-top: 1px solid rgba(255, 255, 255, 0.10);
     border-radius: 16px;
     padding: 6px;
@@ -196,7 +196,7 @@ button.control-tile-row:hover {
 }
 
 .control-icon-circle.active {
-    background-color: rgba(255, 255, 255, 0.20);
+    background-color: rgba(255, 255, 255, 0.40);
     background-image: none;
     border-color: rgba(255, 255, 255, 0.35);
     border-top-color: rgba(255, 255, 255, 0.45);
@@ -411,8 +411,8 @@ button.audio-menu-item-btn.active label {
 /* WiFi Split Tile and Popover Input Forms */
 .control-tile-container {
     background-color: transparent;
-    border: none !important;
-    box-shadow: none !important;
+    border: none;
+    box-shadow: none;
     border-radius: 12px;
     margin: 2px 0;
     transition: all 150ms ease;
@@ -422,12 +422,12 @@ button.audio-menu-item-btn.active label {
 button.control-tile-left-btn {
     background-color: transparent;
     background-image: none;
-    border: none !important;
+    border: none;
     border-radius: 12px 0 0 12px;
     padding: 8px 10px;
     color: #ffffff;
-    box-shadow: none !important;
-    outline: none !important;
+    box-shadow: none;
+    outline: none;
     transition: all 150ms ease;
 }
 
@@ -436,21 +436,21 @@ button.control-tile-left-btn:focus,
 button.control-tile-left-btn:active {
     background-color: rgba(255, 255, 255, 0.05);
     background-image: none;
-    border: none !important;
-    box-shadow: none !important;
-    outline: none !important;
+    border: none;
+    box-shadow: none;
+    outline: none;
 }
 
 button.control-tile-right-btn {
     background-color: transparent;
     background-image: none;
-    border: none !important;
-    border-left: none !important;
+    border: none;
+    border-left: none;
     border-radius: 0 12px 12px 0;
     padding: 8px 12px;
     color: #ffffff;
-    box-shadow: none !important;
-    outline: none !important;
+    box-shadow: none;
+    outline: none;
     transition: all 150ms ease;
 }
 
@@ -459,13 +459,14 @@ button.control-tile-right-btn:focus,
 button.control-tile-right-btn:active {
     background-color: rgba(255, 255, 255, 0.10);
     background-image: none;
-    border: none !important;
-    border-left: none !important;
-    box-shadow: none !important;
-    outline: none !important;
+    border: none;
+    border-left: none;
+    box-shadow: none;
+    outline: none;
 }
 
 .wifi-popover-box {
+    background-color: transparent;
     padding: 10px;
     min-width: 250px;
     max-width: 320px;
@@ -494,19 +495,19 @@ button.control-tile-right-btn:active {
 .wifi-network-item:hover,
 .wifi-network-item:focus,
 .wifi-network-item:active {
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: rgba(255, 255, 255, 0.6);
     color: #ffffff;
-    border: none !important;
-    box-shadow: none !important;
-    outline: none !important;
+    border: none;
+    box-shadow: none;
+    outline: none;
 }
 
 .wifi-network-item.active {
-    background-color: rgba(59, 130, 246, 0.15);
-    border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    background-color: rgba(59, 130, 246, 0.6);
+    border: 1px solid rgba(59, 130, 246, 0.3);
     color: #ffffff;
-    box-shadow: none !important;
-    outline: none !important;
+    box-shadow: none;
+    outline: none;
 }
 
 .wifi-network-item.active label {
