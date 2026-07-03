@@ -183,8 +183,10 @@ pub fn clean_all_native() -> u64 {
     // 4. Clean Trash Bin
     if !home.is_empty() {
         let trash_dir = format!("{}/.local/share/Trash", home);
-        let p_files = Path::new(&format!("{}/files", trash_dir));
-        let p_info = Path::new(&format!("{}/info", trash_dir));
+        let files_path = format!("{}/files", trash_dir);
+        let info_path = format!("{}/info", trash_dir);
+        let p_files = Path::new(&files_path);
+        let p_info = Path::new(&info_path);
         
         if p_files.exists() {
             let size = get_dir_size_native(p_files);
