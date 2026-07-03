@@ -1,4 +1,7 @@
 #!/bin/bash
+# Ensure local bin is in PATH
+export PATH="$HOME/.local/bin:$PATH"
+
 # Autostart configuration for labwc with BabyDra shell
 
 # Start Wayland wallpaper daemon

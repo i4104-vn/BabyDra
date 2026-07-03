@@ -61,6 +61,7 @@ killall babydra-menu || true
 killall babydra-switcher || true
 killall babydra-screenshot || true
 killall babydra-lock || true
+killall babydra-launcher || true
 
 # 6. Install the binaries
 echo "Installing binaries to $LOCAL_BIN..."
@@ -69,19 +70,20 @@ cp target/release/babydra-menu "$LOCAL_BIN/babydra-menu"
 cp target/release/babydra-switcher "$LOCAL_BIN/babydra-switcher"
 cp target/release/babydra-screenshot "$LOCAL_BIN/babydra-screenshot"
 cp target/release/babydra-lock "$LOCAL_BIN/babydra-lock"
+cp target/release/babydra-launcher "$LOCAL_BIN/babydra-launcher"
 
 # Copy wallpaper to standard config dir
 mkdir -p "$HOME/.config/babydra"
 cp wallpaper.png "$HOME/.config/babydra/wallpaper.png"
 
-# 7. Copy labwc configuration files from configs/
+# 7. Copy labwc configuration files from configs/labwc/
 echo "Configuring labwc compositor integrations..."
 mkdir -p "$HOME/.config/labwc"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-cp "$SCRIPT_DIR/configs/autostart" "$HOME/.config/labwc/autostart"
+cp "$SCRIPT_DIR/configs/labwc/autostart" "$HOME/.config/labwc/autostart"
 chmod +x "$HOME/.config/labwc/autostart"
-cp "$SCRIPT_DIR/configs/rc.xml" "$HOME/.config/labwc/rc.xml"
+cp "$SCRIPT_DIR/configs/labwc/rc.xml" "$HOME/.config/labwc/rc.xml"
 
 # 8. Reload configuration and restart panel
 echo "Reloading labwc configuration and starting panel..."
@@ -93,9 +95,15 @@ mkdir -p "$HOME/.cache/babydra"
 echo "Configuring system-wide default fonts for GTK and Fontconfig..."
 mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0" "$HOME/.config/fontconfig"
 
-cp "$SCRIPT_DIR/configs/settings.ini" "$HOME/.config/gtk-3.0/settings.ini"
-cp "$SCRIPT_DIR/configs/settings.ini" "$HOME/.config/gtk-4.0/settings.ini"
-cp "$SCRIPT_DIR/configs/fonts.conf" "$HOME/.config/fontconfig/fonts.conf"
+cp "$SCRIPT_DIR/configs/labwc/settings.ini" "$HOME/.config/gtk-3.0/settings.ini"
+cp "$SCRIPT_DIR/configs/labwc/settings.ini" "$HOME/.config/gtk-4.0/settings.ini"
+cp "$SCRIPT_DIR/configs/labwc/fonts.conf" "$HOME/.config/fontconfig/fonts.conf"
+
+# 10. Configure fastfetch
+echo "Configuring fastfetch..."
+mkdir -p "$HOME/.config/fastfetch"
+cp "$SCRIPT_DIR/configs/fastfetch/config.jsonc" "$HOME/.config/fastfetch/config.jsonc"
+cp "$SCRIPT_DIR/configs/fastfetch/logo.png" "$HOME/.config/fastfetch/logo.png"
 
 # Rebuild font cache
 echo "Rebuilding font cache..."
