@@ -12,27 +12,33 @@ pub fn create_header_row() -> gtk4::Box {
     let btn_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
     btn_box.set_halign(gtk4::Align::End);
 
-    let lang_btn = gtk4::Button::new();
-    lang_btn.add_css_class("circle-btn");
-    lang_btn.set_tooltip_text(Some(&babydra_common::i18n::t("control.switch_language")));
-    
-    let current_lang = babydra_common::i18n::get_locale().to_uppercase();
-    let lang_lbl = gtk4::Label::new(Some(&current_lang));
-    lang_lbl.add_css_class("control-lang-label");
-    lang_btn.set_child(Some(&lang_lbl));
+    let theme_btn = gtk4::Button::new();
+    theme_btn.add_css_class("circle-btn");
+    theme_btn.set_tooltip_text(Some(&babydra_common::i18n::t("control.dark_mode")));
 
-    let lang_lbl_clone = lang_lbl.clone();
-    lang_btn.connect_clicked(move |_| {
-        let new_locale = if babydra_common::i18n::get_locale() == "vi" { "en" } else { "vi" };
-        babydra_common::i18n::set_locale(new_locale);
-        lang_lbl_clone.set_text(&new_locale.to_uppercase());
+    let is_dark_init = gtk4::Settings::default()
+        .map(|s| s.is_gtk_application_prefer_dark_theme())
+        .unwrap_or(true);
+    let initial_icon_name = if is_dark_init { "dark-mode" } else { "brightness" };
+    let initial_color = if is_dark_init { "#ffffff" } else { "rgba(255, 255, 255, 0.8)" };
+    let theme_icon = babydra_common::icon::get_icon_colored(initial_icon_name, 16, initial_color);
+    theme_btn.set_child(Some(&theme_icon));
 
-        let notif_title = babydra_common::i18n::t("control.lang_changed_title");
-        let notif_msg = babydra_common::i18n::t("control.lang_changed_msg");
+    theme_btn.connect_clicked(|_| {
+        let settings = gtk4::Settings::default();
+        let current_dark = settings.as_ref()
+            .map(|s| s.is_gtk_application_prefer_dark_theme())
+            .unwrap_or(true);
+        let new_dark = !current_dark;
 
-        let _ = std::process::Command::new("notify-send")
-            .args(&["-i", "preferences-desktop-locale", &notif_title, &notif_msg])
-            .spawn();
+        let scheme = if new_dark { "prefer-dark" } else { "prefer-light" };
+        let _ = std::process::Command::new("gsettings")
+            .args(&["set", "org.gnome.desktop.interface", "color-scheme", scheme])
+            .output();
+
+        if let Some(ref s) = settings {
+            s.set_gtk_application_prefer_dark_theme(new_dark);
+        }
     });
 
     let settings_btn = gtk4::Button::new();
@@ -45,7 +51,7 @@ pub fn create_header_row() -> gtk4::Box {
 
     let power_off = create_shutdown_button();
 
-    btn_box.append(&lang_btn);
+    btn_box.append(&theme_btn);
     btn_box.append(&settings_btn);
     btn_box.append(&power_off);
 

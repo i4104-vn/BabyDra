@@ -5,3 +5,5 @@ pub mod volume;
 pub mod backlight;
 pub mod storage;
 pub mod power;
+pub mod clean;
+

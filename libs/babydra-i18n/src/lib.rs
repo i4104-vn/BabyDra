@@ -100,6 +100,14 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("control.lang_changed_title", "Language Changed");
             map.insert("control.lang_changed_msg", "Restart widgets to apply changes system-wide.");
             map.insert("control.switch_language", "Switch Language / Đổi ngôn ngữ");
+            map.insert("control.clean", "Clean");
+            map.insert("control.clean_my_linux", "Clean My Linux");
+            map.insert("control.scan", "Scan");
+            map.insert("control.free", "Free");
+            map.insert("control.scanning", "Scanning...");
+            map.insert("control.freed_success", "Successfully freed {}!");
+            map.insert("control.nothing_to_free", "Nothing to free.");
+            map.insert("control.bytes_can_be_freed", "{} can be freed");
 
             // Screenshot
             map.insert("screenshot.reset_tooltip", "Discard and restart (Clear all drawings)");
@@ -210,6 +218,14 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("control.lang_changed_title", "Đã thay đổi ngôn ngữ");
             map.insert("control.lang_changed_msg", "Khởi động lại widgets để áp dụng toàn hệ thống.");
             map.insert("control.switch_language", "Switch Language / Đổi ngôn ngữ");
+            map.insert("control.clean", "Dọn dẹp");
+            map.insert("control.clean_my_linux", "Dọn dẹp Linux");
+            map.insert("control.scan", "Quét");
+            map.insert("control.free", "Giải phóng");
+            map.insert("control.scanning", "Đang quét...");
+            map.insert("control.freed_success", "Đã giải phóng {}!");
+            map.insert("control.nothing_to_free", "Không có tệp thừa.");
+            map.insert("control.bytes_can_be_freed", "Có thể giải phóng {}");
 
             // Screenshot
             map.insert("screenshot.reset_tooltip", "Bỏ chụp và làm lại (Xóa hết nét vẽ)");
