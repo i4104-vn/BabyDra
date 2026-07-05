@@ -643,3 +643,32 @@ popover>arrow {
     background-color: transparent;
     border: none;
 }
+
+/* Clean popover progress circle text styling */
+.clean-popover-percent {
+    font-size: 22px;
+    font-weight: 800;
+    color: #3b82f6;
+    margin: 0;
+    padding: 0;
+}
+
+.clean-popover-percent.scanning {
+    color: #3b82f6;
+}
+
+.clean-popover-percent.cleaning {
+    color: #ef4444;
+}
+
+.clean-popover-percent.finished {
+    color: #10b981;
+}
+
+.clean-popover-size {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+    padding: 0;
+}
