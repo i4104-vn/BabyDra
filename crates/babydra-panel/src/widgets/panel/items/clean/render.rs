@@ -166,7 +166,7 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
                 cr.arc(cx, cy, radius, angle, angle + 1.5);
                 cr.set_source_rgba(59.0 / 255.0, 130.0 / 255.0, 246.0 / 255.0, 0.85); // Blue
                 cr.set_line_width(8.0);
-                cr.set_line_cap(cairo::LineCap::Round);
+                cr.set_line_cap(gtk4::cairo::LineCap::Round);
                 let _ = cr.stroke();
             }
             CleanState::ScanFinished { total_bytes } => {
@@ -183,7 +183,7 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
                 cr.arc(cx, cy, radius, start_angle, end_angle);
                 cr.set_source_rgba(239.0 / 255.0, 68.0 / 255.0, 68.0 / 255.0, 0.85); // Red
                 cr.set_line_width(8.0);
-                cr.set_line_cap(cairo::LineCap::Round);
+                cr.set_line_cap(gtk4::cairo::LineCap::Round);
                 let _ = cr.stroke();
             }
             CleanState::CleanFinished { .. } => {
