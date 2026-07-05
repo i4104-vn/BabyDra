@@ -247,7 +247,7 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
                 let _ = tx.send(CleanProgress::Log("Analyzing user cache...".to_string()));
                 std::thread::sleep(std::time::Duration::from_millis(300));
                 
-                // ONLY measure sizes of paths we will actually clean!
+                // ONLY measure sizes of paths we will actually clean and have write permissions to!
                 let mut cache_size = 0;
                 let home = std::env::var("HOME").unwrap_or_default();
                 if !home.is_empty() {
@@ -264,7 +264,7 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
 
                     for path in safe_paths {
                         let p = Path::new(&path);
-                        if p.exists() {
+                        if p.exists() && is_writable(p) {
                             cache_size += get_dir_size_native(p);
                         }
                     }
@@ -275,7 +275,7 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
                 std::thread::sleep(std::time::Duration::from_millis(300));
                 let pacman_pkg_dir = Path::new("/var/cache/pacman/pkg");
                 let mut pacman_cache = 0;
-                if pacman_pkg_dir.exists() {
+                if pacman_pkg_dir.exists() && is_writable(pacman_pkg_dir) {
                     if let Ok(entries) = fs::read_dir(pacman_pkg_dir) {
                         for entry in entries {
                             if let Ok(entry) = entry {
@@ -300,7 +300,7 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
                         for entry in entries {
                             if let Ok(entry) = entry {
                                 let path = entry.path();
-                                if path.is_dir() {
+                                if path.is_dir() && is_writable(&path) {
                                     if let Ok(sub_entries) = fs::read_dir(&path) {
                                         for sub_entry in sub_entries {
                                             if let Ok(sub_entry) = sub_entry {
@@ -332,10 +332,10 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
                     let info_path = format!("{}/info", trash_dir);
                     let p_files = Path::new(&files_path);
                     let p_info = Path::new(&info_path);
-                    if p_files.exists() {
+                    if p_files.exists() && is_writable(p_files) {
                         trash_size += get_dir_size_native(p_files);
                     }
-                    if p_info.exists() {
+                    if p_info.exists() && is_writable(p_info) {
                         trash_size += get_dir_size_native(p_info);
                     }
                 }
@@ -509,3 +509,32 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
         }
     });
 }
+
+fn is_writable<P: AsRef<Path>>(path: P) -> bool {
+    let path_ref = path.as_ref();
+    if !path_ref.exists() {
+        return false;
+    }
+    if path_ref.is_dir() {
+        let test_file = path_ref.join(".babydra_write_test");
+        if let Ok(_f) = fs::File::create(&test_file) {
+            let _ = fs::remove_file(test_file);
+            true
+        } else {
+            false
+        }
+    } else {
+        if let Some(parent) = path_ref.parent() {
+            let test_file = parent.join(".babydra_write_test");
+            if let Ok(_f) = fs::File::create(&test_file) {
+                let _ = fs::remove_file(test_file);
+                true
+            } else {
+                false
+            }
+        } else {
+            false
+        }
+    }
+}
+
