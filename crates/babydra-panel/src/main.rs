@@ -6,8 +6,6 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 fn main() {
-    println!("Starting BabyDra Panel...");
-
     // Initialize D-Bus StatusNotifierWatcher system tray listener daemon
     babydra_tray::spawn_watcher_service();
 
@@ -16,9 +14,7 @@ fn main() {
 
     // Spawn a background thread to refresh desktop apps cache asynchronously on startup
     std::thread::spawn(|| {
-        println!("Background thread refreshing desktop apps cache...");
         babydra_common::refresh_desktop_apps_cache();
-        println!("Background desktop apps cache refresh complete.");
     });
 
     // Spawn background thread to track focused app and capture screenshots

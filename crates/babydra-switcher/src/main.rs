@@ -36,8 +36,6 @@ fn main() {
         return;
     }
 
-    println!("Starting BabyDra Alt-Tab Switcher...");
-
     let application = gtk4::Application::new(
         Some("org.babydra.switcher"),
         Default::default(),

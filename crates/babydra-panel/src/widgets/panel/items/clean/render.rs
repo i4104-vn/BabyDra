@@ -26,9 +26,11 @@ enum CleanState {
 pub fn create_clean_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) -> gtk4::Button {
     let btn = gtk4::Button::new();
     btn.add_css_class("control-square-tile");
-    btn.set_hexpand(true);
-    btn.set_valign(gtk4::Align::Fill);
-    btn.set_vexpand(true);
+    btn.set_size_request(56, 56);
+    btn.set_halign(gtk4::Align::Center);
+    btn.set_valign(gtk4::Align::Center);
+    btn.set_hexpand(false);
+    btn.set_vexpand(false);
 
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
     main_box.set_valign(gtk4::Align::Center);
@@ -37,20 +39,14 @@ pub fn create_clean_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>)
     let icon_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     icon_container.set_halign(gtk4::Align::Center);
 
-    let icon_widget = babydra_common::icon::get_icon_colored("broom", 16, "rgba(255, 255, 255, 0.8)");
+    let icon_widget = babydra_common::icon::get_icon_colored("broom", 18, "rgba(255, 255, 255, 0.8)");
     icon_container.append(&icon_widget);
 
-    let label = gtk4::Label::new(Some(&babydra_common::i18n::t("control.clean")));
-    label.add_css_class("control-square-label");
-    label.set_halign(gtk4::Align::Center);
-
     main_box.append(&icon_container);
-    main_box.append(&label);
     btn.set_child(Some(&main_box));
 
-    // Create the Popover container
     let popover = gtk4::Popover::new();
-    popover.add_css_class("media-popover"); // Inherit media player popover styles
+    popover.add_css_class("media-popover");
     popover.set_parent(&btn);
     popover.set_position(gtk4::PositionType::Bottom);
     popover.set_has_arrow(false);
@@ -219,22 +215,21 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
         cr.set_line_width(6.0);
         let _ = cr.stroke();
 
-        let draw_neon = |cr: &gtk4::cairo::Context, start: f64, end: f64, r: f64, g: f64, b: f64| {
-            // Outer faint glow
+        let draw_neon = |cr: &gtk4::cairo::Context, start: f64, end: f64, r_val: f64, g: f64, b: f64| {
             cr.arc(cx, cy, radius, start, end);
-            cr.set_source_rgba(r, g, b, 0.08);
+            cr.set_source_rgba(r_val, g, b, 0.08);
             cr.set_line_width(16.0);
             let _ = cr.stroke();
 
             // Medium glow
             cr.arc(cx, cy, radius, start, end);
-            cr.set_source_rgba(r, g, b, 0.22);
+            cr.set_source_rgba(r_val, g, b, 0.22);
             cr.set_line_width(10.0);
             let _ = cr.stroke();
 
             // Core bright line
             cr.arc(cx, cy, radius, start, end);
-            cr.set_source_rgba(r, g, b, 0.95);
+            cr.set_source_rgba(r_val, g, b, 0.95);
             cr.set_line_width(6.0);
             let _ = cr.stroke();
         };
@@ -243,18 +238,18 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
             CleanState::Idle => {}
             CleanState::Scanning { angle } => {
                 cr.set_line_cap(gtk4::cairo::LineCap::Round);
-                draw_neon(cr, angle, angle + 1.5, 59.0 / 255.0, 130.0 / 255.0, 246.0 / 255.0); // Blue Neon
+                draw_neon(cr, angle, angle + 1.5, 59.0 / 255.0, 130.0 / 255.0, 246.0 / 255.0);
             }
             CleanState::ScanFinished { total_bytes } => {
                 if total_bytes > 0 {
-                    draw_neon(cr, 0.0, 2.0 * std::f64::consts::PI, 59.0 / 255.0, 130.0 / 255.0, 246.0 / 255.0); // Blue Neon
+                    draw_neon(cr, 0.0, 2.0 * std::f64::consts::PI, 59.0 / 255.0, 130.0 / 255.0, 246.0 / 255.0);
                 }
             }
             CleanState::Cleaning { progress, .. } => {
                 cr.set_line_cap(gtk4::cairo::LineCap::Round);
                 let start_angle = -std::f64::consts::FRAC_PI_2;
                 let end_angle = start_angle + progress * 2.0 * std::f64::consts::PI;
-                draw_neon(cr, start_angle, end_angle, 239.0 / 255.0, 68.0 / 255.0, 68.0 / 255.0); // Red Neon
+                draw_neon(cr, start_angle, end_angle, 239.0 / 255.0, 68.0 / 255.0, 68.0 / 255.0);
 
                 // Floating particles sucked into the center (Black Hole whirlpool effect)
                 let num_particles = 30;
@@ -263,24 +258,22 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
                     let offset = (i as f64 * 0.13) % 1.0;
                     let p_time = (progress + offset) % 1.0;
 
-                    // Spiraling inward from 2.2x radius down to 0
-                    let R = radius * 2.2 * (1.0 - p_time);
-                    let theta = start_angle + p_time * 7.0; // Spiraling whirlpool angle
+                    let r = radius * 2.2 * (1.0 - p_time);
+                    let theta = start_angle + p_time * 7.0;
 
-                    let px = cx + R * theta.cos();
-                    let py = cy + R * theta.sin();
+                    let px = cx + r * theta.cos();
+                    let py = cy + r * theta.sin();
 
                     let size = 2.5 * (1.0 - p_time);
                     let alpha = 0.9 * (1.0 - p_time);
 
                     cr.arc(px, py, size, 0.0, 2.0 * std::f64::consts::PI);
-                    // Glowing reddish/orange particles
                     cr.set_source_rgba(251.0 / 255.0, 113.0 / 255.0, 133.0 / 255.0, alpha);
                     let _ = cr.fill();
                 }
             }
             CleanState::CleanFinished { .. } => {
-                draw_neon(cr, 0.0, 2.0 * std::f64::consts::PI, 16.0 / 255.0, 185.0 / 255.0, 129.0 / 255.0); // Green Neon
+                draw_neon(cr, 0.0, 2.0 * std::f64::consts::PI, 16.0 / 255.0, 185.0 / 255.0, 129.0 / 255.0);
             }
         }
     });

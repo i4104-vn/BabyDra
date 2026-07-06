@@ -35,7 +35,6 @@ impl NotificationService {
         expire_timeout: i32,
     ) -> u32 {
         let id = self.current_id.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-        println!("Received Notification via D-Bus from {}: [{}] {}", app_name, summary, body);
         
         let mut icon = app_icon.to_string();
         if icon.is_empty() {
@@ -92,7 +91,6 @@ pub fn spawn_dbus_listener(tx: tokio::sync::mpsc::UnboundedSender<NotificationMs
                 sender: tx,
                 current_id: std::sync::atomic::AtomicU32::new(1),
             };
-            println!("Requesting org.freedesktop.Notifications DBus name...");
             let conn_result = zbus::connection::Builder::session()
                 .unwrap()
                 .serve_at("/org/freedesktop/Notifications", service)
@@ -103,24 +101,15 @@ pub fn spawn_dbus_listener(tx: tokio::sync::mpsc::UnboundedSender<NotificationMs
             match conn_result {
                 Ok(conn) => {
                     use zbus::fdo::RequestNameFlags;
-                    match conn.request_name_with_flags(
+                    let _ = conn.request_name_with_flags(
                         "org.freedesktop.Notifications",
                         RequestNameFlags::ReplaceExisting | RequestNameFlags::DoNotQueue,
-                    ).await {
-                        Ok(_) => {
-                            println!("Notification D-Bus daemon started successfully. Listening for incoming notifications.");
-                            loop {
-                                tokio::time::sleep(tokio::time::Duration::from_secs(3600)).await;
-                            }
-                        }
-                        Err(e) => {
-                            eprintln!("Failed to acquire notifications DBus name: {}", e);
-                        }
+                    ).await;
+                    loop {
+                        tokio::time::sleep(tokio::time::Duration::from_secs(3600)).await;
                     }
                 }
-                Err(e) => {
-                    eprintln!("Failed to start DBus daemon: {}", e);
-                }
+                Err(_) => {}
             }
         });
     });

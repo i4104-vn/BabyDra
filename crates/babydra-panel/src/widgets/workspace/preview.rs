@@ -42,9 +42,7 @@ pub fn populate_popover_previews(
             if !parts.is_empty() {
                 let program = parts[0];
                 let args = &parts[1..];
-                if let Err(e) = std::process::Command::new(program).args(args).spawn() {
-                    eprintln!("Failed to spawn command {}: {}", exec_cmd, e);
-                }
+                let _ = std::process::Command::new(program).args(args).spawn();
             }
             pop_open_new.popdown();
         });

@@ -46,7 +46,6 @@ pub fn create_header_row() -> gtk4::Box {
     let settings_icon = babydra_common::icon::get_icon("settings", 16);
     settings_btn.set_child(Some(&settings_icon));
     settings_btn.connect_clicked(|_| {
-        println!("Settings window triggered...");
     });
 
     let power_off = create_shutdown_button();

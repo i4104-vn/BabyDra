@@ -62,10 +62,7 @@ pub fn create_file_row(path: &Path, window: &gtk4::ApplicationWindow) -> gtk4::B
     
     let win_to_close = window.clone();
     btn.connect_clicked(move |_| {
-        println!("Opening file: {}", path_str);
-        if let Err(e) = Command::new("xdg-open").arg(&path_str).spawn() {
-            eprintln!("Failed to open file {}: {}", path_str, e);
-        }
+        let _ = Command::new("xdg-open").arg(&path_str).spawn();
         
         win_to_close.close();
     });

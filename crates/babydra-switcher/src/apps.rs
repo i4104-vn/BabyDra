@@ -118,7 +118,6 @@ pub fn get_running_apps() -> Vec<DesktopApp> {
 /// Utilizes window title first, falling back to app_id and name comparisons.
 pub fn activate_app(app: &DesktopApp) {
     if let Some(ref title) = app.window_title {
-        println!("Activating by window title: {}", title);
         let status = std::process::Command::new("wlrctl")
             .args(&["window", "focus", &format!("title:{}", title)])
             .status();
@@ -146,7 +145,6 @@ pub fn activate_app(app: &DesktopApp) {
     }
 
     if let Some(ref app_id) = app.app_id {
-        println!("Activating by app_id: {}", app_id);
         let status = std::process::Command::new("wlrctl")
             .args(&["window", "focus", app_id])
             .status();

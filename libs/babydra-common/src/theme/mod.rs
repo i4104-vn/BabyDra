@@ -80,7 +80,6 @@ pub fn init_theme() {
                     gtk4::STYLE_PROVIDER_PRIORITY_USER,
                 );
                 REGISTERED.with(|r| r.set(true));
-                println!("Successfully registered glassmorphism stylesheet with GTK Display.");
             }
         }
 
@@ -96,7 +95,6 @@ pub fn init_theme() {
                 let css = if is_dark { DARK_CSS } else { LIGHT_CSS };
                 let cleaned_css = css.replace("\r", "");
                 provider_clone.load_from_data(&cleaned_css);
-                println!("Dynamic theme re-loaded (is_dark = {}).", is_dark);
             });
         } else {
             let cleaned_css = DARK_CSS.replace("\r", "");
