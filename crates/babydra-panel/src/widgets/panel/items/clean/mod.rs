@@ -103,15 +103,11 @@ pub fn get_trash_size() -> u64 {
 pub fn clean_all_native() -> u64 {
     let mut freed_bytes = 0;
 
-    // 1. Clean User Cache
+    // 1. Clean User Cache (strictly exclude developer tool caches like cargo, pip, go, yarn)
     let home = std::env::var("HOME").unwrap_or_default();
     if !home.is_empty() {
         let safe_paths = vec![
             format!("{}/.cache/thumbnails", home),
-            format!("{}/.cache/pip", home),
-            format!("{}/.cache/cargo/registry/cache", home),
-            format!("{}/.cache/go-build", home),
-            format!("{}/.cache/yarn", home),
             format!("{}/.cache/fontconfig", home),
             format!("{}/.cache/gstreamer-1.0", home),
             format!("{}/.cache/mesa_shader_cache", home),
@@ -120,17 +116,14 @@ pub fn clean_all_native() -> u64 {
         for path in safe_paths {
             let p = Path::new(&path);
             if p.exists() {
-                let size = get_dir_size_native(p);
-                if fs::remove_dir_all(p).is_ok() {
-                    freed_bytes += size;
-                }
+                freed_bytes += clean_path_recursive(p);
             }
         }
     }
 
     // 2. Clean Pacman Package Cache (ignoring files if permission denied)
     let pacman_pkg_dir = Path::new("/var/cache/pacman/pkg");
-    if pacman_pkg_dir.exists() {
+    if pacman_pkg_dir.exists() && is_dir_writable(pacman_pkg_dir) {
         if let Ok(entries) = fs::read_dir(pacman_pkg_dir) {
             for entry in entries {
                 if let Ok(entry) = entry {
@@ -155,7 +148,7 @@ pub fn clean_all_native() -> u64 {
             for entry in entries {
                 if let Ok(entry) = entry {
                     let path = entry.path();
-                    if path.is_dir() {
+                    if path.is_dir() && is_dir_writable(&path) {
                         if let Ok(sub_entries) = fs::read_dir(&path) {
                             for sub_entry in sub_entries {
                                 if let Ok(sub_entry) = sub_entry {
@@ -189,18 +182,12 @@ pub fn clean_all_native() -> u64 {
         let p_info = Path::new(&info_path);
         
         if p_files.exists() {
-            let size = get_dir_size_native(p_files);
-            if fs::remove_dir_all(p_files).is_ok() {
-                freed_bytes += size;
-                let _ = fs::create_dir_all(p_files);
-            }
+            freed_bytes += clean_path_recursive(p_files);
+            let _ = fs::create_dir_all(p_files);
         }
         if p_info.exists() {
-            let size = get_dir_size_native(p_info);
-            if fs::remove_dir_all(p_info).is_ok() {
-                freed_bytes += size;
-                let _ = fs::create_dir_all(p_info);
-            }
+            freed_bytes += clean_path_recursive(p_info);
+            let _ = fs::create_dir_all(p_info);
         }
     }
 
@@ -221,4 +208,107 @@ pub fn format_bytes(bytes: u64) -> String {
     } else {
         format!("{} B", bytes)
     }
+}
+
+/// Helper function to check if a directory is writable by creating/removing a temporary file.
+pub fn is_dir_writable<P: AsRef<Path>>(path: P) -> bool {
+    let path_ref = path.as_ref();
+    if !path_ref.exists() || !path_ref.is_dir() {
+        return false;
+    }
+    let test_file = path_ref.join(".babydra_write_test");
+    if let Ok(_f) = fs::File::create(&test_file) {
+        let _ = fs::remove_file(test_file);
+        true
+    } else {
+        false
+    }
+}
+
+/// Recursively calculates cleanable size, checking permissions along the traversal.
+pub fn get_cleanable_size_recursive<P: AsRef<Path>>(path: P) -> u64 {
+    let path_ref = path.as_ref();
+    if !path_ref.exists() {
+        return 0;
+    }
+    let mut size = 0;
+    if path_ref.is_dir() {
+        if is_dir_writable(path_ref) {
+            if let Ok(entries) = fs::read_dir(path_ref) {
+                for entry in entries {
+                    if let Ok(entry) = entry {
+                        let sub_path = entry.path();
+                        if sub_path.is_file() {
+                            if let Ok(meta) = sub_path.metadata() {
+                                size += meta.len();
+                            }
+                        } else if sub_path.is_dir() {
+                            size += get_cleanable_size_recursive(&sub_path);
+                        }
+                    }
+                }
+            }
+        }
+    } else if path_ref.is_file() {
+        if let Some(parent) = path_ref.parent() {
+            if is_dir_writable(parent) {
+                if let Ok(meta) = path_ref.metadata() {
+                    size += meta.len();
+                }
+            }
+        }
+    }
+    size
+}
+
+/// Recursively cleans directory contents, deleting only files we have permission to remove, and sums actual freed size.
+pub fn clean_path_recursive<P: AsRef<Path>>(path: P) -> u64 {
+    let path_ref = path.as_ref();
+    if !path_ref.exists() {
+        return 0;
+    }
+    let mut freed = 0;
+    if path_ref.is_dir() {
+        if is_dir_writable(path_ref) {
+            let mut all_sub_deleted = true;
+            if let Ok(entries) = fs::read_dir(path_ref) {
+                for entry in entries {
+                    if let Ok(entry) = entry {
+                        let sub_path = entry.path();
+                        if sub_path.is_file() {
+                            if let Ok(meta) = sub_path.metadata() {
+                                let len = meta.len();
+                                if fs::remove_file(&sub_path).is_ok() {
+                                    freed += len;
+                                } else {
+                                    all_sub_deleted = false;
+                                }
+                            }
+                        } else if sub_path.is_dir() {
+                            let sub_freed = clean_path_recursive(&sub_path);
+                            freed += sub_freed;
+                            if sub_path.exists() {
+                                all_sub_deleted = false;
+                            }
+                        }
+                    }
+                }
+            }
+            if all_sub_deleted {
+                let _ = fs::remove_dir(path_ref);
+            }
+        }
+    } else if path_ref.is_file() {
+        if let Some(parent) = path_ref.parent() {
+            if is_dir_writable(parent) {
+                if let Ok(meta) = path_ref.metadata() {
+                    let len = meta.len();
+                    if fs::remove_file(path_ref).is_ok() {
+                        freed += len;
+                    }
+                }
+            }
+        }
+    }
+    freed
 }

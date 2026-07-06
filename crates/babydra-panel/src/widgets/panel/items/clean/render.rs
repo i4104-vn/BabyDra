@@ -4,7 +4,7 @@ use std::cell::RefCell;
 use tokio::sync::mpsc;
 use std::path::Path;
 use std::fs;
-use super::{clean_all_native, format_bytes, get_dir_size, get_journal_size, get_orphans_size, get_trash_size, get_dir_size_native};
+use super::{clean_all_native, format_bytes, get_cleanable_size_recursive, is_dir_writable};
 
 #[derive(Clone)]
 enum CleanProgress {
@@ -253,10 +253,6 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
                 if !home.is_empty() {
                     let safe_paths = vec![
                         format!("{}/.cache/thumbnails", home),
-                        format!("{}/.cache/pip", home),
-                        format!("{}/.cache/cargo/registry/cache", home),
-                        format!("{}/.cache/go-build", home),
-                        format!("{}/.cache/yarn", home),
                         format!("{}/.cache/fontconfig", home),
                         format!("{}/.cache/gstreamer-1.0", home),
                         format!("{}/.cache/mesa_shader_cache", home),
@@ -264,8 +260,8 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
 
                     for path in safe_paths {
                         let p = Path::new(&path);
-                        if p.exists() && is_writable(p) {
-                            cache_size += get_dir_size_native(p);
+                        if p.exists() {
+                            cache_size += get_cleanable_size_recursive(p);
                         }
                     }
                 }
@@ -275,7 +271,7 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
                 std::thread::sleep(std::time::Duration::from_millis(300));
                 let pacman_pkg_dir = Path::new("/var/cache/pacman/pkg");
                 let mut pacman_cache = 0;
-                if pacman_pkg_dir.exists() && is_writable(pacman_pkg_dir) {
+                if pacman_pkg_dir.exists() && is_dir_writable(pacman_pkg_dir) {
                     if let Ok(entries) = fs::read_dir(pacman_pkg_dir) {
                         for entry in entries {
                             if let Ok(entry) = entry {
@@ -300,7 +296,7 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
                         for entry in entries {
                             if let Ok(entry) = entry {
                                 let path = entry.path();
-                                if path.is_dir() && is_writable(&path) {
+                                if path.is_dir() && is_dir_writable(&path) {
                                     if let Ok(sub_entries) = fs::read_dir(&path) {
                                         for sub_entry in sub_entries {
                                             if let Ok(sub_entry) = sub_entry {
@@ -332,11 +328,11 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
                     let info_path = format!("{}/info", trash_dir);
                     let p_files = Path::new(&files_path);
                     let p_info = Path::new(&info_path);
-                    if p_files.exists() && is_writable(p_files) {
-                        trash_size += get_dir_size_native(p_files);
+                    if p_files.exists() {
+                        trash_size += get_cleanable_size_recursive(p_files);
                     }
-                    if p_info.exists() && is_writable(p_info) {
-                        trash_size += get_dir_size_native(p_info);
+                    if p_info.exists() {
+                        trash_size += get_cleanable_size_recursive(p_info);
                     }
                 }
                 total += trash_size;
@@ -508,33 +504,5 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
             });
         }
     });
-}
-
-fn is_writable<P: AsRef<Path>>(path: P) -> bool {
-    let path_ref = path.as_ref();
-    if !path_ref.exists() {
-        return false;
-    }
-    if path_ref.is_dir() {
-        let test_file = path_ref.join(".babydra_write_test");
-        if let Ok(_f) = fs::File::create(&test_file) {
-            let _ = fs::remove_file(test_file);
-            true
-        } else {
-            false
-        }
-    } else {
-        if let Some(parent) = path_ref.parent() {
-            let test_file = parent.join(".babydra_write_test");
-            if let Ok(_f) = fs::File::create(&test_file) {
-                let _ = fs::remove_file(test_file);
-                true
-            } else {
-                false
-            }
-        } else {
-            false
-        }
-    }
 }
 
