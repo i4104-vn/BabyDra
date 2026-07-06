@@ -650,7 +650,7 @@ popover > arrow {
 
 /* Clean popover progress circle text styling */
 .clean-popover-percent {
-    font-size: 22px;
+    font-size: 26px;
     font-weight: 800;
     color: #007aff;
     margin: 0;
@@ -670,7 +670,7 @@ popover > arrow {
 }
 
 .clean-popover-size {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 600;
     color: rgba(28, 28, 30, 0.6);
     margin: 0;

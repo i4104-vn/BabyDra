@@ -100,7 +100,7 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
     overlay.set_margin_bottom(12);
 
     let progress_drawing = gtk4::DrawingArea::new();
-    progress_drawing.set_size_request(120, 120);
+    progress_drawing.set_size_request(160, 160);
     overlay.set_child(Some(&progress_drawing));
 
     let center_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
@@ -233,7 +233,35 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
             CleanState::Idle => {}
             CleanState::Scanning { angle } => {
                 cr.set_line_cap(gtk4::cairo::LineCap::Round);
-                draw_neon(cr, angle, angle + 1.5, 59.0 / 255.0, 130.0 / 255.0, 246.0 / 255.0); // Blue Neon
+                
+                // Pulsating arc length
+                let arc_len = 1.2 + (angle * 3.0).sin().abs() * 0.6;
+                // Main blue neon arc spinning clockwise
+                draw_neon(cr, angle, angle + arc_len, 59.0 / 255.0, 130.0 / 255.0, 246.0 / 255.0);
+
+                // Inner cyan neon arc spinning counter-clockwise
+                let inner_radius = radius - 10.0;
+                cr.arc(cx, cy, inner_radius, -angle, -angle + 1.0);
+                cr.set_source_rgba(6.0 / 255.0, 182.0 / 255.0, 212.0 / 255.0, 0.9);
+                cr.set_line_width(4.0);
+                let _ = cr.stroke();
+
+                // Orbiting glowing blue energy particles
+                let num_scan_particles = 12;
+                for i in 0..num_scan_particles {
+                    let p_angle = angle + (i as f64 * (2.0 * std::f64::consts::PI / num_scan_particles as f64));
+                    let wave_offset = (angle * 4.0 + i as f64).sin() * 5.0;
+                    let pr = radius + wave_offset;
+                    let px = cx + pr * p_angle.cos();
+                    let py = cy + pr * p_angle.sin();
+                    
+                    let size = 2.0 + (angle * 6.0 + i as f64).sin().abs() * 1.5;
+                    let alpha = 0.5 + (angle * 4.0 + i as f64).sin().abs() * 0.4;
+                    
+                    cr.arc(px, py, size, 0.0, 2.0 * std::f64::consts::PI);
+                    cr.set_source_rgba(96.0 / 255.0, 165.0 / 255.0, 250.0 / 255.0, alpha);
+                    let _ = cr.fill();
+                }
             }
             CleanState::ScanFinished { total_bytes } => {
                 if total_bytes > 0 {
