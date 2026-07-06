@@ -77,7 +77,7 @@ pub fn create_dnd_tile() -> gtk4::Button {
     btn.set_valign(gtk4::Align::Fill);
     btn.set_vexpand(true);
 
-    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
+    let main_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
     main_box.set_valign(gtk4::Align::Center);
     main_box.set_halign(gtk4::Align::Center);
 
@@ -87,15 +87,15 @@ pub fn create_dnd_tile() -> gtk4::Button {
     }
 
     let icon_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    icon_container.set_halign(gtk4::Align::Center);
+    icon_container.set_valign(gtk4::Align::Center);
 
     let icon_color = if active { "#ffffff" } else { "rgba(255, 255, 255, 0.8)" };
     let icon_widget = babydra_common::icon::get_icon_colored("bell-off", 18, icon_color);
     icon_container.append(&icon_widget);
 
-    let label = gtk4::Label::new(Some(&babydra_common::i18n::t("control.dnd")));
+    let label = gtk4::Label::new(Some("DND"));
     label.add_css_class("control-dnd-label");
-    label.set_halign(gtk4::Align::Center);
+    label.set_valign(gtk4::Align::Center);
 
     main_box.append(&icon_container);
     main_box.append(&label);
@@ -160,15 +160,10 @@ pub fn create_night_light_tile() -> gtk4::Button {
     icon_container.set_halign(gtk4::Align::Center);
 
     let icon_color = if active { "#ffffff" } else { "rgba(255, 255, 255, 0.8)" };
-    let icon_widget = babydra_common::icon::get_icon_colored("night-light", 16, icon_color);
+    let icon_widget = babydra_common::icon::get_icon_colored("night-light", 18, icon_color);
     icon_container.append(&icon_widget);
 
-    let label = gtk4::Label::new(Some(&babydra_common::i18n::t("control.night_light")));
-    label.add_css_class("control-square-label");
-    label.set_halign(gtk4::Align::Center);
-
     main_box.append(&icon_container);
-    main_box.append(&label);
     btn.set_child(Some(&main_box));
 
     btn.connect_clicked(move |b| {
@@ -187,7 +182,7 @@ pub fn create_night_light_tile() -> gtk4::Button {
             icon_container.remove(&old);
         }
         let color = if new_active { "#ffffff" } else { "rgba(255, 255, 255, 0.8)" };
-        let new_img = babydra_common::icon::get_icon_colored("night-light", 16, color);
+        let new_img = babydra_common::icon::get_icon_colored("night-light", 18, color);
         icon_container.append(&new_img);
     });
 
