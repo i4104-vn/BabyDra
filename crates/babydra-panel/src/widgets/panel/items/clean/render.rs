@@ -4,7 +4,7 @@ use std::cell::RefCell;
 use tokio::sync::mpsc;
 use std::path::Path;
 use std::fs;
-use super::{clean_all_native, format_bytes, get_cleanable_size_recursive, is_dir_writable};
+use super::{clean_all_native, format_bytes, cache, logs, temp};
 
 #[derive(Clone)]
 enum CleanProgress {
@@ -246,96 +246,19 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
 
                 let _ = tx.send(CleanProgress::Log("Analyzing user cache...".to_string()));
                 std::thread::sleep(std::time::Duration::from_millis(300));
-                
-                // ONLY measure sizes of paths we will actually clean and have write permissions to!
-                let mut cache_size = 0;
-                let home = std::env::var("HOME").unwrap_or_default();
-                if !home.is_empty() {
-                    let safe_paths = vec![
-                        format!("{}/.cache/thumbnails", home),
-                        format!("{}/.cache/fontconfig", home),
-                        format!("{}/.cache/gstreamer-1.0", home),
-                        format!("{}/.cache/mesa_shader_cache", home),
-                    ];
-
-                    for path in safe_paths {
-                        let p = Path::new(&path);
-                        if p.exists() {
-                            cache_size += get_cleanable_size_recursive(p);
-                        }
-                    }
-                }
-                total += cache_size;
+                total += cache::get_user_cache_size();
 
                 let _ = tx.send(CleanProgress::Log("Checking package cache...".to_string()));
                 std::thread::sleep(std::time::Duration::from_millis(300));
-                let pacman_pkg_dir = Path::new("/var/cache/pacman/pkg");
-                let mut pacman_cache = 0;
-                if pacman_pkg_dir.exists() && is_dir_writable(pacman_pkg_dir) {
-                    if let Ok(entries) = fs::read_dir(pacman_pkg_dir) {
-                        for entry in entries {
-                            if let Ok(entry) = entry {
-                                let path = entry.path();
-                                if path.is_file() {
-                                    if let Ok(meta) = entry.metadata() {
-                                        pacman_cache += meta.len();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                total += pacman_cache;
+                total += cache::get_pacman_cache_size();
 
                 let _ = tx.send(CleanProgress::Log("Reading system log size...".to_string()));
                 std::thread::sleep(std::time::Duration::from_millis(300));
-                let journal_dir = Path::new("/var/log/journal");
-                let mut journal_size = 0;
-                if journal_dir.exists() {
-                    if let Ok(entries) = fs::read_dir(journal_dir) {
-                        for entry in entries {
-                            if let Ok(entry) = entry {
-                                let path = entry.path();
-                                if path.is_dir() && is_dir_writable(&path) {
-                                    if let Ok(sub_entries) = fs::read_dir(&path) {
-                                        for sub_entry in sub_entries {
-                                            if let Ok(sub_entry) = sub_entry {
-                                                let sub_path = sub_entry.path();
-                                                if sub_path.is_file() {
-                                                    if let Ok(meta) = sub_entry.metadata() {
-                                                        let file_name = sub_path.file_name().unwrap_or_default().to_string_lossy();
-                                                        if file_name.contains('@') {
-                                                            journal_size += meta.len();
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                total += journal_size;
+                total += logs::get_journal_logs_size();
 
                 let _ = tx.send(CleanProgress::Log("Checking trash bin...".to_string()));
                 std::thread::sleep(std::time::Duration::from_millis(300));
-                let mut trash_size = 0;
-                if !home.is_empty() {
-                    let trash_dir = format!("{}/.local/share/Trash", home);
-                    let files_path = format!("{}/files", trash_dir);
-                    let info_path = format!("{}/info", trash_dir);
-                    let p_files = Path::new(&files_path);
-                    let p_info = Path::new(&info_path);
-                    if p_files.exists() {
-                        trash_size += get_cleanable_size_recursive(p_files);
-                    }
-                    if p_info.exists() {
-                        trash_size += get_cleanable_size_recursive(p_info);
-                    }
-                }
-                total += trash_size;
+                total += temp::get_trash_size();
 
                 let _ = tx.send(CleanProgress::ScanFinished { total_bytes: total });
             });

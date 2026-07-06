@@ -1,4 +1,7 @@
 pub mod render;
+pub mod cache;
+pub mod logs;
+pub mod temp;
 
 use std::fs;
 use std::path::Path;
@@ -88,109 +91,14 @@ pub fn get_orphans_size() -> u64 {
     total_size
 }
 
-/// Retrieves the size of journal logs natively.
-pub fn get_journal_size() -> u64 {
-    get_dir_size_native("/var/log/journal")
-}
-
-/// Retrieves the size of the user's trash bin.
-pub fn get_trash_size() -> u64 {
-    get_dir_size("~/.local/share/Trash")
-}
-
 /// Native system cleanup using standard library file operations.
-/// Returns the total number of bytes successfully freed.
+/// Returns the total number of bytes successfully freed by calling submodules.
 pub fn clean_all_native() -> u64 {
     let mut freed_bytes = 0;
-
-    // 1. Clean User Cache (strictly exclude developer tool caches like cargo, pip, go, yarn)
-    let home = std::env::var("HOME").unwrap_or_default();
-    if !home.is_empty() {
-        let safe_paths = vec![
-            format!("{}/.cache/thumbnails", home),
-            format!("{}/.cache/fontconfig", home),
-            format!("{}/.cache/gstreamer-1.0", home),
-            format!("{}/.cache/mesa_shader_cache", home),
-        ];
-
-        for path in safe_paths {
-            let p = Path::new(&path);
-            if p.exists() {
-                freed_bytes += clean_path_recursive(p);
-            }
-        }
-    }
-
-    // 2. Clean Pacman Package Cache (ignoring files if permission denied)
-    let pacman_pkg_dir = Path::new("/var/cache/pacman/pkg");
-    if pacman_pkg_dir.exists() && is_dir_writable(pacman_pkg_dir) {
-        if let Ok(entries) = fs::read_dir(pacman_pkg_dir) {
-            for entry in entries {
-                if let Ok(entry) = entry {
-                    let path = entry.path();
-                    if path.is_file() {
-                        if let Ok(meta) = entry.metadata() {
-                            let size = meta.len();
-                            if fs::remove_file(path).is_ok() {
-                                freed_bytes += size;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // 3. Clean Journal Logs (archived files containing '@')
-    let journal_dir = Path::new("/var/log/journal");
-    if journal_dir.exists() {
-        if let Ok(entries) = fs::read_dir(journal_dir) {
-            for entry in entries {
-                if let Ok(entry) = entry {
-                    let path = entry.path();
-                    if path.is_dir() && is_dir_writable(&path) {
-                        if let Ok(sub_entries) = fs::read_dir(&path) {
-                            for sub_entry in sub_entries {
-                                if let Ok(sub_entry) = sub_entry {
-                                    let sub_path = sub_entry.path();
-                                    if sub_path.is_file() {
-                                        if let Ok(meta) = sub_entry.metadata() {
-                                            let size = meta.len();
-                                            let file_name = sub_path.file_name().unwrap_or_default().to_string_lossy();
-                                            if file_name.contains('@') {
-                                                if fs::remove_file(sub_path).is_ok() {
-                                                    freed_bytes += size;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // 4. Clean Trash Bin
-    if !home.is_empty() {
-        let trash_dir = format!("{}/.local/share/Trash", home);
-        let files_path = format!("{}/files", trash_dir);
-        let info_path = format!("{}/info", trash_dir);
-        let p_files = Path::new(&files_path);
-        let p_info = Path::new(&info_path);
-        
-        if p_files.exists() {
-            freed_bytes += clean_path_recursive(p_files);
-            let _ = fs::create_dir_all(p_files);
-        }
-        if p_info.exists() {
-            freed_bytes += clean_path_recursive(p_info);
-            let _ = fs::create_dir_all(p_info);
-        }
-    }
-
+    freed_bytes += cache::remove_user_cache();
+    freed_bytes += cache::remove_pacman_cache();
+    freed_bytes += logs::remove_journal_logs();
+    freed_bytes += temp::remove_trash();
     freed_bytes
 }
 
