@@ -21,6 +21,8 @@ pub const DARK_CAFFEINE_SVG: &str = include_str!("assets/dark/caffeine.svg");
 pub const LIGHT_CAFFEINE_SVG: &str = include_str!("assets/light/caffeine.svg");
 pub const DARK_CAMERA_SVG: &str = include_str!("assets/dark/camera.svg");
 pub const LIGHT_CAMERA_SVG: &str = include_str!("assets/light/camera.svg");
+pub const DARK_BROOM_SVG: &str = include_str!("assets/dark/broom.svg");
+pub const LIGHT_BROOM_SVG: &str = include_str!("assets/light/broom.svg");
 pub const DARK_CLOCK_SVG: &str = include_str!("assets/dark/clock.svg");
 pub const LIGHT_CLOCK_SVG: &str = include_str!("assets/light/clock.svg");
 pub const DARK_DARK_MODE_SVG: &str = include_str!("assets/dark/dark-mode.svg");
@@ -233,6 +235,8 @@ pub fn get_icon(name: &str, size: i32) -> gtk4::Image {
         ("text", true) => Some(LIGHT_TEXT_SVG),
         ("trash", false) => Some(DARK_TRASH_SVG),
         ("trash", true) => Some(LIGHT_TRASH_SVG),
+        ("broom", false) => Some(DARK_BROOM_SVG),
+        ("broom", true) => Some(LIGHT_BROOM_SVG),
         ("unlock", false) => Some(DARK_UNLOCK_SVG),
         ("unlock", true) => Some(LIGHT_UNLOCK_SVG),
         ("user", false) => Some(DARK_USER_SVG),

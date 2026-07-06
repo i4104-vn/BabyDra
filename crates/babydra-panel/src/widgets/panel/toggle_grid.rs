@@ -9,7 +9,7 @@ pub fn create_control_center_grid(on_popover_toggled: Option<Rc<dyn Fn(bool) + '
     main_layout.set_valign(gtk4::Align::Fill);
     main_layout.set_vexpand(true);
 
-    let left_box = create_left_box_toggles(on_popover_toggled);
+    let left_box = create_left_box_toggles(on_popover_toggled.clone());
     let right_grid = gtk4::Grid::new();
     right_grid.set_column_spacing(10);
     right_grid.set_row_spacing(10);
@@ -22,13 +22,14 @@ pub fn create_control_center_grid(on_popover_toggled: Option<Rc<dyn Fn(bool) + '
 
     let small_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
     small_box.set_hexpand(true);
+    small_box.set_homogeneous(true);
     small_box.set_vexpand(true);
     small_box.set_valign(gtk4::Align::Fill);
 
     let night_btn = create_night_light_tile();
-    let theme_btn = items::darkmode::render::create_small_theme_toggle_tile();
+    let clean_btn = items::clean::render::create_clean_tile(on_popover_toggled);
 
-    small_box.append(&theme_btn);
+    small_box.append(&clean_btn);
     small_box.append(&night_btn);
     right_grid.attach(&small_box, 0, 1, 2, 1);
 
