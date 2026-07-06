@@ -48,9 +48,8 @@ pub fn create_clean_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>)
     main_box.append(&label);
     btn.set_child(Some(&main_box));
 
-    // Create the Popover container
     let popover = gtk4::Popover::new();
-    popover.add_css_class("media-popover"); // Inherit media player popover styles
+    popover.add_css_class("media-popover");
     popover.set_parent(&btn);
     popover.set_position(gtk4::PositionType::Bottom);
     popover.set_has_arrow(false);
@@ -191,17 +190,14 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
 
     popover.set_child(Some(&popover_box));
 
-    // Shared State to hold current reclaimable bytes and clean state
     let total_reclaimable = Rc::new(RefCell::new(0u64));
     let state = Rc::new(RefCell::new(CleanState::Idle));
     
-    // Store size of each scanned category to animate their values down to 0
     let user_size = Rc::new(RefCell::new(0u64));
     let pacman_size = Rc::new(RefCell::new(0u64));
     let journal_size = Rc::new(RefCell::new(0u64));
     let trash_size = Rc::new(RefCell::new(0u64));
 
-    // Set custom drawing logic on progress circle drawing area
     let state_draw = state.clone();
     progress_drawing.set_draw_func(move |_, cr, width, height| {
         let current_state = *state_draw.borrow();
@@ -213,28 +209,24 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
             return;
         }
 
-        // Draw background track circle
         cr.arc(cx, cy, radius, 0.0, 2.0 * std::f64::consts::PI);
         cr.set_source_rgba(255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 0.06);
         cr.set_line_width(6.0);
         let _ = cr.stroke();
 
-        let draw_neon = |cr: &gtk4::cairo::Context, start: f64, end: f64, r: f64, g: f64, b: f64| {
-            // Outer faint glow
+        let draw_neon = |cr: &gtk4::cairo::Context, start: f64, end: f64, r_val: f64, g: f64, b: f64| {
             cr.arc(cx, cy, radius, start, end);
-            cr.set_source_rgba(r, g, b, 0.08);
+            cr.set_source_rgba(r_val, g, b, 0.08);
             cr.set_line_width(16.0);
             let _ = cr.stroke();
 
-            // Medium glow
             cr.arc(cx, cy, radius, start, end);
-            cr.set_source_rgba(r, g, b, 0.22);
+            cr.set_source_rgba(r_val, g, b, 0.22);
             cr.set_line_width(10.0);
             let _ = cr.stroke();
 
-            // Core bright line
             cr.arc(cx, cy, radius, start, end);
-            cr.set_source_rgba(r, g, b, 0.95);
+            cr.set_source_rgba(r_val, g, b, 0.95);
             cr.set_line_width(6.0);
             let _ = cr.stroke();
         };
@@ -243,44 +235,41 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
             CleanState::Idle => {}
             CleanState::Scanning { angle } => {
                 cr.set_line_cap(gtk4::cairo::LineCap::Round);
-                draw_neon(cr, angle, angle + 1.5, 59.0 / 255.0, 130.0 / 255.0, 246.0 / 255.0); // Blue Neon
+                draw_neon(cr, angle, angle + 1.5, 59.0 / 255.0, 130.0 / 255.0, 246.0 / 255.0);
             }
             CleanState::ScanFinished { total_bytes } => {
                 if total_bytes > 0 {
-                    draw_neon(cr, 0.0, 2.0 * std::f64::consts::PI, 59.0 / 255.0, 130.0 / 255.0, 246.0 / 255.0); // Blue Neon
+                    draw_neon(cr, 0.0, 2.0 * std::f64::consts::PI, 59.0 / 255.0, 130.0 / 255.0, 246.0 / 255.0);
                 }
             }
             CleanState::Cleaning { progress, .. } => {
                 cr.set_line_cap(gtk4::cairo::LineCap::Round);
                 let start_angle = -std::f64::consts::FRAC_PI_2;
                 let end_angle = start_angle + progress * 2.0 * std::f64::consts::PI;
-                draw_neon(cr, start_angle, end_angle, 239.0 / 255.0, 68.0 / 255.0, 68.0 / 255.0); // Red Neon
+                draw_neon(cr, start_angle, end_angle, 239.0 / 255.0, 68.0 / 255.0, 68.0 / 255.0);
 
-                // Floating particles sucked into the center (Black Hole whirlpool effect)
                 let num_particles = 30;
                 for i in 0..num_particles {
                     let start_angle = (i as f64) * (2.0 * std::f64::consts::PI / num_particles as f64) + (i as f64 * 0.73);
                     let offset = (i as f64 * 0.13) % 1.0;
                     let p_time = (progress + offset) % 1.0;
 
-                    // Spiraling inward from 2.2x radius down to 0
-                    let R = radius * 2.2 * (1.0 - p_time);
-                    let theta = start_angle + p_time * 7.0; // Spiraling whirlpool angle
+                    let r = radius * 2.2 * (1.0 - p_time);
+                    let theta = start_angle + p_time * 7.0;
 
-                    let px = cx + R * theta.cos();
-                    let py = cy + R * theta.sin();
+                    let px = cx + r * theta.cos();
+                    let py = cy + r * theta.sin();
 
                     let size = 2.5 * (1.0 - p_time);
                     let alpha = 0.9 * (1.0 - p_time);
 
                     cr.arc(px, py, size, 0.0, 2.0 * std::f64::consts::PI);
-                    // Glowing reddish/orange particles
                     cr.set_source_rgba(251.0 / 255.0, 113.0 / 255.0, 133.0 / 255.0, alpha);
                     let _ = cr.fill();
                 }
             }
             CleanState::CleanFinished { .. } => {
-                draw_neon(cr, 0.0, 2.0 * std::f64::consts::PI, 16.0 / 255.0, 185.0 / 255.0, 129.0 / 255.0); // Green Neon
+                draw_neon(cr, 0.0, 2.0 * std::f64::consts::PI, 16.0 / 255.0, 185.0 / 255.0, 129.0 / 255.0);
             }
         }
     });
@@ -309,7 +298,6 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
         let free_label_str = babydra_common::i18n::t("control.free");
 
         if label == scan_label_str {
-            // Trigger Scan
             btn.set_sensitive(false);
             btn.set_label(&babydra_common::i18n::t("control.scanning"));
             
@@ -328,7 +316,6 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
             *state_c.borrow_mut() = CleanState::Scanning { angle: 0.0 };
             progress_drawing_c.queue_draw();
 
-            // Start Scanning Animation Loop
             let state_loop = state_c.clone();
             let drawing_loop = progress_drawing_c.clone();
             gtk4::glib::timeout_add_local(std::time::Duration::from_millis(16), move || {
@@ -342,7 +329,6 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
                 }
             });
 
-            // Trigger Background Scan Thread
             let (tx, mut rx) = mpsc::unbounded_channel::<CleanProgress>();
             std::thread::spawn(move || {
                 let mut total = 0u64;
@@ -452,7 +438,6 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
                 }
             });
         } else if label == free_label_str {
-            // Trigger Clean
             btn.set_sensitive(false);
             btn.set_label("Cleaning...");
             
@@ -472,7 +457,6 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
             };
             progress_drawing_c.queue_draw();
 
-            // Background Clean Thread
             let (tx, mut rx) = mpsc::unbounded_channel::<CleanProgress>();
             std::thread::spawn(move || {
                 let _ = tx.send(CleanProgress::Log("Purging safe user caches...".to_string()));
@@ -488,7 +472,6 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
                 let _ = tx.send(CleanProgress::CleanFinished { total_bytes: freed });
             });
 
-            // Smooth Clean Animation Timer Loop
             let state_loop = state_c.clone();
             let drawing_loop = progress_drawing_c.clone();
             let percent_lbl_loop = percent_label_c.clone();
@@ -551,7 +534,6 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
                         let remaining_bytes = ((1.0 - new_progress) * total_bytes as f64) as u64;
                         size_lbl_loop.set_text(&format_bytes(remaining_bytes));
 
-                        // Dynamic countdown for each list item
                         let u_sz = *user_size_loop.borrow();
                         let p_sz = *pacman_size_loop.borrow();
                         let j_sz = *journal_size_loop.borrow();
@@ -570,7 +552,6 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
                 }
             });
 
-            // Receive from Clean thread to update backend status
             let state_inner = state_c.clone();
             let log_inner = log_label_c.clone();
             glib::spawn_future_local(async move {
