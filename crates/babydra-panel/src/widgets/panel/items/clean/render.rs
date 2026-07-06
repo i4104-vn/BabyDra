@@ -55,7 +55,7 @@ pub fn create_clean_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>)
     popover.set_position(gtk4::PositionType::Bottom);
     popover.set_has_arrow(false);
 
-    setup_clean_popover(&popover);
+    let popover_box = setup_clean_popover(&popover);
 
     let on_popover_toggled_c = on_popover_toggled.clone();
     let popover_c = popover.clone();
@@ -73,10 +73,20 @@ pub fn create_clean_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>)
         });
     }
 
+    let popover_box_clone = popover_box.clone();
+    popover.connect_map(move |_| {
+        babydra_common::animation::slide_in(
+            popover_box_clone.upcast_ref(),
+            babydra_common::animation::SlideDirection::Down,
+            15,
+            450,
+        );
+    });
+
     btn
 }
 
-fn setup_clean_popover(popover: &gtk4::Popover) {
+fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
     let popover_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     popover_box.add_css_class("media-popover-box");
     popover_box.set_margin_start(4);
@@ -614,4 +624,6 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
             });
         }
     });
+
+    popover_box
 }
