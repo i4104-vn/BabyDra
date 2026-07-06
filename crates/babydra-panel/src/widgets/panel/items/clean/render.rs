@@ -26,9 +26,11 @@ enum CleanState {
 pub fn create_clean_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) -> gtk4::Button {
     let btn = gtk4::Button::new();
     btn.add_css_class("control-square-tile");
-    btn.set_hexpand(true);
-    btn.set_valign(gtk4::Align::Fill);
-    btn.set_vexpand(true);
+    btn.set_size_request(56, 56);
+    btn.set_halign(gtk4::Align::Center);
+    btn.set_valign(gtk4::Align::Center);
+    btn.set_hexpand(false);
+    btn.set_vexpand(false);
 
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
     main_box.set_valign(gtk4::Align::Center);
