@@ -28,10 +28,7 @@ pub fn execute_change_wallpaper(window: &gtk4::ApplicationWindow) {
     dialog.open(Some(&win), None::<&gio::Cancellable>, move |res| {
         if let Ok(file) = res {
             if let Some(path) = file.path() {
-                println!("Setting wallpaper to: {:?}", path);
-                if let Err(e) = babydra_wallpaper::set_wallpaper(&path) {
-                    eprintln!("Error setting wallpaper: {}", e);
-                }
+                let _ = babydra_wallpaper::set_wallpaper(&path);
             }
         }
     });
