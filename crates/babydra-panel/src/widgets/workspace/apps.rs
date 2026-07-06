@@ -102,7 +102,6 @@ pub fn get_running_windows() -> Vec<DesktopApp> {
 
 /// Focuses a window using wlrctl.
 pub fn focus_window(app_id: &str, title: &str) {
-    println!("Focusing window: {} - {}", app_id, title);
     let status = std::process::Command::new("wlrctl")
         .args(&["window", "focus", &format!("title:{}", title)])
         .status();
@@ -118,7 +117,6 @@ pub fn focus_window(app_id: &str, title: &str) {
 
 /// Closes a window using wlrctl.
 pub fn close_window(app_id: &str, title: &str) {
-    println!("Closing window: {} - {}", app_id, title);
     let status = std::process::Command::new("wlrctl")
         .args(&["window", "close", &format!("title:{}", title)])
         .status();

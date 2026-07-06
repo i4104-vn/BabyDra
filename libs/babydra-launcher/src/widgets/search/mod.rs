@@ -28,10 +28,7 @@ pub fn populate_search_results(
         browser_btn.connect_clicked(move |_| {
             let search_query = query_for_browser.replace(' ', "+");
             let url = format!("https://www.google.com/search?q={}", search_query);
-            println!("Searching Google: {}", url);
-            if let Err(e) = Command::new("xdg-open").arg(&url).spawn() {
-                eprintln!("Failed to launch browser: {}", e);
-            }
+            let _ = Command::new("xdg-open").arg(&url).spawn();
             win_to_close.close();
         });
 

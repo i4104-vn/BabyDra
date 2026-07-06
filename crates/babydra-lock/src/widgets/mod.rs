@@ -119,7 +119,6 @@ pub fn create_lock_window(
             entry_clone.set_text("");
 
             if verify_password(&username_clone, &password) {
-                println!("Unlock verified successfully. Exiting locker...");
                 std::process::exit(0);
             } else {
                 status_label_clone.set_text(&babydra_common::i18n::t("lock.status_incorrect"));

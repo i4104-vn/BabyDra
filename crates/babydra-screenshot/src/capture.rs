@@ -130,10 +130,7 @@ pub fn capture_screen_to_temp() -> Option<String> {
 
     match status {
         Ok(s) if s.success() => Some(temp_path.to_string()),
-        _ => {
-            eprintln!("Failed to capture screen using 'grim'. Please make sure it is installed.");
-            None
-        }
+        _ => None,
     }
 }
 
@@ -190,7 +187,6 @@ pub fn trigger_save(state: &EditorState) -> bool {
         let save_path = get_screenshot_save_path();
         if let Ok(mut file) = std::fs::File::create(&save_path) {
             if surface.write_to_png(&mut file).is_ok() {
-                println!("Screenshot saved to: {:?}", save_path);
                 let notif_title = babydra_common::i18n::t("screenshot.saved_title");
                 let notif_msg = babydra_common::i18n::t("screenshot.saved_msg")
                     .replace("{}", &format!("{:?}", save_path));
@@ -220,7 +216,6 @@ pub fn trigger_copy(state: &EditorState, window: &gtk4::ApplicationWindow) -> bo
                     
                     if let Ok(s) = status {
                         if s.success() {
-                            println!("Screenshot copied to clipboard via wl-copy.");
                             let notif_title = babydra_common::i18n::t("screenshot.copied_title");
                             let notif_msg = babydra_common::i18n::t("screenshot.copied_msg");
                             let _ = std::process::Command::new("notify-send")
@@ -251,7 +246,6 @@ pub fn trigger_copy(state: &EditorState, window: &gtk4::ApplicationWindow) -> bo
             let clipboard = window.upcast_ref::<gtk4::Widget>().display().clipboard();
             clipboard.set_texture(&texture);
 
-            println!("Screenshot copied to clipboard via GTK fallback.");
             let notif_title = babydra_common::i18n::t("screenshot.copied_title");
             let notif_msg = babydra_common::i18n::t("screenshot.copied_msg");
             let _ = std::process::Command::new("notify-send")

@@ -16,14 +16,11 @@ pub fn create_grid_app_widget(
     let exec_cmd = app.exec.clone();
     let win_to_close = window.clone();
     btn.connect_clicked(move |_| {
-        println!("Launching from Grid: {}", exec_cmd);
         let parts: Vec<&str> = exec_cmd.split_whitespace().collect();
         if !parts.is_empty() {
             let program = parts[0];
             let args = &parts[1..];
-            if let Err(e) = Command::new(program).args(args).spawn() {
-                eprintln!("Failed to spawn command {}: {}", exec_cmd, e);
-            }
+            let _ = Command::new(program).args(args).spawn();
         }
 
         win_to_close.close();
@@ -49,14 +46,11 @@ pub fn create_list_app_widget(
     let exec_cmd = app.exec.clone();
     let win_to_close = window.clone();
     btn.connect_clicked(move |_| {
-        println!("Launching from List: {}", exec_cmd);
         let parts: Vec<&str> = exec_cmd.split_whitespace().collect();
         if !parts.is_empty() {
             let program = program_part(parts[0]);
             let args = &parts[1..];
-            if let Err(e) = Command::new(program).args(args).spawn() {
-                eprintln!("Failed to spawn command {}: {}", exec_cmd, e);
-            }
+            let _ = Command::new(program).args(args).spawn();
         }
 
         win_to_close.close();

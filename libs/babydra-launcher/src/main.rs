@@ -3,8 +3,6 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 fn main() {
-    println!("Starting BabyDra Launcher...");
-
     let application = gtk4::Application::new(
         Some("org.babydra.launcher"),
         Default::default(),

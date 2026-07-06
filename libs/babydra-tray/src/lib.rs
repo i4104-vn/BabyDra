@@ -61,22 +61,14 @@ impl StatusNotifierWatcher {
             return;
         }
 
-        println!("RegisterStatusNotifierItem called for service: {}", target_service);
-
         let connection = match zbus::Connection::session().await {
             Ok(conn) => conn,
-            Err(e) => {
-                eprintln!("Failed to get session connection: {}", e);
-                return;
-            }
+            Err(_) => return,
         };
 
         let bus_name = match zbus::names::BusName::try_from(target_service.clone()) {
             Ok(name) => name,
-            Err(e) => {
-                eprintln!("Invalid bus name: {}", e);
-                return;
-            }
+            Err(_) => return,
         };
 
         let proxy = match StatusNotifierItemProxy::builder(&connection)
@@ -88,10 +80,7 @@ impl StatusNotifierWatcher {
             .await
         {
             Ok(p) => p,
-            Err(e) => {
-                eprintln!("Failed to build proxy: {}", e);
-                return;
-            }
+            Err(_) => return,
         };
 
         let icon_name = proxy.icon_name().await.unwrap_or_else(|_| "image-missing".to_string());
@@ -109,9 +98,7 @@ impl StatusNotifierWatcher {
         lock.push(item);
     }
 
-    async fn register_status_notifier_host(&self, service: String) {
-        println!("StatusNotifierHost registered: {}", service);
-    }
+    async fn register_status_notifier_host(&self, _service: String) {}
 
     #[zbus(property)]
     async fn registered_status_notifier_items(&self) -> Vec<String> {
@@ -135,7 +122,6 @@ pub fn spawn_watcher_service() {
     std::thread::spawn(move || {
         let rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(async {
-            println!("Starting D-Bus StatusNotifierWatcher...");
             let watcher = StatusNotifierWatcher;
             
             let conn = match zbus::connection::Builder::session()
@@ -147,14 +133,8 @@ pub fn spawn_watcher_service() {
                 .build()
                 .await
             {
-                Ok(c) => {
-                    println!("StatusNotifierWatcher registered on D-Bus successfully.");
-                    c
-                }
-                Err(e) => {
-                    eprintln!("Failed to register StatusNotifierWatcher: {}", e);
-                    return;
-                }
+                Ok(c) => c,
+                Err(_) => return,
             };
 
             loop {
@@ -241,10 +221,7 @@ pub fn activate_item(service: &str, x: i32, y: i32, is_right_click: bool) {
             if let Ok(conn) = zbus::Connection::session().await {
                 let bus_name = match zbus::names::BusName::try_from(service_str.clone()) {
                     Ok(name) => name,
-                    Err(e) => {
-                        eprintln!("Invalid bus name for activation: {}", e);
-                        return;
-                    }
+                    Err(_) => return,
                 };
 
                 let proxy = match StatusNotifierItemProxy::builder(&conn)
@@ -256,28 +233,17 @@ pub fn activate_item(service: &str, x: i32, y: i32, is_right_click: bool) {
                     .await
                 {
                     Ok(p) => p,
-                    Err(e) => {
-                        eprintln!("Failed to build proxy for activation: {}", e);
-                        return;
-                    }
+                    Err(_) => return,
                 };
 
                 if is_right_click {
-                    println!("Sending D-Bus context_menu({}, {}) to {}", x, y, service_str);
-                    if let Err(e) = proxy.context_menu(x, y).await {
-                        eprintln!("D-Bus context_menu call failed for {}: {}", service_str, e);
-                        println!("Attempting fallback secondary_activate({}, {}) for {}", x, y, service_str);
-                        if let Err(e2) = proxy.secondary_activate(x, y).await {
-                            eprintln!("D-Bus secondary_activate call failed for {}: {}", service_str, e2);
-                            println!("Attempting fallback activate({}, {}) for {}", x, y, service_str);
+                    if proxy.context_menu(x, y).await.is_err() {
+                        if proxy.secondary_activate(x, y).await.is_err() {
                             let _ = proxy.activate(x, y).await;
                         }
                     }
                 } else {
-                    println!("Sending D-Bus activate({}, {}) to {}", x, y, service_str);
-                    if let Err(e) = proxy.activate(x, y).await {
-                        eprintln!("D-Bus activate call failed for {}: {}", service_str, e);
-                    }
+                    let _ = proxy.activate(x, y).await;
                 }
             }
         });
