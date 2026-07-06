@@ -7,7 +7,7 @@ echo "============================================="
 
 # 1. Install all dependencies, the Rust toolchain, and system fonts via pacman
 echo "Installing Arch Linux packages..."
-sudo pacman -Syu --needed --noconfirm base-devel git pkgconf gtk4 gtk4-layer-shell rust labwc meson ninja playerctl grim wl-clipboard libnotify dunst mako gammastep wlsunset wireplumber
+sudo pacman -Syu --needed --noconfirm base-devel git pkgconf gtk4 gtk4-layer-shell rust labwc meson ninja playerctl grim wl-clipboard libnotify gammastep wlsunset wireplumber
 
 
 # Check if yay is installed, and install it from AUR if missing

@@ -15,6 +15,29 @@ thread_local! {
     pub static HISTORICAL_NOTIFICATIONS: RefCell<Vec<ActiveNotification>> = RefCell::new(Vec::new());
 }
 
+fn get_dnd_file_path() -> std::path::PathBuf {
+    let home = std::env::var("HOME").unwrap_or_else(|_| "/home/i4104".to_string());
+    std::path::Path::new(&home).join(".config/babydra/dnd")
+}
+
+/// Checks if DND mode is active.
+pub fn is_dnd_active() -> bool {
+    get_dnd_file_path().exists()
+}
+
+/// Sets DND mode state.
+pub fn set_dnd_active(active: bool) {
+    let path = get_dnd_file_path();
+    if active {
+        if let Some(parent) = path.parent() {
+            let _ = std::fs::create_dir_all(parent);
+        }
+        let _ = std::fs::File::create(&path);
+    } else {
+        let _ = std::fs::remove_file(&path);
+    }
+}
+
 /// DBus Notifications interface server object.
 pub struct NotificationService {
     sender: tokio::sync::mpsc::UnboundedSender<NotificationMsg>,
@@ -71,15 +94,6 @@ impl NotificationService {
     async fn get_capabilities(&self) -> Vec<String> {
         vec!["body".to_string(), "icon-static".to_string()]
     }
-
-    async fn get_server_information(&self) -> (String, String, String, String) {
-        (
-            "babydra-notification".to_string(),
-            "BabyDra".to_string(),
-            "0.1.0".to_string(),
-            "1.2".to_string(),
-        )
-    }
 }
 
 /// Spawns a background thread running Tokio to serve the org.freedesktop.Notifications DBus daemon.
@@ -130,9 +144,11 @@ pub fn show_notification_popup(summary: &str, body: &str, icon_name: &str, app_n
         timestamp: std::time::Instant::now(),
     };
 
-    SHARED_NOTIFICATION.with(|sn| {
-        *sn.borrow_mut() = Some(notif.clone());
-    });
+    if !is_dnd_active() {
+        SHARED_NOTIFICATION.with(|sn| {
+            *sn.borrow_mut() = Some(notif.clone());
+        });
+    }
 
     HISTORICAL_NOTIFICATIONS.with(|list| {
         let mut list_borrow = list.borrow_mut();

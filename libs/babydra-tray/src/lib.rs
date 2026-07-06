@@ -109,11 +109,6 @@ impl StatusNotifierWatcher {
     async fn is_status_notifier_host_registered(&self) -> bool {
         true
     }
-
-    #[zbus(property)]
-    async fn protocol_version(&self) -> i32 {
-        0
-    }
 }
 
 /// Spawns the D-Bus StatusNotifierWatcher service in a background tokio thread.
