@@ -9,6 +9,7 @@ use super::{clean_all_native, format_bytes, cache, logs, temp};
 #[derive(Clone)]
 enum CleanProgress {
     Log(String),
+    ScanStep { step: usize, size: u64 },
     ScanFinished { total_bytes: u64 },
     CleanFinished { total_bytes: u64 },
 }
@@ -117,6 +118,48 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
     overlay.add_overlay(&center_box);
     popover_box.append(&overlay);
 
+    // Target details list below circular progress bar
+    let target_list_box = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
+    target_list_box.set_margin_start(16);
+    target_list_box.set_margin_end(16);
+    target_list_box.set_margin_top(8);
+    target_list_box.set_margin_bottom(8);
+    target_list_box.add_css_class("clean-target-list");
+
+    let create_target_row = |name: &str| -> (gtk4::Box, gtk4::Label) {
+        let row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+        row.add_css_class("clean-target-row");
+        row.set_hexpand(true);
+
+        let bullet = gtk4::Label::new(Some("•"));
+        bullet.add_css_class("clean-target-bullet");
+
+        let name_lbl = gtk4::Label::new(Some(name));
+        name_lbl.add_css_class("clean-target-name");
+        name_lbl.set_halign(gtk4::Align::Start);
+        name_lbl.set_hexpand(true);
+
+        let val_lbl = gtk4::Label::new(Some("-"));
+        val_lbl.add_css_class("clean-target-value");
+        val_lbl.set_halign(gtk4::Align::End);
+
+        row.append(&bullet);
+        row.append(&name_lbl);
+        row.append(&val_lbl);
+        (row, val_lbl)
+    };
+
+    let (row1, val1) = create_target_row("User Cache");
+    let (row2, val2) = create_target_row("Package Cache");
+    let (row3, val3) = create_target_row("System Logs");
+    let (row4, val4) = create_target_row("Trash Bin");
+
+    target_list_box.append(&row1);
+    target_list_box.append(&row2);
+    target_list_box.append(&row3);
+    target_list_box.append(&row4);
+    popover_box.append(&target_list_box);
+
     // Pill Button Container
     let btn_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     btn_container.set_halign(gtk4::Align::Center);
@@ -141,6 +184,12 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
     // Shared State to hold current reclaimable bytes and clean state
     let total_reclaimable = Rc::new(RefCell::new(0u64));
     let state = Rc::new(RefCell::new(CleanState::Idle));
+    
+    // Store size of each scanned category to animate their values down to 0
+    let user_size = Rc::new(RefCell::new(0u64));
+    let pacman_size = Rc::new(RefCell::new(0u64));
+    let journal_size = Rc::new(RefCell::new(0u64));
+    let trash_size = Rc::new(RefCell::new(0u64));
 
     // Set custom drawing logic on progress circle drawing area
     let state_draw = state.clone();
@@ -160,37 +209,68 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
         cr.set_line_width(6.0);
         let _ = cr.stroke();
 
+        let draw_neon = |cr: &gtk4::cairo::Context, start: f64, end: f64, r: f64, g: f64, b: f64| {
+            // Outer faint glow
+            cr.arc(cx, cy, radius, start, end);
+            cr.set_source_rgba(r, g, b, 0.08);
+            cr.set_line_width(16.0);
+            let _ = cr.stroke();
+
+            // Medium glow
+            cr.arc(cx, cy, radius, start, end);
+            cr.set_source_rgba(r, g, b, 0.22);
+            cr.set_line_width(10.0);
+            let _ = cr.stroke();
+
+            // Core bright line
+            cr.arc(cx, cy, radius, start, end);
+            cr.set_source_rgba(r, g, b, 0.95);
+            cr.set_line_width(6.0);
+            let _ = cr.stroke();
+        };
+
         match current_state {
             CleanState::Idle => {}
             CleanState::Scanning { angle } => {
-                cr.arc(cx, cy, radius, angle, angle + 1.5);
-                cr.set_source_rgba(59.0 / 255.0, 130.0 / 255.0, 246.0 / 255.0, 0.85); // Blue
-                cr.set_line_width(8.0);
                 cr.set_line_cap(gtk4::cairo::LineCap::Round);
-                let _ = cr.stroke();
+                draw_neon(cr, angle, angle + 1.5, 59.0 / 255.0, 130.0 / 255.0, 246.0 / 255.0); // Blue Neon
             }
             CleanState::ScanFinished { total_bytes } => {
                 if total_bytes > 0 {
-                    cr.arc(cx, cy, radius, 0.0, 2.0 * std::f64::consts::PI);
-                    cr.set_source_rgba(59.0 / 255.0, 130.0 / 255.0, 246.0 / 255.0, 0.85); // Blue
-                    cr.set_line_width(8.0);
-                    let _ = cr.stroke();
+                    draw_neon(cr, 0.0, 2.0 * std::f64::consts::PI, 59.0 / 255.0, 130.0 / 255.0, 246.0 / 255.0); // Blue Neon
                 }
             }
             CleanState::Cleaning { progress, .. } => {
+                cr.set_line_cap(gtk4::cairo::LineCap::Round);
                 let start_angle = -std::f64::consts::FRAC_PI_2;
                 let end_angle = start_angle + progress * 2.0 * std::f64::consts::PI;
-                cr.arc(cx, cy, radius, start_angle, end_angle);
-                cr.set_source_rgba(239.0 / 255.0, 68.0 / 255.0, 68.0 / 255.0, 0.85); // Red
-                cr.set_line_width(8.0);
-                cr.set_line_cap(gtk4::cairo::LineCap::Round);
-                let _ = cr.stroke();
+                draw_neon(cr, start_angle, end_angle, 239.0 / 255.0, 68.0 / 255.0, 68.0 / 255.0); // Red Neon
+
+                // Floating particles sucked into the center (Black Hole whirlpool effect)
+                let num_particles = 30;
+                for i in 0..num_particles {
+                    let start_angle = (i as f64) * (2.0 * std::f64::consts::PI / num_particles as f64) + (i as f64 * 0.73);
+                    let offset = (i as f64 * 0.13) % 1.0;
+                    let p_time = (progress + offset) % 1.0;
+
+                    // Spiraling inward from 2.2x radius down to 0
+                    let R = radius * 2.2 * (1.0 - p_time);
+                    let theta = start_angle + p_time * 7.0; // Spiraling whirlpool angle
+
+                    let px = cx + R * theta.cos();
+                    let py = cy + R * theta.sin();
+
+                    let size = 2.5 * (1.0 - p_time);
+                    let alpha = 0.9 * (1.0 - p_time);
+
+                    cr.arc(px, py, size, 0.0, 2.0 * std::f64::consts::PI);
+                    // Glowing reddish/orange particles
+                    cr.set_source_rgba(251.0 / 255.0, 113.0 / 255.0, 133.0 / 255.0, alpha);
+                    let _ = cr.fill();
+                }
             }
             CleanState::CleanFinished { .. } => {
-                cr.arc(cx, cy, radius, 0.0, 2.0 * std::f64::consts::PI);
-                cr.set_source_rgba(16.0 / 255.0, 185.0 / 255.0, 129.0 / 255.0, 0.85); // Green
-                cr.set_line_width(8.0);
-                let _ = cr.stroke();
+                draw_neon(cr, 0.0, 2.0 * std::f64::consts::PI, 16.0 / 255.0, 185.0 / 255.0, 129.0 / 255.0); // Green Neon
             }
         }
     });
@@ -203,6 +283,15 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
     let total_reclaimable_c = total_reclaimable.clone();
     let state_c = state.clone();
     let progress_drawing_c = progress_drawing.clone();
+
+    let val1_c = val1.clone();
+    let val2_c = val2.clone();
+    let val3_c = val3.clone();
+    let val4_c = val4.clone();
+    let user_size_c = user_size.clone();
+    let pacman_size_c = pacman_size.clone();
+    let journal_size_c = journal_size.clone();
+    let trash_size_c = trash_size.clone();
 
     action_btn.connect_clicked(move |btn| {
         let label = btn.label().unwrap_or_default().to_string();
@@ -220,6 +309,11 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
             percent_label_c.set_text("SCAN");
             size_label_c.set_text("...");
             log_label_c.set_text("Analyzing disk space...");
+
+            val1_c.set_text("Scanning...");
+            val2_c.set_text("Pending...");
+            val3_c.set_text("Pending...");
+            val4_c.set_text("Pending...");
 
             *state_c.borrow_mut() = CleanState::Scanning { angle: 0.0 };
             progress_drawing_c.queue_draw();
@@ -240,25 +334,32 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
 
             // Trigger Background Scan Thread
             let (tx, mut rx) = mpsc::unbounded_channel::<CleanProgress>();
-            
             std::thread::spawn(move || {
                 let mut total = 0u64;
 
                 let _ = tx.send(CleanProgress::Log("Analyzing user cache...".to_string()));
                 std::thread::sleep(std::time::Duration::from_millis(300));
-                total += cache::get_user_cache_size();
+                let u_sz = cache::get_user_cache_size();
+                total += u_sz;
+                let _ = tx.send(CleanProgress::ScanStep { step: 0, size: u_sz });
 
                 let _ = tx.send(CleanProgress::Log("Checking package cache...".to_string()));
                 std::thread::sleep(std::time::Duration::from_millis(300));
-                total += cache::get_pacman_cache_size();
+                let p_sz = cache::get_pacman_cache_size();
+                total += p_sz;
+                let _ = tx.send(CleanProgress::ScanStep { step: 1, size: p_sz });
 
                 let _ = tx.send(CleanProgress::Log("Reading system log size...".to_string()));
                 std::thread::sleep(std::time::Duration::from_millis(300));
-                total += logs::get_journal_logs_size();
+                let j_sz = logs::get_journal_logs_size();
+                total += j_sz;
+                let _ = tx.send(CleanProgress::ScanStep { step: 2, size: j_sz });
 
                 let _ = tx.send(CleanProgress::Log("Checking trash bin...".to_string()));
                 std::thread::sleep(std::time::Duration::from_millis(300));
-                total += temp::get_trash_size();
+                let t_sz = temp::get_trash_size();
+                total += t_sz;
+                let _ = tx.send(CleanProgress::ScanStep { step: 3, size: t_sz });
 
                 let _ = tx.send(CleanProgress::ScanFinished { total_bytes: total });
             });
@@ -271,11 +372,44 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
             let state_inner = state_c.clone();
             let progress_drawing_inner = progress_drawing_c.clone();
 
+            let val1_inner = val1_c.clone();
+            let val2_inner = val2_c.clone();
+            let val3_inner = val3_c.clone();
+            let val4_inner = val4_c.clone();
+            let user_size_inner = user_size_c.clone();
+            let pacman_size_inner = pacman_size_c.clone();
+            let journal_size_inner = journal_size_c.clone();
+            let trash_size_inner = trash_size_c.clone();
+
             glib::spawn_future_local(async move {
                 while let Some(progress) = rx.recv().await {
                     match progress {
                         CleanProgress::Log(msg) => {
                             log_inner.set_text(&msg);
+                        }
+                        CleanProgress::ScanStep { step, size } => {
+                            match step {
+                                0 => {
+                                    *user_size_inner.borrow_mut() = size;
+                                    val1_inner.set_text(&format_bytes(size));
+                                    val2_inner.set_text("Scanning...");
+                                }
+                                1 => {
+                                    *pacman_size_inner.borrow_mut() = size;
+                                    val2_inner.set_text(&format_bytes(size));
+                                    val3_inner.set_text("Scanning...");
+                                }
+                                2 => {
+                                    *journal_size_inner.borrow_mut() = size;
+                                    val3_inner.set_text(&format_bytes(size));
+                                    val4_inner.set_text("Scanning...");
+                                }
+                                3 => {
+                                    *trash_size_inner.borrow_mut() = size;
+                                    val4_inner.set_text(&format_bytes(size));
+                                }
+                                _ => {}
+                            }
                         }
                         CleanProgress::ScanFinished { total_bytes } => {
                             log_inner.set_text("Scan complete");
@@ -352,6 +486,15 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
             let action_btn_loop = action_btn_c.clone();
             let log_lbl_loop = log_label_c.clone();
 
+            let val1_loop = val1_c.clone();
+            let val2_loop = val2_c.clone();
+            let val3_loop = val3_c.clone();
+            let val4_loop = val4_c.clone();
+            let user_size_loop = user_size_c.clone();
+            let pacman_size_loop = pacman_size_c.clone();
+            let journal_size_loop = journal_size_c.clone();
+            let trash_size_loop = trash_size_c.clone();
+
             gtk4::glib::timeout_add_local(std::time::Duration::from_millis(16), move || {
                 let mut state_borrow = state_loop.borrow_mut();
                 if let CleanState::Cleaning { progress, total_bytes, is_backend_done, actual_freed } = *state_borrow {
@@ -368,6 +511,11 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
                         percent_lbl_loop.add_css_class("finished");
                         percent_lbl_loop.set_text("DONE");
                         size_lbl_loop.set_text("0 B");
+
+                        val1_loop.set_text("0 B");
+                        val2_loop.set_text("0 B");
+                        val3_loop.set_text("0 B");
+                        val4_loop.set_text("0 B");
 
                         let size_str = format_bytes(actual_freed);
                         let success_msg = babydra_common::i18n::t("control.freed_success")
@@ -392,6 +540,17 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
 
                         let remaining_bytes = ((1.0 - new_progress) * total_bytes as f64) as u64;
                         size_lbl_loop.set_text(&format_bytes(remaining_bytes));
+
+                        // Dynamic countdown for each list item
+                        let u_sz = *user_size_loop.borrow();
+                        let p_sz = *pacman_size_loop.borrow();
+                        let j_sz = *journal_size_loop.borrow();
+                        let t_sz = *trash_size_loop.borrow();
+
+                        val1_loop.set_text(&format_bytes(((1.0 - new_progress) * u_sz as f64) as u64));
+                        val2_loop.set_text(&format_bytes(((1.0 - new_progress) * p_sz as f64) as u64));
+                        val3_loop.set_text(&format_bytes(((1.0 - new_progress) * j_sz as f64) as u64));
+                        val4_loop.set_text(&format_bytes(((1.0 - new_progress) * t_sz as f64) as u64));
 
                         drawing_loop.queue_draw();
                         gtk4::glib::ControlFlow::Continue
@@ -428,4 +587,3 @@ fn setup_clean_popover(popover: &gtk4::Popover) {
         }
     });
 }
-

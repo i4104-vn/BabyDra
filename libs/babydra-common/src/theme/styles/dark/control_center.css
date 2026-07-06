@@ -671,4 +671,30 @@ popover>arrow {
     color: rgba(255, 255, 255, 0.6);
     margin: 0;
     padding: 0;
+}
+
+.clean-target-list {
+    margin: 10px 0;
+    padding: 8px 12px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.clean-target-row {
+    margin: 2px 0;
+}
+.clean-target-bullet {
+    font-size: 14px;
+    color: #3b82f6;
+    margin-right: 6px;
+}
+.clean-target-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
+}
+.clean-target-value {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
 }
