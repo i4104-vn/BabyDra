@@ -47,8 +47,13 @@ pub fn create_volume_row(
     };
 
     let mute_btn = gtk4::Button::new();
-    mute_btn.add_css_class("slider-mute-btn");
+    mute_btn.add_css_class("slider-overlay-mute-btn");
     mute_btn.set_child(Some(&icon_container));
+    mute_btn.set_halign(gtk4::Align::Start);
+    mute_btn.set_valign(gtk4::Align::Center);
+    mute_btn.set_margin_start(6);
+    mute_btn.set_can_focus(false);
+    mute_btn.set_focus_on_click(false);
     
     let update_mute_icon_clone = update_mute_icon.clone();
     let muted_state_clone = muted_state.clone();
@@ -72,8 +77,6 @@ pub fn create_volume_row(
         update_mute_icon_clone(new_mute);
         update_topbar_volume_icon(&vol_icon_c);
     });
-    
-    row_box.append(&mute_btn);
 
     update_mute_icon(muted_state.get());
 
@@ -89,9 +92,10 @@ pub fn create_volume_row(
     let update_mute_icon_c = update_mute_icon.clone();
     let muted_state_c = muted_state.clone();
 
+    let value_label_changed = value_label.clone();
     scale.connect_value_changed(move |s| {
         let val = s.value();
-        value_label.set_text(&format!("{:.0}%", val));
+        value_label_changed.set_text(&format!("{:.0}%", val));
 
         if let Some(id) = last_source_clone.take() {
             id.remove();
@@ -117,11 +121,17 @@ pub fn create_volume_row(
         last_source_clone.set(Some(new_id));
     });
 
-    row_box.append(&scale);
+    let overlay = gtk4::Overlay::new();
+    overlay.set_hexpand(true);
+    overlay.set_valign(gtk4::Align::Center);
+    overlay.set_child(Some(&scale));
+    overlay.add_overlay(&mute_btn);
+
+    row_box.append(&overlay);
 
     let menu_btn = gtk4::Button::new();
-    menu_btn.add_css_class("slider-menu-btn");
-    let menu_icon = babydra_common::icon::get_system_or_file_icon("go-next-symbolic", "image-missing");
+    menu_btn.add_css_class("slider-popover-btn");
+    let menu_icon = babydra_common::icon::get_system_or_file_icon("go-up-symbolic", "image-missing");
     menu_icon.set_pixel_size(12);
     menu_btn.set_child(Some(&menu_icon));
 

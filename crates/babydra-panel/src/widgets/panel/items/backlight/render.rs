@@ -26,14 +26,6 @@ pub fn create_brightness_row() -> (gtk4::Box, gtk4::Scale) {
 
     let row_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
 
-    let icon_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    icon_container.set_valign(gtk4::Align::Center);
-
-    let icon_widget = babydra_common::icon::get_icon("brightness", 16);
-    icon_widget.add_css_class("slider-icon");
-    icon_container.append(&icon_widget);
-    row_box.append(&icon_container);
-
     let scale = gtk4::Scale::with_range(gtk4::Orientation::Horizontal, 0.0, 100.0, 1.0);
     scale.adjustment().set_page_increment(5.0);
     scale.set_value(initial_val);
@@ -43,9 +35,10 @@ pub fn create_brightness_row() -> (gtk4::Box, gtk4::Scale) {
     let last_source: Rc<Cell<Option<gtk4::glib::SourceId>>> = Rc::new(Cell::new(None));
     let last_source_clone = last_source.clone();
 
+    let value_label_clone = value_label.clone();
     scale.connect_value_changed(move |s| {
         let val = s.value();
-        value_label.set_text(&format!("{:.0}%", val));
+        value_label_clone.set_text(&format!("{:.0}%", val));
 
         if let Some(id) = last_source_clone.take() {
             id.remove();
@@ -62,7 +55,22 @@ pub fn create_brightness_row() -> (gtk4::Box, gtk4::Scale) {
         last_source_clone.set(Some(new_id));
     });
 
-    row_box.append(&scale);
+    let overlay = gtk4::Overlay::new();
+    overlay.set_hexpand(true);
+    overlay.set_valign(gtk4::Align::Center);
+    overlay.set_child(Some(&scale));
+
+    let icon_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    icon_container.set_valign(gtk4::Align::Center);
+    icon_container.set_halign(gtk4::Align::Start);
+    icon_container.set_margin_start(10);
+
+    let icon_widget = babydra_common::icon::get_icon("brightness", 16);
+    icon_widget.add_css_class("slider-overlay-icon");
+    icon_container.append(&icon_widget);
+    overlay.add_overlay(&icon_container);
+
+    row_box.append(&overlay);
 
     main_box.append(&header_box);
     main_box.append(&row_box);
