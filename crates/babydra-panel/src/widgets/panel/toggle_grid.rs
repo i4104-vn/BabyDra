@@ -53,21 +53,7 @@ fn create_left_box_toggles(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>
 }
 
 fn is_dnd_active() -> bool {
-    // Check dunst
-    if let Ok(output) = std::process::Command::new("dunstctl").arg("is-paused").output() {
-        let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
-        if stdout == "true" {
-            return true;
-        }
-    }
-    // Check mako
-    if let Ok(output) = std::process::Command::new("makoctl").arg("mode").output() {
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        if stdout.contains("dnd") {
-            return true;
-        }
-    }
-    false
+    babydra_island::widgets::notification::is_dnd_active()
 }
 
 pub fn create_dnd_tile() -> gtk4::Button {
@@ -107,12 +93,10 @@ pub fn create_dnd_tile() -> gtk4::Button {
 
         if new_active {
             b.add_css_class("active");
-            let _ = std::process::Command::new("dunstctl").arg("set-paused").arg("true").spawn();
-            let _ = std::process::Command::new("makoctl").args(&["mode", "-a", "dnd"]).spawn();
+            babydra_island::widgets::notification::set_dnd_active(true);
         } else {
             b.remove_css_class("active");
-            let _ = std::process::Command::new("dunstctl").arg("set-paused").arg("false").spawn();
-            let _ = std::process::Command::new("makoctl").args(&["mode", "-r", "dnd"]).spawn();
+            babydra_island::widgets::notification::set_dnd_active(false);
         }
 
         if let Some(old) = icon_container.first_child() {

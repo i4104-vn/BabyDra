@@ -54,7 +54,8 @@ pub fn create_system_island() -> gtk4::Box {
     music_view.append(&visualizer_box);
     notch_content.append(&music_view);
 
-    let notification_view = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
+    let notification_view = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+    notification_view.add_css_class("island-notification-view");
     notification_view.set_valign(gtk4::Align::Center);
     notification_view.set_halign(gtk4::Align::Fill);
     notification_view.set_hexpand(true);
@@ -130,6 +131,7 @@ pub fn create_system_island() -> gtk4::Box {
     notification_view.add_controller(click_gesture);
 
     let notif_art_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    notif_art_container.add_css_class("notif-icon-box");
     notif_art_container.set_valign(gtk4::Align::Center);
 
     let notif_text_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);

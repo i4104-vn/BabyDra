@@ -14,10 +14,11 @@ pub fn create_clock_widget(
     calendar_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
     launcher_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
 ) -> gtk4::Button {
-    let (clock_button, clock_label) = render::build_clock_ui();
+    let (clock_button, clock_label, red_dot) = render::build_clock_ui();
 
     let update_clock = {
         let clock_label = clock_label.clone();
+        let red_dot = red_dot.clone();
         move || {
             let now = chrono::Local::now();
             let time_str = format!(
@@ -26,6 +27,12 @@ pub fn create_clock_widget(
                 now.format("%I:%M %p").to_string().to_uppercase()
             );
             clock_label.set_text(&time_str);
+
+            let notif_count = babydra_island::widgets::notification::HISTORICAL_NOTIFICATIONS.with(|list| {
+                list.borrow().len()
+            });
+            red_dot.set_visible(notif_count > 0);
+
             glib::ControlFlow::Continue
         }
     };
