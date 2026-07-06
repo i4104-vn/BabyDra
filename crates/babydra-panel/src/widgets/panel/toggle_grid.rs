@@ -22,6 +22,7 @@ pub fn create_control_center_grid(on_popover_toggled: Option<Rc<dyn Fn(bool) + '
 
     let small_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
     small_box.set_hexpand(true);
+    small_box.set_homogeneous(true);
     small_box.set_vexpand(true);
     small_box.set_valign(gtk4::Align::Fill);
 
