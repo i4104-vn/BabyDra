@@ -122,12 +122,19 @@ button.quick-tile.active-light .tile-chevron {
 
 .slider-icon {
     color: rgba(255, 255, 255, 0.65);
-    margin-right: 8px;
+    margin: 0;
+}
+
+scale {
+    margin: 0;
+    padding: 0;
 }
 
 scale trough {
-    min-height: 30px;
-    border-radius: 15px;
+    margin: 0;
+    padding: 0;
+    min-height: 24px;
+    border-radius: 12px;
     background-color: rgba(255, 255, 255, 0.10);
     background-image: none;
     border: none;
@@ -135,30 +142,29 @@ scale trough {
 }
 
 scale trough highlight {
-    border-radius: 15px;
+    border-radius: 12px;
     background-color: #3b82f6;
     background-image: linear-gradient(to right, #60a5fa, #2563eb);
-    min-height: 30px;
+    min-height: 24px;
     box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
 }
 
 scale slider {
-    min-width: 22px;
-    min-height: 22px;
-    margin: -11px;
-    border-radius: 11px;
+    min-width: 12px;
+    min-height: 12px;
+    margin: 6px;
+    border-radius: 6px;
     background-color: #ffffff;
     background-image: none;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
     border: none;
-    transition: transform 100ms ease, box-shadow 150ms ease;
+    transition: transform 100ms ease, background-color 150ms ease;
 }
 
 scale slider:hover {
-    background-color: #f0f4ff;
-    background-image: none;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
-    transform: scale(1.08);
+    background-color: #ffffff;
+    transform: scale(1.15);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
 }
 
 .control-left-toggles-box {
@@ -363,10 +369,10 @@ button.slider-overlay-mute-btn {
     background-image: none;
     border: none;
     box-shadow: none;
-    padding: 4px;
-    margin: 0 0 0 4px;
-    min-width: 28px;
-    min-height: 28px;
+    padding: 0;
+    margin: 0;
+    min-width: 20px;
+    min-height: 20px;
     border-radius: 9999px;
     color: rgba(255, 255, 255, 0.85);
     transition: background-color 150ms ease;
@@ -385,11 +391,11 @@ button.slider-popover-btn {
     background-color: rgba(255, 255, 255, 0.10);
     background-image: none;
     border: 1px solid rgba(255, 255, 255, 0.10);
-    border-radius: 9999px;
+    border-radius: 12px;
     padding: 0;
-    min-width: 30px;
-    min-height: 30px;
-    align-self: center;
+    margin: 0;
+    min-width: 24px;
+    min-height: 24px;
     color: rgba(255, 255, 255, 0.65);
     box-shadow: none;
     transition: all 150ms ease;
