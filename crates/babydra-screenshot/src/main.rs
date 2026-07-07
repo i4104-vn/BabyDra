@@ -2,6 +2,7 @@ use gtk4::prelude::*;
 use std::env;
 
 mod capture;
+pub mod models;
 mod widgets;
 mod render;
 
@@ -16,14 +17,11 @@ fn main() {
         if let Some(temp_path) = capture_screen_to_temp() {
             let save_path = get_screenshot_save_path();
             if std::fs::copy(&temp_path, &save_path).is_ok() {
-                println!("Full screenshot saved to: {:?}", save_path);
                 let notif_title = babydra_common::i18n::t("screenshot.full_saved_title");
                 let notif_msg = babydra_common::i18n::t("screenshot.saved_msg")
                     .replace("{}", &format!("{:?}", save_path));
                 
-                let _ = std::process::Command::new("notify-send")
-                    .args(&["-i", "image-x-generic", &notif_title, &notif_msg])
-                    .spawn();
+                babydra_common::helper::notification::send_notification(&notif_title, &notif_msg);
             }
             let _ = std::fs::remove_file(temp_path);
         }

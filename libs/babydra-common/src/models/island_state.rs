@@ -14,4 +14,3 @@ pub struct IslandState {
     /// Icon name or path used to decorate the island.
     pub icon: String,
 }
-

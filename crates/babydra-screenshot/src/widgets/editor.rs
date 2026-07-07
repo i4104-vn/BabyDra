@@ -5,8 +5,8 @@ use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use crate::models::{EditorState, Tool, Drawing};
 use crate::capture::{
-    EditorState, Tool, Drawing,
     draw_pixelated_rect, trigger_save, trigger_copy
 };
 
@@ -392,10 +392,7 @@ fn setup_editor_keys(
 pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::ApplicationWindow {
     let pixbuf = match gdk_pixbuf::Pixbuf::from_file(temp_path) {
         Ok(pb) => pb,
-        Err(e) => {
-            eprintln!("Failed to load temporary screenshot file: {}", e);
-            return gtk4::ApplicationWindow::new(app);
-        }
+        Err(_) => return gtk4::ApplicationWindow::new(app),
     };
 
     let state = Rc::new(RefCell::new(EditorState::new(pixbuf)));

@@ -9,7 +9,7 @@ pub fn create_control_center_grid(on_popover_toggled: Option<Rc<dyn Fn(bool) + '
     main_layout.set_valign(gtk4::Align::Fill);
     main_layout.set_vexpand(true);
 
-    let left_box = create_left_box_toggles(on_popover_toggled);
+    let left_box = create_left_box_toggles(on_popover_toggled.clone());
     let right_grid = gtk4::Grid::new();
     right_grid.set_column_spacing(10);
     right_grid.set_row_spacing(10);
@@ -22,13 +22,14 @@ pub fn create_control_center_grid(on_popover_toggled: Option<Rc<dyn Fn(bool) + '
 
     let small_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
     small_box.set_hexpand(true);
+    small_box.set_homogeneous(true);
     small_box.set_vexpand(true);
     small_box.set_valign(gtk4::Align::Fill);
 
     let night_btn = create_night_light_tile();
-    let theme_btn = items::darkmode::render::create_small_theme_toggle_tile();
+    let clean_btn = items::clean::render::create_clean_tile(on_popover_toggled);
 
-    small_box.append(&theme_btn);
+    small_box.append(&clean_btn);
     small_box.append(&night_btn);
     right_grid.attach(&small_box, 0, 1, 2, 1);
 
@@ -52,21 +53,7 @@ fn create_left_box_toggles(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>
 }
 
 fn is_dnd_active() -> bool {
-    // Check dunst
-    if let Ok(output) = std::process::Command::new("dunstctl").arg("is-paused").output() {
-        let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
-        if stdout == "true" {
-            return true;
-        }
-    }
-    // Check mako
-    if let Ok(output) = std::process::Command::new("makoctl").arg("mode").output() {
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        if stdout.contains("dnd") {
-            return true;
-        }
-    }
-    false
+    babydra_island::widgets::notification::is_dnd_active()
 }
 
 pub fn create_dnd_tile() -> gtk4::Button {
@@ -76,7 +63,7 @@ pub fn create_dnd_tile() -> gtk4::Button {
     btn.set_valign(gtk4::Align::Fill);
     btn.set_vexpand(true);
 
-    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
+    let main_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
     main_box.set_valign(gtk4::Align::Center);
     main_box.set_halign(gtk4::Align::Center);
 
@@ -86,15 +73,15 @@ pub fn create_dnd_tile() -> gtk4::Button {
     }
 
     let icon_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    icon_container.set_halign(gtk4::Align::Center);
+    icon_container.set_valign(gtk4::Align::Center);
 
     let icon_color = if active { "#ffffff" } else { "rgba(255, 255, 255, 0.8)" };
     let icon_widget = babydra_common::icon::get_icon_colored("bell-off", 18, icon_color);
     icon_container.append(&icon_widget);
 
-    let label = gtk4::Label::new(Some(&babydra_common::i18n::t("control.dnd")));
+    let label = gtk4::Label::new(Some("DND"));
     label.add_css_class("control-dnd-label");
-    label.set_halign(gtk4::Align::Center);
+    label.set_valign(gtk4::Align::Center);
 
     main_box.append(&icon_container);
     main_box.append(&label);
@@ -106,12 +93,10 @@ pub fn create_dnd_tile() -> gtk4::Button {
 
         if new_active {
             b.add_css_class("active");
-            let _ = std::process::Command::new("dunstctl").arg("set-paused").arg("true").spawn();
-            let _ = std::process::Command::new("makoctl").args(&["mode", "-a", "dnd"]).spawn();
+            babydra_island::widgets::notification::set_dnd_active(true);
         } else {
             b.remove_css_class("active");
-            let _ = std::process::Command::new("dunstctl").arg("set-paused").arg("false").spawn();
-            let _ = std::process::Command::new("makoctl").args(&["mode", "-r", "dnd"]).spawn();
+            babydra_island::widgets::notification::set_dnd_active(false);
         }
 
         if let Some(old) = icon_container.first_child() {
@@ -142,9 +127,11 @@ fn is_night_light_active() -> bool {
 pub fn create_night_light_tile() -> gtk4::Button {
     let btn = gtk4::Button::new();
     btn.add_css_class("control-square-tile");
-    btn.set_hexpand(true);
-    btn.set_valign(gtk4::Align::Fill);
-    btn.set_vexpand(true);
+    btn.set_size_request(56, 56);
+    btn.set_halign(gtk4::Align::Center);
+    btn.set_valign(gtk4::Align::Center);
+    btn.set_hexpand(false);
+    btn.set_vexpand(false);
 
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
     main_box.set_valign(gtk4::Align::Center);
@@ -159,15 +146,10 @@ pub fn create_night_light_tile() -> gtk4::Button {
     icon_container.set_halign(gtk4::Align::Center);
 
     let icon_color = if active { "#ffffff" } else { "rgba(255, 255, 255, 0.8)" };
-    let icon_widget = babydra_common::icon::get_icon_colored("night-light", 16, icon_color);
+    let icon_widget = babydra_common::icon::get_icon_colored("night-light", 18, icon_color);
     icon_container.append(&icon_widget);
 
-    let label = gtk4::Label::new(Some(&babydra_common::i18n::t("control.night_light")));
-    label.add_css_class("control-square-label");
-    label.set_halign(gtk4::Align::Center);
-
     main_box.append(&icon_container);
-    main_box.append(&label);
     btn.set_child(Some(&main_box));
 
     btn.connect_clicked(move |b| {
@@ -186,7 +168,7 @@ pub fn create_night_light_tile() -> gtk4::Button {
             icon_container.remove(&old);
         }
         let color = if new_active { "#ffffff" } else { "rgba(255, 255, 255, 0.8)" };
-        let new_img = babydra_common::icon::get_icon_colored("night-light", 16, color);
+        let new_img = babydra_common::icon::get_icon_colored("night-light", 18, color);
         icon_container.append(&new_img);
     });
 

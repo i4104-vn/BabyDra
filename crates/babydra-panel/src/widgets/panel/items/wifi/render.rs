@@ -58,19 +58,25 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
     
     let on_popover_toggled_c = on_popover_toggled.clone();
     let popover_c1 = popover.clone();
+    let right_btn_clone = right_btn.clone();
     right_btn.connect_clicked(move |_| {
         popover_c1.popup();
         if let Some(ref cb) = on_popover_toggled_c {
             cb(true);
         }
+        let left_icon = babydra_common::icon::get_icon_colored("go-previous-symbolic", 12, "rgba(255, 255, 255, 0.7)");
+        right_btn_clone.set_child(Some(&left_icon));
     });
 
-    if let Some(ref cb) = on_popover_toggled {
-        let cb_clone = cb.clone();
-        popover.connect_closed(move |_| {
-            cb_clone(false);
-        });
-    }
+    let right_btn_c2 = right_btn.clone();
+    let on_popover_toggled_c2 = on_popover_toggled.clone();
+    popover.connect_closed(move |_| {
+        if let Some(ref cb) = on_popover_toggled_c2 {
+            cb(false);
+        }
+        let right_icon = babydra_common::icon::get_icon_colored("go-next-symbolic", 12, "rgba(255, 255, 255, 0.7)");
+        right_btn_c2.set_child(Some(&right_icon));
+    });
     
     let circle_c = circle.clone();
     let icon_widget_c = icon_widget.clone();
@@ -81,16 +87,12 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
         if new_active {
             b.add_css_class("active");
             circle_c.add_css_class("active");
-            let _ = std::process::Command::new("iwctl")
-                .args(&["device", "wlan0", "set-property", "Powered", "on"])
-                .spawn();
+            babydra_common::helper::wifi::set_wifi_enabled(true);
             sub_label_c.set_text("Scanning...");
         } else {
             b.remove_css_class("active");
             circle_c.remove_css_class("active");
-            let _ = std::process::Command::new("iwctl")
-                .args(&["device", "wlan0", "set-property", "Powered", "off"])
-                .spawn();
+            babydra_common::helper::wifi::set_wifi_enabled(false);
             sub_label_c.set_text("Off");
         }
         let color = if new_active { "#ffffff" } else { "rgba(255, 255, 255, 0.7)" };

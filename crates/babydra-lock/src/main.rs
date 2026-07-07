@@ -9,8 +9,6 @@ mod render;
 use gtk4::prelude::*;
 
 fn main() {
-    println!("Starting BabyDra Screen Locker...");
-
     let args: Vec<String> = std::env::args().collect();
     let mut custom_image = None;
     if args.len() > 1 {
@@ -33,7 +31,6 @@ fn main() {
         if std::path::Path::new(path).exists() {
             path.clone()
         } else {
-            println!("Custom image at {} not found, falling back to default.", path);
             format!("{}/.config/babydra/wallpaper.png", home)
         }
     } else {

@@ -7,8 +7,6 @@ mod render;
 use gtk4::prelude::*;
 
 fn main() {
-    println!("Starting BabyDra Desktop Menu...");
-
     let application = gtk4::Application::new(
         Some("org.babydra.menu"),
         Default::default(),

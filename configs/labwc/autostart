@@ -1,0 +1,16 @@
+#!/bin/bash
+# Ensure local bin is in PATH
+export PATH="$HOME/.local/bin:$PATH"
+
+# Autostart configuration for labwc with BabyDra shell
+
+# Start Wayland wallpaper daemon
+awww-daemon &
+sleep 0.5
+
+# Set the default wallpaper
+awww img "$HOME/.config/babydra/wallpaper.png" &
+
+# Start BabyDra status panel
+mkdir -p "$HOME/.cache/babydra"
+~/.local/bin/babydra-panel > "$HOME/.cache/babydra/panel.log" 2>&1 &

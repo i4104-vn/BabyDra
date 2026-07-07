@@ -54,7 +54,8 @@ pub fn create_system_island() -> gtk4::Box {
     music_view.append(&visualizer_box);
     notch_content.append(&music_view);
 
-    let notification_view = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
+    let notification_view = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+    notification_view.add_css_class("island-notification-view");
     notification_view.set_valign(gtk4::Align::Center);
     notification_view.set_halign(gtk4::Align::Fill);
     notification_view.set_hexpand(true);
@@ -68,8 +69,6 @@ pub fn create_system_island() -> gtk4::Box {
         });
         
         if let Some(app_name) = app_to_activate {
-            println!("Notification clicked! Attempting to activate app: {}", app_name);
-            
             let apps = babydra_common::desktop::find_desktop_apps();
             let mut found_app = None;
             let lower_name = app_name.to_lowercase();
@@ -91,47 +90,26 @@ pub fn create_system_island() -> gtk4::Box {
             }
             
             if let Some(app) = found_app {
-                let exec_parts: Vec<&str> = app.exec.split_whitespace().collect();
-                let exec_name = if !exec_parts.is_empty() {
-                    std::path::Path::new(exec_parts[0])
-                        .file_name()
-                        .map(|f| f.to_string_lossy().to_string())
-                        .unwrap_or_default()
-                } else {
-                    String::new()
-                };
-
-                if !exec_name.is_empty() {
-                    let _ = std::process::Command::new("wlrctl")
-                        .args(&["window", "focus", &exec_name])
-                        .spawn();
-                    let _ = std::process::Command::new("wlrctl")
-                        .args(&["window", "focus", &exec_name.to_lowercase()])
-                        .spawn();
-                }
-                
-                if !app.exec.is_empty() {
-                    let _ = std::process::Command::new("wlrctl")
-                        .args(&["window", "focus", &app.exec])
-                        .spawn();
-                }
-
-                let _ = std::process::Command::new("wlrctl")
-                    .args(&["window", "focus", &app.name])
-                    .spawn();
+                babydra_common::helper::window::focus_app(
+                    &app.name,
+                    &app.exec,
+                    app.app_id.as_deref(),
+                    app.window_title.as_deref(),
+                );
             } else {
-                let _ = std::process::Command::new("wlrctl")
-                    .args(&["window", "focus", &app_name])
-                    .spawn();
-                let _ = std::process::Command::new("wlrctl")
-                    .args(&["window", "focus", &app_name.to_lowercase()])
-                    .spawn();
+                babydra_common::helper::window::focus_app(
+                    &app_name,
+                    "",
+                    Some(&app_name),
+                    None,
+                );
             }
         }
     });
     notification_view.add_controller(click_gesture);
 
     let notif_art_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    notif_art_container.add_css_class("notif-icon-box");
     notif_art_container.set_valign(gtk4::Align::Center);
 
     let notif_text_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);

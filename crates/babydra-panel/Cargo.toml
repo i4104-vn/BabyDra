@@ -9,7 +9,6 @@ edition = "2021"
 babydra-common = { workspace = true }
 babydra-island = { workspace = true }
 babydra-launcher = { workspace = true }
-babydra-tray = { workspace = true }
 
 # GUI & Layer Shell
 gtk4 = { version = "0.9", features = ["v4_10"] }

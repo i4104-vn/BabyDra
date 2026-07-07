@@ -1,15 +1,37 @@
 use gtk4::prelude::*;
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
 
-pub fn build_clock_ui() -> (gtk4::Button, gtk4::Label) {
+pub fn build_clock_ui() -> (gtk4::Button, gtk4::Label, gtk4::Widget) {
     let clock_button = gtk4::Button::new();
     clock_button.add_css_class("panel-clock-btn");
 
+    let clock_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+    clock_box.set_valign(gtk4::Align::Center);
+    clock_box.set_halign(gtk4::Align::Center);
+
+    let overlay = gtk4::Overlay::new();
+    overlay.set_valign(gtk4::Align::Center);
+    overlay.set_halign(gtk4::Align::Center);
+
+    let bell_icon = babydra_common::icon::get_icon("bell", 14);
+    bell_icon.add_css_class("clock-bell-icon");
+    overlay.set_child(Some(&bell_icon));
+
+    let red_dot = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    red_dot.add_css_class("clock-bell-dot");
+    red_dot.set_valign(gtk4::Align::Start);
+    red_dot.set_halign(gtk4::Align::End);
+    overlay.add_overlay(&red_dot);
+
     let clock_label = gtk4::Label::new(None);
     clock_label.add_css_class("panel-clock");
-    clock_button.set_child(Some(&clock_label));
 
-    (clock_button, clock_label)
+    clock_box.append(&clock_label);
+    clock_box.append(&overlay);
+
+    clock_button.set_child(Some(&clock_box));
+
+    (clock_button, clock_label, red_dot.upcast::<gtk4::Widget>())
 }
 
 pub fn build_calendar_window_ui(

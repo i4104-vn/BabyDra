@@ -4,82 +4,7 @@
 use gtk4::prelude::*;
 use std::path::PathBuf;
 
-/// Types of drawing annotations that can be overlayed on the screenshot.
-#[derive(Clone)]
-pub enum Drawing {
-    /// Vector path drawing with points, color, and thickness.
-    Stroke {
-        points: Vec<(f64, f64)>,
-        color: (f64, f64, f64),
-        width: f64,
-    },
-    /// A simple outlined rectangle.
-    Rect {
-        x: f64,
-        y: f64,
-        w: f64,
-        h: f64,
-        color: (f64, f64, f64),
-        width: f64,
-    },
-    /// A pixelated area to conceal sensitive information.
-    Blur {
-        x: f64,
-        y: f64,
-        w: f64,
-        h: f64,
-    },
-}
-
-/// Tools available in the screenshot editor.
-#[derive(Clone, Copy, PartialEq)]
-pub enum Tool {
-    Select,
-    Pen,
-    Rect,
-    Blur,
-    Eraser,
-}
-
-/// Current active state of the editor.
-pub struct EditorState {
-    pub bg_pixbuf: gdk_pixbuf::Pixbuf,
-    pub crop_x: f64,
-    pub crop_y: f64,
-    pub crop_w: f64,
-    pub crop_h: f64,
-    pub has_selection: bool,
-    pub drag_start_x: f64,
-    pub drag_start_y: f64,
-    pub is_selecting: bool,
-    pub current_tool: Tool,
-    pub current_color: (f64, f64, f64),
-    pub drawings: Vec<Drawing>,
-    pub active_stroke: Option<Vec<(f64, f64)>>,
-    pub active_rect: Option<(f64, f64, f64, f64)>,
-}
-
-impl EditorState {
-    /// Creates a new editor state with the provided raw background pixbuf.
-    pub fn new(pixbuf: gdk_pixbuf::Pixbuf) -> Self {
-        Self {
-            bg_pixbuf: pixbuf,
-            crop_x: 0.0,
-            crop_y: 0.0,
-            crop_w: 0.0,
-            crop_h: 0.0,
-            has_selection: false,
-            drag_start_x: 0.0,
-            drag_start_y: 0.0,
-            is_selecting: false,
-            current_tool: Tool::Select,
-            current_color: (0.93, 0.15, 0.15),
-            drawings: Vec::new(),
-            active_stroke: None,
-            active_rect: None,
-        }
-    }
-}
+use crate::models::{Drawing, Tool, EditorState};
 
 /// Draws a pixelated mosaic filter inside the target rectangle bounds.
 pub fn draw_pixelated_rect(cr: &cairo::Context, bg_pixbuf: &gdk_pixbuf::Pixbuf, x: f64, y: f64, w: f64, h: f64) {
@@ -130,10 +55,7 @@ pub fn capture_screen_to_temp() -> Option<String> {
 
     match status {
         Ok(s) if s.success() => Some(temp_path.to_string()),
-        _ => {
-            eprintln!("Failed to capture screen using 'grim'. Please make sure it is installed.");
-            None
-        }
+        _ => None,
     }
 }
 
@@ -190,14 +112,11 @@ pub fn trigger_save(state: &EditorState) -> bool {
         let save_path = get_screenshot_save_path();
         if let Ok(mut file) = std::fs::File::create(&save_path) {
             if surface.write_to_png(&mut file).is_ok() {
-                println!("Screenshot saved to: {:?}", save_path);
                 let notif_title = babydra_common::i18n::t("screenshot.saved_title");
                 let notif_msg = babydra_common::i18n::t("screenshot.saved_msg")
                     .replace("{}", &format!("{:?}", save_path));
                 
-                let _ = std::process::Command::new("notify-send")
-                    .args(&["-i", "image-x-generic", &notif_title, &notif_msg])
-                    .spawn();
+                babydra_common::helper::notification::send_notification(&notif_title, &notif_msg);
                 return true;
             }
         }
@@ -220,12 +139,9 @@ pub fn trigger_copy(state: &EditorState, window: &gtk4::ApplicationWindow) -> bo
                     
                     if let Ok(s) = status {
                         if s.success() {
-                            println!("Screenshot copied to clipboard via wl-copy.");
                             let notif_title = babydra_common::i18n::t("screenshot.copied_title");
                             let notif_msg = babydra_common::i18n::t("screenshot.copied_msg");
-                            let _ = std::process::Command::new("notify-send")
-                                .args(&["-i", "edit-paste", &notif_title, &notif_msg])
-                                .spawn();
+                            babydra_common::helper::notification::send_notification(&notif_title, &notif_msg);
                             return true;
                         }
                     }
@@ -251,12 +167,9 @@ pub fn trigger_copy(state: &EditorState, window: &gtk4::ApplicationWindow) -> bo
             let clipboard = window.upcast_ref::<gtk4::Widget>().display().clipboard();
             clipboard.set_texture(&texture);
 
-            println!("Screenshot copied to clipboard via GTK fallback.");
             let notif_title = babydra_common::i18n::t("screenshot.copied_title");
             let notif_msg = babydra_common::i18n::t("screenshot.copied_msg");
-            let _ = std::process::Command::new("notify-send")
-                .args(&["-i", "edit-paste", &notif_title, &notif_msg])
-                .spawn();
+            babydra_common::helper::notification::send_notification(&notif_title, &notif_msg);
             return true;
         }
     }

@@ -200,6 +200,7 @@ pub fn start_player_polling_loop(
                     should_show_notif = true;
                     widgets.visualizer_box.set_visible(false);
                     widgets.notch_capsule.add_css_class("active-music");
+                    widgets.notch_capsule.add_css_class("notification-mode");
                     babydra_common::animation::island_zoom_in(
                         widgets.notch_capsule.clone().upcast_ref(),
                         300,
@@ -211,6 +212,7 @@ pub fn start_player_polling_loop(
                     island_state.set(IslandState::NotificationActive { timestamp: notif.timestamp });
                     should_show_notif = true;
                     widgets.visualizer_box.set_visible(false);
+                    widgets.notch_capsule.add_css_class("notification-mode");
                     babydra_common::animation::island_animate_size(
                         widgets.notch_capsule.clone().upcast_ref(),
                         200,
@@ -233,6 +235,7 @@ pub fn start_player_polling_loop(
                     widgets.visualizer_box.set_visible(false);
                     widgets.notch_capsule.set_visible(true);
                     widgets.notch_capsule.add_css_class("active-music");
+                    widgets.notch_capsule.add_css_class("notification-mode");
                     babydra_common::animation::island_animate_size(
                         widgets.notch_capsule.clone().upcast_ref(),
                         200,
@@ -287,6 +290,7 @@ pub fn start_player_polling_loop(
                             }
 
                             widgets_clone.notification_view.set_visible(false);
+                            widgets_clone.notch_capsule.remove_css_class("notification-mode");
 
                             if player_active_fresh {
                                 state_clone.set(IslandState::PlayerActive);
@@ -317,6 +321,7 @@ pub fn start_player_polling_loop(
                                 glib::timeout_add_local_once(std::time::Duration::from_millis(500), move || {
                                     state_final.set(IslandState::Hidden);
                                     notch_clone.remove_css_class("active-music");
+                                    notch_clone.remove_css_class("notification-mode");
                                 });
                             }
                         }
@@ -363,6 +368,7 @@ pub fn start_player_polling_loop(
                         glib::timeout_add_local_once(std::time::Duration::from_millis(500), move || {
                             state_final.set(IslandState::Hidden);
                             notch_clone.remove_css_class("active-music");
+                            notch_clone.remove_css_class("notification-mode");
                         });
                     }
                 }
@@ -430,8 +436,38 @@ fn update_notification_view(
     if let Some(child) = widgets.notif_art_container.first_child() {
         widgets.notif_art_container.remove(&child);
     }
-    let icon_symbol = if notif.icon.is_empty() { "preferences-system-notifications-symbolic" } else { &notif.icon };
-    let notif_icon = babydra_common::icon::get_system_or_file_icon(icon_symbol, "preferences-system-notifications-symbolic");
+    
+    // Check if the icon file or system icon name exists, otherwise use logo
+    let mut use_logo = notif.icon.is_empty();
+    if !use_logo {
+        if notif.icon.starts_with('/') {
+            if !std::path::Path::new(&notif.icon).exists() {
+                use_logo = true;
+            }
+        } else {
+            let mut clean_name = notif.icon.clone();
+            for ext in &[".png", ".svg", ".xpm", ".jpg", ".jpeg", ".gif"] {
+                if clean_name.to_lowercase().ends_with(ext) {
+                    clean_name = clean_name[..clean_name.len() - ext.len()].to_string();
+                    break;
+                }
+            }
+            if let Some(disp) = gdk4::Display::default() {
+                let theme = gtk4::IconTheme::for_display(&disp);
+                if !theme.has_icon(&clean_name) {
+                    use_logo = true;
+                }
+            } else {
+                use_logo = true;
+            }
+        }
+    }
+
+    let notif_icon = if use_logo {
+        babydra_common::icon::get_icon("logo", 24)
+    } else {
+        babydra_common::icon::get_system_or_file_icon(&notif.icon, "preferences-system-notifications-symbolic")
+    };
     notif_icon.set_pixel_size(24);
     notif_icon.add_css_class("notch-album-art");
     widgets.notif_art_container.append(&notif_icon);
@@ -484,6 +520,7 @@ fn update_player_view(
     art_url: &str,
     art_sender: &tokio::sync::mpsc::UnboundedSender<(String, String, Result<Vec<u8>, ()>)>,
 ) {
+    widgets.notch_capsule.remove_css_class("notification-mode");
     is_playing_state.set(playing);
 
     let song_changed = {

@@ -47,8 +47,13 @@ pub fn create_volume_row(
     };
 
     let mute_btn = gtk4::Button::new();
-    mute_btn.add_css_class("slider-mute-btn");
+    mute_btn.add_css_class("slider-overlay-mute-btn");
     mute_btn.set_child(Some(&icon_container));
+    mute_btn.set_halign(gtk4::Align::Start);
+    mute_btn.set_valign(gtk4::Align::Center);
+    mute_btn.set_margin_start(10);
+    mute_btn.set_can_focus(false);
+    mute_btn.set_focus_on_click(false);
     
     let update_mute_icon_clone = update_mute_icon.clone();
     let muted_state_clone = muted_state.clone();
@@ -72,8 +77,6 @@ pub fn create_volume_row(
         update_mute_icon_clone(new_mute);
         update_topbar_volume_icon(&vol_icon_c);
     });
-    
-    row_box.append(&mute_btn);
 
     update_mute_icon(muted_state.get());
 
@@ -89,9 +92,10 @@ pub fn create_volume_row(
     let update_mute_icon_c = update_mute_icon.clone();
     let muted_state_c = muted_state.clone();
 
+    let value_label_changed = value_label.clone();
     scale.connect_value_changed(move |s| {
         let val = s.value();
-        value_label.set_text(&format!("{:.0}%", val));
+        value_label_changed.set_text(&format!("{:.0}%", val));
 
         if let Some(id) = last_source_clone.take() {
             id.remove();
@@ -117,13 +121,21 @@ pub fn create_volume_row(
         last_source_clone.set(Some(new_id));
     });
 
-    row_box.append(&scale);
-
     let menu_btn = gtk4::Button::new();
-    menu_btn.add_css_class("slider-menu-btn");
-    let menu_icon = babydra_common::icon::get_system_or_file_icon("go-next-symbolic", "image-missing");
+    menu_btn.add_css_class("slider-popover-btn");
+    menu_btn.set_valign(gtk4::Align::Center);
+    let menu_icon = babydra_common::icon::get_system_or_file_icon("go-up-symbolic", "image-missing");
     menu_icon.set_pixel_size(12);
     menu_btn.set_child(Some(&menu_icon));
+
+    let overlay = gtk4::Overlay::new();
+    overlay.set_hexpand(true);
+    overlay.set_valign(gtk4::Align::Center);
+    overlay.set_child(Some(&scale));
+    overlay.add_overlay(&mute_btn);
+
+    row_box.append(&overlay);
+    row_box.append(&menu_btn);
 
     let popover = gtk4::Popover::new();
     popover.add_css_class("taskbar-popover");
@@ -134,6 +146,7 @@ pub fn create_volume_row(
     let popover_clone = popover.clone();
     let update_mute_clone = update_mute_icon.clone();
     let on_popover_toggled_c = on_popover_toggled.clone();
+    let menu_btn_clone = menu_btn.clone();
     
     menu_btn.connect_clicked(move |_| {
         let update_mute_wrapper = {
@@ -147,16 +160,22 @@ pub fn create_volume_row(
         if let Some(ref cb) = on_popover_toggled_c {
             cb(true);
         }
+        
+        let down_icon = babydra_common::icon::get_system_or_file_icon("go-down-symbolic", "image-missing");
+        down_icon.set_pixel_size(12);
+        menu_btn_clone.set_child(Some(&down_icon));
     });
 
-    if let Some(ref cb) = on_popover_toggled {
-        let cb_clone = cb.clone();
-        popover.connect_closed(move |_| {
-            cb_clone(false);
-        });
-    }
-
-    row_box.append(&menu_btn);
+    let menu_btn_c2 = menu_btn.clone();
+    let on_popover_toggled_c2 = on_popover_toggled.clone();
+    popover.connect_closed(move |_| {
+        if let Some(ref cb) = on_popover_toggled_c2 {
+            cb(false);
+        }
+        let up_icon = babydra_common::icon::get_system_or_file_icon("go-up-symbolic", "image-missing");
+        up_icon.set_pixel_size(12);
+        menu_btn_c2.set_child(Some(&up_icon));
+    });
 
     main_box.append(&header_box);
     main_box.append(&row_box);
