@@ -156,6 +156,19 @@ pub fn get_logo_png(size: i32) -> gtk4::Image {
     }
 }
 
+/// Returns the path to the logo PNG. If it does not exist in the config directory,
+/// it extracts the compiled-in PNG bytes and writes it there.
+pub fn get_logo_path() -> std::path::PathBuf {
+    let logo_dir = crate::core::config::get_babydra_config_dir();
+    let logo_path = logo_dir.join("logo.png");
+    if !logo_path.exists() {
+        let _ = std::fs::create_dir_all(&logo_dir);
+        const PNG_BYTES: &[u8] = include_bytes!("../theme/logo.png");
+        let _ = std::fs::write(&logo_path, PNG_BYTES);
+    }
+    logo_path
+}
+
 /// Helper function to retrieve an SVG icon widget by name. Defaults to white in dark mode and dark gray in light mode.
 pub fn get_icon(name: &str, size: i32) -> gtk4::Image {
     if name == "logo" {
