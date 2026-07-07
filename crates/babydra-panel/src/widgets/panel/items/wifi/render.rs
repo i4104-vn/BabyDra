@@ -87,16 +87,12 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
         if new_active {
             b.add_css_class("active");
             circle_c.add_css_class("active");
-            let _ = std::process::Command::new("iwctl")
-                .args(&["device", "wlan0", "set-property", "Powered", "on"])
-                .spawn();
+            babydra_common::helper::wifi::set_wifi_enabled(true);
             sub_label_c.set_text("Scanning...");
         } else {
             b.remove_css_class("active");
             circle_c.remove_css_class("active");
-            let _ = std::process::Command::new("iwctl")
-                .args(&["device", "wlan0", "set-property", "Powered", "off"])
-                .spawn();
+            babydra_common::helper::wifi::set_wifi_enabled(false);
             sub_label_c.set_text("Off");
         }
         let color = if new_active { "#ffffff" } else { "rgba(255, 255, 255, 0.7)" };
