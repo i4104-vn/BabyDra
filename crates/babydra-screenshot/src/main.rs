@@ -2,6 +2,7 @@ use gtk4::prelude::*;
 use std::env;
 
 mod capture;
+pub mod models;
 mod widgets;
 mod render;
 
@@ -20,9 +21,7 @@ fn main() {
                 let notif_msg = babydra_common::i18n::t("screenshot.saved_msg")
                     .replace("{}", &format!("{:?}", save_path));
                 
-                let _ = std::process::Command::new("notify-send")
-                    .args(&["-i", "image-x-generic", &notif_title, &notif_msg])
-                    .spawn();
+                babydra_common::helper::notification::send_notification(&notif_title, &notif_msg);
             }
             let _ = std::fs::remove_file(temp_path);
         }
