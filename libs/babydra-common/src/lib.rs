@@ -24,14 +24,7 @@ pub mod helper {
     pub use crate::system::clean;
 }
 
-// Re-export models submodules for backward compatibility
-pub mod models {
-    pub use crate::desktop::config::{ThemeConfig, ShellConfig};
-    pub use crate::notification::island::IslandState;
-    pub use crate::system::volume::AudioDevice;
-    pub use crate::system::storage::DiskInfo;
-    pub use crate::notification::service::{ActiveNotification, NotificationMsg};
-}
+pub mod models;
 
 // Flat re-exports at root for backward compatibility
 pub use desktop::config::{ThemeConfig, ShellConfig, get_babydra_config_dir};

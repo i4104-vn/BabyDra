@@ -2,15 +2,7 @@
 
 use std::collections::HashMap;
 
-/// Storage disk information model.
-#[derive(Clone, Debug)]
-pub struct DiskInfo {
-    pub filesystem: String,
-    pub size: String,
-    pub used: String,
-    pub percent: f64,
-    pub mount_point: String,
-}
+pub use crate::models::DiskInfo;
 
 fn get_parent_drive(filesystem: &str) -> String {
     if filesystem.starts_with("/dev/sd") {
