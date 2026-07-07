@@ -90,41 +90,19 @@ pub fn create_system_island() -> gtk4::Box {
             }
             
             if let Some(app) = found_app {
-                let exec_parts: Vec<&str> = app.exec.split_whitespace().collect();
-                let exec_name = if !exec_parts.is_empty() {
-                    std::path::Path::new(exec_parts[0])
-                        .file_name()
-                        .map(|f| f.to_string_lossy().to_string())
-                        .unwrap_or_default()
-                } else {
-                    String::new()
-                };
-
-                if !exec_name.is_empty() {
-                    let _ = std::process::Command::new("wlrctl")
-                        .args(&["window", "focus", &exec_name])
-                        .spawn();
-                    let _ = std::process::Command::new("wlrctl")
-                        .args(&["window", "focus", &exec_name.to_lowercase()])
-                        .spawn();
-                }
-                
-                if !app.exec.is_empty() {
-                    let _ = std::process::Command::new("wlrctl")
-                        .args(&["window", "focus", &app.exec])
-                        .spawn();
-                }
-
-                let _ = std::process::Command::new("wlrctl")
-                    .args(&["window", "focus", &app.name])
-                    .spawn();
+                babydra_common::helper::window::focus_app(
+                    &app.name,
+                    &app.exec,
+                    app.app_id.as_deref(),
+                    app.window_title.as_deref(),
+                );
             } else {
-                let _ = std::process::Command::new("wlrctl")
-                    .args(&["window", "focus", &app_name])
-                    .spawn();
-                let _ = std::process::Command::new("wlrctl")
-                    .args(&["window", "focus", &app_name.to_lowercase()])
-                    .spawn();
+                babydra_common::helper::window::focus_app(
+                    &app_name,
+                    "",
+                    Some(&app_name),
+                    None,
+                );
             }
         }
     });
