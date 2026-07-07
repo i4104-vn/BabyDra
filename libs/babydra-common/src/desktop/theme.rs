@@ -47,21 +47,18 @@ thread_local! {
     static CSS_PROVIDER: gtk4::CssProvider = gtk4::CssProvider::new();
 }
 
+use gio::prelude::*;
+
 /// Initializes the GtkCssProvider, registers it with the GdkDisplay,
 /// and dynamically loads either the dark or light stylesheet folder.
 pub fn init_theme() {
     if let Some(settings) = gtk4::Settings::default() {
-        if let Ok(output) = std::process::Command::new("gsettings")
-            .args(&["get", "org.gnome.desktop.interface", "color-scheme"])
-            .output()
-        {
-            let stdout = String::from_utf8_lossy(&output.stdout);
-            let value = stdout.trim().trim_matches('\'');
-            if value == "prefer-dark" {
-                settings.set_gtk_application_prefer_dark_theme(true);
-            } else if value == "prefer-light" {
-                settings.set_gtk_application_prefer_dark_theme(false);
-            }
+        let gsettings = gio::Settings::new("org.gnome.desktop.interface");
+        let value = gsettings.string("color-scheme");
+        if value == "prefer-dark" {
+            settings.set_gtk_application_prefer_dark_theme(true);
+        } else if value == "prefer-light" {
+            settings.set_gtk_application_prefer_dark_theme(false);
         }
     }
 

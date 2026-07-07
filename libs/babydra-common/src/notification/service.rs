@@ -164,10 +164,45 @@ pub fn show_notification_popup(summary: &str, body: &str, icon_name: &str, app_n
     });
 }
 
+#[zbus::proxy(
+    blocking,
+    interface = "org.freedesktop.Notifications",
+    default_service = "org.freedesktop.Notifications",
+    default_path = "/org/freedesktop/Notifications"
+)]
+trait Notifications {
+    fn notify(
+        &self,
+        app_name: &str,
+        replaces_id: u32,
+        app_icon: &str,
+        summary: &str,
+        body: &str,
+        actions: Vec<&str>,
+        hints: HashMap<&str, zbus::zvariant::Value<'_>>,
+        expire_timeout: i32,
+    ) -> zbus::Result<u32>;
+}
+
 /// Sends a desktop notification using the default theme/common logo.
 pub fn send_notification(title: &str, body: &str) {
     let logo_path = crate::desktop::icon::get_logo_path();
     let logo_str = logo_path.to_string_lossy();
+    if let Ok(conn) = zbus::blocking::Connection::session() {
+        if let Ok(proxy) = NotificationsProxyBlocking::new(&conn) {
+            let _ = proxy.notify(
+                "BabyDra",
+                0,
+                &logo_str,
+                title,
+                body,
+                vec![],
+                HashMap::new(),
+                -1,
+            );
+            return;
+        }
+    }
     let _ = std::process::Command::new("notify-send")
         .args(&["-i", &logo_str, title, body])
         .spawn();
