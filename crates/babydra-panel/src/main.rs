@@ -52,31 +52,8 @@ fn main() {
                 continue;
             }
 
-            // Run wlrctl to get the currently focused window
-            let output = Command::new("wlrctl")
-                .args(&["window", "list", "state:focused"])
-                .output();
-
-            let active_window = if let Ok(out) = output {
-                let stdout = String::from_utf8_lossy(&out.stdout);
-                if let Some(line) = stdout.lines().next() {
-                    if let Some(pos) = line.find(':') {
-                        let app_id = line[..pos].trim().to_string();
-                        let title = line[pos + 1..].trim().to_string();
-                        if !app_id.is_empty() {
-                            Some((app_id, title))
-                        } else {
-                            None
-                        }
-                    } else {
-                        None
-                    }
-                } else {
-                    None
-                }
-            } else {
-                None
-            };
+            // Get the currently focused window
+            let active_window = babydra_common::helper::window::get_active_window();
 
             // Ignore the switcher itself if it gets focused
             let is_switcher = active_window.as_ref().map(|(s, _)| s == "babydra-switcher" || s == "org.babydra.switcher").unwrap_or(false);
@@ -103,18 +80,10 @@ fn main() {
                 if let Ok(entries) = fs::read_dir(cache_dir) {
                     let mut running_hashes = std::collections::HashSet::new();
                     let mut running_app_ids = std::collections::HashSet::new();
-                    if let Ok(out) = Command::new("wlrctl").args(&["window", "list"]).output() {
-                        let list_stdout = String::from_utf8_lossy(&out.stdout);
-                        for line in list_stdout.lines() {
-                            if let Some(pos) = line.find(':') {
-                                let id = line[..pos].trim().to_string();
-                                  let title = line[pos + 1..].trim().to_string();
-                                if !id.is_empty() {
-                                    running_hashes.insert(babydra_common::desktop::get_window_hash(&id, &title));
-                                    running_app_ids.insert(id);
-                                }
-                            }
-                        }
+                    let running_windows = babydra_common::helper::window::get_running_windows();
+                    for (id, title) in running_windows {
+                        running_hashes.insert(babydra_common::desktop::get_window_hash(&id, &title));
+                        running_app_ids.insert(id);
                     }
                     for entry in entries {
                         if let Ok(entry) = entry {
