@@ -9,7 +9,6 @@ edition = "2021"
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"
 tracing = "0.1"
-babydra-i18n = { workspace = true }
 
 # GTK4 for theme provider support
 gtk4 = { version = "0.9", features = ["v4_10"] }

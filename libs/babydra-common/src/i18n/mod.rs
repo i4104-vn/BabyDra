@@ -290,4 +290,3 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
     }
     map
 }
-

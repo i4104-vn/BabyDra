@@ -20,5 +20,5 @@ pub use core::desktop::{find_desktop_apps, refresh_desktop_apps_cache, DesktopAp
 pub use core::desktop;
 pub use core::power::{poweroff, reboot, suspend};
 pub use window::{init_layer_window, setup_click_outside_dismiss};
-pub use babydra_i18n as i18n;
+pub mod i18n;
 

@@ -1,6 +1,0 @@
-[package]
-name = "babydra-i18n"
-version.workspace = true
-edition = "2021"
-
-[dependencies]
