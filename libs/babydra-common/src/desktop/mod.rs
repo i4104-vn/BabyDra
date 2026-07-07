@@ -6,3 +6,5 @@ pub mod icon;
 pub mod animation;
 pub mod window;
 pub mod apps;
+pub mod tray;
+

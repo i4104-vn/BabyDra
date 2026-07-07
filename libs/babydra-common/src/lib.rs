@@ -43,3 +43,4 @@ pub use desktop::animation;
 pub use desktop::icon;
 pub use notification::island;
 pub use desktop::window;
+pub use desktop::tray;
