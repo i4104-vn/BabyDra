@@ -1,6 +1,12 @@
 //! Audio volume helpers calling `wpctl` and `pactl`.
 
-pub use crate::models::AudioDevice;
+/// Volume/Audio device configuration model.
+#[derive(Clone, Debug)]
+pub struct AudioDevice {
+    pub name: String,
+    pub description: String,
+    pub is_default: bool,
+}
 
 pub fn is_muted() -> bool {
     if let Ok(output) = std::process::Command::new("wpctl")

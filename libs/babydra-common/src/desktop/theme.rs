@@ -1,4 +1,3 @@
-
 //! Theme and styling system coordinator.
 //! Concatenates component stylesheets and registers them with the GDK Display context.
 
@@ -84,14 +83,14 @@ pub fn init_theme() {
         }
 
         if let Some(settings) = gtk4::Settings::default() {
-            let is_dark = crate::icon::is_dark_mode();
+            let is_dark = super::icon::is_dark_mode();
             let css = if is_dark { DARK_CSS } else { LIGHT_CSS };
             let cleaned_css = css.replace("\r", "");
             provider.load_from_data(&cleaned_css);
 
             let provider_clone = provider.clone();
             settings.connect_gtk_application_prefer_dark_theme_notify(move |_s| {
-                let is_dark = crate::icon::is_dark_mode();
+                let is_dark = super::icon::is_dark_mode();
                 let css = if is_dark { DARK_CSS } else { LIGHT_CSS };
                 let cleaned_css = css.replace("\r", "");
                 provider_clone.load_from_data(&cleaned_css);
@@ -105,4 +104,3 @@ pub fn init_theme() {
 
 /// Helper stub for backward compatibility.
 pub fn apply_theme_class(_window: &gtk4::ApplicationWindow) { }
-

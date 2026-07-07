@@ -3,8 +3,20 @@
 
 use std::fs;
 use std::path::PathBuf;
+use serde::{Serialize, Deserialize};
 
-use crate::models::IslandState;
+/// Represents the current active state of the Dynamic Island overlay notch.
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+pub struct IslandState {
+    /// Whether the island overlay is currently visible.
+    pub active: bool,
+    /// Primary heading text shown inside the island.
+    pub title: String,
+    /// Secondary description text shown inside the island.
+    pub subtitle: String,
+    /// Icon name or path used to decorate the island.
+    pub icon: String,
+}
 
 /// Resolves the file path of the temporary Dynamic Island state file.
 pub fn get_island_state_path() -> PathBuf {
@@ -28,4 +40,3 @@ pub fn clear_island_state() -> Result<(), std::io::Error> {
     }
     Ok(())
 }
-

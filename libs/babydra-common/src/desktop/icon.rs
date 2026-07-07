@@ -113,12 +113,6 @@ pub fn get_icon_from_svg(svg_content: &str, size: i32) -> gtk4::Image {
 }
 
 /// Whether dark mode is currently active.
-///
-/// Reads the GTK in-process setting which is:
-/// - Synced from `gsettings color-scheme` once at startup by `init_theme()`
-/// - Updated in-process immediately when the user toggles via `set_gtk_application_prefer_dark_theme()`
-///
-/// This is a pure in-memory read — fast enough to call per icon render.
 pub fn is_dark_mode() -> bool {
     gtk4::Settings::default()
         .map(|s| s.is_gtk_application_prefer_dark_theme())
@@ -131,7 +125,7 @@ pub fn get_icon_colored(name: &str, size: i32, _color_hex: &str) -> gtk4::Image 
 }
 
 pub fn get_logo_png(size: i32) -> gtk4::Image {
-    const PNG_BYTES: &[u8] = include_bytes!("../theme/logo.png");
+    const PNG_BYTES: &[u8] = include_bytes!("logo.png");
     let bytes = glib::Bytes::from(PNG_BYTES);
     let stream = gio::MemoryInputStream::from_bytes(&bytes);
     
@@ -159,11 +153,11 @@ pub fn get_logo_png(size: i32) -> gtk4::Image {
 /// Returns the path to the logo PNG. If it does not exist in the config directory,
 /// it extracts the compiled-in PNG bytes and writes it there.
 pub fn get_logo_path() -> std::path::PathBuf {
-    let logo_dir = crate::core::config::get_babydra_config_dir();
+    let logo_dir = crate::desktop::config::get_babydra_config_dir();
     let logo_path = logo_dir.join("logo.png");
     if !logo_path.exists() {
         let _ = std::fs::create_dir_all(&logo_dir);
-        const PNG_BYTES: &[u8] = include_bytes!("../theme/logo.png");
+        const PNG_BYTES: &[u8] = include_bytes!("logo.png");
         let _ = std::fs::write(&logo_path, PNG_BYTES);
     }
     logo_path
@@ -302,7 +296,7 @@ pub fn get_system_or_file_icon(icon_path_or_name: &str, default_fallback: &str) 
         gtk4::Image::from_icon_name(&clean_name)
     } else {
         let lower_name = clean_name.to_lowercase();
-        let apps = crate::core::desktop::find_desktop_apps();
+        let apps = crate::desktop::apps::find_desktop_apps();
         let mut resolved_icon = None;
         for app in apps {
             if app.name.to_lowercase() == lower_name {

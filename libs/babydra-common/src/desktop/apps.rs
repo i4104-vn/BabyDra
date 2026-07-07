@@ -310,7 +310,9 @@ fn is_dependency_heuristic(filename: &str, _name: &str, exec: &str) -> bool {
         return true;
     }
 
+    if filename_lower.starts_with("fcitx5-") && !filename_lower.contains("config") {
+        return true;
+    }
+
     false
 }
-
-

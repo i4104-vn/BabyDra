@@ -5,7 +5,35 @@ use std::collections::HashMap;
 use std::thread;
 use zbus::interface;
 
-pub use crate::models::{ActiveNotification, NotificationMsg};
+/// Representation of an active desktop notification.
+#[derive(Clone, Debug)]
+pub struct ActiveNotification {
+    /// Summary or title of the notification message.
+    pub title: String,
+    /// Detailed description body of the notification.
+    pub body: String,
+    /// Icon key or file path representing the sender app.
+    pub icon: String,
+    /// Friendly name of the app sending the notification.
+    pub app_name: String,
+    /// Time instant when the notification was created.
+    pub timestamp: std::time::Instant,
+}
+
+/// Dynamic Island DBus communication command messages.
+#[derive(Debug)]
+pub enum NotificationMsg {
+    /// Triggered on receiving a new notification.
+    New {
+        summary: String,
+        body: String,
+        icon: String,
+        app_name: String,
+        timeout: i32,
+    },
+    /// Command to close the current active popup.
+    Close,
+}
 
 thread_local! {
     /// Holds reference to the active single dynamic popup notification.
@@ -70,7 +98,7 @@ impl NotificationService {
         let mut icon = app_icon.to_string();
         if icon.is_empty() {
             let lower_name = app_name.to_lowercase();
-            let apps = crate::core::desktop::find_desktop_apps();
+            let apps = crate::desktop::apps::find_desktop_apps();
             for app in apps {
                 if app.name.to_lowercase() == lower_name {
                     if let Some(app_icon) = app.icon {
@@ -166,7 +194,7 @@ pub fn show_notification_popup(summary: &str, body: &str, icon_name: &str, app_n
 
 /// Sends a desktop notification using the default theme/common logo.
 pub fn send_notification(title: &str, body: &str) {
-    let logo_path = crate::get_logo_path();
+    let logo_path = crate::desktop::icon::get_logo_path();
     let logo_str = logo_path.to_string_lossy();
     let _ = std::process::Command::new("notify-send")
         .args(&["-i", &logo_str, title, body])
