@@ -2,8 +2,6 @@
 resolver = "2"
 members = [
     "libs/babydra-common",
-    "libs/babydra-i18n",
-    "libs/babydra-tray",
     "libs/babydra-island",
     "libs/babydra-wallpaper",
     "libs/babydra-launcher",
@@ -19,8 +17,6 @@ version = "1.0.0"
 
 [workspace.dependencies]
 babydra-common = { path = "libs/babydra-common" }
-babydra-i18n = { path = "libs/babydra-i18n" }
-babydra-tray = { path = "libs/babydra-tray" }
 babydra-launcher = { path = "libs/babydra-launcher" }
 babydra-island = { path = "libs/babydra-island" }
 babydra-wallpaper = { path = "libs/babydra-wallpaper" }

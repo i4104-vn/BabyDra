@@ -2,5 +2,5 @@
 
 pub mod visualizer;
 pub mod popover;
-pub mod notification;
+pub use ::babydra_common::helper::notification;
 

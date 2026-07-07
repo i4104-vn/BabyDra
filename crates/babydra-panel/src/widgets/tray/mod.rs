@@ -19,7 +19,7 @@ pub fn create_tray_widget(window: &gtk4::ApplicationWindow) -> gtk4::Box {
     let window_clone = window.clone();
 
     gtk4::glib::timeout_add_local(std::time::Duration::from_secs(1), move || {
-        let current_items = babydra_tray::get_tray_items();
+        let current_items = babydra_common::desktop::tray::get_tray_items();
         let current_snapshot: Vec<TraySnapshot> = current_items
             .iter()
             .map(|x| TraySnapshot {
@@ -58,7 +58,7 @@ pub fn create_tray_widget(window: &gtk4::ApplicationWindow) -> gtk4::Box {
                     let abs_x = (8.0 + root_x + click_x) as i32;
                     let abs_y = (6.0 + root_y + click_y) as i32;
 
-                    babydra_tray::activate_item(&service_name, abs_x, abs_y, is_right_click);
+                    babydra_common::desktop::tray::activate_item(&service_name, abs_x, abs_y, is_right_click);
                 });
 
                 btn.add_controller(gesture);

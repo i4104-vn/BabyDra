@@ -9,4 +9,3 @@ pub struct ShellConfig {
     /// Theming configuration (blur, opacity, border).
     pub theme: ThemeConfig,
 }
-

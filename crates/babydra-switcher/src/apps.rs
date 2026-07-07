@@ -11,19 +11,7 @@ pub fn get_running_apps() -> Vec<DesktopApp> {
     let mut running = Vec::new();
     let mut detected_windows = std::collections::HashSet::new();
 
-    let mut running_windows = Vec::new();
-    if let Ok(output) = std::process::Command::new("wlrctl").args(&["toplevel", "list"]).output() {
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        for line in stdout.lines() {
-            if let Some(pos) = line.find(':') {
-                let app_id = line[..pos].trim().to_string();
-                let title = line[pos + 1..].trim().to_string();
-                if !app_id.is_empty() {
-                    running_windows.push((app_id, title));
-                }
-            }
-        }
-    }
+    let running_windows = babydra_common::helper::window::get_running_windows();
 
     for (app_id, title) in running_windows {
         let app_id_lower = app_id.to_lowercase();
@@ -117,84 +105,12 @@ pub fn get_running_apps() -> Vec<DesktopApp> {
 /// Commands the Wayland compositor to focus/activate a specific application window.
 /// Utilizes window title first, falling back to app_id and name comparisons.
 pub fn activate_app(app: &DesktopApp) {
-    if let Some(ref title) = app.window_title {
-        let status = std::process::Command::new("wlrctl")
-            .args(&["window", "focus", &format!("title:{}", title)])
-            .status();
-        if let Ok(s) = status {
-            if s.success() {
-                return;
-            }
-        }
-        
-        for delim in &[" — ", " - "] {
-            if let Some(pos) = title.rfind(delim) {
-                let short_title = title[..pos].trim();
-                if !short_title.is_empty() {
-                    let status = std::process::Command::new("wlrctl")
-                        .args(&["window", "focus", &format!("title:{}", short_title)])
-                        .status();
-                    if let Ok(s) = status {
-                        if s.success() {
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    if let Some(ref app_id) = app.app_id {
-        let status = std::process::Command::new("wlrctl")
-            .args(&["window", "focus", app_id])
-            .status();
-        if let Ok(s) = status {
-            if s.success() {
-                return;
-            }
-        }
-        let status_lower = std::process::Command::new("wlrctl")
-            .args(&["window", "focus", &app_id.to_lowercase()])
-            .status();
-        if let Ok(s) = status_lower {
-            if s.success() {
-                return;
-            }
-        }
-    }
-
-    let name = &app.name;
-    let exec_parts: Vec<&str> = app.exec.split_whitespace().collect();
-    let exec_name = if !exec_parts.is_empty() {
-        std::path::Path::new(exec_parts[0])
-            .file_name()
-            .map(|f| f.to_string_lossy().to_string())
-            .unwrap_or_default()
-    } else {
-        String::new()
-    };
-
-    if !exec_name.is_empty() {
-        let _ = std::process::Command::new("wlrctl")
-            .args(&["window", "focus", &exec_name])
-            .status();
-        let _ = std::process::Command::new("wlrctl")
-            .args(&["window", "focus", &format!("title:{}", exec_name)])
-            .status();
-    }
-    
-    if !app.exec.is_empty() {
-        let _ = std::process::Command::new("wlrctl")
-            .args(&["window", "focus", &app.exec])
-            .status();
-    }
-
-    let _ = std::process::Command::new("wlrctl")
-        .args(&["window", "focus", name])
-        .status();
-    let _ = std::process::Command::new("wlrctl")
-        .args(&["window", "focus", &format!("title:{}", name)])
-        .status();
+    babydra_common::helper::window::focus_app(
+        &app.name,
+        &app.exec,
+        app.app_id.as_deref(),
+        app.window_title.as_deref(),
+    );
 }
 
 
