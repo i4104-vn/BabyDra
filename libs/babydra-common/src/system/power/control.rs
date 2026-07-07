@@ -1,4 +1,4 @@
-//! System power action wrappers.
+//! Power action trigger triggers.
 
 use std::process::Command;
 

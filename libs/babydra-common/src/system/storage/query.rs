@@ -1,32 +1,8 @@
-//! System disk storage space helpers calling `df`.
+//! Sizing disk partitions and storage query.
 
 use std::collections::HashMap;
-
 pub use crate::models::DiskInfo;
-
-fn get_parent_drive(filesystem: &str) -> String {
-    if filesystem.starts_with("/dev/sd") {
-        if filesystem.len() >= 8 {
-            return filesystem[0..8].to_string();
-        }
-    } else if filesystem.starts_with("/dev/nvme") {
-        if let Some(p_idx) = filesystem.rfind('p') {
-            if p_idx > 9 {
-                return filesystem[0..p_idx].to_string();
-            }
-        }
-    }
-    filesystem.to_string()
-}
-
-fn format_size(kb: u64) -> String {
-    let gb = kb as f64 / 1024.0 / 1024.0;
-    if gb >= 1000.0 {
-        format!("{:.1} TB", gb / 1024.0)
-    } else {
-        format!("{:.1} GB", gb)
-    }
-}
+use super::helper::{get_parent_drive, format_size};
 
 pub fn get_disk_list() -> Vec<DiskInfo> {
     let mut drive_map: HashMap<String, (u64, u64, u64)> = HashMap::new();
