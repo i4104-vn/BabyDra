@@ -180,6 +180,69 @@ pub fn get_audio_devices(is_source: bool) -> Vec<AudioDevice> {
                         }
                     }
 
+                    let valid_profile_indices: std::collections::HashSet<i64> = valid_profiles
+                        .iter()
+                        .filter_map(|p| p.get("index").and_then(|idx| idx.as_i64()))
+                        .collect();
+
+                    let mut active_routes = std::collections::HashSet::new();
+                    if let Some(route_arr) = params.and_then(|p| p.get("Route")).and_then(|p| p.as_array()) {
+                        for r in route_arr {
+                            if let Some(name) = r.get("name").and_then(|n| n.as_str()) {
+                                active_routes.insert(name.to_string());
+                            }
+                        }
+                    }
+
+                    let mut card_has_routes = false;
+                    if let Some(enum_routes) = params.and_then(|p| p.get("EnumRoute")).and_then(|er| er.as_array()) {
+                        for route in enum_routes {
+                            let direction = route.get("direction").and_then(|d| d.as_str()).unwrap_or("");
+                            let target_direction = if is_source { "Input" } else { "Output" };
+                            if direction != target_direction {
+                                continue;
+                            }
+
+                            let r_name = route.get("name").and_then(|n| n.as_str()).unwrap_or("");
+                            let r_desc = route.get("description").and_then(|d| d.as_str()).unwrap_or(r_name);
+                            let r_index = route.get("index").and_then(|idx| idx.as_i64()).unwrap_or(-1);
+                            let r_available = route.get("available").and_then(|a| a.as_str()).unwrap_or("");
+
+                            if r_index == -1 || r_available == "no" {
+                                continue;
+                            }
+
+                            if let Some(prof_ids) = route.get("profiles").and_then(|p| p.as_array()) {
+                                let mut best_pid = None;
+                                for pid in prof_ids {
+                                    if let Some(pid_val) = pid.as_i64() {
+                                        if valid_profile_indices.contains(&pid_val) {
+                                            if pid_val == active_profile_index {
+                                                best_pid = Some(pid_val);
+                                                break;
+                                            } else if best_pid.is_none() {
+                                                best_pid = Some(pid_val);
+                                            }
+                                        }
+                                    }
+                                }
+                                if let Some(pid_val) = best_pid {
+                                    let is_default = pid_val == active_profile_index && active_routes.contains(r_name);
+                                    devices.push(AudioDevice {
+                                        name: format!("route:{}:{}:{}", card_id, r_index, pid_val),
+                                        description: format!("{} - {}", card_desc, r_desc),
+                                        is_default,
+                                    });
+                                    card_has_routes = true;
+                                }
+                            }
+                        }
+                    }
+
+                    if card_has_routes {
+                        continue;
+                    }
+
                     if !is_source {
                         let mut outputs_grouped: std::collections::HashMap<String, Vec<&serde_json::Value>> = std::collections::HashMap::new();
                         for p in &valid_profiles {
