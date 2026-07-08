@@ -149,8 +149,13 @@ pub fn spawn_watcher_service() {
                                 
                                 match has_owner {
                                     Ok(Ok(true)) => {
-                                        let query_fut = async {
-                                            if let Ok(proxy) = StatusNotifierItemProxy::builder(&conn_clone)
+                                        let service_clone = item.service.clone();
+                                        let icon_name_clone = item.icon_name.clone();
+                                        let title_clone = item.title.clone();
+                                        let conn_clone2 = conn_clone.clone();
+
+                                        let query_fut = async move {
+                                            if let Ok(proxy) = StatusNotifierItemProxy::builder(&conn_clone2)
                                                 .destination(bus_name)
                                                 .unwrap()
                                                 .path("/StatusNotifierItem")
@@ -158,9 +163,10 @@ pub fn spawn_watcher_service() {
                                                 .build()
                                                 .await
                                             {
-                                                let new_icon = proxy.icon_name().await.unwrap_or_else(|_| item.icon_name.clone());
-                                                let new_title = proxy.title().await.unwrap_or_else(|_| item.title.clone());
-                                                Some((new_icon, new_title))
+                                                let new_icon = proxy.icon_name().await.unwrap_or_else(|_| icon_name_clone.clone());
+                                                let final_icon = if new_icon.is_empty() { icon_name_clone } else { new_icon };
+                                                let new_title = proxy.title().await.unwrap_or_else(|_| title_clone);
+                                                Some((final_icon, new_title))
                                             } else {
                                                 None
                                             }
@@ -171,15 +177,15 @@ pub fn spawn_watcher_service() {
                                             query_fut
                                         ).await {
                                             return Some(TrayItem {
-                                                service: item.service.clone(),
-                                                icon_name: if new_icon.is_empty() { item.icon_name.clone() } else { new_icon },
+                                                service: service_clone,
+                                                icon_name: new_icon,
                                                 title: new_title,
                                             });
                                         }
                                     }
-                                     _ => {
-                                         return None;
-                                     }
+                                    _ => {
+                                        return None;
+                                    }
                                 }
                             }
                             Some(item)
