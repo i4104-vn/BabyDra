@@ -5,7 +5,7 @@ pub mod resolver;
 
 pub use resolver::{get_icon_from_svg, get_logo_png, get_logo_path, get_system_or_file_icon};
 
-use assets::*;
+pub use assets::*;
 
 /// Whether dark mode is currently active.
 pub fn is_dark_mode() -> bool {
