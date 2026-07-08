@@ -2,7 +2,7 @@
 
 use std::collections::HashMap;
 use zbus::blocking::Connection;
-use zbus::zvariant::{ObjectPath, Value};
+use zbus::zvariant::{ObjectPath, Value, OwnedObjectPath, OwnedValue};
 
 #[zbus::proxy(
     gen_blocking = true,
@@ -17,16 +17,16 @@ pub trait NetworkManager {
     fn set_wireless_enabled(&self, value: bool) -> zbus::Result<()>;
 
     #[zbus(property)]
-    fn all_devices(&self) -> zbus::Result<Vec<ObjectPath<'static>>>;
+    fn all_devices(&self) -> zbus::Result<Vec<OwnedObjectPath>>;
 
-    fn get_device_by_ip_iface(&self, iface: &str) -> zbus::Result<ObjectPath<'static>>;
+    fn get_device_by_ip_iface(&self, iface: &str) -> zbus::Result<OwnedObjectPath>;
 
     fn activate_connection(
         &self,
         connection: &ObjectPath<'_>,
         device: &ObjectPath<'_>,
         specific_object: &ObjectPath<'_>,
-    ) -> zbus::Result<(ObjectPath<'static>, ObjectPath<'static>)>;
+    ) -> zbus::Result<(OwnedObjectPath, OwnedObjectPath)>;
 }
 
 #[zbus::proxy(
@@ -48,9 +48,9 @@ pub trait Device {
 )]
 pub trait DeviceWifi {
     #[zbus(property)]
-    fn active_access_point(&self) -> zbus::Result<ObjectPath<'static>>;
+    fn active_access_point(&self) -> zbus::Result<OwnedObjectPath>;
 
-    fn get_access_points(&self) -> zbus::Result<Vec<ObjectPath<'static>>>;
+    fn get_access_points(&self) -> zbus::Result<Vec<OwnedObjectPath>>;
 
     fn request_scan(&self, options: HashMap<&str, Value<'_>>) -> zbus::Result<()>;
 }
@@ -81,12 +81,12 @@ pub trait AccessPoint {
     default_path = "/org/freedesktop/NetworkManager/Settings"
 )]
 pub trait Settings {
-    fn list_connections(&self) -> zbus::Result<Vec<ObjectPath<'static>>>;
+    fn list_connections(&self) -> zbus::Result<Vec<OwnedObjectPath>>;
 
     fn add_connection(
         &self,
         connection: HashMap<&str, HashMap<&str, Value<'_>>>,
-    ) -> zbus::Result<ObjectPath<'static>>;
+    ) -> zbus::Result<OwnedObjectPath>;
 }
 
 #[zbus::proxy(
@@ -95,11 +95,11 @@ pub trait Settings {
     default_service = "org.freedesktop.NetworkManager"
 )]
 pub trait ConnectionSettings {
-    fn get_settings(&self) -> zbus::Result<HashMap<String, HashMap<String, Value<'static>>>>;
+    fn get_settings(&self) -> zbus::Result<HashMap<String, HashMap<String, OwnedValue>>>;
     fn delete(&self) -> zbus::Result<()>;
 }
 
-pub fn get_wifi_device(conn: &Connection) -> Option<ObjectPath<'static>> {
+pub fn get_wifi_device(conn: &Connection) -> Option<OwnedObjectPath> {
     let nm = NetworkManagerProxyBlocking::new(conn).ok()?;
     let devices = nm.all_devices().ok()?;
     for dev_path in devices {
