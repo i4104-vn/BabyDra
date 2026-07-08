@@ -9,8 +9,10 @@ use crate::widgets;
 /// for every connected display monitor.
 pub fn build_lock_ui(app: &gtk4::Application, wallpaper_path: &str) {
     let provider = gtk4::CssProvider::new();
+    // Use a dark semi-transparent overlay on top of the wallpaper so content underneath is hidden
     let custom_css = format!(
-        ".lock-window {{ background-image: url('file://{}'); background-size: cover; background-position: center; }}",
+        ".lock-window {{ background-image: url('file://{}'); background-size: cover; background-position: center; }}
+         .lock-tint {{ background-color: rgba(0, 0, 0, 0.55); }}",
         wallpaper_path
     );
     provider.load_from_data(&custom_css);

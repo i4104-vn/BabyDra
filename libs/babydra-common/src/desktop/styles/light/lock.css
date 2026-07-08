@@ -3,10 +3,12 @@
 .lock-window {
     background-color: #ffffff;
     color: #1c1c1e;
+    opacity: 1;
 }
 
 .lock-tint {
-    background-color: rgba(255, 255, 255, 0.45);
+    background-color: #ffffff;
+    opacity: 1;
 }
 
 .lock-card {

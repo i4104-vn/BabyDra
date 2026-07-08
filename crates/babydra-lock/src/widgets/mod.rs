@@ -15,6 +15,8 @@ pub fn create_lock_window(
     window.init_layer_shell();
     window.set_layer(Layer::Overlay);
     window.set_exclusive_zone(-1);
+    // Ensure the window is fully opaque — prevents Wayland compositor from rendering it transparent
+    window.set_opacity(1.0);
 
     if let Some(m) = monitor {
         window.set_monitor(m);
