@@ -230,9 +230,20 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
             let pop_clone = popover.clone();
             let update_mute_clone = update_mute_btn.clone();
             btn.connect_clicked(move |_| {
-                let _ = std::process::Command::new("wpctl")
-                    .args(&["set-default", &name])
-                    .status();
+                if name.starts_with("profile:") {
+                    let parts: Vec<&str> = name.split(':').collect();
+                    if parts.len() == 3 {
+                        let card_id = parts[1];
+                        let profile_index = parts[2];
+                        let _ = std::process::Command::new("wpctl")
+                            .args(&["set-profile", card_id, profile_index])
+                            .status();
+                    }
+                } else {
+                    let _ = std::process::Command::new("wpctl")
+                        .args(&["set-default", &name])
+                        .status();
+                }
                 populate_audio_menu(&pop_clone, update_mute_clone.clone());
             });
             container.append(&btn);
@@ -287,9 +298,20 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
         let pop_clone = popover.clone();
         let update_mute_clone = update_mute_btn.clone();
         btn.connect_clicked(move |_| {
-            let _ = std::process::Command::new("wpctl")
-                .args(&["set-default", &name])
-                .status();
+            if name.starts_with("profile:") {
+                let parts: Vec<&str> = name.split(':').collect();
+                if parts.len() == 3 {
+                    let card_id = parts[1];
+                    let profile_index = parts[2];
+                    let _ = std::process::Command::new("wpctl")
+                        .args(&["set-profile", card_id, profile_index])
+                        .status();
+                }
+            } else {
+                let _ = std::process::Command::new("wpctl")
+                    .args(&["set-default", &name])
+                    .status();
+            }
             populate_audio_menu(&pop_clone, update_mute_clone.clone());
         });
         container.append(&btn);
