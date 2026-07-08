@@ -165,7 +165,7 @@ pub fn show_notification_popup(summary: &str, body: &str, icon_name: &str, app_n
 }
 
 #[zbus::proxy(
-    blocking,
+    gen_blocking = true,
     interface = "org.freedesktop.Notifications",
     default_service = "org.freedesktop.Notifications",
     default_path = "/org/freedesktop/Notifications"

@@ -5,7 +5,7 @@ use zbus::blocking::Connection;
 use zbus::zvariant::{ObjectPath, Value};
 
 #[zbus::proxy(
-    blocking,
+    gen_blocking = true,
     interface = "org.freedesktop.NetworkManager",
     default_service = "org.freedesktop.NetworkManager",
     default_path = "/org/freedesktop/NetworkManager"
@@ -30,7 +30,7 @@ pub trait NetworkManager {
 }
 
 #[zbus::proxy(
-    blocking,
+    gen_blocking = true,
     interface = "org.freedesktop.NetworkManager.Device",
     default_service = "org.freedesktop.NetworkManager"
 )]
@@ -42,7 +42,7 @@ pub trait Device {
 }
 
 #[zbus::proxy(
-    blocking,
+    gen_blocking = true,
     interface = "org.freedesktop.NetworkManager.Device.Wifi",
     default_service = "org.freedesktop.NetworkManager"
 )]
@@ -56,7 +56,7 @@ pub trait DeviceWifi {
 }
 
 #[zbus::proxy(
-    blocking,
+    gen_blocking = true,
     interface = "org.freedesktop.NetworkManager.AccessPoint",
     default_service = "org.freedesktop.NetworkManager"
 )]
@@ -75,7 +75,7 @@ pub trait AccessPoint {
 }
 
 #[zbus::proxy(
-    blocking,
+    gen_blocking = true,
     interface = "org.freedesktop.NetworkManager.Settings",
     default_service = "org.freedesktop.NetworkManager",
     default_path = "/org/freedesktop/NetworkManager/Settings"
@@ -90,7 +90,7 @@ pub trait Settings {
 }
 
 #[zbus::proxy(
-    blocking,
+    gen_blocking = true,
     interface = "org.freedesktop.NetworkManager.Settings.Connection",
     default_service = "org.freedesktop.NetworkManager"
 )]
