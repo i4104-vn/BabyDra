@@ -14,6 +14,7 @@ pub fn create_lock_window(
     babydra_common::apply_theme_class(&window);
     window.init_layer_shell();
     window.set_layer(Layer::Overlay);
+    window.set_exclusive_zone(-1);
 
     if let Some(m) = monitor {
         window.set_monitor(m);
@@ -91,6 +92,7 @@ pub fn create_lock_window(
         user_label.add_css_class("lock-username");
 
         let entry = gtk4::Entry::new();
+        entry.set_property("im-module", "none");
         entry.set_visibility(false);
         entry.set_placeholder_text(Some(&babydra_common::i18n::t("lock.placeholder")));
         entry.add_css_class("lock-input");
@@ -139,6 +141,13 @@ pub fn create_lock_window(
         glib::timeout_add_local_once(std::time::Duration::from_millis(100), move || {
             entry_focus.grab_focus();
         });
+
+        let entry_click = entry.clone();
+        let click_gesture = gtk4::GestureClick::new();
+        click_gesture.connect_pressed(move |_, _, _, _| {
+            entry_click.grab_focus();
+        });
+        window.add_controller(click_gesture);
     } else {
         let clock_label = gtk4::Label::new(None);
         clock_label.add_css_class("lock-clock");
