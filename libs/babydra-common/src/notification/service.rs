@@ -102,6 +102,15 @@ impl NotificationService {
     async fn get_capabilities(&self) -> Vec<String> {
         vec!["body".to_string(), "icon-static".to_string()]
     }
+
+    async fn get_server_information(&self) -> (String, String, String, String) {
+        (
+            "BabyDra Notifications".to_string(),
+            "BabyDra".to_string(),
+            "1.0".to_string(),
+            "1.2".to_string(),
+        )
+    }
 }
 
 /// Spawns a background thread running Tokio to serve the org.freedesktop.Notifications DBus daemon.
