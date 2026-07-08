@@ -2,6 +2,9 @@
 # Ensure local bin is in PATH
 export PATH="$HOME/.local/bin:$PATH"
 
+# Update D-Bus activation environment for session services
+dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=labwc || true
+
 # Autostart configuration for labwc with BabyDra shell
 
 # Start Wayland wallpaper daemon

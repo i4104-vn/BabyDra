@@ -35,6 +35,14 @@ echo "Configured labwc rc.xml at $RC_FILE"
 # export WLR_RENDERER=pixman
 # export WLR_NO_HARDWARE_CURSORS=1
 
+# Verify critical display controls are present
+if ! command -v ddcutil &> /dev/null; then
+    echo "Warning: 'ddcutil' is not installed. Brightness controls for external monitors will not be available."
+fi
+if [ ! -f "/usr/share/dbus-1/services/com.ddcutil.DdcutilService.service" ]; then
+    echo "Warning: 'ddcutil-service' D-Bus service is missing. External monitor brightness via D-Bus will not function."
+fi
+
 echo "============================================="
 echo "Starting labwc compositor with BabyDra..."
 echo "Press Ctrl+Alt+Backspace to exit labwc."

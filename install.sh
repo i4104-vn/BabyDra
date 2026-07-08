@@ -7,8 +7,12 @@ echo "============================================="
 
 # 1. Install all dependencies, the Rust toolchain, and system fonts via pacman
 echo "Installing Arch Linux packages..."
-sudo pacman -Syu --needed --noconfirm base-devel git pkgconf gtk4 gtk4-layer-shell rust labwc meson ninja playerctl grim wl-clipboard libnotify gammastep wlsunset wireplumber
+sudo pacman -Syu --needed --noconfirm base-devel git pkgconf gtk4 gtk4-layer-shell rust labwc meson ninja playerctl grim wl-clipboard libnotify gammastep wlsunset wireplumber ddcutil
 
+# Ensure i2c-dev kernel module is loaded and configured to load on boot
+echo "Configuring i2c-dev kernel module..."
+sudo modprobe i2c-dev || true
+echo "i2c-dev" | sudo tee /etc/modules-load.d/i2c.conf > /dev/null || true
 
 # Check if yay is installed, and install it from AUR if missing
 if ! command -v yay &> /dev/null; then
@@ -21,7 +25,7 @@ if ! command -v yay &> /dev/null; then
 fi
 
 # Install AUR packages using yay
-yay -S --noconfirm dolphin github-desktop fastfetch neovim awww brightnessctl 
+yay -S --noconfirm dolphin github-desktop fastfetch neovim awww ddcutil-service
 yay -S --noconfirm inter-font ttf-ubuntu-font-family ttf-jetbrains-mono-nerd otf-font-awesome ttf-nerd-fonts-symbols
 yay -S --noconfirm papirus-icon-theme kvantum-qt5
 
