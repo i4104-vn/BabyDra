@@ -244,7 +244,11 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
                         .args(&["set-default", &name])
                         .status();
                 }
-                populate_audio_menu(&pop_clone, update_mute_clone.clone());
+                let pop_c = pop_clone.clone();
+                let update_mute_c = update_mute_clone.clone();
+                gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(150), move || {
+                    populate_audio_menu(&pop_c, update_mute_c);
+                });
             });
             container.append(&btn);
         }
@@ -312,7 +316,11 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
                     .args(&["set-default", &name])
                     .status();
             }
-            populate_audio_menu(&pop_clone, update_mute_clone.clone());
+            let pop_c = pop_clone.clone();
+            let update_mute_c = update_mute_clone.clone();
+            gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(150), move || {
+                populate_audio_menu(&pop_c, update_mute_c);
+            });
         });
         container.append(&btn);
     }
