@@ -3,4 +3,4 @@
 pub mod query;
 pub mod helper;
 
-pub use query::get_disk_list;
+pub use query::{get_disk_list, DiskInfo};

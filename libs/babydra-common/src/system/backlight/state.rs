@@ -1,36 +1,40 @@
-//! Querying current monitor and notebook backlight state levels.
-
-use super::detection::{DDC_BUS, has_backlight};
+use super::detection::get_backlight_device;
 
 pub static BRIGHTNESS_STATE: std::sync::Mutex<f64> = std::sync::Mutex::new(60.0);
 
+#[zbus::proxy(
+    gen_blocking = true,
+    interface = "com.ddcutil.DdcutilInterface",
+    default_service = "com.ddcutil.DdcutilService",
+    default_path = "/com/ddcutil/DdcutilObject"
+)]
+pub trait Ddcutil {
+    #[zbus(name = "GetVcp")]
+    fn get_vcp(
+        &self,
+        display_number: i32,
+        edid_txt: &str,
+        vcp_code: u8,
+        flags: u32,
+    ) -> zbus::Result<(u16, u16, String, i32, String)>;
+
+    #[zbus(name = "SetVcp")]
+    fn set_vcp(
+        &self,
+        display_number: i32,
+        edid_txt: &str,
+        vcp_code: u8,
+        vcp_new_value: u16,
+        flags: u32,
+    ) -> zbus::Result<(i32, String)>;
+}
+
 pub fn query_ddcutil_brightness() -> Option<f64> {
-    let mut cmd = std::process::Command::new("ddcutil");
-    if let Ok(guard) = DDC_BUS.lock() {
-        if let Some(bus) = *guard {
-            cmd.args(&["--bus", &bus.to_string()]);
-        }
-    }
-    cmd.args(&["--sleep-multiplier", "0.1", "--disable-dynamic-sleep", "getvcp", "10", "--terse"]);
-    
-    if let Ok(output) = cmd.output() {
-        if output.status.success() {
-            let stdout = String::from_utf8_lossy(&output.stdout);
-            let parts: Vec<&str> = stdout.split_whitespace().collect();
-            if parts.len() >= 4 && parts[0] == "VCP" && (parts[1] == "10" || parts[1] == "0x10") {
-                if let Ok(val) = parts[3].parse::<f64>() {
-                    return Some(val);
-                }
-            }
-            if let Some(pos) = stdout.find("current value =") {
-                let start = pos + "current value =".len();
-                let sub = &stdout[start..];
-                let num_str: String = sub.chars()
-                    .skip_while(|c| c.is_whitespace())
-                    .take_while(|c| c.is_numeric())
-                    .collect();
-                if let Ok(val) = num_str.parse::<f64>() {
-                    return Some(val);
+    if let Ok(conn) = zbus::blocking::Connection::session() {
+        if let Ok(proxy) = DdcutilProxyBlocking::new(&conn) {
+            if let Ok((current, _max, _formatted, status, _msg)) = proxy.get_vcp(1, "", 0x10, 0) {
+                if status == 0 {
+                    return Some(current as f64);
                 }
             }
         }
@@ -39,19 +43,13 @@ pub fn query_ddcutil_brightness() -> Option<f64> {
 }
 
 pub fn get_current_brightness() -> f64 {
-    if has_backlight() {
-        if let Ok(output) = std::process::Command::new("brightnessctl")
-            .args(&["-m"])
-            .output()
-        {
-            let stdout = String::from_utf8_lossy(&output.stdout);
-            if let Some(line) = stdout.lines().next() {
-                let parts: Vec<&str> = line.split(',').collect();
-                if parts.len() >= 4 {
-                    let pct_str = parts[3].trim_end_matches('%');
-                    if let Ok(pct) = pct_str.parse::<f64>() {
-                        return pct;
-                    }
+    if let Some(device) = get_backlight_device() {
+        let path = format!("/sys/class/backlight/{}/brightness", device);
+        let max_path = format!("/sys/class/backlight/{}/max_brightness", device);
+        if let (Ok(b_str), Ok(m_str)) = (std::fs::read_to_string(path), std::fs::read_to_string(max_path)) {
+            if let (Ok(b_val), Ok(m_val)) = (b_str.trim().parse::<f64>(), m_str.trim().parse::<f64>()) {
+                if m_val > 0.0 {
+                    return (b_val / m_val) * 100.0;
                 }
             }
         }
@@ -62,3 +60,4 @@ pub fn get_current_brightness() -> f64 {
     }
     60.0
 }
+

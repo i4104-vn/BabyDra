@@ -230,10 +230,38 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
             let pop_clone = popover.clone();
             let update_mute_clone = update_mute_btn.clone();
             btn.connect_clicked(move |_| {
-                let _ = std::process::Command::new("wpctl")
-                    .args(&["set-default", &name])
-                    .status();
-                populate_audio_menu(&pop_clone, update_mute_clone.clone());
+                if name.starts_with("route:") {
+                    let parts: Vec<&str> = name.split(':').collect();
+                    if parts.len() == 4 {
+                        let card_id = parts[1];
+                        let route_index = parts[2];
+                        let profile_index = parts[3];
+                        let _ = std::process::Command::new("wpctl")
+                            .args(&["set-profile", card_id, profile_index])
+                            .status();
+                        let _ = std::process::Command::new("wpctl")
+                            .args(&["set-route", card_id, route_index])
+                            .status();
+                    }
+                } else if name.starts_with("profile:") {
+                    let parts: Vec<&str> = name.split(':').collect();
+                    if parts.len() == 3 {
+                        let card_id = parts[1];
+                        let profile_index = parts[2];
+                        let _ = std::process::Command::new("wpctl")
+                            .args(&["set-profile", card_id, profile_index])
+                            .status();
+                    }
+                } else {
+                    let _ = std::process::Command::new("wpctl")
+                        .args(&["set-default", &name])
+                        .status();
+                }
+                let pop_c = pop_clone.clone();
+                let update_mute_c = update_mute_clone.clone();
+                gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(150), move || {
+                    populate_audio_menu(&pop_c, update_mute_c);
+                });
             });
             container.append(&btn);
         }
@@ -287,10 +315,38 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
         let pop_clone = popover.clone();
         let update_mute_clone = update_mute_btn.clone();
         btn.connect_clicked(move |_| {
-            let _ = std::process::Command::new("wpctl")
-                .args(&["set-default", &name])
-                .status();
-            populate_audio_menu(&pop_clone, update_mute_clone.clone());
+            if name.starts_with("route:") {
+                let parts: Vec<&str> = name.split(':').collect();
+                if parts.len() == 4 {
+                    let card_id = parts[1];
+                    let route_index = parts[2];
+                    let profile_index = parts[3];
+                    let _ = std::process::Command::new("wpctl")
+                        .args(&["set-profile", card_id, profile_index])
+                        .status();
+                    let _ = std::process::Command::new("wpctl")
+                        .args(&["set-route", card_id, route_index])
+                        .status();
+                }
+            } else if name.starts_with("profile:") {
+                let parts: Vec<&str> = name.split(':').collect();
+                if parts.len() == 3 {
+                    let card_id = parts[1];
+                    let profile_index = parts[2];
+                    let _ = std::process::Command::new("wpctl")
+                        .args(&["set-profile", card_id, profile_index])
+                        .status();
+                }
+            } else {
+                let _ = std::process::Command::new("wpctl")
+                    .args(&["set-default", &name])
+                    .status();
+            }
+            let pop_c = pop_clone.clone();
+            let update_mute_c = update_mute_clone.clone();
+            gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(150), move || {
+                populate_audio_menu(&pop_c, update_mute_c);
+            });
         });
         container.append(&btn);
     }

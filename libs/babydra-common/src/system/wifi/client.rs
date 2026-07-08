@@ -2,10 +2,10 @@
 
 use std::collections::HashMap;
 use zbus::blocking::Connection;
-use zbus::zvariant::{ObjectPath, Value};
+use zbus::zvariant::{ObjectPath, Value, OwnedObjectPath, OwnedValue};
 
 #[zbus::proxy(
-    blocking,
+    gen_blocking = true,
     interface = "org.freedesktop.NetworkManager",
     default_service = "org.freedesktop.NetworkManager",
     default_path = "/org/freedesktop/NetworkManager"
@@ -17,20 +17,20 @@ pub trait NetworkManager {
     fn set_wireless_enabled(&self, value: bool) -> zbus::Result<()>;
 
     #[zbus(property)]
-    fn all_devices(&self) -> zbus::Result<Vec<ObjectPath<'static>>>;
+    fn all_devices(&self) -> zbus::Result<Vec<OwnedObjectPath>>;
 
-    fn get_device_by_ip_iface(&self, iface: &str) -> zbus::Result<ObjectPath<'static>>;
+    fn get_device_by_ip_iface(&self, iface: &str) -> zbus::Result<OwnedObjectPath>;
 
     fn activate_connection(
         &self,
         connection: &ObjectPath<'_>,
         device: &ObjectPath<'_>,
         specific_object: &ObjectPath<'_>,
-    ) -> zbus::Result<(ObjectPath<'static>, ObjectPath<'static>)>;
+    ) -> zbus::Result<(OwnedObjectPath, OwnedObjectPath)>;
 }
 
 #[zbus::proxy(
-    blocking,
+    gen_blocking = true,
     interface = "org.freedesktop.NetworkManager.Device",
     default_service = "org.freedesktop.NetworkManager"
 )]
@@ -42,21 +42,21 @@ pub trait Device {
 }
 
 #[zbus::proxy(
-    blocking,
-    interface = "org.freedesktop.NetworkManager.Device.Wifi",
+    gen_blocking = true,
+    interface = "org.freedesktop.NetworkManager.Device.Wireless",
     default_service = "org.freedesktop.NetworkManager"
 )]
 pub trait DeviceWifi {
     #[zbus(property)]
-    fn active_access_point(&self) -> zbus::Result<ObjectPath<'static>>;
+    fn active_access_point(&self) -> zbus::Result<OwnedObjectPath>;
 
-    fn get_access_points(&self) -> zbus::Result<Vec<ObjectPath<'static>>>;
+    fn get_access_points(&self) -> zbus::Result<Vec<OwnedObjectPath>>;
 
     fn request_scan(&self, options: HashMap<&str, Value<'_>>) -> zbus::Result<()>;
 }
 
 #[zbus::proxy(
-    blocking,
+    gen_blocking = true,
     interface = "org.freedesktop.NetworkManager.AccessPoint",
     default_service = "org.freedesktop.NetworkManager"
 )]
@@ -75,38 +75,40 @@ pub trait AccessPoint {
 }
 
 #[zbus::proxy(
-    blocking,
+    gen_blocking = true,
     interface = "org.freedesktop.NetworkManager.Settings",
     default_service = "org.freedesktop.NetworkManager",
     default_path = "/org/freedesktop/NetworkManager/Settings"
 )]
 pub trait Settings {
-    fn list_connections(&self) -> zbus::Result<Vec<ObjectPath<'static>>>;
+    fn list_connections(&self) -> zbus::Result<Vec<OwnedObjectPath>>;
 
     fn add_connection(
         &self,
         connection: HashMap<&str, HashMap<&str, Value<'_>>>,
-    ) -> zbus::Result<ObjectPath<'static>>;
+    ) -> zbus::Result<OwnedObjectPath>;
 }
 
 #[zbus::proxy(
-    blocking,
+    gen_blocking = true,
     interface = "org.freedesktop.NetworkManager.Settings.Connection",
     default_service = "org.freedesktop.NetworkManager"
 )]
 pub trait ConnectionSettings {
-    fn get_settings(&self) -> zbus::Result<HashMap<String, HashMap<String, Value<'static>>>>;
+    fn get_settings(&self) -> zbus::Result<HashMap<String, HashMap<String, OwnedValue>>>;
     fn delete(&self) -> zbus::Result<()>;
 }
 
-pub fn get_wifi_device(conn: &Connection) -> Option<ObjectPath<'static>> {
+pub fn get_wifi_device(conn: &Connection) -> Option<OwnedObjectPath> {
     let nm = NetworkManagerProxyBlocking::new(conn).ok()?;
     let devices = nm.all_devices().ok()?;
     for dev_path in devices {
-        if let Ok(dev) = DeviceProxyBlocking::builder(conn).path(dev_path.clone()).ok()?.build() {
-            if let Ok(dtype) = dev.device_type() {
-                if dtype == 2 {
-                    return Some(dev_path);
+        if let Ok(builder) = DeviceProxyBlocking::builder(conn).path(dev_path.clone()) {
+            if let Ok(dev) = builder.build() {
+                if let Ok(dtype) = dev.device_type() {
+                    if dtype == 2 {
+                        return Some(dev_path);
+                    }
                 }
             }
         }

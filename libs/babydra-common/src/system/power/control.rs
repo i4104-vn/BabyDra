@@ -3,7 +3,7 @@
 use zbus::blocking::Connection;
 
 #[zbus::proxy(
-    blocking,
+    gen_blocking = true,
     interface = "org.freedesktop.login1.Manager",
     default_service = "org.freedesktop.login1",
     default_path = "/org/freedesktop/login1"

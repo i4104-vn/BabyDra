@@ -34,7 +34,7 @@ pub fn delete_existing_connection(conn: &Connection, ssid: &str) {
     if let Ok(settings) = SettingsProxyBlocking::new(conn) {
         if let Ok(conns) = settings.list_connections() {
             for conn_path in conns {
-                if let Ok(c_settings) = ConnectionSettingsProxyBlocking::builder(conn).path(conn_path).ok().and_then(|b| b.build().ok()) {
+                if let Some(c_settings) = ConnectionSettingsProxyBlocking::builder(conn).path(conn_path).ok().and_then(|b| b.build().ok()) {
                     if let Ok(details) = c_settings.get_settings() {
                         if let Some(conn_sec) = details.get("connection") {
                             if let Some(id_val) = conn_sec.get("id") {

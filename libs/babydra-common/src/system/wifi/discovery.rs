@@ -21,7 +21,7 @@ pub fn known_networks() -> Vec<String> {
 
     if let Ok(conns) = settings.list_connections() {
         for conn_path in conns {
-            if let Ok(c_settings) = ConnectionSettingsProxyBlocking::builder(&conn).path(conn_path).ok().and_then(|b| b.build().ok()) {
+            if let Some(c_settings) = ConnectionSettingsProxyBlocking::builder(&conn).path(conn_path).ok().and_then(|b| b.build().ok()) {
                 if let Ok(details) = c_settings.get_settings() {
                     if details.contains_key("802-11-wireless") {
                         if let Some(conn_sec) = details.get("connection") {
@@ -67,7 +67,7 @@ pub fn scan_networks() -> Vec<(String, String, String, bool)> {
     let mut seen_ssids = std::collections::HashSet::new();
 
     for ap_path in aps {
-        if let Ok(ap) = AccessPointProxyBlocking::builder(&conn).path(ap_path.clone()).ok().and_then(|b| b.build().ok()) {
+        if let Some(ap) = AccessPointProxyBlocking::builder(&conn).path(ap_path.clone()).ok().and_then(|b| b.build().ok()) {
             let ssid_bytes = ap.ssid().unwrap_or_default();
             let ssid = String::from_utf8_lossy(&ssid_bytes).to_string();
             if ssid.is_empty() {
@@ -84,7 +84,7 @@ pub fn scan_networks() -> Vec<(String, String, String, bool)> {
 
             let security = if wpa == 0 && rsn == 0 {
                 "open".to_string()
-            } else if (wpa & 0x8) != 0 || (rsn & 0x8) != 0 {
+            } else if (wpa & 0x200) != 0 || (rsn & 0x200) != 0 {
                 "8021x".to_string()
             } else {
                 "psk".to_string()

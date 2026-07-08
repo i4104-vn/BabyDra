@@ -102,6 +102,15 @@ impl NotificationService {
     async fn get_capabilities(&self) -> Vec<String> {
         vec!["body".to_string(), "icon-static".to_string()]
     }
+
+    async fn get_server_information(&self) -> (String, String, String, String) {
+        (
+            "BabyDra Notifications".to_string(),
+            "BabyDra".to_string(),
+            "1.0".to_string(),
+            "1.2".to_string(),
+        )
+    }
 }
 
 /// Spawns a background thread running Tokio to serve the org.freedesktop.Notifications DBus daemon.
@@ -165,7 +174,7 @@ pub fn show_notification_popup(summary: &str, body: &str, icon_name: &str, app_n
 }
 
 #[zbus::proxy(
-    blocking,
+    gen_blocking = true,
     interface = "org.freedesktop.Notifications",
     default_service = "org.freedesktop.Notifications",
     default_path = "/org/freedesktop/Notifications"
