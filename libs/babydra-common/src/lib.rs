@@ -36,7 +36,11 @@ pub use desktop::icon::get_logo_path;
 pub use desktop::theme::{init_theme, apply_theme_class};
 pub use desktop::apps::{find_desktop_apps, refresh_desktop_apps_cache, DesktopApp};
 pub use system::power::{poweroff, reboot, suspend};
-pub use desktop::window::{init_layer_window, setup_click_outside_dismiss};
+pub use system::auth::verify_password;
+pub use desktop::window::{init_layer_window, setup_click_outside_dismiss, close_window, focus_window};
+pub use desktop::screenshot::{capture_screen_to_temp, get_screenshot_save_path, trigger_save, trigger_copy, handle_fullscreen_capture};
+pub use desktop::window::tracker::spawn_switcher_tracker;
+pub use desktop::window::mru::{get_history, save_history, get_running_apps, activate_app};
 
 pub use desktop::theme;
 pub use desktop::animation;

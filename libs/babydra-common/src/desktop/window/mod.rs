@@ -1,5 +1,8 @@
 //! Window layout builders, layer shell configuration, and compositor window helpers.
 
+pub mod tracker;
+pub mod mru;
+
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
 use gtk4::prelude::*;
 
@@ -165,5 +168,35 @@ pub fn focus_app(name: &str, exec: &str, app_id: Option<&str>, window_title: Opt
         .status();
     let _ = std::process::Command::new("wlrctl")
         .args(&["window", "focus", &format!("title:{}", name)])
+        .status();
+}
+
+/// Closes a window using wlrctl.
+pub fn close_window(app_id: &str, title: &str) {
+    let status = std::process::Command::new("wlrctl")
+        .args(&["window", "close", &format!("title:{}", title)])
+        .status();
+    if let Ok(s) = status {
+        if s.success() {
+            return;
+        }
+    }
+    let _ = std::process::Command::new("wlrctl")
+        .args(&["window", "close", app_id])
+        .status();
+}
+
+/// Focuses a window using wlrctl.
+pub fn focus_window(app_id: &str, title: &str) {
+    let status = std::process::Command::new("wlrctl")
+        .args(&["window", "focus", &format!("title:{}", title)])
+        .status();
+    if let Ok(s) = status {
+        if s.success() {
+            return;
+        }
+    }
+    let _ = std::process::Command::new("wlrctl")
+        .args(&["window", "focus", app_id])
         .status();
 }

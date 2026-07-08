@@ -2,7 +2,7 @@
 
 use gtk4::prelude::*;
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
-use crate::pam::verify_password;
+use babydra_common::verify_password;
 
 /// Spawns a lock window assigned to a specific monitor.
 pub fn create_lock_window(

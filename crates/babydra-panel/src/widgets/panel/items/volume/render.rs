@@ -63,16 +63,7 @@ pub fn create_volume_row(
         let new_mute = !muted_state_clone.get();
         muted_state_clone.set(new_mute);
 
-        let mute_val = if new_mute { "1" } else { "0" };
-        let _ = std::process::Command::new("wpctl")
-            .args(&["set-mute", "@DEFAULT_AUDIO_SINK@", mute_val])
-            .spawn();
-        let _ = std::process::Command::new("pactl")
-            .args(&["set-sink-mute", "@DEFAULT_SINK@", mute_val])
-            .spawn();
-        let _ = std::process::Command::new("amixer")
-            .args(&["set", "Master", if new_mute { "mute" } else { "unmute" }])
-            .spawn();
+        babydra_common::system::volume::set_muted(new_mute);
 
         update_mute_icon_clone(new_mute);
         update_topbar_volume_icon(&vol_icon_c);
@@ -230,33 +221,7 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
             let pop_clone = popover.clone();
             let update_mute_clone = update_mute_btn.clone();
             btn.connect_clicked(move |_| {
-                if name.starts_with("route:") {
-                    let parts: Vec<&str> = name.split(':').collect();
-                    if parts.len() == 4 {
-                        let card_id = parts[1];
-                        let route_index = parts[2];
-                        let profile_index = parts[3];
-                        let _ = std::process::Command::new("wpctl")
-                            .args(&["set-profile", card_id, profile_index])
-                            .status();
-                        let _ = std::process::Command::new("wpctl")
-                            .args(&["set-route", card_id, route_index])
-                            .status();
-                    }
-                } else if name.starts_with("profile:") {
-                    let parts: Vec<&str> = name.split(':').collect();
-                    if parts.len() == 3 {
-                        let card_id = parts[1];
-                        let profile_index = parts[2];
-                        let _ = std::process::Command::new("wpctl")
-                            .args(&["set-profile", card_id, profile_index])
-                            .status();
-                    }
-                } else {
-                    let _ = std::process::Command::new("wpctl")
-                        .args(&["set-default", &name])
-                        .status();
-                }
+                babydra_common::system::volume::select_audio_device(&name);
                 let pop_c = pop_clone.clone();
                 let update_mute_c = update_mute_clone.clone();
                 gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(150), move || {
@@ -315,33 +280,7 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
         let pop_clone = popover.clone();
         let update_mute_clone = update_mute_btn.clone();
         btn.connect_clicked(move |_| {
-            if name.starts_with("route:") {
-                let parts: Vec<&str> = name.split(':').collect();
-                if parts.len() == 4 {
-                    let card_id = parts[1];
-                    let route_index = parts[2];
-                    let profile_index = parts[3];
-                    let _ = std::process::Command::new("wpctl")
-                        .args(&["set-profile", card_id, profile_index])
-                        .status();
-                    let _ = std::process::Command::new("wpctl")
-                        .args(&["set-route", card_id, route_index])
-                        .status();
-                }
-            } else if name.starts_with("profile:") {
-                let parts: Vec<&str> = name.split(':').collect();
-                if parts.len() == 3 {
-                    let card_id = parts[1];
-                    let profile_index = parts[2];
-                    let _ = std::process::Command::new("wpctl")
-                        .args(&["set-profile", card_id, profile_index])
-                        .status();
-                }
-            } else {
-                let _ = std::process::Command::new("wpctl")
-                    .args(&["set-default", &name])
-                    .status();
-            }
+            babydra_common::system::volume::select_audio_device(&name);
             let pop_c = pop_clone.clone();
             let update_mute_c = update_mute_clone.clone();
             gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(150), move || {

@@ -1,24 +1,42 @@
-use babydra_common::desktop::{DesktopApp, find_desktop_apps};
+//! Alt-Tab application switcher MRU (Most Recently Used) window history.
 
-/// Lists all running windows matched against desktop entries.
-pub fn get_running_windows() -> Vec<DesktopApp> {
-    let desktop_apps = find_desktop_apps();
+use crate::desktop::DesktopApp;
+use std::io::Write;
+
+/// Retrieves the switcher window focus history list.
+pub fn get_history() -> Vec<String> {
+    let history_path = "/tmp/babydra-switcher-history.txt";
+    if let Ok(content) = std::fs::read_to_string(history_path) {
+        content.lines().map(|s| s.to_string()).collect()
+    } else {
+        Vec::new()
+    }
+}
+
+/// Prepends the recently activated window to the MRU history list and saves it back to the temporary file.
+pub fn save_history(active_name: &str) {
+    let history_path = "/tmp/babydra-switcher-history.txt";
+    let mut history = get_history();
+    
+    history.retain(|x| x != active_name);
+    history.insert(0, active_name.to_string());
+    history.truncate(20);
+    
+    if let Ok(mut file) = std::fs::File::create(history_path) {
+        for name in history {
+            let _ = writeln!(file, "{}", name);
+        }
+    }
+}
+
+/// Queries the Wayland compositor for running windows and matches them with local desktop entries.
+/// Returns matched windows sorted by most recently used (MRU) order.
+pub fn get_running_apps() -> Vec<DesktopApp> {
+    let desktop_apps = crate::desktop::apps::find_desktop_apps();
     let mut running = Vec::new();
     let mut detected_windows = std::collections::HashSet::new();
 
-    let mut running_windows = Vec::new();
-    if let Ok(output) = std::process::Command::new("wlrctl").args(&["toplevel", "list"]).output() {
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        for line in stdout.lines() {
-            if let Some(pos) = line.find(':') {
-                let app_id = line[..pos].trim().to_string();
-                let title = line[pos + 1..].trim().to_string();
-                if !app_id.is_empty() {
-                    running_windows.push((app_id, title));
-                }
-            }
-        }
-    }
+    let running_windows = super::get_running_windows();
 
     for (app_id, title) in running_windows {
         let app_id_lower = app_id.to_lowercase();
@@ -97,35 +115,25 @@ pub fn get_running_windows() -> Vec<DesktopApp> {
         }
     }
 
+    let history = get_history();
+    running.sort_by(|a, b| {
+        let key_a = a.window_title.as_deref().unwrap_or(&a.name);
+        let key_b = b.window_title.as_deref().unwrap_or(&b.name);
+        let idx_a = history.iter().position(|x| x == key_a).unwrap_or(usize::MAX);
+        let idx_b = history.iter().position(|x| x == key_b).unwrap_or(usize::MAX);
+        idx_a.cmp(&idx_b)
+    });
+
     running
 }
 
-/// Focuses a window using wlrctl.
-pub fn focus_window(app_id: &str, title: &str) {
-    let status = std::process::Command::new("wlrctl")
-        .args(&["window", "focus", &format!("title:{}", title)])
-        .status();
-    if let Ok(s) = status {
-        if s.success() {
-            return;
-        }
-    }
-    let _ = std::process::Command::new("wlrctl")
-        .args(&["window", "focus", app_id])
-        .status();
-}
-
-/// Closes a window using wlrctl.
-pub fn close_window(app_id: &str, title: &str) {
-    let status = std::process::Command::new("wlrctl")
-        .args(&["window", "close", &format!("title:{}", title)])
-        .status();
-    if let Ok(s) = status {
-        if s.success() {
-            return;
-        }
-    }
-    let _ = std::process::Command::new("wlrctl")
-        .args(&["window", "close", app_id])
-        .status();
+/// Commands the Wayland compositor to focus/activate a specific application window.
+/// Utilizes window title first, falling back to app_id and name comparisons.
+pub fn activate_app(app: &DesktopApp) {
+    super::focus_app(
+        &app.name,
+        &app.exec,
+        app.app_id.as_deref(),
+        app.window_title.as_deref(),
+    );
 }

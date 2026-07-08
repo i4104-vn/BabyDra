@@ -6,3 +6,5 @@ pub mod backlight;
 pub mod storage;
 pub mod clean;
 pub mod power;
+pub mod auth;
+pub mod monitor;

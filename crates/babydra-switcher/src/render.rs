@@ -7,8 +7,7 @@ use std::rc::Rc;
 use std::os::unix::net::UnixListener;
 use std::io::Read;
 use babydra_common::desktop::DesktopApp;
-use crate::apps::activate_app;
-use crate::history::save_history;
+use babydra_common::{activate_app, save_history};
 use crate::widgets::list::build_apps_list;
 
 /// Builds and runs the Alt-Tab overlay switcher window.
