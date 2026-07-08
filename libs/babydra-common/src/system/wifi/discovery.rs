@@ -84,7 +84,7 @@ pub fn scan_networks() -> Vec<(String, String, String, bool)> {
 
             let security = if wpa == 0 && rsn == 0 {
                 "open".to_string()
-            } else if (wpa & 0x8) != 0 || (rsn & 0x8) != 0 {
+            } else if (wpa & 0x200) != 0 || (rsn & 0x200) != 0 {
                 "8021x".to_string()
             } else {
                 "psk".to_string()

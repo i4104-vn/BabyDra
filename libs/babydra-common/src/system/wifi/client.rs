@@ -43,7 +43,7 @@ pub trait Device {
 
 #[zbus::proxy(
     gen_blocking = true,
-    interface = "org.freedesktop.NetworkManager.Device.Wifi",
+    interface = "org.freedesktop.NetworkManager.Device.Wireless",
     default_service = "org.freedesktop.NetworkManager"
 )]
 pub trait DeviceWifi {
@@ -103,10 +103,12 @@ pub fn get_wifi_device(conn: &Connection) -> Option<OwnedObjectPath> {
     let nm = NetworkManagerProxyBlocking::new(conn).ok()?;
     let devices = nm.all_devices().ok()?;
     for dev_path in devices {
-        if let Ok(dev) = DeviceProxyBlocking::builder(conn).path(dev_path.clone()).ok()?.build() {
-            if let Ok(dtype) = dev.device_type() {
-                if dtype == 2 {
-                    return Some(dev_path);
+        if let Ok(builder) = DeviceProxyBlocking::builder(conn).path(dev_path.clone()) {
+            if let Ok(dev) = builder.build() {
+                if let Ok(dtype) = dev.device_type() {
+                    if dtype == 2 {
+                        return Some(dev_path);
+                    }
                 }
             }
         }
