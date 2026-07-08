@@ -110,6 +110,19 @@ pub fn get_audio_devices_wpctl_fallback(is_source: bool) -> Vec<AudioDevice> {
     devices
 }
 
+fn parse_profile_parts(name: &str) -> (Vec<String>, Vec<String>) {
+    let mut outputs = Vec::new();
+    let mut inputs = Vec::new();
+    for part in name.split('+') {
+        if let Some(stripped) = part.strip_prefix("output:") {
+            outputs.push(stripped.to_string());
+        } else if let Some(stripped) = part.strip_prefix("input:") {
+            inputs.push(stripped.to_string());
+        }
+    }
+    (outputs, inputs)
+}
+
 pub fn get_audio_devices(is_source: bool) -> Vec<AudioDevice> {
     let mut devices = Vec::new();
 
@@ -144,34 +157,116 @@ pub fn get_audio_devices(is_source: bool) -> Vec<AudioDevice> {
 
                     let params = card.get("info").and_then(|i| i.get("params"));
                     let mut active_profile_index = -1;
+                    let mut active_profile_name = String::new();
                     if let Some(profile_arr) = params.and_then(|p| p.get("Profile")).and_then(|p| p.as_array()) {
                         if !profile_arr.is_empty() {
                             active_profile_index = profile_arr[0].get("index").and_then(|idx| idx.as_i64()).unwrap_or(-1);
+                            active_profile_name = profile_arr[0].get("name").and_then(|n| n.as_str()).unwrap_or("").to_string();
                         }
                     }
 
+                    let mut valid_profiles = Vec::new();
                     if let Some(enum_profiles) = params.and_then(|p| p.get("EnumProfile")).and_then(|ep| ep.as_array()) {
                         for prof in enum_profiles {
                             let prof_name = prof.get("name").and_then(|n| n.as_str()).unwrap_or("");
                             let prof_available = prof.get("available").and_then(|a| a.as_str()).unwrap_or("");
                             let prof_index = prof.get("index").and_then(|idx| idx.as_i64()).unwrap_or(-1);
-                            let prof_desc = prof.get("description").and_then(|d| d.as_str()).unwrap_or("");
 
                             if prof_name != "off" && prof_available != "no" && prof_index != -1 {
-                                let matches_direction = if is_source {
-                                    prof_name.contains("input:")
-                                } else {
-                                    prof_name.contains("output:")
-                                };
-
-                                if matches_direction {
-                                    devices.push(AudioDevice {
-                                        name: format!("profile:{}:{}", card_id, prof_index),
-                                        description: format!("{} - {}", card_desc, prof_desc),
-                                        is_default: prof_index == active_profile_index,
-                                    });
+                                if !prof_name.contains("surround") && !prof_name.contains("extra") {
+                                    valid_profiles.push(prof);
                                 }
                             }
+                        }
+                    }
+
+                    if !is_source {
+                        let mut outputs_grouped: std::collections::HashMap<String, Vec<&serde_json::Value>> = std::collections::HashMap::new();
+                        for p in &valid_profiles {
+                            if let Some(name) = p.get("name").and_then(|n| n.as_str()) {
+                                let (outputs, _) = parse_profile_parts(name);
+                                for out in outputs {
+                                    outputs_grouped.entry(out).or_default().push(p);
+                                }
+                            }
+                        }
+
+                        for (out, profs) in outputs_grouped {
+                            let mut best_p = None;
+                            for p in &profs {
+                                if let Some(name) = p.get("name").and_then(|n| n.as_str()) {
+                                    let (_, inputs) = parse_profile_parts(name);
+                                    if !inputs.is_empty() {
+                                        best_p = Some(*p);
+                                        break;
+                                    }
+                                }
+                            }
+                            let best_p = best_p.unwrap_or(profs[0]);
+                            let prof_index = best_p.get("index").and_then(|idx| idx.as_i64()).unwrap_or(-1);
+                            
+                            let is_default = prof_index == active_profile_index;
+                            let desc = if out.contains("analog-stereo") {
+                                "Speakers / Headphones"
+                            } else if out.contains("hdmi-stereo") {
+                                "HDMI Output"
+                            } else {
+                                best_p.get("description").and_then(|d| d.as_str()).unwrap_or(&out)
+                            };
+
+                            devices.push(AudioDevice {
+                                name: format!("profile:{}:{}", card_id, prof_index),
+                                description: format!("{} - {}", card_desc, desc),
+                                is_default,
+                            });
+                        }
+                    } else {
+                        let mut inputs_grouped: std::collections::HashMap<String, Vec<&serde_json::Value>> = std::collections::HashMap::new();
+                        for p in &valid_profiles {
+                            if let Some(name) = p.get("name").and_then(|n| n.as_str()) {
+                                let (_, inputs) = parse_profile_parts(name);
+                                for inp in inputs {
+                                    inputs_grouped.entry(inp).or_default().push(p);
+                                }
+                            }
+                        }
+
+                        for (inp, profs) in inputs_grouped {
+                            let mut best_p = None;
+                            for p in &profs {
+                                let prof_index = p.get("index").and_then(|idx| idx.as_i64()).unwrap_or(-1);
+                                if prof_index == active_profile_index {
+                                    best_p = Some(*p);
+                                    break;
+                                }
+                            }
+                            if best_p.is_none() {
+                                for p in &profs {
+                                    if let Some(name) = p.get("name").and_then(|n| n.as_str()) {
+                                        let (outputs, _) = parse_profile_parts(name);
+                                        if outputs.iter().any(|o| o.contains("analog-stereo")) {
+                                            best_p = Some(*p);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            let best_p = best_p.unwrap_or(profs[0]);
+                            let prof_index = best_p.get("index").and_then(|idx| idx.as_i64()).unwrap_or(-1);
+
+                            let (_, active_inputs) = parse_profile_parts(&active_profile_name);
+                            let is_default = active_inputs.iter().any(|ai| ai == &inp);
+                            let desc = if inp.contains("analog-stereo") || inp.contains("analog-mono") {
+                                "Microphone"
+                            } else {
+                                best_p.get("description").and_then(|d| d.as_str()).unwrap_or(&inp)
+                            };
+
+                            devices.push(AudioDevice {
+                                name: format!("profile:{}:{}", card_id, prof_index),
+                                description: format!("{} - {}", card_desc, desc),
+                                is_default,
+                            });
                         }
                     }
                 }
@@ -197,6 +292,7 @@ pub fn get_audio_devices(is_source: bool) -> Vec<AudioDevice> {
         return get_audio_devices_wpctl_fallback(is_source);
     }
 
+    devices.sort_by(|a, b| a.description.cmp(&b.description));
     devices
 }
 
