@@ -12,6 +12,7 @@ pub mod screenshot;
 pub mod wallpaper;
 pub mod search;
 pub mod mpris;
+pub mod exif;
 
 pub use config::{ThemeConfig, ShellConfig, get_babydra_config_dir};
 pub use theme::{init_theme, apply_theme_class};
@@ -27,4 +28,5 @@ pub use screenshot::{draw_pixelated_rect, get_screenshot_save_path, capture_scre
 pub use wallpaper::{set_wallpaper, get_current_wallpaper};
 pub use search::search_files;
 pub use mpris::{run_playerctl, decode_uri};
+pub use exif::{read_exif, ExifData};
 

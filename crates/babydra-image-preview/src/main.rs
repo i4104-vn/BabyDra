@@ -6,72 +6,6 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::path::PathBuf;
 
-mod exif_reader;
-
-const CSS: &str = r#"
-.viewer-window {
-    background-color: #0f0f0f;
-}
-
-.info-card {
-    background-color: rgba(15, 15, 15, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    padding: 12px 18px;
-    color: #ffffff;
-    font-size: 13px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
-.info-item {
-    font-weight: 500;
-}
-
-.controls-bar {
-    background-color: rgba(15, 15, 15, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 9999px;
-    padding: 6px 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
-.control-btn {
-    border-radius: 9999px;
-    padding: 6px;
-    min-width: 32px;
-    min-height: 32px;
-    transition: all 200ms ease;
-}
-
-.exif-dialog {
-    background-color: rgba(15, 15, 15, 0.96);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-}
-
-.exif-title {
-    font-size: 16px;
-    font-weight: bold;
-    color: #ffffff;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 8px;
-    margin-bottom: 16px;
-}
-
-.exif-label {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 13px;
-}
-
-.exif-value {
-    color: #ffffff;
-    font-family: monospace;
-    font-size: 13px;
-}
-"#;
-
 struct ImageState {
     pixbuf: gdk_pixbuf::Pixbuf,
     scale: f64,
@@ -160,16 +94,8 @@ fn main() {
     );
 
     app.connect_activate(|app| {
-        // Load custom styling CSS rules
-        let provider = gtk4::CssProvider::new();
-        provider.load_from_data(CSS);
-        if let Some(display) = gdk4::Display::default() {
-            gtk4::style_context_add_provider_for_display(
-                &display,
-                &provider,
-                gtk4::STYLE_PROVIDER_PRIORITY_APPLICATION,
-            );
-        }
+        // Load custom styling CSS rules from babydra-common
+        babydra_common::init_theme();
 
         let arg_path = std::env::args().nth(1);
         if let Some(p) = arg_path {
@@ -257,7 +183,7 @@ fn build_ui(app: &gtk4::Application, path: PathBuf) {
     overlay.set_child(Some(&drawing_area));
 
     // Exif Metadata parsing
-    let exif_data = exif_reader::read_exif(&path);
+    let exif_data = babydra_common::read_exif(&path);
 
     // --- Bottom-Right Info Box Overlay ---
     let info_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);

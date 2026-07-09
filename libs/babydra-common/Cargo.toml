@@ -24,3 +24,4 @@ tokio = { version = "1.0", features = ["rt", "rt-multi-thread", "time", "sync", 
 libc = "0.2"
 cairo-rs = { version = "0.20", features = ["use_glib", "png"] }
 chrono = "0.4"
+kamadak-exif = "0.5"

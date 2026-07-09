@@ -19,7 +19,8 @@ const DARK_CSS: &str = concat!(
     include_str!("../styles/dark/menu.css"), "\n",
     include_str!("../styles/dark/switcher.css"), "\n",
     include_str!("../styles/dark/screenshot.css"), "\n",
-    include_str!("../styles/dark/lock.css")
+    include_str!("../styles/dark/lock.css"), "\n",
+    include_str!("../styles/dark/image_preview.css")
 );
 
 const LIGHT_CSS: &str = concat!(
@@ -40,7 +41,8 @@ const LIGHT_CSS: &str = concat!(
     include_str!("../styles/light/menu.css"), "\n",
     include_str!("../styles/light/switcher.css"), "\n",
     include_str!("../styles/light/screenshot.css"), "\n",
-    include_str!("../styles/light/lock.css")
+    include_str!("../styles/light/lock.css"), "\n",
+    include_str!("../styles/light/image_preview.css")
 );
 
 thread_local! {
