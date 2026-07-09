@@ -54,5 +54,8 @@ pub use desktop::search;
 pub use desktop::search::search_files;
 pub use desktop::mpris;
 pub use desktop::mpris::{run_playerctl, decode_uri};
+pub use desktop::exif;
+pub use desktop::exif::{read_exif, ExifData};
+
 
 

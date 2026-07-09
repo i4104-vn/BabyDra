@@ -26,6 +26,8 @@ killall babydra-menu || true
 killall babydra-switcher || true
 killall babydra-screenshot || true
 killall babydra-lock || true
+killall babydra-image-preview || true
+killall babydra-preview || true
 
 # 5. Overwrite binaries in ~/.local/bin
 echo "Installing new binaries..."
@@ -34,6 +36,28 @@ cp target/release/babydra-menu "$LOCAL_BIN/babydra-menu"
 cp target/release/babydra-switcher "$LOCAL_BIN/babydra-switcher"
 cp target/release/babydra-screenshot "$LOCAL_BIN/babydra-screenshot"
 cp target/release/babydra-lock "$LOCAL_BIN/babydra-lock"
+cp target/release/babydra-preview "$LOCAL_BIN/babydra-preview"
+
+# Register default image handler in ~/.local/share/applications
+echo "Registering default image handler..."
+mkdir -p "$HOME/.local/share/applications"
+cat << 'EOF' > "$HOME/.local/share/applications/babydra-preview.desktop"
+[Desktop Entry]
+Type=Application
+Name=BabyDra Preview
+Comment=Viewer for images
+Exec=/home/i4104/.local/bin/babydra-preview %f
+Icon=image-x-generic
+Terminal=false
+Categories=Graphics;Viewer;GTK;
+MimeType=image/png;image/jpeg;image/gif;image/webp;image/bmp;
+NoDisplay=false
+EOF
+
+chmod +x "$HOME/.local/share/applications/babydra-preview.desktop"
+update-desktop-database "$HOME/.local/share/applications" || true
+xdg-mime default babydra-preview.desktop image/png image/jpeg image/gif image/webp image/bmp || true
+
 
 # 6. Reload labwc settings
 echo "Reloading labwc compositor..."

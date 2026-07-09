@@ -66,6 +66,8 @@ killall babydra-switcher || true
 killall babydra-screenshot || true
 killall babydra-lock || true
 killall babydra-launcher || true
+killall babydra-image-preview || true
+killall babydra-preview || true
 
 # 6. Install the binaries
 echo "Installing binaries to $LOCAL_BIN..."
@@ -75,6 +77,7 @@ cp target/release/babydra-switcher "$LOCAL_BIN/babydra-switcher"
 cp target/release/babydra-screenshot "$LOCAL_BIN/babydra-screenshot"
 cp target/release/babydra-lock "$LOCAL_BIN/babydra-lock"
 cp target/release/babydra-launcher "$LOCAL_BIN/babydra-launcher"
+cp target/release/babydra-preview "$LOCAL_BIN/babydra-preview"
 
 # Copy wallpaper to standard config dir
 mkdir -p "$HOME/.config/babydra"
@@ -112,6 +115,26 @@ cp "$SCRIPT_DIR/configs/fastfetch/logo.png" "$HOME/.config/fastfetch/logo.png"
 # Rebuild font cache
 echo "Rebuilding font cache..."
 fc-cache -fv || true
+
+# 11. Configure default applications for image previews
+echo "Registering default image handler..."
+mkdir -p "$HOME/.local/share/applications"
+cat << 'EOF' > "$HOME/.local/share/applications/babydra-preview.desktop"
+[Desktop Entry]
+Type=Application
+Name=BabyDra Preview
+Comment=Viewer for images
+Exec=/home/i4104/.local/bin/babydra-preview %f
+Icon=image-x-generic
+Terminal=false
+Categories=Graphics;Viewer;GTK;
+MimeType=image/png;image/jpeg;image/gif;image/webp;image/bmp;
+NoDisplay=false
+EOF
+
+chmod +x "$HOME/.local/share/applications/babydra-preview.desktop"
+update-desktop-database "$HOME/.local/share/applications" || true
+xdg-mime default babydra-preview.desktop image/png image/jpeg image/gif image/webp image/bmp || true
 
 echo "============================================="
 echo "Installation & Setup complete!"
