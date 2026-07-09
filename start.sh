@@ -39,7 +39,7 @@ cat << 'EOF' > "$HOME/.local/share/applications/babydra-image-preview.desktop"
 Type=Application
 Name=BabyDra Image Preview
 Comment=Viewer for images
-Exec=babydra-image-preview %f
+Exec=/home/i4104/.local/bin/babydra-image-preview %f
 Icon=image-x-generic
 Terminal=false
 Categories=Graphics;Viewer;GTK;
