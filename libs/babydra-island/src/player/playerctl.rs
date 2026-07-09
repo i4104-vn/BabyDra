@@ -4,16 +4,6 @@
 use gdk_pixbuf::prelude::*;
 use gtk4::prelude::*;
 
-/// Launches `playerctl` with the given argument slice, returning stdout as an Option string.
-pub fn run_playerctl(args: &[&str]) -> Option<String> {
-    babydra_common::desktop::mpris::run_playerctl(args)
-}
-
-/// Decodes %-encoded (URL-encoded) string characters back into standard text.
-pub fn decode_uri(uri: &str) -> String {
-    babydra_common::desktop::mpris::decode_uri(uri)
-}
-
 /// Loads local or file:// media album cover art, resizing to fit dimensions.
 pub fn load_album_art(art_url: &str, size: i32) -> Option<gtk4::Widget> {
     if art_url.is_empty() {
@@ -21,7 +11,7 @@ pub fn load_album_art(art_url: &str, size: i32) -> Option<gtk4::Widget> {
     }
 
     let local_path = if let Some(path_str) = art_url.strip_prefix("file://") {
-        decode_uri(path_str)
+        babydra_common::decode_uri(path_str)
     } else if art_url.starts_with('/') {
         art_url.to_string()
     } else {

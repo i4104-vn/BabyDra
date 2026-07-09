@@ -3,7 +3,6 @@ resolver = "2"
 members = [
     "libs/babydra-common",
     "libs/babydra-island",
-    "libs/babydra-wallpaper",
     "libs/babydra-launcher",
     "crates/babydra-panel",
     "crates/babydra-menu",
@@ -19,4 +18,3 @@ version = "1.0.0"
 babydra-common = { path = "libs/babydra-common" }
 babydra-launcher = { path = "libs/babydra-launcher" }
 babydra-island = { path = "libs/babydra-island" }
-babydra-wallpaper = { path = "libs/babydra-wallpaper" }

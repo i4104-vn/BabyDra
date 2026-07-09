@@ -2,14 +2,10 @@
 
 use gtk4::prelude::*;
 use std::process::Command;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 mod render;
 
-/// Iterates user directory folders recursively up to depth 2 to locate matching files.
-pub fn search_files(query: &str) -> Vec<PathBuf> {
-    babydra_common::desktop::search::search_files(query)
-}
 
 /// Creates a clickable button row representing a discovered local file.
 /// Binds clicking the button to launch the file using `xdg-open`.

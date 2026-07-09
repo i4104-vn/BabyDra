@@ -8,7 +8,8 @@ use std::cell::RefCell;
 use crate::widgets::footer::create_launcher_footer;
 use crate::widgets::app_row::create_list_app_widget;
 use crate::widgets::search::build_browser_search_button;
-use crate::widgets::file_search::{search_files, create_file_row};
+use crate::widgets::file_search::create_file_row;
+use babydra_common::search_files;
 
 /// Builds the application launcher UI, connecting its key navigation,
 /// search entry box, and single-column grouped results list.
