@@ -131,6 +131,7 @@ MimeType=image/png;image/jpeg;image/gif;image/webp;image/bmp;
 NoDisplay=false
 EOF
 
+chmod +x "$HOME/.local/share/applications/babydra-image-preview.desktop"
 update-desktop-database "$HOME/.local/share/applications" || true
 xdg-mime default babydra-image-preview.desktop image/png image/jpeg image/gif image/webp image/bmp || true
 
