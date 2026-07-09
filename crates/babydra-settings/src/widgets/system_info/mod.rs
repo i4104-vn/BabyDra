@@ -6,79 +6,6 @@ use sysinfo::System;
 
 mod render;
 
-fn run_system_update() {
-    let terminals = [
-        "kitty",
-        "alacritty",
-        "wezterm",
-        "gnome-terminal",
-        "konsole",
-        "xfce4-terminal",
-    ];
-    let update_cmd = "sudo pacman -Syu";
-
-    for term in terminals {
-        let mut cmd = Command::new(term);
-        match term {
-            "gnome-terminal" | "xfce4-terminal" => {
-                cmd.args(&[
-                    "--title",
-                    "update-system",
-                    "--",
-                    "bash",
-                    "-c",
-                    &format!(
-                        "{}; echo; read -p 'Press Enter to close...' -n 1",
-                        update_cmd
-                    ),
-                ]);
-            }
-            "konsole" => {
-                cmd.args(&[
-                    "-p",
-                    "tabtitle=update-system",
-                    "-e",
-                    "bash",
-                    "-c",
-                    &format!(
-                        "{}; echo; read -p 'Press Enter to close...' -n 1",
-                        update_cmd
-                    ),
-                ]);
-            }
-            "kitty" | "alacritty" => {
-                cmd.args(&[
-                    "--title",
-                    "update-system",
-                    "-e",
-                    "sh",
-                    "-c",
-                    &format!(
-                        "{}; echo; read -p 'Press Enter to close...' -n 1",
-                        update_cmd
-                    ),
-                ]);
-            }
-            "wezterm" => {
-                cmd.args(&[
-                    "-e",
-                    "sh",
-                    "-c",
-                    &format!(
-                        "{}; echo; read -p 'Press Enter to close...' -n 1",
-                        update_cmd
-                    ),
-                ]);
-            }
-            _ => continue,
-        }
-
-        if cmd.spawn().is_ok() {
-            return;
-        }
-    }
-}
-
 pub fn create_system_widget() -> gtk4::Box {
     let mut sys = System::new_all();
     sys.refresh_all();
@@ -105,18 +32,22 @@ pub fn create_system_widget() -> gtk4::Box {
     }
 
     let mut disk_text = "Unknown".to_string();
+    let mut disk_percent = 0.0;
     if let Ok(output) = Command::new("df").arg("-h").arg("/").output() {
         let stdout = String::from_utf8_lossy(&output.stdout);
         let lines: Vec<&str> = stdout.lines().collect();
         if lines.len() >= 2 {
             let parts: Vec<&str> = lines[1].split_whitespace().collect();
             if parts.len() >= 5 {
-                disk_text = format!("{} / {} (Sử dụng {})", parts[2], parts[1], parts[4]);
+                disk_text = format!("{} / {}", parts[2], parts[1]);
+                if let Ok(val) = parts[4].replace("%", "").parse::<f64>() {
+                    disk_percent = val;
+                }
             }
         }
     }
 
-    let (main_box, update_btn) = render::build_system_ui(
+    render::build_system_ui(
         &hostname,
         &os_name,
         &kernel_version,
@@ -124,11 +55,6 @@ pub fn create_system_widget() -> gtk4::Box {
         &gpu_info,
         &memory_text,
         &disk_text,
-    );
-
-    update_btn.connect_clicked(|_| {
-        run_system_update();
-    });
-
-    main_box
+        disk_percent,
+    )
 }

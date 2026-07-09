@@ -180,3 +180,88 @@ switch slider {
     font-family: monospace;
     font-size: 13px;
 }
+
+/* --- System Info & Dashboard Cards Layouts --- */
+.os-logo {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 16px;
+}
+
+.hero-hostname {
+    font-size: 26px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+progressbar.disk-progress trough {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    min-height: 8px;
+}
+
+progressbar.disk-progress progress {
+    background: linear-gradient(135deg, #e5c197, #d4a96a);
+    border-radius: 6px;
+}
+
+.card-icon-wrapper {
+    background: linear-gradient(135deg, #e5c197, #8e2de2);
+    border-radius: 14px;
+    color: #ffffff;
+    box-shadow: 0 4px 16px rgba(229, 193, 151, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- Appearance View Layouts --- */
+.wallpaper-preview-frame {
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.choose-file-card {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 14px;
+    transition: all 250ms ease;
+}
+
+.choose-file-card:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: scale(1.02);
+}
+
+.theme-option-card {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    transition: all 250ms ease;
+}
+
+.theme-option-card:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.theme-option-card.active {
+    background-color: rgba(229, 193, 151, 0.16);
+    border: 1px solid rgba(229, 193, 151, 0.35);
+    color: #e5c197;
+}
+
+.settings-row-item {
+    padding: 12px 16px;
+    border-radius: 14px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+

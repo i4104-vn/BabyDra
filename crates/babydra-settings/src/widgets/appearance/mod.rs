@@ -62,6 +62,19 @@ fn set_gtk_theme(theme_name: &str) {
     set_ini(".config/gtk-4.0/settings.ini");
 }
 
+fn get_current_wallpaper() -> String {
+    let output = Command::new("gsettings")
+        .args(&["get", "org.gnome.desktop.background", "picture-uri"])
+        .output();
+    match output {
+        Ok(o) => {
+            let stdout = String::from_utf8_lossy(&o.stdout);
+            stdout.trim().replace("'", "").replace("file://", "")
+        }
+        Err(_) => "".to_string(),
+    }
+}
+
 pub fn create_appearance_widget() -> gtk4::Box {
     let themes = get_gtk_themes();
     let current_theme = match Command::new("gsettings")
@@ -72,20 +85,44 @@ pub fn create_appearance_widget() -> gtk4::Box {
         Err(_) => "Adwaita".to_string(),
     };
 
-    let (main_box, dark_switch, select_wp_btn, dropdown) = render::build_appearance_ui(&themes, &current_theme);
-
+    let wp_path = get_current_wallpaper();
     let is_dark = get_color_scheme() == "dark";
-    dark_switch.set_active(is_dark);
 
-    dark_switch.connect_state_set(move |_, is_active| {
-        set_color_scheme(is_active);
+    let (
+        main_box,
+        preview_img,
+        pick_btn,
+        light_card,
+        dark_card,
+        trans_switch,
+        dropdown,
+    ) = render::build_appearance_ui(&wp_path, is_dark, &themes, &current_theme);
+
+    // Light theme button
+    let light_card_clone = light_card.clone();
+    let dark_card_clone = dark_card.clone();
+    light_card.connect_clicked(move |_| {
+        set_color_scheme(false);
         babydra_common::init_theme();
-        glib::Propagation::Proceed
+        light_card_clone.add_css_class("active");
+        dark_card_clone.remove_css_class("active");
     });
 
-    let wp_card_parent = main_box.clone();
-    select_wp_btn.connect_clicked(move |_| {
-        if let Some(win) = wp_card_parent.root().and_then(|r| r.downcast::<gtk4::Window>().ok()) {
+    // Dark theme button
+    let light_card_clone2 = light_card.clone();
+    let dark_card_clone2 = dark_card.clone();
+    dark_card.connect_clicked(move |_| {
+        set_color_scheme(true);
+        babydra_common::init_theme();
+        dark_card_clone2.add_css_class("active");
+        light_card_clone2.remove_css_class("active");
+    });
+
+    // Pick Wallpaper
+    let preview_clone = preview_img.clone();
+    let parent_box = main_box.clone();
+    pick_btn.connect_clicked(move |_| {
+        if let Some(win) = parent_box.root().and_then(|r| r.downcast::<gtk4::Window>().ok()) {
             let file_dialog = gtk4::FileDialog::new();
             file_dialog.set_title("Chọn hình nền");
 
@@ -96,14 +133,24 @@ pub fn create_appearance_widget() -> gtk4::Box {
             filter.add_mime_type("image/webp");
             file_dialog.set_default_filter(Some(&filter));
 
+            let preview_cb = preview_clone.clone();
             file_dialog.open(Some(&win), None::<&gio::Cancellable>, move |res| {
                 if let Ok(file) = res {
                     if let Some(path) = file.path() {
                         let _ = babydra_common::set_wallpaper(&path);
+                        preview_cb.set_from_file(Some(&path));
                     }
                 }
             });
         }
+    });
+
+    trans_switch.connect_state_set(move |_, is_active| {
+        let alpha = if is_active { "0.85" } else { "1.00" };
+        let _ = Command::new("gsettings")
+            .args(&["set", "org.gnome.desktop.interface", "text-scaling-factor", alpha]) // dummy or transparency toggle mock
+            .output();
+        glib::Propagation::Proceed
     });
 
     dropdown.connect_selected_notify(move |dd| {

@@ -1,4 +1,4 @@
-//! System specifications UI layout generator.
+//! System specifications UI layout generator matching AboutView.vue.
 
 use gtk4::prelude::*;
 
@@ -10,74 +10,124 @@ pub fn build_system_ui(
     gpu_info: &str,
     memory_text: &str,
     disk_text: &str,
-) -> (gtk4::Box, gtk4::Button) {
-    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
-    main_box.set_margin_start(10);
-    main_box.set_margin_end(10);
+    disk_percent: f64,
+) -> gtk4::Box {
+    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 24);
+    main_box.set_margin_start(16);
+    main_box.set_margin_end(16);
 
-    let title_lbl = gtk4::Label::new(Some("Thông tin hệ thống"));
+    // Title
+    let title_lbl = gtk4::Label::new(Some("About System"));
     title_lbl.add_css_class("settings-title");
     title_lbl.set_halign(gtk4::Align::Start);
     main_box.append(&title_lbl);
 
-    let stats_card = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
-    stats_card.add_css_class("settings-card");
+    // Hero Section glass-panel
+    let hero_section = gtk4::Box::new(gtk4::Orientation::Horizontal, 20);
+    hero_section.add_css_class("settings-card");
+    hero_section.set_margin_bottom(8);
+    hero_section.set_margin_top(40);
+    hero_section.set_margin_bottom(40);
+    hero_section.set_margin_start(40);
+    hero_section.set_margin_end(40);
 
-    let add_info_row = |label: &str, value: &str| {
-        let row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-        row.set_margin_top(4);
-        row.set_margin_bottom(4);
+    // OS Logo/Avatar
+    let logo_container = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    logo_container.add_css_class("os-logo");
+    logo_container.set_size_request(100, 100);
+    
+    let logo_img = gtk4::Image::from_icon_name("computer-symbolic");
+    logo_img.set_pixel_size(72);
+    logo_img.set_valign(gtk4::Align::Center);
+    logo_img.set_halign(gtk4::Align::Center);
+    logo_container.append(&logo_img);
+    hero_section.append(&logo_container);
 
-        let lbl = gtk4::Label::new(Some(label));
-        lbl.add_css_class("settings-label");
-        lbl.set_halign(gtk4::Align::Start);
-        row.append(&lbl);
+    // OS Title and Disk Usage
+    let os_title_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
+    os_title_box.set_hexpand(true);
 
-        let spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-        spacer.set_hexpand(true);
-        row.append(&spacer);
+    let hostname_lbl = gtk4::Label::new(Some(hostname));
+    hostname_lbl.add_css_class("hero-hostname");
+    hostname_lbl.set_halign(gtk4::Align::Start);
+    os_title_box.append(&hostname_lbl);
 
-        let val = gtk4::Label::new(Some(value));
-        val.add_css_class("settings-desc");
-        val.set_halign(gtk4::Align::End);
-        row.append(&val);
+    let disk_info_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+    let os_kernel_lbl = gtk4::Label::new(Some(&format!("{} - {}", os_name, kernel_version)));
+    os_kernel_lbl.add_css_class("settings-desc");
+    os_kernel_lbl.set_halign(gtk4::Align::Start);
+    disk_info_row.append(&os_kernel_lbl);
 
-        stats_card.append(&row);
+    let spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    spacer.set_hexpand(true);
+    disk_info_row.append(&spacer);
+
+    let disk_stats_lbl = gtk4::Label::new(Some(disk_text));
+    disk_stats_lbl.add_css_class("settings-label");
+    disk_stats_lbl.set_halign(gtk4::Align::End);
+    disk_info_row.append(&disk_stats_lbl);
+    os_title_box.append(&disk_info_row);
+
+    // Progress bar for disk usage
+    let progress_bar = gtk4::ProgressBar::new();
+    progress_bar.set_fraction(disk_percent / 100.0);
+    progress_bar.add_css_class("disk-progress");
+    os_title_box.append(&progress_bar);
+
+    hero_section.append(&os_title_box);
+    main_box.append(&hero_section);
+
+    // Grid of cards
+    let grid = gtk4::Grid::new();
+    grid.set_column_spacing(16);
+    grid.set_row_spacing(16);
+    grid.set_column_homogeneous(true);
+
+    let create_info_card = |icon_name: &str, label: &str, value: &str| -> gtk4::Box {
+        let card = gtk4::Box::new(gtk4::Orientation::Horizontal, 16);
+        card.add_css_class("settings-card");
+        card.set_margin_top(20);
+        card.set_margin_bottom(20);
+        card.set_margin_start(20);
+        card.set_margin_end(20);
+
+        let icon_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+        icon_box.add_css_class("card-icon-wrapper");
+        icon_box.set_size_request(46, 46);
+        icon_box.set_valign(gtk4::Align::Center);
+        
+        let icon_img = gtk4::Image::from_icon_name(icon_name);
+        icon_img.set_pixel_size(20);
+        icon_box.append(&icon_img);
+        card.append(&icon_box);
+
+        let text_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
+        let label_lbl = gtk4::Label::new(Some(label));
+        label_lbl.add_css_class("settings-desc");
+        label_lbl.set_halign(gtk4::Align::Start);
+        text_box.append(&label_lbl);
+
+        let value_lbl = gtk4::Label::new(Some(value));
+        value_lbl.add_css_class("settings-label");
+        value_lbl.set_halign(gtk4::Align::Start);
+        value_lbl.set_wrap(true);
+        text_box.append(&value_lbl);
+        card.append(&text_box);
+
+        card
     };
 
-    add_info_row("Tên máy (Hostname)", hostname);
-    add_info_row("Hệ điều hành (OS)", os_name);
-    add_info_row("Nhân Kernel", kernel_version);
-    add_info_row("Bộ vi xử lý (CPU)", cpu_model);
-    add_info_row("Card đồ họa (GPU)", gpu_info);
-    add_info_row("Bộ nhớ RAM", memory_text);
-    add_info_row("Ổ đĩa hệ thống (/)", disk_text);
-    main_box.append(&stats_card);
+    let card_kernel = create_info_card("preferences-system-symbolic", "Kernel", kernel_version);
+    let card_cpu = create_info_card("cpu-symbolic", "Processor", cpu_model);
+    let card_mem = create_info_card("media-flash-symbolic", "Memory", memory_text);
+    let card_gpu = create_info_card("video-display-symbolic", "Graphics", gpu_info);
 
-    let update_card = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    update_card.add_css_class("settings-card");
-    update_card.set_valign(gtk4::Align::Center);
+    grid.attach(&card_kernel, 0, 0, 1, 1);
+    grid.attach(&card_cpu, 1, 0, 1, 1);
+    grid.attach(&card_mem, 0, 1, 1, 1);
+    grid.attach(&card_gpu, 1, 1, 1, 1);
 
-    let update_lbl_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-    let update_title = gtk4::Label::new(Some("Cập nhật hệ thống"));
-    update_title.add_css_class("settings-label");
-    update_title.set_halign(gtk4::Align::Start);
-    let update_desc = gtk4::Label::new(Some("Kiểm tra và cài đặt các bản nâng cấp Arch Linux mới nhất"));
-    update_desc.add_css_class("settings-desc");
-    update_desc.set_halign(gtk4::Align::Start);
-    update_lbl_box.append(&update_title);
-    update_lbl_box.append(&update_desc);
-    update_card.append(&update_lbl_box);
+    main_box.append(&grid);
 
-    let update_spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    update_spacer.set_hexpand(true);
-    update_card.append(&update_spacer);
-
-    let update_btn = gtk4::Button::with_label("Cập nhật ngay");
-    update_btn.set_valign(gtk4::Align::Center);
-    update_btn.add_css_class("suggested-action");
-    update_card.append(&update_btn);
-    main_box.append(&update_card);
-
-    (main_box, update_btn)
+    main_box
 }
