@@ -26,6 +26,7 @@ killall babydra-menu || true
 killall babydra-switcher || true
 killall babydra-screenshot || true
 killall babydra-lock || true
+killall babydra-image-preview || true
 
 # 5. Overwrite binaries in ~/.local/bin
 echo "Installing new binaries..."
@@ -34,6 +35,7 @@ cp target/release/babydra-menu "$LOCAL_BIN/babydra-menu"
 cp target/release/babydra-switcher "$LOCAL_BIN/babydra-switcher"
 cp target/release/babydra-screenshot "$LOCAL_BIN/babydra-screenshot"
 cp target/release/babydra-lock "$LOCAL_BIN/babydra-lock"
+cp target/release/babydra-image-preview "$LOCAL_BIN/babydra-image-preview"
 
 # 6. Reload labwc settings
 echo "Reloading labwc compositor..."

@@ -14,6 +14,7 @@ echo "Stopping any running shell processes..."
 killall babydra-panel || true
 killall babydra-menu || true
 killall babydra-launcher || true
+killall babydra-image-preview || true
 killall fnott || true
 killall xfce4-notifyd || true 
 
