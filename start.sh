@@ -15,6 +15,7 @@ killall babydra-panel || true
 killall babydra-menu || true
 killall babydra-launcher || true
 killall babydra-image-preview || true
+killall babydra-preview || true
 killall fnott || true
 killall xfce4-notifyd || true 
 
@@ -34,12 +35,12 @@ echo "Configured labwc rc.xml at $RC_FILE"
 # Register default image handler in ~/.local/share/applications
 echo "Registering default image handler..."
 mkdir -p "$HOME/.local/share/applications"
-cat << 'EOF' > "$HOME/.local/share/applications/babydra-image-preview.desktop"
+cat << 'EOF' > "$HOME/.local/share/applications/babydra-preview.desktop"
 [Desktop Entry]
 Type=Application
-Name=BabyDra Image Preview
+Name=BabyDra Preview
 Comment=Viewer for images
-Exec=/home/i4104/.local/bin/babydra-image-preview %f
+Exec=/home/i4104/.local/bin/babydra-preview %f
 Icon=image-x-generic
 Terminal=false
 Categories=Graphics;Viewer;GTK;
@@ -47,9 +48,9 @@ MimeType=image/png;image/jpeg;image/gif;image/webp;image/bmp;
 NoDisplay=false
 EOF
 
-chmod +x "$HOME/.local/share/applications/babydra-image-preview.desktop"
+chmod +x "$HOME/.local/share/applications/babydra-preview.desktop"
 update-desktop-database "$HOME/.local/share/applications" || true
-xdg-mime default babydra-image-preview.desktop image/png image/jpeg image/gif image/webp image/bmp || true
+xdg-mime default babydra-preview.desktop image/png image/jpeg image/gif image/webp image/bmp || true
 
 # Commented out software rendering to allow GPU hardware acceleration for 120 FPS.
 # Uncomment these if running in a VM without 3D acceleration.

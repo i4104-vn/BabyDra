@@ -8,7 +8,7 @@ mod widgets;
 
 fn main() {
     let app = gtk4::Application::new(
-        Some("com.babydra.image-preview"),
+        Some("com.babydra.preview"),
         Default::default(),
     );
 
@@ -27,7 +27,7 @@ fn main() {
 
         // Fallback file selector if no path is given or if the path is invalid
         let fallback_window = gtk4::ApplicationWindow::new(app);
-        fallback_window.set_title(Some("BabyDra Image Preview"));
+        fallback_window.set_title(Some("BabyDra Preview"));
         fallback_window.set_default_size(400, 200);
 
         let file_dialog = gtk4::FileDialog::new();
@@ -58,5 +58,5 @@ fn main() {
         fallback_window.present();
     });
 
-    app.run_with_args(&["babydra-image-preview"]);
+    app.run_with_args(&["babydra-preview"]);
 }

@@ -9,7 +9,7 @@ members = [
     "crates/babydra-switcher",
     "crates/babydra-screenshot",
     "crates/babydra-lock",
-    "crates/babydra-image-preview",
+    "crates/babydra-preview",
 ]
 
 [workspace.package]

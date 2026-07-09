@@ -1,5 +1,5 @@
 [package]
-name = "babydra-image-preview"
+name = "babydra-preview"
 version.workspace = true
 edition = "2021"
 
