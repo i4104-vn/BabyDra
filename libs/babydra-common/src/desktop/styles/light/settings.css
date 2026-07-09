@@ -9,7 +9,7 @@ window.settings-window > overlay > box {
 
 .settings-sidebar {
     background-color: #ededeb;
-    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
     padding: 18px 12px;
 }
 
@@ -17,22 +17,22 @@ window.settings-window > overlay > box {
     border-radius: 12px;
     padding: 10px 14px;
     margin-bottom: 4px;
-    color: rgba(0, 0, 0, 0.7);
+    color: #5c5c5e;
     font-size: 14px;
     font-weight: 500;
-    transition: all 200ms ease;
+    transition: all 250ms ease;
 }
 
 .settings-sidebar-row:hover {
-    background-color: rgba(0, 0, 0, 0.06);
-    color: #000000;
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #1c1c1e;
 }
 
 .settings-sidebar-row:selected {
-    background-color: rgba(0, 0, 0, 0.05);
-    background-image: linear-gradient(135deg, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.01) 100%);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    color: #000000;
+    background-color: rgba(138, 103, 71, 0.12);
+    border: 1px solid rgba(138, 103, 71, 0.2);
+    color: #8a6747;
+    font-weight: 600;
 }
 
 .settings-content {
@@ -50,15 +50,15 @@ window.settings-window > overlay > box {
 .settings-subtitle {
     font-size: 16px;
     font-weight: 600;
-    color: rgba(0, 0, 0, 0.9);
+    color: #1c1c1e;
     margin-bottom: 12px;
 }
 
 .settings-card {
     background-color: rgba(0, 0, 0, 0.02);
     background-image: linear-gradient(160deg, rgba(0, 0, 0, 0.02) 0%, rgba(0, 0, 0, 0.005) 100%);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
     border-radius: 16px;
     padding: 16px;
     margin-bottom: 16px;
@@ -66,7 +66,7 @@ window.settings-window > overlay > box {
 
 .settings-row {
     padding: 8px 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .settings-row:last-child {
@@ -81,24 +81,48 @@ window.settings-window > overlay > box {
 
 .settings-desc {
     font-size: 12px;
-    color: rgba(0, 0, 0, 0.50);
+    color: #5c5c5e;
 }
 
 button.suggested-action {
-    background-color: rgba(0, 0, 0, 0.05);
-    background-image: none;
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: linear-gradient(135deg, #8a6747, #d4a96a);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 12px;
-    color: #1c1c1e;
-    padding: 6px 14px;
-    font-weight: 500;
-    box-shadow: none;
-    transition: all 200ms ease;
+    color: #ffffff;
+    padding: 6px 16px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(138, 103, 71, 0.15);
+    transition: all 250ms ease;
 }
 
 button.suggested-action:hover {
-    background-color: rgba(0, 0, 0, 0.09);
-    border-color: rgba(0, 0, 0, 0.12);
+    background: linear-gradient(135deg, #a6805d, #e5c197);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(138, 103, 71, 0.25);
+}
+
+button.suggested-action:active {
+    transform: translateY(0px);
+}
+
+button {
+    background-color: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    color: #1c1c1e;
+    padding: 6px 16px;
+    font-weight: 500;
+    transition: all 200ms ease;
+}
+
+button:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.14);
+}
+
+switch:checked {
+    background-color: #8a6747;
+    border-color: #8a6747;
 }
 
 .cheatsheet-overlay {
