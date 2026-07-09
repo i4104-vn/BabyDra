@@ -17,3 +17,6 @@ awww img "$HOME/.config/babydra/wallpaper.png" &
 # Start BabyDra status panel
 mkdir -p "$HOME/.cache/babydra"
 ~/.local/bin/babydra-panel > "$HOME/.cache/babydra/panel.log" 2>&1 &
+
+# Start dynamic dark/light titlebar theme monitor
+$HOME/.config/labwc/theme-monitor.sh &

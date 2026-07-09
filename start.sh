@@ -33,6 +33,15 @@ echo "Configured labwc autostart at $AUTOSTART_FILE"
 cp "$SCRIPT_DIR/configs/labwc/rc.xml" "$RC_FILE"
 echo "Configured labwc rc.xml at $RC_FILE"
 
+cp "$SCRIPT_DIR/configs/labwc/themerc-override" "$HOME/.config/labwc/themerc-override"
+echo "Configured labwc themerc-override at $HOME/.config/labwc/themerc-override"
+cp "$SCRIPT_DIR/configs/labwc/theme-monitor.sh" "$HOME/.config/labwc/theme-monitor.sh"
+chmod +x "$HOME/.config/labwc/theme-monitor.sh"
+
+mkdir -p "$HOME/.local/share/themes"
+cp -r "$SCRIPT_DIR/configs/themes/BabyDra" "$HOME/.local/share/themes/"
+echo "Configured labwc theme BabyDra"
+
 # Register default image handler in ~/.local/share/applications
 echo "Registering default image handler..."
 mkdir -p "$HOME/.local/share/applications"

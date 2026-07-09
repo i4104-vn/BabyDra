@@ -30,4 +30,22 @@
       </mousebind>
     </context>
   </mouse>
+
+  <theme>
+    <name>BabyDra</name>
+    <titlebar>
+      <layout>iconify,max,close</layout>
+      <showTitle>yes</showTitle>
+    </titlebar>
+    <font place="ActiveWindow">
+      <name>sans</name>
+      <size>12</size>
+      <weight>bold</weight>
+    </font>
+    <font place="InactiveWindow">
+      <name>sans</name>
+      <size>12</size>
+      <weight>normal</weight>
+    </font>
+  </theme>
 </labwc_config>

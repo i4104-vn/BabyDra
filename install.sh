@@ -93,6 +93,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cp "$SCRIPT_DIR/configs/labwc/autostart" "$HOME/.config/labwc/autostart"
 chmod +x "$HOME/.config/labwc/autostart"
 cp "$SCRIPT_DIR/configs/labwc/rc.xml" "$HOME/.config/labwc/rc.xml"
+cp "$SCRIPT_DIR/configs/labwc/themerc-override" "$HOME/.config/labwc/themerc-override"
+cp "$SCRIPT_DIR/configs/labwc/theme-monitor.sh" "$HOME/.config/labwc/theme-monitor.sh"
+chmod +x "$HOME/.config/labwc/theme-monitor.sh"
+
+mkdir -p "$HOME/.local/share/themes"
+cp -r "$SCRIPT_DIR/configs/themes/BabyDra" "$HOME/.local/share/themes/"
 
 # 8. Reload configuration and restart panel
 echo "Reloading labwc configuration and starting panel..."
