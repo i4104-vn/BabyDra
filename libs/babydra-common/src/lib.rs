@@ -33,7 +33,7 @@ pub use system::volume::AudioDevice;
 pub use system::storage::DiskInfo;
 pub use notification::service::{ActiveNotification, NotificationMsg};
 pub use desktop::icon::get_logo_path;
-pub use desktop::theme::{init_theme, apply_theme_class};
+pub use desktop::theme::{init_theme, apply_theme_class, is_dark_mode, set_dark_mode};
 pub use desktop::apps::{find_desktop_apps, refresh_desktop_apps_cache, DesktopApp};
 pub use system::power::{poweroff, reboot, suspend};
 pub use system::auth::verify_password;
@@ -56,6 +56,8 @@ pub use desktop::mpris;
 pub use desktop::mpris::{run_playerctl, decode_uri};
 pub use desktop::exif;
 pub use desktop::exif::{read_exif, ExifData};
+pub use system::bluetooth::{is_bluetooth_enabled, set_bluetooth_enabled, get_bluetooth_devices, BtDevice};
+pub use system::vpn::{get_vpn_connections, VpnConn};
 
 
 

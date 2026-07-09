@@ -10,6 +10,7 @@ members = [
     "crates/babydra-screenshot",
     "crates/babydra-lock",
     "crates/babydra-preview",
+    "crates/babydra-settings",
 ]
 
 [workspace.package]

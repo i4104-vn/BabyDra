@@ -68,6 +68,7 @@ killall babydra-lock || true
 killall babydra-launcher || true
 killall babydra-image-preview || true
 killall babydra-preview || true
+killall babydra-settings || true
 
 # 6. Install the binaries
 echo "Installing binaries to $LOCAL_BIN..."
@@ -78,6 +79,7 @@ cp target/release/babydra-screenshot "$LOCAL_BIN/babydra-screenshot"
 cp target/release/babydra-lock "$LOCAL_BIN/babydra-lock"
 cp target/release/babydra-launcher "$LOCAL_BIN/babydra-launcher"
 cp target/release/babydra-preview "$LOCAL_BIN/babydra-preview"
+cp target/release/babydra-settings "$LOCAL_BIN/babydra-settings"
 
 # Copy wallpaper to standard config dir
 mkdir -p "$HOME/.config/babydra"
@@ -135,6 +137,22 @@ EOF
 chmod +x "$HOME/.local/share/applications/babydra-preview.desktop"
 update-desktop-database "$HOME/.local/share/applications" || true
 xdg-mime default babydra-preview.desktop image/png image/jpeg image/gif image/webp image/bmp || true
+
+# 12. Configure Settings application entry
+echo "Registering settings manager entry..."
+cat << 'EOF' > "$HOME/.local/share/applications/babydra-settings.desktop"
+[Desktop Entry]
+Type=Application
+Name=BabyDra Settings
+Comment=Configure system settings
+Exec=/home/i4104/.local/bin/babydra-settings
+Icon=preferences-system
+Terminal=false
+Categories=Settings;HardwareSettings;GTK;
+NoDisplay=false
+EOF
+chmod +x "$HOME/.local/share/applications/babydra-settings.desktop"
+update-desktop-database "$HOME/.local/share/applications" || true
 
 echo "============================================="
 echo "Installation & Setup complete!"

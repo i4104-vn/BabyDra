@@ -36,20 +36,10 @@ pub fn create_small_theme_toggle_tile() -> gtk4::Button {
     btn.set_child(Some(&main_box));
 
     btn.connect_clicked(move |b| {
-        let settings = gtk4::Settings::default();
-        let current_dark = settings.as_ref()
-            .map(|s| s.is_gtk_application_prefer_dark_theme())
-            .unwrap_or(true);
+        let current_dark = babydra_common::is_dark_mode();
         let new_dark = !current_dark;
 
-        let scheme = if new_dark { "prefer-dark" } else { "prefer-light" };
-        let _ = std::process::Command::new("gsettings")
-            .args(&["set", "org.gnome.desktop.interface", "color-scheme", scheme])
-            .output();
-
-        if let Some(ref s) = settings {
-            s.set_gtk_application_prefer_dark_theme(new_dark);
-        }
+        babydra_common::set_dark_mode(new_dark);
 
         if let Some(old) = icon_container.first_child() {
             icon_container.remove(&old);

@@ -20,7 +20,8 @@ const DARK_CSS: &str = concat!(
     include_str!("../styles/dark/switcher.css"), "\n",
     include_str!("../styles/dark/screenshot.css"), "\n",
     include_str!("../styles/dark/lock.css"), "\n",
-    include_str!("../styles/dark/preview.css")
+    include_str!("../styles/dark/preview.css"), "\n",
+    include_str!("../styles/dark/settings.css")
 );
 
 const LIGHT_CSS: &str = concat!(
@@ -42,7 +43,8 @@ const LIGHT_CSS: &str = concat!(
     include_str!("../styles/light/switcher.css"), "\n",
     include_str!("../styles/light/screenshot.css"), "\n",
     include_str!("../styles/light/lock.css"), "\n",
-    include_str!("../styles/light/preview.css")
+    include_str!("../styles/light/preview.css"), "\n",
+    include_str!("../styles/light/settings.css")
 );
 
 thread_local! {
@@ -103,3 +105,24 @@ pub fn init_theme() {
 
 /// Helper stub for backward compatibility.
 pub fn apply_theme_class(_window: &gtk4::ApplicationWindow) { }
+
+/// Checks if dark mode is preferred in GSettings.
+pub fn is_dark_mode() -> bool {
+    gtk4::Settings::default()
+        .map(|s| s.is_gtk_application_prefer_dark_theme())
+        .unwrap_or(true)
+}
+
+/// Sets the color scheme preference in GSettings.
+pub fn set_dark_mode(dark: bool) {
+    let scheme = if dark { "prefer-dark" } else { "prefer-light" };
+    let _ = std::process::Command::new("gsettings")
+        .args(&["set", "org.gnome.desktop.interface", "color-scheme", scheme])
+        .output();
+
+    if let Some(settings) = gtk4::Settings::default() {
+        settings.set_gtk_application_prefer_dark_theme(dark);
+    }
+
+    init_theme();
+}
