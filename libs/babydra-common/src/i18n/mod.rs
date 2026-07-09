@@ -70,6 +70,7 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("launcher.shutdown", "Shut Down");
             map.insert("launcher.restart", "Restart");
             map.insert("launcher.suspend", "Suspend");
+            map.insert("launcher.logout", "Log Out");
 
             // Panel / Clock
             map.insert("panel.no_notifications", "No new notifications");
@@ -188,6 +189,7 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("launcher.shutdown", "Tắt máy");
             map.insert("launcher.restart", "Khởi động lại");
             map.insert("launcher.suspend", "Tạm dừng");
+            map.insert("launcher.logout", "Đăng xuất");
 
             // Panel / Clock
             map.insert("panel.no_notifications", "Không có thông báo mới");

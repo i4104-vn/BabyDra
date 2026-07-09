@@ -82,3 +82,7 @@ pub const DARK_VOLUME_MUTE_SVG: &str = include_str!("../assets/dark/volume-mute.
 pub const LIGHT_VOLUME_MUTE_SVG: &str = include_str!("../assets/light/volume-mute.svg");
 pub const DARK_WIFI_SVG: &str = include_str!("../assets/dark/wifi.svg");
 pub const LIGHT_WIFI_SVG: &str = include_str!("../assets/light/wifi.svg");
+
+pub const DARK_SLEEP_SVG: &str = include_str!("../assets/dark/sleep.svg");
+pub const LIGHT_SLEEP_SVG: &str = include_str!("../assets/light/sleep.svg");
+

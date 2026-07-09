@@ -7,10 +7,11 @@ use std::rc::Rc;
 use std::cell::RefCell;
 use crate::widgets::footer::create_launcher_footer;
 use crate::widgets::app_row::create_list_app_widget;
-use crate::widgets::search::populate_search_results;
+use crate::widgets::search::build_browser_search_button;
+use crate::widgets::file_search::{search_files, create_file_row};
 
 /// Builds the application launcher UI, connecting its key navigation,
-/// search entry box, left-column app grid, and right-column file/web results.
+/// search entry box, and single-column grouped results list.
 pub fn build_launcher_ui(
     app: &gtk4::Application,
     launcher_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
@@ -34,147 +35,162 @@ pub fn build_launcher_ui(
 
     window.add_css_class("launcher-window");
 
-    let box_layout = gtk4::Box::new(gtk4::Orientation::Vertical, 12);
+    let box_layout = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     box_layout.add_css_class("launcher-box");
     box_layout.set_halign(gtk4::Align::Start);
     box_layout.set_valign(gtk4::Align::Start);
-    box_layout.set_size_request(780, 560);
+    box_layout.set_size_request(420, 600);
     box_layout.set_margin_top(50);
-    box_layout.set_margin_start(12);
+    box_layout.set_margin_start(16);
 
+    // --- Header ---
+    let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    header_box.add_css_class("menu-header");
+    header_box.set_margin_top(12);
+    header_box.set_margin_start(20);
+    header_box.set_margin_end(20);
+    header_box.set_margin_bottom(4);
+
+    let brand_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+    brand_box.set_valign(gtk4::Align::Center);
+
+    let brand_label = gtk4::Label::new(Some("Applications"));
+    brand_label.add_css_class("brand-text");
+    brand_label.set_valign(gtk4::Align::Center);
+
+    brand_box.append(&brand_label);
+
+    let header_spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    header_spacer.set_hexpand(true);
+
+    let close_btn = gtk4::Button::new();
+    close_btn.add_css_class("close-btn");
+    close_btn.set_cursor_from_name(Some("pointer"));
+    
+    let close_content = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
+    let close_icon = babydra_common::icon::get_system_or_file_icon("window-close", "window-close");
+    close_icon.set_pixel_size(12);
+    let close_label = gtk4::Label::new(Some("Close"));
+    close_content.append(&close_icon);
+    close_content.append(&close_label);
+    close_btn.set_child(Some(&close_content));
+
+    let win_close = window.clone();
+    close_btn.connect_clicked(move |_| {
+        win_close.close();
+    });
+
+    header_box.append(&brand_box);
+    header_box.append(&header_spacer);
+    header_box.append(&close_btn);
+    box_layout.append(&header_box);
+
+    // --- Search Entry ---
     let search_entry = gtk4::Entry::new();
-    search_entry.set_placeholder_text(Some(&babydra_common::i18n::t("launcher.search_placeholder")));
+    search_entry.set_placeholder_text(Some("Type to search apps, files or web..."));
     search_entry.add_css_class("launcher-search");
-    search_entry.set_margin_top(16);
-    search_entry.set_margin_start(16);
-    search_entry.set_margin_end(16);
+    search_entry.set_margin_start(20);
+    search_entry.set_margin_end(20);
+    search_entry.set_margin_bottom(6);
+    box_layout.append(&search_entry);
 
-    let columns_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    columns_box.add_css_class("launcher-columns-box");
-    columns_box.set_vexpand(true);
+    // --- Content Scroll Area ---
+    let scrolled_window = gtk4::ScrolledWindow::new();
+    scrolled_window.add_css_class("list-container");
+    scrolled_window.set_hexpand(true);
+    scrolled_window.set_vexpand(true);
+    scrolled_window.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
+    scrolled_window.set_margin_start(20);
+    scrolled_window.set_margin_end(20);
 
-    let left_scroll = gtk4::ScrolledWindow::new();
-    left_scroll.add_css_class("launcher-left-column");
-    left_scroll.set_size_request(280, -1);
-    left_scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
+    let list_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    scrolled_window.set_child(Some(&list_box));
+    box_layout.append(&scrolled_window);
 
-    let left_list_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    // --- Footer & Separator ---
+    let footer_sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
+    footer_sep.add_css_class("launcher-footer-separator");
+    footer_sep.set_margin_start(20);
+    footer_sep.set_margin_end(20);
+    footer_sep.set_margin_top(6);
+    footer_sep.set_margin_bottom(6);
+    box_layout.append(&footer_sep);
 
+    let footer = create_launcher_footer();
+    footer.set_margin_start(20);
+    footer.set_margin_end(20);
+    footer.set_margin_bottom(14);
+    box_layout.append(&footer);
+
+    window.set_child(Some(&box_layout));
+
+    // Apps list
     let apps = find_desktop_apps();
     let apps_rc = Rc::new(apps);
 
+    // State
+    let current_query = Rc::new(RefCell::new(String::new()));
+    let selected_index = Rc::new(RefCell::new(Some(0usize)));
+    let expanded = Rc::new(RefCell::new(false));
+
+    // Toggle button for other apps
     let toggle_btn = gtk4::Button::new();
     toggle_btn.add_css_class("launcher-toggle-btn");
     toggle_btn.set_cursor_from_name(Some("pointer"));
-    let toggle_label_text_expanded = format!("{}  ▼", babydra_common::i18n::t("launcher.other_apps"));
     let toggle_label_text_collapsed = format!("{}  ▶", babydra_common::i18n::t("launcher.other_apps"));
     toggle_btn.set_label(&toggle_label_text_collapsed);
 
-    let mut app_widgets = Vec::new();
-    let mut installed_widgets = Vec::new();
-    let mut dep_widgets = Vec::new();
-
-    for app in apps_rc.iter() {
-        let btn = create_list_app_widget(app, &window);
-        app_widgets.push((app.clone(), btn.clone()));
-        if app.is_dependency {
-            dep_widgets.push((app.clone(), btn));
-        } else {
-            installed_widgets.push((app.clone(), btn));
-        }
-    }
-
-    for (_, btn) in &installed_widgets {
-        left_list_box.append(btn);
-    }
-
-    left_list_box.append(&toggle_btn);
-
-    for (_, btn) in &dep_widgets {
-        left_list_box.append(btn);
-        btn.set_visible(false);
-    }
-
-    let expanded = Rc::new(RefCell::new(false));
     let expanded_clone = expanded.clone();
-    let dep_widgets_clone = dep_widgets.clone();
     let toggle_btn_clone = toggle_btn.clone();
-    let toggle_label_text_expanded_clone = toggle_label_text_expanded.clone();
-    let toggle_label_text_collapsed_clone = toggle_label_text_collapsed.clone();
+    let list_box_clone = list_box.clone();
+    let current_query_clone = current_query.clone();
+    let apps_clone = apps_rc.clone();
+    let window_clone = window.clone();
+    let selected_index_clone = selected_index.clone();
 
     toggle_btn.connect_clicked(move |_| {
         let mut exp = expanded_clone.borrow_mut();
         *exp = !*exp;
-        if *exp {
-            toggle_btn_clone.set_label(&toggle_label_text_expanded_clone);
+        
+        let toggle_label_text = if *exp {
+            format!("{}  ▼", babydra_common::i18n::t("launcher.other_apps"))
         } else {
-            toggle_btn_clone.set_label(&toggle_label_text_collapsed_clone);
-        }
-        for (_, btn) in &dep_widgets_clone {
-            btn.set_visible(*exp);
-        }
+            format!("{}  ▶", babydra_common::i18n::t("launcher.other_apps"))
+        };
+        toggle_btn_clone.set_label(&toggle_label_text);
+
+        repopulate_results(
+            &list_box_clone,
+            &current_query_clone.borrow(),
+            &apps_clone,
+            &window_clone,
+            *exp,
+            &toggle_btn_clone,
+            selected_index_clone.clone(),
+        );
     });
 
-    let app_widgets_rc = Rc::new(app_widgets);
-    left_scroll.set_child(Some(&left_list_box));
+    // Populate initial state
+    repopulate_results(
+        &list_box,
+        &current_query.borrow(),
+        &apps_rc,
+        &window,
+        *expanded.borrow(),
+        &toggle_btn,
+        selected_index.clone(),
+    );
 
-    let right_scroll = gtk4::ScrolledWindow::new();
-    right_scroll.add_css_class("launcher-right-column");
-    right_scroll.set_hexpand(true);
-    right_scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
-
-    let current_query = Rc::new(RefCell::new(String::new()));
-    let selected_index = Rc::new(RefCell::new(Some(0usize)));
-
-    let populate_impl = {
-        let current_query = current_query.clone();
-        let app_widgets = app_widgets_rc.clone();
-        let right_scroll = right_scroll.clone();
-        let window = window.clone();
-        let toggle_btn = toggle_btn.clone();
-        let expanded = expanded.clone();
-        let dep_count = dep_widgets.len();
-
-        move || {
-            let query = current_query.borrow().trim().to_lowercase();
-
-            if query.is_empty() {
-                toggle_btn.set_visible(dep_count > 0);
-                for (app, btn) in app_widgets.iter() {
-                    if app.is_dependency {
-                        btn.set_visible(*expanded.borrow());
-                    } else {
-                        btn.set_visible(true);
-                    }
-                }
-            } else {
-                toggle_btn.set_visible(false);
-                for (app, btn) in app_widgets.iter() {
-                    let matches = app.name.to_lowercase().contains(&query);
-                    btn.set_visible(matches);
-                }
-            }
-
-            populate_search_results(
-                &right_scroll,
-                &current_query.borrow(),
-                &window,
-            );
-        }
-    };
-
-    let populate_impl_rc = Rc::new(populate_impl);
-
-    populate_impl_rc();
-    update_highlight(&left_list_box, &right_scroll, Some(0));
-
+    // Search entry connect
     let debounce_source_id: Rc<RefCell<Option<gtk4::glib::SourceId>>> = Rc::new(RefCell::new(None));
     let current_query_search = current_query.clone();
-    let populate_grid_search = populate_impl_rc.clone();
     let d_source_id = debounce_source_id.clone();
-    let selected_index_changed = selected_index.clone();
-    let left_list_box_changed = left_list_box.clone();
-    let right_scroll_changed = right_scroll.clone();
+    let list_box_search = list_box.clone();
+    let apps_search = apps_rc.clone();
+    let window_search = window.clone();
+    let expanded_search = expanded.clone();
+    let toggle_btn_search = toggle_btn.clone();
+    let selected_index_search = selected_index.clone();
 
     search_entry.connect_changed(move |entry| {
         let text = entry.text().to_string();
@@ -184,24 +200,35 @@ pub fn build_launcher_ui(
             source_id.remove();
         }
         
-        let populate_clone = populate_grid_search.clone();
+        let current_query = current_query_search.clone();
         let d_source_id_clone = d_source_id.clone();
-        let selected_index_clone = selected_index_changed.clone();
-        let left_list_box_clone = left_list_box_changed.clone();
-        let right_scroll_clone = right_scroll_changed.clone();
+        let list_box = list_box_search.clone();
+        let apps = apps_search.clone();
+        let window = window_search.clone();
+        let expanded = expanded_search.clone();
+        let toggle_btn = toggle_btn_search.clone();
+        let selected_index = selected_index_search.clone();
 
         let new_source_id = gtk4::glib::timeout_add_local_once(
             std::time::Duration::from_millis(200),
             move || {
-                populate_clone();
                 *d_source_id_clone.borrow_mut() = None;
-                *selected_index_clone.borrow_mut() = Some(0);
-                update_highlight(&left_list_box_clone, &right_scroll_clone, Some(0));
+                *selected_index.borrow_mut() = Some(0);
+                repopulate_results(
+                    &list_box,
+                    &current_query.borrow(),
+                    &apps,
+                    &window,
+                    *expanded.borrow(),
+                    &toggle_btn,
+                    selected_index.clone(),
+                );
             }
         );
         *d_source_id.borrow_mut() = Some(new_source_id);
     });
 
+    // Handle slide animations
     let is_animating = Rc::new(std::cell::Cell::new(false));
     let is_animating_clone = is_animating.clone();
     let win_clone_close = window.clone();
@@ -238,13 +265,13 @@ pub fn build_launcher_ui(
         }
     });
 
+    // Key event controller for keyboard navigation
     let key_controller = gtk4::EventControllerKey::new();
     key_controller.set_propagation_phase(gtk4::PropagationPhase::Capture);
     let win_clone = window.clone();
-    let left_list_box_clone = left_list_box.clone();
-    let right_scroll_clone = right_scroll.clone();
-    let selected_index_clone = selected_index.clone();
-    let search_entry_clone = search_entry.clone();
+    let list_box_key = list_box.clone();
+    let selected_index_key = selected_index.clone();
+    let search_entry_key = search_entry.clone();
 
     key_controller.connect_key_pressed(move |_, key, _, _| {
         match key {
@@ -253,30 +280,30 @@ pub fn build_launcher_ui(
                 gtk4::glib::Propagation::Stop
             }
             gtk4::gdk::Key::Down => {
-                let buttons = get_visible_selectable_buttons(&left_list_box_clone, &right_scroll_clone);
+                let buttons = get_visible_selectable_buttons(&list_box_key);
                 if !buttons.is_empty() {
-                    let current = selected_index_clone.borrow().unwrap_or(0);
+                    let current = selected_index_key.borrow().unwrap_or(0);
                     let next = (current + 1) % buttons.len();
-                    *selected_index_clone.borrow_mut() = Some(next);
-                    update_highlight(&left_list_box_clone, &right_scroll_clone, Some(next));
+                    *selected_index_key.borrow_mut() = Some(next);
+                    update_highlight(&list_box_key, Some(next));
                     buttons[next].grab_focus();
                 }
                 gtk4::glib::Propagation::Stop
             }
             gtk4::gdk::Key::Up => {
-                let buttons = get_visible_selectable_buttons(&left_list_box_clone, &right_scroll_clone);
+                let buttons = get_visible_selectable_buttons(&list_box_key);
                 if !buttons.is_empty() {
-                    let current = selected_index_clone.borrow().unwrap_or(0);
+                    let current = selected_index_key.borrow().unwrap_or(0);
                     let prev = if current == 0 { buttons.len() - 1 } else { current - 1 };
-                    *selected_index_clone.borrow_mut() = Some(prev);
-                    update_highlight(&left_list_box_clone, &right_scroll_clone, Some(prev));
+                    *selected_index_key.borrow_mut() = Some(prev);
+                    update_highlight(&list_box_key, Some(prev));
                     buttons[prev].grab_focus();
                 }
                 gtk4::glib::Propagation::Stop
             }
             gtk4::gdk::Key::Return | gtk4::gdk::Key::KP_Enter => {
-                let buttons = get_visible_selectable_buttons(&left_list_box_clone, &right_scroll_clone);
-                if let Some(idx) = *selected_index_clone.borrow() {
+                let buttons = get_visible_selectable_buttons(&list_box_key);
+                if let Some(idx) = *selected_index_key.borrow() {
                     if idx < buttons.len() {
                         buttons[idx].activate();
                     }
@@ -286,21 +313,21 @@ pub fn build_launcher_ui(
                 gtk4::glib::Propagation::Stop
             }
             _ => {
-                if !search_entry_clone.is_focus() {
+                if !search_entry_key.is_focus() {
                     if let Some(c) = key.to_unicode() {
                         if !c.is_control() {
-                            let text = search_entry_clone.text().to_string();
-                            search_entry_clone.set_text(&format!("{}{}", text, c));
-                            search_entry_clone.set_position(-1);
-                            search_entry_clone.grab_focus();
+                            let text = search_entry_key.text().to_string();
+                            search_entry_key.set_text(&format!("{}{}", text, c));
+                            search_entry_key.set_position(-1);
+                            search_entry_key.grab_focus();
                             return gtk4::glib::Propagation::Stop;
                         }
                     } else if key == gtk4::gdk::Key::BackSpace {
-                        let mut text = search_entry_clone.text().to_string();
+                        let mut text = search_entry_key.text().to_string();
                         text.pop();
-                        search_entry_clone.set_text(&text);
-                        search_entry_clone.set_position(-1);
-                        search_entry_clone.grab_focus();
+                        search_entry_key.set_text(&text);
+                        search_entry_key.set_position(-1);
+                        search_entry_key.grab_focus();
                         return gtk4::glib::Propagation::Stop;
                     }
                 }
@@ -310,59 +337,28 @@ pub fn build_launcher_ui(
     });
     window.add_controller(key_controller);
 
-    box_layout.append(&search_entry);
-    
-    columns_box.append(&left_scroll);
-    columns_box.append(&right_scroll);
-    columns_box.set_margin_start(16);
-    columns_box.set_margin_end(16);
-    box_layout.append(&columns_box);
-
-    let footer_sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
-    footer_sep.add_css_class("launcher-footer-separator");
-    footer_sep.set_margin_start(16);
-    footer_sep.set_margin_end(16);
-    box_layout.append(&footer_sep);
-
-    let footer = create_launcher_footer();
-    footer.set_margin_start(16);
-    footer.set_margin_end(16);
-    footer.set_margin_bottom(16);
-    box_layout.append(&footer);
-
-    window.set_child(Some(&box_layout));
-
-    babydra_common::animation::slide_in(
-        box_layout.upcast_ref(),
-        babydra_common::animation::SlideDirection::Down,
-        40,
-        450,
-    );
-
-    let left_list_box_focus_change = left_list_box.clone();
-    let right_scroll_focus_change = right_scroll.clone();
-    let selected_index_focus_change = selected_index.clone();
+    // Focus state listeners
+    let list_box_focus = list_box.clone();
+    let selected_index_focus = selected_index.clone();
 
     window.connect_focus_widget_notify(move |win| {
         if let Some(focus_widget) = gtk4::prelude::RootExt::focus(win) {
-            let buttons = get_visible_selectable_buttons(&left_list_box_focus_change, &right_scroll_focus_change);
+            let buttons = get_visible_selectable_buttons(&list_box_focus);
             if let Some(pos) = buttons.iter().position(|b| b.clone().upcast::<gtk4::Widget>() == focus_widget) {
-                *selected_index_focus_change.borrow_mut() = Some(pos);
-                update_highlight(&left_list_box_focus_change, &right_scroll_focus_change, Some(pos));
+                *selected_index_focus.borrow_mut() = Some(pos);
+                update_highlight(&list_box_focus, Some(pos));
             }
         }
     });
 
-    let left_list_box_focus = left_list_box.clone();
-    let right_scroll_focus = right_scroll.clone();
-    let search_entry_focus = search_entry.clone();
+    let list_box_map = list_box.clone();
+    let search_entry_map = search_entry.clone();
     window.connect_map(move |_| {
         gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(50), {
-            let left_list_box = left_list_box_focus.clone();
-            let right_scroll = right_scroll_focus.clone();
-            let search_entry = search_entry_focus.clone();
+            let list_box = list_box_map.clone();
+            let search_entry = search_entry_map.clone();
             move || {
-                let buttons = get_visible_selectable_buttons(&left_list_box, &right_scroll);
+                let buttons = get_visible_selectable_buttons(&list_box);
                 if !buttons.is_empty() {
                     buttons[0].grab_focus();
                 } else {
@@ -372,60 +368,44 @@ pub fn build_launcher_ui(
         });
     });
 
+    babydra_common::animation::slide_in(
+        box_layout.upcast_ref(),
+        babydra_common::animation::SlideDirection::Down,
+        40,
+        450,
+    );
+
     window
 }
 
-/// Helper function to traverse left and right grids to collect all visible clickable button widgets.
-fn get_visible_selectable_buttons(
-    left_list_box: &gtk4::Box,
-    right_scroll: &gtk4::ScrolledWindow,
-) -> Vec<gtk4::Button> {
+/// Helper function to traverse the list box to collect all visible clickable button widgets.
+fn get_visible_selectable_buttons(list_box: &gtk4::Box) -> Vec<gtk4::Button> {
     let mut buttons = Vec::new();
-
-    let mut child = left_list_box.first_child();
+    let mut child = list_box.first_child();
     while let Some(w) = child {
         if w.is_visible() {
             if let Some(btn) = w.downcast_ref::<gtk4::Button>() {
                 buttons.push(btn.clone());
+            } else if let Some(sub_box) = w.downcast_ref::<gtk4::Box>() {
+                let mut sub_child = sub_box.first_child();
+                while let Some(sw) = sub_child {
+                    if sw.is_visible() {
+                        if let Some(btn) = sw.downcast_ref::<gtk4::Button>() {
+                            buttons.push(btn.clone());
+                        }
+                    }
+                    sub_child = sw.next_sibling();
+                }
             }
         }
         child = w.next_sibling();
     }
-
-    if let Some(right_child) = right_scroll.child() {
-        if let Some(right_box) = right_child.downcast_ref::<gtk4::Box>() {
-            let mut sub_child = right_box.first_child();
-            while let Some(w) = sub_child {
-                if w.is_visible() {
-                    if let Some(btn) = w.downcast_ref::<gtk4::Button>() {
-                        buttons.push(btn.clone());
-                    } else if let Some(files_box) = w.downcast_ref::<gtk4::Box>() {
-                        let mut file_child = files_box.first_child();
-                        while let Some(fw) = file_child {
-                            if fw.is_visible() {
-                                if let Some(btn) = fw.downcast_ref::<gtk4::Button>() {
-                                    buttons.push(btn.clone());
-                                }
-                            }
-                            file_child = fw.next_sibling();
-                        }
-                    }
-                }
-                sub_child = w.next_sibling();
-            }
-        }
-    }
-
     buttons
 }
 
-/// Applies highlit/selected styling to the active child button index while removing it from others.
-fn update_highlight(
-    left_list_box: &gtk4::Box,
-    right_scroll: &gtk4::ScrolledWindow,
-    selected_idx: Option<usize>,
-) {
-    let buttons = get_visible_selectable_buttons(left_list_box, right_scroll);
+/// Applies active highlit/selected styling to the active child button index while removing it from others.
+fn update_highlight(list_box: &gtk4::Box, selected_idx: Option<usize>) {
+    let buttons = get_visible_selectable_buttons(list_box);
     for (i, btn) in buttons.iter().enumerate() {
         if Some(i) == selected_idx {
             btn.add_css_class("selected");
@@ -435,3 +415,142 @@ fn update_highlight(
     }
 }
 
+/// Re-populates the unified results list box dynamically.
+fn repopulate_results(
+    list_box: &gtk4::Box,
+    query: &str,
+    apps: &[babydra_common::desktop::DesktopApp],
+    window: &gtk4::ApplicationWindow,
+    expanded: bool,
+    toggle_btn: &gtk4::Button,
+    selected_index: Rc<RefCell<Option<usize>>>,
+) {
+    // 1. Remove all children from list_box
+    while let Some(child) = list_box.first_child() {
+        list_box.remove(&child);
+    }
+
+    let q = query.trim().to_lowercase();
+
+    if q.is_empty() {
+        // --- 1. APPLICATIONS GROUP (When empty query) ---
+        let app_title = gtk4::Label::new(Some("Applications"));
+        app_title.add_css_class("launcher-section-title");
+        app_title.set_halign(gtk4::Align::Start);
+        list_box.append(&app_title);
+
+        let mut dep_count = 0;
+        for app in apps {
+            if !app.is_dependency {
+                let btn = create_list_app_widget(app, window);
+                list_box.append(&btn);
+            } else {
+                dep_count += 1;
+            }
+        }
+
+        // Add the toggle button if there are dependency apps
+        if dep_count > 0 {
+            list_box.append(toggle_btn);
+
+            // Add dependency apps (visible only if expanded)
+            for app in apps {
+                if app.is_dependency {
+                    let btn = create_list_app_widget(app, window);
+                    btn.set_visible(expanded);
+                    list_box.append(&btn);
+                }
+            }
+        }
+    } else {
+        // --- 1. APPLICATIONS GROUP (When filtering) ---
+        let mut matched_apps = Vec::new();
+        for app in apps {
+            if app.name.to_lowercase().contains(&q) {
+                matched_apps.push(app.clone());
+            }
+        }
+
+        if !matched_apps.is_empty() {
+            let app_title = gtk4::Label::new(Some("Applications"));
+            app_title.add_css_class("launcher-section-title");
+            app_title.set_halign(gtk4::Align::Start);
+            list_box.append(&app_title);
+
+            for app in &matched_apps {
+                let btn = create_list_app_widget(app, window);
+                list_box.append(&btn);
+            }
+        }
+
+        // --- 2. WEB SEARCH GROUP ---
+        let web_title = gtk4::Label::new(Some("Web Search"));
+        web_title.add_css_class("launcher-section-title");
+        web_title.set_halign(gtk4::Align::Start);
+        list_box.append(&web_title);
+
+        let (browser_btn, _) = build_browser_search_button(&query);
+        let q_for_browser = query.to_string();
+        let win_to_close = window.clone();
+        browser_btn.connect_clicked(move |_| {
+            let search_query = q_for_browser.replace(' ', "+");
+            let url = format!("https://www.google.com/search?q={}", search_query);
+            let _ = std::process::Command::new("xdg-open").arg(&url).spawn();
+            win_to_close.close();
+        });
+
+        let motion = gtk4::EventControllerMotion::new();
+        let btn_clone = browser_btn.clone();
+        motion.connect_enter(move |_, _, _| {
+            btn_clone.grab_focus();
+        });
+        browser_btn.add_controller(motion);
+        list_box.append(&browser_btn);
+
+        // --- 3. FILES GROUP (Asynchronous search placeholder container) ---
+        let files_container = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+        list_box.append(&files_container);
+
+        let query_for_search = query.to_string();
+        let (sender, receiver) = std::sync::mpsc::channel::<Vec<std::path::PathBuf>>();
+
+        std::thread::spawn(move || {
+            let results = search_files(&query_for_search);
+            let _ = sender.send(results);
+        });
+
+        let win_clone = window.clone();
+        let list_box_clone = list_box.clone();
+        let selected_index_clone = selected_index.clone();
+        
+        gtk4::glib::idle_add_local(move || {
+            match receiver.try_recv() {
+                Ok(matched_files) => {
+                    if !matched_files.is_empty() {
+                        let files_title = gtk4::Label::new(Some("Files & Directories"));
+                        files_title.add_css_class("launcher-section-title");
+                        files_title.set_halign(gtk4::Align::Start);
+                        files_container.append(&files_title);
+
+                        for file_path in &matched_files {
+                            let btn = create_file_row(file_path, &win_clone);
+                            files_container.append(&btn);
+                        }
+
+                        // Make sure highlight adapts after files load
+                        update_highlight(&list_box_clone, *selected_index_clone.borrow());
+                    }
+                    gtk4::glib::ControlFlow::Break
+                }
+                Err(std::sync::mpsc::TryRecvError::Empty) => {
+                    gtk4::glib::ControlFlow::Continue
+                }
+                Err(std::sync::mpsc::TryRecvError::Disconnected) => {
+                    gtk4::glib::ControlFlow::Break
+                }
+            }
+        });
+    }
+
+    update_highlight(list_box, *selected_index.borrow());
+}
