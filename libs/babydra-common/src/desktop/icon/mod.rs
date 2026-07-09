@@ -84,6 +84,8 @@ pub fn get_icon(name: &str, size: i32) -> gtk4::Image {
         ("privacy", true) => Some(LIGHT_PRIVACY_SVG),
         ("restart", false) => Some(DARK_RESTART_SVG),
         ("restart", true) => Some(LIGHT_RESTART_SVG),
+        ("sleep", false) => Some(DARK_SLEEP_SVG),
+        ("sleep", true) => Some(LIGHT_SLEEP_SVG),
         ("search", false) => Some(DARK_SEARCH_SVG),
         ("search", true) => Some(LIGHT_SEARCH_SVG),
         ("server", false) => Some(DARK_SERVER_SVG),
