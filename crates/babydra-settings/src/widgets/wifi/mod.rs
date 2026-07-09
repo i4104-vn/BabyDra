@@ -4,20 +4,15 @@ use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
+mod render;
+
 struct WifiState {
     enabled: bool,
     networks: Vec<(String, String, String, bool)>,
 }
 
 pub fn create_wifi_widget() -> gtk4::Box {
-    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
-    main_box.set_margin_start(10);
-    main_box.set_margin_end(10);
-
-    let title_lbl = gtk4::Label::new(Some("Wi-Fi & Mạng"));
-    title_lbl.add_css_class("settings-title");
-    title_lbl.set_halign(gtk4::Align::Start);
-    main_box.append(&title_lbl);
+    let (main_box, wifi_switch, list_box) = render::build_wifi_ui();
 
     let wifi_status = babydra_common::helper::wifi::get_wifi_state().0;
     let state = Rc::new(RefCell::new(WifiState {
@@ -25,59 +20,12 @@ pub fn create_wifi_widget() -> gtk4::Box {
         networks: Vec::new(),
     }));
 
-    // Switch Card Row
-    let switch_card = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    switch_card.add_css_class("settings-card");
-    switch_card.set_valign(gtk4::Align::Center);
-
-    let label_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-    let status_title = gtk4::Label::new(Some("Bật/Tắt Wi-Fi"));
-    status_title.add_css_class("settings-label");
-    status_title.set_halign(gtk4::Align::Start);
-    let status_desc = gtk4::Label::new(Some("Bật hoặc tắt bộ thu phát mạng không dây"));
-    status_desc.add_css_class("settings-desc");
-    status_desc.set_halign(gtk4::Align::Start);
-    label_box.append(&status_title);
-    label_box.append(&status_desc);
-    switch_card.append(&label_box);
-
-    let spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    spacer.set_hexpand(true);
-    switch_card.append(&spacer);
-
-    let wifi_switch = gtk4::Switch::new();
     wifi_switch.set_active(wifi_status);
-    wifi_switch.set_valign(gtk4::Align::Center);
-    switch_card.append(&wifi_switch);
-
-    main_box.append(&switch_card);
-
-    // List title
-    let list_title = gtk4::Label::new(Some("Danh sách mạng khả dụng"));
-    list_title.add_css_class("settings-subtitle");
-    list_title.set_halign(gtk4::Align::Start);
-    main_box.append(&list_title);
-
-    let list_container = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
-    list_container.add_css_class("settings-card");
-    list_container.set_vexpand(true);
-
-    let scroll = gtk4::ScrolledWindow::new();
-    scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
-    scroll.set_vexpand(true);
-
-    let list_box = gtk4::ListBox::new();
-    list_box.set_selection_mode(gtk4::SelectionMode::None);
-    scroll.set_child(Some(&list_box));
-    list_container.append(&scroll);
-
-    main_box.append(&list_container);
 
     let render_networks = {
         let list_box_clone = list_box.clone();
         let state_clone = state.clone();
         move || {
-            // Clear existing rows
             while let Some(child) = list_box_clone.first_child() {
                 list_box_clone.remove(&child);
             }
@@ -156,7 +104,6 @@ pub fn create_wifi_widget() -> gtk4::Box {
                         if security_clone == "open" {
                             let _ = babydra_common::helper::wifi::connect_wifi(&ssid_clone, None, None);
                         } else {
-                            // Show password dialog
                             if let Some(win) = list_box_parent.root().and_then(|r| r.downcast::<gtk4::Window>().ok()) {
                                 let dialog = gtk4::Dialog::with_buttons(
                                     Some(&format!("Kết nối đến {}", ssid_clone)),

@@ -4,17 +4,82 @@ use gtk4::prelude::*;
 use std::process::Command;
 use sysinfo::System;
 
+mod render;
+
+fn run_system_update() {
+    let terminals = [
+        "kitty",
+        "alacritty",
+        "wezterm",
+        "gnome-terminal",
+        "konsole",
+        "xfce4-terminal",
+    ];
+    let update_cmd = "sudo pacman -Syu";
+
+    for term in terminals {
+        let mut cmd = Command::new(term);
+        match term {
+            "gnome-terminal" | "xfce4-terminal" => {
+                cmd.args(&[
+                    "--title",
+                    "update-system",
+                    "--",
+                    "bash",
+                    "-c",
+                    &format!(
+                        "{}; echo; read -p 'Press Enter to close...' -n 1",
+                        update_cmd
+                    ),
+                ]);
+            }
+            "konsole" => {
+                cmd.args(&[
+                    "-p",
+                    "tabtitle=update-system",
+                    "-e",
+                    "bash",
+                    "-c",
+                    &format!(
+                        "{}; echo; read -p 'Press Enter to close...' -n 1",
+                        update_cmd
+                    ),
+                ]);
+            }
+            "kitty" | "alacritty" => {
+                cmd.args(&[
+                    "--title",
+                    "update-system",
+                    "-e",
+                    "sh",
+                    "-c",
+                    &format!(
+                        "{}; echo; read -p 'Press Enter to close...' -n 1",
+                        update_cmd
+                    ),
+                ]);
+            }
+            "wezterm" => {
+                cmd.args(&[
+                    "-e",
+                    "sh",
+                    "-c",
+                    &format!(
+                        "{}; echo; read -p 'Press Enter to close...' -n 1",
+                        update_cmd
+                    ),
+                ]);
+            }
+            _ => continue,
+        }
+
+        if cmd.spawn().is_ok() {
+            return;
+        }
+    }
+}
+
 pub fn create_system_widget() -> gtk4::Box {
-    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
-    main_box.set_margin_start(10);
-    main_box.set_margin_end(10);
-
-    let title_lbl = gtk4::Label::new(Some("Thông tin hệ thống"));
-    title_lbl.add_css_class("settings-title");
-    title_lbl.set_halign(gtk4::Align::Start);
-    main_box.append(&title_lbl);
-
-    // Fetch system statistics
     let mut sys = System::new_all();
     sys.refresh_all();
 
@@ -27,7 +92,6 @@ pub fn create_system_widget() -> gtk4::Box {
     let used_mem_gb = sys.used_memory() as f64 / (1024.0 * 1024.0 * 1024.0);
     let memory_text = format!("{:.1} GB / {:.1} GB ({:.0}%)", used_mem_gb, total_mem_gb, (used_mem_gb / total_mem_gb) * 100.0);
 
-    // Retrieve primary GPU information using lspci
     let mut gpu_info = "lspci lookup failed".to_string();
     if let Ok(output) = Command::new("sh")
         .arg("-c")
@@ -40,7 +104,6 @@ pub fn create_system_widget() -> gtk4::Box {
         }
     }
 
-    // Disk Usage
     let mut disk_text = "Unknown".to_string();
     if let Ok(output) = Command::new("df").arg("-h").arg("/").output() {
         let stdout = String::from_utf8_lossy(&output.stdout);
@@ -53,73 +116,18 @@ pub fn create_system_widget() -> gtk4::Box {
         }
     }
 
-    let stats_card = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
-    stats_card.add_css_class("settings-card");
-
-    let mut add_info_row = |label: &str, value: &str| {
-        let row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-        row.set_margin_top(4);
-        row.set_margin_bottom(4);
-
-        let lbl = gtk4::Label::new(Some(label));
-        lbl.add_css_class("settings-label");
-        lbl.set_halign(gtk4::Align::Start);
-        row.append(&lbl);
-
-        let spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-        spacer.set_hexpand(true);
-        row.append(&spacer);
-
-        let val = gtk4::Label::new(Some(value));
-        val.add_css_class("settings-desc");
-        val.set_halign(gtk4::Align::End);
-        row.append(&val);
-
-        stats_card.append(&row);
-    };
-
-    add_info_row("Tên máy (Hostname)", &hostname);
-    add_info_row("Hệ điều hành (OS)", &os_name);
-    add_info_row("Nhân Kernel", &kernel_version);
-    add_info_row("Bộ vi xử lý (CPU)", &cpu_model);
-    add_info_row("Card đồ họa (GPU)", &gpu_info);
-    add_info_row("Bộ nhớ RAM", &memory_text);
-    add_info_row("Ổ đĩa hệ thống (/)", &disk_text);
-
-    main_box.append(&stats_card);
-
-    // --- Update Card ---
-    let update_card = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    update_card.add_css_class("settings-card");
-    update_card.set_valign(gtk4::Align::Center);
-
-    let update_lbl_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-    let update_title = gtk4::Label::new(Some("Cập nhật hệ thống"));
-    update_title.add_css_class("settings-label");
-    update_title.set_halign(gtk4::Align::Start);
-    let update_desc = gtk4::Label::new(Some("Kiểm tra và cài đặt các bản nâng cấp Arch Linux mới nhất"));
-    update_desc.add_css_class("settings-desc");
-    update_desc.set_halign(gtk4::Align::Start);
-    update_lbl_box.append(&update_title);
-    update_lbl_box.append(&update_desc);
-    update_card.append(&update_lbl_box);
-
-    let update_spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    update_spacer.set_hexpand(true);
-    update_card.append(&update_spacer);
-
-    let update_btn = gtk4::Button::with_label("Cập nhật ngay");
-    update_btn.set_valign(gtk4::Align::Center);
-    update_btn.add_css_class("suggested-action");
-    update_card.append(&update_btn);
-
-    main_box.append(&update_card);
+    let (main_box, update_btn) = render::build_system_ui(
+        &hostname,
+        &os_name,
+        &kernel_version,
+        &cpu_model,
+        &gpu_info,
+        &memory_text,
+        &disk_text,
+    );
 
     update_btn.connect_clicked(|_| {
-        // Launch a terminal window executing pacman/yay update
-        let _ = Command::new("kitty")
-            .args(&["-e", "yay", "-Syu"])
-            .spawn();
+        run_system_update();
     });
 
     main_box
