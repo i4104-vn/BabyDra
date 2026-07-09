@@ -3,8 +3,8 @@
 window.settings-window,
 window.settings-window > overlay,
 window.settings-window > overlay > box {
-    background-color: #f7f5f0 !important;
-    background-image: none !important;
+    background-color: #f7f5f0;
+    background-image: none;
 }
 
 .settings-sidebar {
