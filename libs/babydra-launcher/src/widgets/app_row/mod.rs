@@ -1,6 +1,6 @@
 //! Controller wrappers for individual launcher application row and grid item buttons.
 
-use crate::models::DesktopApp;
+use babydra_common::DesktopApp;
 use gtk4::prelude::*;
 use std::process::Command;
 

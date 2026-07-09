@@ -1,6 +1,6 @@
 //! UI renderer and main window coordinator for the search/app launcher overlay.
 
-use crate::core::find_desktop_apps;
+use babydra_common::find_desktop_apps;
 use gtk4::prelude::*;
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer};
 use std::rc::Rc;
