@@ -5,6 +5,7 @@ window.settings-window > overlay,
 window.settings-window > overlay > box {
     background-color: #f7f5f0;
     background-image: none;
+    transition: all 250ms ease;
 }
 
 .settings-sidebar {
@@ -20,12 +21,13 @@ window.settings-window > overlay > box {
     color: #5c5c5e;
     font-size: 14px;
     font-weight: 500;
-    transition: all 250ms ease;
+    transition: all 250ms ease-out;
 }
 
 .settings-sidebar-row:hover {
     background-color: rgba(0, 0, 0, 0.05);
     color: #1c1c1e;
+    transform: translateX(2px);
 }
 
 .settings-sidebar-row:selected {
@@ -62,6 +64,12 @@ window.settings-window > overlay > box {
     border-radius: 16px;
     padding: 16px;
     margin-bottom: 16px;
+    transition: all 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.settings-card:hover {
+    border-color: rgba(0, 0, 0, 0.14);
+    background-color: rgba(0, 0, 0, 0.04);
 }
 
 .settings-row {
@@ -120,9 +128,28 @@ button:hover {
     border-color: rgba(0, 0, 0, 0.14);
 }
 
+/* Custom GTK Switch Slider style */
+switch {
+    background-color: rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 34px;
+    min-height: 24px;
+    min-width: 44px;
+    transition: all 250ms ease;
+}
+
 switch:checked {
-    background-color: #8a6747;
-    border-color: #8a6747;
+    background: linear-gradient(135deg, #8a6747, #d4a96a);
+    border-color: rgba(0, 0, 0, 0.10);
+}
+
+switch slider {
+    background-color: #ffffff;
+    border-radius: 50%;
+    min-width: 20px;
+    min-height: 20px;
+    margin: 1px;
+    transition: all 250ms ease;
 }
 
 .cheatsheet-overlay {
