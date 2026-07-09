@@ -1,0 +1,105 @@
+/* Settings Dark Mode stylesheet */
+
+.settings-window {
+    background-color: #0f0f0f;
+}
+
+.settings-sidebar {
+    background-color: rgba(20, 20, 20, 0.5);
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 18px 12px;
+}
+
+.settings-sidebar-row {
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 4px;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 200ms ease;
+}
+
+.settings-sidebar-row:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.settings-sidebar-row:selected {
+    background-color: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
+.settings-content {
+    background-color: transparent;
+    padding: 24px;
+}
+
+.settings-title {
+    font-size: 22px;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 20px;
+}
+
+.settings-subtitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 12px;
+}
+
+.settings-card {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.settings-row {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.settings-row:last-child {
+    border-bottom: none;
+}
+
+.settings-label {
+    font-size: 14px;
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.settings-desc {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.cheatsheet-overlay {
+    background-color: rgba(15, 15, 15, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.cheatsheet-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+}
+
+.cheatsheet-label {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 13px;
+}
+
+.cheatsheet-value {
+    color: #ffffff;
+    font-family: monospace;
+    font-size: 13px;
+}
