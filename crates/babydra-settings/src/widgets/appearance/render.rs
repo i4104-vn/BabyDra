@@ -13,7 +13,6 @@ pub fn build_appearance_ui(
     gtk4::Button,
     gtk4::Button,
     gtk4::Button,
-    gtk4::Switch,
     gtk4::DropDown,
 ) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 20);
@@ -117,30 +116,6 @@ pub fn build_appearance_ui(
     config_row.append(&theme_box);
     cc_box.append(&config_row);
 
-    // Transparency Control Row
-    let transparency_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    transparency_row.add_css_class("settings-row-item");
-    transparency_row.set_margin_top(12);
-
-    let row_left = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    let eye_icon = gtk4::Image::from_icon_name("avatar-default-symbolic"); // eye icon standard name
-    eye_icon.set_pixel_size(16);
-    row_left.append(&eye_icon);
-
-    let row_lbl = gtk4::Label::new(Some("Transparency"));
-    row_lbl.add_css_class("settings-label");
-    row_left.append(&row_lbl);
-    transparency_row.append(&row_left);
-
-    let spacer1 = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    spacer1.set_hexpand(true);
-    transparency_row.append(&spacer1);
-
-    let trans_switch = gtk4::Switch::new();
-    trans_switch.set_active(true);
-    transparency_row.append(&trans_switch);
-    cc_box.append(&transparency_row);
-
     // GTK Theme Selector
     let gtk_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
     gtk_row.add_css_class("settings-row-item");
@@ -176,7 +151,6 @@ pub fn build_appearance_ui(
         pick_btn,
         light_card,
         dark_card,
-        trans_switch,
         dropdown,
     )
 }

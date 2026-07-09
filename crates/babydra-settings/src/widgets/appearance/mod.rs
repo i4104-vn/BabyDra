@@ -5,32 +5,6 @@ use std::process::Command;
 
 mod render;
 
-fn get_color_scheme() -> String {
-    let output = Command::new("gsettings")
-        .args(&["get", "org.gnome.desktop.interface", "color-scheme"])
-        .output();
-
-    match output {
-        Ok(o) => {
-            let stdout = String::from_utf8_lossy(&o.stdout);
-            let raw = stdout.trim().replace("'", "");
-            if raw == "prefer-dark" {
-                "dark".to_string()
-            } else {
-                "light".to_string()
-            }
-        }
-        Err(_) => "dark".to_string(),
-    }
-}
-
-fn set_color_scheme(dark: bool) {
-    let scheme = if dark { "prefer-dark" } else { "prefer-light" };
-    let _ = Command::new("gsettings")
-        .args(&["set", "org.gnome.desktop.interface", "color-scheme", scheme])
-        .output();
-}
-
 fn get_gtk_themes() -> Vec<String> {
     let mut themes = vec!["Adwaita".to_string(), "Adwaita-dark".to_string()];
     if let Ok(entries) = std::fs::read_dir("/usr/share/themes") {
@@ -86,7 +60,7 @@ pub fn create_appearance_widget() -> gtk4::Box {
     };
 
     let wp_path = get_current_wallpaper();
-    let is_dark = get_color_scheme() == "dark";
+    let is_dark = babydra_common::is_dark_mode();
 
     let (
         main_box,
@@ -94,7 +68,6 @@ pub fn create_appearance_widget() -> gtk4::Box {
         pick_btn,
         light_card,
         dark_card,
-        trans_switch,
         dropdown,
     ) = render::build_appearance_ui(&wp_path, is_dark, &themes, &current_theme);
 
@@ -102,7 +75,7 @@ pub fn create_appearance_widget() -> gtk4::Box {
     let light_card_clone = light_card.clone();
     let dark_card_clone = dark_card.clone();
     light_card.connect_clicked(move |_| {
-        set_color_scheme(false);
+        babydra_common::set_dark_mode(false);
         babydra_common::init_theme();
         light_card_clone.add_css_class("active");
         dark_card_clone.remove_css_class("active");
@@ -112,7 +85,7 @@ pub fn create_appearance_widget() -> gtk4::Box {
     let light_card_clone2 = light_card.clone();
     let dark_card_clone2 = dark_card.clone();
     dark_card.connect_clicked(move |_| {
-        set_color_scheme(true);
+        babydra_common::set_dark_mode(true);
         babydra_common::init_theme();
         dark_card_clone2.add_css_class("active");
         light_card_clone2.remove_css_class("active");
@@ -145,17 +118,12 @@ pub fn create_appearance_widget() -> gtk4::Box {
         }
     });
 
-    trans_switch.connect_state_set(move |_, is_active| {
-        let alpha = if is_active { "0.85" } else { "1.00" };
-        let _ = Command::new("gsettings")
-            .args(&["set", "org.gnome.desktop.interface", "text-scaling-factor", alpha]) // dummy or transparency toggle mock
-            .output();
-        glib::Propagation::Proceed
-    });
-
     dropdown.connect_selected_notify(move |dd| {
-        if let Some(selected_str) = dd.selected_item().and_downcast::<gtk4::StringObject>().map(|o| o.string()) {
-            set_gtk_theme(&selected_str);
+        if let Some(obj) = dd.selected_item() {
+            if let Ok(string_obj) = obj.downcast::<gtk4::StringObject>() {
+                let selected_str = string_obj.string();
+                set_gtk_theme(&selected_str);
+            }
         }
     });
 
