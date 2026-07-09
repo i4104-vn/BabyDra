@@ -108,14 +108,21 @@ pub fn apply_theme_class(_window: &gtk4::ApplicationWindow) { }
 
 /// Checks if dark mode is preferred in GSettings.
 pub fn is_dark_mode() -> bool {
-    let gsettings = gio::Settings::new("org.gnome.desktop.interface");
-    let value = gsettings.string("color-scheme");
-    value == "prefer-dark"
+    gtk4::Settings::default()
+        .map(|s| s.is_gtk_application_prefer_dark_theme())
+        .unwrap_or(true)
 }
 
 /// Sets the color scheme preference in GSettings.
 pub fn set_dark_mode(dark: bool) {
     let scheme = if dark { "prefer-dark" } else { "prefer-light" };
-    let gsettings = gio::Settings::new("org.gnome.desktop.interface");
-    let _ = gsettings.set_string("color-scheme", scheme);
+    let _ = std::process::Command::new("gsettings")
+        .args(&["set", "org.gnome.desktop.interface", "color-scheme", scheme])
+        .output();
+
+    if let Some(settings) = gtk4::Settings::default() {
+        settings.set_gtk_application_prefer_dark_theme(dark);
+    }
+
+    init_theme();
 }

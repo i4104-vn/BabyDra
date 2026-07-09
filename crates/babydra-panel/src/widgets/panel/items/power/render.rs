@@ -25,20 +25,9 @@ pub fn create_header_row() -> gtk4::Box {
     theme_btn.set_child(Some(&theme_icon));
 
     theme_btn.connect_clicked(|_| {
-        let settings = gtk4::Settings::default();
-        let current_dark = settings.as_ref()
-            .map(|s| s.is_gtk_application_prefer_dark_theme())
-            .unwrap_or(true);
+        let current_dark = babydra_common::is_dark_mode();
         let new_dark = !current_dark;
-
-        let scheme = if new_dark { "prefer-dark" } else { "prefer-light" };
-        let _ = std::process::Command::new("gsettings")
-            .args(&["set", "org.gnome.desktop.interface", "color-scheme", scheme])
-            .output();
-
-        if let Some(ref s) = settings {
-            s.set_gtk_application_prefer_dark_theme(new_dark);
-        }
+        babydra_common::set_dark_mode(new_dark);
     });
 
     let settings_btn = gtk4::Button::new();
