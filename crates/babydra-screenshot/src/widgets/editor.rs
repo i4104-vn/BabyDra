@@ -5,8 +5,8 @@ use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::models::{EditorState, Tool, Drawing};
-use crate::capture::{
+use babydra_common::models::{EditorState, Tool, Drawing};
+use babydra_common::desktop::screenshot::{
     draw_pixelated_rect, trigger_save, trigger_copy
 };
 

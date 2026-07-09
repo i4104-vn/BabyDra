@@ -3,8 +3,7 @@
 
 use gtk4::prelude::*;
 use std::path::PathBuf;
-
-use crate::models::{Drawing, Tool, EditorState};
+use crate::models::{Drawing, EditorState};
 
 /// Draws a pixelated mosaic filter inside the target rectangle bounds.
 pub fn draw_pixelated_rect(cr: &cairo::Context, bg_pixbuf: &gdk_pixbuf::Pixbuf, x: f64, y: f64, w: f64, h: f64) {
@@ -112,11 +111,11 @@ pub fn trigger_save(state: &EditorState) -> bool {
         let save_path = get_screenshot_save_path();
         if let Ok(mut file) = std::fs::File::create(&save_path) {
             if surface.write_to_png(&mut file).is_ok() {
-                let notif_title = babydra_common::i18n::t("screenshot.saved_title");
-                let notif_msg = babydra_common::i18n::t("screenshot.saved_msg")
+                let notif_title = crate::i18n::t("screenshot.saved_title");
+                let notif_msg = crate::i18n::t("screenshot.saved_msg")
                     .replace("{}", &format!("{:?}", save_path));
                 
-                babydra_common::helper::notification::send_notification(&notif_title, &notif_msg);
+                crate::helper::notification::send_notification(&notif_title, &notif_msg);
                 return true;
             }
         }
@@ -139,9 +138,9 @@ pub fn trigger_copy(state: &EditorState, window: &gtk4::ApplicationWindow) -> bo
                     
                     if let Ok(s) = status {
                         if s.success() {
-                            let notif_title = babydra_common::i18n::t("screenshot.copied_title");
-                            let notif_msg = babydra_common::i18n::t("screenshot.copied_msg");
-                            babydra_common::helper::notification::send_notification(&notif_title, &notif_msg);
+                            let notif_title = crate::i18n::t("screenshot.copied_title");
+                            let notif_msg = crate::i18n::t("screenshot.copied_msg");
+                            crate::helper::notification::send_notification(&notif_title, &notif_msg);
                             return true;
                         }
                     }
@@ -161,18 +160,35 @@ pub fn trigger_copy(state: &EditorState, window: &gtk4::ApplicationWindow) -> bo
                 w,
                 h,
                 stride,
-            );
+                );
 
             let texture = gtk4::gdk::Texture::for_pixbuf(&pixbuf);
             let clipboard = window.upcast_ref::<gtk4::Widget>().display().clipboard();
             clipboard.set_texture(&texture);
 
-            let notif_title = babydra_common::i18n::t("screenshot.copied_title");
-            let notif_msg = babydra_common::i18n::t("screenshot.copied_msg");
-            babydra_common::helper::notification::send_notification(&notif_title, &notif_msg);
+            let notif_title = crate::i18n::t("screenshot.copied_title");
+            let notif_msg = crate::i18n::t("screenshot.copied_msg");
+            crate::helper::notification::send_notification(&notif_title, &notif_msg);
             return true;
         }
     }
     false
 }
 
+/// Performs a fullscreen screenshot capture, saves it, triggers a desktop notification, and returns success status.
+pub fn handle_fullscreen_capture() -> bool {
+    if let Some(temp_path) = capture_screen_to_temp() {
+        let save_path = get_screenshot_save_path();
+        if std::fs::copy(&temp_path, &save_path).is_ok() {
+            let notif_title = crate::i18n::t("screenshot.full_saved_title");
+            let notif_msg = crate::i18n::t("screenshot.saved_msg")
+                .replace("{}", &format!("{:?}", save_path));
+            
+            crate::helper::notification::send_notification(&notif_title, &notif_msg);
+            let _ = std::fs::remove_file(temp_path);
+            return true;
+        }
+        let _ = std::fs::remove_file(temp_path);
+    }
+    false
+}

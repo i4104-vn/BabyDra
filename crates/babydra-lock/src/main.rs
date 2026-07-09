@@ -2,7 +2,6 @@
 //! Sets up GTK Application, parses command line arguments for a custom wallpaper,
 //! initializes theme context, and maps locker windows to all connected monitors.
 
-mod pam;
 mod widgets;
 mod render;
 

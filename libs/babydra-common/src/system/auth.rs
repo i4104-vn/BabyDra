@@ -123,4 +123,3 @@ pub fn verify_password(username: &str, password: &str) -> bool {
         auth_status == PAM_SUCCESS
     }
 }
-

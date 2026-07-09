@@ -5,12 +5,10 @@ use gtk4::prelude::*;
 use std::os::unix::net::UnixStream;
 use std::io::Write;
 
-mod history;
-mod apps;
 mod widgets;
 mod render;
 
-use apps::get_running_apps;
+use babydra_common::get_running_apps;
 
 /// Connects to the active switcher instance socket to cycle the selection.
 /// Returns true if no other instance is running and this process should start the GUI.
