@@ -1,3 +1,6 @@
+//! Wallpaper management utilities.
+//! Supported backends: swww, swaybg, feh.
+
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -11,7 +14,6 @@ fn has_binary(name: &str) -> bool {
 }
 
 /// Sets the desktop wallpaper using the best available backend utility.
-/// Supported backends: swww, swaybg, feh.
 pub fn set_wallpaper(path: &Path) -> Result<(), String> {
     if !path.exists() {
         return Err(format!("Wallpaper file does not exist at: {:?}", path));

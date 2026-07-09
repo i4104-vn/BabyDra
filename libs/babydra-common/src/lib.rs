@@ -48,3 +48,11 @@ pub use desktop::icon;
 pub use notification::island;
 pub use desktop::window;
 pub use desktop::tray;
+pub use desktop::wallpaper;
+pub use desktop::wallpaper::{set_wallpaper, get_current_wallpaper};
+pub use desktop::search;
+pub use desktop::search::search_files;
+pub use desktop::mpris;
+pub use desktop::mpris::{run_playerctl, decode_uri};
+
+

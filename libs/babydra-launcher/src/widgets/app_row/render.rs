@@ -1,6 +1,6 @@
 //! UI layout renderer for launcher application rows and grids.
 
-use crate::models::DesktopApp;
+use babydra_common::DesktopApp;
 use gtk4::prelude::*;
 
 /// Builds a grid item button widget displaying an application icon and truncated label.

@@ -5,7 +5,8 @@ use gtk4::prelude::*;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
-use super::playerctl::{run_playerctl, load_album_art_from_bytes, decode_uri};
+use super::playerctl::load_album_art_from_bytes;
+use babydra_common::{run_playerctl, decode_uri};
 use crate::models::IslandWidgets;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

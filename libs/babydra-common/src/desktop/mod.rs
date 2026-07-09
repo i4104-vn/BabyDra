@@ -9,6 +9,9 @@ pub mod apps;
 pub mod tray;
 pub mod actions;
 pub mod screenshot;
+pub mod wallpaper;
+pub mod search;
+pub mod mpris;
 
 pub use config::{ThemeConfig, ShellConfig, get_babydra_config_dir};
 pub use theme::{init_theme, apply_theme_class};
@@ -21,4 +24,7 @@ pub use window::{
 };
 pub use apps::{find_desktop_apps, refresh_desktop_apps_cache, DesktopApp, get_window_hash};
 pub use screenshot::{draw_pixelated_rect, get_screenshot_save_path, capture_screen_to_temp, save_cropped_surface, trigger_save, trigger_copy, handle_fullscreen_capture};
+pub use wallpaper::{set_wallpaper, get_current_wallpaper};
+pub use search::search_files;
+pub use mpris::{run_playerctl, decode_uri};
 
