@@ -29,6 +29,12 @@ fn main() {
         // Initialize style provider
         babydra_common::init_theme();
 
+        // Sync system color-scheme changes (GSettings) to GTK settings in real-time
+        let gsettings = gtk4::gio::Settings::new("org.gnome.desktop.interface");
+        gsettings.connect_changed(Some("color-scheme"), |_, _| {
+            babydra_common::init_theme();
+        });
+
         // Define shared window states for mutual exclusivity
         let control_center_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>> = Rc::new(RefCell::new(None));
         let calendar_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>> = Rc::new(RefCell::new(None));
