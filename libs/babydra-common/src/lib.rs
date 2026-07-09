@@ -56,6 +56,8 @@ pub use desktop::mpris;
 pub use desktop::mpris::{run_playerctl, decode_uri};
 pub use desktop::exif;
 pub use desktop::exif::{read_exif, ExifData};
+pub use system::bluetooth::{is_bluetooth_enabled, set_bluetooth_enabled, get_bluetooth_devices, BtDevice};
+pub use system::vpn::{get_vpn_connections, VpnConn};
 
 
 

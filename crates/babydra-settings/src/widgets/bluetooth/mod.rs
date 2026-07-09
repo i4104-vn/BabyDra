@@ -5,61 +5,11 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::process::Command;
 
-struct BtDevice {
-    mac: String,
-    name: String,
-    connected: bool,
-}
+use babydra_common::{is_bluetooth_enabled, set_bluetooth_enabled, get_bluetooth_devices, BtDevice};
 
 struct BluetoothState {
     enabled: bool,
     devices: Vec<BtDevice>,
-}
-
-fn is_bluetooth_enabled() -> bool {
-    if let Ok(output) = Command::new("bluetoothctl").arg("show").output() {
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        stdout.contains("Powered: yes")
-    } else {
-        false
-    }
-}
-
-fn set_bluetooth_enabled(enabled: bool) {
-    let arg = if enabled { "power on" } else { "power off" };
-    let _ = Command::new("sh").arg("-c").arg(&format!("bluetoothctl {}", arg)).output();
-}
-
-fn get_bluetooth_devices() -> Vec<BtDevice> {
-    let mut devices = Vec::new();
-    
-    // Get list of known devices
-    let output = match Command::new("bluetoothctl").arg("devices").output() {
-        Ok(out) => out,
-        Err(_) => return devices,
-    };
-    
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    for line in stdout.lines() {
-        if line.starts_with("Device ") {
-            let parts: Vec<&str> = line.splitn(3, ' ').collect();
-            if parts.len() >= 3 {
-                let mac = parts[1].to_string();
-                let name = parts[2].to_string();
-                
-                // Check if connected
-                let mut connected = false;
-                if let Ok(info_out) = Command::new("bluetoothctl").arg("info").arg(&mac).output() {
-                    let info_str = String::from_utf8_lossy(&info_out.stdout);
-                    connected = info_str.contains("Connected: yes");
-                }
-                
-                devices.push(BtDevice { mac, name, connected });
-            }
-        }
-    }
-    
-    devices
 }
 
 pub fn create_bluetooth_widget() -> gtk4::Box {

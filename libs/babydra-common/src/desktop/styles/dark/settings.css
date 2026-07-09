@@ -1,7 +1,10 @@
 /* Settings Dark Mode stylesheet */
 
-.settings-window {
-    background-color: #0f0f0f;
+window.settings-window,
+window.settings-window > overlay,
+window.settings-window > overlay > box {
+    background-color: #121214 !important;
+    background-image: none !important;
 }
 
 .settings-sidebar {
