@@ -1,0 +1,207 @@
+//! VPN and WireGuard connections manager.
+
+use gtk4::prelude::*;
+use std::cell::RefCell;
+use std::rc::Rc;
+use std::process::Command;
+use std::path::PathBuf;
+
+struct VpnConn {
+    name: String,
+    conn_type: String,
+    active: bool,
+}
+
+fn get_vpn_connections() -> Vec<VpnConn> {
+    let mut connections = Vec::new();
+    let output = match Command::new("nmcli").args(&["-g", "name,type,active", "connection", "show"]).output() {
+        Ok(out) => out,
+        Err(_) => return connections,
+    };
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    for line in stdout.lines() {
+        let parts: Vec<&str> = line.split(':').collect();
+        if parts.len() >= 3 {
+            let name = parts[0].to_string();
+            let conn_type = parts[1].to_string();
+            let active = parts[2] == "yes";
+
+            if conn_type == "vpn" || conn_type == "wireguard" {
+                connections.push(VpnConn { name, conn_type, active });
+            }
+        }
+    }
+    connections
+}
+
+pub fn create_vpn_widget() -> gtk4::Box {
+    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
+    main_box.set_margin_start(10);
+    main_box.set_margin_end(10);
+
+    let title_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+    let title_lbl = gtk4::Label::new(Some("VPN & Mạng ảo"));
+    title_lbl.add_css_class("settings-title");
+    title_lbl.set_halign(gtk4::Align::Start);
+    title_box.append(&title_lbl);
+
+    let spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    spacer.set_hexpand(true);
+    title_box.append(&spacer);
+
+    let import_btn = gtk4::Button::with_label("Nhập file cấu hình (.ovpn/.conf)");
+    import_btn.set_valign(gtk4::Align::Center);
+    import_btn.add_css_class("suggested-action");
+    title_box.append(&import_btn);
+
+    main_box.append(&title_box);
+
+    let state = Rc::new(RefCell::new(get_vpn_connections()));
+
+    let list_container = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
+    list_container.add_css_class("settings-card");
+    list_container.set_vexpand(true);
+
+    let scroll = gtk4::ScrolledWindow::new();
+    scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
+    scroll.set_vexpand(true);
+
+    let list_box = gtk4::ListBox::new();
+    list_box.set_selection_mode(gtk4::SelectionMode::None);
+    scroll.set_child(Some(&list_box));
+    list_container.append(&scroll);
+
+    main_box.append(&list_container);
+
+    let render_vpns = {
+        let list_box_clone = list_box.clone();
+        let state_clone = state.clone();
+        move || {
+            while let Some(child) = list_box_clone.first_child() {
+                list_box_clone.remove(&child);
+            }
+
+            let vpns = state_clone.borrow();
+            if vpns.is_empty() {
+                let placeholder = gtk4::Label::new(Some("Chưa cấu hình cấu kết nối VPN nào. Bấm 'Nhập file' để thêm."));
+                placeholder.add_css_class("settings-desc");
+                placeholder.set_margin_top(20);
+                placeholder.set_margin_bottom(20);
+                list_box_clone.append(&placeholder);
+                return;
+            }
+
+            for vpn in vpns.iter() {
+                let row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+                row.set_margin_top(8);
+                row.set_margin_bottom(8);
+                row.set_margin_start(8);
+                row.set_margin_end(8);
+
+                let icon = gtk4::Image::from_icon_name("network-vpn-symbolic");
+                icon.set_valign(gtk4::Align::Center);
+                row.append(&icon);
+
+                let text_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
+                let name_lbl = gtk4::Label::new(Some(&vpn.name));
+                name_lbl.add_css_class("settings-label");
+                name_lbl.set_halign(gtk4::Align::Start);
+                text_box.append(&name_lbl);
+
+                let desc_lbl = gtk4::Label::new(Some(&format!("Kiểu kết nối: {}", vpn.conn_type.to_uppercase())));
+                desc_lbl.add_css_class("settings-desc");
+                desc_lbl.set_halign(gtk4::Align::Start);
+                text_box.append(&desc_lbl);
+
+                row.append(&text_box);
+
+                let spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+                spacer.set_hexpand(true);
+                row.append(&spacer);
+
+                if vpn.active {
+                    let active_lbl = gtk4::Label::new(Some("Đang kết nối"));
+                    active_lbl.add_css_class("success-text");
+                    active_lbl.set_valign(gtk4::Align::Center);
+                    row.append(&active_lbl);
+
+                    let disconnect_btn = gtk4::Button::with_label("Ngắt");
+                    disconnect_btn.set_valign(gtk4::Align::Center);
+                    let name_clone = vpn.name.clone();
+                    disconnect_btn.connect_clicked(move |_| {
+                        let _ = Command::new("nmcli").args(&["connection", "down", &name_clone]).output();
+                    });
+                    row.append(&disconnect_btn);
+                } else {
+                    let connect_btn = gtk4::Button::with_label("Kết nối");
+                    connect_btn.set_valign(gtk4::Align::Center);
+                    connect_btn.add_css_class("suggested-action");
+                    let name_clone = vpn.name.clone();
+                    connect_btn.connect_clicked(move |_| {
+                        let _ = Command::new("nmcli").args(&["connection", "up", &name_clone]).output();
+                    });
+                    row.append(&connect_btn);
+                }
+
+                list_box_clone.append(&row);
+            }
+        }
+    };
+
+    let refresh_vpns = {
+        let state_clone = state.clone();
+        let render_clone = render_vpns.clone();
+        move || {
+            *state_clone.borrow_mut() = get_vpn_connections();
+            render_clone();
+        }
+    };
+
+    // Load initial
+    let refresh_init = refresh_vpns.clone();
+    glib::timeout_add_local(std::time::Duration::from_millis(200), move || {
+        refresh_init();
+        glib::ControlFlow::Break
+    });
+
+    // Refresh periodic
+    let refresh_periodic = refresh_vpns.clone();
+    glib::timeout_add_local(std::time::Duration::from_secs(4), move || {
+        refresh_periodic();
+        glib::ControlFlow::Continue
+    });
+
+    // Handle config file import
+    let list_box_parent = list_box.clone();
+    let refresh_on_import = refresh_vpns.clone();
+    import_btn.connect_clicked(move |_| {
+        if let Some(win) = list_box_parent.root().and_then(|r| r.downcast::<gtk4::Window>().ok()) {
+            let file_dialog = gtk4::FileDialog::new();
+            file_dialog.set_title("Open VPN Profile");
+
+            let filter = gtk4::FileFilter::new();
+            filter.set_name(Some("VPN Configurations (*.ovpn, *.conf)"));
+            filter.add_pattern("*.ovpn");
+            filter.add_pattern("*.conf");
+            file_dialog.set_default_filter(Some(&filter));
+
+            let refresh_cb = refresh_on_import.clone();
+            file_dialog.open(Some(&win), None::<&gio::Cancellable>, move |res| {
+                if let Ok(file) = res {
+                    if let Some(path) = file.path() {
+                        let path_str = path.to_string_lossy().to_string();
+                        let type_str = if path_str.ends_with(".ovpn") { "openvpn" } else { "wireguard" };
+                        let _ = Command::new("nmcli")
+                            .args(&["connection", "import", "type", type_str, "file", &path_str])
+                            .output();
+                        
+                        refresh_cb();
+                    }
+                }
+            });
+        }
+    });
+
+    main_box
+}

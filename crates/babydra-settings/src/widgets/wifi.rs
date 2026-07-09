@@ -19,7 +19,7 @@ pub fn create_wifi_widget() -> gtk4::Box {
     title_lbl.set_halign(gtk4::Align::Start);
     main_box.append(&title_lbl);
 
-    let wifi_status = babydra_common::helper::wifi::get_wifi_state().unwrap_or(false);
+    let wifi_status = babydra_common::helper::wifi::get_wifi_state().0;
     let state = Rc::new(RefCell::new(WifiState {
         enabled: wifi_status,
         networks: Vec::new(),
@@ -154,7 +154,7 @@ pub fn create_wifi_widget() -> gtk4::Box {
                     let list_box_parent = list_box_clone.clone();
                     connect_btn.connect_clicked(move |_| {
                         if security_clone == "open" {
-                            let _ = babydra_common::helper::wifi::connect_wifi(&ssid_clone, "");
+                            let _ = babydra_common::helper::wifi::connect_wifi(&ssid_clone, None, None);
                         } else {
                             // Show password dialog
                             if let Some(win) = list_box_parent.root().and_then(|r| r.downcast::<gtk4::Window>().ok()) {
@@ -166,8 +166,23 @@ pub fn create_wifi_widget() -> gtk4::Box {
                                 );
 
                                 let content_area = dialog.content_area();
-                                content_area.set_margin_all(12);
+                                content_area.set_margin_top(12);
+                                content_area.set_margin_bottom(12);
+                                content_area.set_margin_start(12);
+                                content_area.set_margin_end(12);
                                 content_area.set_spacing(10);
+
+                                let user_entry = if security_clone == "8021x" {
+                                    let user_lbl = gtk4::Label::new(Some("Tài khoản (Identity):"));
+                                    user_lbl.set_halign(gtk4::Align::Start);
+                                    content_area.append(&user_lbl);
+
+                                    let entry = gtk4::Entry::new();
+                                    content_area.append(&entry);
+                                    Some(entry)
+                                } else {
+                                    None
+                                };
 
                                 let entry_lbl = gtk4::Label::new(Some("Nhập mật khẩu cho mạng này:"));
                                 entry_lbl.set_halign(gtk4::Align::Start);
@@ -178,10 +193,16 @@ pub fn create_wifi_widget() -> gtk4::Box {
                                 content_area.append(&pw_entry);
 
                                 let ssid_btn = ssid_clone.clone();
+                                let user_entry_btn = user_entry.clone();
                                 dialog.connect_response(move |d, res| {
                                     if res == gtk4::ResponseType::Accept {
                                         let password = pw_entry.text().to_string();
-                                        let _ = babydra_common::helper::wifi::connect_wifi(&ssid_btn, &password);
+                                        let username = user_entry_btn.as_ref().map(|e| e.text().to_string());
+                                        let _ = babydra_common::helper::wifi::connect_wifi(
+                                            &ssid_btn,
+                                            username.as_deref(),
+                                            Some(&password),
+                                        );
                                     }
                                     d.destroy();
                                 });
@@ -201,11 +222,13 @@ pub fn create_wifi_widget() -> gtk4::Box {
         let state_clone = state.clone();
         let render_clone = render_networks.clone();
         move || {
-            let mut st = state_clone.borrow_mut();
-            if st.enabled {
-                st.networks = babydra_common::helper::wifi::scan_networks();
-            } else {
-                st.networks.clear();
+            {
+                let mut st = state_clone.borrow_mut();
+                if st.enabled {
+                    st.networks = babydra_common::helper::wifi::scan_networks();
+                } else {
+                    st.networks.clear();
+                }
             }
             render_clone();
         }

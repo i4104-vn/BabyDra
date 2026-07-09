@@ -28,6 +28,7 @@ killall babydra-screenshot || true
 killall babydra-lock || true
 killall babydra-image-preview || true
 killall babydra-preview || true
+killall babydra-settings || true
 
 # 5. Overwrite binaries in ~/.local/bin
 echo "Installing new binaries..."
@@ -37,6 +38,7 @@ cp target/release/babydra-switcher "$LOCAL_BIN/babydra-switcher"
 cp target/release/babydra-screenshot "$LOCAL_BIN/babydra-screenshot"
 cp target/release/babydra-lock "$LOCAL_BIN/babydra-lock"
 cp target/release/babydra-preview "$LOCAL_BIN/babydra-preview"
+cp target/release/babydra-settings "$LOCAL_BIN/babydra-settings"
 
 # Register default image handler in ~/.local/share/applications
 echo "Registering default image handler..."
@@ -57,6 +59,22 @@ EOF
 chmod +x "$HOME/.local/share/applications/babydra-preview.desktop"
 update-desktop-database "$HOME/.local/share/applications" || true
 xdg-mime default babydra-preview.desktop image/png image/jpeg image/gif image/webp image/bmp || true
+
+# Register Settings application entry
+echo "Registering settings manager entry..."
+cat << 'EOF' > "$HOME/.local/share/applications/babydra-settings.desktop"
+[Desktop Entry]
+Type=Application
+Name=BabyDra Settings
+Comment=Configure system settings
+Exec=/home/i4104/.local/bin/babydra-settings
+Icon=preferences-system
+Terminal=false
+Categories=Settings;HardwareSettings;GTK;
+NoDisplay=false
+EOF
+chmod +x "$HOME/.local/share/applications/babydra-settings.desktop"
+update-desktop-database "$HOME/.local/share/applications" || true
 
 
 # 6. Reload labwc settings

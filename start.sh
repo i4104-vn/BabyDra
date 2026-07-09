@@ -16,6 +16,7 @@ killall babydra-menu || true
 killall babydra-launcher || true
 killall babydra-image-preview || true
 killall babydra-preview || true
+killall babydra-settings || true
 killall fnott || true
 killall xfce4-notifyd || true 
 
@@ -51,6 +52,22 @@ EOF
 chmod +x "$HOME/.local/share/applications/babydra-preview.desktop"
 update-desktop-database "$HOME/.local/share/applications" || true
 xdg-mime default babydra-preview.desktop image/png image/jpeg image/gif image/webp image/bmp || true
+
+# Register Settings application entry
+echo "Registering settings manager entry..."
+cat << 'EOF' > "$HOME/.local/share/applications/babydra-settings.desktop"
+[Desktop Entry]
+Type=Application
+Name=BabyDra Settings
+Comment=Configure system settings
+Exec=/home/i4104/.local/bin/babydra-settings
+Icon=preferences-system
+Terminal=false
+Categories=Settings;HardwareSettings;GTK;
+NoDisplay=false
+EOF
+chmod +x "$HOME/.local/share/applications/babydra-settings.desktop"
+update-desktop-database "$HOME/.local/share/applications" || true
 
 # Commented out software rendering to allow GPU hardware acceleration for 120 FPS.
 # Uncomment these if running in a VM without 3D acceleration.

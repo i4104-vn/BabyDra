@@ -214,11 +214,13 @@ pub fn create_bluetooth_widget() -> gtk4::Box {
         let state_clone = state.clone();
         let render_clone = render_devices.clone();
         move || {
-            let mut st = state_clone.borrow_mut();
-            if st.enabled {
-                st.devices = get_bluetooth_devices();
-            } else {
-                st.devices.clear();
+            {
+                let mut st = state_clone.borrow_mut();
+                if st.enabled {
+                    st.devices = get_bluetooth_devices();
+                } else {
+                    st.devices.clear();
+                }
             }
             render_clone();
         }
