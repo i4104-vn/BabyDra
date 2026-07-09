@@ -58,5 +58,5 @@ fn main() {
         fallback_window.present();
     });
 
-    app.run();
+    app.run_with_args(&["babydra-image-preview"]);
 }
