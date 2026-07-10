@@ -1,9 +1,11 @@
 use gtk4::prelude::*;
 use gtk4::{Box, Orientation, ScrolledWindow, FlowBox, Align, Label, Button, Image, ListBox, Stack};
 use std::path::PathBuf;
+use std::rc::Rc;
 use std::cell::{Cell, RefCell};
 use babydra_common::FileEntry;
 use baby_utils::explore_helpers;
+use crate::ui::window::MainWindow;
 
 pub struct ContentView {
     container: ScrolledWindow,
@@ -12,6 +14,8 @@ pub struct ContentView {
     stack: Stack,
     current_mode: Cell<Option<&'static str>>,
     entries: RefCell<Vec<FileEntry>>,
+    window_handle: RefCell<Option<Rc<MainWindow>>>,
+    current_path: RefCell<PathBuf>,
     nav_callback: std::boxed::Box<dyn Fn(PathBuf)>,
 }
 
@@ -55,6 +59,8 @@ impl ContentView {
             stack,
             current_mode: Cell::new(Some("icons")),
             entries: RefCell::new(Vec::new()),
+            window_handle: RefCell::new(None),
+            current_path: RefCell::new(PathBuf::new()),
             nav_callback: std::boxed::Box::new(nav_callback),
         }
     }
@@ -71,17 +77,17 @@ impl ContentView {
             self.current_mode.set(Some("list"));
             self.stack.set_visible_child_name("list");
         }
-        // Force refresh view with current entries
-        let entries = self.entries.borrow();
-        self.update_ui(&entries);
+        self.update_ui();
     }
 
-    pub fn update(&self, entries: &[FileEntry]) {
+    pub fn update(&self, entries: &[FileEntry], window_handle: Rc<MainWindow>, current_path: PathBuf) {
         self.entries.replace(entries.to_vec());
-        self.update_ui(entries);
+        self.window_handle.replace(Some(window_handle));
+        self.current_path.replace(current_path);
+        self.update_ui();
     }
 
-    fn update_ui(&self, entries: &[FileEntry]) {
+    fn update_ui(&self) {
         // Clear flowbox
         while let Some(child) = self.flowbox.first_child() {
             self.flowbox.remove(&child);
@@ -93,9 +99,53 @@ impl ContentView {
         }
 
         let mode = self.current_mode.get().unwrap_or("icons");
+        let entries = self.entries.borrow();
+        let window_handle_opt = self.window_handle.borrow();
+        let current_path_val = self.current_path.borrow().clone();
+
+        let window_handle = match &*window_handle_opt {
+            Some(win) => win.clone(),
+            None => return, // Wait until handle is set
+        };
+
+        // Setup background right click gesture for FlowBox
+        let gesture_flow = gtk4::GestureClick::new();
+        gesture_flow.set_button(3);
+        let win = window_handle.clone();
+        let cp = current_path_val.clone();
+        let flow_widget = self.flowbox.clone();
+        gesture_flow.connect_pressed(move |gesture, _, x, y| {
+            gesture.set_state(gtk4::EventSequenceState::Claimed);
+            crate::ui::context_menu::ContextMenu::show_for_empty(
+                flow_widget.upcast_ref(),
+                x,
+                y,
+                win.clone(),
+                cp.clone(),
+            );
+        });
+        self.flowbox.add_controller(gesture_flow);
+
+        // Setup background right click gesture for ListBox
+        let gesture_list = gtk4::GestureClick::new();
+        gesture_list.set_button(3);
+        let win = window_handle.clone();
+        let cp = current_path_val.clone();
+        let list_widget = self.listbox.clone();
+        gesture_list.connect_pressed(move |gesture, _, x, y| {
+            gesture.set_state(gtk4::EventSequenceState::Claimed);
+            crate::ui::context_menu::ContextMenu::show_for_empty(
+                list_widget.upcast_ref(),
+                x,
+                y,
+                win.clone(),
+                cp.clone(),
+            );
+        });
+        self.listbox.add_controller(gesture_list);
 
         if mode == "icons" {
-            for entry in entries {
+            for entry in entries.iter() {
                 let item_box = Box::new(Orientation::Vertical, 6);
                 item_box.set_size_request(100, 100);
                 item_box.set_css_classes(&["file-item"]);
@@ -132,11 +182,31 @@ impl ContentView {
                     }
                 });
 
+                // Attach right click gesture to item
+                let gesture = gtk4::GestureClick::new();
+                gesture.set_button(3);
+                let target_entry = entry.clone();
+                let win = window_handle.clone();
+                let cp = current_path_val.clone();
+                let btn_widget = btn.clone();
+                gesture.connect_pressed(move |gesture, _, x, y| {
+                    gesture.set_state(gtk4::EventSequenceState::Claimed);
+                    crate::ui::context_menu::ContextMenu::show_for_file(
+                        btn_widget.upcast_ref(),
+                        x,
+                        y,
+                        target_entry.clone(),
+                        win.clone(),
+                        cp.clone(),
+                    );
+                });
+                btn.add_controller(gesture);
+
                 self.flowbox.append(&btn);
             }
         } else {
             // Render list/details view
-            for entry in entries {
+            for entry in entries.iter() {
                 let item_box = Box::new(Orientation::Horizontal, 12);
                 item_box.set_margin_top(6);
                 item_box.set_margin_bottom(6);
@@ -201,6 +271,26 @@ impl ContentView {
                         let _ = gio::AppInfo::launch_default_for_uri(&uri, gio::AppLaunchContext::NONE);
                     }
                 });
+
+                // Attach right click gesture to item
+                let gesture = gtk4::GestureClick::new();
+                gesture.set_button(3);
+                let target_entry = entry.clone();
+                let win = window_handle.clone();
+                let cp = current_path_val.clone();
+                let btn_widget = btn.clone();
+                gesture.connect_pressed(move |gesture, _, x, y| {
+                    gesture.set_state(gtk4::EventSequenceState::Claimed);
+                    crate::ui::context_menu::ContextMenu::show_for_file(
+                        btn_widget.upcast_ref(),
+                        x,
+                        y,
+                        target_entry.clone(),
+                        win.clone(),
+                        cp.clone(),
+                    );
+                });
+                btn.add_controller(gesture);
 
                 self.listbox.append(&btn);
             }
