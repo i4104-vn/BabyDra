@@ -1,0 +1,1 @@
+// Placeholder for MainWindow UI
