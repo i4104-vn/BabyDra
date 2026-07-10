@@ -61,19 +61,7 @@ pub fn build_launcher_ui(
 
     brand_box.append(&brand_label);
 
-    let header_spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    header_spacer.set_hexpand(true);
-
-    let close_btn = baby_utils::components::create_close_button_with_label("Close", "close-btn");
-
-    let win_close = window.clone();
-    close_btn.connect_clicked(move |_| {
-        win_close.close();
-    });
-
     header_box.append(&brand_box);
-    header_box.append(&header_spacer);
-    header_box.append(&close_btn);
     box_layout.append(&header_box);
 
     // --- Search Entry ---
