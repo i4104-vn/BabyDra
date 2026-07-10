@@ -7,42 +7,19 @@ pub fn build_wifi_ui() -> (gtk4::Box, gtk4::Switch, gtk4::ListBox) {
     main_box.set_margin_start(10);
     main_box.set_margin_end(10);
 
-    let title_lbl = gtk4::Label::new(Some("Wi-Fi & Mạng"));
-    title_lbl.add_css_class("settings-title");
-    title_lbl.set_halign(gtk4::Align::Start);
+    let title_lbl = baby_utils::components::create_title("Wi-Fi & Mạng");
     main_box.append(&title_lbl);
 
-    let switch_card = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    switch_card.add_css_class("settings-card");
-    switch_card.set_valign(gtk4::Align::Center);
-
-    let label_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-    let status_title = gtk4::Label::new(Some("Bật/Tắt Wi-Fi"));
-    status_title.add_css_class("settings-label");
-    status_title.set_halign(gtk4::Align::Start);
-    let status_desc = gtk4::Label::new(Some("Bật hoặc tắt bộ thu phát mạng không dây"));
-    status_desc.add_css_class("settings-desc");
-    status_desc.set_halign(gtk4::Align::Start);
-    label_box.append(&status_title);
-    label_box.append(&status_desc);
-    switch_card.append(&label_box);
-
-    let spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    spacer.set_hexpand(true);
-    switch_card.append(&spacer);
-
-    let wifi_switch = gtk4::Switch::new();
-    wifi_switch.set_valign(gtk4::Align::Center);
-    switch_card.append(&wifi_switch);
+    let (switch_card, wifi_switch) = baby_utils::components::create_switch_card(
+        "Bật/Tắt Wi-Fi",
+        "Bật hoặc tắt bộ thu phát mạng không dây"
+    );
     main_box.append(&switch_card);
 
-    let list_title = gtk4::Label::new(Some("Danh sách mạng khả dụng"));
-    list_title.add_css_class("settings-subtitle");
-    list_title.set_halign(gtk4::Align::Start);
+    let list_title = baby_utils::components::create_subtitle("Danh sách mạng khả dụng");
     main_box.append(&list_title);
 
-    let list_container = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
-    list_container.add_css_class("settings-card");
+    let list_container = baby_utils::components::create_card(gtk4::Orientation::Vertical, 8);
     list_container.set_vexpand(true);
 
     let scroll = gtk4::ScrolledWindow::new();

@@ -1,0 +1,110 @@
+//! Reusable premium GTK4 components for BabyDra desktop shell.
+
+use gtk4::prelude::*;
+
+/// Creates a container Box with card layout (rounded corners, dark background).
+pub fn create_card(orientation: gtk4::Orientation, spacing: i32) -> gtk4::Box {
+    let card = gtk4::Box::new(orientation, spacing);
+    card.add_css_class("settings-card");
+    card
+}
+
+/// Creates a header/title label.
+pub fn create_title(text: &str) -> gtk4::Label {
+    let lbl = gtk4::Label::new(Some(text));
+    lbl.add_css_class("settings-title");
+    lbl.set_halign(gtk4::Align::Start);
+    lbl
+}
+
+/// Creates a sub-header/subtitle label.
+pub fn create_subtitle(text: &str) -> gtk4::Label {
+    let lbl = gtk4::Label::new(Some(text));
+    lbl.add_css_class("settings-subtitle");
+    lbl.set_halign(gtk4::Align::Start);
+    lbl
+}
+
+/// Creates an item row with a title, subtitle, and an optional right-aligned widget.
+pub fn create_item_row(title: &str, subtitle: &str, right_widget: Option<&impl IsA<gtk4::Widget>>) -> gtk4::Box {
+    let row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+    row.add_css_class("settings-row-item");
+
+    let text_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
+    let title_lbl = gtk4::Label::new(Some(title));
+    title_lbl.add_css_class("settings-label");
+    title_lbl.set_halign(gtk4::Align::Start);
+    text_box.append(&title_lbl);
+
+    let desc_lbl = gtk4::Label::new(Some(subtitle));
+    desc_lbl.add_css_class("settings-desc");
+    desc_lbl.set_halign(gtk4::Align::Start);
+    text_box.append(&desc_lbl);
+
+    row.append(&text_box);
+
+    let spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    spacer.set_hexpand(true);
+    row.append(&spacer);
+
+    if let Some(widget) = right_widget {
+        row.append(widget);
+    }
+
+    row
+}
+
+/// Creates a switch card containing a title, subtitle, and an active switch.
+pub fn create_switch_card(title: &str, subtitle: &str) -> (gtk4::Box, gtk4::Switch) {
+    let card = create_card(gtk4::Orientation::Horizontal, 12);
+    card.set_valign(gtk4::Align::Center);
+
+    let label_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
+    let status_title = gtk4::Label::new(Some(title));
+    status_title.add_css_class("settings-label");
+    status_title.set_halign(gtk4::Align::Start);
+    
+    let status_desc = gtk4::Label::new(Some(subtitle));
+    status_desc.add_css_class("settings-desc");
+    status_desc.set_halign(gtk4::Align::Start);
+    
+    label_box.append(&status_title);
+    label_box.append(&status_desc);
+    card.append(&label_box);
+
+    let spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    spacer.set_hexpand(true);
+    card.append(&spacer);
+
+    let sw = gtk4::Switch::new();
+    sw.set_valign(gtk4::Align::Center);
+    sw.add_css_class("baby-switch");
+    card.append(&sw);
+
+    (card, sw)
+}
+
+/// Creates a standard interactive button.
+pub fn create_button(label: &str) -> gtk4::Button {
+    let btn = gtk4::Button::with_label(label);
+    btn.add_css_class("baby-button");
+    btn
+}
+
+/// Creates a highlighted/suggested action button (blue gradient/accent).
+pub fn create_accent_button(label: &str) -> gtk4::Button {
+    let btn = gtk4::Button::with_label(label);
+    btn.add_css_class("suggested-action");
+    btn
+}
+
+/// Creates a Floating Action Button (FAB) matching the circular blue "+" button in the image.
+pub fn create_fab(icon_name: &str) -> gtk4::Button {
+    let btn = gtk4::Button::new();
+    btn.add_css_class("baby-fab");
+    let icon = gtk4::Image::from_icon_name(icon_name);
+    btn.set_child(Some(&icon));
+    btn.set_halign(gtk4::Align::End);
+    btn.set_valign(gtk4::Align::End);
+    btn
+}
