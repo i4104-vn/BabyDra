@@ -114,10 +114,7 @@ fn create_color_popover(
     state: Rc<RefCell<EditorState>>,
     color_dot: &gtk4::DrawingArea,
 ) -> gtk4::Popover {
-    let popover = gtk4::Popover::new();
-    popover.set_parent(parent);
-    popover.set_position(gtk4::PositionType::Top);
-    popover.add_css_class("screenshot-color-popover");
+    let popover = baby_utils::components::create_popover(parent, gtk4::PositionType::Top, "screenshot-color-popover");
 
     let grid = gtk4::Grid::new();
     grid.set_column_spacing(6);

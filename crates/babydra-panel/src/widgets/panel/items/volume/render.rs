@@ -46,29 +46,30 @@ pub fn create_volume_row(
         })
     };
 
-    let mute_btn = gtk4::Button::new();
-    mute_btn.add_css_class("slider-overlay-mute-btn");
-    mute_btn.set_child(Some(&icon_container));
+    let mute_btn = baby_utils::components::create_colored_icon_button(
+        if muted_state.get() { "volume-mute" } else { "volume" },
+        16,
+        "rgba(255,255,255,0.9)",
+        &["slider-overlay-mute-btn"],
+        None,
+        {
+            let update_mute_icon_clone = update_mute_icon.clone();
+            let muted_state_clone = muted_state.clone();
+            let vol_icon_c = vol_icon.clone();
+            move || {
+                let new_mute = !muted_state_clone.get();
+                muted_state_clone.set(new_mute);
+                babydra_common::system::volume::set_muted(new_mute);
+                update_mute_icon_clone(new_mute);
+                update_topbar_volume_icon(&vol_icon_c);
+            }
+        },
+    );
     mute_btn.set_halign(gtk4::Align::Start);
     mute_btn.set_valign(gtk4::Align::Center);
     mute_btn.set_margin_start(10);
     mute_btn.set_can_focus(false);
     mute_btn.set_focus_on_click(false);
-    
-    let update_mute_icon_clone = update_mute_icon.clone();
-    let muted_state_clone = muted_state.clone();
-    let vol_icon_c = vol_icon.clone();
-    
-    mute_btn.connect_clicked(move |_| {
-        let new_mute = !muted_state_clone.get();
-        muted_state_clone.set(new_mute);
-
-        babydra_common::system::volume::set_muted(new_mute);
-
-        update_mute_icon_clone(new_mute);
-        update_topbar_volume_icon(&vol_icon_c);
-    });
-
     update_mute_icon(muted_state.get());
 
     let scale = gtk4::Scale::with_range(gtk4::Orientation::Horizontal, 0.0, 100.0, 1.0);
@@ -128,10 +129,7 @@ pub fn create_volume_row(
     row_box.append(&overlay);
     row_box.append(&menu_btn);
 
-    let popover = gtk4::Popover::new();
-    popover.add_css_class("taskbar-popover");
-    popover.set_parent(&menu_btn);
-    popover.set_position(gtk4::PositionType::Bottom);
+    let popover = baby_utils::components::create_popover(&menu_btn, gtk4::PositionType::Bottom, "taskbar-popover");
     popover.set_has_arrow(true);
 
     let popover_clone = popover.clone();
@@ -163,8 +161,7 @@ pub fn create_volume_row(
         if let Some(ref cb) = on_popover_toggled_c2 {
             cb(false);
         }
-        let up_icon = babydra_common::icon::get_system_or_file_icon("go-up-symbolic", "image-missing");
-        up_icon.set_pixel_size(12);
+        let up_icon = babydra_common::icon::get_icon("go-up-symbolic", 12);
         menu_btn_c2.set_child(Some(&up_icon));
     });
 

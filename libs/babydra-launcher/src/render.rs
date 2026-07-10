@@ -47,10 +47,10 @@ pub fn build_launcher_ui(
     // --- Header ---
     let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     header_box.add_css_class("menu-header");
-    header_box.set_margin_top(12);
-    header_box.set_margin_start(20);
-    header_box.set_margin_end(20);
-    header_box.set_margin_bottom(4);
+    header_box.set_margin_top(20);
+    header_box.set_margin_start(24);
+    header_box.set_margin_end(24);
+    header_box.set_margin_bottom(12);
 
     let brand_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
     brand_box.set_valign(gtk4::Align::Center);
@@ -61,38 +61,16 @@ pub fn build_launcher_ui(
 
     brand_box.append(&brand_label);
 
-    let header_spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    header_spacer.set_hexpand(true);
-
-    let close_btn = gtk4::Button::new();
-    close_btn.add_css_class("close-btn");
-    close_btn.set_cursor_from_name(Some("pointer"));
-    
-    let close_content = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
-    let close_icon = babydra_common::icon::get_system_or_file_icon("window-close", "window-close");
-    close_icon.set_pixel_size(12);
-    let close_label = gtk4::Label::new(Some("Close"));
-    close_content.append(&close_icon);
-    close_content.append(&close_label);
-    close_btn.set_child(Some(&close_content));
-
-    let win_close = window.clone();
-    close_btn.connect_clicked(move |_| {
-        win_close.close();
-    });
-
     header_box.append(&brand_box);
-    header_box.append(&header_spacer);
-    header_box.append(&close_btn);
     box_layout.append(&header_box);
 
     // --- Search Entry ---
     let search_entry = gtk4::Entry::new();
     search_entry.set_placeholder_text(Some("Type to search apps, files or web..."));
     search_entry.add_css_class("launcher-search");
-    search_entry.set_margin_start(20);
-    search_entry.set_margin_end(20);
-    search_entry.set_margin_bottom(6);
+    search_entry.set_margin_start(24);
+    search_entry.set_margin_end(24);
+    search_entry.set_margin_bottom(12);
     box_layout.append(&search_entry);
 
     // --- Content Scroll Area ---
@@ -101,8 +79,8 @@ pub fn build_launcher_ui(
     scrolled_window.set_hexpand(true);
     scrolled_window.set_vexpand(true);
     scrolled_window.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
-    scrolled_window.set_margin_start(20);
-    scrolled_window.set_margin_end(20);
+    scrolled_window.set_margin_start(24);
+    scrolled_window.set_margin_end(24);
 
     let list_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     scrolled_window.set_child(Some(&list_box));

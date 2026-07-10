@@ -13,20 +13,13 @@ pub fn add_menu_item(
     icon_name: &str,
     action: Rc<dyn Fn()>,
 ) {
-    let btn = gtk4::Button::new();
-    btn.add_css_class("menu-item");
-
-    let item_layout = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
-    item_layout.set_halign(gtk4::Align::Start);
-    item_layout.set_valign(gtk4::Align::Center);
-
-    let icon = babydra_common::icon::get_icon_colored(icon_name, 16, "#ffffff");
-    let label = gtk4::Label::new(Some(label_text));
-    label.set_halign(gtk4::Align::Start);
-
-    item_layout.append(&icon);
-    item_layout.append(&label);
-    btn.set_child(Some(&item_layout));
+    let btn = baby_utils::components::create_icon_label_button(icon_name, label_text, "menu-item");
+    if let Some(content_widget) = btn.child() {
+        if let Ok(box_layout) = content_widget.downcast::<gtk4::Box>() {
+            box_layout.set_halign(gtk4::Align::Start);
+            box_layout.set_valign(gtk4::Align::Center);
+        }
+    }
 
     let win = window.clone();
     let mb = menu_box.clone();

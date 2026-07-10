@@ -12,51 +12,47 @@ pub fn create_header_row() -> gtk4::Box {
     let btn_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
     btn_box.set_halign(gtk4::Align::End);
 
-    let theme_btn = gtk4::Button::new();
-    theme_btn.add_css_class("circle-btn");
-    theme_btn.set_tooltip_text(Some(&babydra_common::i18n::t("control.dark_mode")));
+    // Theme toggle: uses colored icon, reacts to theme changes
+    let is_dark = babydra_common::is_dark_mode();
+    let theme_icon_name = if is_dark { "dark-mode" } else { "brightness" };
+    let theme_icon_color = if is_dark { "#ffffff" } else { "rgba(255,255,255,0.8)" };
+    let theme_tooltip = babydra_common::i18n::t("control.dark_mode");
+    let theme_btn = baby_utils::components::create_colored_icon_button(
+        theme_icon_name,
+        16,
+        theme_icon_color,
+        &["circle-btn"],
+        Some(&theme_tooltip),
+        || {
+            babydra_common::set_dark_mode(!babydra_common::is_dark_mode());
+        },
+    );
 
-    let is_dark_init = gtk4::Settings::default()
-        .map(|s| s.is_gtk_application_prefer_dark_theme())
-        .unwrap_or(true);
-    let initial_icon_name = if is_dark_init { "dark-mode" } else { "brightness" };
-    let initial_color = if is_dark_init { "#ffffff" } else { "rgba(255, 255, 255, 0.8)" };
-    let theme_icon = babydra_common::icon::get_icon_colored(initial_icon_name, 16, initial_color);
-    theme_btn.set_child(Some(&theme_icon));
+    // Auto-update icon when theme changes
+    if let Some(settings) = gtk4::Settings::default() {
+        let btn_clone = theme_btn.clone();
+        settings.connect_gtk_application_prefer_dark_theme_notify(move |_| {
+            let dark = babydra_common::is_dark_mode();
+            let name = if dark { "dark-mode" } else { "brightness" };
+            let color = if dark { "#ffffff" } else { "rgba(255,255,255,0.8)" };
+            let new_icon = babydra_common::icon::get_icon_colored(name, 16, color);
+            btn_clone.set_child(Some(&new_icon));
+        });
+    }
 
-    theme_btn.connect_clicked(|_| {
-        let current_dark = babydra_common::is_dark_mode();
-        let new_dark = !current_dark;
-        babydra_common::set_dark_mode(new_dark);
-    });
-
-    let settings_btn = gtk4::Button::new();
-    settings_btn.add_css_class("circle-btn");
-    let settings_icon = babydra_common::icon::get_icon("settings", 16);
-    settings_btn.set_child(Some(&settings_icon));
-    settings_btn.connect_clicked(|_| {
-    });
-
-    let power_off = create_shutdown_button();
+    let settings_btn = baby_utils::components::create_icon_button(
+        "settings",
+        16,
+        &["circle-btn"],
+        Some(&babydra_common::i18n::t("control.settings")),
+        || {},
+    );
 
     btn_box.append(&theme_btn);
     btn_box.append(&settings_btn);
-    btn_box.append(&power_off);
 
     header_box.append(&title);
     header_box.append(&btn_box);
 
     header_box
-}
-
-fn create_shutdown_button() -> gtk4::Button {
-    let power_off = gtk4::Button::new();
-    power_off.add_css_class("circle-btn");
-    power_off.add_css_class("power-btn");
-    let power_icon = babydra_common::icon::get_icon("power", 16);
-    power_off.set_child(Some(&power_icon));
-    power_off.connect_clicked(|_| {
-        babydra_common::poweroff();
-    });
-    power_off
 }

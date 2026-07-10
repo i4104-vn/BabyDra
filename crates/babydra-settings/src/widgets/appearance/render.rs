@@ -20,14 +20,11 @@ pub fn build_appearance_ui(
     main_box.set_margin_end(16);
 
     // Title
-    let title_lbl = gtk4::Label::new(Some("Wallpaper & Colors"));
-    title_lbl.add_css_class("settings-title");
-    title_lbl.set_halign(gtk4::Align::Start);
+    let title_lbl = baby_utils::components::create_title("Wallpaper & Colors");
     main_box.append(&title_lbl);
 
     // Dashboard glass panel container
-    let cc_box = gtk4::Box::new(gtk4::Orientation::Vertical, 20);
-    cc_box.add_css_class("settings-card");
+    let cc_box = baby_utils::components::create_card(gtk4::Orientation::Vertical, 20);
     cc_box.set_margin_top(24);
     cc_box.set_margin_bottom(24);
     cc_box.set_margin_start(24);

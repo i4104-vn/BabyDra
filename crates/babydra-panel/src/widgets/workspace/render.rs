@@ -17,10 +17,7 @@ pub fn build_workspace_container() -> (gtk4::Box, gtk4::Box) {
 
 /// Creates a Popover widget anchored to the parent taskbar button.
 pub fn build_popover_container(parent: &gtk4::Button) -> gtk4::Popover {
-    let popover = gtk4::Popover::new();
-    popover.add_css_class("taskbar-popover");
-    popover.set_parent(parent);
-    popover.set_position(gtk4::PositionType::Bottom);
+    let popover = baby_utils::components::create_popover(parent, gtk4::PositionType::Bottom, "taskbar-popover");
     popover.set_autohide(true);
     popover
 }

@@ -3,7 +3,7 @@
 window.settings-window,
 window.settings-window > overlay,
 window.settings-window > overlay > box {
-    background-color: #080810;
+    background-color: #121212;
     background-image: none;
     transition: all 250ms ease;
 }
@@ -58,19 +58,18 @@ window.settings-window > overlay > box {
 }
 
 .settings-card {
-    background-color: rgba(255, 255, 255, 0.06);
-    background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    background-color: #1c1c1e;
+    border: 1px solid #2c2c2e;
     border-radius: 16px;
-    padding: 16px;
+    padding: 18px;
     margin-bottom: 16px;
-    transition: all 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 250ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .settings-card:hover {
-    border-color: rgba(255, 255, 255, 0.20);
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: #2c2c2e;
+    border-color: #3a3a3c;
 }
 
 .settings-row {
@@ -94,20 +93,20 @@ window.settings-window > overlay > box {
 }
 
 button.suggested-action {
-    background: linear-gradient(135deg, #e5c197, #d4a96a);
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 12px;
-    color: #121214;
+    color: #ffffff;
     padding: 6px 16px;
     font-weight: 600;
-    box-shadow: 0 4px 12px rgba(229, 193, 151, 0.2);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
     transition: all 250ms ease;
 }
 
 button.suggested-action:hover {
-    background: linear-gradient(135deg, #f3d4b2, #e5c197);
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(229, 193, 151, 0.3);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
 }
 
 button.suggested-action:active {
@@ -131,26 +130,56 @@ button:hover {
 
 /* Custom GTK Switch Slider style */
 switch {
-    background-color: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background-color: #3a3a3c;
+    border: none;
     border-radius: 34px;
-    min-height: 24px;
-    min-width: 44px;
-    transition: all 250ms ease;
+    min-height: 28px;
+    min-width: 50px;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 switch:checked {
-    background: linear-gradient(135deg, #e5c197, #d4a96a);
-    border-color: rgba(255, 255, 255, 0.15);
+    background-color: #0a84ff;
+    background-image: none;
+    border-color: transparent;
 }
 
 switch slider {
     background-color: #ffffff;
     border-radius: 50%;
-    min-width: 20px;
-    min-height: 20px;
-    margin: 1px;
-    transition: all 250ms ease;
+    min-width: 24px;
+    min-height: 24px;
+    margin: 2px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Premium Floating Action Button (FAB) */
+.baby-fab {
+    background-color: #0a84ff;
+    border: none;
+    border-radius: 50%;
+    min-width: 56px;
+    min-height: 56px;
+    padding: 0;
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(10, 132, 255, 0.4);
+    transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 16px;
+}
+
+.baby-fab:hover {
+    background-color: #359aff;
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(10, 132, 255, 0.6);
+}
+
+.baby-fab:active {
+    transform: scale(0.95);
+}
+
+.baby-fab image {
+    -gtk-icon-size: 24px;
 }
 
 .cheatsheet-overlay {

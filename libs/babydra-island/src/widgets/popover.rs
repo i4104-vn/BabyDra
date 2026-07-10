@@ -14,11 +14,9 @@ pub fn create_media_popover(
     gtk4::Label,
     gtk4::Image,
 ) {
-    let popover = gtk4::Popover::new();
-    popover.set_parent(notch_capsule);
+    let popover = baby_utils::components::create_popover(notch_capsule, gtk4::PositionType::Bottom, "media-popover");
     popover.set_has_arrow(false);
     popover.set_offset(0, 10);
-    popover.add_css_class("media-popover");
 
     let popover_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     popover_box.add_css_class("media-popover-box");

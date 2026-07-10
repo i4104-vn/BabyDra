@@ -93,20 +93,20 @@ window.settings-window > overlay > box {
 }
 
 button.suggested-action {
-    background: linear-gradient(135deg, #8a6747, #d4a96a);
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 12px;
     color: #ffffff;
     padding: 6px 16px;
     font-weight: 600;
-    box-shadow: 0 4px 12px rgba(138, 103, 71, 0.15);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
     transition: all 250ms ease;
 }
 
 button.suggested-action:hover {
-    background: linear-gradient(135deg, #a6805d, #e5c197);
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(138, 103, 71, 0.25);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.25);
 }
 
 button.suggested-action:active {
