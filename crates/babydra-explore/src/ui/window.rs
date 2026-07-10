@@ -16,6 +16,9 @@ pub struct MainWindow {
     sidebar: Rc<RefCell<Option<Sidebar>>>,
     content_view: Rc<RefCell<Option<ContentView>>>,
     status_bar: Rc<RefCell<Option<StatusBar>>>,
+    self_weak: RefCell<Option<std::rc::Weak<MainWindow>>>,
+    watcher: RefCell<Option<babydra_common::FileWatcher>>,
+    watch_tx: tokio::sync::mpsc::UnboundedSender<()>,
 }
 
 impl MainWindow {
@@ -30,6 +33,8 @@ impl MainWindow {
         let vbox = Box::new(Orientation::Vertical, 0);
         window.set_child(Some(&vbox));
 
+        let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<()>();
+
         let self_ = Rc::new(Self {
             window,
             session,
@@ -37,6 +42,23 @@ impl MainWindow {
             sidebar: Rc::new(RefCell::new(None)),
             content_view: Rc::new(RefCell::new(None)),
             status_bar: Rc::new(RefCell::new(None)),
+            self_weak: RefCell::new(None),
+            watcher: RefCell::new(None),
+            watch_tx: tx,
+        });
+
+        // Store weak reference
+        *self_.self_weak.borrow_mut() = Some(Rc::downgrade(&self_));
+
+        // Connect receiver to reload directory
+        let self_weak = Rc::downgrade(&self_);
+        glib::MainContext::default().spawn_local(async move {
+            while let Some(_) = rx.recv().await {
+                if let Some(win) = self_weak.upgrade() {
+                    let path = win.session.borrow().active_tab().current_path.clone();
+                    win.navigate_to_no_watch(path);
+                }
+            }
         });
 
         // Setup navigation callback
@@ -97,12 +119,39 @@ impl MainWindow {
     }
 
     pub fn navigate_to(&self, path: PathBuf) {
+        // Setup or update watcher
+        let mut watcher_borrow = self.watcher.borrow_mut();
+        if let Some(ref mut w) = *watcher_borrow {
+            let _ = w.watch(&path);
+        } else {
+            let tx_clone = self.watch_tx.clone();
+            if let Ok(w) = babydra_common::FileWatcher::new(path.clone(), move |_event| {
+                let _ = tx_clone.send(());
+            }) {
+                *watcher_borrow = Some(w);
+            }
+        }
+
+        self.navigate_to_no_watch(path);
+    }
+
+    pub fn navigate_to_no_watch(&self, path: PathBuf) {
         let show_hidden = self.session.borrow().active_tab().current_path == path 
             && self.session.borrow().active_tab().history_index > 0; // standard default false
         
         let header_bar = self.header_bar.clone();
         let content_view = self.content_view.clone();
         let status_bar = self.status_bar.clone();
+
+        // Upgrade weak self reference
+        let self_weak_opt = self.self_weak.borrow();
+        let self_rc = match &*self_weak_opt {
+            Some(weak) => match weak.upgrade() {
+                Some(rc) => rc,
+                None => return,
+            },
+            None => return,
+        };
 
         glib::spawn_future_local(async move {
             match babydra_common::load_directory(path.clone(), show_hidden).await {
@@ -117,7 +166,7 @@ impl MainWindow {
 
                     // Update Content
                     if let Some(ref c) = *content_view.borrow() {
-                        c.update(&entries);
+                        c.update(&entries, self_rc, path);
                     }
 
                     // Update Status Bar
