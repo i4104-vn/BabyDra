@@ -90,13 +90,14 @@ pub fn create_toggle_tile(
     let title_label = gtk4::Label::new(Some(title));
     title_label.set_xalign(0.0);
     title_label.add_css_class("tile-title");
-
-    let sub_label = gtk4::Label::new(Some(subtitle));
-    sub_label.set_xalign(0.0);
-    sub_label.add_css_class("tile-subtitle");
-
     text_box.append(&title_label);
-    text_box.append(&sub_label);
+
+    if !subtitle.is_empty() {
+        let sub_label = gtk4::Label::new(Some(subtitle));
+        sub_label.set_xalign(0.0);
+        sub_label.add_css_class("tile-subtitle");
+        text_box.append(&sub_label);
+    }
     main_box.append(&text_box);
 
     btn.set_child(Some(&main_box));
@@ -122,6 +123,72 @@ pub fn create_toggle_tile(
         let color = if is_now_active { "#ffffff" } else { "rgba(255, 255, 255, 0.7)" };
         let new_img = babydra_common::icon::get_icon_colored(&icon_name_str, 14, color);
         circle_clone.append(&new_img);
+
+        on_click(is_now_active);
+    });
+
+    btn
+}
+
+/// Creates a square panel toggle tile with active/inactive state.
+pub fn create_square_toggle_tile(
+    icon_name: &str,
+    label_text: &str,
+    initial_active: bool,
+    on_click: impl Fn(bool) + 'static,
+) -> gtk4::Button {
+    let btn = gtk4::Button::new();
+    btn.add_css_class("control-square-tile");
+    btn.set_size_request(56, 56);
+    btn.set_halign(gtk4::Align::Center);
+    btn.set_valign(gtk4::Align::Center);
+    btn.set_hexpand(false);
+    btn.set_vexpand(false);
+
+    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
+    main_box.set_valign(gtk4::Align::Center);
+    main_box.set_halign(gtk4::Align::Center);
+
+    if initial_active {
+        btn.add_css_class("active");
+    }
+
+    let icon_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    icon_container.set_halign(gtk4::Align::Center);
+
+    let color = if initial_active { "#ffffff" } else { "rgba(255, 255, 255, 0.8)" };
+    let icon_widget = babydra_common::icon::get_icon_colored(icon_name, 18, color);
+    icon_container.append(&icon_widget);
+
+    main_box.append(&icon_container);
+
+    if !label_text.is_empty() {
+        let label = gtk4::Label::new(Some(label_text));
+        label.add_css_class("control-square-label");
+        label.set_halign(gtk4::Align::Center);
+        main_box.append(&label);
+    }
+
+    btn.set_child(Some(&main_box));
+
+    let icon_name_str = icon_name.to_string();
+    let on_click = Rc::new(on_click);
+
+    btn.connect_clicked(move |b| {
+        let is_now_active = if b.has_css_class("active") {
+            b.remove_css_class("active");
+            false
+        } else {
+            b.add_css_class("active");
+            true
+        };
+
+        if let Some(old) = icon_container.first_child() {
+            icon_container.remove(&old);
+        }
+        let color = if is_now_active { "#ffffff" } else { "rgba(255, 255, 255, 0.8)" };
+        let new_img = babydra_common::icon::get_icon_colored(&icon_name_str, 18, color);
+        icon_container.append(&new_img);
 
         on_click(is_now_active);
     });

@@ -57,57 +57,17 @@ fn is_dnd_active() -> bool {
 }
 
 pub fn create_dnd_tile() -> gtk4::Button {
-    let btn = gtk4::Button::new();
-    btn.add_css_class("control-dnd-tile");
-    btn.set_hexpand(true);
-    btn.set_valign(gtk4::Align::Fill);
-    btn.set_vexpand(true);
-
-    let main_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
-    main_box.set_valign(gtk4::Align::Center);
-    main_box.set_halign(gtk4::Align::Center);
-
     let active = is_dnd_active();
-    if active {
-        btn.add_css_class("active");
-    }
-
-    let icon_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    icon_container.set_valign(gtk4::Align::Center);
-
-    let icon_color = if active { "#ffffff" } else { "rgba(255, 255, 255, 0.8)" };
-    let icon_widget = babydra_common::icon::get_icon_colored("bell-off", 18, icon_color);
-    icon_container.append(&icon_widget);
-
-    let label = gtk4::Label::new(Some("DND"));
-    label.add_css_class("control-dnd-label");
-    label.set_valign(gtk4::Align::Center);
-
-    main_box.append(&icon_container);
-    main_box.append(&label);
-    btn.set_child(Some(&main_box));
-
-    btn.connect_clicked(move |b| {
-        let current_active = b.has_css_class("active");
-        let new_active = !current_active;
-
-        if new_active {
-            b.add_css_class("active");
-            babydra_island::widgets::notification::set_dnd_active(true);
-        } else {
-            b.remove_css_class("active");
-            babydra_island::widgets::notification::set_dnd_active(false);
+    baby_utils::components::create_toggle_tile(
+        "bell-off",
+        "DND",
+        "",
+        "control-dnd-tile",
+        active,
+        |new_active| {
+            babydra_island::widgets::notification::set_dnd_active(new_active);
         }
-
-        if let Some(old) = icon_container.first_child() {
-            icon_container.remove(&old);
-        }
-        let color = if new_active { "#ffffff" } else { "rgba(255, 255, 255, 0.8)" };
-        let new_img = babydra_common::icon::get_icon_colored("bell-off", 18, color);
-        icon_container.append(&new_img);
-    });
-
-    btn
+    )
 }
 
 fn is_night_light_active() -> bool {
@@ -125,52 +85,17 @@ fn is_night_light_active() -> bool {
 }
 
 pub fn create_night_light_tile() -> gtk4::Button {
-    let btn = gtk4::Button::new();
-    btn.add_css_class("control-square-tile");
-    btn.set_size_request(56, 56);
-    btn.set_halign(gtk4::Align::Center);
-    btn.set_valign(gtk4::Align::Center);
-    btn.set_hexpand(false);
-    btn.set_vexpand(false);
-
-    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
-    main_box.set_valign(gtk4::Align::Center);
-    main_box.set_halign(gtk4::Align::Center);
-
     let active = is_night_light_active();
-    if active {
-        btn.add_css_class("active");
-    }
-
-    let icon_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    icon_container.set_halign(gtk4::Align::Center);
-
-    let icon_color = if active { "#ffffff" } else { "rgba(255, 255, 255, 0.8)" };
-    let icon_widget = babydra_common::icon::get_icon_colored("night-light", 18, icon_color);
-    icon_container.append(&icon_widget);
-
-    main_box.append(&icon_container);
-    btn.set_child(Some(&main_box));
-
-    btn.connect_clicked(move |b| {
-        let current_active = b.has_css_class("active");
-        let new_active = !current_active;
-
-        if new_active {
-            b.add_css_class("active");
-            let _ = std::process::Command::new("gammastep").args(&["-O", "4500", "-b", "1.0:1.0"]).spawn();
-        } else {
-            b.remove_css_class("active");
-            let _ = std::process::Command::new("pkill").arg("-x").arg("gammastep").status();
+    baby_utils::components::create_square_toggle_tile(
+        "night-light",
+        "",
+        active,
+        |new_active| {
+            if new_active {
+                let _ = std::process::Command::new("gammastep").args(&["-O", "4500", "-b", "1.0:1.0"]).spawn();
+            } else {
+                let _ = std::process::Command::new("pkill").arg("-x").arg("gammastep").status();
+            }
         }
-
-        if let Some(old) = icon_container.first_child() {
-            icon_container.remove(&old);
-        }
-        let color = if new_active { "#ffffff" } else { "rgba(255, 255, 255, 0.8)" };
-        let new_img = babydra_common::icon::get_icon_colored("night-light", 18, color);
-        icon_container.append(&new_img);
-    });
-
-    btn
+    )
 }

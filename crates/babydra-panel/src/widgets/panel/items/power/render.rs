@@ -30,10 +30,7 @@ pub fn create_header_row() -> gtk4::Box {
         babydra_common::set_dark_mode(new_dark);
     });
 
-    let settings_btn = gtk4::Button::new();
-    settings_btn.add_css_class("circle-btn");
-    let settings_icon = babydra_common::icon::get_icon("settings", 16);
-    settings_btn.set_child(Some(&settings_icon));
+    let settings_btn = baby_utils::components::create_icon_button("settings", 16, "circle-btn");
     settings_btn.connect_clicked(|_| {
     });
 
@@ -50,11 +47,7 @@ pub fn create_header_row() -> gtk4::Box {
 }
 
 fn create_shutdown_button() -> gtk4::Button {
-    let power_off = gtk4::Button::new();
-    power_off.add_css_class("circle-btn");
-    power_off.add_css_class("power-btn");
-    let power_icon = babydra_common::icon::get_icon("power", 16);
-    power_off.set_child(Some(&power_icon));
+    let power_off = baby_utils::components::create_icon_button("power", 16, "circle-btn power-btn");
     power_off.connect_clicked(|_| {
         babydra_common::poweroff();
     });
