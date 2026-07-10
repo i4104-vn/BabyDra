@@ -121,6 +121,13 @@ chmod +x "$HOME/.config/labwc/switcher.sh"
 mkdir -p "$HOME/.local/share/themes"
 cp -r "$SCRIPT_DIR/configs/themes/BabyDra" "$HOME/.local/share/themes/"
 
+mkdir -p "$HOME/.local/share/icons"
+cp -r "$SCRIPT_DIR/configs/themes/cursor/aosp-cursors" "$HOME/.local/share/icons/"
+cp -r "$SCRIPT_DIR/configs/themes/icons/We10X" "$HOME/.local/share/icons/"
+cp -r "$SCRIPT_DIR/configs/themes/icons/We10X-blue" "$HOME/.local/share/icons/"
+cp -r "$SCRIPT_DIR/configs/themes/icons/We10X-blue-dark" "$HOME/.local/share/icons/"
+cp -r "$SCRIPT_DIR/configs/themes/icons/We10X-dark" "$HOME/.local/share/icons/"
+
 # 8. Reload configuration and restart panel
 echo "Reloading labwc configuration and starting panel..."
 labwc --reconfigure || true
