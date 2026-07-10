@@ -223,9 +223,19 @@ entry.address-entry {
     color: #0066cc;
 }
 
-/* ── Content Area ────────────────────────────────────────────────── */
+/* ── Content Area ───────────────────────────────────────────────── */
 .content-view {
     background-color: #f3f3f3;
+}
+
+/* Scoped: reset GTK4 internal widget backgrounds only within content-view */
+.content-view viewport,
+.content-view flowbox,
+.content-view flowboxchild,
+.content-view listbox,
+.content-view row,
+.content-view stack {
+    background-color: transparent;
 }
 
 .section-title {

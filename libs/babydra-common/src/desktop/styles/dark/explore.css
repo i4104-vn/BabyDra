@@ -190,8 +190,13 @@ entry.address-entry {
 .sidebar {
     background-color: #1f1f1f;
     border-right: 1px solid #2a2a2a;
-    padding: 4px 0;
     min-width: 220px;
+}
+
+.sidebar>viewport,
+.sidebar>viewport>box {
+    background-color: #1f1f1f;
+    padding: 4px 0;
 }
 
 .sidebar-section-label {
@@ -223,9 +228,19 @@ entry.address-entry {
     color: #60cdff;
 }
 
-/* ── Content Area ────────────────────────────────────────────────── */
+/* ── Content Area ───────────────────────────────────────────────── */
 .content-view {
     background-color: #202020;
+}
+
+/* Scoped: reset GTK4 internal widget backgrounds only within content-view */
+.content-view viewport,
+.content-view flowbox,
+.content-view flowboxchild,
+.content-view listbox,
+.content-view row,
+.content-view stack {
+    background-color: transparent;
 }
 
 .section-title {
