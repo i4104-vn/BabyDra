@@ -17,14 +17,11 @@ pub fn build_system_ui(
     main_box.set_margin_end(16);
 
     // Title
-    let title_lbl = gtk4::Label::new(Some("About System"));
-    title_lbl.add_css_class("settings-title");
-    title_lbl.set_halign(gtk4::Align::Start);
+    let title_lbl = baby_utils::components::create_title("About System");
     main_box.append(&title_lbl);
 
     // Hero Section glass-panel
-    let hero_section = gtk4::Box::new(gtk4::Orientation::Horizontal, 20);
-    hero_section.add_css_class("settings-card");
+    let hero_section = baby_utils::components::create_card(gtk4::Orientation::Horizontal, 20);
     hero_section.set_margin_bottom(8);
 
     // OS Logo/Avatar
@@ -65,9 +62,7 @@ pub fn build_system_ui(
     os_title_box.append(&disk_info_row);
 
     // Progress bar for disk usage
-    let progress_bar = gtk4::ProgressBar::new();
-    progress_bar.set_fraction(disk_percent / 100.0);
-    progress_bar.add_css_class("disk-progress");
+    let progress_bar = baby_utils::components::create_disk_progress(disk_percent / 100.0, "");
     os_title_box.append(&progress_bar);
 
     hero_section.append(&os_title_box);
@@ -80,8 +75,7 @@ pub fn build_system_ui(
     grid.set_column_homogeneous(true);
 
     let create_info_card = |icon_name: &str, label: &str, value: &str| -> gtk4::Box {
-        let card = gtk4::Box::new(gtk4::Orientation::Horizontal, 16);
-        card.add_css_class("settings-card");
+        let card = baby_utils::components::create_card(gtk4::Orientation::Horizontal, 16);
 
         let icon_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
         icon_box.add_css_class("card-icon-wrapper");
