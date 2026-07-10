@@ -242,6 +242,7 @@ impl MainWindow {
         let main_paned = Paned::new(Orientation::Horizontal);
         main_paned.set_hexpand(true);
         main_paned.set_vexpand(true);
+        main_paned.set_position(220); // Allocate sidebar space
         vbox.append(&main_paned);
 
         // Sidebar
@@ -251,12 +252,15 @@ impl MainWindow {
 
         // Content Area VBox (contains SplitPaned + InfoPanel side-by-side)
         let content_vbox = Box::new(Orientation::Vertical, 0);
+        content_vbox.set_hexpand(true);
+        content_vbox.set_vexpand(true);
         main_paned.set_end_child(Some(&content_vbox));
 
         // Horizontal Paned to show InfoPanel resizable next to split view
         let layout_paned = Paned::new(Orientation::Horizontal);
         layout_paned.set_hexpand(true);
         layout_paned.set_vexpand(true);
+        layout_paned.set_position(530); // Allocate space for InfoPanel
         content_vbox.append(&layout_paned);
 
         layout_paned.set_start_child(Some(&self_.split_paned));
@@ -343,6 +347,7 @@ impl MainWindow {
             let right_view = Rc::new(ContentView::new(right_nav_cb));
             
             self.split_paned.set_end_child(Some(right_view.widget()));
+            self.split_paned.set_position(390); // Split view panes sized equally
             self.right_content_view.replace(Some(right_view.clone()));
             self.is_split.set(true);
 
