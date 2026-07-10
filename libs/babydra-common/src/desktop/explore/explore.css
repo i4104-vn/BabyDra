@@ -1,0 +1,320 @@
+/* ================================================================
+   BabyDra Explore — Windows 11 Mica Dark Theme
+   ================================================================ */
+
+/* ── Base Window ───────────────────────────────────────────────── */
+window {
+    background-color: #202020;
+    color: #e8e8e8;
+    font-family: "Segoe UI Variable", "Inter", "Cantarell", sans-serif;
+    font-size: 13px;
+}
+
+/* ── Tab Bar ────────────────────────────────────────────────────── */
+.tab-bar {
+    background-color: #1c1c1c;
+    border-bottom: 1px solid #303030;
+    padding: 0 6px;
+    min-height: 38px;
+}
+.tab-item {
+    background-color: transparent;
+    border: none;
+    border-radius: 6px 6px 0 0;
+    padding: 6px 14px;
+    color: #999;
+    font-size: 12px;
+    min-width: 120px;
+    margin-top: 4px;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+.tab-item:hover {
+    background-color: rgba(255,255,255,0.06);
+    color: #e8e8e8;
+}
+.tab-item.active-tab {
+    background-color: #202020;
+    color: #e8e8e8;
+    border-top: 2px solid #60cdff;
+    margin-top: 2px;
+}
+.tab-new-btn {
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    padding: 4px;
+    color: #999;
+    min-width: 26px;
+    min-height: 26px;
+    margin: auto 4px;
+}
+.tab-new-btn:hover {
+    background-color: rgba(255,255,255,0.08);
+    color: #e8e8e8;
+}
+
+/* ── Navigation Row ─────────────────────────────────────────────── */
+.nav-bar {
+    background-color: #202020;
+    padding: 6px 8px;
+    border-bottom: 1px solid #2a2a2a;
+}
+.nav-btn {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 7px;
+    color: #e8e8e8;
+    min-width: 32px;
+    min-height: 32px;
+    transition: background 0.1s ease;
+}
+.nav-btn:hover {
+    background-color: rgba(255,255,255,0.07);
+}
+.nav-btn:active {
+    background-color: rgba(255,255,255,0.12);
+}
+.nav-btn:disabled {
+    color: #555;
+}
+.address-bar-wrap {
+    background-color: #2b2b2b;
+    border: 1px solid #3a3a3a;
+    border-radius: 6px;
+    padding: 0 8px;
+    transition: border-color 0.15s ease;
+}
+.address-bar-wrap:focus-within {
+    border-color: #60cdff;
+}
+.breadcrumb-btn {
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    padding: 2px 6px;
+    color: #e8e8e8;
+    font-size: 13px;
+}
+.breadcrumb-btn:hover {
+    background-color: rgba(255,255,255,0.08);
+}
+.breadcrumb-sep {
+    color: #666;
+    margin: 0 2px;
+}
+entry.address-entry {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: #e8e8e8;
+    padding: 4px 0;
+    font-size: 13px;
+}
+.search-entry {
+    background-color: #2b2b2b;
+    border: 1px solid #3a3a3a;
+    border-radius: 6px;
+    color: #e8e8e8;
+    padding: 5px 10px;
+    font-size: 12px;
+    min-width: 200px;
+    transition: border-color 0.15s ease;
+}
+.search-entry:focus {
+    border-color: #60cdff;
+}
+
+/* ── Command Toolbar (Ribbon) ────────────────────────────────────── */
+.toolbar {
+    background-color: #202020;
+    border-bottom: 1px solid #2a2a2a;
+    padding: 4px 8px;
+    min-height: 42px;
+}
+.toolbar-btn {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 10px;
+    color: #e8e8e8;
+    font-size: 12px;
+    transition: background 0.1s ease;
+}
+.toolbar-btn:hover {
+    background-color: rgba(255,255,255,0.07);
+}
+.toolbar-btn:active {
+    background-color: rgba(255,255,255,0.12);
+}
+.toolbar-sep {
+    background-color: #3a3a3a;
+    min-width: 1px;
+    margin: 6px 4px;
+}
+.toolbar-btn.new-btn {
+    color: #60cdff;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────── */
+.sidebar {
+    background-color: #1f1f1f;
+    border-right: 1px solid #2a2a2a;
+    padding: 4px 0;
+    min-width: 220px;
+}
+.sidebar-section-label {
+    color: #888;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 10px 16px 4px 16px;
+    letter-spacing: 0.5px;
+}
+.sidebar-item {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: #ccc;
+    font-size: 13px;
+    margin: 1px 6px;
+    transition: background 0.1s ease, color 0.1s ease;
+}
+.sidebar-item:hover {
+    background-color: rgba(255,255,255,0.06);
+    color: #e8e8e8;
+}
+.sidebar-item.active-nav {
+    background-color: rgba(96,205,255,0.12);
+    color: #60cdff;
+}
+
+/* ── Content Area ────────────────────────────────────────────────── */
+.content-view {
+    background-color: #202020;
+}
+.section-title {
+    color: #e8e8e8;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 16px 20px 8px 20px;
+}
+.subsection-tab-btn {
+    background: transparent;
+    border: none;
+    border-radius: 20px;
+    padding: 5px 14px;
+    color: #999;
+    font-size: 12px;
+    margin: 0 2px;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+.subsection-tab-btn:hover {
+    background-color: rgba(255,255,255,0.06);
+    color: #e8e8e8;
+}
+.subsection-tab-btn.active-subsection {
+    background-color: rgba(96,205,255,0.15);
+    color: #60cdff;
+}
+
+/* Quick Access Cards */
+.qa-card {
+    background-color: #2b2b2b;
+    border: 1px solid #363636;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 6px;
+    min-width: 180px;
+    transition: background 0.12s ease, border-color 0.12s ease;
+}
+.qa-card:hover {
+    background-color: #333;
+    border-color: #454545;
+}
+.qa-card-name {
+    color: #e8e8e8;
+    font-size: 13px;
+    font-weight: 500;
+}
+.qa-card-sub {
+    color: #888;
+    font-size: 11px;
+    margin-top: 2px;
+}
+
+/* Icon view file items */
+.file-item-btn {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 8px;
+    transition: background 0.1s ease;
+}
+.file-item-btn:hover {
+    background-color: rgba(255,255,255,0.07);
+}
+.file-item-btn:active {
+    background-color: rgba(255,255,255,0.12);
+}
+.file-item-label {
+    color: #e8e8e8;
+    font-size: 12px;
+}
+
+/* List view rows */
+.list-row {
+    background: transparent;
+    border-radius: 6px;
+    padding: 6px 12px;
+    margin: 1px 6px;
+    color: #ccc;
+    font-size: 13px;
+    transition: background 0.1s ease;
+}
+.list-row:hover {
+    background-color: rgba(255,255,255,0.06);
+    color: #e8e8e8;
+}
+.list-col-meta { color: #888; font-size: 12px; }
+
+/* Active split pane */
+.active-pane {
+    outline: 2px solid #60cdff;
+    outline-offset: -2px;
+    border-radius: 4px;
+}
+
+/* ── Info Panel ─────────────────────────────────────────────────── */
+.info-panel {
+    background-color: #1f1f1f;
+    border-left: 1px solid #2a2a2a;
+    padding: 16px;
+    min-width: 240px;
+}
+.info-row-key { color: #888; font-size: 12px; }
+.info-row-val { color: #ccc; font-size: 12px; }
+
+/* ── Status Bar ─────────────────────────────────────────────────── */
+.status-bar {
+    background-color: #1c1c1c;
+    border-top: 1px solid #2a2a2a;
+    padding: 4px 12px;
+    color: #888;
+    font-size: 12px;
+    min-height: 26px;
+}
+
+/* ── Context Menu ────────────────────────────────────────────────── */
+.context-menu-item {
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    padding: 7px 14px;
+    color: #e8e8e8;
+    font-size: 13px;
+    transition: background 0.1s ease;
+}
+.context-menu-item:hover {
+    background-color: rgba(255,255,255,0.08);
+}

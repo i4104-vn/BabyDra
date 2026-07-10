@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Orientation, ScrolledWindow, Frame, Label, Align};
+use gtk4::{Box, Button, Label, Orientation, ScrolledWindow, Align, Separator};
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::path::PathBuf;
@@ -8,7 +8,7 @@ use babydra_common::SessionState;
 pub struct Sidebar {
     container: ScrolledWindow,
     session: Rc<RefCell<SessionState>>,
-    nav_callback: std::boxed::Box<dyn Fn(PathBuf)>,
+    nav_callback: Rc<dyn Fn(PathBuf)>,
 }
 
 impl Sidebar {
@@ -16,60 +16,59 @@ impl Sidebar {
         let container = ScrolledWindow::new();
         container.set_hscrollbar_policy(gtk4::PolicyType::Never);
         container.set_css_classes(&["sidebar"]);
-        container.set_size_request(200, -1);
+        container.set_size_request(220, -1);
+        container.set_vexpand(true);
 
-        let vbox = Box::new(Orientation::Vertical, 12);
-        vbox.set_margin_top(12);
-        vbox.set_margin_bottom(12);
-        vbox.set_margin_start(12);
-        vbox.set_margin_end(12);
-
+        let vbox = Box::new(Orientation::Vertical, 0);
         container.set_child(Some(&vbox));
 
-        let places_frame = Frame::new(Some("Places"));
-        let places_box = Box::new(Orientation::Vertical, 4);
-        places_frame.set_child(Some(&places_box));
-        vbox.append(&places_frame);
+        let nav_cb = Rc::new(nav_callback);
+
+        // ── Section: Quick Access ──────────────────────────────────
+        let qa_label = Label::new(Some("Quick access"));
+        qa_label.set_css_classes(&["sidebar-section-label"]);
+        qa_label.set_halign(Align::Start);
+        vbox.append(&qa_label);
 
         let self_ = Self {
             container,
-            session,
-            nav_callback: std::boxed::Box::new(nav_callback),
+            session: session.clone(),
+            nav_callback: nav_cb.clone(),
         };
 
-        self_.add_place(&places_box, "Home", "user-home", glib::home_dir());
-        
-        if let Some(path) = glib::user_special_dir(glib::UserDirectory::Documents) {
-            if path.exists() {
-                self_.add_place(&places_box, "Documents", "folder-documents", path);
+        self_.add_item(&vbox, "Home", "user-home", glib::home_dir());
+
+        let special_dirs = [
+            ("Desktop", "folder-desktop", glib::UserDirectory::Desktop),
+            ("Downloads", "folder-download", glib::UserDirectory::Downloads),
+            ("Documents", "folder-documents", glib::UserDirectory::Documents),
+            ("Pictures", "folder-pictures", glib::UserDirectory::Pictures),
+            ("Music",    "folder-music",     glib::UserDirectory::Music),
+            ("Videos",   "folder-videos",    glib::UserDirectory::Videos),
+        ];
+        for (name, icon, dir) in &special_dirs {
+            if let Some(path) = glib::user_special_dir(*dir) {
+                if path.exists() {
+                    self_.add_item(&vbox, name, icon, path);
+                }
             }
         }
 
-        if let Some(path) = glib::user_special_dir(glib::UserDirectory::Downloads) {
-            if path.exists() {
-                self_.add_place(&places_box, "Downloads", "folder-download", path);
-            }
-        }
+        // ── Separator ──────────────────────────────────────────────
+        let sep = Separator::new(Orientation::Horizontal);
+        sep.set_margin_top(8);
+        sep.set_margin_bottom(4);
+        sep.set_margin_start(12);
+        sep.set_margin_end(12);
+        vbox.append(&sep);
 
-        if let Some(path) = glib::user_special_dir(glib::UserDirectory::Pictures) {
-            if path.exists() {
-                self_.add_place(&places_box, "Pictures", "folder-pictures", path);
-            }
-        }
+        // ── Section: This PC ───────────────────────────────────────
+        let pc_label = Label::new(Some("This PC"));
+        pc_label.set_css_classes(&["sidebar-section-label"]);
+        pc_label.set_halign(Align::Start);
+        vbox.append(&pc_label);
 
-        if let Some(path) = glib::user_special_dir(glib::UserDirectory::Music) {
-            if path.exists() {
-                self_.add_place(&places_box, "Music", "folder-music", path);
-            }
-        }
-
-        if let Some(path) = glib::user_special_dir(glib::UserDirectory::Videos) {
-            if path.exists() {
-                self_.add_place(&places_box, "Videos", "folder-videos", path);
-            }
-        }
-
-        self_.add_place(&places_box, "Root", "drive-harddisk", PathBuf::from("/"));
+        self_.add_item(&vbox, "Local Disk (/)", "drive-harddisk", PathBuf::from("/"));
 
         self_
     }
@@ -78,12 +77,21 @@ impl Sidebar {
         &self.container
     }
 
-    fn add_place(&self, container: &Box, name: &str, icon_name: &str, path: PathBuf) {
-        let hbox = Box::new(Orientation::Horizontal, 8);
+    fn add_item(&self, container: &Box, name: &str, icon_name: &str, path: PathBuf) {
+        let hbox = Box::new(Orientation::Horizontal, 10);
+        hbox.set_margin_start(8);
+        hbox.set_margin_end(8);
+        hbox.set_margin_top(1);
+        hbox.set_margin_bottom(1);
+
         let img = gtk4::Image::from_icon_name(icon_name);
+        img.set_pixel_size(18);
+        img.set_css_classes(&[]);
+
         let lbl = Label::builder()
             .label(name)
             .halign(Align::Start)
+            .hexpand(true)
             .build();
 
         hbox.append(&img);
@@ -91,16 +99,17 @@ impl Sidebar {
 
         let btn = Button::builder()
             .child(&hbox)
-            .css_classes(vec!["flat".to_string(), "sidebar-item".to_string()])
-            .halign(Align::Fill)
+            .css_classes(vec!["sidebar-item".to_string()])
             .build();
 
-        let nav_cb = self.nav_callback.as_ref() as *const dyn Fn(PathBuf);
-        let nav_cb = unsafe { &*nav_cb };
+        let nav_cb = self.nav_callback.clone();
         let session = self.session.clone();
         let target_path = path.clone();
         btn.connect_clicked(move |_| {
-            session.borrow_mut().active_tab_mut().navigate_to(target_path.clone());
+            {
+                let mut s = session.borrow_mut();
+                s.active_tab_mut().navigate_to(target_path.clone());
+            }
             nav_cb(target_path.clone());
         });
 

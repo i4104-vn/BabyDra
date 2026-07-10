@@ -1,20 +1,24 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Entry, Orientation, Stack, Image, Label};
+use gtk4::{Box, Button, Entry, Label, Orientation, Stack, Separator};
 use std::rc::Rc;
 use std::cell::RefCell;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use babydra_common::SessionState;
 
 pub struct HeaderBar {
     container: Box,
+    // Navigation row
     btn_back: Button,
     btn_forward: Button,
     btn_up: Button,
+    // Address bar
     breadcrumb_box: Box,
     entry_address: Entry,
     address_stack: Stack,
+    address_wrap: Box,
+    // State
     session: Rc<RefCell<SessionState>>,
-    nav_callback: std::boxed::Box<dyn Fn(PathBuf)>,
+    nav_callback: Rc<dyn Fn(PathBuf)>,
     view_mode_callback: Rc<dyn Fn(String)>,
 }
 
@@ -23,58 +27,106 @@ impl HeaderBar {
         session: Rc<RefCell<SessionState>>,
         nav_callback: impl Fn(PathBuf) + 'static,
         view_mode_callback: impl Fn(String) + 'static,
-    ) -> Self {
-        let container = Box::new(Orientation::Horizontal, 6);
-        container.set_css_classes(&["header-bar"]);
-        container.set_margin_top(6);
-        container.set_margin_bottom(6);
-        container.set_margin_start(6);
-        container.set_margin_end(6);
+    ) -> Rc<RefCell<Self>> {
+        let container = Box::new(Orientation::Vertical, 0);
 
-        let btn_back = Button::from_icon_name("go-previous");
-        let btn_forward = Button::from_icon_name("go-next");
-        let btn_up = Button::from_icon_name("go-up");
+        // ── Row 1: Navigation Bar ──────────────────────────────────
+        let nav_row = Box::new(Orientation::Horizontal, 4);
+        nav_row.set_css_classes(&["nav-bar"]);
+        nav_row.set_margin_start(6);
+        nav_row.set_margin_end(6);
+        container.append(&nav_row);
 
-        container.append(&btn_back);
-        container.append(&btn_forward);
-        container.append(&btn_up);
+        let btn_back    = Button::from_icon_name("go-previous-symbolic");
+        let btn_forward = Button::from_icon_name("go-next-symbolic");
+        let btn_up      = Button::from_icon_name("go-up-symbolic");
+        let btn_refresh = Button::from_icon_name("view-refresh-symbolic");
 
-        // Address Bar Switcher (Breadcrumbs vs. Manual Text Entry)
+        for btn in &[&btn_back, &btn_forward, &btn_up, &btn_refresh] {
+            btn.set_css_classes(&["nav-btn"]);
+        }
+
+        nav_row.append(&btn_back);
+        nav_row.append(&btn_forward);
+        nav_row.append(&btn_up);
+        nav_row.append(&btn_refresh);
+
+        // Address bar wrapper
+        let address_wrap = Box::new(Orientation::Horizontal, 0);
+        address_wrap.set_css_classes(&["address-bar-wrap"]);
+        address_wrap.set_hexpand(true);
+        address_wrap.set_valign(gtk4::Align::Center);
+
         let address_stack = Stack::new();
         address_stack.set_hexpand(true);
 
         let breadcrumb_box = Box::new(Orientation::Horizontal, 2);
+        breadcrumb_box.set_valign(gtk4::Align::Center);
         address_stack.add_named(&breadcrumb_box, Some("breadcrumbs"));
 
         let entry_address = Entry::new();
         entry_address.set_hexpand(true);
+        entry_address.set_css_classes(&["address-entry"]);
         address_stack.add_named(&entry_address, Some("address"));
 
-        container.append(&address_stack);
+        address_wrap.append(&address_stack);
+        nav_row.append(&address_wrap);
 
-        // Add View Switcher placeholder buttons
-        let btn_view_icons = Button::from_icon_name("view-grid");
-        let btn_view_list = Button::from_icon_name("view-list");
-        container.append(&btn_view_icons);
-        container.append(&btn_view_list);
+        // Search entry
+        let search = Entry::builder()
+            .placeholder_text("Search")
+            .primary_icon_name("system-search-symbolic")
+            .css_classes(vec!["search-entry".to_string()])
+            .build();
+        search.set_size_request(200, -1);
+        nav_row.append(&search);
+
+        // ── Row 2: Command Toolbar ─────────────────────────────────
+        let toolbar = Box::new(Orientation::Horizontal, 2);
+        toolbar.set_css_classes(&["toolbar"]);
+        toolbar.set_margin_start(6);
+        toolbar.set_margin_end(6);
+        container.append(&toolbar);
+
+        let btn_new_folder   = Button::with_label("⊕ New Folder");
+        let btn_cut          = Button::from_icon_name("edit-cut-symbolic");
+        let btn_copy         = Button::from_icon_name("edit-copy-symbolic");
+        let btn_paste        = Button::from_icon_name("edit-paste-symbolic");
+        let btn_rename       = Button::from_icon_name("edit-rename-symbolic");
+        let btn_delete       = Button::from_icon_name("edit-delete-symbolic");
+        let sep1 = Separator::new(Orientation::Vertical);
+        sep1.set_css_classes(&["toolbar-sep"]);
+        let sep2 = Separator::new(Orientation::Vertical);
+        sep2.set_css_classes(&["toolbar-sep"]);
+        let btn_view_icons   = Button::from_icon_name("view-grid-symbolic");
+        let btn_view_list    = Button::from_icon_name("view-list-symbolic");
+
+        btn_new_folder.set_css_classes(&["toolbar-btn", "new-btn"]);
+        for btn in &[&btn_cut, &btn_copy, &btn_paste, &btn_rename, &btn_delete,
+                     &btn_view_icons, &btn_view_list] {
+            btn.set_css_classes(&["toolbar-btn"]);
+        }
+
+        toolbar.append(&btn_new_folder);
+        toolbar.append(&sep1);
+        toolbar.append(&btn_cut);
+        toolbar.append(&btn_copy);
+        toolbar.append(&btn_paste);
+        toolbar.append(&sep2);
+        toolbar.append(&btn_rename);
+        toolbar.append(&btn_delete);
+
+        // push view toggle to the right
+        let spacer = Box::new(Orientation::Horizontal, 0);
+        spacer.set_hexpand(true);
+        toolbar.append(&spacer);
+        toolbar.append(&btn_view_icons);
+        toolbar.append(&btn_view_list);
 
         let view_mode_cb = Rc::new(view_mode_callback);
+        let nav_cb       = Rc::new(nav_callback);
 
-        btn_view_icons.connect_clicked({
-            let view_cb = view_mode_cb.clone();
-            move |_| {
-                view_cb("icons".to_string());
-            }
-        });
-
-        btn_view_list.connect_clicked({
-            let view_cb = view_mode_cb.clone();
-            move |_| {
-                view_cb("list".to_string());
-            }
-        });
-
-        let self_ = Self {
+        let self_ = Rc::new(RefCell::new(Self {
             container,
             btn_back,
             btn_forward,
@@ -82,12 +134,122 @@ impl HeaderBar {
             breadcrumb_box,
             entry_address,
             address_stack,
+            address_wrap,
             session,
-            nav_callback: std::boxed::Box::new(nav_callback),
-            view_mode_callback: view_mode_cb,
-        };
+            nav_callback: nav_cb.clone(),
+            view_mode_callback: view_mode_cb.clone(),
+        }));
 
-        self_.setup_events();
+        // View toggle wiring
+        btn_view_icons.connect_clicked({
+            let cb = view_mode_cb.clone();
+            move |_| { cb("icons".to_string()); }
+        });
+        btn_view_list.connect_clicked({
+            let cb = view_mode_cb.clone();
+            move |_| { cb("list".to_string()); }
+        });
+
+        // Navigation buttons
+        {
+            let s = self_.clone();
+            btn_back_borrow(&*self_.borrow()).connect_clicked({
+                let s = s.clone();
+                move |_| {
+                    let path_opt = {
+                        let me = s.borrow();
+                        let mut state = me.session.borrow_mut();
+                        if state.active_tab_mut().go_back() {
+                            Some(state.active_tab().current_path.clone())
+                        } else { None }
+                    };
+                    if let Some(path) = path_opt {
+                        s.borrow().nav_callback.as_ref()(path);
+                    }
+                }
+            });
+        }
+        {
+            let s = self_.clone();
+            btn_forward_borrow(&*self_.borrow()).connect_clicked({
+                let s = s.clone();
+                move |_| {
+                    let path_opt = {
+                        let me = s.borrow();
+                        let mut state = me.session.borrow_mut();
+                        if state.active_tab_mut().go_forward() {
+                            Some(state.active_tab().current_path.clone())
+                        } else { None }
+                    };
+                    if let Some(path) = path_opt {
+                        s.borrow().nav_callback.as_ref()(path);
+                    }
+                }
+            });
+        }
+        {
+            let s = self_.clone();
+            btn_up_borrow(&*self_.borrow()).connect_clicked({
+                let s = s.clone();
+                move |_| {
+                    let path_opt = {
+                        let me = s.borrow();
+                        let mut state = me.session.borrow_mut();
+                        if state.active_tab_mut().go_up() {
+                            Some(state.active_tab().current_path.clone())
+                        } else { None }
+                    };
+                    if let Some(path) = path_opt {
+                        s.borrow().nav_callback.as_ref()(path);
+                    }
+                }
+            });
+        }
+        {
+            let s = self_.clone();
+            btn_refresh.connect_clicked(move |_| {
+                let path = s.borrow().session.borrow().active_tab().current_path.clone();
+                s.borrow().nav_callback.as_ref()(path);
+            });
+        }
+
+        // Address bar toggle on click
+        {
+            let s = self_.clone();
+            let gesture = gtk4::GestureClick::new();
+            gesture.connect_pressed({
+                let s = s.clone();
+                move |_, _, _, _| {
+                    let me = s.borrow();
+                    if me.address_stack.visible_child_name().as_deref() == Some("breadcrumbs") {
+                        let path = me.session.borrow().active_tab().current_path.clone();
+                        me.entry_address.set_text(&path.to_string_lossy());
+                        me.address_stack.set_visible_child_name("address");
+                        me.entry_address.grab_focus();
+                    }
+                }
+            });
+            self_.borrow().address_wrap.add_controller(gesture);
+        }
+
+        // Entry activate
+        {
+            let s = self_.clone();
+            self_.borrow().entry_address.connect_activate(move |entry| {
+                let text = entry.text().to_string();
+                let path = PathBuf::from(&text);
+                if path.exists() {
+                    {
+                        let me = s.borrow();
+                        let mut state = me.session.borrow_mut();
+                        state.active_tab_mut().navigate_to(path.clone());
+                        me.address_stack.set_visible_child_name("breadcrumbs");
+                    }
+                    s.borrow().nav_callback.as_ref()(path);
+                }
+            });
+        }
+
         self_
     }
 
@@ -95,127 +257,60 @@ impl HeaderBar {
         &self.container
     }
 
-    fn setup_events(&self) {
-        let session_clone = self.session.clone();
-        let nav_cb = self.nav_callback.as_ref() as *const dyn Fn(PathBuf);
-        let nav_cb = unsafe { &*nav_cb };
-
-        self.btn_back.connect_clicked({
-            let session = session_clone.clone();
-            move |_| {
-                let mut path_opt = None;
-                {
-                    let mut state = session.borrow_mut();
-                    if state.active_tab_mut().go_back() {
-                        path_opt = Some(state.active_tab().current_path.clone());
-                    }
-                }
-                if let Some(path) = path_opt {
-                    nav_cb(path);
-                }
-            }
-        });
-
-        self.btn_forward.connect_clicked({
-            let session = session_clone.clone();
-            move |_| {
-                let mut path_opt = None;
-                {
-                    let mut state = session.borrow_mut();
-                    if state.active_tab_mut().go_forward() {
-                        path_opt = Some(state.active_tab().current_path.clone());
-                    }
-                }
-                if let Some(path) = path_opt {
-                    nav_cb(path);
-                }
-            }
-        });
-
-        self.btn_up.connect_clicked({
-            let session = session_clone.clone();
-            move |_| {
-                let mut path_opt = None;
-                {
-                    let mut state = session.borrow_mut();
-                    if state.active_tab_mut().go_up() {
-                        path_opt = Some(state.active_tab().current_path.clone());
-                    }
-                }
-                if let Some(path) = path_opt {
-                    nav_cb(path);
-                }
-            }
-        });
-
-        // Toggle address bar manual typing when clicking empty space
-        let stack = self.address_stack.clone();
-        let entry = self.entry_address.clone();
-        let session = self.session.clone();
-        entry.connect_activate({
-            let nav_cb = self.nav_callback.as_ref() as *const dyn Fn(PathBuf);
-            let nav_cb = unsafe { &*nav_cb };
-            move |entry| {
-                let path_str = entry.text().to_string();
-                let path = PathBuf::from(path_str);
-                if path.exists() {
-                    session.borrow_mut().active_tab_mut().navigate_to(path.clone());
-                    nav_cb(path);
-                    stack.set_visible_child_name("breadcrumbs");
-                }
-            }
-        });
-    }
-
-    pub fn update(&self, path: &Path) {
-        // Update Back/Forward button sensitivity
-        let state = self.session.borrow();
-        let tab = state.active_tab();
-        self.btn_back.set_sensitive(tab.history_index > 0);
-        self.btn_forward.set_sensitive(tab.history_index + 1 < tab.history.len());
-        self.btn_up.set_sensitive(path.parent().is_some());
-
-        // Update address text
-        self.entry_address.set_text(&path.to_string_lossy());
-
-        // Clear breadcrumbs
+    pub fn update_address(&self, path: &std::path::Path) {
+        // Clear existing breadcrumbs
         while let Some(child) = self.breadcrumb_box.first_child() {
             self.breadcrumb_box.remove(&child);
         }
 
-        // Build breadcrumbs
-        let mut current = PathBuf::new();
+        let home = glib::home_dir();
         let components: Vec<_> = path.components().collect();
 
+        let mut current = PathBuf::new();
         for (i, comp) in components.iter().enumerate() {
             let comp_str = match comp {
                 std::path::Component::RootDir => "/".to_string(),
-                _ => comp.as_os_str().to_string_lossy().into_owned(),
+                std::path::Component::Normal(s) => s.to_string_lossy().to_string(),
+                _ => continue,
             };
 
             current.push(comp);
 
+            // Friendly name for home
+            let display = if current == home {
+                "Home".to_string()
+            } else {
+                comp_str.clone()
+            };
+
             let btn = Button::builder()
-                .label(&comp_str)
-                .css_classes(vec!["flat".to_string()])
+                .label(&display)
+                .css_classes(vec!["breadcrumb-btn".to_string()])
                 .build();
 
-            let target_path = current.clone();
-            let nav_cb = self.nav_callback.as_ref() as *const dyn Fn(PathBuf);
-            let nav_cb = unsafe { &*nav_cb };
+            let target = current.clone();
             let session = self.session.clone();
+            let nav_cb  = self.nav_callback.clone();
             btn.connect_clicked(move |_| {
-                session.borrow_mut().active_tab_mut().navigate_to(target_path.clone());
-                nav_cb(target_path.clone());
+                { session.borrow_mut().active_tab_mut().navigate_to(target.clone()); }
+                nav_cb(target.clone());
             });
 
             self.breadcrumb_box.append(&btn);
 
             if i + 1 < components.len() {
-                let sep = Label::new(Some("/"));
-                sep.set_css_classes(&["dim-label"]);
+                let sep = Label::new(Some("›"));
+                sep.set_css_classes(&["breadcrumb-sep"]);
                 self.breadcrumb_box.append(&sep);
             }
         }
+
+        // Switch back to breadcrumbs view
+        self.address_stack.set_visible_child_name("breadcrumbs");
     }
 }
+
+// Helper fns to borrow inner buttons without Rc<RefCell> issue
+fn btn_back_borrow(hb: &HeaderBar) -> &Button { &hb.btn_back }
+fn btn_forward_borrow(hb: &HeaderBar) -> &Button { &hb.btn_forward }
+fn btn_up_borrow(hb: &HeaderBar) -> &Button { &hb.btn_up }

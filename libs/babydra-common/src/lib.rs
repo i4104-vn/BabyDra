@@ -65,6 +65,7 @@ pub use desktop::explore::{
     copy_path, move_path, delete_path, rename_path, send_to_trash,
     FileWatcher,
     start_dbus_service,
+    apply_explore_theme,
 };
 
 
