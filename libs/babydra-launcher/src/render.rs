@@ -47,10 +47,10 @@ pub fn build_launcher_ui(
     // --- Header ---
     let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     header_box.add_css_class("menu-header");
-    header_box.set_margin_top(12);
-    header_box.set_margin_start(20);
-    header_box.set_margin_end(20);
-    header_box.set_margin_bottom(4);
+    header_box.set_margin_top(20);
+    header_box.set_margin_start(24);
+    header_box.set_margin_end(24);
+    header_box.set_margin_bottom(12);
 
     let brand_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
     brand_box.set_valign(gtk4::Align::Center);
@@ -68,9 +68,9 @@ pub fn build_launcher_ui(
     let search_entry = gtk4::Entry::new();
     search_entry.set_placeholder_text(Some("Type to search apps, files or web..."));
     search_entry.add_css_class("launcher-search");
-    search_entry.set_margin_start(20);
-    search_entry.set_margin_end(20);
-    search_entry.set_margin_bottom(6);
+    search_entry.set_margin_start(24);
+    search_entry.set_margin_end(24);
+    search_entry.set_margin_bottom(12);
     box_layout.append(&search_entry);
 
     // --- Content Scroll Area ---
@@ -79,8 +79,8 @@ pub fn build_launcher_ui(
     scrolled_window.set_hexpand(true);
     scrolled_window.set_vexpand(true);
     scrolled_window.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
-    scrolled_window.set_margin_start(20);
-    scrolled_window.set_margin_end(20);
+    scrolled_window.set_margin_start(24);
+    scrolled_window.set_margin_end(24);
 
     let list_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     scrolled_window.set_child(Some(&list_box));
