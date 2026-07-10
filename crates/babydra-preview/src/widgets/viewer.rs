@@ -130,8 +130,7 @@ pub fn build_ui(app: &gtk4::Application, path: PathBuf) {
     let exif_data = babydra_common::read_exif(&path);
 
     // --- Bottom-Right Info Box Overlay ---
-    let info_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
-    info_box.add_css_class("info-card");
+    let info_box = baby_utils::components::create_card_with_class(gtk4::Orientation::Vertical, 4, "info-card");
     info_box.set_halign(gtk4::Align::End);
     info_box.set_valign(gtk4::Align::End);
     info_box.set_margin_end(20);
