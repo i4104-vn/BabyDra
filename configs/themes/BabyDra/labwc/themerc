@@ -1,0 +1,69 @@
+# BabyDra Premium Window Theme for Labwc
+
+# ── General ──────────────────────────────────────────────
+border.width: 1
+border.color: #1a1a2e
+
+# ── Corner Radius (rounded window corners) ───────────────
+window.active.border.corner-radius: 12
+window.inactive.border.corner-radius: 12
+
+# ── Titlebar Padding ────────────────────────────────────
+window.titlebar.padding.width: 14
+window.titlebar.padding.height: 8
+
+# ── Window Border Colors ────────────────────────────────
+window.active.border.color: #3d3d5c
+window.inactive.border.color: #161622
+
+# ── Titlebar Background ────────────────────────────────
+window.active.title.bg: Solid
+window.active.title.bg.color: #12121e
+window.inactive.title.bg: Solid
+window.inactive.title.bg.color: #0a0a14
+
+# ── Titlebar Text ───────────────────────────────────────
+window.active.label.text.color: #e8e8f0
+window.inactive.label.text.color: #5c5c6e
+window.label.text.justify: center
+
+# ── Window Button Sizes ─────────────────────────────────
+window.button.width: 16
+window.button.height: 16
+window.button.spacing: 10
+
+# ── Window Button Hover Overlay ──────────────────────────
+window.button.hover.bg: Solid
+window.button.hover.bg.color: #ffffff00
+window.button.hover.bg.corner-radius: 8
+
+# ── Toggled (Maximized) Button Icons — hidden (SVG handles it) ──
+window.active.button.max.toggled.unpressed.image.color: #00000000
+window.active.button.max.toggled.hover.image.color: #00000000
+window.active.button.max.toggled.pressed.image.color: #00000000
+window.inactive.button.max.toggled.unpressed.image.color: #00000000
+window.inactive.button.max.toggled.hover.image.color: #00000000
+window.inactive.button.max.toggled.pressed.image.color: #00000000
+
+# ── OSD (On-Screen Display) ────────────────────────────
+osd.bg: Solid
+osd.bg.color: #12121eee
+osd.border.width: 1
+osd.border.color: #3d3d5c
+osd.label.text.color: #e8e8f0
+
+# ── Menu ────────────────────────────────────────────────
+menu.items.bg: Solid
+menu.items.bg.color: #12121e
+menu.items.text.color: #c8c8d8
+menu.items.active.bg: Solid
+menu.items.active.bg.color: #2a2a44
+menu.items.active.text.color: #ffffff
+menu.title.bg: Solid
+menu.title.bg.color: #12121e
+menu.title.text.color: #e8e8f0
+menu.title.text.justify: center
+menu.border.width: 1
+menu.border.color: #3d3d5c
+menu.border.corner-radius: 10
+menu.separator.color: #2a2a3e

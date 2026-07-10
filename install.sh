@@ -26,7 +26,22 @@ fi
 
 # Install AUR packages using yay
 yay -S --noconfirm dolphin github-desktop fastfetch neovim awww ddcutil-service
-yay -S --noconfirm inter-font ttf-ubuntu-font-family ttf-jetbrains-mono-nerd otf-font-awesome ttf-nerd-fonts-symbols
+# Core UI fonts
+yay -S --noconfirm inter-font ttf-ubuntu-font-family ttf-jetbrains-mono-nerd
+
+# Nerd Font symbols (icons in terminal and panel)
+yay -S --noconfirm ttf-nerd-fonts-symbols ttf-nerd-fonts-symbols-mono
+
+# Font Awesome icons (used by many GTK/Qt apps)
+yay -S --noconfirm otf-font-awesome ttf-font-awesome
+
+# Noto font family — covers virtually all Unicode ranges
+yay -S --noconfirm noto-fonts noto-fonts-cjk noto-fonts-emoji noto-fonts-extra
+
+# Liberation fonts (metric-compatible fallback for Arial/Times/Courier)
+yay -S --noconfirm ttf-liberation
+
+# Icon theme and Qt theming
 yay -S --noconfirm papirus-icon-theme kvantum-qt5
 
 # 2. Install wlrctl from AUR if not present (required by the window switcher)
@@ -93,6 +108,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cp "$SCRIPT_DIR/configs/labwc/autostart" "$HOME/.config/labwc/autostart"
 chmod +x "$HOME/.config/labwc/autostart"
 cp "$SCRIPT_DIR/configs/labwc/rc.xml" "$HOME/.config/labwc/rc.xml"
+cp "$SCRIPT_DIR/configs/labwc/themerc-override" "$HOME/.config/labwc/themerc-override"
+mkdir -p "$HOME/.config/labwc/themes"
+cp -r "$SCRIPT_DIR/configs/labwc/themes/"* "$HOME/.config/labwc/themes/"
+cp "$SCRIPT_DIR/configs/labwc/switcher.sh" "$HOME/.config/labwc/switcher.sh"
+chmod +x "$HOME/.config/labwc/switcher.sh"
+
+mkdir -p "$HOME/.local/share/themes"
+cp -r "$SCRIPT_DIR/configs/themes/BabyDra" "$HOME/.local/share/themes/"
 
 # 8. Reload configuration and restart panel
 echo "Reloading labwc configuration and starting panel..."

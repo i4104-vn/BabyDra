@@ -1,4 +1,4 @@
-//! System specifications UI layout generator matching AboutView.vue.
+//! System specifications UI layout generator.
 
 use gtk4::prelude::*;
 
@@ -26,10 +26,6 @@ pub fn build_system_ui(
     let hero_section = gtk4::Box::new(gtk4::Orientation::Horizontal, 20);
     hero_section.add_css_class("settings-card");
     hero_section.set_margin_bottom(8);
-    hero_section.set_margin_top(40);
-    hero_section.set_margin_bottom(40);
-    hero_section.set_margin_start(40);
-    hero_section.set_margin_end(40);
 
     // OS Logo/Avatar
     let logo_container = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
@@ -86,10 +82,6 @@ pub fn build_system_ui(
     let create_info_card = |icon_name: &str, label: &str, value: &str| -> gtk4::Box {
         let card = gtk4::Box::new(gtk4::Orientation::Horizontal, 16);
         card.add_css_class("settings-card");
-        card.set_margin_top(20);
-        card.set_margin_bottom(20);
-        card.set_margin_start(20);
-        card.set_margin_end(20);
 
         let icon_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
         icon_box.add_css_class("card-icon-wrapper");
