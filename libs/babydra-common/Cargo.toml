@@ -29,5 +29,5 @@ notify = "6.0"
 trash = "3.0"
 mime_guess = "2.0"
 walkdir = "2.0"
-uuid = { version = "1.0", features = ["v4"] }
+uuid = { version = "1.0", features = ["v4", "serde"] }
 
