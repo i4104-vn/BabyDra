@@ -26,14 +26,86 @@ pub fn create_fab(icon_name: &str) -> gtk4::Button {
     btn
 }
 
-/// Creates an icon-only button.
-pub fn create_icon_button(icon_name: &str, size: i32, css_class: &str) -> gtk4::Button {
+/// Creates a fully generic icon button reusable across all crates.
+///
+/// - `icon_name`: icon to display
+/// - `size`: icon pixel size
+/// - `css_classes`: CSS classes to apply e.g. `&["circle-btn", "power-btn"]`
+/// - `tooltip`: optional tooltip text
+/// - `on_click`: callback invoked on click
+///
+/// # Example
+/// ```ignore
+/// let btn = create_icon_button(
+///     "settings", 16,
+///     &["circle-btn"],
+///     Some("Settings"),
+///     || { /* open settings */ },
+/// );
+/// let power = create_icon_button(
+///     "power", 16,
+///     &["circle-btn", "power-btn"],
+///     Some("Shutdown"),
+///     || { babydra_common::poweroff(); },
+/// );
+/// ```
+pub fn create_icon_button(
+    icon_name: &str,
+    size: i32,
+    css_classes: &[&str],
+    tooltip: Option<&str>,
+    on_click: impl Fn() + 'static,
+) -> gtk4::Button {
     let btn = gtk4::Button::new();
-    if !css_class.is_empty() {
-        btn.add_css_class(css_class);
+    for cls in css_classes {
+        if !cls.is_empty() {
+            btn.add_css_class(cls);
+        }
+    }
+    if let Some(tip) = tooltip {
+        btn.set_tooltip_text(Some(tip));
     }
     let icon = babydra_common::icon::get_icon(icon_name, size);
     btn.set_child(Some(&icon));
+    btn.connect_clicked(move |_| on_click());
+    btn
+}
+
+/// Creates a generic icon button using a **colored** icon.
+///
+/// Same as `create_icon_button` but uses `get_icon_colored` internally.
+/// Useful when you need a tinted icon that doesn't follow GTK's icon theme color.
+///
+/// # Example
+/// ```ignore
+/// let btn = create_colored_icon_button(
+///     "dark-mode", 16,
+///     "#ffffff",
+///     &["circle-btn"],
+///     Some("Toggle Dark Mode"),
+///     || { babydra_common::set_dark_mode(!babydra_common::is_dark_mode()); },
+/// );
+/// ```
+pub fn create_colored_icon_button(
+    icon_name: &str,
+    size: i32,
+    color: &str,
+    css_classes: &[&str],
+    tooltip: Option<&str>,
+    on_click: impl Fn() + 'static,
+) -> gtk4::Button {
+    let btn = gtk4::Button::new();
+    for cls in css_classes {
+        if !cls.is_empty() {
+            btn.add_css_class(cls);
+        }
+    }
+    if let Some(tip) = tooltip {
+        btn.set_tooltip_text(Some(tip));
+    }
+    let icon = babydra_common::icon::get_icon_colored(icon_name, size, color);
+    btn.set_child(Some(&icon));
+    btn.connect_clicked(move |_| on_click());
     btn
 }
 
@@ -192,40 +264,6 @@ pub fn create_square_toggle_tile(
 
         on_click(is_now_active);
     });
-
-    btn
-}
-
-/// Creates a circular theme toggle button that automatically updates its icon and state.
-pub fn create_theme_toggle_button() -> gtk4::Button {
-    let btn = gtk4::Button::new();
-    btn.add_css_class("circle-btn");
-    btn.set_tooltip_text(Some(&babydra_common::i18n::t("control.dark_mode")));
-
-    let is_dark_init = babydra_common::is_dark_mode();
-    let initial_icon_name = if is_dark_init { "dark-mode" } else { "brightness" };
-    let initial_color = if is_dark_init { "#ffffff" } else { "rgba(255, 255, 255, 0.8)" };
-    let theme_icon = babydra_common::icon::get_icon_colored(initial_icon_name, 16, initial_color);
-    btn.set_child(Some(&theme_icon));
-
-    btn.connect_clicked(move |_| {
-        let current_dark = babydra_common::is_dark_mode();
-        let new_dark = !current_dark;
-        babydra_common::set_dark_mode(new_dark);
-    });
-
-    if let Some(settings) = gtk4::Settings::default() {
-        let theme_icon_c = theme_icon.clone();
-        settings.connect_gtk_application_prefer_dark_theme_notify(move |_| {
-            let is_dark = babydra_common::is_dark_mode();
-            let name = if is_dark { "dark-mode" } else { "brightness" };
-            let color = if is_dark { "#ffffff" } else { "rgba(255, 255, 255, 0.8)" };
-            let new_img = babydra_common::icon::get_icon_colored(name, 16, color);
-            if let Some(paintable) = new_img.paintable() {
-                theme_icon_c.set_paintable(Some(&paintable));
-            }
-        });
-    }
 
     btn
 }
