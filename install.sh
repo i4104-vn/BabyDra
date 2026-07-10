@@ -84,6 +84,7 @@ killall babydra-launcher || true
 killall babydra-image-preview || true
 killall babydra-preview || true
 killall babydra-settings || true
+killall babydra-explore || true
 
 # 6. Install the binaries
 echo "Installing binaries to $LOCAL_BIN..."
@@ -95,6 +96,7 @@ cp target/release/babydra-lock "$LOCAL_BIN/babydra-lock"
 cp target/release/babydra-launcher "$LOCAL_BIN/babydra-launcher"
 cp target/release/babydra-preview "$LOCAL_BIN/babydra-preview"
 cp target/release/babydra-settings "$LOCAL_BIN/babydra-settings"
+cp target/release/babydra-explore "$LOCAL_BIN/babydra-explore"
 
 # Copy wallpaper to standard config dir
 mkdir -p "$HOME/.config/babydra"
@@ -127,6 +129,7 @@ cp -r "$SCRIPT_DIR/configs/themes/icons/We10X" "$HOME/.local/share/icons/"
 cp -r "$SCRIPT_DIR/configs/themes/icons/We10X-blue" "$HOME/.local/share/icons/"
 cp -r "$SCRIPT_DIR/configs/themes/icons/We10X-blue-dark" "$HOME/.local/share/icons/"
 cp -r "$SCRIPT_DIR/configs/themes/icons/We10X-dark" "$HOME/.local/share/icons/"
+cp -r "$SCRIPT_DIR/configs/themes/cursor/Twilight-cursors" "$HOME/.local/share/icons/"
 
 # 8. Reload configuration and restart panel
 echo "Reloading labwc configuration and starting panel..."
@@ -187,6 +190,24 @@ NoDisplay=false
 EOF
 chmod +x "$HOME/.local/share/applications/babydra-settings.desktop"
 update-desktop-database "$HOME/.local/share/applications" || true
+
+# 13. Configure default applications for folder explore
+echo "Registering default folder handler..."
+cat << EOF > "$HOME/.local/share/applications/babydra-explore.desktop"
+[Desktop Entry]
+Type=Application
+Name=BabyDra Explore
+Comment=Explore files and folders
+Exec=/home/i4104/.local/bin/babydra-explore %u
+Icon=system-file-manager
+Terminal=false
+Categories=System;FileTools;FileManager;GTK;
+MimeType=inode/directory;
+NoDisplay=false
+EOF
+chmod +x "$HOME/.local/share/applications/babydra-explore.desktop"
+update-desktop-database "$HOME/.local/share/applications" || true
+xdg-mime default babydra-explore.desktop inode/directory || true
 
 echo "============================================="
 echo "Installation & Setup complete!"
