@@ -43,10 +43,14 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
     main_box.append(&text_box);
     left_btn.set_child(Some(&main_box));
     
-    let right_btn = gtk4::Button::new();
-    right_btn.add_css_class("control-tile-right-btn");
-    let arrow_icon = babydra_common::icon::get_icon_colored("go-next-symbolic", 12, "rgba(255, 255, 255, 0.7)");
-    right_btn.set_child(Some(&arrow_icon));
+    let right_btn = baby_utils::components::create_colored_icon_button(
+        "go-next-symbolic",
+        12,
+        "rgba(255, 255, 255, 0.7)",
+        &["control-tile-right-btn"],
+        None,
+        || {},
+    );
     
     let popover = baby_utils::components::create_popover(&container, gtk4::PositionType::Right, "taskbar-popover");
     popover.set_has_arrow(false);

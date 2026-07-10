@@ -24,26 +24,9 @@ enum CleanState {
 }
 
 pub fn create_clean_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) -> gtk4::Button {
-    let btn = gtk4::Button::new();
-    btn.add_css_class("control-square-tile");
-    btn.set_size_request(56, 56);
-    btn.set_halign(gtk4::Align::Center);
-    btn.set_valign(gtk4::Align::Center);
-    btn.set_hexpand(false);
-    btn.set_vexpand(false);
-
-    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
-    main_box.set_valign(gtk4::Align::Center);
-    main_box.set_halign(gtk4::Align::Center);
-
-    let icon_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    icon_container.set_halign(gtk4::Align::Center);
-
-    let icon_widget = babydra_common::icon::get_icon_colored("broom", 18, "rgba(255, 255, 255, 0.8)");
-    icon_container.append(&icon_widget);
-
-    main_box.append(&icon_container);
-    btn.set_child(Some(&main_box));
+    let btn = baby_utils::components::create_square_toggle_tile(
+        "broom", "", false, |_| {}
+    );
 
     let popover = baby_utils::components::create_popover(&btn, gtk4::PositionType::Bottom, "media-popover");
     popover.set_has_arrow(false);

@@ -26,29 +26,6 @@ pub fn create_fab(icon_name: &str) -> gtk4::Button {
     btn
 }
 
-/// Creates a fully generic icon button reusable across all crates.
-///
-/// - `icon_name`: icon to display
-/// - `size`: icon pixel size
-/// - `css_classes`: CSS classes to apply e.g. `&["circle-btn", "power-btn"]`
-/// - `tooltip`: optional tooltip text
-/// - `on_click`: callback invoked on click
-///
-/// # Example
-/// ```ignore
-/// let btn = create_icon_button(
-///     "settings", 16,
-///     &["circle-btn"],
-///     Some("Settings"),
-///     || { /* open settings */ },
-/// );
-/// let power = create_icon_button(
-///     "power", 16,
-///     &["circle-btn", "power-btn"],
-///     Some("Shutdown"),
-///     || { babydra_common::poweroff(); },
-/// );
-/// ```
 pub fn create_icon_button(
     icon_name: &str,
     size: i32,
@@ -71,21 +48,6 @@ pub fn create_icon_button(
     btn
 }
 
-/// Creates a generic icon button using a **colored** icon.
-///
-/// Same as `create_icon_button` but uses `get_icon_colored` internally.
-/// Useful when you need a tinted icon that doesn't follow GTK's icon theme color.
-///
-/// # Example
-/// ```ignore
-/// let btn = create_colored_icon_button(
-///     "dark-mode", 16,
-///     "#ffffff",
-///     &["circle-btn"],
-///     Some("Toggle Dark Mode"),
-///     || { babydra_common::set_dark_mode(!babydra_common::is_dark_mode()); },
-/// );
-/// ```
 pub fn create_colored_icon_button(
     icon_name: &str,
     size: i32,
