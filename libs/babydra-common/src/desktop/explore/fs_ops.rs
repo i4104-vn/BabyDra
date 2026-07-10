@@ -195,3 +195,56 @@ pub async fn send_to_trash(path: PathBuf) -> Result<(), String> {
         trash::delete(path).map_err(|e| e.to_string())
     }).await.unwrap()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs::File;
+    use std::io::Write;
+
+    #[tokio::test]
+    async fn test_fs_operations() {
+        let temp_base = std::env::temp_dir().join(format!("babydra_test_{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&temp_base).unwrap();
+
+        // Create test file
+        let file_path = temp_base.join("test_file.txt");
+        {
+            let mut f = File::create(&file_path).unwrap();
+            f.write_all(b"Hello BabyDra!").unwrap();
+        }
+
+        // Test load_directory
+        let entries = load_directory(temp_base.clone(), false).await.unwrap();
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].display_name, "test_file.txt");
+        assert_eq!(entries[0].size, 14);
+
+        // Test rename_path
+        rename_path(file_path.clone(), "renamed_file.txt".to_string()).await.unwrap();
+        let renamed_path = temp_base.join("renamed_file.txt");
+        assert!(renamed_path.exists());
+        assert!(!file_path.exists());
+
+        // Test copy_path
+        let copied_path = temp_base.join("copied_file.txt");
+        copy_path(renamed_path.clone(), copied_path.clone()).await.unwrap();
+        assert!(copied_path.exists());
+        assert!(renamed_path.exists());
+
+        // Test move_path
+        let moved_path = temp_base.join("moved_file.txt");
+        move_path(copied_path.clone(), moved_path.clone()).await.unwrap();
+        assert!(moved_path.exists());
+        assert!(!copied_path.exists());
+
+        // Test delete_path
+        delete_path(moved_path.clone()).await.unwrap();
+        delete_path(renamed_path.clone()).await.unwrap();
+        assert!(!moved_path.exists());
+        assert!(!renamed_path.exists());
+
+        // Clean up base dir
+        let _ = std::fs::remove_dir_all(&temp_base);
+    }
+}
