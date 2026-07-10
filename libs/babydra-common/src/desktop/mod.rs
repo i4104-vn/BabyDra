@@ -13,6 +13,7 @@ pub mod wallpaper;
 pub mod search;
 pub mod mpris;
 pub mod exif;
+pub mod explore;
 
 pub use config::{ThemeConfig, ShellConfig, get_babydra_config_dir};
 pub use theme::{init_theme, apply_theme_class};
