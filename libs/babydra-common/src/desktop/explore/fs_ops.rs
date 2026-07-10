@@ -123,3 +123,75 @@ pub async fn load_directory(path: PathBuf, show_hidden: bool) -> Result<Vec<File
         Ok(file_entries)
     }).await.unwrap_or_else(|e| Err(std::io::Error::new(std::io::ErrorKind::Other, e.to_string())))
 }
+
+/// Helper to recursively copy directories.
+fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> std::io::Result<()> {
+    fs::create_dir_all(&dst)?;
+    for entry in fs::read_dir(src)? {
+        let entry = entry?;
+        let ty = entry.file_type()?;
+        if ty.is_dir() {
+            copy_dir_all(entry.path(), dst.as_ref().join(entry.file_name()))?;
+        } else {
+            fs::copy(entry.path(), dst.as_ref().join(entry.file_name()))?;
+        }
+    }
+    Ok(())
+}
+
+/// Asynchronously copies a file or directory.
+pub async fn copy_path(src: PathBuf, dest: PathBuf) -> Result<(), std::io::Error> {
+    tokio::task::spawn_blocking(move || {
+        let metadata = fs::metadata(&src)?;
+        if metadata.is_dir() {
+            copy_dir_all(&src, &dest)
+        } else {
+            fs::copy(&src, &dest).map(|_| ())
+        }
+    }).await.unwrap()
+}
+
+/// Asynchronously moves a file or directory (handles cross-device move).
+pub async fn move_path(src: PathBuf, dest: PathBuf) -> Result<(), std::io::Error> {
+    tokio::task::spawn_blocking(move || {
+        if fs::rename(&src, &dest).is_err() {
+            let metadata = fs::metadata(&src)?;
+            if metadata.is_dir() {
+                copy_dir_all(&src, &dest)?;
+                fs::remove_dir_all(&src)?;
+            } else {
+                fs::copy(&src, &dest)?;
+                fs::remove_file(&src)?;
+            }
+        }
+        Ok(())
+    }).await.unwrap()
+}
+
+/// Asynchronously deletes a file or directory.
+pub async fn delete_path(path: PathBuf) -> Result<(), std::io::Error> {
+    tokio::task::spawn_blocking(move || {
+        let metadata = fs::metadata(&path)?;
+        if metadata.is_dir() {
+            fs::remove_dir_all(&path)
+        } else {
+            fs::remove_file(&path)
+        }
+    }).await.unwrap()
+}
+
+/// Asynchronously renames a file or directory.
+pub async fn rename_path(path: PathBuf, new_name: String) -> Result<(), std::io::Error> {
+    tokio::task::spawn_blocking(move || {
+        let parent = path.parent().ok_or_else(|| std::io::Error::new(std::io::ErrorKind::InvalidInput, "No parent directory"))?;
+        let dest = parent.join(new_name);
+        fs::rename(&path, &dest)
+    }).await.unwrap()
+}
+
+/// Asynchronously sends a file or directory to XDG Trash.
+pub async fn send_to_trash(path: PathBuf) -> Result<(), String> {
+    tokio::task::spawn_blocking(move || {
+        trash::delete(path).map_err(|e| e.to_string())
+    }).await.unwrap()
+}
