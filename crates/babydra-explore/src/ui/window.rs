@@ -1,7 +1,7 @@
 use gtk4::prelude::*;
 use gtk4::{ApplicationWindow, Box, Orientation, Paned};
 use std::rc::Rc;
-use std::cell::RefCell;
+use std::cell::{RefCell, Cell};
 use std::path::PathBuf;
 use babydra_common::SessionState;
 use crate::ui::header_bar::HeaderBar;
@@ -10,12 +10,22 @@ use crate::ui::content_view::ContentView;
 use crate::ui::status_bar::StatusBar;
 use crate::ui::info_panel::InfoPanel;
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum ActivePane {
+    Left,
+    Right,
+}
+
 pub struct MainWindow {
     window: ApplicationWindow,
     session: Rc<RefCell<SessionState>>,
     header_bar: Rc<RefCell<Option<HeaderBar>>>,
     sidebar: Rc<RefCell<Option<Sidebar>>>,
-    content_view: Rc<RefCell<Option<ContentView>>>,
+    left_content_view: Rc<ContentView>,
+    right_content_view: Rc<RefCell<Option<Rc<ContentView>>>>,
+    is_split: Cell<bool>,
+    active_pane: Cell<ActivePane>,
+    split_paned: Paned,
     status_bar: Rc<RefCell<Option<StatusBar>>>,
     self_weak: RefCell<Option<std::rc::Weak<MainWindow>>>,
     watcher: RefCell<Option<babydra_common::FileWatcher>>,
@@ -37,12 +47,32 @@ impl MainWindow {
 
         let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<()>();
 
+        // Create Split Paned container
+        let split_paned = Paned::new(Orientation::Horizontal);
+        split_paned.set_hexpand(true);
+        split_paned.set_vexpand(true);
+
+        // HeaderBar navigation setup
+        let (left_tx, mut left_rx) = tokio::sync::mpsc::unbounded_channel::<PathBuf>();
+
+        let left_nav_callback = move |path: PathBuf| {
+            let _ = left_tx.send(path);
+        };
+
+        // Create content views
+        let left_content_view = Rc::new(ContentView::new(left_nav_callback));
+        split_paned.set_start_child(Some(left_content_view.widget()));
+
         let self_ = Rc::new(Self {
-            window,
+            window: window.clone(),
             session,
             header_bar: Rc::new(RefCell::new(None)),
             sidebar: Rc::new(RefCell::new(None)),
-            content_view: Rc::new(RefCell::new(None)),
+            left_content_view,
+            right_content_view: Rc::new(RefCell::new(None)),
+            is_split: Cell::new(false),
+            active_pane: Cell::new(ActivePane::Left),
+            split_paned,
             status_bar: Rc::new(RefCell::new(None)),
             self_weak: RefCell::new(None),
             watcher: RefCell::new(None),
@@ -53,7 +83,7 @@ impl MainWindow {
         // Store weak reference
         *self_.self_weak.borrow_mut() = Some(Rc::downgrade(&self_));
 
-        // Connect receiver to reload directory
+        // Connect receiver to reload active directory
         let self_weak = Rc::downgrade(&self_);
         glib::MainContext::default().spawn_local(async move {
             while let Some(_) = rx.recv().await {
@@ -64,17 +94,29 @@ impl MainWindow {
             }
         });
 
-        // Setup navigation callback
+        // Wire left/right pane navigation channels
+        let self_weak = Rc::downgrade(&self_);
+        glib::MainContext::default().spawn_local(async move {
+            while let Some(path) = left_rx.recv().await {
+                if let Some(win) = self_weak.upgrade() {
+                    win.navigate_pane(ActivePane::Left, path);
+                }
+            }
+        });
+
+        // Setup global window navigation callback
         let self_clone = self_.clone();
         let nav_callback = move |path: PathBuf| {
             self_clone.navigate_to(path);
         };
 
         // HeaderBar
-        let content_view_ref = self_.content_view.clone();
+        let content_view_ref = self_.left_content_view.clone();
+        let right_view_ref = self_.right_content_view.clone();
         let view_mode_callback = move |mode: String| {
-            if let Some(ref c) = *content_view_ref.borrow() {
-                c.set_view_mode(&mode);
+            content_view_ref.set_view_mode(&mode);
+            if let Some(ref r) = *right_view_ref.borrow() {
+                r.set_view_mode(&mode);
             }
         };
 
@@ -86,43 +128,59 @@ impl MainWindow {
         vbox.append(header.widget());
         self_.header_bar.replace(Some(header));
 
-        // Paned (Sidebar + ContentView)
-        let paned = Paned::new(Orientation::Horizontal);
-        paned.set_hexpand(true);
-        paned.set_vexpand(true);
-        vbox.append(&paned);
+        // Paned (Sidebar + Main Split Content View Area)
+        let main_paned = Paned::new(Orientation::Horizontal);
+        main_paned.set_hexpand(true);
+        main_paned.set_vexpand(true);
+        vbox.append(&main_paned);
 
         // Sidebar
         let sidebar = Sidebar::new(self_.session.clone(), nav_callback.clone());
-        paned.set_start_child(Some(sidebar.widget()));
+        main_paned.set_start_child(Some(sidebar.widget()));
         self_.sidebar.replace(Some(sidebar));
 
-        // Content Area VBox
+        // Content Area VBox (contains SplitPaned + InfoPanel side-by-side)
         let content_vbox = Box::new(Orientation::Vertical, 0);
-        paned.set_end_child(Some(&content_vbox));
+        main_paned.set_end_child(Some(&content_vbox));
 
-        // Horizontal Paned for ContentView + InfoPanel
-        let content_paned = Paned::new(Orientation::Horizontal);
-        content_paned.set_hexpand(true);
-        content_paned.set_vexpand(true);
-        content_vbox.append(&content_paned);
+        // Horizontal Paned to show InfoPanel resizable next to split view
+        let layout_paned = Paned::new(Orientation::Horizontal);
+        layout_paned.set_hexpand(true);
+        layout_paned.set_vexpand(true);
+        content_vbox.append(&layout_paned);
 
-        // ContentView
-        let content_view = ContentView::new(nav_callback);
-        content_paned.set_start_child(Some(content_view.widget()));
+        layout_paned.set_start_child(Some(&self_.split_paned));
 
         // InfoPanel
         let info_panel = Rc::new(InfoPanel::new());
-        content_paned.set_end_child(Some(info_panel.widget()));
+        layout_paned.set_end_child(Some(info_panel.widget()));
+        self_.info_panel.replace(Some(info_panel.clone()));
 
-        // Connect selection callback from content view to update info panel
+        // Connect selection callback on Left pane
         let info_panel_clone = info_panel.clone();
-        content_view.connect_selection_changed(move |selected| {
+        let self_weak = Rc::downgrade(&self_);
+        self_.left_content_view.connect_selection_changed(move |selected| {
+            if let Some(win) = self_weak.upgrade() {
+                win.set_active_pane(ActivePane::Left);
+            }
             info_panel_clone.update(&selected);
         });
 
-        self_.content_view.replace(Some(content_view));
-        self_.info_panel.replace(Some(info_panel));
+        // Add visual styling active pane classes
+        self_.left_content_view.widget().add_css_class("active-pane");
+
+        // Key Press Controller for F3 split toggling
+        let key_controller = gtk4::EventControllerKey::new();
+        let self_clone = self_.clone();
+        key_controller.connect_key_pressed(move |_controller, keyval, _keycode, _state| {
+            if keyval == gtk4::gdk::Key::F3 {
+                self_clone.toggle_split_view();
+                glib::Propagation::Stop
+            } else {
+                glib::Propagation::Proceed
+            }
+        });
+        window.add_controller(key_controller);
 
         // StatusBar
         let status_bar = StatusBar::new();
@@ -134,12 +192,76 @@ impl MainWindow {
 
     pub fn show(&self) {
         self.window.present();
-        // Trigger initial navigation to current session path
+        // Trigger initial navigation
         let path = self.session.borrow().active_tab().current_path.clone();
-        self.navigate_to(path);
+        self.navigate_pane(ActivePane::Left, path);
+    }
+
+    pub fn set_active_pane(&self, pane: ActivePane) {
+        self.active_pane.set(pane);
+        if pane == ActivePane::Left {
+            self.left_content_view.widget().add_css_class("active-pane");
+            if let Some(ref right) = *self.right_content_view.borrow() {
+                right.widget().remove_css_class("active-pane");
+            }
+        } else {
+            self.left_content_view.widget().remove_css_class("active-pane");
+            if let Some(ref right) = *self.right_content_view.borrow() {
+                right.widget().add_css_class("active-pane");
+            }
+        }
+    }
+
+    pub fn toggle_split_view(&self) {
+        if self.is_split.get() {
+            // Remove right view
+            self.split_paned.set_end_child(None::<&gtk4::Widget>);
+            self.right_content_view.replace(None);
+            self.is_split.set(false);
+            self.set_active_pane(ActivePane::Left);
+        } else {
+            // Add right view starting at left current path
+            let current_p = self.session.borrow().active_tab().current_path.clone();
+            
+            // Build Right pane navigation channel callback
+            let self_weak = Rc::downgrade(&self.self_weak.borrow().as_ref().unwrap().upgrade().unwrap());
+            let right_nav_cb = move |path: PathBuf| {
+                if let Some(win) = self_weak.upgrade() {
+                    win.navigate_pane(ActivePane::Right, path);
+                }
+            };
+            let right_view = Rc::new(ContentView::new(right_nav_cb));
+            
+            self.split_paned.set_end_child(Some(right_view.widget()));
+            self.right_content_view.replace(Some(right_view.clone()));
+            self.is_split.set(true);
+
+            // Connect selection callback on Right pane
+            let info_panel_opt = self.info_panel.borrow();
+            let info_panel = info_panel_opt.as_ref().unwrap().clone();
+            let info_panel_clone = info_panel.clone();
+            let self_weak = Rc::downgrade(&self.self_weak.borrow().as_ref().unwrap().upgrade().unwrap());
+            right_view.connect_selection_changed(move |selected| {
+                if let Some(win) = self_weak.upgrade() {
+                    win.set_active_pane(ActivePane::Right);
+                }
+                info_panel_clone.update(&selected);
+            });
+
+            self.set_active_pane(ActivePane::Right);
+            self.navigate_pane(ActivePane::Right, current_p);
+        }
     }
 
     pub fn navigate_to(&self, path: PathBuf) {
+        self.navigate_pane(self.active_pane.get(), path);
+    }
+
+    pub fn navigate_to_no_watch(&self, path: PathBuf) {
+        self.navigate_pane_no_watch(self.active_pane.get(), path);
+    }
+
+    pub fn navigate_pane(&self, pane: ActivePane, path: PathBuf) {
         // Setup or update watcher
         let mut watcher_borrow = self.watcher.borrow_mut();
         if let Some(ref mut w) = *watcher_borrow {
@@ -153,16 +275,29 @@ impl MainWindow {
             }
         }
 
-        self.navigate_to_no_watch(path);
+        self.navigate_pane_no_watch(pane, path);
     }
 
-    pub fn navigate_to_no_watch(&self, path: PathBuf) {
+    pub fn navigate_pane_no_watch(&self, pane: ActivePane, path: PathBuf) {
+        // Highlight active pane
+        self.set_active_pane(pane);
+
         let show_hidden = self.session.borrow().active_tab().current_path == path 
             && self.session.borrow().active_tab().history_index > 0; // standard default false
         
         let header_bar = self.header_bar.clone();
-        let content_view = self.content_view.clone();
+        let content_view = if pane == ActivePane::Left {
+            self.left_content_view.clone()
+        } else {
+            match &*self.right_content_view.borrow() {
+                Some(r) => r.clone(),
+                None => return,
+            }
+        };
         let status_bar = self.status_bar.clone();
+
+        // Update session path
+        self.session.borrow_mut().active_tab_mut().current_path = path.clone();
 
         // Upgrade weak self reference
         let self_weak_opt = self.self_weak.borrow();
@@ -186,9 +321,7 @@ impl MainWindow {
                     let total_size: u64 = entries.iter().map(|e| e.size).sum();
 
                     // Update Content
-                    if let Some(ref c) = *content_view.borrow() {
-                        c.update(&entries, self_rc, path);
-                    }
+                    content_view.update(&entries, self_rc, path);
 
                     // Update Status Bar
                     if let Some(ref s) = *status_bar.borrow() {
