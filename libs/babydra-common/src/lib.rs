@@ -64,6 +64,7 @@ pub use desktop::explore::{
     load_directory, get_owner_group, get_icon_name,
     copy_path, move_path, delete_path, rename_path, send_to_trash,
     FileWatcher,
+    start_dbus_service,
 };
 
 
