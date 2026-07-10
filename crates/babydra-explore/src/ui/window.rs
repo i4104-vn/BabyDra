@@ -42,6 +42,116 @@ impl MainWindow {
             .default_height(700)
             .build();
 
+        // Load Windows 11 Dark Mode styling
+        let provider = gtk4::CssProvider::new();
+        provider.load_from_data("
+            window, .main-window {
+                background-color: #1c1c1c;
+                color: #ffffff;
+                font-family: 'Segoe UI', 'Inter', sans-serif;
+            }
+            .header-bar {
+                background-color: #1c1c1c;
+                border-bottom: 1px solid #2b2b2b;
+                padding: 8px;
+            }
+            .sidebar {
+                background-color: #202020;
+                border-right: 1px solid #2b2b2b;
+                padding: 6px;
+            }
+            .sidebar list {
+                background: transparent;
+            }
+            .sidebar row {
+                background: transparent;
+                border-radius: 4px;
+                margin: 2px 4px;
+                padding: 8px 12px;
+                transition: background 0.15s ease;
+            }
+            .sidebar row:hover {
+                background-color: rgba(255, 255, 255, 0.06);
+            }
+            .sidebar row:selected {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: #ffffff;
+            }
+            entry {
+                background-color: rgba(255, 255, 255, 0.06);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+                border-radius: 4px;
+                color: #ffffff;
+                padding: 6px 12px;
+                transition: all 0.15s ease;
+            }
+            entry:focus {
+                background-color: #202020;
+                border: 1px solid #60cdff;
+                border-bottom: 2px solid #60cdff;
+                box-shadow: none;
+            }
+            .content-view {
+                background-color: #1e1e1e;
+            }
+            .file-item {
+                padding: 8px;
+                border-radius: 6px;
+                transition: all 0.15s ease;
+            }
+            button.flat {
+                background: transparent;
+                border: none;
+                border-radius: 6px;
+                padding: 4px;
+                color: #ffffff;
+            }
+            button.flat:hover {
+                background-color: rgba(255, 255, 255, 0.06);
+            }
+            button.flat:active {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+            .active-pane {
+                outline: 2px solid #60cdff;
+                outline-offset: -2px;
+                border-radius: 4px;
+            }
+            .info-panel {
+                background-color: #202020;
+                border-left: 1px solid #2b2b2b;
+                padding: 12px;
+            }
+            .info-panel frame {
+                border: 1px solid #2b2b2b;
+                border-radius: 6px;
+                background-color: rgba(255, 255, 255, 0.02);
+            }
+            .context-menu-box {
+                background-color: #2c2c2c;
+                border: 1px solid #3c3c3c;
+                border-radius: 8px;
+                padding: 4px;
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            }
+            .context-menu-item {
+                border-radius: 4px;
+                padding: 6px 12px;
+                transition: background 0.12s ease;
+            }
+            .context-menu-item:hover {
+                background-color: rgba(255, 255, 255, 0.08);
+            }
+        ");
+        if let Some(display) = gtk4::gdk::Display::default() {
+            gtk4::style_context_add_provider_for_display(
+                &display,
+                &provider,
+                gtk4::STYLE_PROVIDER_PRIORITY_APPLICATION,
+            );
+        }
+
         let vbox = Box::new(Orientation::Vertical, 0);
         window.set_child(Some(&vbox));
 

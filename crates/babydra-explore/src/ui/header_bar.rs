@@ -103,9 +103,14 @@ impl HeaderBar {
         self.btn_back.connect_clicked({
             let session = session_clone.clone();
             move |_| {
-                let mut state = session.borrow_mut();
-                if state.active_tab_mut().go_back() {
-                    let path = state.active_tab().current_path.clone();
+                let mut path_opt = None;
+                {
+                    let mut state = session.borrow_mut();
+                    if state.active_tab_mut().go_back() {
+                        path_opt = Some(state.active_tab().current_path.clone());
+                    }
+                }
+                if let Some(path) = path_opt {
                     nav_cb(path);
                 }
             }
@@ -114,9 +119,14 @@ impl HeaderBar {
         self.btn_forward.connect_clicked({
             let session = session_clone.clone();
             move |_| {
-                let mut state = session.borrow_mut();
-                if state.active_tab_mut().go_forward() {
-                    let path = state.active_tab().current_path.clone();
+                let mut path_opt = None;
+                {
+                    let mut state = session.borrow_mut();
+                    if state.active_tab_mut().go_forward() {
+                        path_opt = Some(state.active_tab().current_path.clone());
+                    }
+                }
+                if let Some(path) = path_opt {
                     nav_cb(path);
                 }
             }
@@ -125,9 +135,14 @@ impl HeaderBar {
         self.btn_up.connect_clicked({
             let session = session_clone.clone();
             move |_| {
-                let mut state = session.borrow_mut();
-                if state.active_tab_mut().go_up() {
-                    let path = state.active_tab().current_path.clone();
+                let mut path_opt = None;
+                {
+                    let mut state = session.borrow_mut();
+                    if state.active_tab_mut().go_up() {
+                        path_opt = Some(state.active_tab().current_path.clone());
+                    }
+                }
+                if let Some(path) = path_opt {
                     nav_cb(path);
                 }
             }
