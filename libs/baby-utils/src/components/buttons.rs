@@ -195,3 +195,37 @@ pub fn create_square_toggle_tile(
 
     btn
 }
+
+/// Creates a circular theme toggle button that automatically updates its icon and state.
+pub fn create_theme_toggle_button() -> gtk4::Button {
+    let btn = gtk4::Button::new();
+    btn.add_css_class("circle-btn");
+    btn.set_tooltip_text(Some(&babydra_common::i18n::t("control.dark_mode")));
+
+    let is_dark_init = babydra_common::is_dark_mode();
+    let initial_icon_name = if is_dark_init { "dark-mode" } else { "brightness" };
+    let initial_color = if is_dark_init { "#ffffff" } else { "rgba(255, 255, 255, 0.8)" };
+    let theme_icon = babydra_common::icon::get_icon_colored(initial_icon_name, 16, initial_color);
+    btn.set_child(Some(&theme_icon));
+
+    btn.connect_clicked(move |_| {
+        let current_dark = babydra_common::is_dark_mode();
+        let new_dark = !current_dark;
+        babydra_common::set_dark_mode(new_dark);
+    });
+
+    if let Some(settings) = gtk4::Settings::default() {
+        let theme_icon_c = theme_icon.clone();
+        settings.connect_gtk_application_prefer_dark_theme_notify(move |_| {
+            let is_dark = babydra_common::is_dark_mode();
+            let name = if is_dark { "dark-mode" } else { "brightness" };
+            let color = if is_dark { "#ffffff" } else { "rgba(255, 255, 255, 0.8)" };
+            let new_img = babydra_common::icon::get_icon_colored(name, 16, color);
+            if let Some(paintable) = new_img.paintable() {
+                theme_icon_c.set_paintable(Some(&paintable));
+            }
+        });
+    }
+
+    btn
+}
