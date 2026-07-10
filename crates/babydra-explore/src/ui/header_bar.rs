@@ -15,10 +15,15 @@ pub struct HeaderBar {
     address_stack: Stack,
     session: Rc<RefCell<SessionState>>,
     nav_callback: std::boxed::Box<dyn Fn(PathBuf)>,
+    view_mode_callback: Rc<dyn Fn(String)>,
 }
 
 impl HeaderBar {
-    pub fn new(session: Rc<RefCell<SessionState>>, nav_callback: impl Fn(PathBuf) + 'static) -> Self {
+    pub fn new(
+        session: Rc<RefCell<SessionState>>,
+        nav_callback: impl Fn(PathBuf) + 'static,
+        view_mode_callback: impl Fn(String) + 'static,
+    ) -> Self {
         let container = Box::new(Orientation::Horizontal, 6);
         container.set_css_classes(&["header-bar"]);
         container.set_margin_top(6);
@@ -53,6 +58,22 @@ impl HeaderBar {
         container.append(&btn_view_icons);
         container.append(&btn_view_list);
 
+        let view_mode_cb = Rc::new(view_mode_callback);
+
+        btn_view_icons.connect_clicked({
+            let view_cb = view_mode_cb.clone();
+            move |_| {
+                view_cb("icons".to_string());
+            }
+        });
+
+        btn_view_list.connect_clicked({
+            let view_cb = view_mode_cb.clone();
+            move |_| {
+                view_cb("list".to_string());
+            }
+        });
+
         let self_ = Self {
             container,
             btn_back,
@@ -63,6 +84,7 @@ impl HeaderBar {
             address_stack,
             session,
             nav_callback: std::boxed::Box::new(nav_callback),
+            view_mode_callback: view_mode_cb,
         };
 
         self_.setup_events();

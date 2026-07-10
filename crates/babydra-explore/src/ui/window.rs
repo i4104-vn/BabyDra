@@ -46,7 +46,18 @@ impl MainWindow {
         };
 
         // HeaderBar
-        let header = HeaderBar::new(self_.session.clone(), nav_callback.clone());
+        let content_view_ref = self_.content_view.clone();
+        let view_mode_callback = move |mode: String| {
+            if let Some(ref c) = *content_view_ref.borrow() {
+                c.set_view_mode(&mode);
+            }
+        };
+
+        let header = HeaderBar::new(
+            self_.session.clone(),
+            nav_callback.clone(),
+            view_mode_callback,
+        );
         vbox.append(header.widget());
         self_.header_bar.replace(Some(header));
 
