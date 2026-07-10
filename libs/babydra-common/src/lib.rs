@@ -25,6 +25,8 @@ pub mod helper {
 }
 
 pub mod models;
+pub use models::explore::{FileEntry, FileType, DirectoryModel, SortColumn, SortOrder, TabState, SessionState};
+
 
 // Flat re-exports at root for backward compatibility
 pub use desktop::config::{ThemeConfig, ShellConfig, get_babydra_config_dir};
