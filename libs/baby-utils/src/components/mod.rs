@@ -20,6 +20,7 @@ pub mod popovers;
 pub mod progress;
 pub mod scrollspy;
 pub mod spinners;
+pub mod switch;
 pub mod toasts;
 pub mod tooltips;
 
@@ -36,3 +37,4 @@ pub use progress::{create_progress_bar, create_disk_progress};
 pub use spinners::{create_spinner, create_loading_box};
 pub use tooltips::set_tooltip;
 pub use list_group::create_list_row;
+pub use switch::create_switch;

@@ -83,9 +83,7 @@ pub fn create_switch_card(title: &str, subtitle: &str) -> (gtk4::Box, gtk4::Swit
     spacer.set_hexpand(true);
     card.append(&spacer);
 
-    let sw = gtk4::Switch::new();
-    sw.set_valign(gtk4::Align::Center);
-    sw.add_css_class("baby-switch");
+    let sw = super::switch::create_switch(false, |_| {});
     card.append(&sw);
 
     (card, sw)
