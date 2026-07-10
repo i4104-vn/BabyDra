@@ -48,17 +48,8 @@ pub fn create_header_row() -> gtk4::Box {
         || {},
     );
 
-    let power_off = baby_utils::components::create_icon_button(
-        "power",
-        16,
-        &["circle-btn", "power-btn"],
-        Some(&babydra_common::i18n::t("control.shutdown")),
-        || { babydra_common::poweroff(); },
-    );
-
     btn_box.append(&theme_btn);
     btn_box.append(&settings_btn);
-    btn_box.append(&power_off);
 
     header_box.append(&title);
     header_box.append(&btn_box);
