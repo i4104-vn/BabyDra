@@ -50,8 +50,7 @@ pub fn create_lock_window(
     center_box.set_vexpand(true);
 
     if is_primary {
-        let card_box = gtk4::Box::new(gtk4::Orientation::Vertical, 20);
-        card_box.add_css_class("lock-card");
+        let card_box = baby_utils::components::create_card_with_class(gtk4::Orientation::Vertical, 20, "lock-card");
         card_box.set_valign(gtk4::Align::Center);
         card_box.set_halign(gtk4::Align::Center);
 
