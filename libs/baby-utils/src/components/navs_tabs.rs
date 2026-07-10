@@ -1,1 +1,0 @@
-// Navs & tabs component
