@@ -17,20 +17,28 @@ impl BabyExploreApp {
 
     pub fn run(&self) -> i32 {
         self.app.connect_activate(|app| {
-            let window = ApplicationWindow::builder()
-                .application(app)
-                .title("BabyDra Explore")
-                .default_width(1000)
-                .default_height(700)
-                .build();
-
-            // Setup temporary state
             let home_dir = glib::home_dir();
-            let _session = SessionState::new(home_dir);
-
-            // TODO: Initialize MainWindow UI and bind session state here
+            let session = std::rc::Rc::new(std::cell::RefCell::new(SessionState::new(home_dir)));
             
-            window.present();
+            let main_window = crate::ui::window::MainWindow::new(app, session);
+            main_window.show();
+
+            // Setup D-Bus channel for navigation requests
+            let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<std::path::PathBuf>();
+
+            let win_clone = main_window.clone();
+            glib::MainContext::default().spawn_local(async move {
+                while let Some(path) = rx.recv().await {
+                    win_clone.navigate_to(path);
+                }
+            });
+
+            // Start D-Bus service in tokio background thread
+            tokio::spawn(async move {
+                if let Err(e) = babydra_common::start_dbus_service(tx).await {
+                    eprintln!("Failed to start D-Bus service: {}", e);
+                }
+            });
         });
 
         self.app.run().value()
