@@ -96,11 +96,13 @@ cp target/release/babydra-launcher "$LOCAL_BIN/babydra-launcher"
 cp target/release/babydra-preview "$LOCAL_BIN/babydra-preview"
 cp target/release/babydra-settings "$LOCAL_BIN/babydra-settings"
 
-# Copy wallpaper and custom logos to standard config dir
+# Copy wallpaper to standard config dir
 mkdir -p "$HOME/.config/babydra"
 cp wallpaper.png "$HOME/.config/babydra/wallpaper.png"
-cp crates/babydra-preview/logo.png "$HOME/.config/babydra/logo_preview.png"
-cp crates/babydra-settings/logo.png "$HOME/.config/babydra/logo_settings.png"
+
+# Copy custom transparent logos to system pixmaps
+sudo cp crates/babydra-preview/logo.png /usr/share/pixmaps/babydra-preview.png
+sudo cp crates/babydra-settings/logo.png /usr/share/pixmaps/babydra-settings.png
 
 # 7. Copy labwc configuration files from configs/labwc/
 echo "Configuring labwc compositor integrations..."
@@ -152,7 +154,7 @@ Type=Application
 Name=BabyDra Preview
 Comment=Viewer for images
 Exec=/home/i4104/.local/bin/babydra-preview %f
-Icon=$HOME/.config/babydra/logo_preview.png
+Icon=babydra-preview
 Terminal=false
 Categories=Graphics;Viewer;GTK;
 MimeType=image/png;image/jpeg;image/gif;image/webp;image/bmp;
@@ -171,7 +173,7 @@ Type=Application
 Name=BabyDra Settings
 Comment=Configure system settings
 Exec=/home/i4104/.local/bin/babydra-settings
-Icon=$HOME/.config/babydra/logo_settings.png
+Icon=babydra-settings
 Terminal=false
 Categories=Settings;HardwareSettings;GTK;
 NoDisplay=false
