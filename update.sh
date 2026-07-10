@@ -29,6 +29,7 @@ killall babydra-lock || true
 killall babydra-image-preview || true
 killall babydra-preview || true
 killall babydra-settings || true
+killall babydra-explore || true
 
 # 5. Overwrite binaries in ~/.local/bin
 echo "Installing new binaries..."
@@ -39,6 +40,7 @@ cp target/release/babydra-screenshot "$LOCAL_BIN/babydra-screenshot"
 cp target/release/babydra-lock "$LOCAL_BIN/babydra-lock"
 cp target/release/babydra-preview "$LOCAL_BIN/babydra-preview"
 cp target/release/babydra-settings "$LOCAL_BIN/babydra-settings"
+cp target/release/babydra-explore "$LOCAL_BIN/babydra-explore"
 
 # Register default image handler in ~/.local/share/applications
 echo "Registering default image handler..."
@@ -75,6 +77,24 @@ NoDisplay=false
 EOF
 chmod +x "$HOME/.local/share/applications/babydra-settings.desktop"
 update-desktop-database "$HOME/.local/share/applications" || true
+
+# Register default folder handler
+echo "Registering default folder handler..."
+cat << 'EOF' > "$HOME/.local/share/applications/babydra-explore.desktop"
+[Desktop Entry]
+Type=Application
+Name=BabyDra Explore
+Comment=Explore files and folders
+Exec=/home/i4104/.local/bin/babydra-explore %u
+Icon=system-file-manager
+Terminal=false
+Categories=System;FileTools;FileManager;GTK;
+MimeType=inode/directory;
+NoDisplay=false
+EOF
+chmod +x "$HOME/.local/share/applications/babydra-explore.desktop"
+update-desktop-database "$HOME/.local/share/applications" || true
+xdg-mime default babydra-explore.desktop inode/directory || true
 
 
 # 6. Reload labwc settings
