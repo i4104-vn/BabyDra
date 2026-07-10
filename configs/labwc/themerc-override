@@ -1,41 +1,79 @@
-# Premium Custom Window Titlebar Theme Override for Labwc
+# BabyDra Premium Window Titlebar Theme Override for Labwc
 
-# General
-border.width: 0
+# ── General ──────────────────────────────────────────────
+border.width: 1
+border.color: #1a1a2e
 
-# Padding
-window.titlebar.padding.width: 12
-window.titlebar.padding.height: 6
+# ── Corner Radius ────────────────────────────────────────
+window.active.border.corner-radius: 12
+window.inactive.border.corner-radius: 12
 
-# Window border colors (Gold for active windows)
-window.active.border.color: #e5c197
+# ── Padding ─────────────────────────────────────────────
+window.titlebar.padding.width: 14
+window.titlebar.padding.height: 8
+
+# ── Window Border Colors ────────────────────────────────
+window.active.border.color: #3d3d5c
 window.inactive.border.color: #161622
 
-# Window titlebar background
-window.active.title.bg.color: #0c0c14
-window.inactive.title.bg.color: #080810
-window.*.title.bg: Solid
+# ── Titlebar Background ────────────────────────────────
+window.active.title.bg: Solid
+window.active.title.bg.color: #12121e
+window.inactive.title.bg: Solid
+window.inactive.title.bg.color: #0a0a14
 
-# Window titlebar text
-window.active.label.text.color: #ffffff
-window.inactive.label.text.color: #7c7c8c
+# ── Titlebar Text ──────────────────────────────────────
+window.active.label.text.color: #e8e8f0
+window.inactive.label.text.color: #5c5c6e
 window.label.text.justify: center
 
-# Window button sizes and spacing
-window.button.width: 14
-window.button.height: 14
-window.button.spacing: 8
+# ── Window Button Sizes ─────────────────────────────────
+window.button.width: 16
+window.button.height: 16
+window.button.spacing: 10
 
-# Window button hover overlay
-window.button.hover.bg.color: #ffffff15
-window.button.hover.bg.corner-radius: 4
+# ── Window Button Hover Overlay ──────────────────────────
+window.button.hover.bg: Solid
+window.button.hover.bg.color: #ffffff10
+window.button.hover.bg.corner-radius: 8
 
-# Active Window Buttons (Mac-like colored dots)
+# ── Active Window Buttons (Mac-like colored dots) ────────
 window.active.button.close.unpressed.image.color: #ff5f56
 window.active.button.max.unpressed.image.color: #27c93f
 window.active.button.iconify.unpressed.image.color: #ffbd2e
 
-# Inactive Window Buttons (Semi-transparent / desaturated)
-window.inactive.button.close.unpressed.image.color: #ff5f5666
-window.inactive.button.max.unpressed.image.color: #27c93f66
-window.inactive.button.iconify.unpressed.image.color: #ffbd2e66
+# ── Inactive Window Buttons (Muted / desaturated) ───────
+window.inactive.button.close.unpressed.image.color: #3a3a4a
+window.inactive.button.max.unpressed.image.color: #3a3a4a
+window.inactive.button.iconify.unpressed.image.color: #3a3a4a
+
+# ── Toggled (Maximized) Button Icons — hidden (SVG handles it) ──
+window.active.button.max.toggled.unpressed.image.color: #00000000
+window.active.button.max.toggled.hover.image.color: #00000000
+window.active.button.max.toggled.pressed.image.color: #00000000
+window.inactive.button.max.toggled.unpressed.image.color: #00000000
+window.inactive.button.max.toggled.hover.image.color: #00000000
+window.inactive.button.max.toggled.pressed.image.color: #00000000
+
+# ── OSD (On-Screen Display) ────────────────────────────
+osd.bg: Solid
+osd.bg.color: #12121eee
+osd.border.width: 1
+osd.border.color: #3d3d5c
+osd.label.text.color: #e8e8f0
+
+# ── Menu ────────────────────────────────────────────────
+menu.items.bg: Solid
+menu.items.bg.color: #12121e
+menu.items.text.color: #c8c8d8
+menu.items.active.bg: Solid
+menu.items.active.bg.color: #2a2a44
+menu.items.active.text.color: #ffffff
+menu.title.bg: Solid
+menu.title.bg.color: #12121e
+menu.title.text.color: #e8e8f0
+menu.title.text.justify: center
+menu.border.width: 1
+menu.border.color: #3d3d5c
+menu.border.corner-radius: 10
+menu.separator.color: #2a2a3e

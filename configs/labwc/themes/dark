@@ -1,14 +1,14 @@
-# BabyDra Premium Window Theme for Labwc
+# BabyDra Window Titlebar Theme Override (Dark)
 
 # ── General ──────────────────────────────────────────────
 border.width: 1
 border.color: #1a1a2e
 
-# ── Corner Radius (rounded window corners) ───────────────
+# ── Corner Radius ────────────────────────────────────────
 window.active.border.corner-radius: 12
 window.inactive.border.corner-radius: 12
 
-# ── Titlebar Padding ────────────────────────────────────
+# ── Padding ─────────────────────────────────────────────
 window.titlebar.padding.width: 14
 window.titlebar.padding.height: 8
 
@@ -22,7 +22,7 @@ window.active.title.bg.color: #12121e
 window.inactive.title.bg: Solid
 window.inactive.title.bg.color: #0a0a14
 
-# ── Titlebar Text ───────────────────────────────────────
+# ── Titlebar Text ──────────────────────────────────────
 window.active.label.text.color: #e8e8f0
 window.inactive.label.text.color: #5c5c6e
 window.label.text.justify: center
@@ -34,8 +34,18 @@ window.button.spacing: 10
 
 # ── Window Button Hover Overlay ──────────────────────────
 window.button.hover.bg: Solid
-window.button.hover.bg.color: #ffffff00
+window.button.hover.bg.color: #ffffff10
 window.button.hover.bg.corner-radius: 8
+
+# ── Active Window Buttons (Mac-like colored dots) ────────
+window.active.button.close.unpressed.image.color: #ff5f56
+window.active.button.max.unpressed.image.color: #27c93f
+window.active.button.iconify.unpressed.image.color: #ffbd2e
+
+# ── Inactive Window Buttons (Muted) ─────────────────────
+window.inactive.button.close.unpressed.image.color: #3a3a4a
+window.inactive.button.max.unpressed.image.color: #3a3a4a
+window.inactive.button.iconify.unpressed.image.color: #3a3a4a
 
 # ── Toggled (Maximized) Button Icons — hidden (SVG handles it) ──
 window.active.button.max.toggled.unpressed.image.color: #00000000
@@ -45,7 +55,7 @@ window.inactive.button.max.toggled.unpressed.image.color: #00000000
 window.inactive.button.max.toggled.hover.image.color: #00000000
 window.inactive.button.max.toggled.pressed.image.color: #00000000
 
-# ── OSD (On-Screen Display) ────────────────────────────
+# ── OSD ─────────────────────────────────────────────────
 osd.bg: Solid
 osd.bg.color: #12121eee
 osd.border.width: 1

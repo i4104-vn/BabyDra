@@ -1,30 +1,30 @@
-# BabyDra Premium Window Theme for Labwc
+# BabyDra Window Titlebar Theme Override (Light)
 
 # ── General ──────────────────────────────────────────────
 border.width: 1
-border.color: #1a1a2e
+border.color: #d0d0da
 
-# ── Corner Radius (rounded window corners) ───────────────
+# ── Corner Radius ────────────────────────────────────────
 window.active.border.corner-radius: 12
 window.inactive.border.corner-radius: 12
 
-# ── Titlebar Padding ────────────────────────────────────
+# ── Padding ─────────────────────────────────────────────
 window.titlebar.padding.width: 14
 window.titlebar.padding.height: 8
 
 # ── Window Border Colors ────────────────────────────────
-window.active.border.color: #3d3d5c
-window.inactive.border.color: #161622
+window.active.border.color: #c0c0cc
+window.inactive.border.color: #d8d8e0
 
 # ── Titlebar Background ────────────────────────────────
 window.active.title.bg: Solid
-window.active.title.bg.color: #12121e
+window.active.title.bg.color: #f2f2f8
 window.inactive.title.bg: Solid
-window.inactive.title.bg.color: #0a0a14
+window.inactive.title.bg.color: #e8e8ee
 
-# ── Titlebar Text ───────────────────────────────────────
-window.active.label.text.color: #e8e8f0
-window.inactive.label.text.color: #5c5c6e
+# ── Titlebar Text ──────────────────────────────────────
+window.active.label.text.color: #1a1a28
+window.inactive.label.text.color: #70707e
 window.label.text.justify: center
 
 # ── Window Button Sizes ─────────────────────────────────
@@ -34,8 +34,18 @@ window.button.spacing: 10
 
 # ── Window Button Hover Overlay ──────────────────────────
 window.button.hover.bg: Solid
-window.button.hover.bg.color: #ffffff00
+window.button.hover.bg.color: #00000008
 window.button.hover.bg.corner-radius: 8
+
+# ── Active Window Buttons (Mac-like colored dots) ────────
+window.active.button.close.unpressed.image.color: #ff5f56
+window.active.button.max.unpressed.image.color: #27c93f
+window.active.button.iconify.unpressed.image.color: #ffbd2e
+
+# ── Inactive Window Buttons (Muted) ─────────────────────
+window.inactive.button.close.unpressed.image.color: #c0c0cc
+window.inactive.button.max.unpressed.image.color: #c0c0cc
+window.inactive.button.iconify.unpressed.image.color: #c0c0cc
 
 # ── Toggled (Maximized) Button Icons — hidden (SVG handles it) ──
 window.active.button.max.toggled.unpressed.image.color: #00000000
@@ -45,25 +55,25 @@ window.inactive.button.max.toggled.unpressed.image.color: #00000000
 window.inactive.button.max.toggled.hover.image.color: #00000000
 window.inactive.button.max.toggled.pressed.image.color: #00000000
 
-# ── OSD (On-Screen Display) ────────────────────────────
+# ── OSD ─────────────────────────────────────────────────
 osd.bg: Solid
-osd.bg.color: #12121eee
+osd.bg.color: #f2f2f8ee
 osd.border.width: 1
-osd.border.color: #3d3d5c
-osd.label.text.color: #e8e8f0
+osd.border.color: #c0c0cc
+osd.label.text.color: #1a1a28
 
 # ── Menu ────────────────────────────────────────────────
 menu.items.bg: Solid
-menu.items.bg.color: #12121e
-menu.items.text.color: #c8c8d8
+menu.items.bg.color: #f2f2f8
+menu.items.text.color: #2a2a38
 menu.items.active.bg: Solid
-menu.items.active.bg.color: #2a2a44
-menu.items.active.text.color: #ffffff
+menu.items.active.bg.color: #dcdce8
+menu.items.active.text.color: #1a1a28
 menu.title.bg: Solid
-menu.title.bg.color: #12121e
-menu.title.text.color: #e8e8f0
+menu.title.bg.color: #f2f2f8
+menu.title.text.color: #1a1a28
 menu.title.text.justify: center
 menu.border.width: 1
-menu.border.color: #3d3d5c
+menu.border.color: #c0c0cc
 menu.border.corner-radius: 10
-menu.separator.color: #2a2a3e
+menu.separator.color: #d0d0da

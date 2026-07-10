@@ -33,19 +33,34 @@
 
   <theme>
     <name>BabyDra</name>
+    <cornerRadius>12</cornerRadius>
     <titlebar>
       <layout>iconify,max,close</layout>
       <showTitle>yes</showTitle>
     </titlebar>
     <font place="ActiveWindow">
-      <name>sans</name>
-      <size>12</size>
+      <name>Inter</name>
+      <size>10</size>
       <weight>bold</weight>
     </font>
     <font place="InactiveWindow">
-      <name>sans</name>
-      <size>12</size>
+      <name>Inter</name>
+      <size>10</size>
       <weight>normal</weight>
     </font>
+    <font place="MenuItem">
+      <name>Inter</name>
+      <size>10</size>
+    </font>
+    <font place="OnScreenDisplay">
+      <name>Inter</name>
+      <size>10</size>
+    </font>
   </theme>
+
+  <!-- Window snapping behavior -->
+  <snapping>
+    <range>12</range>
+    <topMaximize>yes</topMaximize>
+  </snapping>
 </labwc_config>
