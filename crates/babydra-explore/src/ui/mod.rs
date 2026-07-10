@@ -7,3 +7,5 @@ pub mod status_bar;
 pub mod context_menu;
 pub mod dialogs;
 pub mod widgets;
+pub mod info_panel;
+pub mod preview_panel;

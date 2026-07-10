@@ -8,6 +8,7 @@ use crate::ui::header_bar::HeaderBar;
 use crate::ui::sidebar::Sidebar;
 use crate::ui::content_view::ContentView;
 use crate::ui::status_bar::StatusBar;
+use crate::ui::info_panel::InfoPanel;
 
 pub struct MainWindow {
     window: ApplicationWindow,
@@ -19,6 +20,7 @@ pub struct MainWindow {
     self_weak: RefCell<Option<std::rc::Weak<MainWindow>>>,
     watcher: RefCell<Option<babydra_common::FileWatcher>>,
     watch_tx: tokio::sync::mpsc::UnboundedSender<()>,
+    info_panel: Rc<RefCell<Option<Rc<InfoPanel>>>>,
 }
 
 impl MainWindow {
@@ -45,6 +47,7 @@ impl MainWindow {
             self_weak: RefCell::new(None),
             watcher: RefCell::new(None),
             watch_tx: tx,
+            info_panel: Rc::new(RefCell::new(None)),
         });
 
         // Store weak reference
@@ -98,10 +101,28 @@ impl MainWindow {
         let content_vbox = Box::new(Orientation::Vertical, 0);
         paned.set_end_child(Some(&content_vbox));
 
+        // Horizontal Paned for ContentView + InfoPanel
+        let content_paned = Paned::new(Orientation::Horizontal);
+        content_paned.set_hexpand(true);
+        content_paned.set_vexpand(true);
+        content_vbox.append(&content_paned);
+
         // ContentView
         let content_view = ContentView::new(nav_callback);
-        content_vbox.append(content_view.widget());
+        content_paned.set_start_child(Some(content_view.widget()));
+
+        // InfoPanel
+        let info_panel = Rc::new(InfoPanel::new());
+        content_paned.set_end_child(Some(info_panel.widget()));
+
+        // Connect selection callback from content view to update info panel
+        let info_panel_clone = info_panel.clone();
+        content_view.connect_selection_changed(move |selected| {
+            info_panel_clone.update(&selected);
+        });
+
         self_.content_view.replace(Some(content_view));
+        self_.info_panel.replace(Some(info_panel));
 
         // StatusBar
         let status_bar = StatusBar::new();

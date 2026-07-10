@@ -13,10 +13,11 @@ pub struct ContentView {
     listbox: ListBox,
     stack: Stack,
     current_mode: Cell<Option<&'static str>>,
-    entries: RefCell<Vec<FileEntry>>,
+    entries: Rc<RefCell<Vec<FileEntry>>>,
     window_handle: RefCell<Option<Rc<MainWindow>>>,
     current_path: RefCell<PathBuf>,
     nav_callback: std::boxed::Box<dyn Fn(PathBuf)>,
+    selection_callback: RefCell<Option<Rc<dyn Fn(Vec<FileEntry>)>>>,
 }
 
 impl ContentView {
@@ -58,10 +59,11 @@ impl ContentView {
             listbox,
             stack,
             current_mode: Cell::new(Some("icons")),
-            entries: RefCell::new(Vec::new()),
+            entries: Rc::new(RefCell::new(Vec::new())),
             window_handle: RefCell::new(None),
             current_path: RefCell::new(PathBuf::new()),
             nav_callback: std::boxed::Box::new(nav_callback),
+            selection_callback: RefCell::new(None),
         }
     }
 
@@ -295,5 +297,44 @@ impl ContentView {
                 self.listbox.append(&btn);
             }
         }
+    }
+
+    pub fn connect_selection_changed(&self, callback: impl Fn(Vec<FileEntry>) + 'static) {
+        let cb = Rc::new(callback);
+        self.selection_callback.replace(Some(cb.clone()));
+
+        let flowbox = self.flowbox.clone();
+        let listbox = self.listbox.clone();
+        let self_weak = Rc::downgrade(&self.entries);
+        let cb_flow = cb.clone();
+        self.flowbox.connect_selected_children_changed(move |_| {
+            if let Some(entries) = self_weak.upgrade() {
+                let borrowed = entries.borrow();
+                let mut selected = Vec::new();
+                for child in flowbox.selected_children() {
+                    let idx = child.index() as usize;
+                    if idx < borrowed.len() {
+                        selected.push(borrowed[idx].clone());
+                    }
+                }
+                cb_flow(selected);
+            }
+        });
+
+        let self_weak = Rc::downgrade(&self.entries);
+        let cb_list = cb;
+        self.listbox.connect_selected_rows_changed(move |_| {
+            if let Some(entries) = self_weak.upgrade() {
+                let borrowed = entries.borrow();
+                let mut selected = Vec::new();
+                for row in listbox.selected_rows() {
+                    let idx = row.index() as usize;
+                    if idx < borrowed.len() {
+                        selected.push(borrowed[idx].clone());
+                    }
+                }
+                cb_list(selected);
+            }
+        });
     }
 }
