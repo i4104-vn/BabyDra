@@ -7,6 +7,15 @@ pub fn create_card(orientation: gtk4::Orientation, spacing: i32) -> gtk4::Box {
     card
 }
 
+/// Creates a card with custom class.
+pub fn create_card_with_class(orientation: gtk4::Orientation, spacing: i32, css_class: &str) -> gtk4::Box {
+    let card = gtk4::Box::new(orientation, spacing);
+    if !css_class.is_empty() {
+        card.add_css_class(css_class);
+    }
+    card
+}
+
 /// Creates a header/title label.
 pub fn create_title(text: &str) -> gtk4::Label {
     let lbl = gtk4::Label::new(Some(text));
@@ -80,4 +89,20 @@ pub fn create_switch_card(title: &str, subtitle: &str) -> (gtk4::Box, gtk4::Swit
     card.append(&sw);
 
     (card, sw)
+}
+
+/// Creates a ScrolledWindow + ListBox combo.
+pub fn create_scrollable_list(css_class: &str) -> (gtk4::ScrolledWindow, gtk4::ListBox) {
+    let scroll = gtk4::ScrolledWindow::new();
+    scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
+    scroll.set_vexpand(true);
+
+    let list_box = gtk4::ListBox::new();
+    list_box.set_selection_mode(gtk4::SelectionMode::None);
+    if !css_class.is_empty() {
+        list_box.add_css_class(css_class);
+    }
+    scroll.set_child(Some(&list_box));
+
+    (scroll, list_box)
 }
