@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="64"
+   height="64"
+   version="1.1"
+   id="svg4"
+   sodipodi:docname="distributor-logo-endeavouros.svg"
+   inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview4"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     inkscape:zoom="5.9296875"
+     inkscape:cx="13.997365"
+     inkscape:cy="39.040843"
+     inkscape:window-width="1920"
+     inkscape:window-height="996"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg4" />
+  <defs
+     id="defs2">
+    <linearGradient
+       id="a"
+       x1="7.937"
+       x2="7.937"
+       y1="15.081"
+       y2="1.852"
+       gradientTransform="scale(3.7796)"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#0e71de"
+         id="stop1" />
+      <stop
+         offset="1"
+         stop-color="#25c9ff"
+         id="stop2" />
+    </linearGradient>
+  </defs>
+  <g
+     id="g4"
+     transform="matrix(1.1666465,0,0,1.1666465,-5.3331724,-3.8160716)">
+    <path
+       d="M 37.134,7.02 C 37.07,7.001 9.836,49.68 9.836,49.68 7.46,53.6 5.56,56.752 5.56,56.752 c 0,0 25.55,1.155 45.417,-1.518 C 79.247,51.431 45.166,15.187 37.135,7.02"
+       style="fill:#7f7fff"
+       transform="matrix(0.8,0,0,0.8,6.4,5.1)"
+       id="path2" />
+    <path
+       d="M 37.071,7.001 C 35.256,7.251 2,48.207 2,48.207 c 0,0 2.39,0.681 7.836,1.473 C 11.604,48.3 36.381,6.36 37.134,7.02 Q 37.114,6.995 37.071,7.001"
+       style="fill:#ff7f7f"
+       transform="matrix(0.8,0,0,0.8,6.4,5.1)"
+       id="path3" />
+    <path
+       d="M 37.104,7.005 C 35.961,6.82 9.836,49.68 9.836,49.68 c 0,0 24.69,1.485 34.414,1.32 C 71.785,50.533 43.488,15.451 37.134,7.02 a 0.05,0.05 0 0 0 -0.03,-0.015"
+       style="fill:#7f3fbf"
+       transform="matrix(0.8,0,0,0.8,6.4,5.1)"
+       id="path4" />
+  </g>
+</svg>
