@@ -64,17 +64,7 @@ pub fn build_launcher_ui(
     let header_spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     header_spacer.set_hexpand(true);
 
-    let close_btn = gtk4::Button::new();
-    close_btn.add_css_class("close-btn");
-    close_btn.set_cursor_from_name(Some("pointer"));
-    
-    let close_content = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
-    let close_icon = babydra_common::icon::get_system_or_file_icon("window-close", "window-close");
-    close_icon.set_pixel_size(12);
-    let close_label = gtk4::Label::new(Some("Close"));
-    close_content.append(&close_icon);
-    close_content.append(&close_label);
-    close_btn.set_child(Some(&close_content));
+    let close_btn = baby_utils::components::create_close_button_with_label("Close", "close-btn");
 
     let win_close = window.clone();
     close_btn.connect_clicked(move |_| {
