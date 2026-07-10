@@ -21,7 +21,8 @@ const DARK_CSS: &str = concat!(
     include_str!("../styles/dark/screenshot.css"), "\n",
     include_str!("../styles/dark/lock.css"), "\n",
     include_str!("../styles/dark/preview.css"), "\n",
-    include_str!("../styles/dark/settings.css")
+    include_str!("../styles/dark/settings.css"), "\n",
+    include_str!("../styles/dark/explore.css")
 );
 
 const LIGHT_CSS: &str = concat!(
@@ -44,7 +45,8 @@ const LIGHT_CSS: &str = concat!(
     include_str!("../styles/light/screenshot.css"), "\n",
     include_str!("../styles/light/lock.css"), "\n",
     include_str!("../styles/light/preview.css"), "\n",
-    include_str!("../styles/light/settings.css")
+    include_str!("../styles/light/settings.css"), "\n",
+    include_str!("../styles/light/explore.css")
 );
 
 thread_local! {
@@ -63,6 +65,21 @@ pub fn init_theme() {
             settings.set_gtk_application_prefer_dark_theme(true);
         } else if value == "prefer-light" {
             settings.set_gtk_application_prefer_dark_theme(false);
+        }
+
+        let user_icon_theme = gsettings.string("icon-theme");
+        let user_icon_theme = user_icon_theme.trim();
+        settings.set_gtk_icon_theme_name(Some(user_icon_theme));
+
+        if let Some(display) = gtk4::gdk::Display::default() {
+            let icon_theme = gtk4::IconTheme::for_display(&display);
+            let home = glib::home_dir();
+            let local_path = home.join(".local/share/icons");
+            if local_path.exists() {
+                icon_theme.add_search_path(local_path);
+            }
+            icon_theme.add_search_path("/usr/share/icons");
+            icon_theme.add_search_path("/usr/share/pixmaps");
         }
     }
 
@@ -124,5 +141,9 @@ pub fn set_dark_mode(dark: bool) {
         settings.set_gtk_application_prefer_dark_theme(dark);
     }
 
+    init_theme();
+}
+
+pub fn apply_explore_theme() {
     init_theme();
 }

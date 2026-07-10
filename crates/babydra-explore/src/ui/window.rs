@@ -20,6 +20,7 @@ pub struct MainWindow {
     window: ApplicationWindow,
     session: Rc<RefCell<SessionState>>,
     header_bar: Rc<RefCell<Option<Rc<RefCell<HeaderBar>>>>>,
+    tab_bar: Rc<RefCell<Option<crate::ui::tab_bar::TabBar>>>,
     sidebar: Rc<RefCell<Option<Sidebar>>>,
     left_content_view: Rc<ContentView>,
     right_content_view: Rc<RefCell<Option<Rc<ContentView>>>>,
@@ -70,6 +71,7 @@ impl MainWindow {
             window: window.clone(),
             session,
             header_bar: Rc::new(RefCell::new(None)),
+            tab_bar: Rc::new(RefCell::new(None)),
             sidebar: Rc::new(RefCell::new(None)),
             left_content_view,
             right_content_view: Rc::new(RefCell::new(None)),
@@ -123,10 +125,84 @@ impl MainWindow {
             }
         };
 
+        let left_view_ref = self_.left_content_view.clone();
+        let right_view_ref_for_search = self_.right_content_view.clone();
+        let self_weak_for_search = Rc::downgrade(&self_);
+        let search_callback = move |query: String| {
+            if let Some(win) = self_weak_for_search.upgrade() {
+                if win.active_pane.get() == ActivePane::Left {
+                    left_view_ref.filter(&query);
+                } else if let Some(ref r) = *right_view_ref_for_search.borrow() {
+                    r.filter(&query);
+                }
+            }
+        };
+
+        // TabBar setup
+        let self_weak_for_tabs = Rc::downgrade(&self_);
+        let on_tab_activated = {
+            let self_weak = self_weak_for_tabs.clone();
+            move |idx: usize| {
+                if let Some(win) = self_weak.upgrade() {
+                    {
+                        let mut sess = win.session.borrow_mut();
+                        sess.active_tab_index = idx;
+                    }
+                    let active_path = win.session.borrow().active_tab().current_path.clone();
+                    win.navigate_to(active_path);
+                    win.update_tab_bar();
+                }
+            }
+        };
+
+        let on_tab_closed = {
+            let self_weak = self_weak_for_tabs.clone();
+            move |idx: usize| {
+                if let Some(win) = self_weak.upgrade() {
+                    let should_navigate = {
+                        let mut sess = win.session.borrow_mut();
+                        let is_active = sess.active_tab_index == idx;
+                        let closed = sess.close_tab(idx);
+                        closed && is_active
+                    };
+                    if should_navigate {
+                        let active_path = win.session.borrow().active_tab().current_path.clone();
+                        win.navigate_to(active_path);
+                    }
+                    win.update_tab_bar();
+                }
+            }
+        };
+
+        let on_tab_created = {
+            let self_weak = self_weak_for_tabs.clone();
+            move || {
+                if let Some(win) = self_weak.upgrade() {
+                    let home = glib::home_dir();
+                    {
+                        let mut sess = win.session.borrow_mut();
+                        sess.add_tab(home.clone());
+                    }
+                    win.navigate_to(home);
+                    win.update_tab_bar();
+                }
+            }
+        };
+
+        let tab_bar = crate::ui::tab_bar::TabBar::new(
+            self_.session.clone(),
+            on_tab_activated,
+            on_tab_closed,
+            on_tab_created,
+        );
+        vbox.append(tab_bar.widget());
+        self_.tab_bar.replace(Some(tab_bar));
+
         let header = HeaderBar::new(
             self_.session.clone(),
             nav_callback.clone(),
             view_mode_callback,
+            search_callback,
         );
         vbox.append(header.borrow().widget());
         self_.header_bar.replace(Some(header));
@@ -329,17 +405,26 @@ impl MainWindow {
                     let total_size: u64 = entries.iter().map(|e| e.size).sum();
 
                     // Update Content
-                    content_view.update(&entries, self_rc, path);
+                    content_view.update(&entries, self_rc.clone(), path);
 
                     // Update Status Bar
                     if let Some(ref s) = *status_bar.borrow() {
                         s.update(entries.len(), total_size);
                     }
+
+                    // Update Tab Bar titles
+                    self_rc.update_tab_bar();
                 }
                 Err(err) => {
                     eprintln!("Failed to load directory: {}", err);
                 }
             }
         });
+    }
+
+    pub fn update_tab_bar(&self) {
+        if let Some(ref tb) = *self.tab_bar.borrow() {
+            tb.rebuild();
+        }
     }
 }

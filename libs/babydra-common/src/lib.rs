@@ -35,7 +35,7 @@ pub use system::volume::AudioDevice;
 pub use system::storage::DiskInfo;
 pub use notification::service::{ActiveNotification, NotificationMsg};
 pub use desktop::icon::get_logo_path;
-pub use desktop::theme::{init_theme, apply_theme_class, is_dark_mode, set_dark_mode};
+pub use desktop::theme::{init_theme, apply_theme_class, is_dark_mode, set_dark_mode, apply_explore_theme};
 pub use desktop::apps::{find_desktop_apps, refresh_desktop_apps_cache, DesktopApp};
 pub use system::power::{poweroff, reboot, suspend};
 pub use system::auth::verify_password;
@@ -65,7 +65,7 @@ pub use desktop::explore::{
     copy_path, move_path, delete_path, rename_path, send_to_trash,
     FileWatcher,
     start_dbus_service,
-    apply_explore_theme,
+    calculate_dir_size_parallel,
 };
 
 

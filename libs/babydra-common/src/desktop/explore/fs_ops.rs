@@ -99,13 +99,24 @@ pub async fn load_directory(path: PathBuf, show_hidden: bool) -> Result<Vec<File
                 from_path(&entry_path).first_or_octet_stream().to_string()
             };
 
-            let icon_name = get_icon_name(&entry_path, metadata.is_dir(), &mime_type);
+            let mut icon_name = get_icon_name(&entry_path, metadata.is_dir(), &mime_type);
+            let mut display_name = name_str.clone();
+
+            if file_type == FileType::RegularFile && entry_path.extension().map(|e| e == "desktop").unwrap_or(false) {
+                if let Some(app) = crate::desktop::apps::parse_desktop_file(&entry_path) {
+                    display_name = app.name;
+                    if let Some(app_icon) = app.icon {
+                        icon_name = app_icon;
+                    }
+                }
+            }
+
             let (owner, group) = get_owner_group(&metadata);
 
             file_entries.push(FileEntry {
                 path: entry_path,
                 name,
-                display_name: name_str,
+                display_name,
                 file_type,
                 mime_type,
                 size: metadata.len(),

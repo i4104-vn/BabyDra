@@ -58,7 +58,7 @@ pub fn scan_desktop_apps_from_filesystem() -> Vec<DesktopApp> {
     apps
 }
 
-fn parse_desktop_file(path: &Path) -> Option<DesktopApp> {
+pub fn parse_desktop_file(path: &Path) -> Option<DesktopApp> {
     let file = File::open(path).ok()?;
     let reader = BufReader::new(file);
 

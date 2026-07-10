@@ -2,10 +2,13 @@ use gtk4::prelude::*;
 use gtk4::{Box, Orientation, Label, Align, Image, ScrolledWindow, Frame};
 use babydra_common::FileEntry;
 use baby_utils::explore_helpers;
+use crate::ui::preview_panel::PreviewPanel;
 
 pub struct InfoPanel {
     container: ScrolledWindow,
     img_preview: Image,
+    preview_panel: PreviewPanel,
+    stack: gtk4::Stack,
     lbl_name: Label,
     lbl_type: Label,
     lbl_size: Label,
@@ -30,17 +33,20 @@ impl InfoPanel {
 
         // Preview Section
         let preview_frame = Frame::new(Some("Preview"));
-        let preview_box = Box::new(Orientation::Vertical, 6);
-        preview_box.set_margin_top(6);
-        preview_box.set_margin_bottom(6);
-        preview_box.set_margin_start(6);
-        preview_box.set_margin_end(6);
-        preview_frame.set_child(Some(&preview_box));
+        preview_frame.set_size_request(-1, 240); // Allocate height for preview
+        
+        let stack = gtk4::Stack::new();
+        stack.set_transition_type(gtk4::StackTransitionType::Crossfade);
+        preview_frame.set_child(Some(&stack));
 
         let img_preview = Image::from_icon_name("text-x-generic");
         img_preview.set_pixel_size(96);
         img_preview.set_halign(Align::Center);
-        preview_box.append(&img_preview);
+        img_preview.set_valign(Align::Center);
+        stack.add_named(&img_preview, Some("image"));
+
+        let preview_panel = PreviewPanel::new();
+        stack.add_named(preview_panel.widget(), Some("text"));
 
         vbox.append(&preview_frame);
 
@@ -65,6 +71,8 @@ impl InfoPanel {
         Self {
             container,
             img_preview,
+            preview_panel,
+            stack,
             lbl_name,
             lbl_type,
             lbl_size,
@@ -108,6 +116,8 @@ impl InfoPanel {
         }
 
         if selection.len() > 1 {
+            self.preview_panel.clear();
+            self.stack.set_visible_child_name("image");
             self.img_preview.set_icon_name(Some("dialog-information"));
             self.lbl_name.set_text(&format!("{} items selected", selection.len()));
             let total_size: u64 = selection.iter().map(|e| e.size).sum();
@@ -121,18 +131,46 @@ impl InfoPanel {
 
         let entry = &selection[0];
         
-        // Update thumbnail or icon preview
-        if entry.mime_type.starts_with("image/") {
-            self.img_preview.set_from_file(Some(&entry.path));
+        // Check if file is text/markdown
+        let is_dir = matches!(entry.file_type, babydra_common::FileType::Directory);
+        let ext = entry.path.extension().and_then(|e| e.to_str()).unwrap_or_default().to_lowercase();
+        let is_txt_or_md = entry.mime_type.starts_with("text/") 
+            || ext == "md" 
+            || ext == "txt" 
+            || ext == "json" 
+            || ext == "toml" 
+            || ext == "rs"
+            || ext == "sh";
+
+        if is_txt_or_md && !is_dir {
+            self.preview_panel.show_preview(&entry.path);
+            self.stack.set_visible_child_name("text");
         } else {
-            self.img_preview.set_icon_name(Some(&entry.icon_name));
+            self.preview_panel.clear();
+            // Update thumbnail or icon preview
+            if entry.mime_type.starts_with("image/") {
+                self.img_preview.set_from_file(Some(&entry.path));
+            } else {
+                babydra_common::icon::set_system_or_file_icon(&self.img_preview, &entry.icon_name, "text-x-generic");
+            }
+            self.stack.set_visible_child_name("image");
         }
 
         self.lbl_name.set_text(&entry.display_name);
         self.lbl_type.set_text(&entry.mime_type);
         
-        if matches!(entry.file_type, babydra_common::FileType::Directory) {
-            self.lbl_size.set_text("Folder");
+        if is_dir {
+            self.lbl_size.set_text("Calculating...");
+            let path = entry.path.clone();
+            let lbl_size = self.lbl_size.clone();
+            glib::spawn_future_local(async move {
+                let size_res = tokio::task::spawn_blocking(move || {
+                    babydra_common::calculate_dir_size_parallel(&path)
+                }).await;
+                let size = size_res.unwrap_or(0);
+                let size_str = explore_helpers::format_size(size);
+                lbl_size.set_text(&size_str);
+            });
         } else {
             self.lbl_size.set_text(&explore_helpers::format_size(entry.size));
         }
@@ -148,6 +186,8 @@ impl InfoPanel {
     }
 
     fn clear(&self) {
+        self.preview_panel.clear();
+        self.stack.set_visible_child_name("image");
         self.img_preview.set_icon_name(Some("text-x-generic"));
         self.lbl_name.set_text("--");
         self.lbl_type.set_text("--");
@@ -157,3 +197,4 @@ impl InfoPanel {
         self.lbl_permissions.set_text("--");
     }
 }
+

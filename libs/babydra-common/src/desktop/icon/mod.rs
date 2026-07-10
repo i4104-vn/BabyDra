@@ -3,7 +3,7 @@
 pub mod assets;
 pub mod resolver;
 
-pub use resolver::{get_icon_from_svg, get_logo_png, get_logo_path, get_system_or_file_icon};
+pub use resolver::{get_icon_from_svg, get_logo_png, get_logo_path, get_system_or_file_icon, set_system_or_file_icon};
 
 pub use assets::*;
 

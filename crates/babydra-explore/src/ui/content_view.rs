@@ -7,14 +7,16 @@ use babydra_common::FileEntry;
 use baby_utils::explore_helpers;
 use crate::ui::window::MainWindow;
 
+
+
 pub struct ContentView {
     container: ScrolledWindow,
     flowbox: FlowBox,
     listbox: ListBox,
     stack: Stack,
-    home_box: Box,
     current_mode: Cell<Option<&'static str>>,
     entries: Rc<RefCell<Vec<FileEntry>>>,
+    all_entries: Rc<RefCell<Vec<FileEntry>>>,
     window_handle: RefCell<Option<Rc<MainWindow>>>,
     current_path: RefCell<PathBuf>,
     nav_callback: Rc<dyn Fn(PathBuf)>,
@@ -31,9 +33,7 @@ impl ContentView {
         let stack = Stack::new();
         container.set_child(Some(&stack));
 
-        // ── Home page (Quick Access) ──────────────────────────────
-        let home_box = Box::new(Orientation::Vertical, 0);
-        stack.add_named(&home_box, Some("home"));
+
 
         // FlowBox (Icon View)
         let flowbox = FlowBox::new();
@@ -41,6 +41,7 @@ impl ContentView {
         flowbox.set_max_children_per_line(15);
         flowbox.set_min_children_per_line(3);
         flowbox.set_selection_mode(gtk4::SelectionMode::Multiple);
+        flowbox.set_activate_on_single_click(false);
         flowbox.set_margin_top(12);
         flowbox.set_margin_bottom(12);
         flowbox.set_margin_start(12);
@@ -52,6 +53,7 @@ impl ContentView {
         // ListBox (List View)
         let listbox = ListBox::new();
         listbox.set_selection_mode(gtk4::SelectionMode::Multiple);
+        listbox.set_activate_on_single_click(false);
         listbox.set_margin_top(6);
         listbox.set_margin_bottom(6);
         listbox.set_margin_start(6);
@@ -60,6 +62,7 @@ impl ContentView {
 
         let nav_callback_rc = Rc::new(nav_callback);
         let entries = Rc::new(RefCell::new(Vec::<FileEntry>::new()));
+        let all_entries = Rc::new(RefCell::new(Vec::<FileEntry>::new()));
 
         // Wire activation events for double-click / Enter navigation
         let nav_clone1 = nav_callback_rc.clone();
@@ -101,9 +104,9 @@ impl ContentView {
             flowbox,
             listbox,
             stack,
-            home_box,
             current_mode: Cell::new(Some("icons")),
             entries,
+            all_entries,
             window_handle: RefCell::new(None),
             current_path: RefCell::new(PathBuf::new()),
             nav_callback: nav_callback_rc,
@@ -127,145 +130,50 @@ impl ContentView {
     }
 
     pub fn update(&self, entries: &[FileEntry], window_handle: Rc<MainWindow>, current_path: PathBuf) {
+        self.all_entries.replace(entries.to_vec());
         self.entries.replace(entries.to_vec());
         self.window_handle.replace(Some(window_handle));
         self.current_path.replace(current_path.clone());
 
-        // Show home page when navigating to home directory
-        if current_path == glib::home_dir() {
-            self.build_home_page();
-            self.stack.set_visible_child_name("home");
+        let mode = self.current_mode.get().unwrap_or("icons");
+        self.stack.set_visible_child_name(mode);
+        self.update_ui();
+    }
+
+    pub fn filter(&self, query: &str) {
+        if query.is_empty() {
+            let all = self.all_entries.borrow().clone();
+            self.entries.replace(all);
         } else {
-            let mode = self.current_mode.get().unwrap_or("icons");
-            self.stack.set_visible_child_name(mode);
-            self.update_ui();
+            use fuzzy_matcher::skim::SkimMatcherV2;
+            use fuzzy_matcher::FuzzyMatcher;
+            use rayon::prelude::*;
+
+            let matcher = SkimMatcherV2::default();
+            let all = self.all_entries.borrow().clone();
+            
+            // Match and rank items using Rayon
+            let mut scored_entries: Vec<(i64, FileEntry)> = all
+                .into_par_iter()
+                .filter_map(|entry| {
+                    if let Some(score) = matcher.fuzzy_match(&entry.display_name, query) {
+                        Some((score, entry))
+                    } else {
+                        None
+                    }
+                })
+                .collect();
+
+            // Sort by score descending (highest score first)
+            scored_entries.sort_by(|a, b| b.0.cmp(&a.0));
+
+            let filtered: Vec<FileEntry> = scored_entries.into_iter().map(|(_, e)| e).collect();
+            self.entries.replace(filtered);
         }
+        self.update_ui();
     }
 
-    fn build_home_page(&self) {
-        // Clear previous home content
-        while let Some(child) = self.home_box.first_child() {
-            self.home_box.remove(&child);
-        }
 
-        let scroll = gtk4::ScrolledWindow::new();
-        scroll.set_hexpand(true);
-        scroll.set_vexpand(true);
-        let inner = Box::new(Orientation::Vertical, 0);
-        scroll.set_child(Some(&inner));
-        self.home_box.append(&scroll);
-
-        // Quick Access title
-        let title = Label::new(Some("Quick access"));
-        title.set_css_classes(&["section-title"]);
-        title.set_halign(Align::Start);
-        inner.append(&title);
-
-        // Cards row (wrapping FlowBox)
-        let cards_flow = FlowBox::new();
-        cards_flow.set_valign(Align::Start);
-        cards_flow.set_homogeneous(false);
-        cards_flow.set_selection_mode(gtk4::SelectionMode::None);
-        cards_flow.set_margin_start(14);
-        cards_flow.set_margin_end(14);
-        cards_flow.set_margin_bottom(16);
-        cards_flow.set_column_spacing(4);
-        cards_flow.set_row_spacing(4);
-        inner.append(&cards_flow);
-
-        let quick_dirs = [
-            ("Desktop",   "user-desktop",          glib::UserDirectory::Desktop),
-            ("Downloads", "folder-download",        glib::UserDirectory::Downloads),
-            ("Documents", "folder-documents",       glib::UserDirectory::Documents),
-            ("Pictures",  "folder-pictures",        glib::UserDirectory::Pictures),
-            ("Music",     "folder-music",           glib::UserDirectory::Music),
-            ("Videos",    "folder-videos",          glib::UserDirectory::Videos),
-        ];
-
-        for (name, icon_name, dir) in &quick_dirs {
-            let path = match glib::user_special_dir(*dir) {
-                Some(p) if p.exists() => p,
-                _ => continue,
-            };
-
-            let card = Box::new(Orientation::Horizontal, 12);
-            card.set_css_classes(&["qa-card"]);
-            card.set_margin_top(2);
-            card.set_margin_bottom(2);
-            card.set_margin_start(2);
-            card.set_margin_end(2);
-
-            let img = Image::from_icon_name(icon_name);
-            img.set_pixel_size(40);
-            card.append(&img);
-
-            let text_box = Box::new(Orientation::Vertical, 2);
-            let name_lbl = Label::builder()
-                .label(*name)
-                .halign(Align::Start)
-                .css_classes(vec!["qa-card-name".to_string()])
-                .build();
-            let sub_lbl = Label::builder()
-                .label("Stored locally")
-                .halign(Align::Start)
-                .css_classes(vec!["qa-card-sub".to_string()])
-                .build();
-            text_box.append(&name_lbl);
-            text_box.append(&sub_lbl);
-            card.append(&text_box);
-
-            let btn = Button::builder()
-                .child(&card)
-                .css_classes(vec!["file-item-btn".to_string()])
-                .build();
-
-            let nav_cb = self.nav_callback.as_ref() as *const dyn Fn(PathBuf);
-            let nav_cb = unsafe { &*nav_cb };
-            let target = path.clone();
-            btn.connect_clicked(move |_| {
-                nav_cb(target.clone());
-            });
-
-            cards_flow.append(&btn);
-        }
-
-        // Recent / Favorites / Shared tab row
-        let tab_row = Box::new(Orientation::Horizontal, 4);
-        tab_row.set_margin_start(16);
-        tab_row.set_margin_end(16);
-        tab_row.set_margin_bottom(8);
-        inner.append(&tab_row);
-
-        for label in &["Recent", "Favorites", "Shared"] {
-            let btn = Button::with_label(label);
-            btn.set_css_classes(&["subsection-tab-btn"]);
-            tab_row.append(&btn);
-        }
-
-        // Empty state message
-        let empty_box = Box::new(Orientation::Vertical, 8);
-        empty_box.set_valign(Align::Center);
-        empty_box.set_halign(Align::Center);
-        empty_box.set_vexpand(true);
-        empty_box.set_margin_top(40);
-
-        let empty_icon = Image::from_icon_name("document-open-recent-symbolic");
-        empty_icon.set_pixel_size(64);
-        empty_icon.set_opacity(0.3);
-        empty_box.append(&empty_icon);
-
-        let empty_lbl = Label::builder()
-            .label("Your recent activity will show here")
-            .css_classes(vec!["empty-state-label".to_string()])
-            .build();
-        let empty_sub = Label::builder()
-            .label("You'll get quick access to your recently used files here.")
-            .css_classes(vec!["empty-state-sub".to_string()])
-            .build();
-        empty_box.append(&empty_lbl);
-        empty_box.append(&empty_sub);
-        inner.append(&empty_box);
-    }
 
     fn update_ui(&self) {
         // Clear flowbox
@@ -330,7 +238,7 @@ impl ContentView {
                 item_box.set_size_request(100, 100);
                 item_box.set_css_classes(&["file-item"]);
 
-                let img = Image::from_icon_name(&entry.icon_name);
+                let img = babydra_common::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
                 img.set_pixel_size(48);
 
                 let lbl = Label::builder()
@@ -375,7 +283,7 @@ impl ContentView {
                 item_box.set_margin_start(6);
                 item_box.set_margin_end(6);
 
-                let img = Image::from_icon_name(&entry.icon_name);
+                let img = babydra_common::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
                 img.set_pixel_size(24);
                 item_box.append(&img);
 

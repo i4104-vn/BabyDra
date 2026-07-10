@@ -27,6 +27,7 @@ impl HeaderBar {
         session: Rc<RefCell<SessionState>>,
         nav_callback: impl Fn(PathBuf) + 'static,
         view_mode_callback: impl Fn(String) + 'static,
+        search_callback: impl Fn(String) + 'static,
     ) -> Rc<RefCell<Self>> {
         let container = Box::new(Orientation::Vertical, 0);
 
@@ -80,6 +81,12 @@ impl HeaderBar {
             .build();
         search.set_size_request(200, -1);
         nav_row.append(&search);
+
+        let search_cb = Rc::new(search_callback);
+        let search_cb_clone = search_cb.clone();
+        search.connect_changed(move |entry| {
+            search_cb_clone(entry.text().to_string());
+        });
 
         // ── Row 2: Command Toolbar ─────────────────────────────────
         let toolbar = Box::new(Orientation::Horizontal, 2);

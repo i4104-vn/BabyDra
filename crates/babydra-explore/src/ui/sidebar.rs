@@ -24,8 +24,8 @@ impl Sidebar {
 
         let nav_cb = Rc::new(nav_callback);
 
-        // ── Section: Quick Access ──────────────────────────────────
-        let qa_label = Label::new(Some("Quick access"));
+        // ── Section: Places ────────────────────────────────────────
+        let qa_label = Label::new(Some("Places"));
         qa_label.set_css_classes(&["sidebar-section-label"]);
         qa_label.set_halign(Align::Start);
         vbox.append(&qa_label);
