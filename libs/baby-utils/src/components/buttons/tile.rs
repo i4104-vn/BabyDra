@@ -9,11 +9,12 @@ pub fn create_toggle_tile(
     css_class: &str,
     initial_active: bool,
     on_click: impl Fn(bool) + 'static,
-) -> gtk4::Button {
+) -> (gtk4::Button, gtk4::Label) {
     let btn = gtk4::Button::new();
-    btn.add_css_class("control-tile-row");
     if !css_class.is_empty() {
         btn.add_css_class(css_class);
+    } else {
+        btn.add_css_class("control-tile-row");
     }
     btn.set_hexpand(true);
     btn.set_vexpand(true);
@@ -41,12 +42,10 @@ pub fn create_toggle_tile(
     title_label.add_css_class("tile-title");
     text_box.append(&title_label);
 
-    if !subtitle.is_empty() {
-        let sub_label = gtk4::Label::new(Some(subtitle));
-        sub_label.set_xalign(0.0);
-        sub_label.add_css_class("tile-subtitle");
-        text_box.append(&sub_label);
-    }
+    let sub_label = gtk4::Label::new(Some(subtitle));
+    sub_label.set_xalign(0.0);
+    sub_label.add_css_class("tile-subtitle");
+    text_box.append(&sub_label);
     main_box.append(&text_box);
 
     btn.set_child(Some(&main_box));
@@ -76,7 +75,7 @@ pub fn create_toggle_tile(
         on_click(is_now_active);
     });
 
-    btn
+    (btn, sub_label)
 }
 
 /// Creates a square panel toggle tile with active/inactive state.

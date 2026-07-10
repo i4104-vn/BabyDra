@@ -8,41 +8,28 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
     container.add_css_class("control-tile-container");
     container.set_hexpand(false);
     
-    let left_btn = gtk4::Button::new();
-    left_btn.add_css_class("control-tile-left-btn");
-    left_btn.set_hexpand(false);
-    
-    let main_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
-    main_box.set_valign(gtk4::Align::Center);
-    
-    let circle = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    circle.add_css_class("control-icon-circle");
-    
     let (is_active, ssid) = get_wifi_state();
-    if is_active {
-        left_btn.add_css_class("active");
-        circle.add_css_class("active");
-    }
     
-    let color = if is_active { "#ffffff" } else { "rgba(255, 255, 255, 0.7)" };
-    let icon_widget = babydra_common::icon::get_icon_colored("wifi", 14, color);
-    circle.append(&icon_widget);
-    main_box.append(&circle);
-    
-    let text_box = gtk4::Box::new(gtk4::Orientation::Vertical, 1);
-    let title_label = gtk4::Label::new(Some(&babydra_common::i18n::t("control.network")));
-    title_label.set_xalign(0.0);
-    title_label.add_css_class("tile-title");
-    
-    let sub_label = gtk4::Label::new(Some(&ssid));
-    sub_label.set_xalign(0.0);
-    sub_label.add_css_class("tile-subtitle");
-    
-    text_box.append(&title_label);
-    text_box.append(&sub_label);
-    main_box.append(&text_box);
-    left_btn.set_child(Some(&main_box));
-    
+    let (left_btn, sub_label) = baby_utils::components::create_toggle_tile(
+        "wifi",
+        &babydra_common::i18n::t("control.network"),
+        &ssid,
+        "control-tile-left-btn",
+        is_active,
+        |_| {}
+    );
+    left_btn.set_hexpand(false);
+
+    let circle = left_btn.child()
+        .and_then(|w| w.downcast::<gtk4::Box>().ok())
+        .and_then(|main_box| main_box.first_child())
+        .and_then(|c| c.downcast::<gtk4::Box>().ok())
+        .unwrap();
+
+    let icon_widget = circle.first_child()
+        .and_then(|img| img.downcast::<gtk4::Image>().ok())
+        .unwrap();
+
     let right_btn = baby_utils::components::create_colored_icon_button(
         "go-next-symbolic",
         12,
@@ -79,27 +66,15 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
         right_btn_c2.set_child(Some(&right_icon));
     });
     
-    let circle_c = circle.clone();
-    let icon_widget_c = icon_widget.clone();
     let sub_label_c = sub_label.clone();
     left_btn.connect_clicked(move |b| {
-        let current_active = b.has_css_class("active");
-        let new_active = !current_active;
-        if new_active {
-            b.add_css_class("active");
-            circle_c.add_css_class("active");
+        let is_now_active = b.has_css_class("active");
+        if is_now_active {
             babydra_common::helper::wifi::set_wifi_enabled(true);
             sub_label_c.set_text("Scanning...");
         } else {
-            b.remove_css_class("active");
-            circle_c.remove_css_class("active");
             babydra_common::helper::wifi::set_wifi_enabled(false);
             sub_label_c.set_text("Off");
-        }
-        let color = if new_active { "#ffffff" } else { "rgba(255, 255, 255, 0.7)" };
-        let new_img = babydra_common::icon::get_icon_colored("wifi", 14, color);
-        if let Some(paintable) = new_img.paintable() {
-            icon_widget_c.set_paintable(Some(&paintable));
         }
     });
     

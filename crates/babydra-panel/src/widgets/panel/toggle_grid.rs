@@ -58,7 +58,7 @@ fn is_dnd_active() -> bool {
 
 pub fn create_dnd_tile() -> gtk4::Button {
     let active = is_dnd_active();
-    baby_utils::components::create_toggle_tile(
+    let (btn, _) = baby_utils::components::create_toggle_tile(
         "bell-off",
         "DND",
         "",
@@ -67,7 +67,8 @@ pub fn create_dnd_tile() -> gtk4::Button {
         |new_active| {
             babydra_island::widgets::notification::set_dnd_active(new_active);
         }
-    )
+    );
+    btn
 }
 
 fn is_night_light_active() -> bool {
