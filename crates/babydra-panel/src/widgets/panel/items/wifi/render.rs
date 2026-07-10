@@ -48,10 +48,7 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
     let arrow_icon = babydra_common::icon::get_icon_colored("go-next-symbolic", 12, "rgba(255, 255, 255, 0.7)");
     right_btn.set_child(Some(&arrow_icon));
     
-    let popover = gtk4::Popover::new();
-    popover.add_css_class("taskbar-popover");
-    popover.set_parent(&container);
-    popover.set_position(gtk4::PositionType::Right);
+    let popover = baby_utils::components::create_popover(&container, gtk4::PositionType::Right, "taskbar-popover");
     popover.set_has_arrow(false);
     
     setup_wifi_popover(&popover, sub_label.clone(), left_btn.clone(), circle.clone(), icon_widget.clone());

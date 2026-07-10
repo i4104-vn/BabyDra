@@ -128,10 +128,7 @@ pub fn create_volume_row(
     row_box.append(&overlay);
     row_box.append(&menu_btn);
 
-    let popover = gtk4::Popover::new();
-    popover.add_css_class("taskbar-popover");
-    popover.set_parent(&menu_btn);
-    popover.set_position(gtk4::PositionType::Bottom);
+    let popover = baby_utils::components::create_popover(&menu_btn, gtk4::PositionType::Bottom, "taskbar-popover");
     popover.set_has_arrow(true);
 
     let popover_clone = popover.clone();

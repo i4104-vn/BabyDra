@@ -25,9 +25,7 @@ pub fn build_sys_monitor_ui(
     sys_label.add_css_class("status-text");
     capsule.append(&sys_label);
 
-    let popover = gtk4::Popover::new();
-    popover.add_css_class("sys-monitor-popover");
-    popover.set_parent(capsule);
+    let popover = baby_utils::components::create_popover(capsule, gtk4::PositionType::Bottom, "sys-monitor-popover");
     popover.set_autohide(false);
 
     let popover_box = gtk4::Box::new(gtk4::Orientation::Vertical, 10);
