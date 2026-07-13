@@ -23,7 +23,8 @@ window.explore-window,
     border-radius: 6px 6px 0 0;
     padding: 6px 10px 6px 14px;
     font-size: 12px;
-    min-width: 130px;
+    min-width: 100px;
+    max-width: 160px;
     margin-top: 4px;
     cursor: pointer;
     transition: background 0.12s ease;

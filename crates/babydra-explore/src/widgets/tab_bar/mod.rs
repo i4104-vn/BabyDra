@@ -67,8 +67,6 @@ pub fn rebuild_tab_bar(
         let lbl = Label::new(Some(&display_name));
         lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
         lbl.set_max_width_chars(15);
-        lbl.set_hexpand(true);
-        lbl.set_halign(Align::Start);
         tab_box.append(&lbl);
 
         // Close button (only shown if there is more than 1 tab)
