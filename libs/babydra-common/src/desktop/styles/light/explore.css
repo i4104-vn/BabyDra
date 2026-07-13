@@ -333,6 +333,27 @@ window.explore-window,
     color: #1a1a1a;
 }
 
+/* List view column header */
+.explore-window .list-header-row {
+    background-color: #f3f3f3;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 0 18px;
+    min-height: 28px;
+}
+
+.explore-window .list-header-cell {
+    color: #666;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 0;
+}
+
+.explore-window .list-header-sort-icon {
+    color: #0066cc;
+    font-size: 11px;
+    margin-left: 2px;
+}
+
 .explore-window .list-col-meta {
     color: #666;
     font-size: 12px;
