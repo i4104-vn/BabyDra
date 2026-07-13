@@ -10,7 +10,7 @@ window.explore-window,
 /* ── Tab Bar ────────────────────────────────────────────────────── */
 .explore-window .tab-bar {
     background-color: #1c1c1c;
-    border-bottom: 1px solid #303030;
+    border-bottom: 1px solid #3a3a3a;
     padding: 0 6px;
     min-height: 38px;
 }
@@ -386,9 +386,7 @@ window.explore-window,
 
 /* Active split pane */
 .explore-window .active-pane {
-    outline: 2px solid #3b82f6;
-    outline-offset: -2px;
-    border-radius: 4px;
+    outline: none;
 }
 
 /* ── Info Panel ─────────────────────────────────────────────────── */
