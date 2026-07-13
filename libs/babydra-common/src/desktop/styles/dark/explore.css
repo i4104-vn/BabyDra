@@ -443,8 +443,8 @@ popover.explore-popover>arrow {
 }
 
 .context-menu-box {
-    background-color: rgba(20, 20, 22, 0.94);
-    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(20, 20, 22, 0.94) 100%);
+    background-color: rgb(20, 20, 22);
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgb(20, 20, 22) 100%);
     color: #e8e8e8;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-top: 1px solid rgba(255, 255, 255, 0.12);
