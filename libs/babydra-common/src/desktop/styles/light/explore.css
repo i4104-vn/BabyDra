@@ -101,7 +101,7 @@ window.explore-window,
 /* ── Navigation Row ─────────────────────────────────────────────── */
 .explore-window .nav-bar {
     background-color: #f3f3f3;
-    padding: 6px 8px;
+    padding: 4px 8px;
     border-bottom: 1px solid #e5e5e5;
 }
 
@@ -109,10 +109,10 @@ window.explore-window,
     background: transparent;
     border: none;
     border-radius: 6px;
-    padding: 5px 7px;
+    padding: 3px 5px;
     color: #1a1a1a;
-    min-width: 32px;
-    min-height: 32px;
+    min-width: 28px;
+    min-height: 28px;
     transition: background 0.1s ease;
 }
 
@@ -133,6 +133,7 @@ window.explore-window,
     border: 1px solid #d0d0d0;
     border-radius: 6px;
     padding: 0 8px;
+    min-height: 28px;
     transition: border-color 0.15s ease;
 }
 
@@ -144,7 +145,7 @@ window.explore-window,
     background: transparent;
     border: none;
     border-radius: 4px;
-    padding: 2px 6px;
+    padding: 2px 4px;
     color: #1a1a1a;
     font-size: 13px;
 }
@@ -163,7 +164,7 @@ window.explore-window,
     border: none;
     box-shadow: none;
     color: #1a1a1a;
-    padding: 4px 0;
+    padding: 2px 0;
     font-size: 13px;
 }
 
@@ -172,7 +173,7 @@ window.explore-window,
     border: 1px solid #d0d0d0;
     border-radius: 6px;
     color: #1a1a1a;
-    padding: 5px 10px;
+    padding: 3px 8px;
     font-size: 12px;
     min-width: 200px;
     transition: border-color 0.15s ease;
@@ -186,15 +187,15 @@ window.explore-window,
 .explore-window .toolbar {
     background-color: #f3f3f3;
     border-bottom: 1px solid #e5e5e5;
-    padding: 4px 8px;
-    min-height: 42px;
+    padding: 3px 8px;
+    min-height: 32px;
 }
 
 .explore-window .toolbar-btn {
     background: transparent;
     border: none;
     border-radius: 6px;
-    padding: 5px 10px;
+    padding: 4px 8px;
     color: #1a1a1a;
     font-size: 12px;
     transition: background 0.1s ease;
@@ -211,7 +212,7 @@ window.explore-window,
 .explore-window .toolbar-sep {
     background-color: #d0d0d0;
     min-width: 1px;
-    margin: 6px 4px;
+    margin: 4px 4px;
 }
 
 .explore-window .toolbar-btn.new-btn {
