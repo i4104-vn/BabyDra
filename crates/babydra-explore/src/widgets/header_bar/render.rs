@@ -99,6 +99,15 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     toolbar.append(&btn_view_icons);
     toolbar.append(&btn_view_list);
 
+    let sep3 = Separator::new(Orientation::Vertical);
+    sep3.set_css_classes(&["toolbar-sep"]);
+    toolbar.append(&sep3);
+
+    let btn_toggle_preview = Button::from_icon_name("view-sidebar-symbolic");
+    btn_toggle_preview.set_css_classes(&["toolbar-btn", "toolbar-btn-active"]);
+    btn_toggle_preview.set_tooltip_text(Some("Toggle Preview (F4)"));
+    toolbar.append(&btn_toggle_preview);
+
     HeaderBarWidgets {
         container,
         btn_back,
@@ -118,5 +127,6 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
         btn_paste,
         btn_rename,
         btn_delete,
+        btn_toggle_preview,
     }
 }

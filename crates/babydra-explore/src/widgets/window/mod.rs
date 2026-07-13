@@ -17,6 +17,7 @@ pub fn create_explore_window(
     // Active state variables
     let is_split = Rc::new(Cell::new(false));
     let active_pane = Rc::new(Cell::new(ActivePane::Left));
+    let preview_visible = Rc::new(Cell::new(true));
     let watcher = Rc::new(RefCell::new(None::<babydra_common::FileWatcher>));
 
     // Channels for file watching/reloading
@@ -262,7 +263,35 @@ pub fn create_explore_window(
         search_callback,
     );
     ui.vbox.insert_child_after(&header_box, None::<&gtk4::Widget>);
-    header_widgets_cell.replace(Some(header_widgets));
+    header_widgets_cell.replace(Some(header_widgets.clone()));
+
+    // Preview toggle closure
+    let toggle_preview = {
+        let layout_paned = ui.layout_paned.clone();
+        let info_panel_container = info_panel_container.clone();
+        let preview_visible = preview_visible.clone();
+        let btn = header_widgets.btn_toggle_preview.clone();
+        move || {
+            if preview_visible.get() {
+                layout_paned.set_end_child(None::<&gtk4::Widget>);
+                preview_visible.set(false);
+                btn.remove_css_class("toolbar-btn-active");
+            } else {
+                layout_paned.set_end_child(Some(&info_panel_container));
+                preview_visible.set(true);
+                btn.add_css_class("toolbar-btn-active");
+            }
+        }
+    };
+    let toggle_preview_rc = Rc::new(toggle_preview);
+
+    // Wire btn_toggle_preview click
+    {
+        let toggle = toggle_preview_rc.clone();
+        header_widgets.btn_toggle_preview.connect_clicked(move |_| {
+            toggle();
+        });
+    }
 
     // TabBar wire/rebuilding function
     let rebuild_tabs = {
@@ -478,19 +507,43 @@ pub fn create_explore_window(
 
     let toggle_split_view_rc = Rc::new(toggle_split_view);
 
-    // Wire F3 key controller
+    // Wire F3 key controller (split view) and F4 (preview toggle)
     {
-        let toggle = toggle_split_view_rc.clone();
+        let toggle_split = toggle_split_view_rc.clone();
+        let toggle_preview = toggle_preview_rc.clone();
         let key_controller = gtk4::EventControllerKey::new();
         key_controller.connect_key_pressed(move |_, keyval, _, _| {
             if keyval == gtk4::gdk::Key::F3 {
-                toggle();
+                toggle_split();
+                glib::Propagation::Stop
+            } else if keyval == gtk4::gdk::Key::F4 {
+                toggle_preview();
                 glib::Propagation::Stop
             } else {
                 glib::Propagation::Proceed
             }
         });
         ui.window.add_controller(key_controller);
+    }
+
+    // Auto-hide preview when window is too narrow (< 700px)
+    {
+        let layout_paned = ui.layout_paned.clone();
+        let info_panel_ref = info_panel_container.clone();
+        let preview_visible = preview_visible.clone();
+        let btn = header_widgets.btn_toggle_preview.clone();
+        ui.window.connect_default_width_notify(move |window| {
+            let w = window.width();
+            if w < 700 && preview_visible.get() {
+                layout_paned.set_end_child(None::<&gtk4::Widget>);
+                preview_visible.set(false);
+                btn.remove_css_class("toolbar-btn-active");
+            } else if w >= 700 && !preview_visible.get() {
+                layout_paned.set_end_child(Some(&info_panel_ref));
+                preview_visible.set(true);
+                btn.add_css_class("toolbar-btn-active");
+            }
+        });
     }
 
     // Connect file watcher hot-reload channel receiver
