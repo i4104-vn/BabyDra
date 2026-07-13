@@ -15,32 +15,65 @@ window.explore-window,
     min-height: 38px;
 }
 
-.explore-window button.tab-item {
+.explore-window .tab-item {
     background-image: none;
     background-color: transparent;
     border: none;
     box-shadow: none;
     border-radius: 6px 6px 0 0;
-    padding: 6px 14px;
-    color: #666;
+    padding: 6px 10px 6px 14px;
     font-size: 12px;
-    min-width: 120px;
+    min-width: 130px;
     margin-top: 4px;
-    transition: background 0.12s ease, color 0.12s ease;
+    cursor: pointer;
+    transition: background 0.12s ease;
 }
 
-.explore-window button.tab-item:hover {
+.explore-window .tab-item label {
+    color: #666;
+    font-weight: 500;
+}
+
+.explore-window .tab-item:hover {
     background-image: none;
     background-color: rgba(0, 0, 0, 0.03);
+}
+
+.explore-window .tab-item:hover label {
     color: #1a1a1a;
 }
 
-.explore-window button.tab-item.active-tab {
+.explore-window .tab-item.active-tab {
     background-image: none;
     background-color: #f3f3f3;
-    color: #1a1a1a;
     border-top: 2px solid #0066cc;
     margin-top: 2px;
+}
+
+.explore-window .tab-item.active-tab label {
+    color: #1a1a1a;
+}
+
+.explore-window .tab-close-btn {
+    background-image: none;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 4px;
+    padding: 0;
+    margin: 0;
+    min-width: 18px;
+    min-height: 18px;
+    color: #666;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.1s ease, color 0.1s ease;
+}
+
+.explore-window .tab-close-btn:hover {
+    background-image: none;
+    background-color: rgba(0, 0, 0, 0.08);
+    color: #1a1a1a;
 }
 
 .explore-window button.tab-new-btn {

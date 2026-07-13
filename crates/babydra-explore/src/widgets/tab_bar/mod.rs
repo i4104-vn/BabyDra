@@ -49,6 +49,11 @@ pub fn rebuild_tab_bar(
     for (idx, tab) in session_borrow.tabs.iter().enumerate() {
         let tab_box = Box::new(Orientation::Horizontal, 6);
         tab_box.set_valign(Align::Center);
+        tab_box.set_css_classes(&["tab-item"]);
+
+        if idx == active_idx {
+            tab_box.add_css_class("active-tab");
+        }
 
         let display_name = if tab.current_path == glib::home_dir() {
             "Home".to_string()
@@ -62,15 +67,16 @@ pub fn rebuild_tab_bar(
         let lbl = Label::new(Some(&display_name));
         lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
         lbl.set_max_width_chars(15);
+        lbl.set_hexpand(true);
+        lbl.set_halign(Align::Start);
         tab_box.append(&lbl);
 
         // Close button (only shown if there is more than 1 tab)
         if session_borrow.tabs.len() > 1 {
             let btn_close = Button::builder()
                 .label("×")
-                .css_classes(vec!["nav-btn".to_string(), "flat".to_string()])
+                .css_classes(vec!["tab-close-btn".to_string(), "flat".to_string()])
                 .build();
-            btn_close.set_size_request(16, 16);
             btn_close.set_valign(Align::Center);
             
             let on_close = on_tab_closed.clone();
@@ -80,21 +86,16 @@ pub fn rebuild_tab_bar(
             tab_box.append(&btn_close);
         }
 
-        let btn_tab = Button::builder()
-            .child(&tab_box)
-            .css_classes(vec!["tab-item".to_string(), "flat".to_string()])
-            .build();
-
-        if idx == active_idx {
-            btn_tab.add_css_class("active-tab");
-        }
-
+        // Gesture to activate the tab on click (handles clicking anywhere on the tab)
+        let gesture = gtk4::GestureClick::new();
         let on_activate = on_tab_activated.clone();
-        btn_tab.connect_clicked(move |_| {
+        gesture.connect_released(move |gesture, _, _, _| {
+            gesture.set_state(gtk4::EventSequenceState::Claimed);
             on_activate(idx);
         });
+        tab_box.add_controller(gesture);
 
-        container.append(&btn_tab);
+        container.append(&tab_box);
     }
 
     // New Tab Button (+)
