@@ -296,19 +296,18 @@ window.explore-window,
 }
 
 /* Icon view file items */
-.explore-window .file-item-btn {
-    background: transparent;
-    border: none;
+.explore-window .file-item {
     border-radius: 6px;
     padding: 8px;
+    cursor: pointer;
     transition: background 0.1s ease;
 }
 
-.explore-window .file-item-btn:hover {
+.explore-window .file-item:hover {
     background-color: rgba(0, 0, 0, 0.04);
 }
 
-.explore-window .file-item-btn:active {
+.explore-window .file-item:active {
     background-color: rgba(0, 0, 0, 0.08);
 }
 
@@ -325,6 +324,7 @@ window.explore-window,
     margin: 1px 6px;
     color: #444;
     font-size: 13px;
+    cursor: pointer;
     transition: background 0.1s ease;
 }
 

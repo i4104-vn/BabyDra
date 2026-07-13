@@ -17,6 +17,7 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
     flowbox.set_max_children_per_line(20);
     flowbox.set_min_children_per_line(1);
     flowbox.set_selection_mode(gtk4::SelectionMode::Multiple);
+    flowbox.set_activate_on_single_click(false);
     flowbox.set_row_spacing(10);
     flowbox.set_column_spacing(10);
 
@@ -27,6 +28,7 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
     // View Mode: List (ListBox)
     let listbox = ListBox::new();
     listbox.set_selection_mode(gtk4::SelectionMode::Multiple);
+    listbox.set_activate_on_single_click(false);
 
     let list_scroll = ScrolledWindow::new();
     list_scroll.set_child(Some(&listbox));
