@@ -382,14 +382,32 @@ window.explore-window,
     min-height: 26px;
 }
 
-/* ── Context Menu (Popover) ───────────────────────────────────────── */
-.explore-popover contents {
+popover.explore-popover,
+popover.explore-popover>contents {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+}
+
+.context-menu-box {
     background-color: #ffffff;
     color: #1a1a1a;
     border: 1px solid #d0d0d0;
-    border-radius: 8px;
+    border-radius: 20px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
     padding: 6px;
+}
+
+.context-menu-box button:first-child {
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+}
+
+.context-menu-box button:last-child {
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
 }
 
 button.context-menu-item {

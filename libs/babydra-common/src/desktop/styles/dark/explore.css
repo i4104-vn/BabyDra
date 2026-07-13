@@ -383,21 +383,31 @@ window.explore-window,
 }
 
 popover.explore-popover,
-.explore-popover {
-    background-color: transparent !important;
-    background-image: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
+popover.explore-popover>contents {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    padding: 0;
 }
 
-.explore-popover contents {
+.context-menu-box {
     background-color: #2c2c2c;
     color: #e8e8e8;
-    border: 1px solid #3c3c3c;
-    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
     padding: 6px;
+}
+
+.context-menu-box button:first-child {
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+}
+
+.context-menu-box button:last-child {
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
 }
 
 button.context-menu-item {

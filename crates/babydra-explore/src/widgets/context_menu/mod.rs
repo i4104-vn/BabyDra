@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Orientation, Popover, Align, Label, Image};
+use gtk4::{Box, Button, Orientation, Align, Label, Image, Popover};
 use std::rc::Rc;
 use std::path::PathBuf;
 use babydra_common::FileEntry;
@@ -13,6 +13,27 @@ thread_local! {
 }
 
 impl ContextMenu {
+    fn create_menu_popover(parent: &gtk4::Widget, x: f64, y: f64) -> (Popover, Box) {
+        let popover = Popover::builder()
+            .has_arrow(false)
+            .autohide(true)
+            .build();
+        popover.set_parent(parent);
+        popover.add_css_class("explore-popover");
+
+        // Position popover at click coordinates
+        let rect = gtk4::gdk::Rectangle::new(x as i32, y as i32, 1, 1);
+        popover.set_pointing_to(Some(&rect));
+
+        let vbox = Box::new(Orientation::Vertical, 2);
+        vbox.set_css_classes(&["context-menu-box"]);
+        vbox.set_width_request(200);
+
+        popover.set_child(Some(&vbox));
+
+        (popover, vbox)
+    }
+
     pub fn show_for_file(
         parent: &gtk4::Widget,
         x: f64,
@@ -21,18 +42,7 @@ impl ContextMenu {
         current_path: PathBuf,
         nav_callback: Rc<dyn Fn(PathBuf)>,
     ) {
-        let popover = Popover::new();
-        popover.add_css_class("explore-popover");
-        popover.set_parent(parent);
-        popover.set_has_arrow(false);
-
-        // Position popover at click coordinates
-        let rect = gtk4::gdk::Rectangle::new(x as i32, y as i32, 1, 1);
-        popover.set_pointing_to(Some(&rect));
-
-        let vbox = Box::new(Orientation::Vertical, 2);
-        vbox.set_css_classes(&["context-menu-box"]);
-        popover.set_child(Some(&vbox));
+        let (popover, vbox) = Self::create_menu_popover(parent, x, y);
 
         // Create buttons
         let btn_open = Self::create_menu_button("Open", "document-open");
@@ -50,12 +60,12 @@ impl ContextMenu {
         vbox.append(&btn_delete);
 
         // Event handling
-        let pop_clone = popover.clone();
+        let pop_c = popover.clone();
         let target_path = entry.path.clone();
         let is_dir = matches!(entry.file_type, babydra_common::FileType::Directory);
         let nav = nav_callback.clone();
         btn_open.connect_clicked(move |_| {
-            pop_clone.popdown();
+            pop_c.popdown();
             if is_dir {
                 nav(target_path.clone());
             } else {
@@ -64,41 +74,41 @@ impl ContextMenu {
             }
         });
 
-        let pop_clone = popover.clone();
+        let pop_c = popover.clone();
         let src_path = entry.path.clone();
         btn_copy.connect_clicked(move |_| {
-            pop_clone.popdown();
+            pop_c.popdown();
             CLIPBOARD.with(|cb| {
                 cb.replace(Some((src_path.clone(), false)));
             });
         });
 
-        let pop_clone = popover.clone();
+        let pop_c = popover.clone();
         let src_path = entry.path.clone();
         btn_cut.connect_clicked(move |_| {
-            pop_clone.popdown();
+            pop_c.popdown();
             CLIPBOARD.with(|cb| {
                 cb.replace(Some((src_path.clone(), true)));
             });
         });
 
         // Rename dialog trigger
-        let pop_clone = popover.clone();
+        let pop_c = popover.clone();
         let rename_path = entry.path.clone();
         let nav = nav_callback.clone();
         let current_p = current_path.clone();
         btn_rename.connect_clicked(move |_| {
-            pop_clone.popdown();
+            pop_c.popdown();
             dialogs::show_rename_dialog(&rename_path, current_p.clone(), nav.clone());
         });
 
         // Trash action
-        let pop_clone = popover.clone();
+        let pop_c = popover.clone();
         let trash_path = entry.path.clone();
         let nav = nav_callback.clone();
         let current_p = current_path.clone();
         btn_trash.connect_clicked(move |_| {
-            pop_clone.popdown();
+            pop_c.popdown();
             let nav_c = nav.clone();
             let cp_c = current_p.clone();
             let path_c = trash_path.clone();
@@ -111,12 +121,12 @@ impl ContextMenu {
         });
 
         // Permanent delete
-        let pop_clone = popover.clone();
+        let pop_c = popover.clone();
         let del_path = entry.path.clone();
         let nav = nav_callback.clone();
         let current_p = current_path.clone();
         btn_delete.connect_clicked(move |_| {
-            pop_clone.popdown();
+            pop_c.popdown();
             let nav_c = nav.clone();
             let cp_c = current_p.clone();
             let path_c = del_path.clone();
@@ -138,17 +148,7 @@ impl ContextMenu {
         current_path: PathBuf,
         nav_callback: Rc<dyn Fn(PathBuf)>,
     ) {
-        let popover = Popover::new();
-        popover.add_css_class("explore-popover");
-        popover.set_parent(parent);
-        popover.set_has_arrow(false);
-
-        let rect = gtk4::gdk::Rectangle::new(x as i32, y as i32, 1, 1);
-        popover.set_pointing_to(Some(&rect));
-
-        let vbox = Box::new(Orientation::Vertical, 2);
-        vbox.set_css_classes(&["context-menu-box"]);
-        popover.set_child(Some(&vbox));
+        let (popover, vbox) = Self::create_menu_popover(parent, x, y);
 
         let btn_new_folder = Self::create_menu_button("New Folder", "folder-new");
         let btn_paste = Self::create_menu_button("Paste", "edit-paste");
@@ -161,40 +161,39 @@ impl ContextMenu {
         btn_paste.set_sensitive(clipboard_data.is_some());
 
         // Paste action implementation
-        let pop_clone = popover.clone();
+        let pop_c = popover.clone();
         let dest_dir = current_path.clone();
         let nav = nav_callback.clone();
         let current_p = current_path.clone();
         btn_paste.connect_clicked(move |_| {
-            pop_clone.popdown();
+            pop_c.popdown();
             if let Some((src, is_cut)) = clipboard_data.clone() {
-                let dest = dest_dir.clone().join(src.file_name().unwrap());
-                let nav_c = nav.clone();
-                let cp_c = current_p.clone();
-                let src_c = src.clone();
+                let dest = dest_dir.join(src.file_name().unwrap());
+                let nav_f = nav.clone();
+                let cp_f = current_p.clone();
                 glib::spawn_future_local(async move {
                     if is_cut {
-                        if let Err(e) = babydra_common::move_path(src_c, dest).await {
+                        if let Err(e) = babydra_common::move_path(src, dest).await {
                             eprintln!("Failed to move file: {}", e);
                         } else {
                             CLIPBOARD.with(|cb| cb.replace(None)); // Clear clipboard on cut
                         }
                     } else {
-                        if let Err(e) = babydra_common::copy_path(src_c, dest).await {
+                        if let Err(e) = babydra_common::copy_path(src, dest).await {
                             eprintln!("Failed to copy file: {}", e);
                         }
                     }
-                    nav_c(cp_c);
+                    nav_f(cp_f);
                 });
             }
         });
 
         // New folder action
-        let pop_clone = popover.clone();
+        let pop_c = popover.clone();
         let nav = nav_callback.clone();
         let current_p = current_path.clone();
         btn_new_folder.connect_clicked(move |_| {
-            pop_clone.popdown();
+            pop_c.popdown();
             dialogs::show_new_folder_dialog(current_p.clone(), nav.clone());
         });
 
