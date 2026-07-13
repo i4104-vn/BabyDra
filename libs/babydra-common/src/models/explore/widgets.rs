@@ -41,7 +41,6 @@ pub struct ContentViewWidgets {
     pub container: ScrolledWindow,
     pub flowbox: gtk4::FlowBox,
     pub listbox: gtk4::ListBox,
-    pub list_header: Box,
     pub stack: Stack,
 }
 

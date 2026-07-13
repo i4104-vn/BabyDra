@@ -14,6 +14,19 @@ pub fn update_content_view_ui(
     current_path: &PathBuf,
     current_mode: &str,
 ) {
+    // Sort: directories first (by name), then files (by name), both case-insensitive
+    let mut sorted: Vec<FileEntry> = entries.to_vec();
+    sorted.sort_by(|a, b| {
+        let a_is_dir = matches!(a.file_type, babydra_common::FileType::Directory);
+        let b_is_dir = matches!(b.file_type, babydra_common::FileType::Directory);
+        match (a_is_dir, b_is_dir) {
+            (true, false) => std::cmp::Ordering::Less,
+            (false, true) => std::cmp::Ordering::Greater,
+            _ => a.display_name.to_lowercase().cmp(&b.display_name.to_lowercase()),
+        }
+    });
+    let entries = sorted.as_slice();
+
     // Clear flowbox
     while let Some(child) = widgets.flowbox.first_child() {
         widgets.flowbox.remove(&child);
