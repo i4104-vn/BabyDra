@@ -5,7 +5,6 @@ pub mod content_view;
 pub mod tab_bar;
 pub mod status_bar;
 pub mod context_menu;
-pub mod dialogs;
-pub mod widgets;
 pub mod info_panel;
 pub mod preview_panel;
+pub mod dialogs;

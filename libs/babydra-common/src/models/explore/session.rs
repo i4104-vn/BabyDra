@@ -2,6 +2,12 @@ use serde::{Serialize, Deserialize};
 use std::path::PathBuf;
 use crate::models::explore::tab::TabState;
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ActivePane {
+    Left,
+    Right,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SessionState {
     pub tabs: Vec<TabState>,

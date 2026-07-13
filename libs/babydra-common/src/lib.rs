@@ -25,7 +25,10 @@ pub mod helper {
 }
 
 pub mod models;
-pub use models::explore::{FileEntry, FileType, DirectoryModel, SortColumn, SortOrder, TabState, SessionState};
+pub use models::explore::{
+    FileEntry, FileType, DirectoryModel, SortColumn, SortOrder, TabState, SessionState, ActivePane,
+    MainWindowWidgets, HeaderBarWidgets, ContentViewWidgets, ContentViewHandle, PreviewPanelWidgets, InfoPanelWidgets
+};
 
 
 // Flat re-exports at root for backward compatibility
@@ -66,6 +69,7 @@ pub use desktop::explore::{
     FileWatcher,
     start_dbus_service,
     calculate_dir_size_parallel,
+    filter_entries,
 };
 
 

@@ -1,13 +1,25 @@
-mod app;
-mod ui;
+pub mod widgets;
 
-use app::BabyExploreApp;
+use gtk4::prelude::*;
+use gtk4::Application;
+use babydra_common::SessionState;
 
 fn main() {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let _guard = rt.enter();
 
-    let app = BabyExploreApp::new();
-    let exit_code = app.run();
+    let app = Application::builder()
+        .application_id("org.babydra.explore")
+        .build();
+
+    app.connect_activate(|app| {
+        let home_dir = glib::home_dir();
+        let session = std::rc::Rc::new(std::cell::RefCell::new(SessionState::new(home_dir)));
+        
+        let main_window = crate::widgets::window::create_explore_window(app, session);
+        main_window.present();
+    });
+
+    let exit_code = app.run().value();
     std::process::exit(exit_code);
 }

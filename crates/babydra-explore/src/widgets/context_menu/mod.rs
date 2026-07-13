@@ -3,9 +3,14 @@ use gtk4::{Box, Button, Orientation, Popover, Align, Label, Image};
 use std::rc::Rc;
 use std::path::PathBuf;
 use babydra_common::FileEntry;
-use crate::ui::window::MainWindow;
+use crate::widgets::dialogs;
 
 pub struct ContextMenu;
+
+// Copy / Cut (using a simple static thread-local clipboard buffer for simplicity & cross-pane support)
+thread_local! {
+    static CLIPBOARD: std::cell::RefCell<Option<(PathBuf, bool)>> = std::cell::RefCell::new(None); // (path, is_cut)
+}
 
 impl ContextMenu {
     pub fn show_for_file(
@@ -13,10 +18,11 @@ impl ContextMenu {
         x: f64,
         y: f64,
         entry: FileEntry,
-        window_handle: Rc<MainWindow>,
         current_path: PathBuf,
+        nav_callback: Rc<dyn Fn(PathBuf)>,
     ) {
         let popover = Popover::new();
+        popover.add_css_class("explore-popover");
         popover.set_parent(parent);
         popover.set_has_arrow(false);
 
@@ -47,21 +53,16 @@ impl ContextMenu {
         let pop_clone = popover.clone();
         let target_path = entry.path.clone();
         let is_dir = matches!(entry.file_type, babydra_common::FileType::Directory);
-        let win = window_handle.clone();
+        let nav = nav_callback.clone();
         btn_open.connect_clicked(move |_| {
             pop_clone.popdown();
             if is_dir {
-                win.navigate_to(target_path.clone());
+                nav(target_path.clone());
             } else {
                 let uri = format!("file://{}", target_path.to_string_lossy());
                 let _ = gio::AppInfo::launch_default_for_uri(&uri, gio::AppLaunchContext::NONE);
             }
         });
-
-        // Copy / Cut (using a simple static thread-local clipboard buffer for simplicity & cross-pane support)
-        thread_local! {
-            static CLIPBOARD: std::cell::RefCell<Option<(PathBuf, bool)>> = std::cell::RefCell::new(None); // (path, is_cut)
-        }
 
         let pop_clone = popover.clone();
         let src_path = entry.path.clone();
@@ -84,47 +85,46 @@ impl ContextMenu {
         // Rename dialog trigger
         let pop_clone = popover.clone();
         let rename_path = entry.path.clone();
-        let win = window_handle.clone();
+        let nav = nav_callback.clone();
         let current_p = current_path.clone();
         btn_rename.connect_clicked(move |_| {
             pop_clone.popdown();
-            // Trigger simple rename dialog inline
-            Self::show_rename_dialog(&rename_path, win.clone(), current_p.clone());
+            dialogs::show_rename_dialog(&rename_path, current_p.clone(), nav.clone());
         });
 
         // Trash action
         let pop_clone = popover.clone();
         let trash_path = entry.path.clone();
-        let win = window_handle.clone();
+        let nav = nav_callback.clone();
         let current_p = current_path.clone();
         btn_trash.connect_clicked(move |_| {
             pop_clone.popdown();
-            let win_c = win.clone();
+            let nav_c = nav.clone();
             let cp_c = current_p.clone();
             let path_c = trash_path.clone();
             glib::spawn_future_local(async move {
                 if let Err(err) = babydra_common::send_to_trash(path_c).await {
                     eprintln!("Failed to trash file: {}", err);
                 }
-                win_c.navigate_to(cp_c);
+                nav_c(cp_c);
             });
         });
 
         // Permanent delete
         let pop_clone = popover.clone();
         let del_path = entry.path.clone();
-        let win = window_handle.clone();
+        let nav = nav_callback.clone();
         let current_p = current_path.clone();
         btn_delete.connect_clicked(move |_| {
             pop_clone.popdown();
-            let win_c = win.clone();
+            let nav_c = nav.clone();
             let cp_c = current_p.clone();
             let path_c = del_path.clone();
             glib::spawn_future_local(async move {
                 if let Err(err) = babydra_common::delete_path(path_c).await {
                     eprintln!("Failed to delete file: {}", err);
                 }
-                win_c.navigate_to(cp_c);
+                nav_c(cp_c);
             });
         });
 
@@ -135,10 +135,11 @@ impl ContextMenu {
         parent: &gtk4::Widget,
         x: f64,
         y: f64,
-        window_handle: Rc<MainWindow>,
         current_path: PathBuf,
+        nav_callback: Rc<dyn Fn(PathBuf)>,
     ) {
         let popover = Popover::new();
+        popover.add_css_class("explore-popover");
         popover.set_parent(parent);
         popover.set_has_arrow(false);
 
@@ -156,23 +157,19 @@ impl ContextMenu {
         vbox.append(&btn_paste);
 
         // Check clipboard state for paste sensitivity
-        thread_local! {
-            static CLIPBOARD: std::cell::RefCell<Option<(PathBuf, bool)>> = std::cell::RefCell::new(None);
-        }
-
         let clipboard_data = CLIPBOARD.with(|cb| cb.borrow().clone());
         btn_paste.set_sensitive(clipboard_data.is_some());
 
         // Paste action implementation
         let pop_clone = popover.clone();
         let dest_dir = current_path.clone();
-        let win = window_handle.clone();
+        let nav = nav_callback.clone();
         let current_p = current_path.clone();
         btn_paste.connect_clicked(move |_| {
             pop_clone.popdown();
             if let Some((src, is_cut)) = clipboard_data.clone() {
                 let dest = dest_dir.clone().join(src.file_name().unwrap());
-                let win_c = win.clone();
+                let nav_c = nav.clone();
                 let cp_c = current_p.clone();
                 let src_c = src.clone();
                 glib::spawn_future_local(async move {
@@ -187,18 +184,18 @@ impl ContextMenu {
                             eprintln!("Failed to copy file: {}", e);
                         }
                     }
-                    win_c.navigate_to(cp_c);
+                    nav_c(cp_c);
                 });
             }
         });
 
         // New folder action
         let pop_clone = popover.clone();
-        let win = window_handle.clone();
+        let nav = nav_callback.clone();
         let current_p = current_path.clone();
         btn_new_folder.connect_clicked(move |_| {
             pop_clone.popdown();
-            Self::show_new_folder_dialog(win.clone(), current_p.clone());
+            dialogs::show_new_folder_dialog(current_p.clone(), nav.clone());
         });
 
         popover.popup();
@@ -221,95 +218,5 @@ impl ContextMenu {
             .css_classes(vec!["flat".to_string(), "context-menu-item".to_string()])
             .halign(Align::Fill)
             .build()
-    }
-
-    fn show_rename_dialog(path: &PathBuf, window: Rc<MainWindow>, current_path: PathBuf) {
-        let dialog = gtk4::Dialog::builder()
-            .title("Rename File")
-            .use_header_bar(1)
-            .build();
-        
-        let content_area = dialog.content_area();
-        let vbox = Box::new(Orientation::Vertical, 8);
-        vbox.set_margin_top(12);
-        vbox.set_margin_bottom(12);
-        vbox.set_margin_start(12);
-        vbox.set_margin_end(12);
-        content_area.append(&vbox);
-
-        let lbl = Label::new(Some("Enter new name:"));
-        vbox.append(&lbl);
-
-        let entry = gtk4::Entry::new();
-        entry.set_text(&path.file_name().unwrap().to_string_lossy());
-        vbox.append(&entry);
-
-        dialog.add_button("Cancel", gtk4::ResponseType::Cancel);
-        dialog.add_button("Rename", gtk4::ResponseType::Ok);
-
-        let path = path.clone();
-        dialog.connect_response(move |dialog, response| {
-            if response == gtk4::ResponseType::Ok {
-                let new_name = entry.text().to_string();
-                if !new_name.is_empty() {
-                    let path = path.clone();
-                    let win = window.clone();
-                    let current_p = current_path.clone();
-                    glib::spawn_future_local(async move {
-                        if let Err(e) = babydra_common::rename_path(path, new_name).await {
-                            eprintln!("Rename failed: {}", e);
-                        }
-                        win.navigate_to(current_p);
-                    });
-                }
-            }
-            dialog.destroy();
-        });
-
-        dialog.show();
-    }
-
-    fn show_new_folder_dialog(window: Rc<MainWindow>, current_path: PathBuf) {
-        let dialog = gtk4::Dialog::builder()
-            .title("Create New Folder")
-            .use_header_bar(1)
-            .build();
-        
-        let content_area = dialog.content_area();
-        let vbox = Box::new(Orientation::Vertical, 8);
-        vbox.set_margin_top(12);
-        vbox.set_margin_bottom(12);
-        vbox.set_margin_start(12);
-        vbox.set_margin_end(12);
-        content_area.append(&vbox);
-
-        let lbl = Label::new(Some("Folder name:"));
-        vbox.append(&lbl);
-
-        let entry = gtk4::Entry::new();
-        entry.set_text("New Folder");
-        vbox.append(&entry);
-
-        dialog.add_button("Cancel", gtk4::ResponseType::Cancel);
-        dialog.add_button("Create", gtk4::ResponseType::Ok);
-
-        let current_p_clone = current_path.clone();
-        dialog.connect_response(move |dialog, response| {
-            if response == gtk4::ResponseType::Ok {
-                let name = entry.text().to_string();
-                if !name.is_empty() {
-                    let folder_path = current_p_clone.join(name);
-                    let win = window.clone();
-                    let current_p = current_p_clone.clone();
-                    glib::spawn_future_local(async move {
-                        let _ = tokio::fs::create_dir_all(folder_path).await;
-                        win.navigate_to(current_p);
-                    });
-                }
-            }
-            dialog.destroy();
-        });
-
-        dialog.show();
     }
 }
