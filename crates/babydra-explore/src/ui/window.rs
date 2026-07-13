@@ -42,6 +42,7 @@ impl MainWindow {
             .default_width(1000)
             .default_height(700)
             .build();
+        window.add_css_class("explore-window");
 
         // Apply Windows 11 dark theme from babydra-common
         babydra_common::apply_explore_theme();

@@ -99,7 +99,7 @@ impl Sidebar {
 
         let btn = Button::builder()
             .child(&hbox)
-            .css_classes(vec!["sidebar-item".to_string()])
+            .css_classes(vec!["sidebar-item".to_string(), "flat".to_string()])
             .build();
 
         let nav_cb = self.nav_callback.clone();
