@@ -47,7 +47,7 @@ window.explore-window,
 .explore-window .tab-item.active-tab {
     background-image: none;
     background-color: #202020;
-    border-top: 2px solid #60cdff;
+    border-top: 2px solid #3b82f6;
     margin-top: 2px;
 }
 
@@ -102,7 +102,7 @@ window.explore-window,
 .explore-window .nav-bar {
     background-color: #202020;
     padding: 4px 8px;
-    border-bottom: 1px solid #2a2a2a;
+    border-bottom: 1px solid #3a3a3a;
 }
 
 .explore-window .nav-btn {
@@ -130,7 +130,7 @@ window.explore-window,
 
 .explore-window .address-bar-wrap {
     background-color: #2b2b2b;
-    border: 1px solid #3a3a3a;
+    border: 1px solid #4a4a4a;
     border-radius: 6px;
     padding: 0 8px;
     min-height: 28px;
@@ -138,7 +138,7 @@ window.explore-window,
 }
 
 .explore-window .address-bar-wrap:focus-within {
-    border-color: #60cdff;
+    border-color: #3b82f6;
 }
 
 .explore-window .breadcrumb-btn {
@@ -170,7 +170,7 @@ window.explore-window,
 
 .explore-window .search-entry {
     background-color: #2b2b2b;
-    border: 1px solid #3a3a3a;
+    border: 1px solid #4a4a4a;
     border-radius: 6px;
     color: #e8e8e8;
     padding: 3px 8px;
@@ -180,13 +180,13 @@ window.explore-window,
 }
 
 .explore-window .search-entry:focus {
-    border-color: #60cdff;
+    border-color: #3b82f6;
 }
 
 /* ── Command Toolbar (Ribbon) ────────────────────────────────────── */
 .explore-window .toolbar {
     background-color: #202020;
-    border-bottom: 1px solid #2a2a2a;
+    border-bottom: 1px solid #3a3a3a;
     padding: 3px 8px;
     min-height: 32px;
 }
@@ -216,22 +216,22 @@ window.explore-window,
 }
 
 .explore-window .toolbar-btn.new-btn {
-    color: #60cdff;
+    color: #60a5fa;
 }
 
 .explore-window .toolbar-btn.toolbar-btn-active {
-    background-color: rgba(96, 205, 255, 0.12);
-    color: #60cdff;
+    background-color: rgba(59, 130, 246, 0.12);
+    color: #60a5fa;
 }
 
 .explore-window .toolbar-btn.toolbar-btn-active:hover {
-    background-color: rgba(96, 205, 255, 0.18);
+    background-color: rgba(59, 130, 246, 0.18);
 }
 
 /* ── Sidebar ─────────────────────────────────────────────────────── */
 .explore-window .sidebar {
     background-color: #1f1f1f;
-    border-right: 1px solid #2a2a2a;
+    border-right: 1px solid #3a3a3a;
     min-width: 220px;
 }
 
@@ -266,8 +266,8 @@ window.explore-window,
 }
 
 .explore-window .sidebar-item.active-nav {
-    background-color: rgba(96, 205, 255, 0.12);
-    color: #60cdff;
+    background-color: rgba(59, 130, 246, 0.12);
+    color: #60a5fa;
 }
 
 /* ── Content Area ───────────────────────────────────────────────── */
@@ -386,7 +386,7 @@ window.explore-window,
 
 /* Active split pane */
 .explore-window .active-pane {
-    outline: 2px solid #60cdff;
+    outline: 2px solid #3b82f6;
     outline-offset: -2px;
     border-radius: 4px;
 }
@@ -394,7 +394,7 @@ window.explore-window,
 /* ── Info Panel ─────────────────────────────────────────────────── */
 .explore-window .info-panel {
     background-color: #1f1f1f;
-    border-left: 1px solid #2a2a2a;
+    border-left: 1px solid #3a3a3a;
     padding: 16px;
     min-width: 240px;
     max-width: 240px;
@@ -418,7 +418,7 @@ window.explore-window,
 /* ── Status Bar ─────────────────────────────────────────────────── */
 .explore-window .status-bar {
     background-color: #1c1c1c;
-    border-top: 1px solid #2a2a2a;
+    border-top: 1px solid #3a3a3a;
     padding: 4px 12px;
     color: #888;
     font-size: 12px;

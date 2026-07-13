@@ -102,7 +102,7 @@ window.explore-window,
 .explore-window .nav-bar {
     background-color: #f3f3f3;
     padding: 4px 8px;
-    border-bottom: 1px solid #e5e5e5;
+    border-bottom: 1px solid #d0d0d0;
 }
 
 .explore-window .nav-btn {
@@ -130,7 +130,7 @@ window.explore-window,
 
 .explore-window .address-bar-wrap {
     background-color: #ffffff;
-    border: 1px solid #d0d0d0;
+    border: 1px solid #b8b8b8;
     border-radius: 6px;
     padding: 0 8px;
     min-height: 28px;
@@ -170,7 +170,7 @@ window.explore-window,
 
 .explore-window .search-entry {
     background-color: #ffffff;
-    border: 1px solid #d0d0d0;
+    border: 1px solid #b8b8b8;
     border-radius: 6px;
     color: #1a1a1a;
     padding: 3px 8px;
@@ -186,7 +186,7 @@ window.explore-window,
 /* ── Command Toolbar (Ribbon) ────────────────────────────────────── */
 .explore-window .toolbar {
     background-color: #f3f3f3;
-    border-bottom: 1px solid #e5e5e5;
+    border-bottom: 1px solid #d0d0d0;
     padding: 3px 8px;
     min-height: 32px;
 }
@@ -231,7 +231,7 @@ window.explore-window,
 /* ── Sidebar ─────────────────────────────────────────────────────── */
 .explore-window .sidebar {
     background-color: #fbfbfb;
-    border-right: 1px solid #e5e5e5;
+    border-right: 1px solid #d0d0d0;
     padding: 4px 0;
     min-width: 220px;
 }
@@ -394,7 +394,7 @@ window.explore-window,
 /* ── Info Panel ─────────────────────────────────────────────────── */
 .explore-window .info-panel {
     background-color: #fbfbfb;
-    border-left: 1px solid #e5e5e5;
+    border-left: 1px solid #d0d0d0;
     padding: 16px;
     min-width: 240px;
     max-width: 240px;
@@ -418,7 +418,7 @@ window.explore-window,
 /* ── Status Bar ─────────────────────────────────────────────────── */
 .explore-window .status-bar {
     background-color: #f8f8f8;
-    border-top: 1px solid #e5e5e5;
+    border-top: 1px solid #d0d0d0;
     padding: 4px 12px;
     color: #666;
     font-size: 12px;
