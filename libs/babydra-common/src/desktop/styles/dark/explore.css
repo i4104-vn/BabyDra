@@ -360,6 +360,7 @@ window.explore-window,
     border-left: 1px solid #2a2a2a;
     padding: 16px;
     min-width: 240px;
+    max-width: 240px;
 }
 
 .explore-window .info-panel viewport,

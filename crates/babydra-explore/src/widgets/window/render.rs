@@ -41,6 +41,8 @@ pub fn build_window_ui(app: &gtk4::Application) -> MainWindowWidgets {
     layout_paned.set_hexpand(true);
     layout_paned.set_vexpand(true);
     layout_paned.set_position(530); // Allocate space for InfoPanel
+    layout_paned.set_resize_end_child(false);  // Info panel keeps fixed width
+    layout_paned.set_shrink_end_child(false);  // Info panel cannot be shrunk
     content_vbox.append(&layout_paned);
 
     layout_paned.set_start_child(Some(&split_paned));
