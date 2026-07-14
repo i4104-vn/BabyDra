@@ -21,8 +21,11 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
     flowbox.set_row_spacing(10);
     flowbox.set_column_spacing(10);
 
+    let grid_container = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    grid_container.set_valign(Align::Start);
+
     let flow_scroll = ScrolledWindow::new();
-    flow_scroll.set_child(Some(&flowbox));
+    flow_scroll.set_child(Some(&grid_container));
     stack.add_named(&flow_scroll, Some("icons"));
 
     // View Mode: List (ListBox)
@@ -38,6 +41,7 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
         container,
         flowbox,
         listbox,
+        grid_container,
         stack,
     }
 }

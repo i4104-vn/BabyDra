@@ -5,19 +5,74 @@ use std::rc::Rc;
 use babydra_common::FileEntry;
 use baby_utils::explore_helpers;
 use babydra_common::ContentViewWidgets;
+use babydra_common::ContentViewHandle;
+
+/// Helper to create flow child elements for grid view
+fn create_flow_child(
+    idx: usize,
+    entry: &FileEntry,
+    current_path: &PathBuf,
+    nav_callback: &Rc<dyn Fn(PathBuf)>,
+) -> gtk4::FlowBoxChild {
+    let item_box = Box::new(Orientation::Vertical, 6);
+    item_box.set_size_request(100, 100);
+    item_box.set_css_classes(&["file-item"]);
+
+    let img = babydra_common::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
+    img.set_pixel_size(48);
+
+    let lbl = Label::builder()
+        .label(&entry.display_name)
+        .max_width_chars(12)
+        .ellipsize(gtk4::pango::EllipsizeMode::End)
+        .halign(Align::Center)
+        .build();
+
+    item_box.append(&img);
+    item_box.append(&lbl);
+
+    // Attach right click gesture to item_box
+    let gesture = gtk4::GestureClick::new();
+    gesture.set_button(3);
+    let target_entry = entry.clone();
+    let cp = current_path.clone();
+    let widget_clone = item_box.clone();
+    let nav = nav_callback.clone();
+    gesture.connect_pressed(move |gesture, _, x, y| {
+        gesture.set_state(gtk4::EventSequenceState::Claimed);
+        crate::widgets::context_menu::ContextMenu::show_for_file(
+            widget_clone.upcast_ref(),
+            x,
+            y,
+            target_entry.clone(),
+            cp.clone(),
+            nav.clone(),
+        );
+    });
+    item_box.add_controller(gesture);
+
+    let flow_child = gtk4::FlowBoxChild::new();
+    flow_child.set_child(Some(&item_box));
+    flow_child.set_property("name", &format!("{}", idx));
+    flow_child
+}
 
 /// Refreshes the FlowBox or ListBox view with the latest directories and file entries.
-pub fn update_content_view_ui(
-    widgets: &ContentViewWidgets,
-    entries: &[FileEntry],
-    nav_callback: &Rc<dyn Fn(PathBuf)>,
-    current_path: &PathBuf,
-    current_mode: &str,
-    sort_mode: &str,
-) {
-    // Clear flowbox
-    while let Some(child) = widgets.flowbox.first_child() {
-        widgets.flowbox.remove(&child);
+pub fn update_content_view_ui(handle: &ContentViewHandle) {
+    let widgets = &handle.widgets;
+    let entries_borrow = handle.entries.borrow();
+    let entries = &*entries_borrow;
+    let nav_callback = &handle.nav_callback;
+    let current_path_borrow = handle.current_path.borrow();
+    let current_path = &*current_path_borrow;
+    let current_mode_borrow = handle.current_mode.borrow();
+    let current_mode = &*current_mode_borrow;
+    let sort_mode_borrow = handle.sort_mode.borrow();
+    let sort_mode = &*sort_mode_borrow;
+
+    // Clear grid_container (for icons/grid view)
+    while let Some(child) = widgets.grid_container.first_child() {
+        widgets.grid_container.remove(&child);
     }
 
     // Clear listbox
@@ -25,24 +80,24 @@ pub fn update_content_view_ui(
         widgets.listbox.remove(&child);
     }
 
-    // Setup background right click gesture for FlowBox
+    // Setup background right click gesture for Grid Container
     {
         let gesture_flow = gtk4::GestureClick::new();
         gesture_flow.set_button(3);
         let cp = current_path.clone();
-        let flow_widget = widgets.flowbox.clone();
+        let grid_widget = widgets.grid_container.clone();
         let nav = nav_callback.clone();
         gesture_flow.connect_pressed(move |gesture, _, x, y| {
             gesture.set_state(gtk4::EventSequenceState::Claimed);
             crate::widgets::context_menu::ContextMenu::show_for_empty(
-                flow_widget.upcast_ref(),
+                grid_widget.upcast_ref(),
                 x,
                 y,
                 cp.clone(),
                 nav.clone(),
             );
         });
-        widgets.flowbox.add_controller(gesture_flow);
+        widgets.grid_container.add_controller(gesture_flow);
     }
 
     // Setup background right click gesture for ListBox
@@ -66,48 +121,91 @@ pub fn update_content_view_ui(
     }
 
     if current_mode == "icons" {
-        for (idx, entry) in entries.iter().enumerate() {
-            let item_box = Box::new(Orientation::Vertical, 6);
-            item_box.set_size_request(100, 100);
-            item_box.set_css_classes(&["file-item"]);
+        if sort_mode == "auto" {
+            // Flat grid, no headers
+            let flowbox = crate::widgets::content_view::create_grid_flowbox(
+                handle.entries.clone(),
+                handle.nav_callback.clone(),
+                handle.selection_callback.clone(),
+                &widgets.grid_container,
+            );
+            
+            for (idx, entry) in entries.iter().enumerate() {
+                let flow_child = create_flow_child(idx, entry, current_path, nav_callback);
+                flowbox.append(&flow_child);
+            }
+            widgets.grid_container.append(&flowbox);
+        } else {
+            // Grouping/categories active!
+            let get_group_name = |entry: &FileEntry| -> String {
+                if sort_mode == "date" {
+                    if let Some(modified) = entry.modified {
+                        let datetime: chrono::DateTime<chrono::Local> = modified.into();
+                        let now = chrono::Local::now();
+                        let date_naive = datetime.date_naive();
+                        let now_naive = now.date_naive();
+                        let date_str = datetime.format(" (%d/%m)").to_string();
+                        if date_naive == now_naive {
+                            format!("Today{}", date_str)
+                        } else if date_naive == now_naive - chrono::Duration::days(1) {
+                            format!("Yesterday{}", date_str)
+                        } else {
+                            let diff = (now_naive - date_naive).num_days();
+                            if diff >= 2 && diff <= 7 {
+                                format!("{}{}", datetime.format("%A"), date_str)
+                            } else if diff > 7 {
+                                "Older than a week".to_string()
+                            } else {
+                                format!("Today{}", date_str)
+                            }
+                        }
+                    } else {
+                        "Unknown Date".to_string()
+                    }
+                } else { // "group"
+                    if matches!(entry.file_type, babydra_common::FileType::Directory) {
+                        "Folders".to_string()
+                    } else {
+                        match entry.path.extension() {
+                            Some(ext) => format!("{} Files", ext.to_string_lossy().to_uppercase()),
+                            None => "Other Files".to_string(),
+                        }
+                    }
+                }
+            };
 
-            let img = babydra_common::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
-            img.set_pixel_size(48);
+            let mut current_group_name = String::new();
+            let mut current_flowbox: Option<gtk4::FlowBox> = None;
 
-            let lbl = Label::builder()
-                .label(&entry.display_name)
-                .max_width_chars(12)
-                .ellipsize(gtk4::pango::EllipsizeMode::End)
-                .halign(Align::Center)
-                .build();
+            for (idx, entry) in entries.iter().enumerate() {
+                let group_name = get_group_name(entry);
+                if group_name != current_group_name {
+                    current_group_name = group_name.clone();
 
-            item_box.append(&img);
-            item_box.append(&lbl);
+                    let header_lbl = Label::new(Some(&current_group_name));
+                    header_lbl.add_css_class("group-header-label");
+                    header_lbl.set_halign(Align::Start);
+                    header_lbl.set_margin_top(12);
+                    header_lbl.set_margin_bottom(6);
+                    header_lbl.set_margin_start(14);
+                    header_lbl.set_margin_end(14);
+                    widgets.grid_container.append(&header_lbl);
 
-            // Attach right click gesture to item_box
-            let gesture = gtk4::GestureClick::new();
-            gesture.set_button(3);
-            let target_entry = entry.clone();
-            let cp = current_path.clone();
-            let widget_clone = item_box.clone();
-            let nav = nav_callback.clone();
-            gesture.connect_pressed(move |gesture, _, x, y| {
-                gesture.set_state(gtk4::EventSequenceState::Claimed);
-                crate::widgets::context_menu::ContextMenu::show_for_file(
-                    widget_clone.upcast_ref(),
-                    x,
-                    y,
-                    target_entry.clone(),
-                    cp.clone(),
-                    nav.clone(),
-                );
-            });
-            item_box.add_controller(gesture);
+                    let flowbox = crate::widgets::content_view::create_grid_flowbox(
+                        handle.entries.clone(),
+                        handle.nav_callback.clone(),
+                        handle.selection_callback.clone(),
+                        &widgets.grid_container,
+                    );
+                    widgets.grid_container.append(&flowbox);
+                    current_flowbox = Some(flowbox);
+                }
 
-            let flow_child = gtk4::FlowBoxChild::new();
-            flow_child.set_child(Some(&item_box));
-            flow_child.set_property("name", &format!("{}", idx));
-            widgets.flowbox.append(&flow_child);
+                if let Some(ref flowbox) = current_flowbox {
+                    let flow_child = create_flow_child(idx, entry, current_path, nav_callback);
+                    flowbox.append(&flow_child);
+                }
+            }
         }
     } else {
         // Render list/details view
