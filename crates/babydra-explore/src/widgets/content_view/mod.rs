@@ -75,25 +75,108 @@ pub fn create_content_view(
     {
         let e_ref = entries.clone();
         let nav = nav_cb.clone();
-        widgets.listbox.connect_row_activated(move |_, row| {
-            let idx = row.property::<String>("name").parse::<usize>().unwrap_or(usize::MAX);
-            let entry_opt = {
-                let b = e_ref.borrow();
-                if idx < b.len() {
-                    Some(b[idx].clone())
-                } else {
-                    None
+        widgets.listbox.connect_row_activated(move |lb, row| {
+            let mut selected_indices: Vec<usize> = lb.selected_rows().iter()
+                .map(|r| r.property::<String>("name").parse::<usize>().unwrap_or(usize::MAX))
+                .filter(|&idx| idx != usize::MAX)
+                .collect();
+            if selected_indices.is_empty() {
+                let idx = row.property::<String>("name").parse::<usize>().unwrap_or(usize::MAX);
+                if idx != usize::MAX {
+                    selected_indices.push(idx);
                 }
-            };
-            if let Some(entry) = entry_opt {
-                if matches!(entry.file_type, babydra_common::FileType::Directory) {
-                    nav(entry.path);
-                } else {
-                    let uri = format!("file://{}", entry.path.to_string_lossy());
-                    let _ = gio::AppInfo::launch_default_for_uri(&uri, gio::AppLaunchContext::NONE);
+            }
+            let b = e_ref.borrow();
+            for idx in selected_indices {
+                if idx < b.len() {
+                    let entry = &b[idx];
+                    if matches!(entry.file_type, babydra_common::FileType::Directory) {
+                        nav(entry.path.clone());
+                    } else {
+                        let uri = format!("file://{}", entry.path.to_string_lossy());
+                        let _ = gio::AppInfo::launch_default_for_uri(&uri, gio::AppLaunchContext::NONE);
+                    }
                 }
             }
         });
+    }
+
+    // Wire Enter key activation for ListBox
+    {
+        let lb_clone = widgets.listbox.clone();
+        let e_ref = entries.clone();
+        let nav = nav_cb.clone();
+        let key_controller = gtk4::EventControllerKey::new();
+        key_controller.connect_key_pressed(move |_, keyval, _, _| {
+            if keyval == gtk4::gdk::Key::Return || keyval == gtk4::gdk::Key::KP_Enter {
+                let selected_indices: Vec<usize> = lb_clone.selected_rows().iter()
+                    .map(|r| r.property::<String>("name").parse::<usize>().unwrap_or(usize::MAX))
+                    .filter(|&idx| idx != usize::MAX)
+                    .collect();
+                let b = e_ref.borrow();
+                for idx in selected_indices {
+                    if idx < b.len() {
+                        let entry = &b[idx];
+                        if matches!(entry.file_type, babydra_common::FileType::Directory) {
+                            nav(entry.path.clone());
+                        } else {
+                            let uri = format!("file://{}", entry.path.to_string_lossy());
+                            let _ = gio::AppInfo::launch_default_for_uri(&uri, gio::AppLaunchContext::NONE);
+                        }
+                    }
+                }
+                glib::Propagation::Stop
+            } else {
+                glib::Propagation::Proceed
+            }
+        });
+        widgets.listbox.add_controller(key_controller);
+    }
+
+    // Wire drag-to-select for ListBox
+    {
+        let lb_clone = widgets.listbox.clone();
+        let drag_gesture = gtk4::GestureDrag::new();
+        drag_gesture.set_button(1);
+        
+        let start_pos = Rc::new(RefCell::new(None::<(f64, f64)>));
+        let start_pos_c = start_pos.clone();
+        
+        drag_gesture.connect_drag_begin(move |_, x, y| {
+            start_pos_c.replace(Some((x, y)));
+        });
+
+        let start_pos_update = start_pos.clone();
+        let lb_update = lb_clone.clone();
+        drag_gesture.connect_drag_update(move |_, offset_x, offset_y| {
+            if let Some((start_x, start_y)) = *start_pos_update.borrow() {
+                let current_x = start_x + offset_x;
+                let current_y = start_y + offset_y;
+                let min_x = start_x.min(current_x);
+                let max_x = start_x.max(current_x);
+                let min_y = start_y.min(current_y);
+                let max_y = start_y.max(current_y);
+
+                let mut child = lb_update.first_child();
+                while let Some(c) = child {
+                    if let Some((cx, cy)) = c.translate_coordinates(&lb_update, 0.0, 0.0) {
+                        let cw = c.width() as f64;
+                        let ch = c.height() as f64;
+                        
+                        let intersects = !(cx > max_x || cx + cw < min_x || cy > max_y || cy + ch < min_y);
+                        if let Some(row) = c.downcast_ref::<gtk4::ListBoxRow>() {
+                            if intersects {
+                                lb_update.select_row(Some(row));
+                            } else {
+                                lb_update.unselect_row(row);
+                            }
+                        }
+                    }
+                    child = c.next_sibling();
+                }
+            }
+        });
+        widgets.listbox.add_controller(drag_gesture);
     }
     // Wire right click empty area context menu gesture to the main scrolled window
     {
@@ -179,25 +262,108 @@ pub fn create_grid_flowbox(
     {
         let e_ref = entries.clone();
         let nav = nav_cb.clone();
-        flowbox.connect_child_activated(move |_, child| {
-            let idx = child.property::<String>("name").parse::<usize>().unwrap_or(usize::MAX);
-            let entry_opt = {
-                let b = e_ref.borrow();
-                if idx < b.len() {
-                    Some(b[idx].clone())
-                } else {
-                    None
+        flowbox.connect_child_activated(move |fb, child| {
+            let mut selected_indices: Vec<usize> = fb.selected_children().iter()
+                .map(|c| c.property::<String>("name").parse::<usize>().unwrap_or(usize::MAX))
+                .filter(|&idx| idx != usize::MAX)
+                .collect();
+            if selected_indices.is_empty() {
+                let idx = child.property::<String>("name").parse::<usize>().unwrap_or(usize::MAX);
+                if idx != usize::MAX {
+                    selected_indices.push(idx);
                 }
-            };
-            if let Some(entry) = entry_opt {
-                if matches!(entry.file_type, babydra_common::FileType::Directory) {
-                    nav(entry.path);
-                } else {
-                    let uri = format!("file://{}", entry.path.to_string_lossy());
-                    let _ = gio::AppInfo::launch_default_for_uri(&uri, gio::AppLaunchContext::NONE);
+            }
+            let b = e_ref.borrow();
+            for idx in selected_indices {
+                if idx < b.len() {
+                    let entry = &b[idx];
+                    if matches!(entry.file_type, babydra_common::FileType::Directory) {
+                        nav(entry.path.clone());
+                    } else {
+                        let uri = format!("file://{}", entry.path.to_string_lossy());
+                        let _ = gio::AppInfo::launch_default_for_uri(&uri, gio::AppLaunchContext::NONE);
+                    }
                 }
             }
         });
+    }
+
+    // Wire Enter key activation for FlowBox
+    {
+        let fb_clone = flowbox.clone();
+        let e_ref = entries.clone();
+        let nav = nav_cb.clone();
+        let key_controller = gtk4::EventControllerKey::new();
+        key_controller.connect_key_pressed(move |_, keyval, _, _| {
+            if keyval == gtk4::gdk::Key::Return || keyval == gtk4::gdk::Key::KP_Enter {
+                let selected_indices: Vec<usize> = fb_clone.selected_children().iter()
+                    .map(|c| c.property::<String>("name").parse::<usize>().unwrap_or(usize::MAX))
+                    .filter(|&idx| idx != usize::MAX)
+                    .collect();
+                let b = e_ref.borrow();
+                for idx in selected_indices {
+                    if idx < b.len() {
+                        let entry = &b[idx];
+                        if matches!(entry.file_type, babydra_common::FileType::Directory) {
+                            nav(entry.path.clone());
+                        } else {
+                            let uri = format!("file://{}", entry.path.to_string_lossy());
+                            let _ = gio::AppInfo::launch_default_for_uri(&uri, gio::AppLaunchContext::NONE);
+                        }
+                    }
+                }
+                glib::Propagation::Stop
+            } else {
+                glib::Propagation::Proceed
+            }
+        });
+        flowbox.add_controller(key_controller);
+    }
+
+    // Wire drag-to-select for FlowBox
+    {
+        let fb_clone = flowbox.clone();
+        let drag_gesture = gtk4::GestureDrag::new();
+        drag_gesture.set_button(1);
+        
+        let start_pos = Rc::new(RefCell::new(None::<(f64, f64)>));
+        let start_pos_c = start_pos.clone();
+        
+        drag_gesture.connect_drag_begin(move |_, x, y| {
+            start_pos_c.replace(Some((x, y)));
+        });
+
+        let start_pos_update = start_pos.clone();
+        let fb_update = fb_clone.clone();
+        drag_gesture.connect_drag_update(move |_, offset_x, offset_y| {
+            if let Some((start_x, start_y)) = *start_pos_update.borrow() {
+                let current_x = start_x + offset_x;
+                let current_y = start_y + offset_y;
+                let min_x = start_x.min(current_x);
+                let max_x = start_x.max(current_x);
+                let min_y = start_y.min(current_y);
+                let max_y = start_y.max(current_y);
+
+                let mut child = fb_update.first_child();
+                while let Some(c) = child {
+                    if let Some((cx, cy)) = c.translate_coordinates(&fb_update, 0.0, 0.0) {
+                        let cw = c.width() as f64;
+                        let ch = c.height() as f64;
+                        
+                        let intersects = !(cx > max_x || cx + cw < min_x || cy > max_y || cy + ch < min_y);
+                        if let Some(child_item) = c.downcast_ref::<gtk4::FlowBoxChild>() {
+                            if intersects {
+                                fb_update.select_child(child_item);
+                            } else {
+                                fb_update.unselect_child(child_item);
+                            }
+                        }
+                    }
+                    child = c.next_sibling();
+                }
+            }
+        });
+        flowbox.add_controller(drag_gesture);
     }
 
     // Wire click to update active pane
