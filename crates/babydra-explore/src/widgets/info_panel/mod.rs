@@ -1,7 +1,7 @@
 use gtk4::prelude::*;
 use gtk4::ScrolledWindow;
 use babydra_common::FileEntry;
-use baby_utils::explore as explore_helpers;
+use baby_utils::explore;
 use crate::widgets::preview_panel;
 
 pub use babydra_common::InfoPanelWidgets;
@@ -40,7 +40,7 @@ pub fn update_info_panel(widgets: &InfoPanelWidgets, selection: &[FileEntry]) {
         widgets.img_preview.set_icon_name(Some("dialog-information"));
         widgets.lbl_name.set_text(&format!("{} items selected", selection.len()));
         let total_size: u64 = selection.iter().map(|e| e.size).sum();
-        widgets.lbl_size.set_text(&explore_helpers::format_size(total_size));
+        widgets.lbl_size.set_text(&explore::format_size(total_size));
         widgets.lbl_type.set_text("Multiple types");
         widgets.lbl_modified.set_text("--");
         widgets.lbl_owner.set_text("--");
@@ -87,15 +87,15 @@ pub fn update_info_panel(widgets: &InfoPanelWidgets, selection: &[FileEntry]) {
                 babydra_common::calculate_dir_size_parallel(&path)
             }).await;
             let size = size_res.unwrap_or(0);
-            let size_str = explore_helpers::format_size(size);
+            let size_str = explore::format_size(size);
             lbl_size.set_text(&size_str);
         });
     } else {
-        widgets.lbl_size.set_text(&explore_helpers::format_size(entry.size));
+        widgets.lbl_size.set_text(&explore::format_size(entry.size));
     }
 
     if let Some(mtime) = entry.modified {
-        widgets.lbl_modified.set_text(&explore_helpers::format_date(mtime));
+        widgets.lbl_modified.set_text(&explore::format_date(mtime));
     } else {
         widgets.lbl_modified.set_text("--");
     }

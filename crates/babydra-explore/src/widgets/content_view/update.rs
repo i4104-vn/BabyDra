@@ -3,7 +3,7 @@ use gtk4::{Box, Orientation, Label, Align};
 use std::path::PathBuf;
 use std::rc::Rc;
 use babydra_common::FileEntry;
-use baby_utils::explore as explore_helpers;
+use baby_utils::explore;
 use babydra_common::ContentViewWidgets;
 use babydra_common::ContentViewHandle;
 
@@ -145,7 +145,7 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
             let size_str = if matches!(entry.file_type, babydra_common::FileType::Directory) {
                 "--".to_string()
             } else {
-                explore_helpers::format_size(entry.size)
+                explore::format_size(entry.size)
             };
             let lbl_size = Label::new(Some(&size_str));
             lbl_size.set_css_classes(&["list-col-meta"]);
@@ -165,7 +165,7 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
 
             // Modified info
             let mod_str = if let Some(mtime) = entry.modified {
-                explore_helpers::format_date(mtime)
+                explore::format_date(mtime)
             } else {
                 "--".to_string()
             };
