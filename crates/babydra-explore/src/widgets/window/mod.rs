@@ -77,13 +77,14 @@ pub fn create_explore_window(
 
     // Create HeaderBar
     let header_widgets_cell = Rc::new(RefCell::new(None::<crate::widgets::header_bar::HeaderBarWidgets>));
+    let status_bar_widgets_cell = Rc::new(RefCell::new(None::<crate::widgets::status_bar::StatusBarWidgets>));
 
     // Toggle hidden files closure
     let toggle_hidden = {
         let session_c = session.clone();
         let nav = navigate_pane_ref.clone();
         let active = active_pane.clone();
-        let header_widgets_c = header_widgets_cell.clone();
+        let status_widgets_c = status_bar_widgets_cell.clone();
         move || {
             let show_hidden_now = {
                 let mut s = session_c.borrow_mut();
@@ -92,11 +93,11 @@ pub fn create_explore_window(
                 tab.show_hidden
             };
 
-            if let Some(ref hw) = *header_widgets_c.borrow() {
+            if let Some(ref sw) = *status_widgets_c.borrow() {
                 if show_hidden_now {
-                    hw.btn_toggle_hidden.add_css_class("toolbar-btn-active");
+                    sw.btn_toggle_hidden.add_css_class("status-bar-btn-active");
                 } else {
-                    hw.btn_toggle_hidden.remove_css_class("toolbar-btn-active");
+                    sw.btn_toggle_hidden.remove_css_class("status-bar-btn-active");
                 }
             }
 
@@ -112,10 +113,10 @@ pub fn create_explore_window(
     let tab_bar_box = Rc::new(RefCell::new(None::<gtk4::Box>));
 
     // Create StatusBar
-    let (status_bar_box, status_bar_lbl) = crate::widgets::status_bar::create_status_bar();
-    ui.vbox.append(&status_bar_box);
-
-    let status_bar_lbl_rc = Rc::new(status_bar_lbl);
+    let status_bar_widgets = crate::widgets::status_bar::create_status_bar();
+    ui.vbox.append(&status_bar_widgets.container);
+    let status_bar_lbl_rc = Rc::new(status_bar_widgets.lbl_status.clone());
+    status_bar_widgets_cell.replace(Some(status_bar_widgets.clone()));
 
     // Define navigate_pane_no_watch closure
     {
@@ -125,6 +126,7 @@ pub fn create_explore_window(
         let right_handle = right_content_handle.clone();
         let right_s = right_scroll_cell.clone();
         let left_s = left_scroll_cell.clone();
+        let status_bar_widgets_cell = status_bar_widgets_cell.clone();
         let header_widgets_cell = header_widgets_cell.clone();
         let tab_bar_box = tab_bar_box.clone();
         let status_bar_lbl = status_bar_lbl_rc.clone();
@@ -151,12 +153,12 @@ pub fn create_explore_window(
 
             let show_hidden = session.borrow().active_tab().show_hidden;
 
-            // Sync toggle button active class in HeaderBar
-            if let Some(ref hw) = *header_widgets_cell.borrow() {
+            // Sync toggle button active class in StatusBar
+            if let Some(ref sw) = *status_bar_widgets_cell.borrow() {
                 if show_hidden {
-                    hw.btn_toggle_hidden.add_css_class("toolbar-btn-active");
+                    sw.btn_toggle_hidden.add_css_class("status-bar-btn-active");
                 } else {
-                    hw.btn_toggle_hidden.remove_css_class("toolbar-btn-active");
+                    sw.btn_toggle_hidden.remove_css_class("status-bar-btn-active");
                 }
             }
 
@@ -320,10 +322,6 @@ pub fn create_explore_window(
         view_mode_callback,
         search_callback,
         sort_callback,
-        {
-            let th = toggle_hidden_rc.clone();
-            move || th()
-        },
     );
     ui.vbox.insert_child_after(&header_box, None::<&gtk4::Widget>);
     header_widgets_cell.replace(Some(header_widgets.clone()));
@@ -333,27 +331,40 @@ pub fn create_explore_window(
         let layout_paned = ui.layout_paned.clone();
         let info_panel_container = info_panel_container.clone();
         let preview_visible = preview_visible.clone();
-        let btn = header_widgets.btn_toggle_preview.clone();
+        let status_widgets_c = status_bar_widgets_cell.clone();
         move || {
-            if preview_visible.get() {
-                layout_paned.set_end_child(None::<&gtk4::Widget>);
-                preview_visible.set(false);
-                btn.remove_css_class("toolbar-btn-active");
-            } else {
+            let now_visible = !preview_visible.get();
+            preview_visible.set(now_visible);
+
+            if now_visible {
                 layout_paned.set_end_child(Some(&info_panel_container));
-                preview_visible.set(true);
-                btn.add_css_class("toolbar-btn-active");
+            } else {
+                layout_paned.set_end_child(None::<&gtk4::Widget>);
+            }
+
+            if let Some(ref sw) = *status_widgets_c.borrow() {
+                if now_visible {
+                    sw.btn_toggle_preview.add_css_class("status-bar-btn-active");
+                } else {
+                    sw.btn_toggle_preview.remove_css_class("status-bar-btn-active");
+                }
             }
         }
     };
     let toggle_preview_rc = Rc::new(toggle_preview);
 
-    // Wire btn_toggle_preview click
+    // Wire status bar buttons click
     {
-        let toggle = toggle_preview_rc.clone();
-        header_widgets.btn_toggle_preview.connect_clicked(move |_| {
-            toggle();
-        });
+        let toggle_p = toggle_preview_rc.clone();
+        let toggle_h = toggle_hidden_rc.clone();
+        if let Some(ref sw) = *status_bar_widgets_cell.borrow() {
+            sw.btn_toggle_preview.connect_clicked(move |_| {
+                toggle_p();
+            });
+            sw.btn_toggle_hidden.connect_clicked(move |_| {
+                toggle_h();
+            });
+        }
     }
 
     let _rebuild_tabs_rc = tabs::setup_tab_bar(&ui.vbox, session.clone(), navigate_pane_ref.clone(), tab_bar_box.clone());
@@ -410,17 +421,21 @@ pub fn create_explore_window(
         let layout_paned = ui.layout_paned.clone();
         let info_panel_ref = info_panel_container.clone();
         let preview_visible = preview_visible.clone();
-        let btn = header_widgets.btn_toggle_preview.clone();
+        let status_widgets_c = status_bar_widgets_cell.clone();
         ui.window.connect_default_width_notify(move |window| {
             let w = window.width();
             if w < 700 && preview_visible.get() {
                 layout_paned.set_end_child(None::<&gtk4::Widget>);
                 preview_visible.set(false);
-                btn.remove_css_class("toolbar-btn-active");
+                if let Some(ref sw) = *status_widgets_c.borrow() {
+                    sw.btn_toggle_preview.remove_css_class("status-bar-btn-active");
+                }
             } else if w >= 700 && !preview_visible.get() {
                 layout_paned.set_end_child(Some(&info_panel_ref));
                 preview_visible.set(true);
-                btn.add_css_class("toolbar-btn-active");
+                if let Some(ref sw) = *status_widgets_c.borrow() {
+                    sw.btn_toggle_preview.add_css_class("status-bar-btn-active");
+                }
             }
         });
     }
