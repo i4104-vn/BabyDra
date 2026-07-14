@@ -34,6 +34,8 @@ fn create_flow_child(
     let item_box = Box::new(Orientation::Vertical, 4);
     item_box.set_size_request(110, 120);
     item_box.set_css_classes(&["file-item"]);
+    item_box.set_halign(Align::Center);
+    item_box.set_valign(Align::Center);
 
     let has_preview = if let Some(ext) = entry.path.extension() {
         let ext_str = ext.to_string_lossy().to_lowercase();
