@@ -70,6 +70,8 @@ pub use desktop::explore::{
     start_dbus_service,
     calculate_dir_size_parallel,
     filter_entries,
+    sort_entries,
+    load_cropped_square_pixbuf,
 };
 
 
