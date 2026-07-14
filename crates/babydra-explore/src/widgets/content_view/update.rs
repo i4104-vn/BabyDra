@@ -206,15 +206,23 @@ pub fn update_content_view_ui(
                     let entry = &entries_clone[idx];
                     if sort_mode_clone == "date" {
                         if let Some(modified) = entry.modified {
-                            if let Ok(duration) = std::time::SystemTime::now().duration_since(modified) {
-                                let days = duration.as_secs() / 86400;
-                                if days == 0 { "Today".to_string() }
-                                else if days == 1 { "Yesterday".to_string() }
-                                else if days <= 7 { "Last 7 Days".to_string() }
-                                else if days <= 30 { "Last 30 Days".to_string() }
-                                else { "Earlier".to_string() }
-                            } else {
+                            let datetime: chrono::DateTime<chrono::Local> = modified.into();
+                            let now = chrono::Local::now();
+                            let date_naive = datetime.date_naive();
+                            let now_naive = now.date_naive();
+                            if date_naive == now_naive {
                                 "Today".to_string()
+                            } else if date_naive == now_naive - chrono::Duration::days(1) {
+                                "Yesterday".to_string()
+                            } else {
+                                let diff = (now_naive - date_naive).num_days();
+                                if diff >= 2 && diff <= 7 {
+                                    datetime.format("%A").to_string()
+                                } else if diff > 7 {
+                                    "Older than a week".to_string()
+                                } else {
+                                    "Today".to_string()
+                                }
                             }
                         } else {
                             "Unknown Date".to_string()

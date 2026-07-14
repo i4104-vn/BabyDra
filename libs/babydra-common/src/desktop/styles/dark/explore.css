@@ -227,6 +227,27 @@ window.explore-window {
     margin: 4px 4px;
 }
 
+.explore-window dropdown.toolbar-dropdown {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid #4a4a4a;
+    border-radius: 6px;
+    padding: 2px 8px;
+    color: #e8e8e8;
+    font-size: 12px;
+    min-height: 26px;
+    transition: all 0.1s ease;
+    margin-right: 6px;
+}
+
+.explore-window dropdown.toolbar-dropdown:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: #3b82f6;
+}
+
+.explore-window dropdown.toolbar-dropdown:active {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
 .explore-window .toolbar-btn.new-btn {
     color: #60a5fa;
 }

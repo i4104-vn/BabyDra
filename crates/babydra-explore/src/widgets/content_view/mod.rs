@@ -128,24 +128,32 @@ pub fn create_content_view(
 pub fn sort_entries(entries: &mut [FileEntry], sort_mode: &str) {
     entries.sort_by(|a, b| {
         if sort_mode == "date" {
-            let weight = |e: &FileEntry| -> u32 {
+            let get_weight = |e: &FileEntry| -> u32 {
                 if let Some(modified) = e.modified {
-                    if let Ok(duration) = std::time::SystemTime::now().duration_since(modified) {
-                        let days = duration.as_secs() / 86400;
-                        if days == 0 { 0 }
-                        else if days == 1 { 1 }
-                        else if days <= 7 { 2 }
-                        else if days <= 30 { 3 }
-                        else { 4 }
-                    } else {
+                    let datetime: chrono::DateTime<chrono::Local> = modified.into();
+                    let now = chrono::Local::now();
+                    let date_naive = datetime.date_naive();
+                    let now_naive = now.date_naive();
+                    if date_naive == now_naive {
                         0
+                    } else if date_naive == now_naive - chrono::Duration::days(1) {
+                        1
+                    } else {
+                        let diff = (now_naive - date_naive).num_days();
+                        if diff >= 2 && diff <= 7 {
+                            diff as u32
+                        } else if diff > 7 {
+                            8
+                        } else {
+                            0
+                        }
                     }
                 } else {
-                    5
+                    9
                 }
             };
-            let w_a = weight(a);
-            let w_b = weight(b);
+            let w_a = get_weight(a);
+            let w_b = get_weight(b);
             if w_a != w_b {
                 return w_a.cmp(&w_b);
             }
