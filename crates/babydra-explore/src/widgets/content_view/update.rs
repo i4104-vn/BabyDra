@@ -15,7 +15,7 @@ fn create_flow_child(
     nav_callback: &Rc<dyn Fn(PathBuf)>,
 ) -> gtk4::FlowBoxChild {
     let item_box = Box::new(Orientation::Vertical, 6);
-    item_box.set_size_request(100, 100);
+    item_box.set_size_request(110, 110);
     item_box.set_css_classes(&["file-item"]);
 
     let has_preview = if let Some(ext) = entry.path.extension() {
@@ -26,7 +26,7 @@ fn create_flow_child(
     };
 
     let img = if has_preview {
-        if let Ok(pixbuf) = gdk_pixbuf::Pixbuf::from_file_at_scale(&entry.path, 48, 48, true) {
+        if let Ok(pixbuf) = gdk_pixbuf::Pixbuf::from_file_at_scale(&entry.path, 80, 80, true) {
             let image = gtk4::Image::new();
             image.set_from_pixbuf(Some(&pixbuf));
             image
@@ -40,6 +40,10 @@ fn create_flow_child(
         icon.set_pixel_size(48);
         icon
     };
+    img.set_halign(Align::Center);
+    img.set_valign(Align::Center);
+    img.set_hexpand(true);
+    img.set_vexpand(true);
 
     let lbl = Label::builder()
         .label(&entry.display_name)
@@ -47,6 +51,7 @@ fn create_flow_child(
         .ellipsize(gtk4::pango::EllipsizeMode::End)
         .halign(Align::Center)
         .build();
+    lbl.add_css_class("file-item-label");
 
     item_box.append(&img);
     item_box.append(&lbl);
