@@ -1,11 +1,15 @@
 use gtk4::prelude::*;
 use gtk4::{Box, Orientation, Label, Align, FlowBoxChild, Picture};
 use babydra_common::{FileEntry, load_cropped_square_pixbuf};
+use std::rc::Rc;
+use std::cell::RefCell;
+use std::path::PathBuf;
 
 /// Creates a generic grid card representation for a file or directory.
 pub fn create_grid_file_item(
     idx: usize,
     entry: &FileEntry,
+    selected_paths: Rc<RefCell<Vec<PathBuf>>>,
     on_right_click: impl Fn(&gtk4::Widget, f64, f64) + 'static,
 ) -> FlowBoxChild {
     let item_box = Box::new(Orientation::Vertical, 4);
@@ -73,7 +77,7 @@ pub fn create_grid_file_item(
     item_box.add_controller(gesture);
 
     // Add Drag Source to item_box
-    let drag_source = crate::explore::create_drag_source(&entry.path, &entry.icon_name);
+    let drag_source = crate::explore::create_drag_source(&entry.path, &entry.icon_name, selected_paths);
     item_box.add_controller(drag_source);
 
     // If directory, add Drop Target to item_box

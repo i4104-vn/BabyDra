@@ -25,16 +25,21 @@ pub fn create_content_view(
     let nav_cb = Rc::new(nav_callback) as Rc<dyn Fn(PathBuf)>;
 
     let entries_clone = entries.clone();
+    let selected_paths = Rc::new(RefCell::new(Vec::new()));
+    let selected_paths_c = selected_paths.clone();
     let sel_cb = Rc::new(selection_callback) as Rc<dyn Fn(Vec<FileEntry>)>;
     
     let sc_fn = Rc::new(move |selected_indices: Vec<usize>| {
         let mut list = Vec::new();
+        let mut paths = Vec::new();
         let b = entries_clone.borrow();
         for idx in selected_indices {
             if idx < b.len() {
                 list.push(b[idx].clone());
+                paths.push(b[idx].path.clone());
             }
         }
+        *selected_paths_c.borrow_mut() = paths;
         sel_cb(list);
     }) as Rc<dyn Fn(Vec<usize>)>;
 
@@ -47,10 +52,11 @@ pub fn create_content_view(
         sort_mode: sort_mode.clone(),
         nav_callback: nav_cb.clone(),
         selection_callback: sc_fn.clone(),
+        selected_paths: selected_paths.clone(),
     };
 
     // Wire all controllers/gestures for ListBox and overlay background
-    gestures::wire_listbox_controllers(&widgets, entries.clone(), nav_cb.clone(), sc_fn.clone(), current_path.clone());
+    gestures::wire_listbox_controllers(&widgets, entries.clone(), nav_cb.clone(), sc_fn.clone(), current_path.clone(), selected_paths.clone());
     gestures::wire_background_controllers(&widgets, current_path.clone(), nav_cb.clone());
 
     (widgets.container.clone(), handle)
@@ -63,6 +69,7 @@ pub fn create_grid_flowbox(
     sc_fn: Rc<dyn Fn(Vec<usize>)>,
     grid_container: &gtk4::Box,
     current_path: Rc<RefCell<PathBuf>>,
+    selected_paths: Rc<RefCell<Vec<PathBuf>>>,
 ) -> gtk4::FlowBox {
     let flowbox = gtk4::FlowBox::builder()
         .valign(gtk4::Align::Start)
@@ -74,7 +81,7 @@ pub fn create_grid_flowbox(
         .column_spacing(10)
         .build();
 
-    gestures::wire_grid_flowbox_controllers(&flowbox, entries, nav_cb, sc_fn, grid_container, current_path);
+    gestures::wire_grid_flowbox_controllers(&flowbox, entries, nav_cb, sc_fn, grid_container, current_path, selected_paths);
 
     flowbox
 }

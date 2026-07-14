@@ -2,12 +2,14 @@ use gtk4::prelude::*;
 use gtk4::{Box, Orientation, Label, Align, ListBoxRow};
 use std::path::PathBuf;
 use std::rc::Rc;
+use std::cell::RefCell;
 use babydra_common::FileEntry;
 
 /// Creates a list row representational component for a file/folder entry.
 pub fn create_list_row(
     idx: usize,
     entry: &FileEntry,
+    selected_paths: Rc<RefCell<Vec<PathBuf>>>,
     nav_callback: Rc<dyn Fn(PathBuf)>,
     on_right_click: impl Fn(&gtk4::Widget, f64, f64) + 'static,
 ) -> ListBoxRow {
@@ -75,7 +77,7 @@ pub fn create_list_row(
     item_box.add_controller(gesture);
 
     // Add Drag Source to item_box
-    let drag_source = crate::explore::create_drag_source(&entry.path, &entry.icon_name);
+    let drag_source = crate::explore::create_drag_source(&entry.path, &entry.icon_name, selected_paths);
     item_box.add_controller(drag_source);
 
     // If directory, add Drop Target to item_box

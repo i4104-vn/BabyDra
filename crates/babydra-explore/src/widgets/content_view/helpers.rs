@@ -10,55 +10,21 @@ pub fn create_flow_child(
     entry: &FileEntry,
     current_path: &PathBuf,
     nav_callback: &Rc<dyn Fn(PathBuf)>,
-    entries: Rc<RefCell<Vec<FileEntry>>>,
+    selected_paths: Rc<RefCell<Vec<PathBuf>>>,
 ) -> FlowBoxChild {
     let target_entry = entry.clone();
     let cp = current_path.clone();
     let nav = nav_callback.clone();
-    let entries_c = entries.clone();
 
+    let sel_paths = selected_paths.clone();
     let flow_child = baby_utils::components::create_grid_file_item(
         idx,
         entry,
+        selected_paths,
         move |widget, x, y| {
-            let mut target_paths = Vec::new();
-            if let Some(child) = widget.parent().and_then(|p| p.downcast::<gtk4::FlowBoxChild>().ok()) {
-                if let Some(flowbox) = child.parent().and_then(|p| p.downcast::<gtk4::FlowBox>().ok()) {
-                    let selected = flowbox.selected_children();
-                    let is_clicked_selected = selected.contains(&child);
-                    
-                    let mut target_indices = Vec::new();
-                    if is_clicked_selected {
-                        if let Some(grid_container) = flowbox.parent().and_then(|p| p.downcast::<gtk4::Box>().ok()) {
-                            let mut sibling = grid_container.first_child();
-                            while let Some(c) = sibling {
-                                if let Some(fb) = c.downcast_ref::<gtk4::FlowBox>() {
-                                    for item in fb.selected_children() {
-                                        if let Ok(idx_val) = item.property::<String>("name").parse::<usize>() {
-                                            target_indices.push(idx_val);
-                                        }
-                                    }
-                                }
-                                sibling = c.next_sibling();
-                            }
-                        }
-                    } else {
-                        flowbox.select_child(&child);
-                        if let Ok(idx_val) = child.property::<String>("name").parse::<usize>() {
-                            target_indices.push(idx_val);
-                        }
-                    }
-                    
-                    let b = entries_c.borrow();
-                    for idx_val in target_indices {
-                        if idx_val < b.len() {
-                            target_paths.push(b[idx_val].path.clone());
-                        }
-                    }
-                }
-            }
-            if target_paths.is_empty() {
-                target_paths.push(target_entry.path.clone());
+            let mut target_paths = sel_paths.borrow().clone();
+            if !target_paths.contains(&target_entry.path) {
+                target_paths = vec![target_entry.path.clone()];
             }
 
             crate::widgets::context_menu::show_for_file(

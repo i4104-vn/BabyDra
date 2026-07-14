@@ -38,10 +38,11 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
                 handle.selection_callback.clone(),
                 &widgets.grid_container,
                 handle.current_path.clone(),
+                handle.selected_paths.clone(),
             );
             
             for (idx, entry) in entries.iter().enumerate() {
-                let flow_child = create_flow_child(idx, entry, current_path, nav_callback, handle.entries.clone());
+                let flow_child = create_flow_child(idx, entry, current_path, nav_callback, handle.selected_paths.clone());
                 flowbox.append(&flow_child);
             }
             widgets.grid_container.append(&flowbox);
@@ -74,61 +75,34 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
                         handle.selection_callback.clone(),
                         &widgets.grid_container,
                         handle.current_path.clone(),
+                        handle.selected_paths.clone(),
                     );
                     widgets.grid_container.append(&flowbox);
                     current_flowbox = Some(flowbox);
                 }
 
                 if let Some(ref flowbox) = current_flowbox {
-                    let flow_child = create_flow_child(idx, entry, current_path, nav_callback, handle.entries.clone());
+                    let flow_child = create_flow_child(idx, entry, current_path, nav_callback, handle.selected_paths.clone());
                     flowbox.append(&flow_child);
                 }
             }
         }
     } else {
         // Render list/details view
-        let entries_c = handle.entries.clone();
         for (idx, entry) in entries.iter().enumerate() {
             let target_entry = entry.clone();
             let cp = current_path.clone();
             let nav = nav_callback.clone();
-            let entries_cc = entries_c.clone();
+            let sel_paths = handle.selected_paths.clone();
             let list_row = baby_utils::explore::create_list_row(
                 idx,
                 entry,
+                handle.selected_paths.clone(),
                 nav_callback.clone(),
                 move |widget, x, y| {
-                    let mut target_paths = Vec::new();
-                    if let Some(row) = widget.parent().and_then(|p| p.downcast::<gtk4::ListBoxRow>().ok()) {
-                        if let Some(listbox) = row.parent().and_then(|p| p.downcast::<gtk4::ListBox>().ok()) {
-                            let selected_rows = listbox.selected_rows();
-                            let is_clicked_selected = selected_rows.contains(&row);
-                            
-                            let mut target_indices = Vec::new();
-                            if is_clicked_selected {
-                                for r in selected_rows {
-                                    if let Ok(idx_val) = r.property::<String>("name").parse::<usize>() {
-                                        target_indices.push(idx_val);
-                                    }
-                                }
-                            } else {
-                                // Right-clicked on an unselected row: select it, and only act on it
-                                listbox.select_row(Some(&row));
-                                if let Ok(idx_val) = row.property::<String>("name").parse::<usize>() {
-                                    target_indices.push(idx_val);
-                                }
-                            }
-                            
-                            let b = entries_cc.borrow();
-                            for idx_val in target_indices {
-                                if idx_val < b.len() {
-                                    target_paths.push(b[idx_val].path.clone());
-                                }
-                            }
-                        }
-                    }
-                    if target_paths.is_empty() {
-                        target_paths.push(target_entry.path.clone());
+                    let mut target_paths = sel_paths.borrow().clone();
+                    if !target_paths.contains(&target_entry.path) {
+                        target_paths = vec![target_entry.path.clone()];
                     }
 
                     crate::widgets::context_menu::show_for_file(
