@@ -6,10 +6,10 @@ window.explore-window {
     border: none;
 }
 
-.explore-window > box {
+.explore-window>box {
     background-color: rgba(245, 245, 247, 0.97);
     background-image: repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.015) 0px, rgba(0, 0, 0, 0.015) 1px, transparent 1px, transparent 2px),
-                      linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(0, 0, 0, 0.05) 100%);
+        linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(0, 0, 0, 0.05) 100%);
     -gtk-background-blur: 24;
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 12px;
@@ -234,7 +234,7 @@ window.explore-window {
     margin-right: 8px;
 }
 
-.explore-window dropdown.toolbar-dropdown > button {
+.explore-window dropdown.toolbar-dropdown>button {
     background: transparent;
     border: none;
     border-radius: 6px;
@@ -244,16 +244,16 @@ window.explore-window {
     transition: background 0.1s ease;
 }
 
-.explore-window dropdown.toolbar-dropdown > button:hover {
+.explore-window dropdown.toolbar-dropdown>button:hover {
     background-color: rgba(0, 0, 0, 0.05);
 }
 
-.explore-window dropdown.toolbar-dropdown > button:active {
+.explore-window dropdown.toolbar-dropdown>button:active {
     background-color: rgba(0, 0, 0, 0.1);
 }
 
-.explore-window dropdown.toolbar-dropdown > button arrow,
-.explore-window dropdown.toolbar-dropdown > button image {
+.explore-window dropdown.toolbar-dropdown>button arrow,
+.explore-window dropdown.toolbar-dropdown>button image {
     margin: 0;
     padding: 0;
     min-width: 0;
@@ -261,18 +261,18 @@ window.explore-window {
     opacity: 0;
 }
 
-.explore-window dropdown.toolbar-dropdown > button label {
+.explore-window dropdown.toolbar-dropdown>button label {
     margin-right: 0;
     padding-right: 0;
 }
 
-.explore-window dropdown > popover {
+.explore-window dropdown>popover {
     background-color: transparent;
     border: none;
     box-shadow: none;
 }
 
-.explore-window dropdown > popover > contents {
+.explore-window dropdown>popover>contents {
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(0, 0, 0, 0.15);
@@ -281,12 +281,12 @@ window.explore-window {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
-.explore-window dropdown > popover > contents listview {
+.explore-window dropdown>popover>contents listview {
     background-color: transparent;
     padding: 0;
 }
 
-.explore-window dropdown > popover > contents row {
+.explore-window dropdown>popover>contents row {
     border-radius: 6px;
     padding: 6px 12px;
     color: #1a1a1a;
@@ -296,11 +296,11 @@ window.explore-window {
     transition: background-color 0.1s ease;
 }
 
-.explore-window dropdown > popover > contents row:hover {
+.explore-window dropdown>popover>contents row:hover {
     background-color: rgba(0, 0, 0, 0.05);
 }
 
-.explore-window dropdown > popover > contents row:selected {
+.explore-window dropdown>popover>contents row:selected {
     background-color: rgba(0, 102, 204, 0.6);
     color: white;
 }
