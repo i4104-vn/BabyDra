@@ -21,15 +21,37 @@ pub fn create_sidebar(
 
     add_sidebar_item(&vbox, "Home", "user-home", glib::home_dir(), &session, &nav_cb);
 
-    let special_dirs = [
-        ("Desktop", "folder-desktop", glib::UserDirectory::Desktop),
-        ("Downloads", "folder-download", glib::UserDirectory::Downloads),
-        ("Documents", "folder-documents", glib::UserDirectory::Documents),
-        ("Pictures", "folder-pictures", glib::UserDirectory::Pictures),
-        ("Music",    "folder-music",     glib::UserDirectory::Music),
-        ("Videos",   "folder-videos",    glib::UserDirectory::Videos),
+    let home = glib::home_dir();
+
+    // Folders that MUST be shown and auto-created at Home if not exist
+    let folders_to_ensure = [
+        ("Downloads", "folder-download", glib::UserDirectory::Downloads, "Downloads"),
+        ("Documents", "folder-documents", glib::UserDirectory::Documents, "Documents"),
+        ("Pictures", "folder-pictures", glib::UserDirectory::Pictures, "Pictures"),
+        ("Musics",    "folder-music",     glib::UserDirectory::Music, "Music"),
     ];
-    for (name, icon, dir) in &special_dirs {
+
+    for (label, icon, user_dir, fallback_sub) in &folders_to_ensure {
+        let path = if let Some(p) = glib::user_special_dir(*user_dir) {
+            p
+        } else {
+            home.join(fallback_sub)
+        };
+
+        // Auto-create directory if it doesn't exist
+        if !path.exists() {
+            let _ = std::fs::create_dir_all(&path);
+        }
+
+        add_sidebar_item(&vbox, label, icon, path, &session, &nav_cb);
+    }
+
+    // Other optional folders
+    let optional_dirs = [
+        ("Desktop", "folder-desktop", glib::UserDirectory::Desktop),
+        ("Videos",  "folder-videos",  glib::UserDirectory::Videos),
+    ];
+    for (name, icon, dir) in &optional_dirs {
         if let Some(path) = glib::user_special_dir(*dir) {
             if path.exists() {
                 add_sidebar_item(&vbox, name, icon, path, &session, &nav_cb);
