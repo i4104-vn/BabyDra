@@ -29,19 +29,17 @@ pub fn create_content_view(
     let selected_paths_c = selected_paths.clone();
     let sel_cb = Rc::new(selection_callback) as Rc<dyn Fn(Vec<FileEntry>)>;
     
-    let sc_fn = Rc::new(move |selected_indices: Vec<usize>| {
+    let sc_fn = Rc::new(move |selected_paths_list: Vec<PathBuf>| {
         let mut list = Vec::new();
-        let mut paths = Vec::new();
         let b = entries_clone.borrow();
-        for idx in selected_indices {
-            if idx < b.len() {
-                list.push(b[idx].clone());
-                paths.push(b[idx].path.clone());
+        for path in &selected_paths_list {
+            if let Some(entry) = b.iter().find(|e| e.path == *path) {
+                list.push(entry.clone());
             }
         }
-        *selected_paths_c.borrow_mut() = paths;
+        *selected_paths_c.borrow_mut() = selected_paths_list;
         sel_cb(list);
-    }) as Rc<dyn Fn(Vec<usize>)>;
+    }) as Rc<dyn Fn(Vec<PathBuf>)>;
 
     let handle = ContentViewHandle {
         widgets: widgets.clone(),
@@ -66,7 +64,7 @@ pub fn create_content_view(
 pub fn create_grid_flowbox(
     entries: Rc<RefCell<Vec<FileEntry>>>,
     nav_cb: Rc<dyn Fn(PathBuf)>,
-    sc_fn: Rc<dyn Fn(Vec<usize>)>,
+    sc_fn: Rc<dyn Fn(Vec<PathBuf>)>,
     grid_container: &gtk4::Box,
     current_path: Rc<RefCell<PathBuf>>,
     selected_paths: Rc<RefCell<Vec<PathBuf>>>,

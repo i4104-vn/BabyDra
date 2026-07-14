@@ -59,7 +59,7 @@ pub struct ContentViewHandle {
     pub current_mode: Rc<RefCell<String>>,
     pub sort_mode: Rc<RefCell<String>>,
     pub nav_callback: Rc<dyn Fn(PathBuf)>,
-    pub selection_callback: Rc<dyn Fn(Vec<usize>)>,
+    pub selection_callback: Rc<dyn Fn(Vec<PathBuf>)>,
     pub selected_paths: Rc<RefCell<Vec<PathBuf>>>,
 }
 

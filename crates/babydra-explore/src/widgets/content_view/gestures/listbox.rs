@@ -9,7 +9,7 @@ pub fn wire_listbox_controllers(
     widgets: &ContentViewWidgets,
     entries: Rc<RefCell<Vec<FileEntry>>>,
     nav_cb: Rc<dyn Fn(PathBuf)>,
-    sc_fn: Rc<dyn Fn(Vec<usize>)>,
+    sc_fn: Rc<dyn Fn(Vec<PathBuf>)>,
     current_path: Rc<RefCell<PathBuf>>,
     selected_paths: Rc<RefCell<Vec<PathBuf>>>,
 ) {
@@ -17,9 +17,9 @@ pub fn wire_listbox_controllers(
     {
         let sc = sc_fn.clone();
         widgets.listbox.connect_selected_rows_changed(move |lb| {
-            let sel: Vec<usize> = lb.selected_rows().iter()
-                .map(|r| r.property::<String>("name").parse::<usize>().unwrap_or(usize::MAX))
-                .filter(|&idx| idx != usize::MAX)
+            let sel: Vec<PathBuf> = lb.selected_rows().iter()
+                .map(|r| PathBuf::from(r.widget_name().to_string()))
+                .filter(|p| p.is_absolute())
                 .collect();
             sc(sel);
         });

@@ -9,7 +9,7 @@ pub fn wire_grid_flowbox_controllers(
     flowbox: &gtk4::FlowBox,
     entries: Rc<RefCell<Vec<FileEntry>>>,
     nav_cb: Rc<dyn Fn(PathBuf)>,
-    sc_fn: Rc<dyn Fn(Vec<usize>)>,
+    sc_fn: Rc<dyn Fn(Vec<PathBuf>)>,
     grid_container: &gtk4::Box,
     current_path: Rc<RefCell<PathBuf>>,
     selected_paths: Rc<RefCell<Vec<PathBuf>>>,
@@ -35,15 +35,16 @@ pub fn wire_grid_flowbox_controllers(
                 }
             }
             
-            // Collect selected indices from ALL flowboxes inside grid_container
+            // Collect selected paths from ALL flowboxes inside grid_container
             let mut sel = Vec::new();
             let mut sibling = grid_c.first_child();
             while let Some(child) = sibling {
                 if let Some(other_fb) = child.downcast_ref::<gtk4::FlowBox>() {
                     for child_item in other_fb.selected_children() {
-                        let idx_str = child_item.property::<String>("name");
-                        if let Ok(idx) = idx_str.parse::<usize>() {
-                            sel.push(idx);
+                        let path_str = child_item.widget_name();
+                        let path = PathBuf::from(path_str.to_string());
+                        if path.is_absolute() {
+                            sel.push(path);
                         }
                     }
                 }
