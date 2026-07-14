@@ -494,3 +494,13 @@ button.context-menu-item:focus label,
 button.context-menu-item:hover label {
     color: #000000;
 }
+
+.explore-window .group-header-label {
+    font-weight: 700;
+    font-size: 11px;
+    color: #0066cc;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-top: 6px;
+    margin-bottom: 2px;
+}

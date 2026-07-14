@@ -14,19 +14,6 @@ pub fn update_content_view_ui(
     current_path: &PathBuf,
     current_mode: &str,
 ) {
-    // Sort: directories first (by name), then files (by name), both case-insensitive
-    let mut sorted: Vec<FileEntry> = entries.to_vec();
-    sorted.sort_by(|a, b| {
-        let a_is_dir = matches!(a.file_type, babydra_common::FileType::Directory);
-        let b_is_dir = matches!(b.file_type, babydra_common::FileType::Directory);
-        match (a_is_dir, b_is_dir) {
-            (true, false) => std::cmp::Ordering::Less,
-            (false, true) => std::cmp::Ordering::Greater,
-            _ => a.display_name.to_lowercase().cmp(&b.display_name.to_lowercase()),
-        }
-    });
-    let entries = sorted.as_slice();
-
     // Clear flowbox
     while let Some(child) = widgets.flowbox.first_child() {
         widgets.flowbox.remove(&child);
@@ -78,7 +65,7 @@ pub fn update_content_view_ui(
     }
 
     if current_mode == "icons" {
-        for entry in entries.iter() {
+        for (idx, entry) in entries.iter().enumerate() {
             let item_box = Box::new(Orientation::Vertical, 6);
             item_box.set_size_request(100, 100);
             item_box.set_css_classes(&["file-item"]);
@@ -116,11 +103,14 @@ pub fn update_content_view_ui(
             });
             item_box.add_controller(gesture);
 
-            widgets.flowbox.append(&item_box);
+            let flow_child = gtk4::FlowBoxChild::new();
+            flow_child.set_child(Some(&item_box));
+            flow_child.set_property("name", &format!("{}", idx));
+            widgets.flowbox.append(&flow_child);
         }
     } else {
         // Render list/details view
-        for entry in entries.iter() {
+        for (idx, entry) in entries.iter().enumerate() {
             let item_box = Box::new(Orientation::Horizontal, 12);
             item_box.set_css_classes(&["list-row"]);
             item_box.set_margin_top(2);
@@ -183,7 +173,61 @@ pub fn update_content_view_ui(
             });
             item_box.add_controller(gesture);
 
-            widgets.listbox.append(&item_box);
+            let list_row = gtk4::ListBoxRow::new();
+            list_row.set_child(Some(&item_box));
+            list_row.set_property("name", &format!("{}", idx));
+            widgets.listbox.append(&list_row);
         }
+
+        // Set header function for grouping in ListBox
+        let entries_clone = entries.to_vec();
+        widgets.listbox.set_header_func(move |row, before| {
+            let get_group = |r: &gtk4::ListBoxRow| -> String {
+                let idx = r.property::<String>("name").parse::<usize>().unwrap_or(usize::MAX);
+                if idx < entries_clone.len() {
+                    let entry = &entries_clone[idx];
+                    if matches!(entry.file_type, babydra_common::FileType::Directory) {
+                        "Folders".to_string()
+                    } else {
+                        match entry.path.extension() {
+                            Some(ext) => format!("{} Files", ext.to_string_lossy().to_uppercase()),
+                            None => "Other Files".to_string(),
+                        }
+                    }
+                } else {
+                    "".to_string()
+                }
+            };
+
+            let group_curr = get_group(row);
+            if group_curr.is_empty() {
+                row.set_header(None::<&gtk4::Widget>);
+                return;
+            }
+
+            let show_header = if let Some(before) = before {
+                let group_prev = get_group(before);
+                group_curr != group_prev
+            } else {
+                true
+            };
+
+            if show_header {
+                let box_container = Box::new(Orientation::Vertical, 0);
+                box_container.set_margin_top(12);
+                box_container.set_margin_bottom(6);
+                box_container.set_margin_start(14);
+                box_container.set_margin_end(14);
+
+                let header_lbl = Label::new(Some(&group_curr));
+                header_lbl.add_css_class("group-header-label");
+                header_lbl.set_halign(Align::Start);
+                box_container.append(&header_lbl);
+
+                row.set_header(Some(&box_container));
+            } else {
+                row.set_header(None::<&gtk4::Widget>);
+            }
+        });
     }
 }
