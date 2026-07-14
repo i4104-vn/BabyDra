@@ -139,7 +139,17 @@ pub fn update_content_view_ui(
             lbl_size.set_css_classes(&["list-col-meta"]);
             lbl_size.set_size_request(80, -1);
             lbl_size.set_halign(Align::End);
+            lbl_size.set_tooltip_text(Some("Size"));
             item_box.append(&lbl_size);
+
+            // Permissions info
+            let perm_str = format!("{:o}", entry.permissions & 0o777);
+            let lbl_perm = Label::new(Some(&perm_str));
+            lbl_perm.set_css_classes(&["list-col-meta"]);
+            lbl_perm.set_size_request(80, -1);
+            lbl_perm.set_halign(Align::End);
+            lbl_perm.set_tooltip_text(Some("Permissions"));
+            item_box.append(&lbl_perm);
 
             // Modified info
             let mod_str = if let Some(mtime) = entry.modified {
@@ -151,6 +161,7 @@ pub fn update_content_view_ui(
             lbl_date.set_css_classes(&["list-col-meta"]);
             lbl_date.set_size_request(140, -1);
             lbl_date.set_halign(Align::End);
+            lbl_date.set_tooltip_text(Some("Modified Date"));
             item_box.append(&lbl_date);
 
             // Attach right click gesture to list item_box
