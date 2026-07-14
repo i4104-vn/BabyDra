@@ -183,13 +183,27 @@ pub fn create_explore_window(
                         // Update Header breadcrumbs
                         if let Some(ref hw) = *header_widgets_c.borrow() {
                             let is_in_trash = path.to_string_lossy().ends_with("Trash/files");
-                            if is_in_trash {
-                                hw.btn_new_folder.set_label("Empty Trash");
-                                hw.btn_new_folder.add_css_class("empty-trash-btn");
-                            } else {
-                                hw.btn_new_folder.set_label("⊕ New Folder");
-                                hw.btn_new_folder.remove_css_class("empty-trash-btn");
-                            }
+                              if is_in_trash {
+                                 if let Some(box_child) = hw.btn_new_folder.child().and_downcast::<gtk4::Box>() {
+                                     if let Some(img) = box_child.first_child().and_downcast::<gtk4::Image>() {
+                                         img.set_icon_name(Some("user-trash-full-symbolic"));
+                                     }
+                                     if let Some(lbl) = box_child.first_child().and_then(|w| w.next_sibling()).and_downcast::<gtk4::Label>() {
+                                         lbl.set_text("Empty Trash");
+                                     }
+                                 }
+                                 hw.btn_new_folder.add_css_class("empty-trash-btn");
+                             } else {
+                                 if let Some(box_child) = hw.btn_new_folder.child().and_downcast::<gtk4::Box>() {
+                                     if let Some(img) = box_child.first_child().and_downcast::<gtk4::Image>() {
+                                         img.set_icon_name(Some("folder-new-symbolic"));
+                                     }
+                                     if let Some(lbl) = box_child.first_child().and_then(|w| w.next_sibling()).and_downcast::<gtk4::Label>() {
+                                         lbl.set_text("New Folder");
+                                     }
+                                 }
+                                 hw.btn_new_folder.remove_css_class("empty-trash-btn");
+                             }
 
                             let nav_cb: Rc<dyn Fn(PathBuf)> = Rc::new(move |p: PathBuf| {
                                 if let Some(ref f) = *nav_no_watch_c.borrow() {

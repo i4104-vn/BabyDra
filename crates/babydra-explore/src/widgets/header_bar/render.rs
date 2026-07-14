@@ -64,7 +64,15 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     toolbar.set_margin_end(6);
     container.append(&toolbar);
 
-    let btn_new_folder   = Button::with_label("⊕ New Folder");
+    let new_folder_box = Box::new(Orientation::Horizontal, 6);
+    let new_folder_img = gtk4::Image::from_icon_name("folder-new-symbolic");
+    let new_folder_lbl = gtk4::Label::new(Some("New Folder"));
+    new_folder_box.append(&new_folder_img);
+    new_folder_box.append(&new_folder_lbl);
+
+    let btn_new_folder = Button::builder()
+        .child(&new_folder_box)
+        .build();
     let btn_cut          = Button::from_icon_name("edit-cut-symbolic");
     let btn_copy         = Button::from_icon_name("edit-copy-symbolic");
     let btn_paste        = Button::from_icon_name("edit-paste-symbolic");
