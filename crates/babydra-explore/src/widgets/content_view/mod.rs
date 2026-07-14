@@ -8,6 +8,7 @@ pub use babydra_common::{ContentViewWidgets, ContentViewHandle};
 
 mod render;
 mod update;
+pub mod helpers;
 
 /// Creates the content view area widgets and returns the scroll container and ContentViewHandle state handle.
 pub fn create_content_view(
