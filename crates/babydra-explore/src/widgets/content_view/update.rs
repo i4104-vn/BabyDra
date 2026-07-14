@@ -32,45 +32,6 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
         widgets.listbox.remove(&child);
     }
 
-    // Setup background right click gesture for Grid Container
-    {
-        let gesture_flow = gtk4::GestureClick::new();
-        gesture_flow.set_button(3);
-        let cp = current_path.clone();
-        let grid_widget = widgets.grid_container.clone();
-        let nav = nav_callback.clone();
-        gesture_flow.connect_pressed(move |gesture, _, x, y| {
-            gesture.set_state(gtk4::EventSequenceState::Claimed);
-            crate::widgets::context_menu::show_for_empty(
-                grid_widget.upcast_ref(),
-                x,
-                y,
-                cp.clone(),
-                nav.clone(),
-            );
-        });
-        widgets.grid_container.add_controller(gesture_flow);
-    }
-
-    // Setup background right click gesture for ListBox
-    {
-        let gesture_list = gtk4::GestureClick::new();
-        gesture_list.set_button(3);
-        let cp = current_path.clone();
-        let list_widget = widgets.listbox.clone();
-        let nav = nav_callback.clone();
-        gesture_list.connect_pressed(move |gesture, _, x, y| {
-            gesture.set_state(gtk4::EventSequenceState::Claimed);
-            crate::widgets::context_menu::show_for_empty(
-                list_widget.upcast_ref(),
-                x,
-                y,
-                cp.clone(),
-                nav.clone(),
-            );
-        });
-        widgets.listbox.add_controller(gesture_list);
-    }
 
     if current_mode == "icons" {
         if sort_mode == "auto" {

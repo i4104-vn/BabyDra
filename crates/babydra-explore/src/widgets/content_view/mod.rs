@@ -95,6 +95,26 @@ pub fn create_content_view(
             }
         });
     }
+    // Wire right click empty area context menu gesture to the main scrolled window
+    {
+        let cp = current_path.clone();
+        let nav = nav_cb.clone();
+        let container_widget = widgets.container.clone();
+        let gesture = gtk4::GestureClick::new();
+        gesture.set_button(3);
+        gesture.connect_pressed(move |gesture, _, x, y| {
+            gesture.set_state(gtk4::EventSequenceState::Claimed);
+            let path = cp.borrow().clone();
+            crate::widgets::context_menu::show_for_empty(
+                container_widget.upcast_ref(),
+                x,
+                y,
+                path,
+                nav.clone(),
+            );
+        });
+        widgets.container.add_controller(gesture);
+    }
 
     (widgets.container.clone(), handle)
 }
