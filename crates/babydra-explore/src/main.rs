@@ -13,7 +13,7 @@ fn main() {
         .build();
 
     app.connect_activate(|app| {
-        let target_dir = baby_utils::explore_helpers::parse_target_dir();
+        let target_dir = baby_utils::explore::parse_target_dir();
 
         let session = std::rc::Rc::new(std::cell::RefCell::new(SessionState::new(target_dir)));
         

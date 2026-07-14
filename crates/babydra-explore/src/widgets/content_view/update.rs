@@ -3,7 +3,7 @@ use gtk4::{Box, Orientation, Label, Align};
 use std::path::PathBuf;
 use std::rc::Rc;
 use babydra_common::FileEntry;
-use baby_utils::explore_helpers;
+use baby_utils::explore as explore_helpers;
 use babydra_common::ContentViewWidgets;
 use babydra_common::ContentViewHandle;
 
