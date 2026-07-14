@@ -210,18 +210,19 @@ pub fn update_content_view_ui(
                             let now = chrono::Local::now();
                             let date_naive = datetime.date_naive();
                             let now_naive = now.date_naive();
+                            let date_str = datetime.format(" (%d/%m)").to_string();
                             if date_naive == now_naive {
-                                "Today".to_string()
+                                format!("Today{}", date_str)
                             } else if date_naive == now_naive - chrono::Duration::days(1) {
-                                "Yesterday".to_string()
+                                format!("Yesterday{}", date_str)
                             } else {
                                 let diff = (now_naive - date_naive).num_days();
                                 if diff >= 2 && diff <= 7 {
-                                    datetime.format("%A").to_string()
+                                    format!("{}{}", datetime.format("%A"), date_str)
                                 } else if diff > 7 {
                                     "Older than a week".to_string()
                                 } else {
-                                    "Today".to_string()
+                                    format!("Today{}", date_str)
                                 }
                             }
                         } else {
