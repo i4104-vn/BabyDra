@@ -348,6 +348,29 @@ pub fn create_content_view(
         widgets.container.add_controller(gesture);
     }
 
+    // Wire drop-to-move for empty space in the view area
+    {
+        let cp_clone = current_path.clone();
+        let drop_target = gtk4::DropTarget::new(
+            gtk4::gio::File::static_type(),
+            gtk4::gdk::DragAction::MOVE | gtk4::gdk::DragAction::COPY,
+        );
+        drop_target.connect_drop(move |_, value, _, _| {
+            let dest_dir = cp_clone.borrow().clone();
+            if let Ok(file) = value.get::<gtk4::gio::File>() {
+                if let Some(src_path) = file.path() {
+                    let dest = dest_dir.join(src_path.file_name().unwrap());
+                    if src_path != dest {
+                        let _ = std::fs::rename(&src_path, &dest);
+                    }
+                }
+                return true;
+            }
+            false
+        });
+        widgets.container.add_controller(drop_target);
+    }
+
     (widgets.container.clone(), handle)
 }
 

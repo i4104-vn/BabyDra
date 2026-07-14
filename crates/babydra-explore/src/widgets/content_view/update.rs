@@ -196,6 +196,38 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
             });
             item_box.add_controller(gesture);
 
+            // Add Drag Source to item_box
+            let drag_source = gtk4::DragSource::new();
+            drag_source.set_actions(gtk4::gdk::DragAction::MOVE | gtk4::gdk::DragAction::COPY);
+            let path_clone = entry.path.clone();
+            drag_source.connect_prepare(move |_, _, _| {
+                let file = gtk4::gio::File::for_path(&path_clone);
+                Some(gtk4::gdk::ContentProvider::for_value(&file.to_value()))
+            });
+            item_box.add_controller(drag_source);
+
+            // If directory, add Drop Target to item_box
+            if matches!(entry.file_type, babydra_common::FileType::Directory) {
+                let drop_target = gtk4::DropTarget::new(
+                    gtk4::gio::File::static_type(),
+                    gtk4::gdk::DragAction::MOVE | gtk4::gdk::DragAction::COPY,
+                );
+                let dest_path = entry.path.clone();
+                drop_target.connect_drop(move |_, value, _, _| {
+                    if let Ok(file) = value.get::<gtk4::gio::File>() {
+                        if let Some(src_path) = file.path() {
+                            let dest = dest_path.join(src_path.file_name().unwrap());
+                            if src_path != dest {
+                                let _ = std::fs::rename(&src_path, &dest);
+                            }
+                        }
+                        return true;
+                    }
+                    false
+                });
+                item_box.add_controller(drop_target);
+            }
+
             let list_row = gtk4::ListBoxRow::new();
             list_row.set_child(Some(&item_box));
             list_row.set_property("name", &format!("{}", idx));
