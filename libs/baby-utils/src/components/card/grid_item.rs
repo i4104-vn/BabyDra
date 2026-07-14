@@ -80,6 +80,38 @@ pub fn create_grid_file_item(
         let file = gtk4::gio::File::for_path(&path_clone);
         Some(gtk4::gdk::ContentProvider::for_value(&file.to_value()))
     });
+
+    if has_preview {
+        if let Ok(pixbuf) = load_cropped_square_pixbuf(&entry.path, 85) {
+            let texture = gtk4::gdk::Texture::for_pixbuf(&pixbuf);
+            drag_source.set_icon(Some(&texture), 42, 42);
+        } else {
+            let display = gtk4::gdk::Display::default().unwrap();
+            let icon_theme = gtk4::IconTheme::for_display(&display);
+            let paintable = icon_theme.lookup_icon(
+                &entry.icon_name,
+                &[],
+                48,
+                1,
+                gtk4::TextDirection::Ltr,
+                gtk4::IconLookupFlags::empty(),
+            );
+            drag_source.set_icon(Some(&paintable), 24, 24);
+        }
+    } else {
+        let display = gtk4::gdk::Display::default().unwrap();
+        let icon_theme = gtk4::IconTheme::for_display(&display);
+        let paintable = icon_theme.lookup_icon(
+            &entry.icon_name,
+            &[],
+            48,
+            1,
+            gtk4::TextDirection::Ltr,
+            gtk4::IconLookupFlags::empty(),
+        );
+        drag_source.set_icon(Some(&paintable), 24, 24);
+    }
+
     item_box.add_controller(drag_source);
 
     // If directory, add Drop Target to item_box

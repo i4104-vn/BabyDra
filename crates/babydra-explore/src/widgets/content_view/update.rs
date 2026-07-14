@@ -204,6 +204,45 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
                 let file = gtk4::gio::File::for_path(&path_clone);
                 Some(gtk4::gdk::ContentProvider::for_value(&file.to_value()))
             });
+
+            let has_preview = if let Some(ext) = entry.path.extension() {
+                let ext_str = ext.to_string_lossy().to_lowercase();
+                matches!(ext_str.as_str(), "png" | "jpg" | "jpeg" | "gif" | "bmp" | "webp" | "svg")
+            } else {
+                false
+            };
+
+            if has_preview {
+                if let Ok(pixbuf) = babydra_common::load_cropped_square_pixbuf(&entry.path, 85) {
+                    let texture = gtk4::gdk::Texture::for_pixbuf(&pixbuf);
+                    drag_source.set_icon(Some(&texture), 42, 42);
+                } else {
+                    let display = gtk4::gdk::Display::default().unwrap();
+                    let icon_theme = gtk4::IconTheme::for_display(&display);
+                    let paintable = icon_theme.lookup_icon(
+                        &entry.icon_name,
+                        &[],
+                        48,
+                        1,
+                        gtk4::TextDirection::Ltr,
+                        gtk4::IconLookupFlags::empty(),
+                    );
+                    drag_source.set_icon(Some(&paintable), 24, 24);
+                }
+            } else {
+                let display = gtk4::gdk::Display::default().unwrap();
+                let icon_theme = gtk4::IconTheme::for_display(&display);
+                let paintable = icon_theme.lookup_icon(
+                    &entry.icon_name,
+                    &[],
+                    48,
+                    1,
+                    gtk4::TextDirection::Ltr,
+                    gtk4::IconLookupFlags::empty(),
+                );
+                drag_source.set_icon(Some(&paintable), 24, 24);
+            }
+
             item_box.add_controller(drag_source);
 
             // If directory, add Drop Target to item_box
