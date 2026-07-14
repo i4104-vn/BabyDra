@@ -51,40 +51,7 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
         } else {
             // Grouping/categories active!
             let get_group_name = |entry: &FileEntry| -> String {
-                if sort_mode == "date" {
-                    if let Some(modified) = entry.modified {
-                        let datetime: chrono::DateTime<chrono::Local> = modified.into();
-                        let now = chrono::Local::now();
-                        let date_naive = datetime.date_naive();
-                        let now_naive = now.date_naive();
-                        let date_str = datetime.format(" (%d/%m)").to_string();
-                        if date_naive == now_naive {
-                            format!("Today{}", date_str)
-                        } else if date_naive == now_naive - chrono::Duration::days(1) {
-                            format!("Yesterday{}", date_str)
-                        } else {
-                            let diff = (now_naive - date_naive).num_days();
-                            if diff >= 2 && diff <= 7 {
-                                format!("{}{}", datetime.format("%A"), date_str)
-                            } else if diff > 7 {
-                                "Older than a week".to_string()
-                            } else {
-                                format!("Today{}", date_str)
-                            }
-                        }
-                    } else {
-                        "Unknown Date".to_string()
-                    }
-                } else { // "group"
-                    if matches!(entry.file_type, babydra_common::FileType::Directory) {
-                        "Folders".to_string()
-                    } else {
-                        match entry.path.extension() {
-                            Some(ext) => format!("{} Files", ext.to_string_lossy().to_uppercase()),
-                            None => "Other Files".to_string(),
-                        }
-                    }
-                }
+                super::grouping::get_group_name(entry, sort_mode)
             };
 
             let mut current_group_name = String::new();
@@ -304,40 +271,7 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
                 let idx = r.property::<String>("name").parse::<usize>().unwrap_or(usize::MAX);
                 if idx < entries_clone.len() {
                     let entry = &entries_clone[idx];
-                    if sort_mode_clone == "date" {
-                        if let Some(modified) = entry.modified {
-                            let datetime: chrono::DateTime<chrono::Local> = modified.into();
-                            let now = chrono::Local::now();
-                            let date_naive = datetime.date_naive();
-                            let now_naive = now.date_naive();
-                            let date_str = datetime.format(" (%d/%m)").to_string();
-                            if date_naive == now_naive {
-                                format!("Today{}", date_str)
-                            } else if date_naive == now_naive - chrono::Duration::days(1) {
-                                format!("Yesterday{}", date_str)
-                            } else {
-                                let diff = (now_naive - date_naive).num_days();
-                                if diff >= 2 && diff <= 7 {
-                                    format!("{}{}", datetime.format("%A"), date_str)
-                                } else if diff > 7 {
-                                    "Older than a week".to_string()
-                                } else {
-                                    format!("Today{}", date_str)
-                                }
-                            }
-                        } else {
-                            "Unknown Date".to_string()
-                        }
-                    } else { // "group"
-                        if matches!(entry.file_type, babydra_common::FileType::Directory) {
-                            "Folders".to_string()
-                        } else {
-                            match entry.path.extension() {
-                                Some(ext) => format!("{} Files", ext.to_string_lossy().to_uppercase()),
-                                None => "Other Files".to_string(),
-                            }
-                        }
-                    }
+                    super::grouping::get_group_name(entry, &sort_mode_clone)
                 } else {
                     "".to_string()
                 }
