@@ -50,7 +50,7 @@ pub fn create_content_view(
     };
 
     // Wire all controllers/gestures for ListBox and overlay background
-    gestures::wire_listbox_controllers(&widgets, entries.clone(), nav_cb.clone(), sc_fn.clone());
+    gestures::wire_listbox_controllers(&widgets, entries.clone(), nav_cb.clone(), sc_fn.clone(), current_path.clone());
     gestures::wire_background_controllers(&widgets, current_path.clone(), nav_cb.clone());
 
     (widgets.container.clone(), handle)
@@ -62,6 +62,7 @@ pub fn create_grid_flowbox(
     nav_cb: Rc<dyn Fn(PathBuf)>,
     sc_fn: Rc<dyn Fn(Vec<usize>)>,
     grid_container: &gtk4::Box,
+    current_path: Rc<RefCell<PathBuf>>,
 ) -> gtk4::FlowBox {
     let flowbox = gtk4::FlowBox::builder()
         .valign(gtk4::Align::Start)
@@ -73,7 +74,7 @@ pub fn create_grid_flowbox(
         .column_spacing(10)
         .build();
 
-    gestures::wire_grid_flowbox_controllers(&flowbox, entries, nav_cb, sc_fn, grid_container);
+    gestures::wire_grid_flowbox_controllers(&flowbox, entries, nav_cb, sc_fn, grid_container, current_path);
 
     flowbox
 }

@@ -37,6 +37,7 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
                 handle.nav_callback.clone(),
                 handle.selection_callback.clone(),
                 &widgets.grid_container,
+                handle.current_path.clone(),
             );
             
             for (idx, entry) in entries.iter().enumerate() {
@@ -72,6 +73,7 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
                         handle.nav_callback.clone(),
                         handle.selection_callback.clone(),
                         &widgets.grid_container,
+                        handle.current_path.clone(),
                     );
                     widgets.grid_container.append(&flowbox);
                     current_flowbox = Some(flowbox);

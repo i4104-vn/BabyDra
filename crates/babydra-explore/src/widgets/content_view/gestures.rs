@@ -10,6 +10,7 @@ pub fn wire_listbox_controllers(
     entries: Rc<RefCell<Vec<FileEntry>>>,
     nav_cb: Rc<dyn Fn(PathBuf)>,
     sc_fn: Rc<dyn Fn(Vec<usize>)>,
+    current_path: Rc<RefCell<PathBuf>>,
 ) {
     // 1. Selection changed
     {
@@ -64,13 +65,15 @@ pub fn wire_listbox_controllers(
         });
     }
 
-    // 4. Enter key activation
+    // 4. Keyboard shortcuts (Enter, Ctrl+X, Ctrl+C, Ctrl+V)
     {
         let lb_clone = widgets.listbox.clone();
         let e_ref = entries.clone();
         let nav = nav_cb.clone();
+        let cp_ref = current_path.clone();
         let key_controller = gtk4::EventControllerKey::new();
-        key_controller.connect_key_pressed(move |_, keyval, _, _| {
+        key_controller.connect_key_pressed(move |_, keyval, _, state| {
+            let has_ctrl = state.contains(gtk4::gdk::ModifierType::CONTROL_MASK);
             if keyval == gtk4::gdk::Key::Return || keyval == gtk4::gdk::Key::KP_Enter {
                 let selected_indices: Vec<usize> = lb_clone.selected_rows().iter()
                     .map(|r| r.property::<String>("name").parse::<usize>().unwrap_or(usize::MAX))
@@ -87,6 +90,74 @@ pub fn wire_listbox_controllers(
                             let _ = gtk4::gio::AppInfo::launch_default_for_uri(&uri, gtk4::gio::AppLaunchContext::NONE);
                         }
                     }
+                }
+                glib::Propagation::Stop
+            } else if has_ctrl && (keyval == gtk4::gdk::Key::x || keyval == gtk4::gdk::Key::X) {
+                let selected_indices: Vec<usize> = lb_clone.selected_rows().iter()
+                    .map(|r| r.property::<String>("name").parse::<usize>().unwrap_or(usize::MAX))
+                    .filter(|&idx| idx != usize::MAX)
+                    .collect();
+                let b = e_ref.borrow();
+                let mut paths = Vec::new();
+                for idx in selected_indices {
+                    if idx < b.len() {
+                        paths.push(b[idx].path.clone());
+                    }
+                }
+                if !paths.is_empty() {
+                    baby_utils::explore::CLIPBOARD.with(|cb| {
+                        cb.replace(Some((paths, true)));
+                    });
+                    nav(cp_ref.borrow().clone());
+                }
+                glib::Propagation::Stop
+            } else if has_ctrl && (keyval == gtk4::gdk::Key::c || keyval == gtk4::gdk::Key::C) {
+                let selected_indices: Vec<usize> = lb_clone.selected_rows().iter()
+                    .map(|r| r.property::<String>("name").parse::<usize>().unwrap_or(usize::MAX))
+                    .filter(|&idx| idx != usize::MAX)
+                    .collect();
+                let b = e_ref.borrow();
+                let mut paths = Vec::new();
+                for idx in selected_indices {
+                    if idx < b.len() {
+                        paths.push(b[idx].path.clone());
+                    }
+                }
+                if !paths.is_empty() {
+                    baby_utils::explore::CLIPBOARD.with(|cb| {
+                        cb.replace(Some((paths, false)));
+                    });
+                    nav(cp_ref.borrow().clone());
+                }
+                glib::Propagation::Stop
+            } else if has_ctrl && (keyval == gtk4::gdk::Key::v || keyval == gtk4::gdk::Key::V) {
+                let clipboard_data = baby_utils::explore::CLIPBOARD.with(|cb| cb.borrow().clone());
+                if let Some((sources, is_cut)) = clipboard_data {
+                    let dest_dir_c = cp_ref.borrow().clone();
+                    let nav_c = nav.clone();
+                    glib::spawn_future_local(async move {
+                        let mut all_success = true;
+                        for src in sources {
+                            if let Some(filename) = src.file_name() {
+                                let dest = dest_dir_c.join(filename);
+                                if is_cut {
+                                    if let Err(e) = babydra_common::move_path(src, dest).await {
+                                        eprintln!("Failed to move file: {}", e);
+                                        all_success = false;
+                                    }
+                                } else {
+                                    if let Err(e) = babydra_common::copy_path(src, dest).await {
+                                        eprintln!("Failed to copy file: {}", e);
+                                        all_success = false;
+                                    }
+                                }
+                            }
+                        }
+                        if is_cut && all_success {
+                            baby_utils::explore::CLIPBOARD.with(|cb| cb.replace(None));
+                        }
+                        nav_c(dest_dir_c);
+                    });
                 }
                 glib::Propagation::Stop
             } else {
@@ -114,6 +185,7 @@ pub fn wire_grid_flowbox_controllers(
     nav_cb: Rc<dyn Fn(PathBuf)>,
     sc_fn: Rc<dyn Fn(Vec<usize>)>,
     grid_container: &gtk4::Box,
+    current_path: Rc<RefCell<PathBuf>>,
 ) {
     // 1. Selection changed
     {
@@ -184,13 +256,15 @@ pub fn wire_grid_flowbox_controllers(
         });
     }
 
-    // 3. Enter key activation
+    // 3. Keyboard shortcuts (Enter, Ctrl+X, Ctrl+C, Ctrl+V)
     {
         let fb_clone = flowbox.clone();
         let e_ref = entries.clone();
         let nav = nav_cb.clone();
+        let cp_ref = current_path.clone();
         let key_controller = gtk4::EventControllerKey::new();
-        key_controller.connect_key_pressed(move |_, keyval, _, _| {
+        key_controller.connect_key_pressed(move |_, keyval, _, state| {
+            let has_ctrl = state.contains(gtk4::gdk::ModifierType::CONTROL_MASK);
             if keyval == gtk4::gdk::Key::Return || keyval == gtk4::gdk::Key::KP_Enter {
                 let selected_indices: Vec<usize> = fb_clone.selected_children().iter()
                     .map(|c| c.property::<String>("name").parse::<usize>().unwrap_or(usize::MAX))
@@ -207,6 +281,94 @@ pub fn wire_grid_flowbox_controllers(
                             let _ = gtk4::gio::AppInfo::launch_default_for_uri(&uri, gtk4::gio::AppLaunchContext::NONE);
                         }
                     }
+                }
+                glib::Propagation::Stop
+            } else if has_ctrl && (keyval == gtk4::gdk::Key::x || keyval == gtk4::gdk::Key::X) {
+                let mut selected_indices = Vec::new();
+                if let Some(grid_container) = fb_clone.parent().and_then(|p| p.downcast::<gtk4::Box>().ok()) {
+                    let mut sibling = grid_container.first_child();
+                    while let Some(c) = sibling {
+                        if let Some(fb) = c.downcast_ref::<gtk4::FlowBox>() {
+                            for item in fb.selected_children() {
+                                if let Ok(idx_val) = item.property::<String>("name").parse::<usize>() {
+                                    selected_indices.push(idx_val);
+                                }
+                            }
+                        }
+                        sibling = c.next_sibling();
+                    }
+                }
+                let b = e_ref.borrow();
+                let mut paths = Vec::new();
+                for idx in selected_indices {
+                    if idx < b.len() {
+                        paths.push(b[idx].path.clone());
+                    }
+                }
+                if !paths.is_empty() {
+                    baby_utils::explore::CLIPBOARD.with(|cb| {
+                        cb.replace(Some((paths, true)));
+                    });
+                    nav(cp_ref.borrow().clone());
+                }
+                glib::Propagation::Stop
+            } else if has_ctrl && (keyval == gtk4::gdk::Key::c || keyval == gtk4::gdk::Key::C) {
+                let mut selected_indices = Vec::new();
+                if let Some(grid_container) = fb_clone.parent().and_then(|p| p.downcast::<gtk4::Box>().ok()) {
+                    let mut sibling = grid_container.first_child();
+                    while let Some(c) = sibling {
+                        if let Some(fb) = c.downcast_ref::<gtk4::FlowBox>() {
+                            for item in fb.selected_children() {
+                                if let Ok(idx_val) = item.property::<String>("name").parse::<usize>() {
+                                    selected_indices.push(idx_val);
+                                }
+                            }
+                        }
+                        sibling = c.next_sibling();
+                    }
+                }
+                let b = e_ref.borrow();
+                let mut paths = Vec::new();
+                for idx in selected_indices {
+                    if idx < b.len() {
+                        paths.push(b[idx].path.clone());
+                    }
+                }
+                if !paths.is_empty() {
+                    baby_utils::explore::CLIPBOARD.with(|cb| {
+                        cb.replace(Some((paths, false)));
+                    });
+                    nav(cp_ref.borrow().clone());
+                }
+                glib::Propagation::Stop
+            } else if has_ctrl && (keyval == gtk4::gdk::Key::v || keyval == gtk4::gdk::Key::V) {
+                let clipboard_data = baby_utils::explore::CLIPBOARD.with(|cb| cb.borrow().clone());
+                if let Some((sources, is_cut)) = clipboard_data {
+                    let dest_dir_c = cp_ref.borrow().clone();
+                    let nav_c = nav.clone();
+                    glib::spawn_future_local(async move {
+                        let mut all_success = true;
+                        for src in sources {
+                            if let Some(filename) = src.file_name() {
+                                let dest = dest_dir_c.join(filename);
+                                if is_cut {
+                                    if let Err(e) = babydra_common::move_path(src, dest).await {
+                                        eprintln!("Failed to move file: {}", e);
+                                        all_success = false;
+                                    }
+                                } else {
+                                    if let Err(e) = babydra_common::copy_path(src, dest).await {
+                                        eprintln!("Failed to copy file: {}", e);
+                                        all_success = false;
+                                    }
+                                }
+                            }
+                        }
+                        if is_cut && all_success {
+                            baby_utils::explore::CLIPBOARD.with(|cb| cb.replace(None));
+                        }
+                        nav_c(dest_dir_c);
+                    });
                 }
                 glib::Propagation::Stop
             } else {
