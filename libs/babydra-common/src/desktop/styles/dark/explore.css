@@ -455,6 +455,27 @@ window.explore-window {
     background-color: rgba(255, 255, 255, 0.12);
 }
 
+.explore-window flowboxchild:selected {
+    background-color: transparent;
+    outline: none;
+}
+
+.explore-window flowboxchild:selected .file-item {
+    background-color: rgba(255, 255, 255, 0.15);
+    outline: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.explore-window listrow:selected {
+    background-color: transparent;
+    outline: none;
+}
+
+.explore-window listrow:selected .list-row {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    outline: 2px solid rgba(255, 255, 255, 0.3);
+}
+
 .explore-window .file-item-label {
     color: #e8e8e8;
     font-size: 12px;
