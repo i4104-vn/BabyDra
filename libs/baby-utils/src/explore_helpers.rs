@@ -45,6 +45,49 @@ pub fn sanitize_path(path: &Path) -> PathBuf {
     components
 }
 
+/// Parses command line arguments to determine target directory, decoding URI if necessary.
+pub fn parse_target_dir() -> PathBuf {
+    let mut target_dir = glib::home_dir();
+    if let Some(arg) = std::env::args().nth(1) {
+        let path_str = if arg.starts_with("file://") {
+            babydra_common::desktop::mpris::decode_uri(&arg.replacen("file://", "", 1))
+        } else {
+            arg
+        };
+        let path = PathBuf::from(path_str);
+        if path.exists() {
+            target_dir = path;
+        }
+    }
+    target_dir
+}
+
+/// Dynamically morphs the button layout/icons between "New Folder" and "Empty Trash".
+pub fn update_new_folder_button(btn: &gtk4::Button, is_in_trash: bool) {
+    use gtk4::prelude::*;
+    if is_in_trash {
+        if let Some(box_child) = btn.child().and_downcast::<gtk4::Box>() {
+            if let Some(img) = box_child.first_child().and_downcast::<gtk4::Image>() {
+                img.set_icon_name(Some("user-trash-full-symbolic"));
+            }
+            if let Some(lbl) = box_child.first_child().and_then(|w| w.next_sibling()).and_downcast::<gtk4::Label>() {
+                lbl.set_text("Empty Trash");
+            }
+        }
+        btn.add_css_class("empty-trash-btn");
+    } else {
+        if let Some(box_child) = btn.child().and_downcast::<gtk4::Box>() {
+            if let Some(img) = box_child.first_child().and_downcast::<gtk4::Image>() {
+                img.set_icon_name(Some("folder-new-symbolic"));
+            }
+            if let Some(lbl) = box_child.first_child().and_then(|w| w.next_sibling()).and_downcast::<gtk4::Label>() {
+                lbl.set_text("New Folder");
+            }
+        }
+        btn.remove_css_class("empty-trash-btn");
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

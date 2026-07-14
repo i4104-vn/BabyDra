@@ -13,19 +13,7 @@ fn main() {
         .build();
 
     app.connect_activate(|app| {
-        let mut target_dir = glib::home_dir();
-
-        if let Some(arg) = std::env::args().nth(1) {
-            let path_str = if arg.starts_with("file://") {
-                babydra_common::desktop::mpris::decode_uri(&arg.replacen("file://", "", 1))
-            } else {
-                arg
-            };
-            let path = std::path::PathBuf::from(path_str);
-            if path.exists() {
-                target_dir = path;
-            }
-        }
+        let target_dir = baby_utils::explore_helpers::parse_target_dir();
 
         let session = std::rc::Rc::new(std::cell::RefCell::new(SessionState::new(target_dir)));
         
