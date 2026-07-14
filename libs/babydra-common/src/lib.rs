@@ -27,7 +27,8 @@ pub mod helper {
 pub mod models;
 pub use models::explore::{
     FileEntry, FileType, DirectoryModel, SortColumn, SortOrder, TabState, SessionState, ActivePane,
-    MainWindowWidgets, HeaderBarWidgets, ContentViewWidgets, ContentViewHandle, PreviewPanelWidgets, InfoPanelWidgets
+    MainWindowWidgets, HeaderBarWidgets, ContentViewWidgets, ContentViewHandle, PreviewPanelWidgets, InfoPanelWidgets,
+    get_group_name
 };
 
 

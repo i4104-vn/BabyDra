@@ -1,8 +1,8 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Label, Align, FlowBoxChild, Image, Picture};
+use gtk4::FlowBoxChild;
 use std::path::PathBuf;
 use std::rc::Rc;
-use babydra_common::{FileEntry, load_cropped_square_pixbuf};
+use babydra_common::FileEntry;
 
 pub fn create_flow_child(
     idx: usize,

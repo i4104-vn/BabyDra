@@ -73,66 +73,12 @@ pub fn create_grid_file_item(
     item_box.add_controller(gesture);
 
     // Add Drag Source to item_box
-    let drag_source = gtk4::DragSource::new();
-    drag_source.set_actions(gtk4::gdk::DragAction::MOVE | gtk4::gdk::DragAction::COPY);
-    let path_clone = entry.path.clone();
-    drag_source.connect_prepare(move |_, _, _| {
-        let file = gtk4::gio::File::for_path(&path_clone);
-        Some(gtk4::gdk::ContentProvider::for_value(&file.to_value()))
-    });
-
-    if has_preview {
-        if let Ok(pixbuf) = load_cropped_square_pixbuf(&entry.path, 85) {
-            let texture = gtk4::gdk::Texture::for_pixbuf(&pixbuf);
-            drag_source.set_icon(Some(&texture), 42, 42);
-        } else {
-            let display = gtk4::gdk::Display::default().unwrap();
-            let icon_theme = gtk4::IconTheme::for_display(&display);
-            let paintable = icon_theme.lookup_icon(
-                &entry.icon_name,
-                &[],
-                48,
-                1,
-                gtk4::TextDirection::Ltr,
-                gtk4::IconLookupFlags::empty(),
-            );
-            drag_source.set_icon(Some(&paintable), 24, 24);
-        }
-    } else {
-        let display = gtk4::gdk::Display::default().unwrap();
-        let icon_theme = gtk4::IconTheme::for_display(&display);
-        let paintable = icon_theme.lookup_icon(
-            &entry.icon_name,
-            &[],
-            48,
-            1,
-            gtk4::TextDirection::Ltr,
-            gtk4::IconLookupFlags::empty(),
-        );
-        drag_source.set_icon(Some(&paintable), 24, 24);
-    }
-
+    let drag_source = crate::explore::create_drag_source(&entry.path, &entry.icon_name);
     item_box.add_controller(drag_source);
 
     // If directory, add Drop Target to item_box
     if matches!(entry.file_type, babydra_common::FileType::Directory) {
-        let drop_target = gtk4::DropTarget::new(
-            gtk4::gio::File::static_type(),
-            gtk4::gdk::DragAction::MOVE | gtk4::gdk::DragAction::COPY,
-        );
-        let dest_path = entry.path.clone();
-        drop_target.connect_drop(move |_, value, _, _| {
-            if let Ok(file) = value.get::<gtk4::gio::File>() {
-                if let Some(src_path) = file.path() {
-                    let dest = dest_path.join(src_path.file_name().unwrap());
-                    if src_path != dest {
-                        let _ = std::fs::rename(&src_path, &dest);
-                    }
-                }
-                return true;
-            }
-            false
-        });
+        let drop_target = crate::explore::create_dir_drop_target(entry.path.clone());
         item_box.add_controller(drop_target);
     }
 

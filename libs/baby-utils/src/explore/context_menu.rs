@@ -1,10 +1,52 @@
 use std::path::PathBuf;
 use std::rc::Rc;
 use gtk4::prelude::*;
+use gtk4::{Box, Button, Orientation, Align, Label, Image, Popover};
 use babydra_common::FileEntry;
-use crate::widgets::dialogs;
-use super::CLIPBOARD;
-use super::helpers::{create_menu_popover, create_menu_button};
+
+thread_local! {
+    pub static CLIPBOARD: std::cell::RefCell<Option<(PathBuf, bool)>> = std::cell::RefCell::new(None); // (path, is_cut)
+}
+
+pub fn create_menu_popover(parent: &gtk4::Widget, x: f64, y: f64) -> (Popover, Box) {
+    let popover = Popover::builder()
+        .has_arrow(false)
+        .autohide(true)
+        .build();
+    popover.set_parent(parent);
+    popover.add_css_class("explore-popover");
+
+    // Position popover at click coordinates
+    let rect = gtk4::gdk::Rectangle::new(x as i32, y as i32, 1, 1);
+    popover.set_pointing_to(Some(&rect));
+
+    let vbox = Box::new(Orientation::Vertical, 2);
+    vbox.set_css_classes(&["context-menu-box"]);
+    vbox.set_width_request(200);
+
+    popover.set_child(Some(&vbox));
+
+    (popover, vbox)
+}
+
+pub fn create_menu_button(label: &str, icon: &str) -> Button {
+    let hbox = Box::new(Orientation::Horizontal, 8);
+    let img = Image::from_icon_name(icon);
+    img.set_pixel_size(16);
+    let lbl = Label::builder()
+        .label(label)
+        .halign(Align::Start)
+        .build();
+
+    hbox.append(&img);
+    hbox.append(&lbl);
+
+    Button::builder()
+        .child(&hbox)
+        .css_classes(vec!["flat".to_string(), "context-menu-item".to_string()])
+        .halign(Align::Fill)
+        .build()
+}
 
 pub fn show_for_file(
     parent: &gtk4::Widget,
@@ -42,7 +84,7 @@ pub fn show_for_file(
             nav(target_path.clone());
         } else {
             let uri = format!("file://{}", target_path.to_string_lossy());
-            let _ = gio::AppInfo::launch_default_for_uri(&uri, gio::AppLaunchContext::NONE);
+            let _ = gtk4::gio::AppInfo::launch_default_for_uri(&uri, gtk4::gio::AppLaunchContext::NONE);
         }
     });
 
@@ -71,7 +113,7 @@ pub fn show_for_file(
     let current_p = current_path.clone();
     btn_rename.connect_clicked(move |_| {
         pop_c.popdown();
-        dialogs::show_rename_dialog(&rename_path, current_p.clone(), nav.clone());
+        crate::explore::dialogs::show_rename_dialog(&rename_path, current_p.clone(), nav.clone());
     });
 
     // Trash action
@@ -166,7 +208,7 @@ pub fn show_for_empty(
     let current_p = current_path.clone();
     btn_new_folder.connect_clicked(move |_| {
         pop_c.popdown();
-        dialogs::show_new_folder_dialog(current_p.clone(), nav.clone());
+        crate::explore::dialogs::show_new_folder_dialog(current_p.clone(), nav.clone());
     });
 
     popover.popup();

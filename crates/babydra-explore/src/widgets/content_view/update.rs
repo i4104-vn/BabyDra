@@ -1,10 +1,6 @@
 use gtk4::prelude::*;
 use gtk4::{Box, Orientation, Label, Align};
-use std::path::PathBuf;
-use std::rc::Rc;
 use babydra_common::FileEntry;
-use baby_utils::explore;
-use babydra_common::ContentViewWidgets;
 use babydra_common::ContentViewHandle;
 
 use super::helpers::create_flow_child;
@@ -51,7 +47,7 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
         } else {
             // Grouping/categories active!
             let get_group_name = |entry: &FileEntry| -> String {
-                super::grouping::get_group_name(entry, sort_mode)
+                babydra_common::get_group_name(entry, sort_mode)
             };
 
             let mut current_group_name = String::new();
@@ -90,171 +86,24 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
     } else {
         // Render list/details view
         for (idx, entry) in entries.iter().enumerate() {
-            let item_box = Box::new(Orientation::Horizontal, 12);
-            item_box.set_css_classes(&["list-row"]);
-            item_box.set_margin_top(2);
-            item_box.set_margin_bottom(2);
-            item_box.set_margin_start(6);
-            item_box.set_margin_end(6);
-
-            let img = babydra_common::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
-            img.set_pixel_size(24);
-            item_box.append(&img);
-
-            let lbl_name = Label::builder()
-                .label(&entry.display_name)
-                .halign(Align::Start)
-                .hexpand(true)
-                .build();
-            item_box.append(&lbl_name);
-
-            // File size info
-            let size_str = if matches!(entry.file_type, babydra_common::FileType::Directory) {
-                "--".to_string()
-            } else {
-                explore::format_size(entry.size)
-            };
-            let lbl_size = Label::new(Some(&size_str));
-            lbl_size.set_css_classes(&["list-col-meta"]);
-            lbl_size.set_size_request(80, -1);
-            lbl_size.set_halign(Align::End);
-            lbl_size.set_tooltip_text(Some("Size"));
-            item_box.append(&lbl_size);
-
-            // Permissions info
-            let perm_str = format!("{:o}", entry.permissions & 0o777);
-            let lbl_perm = Label::new(Some(&perm_str));
-            lbl_perm.set_css_classes(&["list-col-meta"]);
-            lbl_perm.set_size_request(80, -1);
-            lbl_perm.set_halign(Align::End);
-            lbl_perm.set_tooltip_text(Some("Permissions"));
-            item_box.append(&lbl_perm);
-
-            // Modified info
-            let mod_str = if let Some(mtime) = entry.modified {
-                explore::format_date(mtime)
-            } else {
-                "--".to_string()
-            };
-            let lbl_date = Label::new(Some(&mod_str));
-            lbl_date.set_css_classes(&["list-col-meta"]);
-            lbl_date.set_size_request(140, -1);
-            lbl_date.set_halign(Align::End);
-            lbl_date.set_tooltip_text(Some("Modified Date"));
-            item_box.append(&lbl_date);
-
-            // Attach right click gesture to list item_box
-            let gesture = gtk4::GestureClick::new();
-            gesture.set_button(3);
             let target_entry = entry.clone();
             let cp = current_path.clone();
-            let widget_clone = item_box.clone();
             let nav = nav_callback.clone();
-            gesture.connect_pressed(move |gesture, _, x, y| {
-                gesture.set_state(gtk4::EventSequenceState::Claimed);
-                crate::widgets::context_menu::show_for_file(
-                    widget_clone.upcast_ref(),
-                    x,
-                    y,
-                    target_entry.clone(),
-                    cp.clone(),
-                    nav.clone(),
-                );
-            });
-            item_box.add_controller(gesture);
-
-            // Add Drag Source to item_box
-            let drag_source = gtk4::DragSource::new();
-            drag_source.set_actions(gtk4::gdk::DragAction::MOVE | gtk4::gdk::DragAction::COPY);
-            let path_clone = entry.path.clone();
-            drag_source.connect_prepare(move |_, _, _| {
-                let file = gtk4::gio::File::for_path(&path_clone);
-                Some(gtk4::gdk::ContentProvider::for_value(&file.to_value()))
-            });
-
-            let has_preview = if let Some(ext) = entry.path.extension() {
-                let ext_str = ext.to_string_lossy().to_lowercase();
-                matches!(ext_str.as_str(), "png" | "jpg" | "jpeg" | "gif" | "bmp" | "webp" | "svg")
-            } else {
-                false
-            };
-
-            if has_preview {
-                if let Ok(pixbuf) = babydra_common::load_cropped_square_pixbuf(&entry.path, 85) {
-                    let texture = gtk4::gdk::Texture::for_pixbuf(&pixbuf);
-                    drag_source.set_icon(Some(&texture), 42, 42);
-                } else {
-                    let display = gtk4::gdk::Display::default().unwrap();
-                    let icon_theme = gtk4::IconTheme::for_display(&display);
-                    let paintable = icon_theme.lookup_icon(
-                        &entry.icon_name,
-                        &[],
-                        48,
-                        1,
-                        gtk4::TextDirection::Ltr,
-                        gtk4::IconLookupFlags::empty(),
+            let list_row = baby_utils::explore::create_list_row(
+                idx,
+                entry,
+                nav_callback.clone(),
+                move |widget, x, y| {
+                    crate::widgets::context_menu::show_for_file(
+                        widget,
+                        x,
+                        y,
+                        target_entry.clone(),
+                        cp.clone(),
+                        nav.clone(),
                     );
-                    drag_source.set_icon(Some(&paintable), 24, 24);
-                }
-            } else {
-                let display = gtk4::gdk::Display::default().unwrap();
-                let icon_theme = gtk4::IconTheme::for_display(&display);
-                let paintable = icon_theme.lookup_icon(
-                    &entry.icon_name,
-                    &[],
-                    48,
-                    1,
-                    gtk4::TextDirection::Ltr,
-                    gtk4::IconLookupFlags::empty(),
-                );
-                drag_source.set_icon(Some(&paintable), 24, 24);
-            }
-
-            item_box.add_controller(drag_source);
-
-            // If directory, add Drop Target to item_box
-            if matches!(entry.file_type, babydra_common::FileType::Directory) {
-                let drop_target = gtk4::DropTarget::new(
-                    gtk4::gio::File::static_type(),
-                    gtk4::gdk::DragAction::MOVE | gtk4::gdk::DragAction::COPY,
-                );
-                let dest_path = entry.path.clone();
-                drop_target.connect_drop(move |_, value, _, _| {
-                    if let Ok(file) = value.get::<gtk4::gio::File>() {
-                        if let Some(src_path) = file.path() {
-                            let dest = dest_path.join(src_path.file_name().unwrap());
-                            if src_path != dest {
-                                let _ = std::fs::rename(&src_path, &dest);
-                            }
-                        }
-                        return true;
-                    }
-                    false
-                });
-                item_box.add_controller(drop_target);
-            }
-
-            let list_row = gtk4::ListBoxRow::new();
-            list_row.set_child(Some(&item_box));
-            list_row.set_property("name", &format!("{}", idx));
-
-            let double_click_gesture = gtk4::GestureClick::new();
-            double_click_gesture.set_button(1);
-            let target_path = entry.path.clone();
-            let is_dir = matches!(entry.file_type, babydra_common::FileType::Directory);
-            let nav_c = nav_callback.clone();
-            double_click_gesture.connect_pressed(move |_, n_press, _, _| {
-                if n_press == 2 {
-                    if is_dir {
-                        nav_c(target_path.clone());
-                    } else {
-                        let uri = format!("file://{}", target_path.to_string_lossy());
-                        let _ = gtk4::gio::AppInfo::launch_default_for_uri(&uri, gtk4::gio::AppLaunchContext::NONE);
-                    }
-                }
-            });
-            list_row.add_controller(double_click_gesture);
-
+                },
+            );
             widgets.listbox.append(&list_row);
         }
 
@@ -271,7 +120,7 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
                 let idx = r.property::<String>("name").parse::<usize>().unwrap_or(usize::MAX);
                 if idx < entries_clone.len() {
                     let entry = &entries_clone[idx];
-                    super::grouping::get_group_name(entry, &sort_mode_clone)
+                    babydra_common::get_group_name(entry, &sort_mode_clone)
                 } else {
                     "".to_string()
                 }

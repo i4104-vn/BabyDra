@@ -1,4 +1,4 @@
-use babydra_common::FileEntry;
+use crate::models::explore::file_entry::FileEntry;
 use chrono::{DateTime, Local, Duration};
 
 /// Helper to determine the group/category name of a file entry.
@@ -28,7 +28,7 @@ pub fn get_group_name(entry: &FileEntry, sort_mode: &str) -> String {
             "Unknown Date".to_string()
         }
     } else { // "group"
-        if matches!(entry.file_type, babydra_common::FileType::Directory) {
+        if matches!(entry.file_type, crate::models::explore::file_entry::FileType::Directory) {
             "Folders".to_string()
         } else {
             match entry.path.extension() {

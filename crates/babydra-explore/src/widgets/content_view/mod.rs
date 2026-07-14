@@ -10,7 +10,6 @@ mod render;
 mod update;
 pub mod helpers;
 mod gestures;
-mod grouping;
 
 /// Creates the content view area widgets and returns the scroll container and ContentViewHandle state handle.
 pub fn create_content_view(
