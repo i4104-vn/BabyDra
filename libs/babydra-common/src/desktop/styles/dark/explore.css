@@ -602,3 +602,22 @@ button.suggested-action:hover {
 button.suggested-action:active {
     background: #1d4ed8;
 }
+
+window.explore-dialog,
+window.explore-dialog > box {
+    background-color: #1a1a1e;
+    border: 1px solid #3a3a3e;
+    border-radius: 12px;
+}
+
+.explore-dialog entry {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid #4a4a4a;
+    border-radius: 6px;
+    color: #e8e8e8;
+    padding: 6px 10px;
+}
+
+.explore-dialog entry:focus {
+    border-color: #3b82f6;
+}

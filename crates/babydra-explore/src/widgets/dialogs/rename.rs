@@ -8,6 +8,7 @@ pub fn show_rename_dialog(path: &PathBuf, current_path: PathBuf, nav_callback: R
         .title("Rename File")
         .use_header_bar(1)
         .build();
+    dialog.add_css_class("explore-dialog");
     
     let content_area = dialog.content_area();
     let vbox = Box::new(Orientation::Vertical, 8);

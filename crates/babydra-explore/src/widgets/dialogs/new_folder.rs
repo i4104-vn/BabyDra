@@ -8,6 +8,7 @@ pub fn show_new_folder_dialog(current_path: PathBuf, nav_callback: Rc<dyn Fn(Pat
         .title("Create New Folder")
         .use_header_bar(1)
         .build();
+    dialog.add_css_class("explore-dialog");
     
     let content_area = dialog.content_area();
     let vbox = Box::new(Orientation::Vertical, 8);
