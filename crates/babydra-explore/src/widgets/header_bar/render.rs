@@ -70,7 +70,6 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     let btn_paste        = Button::from_icon_name("edit-paste-symbolic");
     let btn_rename       = Button::from_icon_name("edit-rename-symbolic");
     let btn_delete       = Button::from_icon_name("edit-delete-symbolic");
-    let btn_empty_trash  = Button::from_icon_name("user-trash-full-symbolic");
     let sep1 = Separator::new(Orientation::Vertical);
     sep1.set_css_classes(&["toolbar-sep"]);
     let sep2 = Separator::new(Orientation::Vertical);
@@ -79,9 +78,6 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     let btn_view_list    = Button::from_icon_name("view-list-symbolic");
 
     btn_new_folder.set_css_classes(&["toolbar-btn", "new-btn"]);
-    btn_empty_trash.set_css_classes(&["toolbar-btn", "empty-trash-btn"]);
-    btn_empty_trash.set_tooltip_text(Some("Empty Trash"));
-    btn_empty_trash.set_visible(false);
 
     for btn in &[&btn_cut, &btn_copy, &btn_paste, &btn_rename, &btn_delete,
                  &btn_view_icons, &btn_view_list] {
@@ -96,7 +92,6 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     toolbar.append(&sep2);
     toolbar.append(&btn_rename);
     toolbar.append(&btn_delete);
-    toolbar.append(&btn_empty_trash);
 
     // push view toggle to the right
     let spacer = Box::new(Orientation::Horizontal, 0);
@@ -132,6 +127,5 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
         btn_paste,
         btn_rename,
         btn_delete,
-        btn_empty_trash,
     }
 }

@@ -183,7 +183,13 @@ pub fn create_explore_window(
                         // Update Header breadcrumbs
                         if let Some(ref hw) = *header_widgets_c.borrow() {
                             let is_in_trash = path.to_string_lossy().ends_with("Trash/files");
-                            hw.btn_empty_trash.set_visible(is_in_trash);
+                            if is_in_trash {
+                                hw.btn_new_folder.set_label("Empty Trash");
+                                hw.btn_new_folder.add_css_class("empty-trash-btn");
+                            } else {
+                                hw.btn_new_folder.set_label("⊕ New Folder");
+                                hw.btn_new_folder.remove_css_class("empty-trash-btn");
+                            }
 
                             let nav_cb: Rc<dyn Fn(PathBuf)> = Rc::new(move |p: PathBuf| {
                                 if let Some(ref f) = *nav_no_watch_c.borrow() {
@@ -329,16 +335,30 @@ pub fn create_explore_window(
     ui.vbox.insert_child_after(&header_box, None::<&gtk4::Widget>);
     header_widgets_cell.replace(Some(header_widgets.clone()));
 
-    // Wire btn_empty_trash click
+    // Wire btn_new_folder click (dynamically handles New Folder or Empty Trash depending on path)
     {
         let session_c = session.clone();
         let nav = navigate_pane_ref.clone();
         let active = active_pane.clone();
-        header_widgets.btn_empty_trash.connect_clicked(move |_| {
-            babydra_common::helper::clean::remove_trash();
+        header_widgets.btn_new_folder.connect_clicked(move |_| {
             let path = session_c.borrow().active_tab().current_path.clone();
-            if let Some(ref f) = *nav.borrow() {
-                f(active.get(), path);
+            let is_in_trash = path.to_string_lossy().ends_with("Trash/files");
+            if is_in_trash {
+                babydra_common::helper::clean::remove_trash();
+                if let Some(ref f) = *nav.borrow() {
+                    f(active.get(), path);
+                }
+            } else {
+                let nav_cb = {
+                    let nav = nav.clone();
+                    let act = active.clone();
+                    Rc::new(move |p| {
+                        if let Some(ref f) = *nav.borrow() {
+                            f(act.get(), p);
+                        }
+                    })
+                };
+                crate::widgets::dialogs::show_new_folder_dialog(path, nav_cb);
             }
         });
     }
