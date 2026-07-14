@@ -6,7 +6,7 @@ pub fn build_sidebar_ui() -> (ScrolledWindow, Box) {
     let container = ScrolledWindow::new();
     container.set_hscrollbar_policy(gtk4::PolicyType::Never);
     container.set_css_classes(&["sidebar"]);
-    container.set_width_request(250);
+    container.set_width_request(200);
     container.set_hexpand(false);
     container.set_vexpand(true);
 
