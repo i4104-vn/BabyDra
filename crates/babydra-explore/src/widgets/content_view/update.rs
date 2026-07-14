@@ -7,6 +7,23 @@ use baby_utils::explore_helpers;
 use babydra_common::ContentViewWidgets;
 use babydra_common::ContentViewHandle;
 
+/// Helper to load an image, crop it to a center square, and scale it.
+fn load_cropped_square_pixbuf(path: &std::path::Path, size: i32) -> Result<gdk_pixbuf::Pixbuf, glib::Error> {
+    let pixbuf = gdk_pixbuf::Pixbuf::from_file(path)?;
+    let w = pixbuf.width();
+    let h = pixbuf.height();
+    let min_dim = std::cmp::min(w, h);
+    
+    // Crop center square
+    let x = (w - min_dim) / 2;
+    let y = (h - min_dim) / 2;
+    let sub = pixbuf.new_subpixbuf(x, y, min_dim, min_dim);
+    
+    // Scale to target size
+    sub.scale_simple(size, size, gdk_pixbuf::InterpType::Bilinear)
+        .ok_or_else(|| glib::Error::new(glib::FileError::Failed, "Failed to scale pixbuf"))
+}
+
 /// Helper to create flow child elements for grid view
 fn create_flow_child(
     idx: usize,
@@ -14,8 +31,8 @@ fn create_flow_child(
     current_path: &PathBuf,
     nav_callback: &Rc<dyn Fn(PathBuf)>,
 ) -> gtk4::FlowBoxChild {
-    let item_box = Box::new(Orientation::Vertical, 6);
-    item_box.set_size_request(110, 110);
+    let item_box = Box::new(Orientation::Vertical, 4);
+    item_box.set_size_request(110, 130);
     item_box.set_css_classes(&["file-item"]);
 
     let has_preview = if let Some(ext) = entry.path.extension() {
@@ -26,7 +43,7 @@ fn create_flow_child(
     };
 
     let img = if has_preview {
-        if let Ok(pixbuf) = gdk_pixbuf::Pixbuf::from_file_at_scale(&entry.path, 80, 80, true) {
+        if let Ok(pixbuf) = load_cropped_square_pixbuf(&entry.path, 90) {
             let image = gtk4::Image::new();
             image.set_from_pixbuf(Some(&pixbuf));
             image
