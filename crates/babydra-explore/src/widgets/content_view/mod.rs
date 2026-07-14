@@ -136,18 +136,25 @@ pub fn create_content_view(
     // Wire drag-to-select for ListBox
     {
         let lb_clone = widgets.listbox.clone();
+        let list_fixed = widgets.list_fixed.clone();
+        let list_rubberband = widgets.list_rubberband.clone();
         let drag_gesture = gtk4::GestureDrag::new();
         drag_gesture.set_button(1);
         
         let start_pos = Rc::new(RefCell::new(None::<(f64, f64)>));
         let start_pos_c = start_pos.clone();
         
+        let rb_begin = list_rubberband.clone();
         drag_gesture.connect_drag_begin(move |_, x, y| {
             start_pos_c.replace(Some((x, y)));
+            rb_begin.set_visible(true);
+            rb_begin.set_size_request(0, 0);
         });
 
         let start_pos_update = start_pos.clone();
         let lb_update = lb_clone.clone();
+        let lf_update = list_fixed.clone();
+        let lr_update = list_rubberband.clone();
         drag_gesture.connect_drag_update(move |_, offset_x, offset_y| {
             if let Some((start_x, start_y)) = *start_pos_update.borrow() {
                 let current_x = start_x + offset_x;
@@ -156,6 +163,11 @@ pub fn create_content_view(
                 let max_x = start_x.max(current_x);
                 let min_y = start_y.min(current_y);
                 let max_y = start_y.max(current_y);
+                let width = max_x - min_x;
+                let height = max_y - min_y;
+
+                lf_update.move_(&lr_update, min_x, min_y);
+                lr_update.set_size_request(width as i32, height as i32);
 
                 let mut child = lb_update.first_child();
                 while let Some(c) = child {
@@ -176,7 +188,88 @@ pub fn create_content_view(
                 }
             }
         });
-        widgets.listbox.add_controller(drag_gesture);
+
+        let rb_end = list_rubberband.clone();
+        drag_gesture.connect_drag_end(move |_, _, _| {
+            rb_end.set_visible(false);
+        });
+
+        if let Some(list_overlay) = widgets.list_fixed.parent() {
+            list_overlay.add_controller(drag_gesture);
+        }
+    }
+
+    // Wire drag-to-select for FlowBox (grid mode)
+    {
+        let grid_container = widgets.grid_container.clone();
+        let grid_fixed = widgets.grid_fixed.clone();
+        let grid_rubberband = widgets.grid_rubberband.clone();
+        
+        let drag_gesture = gtk4::GestureDrag::new();
+        drag_gesture.set_button(1);
+        
+        let start_pos = Rc::new(RefCell::new(None::<(f64, f64)>));
+        let start_pos_c = start_pos.clone();
+        
+        let rb_begin = grid_rubberband.clone();
+        drag_gesture.connect_drag_begin(move |_, x, y| {
+            start_pos_c.replace(Some((x, y)));
+            rb_begin.set_visible(true);
+            rb_begin.set_size_request(0, 0);
+        });
+
+        let start_pos_update = start_pos.clone();
+        let gc_update = grid_container.clone();
+        let gf_update = grid_fixed.clone();
+        let gr_update = grid_rubberband.clone();
+        drag_gesture.connect_drag_update(move |_, offset_x, offset_y| {
+            if let Some((start_x, start_y)) = *start_pos_update.borrow() {
+                let current_x = start_x + offset_x;
+                let current_y = start_y + offset_y;
+                let min_x = start_x.min(current_x);
+                let max_x = start_x.max(current_x);
+                let min_y = start_y.min(current_y);
+                let max_y = start_y.max(current_y);
+                let width = max_x - min_x;
+                let height = max_y - min_y;
+
+                gf_update.move_(&gr_update, min_x, min_y);
+                gr_update.set_size_request(width as i32, height as i32);
+
+                let mut sibling = gc_update.first_child();
+                while let Some(child) = sibling {
+                    if let Some(fb) = child.downcast_ref::<gtk4::FlowBox>() {
+                        let mut item_child = fb.first_child();
+                        while let Some(c) = item_child {
+                            if let Some((cx, cy)) = c.translate_coordinates(&gc_update, 0.0, 0.0) {
+                                let cw = c.width() as f64;
+                                let ch = c.height() as f64;
+                                
+                                let intersects = !(cx > max_x || cx + cw < min_x || cy > max_y || cy + ch < min_y);
+                                if let Some(fb_child) = c.downcast_ref::<gtk4::FlowBoxChild>() {
+                                    if intersects {
+                                        fb.select_child(fb_child);
+                                    } else {
+                                        fb.unselect_child(fb_child);
+                                    }
+                                }
+                            }
+                            item_child = c.next_sibling();
+                        }
+                    }
+                    sibling = child.next_sibling();
+                }
+            }
+        });
+
+        let rb_end = grid_rubberband.clone();
+        drag_gesture.connect_drag_end(move |_, _, _| {
+            rb_end.set_visible(false);
+        });
+
+        if let Some(grid_overlay) = widgets.grid_fixed.parent() {
+            grid_overlay.add_controller(drag_gesture);
+        }
     }
     // Wire right click empty area context menu gesture to the main scrolled window
     {
@@ -320,51 +413,7 @@ pub fn create_grid_flowbox(
         flowbox.add_controller(key_controller);
     }
 
-    // Wire drag-to-select for FlowBox
-    {
-        let fb_clone = flowbox.clone();
-        let drag_gesture = gtk4::GestureDrag::new();
-        drag_gesture.set_button(1);
-        
-        let start_pos = Rc::new(RefCell::new(None::<(f64, f64)>));
-        let start_pos_c = start_pos.clone();
-        
-        drag_gesture.connect_drag_begin(move |_, x, y| {
-            start_pos_c.replace(Some((x, y)));
-        });
 
-        let start_pos_update = start_pos.clone();
-        let fb_update = fb_clone.clone();
-        drag_gesture.connect_drag_update(move |_, offset_x, offset_y| {
-            if let Some((start_x, start_y)) = *start_pos_update.borrow() {
-                let current_x = start_x + offset_x;
-                let current_y = start_y + offset_y;
-                let min_x = start_x.min(current_x);
-                let max_x = start_x.max(current_x);
-                let min_y = start_y.min(current_y);
-                let max_y = start_y.max(current_y);
-
-                let mut child = fb_update.first_child();
-                while let Some(c) = child {
-                    if let Some((cx, cy)) = c.translate_coordinates(&fb_update, 0.0, 0.0) {
-                        let cw = c.width() as f64;
-                        let ch = c.height() as f64;
-                        
-                        let intersects = !(cx > max_x || cx + cw < min_x || cy > max_y || cy + ch < min_y);
-                        if let Some(child_item) = c.downcast_ref::<gtk4::FlowBoxChild>() {
-                            if intersects {
-                                fb_update.select_child(child_item);
-                            } else {
-                                fb_update.unselect_child(child_item);
-                            }
-                        }
-                    }
-                    child = c.next_sibling();
-                }
-            }
-        });
-        flowbox.add_controller(drag_gesture);
-    }
 
     // Wire click to update active pane
     {

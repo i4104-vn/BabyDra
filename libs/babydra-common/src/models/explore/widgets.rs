@@ -44,6 +44,10 @@ pub struct ContentViewWidgets {
     pub listbox: gtk4::ListBox,
     pub grid_container: gtk4::Box,
     pub stack: Stack,
+    pub grid_fixed: gtk4::Fixed,
+    pub grid_rubberband: gtk4::Box,
+    pub list_fixed: gtk4::Fixed,
+    pub list_rubberband: gtk4::Box,
 }
 
 #[derive(Clone)]

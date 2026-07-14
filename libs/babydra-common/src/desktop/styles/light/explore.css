@@ -684,3 +684,9 @@ button.empty-trash-btn:hover {
     background-color: rgba(220, 38, 38, 0.1) !important;
     color: #ef4444 !important;
 }
+
+.explore-window .rubberband {
+    background-color: rgba(52, 152, 219, 0.18);
+    border: 1.5px solid rgba(52, 152, 219, 0.6);
+    border-radius: 2px;
+}
