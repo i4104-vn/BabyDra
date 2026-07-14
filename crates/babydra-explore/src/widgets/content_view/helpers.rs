@@ -2,12 +2,7 @@ use gtk4::prelude::*;
 use gtk4::{Box, Orientation, Label, Align, FlowBoxChild, Image, Picture};
 use std::path::PathBuf;
 use std::rc::Rc;
-use babydra_common::FileEntry;
-
-/// Helper to load an image, crop it to a center square, and scale it.
-pub fn load_cropped_square_pixbuf(path: &std::path::Path, size: i32) -> Result<gdk_pixbuf::Pixbuf, glib::Error> {
-    babydra_common::load_cropped_square_pixbuf(path, size)
-}
+use babydra_common::{FileEntry, load_cropped_square_pixbuf};
 
 /// Helper to create flow child elements for grid view
 pub fn create_flow_child(
