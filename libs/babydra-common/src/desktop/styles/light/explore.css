@@ -235,23 +235,21 @@ window.explore-window {
 }
 
 .explore-window dropdown.toolbar-dropdown > button {
-    background-color: rgba(0, 0, 0, 0.04);
-    border: 1px solid #b8b8b8;
+    background: transparent;
+    border: none;
     border-radius: 6px;
-    padding: 4px 10px;
+    padding: 4px 8px;
     color: #1a1a1a;
     font-size: 12px;
-    min-height: 28px;
-    transition: all 0.1s ease;
+    transition: background 0.1s ease;
 }
 
 .explore-window dropdown.toolbar-dropdown > button:hover {
-    background-color: rgba(0, 0, 0, 0.08);
-    border-color: #0066cc;
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .explore-window dropdown.toolbar-dropdown > button:active {
-    background-color: rgba(0, 0, 0, 0.12);
+    background-color: rgba(0, 0, 0, 0.1);
 }
 
 .explore-window dropdown > popover {
