@@ -73,6 +73,26 @@ pub fn create_content_view(
         });
     }
 
+    // Wire pane activation gestures on empty space clicks
+    {
+        let sc = sc_fn.clone();
+        let gesture = gtk4::GestureClick::new();
+        gesture.set_button(1);
+        gesture.connect_pressed(move |_, _, _, _| {
+            sc(Vec::new());
+        });
+        widgets.flowbox.add_controller(gesture);
+    }
+    {
+        let sc = sc_fn.clone();
+        let gesture = gtk4::GestureClick::new();
+        gesture.set_button(1);
+        gesture.connect_pressed(move |_, _, _, _| {
+            sc(Vec::new());
+        });
+        widgets.listbox.add_controller(gesture);
+    }
+
     // Wire double click activations
     {
         let e_ref = entries.clone();
@@ -124,57 +144,113 @@ pub fn create_content_view(
     (widgets.container.clone(), handle)
 }
 
-/// Helper to sort entries: directories first (sorted by name), then files (sorted by type/extension, then by name)
-pub fn sort_entries(entries: &mut [FileEntry], sort_mode: &str) {
+/// Helper to sort entries: directories first (sorted by name), then files.
+/// In grid view (icons mode), directories are always placed before all files.
+/// In list view, folders and files can be grouped by date weight or group type.
+pub fn sort_entries(entries: &mut [FileEntry], sort_mode: &str, is_grid: bool) {
     entries.sort_by(|a, b| {
-        if sort_mode == "date" {
-            let get_weight = |e: &FileEntry| -> u32 {
-                if let Some(modified) = e.modified {
-                    let datetime: chrono::DateTime<chrono::Local> = modified.into();
-                    let now = chrono::Local::now();
-                    let date_naive = datetime.date_naive();
-                    let now_naive = now.date_naive();
-                    if date_naive == now_naive {
-                        0
-                    } else if date_naive == now_naive - chrono::Duration::days(1) {
-                        1
-                    } else {
-                        let diff = (now_naive - date_naive).num_days();
-                        if diff >= 2 && diff <= 7 {
-                            diff as u32
-                        } else if diff > 7 {
-                            8
-                        } else {
-                            0
-                        }
-                    }
-                } else {
-                    9
-                }
-            };
-            let w_a = get_weight(a);
-            let w_b = get_weight(b);
-            if w_a != w_b {
-                return w_a.cmp(&w_b);
-            }
-        }
-
         let a_is_dir = matches!(a.file_type, babydra_common::FileType::Directory);
         let b_is_dir = matches!(b.file_type, babydra_common::FileType::Directory);
-        match (a_is_dir, b_is_dir) {
-            (true, false) => std::cmp::Ordering::Less,
-            (false, true) => std::cmp::Ordering::Greater,
-            (true, true) => {
-                a.display_name.to_lowercase().cmp(&b.display_name.to_lowercase())
+
+        if is_grid {
+            // Grid view: Directories always first!
+            match (a_is_dir, b_is_dir) {
+                (true, false) => return std::cmp::Ordering::Less,
+                (false, true) => return std::cmp::Ordering::Greater,
+                _ => {}
             }
-            (false, false) => {
-                let ext_a = a.path.extension().map(|e| e.to_string_lossy().to_lowercase()).unwrap_or_default();
-                let ext_b = b.path.extension().map(|e| e.to_string_lossy().to_lowercase()).unwrap_or_default();
-                let cmp_type = ext_a.cmp(&ext_b);
-                if cmp_type == std::cmp::Ordering::Equal {
+            if a_is_dir && b_is_dir {
+                return a.display_name.to_lowercase().cmp(&b.display_name.to_lowercase());
+            }
+            // Both are files, sort by sort_mode
+            if sort_mode == "date" {
+                let get_weight = |e: &FileEntry| -> u32 {
+                    if let Some(modified) = e.modified {
+                        let datetime: chrono::DateTime<chrono::Local> = modified.into();
+                        let now = chrono::Local::now();
+                        let date_naive = datetime.date_naive();
+                        let now_naive = now.date_naive();
+                        if date_naive == now_naive {
+                            0
+                        } else if date_naive == now_naive - chrono::Duration::days(1) {
+                            1
+                        } else {
+                            let diff = (now_naive - date_naive).num_days();
+                            if diff >= 2 && diff <= 7 {
+                                diff as u32
+                            } else if diff > 7 {
+                                8
+                            } else {
+                                0
+                            }
+                        }
+                    } else {
+                        9
+                    }
+                };
+                let w_a = get_weight(a);
+                let w_b = get_weight(b);
+                if w_a != w_b {
+                    return w_a.cmp(&w_b);
+                }
+            }
+            let ext_a = a.path.extension().map(|e| e.to_string_lossy().to_lowercase()).unwrap_or_default();
+            let ext_b = b.path.extension().map(|e| e.to_string_lossy().to_lowercase()).unwrap_or_default();
+            let cmp_type = ext_a.cmp(&ext_b);
+            if cmp_type == std::cmp::Ordering::Equal {
+                a.display_name.to_lowercase().cmp(&b.display_name.to_lowercase())
+            } else {
+                cmp_type
+            }
+        } else {
+            // List view
+            if sort_mode == "date" {
+                let get_weight = |e: &FileEntry| -> u32 {
+                    if let Some(modified) = e.modified {
+                        let datetime: chrono::DateTime<chrono::Local> = modified.into();
+                        let now = chrono::Local::now();
+                        let date_naive = datetime.date_naive();
+                        let now_naive = now.date_naive();
+                        if date_naive == now_naive {
+                            0
+                        } else if date_naive == now_naive - chrono::Duration::days(1) {
+                            1
+                        } else {
+                            let diff = (now_naive - date_naive).num_days();
+                            if diff >= 2 && diff <= 7 {
+                                diff as u32
+                            } else if diff > 7 {
+                                8
+                            } else {
+                                0
+                            }
+                        }
+                    } else {
+                        9
+                    }
+                };
+                let w_a = get_weight(a);
+                let w_b = get_weight(b);
+                if w_a != w_b {
+                    return w_a.cmp(&w_b);
+                }
+            }
+
+            match (a_is_dir, b_is_dir) {
+                (true, false) => std::cmp::Ordering::Less,
+                (false, true) => std::cmp::Ordering::Greater,
+                (true, true) => {
                     a.display_name.to_lowercase().cmp(&b.display_name.to_lowercase())
-                } else {
-                    cmp_type
+                }
+                (false, false) => {
+                    let ext_a = a.path.extension().map(|e| e.to_string_lossy().to_lowercase()).unwrap_or_default();
+                    let ext_b = b.path.extension().map(|e| e.to_string_lossy().to_lowercase()).unwrap_or_default();
+                    let cmp_type = ext_a.cmp(&ext_b);
+                    if cmp_type == std::cmp::Ordering::Equal {
+                        a.display_name.to_lowercase().cmp(&b.display_name.to_lowercase())
+                    } else {
+                        cmp_type
+                    }
                 }
             }
         }
@@ -186,24 +262,31 @@ pub fn set_content_view_mode(handle: &ContentViewHandle, mode: &str) {
     handle.current_mode.replace(mode.to_string());
     handle.widgets.stack.set_visible_child_name(mode);
     
-    let e = handle.entries.borrow().clone();
+    let mut e = handle.entries.borrow().clone();
     let cp = handle.current_path.borrow().clone();
     let sort = handle.sort_mode.borrow().clone();
+    
+    // Sort with the new mode
+    let is_grid = mode == "icons";
+    sort_entries(&mut e, &sort, is_grid);
+    handle.entries.replace(e.clone());
+    
     update::update_content_view_ui(&handle.widgets, &e, &handle.nav_callback, &cp, mode, &sort);
 }
 
 /// Changes the sorting mode of the content view and updates the layout.
 pub fn set_content_view_sort(handle: &ContentViewHandle, sort_mode: &str) {
     handle.sort_mode.replace(sort_mode.to_string());
+    let is_grid = *handle.current_mode.borrow() == "icons";
     
     // Sort current entries
     let mut e = handle.entries.borrow().clone();
-    sort_entries(&mut e, sort_mode);
+    sort_entries(&mut e, sort_mode, is_grid);
     handle.entries.replace(e.clone());
     
     // Sort all entries
     let mut all = handle.all_entries.borrow().clone();
-    sort_entries(&mut all, sort_mode);
+    sort_entries(&mut all, sort_mode, is_grid);
     handle.all_entries.replace(all);
 
     let cp = handle.current_path.borrow().clone();
@@ -214,13 +297,15 @@ pub fn set_content_view_sort(handle: &ContentViewHandle, sort_mode: &str) {
 /// Updates files in view area.
 pub fn update_content_view(handle: &ContentViewHandle, entries: &[FileEntry], current_path: PathBuf) {
     let sort = handle.sort_mode.borrow().clone();
+    let mode = handle.current_mode.borrow().clone();
+    let is_grid = mode == "icons";
+    
     let mut sorted = entries.to_vec();
-    sort_entries(&mut sorted, &sort);
+    sort_entries(&mut sorted, &sort, is_grid);
     handle.all_entries.replace(sorted.clone());
     handle.entries.replace(sorted.clone());
     handle.current_path.replace(current_path);
 
-    let mode = handle.current_mode.borrow().clone();
     handle.widgets.stack.set_visible_child_name(&mode);
 
     let cp = handle.current_path.borrow().clone();
@@ -230,12 +315,14 @@ pub fn update_content_view(handle: &ContentViewHandle, entries: &[FileEntry], cu
 /// Filters content files list.
 pub fn filter_content_view(handle: &ContentViewHandle, query: &str) {
     let sort = handle.sort_mode.borrow().clone();
+    let mode = handle.current_mode.borrow().clone();
+    let is_grid = mode == "icons";
+    
     let all = handle.all_entries.borrow().clone();
     let mut filtered = babydra_common::filter_entries(&all, query);
-    sort_entries(&mut filtered, &sort);
+    sort_entries(&mut filtered, &sort, is_grid);
     handle.entries.replace(filtered.clone());
 
-    let mode = handle.current_mode.borrow().clone();
     let cp = handle.current_path.borrow().clone();
     update::update_content_view_ui(&handle.widgets, &filtered, &handle.nav_callback, &cp, &mode, &sort);
 }
