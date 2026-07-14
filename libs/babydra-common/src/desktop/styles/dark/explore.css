@@ -322,7 +322,8 @@ window.explore-window {
 .explore-window .sidebar {
     background-color: rgba(0, 0, 0, 0.1);
     border-right: 1px solid #3a3a3a;
-    min-width: 220px;
+    min-width: 250px;
+    max-width: 250px;
 }
 
 .explore-window .sidebar>viewport,
