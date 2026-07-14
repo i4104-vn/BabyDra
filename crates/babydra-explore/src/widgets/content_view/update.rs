@@ -57,7 +57,7 @@ fn create_flow_child(
             item_box.append(&picture);
         } else {
             let icon = babydra_common::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
-            icon.set_pixel_size(40);
+            icon.set_pixel_size(48);
             icon.set_halign(Align::Center);
             icon.set_valign(Align::Center);
             icon.set_hexpand(true);
@@ -66,7 +66,7 @@ fn create_flow_child(
         }
     } else {
         let icon = babydra_common::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
-        icon.set_pixel_size(40);
+        icon.set_pixel_size(48);
         icon.set_halign(Align::Center);
         icon.set_valign(Align::Center);
         icon.set_hexpand(true);
