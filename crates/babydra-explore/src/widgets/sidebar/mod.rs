@@ -85,39 +85,22 @@ fn add_sidebar_item(
     session: &Rc<RefCell<SessionState>>,
     nav_callback: &Rc<dyn Fn(PathBuf)>,
 ) {
-    let hbox = Box::new(Orientation::Horizontal, 10);
-    hbox.set_margin_start(8);
-    hbox.set_margin_end(8);
-    hbox.set_margin_top(1);
-    hbox.set_margin_bottom(1);
-
-    let img = gtk4::Image::from_icon_name(icon_name);
-    img.set_pixel_size(18);
-
-    let lbl = Label::builder()
-        .label(name)
-        .halign(Align::Start)
-        .hexpand(true)
-        .build();
-
-    hbox.append(&img);
-    hbox.append(&lbl);
-
-    let btn = Button::builder()
-        .child(&hbox)
-        .css_classes(vec!["sidebar-item".to_string(), "flat".to_string()])
-        .build();
-
     let nav_cb = nav_callback.clone();
     let session_clone = session.clone();
     let target_path = path.clone();
-    btn.connect_clicked(move |_| {
-        {
-            let mut s = session_clone.borrow_mut();
-            s.active_tab_mut().navigate_to(target_path.clone());
-        }
-        nav_cb(target_path.clone());
-    });
+
+    let btn = baby_utils::components::create_sidebar_item_button(
+        name,
+        icon_name,
+        "sidebar-item",
+        move || {
+            {
+                let mut s = session_clone.borrow_mut();
+                s.active_tab_mut().navigate_to(target_path.clone());
+            }
+            nav_cb(target_path.clone());
+        },
+    );
 
     container.append(&btn);
 }
