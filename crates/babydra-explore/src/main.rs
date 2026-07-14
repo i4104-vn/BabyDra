@@ -13,8 +13,21 @@ fn main() {
         .build();
 
     app.connect_activate(|app| {
-        let home_dir = glib::home_dir();
-        let session = std::rc::Rc::new(std::cell::RefCell::new(SessionState::new(home_dir)));
+        let mut target_dir = glib::home_dir();
+
+        if let Some(arg) = std::env::args().nth(1) {
+            let path_str = if arg.starts_with("file://") {
+                babydra_common::desktop::mpris::decode_uri(&arg.replacen("file://", "", 1))
+            } else {
+                arg
+            };
+            let path = std::path::PathBuf::from(path_str);
+            if path.exists() {
+                target_dir = path;
+            }
+        }
+
+        let session = std::rc::Rc::new(std::cell::RefCell::new(SessionState::new(target_dir)));
         
         let main_window = crate::widgets::window::create_explore_window(app, session);
         main_window.present();
