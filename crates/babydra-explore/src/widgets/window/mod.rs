@@ -6,6 +6,8 @@ use std::path::PathBuf;
 use babydra_common::{SessionState, ActivePane};
 
 mod render;
+pub mod tabs;
+pub mod split;
 
 /// Creates and configures the main file explorer window, wires all component widgets (header, sidebar, content panes, tabs, info panel, status bar), and launches the navigation loops.
 pub fn create_explore_window(
@@ -22,7 +24,7 @@ pub fn create_explore_window(
 
     // Channels for file watching/reloading
     let (watch_tx, mut watch_rx) = tokio::sync::mpsc::unbounded_channel::<()>();
-    let watch_tx_clone = watch_tx.clone();
+    let _watch_tx_clone = watch_tx.clone();
 
     // Create InfoPanel
     let (info_panel_container, info_widgets) = crate::widgets::info_panel::create_info_panel();
@@ -307,140 +309,7 @@ pub fn create_explore_window(
         });
     }
 
-    // TabBar wire/rebuilding function
-    let rebuild_tabs = {
-        let session = session.clone();
-        let tab_bar_box = tab_bar_box.clone();
-        let nav = navigate_pane_ref.clone();
-        move || {
-            if let Some(ref tbb) = *tab_bar_box.borrow() {
-                let session_c = session.clone();
-                let nav_c = nav.clone();
-                let tab_bar_box_c = tab_bar_box.clone();
-                let rebuild_tabs_c = Rc::new(RefCell::new(None::<Box<dyn Fn()>>));
-                let rebuild_tabs_c_clone = rebuild_tabs_c.clone();
-
-                let on_tab_activated = {
-                    let session = session.clone();
-                    let nav = nav.clone();
-                    let rebuild = rebuild_tabs_c_clone.clone();
-                    move |idx: usize| {
-                        {
-                            let mut sess = session.borrow_mut();
-                            sess.active_tab_index = idx;
-                        }
-                        let path = session.borrow().active_tab().current_path.clone();
-                        if let Some(ref f) = *nav.borrow() {
-                            f(ActivePane::Left, path);
-                        }
-                        if let Some(ref reb) = *rebuild.borrow() {
-                            reb();
-                        }
-                    }
-                };
-
-                let on_tab_closed = {
-                    let session = session.clone();
-                    let nav = nav.clone();
-                    let rebuild = rebuild_tabs_c_clone.clone();
-                    move |idx: usize| {
-                        let should_navigate = {
-                            let mut sess = session.borrow_mut();
-                            let is_active = sess.active_tab_index == idx;
-                            let closed = sess.close_tab(idx);
-                            closed && is_active
-                        };
-                        if should_navigate {
-                            let path = session.borrow().active_tab().current_path.clone();
-                            if let Some(ref f) = *nav.borrow() {
-                                f(ActivePane::Left, path);
-                            }
-                        }
-                        if let Some(ref reb) = *rebuild.borrow() {
-                            reb();
-                        }
-                    }
-                };
-
-                let on_tab_created = {
-                    let session = session.clone();
-                    let nav = nav.clone();
-                    let rebuild = rebuild_tabs_c_clone.clone();
-                    move || {
-                        let home = glib::home_dir();
-                        {
-                            let mut sess = session.borrow_mut();
-                            sess.add_tab(home.clone());
-                        }
-                        if let Some(ref f) = *nav.borrow() {
-                            f(ActivePane::Left, home);
-                        }
-                        if let Some(ref reb) = *rebuild.borrow() {
-                            reb();
-                        }
-                    }
-                };
-
-                // Store recursive rebuild reference
-                let tbb_c = tbb.clone();
-                let sess_c = session.clone();
-                let on_act: Rc<dyn Fn(usize)> = Rc::new(on_tab_activated);
-                let on_cls: Rc<dyn Fn(usize)> = Rc::new(on_tab_closed);
-                let on_cre: Rc<dyn Fn()> = Rc::new(on_tab_created);
-                *rebuild_tabs_c.borrow_mut() = Some(Box::new(move || {
-                    crate::widgets::tab_bar::rebuild_tab_bar(
-                        &tbb_c,
-                        &sess_c,
-                        &on_act,
-                        &on_cls,
-                        &on_cre,
-                    );
-                }) as Box<dyn Fn()>);
-
-                let borrow = rebuild_tabs_c.borrow();
-                if let Some(ref reb) = *borrow {
-                    reb();
-                }
-            }
-        }
-    };
-
-    let rebuild_tabs_rc = Rc::new(rebuild_tabs);
-
-    // Initial TabBar creation
-    {
-        let session_c = session.clone();
-        let nav_c = navigate_pane_ref.clone();
-        let rebuild_tabs_c = rebuild_tabs_rc.clone();
-        let tab_bar = crate::widgets::tab_bar::create_tab_bar(
-            session_c,
-            {
-                let rebuild = rebuild_tabs_c.clone();
-                let nav = nav_c.clone();
-                move |idx| {
-                    if let Some(ref f) = *nav.borrow() {
-                        f(ActivePane::Left, PathBuf::from("/"));
-                    }
-                    rebuild();
-                }
-            },
-            {
-                let rebuild = rebuild_tabs_c.clone();
-                move |_idx| {
-                    rebuild();
-                }
-            },
-            {
-                let rebuild = rebuild_tabs_c.clone();
-                move || {
-                    rebuild();
-                }
-            }
-        );
-        ui.vbox.prepend(&tab_bar);
-        tab_bar_box.replace(Some(tab_bar));
-        rebuild_tabs_rc();
-    }
+    let _rebuild_tabs_rc = tabs::setup_tab_bar(&ui.vbox, session.clone(), navigate_pane_ref.clone(), tab_bar_box.clone());
 
     // Sidebar creation
     let sidebar = crate::widgets::sidebar::create_sidebar(
@@ -453,73 +322,17 @@ pub fn create_explore_window(
     ui.main_paned.set_start_child(Some(&sidebar));
 
     // Active split toggling handler
-    let split_paned_c = ui.split_paned.clone();
-    let is_split_c = is_split.clone();
-    let right_scroll_c = right_scroll_cell.clone();
-    let right_handle_c = right_content_handle.clone();
-    let session_c = session.clone();
-    let active_pane_c = active_pane.clone();
-    let nav_c = navigate_pane_ref.clone();
-    let info_widgets_c = info_widgets_rc.clone();
-    let left_scroll_c = left_content_scroll.clone();
-    let nav_callback_rc_c = nav_callback_rc.clone();
-
-    let toggle_split_view = move || {
-        if is_split_c.get() {
-            split_paned_c.set_end_child(None::<&gtk4::Widget>);
-            right_handle_c.replace(None);
-            right_scroll_c.replace(None);
-            is_split_c.set(false);
-            active_pane_c.set(ActivePane::Left);
-        } else {
-            let current_p = session_c.borrow().active_tab().current_path.clone();
-            let (tx_right, mut rx_right) = tokio::sync::mpsc::unbounded_channel::<PathBuf>();
-            let right_nav_cb = move |path| {
-                let _ = tx_right.send(path);
-            };
-
-            let nav_c_clone = nav_c.clone();
-            glib::MainContext::default().spawn_local(async move {
-                while let Some(path) = rx_right.recv().await {
-                    if let Some(ref f) = *nav_c_clone.borrow() {
-                        f(ActivePane::Right, path);
-                    }
-                }
-            });
-
-            let info_panel_c = info_widgets_c.clone();
-            let active_c = active_pane_c.clone();
-            let left_scroll_cc = left_scroll_c.clone();
-            let right_scroll_cc = right_scroll_c.clone();
-            let nav_cb = nav_callback_rc_c.clone();
-
-            let (right_scroll, right_handle) = crate::widgets::content_view::create_content_view(
-                right_nav_cb,
-                move |sel| {
-                    active_c.set(ActivePane::Right);
-                    left_scroll_cc.remove_css_class("active-pane");
-                    if let Some(ref rs) = *right_scroll_cc.borrow() {
-                        rs.add_css_class("active-pane");
-                    }
-                    crate::widgets::info_panel::update_info_panel(&info_panel_c, &sel);
-                }
-            );
-
-            split_paned_c.set_end_child(Some(&right_scroll));
-            split_paned_c.set_position(390);
-
-            right_scroll_c.borrow_mut().replace(right_scroll);
-            right_handle_c.replace(Some(Rc::new(right_handle)));
-            is_split_c.set(true);
-
-            active_pane_c.set(ActivePane::Right);
-            if let Some(ref f) = *nav_c.borrow() {
-                f(ActivePane::Right, current_p);
-            }
-        }
-    };
-
-    let toggle_split_view_rc = Rc::new(toggle_split_view);
+    let toggle_split_view_rc = split::setup_split_view(
+        ui.split_paned.clone(),
+        is_split.clone(),
+        right_scroll_cell.clone(),
+        right_content_handle.clone(),
+        session.clone(),
+        active_pane.clone(),
+        navigate_pane_ref.clone(),
+        info_widgets_rc.clone(),
+        left_content_scroll.clone(),
+    );
 
     // Wire F3 key controller (split view) and F4 (preview toggle)
     {
