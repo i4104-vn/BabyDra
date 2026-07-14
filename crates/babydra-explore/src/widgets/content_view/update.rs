@@ -32,7 +32,7 @@ fn create_flow_child(
     nav_callback: &Rc<dyn Fn(PathBuf)>,
 ) -> gtk4::FlowBoxChild {
     let item_box = Box::new(Orientation::Vertical, 4);
-    item_box.set_size_request(110, 130);
+    item_box.set_size_request(140, 160);
     item_box.set_css_classes(&["file-item"]);
 
     let has_preview = if let Some(ext) = entry.path.extension() {
@@ -42,25 +42,29 @@ fn create_flow_child(
         false
     };
 
-    let img = if has_preview {
-        if let Ok(pixbuf) = load_cropped_square_pixbuf(&entry.path, 90) {
-            let image = gtk4::Image::new();
-            image.set_from_pixbuf(Some(&pixbuf));
-            image
+    if has_preview {
+        if let Ok(pixbuf) = load_cropped_square_pixbuf(&entry.path, 128) {
+            let texture = gdk4::Texture::for_pixbuf(&pixbuf);
+            let picture = gtk4::Picture::for_paintable(&texture);
+            picture.set_size_request(128, 128);
+            picture.set_halign(Align::Center);
+            picture.set_valign(Align::Center);
+            picture.set_content_fit(gtk4::ContentFit::Cover);
+            item_box.append(&picture);
         } else {
             let icon = babydra_common::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
             icon.set_pixel_size(48);
-            icon
+            icon.set_halign(Align::Center);
+            icon.set_valign(Align::Center);
+            item_box.append(&icon);
         }
     } else {
         let icon = babydra_common::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
         icon.set_pixel_size(48);
-        icon
+        icon.set_halign(Align::Center);
+        icon.set_valign(Align::Center);
+        item_box.append(&icon);
     };
-    img.set_halign(Align::Center);
-    img.set_valign(Align::Center);
-    img.set_hexpand(true);
-    img.set_vexpand(true);
 
     let lbl = Label::builder()
         .label(&entry.display_name)
@@ -70,7 +74,6 @@ fn create_flow_child(
         .build();
     lbl.add_css_class("file-item-label");
 
-    item_box.append(&img);
     item_box.append(&lbl);
 
     // Attach right click gesture to item_box
