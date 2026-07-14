@@ -74,7 +74,7 @@ pub fn create_flow_child(
     let nav = nav_callback.clone();
     gesture.connect_pressed(move |gesture, _, x, y| {
         gesture.set_state(gtk4::EventSequenceState::Claimed);
-        crate::widgets::context_menu::ContextMenu::show_for_file(
+        crate::widgets::context_menu::show_for_file(
             widget_clone.upcast_ref(),
             x,
             y,

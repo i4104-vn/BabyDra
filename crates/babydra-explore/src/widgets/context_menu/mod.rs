@@ -1,12 +1,9 @@
 use std::path::PathBuf;
-use std::rc::Rc;
-use gtk4::prelude::*;
-use babydra_common::FileEntry;
 
 mod helpers;
 mod show;
 
-pub struct ContextMenu;
+pub use show::{show_for_file, show_for_empty};
 
 // Copy / Cut (using a simple static thread-local clipboard buffer for simplicity & cross-pane support)
 thread_local! {

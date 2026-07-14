@@ -41,7 +41,7 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
         let nav = nav_callback.clone();
         gesture_flow.connect_pressed(move |gesture, _, x, y| {
             gesture.set_state(gtk4::EventSequenceState::Claimed);
-            crate::widgets::context_menu::ContextMenu::show_for_empty(
+            crate::widgets::context_menu::show_for_empty(
                 grid_widget.upcast_ref(),
                 x,
                 y,
@@ -61,7 +61,7 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
         let nav = nav_callback.clone();
         gesture_list.connect_pressed(move |gesture, _, x, y| {
             gesture.set_state(gtk4::EventSequenceState::Claimed);
-            crate::widgets::context_menu::ContextMenu::show_for_empty(
+            crate::widgets::context_menu::show_for_empty(
                 list_widget.upcast_ref(),
                 x,
                 y,
@@ -224,7 +224,7 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
             let nav = nav_callback.clone();
             gesture.connect_pressed(move |gesture, _, x, y| {
                 gesture.set_state(gtk4::EventSequenceState::Claimed);
-                crate::widgets::context_menu::ContextMenu::show_for_file(
+                crate::widgets::context_menu::show_for_file(
                     widget_clone.upcast_ref(),
                     x,
                     y,
