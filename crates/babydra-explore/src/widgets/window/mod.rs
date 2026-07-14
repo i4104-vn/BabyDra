@@ -182,6 +182,9 @@ pub fn create_explore_window(
                     Ok(entries) => {
                         // Update Header breadcrumbs
                         if let Some(ref hw) = *header_widgets_c.borrow() {
+                            let is_in_trash = path.to_string_lossy().ends_with("Trash/files");
+                            hw.btn_empty_trash.set_visible(is_in_trash);
+
                             let nav_cb: Rc<dyn Fn(PathBuf)> = Rc::new(move |p: PathBuf| {
                                 if let Some(ref f) = *nav_no_watch_c.borrow() {
                                     f(pane, p);
@@ -325,6 +328,20 @@ pub fn create_explore_window(
     );
     ui.vbox.insert_child_after(&header_box, None::<&gtk4::Widget>);
     header_widgets_cell.replace(Some(header_widgets.clone()));
+
+    // Wire btn_empty_trash click
+    {
+        let session_c = session.clone();
+        let nav = navigate_pane_ref.clone();
+        let active = active_pane.clone();
+        header_widgets.btn_empty_trash.connect_clicked(move |_| {
+            babydra_common::helper::clean::remove_trash();
+            let path = session_c.borrow().active_tab().current_path.clone();
+            if let Some(ref f) = *nav.borrow() {
+                f(active.get(), path);
+            }
+        });
+    }
 
     // Preview toggle closure
     let toggle_preview = {

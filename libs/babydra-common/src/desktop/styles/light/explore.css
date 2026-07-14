@@ -645,3 +645,12 @@ window.explore-dialog > box {
 .explore-dialog entry:focus {
     border-color: #0066cc;
 }
+
+button.empty-trash-btn {
+    color: #dc2626 !important;
+}
+
+button.empty-trash-btn:hover {
+    background-color: rgba(220, 38, 38, 0.1) !important;
+    color: #ef4444 !important;
+}

@@ -46,6 +46,12 @@ pub fn create_sidebar(
         add_sidebar_item(&vbox, label, icon, path, &session, &nav_cb);
     }
 
+    // Add Trash quick link
+    let trash_path = glib::user_data_dir().join("Trash/files");
+    let _ = std::fs::create_dir_all(&trash_path);
+    let _ = std::fs::create_dir_all(glib::user_data_dir().join("Trash/info"));
+    add_sidebar_item(&vbox, "Trash", "user-trash", trash_path, &session, &nav_cb);
+
     // Other optional folders
     let optional_dirs = [
         ("Desktop", "folder-desktop", glib::UserDirectory::Desktop),
