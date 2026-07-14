@@ -143,19 +143,44 @@ pub fn create_content_view(
         
         let start_pos = Rc::new(RefCell::new(None::<(f64, f64)>));
         let start_pos_c = start_pos.clone();
+        let drag_select_active = Rc::new(RefCell::new(false));
         
         let rb_begin = list_rubberband.clone();
+        let drag_select_active_begin = drag_select_active.clone();
+        let lf_parent = list_fixed.parent().map(|p| p.clone());
         drag_gesture.connect_drag_begin(move |_, x, y| {
-            start_pos_c.replace(Some((x, y)));
-            rb_begin.set_visible(true);
-            rb_begin.set_size_request(0, 0);
+            let mut is_item = false;
+            if let Some(ref parent) = lf_parent {
+                let picked = parent.pick(x, y, gtk4::PickFlags::empty());
+                let mut next = picked;
+                while let Some(w) = next {
+                    if w.downcast_ref::<gtk4::FlowBoxChild>().is_some() || w.downcast_ref::<gtk4::ListBoxRow>().is_some() {
+                        is_item = true;
+                        break;
+                    }
+                    next = w.parent();
+                }
+            }
+
+            if !is_item {
+                drag_select_active_begin.replace(true);
+                start_pos_c.replace(Some((x, y)));
+                rb_begin.set_visible(true);
+                rb_begin.set_size_request(0, 0);
+            } else {
+                drag_select_active_begin.replace(false);
+            }
         });
 
         let start_pos_update = start_pos.clone();
+        let drag_select_active_update = drag_select_active.clone();
         let lb_update = lb_clone.clone();
         let lf_update = list_fixed.clone();
         let lr_update = list_rubberband.clone();
         drag_gesture.connect_drag_update(move |_, offset_x, offset_y| {
+            if !*drag_select_active_update.borrow() {
+                return;
+            }
             if let Some((start_x, start_y)) = *start_pos_update.borrow() {
                 let current_x = start_x + offset_x;
                 let current_y = start_y + offset_y;
@@ -190,8 +215,11 @@ pub fn create_content_view(
         });
 
         let rb_end = list_rubberband.clone();
+        let drag_select_active_end = drag_select_active.clone();
         drag_gesture.connect_drag_end(move |_, _, _| {
-            rb_end.set_visible(false);
+            if *drag_select_active_end.borrow() {
+                rb_end.set_visible(false);
+            }
         });
 
         if let Some(list_overlay) = widgets.list_fixed.parent() {
@@ -210,19 +238,44 @@ pub fn create_content_view(
         
         let start_pos = Rc::new(RefCell::new(None::<(f64, f64)>));
         let start_pos_c = start_pos.clone();
+        let drag_select_active = Rc::new(RefCell::new(false));
         
         let rb_begin = grid_rubberband.clone();
+        let drag_select_active_begin = drag_select_active.clone();
+        let gf_parent = grid_fixed.parent().map(|p| p.clone());
         drag_gesture.connect_drag_begin(move |_, x, y| {
-            start_pos_c.replace(Some((x, y)));
-            rb_begin.set_visible(true);
-            rb_begin.set_size_request(0, 0);
+            let mut is_item = false;
+            if let Some(ref parent) = gf_parent {
+                let picked = parent.pick(x, y, gtk4::PickFlags::empty());
+                let mut next = picked;
+                while let Some(w) = next {
+                    if w.downcast_ref::<gtk4::FlowBoxChild>().is_some() || w.downcast_ref::<gtk4::ListBoxRow>().is_some() {
+                        is_item = true;
+                        break;
+                    }
+                    next = w.parent();
+                }
+            }
+
+            if !is_item {
+                drag_select_active_begin.replace(true);
+                start_pos_c.replace(Some((x, y)));
+                rb_begin.set_visible(true);
+                rb_begin.set_size_request(0, 0);
+            } else {
+                drag_select_active_begin.replace(false);
+            }
         });
 
         let start_pos_update = start_pos.clone();
+        let drag_select_active_update = drag_select_active.clone();
         let gc_update = grid_container.clone();
         let gf_update = grid_fixed.clone();
         let gr_update = grid_rubberband.clone();
         drag_gesture.connect_drag_update(move |_, offset_x, offset_y| {
+            if !*drag_select_active_update.borrow() {
+                return;
+            }
             if let Some((start_x, start_y)) = *start_pos_update.borrow() {
                 let current_x = start_x + offset_x;
                 let current_y = start_y + offset_y;
@@ -263,8 +316,11 @@ pub fn create_content_view(
         });
 
         let rb_end = grid_rubberband.clone();
+        let drag_select_active_end = drag_select_active.clone();
         drag_gesture.connect_drag_end(move |_, _, _| {
-            rb_end.set_visible(false);
+            if *drag_select_active_end.borrow() {
+                rb_end.set_visible(false);
+            }
         });
 
         if let Some(grid_overlay) = widgets.grid_fixed.parent() {
