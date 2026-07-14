@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use std::rc::Rc;
 use std::cell::RefCell;
 use babydra_common::FileEntry;
-pub use babydra_common::{ContentViewWidgets, ContentViewHandle};
+pub use babydra_common::{ContentViewWidgets, ContentViewHandle, sort_entries};
 
 mod render;
 mod update;
@@ -194,10 +194,6 @@ pub fn create_grid_flowbox(
     flowbox
 }
 
-/// Helper to sort entries: delegating to common library.
-pub fn sort_entries(entries: &mut [FileEntry], sort_mode: &str) {
-    babydra_common::sort_entries(entries, sort_mode);
-}
 
 /// Changes the layout layout style of content view stack.
 pub fn set_content_view_mode(handle: &ContentViewHandle, mode: &str) {
