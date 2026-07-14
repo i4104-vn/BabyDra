@@ -32,7 +32,7 @@ fn create_flow_child(
     nav_callback: &Rc<dyn Fn(PathBuf)>,
 ) -> gtk4::FlowBoxChild {
     let item_box = Box::new(Orientation::Vertical, 4);
-    item_box.set_size_request(140, 160);
+    item_box.set_size_request(110, 120);
     item_box.set_css_classes(&["file-item"]);
 
     let has_preview = if let Some(ext) = entry.path.extension() {
@@ -43,24 +43,24 @@ fn create_flow_child(
     };
 
     if has_preview {
-        if let Ok(pixbuf) = load_cropped_square_pixbuf(&entry.path, 128) {
+        if let Ok(pixbuf) = load_cropped_square_pixbuf(&entry.path, 90) {
             let texture = gdk4::Texture::for_pixbuf(&pixbuf);
             let picture = gtk4::Picture::for_paintable(&texture);
-            picture.set_size_request(128, 128);
+            picture.set_size_request(90, 90);
             picture.set_halign(Align::Center);
             picture.set_valign(Align::Center);
             picture.set_content_fit(gtk4::ContentFit::Cover);
             item_box.append(&picture);
         } else {
             let icon = babydra_common::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
-            icon.set_pixel_size(48);
+            icon.set_pixel_size(40);
             icon.set_halign(Align::Center);
             icon.set_valign(Align::Center);
             item_box.append(&icon);
         }
     } else {
         let icon = babydra_common::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
-        icon.set_pixel_size(48);
+        icon.set_pixel_size(40);
         icon.set_halign(Align::Center);
         icon.set_valign(Align::Center);
         item_box.append(&icon);
