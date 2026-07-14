@@ -211,7 +211,7 @@ pub fn create_explore_window(
                         crate::widgets::status_bar::update_status_bar(&status_lbl_c, entries.len(), total_size);
 
                         // Update Tab Bar titles
-                        if let Some(ref tbb) = *tab_bar_box_c.borrow() {
+                        if let Some(ref _tbb) = *tab_bar_box_c.borrow() {
                             // Trigger TabBar rebuild
                             // Re-borrow tabs callbacks inside rebuild
                         }

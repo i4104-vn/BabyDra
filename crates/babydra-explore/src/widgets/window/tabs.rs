@@ -20,8 +20,6 @@ pub fn setup_tab_bar(
         let nav = nav.clone();
         move || {
             if let Some(ref tbb) = *tab_bar_box.borrow() {
-                let session_c = session.clone();
-                let nav_c = nav.clone();
                 let rebuild_tabs_c = Rc::new(RefCell::new(None::<Box<dyn Fn()>>));
                 let rebuild_tabs_c_clone = rebuild_tabs_c.clone();
 
@@ -121,7 +119,7 @@ pub fn setup_tab_bar(
             {
                 let rebuild = rebuild_tabs_c.clone();
                 let nav = nav_c.clone();
-                move |idx| {
+                move |_idx| {
                     if let Some(ref f) = *nav.borrow() {
                         f(ActivePane::Left, PathBuf::from("/"));
                     }
