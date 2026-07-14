@@ -26,6 +26,9 @@ pub fn show_new_folder_dialog(current_path: PathBuf, nav_callback: Rc<dyn Fn(Pat
 
     dialog.add_button("Cancel", gtk4::ResponseType::Cancel);
     dialog.add_button("Create", gtk4::ResponseType::Ok);
+    if let Some(btn) = dialog.widget_for_response(gtk4::ResponseType::Ok) {
+        btn.add_css_class("suggested-action");
+    }
 
     let current_p_clone = current_path.clone();
     dialog.connect_response(move |dialog, response| {

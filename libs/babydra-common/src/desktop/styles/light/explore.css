@@ -582,3 +582,23 @@ button.context-menu-item:hover label {
     margin-top: 6px;
     margin-bottom: 2px;
 }
+
+button.suggested-action {
+    background: linear-gradient(135deg, #0066cc, #0044aa);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    color: #ffffff;
+    padding: 4px 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.2);
+    transition: all 150ms ease;
+}
+
+button.suggested-action:hover {
+    background: linear-gradient(135deg, #3399ff, #0066cc);
+    box-shadow: 0 6px 16px rgba(0, 102, 204, 0.3);
+}
+
+button.suggested-action:active {
+    background: #0044aa;
+}

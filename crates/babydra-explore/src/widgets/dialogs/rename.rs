@@ -26,6 +26,9 @@ pub fn show_rename_dialog(path: &PathBuf, current_path: PathBuf, nav_callback: R
 
     dialog.add_button("Cancel", gtk4::ResponseType::Cancel);
     dialog.add_button("Rename", gtk4::ResponseType::Ok);
+    if let Some(btn) = dialog.widget_for_response(gtk4::ResponseType::Ok) {
+        btn.add_css_class("suggested-action");
+    }
 
     let path = path.clone();
     dialog.connect_response(move |dialog, response| {
