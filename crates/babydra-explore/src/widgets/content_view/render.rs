@@ -28,6 +28,7 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
     grid_overlay.set_child(Some(&grid_container));
 
     let grid_fixed = gtk4::Fixed::new();
+    grid_fixed.set_can_target(false);
     grid_overlay.add_overlay(&grid_fixed);
 
     let grid_rubberband = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
@@ -48,6 +49,7 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
     list_overlay.set_child(Some(&listbox));
 
     let list_fixed = gtk4::Fixed::new();
+    list_fixed.set_can_target(false);
     list_overlay.add_overlay(&list_fixed);
 
     let list_rubberband = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);

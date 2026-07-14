@@ -231,6 +231,24 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
             let list_row = gtk4::ListBoxRow::new();
             list_row.set_child(Some(&item_box));
             list_row.set_property("name", &format!("{}", idx));
+
+            let double_click_gesture = gtk4::GestureClick::new();
+            double_click_gesture.set_button(1);
+            let target_path = entry.path.clone();
+            let is_dir = matches!(entry.file_type, babydra_common::FileType::Directory);
+            let nav_c = nav_callback.clone();
+            double_click_gesture.connect_pressed(move |_, n_press, _, _| {
+                if n_press == 2 {
+                    if is_dir {
+                        nav_c(target_path.clone());
+                    } else {
+                        let uri = format!("file://{}", target_path.to_string_lossy());
+                        let _ = gtk4::gio::AppInfo::launch_default_for_uri(&uri, gtk4::gio::AppLaunchContext::NONE);
+                    }
+                }
+            });
+            list_row.add_controller(double_click_gesture);
+
             widgets.listbox.append(&list_row);
         }
 
