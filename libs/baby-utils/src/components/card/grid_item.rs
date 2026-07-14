@@ -85,5 +85,6 @@ pub fn create_grid_file_item(
     let flow_child = FlowBoxChild::new();
     flow_child.set_child(Some(&item_box));
     flow_child.set_property("name", &format!("{}", idx));
+    flow_child.set_widget_name(&entry.path.to_string_lossy());
     flow_child
 }

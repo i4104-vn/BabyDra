@@ -690,3 +690,14 @@ button.empty-trash-btn:hover {
     border: 1.5px solid rgba(52, 152, 219, 0.6);
     border-radius: 2px;
 }
+
+/* ── Cut Item (dim when cut to clipboard) ───────────────────────── */
+.explore-window .cut-item {
+    opacity: 0.45;
+    filter: saturate(0.4);
+    transition: opacity 0.15s ease, filter 0.15s ease;
+}
+
+.explore-window .cut-item:hover {
+    opacity: 0.6;
+}

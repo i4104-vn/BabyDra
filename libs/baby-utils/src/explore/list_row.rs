@@ -84,9 +84,18 @@ pub fn create_list_row(
         item_box.add_controller(drop_target);
     }
 
+    // Dim item if it's currently in the cut clipboard
+    let is_cut = crate::explore::CLIPBOARD.with(|cb| {
+        cb.borrow().as_ref().map(|(paths, cut)| *cut && paths.contains(&entry.path)).unwrap_or(false)
+    });
+    if is_cut {
+        item_box.add_css_class("cut-item");
+    }
+
     let list_row = ListBoxRow::new();
     list_row.set_child(Some(&item_box));
     list_row.set_property("name", &format!("{}", idx));
+    list_row.set_widget_name(&entry.path.to_string_lossy());
 
     let double_click_gesture = gtk4::GestureClick::new();
     double_click_gesture.set_button(1);

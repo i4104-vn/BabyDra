@@ -5,7 +5,7 @@ use gtk4::{Box, Button, Orientation, Align, Label, Image, Popover};
 use babydra_common::FileEntry;
 
 thread_local! {
-    pub static CLIPBOARD: std::cell::RefCell<Option<(PathBuf, bool)>> = std::cell::RefCell::new(None); // (path, is_cut)
+    pub static CLIPBOARD: std::cell::RefCell<Option<(Vec<PathBuf>, bool)>> = std::cell::RefCell::new(None); // (paths, is_cut)
 }
 
 pub fn create_menu_popover(parent: &gtk4::Widget, x: f64, y: f64) -> (Popover, Box) {
@@ -52,7 +52,7 @@ pub fn show_for_file(
     parent: &gtk4::Widget,
     x: f64,
     y: f64,
-    entry: FileEntry,
+    target_paths: Vec<PathBuf>,
     current_path: PathBuf,
     nav_callback: Rc<dyn Fn(PathBuf)>,
 ) {
@@ -69,66 +69,79 @@ pub fn show_for_file(
     vbox.append(&btn_open);
     vbox.append(&btn_cut);
     vbox.append(&btn_copy);
-    vbox.append(&btn_rename);
+    if target_paths.len() == 1 {
+        vbox.append(&btn_rename);
+    }
     vbox.append(&btn_trash);
     vbox.append(&btn_delete);
 
     // Event handling
     let pop_c = popover.clone();
-    let target_path = entry.path.clone();
-    let is_dir = matches!(entry.file_type, babydra_common::FileType::Directory);
+    let target_paths_open = target_paths.clone();
     let nav = nav_callback.clone();
     btn_open.connect_clicked(move |_| {
         pop_c.popdown();
-        if is_dir {
-            nav(target_path.clone());
-        } else {
-            let uri = format!("file://{}", target_path.to_string_lossy());
-            let _ = gtk4::gio::AppInfo::launch_default_for_uri(&uri, gtk4::gio::AppLaunchContext::NONE);
+        for path in &target_paths_open {
+            if path.is_dir() {
+                nav(path.clone());
+            } else {
+                let uri = format!("file://{}", path.to_string_lossy());
+                let _ = gtk4::gio::AppInfo::launch_default_for_uri(&uri, gtk4::gio::AppLaunchContext::NONE);
+            }
         }
     });
 
     let pop_c = popover.clone();
-    let src_path = entry.path.clone();
+    let target_paths_copy = target_paths.clone();
+    let nav_c = nav_callback.clone();
+    let current_p = current_path.clone();
     btn_copy.connect_clicked(move |_| {
         pop_c.popdown();
         CLIPBOARD.with(|cb| {
-            cb.replace(Some((src_path.clone(), false)));
+            cb.replace(Some((target_paths_copy.clone(), false)));
         });
+        nav_c(current_p.clone());
     });
 
     let pop_c = popover.clone();
-    let src_path = entry.path.clone();
+    let target_paths_cut = target_paths.clone();
+    let nav_c = nav_callback.clone();
+    let current_p = current_path.clone();
     btn_cut.connect_clicked(move |_| {
         pop_c.popdown();
         CLIPBOARD.with(|cb| {
-            cb.replace(Some((src_path.clone(), true)));
+            cb.replace(Some((target_paths_cut.clone(), true)));
         });
+        nav_c(current_p.clone());
     });
 
-    // Rename dialog trigger
-    let pop_c = popover.clone();
-    let rename_path = entry.path.clone();
-    let nav = nav_callback.clone();
-    let current_p = current_path.clone();
-    btn_rename.connect_clicked(move |_| {
-        pop_c.popdown();
-        crate::explore::dialogs::show_rename_dialog(&rename_path, current_p.clone(), nav.clone());
-    });
+    // Rename dialog trigger (only if 1 item selected)
+    if target_paths.len() == 1 {
+        let pop_c = popover.clone();
+        let rename_path = target_paths[0].clone();
+        let nav = nav_callback.clone();
+        let current_p = current_path.clone();
+        btn_rename.connect_clicked(move |_| {
+            pop_c.popdown();
+            crate::explore::dialogs::show_rename_dialog(&rename_path, current_p.clone(), nav.clone());
+        });
+    }
 
     // Trash action
     let pop_c = popover.clone();
-    let trash_path = entry.path.clone();
+    let target_paths_trash = target_paths.clone();
     let nav = nav_callback.clone();
     let current_p = current_path.clone();
     btn_trash.connect_clicked(move |_| {
         pop_c.popdown();
         let nav_c = nav.clone();
         let cp_c = current_p.clone();
-        let path_c = trash_path.clone();
+        let paths_c = target_paths_trash.clone();
         glib::spawn_future_local(async move {
-            if let Err(err) = babydra_common::send_to_trash(path_c).await {
-                eprintln!("Failed to trash file: {}", err);
+            for path in paths_c {
+                if let Err(err) = babydra_common::send_to_trash(path).await {
+                    eprintln!("Failed to trash file: {}", err);
+                }
             }
             nav_c(cp_c);
         });
@@ -136,17 +149,19 @@ pub fn show_for_file(
 
     // Permanent delete
     let pop_c = popover.clone();
-    let del_path = entry.path.clone();
+    let target_paths_del = target_paths.clone();
     let nav = nav_callback.clone();
     let current_p = current_path.clone();
     btn_delete.connect_clicked(move |_| {
         pop_c.popdown();
         let nav_c = nav.clone();
         let cp_c = current_p.clone();
-        let path_c = del_path.clone();
+        let paths_c = target_paths_del.clone();
         glib::spawn_future_local(async move {
-            if let Err(err) = babydra_common::delete_path(path_c).await {
-                eprintln!("Failed to delete file: {}", err);
+            for path in paths_c {
+                if let Err(err) = babydra_common::delete_path(path).await {
+                    eprintln!("Failed to delete file: {}", err);
+                }
             }
             nav_c(cp_c);
         });
@@ -181,21 +196,30 @@ pub fn show_for_empty(
     let current_p = current_path.clone();
     btn_paste.connect_clicked(move |_| {
         pop_c.popdown();
-        if let Some((src, is_cut)) = clipboard_data.clone() {
-            let dest = dest_dir.join(src.file_name().unwrap());
+        if let Some((sources, is_cut)) = clipboard_data.clone() {
             let nav_f = nav.clone();
             let cp_f = current_p.clone();
+            let dest_dir_c = dest_dir.clone();
             glib::spawn_future_local(async move {
-                if is_cut {
-                    if let Err(e) = babydra_common::move_path(src, dest).await {
-                        eprintln!("Failed to move file: {}", e);
-                    } else {
-                        CLIPBOARD.with(|cb| cb.replace(None)); // Clear clipboard on cut
+                let mut all_success = true;
+                for src in sources {
+                    if let Some(filename) = src.file_name() {
+                        let dest = dest_dir_c.join(filename);
+                        if is_cut {
+                            if let Err(e) = babydra_common::move_path(src, dest).await {
+                                eprintln!("Failed to move file: {}", e);
+                                all_success = false;
+                            }
+                        } else {
+                            if let Err(e) = babydra_common::copy_path(src, dest).await {
+                                eprintln!("Failed to copy file: {}", e);
+                                all_success = false;
+                            }
+                        }
                     }
-                } else {
-                    if let Err(e) = babydra_common::copy_path(src, dest).await {
-                        eprintln!("Failed to copy file: {}", e);
-                    }
+                }
+                if is_cut && all_success {
+                    CLIPBOARD.with(|cb| cb.replace(None)); // Clear clipboard on cut
                 }
                 nav_f(cp_f);
             });

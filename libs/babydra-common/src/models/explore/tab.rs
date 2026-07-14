@@ -27,6 +27,10 @@ impl TabState {
     }
 
     pub fn navigate_to(&mut self, path: PathBuf) {
+        if self.current_path == path && !self.history.is_empty() {
+            self.selection.clear();
+            return;
+        }
         // Truncate history forward if we were navigated back
         if self.history_index + 1 < self.history.len() {
             self.history.truncate(self.history_index + 1);
