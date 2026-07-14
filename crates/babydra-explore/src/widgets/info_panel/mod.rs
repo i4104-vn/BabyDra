@@ -1,4 +1,3 @@
-use gtk4::prelude::*;
 use gtk4::ScrolledWindow;
 use babydra_common::FileEntry;
 use baby_utils::explore;

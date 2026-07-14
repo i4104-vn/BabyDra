@@ -1,4 +1,3 @@
-use gtk4::prelude::*;
 use std::path::Path;
 use std::fs;
 use babydra_common::PreviewPanelWidgets;

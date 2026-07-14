@@ -1,4 +1,3 @@
-use gtk4::prelude::*;
 use gtk4::ScrolledWindow;
 use std::path::PathBuf;
 use std::rc::Rc;

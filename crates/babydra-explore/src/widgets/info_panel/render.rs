@@ -1,7 +1,7 @@
 use gtk4::prelude::*;
 use gtk4::{Box, Orientation, Label, Align, Image, ScrolledWindow, Frame, Stack};
 use crate::widgets::preview_panel::create_preview_panel;
-use babydra_common::{PreviewPanelWidgets, InfoPanelWidgets};
+use babydra_common::InfoPanelWidgets;
 
 /// Builds the InfoPanel UI hierarchy and returns a handle containing all components.
 pub fn build_info_panel_ui() -> InfoPanelWidgets {
