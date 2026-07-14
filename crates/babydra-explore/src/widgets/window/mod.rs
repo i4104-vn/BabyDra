@@ -377,7 +377,7 @@ pub fn create_explore_window(
             move |p| nav(p)
         }
     );
-    ui.main_paned.set_start_child(Some(&sidebar));
+    ui.main_paned.prepend(&sidebar);
 
     // Active split toggling handler
     let toggle_split_view_rc = split::setup_split_view(

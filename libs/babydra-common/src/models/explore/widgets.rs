@@ -9,7 +9,7 @@ pub struct MainWindowWidgets {
     pub window: ApplicationWindow,
     pub vbox: Box,
     pub split_paned: Paned,
-    pub main_paned: Paned,
+    pub main_paned: Box,
     pub content_vbox: Box,
     pub layout_paned: Paned,
 }

@@ -23,18 +23,17 @@ pub fn build_window_ui(app: &gtk4::Application) -> MainWindowWidgets {
     split_paned.set_hexpand(true);
     split_paned.set_vexpand(true);
 
-    // Paned (Sidebar + Main Split Content View Area)
-    let main_paned = Paned::new(Orientation::Horizontal);
+    // Box (Sidebar + Main Split Content View Area)
+    let main_paned = Box::new(Orientation::Horizontal, 0);
     main_paned.set_hexpand(true);
     main_paned.set_vexpand(true);
-    main_paned.set_position(220); // Allocate sidebar space
     vbox.append(&main_paned);
 
     // Content Area VBox (contains SplitPaned + InfoPanel side-by-side)
     let content_vbox = Box::new(Orientation::Vertical, 0);
     content_vbox.set_hexpand(true);
     content_vbox.set_vexpand(true);
-    main_paned.set_end_child(Some(&content_vbox));
+    main_paned.append(&content_vbox);
 
     // Horizontal Paned to show InfoPanel resizable next to split view
     let layout_paned = Paned::new(Orientation::Horizontal);
