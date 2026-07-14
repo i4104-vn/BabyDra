@@ -78,6 +78,36 @@ pub fn create_explore_window(
     // Create HeaderBar
     let header_widgets_cell = Rc::new(RefCell::new(None::<crate::widgets::header_bar::HeaderBarWidgets>));
 
+    // Toggle hidden files closure
+    let toggle_hidden = {
+        let session_c = session.clone();
+        let nav = navigate_pane_ref.clone();
+        let active = active_pane.clone();
+        let header_widgets_c = header_widgets_cell.clone();
+        move || {
+            let show_hidden_now = {
+                let mut s = session_c.borrow_mut();
+                let tab = s.active_tab_mut();
+                tab.show_hidden = !tab.show_hidden;
+                tab.show_hidden
+            };
+
+            if let Some(ref hw) = *header_widgets_c.borrow() {
+                if show_hidden_now {
+                    hw.btn_toggle_hidden.add_css_class("toolbar-btn-active");
+                } else {
+                    hw.btn_toggle_hidden.remove_css_class("toolbar-btn-active");
+                }
+            }
+
+            let path = session_c.borrow().active_tab().current_path.clone();
+            if let Some(ref f) = *nav.borrow() {
+                f(active.get(), path);
+            }
+        }
+    };
+    let toggle_hidden_rc = Rc::new(toggle_hidden) as Rc<dyn Fn()>;
+
     // Create TabBar Container
     let tab_bar_box = Rc::new(RefCell::new(None::<gtk4::Box>));
 
@@ -119,8 +149,16 @@ pub fn create_explore_window(
                 }
             }
 
-            let show_hidden = session.borrow().active_tab().current_path == path 
-                && session.borrow().active_tab().history_index > 0;
+            let show_hidden = session.borrow().active_tab().show_hidden;
+
+            // Sync toggle button active class in HeaderBar
+            if let Some(ref hw) = *header_widgets_cell.borrow() {
+                if show_hidden {
+                    hw.btn_toggle_hidden.add_css_class("toolbar-btn-active");
+                } else {
+                    hw.btn_toggle_hidden.remove_css_class("toolbar-btn-active");
+                }
+            }
 
             let content_handle = if pane == ActivePane::Left {
                 Some(left_handle.clone())
@@ -282,6 +320,10 @@ pub fn create_explore_window(
         view_mode_callback,
         search_callback,
         sort_callback,
+        {
+            let th = toggle_hidden_rc.clone();
+            move || th()
+        },
     );
     ui.vbox.insert_child_after(&header_box, None::<&gtk4::Widget>);
     header_widgets_cell.replace(Some(header_widgets.clone()));
@@ -343,13 +385,18 @@ pub fn create_explore_window(
     {
         let toggle_split = toggle_split_view_rc.clone();
         let toggle_preview = toggle_preview_rc.clone();
+        let toggle_hidden = toggle_hidden_rc.clone();
         let key_controller = gtk4::EventControllerKey::new();
-        key_controller.connect_key_pressed(move |_, keyval, _, _| {
+        key_controller.connect_key_pressed(move |_, keyval, _, state| {
+            let has_ctrl = state.contains(gtk4::gdk::ModifierType::CONTROL_MASK);
             if keyval == gtk4::gdk::Key::F3 {
                 toggle_split();
                 glib::Propagation::Stop
             } else if keyval == gtk4::gdk::Key::F4 {
                 toggle_preview();
+                glib::Propagation::Stop
+            } else if has_ctrl && (keyval == gtk4::gdk::Key::h || keyval == gtk4::gdk::Key::H) {
+                toggle_hidden();
                 glib::Propagation::Stop
             } else {
                 glib::Propagation::Proceed

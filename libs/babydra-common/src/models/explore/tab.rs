@@ -10,6 +10,7 @@ pub struct TabState {
     pub history_index: usize,
     pub selection: Vec<PathBuf>,
     pub view_mode: String, // "icons" | "list" | "detail"
+    pub show_hidden: bool,
 }
 
 impl TabState {
@@ -21,6 +22,7 @@ impl TabState {
             history_index: 0,
             selection: Vec::new(),
             view_mode: "icons".to_string(),
+            show_hidden: false,
         }
     }
 

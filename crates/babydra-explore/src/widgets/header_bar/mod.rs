@@ -18,6 +18,7 @@ pub fn create_header_bar(
     view_mode_callback: impl Fn(String) + 'static,
     search_callback: impl Fn(String) + 'static,
     sort_callback: impl Fn(String) + 'static,
+    toggle_hidden_callback: impl Fn() + 'static,
 ) -> (Box, HeaderBarWidgets) {
     let widgets = render::build_header_bar_ui();
 
@@ -25,6 +26,15 @@ pub fn create_header_bar(
     let view_mode_cb = Rc::new(view_mode_callback) as Rc<dyn Fn(String)>;
     let search_cb = Rc::new(search_callback) as Rc<dyn Fn(String)>;
     let sort_cb = Rc::new(sort_callback) as Rc<dyn Fn(String)>;
+    let toggle_hidden_cb = Rc::new(toggle_hidden_callback) as Rc<dyn Fn()>;
+
+    // Wire toggle hidden clicked
+    {
+        let cb = toggle_hidden_cb.clone();
+        widgets.btn_toggle_hidden.connect_clicked(move |_| {
+            cb();
+        });
+    }
 
     // Sort dropdown wiring
     {

@@ -115,6 +115,11 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     btn_toggle_preview.set_tooltip_text(Some("Toggle Preview (F4)"));
     toolbar.append(&btn_toggle_preview);
 
+    let btn_toggle_hidden = Button::from_icon_name("view-conceal-symbolic");
+    btn_toggle_hidden.set_css_classes(&["toolbar-btn"]);
+    btn_toggle_hidden.set_tooltip_text(Some("Toggle Hidden Files (Ctrl+H)"));
+    toolbar.append(&btn_toggle_hidden);
+
     HeaderBarWidgets {
         container,
         btn_back,
@@ -136,5 +141,6 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
         btn_rename,
         btn_delete,
         btn_toggle_preview,
+        btn_toggle_hidden,
     }
 }
