@@ -209,8 +209,13 @@ pub fn create_explore_window(
     // Wire left pane navigation loop
     {
         let nav = navigate_pane_ref.clone();
+        let session_c = session.clone();
         glib::MainContext::default().spawn_local(async move {
             while let Some(path) = left_rx.recv().await {
+                {
+                    let mut s = session_c.borrow_mut();
+                    s.active_tab_mut().navigate_to(path.clone());
+                }
                 if let Some(ref f) = *nav.borrow() {
                     f(ActivePane::Left, path);
                 }

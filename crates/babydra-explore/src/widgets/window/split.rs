@@ -41,8 +41,13 @@ pub fn setup_split_view(
             };
 
             let nav_c_clone = nav_c.clone();
+            let session_cc = session_c.clone();
             glib::MainContext::default().spawn_local(async move {
                 while let Some(path) = rx_right.recv().await {
+                    {
+                        let mut s = session_cc.borrow_mut();
+                        s.active_tab_mut().navigate_to(path.clone());
+                    }
                     if let Some(ref f) = *nav_c_clone.borrow() {
                         f(ActivePane::Right, path);
                     }
