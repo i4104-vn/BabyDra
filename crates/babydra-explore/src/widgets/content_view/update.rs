@@ -34,8 +34,8 @@ fn create_flow_child(
     let item_box = Box::new(Orientation::Vertical, 4);
     item_box.set_size_request(110, 120);
     item_box.set_css_classes(&["file-item"]);
-    item_box.set_halign(Align::Center);
-    item_box.set_valign(Align::Center);
+    item_box.set_halign(Align::Fill);
+    item_box.set_valign(Align::Fill);
 
     let has_preview = if let Some(ext) = entry.path.extension() {
         let ext_str = ext.to_string_lossy().to_lowercase();
@@ -51,6 +51,8 @@ fn create_flow_child(
             picture.set_size_request(90, 90);
             picture.set_halign(Align::Center);
             picture.set_valign(Align::Center);
+            picture.set_hexpand(true);
+            picture.set_vexpand(true);
             picture.set_content_fit(gtk4::ContentFit::Cover);
             item_box.append(&picture);
         } else {
@@ -58,6 +60,8 @@ fn create_flow_child(
             icon.set_pixel_size(40);
             icon.set_halign(Align::Center);
             icon.set_valign(Align::Center);
+            icon.set_hexpand(true);
+            icon.set_vexpand(true);
             item_box.append(&icon);
         }
     } else {
@@ -65,6 +69,8 @@ fn create_flow_child(
         icon.set_pixel_size(40);
         icon.set_halign(Align::Center);
         icon.set_valign(Align::Center);
+        icon.set_hexpand(true);
+        icon.set_vexpand(true);
         item_box.append(&icon);
     };
 
@@ -73,6 +79,7 @@ fn create_flow_child(
         .max_width_chars(12)
         .ellipsize(gtk4::pango::EllipsizeMode::End)
         .halign(Align::Center)
+        .hexpand(true)
         .build();
     lbl.add_css_class("file-item-label");
 
