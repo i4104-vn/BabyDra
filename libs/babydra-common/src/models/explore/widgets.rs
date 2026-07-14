@@ -28,6 +28,7 @@ pub struct HeaderBarWidgets {
     pub search: Entry,
     pub btn_view_icons: Button,
     pub btn_view_list: Button,
+    pub dropdown_sort: gtk4::DropDown,
     pub btn_new_folder: Button,
     pub btn_cut: Button,
     pub btn_copy: Button,
@@ -52,6 +53,7 @@ pub struct ContentViewHandle {
     pub all_entries: Rc<RefCell<Vec<FileEntry>>>,
     pub current_path: Rc<RefCell<PathBuf>>,
     pub current_mode: Rc<RefCell<String>>,
+    pub sort_mode: Rc<RefCell<String>>,
     pub nav_callback: Rc<dyn Fn(PathBuf)>,
 }
 

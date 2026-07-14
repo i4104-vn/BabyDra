@@ -13,6 +13,7 @@ pub fn update_content_view_ui(
     nav_callback: &Rc<dyn Fn(PathBuf)>,
     current_path: &PathBuf,
     current_mode: &str,
+    sort_mode: &str,
 ) {
     // Clear flowbox
     while let Some(child) = widgets.flowbox.first_child() {
@@ -192,17 +193,40 @@ pub fn update_content_view_ui(
 
         // Set header function for grouping in ListBox
         let entries_clone = entries.to_vec();
+        let sort_mode_clone = sort_mode.to_string();
         widgets.listbox.set_header_func(move |row, before| {
+            if sort_mode_clone == "auto" {
+                row.set_header(None::<&gtk4::Widget>);
+                return;
+            }
+
             let get_group = |r: &gtk4::ListBoxRow| -> String {
                 let idx = r.property::<String>("name").parse::<usize>().unwrap_or(usize::MAX);
                 if idx < entries_clone.len() {
                     let entry = &entries_clone[idx];
-                    if matches!(entry.file_type, babydra_common::FileType::Directory) {
-                        "Folders".to_string()
-                    } else {
-                        match entry.path.extension() {
-                            Some(ext) => format!("{} Files", ext.to_string_lossy().to_uppercase()),
-                            None => "Other Files".to_string(),
+                    if sort_mode_clone == "date" {
+                        if let Some(modified) = entry.modified {
+                            if let Ok(duration) = std::time::SystemTime::now().duration_since(modified) {
+                                let days = duration.as_secs() / 86400;
+                                if days == 0 { "Today".to_string() }
+                                else if days == 1 { "Yesterday".to_string() }
+                                else if days <= 7 { "Last 7 Days".to_string() }
+                                else if days <= 30 { "Last 30 Days".to_string() }
+                                else { "Earlier".to_string() }
+                            } else {
+                                "Today".to_string()
+                            }
+                        } else {
+                            "Unknown Date".to_string()
+                        }
+                    } else { // "group"
+                        if matches!(entry.file_type, babydra_common::FileType::Directory) {
+                            "Folders".to_string()
+                        } else {
+                            match entry.path.extension() {
+                                Some(ext) => format!("{} Files", ext.to_string_lossy().to_uppercase()),
+                                None => "Other Files".to_string(),
+                            }
                         }
                     }
                 } else {

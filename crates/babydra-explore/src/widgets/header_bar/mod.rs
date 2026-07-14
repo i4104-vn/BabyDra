@@ -17,12 +17,29 @@ pub fn create_header_bar(
     nav_callback: impl Fn(PathBuf) + 'static,
     view_mode_callback: impl Fn(String) + 'static,
     search_callback: impl Fn(String) + 'static,
+    sort_callback: impl Fn(String) + 'static,
 ) -> (Box, HeaderBarWidgets) {
     let widgets = render::build_header_bar_ui();
 
     let nav_cb = Rc::new(nav_callback) as Rc<dyn Fn(PathBuf)>;
     let view_mode_cb = Rc::new(view_mode_callback) as Rc<dyn Fn(String)>;
     let search_cb = Rc::new(search_callback) as Rc<dyn Fn(String)>;
+    let sort_cb = Rc::new(sort_callback) as Rc<dyn Fn(String)>;
+
+    // Sort dropdown wiring
+    {
+        let cb = sort_cb.clone();
+        widgets.dropdown_sort.connect_selected_notify(move |dd| {
+            let selected = dd.selected();
+            let mode = match selected {
+                0 => "auto".to_string(),
+                1 => "date".to_string(),
+                2 => "group".to_string(),
+                _ => "auto".to_string(),
+            };
+            cb(mode);
+        });
+    }
 
     // View toggle wiring
     {

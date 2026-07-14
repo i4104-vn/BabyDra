@@ -96,6 +96,13 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     let spacer = Box::new(Orientation::Horizontal, 0);
     spacer.set_hexpand(true);
     toolbar.append(&spacer);
+
+    // DropDown for sorting (Auto, Theo ngày, Theo group)
+    let dropdown_sort = gtk4::DropDown::from_strings(&["Auto", "Theo ngày", "Theo group"]);
+    dropdown_sort.set_css_classes(&["toolbar-dropdown"]);
+    dropdown_sort.set_tooltip_text(Some("Sắp xếp theo"));
+    toolbar.append(&dropdown_sort);
+
     toolbar.append(&btn_view_icons);
     toolbar.append(&btn_view_list);
 
@@ -121,6 +128,7 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
         search,
         btn_view_icons,
         btn_view_list,
+        dropdown_sort,
         btn_new_folder,
         btn_cut,
         btn_copy,

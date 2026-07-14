@@ -252,6 +252,19 @@ pub fn create_explore_window(
         }
     };
 
+    let sort_callback = {
+        let left = left_content_handle.clone();
+        let right = right_content_handle.clone();
+        let active = active_pane.clone();
+        move |sort_mode: String| {
+            if active.get() == ActivePane::Left {
+                crate::widgets::content_view::set_content_view_sort(&left, &sort_mode);
+            } else if let Some(ref r) = *right.borrow() {
+                crate::widgets::content_view::set_content_view_sort(r, &sort_mode);
+            }
+        }
+    };
+
     // Create Header Bar Box
     let (header_box, header_widgets) = crate::widgets::header_bar::create_header_bar(
         session.clone(),
@@ -261,6 +274,7 @@ pub fn create_explore_window(
         },
         view_mode_callback,
         search_callback,
+        sort_callback,
     );
     ui.vbox.insert_child_after(&header_box, None::<&gtk4::Widget>);
     header_widgets_cell.replace(Some(header_widgets.clone()));

@@ -20,6 +20,7 @@ pub fn create_content_view(
     let all_entries = Rc::new(RefCell::new(Vec::new()));
     let current_path = Rc::new(RefCell::new(PathBuf::new()));
     let current_mode = Rc::new(RefCell::new("icons".to_string()));
+    let sort_mode = Rc::new(RefCell::new("auto".to_string()));
     let nav_cb = Rc::new(nav_callback) as Rc<dyn Fn(PathBuf)>;
 
     let handle = ContentViewHandle {
@@ -28,6 +29,7 @@ pub fn create_content_view(
         all_entries: all_entries.clone(),
         current_path: current_path.clone(),
         current_mode: current_mode.clone(),
+        sort_mode: sort_mode.clone(),
         nav_callback: nav_cb.clone(),
     };
 
@@ -123,8 +125,32 @@ pub fn create_content_view(
 }
 
 /// Helper to sort entries: directories first (sorted by name), then files (sorted by type/extension, then by name)
-pub fn sort_entries(entries: &mut [FileEntry]) {
+pub fn sort_entries(entries: &mut [FileEntry], sort_mode: &str) {
     entries.sort_by(|a, b| {
+        if sort_mode == "date" {
+            let weight = |e: &FileEntry| -> u32 {
+                if let Some(modified) = e.modified {
+                    if let Ok(duration) = std::time::SystemTime::now().duration_since(modified) {
+                        let days = duration.as_secs() / 86400;
+                        if days == 0 { 0 }
+                        else if days == 1 { 1 }
+                        else if days <= 7 { 2 }
+                        else if days <= 30 { 3 }
+                        else { 4 }
+                    } else {
+                        0
+                    }
+                } else {
+                    5
+                }
+            };
+            let w_a = weight(a);
+            let w_b = weight(b);
+            if w_a != w_b {
+                return w_a.cmp(&w_b);
+            }
+        }
+
         let a_is_dir = matches!(a.file_type, babydra_common::FileType::Directory);
         let b_is_dir = matches!(b.file_type, babydra_common::FileType::Directory);
         match (a_is_dir, b_is_dir) {
@@ -154,13 +180,34 @@ pub fn set_content_view_mode(handle: &ContentViewHandle, mode: &str) {
     
     let e = handle.entries.borrow().clone();
     let cp = handle.current_path.borrow().clone();
-    update::update_content_view_ui(&handle.widgets, &e, &handle.nav_callback, &cp, mode);
+    let sort = handle.sort_mode.borrow().clone();
+    update::update_content_view_ui(&handle.widgets, &e, &handle.nav_callback, &cp, mode, &sort);
+}
+
+/// Changes the sorting mode of the content view and updates the layout.
+pub fn set_content_view_sort(handle: &ContentViewHandle, sort_mode: &str) {
+    handle.sort_mode.replace(sort_mode.to_string());
+    
+    // Sort current entries
+    let mut e = handle.entries.borrow().clone();
+    sort_entries(&mut e, sort_mode);
+    handle.entries.replace(e.clone());
+    
+    // Sort all entries
+    let mut all = handle.all_entries.borrow().clone();
+    sort_entries(&mut all, sort_mode);
+    handle.all_entries.replace(all);
+
+    let cp = handle.current_path.borrow().clone();
+    let mode = handle.current_mode.borrow().clone();
+    update::update_content_view_ui(&handle.widgets, &e, &handle.nav_callback, &cp, &mode, sort_mode);
 }
 
 /// Updates files in view area.
 pub fn update_content_view(handle: &ContentViewHandle, entries: &[FileEntry], current_path: PathBuf) {
+    let sort = handle.sort_mode.borrow().clone();
     let mut sorted = entries.to_vec();
-    sort_entries(&mut sorted);
+    sort_entries(&mut sorted, &sort);
     handle.all_entries.replace(sorted.clone());
     handle.entries.replace(sorted.clone());
     handle.current_path.replace(current_path);
@@ -169,17 +216,18 @@ pub fn update_content_view(handle: &ContentViewHandle, entries: &[FileEntry], cu
     handle.widgets.stack.set_visible_child_name(&mode);
 
     let cp = handle.current_path.borrow().clone();
-    update::update_content_view_ui(&handle.widgets, &sorted, &handle.nav_callback, &cp, &mode);
+    update::update_content_view_ui(&handle.widgets, &sorted, &handle.nav_callback, &cp, &mode, &sort);
 }
 
 /// Filters content files list.
 pub fn filter_content_view(handle: &ContentViewHandle, query: &str) {
+    let sort = handle.sort_mode.borrow().clone();
     let all = handle.all_entries.borrow().clone();
     let mut filtered = babydra_common::filter_entries(&all, query);
-    sort_entries(&mut filtered);
+    sort_entries(&mut filtered, &sort);
     handle.entries.replace(filtered.clone());
 
     let mode = handle.current_mode.borrow().clone();
     let cp = handle.current_path.borrow().clone();
-    update::update_content_view_ui(&handle.widgets, &filtered, &handle.nav_callback, &cp, &mode);
+    update::update_content_view_ui(&handle.widgets, &filtered, &handle.nav_callback, &cp, &mode, &sort);
 }
