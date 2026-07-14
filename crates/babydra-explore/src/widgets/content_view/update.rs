@@ -18,8 +18,28 @@ fn create_flow_child(
     item_box.set_size_request(100, 100);
     item_box.set_css_classes(&["file-item"]);
 
-    let img = babydra_common::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
-    img.set_pixel_size(48);
+    let has_preview = if let Some(ext) = entry.path.extension() {
+        let ext_str = ext.to_string_lossy().to_lowercase();
+        matches!(ext_str.as_str(), "png" | "jpg" | "jpeg" | "gif" | "bmp" | "webp" | "svg")
+    } else {
+        false
+    };
+
+    let img = if has_preview {
+        if let Ok(pixbuf) = gdk_pixbuf::Pixbuf::from_file_at_scale(&entry.path, 48, 48, true) {
+            let image = gtk4::Image::new();
+            image.set_from_pixbuf(Some(&pixbuf));
+            image
+        } else {
+            let icon = babydra_common::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
+            icon.set_pixel_size(48);
+            icon
+        }
+    } else {
+        let icon = babydra_common::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
+        icon.set_pixel_size(48);
+        icon
+    };
 
     let lbl = Label::builder()
         .label(&entry.display_name)
