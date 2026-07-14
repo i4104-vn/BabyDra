@@ -1,7 +1,19 @@
 /* ── Base Window ───────────────────────────────────────────────── */
-window.explore-window,
-.explore-window .background {
-    background-color: #202020;
+window.explore-window {
+    background-color: transparent;
+    background-image: none;
+    box-shadow: none;
+    border: none;
+}
+
+.explore-window > box {
+    background-color: rgba(14, 14, 18, 0.85);
+    background-image: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.015) 0px, rgba(255, 255, 255, 0.015) 1px, transparent 1px, transparent 4px),
+                      linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0.12) 100%);
+    -gtk-background-blur: 24;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
     color: #e8e8e8;
     font-family: "Segoe UI Variable", "Inter", "Cantarell", sans-serif;
     font-size: 13px;
@@ -9,7 +21,7 @@ window.explore-window,
 
 /* ── Tab Bar ────────────────────────────────────────────────────── */
 .explore-window .tab-bar {
-    background-color: #1c1c1c;
+    background-color: rgba(0, 0, 0, 0.2);
     border-bottom: 1px solid #3a3a3a;
     padding: 0 6px;
     min-height: 38px;
@@ -46,7 +58,7 @@ window.explore-window,
 
 .explore-window .tab-item.active-tab {
     background-image: none;
-    background-color: #202020;
+    background-color: rgba(255, 255, 255, 0.08);
     border-top: 2px solid #3b82f6;
     margin-top: 2px;
 }
@@ -100,7 +112,7 @@ window.explore-window,
 
 /* ── Navigation Row ─────────────────────────────────────────────── */
 .explore-window .nav-bar {
-    background-color: #202020;
+    background-color: rgba(0, 0, 0, 0.1);
     padding: 4px 8px;
     border-bottom: 1px solid #3a3a3a;
 }
@@ -129,7 +141,7 @@ window.explore-window,
 }
 
 .explore-window .address-bar-wrap {
-    background-color: #2b2b2b;
+    background-color: rgba(255, 255, 255, 0.05);
     border: 1px solid #4a4a4a;
     border-radius: 6px;
     padding: 0 8px;
@@ -169,7 +181,7 @@ window.explore-window,
 }
 
 .explore-window .search-entry {
-    background-color: #2b2b2b;
+    background-color: rgba(255, 255, 255, 0.05);
     border: 1px solid #4a4a4a;
     border-radius: 6px;
     color: #e8e8e8;
@@ -185,7 +197,7 @@ window.explore-window,
 
 /* ── Command Toolbar (Ribbon) ────────────────────────────────────── */
 .explore-window .toolbar {
-    background-color: #202020;
+    background-color: rgba(0, 0, 0, 0.15);
     border-bottom: 1px solid #3a3a3a;
     padding: 3px 8px;
     min-height: 32px;
@@ -230,14 +242,14 @@ window.explore-window,
 
 /* ── Sidebar ─────────────────────────────────────────────────────── */
 .explore-window .sidebar {
-    background-color: #1f1f1f;
+    background-color: rgba(0, 0, 0, 0.1);
     border-right: 1px solid #3a3a3a;
     min-width: 220px;
 }
 
 .explore-window .sidebar>viewport,
 .explore-window .sidebar>viewport>box {
-    background-color: #1f1f1f;
+    background-color: transparent;
     padding: 4px 0;
 }
 
@@ -272,7 +284,7 @@ window.explore-window,
 
 /* ── Content Area ───────────────────────────────────────────────── */
 .explore-window .content-view {
-    background-color: #202020;
+    background-color: transparent;
 }
 
 /* Scoped: set GTK4 internal widget backgrounds to solid color within content-view */
@@ -282,7 +294,7 @@ window.explore-window,
 .explore-window .content-view listbox,
 .explore-window .content-view row,
 .explore-window .content-view stack {
-    background-color: #202020;
+    background-color: transparent;
 }
 
 .explore-window .section-title {
@@ -391,7 +403,7 @@ window.explore-window,
 
 /* ── Info Panel ─────────────────────────────────────────────────── */
 .explore-window .info-panel {
-    background-color: #1f1f1f;
+    background-color: rgba(0, 0, 0, 0.1);
     border-left: 1px solid #3a3a3a;
     padding: 16px;
     min-width: 240px;
@@ -400,7 +412,7 @@ window.explore-window,
 
 .explore-window .info-panel viewport,
 .explore-window .info-panel viewport>box {
-    background-color: #1f1f1f;
+    background-color: transparent;
 }
 
 .explore-window .info-row-key {
@@ -415,7 +427,7 @@ window.explore-window,
 
 /* ── Status Bar ─────────────────────────────────────────────────── */
 .explore-window .status-bar {
-    background-color: #1c1c1c;
+    background-color: rgba(0, 0, 0, 0.2);
     border-top: 1px solid #3a3a3a;
     padding: 4px 12px;
     color: #888;
