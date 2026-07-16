@@ -1,0 +1,13 @@
+pub mod explore;
+pub mod apps;
+pub mod notification;
+pub mod system;
+pub mod screenshot;
+pub mod search;
+pub mod mpris;
+pub mod exif;
+pub mod wallpaper;
+pub mod actions;
+pub mod window;
+pub mod icon;
+pub mod tray;

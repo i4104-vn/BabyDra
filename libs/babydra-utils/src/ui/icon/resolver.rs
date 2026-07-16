@@ -59,7 +59,7 @@ pub fn get_logo_png(size: i32) -> gtk4::Image {
 }
 
 pub fn get_logo_path() -> std::path::PathBuf {
-    let logo_dir = babydra_common::desktop::config::get_babydra_config_dir();
+    let logo_dir = babydra_common::config::get_babydra_config_dir();
     let logo_path = logo_dir.join("logo.png");
     if !logo_path.exists() {
         let _ = std::fs::create_dir_all(&logo_dir);
@@ -209,7 +209,7 @@ pub fn set_system_or_file_icon(img: &gtk4::Image, icon_path_or_name: &str, defau
         img.set_icon_name(Some(&clean_name));
     } else {
         let lower_name = clean_name.to_lowercase();
-        let apps = babydra_common::desktop::apps::find_desktop_apps();
+        let apps = babydra_common::services::apps::find_desktop_apps();
         let mut resolved_icon = None;
         for app in apps {
             if app.name.to_lowercase() == lower_name {

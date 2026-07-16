@@ -1,6 +1,6 @@
 //! Alt-Tab application switcher MRU (Most Recently Used) window history.
 
-use crate::desktop::DesktopApp;
+use crate::services::apps::DesktopApp;
 use std::io::Write;
 
 /// Retrieves the switcher window focus history list.
@@ -32,7 +32,7 @@ pub fn save_history(active_name: &str) {
 /// Queries the Wayland compositor for running windows and matches them with local desktop entries.
 /// Returns matched windows sorted by most recently used (MRU) order.
 pub fn get_running_apps() -> Vec<DesktopApp> {
-    let desktop_apps = crate::desktop::apps::find_desktop_apps();
+    let desktop_apps = crate::services::apps::find_desktop_apps();
     let mut running = Vec::new();
     let mut detected_windows = std::collections::HashSet::new();
 

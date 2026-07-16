@@ -6,7 +6,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::os::unix::net::UnixListener;
 use std::io::Read;
-use babydra_common::desktop::DesktopApp;
+use babydra_common::DesktopApp;
 use babydra_common::{activate_app, save_history};
 use crate::widgets::list::build_apps_list;
 

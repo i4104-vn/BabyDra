@@ -398,7 +398,7 @@ fn update_highlight(list_box: &gtk4::Box, selected_idx: Option<usize>) {
 fn repopulate_results(
     list_box: &gtk4::Box,
     query: &str,
-    apps: &[babydra_common::desktop::DesktopApp],
+    apps: &[babydra_common::DesktopApp],
     window: &gtk4::ApplicationWindow,
     expanded: bool,
     toggle_btn: &gtk4::Button,

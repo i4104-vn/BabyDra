@@ -59,7 +59,7 @@ pub fn create_volume_row(
             move || {
                 let new_mute = !muted_state_clone.get();
                 muted_state_clone.set(new_mute);
-                babydra_common::system::volume::set_muted(new_mute);
+                babydra_common::volume::set_muted(new_mute);
                 update_mute_icon_clone(new_mute);
                 update_topbar_volume_icon(&vol_icon_c);
             }
@@ -218,7 +218,7 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
             let pop_clone = popover.clone();
             let update_mute_clone = update_mute_btn.clone();
             btn.connect_clicked(move |_| {
-                babydra_common::system::volume::select_audio_device(&name);
+                babydra_common::volume::select_audio_device(&name);
                 let pop_c = pop_clone.clone();
                 let update_mute_c = update_mute_clone.clone();
                 gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(150), move || {
@@ -277,7 +277,7 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
         let pop_clone = popover.clone();
         let update_mute_clone = update_mute_btn.clone();
         btn.connect_clicked(move |_| {
-            babydra_common::system::volume::select_audio_device(&name);
+            babydra_common::volume::select_audio_device(&name);
             let pop_c = pop_clone.clone();
             let update_mute_c = update_mute_clone.clone();
             gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(150), move || {

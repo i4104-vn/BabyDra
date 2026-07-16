@@ -103,7 +103,7 @@ pub async fn load_directory(path: PathBuf, show_hidden: bool) -> Result<Vec<File
             let mut display_name = name_str.clone();
 
             if file_type == FileType::RegularFile && entry_path.extension().map(|e| e == "desktop").unwrap_or(false) {
-                if let Some(app) = crate::desktop::apps::parse_desktop_file(&entry_path) {
+                if let Some(app) = crate::services::apps::parse_desktop_file(&entry_path) {
                     display_name = app.name;
                     if let Some(app_icon) = app.icon {
                         icon_name = app_icon;

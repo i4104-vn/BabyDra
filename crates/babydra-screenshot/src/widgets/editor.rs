@@ -6,7 +6,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use babydra_common::models::{EditorState, Tool, Drawing};
-use babydra_common::desktop::screenshot::{
+use babydra_common::services::screenshot::{
     draw_pixelated_rect, trigger_save, trigger_copy
 };
 

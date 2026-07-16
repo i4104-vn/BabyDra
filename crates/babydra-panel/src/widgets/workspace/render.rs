@@ -1,7 +1,7 @@
 //! Layout structure and widget builders for the desktop taskbar buttons and window previews.
 
 use gtk4::prelude::*;
-use babydra_common::desktop::DesktopApp;
+use babydra_common::DesktopApp;
 
 /// Builds the base container box for the taskbar.
 pub fn build_workspace_container() -> (gtk4::Box, gtk4::Box) {

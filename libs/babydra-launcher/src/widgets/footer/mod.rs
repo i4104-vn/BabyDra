@@ -28,7 +28,7 @@ pub fn create_launcher_footer() -> gtk4::Box {
     });
 
     logout_btn.connect_clicked(|_| {
-        babydra_common::desktop::actions::execute_exit_shell();
+        babydra_common::services::actions::execute_exit_shell();
     });
 
     footer_box

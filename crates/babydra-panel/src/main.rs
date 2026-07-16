@@ -7,7 +7,7 @@ use std::rc::Rc;
 
 fn main() {
     // Initialize D-Bus StatusNotifierWatcher system tray listener daemon
-    babydra_common::desktop::tray::spawn_watcher_service();
+    babydra_common::tray::spawn_watcher_service();
 
     // Detect DDC/CI bus for desktop monitors on startup
     widgets::panel::detect_ddc_bus();

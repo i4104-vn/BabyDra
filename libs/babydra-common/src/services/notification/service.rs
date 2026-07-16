@@ -70,7 +70,7 @@ impl NotificationService {
         let mut icon = app_icon.to_string();
         if icon.is_empty() {
             let lower_name = app_name.to_lowercase();
-            let apps = crate::desktop::apps::find_desktop_apps();
+            let apps = crate::services::apps::find_desktop_apps();
             for app in apps {
                 if app.name.to_lowercase() == lower_name {
                     if let Some(app_icon) = app.icon {
@@ -195,7 +195,7 @@ trait Notifications {
 
 /// Sends a desktop notification using the default theme/common logo.
 pub fn send_notification(title: &str, body: &str) {
-    let logo_path = crate::desktop::icon::get_logo_path();
+    let logo_path = crate::services::icon::get_logo_path();
     let logo_str = logo_path.to_string_lossy();
     if let Ok(conn) = zbus::blocking::Connection::session() {
         if let Ok(proxy) = NotificationsProxyBlocking::new(&conn) {

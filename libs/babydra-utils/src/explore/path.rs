@@ -22,7 +22,7 @@ pub fn parse_target_dir() -> PathBuf {
     let mut target_dir = glib::home_dir();
     if let Some(arg) = std::env::args().nth(1) {
         let path_str = if arg.starts_with("file://") {
-            babydra_common::desktop::mpris::decode_uri(&arg.replacen("file://", "", 1))
+            babydra_common::mpris::decode_uri(&arg.replacen("file://", "", 1))
         } else {
             arg
         };

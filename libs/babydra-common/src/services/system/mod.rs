@@ -1,5 +1,3 @@
-//! System / hardware subsystem interfaces namespace.
-
 pub mod wifi;
 pub mod volume;
 pub mod backlight;

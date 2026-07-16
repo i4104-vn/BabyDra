@@ -2,7 +2,7 @@
 //! Renders active application thumbnail previews or falls back to system application icons.
 
 use gtk4::prelude::*;
-use babydra_common::desktop::DesktopApp;
+use babydra_common::DesktopApp;
 
 /// Creates a card button displaying a window preview screenshot or a placeholder icon.
 pub fn create_app_button(app_item: &DesktopApp) -> gtk4::Button {

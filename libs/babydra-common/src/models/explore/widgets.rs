@@ -3,7 +3,7 @@ use std::rc::Rc;
 use std::cell::RefCell;
 use std::path::PathBuf;
 use crate::models::explore::file_entry::FileEntry;
-use crate::desktop::explore::watcher::FileWatcher;
+use crate::services::explore::FileWatcher;
 
 pub struct MainWindowWidgets {
     pub window: ApplicationWindow,

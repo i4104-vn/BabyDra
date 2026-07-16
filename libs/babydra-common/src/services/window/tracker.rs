@@ -24,7 +24,7 @@ pub fn spawn_switcher_tracker() {
                     if screenshot_taken {
                         let temp_file = format!("{}/temp_active.png", cache_dir);
                         // Save window-specific screenshot
-                        let hash = crate::desktop::apps::get_window_hash(old_app, old_title);
+                        let hash = crate::services::apps::get_window_hash(old_app, old_title);
                         let dest_file = format!("{}/{}.png", cache_dir, hash);
                         let _ = fs::copy(&temp_file, &dest_file);
                         // Save generic fallback screenshot
@@ -52,7 +52,7 @@ pub fn spawn_switcher_tracker() {
                     if screenshot_taken {
                         // Copy the temp screenshot to the old window's cache file
                         let temp_file = format!("{}/temp_active.png", cache_dir);
-                        let hash = crate::desktop::apps::get_window_hash(old_app, old_title);
+                        let hash = crate::services::apps::get_window_hash(old_app, old_title);
                         let dest_file = format!("{}/{}.png", cache_dir, hash);
                         let _ = fs::copy(&temp_file, &dest_file);
                         // Copy to generic fallback screenshot
@@ -67,7 +67,7 @@ pub fn spawn_switcher_tracker() {
                     let mut running_app_ids = std::collections::HashSet::new();
                     let running_windows = super::get_running_windows();
                     for (id, title) in running_windows {
-                        running_hashes.insert(crate::desktop::apps::get_window_hash(&id, &title));
+                        running_hashes.insert(crate::services::apps::get_window_hash(&id, &title));
                         running_app_ids.insert(id);
                     }
                     for entry in entries {

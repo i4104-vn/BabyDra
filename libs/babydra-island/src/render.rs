@@ -69,7 +69,7 @@ pub fn create_system_island() -> gtk4::Box {
         });
         
         if let Some(app_name) = app_to_activate {
-            let apps = babydra_common::desktop::find_desktop_apps();
+            let apps = babydra_common::find_desktop_apps();
             let mut found_app = None;
             let lower_name = app_name.to_lowercase();
             
