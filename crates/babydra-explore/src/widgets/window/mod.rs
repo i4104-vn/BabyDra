@@ -387,5 +387,17 @@ pub fn create_explore_window(
         f(ActivePane::Left, path);
     }
 
+    // Connect theme-change listener to rebuild content views
+    if let Some(settings) = gtk4::Settings::default() {
+        let left_handle = left_content_handle.clone();
+        let right_handle = right_content_handle.clone();
+        settings.connect_gtk_application_prefer_dark_theme_notify(move |_| {
+            crate::widgets::content_view::update_content_view_ui(&left_handle);
+            if let Some(ref rh) = *right_handle.borrow() {
+                crate::widgets::content_view::update_content_view_ui(rh);
+            }
+        });
+    }
+
     ui.window
 }
