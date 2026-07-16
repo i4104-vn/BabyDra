@@ -29,7 +29,7 @@ pub fn create_system_island() -> gtk4::Box {
     let default_view = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     default_view.set_valign(gtk4::Align::Center);
     default_view.set_halign(gtk4::Align::Center);
-    let default_icon = babydra_common::icon::get_icon("logo", 12);
+    let default_icon = babydra_utils::ui::icon::get_icon("logo", 12);
     default_view.append(&default_icon);
     notch_content.append(&default_view);
 
@@ -69,7 +69,7 @@ pub fn create_system_island() -> gtk4::Box {
         });
         
         if let Some(app_name) = app_to_activate {
-            let apps = babydra_common::desktop::find_desktop_apps();
+            let apps = babydra_common::find_desktop_apps();
             let mut found_app = None;
             let lower_name = app_name.to_lowercase();
             
@@ -146,7 +146,7 @@ pub fn create_system_island() -> gtk4::Box {
 
     let badge_icon_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     badge_icon_container.set_valign(gtk4::Align::Center);
-    let badge_icon = babydra_common::icon::get_icon_colored("bell", 14, "#3b82f6");
+    let badge_icon = babydra_utils::ui::icon::get_icon_colored("bell", 14, "#3b82f6");
     badge_icon_container.append(&badge_icon);
 
     let badge_text_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);

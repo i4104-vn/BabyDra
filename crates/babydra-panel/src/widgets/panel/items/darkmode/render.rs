@@ -5,12 +5,12 @@ pub fn create_small_theme_toggle_tile() -> gtk4::Button {
         .map(|s| s.is_gtk_application_prefer_dark_theme())
         .unwrap_or(true);
 
-    baby_utils::components::create_square_toggle_tile(
+    babydra_utils::components::create_square_toggle_tile(
         "dark-mode",
         &babydra_common::i18n::t("control.dark_mode"),
         is_dark_init,
         |new_dark| {
-            babydra_common::set_dark_mode(new_dark);
+            babydra_utils::ui::theme::set_dark_mode(new_dark);
         }
     )
 }

@@ -25,7 +25,7 @@ pub fn rebuild_panel_window(
     // 3. Logo Button
     let logo_btn = gtk4::Button::new();
     logo_btn.add_css_class("panel-logo-btn");
-    let logo_icon = babydra_common::icon::get_icon("logo", 16);
+    let logo_icon = babydra_utils::ui::icon::get_icon("logo", 16);
     logo_btn.set_child(Some(&logo_icon));
     
     let lw_clone = launcher_window.clone();
@@ -117,7 +117,7 @@ pub fn build_panel_ui(
     launcher_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
 ) -> gtk4::ApplicationWindow {
     let window = gtk4::ApplicationWindow::new(app);
-    babydra_common::apply_theme_class(&window);
+    babydra_utils::ui::theme::apply_theme_class(&window);
 
     // Initialize layer shell properties on the window
     window.init_layer_shell();

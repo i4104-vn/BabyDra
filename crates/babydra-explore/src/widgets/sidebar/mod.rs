@@ -89,7 +89,7 @@ fn add_sidebar_item(
     let session_clone = session.clone();
     let target_path = path.clone();
 
-    let btn = baby_utils::components::create_sidebar_item_button(
+    let btn = babydra_utils::components::create_sidebar_item_button(
         name,
         icon_name,
         "sidebar-item",

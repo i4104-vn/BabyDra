@@ -10,7 +10,7 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
     
     let (is_active, ssid) = get_wifi_state();
     
-    let (left_btn, sub_label) = baby_utils::components::create_toggle_tile(
+    let (left_btn, sub_label) = babydra_utils::components::create_toggle_tile(
         "wifi",
         &babydra_common::i18n::t("control.network"),
         &ssid,
@@ -30,7 +30,7 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
         .and_then(|img| img.downcast::<gtk4::Image>().ok())
         .unwrap();
 
-    let right_btn = baby_utils::components::create_colored_icon_button(
+    let right_btn = babydra_utils::components::create_colored_icon_button(
         "go-next-symbolic",
         12,
         "rgba(255, 255, 255, 0.7)",
@@ -39,7 +39,7 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
         || {},
     );
     
-    let popover = baby_utils::components::create_popover(&container, gtk4::PositionType::Right, "taskbar-popover");
+    let popover = babydra_utils::components::create_popover(&container, gtk4::PositionType::Right, "taskbar-popover");
     popover.set_has_arrow(false);
     
     setup_wifi_popover(&popover, sub_label.clone(), left_btn.clone(), circle.clone(), icon_widget.clone());
@@ -52,7 +52,7 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
         if let Some(ref cb) = on_popover_toggled_c {
             cb(true);
         }
-        let left_icon = babydra_common::icon::get_icon_colored("go-previous-symbolic", 12, "rgba(255, 255, 255, 0.7)");
+        let left_icon = babydra_utils::ui::icon::get_icon_colored("go-previous-symbolic", 12, "rgba(255, 255, 255, 0.7)");
         right_btn_clone.set_child(Some(&left_icon));
     });
 
@@ -62,7 +62,7 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
         if let Some(ref cb) = on_popover_toggled_c2 {
             cb(false);
         }
-        let right_icon = babydra_common::icon::get_icon_colored("go-next-symbolic", 12, "rgba(255, 255, 255, 0.7)");
+        let right_icon = babydra_utils::ui::icon::get_icon_colored("go-next-symbolic", 12, "rgba(255, 255, 255, 0.7)");
         right_btn_c2.set_child(Some(&right_icon));
     });
     
@@ -212,7 +212,7 @@ fn build_wifi_list_ui(
         item_box.set_valign(gtk4::Align::Center);
 
         let icon_color = if is_connected { "#ffffff" } else { "rgba(255, 255, 255, 0.5)" };
-        let wifi_icon = babydra_common::icon::get_icon_colored("wifi", 14, icon_color);
+        let wifi_icon = babydra_utils::ui::icon::get_icon_colored("wifi", 14, icon_color);
         item_box.append(&wifi_icon);
 
         let name_label = gtk4::Label::new(Some(&ssid));
@@ -222,7 +222,7 @@ fn build_wifi_list_ui(
 
         let is_secured = security != "open";
         if is_secured {
-            let lock_icon = babydra_common::icon::get_icon_colored("lock", 12, "rgba(255, 255, 255, 0.4)");
+            let lock_icon = babydra_utils::ui::icon::get_icon_colored("lock", 12, "rgba(255, 255, 255, 0.4)");
             item_box.append(&lock_icon);
         }
 

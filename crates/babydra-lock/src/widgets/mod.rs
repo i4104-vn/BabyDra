@@ -11,7 +11,7 @@ pub fn create_lock_window(
     is_primary: bool,
 ) {
     let window = gtk4::ApplicationWindow::new(app);
-    babydra_common::apply_theme_class(&window);
+    babydra_utils::ui::theme::apply_theme_class(&window);
     window.init_layer_shell();
     window.set_layer(Layer::Overlay);
     window.set_exclusive_zone(-1);
@@ -50,7 +50,7 @@ pub fn create_lock_window(
     center_box.set_vexpand(true);
 
     if is_primary {
-        let card_box = baby_utils::components::create_card_with_class(gtk4::Orientation::Vertical, 20, "lock-card");
+        let card_box = babydra_utils::components::create_card_with_class(gtk4::Orientation::Vertical, 20, "lock-card");
         card_box.set_valign(gtk4::Align::Center);
         card_box.set_halign(gtk4::Align::Center);
 
@@ -84,7 +84,7 @@ pub fn create_lock_window(
         update_clock();
         glib::timeout_add_local(std::time::Duration::from_secs(1), update_clock);
 
-        let avatar_icon = babydra_common::icon::get_icon("avatar-default", 80);
+        let avatar_icon = babydra_utils::ui::icon::get_icon("avatar-default", 80);
         avatar_icon.add_css_class("lock-avatar");
         avatar_icon.set_halign(gtk4::Align::Center);
 

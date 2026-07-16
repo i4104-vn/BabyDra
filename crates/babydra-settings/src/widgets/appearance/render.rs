@@ -20,11 +20,11 @@ pub fn build_appearance_ui(
     main_box.set_margin_end(16);
 
     // Title
-    let title_lbl = baby_utils::components::create_title("Wallpaper & Colors");
+    let title_lbl = babydra_utils::components::create_title("Wallpaper & Colors");
     main_box.append(&title_lbl);
 
     // Dashboard glass panel container
-    let cc_box = baby_utils::components::create_card(gtk4::Orientation::Vertical, 20);
+    let cc_box = babydra_utils::components::create_card(gtk4::Orientation::Vertical, 20);
     cc_box.set_margin_top(24);
     cc_box.set_margin_bottom(24);
     cc_box.set_margin_start(24);

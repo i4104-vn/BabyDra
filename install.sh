@@ -76,7 +76,6 @@ cargo build --release
 # 5. Stop running panel/menu/switcher/lock instances
 echo "Stopping active processes..."
 killall babydra-panel || true
-killall babydra-menu || true
 killall babydra-switcher || true
 killall babydra-screenshot || true
 killall babydra-lock || true
@@ -89,7 +88,6 @@ killall babydra-explore || true
 # 6. Install the binaries
 echo "Installing binaries to $LOCAL_BIN..."
 cp target/release/babydra-panel "$LOCAL_BIN/babydra-panel"
-cp target/release/babydra-menu "$LOCAL_BIN/babydra-menu"
 cp target/release/babydra-switcher "$LOCAL_BIN/babydra-switcher"
 cp target/release/babydra-screenshot "$LOCAL_BIN/babydra-screenshot"
 cp target/release/babydra-lock "$LOCAL_BIN/babydra-lock"

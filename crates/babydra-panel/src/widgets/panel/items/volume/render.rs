@@ -37,16 +37,16 @@ pub fn create_volume_row(
                 icon_container.remove(&old);
             }
             let icon_widget = if is_muted_val {
-                babydra_common::icon::get_icon("volume-mute", 16)
+                babydra_utils::ui::icon::get_icon("volume-mute", 16)
             } else {
-                babydra_common::icon::get_icon("volume", 16)
+                babydra_utils::ui::icon::get_icon("volume", 16)
             };
             icon_widget.add_css_class("slider-icon");
             icon_container.append(&icon_widget);
         })
     };
 
-    let mute_btn = baby_utils::components::create_colored_icon_button(
+    let mute_btn = babydra_utils::components::create_colored_icon_button(
         if muted_state.get() { "volume-mute" } else { "volume" },
         16,
         "rgba(255,255,255,0.9)",
@@ -59,7 +59,7 @@ pub fn create_volume_row(
             move || {
                 let new_mute = !muted_state_clone.get();
                 muted_state_clone.set(new_mute);
-                babydra_common::system::volume::set_muted(new_mute);
+                babydra_common::volume::set_muted(new_mute);
                 update_mute_icon_clone(new_mute);
                 update_topbar_volume_icon(&vol_icon_c);
             }
@@ -116,7 +116,7 @@ pub fn create_volume_row(
     let menu_btn = gtk4::Button::new();
     menu_btn.add_css_class("slider-popover-btn");
     menu_btn.set_valign(gtk4::Align::Center);
-    let menu_icon = babydra_common::icon::get_system_or_file_icon("go-up-symbolic", "image-missing");
+    let menu_icon = babydra_utils::ui::icon::get_system_or_file_icon("go-up-symbolic", "image-missing");
     menu_icon.set_pixel_size(12);
     menu_btn.set_child(Some(&menu_icon));
 
@@ -129,7 +129,7 @@ pub fn create_volume_row(
     row_box.append(&overlay);
     row_box.append(&menu_btn);
 
-    let popover = baby_utils::components::create_popover(&menu_btn, gtk4::PositionType::Bottom, "taskbar-popover");
+    let popover = babydra_utils::components::create_popover(&menu_btn, gtk4::PositionType::Bottom, "taskbar-popover");
     popover.set_has_arrow(true);
 
     let popover_clone = popover.clone();
@@ -150,7 +150,7 @@ pub fn create_volume_row(
             cb(true);
         }
         
-        let down_icon = babydra_common::icon::get_system_or_file_icon("go-down-symbolic", "image-missing");
+        let down_icon = babydra_utils::ui::icon::get_system_or_file_icon("go-down-symbolic", "image-missing");
         down_icon.set_pixel_size(12);
         menu_btn_clone.set_child(Some(&down_icon));
     });
@@ -161,7 +161,7 @@ pub fn create_volume_row(
         if let Some(ref cb) = on_popover_toggled_c2 {
             cb(false);
         }
-        let up_icon = babydra_common::icon::get_icon("go-up-symbolic", 12);
+        let up_icon = babydra_utils::ui::icon::get_icon("go-up-symbolic", 12);
         menu_btn_c2.set_child(Some(&up_icon));
     });
 
@@ -194,7 +194,7 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
             }
             
             let btn_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
-            let icon = babydra_common::icon::get_icon_colored(
+            let icon = babydra_utils::ui::icon::get_icon_colored(
                 "volume", 14, 
                 if sink.is_default { "#ffffff" } else { "rgba(255, 255, 255, 0.5)" }
             );
@@ -218,7 +218,7 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
             let pop_clone = popover.clone();
             let update_mute_clone = update_mute_btn.clone();
             btn.connect_clicked(move |_| {
-                babydra_common::system::volume::select_audio_device(&name);
+                babydra_common::volume::select_audio_device(&name);
                 let pop_c = pop_clone.clone();
                 let update_mute_c = update_mute_clone.clone();
                 gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(150), move || {
@@ -253,7 +253,7 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
         }
         
         let btn_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
-        let icon = babydra_common::icon::get_icon_colored(
+        let icon = babydra_utils::ui::icon::get_icon_colored(
             "microphone", 14, 
             if source.is_default { "#ffffff" } else { "rgba(255, 255, 255, 0.5)" }
         );
@@ -277,7 +277,7 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
         let pop_clone = popover.clone();
         let update_mute_clone = update_mute_btn.clone();
         btn.connect_clicked(move |_| {
-            babydra_common::system::volume::select_audio_device(&name);
+            babydra_common::volume::select_audio_device(&name);
             let pop_c = pop_clone.clone();
             let update_mute_c = update_mute_clone.clone();
             gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(150), move || {

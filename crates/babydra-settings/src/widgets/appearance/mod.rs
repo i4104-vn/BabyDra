@@ -60,7 +60,7 @@ pub fn create_appearance_widget() -> gtk4::Box {
     };
 
     let wp_path = get_current_wallpaper();
-    let is_dark = babydra_common::is_dark_mode();
+    let is_dark = babydra_utils::ui::theme::is_dark_mode();
 
     let (
         main_box,
@@ -75,8 +75,8 @@ pub fn create_appearance_widget() -> gtk4::Box {
     let light_card_clone = light_card.clone();
     let dark_card_clone = dark_card.clone();
     light_card.connect_clicked(move |_| {
-        babydra_common::set_dark_mode(false);
-        babydra_common::init_theme();
+        babydra_utils::ui::theme::set_dark_mode(false);
+        babydra_utils::ui::theme::init_theme();
         light_card_clone.add_css_class("active");
         dark_card_clone.remove_css_class("active");
     });
@@ -85,8 +85,8 @@ pub fn create_appearance_widget() -> gtk4::Box {
     let light_card_clone2 = light_card.clone();
     let dark_card_clone2 = dark_card.clone();
     dark_card.connect_clicked(move |_| {
-        babydra_common::set_dark_mode(true);
-        babydra_common::init_theme();
+        babydra_utils::ui::theme::set_dark_mode(true);
+        babydra_utils::ui::theme::init_theme();
         dark_card_clone2.add_css_class("active");
         light_card_clone2.remove_css_class("active");
     });

@@ -101,9 +101,9 @@ pub fn setup_notifications_list(
         babydra_island::widgets::notification::HISTORICAL_NOTIFICATIONS.with(|list| {
             list.borrow_mut().clear();
         });
-        babydra_common::animation::slide_out_cb(
+        babydra_utils::ui::animation::slide_out_cb(
             notif_stack_clear_clone.upcast_ref(),
-            babydra_common::animation::SlideDirection::Up,
+            babydra_utils::ui::animation::SlideDirection::Up,
             20,
             450,
             false,
@@ -166,7 +166,7 @@ fn render_expanded_group(
     group_header.add_css_class("notif-group-header");
 
     let name = if app_key == "system" { "preferences-system" } else { app_key };
-    let icon_widget = babydra_common::icon::get_system_or_file_icon(name, "preferences-system");
+    let icon_widget = babydra_utils::ui::icon::get_system_or_file_icon(name, "preferences-system");
     icon_widget.set_pixel_size(18);
     icon_widget.set_valign(gtk4::Align::Center);
     icon_widget.set_halign(gtk4::Align::Center);
@@ -194,7 +194,7 @@ fn render_expanded_group(
         let item_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
         item_box.add_css_class("notif-stack-item");
 
-        let icon_widget = babydra_common::icon::get_system_or_file_icon(name, "preferences-system");
+        let icon_widget = babydra_utils::ui::icon::get_system_or_file_icon(name, "preferences-system");
         icon_widget.set_pixel_size(18);
         icon_widget.set_valign(gtk4::Align::Center);
         icon_widget.set_halign(gtk4::Align::Center);
@@ -243,9 +243,9 @@ fn render_expanded_group(
         let ea_cb = ea_c.clone();
         let ak_cb = ak_c.clone();
         let render_cb = render_c.clone();
-        babydra_common::animation::slide_out_cb(
+        babydra_utils::ui::animation::slide_out_cb(
             sub_box_c.upcast_ref(),
-            babydra_common::animation::SlideDirection::Up,
+            babydra_utils::ui::animation::SlideDirection::Up,
             15,
             400,
             false,
@@ -257,9 +257,9 @@ fn render_expanded_group(
     });
     group_header.add_controller(click_gesture);
 
-    babydra_common::animation::slide_in(
+    babydra_utils::ui::animation::slide_in(
         sub_box.upcast_ref(),
-        babydra_common::animation::SlideDirection::Down,
+        babydra_utils::ui::animation::SlideDirection::Down,
         15,
         450,
     );
@@ -285,7 +285,7 @@ fn render_collapsed_group(
     main_item.add_css_class("notif-stack-item");
 
     let name = if app_key == "system" { "preferences-system" } else { app_key };
-    let icon_widget = babydra_common::icon::get_system_or_file_icon(name, "preferences-system");
+    let icon_widget = babydra_utils::ui::icon::get_system_or_file_icon(name, "preferences-system");
     icon_widget.set_pixel_size(18);
     icon_widget.set_valign(gtk4::Align::Center);
     icon_widget.set_halign(gtk4::Align::Center);

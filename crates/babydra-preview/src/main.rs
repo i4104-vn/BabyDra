@@ -14,7 +14,7 @@ fn main() {
 
     app.connect_activate(|app| {
         // Load custom styling CSS rules from babydra-common
-        babydra_common::init_theme();
+        babydra_utils::ui::theme::init_theme();
 
         let arg_path = std::env::args().nth(1);
         if let Some(p) = arg_path {

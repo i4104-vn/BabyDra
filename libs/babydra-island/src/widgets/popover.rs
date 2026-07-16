@@ -14,7 +14,7 @@ pub fn create_media_popover(
     gtk4::Label,
     gtk4::Image,
 ) {
-    let popover = baby_utils::components::create_popover(notch_capsule, gtk4::PositionType::Bottom, "media-popover");
+    let popover = babydra_utils::components::create_popover(notch_capsule, gtk4::PositionType::Bottom, "media-popover");
     popover.set_has_arrow(false);
     popover.set_offset(0, 10);
 
@@ -24,7 +24,7 @@ pub fn create_media_popover(
     let popover_header = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
     popover_header.add_css_class("media-popover-header");
     popover_header.set_valign(gtk4::Align::Center);
-    let popover_app_icon = babydra_common::icon::get_icon_colored("logo", 14, "#3b82f6");
+    let popover_app_icon = babydra_utils::ui::icon::get_icon_colored("logo", 14, "#3b82f6");
     let popover_app_name = gtk4::Label::new(Some("Music Player"));
     popover_app_name.add_css_class("media-popover-app-name");
     popover_header.append(&popover_app_icon);
@@ -129,9 +129,9 @@ pub fn create_media_popover(
             let is_animating_cb = is_animating_clone.clone();
             is_animating_cb.set(true);
             
-            babydra_common::animation::slide_out_cb(
+            babydra_utils::ui::animation::slide_out_cb(
                 popover_box_clone.upcast_ref(),
-                babydra_common::animation::SlideDirection::Up,
+                babydra_utils::ui::animation::SlideDirection::Up,
                 15,
                 450,
                 false,
@@ -150,9 +150,9 @@ pub fn create_media_popover(
     let notch_capsule_clone = notch_capsule.clone();
     popover.connect_map(move |_| {
         notch_capsule_clone.add_css_class("popover-open");
-        babydra_common::animation::slide_in(
+        babydra_utils::ui::animation::slide_in(
             popover_box_clone2.upcast_ref(),
-            babydra_common::animation::SlideDirection::Down,
+            babydra_utils::ui::animation::SlideDirection::Down,
             15,
             450,
         );

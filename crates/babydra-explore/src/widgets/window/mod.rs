@@ -183,7 +183,7 @@ pub fn create_explore_window(
                         // Update Header breadcrumbs
                         if let Some(ref hw) = *header_widgets_c.borrow() {
                             let is_in_trash = path.to_string_lossy().ends_with("Trash/files");
-                              baby_utils::explore::update_new_folder_button(&hw.btn_new_folder, is_in_trash);
+                              babydra_utils::explore::update_new_folder_button(&hw.btn_new_folder, is_in_trash);
 
                             let nav_cb: Rc<dyn Fn(PathBuf)> = Rc::new(move |p: PathBuf| {
                                 if let Some(ref f) = *nav_no_watch_c.borrow() {
@@ -352,7 +352,7 @@ pub fn create_explore_window(
                         }
                     })
                 };
-                crate::widgets::dialogs::show_new_folder_dialog(path, nav_cb);
+                babydra_utils::explore::dialogs::show_new_folder_dialog(path, nav_cb);
             }
         });
     }

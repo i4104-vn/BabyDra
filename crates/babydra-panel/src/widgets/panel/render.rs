@@ -30,13 +30,13 @@ pub fn build_status_indicators_ui() -> (gtk4::Box, gtk4::Button, gtk4::Label, gt
     status_button.add_css_class("panel-status-btn");
 
     let inner_layout = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
-    let net_icon = babydra_common::icon::get_icon("wifi", 14);
+    let net_icon = babydra_utils::ui::icon::get_icon("wifi", 14);
     net_icon.add_css_class("status-icon");
     
     let vol_icon = if super::items::volume::is_muted() {
-        babydra_common::icon::get_icon("volume-mute", 14)
+        babydra_utils::ui::icon::get_icon("volume-mute", 14)
     } else {
-        babydra_common::icon::get_icon("volume", 14)
+        babydra_utils::ui::icon::get_icon("volume", 14)
     };
     vol_icon.add_css_class("status-icon");
     
@@ -44,7 +44,7 @@ pub fn build_status_indicators_ui() -> (gtk4::Box, gtk4::Button, gtk4::Label, gt
     inner_layout.append(&vol_icon);
 
     if has_battery() {
-        let bat_icon = babydra_common::icon::get_icon("battery", 14);
+        let bat_icon = babydra_utils::ui::icon::get_icon("battery", 14);
         bat_icon.add_css_class("status-icon");
         inner_layout.append(&bat_icon);
     }
@@ -61,7 +61,7 @@ pub fn build_control_center_window_ui(
     app: &gtk4::Application,
 ) -> (gtk4::ApplicationWindow, gtk4::Box) {
     let q_win = gtk4::ApplicationWindow::new(app);
-    babydra_common::apply_theme_class(&q_win);
+    babydra_utils::ui::theme::apply_theme_class(&q_win);
     q_win.init_layer_shell();
     q_win.set_layer(Layer::Overlay);
     q_win.set_keyboard_mode(KeyboardMode::OnDemand);

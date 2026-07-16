@@ -1,7 +1,7 @@
 //! Switcher collection list renderer component.
 
 use gtk4::prelude::*;
-use babydra_common::desktop::DesktopApp;
+use babydra_common::DesktopApp;
 use crate::widgets::item::create_app_button;
 
 /// Populates a horizontal list of window switcher preview buttons from the list of running apps.

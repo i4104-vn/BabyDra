@@ -100,14 +100,14 @@ pub fn start_player_polling_loop(
                             if let Some(child) = widgets_clone.art_container.first_child() {
                                 widgets_clone.art_container.remove(&child);
                             }
-                            let music_icon_s = babydra_common::icon::get_icon_colored(&app_icon_name, 14, "#3b82f6");
+                            let music_icon_s = babydra_utils::ui::icon::get_icon_colored(&app_icon_name, 14, "#3b82f6");
                             music_icon_s.add_css_class("notch-album-art");
                             widgets_clone.art_container.append(&music_icon_s);
 
                             if let Some(child) = widgets_clone.popover_art_container.first_child() {
                                 widgets_clone.popover_art_container.remove(&child);
                             }
-                            let music_icon_l = babydra_common::icon::get_icon_colored(&app_icon_name, 120, "#3b82f6");
+                            let music_icon_l = babydra_utils::ui::icon::get_icon_colored(&app_icon_name, 120, "#3b82f6");
                             music_icon_l.add_css_class("media-popover-art");
                             music_icon_l.set_size_request(240, 240);
                             music_icon_l.set_hexpand(true);
@@ -129,14 +129,14 @@ pub fn start_player_polling_loop(
                         if let Some(child) = widgets_clone.art_container.first_child() {
                             widgets_clone.art_container.remove(&child);
                         }
-                        let music_icon_s = babydra_common::icon::get_icon_colored(&app_icon_name, 14, "#3b82f6");
+                        let music_icon_s = babydra_utils::ui::icon::get_icon_colored(&app_icon_name, 14, "#3b82f6");
                         music_icon_s.add_css_class("notch-album-art");
                         widgets_clone.art_container.append(&music_icon_s);
 
                         if let Some(child) = widgets_clone.popover_art_container.first_child() {
                             widgets_clone.popover_art_container.remove(&child);
                         }
-                        let music_icon_l = babydra_common::icon::get_icon_colored(&app_icon_name, 120, "#3b82f6");
+                        let music_icon_l = babydra_utils::ui::icon::get_icon_colored(&app_icon_name, 120, "#3b82f6");
                         music_icon_l.add_css_class("media-popover-art");
                         music_icon_l.set_size_request(240, 240);
                         music_icon_l.set_hexpand(true);
@@ -202,7 +202,7 @@ pub fn start_player_polling_loop(
                     widgets.visualizer_box.set_visible(false);
                     widgets.notch_capsule.add_css_class("active-music");
                     widgets.notch_capsule.add_css_class("notification-mode");
-                    babydra_common::animation::island_zoom_in(
+                    babydra_utils::ui::animation::island_zoom_in(
                         widgets.notch_capsule.clone().upcast_ref(),
                         300,
                         70,
@@ -214,7 +214,7 @@ pub fn start_player_polling_loop(
                     should_show_notif = true;
                     widgets.visualizer_box.set_visible(false);
                     widgets.notch_capsule.add_css_class("notification-mode");
-                    babydra_common::animation::island_animate_size(
+                    babydra_utils::ui::animation::island_animate_size(
                         widgets.notch_capsule.clone().upcast_ref(),
                         200,
                         300,
@@ -237,7 +237,7 @@ pub fn start_player_polling_loop(
                     widgets.notch_capsule.set_visible(true);
                     widgets.notch_capsule.add_css_class("active-music");
                     widgets.notch_capsule.add_css_class("notification-mode");
-                    babydra_common::animation::island_animate_size(
+                    babydra_utils::ui::animation::island_animate_size(
                         widgets.notch_capsule.clone().upcast_ref(),
                         200,
                         300,
@@ -270,7 +270,7 @@ pub fn start_player_polling_loop(
                     let is_playing_clone = is_playing_state.clone();
                     let latest_metadata_clone = latest_metadata.clone();
                     
-                    babydra_common::animation::island_animate_size(
+                    babydra_utils::ui::animation::island_animate_size(
                         widgets.notch_capsule.clone().upcast_ref(),
                         280,
                         200,
@@ -310,7 +310,7 @@ pub fn start_player_polling_loop(
                                     widgets_clone.popover_art_container.remove(&child);
                                 }
 
-                                babydra_common::animation::island_zoom_out(
+                                babydra_utils::ui::animation::island_zoom_out(
                                     widgets_clone.notch_capsule.clone().upcast_ref(),
                                     200,
                                     500,
@@ -357,7 +357,7 @@ pub fn start_player_polling_loop(
                             widgets.popover_art_container.remove(&child);
                         }
 
-                        babydra_common::animation::island_zoom_out(
+                        babydra_utils::ui::animation::island_zoom_out(
                             widgets.notch_capsule.clone().upcast_ref(),
                             200,
                             500,
@@ -379,7 +379,7 @@ pub fn start_player_polling_loop(
                         widgets.music_view.set_visible(true);
                         widgets.visualizer_box.set_visible(true);
                         widgets.notch_capsule.add_css_class("active-music");
-                        babydra_common::animation::island_zoom_in(
+                        babydra_utils::ui::animation::island_zoom_in(
                             widgets.notch_capsule.clone().upcast_ref(),
                             200,
                             30,
@@ -465,9 +465,9 @@ fn update_notification_view(
     }
 
     let notif_icon = if use_logo {
-        babydra_common::icon::get_icon("logo", 24)
+        babydra_utils::ui::icon::get_icon("logo", 24)
     } else {
-        babydra_common::icon::get_system_or_file_icon(&notif.icon, "preferences-system-notifications-symbolic")
+        babydra_utils::ui::icon::get_system_or_file_icon(&notif.icon, "preferences-system-notifications-symbolic")
     };
     notif_icon.set_pixel_size(24);
     notif_icon.add_css_class("notch-album-art");
@@ -583,14 +583,14 @@ fn update_player_view(
             if let Some(child) = widgets.art_container.first_child() {
                 widgets.art_container.remove(&child);
             }
-            let music_icon_s = babydra_common::icon::get_icon_colored(&app_icon_name, 14, "#3b82f6");
+            let music_icon_s = babydra_utils::ui::icon::get_icon_colored(&app_icon_name, 14, "#3b82f6");
             music_icon_s.add_css_class("notch-album-art");
             widgets.art_container.append(&music_icon_s);
 
             if let Some(child) = widgets.popover_art_container.first_child() {
                 widgets.popover_art_container.remove(&child);
             }
-            let music_icon_l = babydra_common::icon::get_icon_colored(&app_icon_name, 120, "#3b82f6");
+            let music_icon_l = babydra_utils::ui::icon::get_icon_colored(&app_icon_name, 120, "#3b82f6");
             music_icon_l.add_css_class("media-popover-art");
             music_icon_l.set_size_request(240, 240);
             music_icon_l.set_hexpand(true);
@@ -640,7 +640,7 @@ fn update_player_view(
     widgets.music_view.set_visible(true);
     if !widgets.notch_capsule.is_visible() {
         widgets.notch_capsule.add_css_class("active-music");
-        babydra_common::animation::island_zoom_in(
+        babydra_utils::ui::animation::island_zoom_in(
             widgets.notch_capsule.clone().upcast_ref(),
             200,
             10,

@@ -1,6 +1,6 @@
 use gtk4::ScrolledWindow;
 use babydra_common::FileEntry;
-use baby_utils::explore;
+use babydra_utils::explore;
 use crate::widgets::preview_panel;
 
 pub use babydra_common::InfoPanelWidgets;
@@ -69,7 +69,7 @@ pub fn update_info_panel(widgets: &InfoPanelWidgets, selection: &[FileEntry]) {
         if entry.mime_type.starts_with("image/") {
             widgets.img_preview.set_from_file(Some(&entry.path));
         } else {
-            babydra_common::icon::set_system_or_file_icon(&widgets.img_preview, &entry.icon_name, "text-x-generic");
+            babydra_utils::ui::icon::set_system_or_file_icon(&widgets.img_preview, &entry.icon_name, "text-x-generic");
         }
         widgets.stack.set_visible_child_name("image");
     }

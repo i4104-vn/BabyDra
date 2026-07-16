@@ -17,7 +17,7 @@ pub fn create_flow_child(
     let nav = nav_callback.clone();
 
     let sel_paths = selected_paths.clone();
-    let flow_child = baby_utils::components::create_grid_file_item(
+    let flow_child = babydra_utils::components::create_grid_file_item(
         idx,
         entry,
         selected_paths,
@@ -27,7 +27,7 @@ pub fn create_flow_child(
                 target_paths = vec![target_entry.path.clone()];
             }
 
-            crate::widgets::context_menu::show_for_file(
+            babydra_utils::explore::context_menu::show_for_file(
                 widget,
                 x,
                 y,
@@ -39,7 +39,7 @@ pub fn create_flow_child(
     );
 
     // Dim item if it's currently in the cut clipboard
-    let is_cut = baby_utils::explore::CLIPBOARD.with(|cb| {
+    let is_cut = babydra_utils::explore::CLIPBOARD.with(|cb| {
         cb.borrow().as_ref().map(|(paths, cut)| *cut && paths.contains(&entry.path)).unwrap_or(false)
     });
     if is_cut {

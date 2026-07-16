@@ -12,7 +12,6 @@ RC_FILE="$HOME/.config/labwc/rc.xml"
 
 echo "Stopping any running shell processes..."
 killall babydra-panel || true
-killall babydra-menu || true
 killall babydra-launcher || true
 killall babydra-image-preview || true
 killall babydra-preview || true

@@ -42,7 +42,7 @@ fn main() {
     );
 
     application.connect_activate(move |app| {
-        babydra_common::init_theme();
+        babydra_utils::ui::theme::init_theme();
         render::build_lock_ui(app, &wallpaper_path);
     });
 

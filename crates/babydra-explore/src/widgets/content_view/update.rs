@@ -94,7 +94,7 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
             let cp = current_path.clone();
             let nav = nav_callback.clone();
             let sel_paths = handle.selected_paths.clone();
-            let list_row = baby_utils::explore::create_list_row(
+            let list_row = babydra_utils::explore::create_list_row(
                 idx,
                 entry,
                 handle.selected_paths.clone(),
@@ -105,7 +105,7 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
                         target_paths = vec![target_entry.path.clone()];
                     }
 
-                    crate::widgets::context_menu::show_for_file(
+                    babydra_utils::explore::context_menu::show_for_file(
                         widget,
                         x,
                         y,

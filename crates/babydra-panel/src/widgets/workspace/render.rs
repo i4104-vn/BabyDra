@@ -1,7 +1,7 @@
 //! Layout structure and widget builders for the desktop taskbar buttons and window previews.
 
 use gtk4::prelude::*;
-use babydra_common::desktop::DesktopApp;
+use babydra_common::DesktopApp;
 
 /// Builds the base container box for the taskbar.
 pub fn build_workspace_container() -> (gtk4::Box, gtk4::Box) {
@@ -17,7 +17,7 @@ pub fn build_workspace_container() -> (gtk4::Box, gtk4::Box) {
 
 /// Creates a Popover widget anchored to the parent taskbar button.
 pub fn build_popover_container(parent: &gtk4::Button) -> gtk4::Popover {
-    let popover = baby_utils::components::create_popover(parent, gtk4::PositionType::Bottom, "taskbar-popover");
+    let popover = babydra_utils::components::create_popover(parent, gtk4::PositionType::Bottom, "taskbar-popover");
     popover.set_autohide(true);
     popover
 }
@@ -33,7 +33,7 @@ pub fn build_taskbar_item_button(app: &DesktopApp, is_active: bool) -> gtk4::But
         btn.add_css_class("active");
     }
 
-    let icon = babydra_common::icon::get_system_or_file_icon(app.icon.as_deref().unwrap_or(""), "application-x-executable");
+    let icon = babydra_utils::ui::icon::get_system_or_file_icon(app.icon.as_deref().unwrap_or(""), "application-x-executable");
     icon.set_pixel_size(18);
     btn.set_child(Some(&icon));
 
@@ -122,7 +122,7 @@ pub fn render_popover_previews(
 
         let open_new_content = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
         open_new_content.set_halign(gtk4::Align::Start);
-        let open_new_icon = babydra_common::icon::get_system_or_file_icon(&icon_name, "application-x-executable");
+        let open_new_icon = babydra_utils::ui::icon::get_system_or_file_icon(&icon_name, "application-x-executable");
         open_new_icon.set_pixel_size(16);
         let open_new_label = gtk4::Label::new(Some(&app_name));
         open_new_label.add_css_class("taskbar-preview-action-label");

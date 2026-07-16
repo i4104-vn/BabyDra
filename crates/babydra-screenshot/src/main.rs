@@ -30,7 +30,7 @@ fn main() {
     );
 
     application.connect_activate(move |app| {
-        babydra_common::init_theme();
+        babydra_utils::ui::theme::init_theme();
         let window = build_editor_ui(app, &temp_path_for_activate);
         window.present();
     });
