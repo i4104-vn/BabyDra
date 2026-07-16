@@ -7,12 +7,10 @@ pub use crate::models::{ThemeConfig, ShellConfig};
 pub mod settings;
 pub use settings::{ExploreSettings, load_explore_settings, save_explore_settings};
 
-/// Resolves the absolute directory path to the user's config folder: `~/.config/babydra/`.
+/// Resolves the absolute directory path to the user's config folder: `~/.babydra/configs/`.
 pub fn get_babydra_config_dir() -> PathBuf {
-    dirs::config_dir()
-        .unwrap_or_else(|| {
-            let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
-            PathBuf::from(home).join(".config")
-        })
-        .join("babydra")
+    dirs::home_dir()
+        .unwrap_or_else(|| PathBuf::from("."))
+        .join(".babydra")
+        .join("configs")
 }

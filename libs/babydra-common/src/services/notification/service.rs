@@ -195,14 +195,13 @@ trait Notifications {
 
 /// Sends a desktop notification using the default theme/common logo.
 pub fn send_notification(title: &str, body: &str) {
-    let logo_path = crate::services::icon::get_logo_path();
-    let logo_str = logo_path.to_string_lossy();
+    let logo_str = "babydra-settings";
     if let Ok(conn) = zbus::blocking::Connection::session() {
         if let Ok(proxy) = NotificationsProxyBlocking::new(&conn) {
             let _ = proxy.notify(
                 "BabyDra",
                 0,
-                &logo_str,
+                logo_str,
                 title,
                 body,
                 vec![],
@@ -213,6 +212,6 @@ pub fn send_notification(title: &str, body: &str) {
         }
     }
     let _ = std::process::Command::new("notify-send")
-        .args(&["-i", &logo_str, title, body])
+        .args(&["-i", logo_str, title, body])
         .spawn();
 }

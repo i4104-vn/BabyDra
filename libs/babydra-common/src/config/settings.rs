@@ -1,5 +1,4 @@
 use serde::{Serialize, Deserialize};
-use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ExploreSettings {
@@ -18,28 +17,43 @@ impl Default for ExploreSettings {
     }
 }
 
-pub fn get_settings_path() -> PathBuf {
-    super::get_babydra_config_dir().join("explore_settings.json")
-}
-
 pub fn load_explore_settings() -> ExploreSettings {
-    let path = get_settings_path();
-    if path.exists() {
-        if let Ok(content) = std::fs::read_to_string(&path) {
-            if let Ok(settings) = serde_json::from_str::<ExploreSettings>(&content) {
-                return settings;
-            }
+    let dir = super::get_babydra_config_dir();
+    let path = dir.join("explore.json");
+    if let Ok(content) = std::fs::read_to_string(&path) {
+        if let Ok(settings) = serde_json::from_str(&content) {
+            return settings;
         }
     }
     ExploreSettings::default()
 }
 
 pub fn save_explore_settings(settings: &ExploreSettings) {
-    let path = get_settings_path();
-    if let Some(parent) = path.parent() {
-        let _ = std::fs::create_dir_all(parent);
+    let dir = super::get_babydra_config_dir();
+    let path = dir.join("explore.json");
+
+    #[cfg(unix)]
+    {
+        if dir.exists() {
+            use std::os::unix::fs::PermissionsExt;
+            let _ = std::fs::set_permissions(&dir, std::fs::Permissions::from_mode(0o700));
+        }
+        if path.exists() {
+            use std::os::unix::fs::PermissionsExt;
+            let _ = std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o600));
+        }
     }
+
+    let _ = std::fs::create_dir_all(&dir);
+
     if let Ok(content) = serde_json::to_string_pretty(settings) {
-        let _ = std::fs::write(path, content);
+        let _ = std::fs::write(&path, content);
+    }
+
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let _ = std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o400));
+        let _ = std::fs::set_permissions(&dir, std::fs::Permissions::from_mode(0o500));
     }
 }
