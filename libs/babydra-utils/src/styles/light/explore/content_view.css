@@ -184,17 +184,22 @@
 }
 
 .explore-window .content-loading-progress {
-    margin: 0px 12px 8px 12px;
+    margin: 0px;
+    padding: 0px;
+    border: none;
+    background: transparent;
 }
 
 .explore-window .content-loading-progress trough {
-    background-color: rgba(0, 0, 0, 0.05);
-    border-radius: 4px;
-    min-height: 4px;
+    background-color: transparent;
+    border: none;
+    border-radius: 0px;
+    min-height: 3px;
 }
 
 .explore-window .content-loading-progress progress {
     background-color: #0066cc;
-    border-radius: 4px;
-    min-height: 4px;
+    border: none;
+    border-radius: 0px;
+    min-height: 3px;
 }
