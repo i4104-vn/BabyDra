@@ -28,7 +28,8 @@ const DARK_CSS: &str = concat!(
     include_str!("../../styles/dark/explore/info_panel.css"), "\n",
     include_str!("../../styles/dark/explore/status_bar.css"), "\n",
     include_str!("../../styles/dark/explore/context_menu.css"), "\n",
-    include_str!("../../styles/dark/explore/dialogs.css")
+    include_str!("../../styles/dark/explore/dialogs.css"), "\n",
+    include_str!("../../styles/dark/shared/scrollbar.css")
 );
 
 const LIGHT_CSS: &str = concat!(
@@ -58,7 +59,8 @@ const LIGHT_CSS: &str = concat!(
     include_str!("../../styles/light/explore/info_panel.css"), "\n",
     include_str!("../../styles/light/explore/status_bar.css"), "\n",
     include_str!("../../styles/light/explore/context_menu.css"), "\n",
-    include_str!("../../styles/light/explore/dialogs.css")
+    include_str!("../../styles/light/explore/dialogs.css"), "\n",
+    include_str!("../../styles/light/shared/scrollbar.css")
 );
 
 thread_local! {
