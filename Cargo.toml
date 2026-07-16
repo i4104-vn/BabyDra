@@ -12,6 +12,7 @@ members = [
     "crates/babydra-lock",
     "crates/babydra-preview",
     "crates/babydra-settings",
+    "crates/babydra-explore",
 ]
 
 [workspace.package]

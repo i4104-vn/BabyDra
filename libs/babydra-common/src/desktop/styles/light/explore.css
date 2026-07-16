@@ -1,0 +1,706 @@
+/* ── Base Window ───────────────────────────────────────────────── */
+window.explore-window {
+    background-color: transparent;
+    background-image: none;
+    box-shadow: none;
+    border: none;
+}
+
+.explore-window>box {
+    background-color: rgba(245, 245, 247, 0.97);
+    background-image: repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.015) 0px, rgba(0, 0, 0, 0.015) 1px, transparent 1px, transparent 2px),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(0, 0, 0, 0.05) 100%);
+    -gtk-background-blur: 24;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    color: #1a1a1a;
+    font-family: "Segoe UI Variable", "Inter", "Cantarell", sans-serif;
+    font-size: 13px;
+}
+
+/* ── Tab Bar ────────────────────────────────────────────────────── */
+.explore-window .tab-bar {
+    background-color: rgba(255, 255, 255, 0.25);
+    border-bottom: 1px solid #d0d0d0;
+    padding: 0 6px;
+    min-height: 38px;
+}
+
+.explore-window .tab-item {
+    background-image: none;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 6px 6px 0 0;
+    padding: 6px 10px 6px 14px;
+    font-size: 12px;
+    min-width: 100px;
+    max-width: 160px;
+    margin-top: 4px;
+    cursor: pointer;
+    transition: background 0.12s ease;
+}
+
+.explore-window .tab-item label {
+    color: #666;
+    font-weight: 500;
+}
+
+.explore-window .tab-item:hover {
+    background-image: none;
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.explore-window .tab-item:hover label {
+    color: #1a1a1a;
+}
+
+.explore-window .tab-item.active-tab {
+    background-image: none;
+    background-color: rgba(255, 255, 255, 0.45);
+    border-top: 2px solid #0066cc;
+    margin-top: 2px;
+}
+
+.explore-window .tab-item.active-tab label {
+    color: #1a1a1a;
+}
+
+.explore-window .tab-close-btn {
+    background-image: none;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 4px;
+    padding: 0;
+    margin: 0;
+    min-width: 18px;
+    min-height: 18px;
+    color: #666;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.1s ease, color 0.1s ease;
+}
+
+.explore-window .tab-close-btn:hover {
+    background-image: none;
+    background-color: rgba(0, 0, 0, 0.08);
+    color: #1a1a1a;
+}
+
+.explore-window button.tab-new-btn {
+    background-image: none;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 9999px;
+    padding: 0;
+    color: #666;
+    min-width: 24px;
+    min-height: 24px;
+    max-width: 24px;
+    max-height: 24px;
+    margin: auto 4px;
+}
+
+.explore-window button.tab-new-btn:hover {
+    background-image: none;
+    background-color: rgba(0, 0, 0, 0.04);
+    color: #1a1a1a;
+}
+
+/* ── Navigation Row ─────────────────────────────────────────────── */
+.explore-window .nav-bar {
+    background-color: rgba(255, 255, 255, 0.15);
+    padding: 4px 8px;
+    border-bottom: 1px solid #d0d0d0;
+}
+
+.explore-window .nav-btn {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 3px 5px;
+    color: #1a1a1a;
+    min-width: 28px;
+    min-height: 28px;
+    transition: background 0.1s ease;
+}
+
+.explore-window .nav-btn:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+.explore-window .nav-btn:active {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+.explore-window .nav-btn:disabled {
+    color: #ccc;
+}
+
+.explore-window .address-bar-wrap {
+    background-color: rgba(255, 255, 255, 0.4);
+    border: 1px solid #b8b8b8;
+    border-radius: 6px;
+    padding: 0 8px;
+    min-height: 28px;
+    transition: border-color 0.15s ease;
+}
+
+.explore-window .address-bar-wrap:focus-within {
+    border-color: #0066cc;
+}
+
+.explore-window .breadcrumb-btn {
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    padding: 2px 4px;
+    color: #1a1a1a;
+    font-size: 13px;
+}
+
+.explore-window .breadcrumb-btn:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+.explore-window .breadcrumb-sep {
+    color: #999;
+    margin: 0 2px;
+}
+
+.explore-window entry.address-entry {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: #1a1a1a;
+    padding: 2px 0;
+    font-size: 13px;
+}
+
+.explore-window .search-entry {
+    background-color: rgba(255, 255, 255, 0.4);
+    border: 1px solid #b8b8b8;
+    border-radius: 6px;
+    color: #1a1a1a;
+    padding: 3px 8px;
+    font-size: 12px;
+    min-width: 200px;
+    transition: border-color 0.15s ease;
+}
+
+.explore-window .search-entry:focus {
+    border-color: #0066cc;
+}
+
+/* ── Command Toolbar (Ribbon) ────────────────────────────────────── */
+.explore-window .toolbar {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid #d0d0d0;
+    padding: 3px 8px;
+    min-height: 32px;
+}
+
+.explore-window .toolbar-btn {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 8px;
+    color: #1a1a1a;
+    font-size: 12px;
+    transition: background 0.1s ease;
+}
+
+.explore-window .toolbar-btn:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+.explore-window .toolbar-btn:active {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+.explore-window .toolbar-sep {
+    background-color: #d0d0d0;
+    min-width: 1px;
+    margin: 4px 4px;
+}
+
+.explore-window dropdown.toolbar-dropdown {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin-right: 8px;
+}
+
+.explore-window dropdown.toolbar-dropdown>button {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 8px;
+    color: #1a1a1a;
+    font-size: 12px;
+    transition: background 0.1s ease;
+}
+
+.explore-window dropdown.toolbar-dropdown>button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.explore-window dropdown.toolbar-dropdown>button:active {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.explore-window dropdown.toolbar-dropdown>button arrow,
+.explore-window dropdown.toolbar-dropdown>button image {
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+    min-height: 0;
+    opacity: 0;
+}
+
+.explore-window dropdown.toolbar-dropdown>button label {
+    margin-right: 0;
+    padding-right: 0;
+}
+
+.explore-window dropdown>popover {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.explore-window dropdown>popover>contents {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.explore-window dropdown>popover>contents listview {
+    background-color: transparent;
+    padding: 0;
+}
+
+.explore-window dropdown>popover>contents row {
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: #1a1a1a;
+    background-color: transparent;
+    margin: 2px 0;
+    font-size: 12px;
+    transition: background-color 0.1s ease;
+}
+
+.explore-window dropdown>popover>contents row:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.explore-window dropdown>popover>contents row:selected {
+    background-color: rgba(0, 102, 204, 0.6);
+    color: white;
+}
+
+.explore-window .toolbar-btn.new-btn {
+    color: #0066cc;
+}
+
+.explore-window .toolbar-btn.toolbar-btn-active {
+    background-color: rgba(0, 102, 204, 0.10);
+    color: #0066cc;
+}
+
+.explore-window .toolbar-btn.toolbar-btn-active:hover {
+    background-color: rgba(0, 102, 204, 0.16);
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────── */
+.explore-window .sidebar {
+    background-color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 14px;
+    margin: 8px 4px 8px 8px;
+    min-width: 200px;
+    max-width: 200px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.explore-window .sidebar viewport,
+.explore-window .sidebar viewport>box {
+    background-color: transparent;
+}
+
+.explore-window .sidebar-section-label {
+    color: #666;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 10px 16px 4px 16px;
+    letter-spacing: 0.5px;
+}
+
+.explore-window .sidebar-item {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: #444;
+    font-size: 13px;
+    margin: 1px 6px;
+    transition: background 0.1s ease, color 0.1s ease;
+}
+
+.explore-window .sidebar-item:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    color: #1a1a1a;
+}
+
+.explore-window .sidebar-item.active-nav {
+    background-color: rgba(0, 102, 204, 0.08);
+    color: #0066cc;
+}
+
+/* ── Content Area ───────────────────────────────────────────────── */
+.explore-window .content-view {
+    background-color: rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 14px;
+    margin: 8px 8px 8px 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Scoped: set GTK4 internal widget backgrounds to solid color within content-view */
+.explore-window .content-view viewport,
+.explore-window .content-view flowbox,
+.explore-window .content-view flowboxchild,
+.explore-window .content-view listbox,
+.explore-window .content-view row,
+.explore-window .content-view stack {
+    background-color: transparent;
+}
+
+.explore-window .section-title {
+    color: #1a1a1a;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 16px 20px 8px 20px;
+}
+
+.explore-window .subsection-tab-btn {
+    background: transparent;
+    border: none;
+    border-radius: 20px;
+    padding: 5px 14px;
+    color: #666;
+    font-size: 12px;
+    margin: 0 2px;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.explore-window .subsection-tab-btn:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+    color: #1a1a1a;
+}
+
+.explore-window .subsection-tab-btn.active-subsection {
+    background-color: rgba(0, 102, 204, 0.1);
+    color: #0066cc;
+}
+
+/* Quick Access Cards */
+.explore-window .qa-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 6px;
+    min-width: 180px;
+    transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.explore-window .qa-card:hover {
+    background-color: #f9f9f9;
+    border-color: #ccc;
+}
+
+.explore-window .qa-card-name {
+    color: #1a1a1a;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.explore-window .qa-card-sub {
+    color: #666;
+    font-size: 11px;
+    margin-top: 2px;
+}
+
+/* Icon view file items */
+.explore-window .file-item {
+    border-radius: 6px;
+    padding: 8px;
+    cursor: pointer;
+    transition: background 0.1s ease;
+}
+
+.explore-window .file-item:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+.explore-window .file-item:active {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+.explore-window flowboxchild:selected {
+    background-color: transparent;
+    outline: none;
+}
+
+.explore-window flowboxchild:selected .file-item {
+    background-color: rgba(0, 0, 0, 0.08);
+    outline: 2px solid rgba(0, 0, 0, 0.15);
+}
+
+.explore-window listrow:selected {
+    background-color: transparent;
+    outline: none;
+}
+
+.explore-window listrow:selected .list-row {
+    background-color: rgba(0, 0, 0, 0.08);
+    color: #000000;
+    outline: 2px solid rgba(0, 0, 0, 0.15);
+}
+
+.explore-window .file-item-label {
+    color: #1a1a1a;
+    font-size: 12px;
+}
+
+/* List view rows */
+.explore-window .list-row {
+    background: transparent;
+    border-radius: 6px;
+    padding: 6px 12px;
+    margin: 1px 6px;
+    color: #444;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.1s ease;
+}
+
+.explore-window .list-row:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+    color: #1a1a1a;
+}
+
+.explore-window .list-col-meta {
+    color: #666;
+    font-size: 12px;
+}
+
+/* Active split pane */
+.explore-window .active-pane {
+    outline: none;
+}
+
+/* ── Info Panel ─────────────────────────────────────────────────── */
+.explore-window .info-panel {
+    background-color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 14px;
+    margin: 8px 8px 8px 4px;
+    padding: 16px;
+    min-width: 250px;
+    max-width: 250px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.explore-window .info-panel viewport,
+.explore-window .info-panel viewport>box {
+    background-color: transparent;
+}
+
+.explore-window .info-row-key {
+    color: #666;
+    font-size: 12px;
+}
+
+.explore-window .info-row-val {
+    color: #333;
+    font-size: 12px;
+}
+
+/* ── Status Bar ─────────────────────────────────────────────────── */
+.explore-window .status-bar {
+    background-color: rgba(255, 255, 255, 0.25);
+    border-top: 1px solid #d0d0d0;
+    padding: 4px 12px;
+    color: #666;
+    font-size: 12px;
+    min-height: 26px;
+}
+
+.explore-window .status-bar button.status-bar-btn {
+    background: none;
+    border: none;
+    border-radius: 4px;
+    color: #555555;
+    padding: 2px 6px;
+    box-shadow: none;
+    transition: all 150ms ease;
+}
+
+.explore-window .status-bar button.status-bar-btn:hover {
+    background-color: rgba(0, 0, 0, 0.06);
+    color: #000000;
+}
+
+.explore-window .status-bar button.status-bar-btn-active {
+    background-color: rgba(0, 102, 204, 0.1);
+    color: #0066cc;
+}
+
+.explore-window .status-bar button.status-bar-btn-active:hover {
+    background-color: rgba(0, 102, 204, 0.15);
+    color: #0066cc;
+}
+
+
+popover.explore-popover,
+popover.explore-popover>contents {
+    background: none;
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+}
+
+popover.explore-popover>arrow {
+    background: none;
+    border: none;
+}
+
+.context-menu-box {
+    background-color: rgb(255, 255, 255);
+    background-image: none;
+    color: #1a1a1a;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    border-top: 1px solid rgba(0, 0, 0, 0.14);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    padding: 4px;
+}
+
+button.context-menu-item {
+    background-image: none;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: #1a1a1a;
+    font-size: 13px;
+    min-height: 30px;
+    transition: background-color 0.1s ease;
+}
+
+button.context-menu-item:focus,
+button.context-menu-item:hover {
+    background-image: none;
+    background-color: rgba(0, 0, 0, 0.04);
+    color: #000000;
+    outline: none;
+    box-shadow: none;
+}
+
+button.context-menu-item label {
+    color: #1a1a1a;
+}
+
+button.context-menu-item:focus label,
+button.context-menu-item:hover label {
+    color: #000000;
+}
+
+.explore-window .group-header-label {
+    font-weight: 700;
+    font-size: 11px;
+    color: #0066cc;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-top: 6px;
+    margin-bottom: 2px;
+}
+
+button.suggested-action {
+    background: linear-gradient(135deg, #0066cc, #0044aa);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    color: #ffffff;
+    padding: 4px 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.2);
+    transition: all 150ms ease;
+}
+
+button.suggested-action:hover {
+    background: linear-gradient(135deg, #3399ff, #0066cc);
+    box-shadow: 0 6px 16px rgba(0, 102, 204, 0.3);
+}
+
+button.suggested-action:active {
+    background: #0044aa;
+}
+
+window.explore-dialog,
+window.explore-dialog>box {
+    background-color: #f5f5f7;
+    border: 1px solid #d0d0d0;
+    border-radius: 12px;
+}
+
+.explore-dialog entry {
+    background-color: rgba(0, 0, 0, 0.05);
+    border: 1px solid #c8c8c8;
+    border-radius: 6px;
+    color: #1a1a1a;
+    padding: 6px 10px;
+}
+
+.explore-dialog entry:focus {
+    border-color: #0066cc;
+}
+
+button.empty-trash-btn {
+    color: #dc2626 !important;
+}
+
+button.empty-trash-btn:hover {
+    background-color: rgba(220, 38, 38, 0.1) !important;
+    color: #ef4444 !important;
+}
+
+.explore-window .rubberband {
+    background-color: rgba(52, 152, 219, 0.18);
+    border: 1.5px solid rgba(52, 152, 219, 0.6);
+    border-radius: 2px;
+}
+
+/* ── Cut Item (dim when cut to clipboard) ───────────────────────── */
+.explore-window .cut-item {
+    opacity: 0.45;
+    filter: saturate(0.4);
+    transition: opacity 0.15s ease, filter 0.15s ease;
+}
+
+.explore-window .cut-item:hover {
+    opacity: 0.6;
+}

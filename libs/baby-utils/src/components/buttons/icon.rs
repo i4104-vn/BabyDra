@@ -61,3 +61,37 @@ pub fn create_icon_label_button(icon_name: &str, label_text: &str, css_class: &s
     btn.set_child(Some(&content));
     btn
 }
+
+/// Creates a generic sidebar-style item button with an icon and label.
+pub fn create_sidebar_item_button(
+    name: &str,
+    icon_name: &str,
+    css_class: &str,
+    on_click: impl Fn() + 'static,
+) -> gtk4::Button {
+    let hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
+    hbox.set_margin_start(8);
+    hbox.set_margin_end(8);
+    hbox.set_margin_top(1);
+    hbox.set_margin_bottom(1);
+
+    let img = gtk4::Image::from_icon_name(icon_name);
+    img.set_pixel_size(18);
+
+    let lbl = gtk4::Label::builder()
+        .label(name)
+        .halign(gtk4::Align::Start)
+        .hexpand(true)
+        .build();
+
+    hbox.append(&img);
+    hbox.append(&lbl);
+
+    let btn = gtk4::Button::builder()
+        .child(&hbox)
+        .css_classes(vec![css_class.to_string(), "flat".to_string()])
+        .build();
+
+    btn.connect_clicked(move |_| on_click());
+    btn
+}

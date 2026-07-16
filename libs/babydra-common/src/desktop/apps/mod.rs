@@ -8,7 +8,7 @@ use std::fs::File;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, OnceLock};
 
-pub use discovery::scan_desktop_apps_from_filesystem;
+pub use discovery::{scan_desktop_apps_from_filesystem, parse_desktop_file};
 
 /// Information model of a parsed desktop entry application.
 #[derive(Clone, Debug, Serialize, Deserialize)]

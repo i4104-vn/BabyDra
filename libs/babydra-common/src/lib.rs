@@ -25,6 +25,12 @@ pub mod helper {
 }
 
 pub mod models;
+pub use models::explore::{
+    FileEntry, FileType, DirectoryModel, SortColumn, SortOrder, TabState, SessionState, ActivePane,
+    MainWindowWidgets, HeaderBarWidgets, ContentViewWidgets, ContentViewHandle, PreviewPanelWidgets, InfoPanelWidgets,
+    get_group_name
+};
+
 
 // Flat re-exports at root for backward compatibility
 pub use desktop::config::{ThemeConfig, ShellConfig, get_babydra_config_dir};
@@ -33,7 +39,7 @@ pub use system::volume::AudioDevice;
 pub use system::storage::DiskInfo;
 pub use notification::service::{ActiveNotification, NotificationMsg};
 pub use desktop::icon::get_logo_path;
-pub use desktop::theme::{init_theme, apply_theme_class, is_dark_mode, set_dark_mode};
+pub use desktop::theme::{init_theme, apply_theme_class, is_dark_mode, set_dark_mode, apply_explore_theme};
 pub use desktop::apps::{find_desktop_apps, refresh_desktop_apps_cache, DesktopApp};
 pub use system::power::{poweroff, reboot, suspend};
 pub use system::auth::verify_password;
@@ -58,6 +64,17 @@ pub use desktop::exif;
 pub use desktop::exif::{read_exif, ExifData};
 pub use system::bluetooth::{is_bluetooth_enabled, set_bluetooth_enabled, get_bluetooth_devices, BtDevice};
 pub use system::vpn::{get_vpn_connections, VpnConn};
+pub use desktop::explore::{
+    load_directory, get_owner_group, get_icon_name,
+    copy_path, move_path, delete_path, rename_path, send_to_trash,
+    FileWatcher,
+    start_dbus_service,
+    calculate_dir_size_parallel,
+    filter_entries,
+    sort_entries,
+    load_cropped_square_pixbuf,
+};
+
 
 
 
