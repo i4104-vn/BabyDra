@@ -1,0 +1,48 @@
+    background: linear-gradient(135deg, #0066cc, #0044aa);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    color: #ffffff;
+    padding: 4px 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.2);
+    transition: all 150ms ease;
+}
+
+button.suggested-action:hover {
+    background: linear-gradient(135deg, #3399ff, #0066cc);
+    box-shadow: 0 6px 16px rgba(0, 102, 204, 0.3);
+}
+
+button.suggested-action:active {
+    background: #0044aa;
+}
+
+window.explore-dialog,
+window.explore-dialog>box {
+    background-color: #f5f5f7;
+    border: 1px solid #d0d0d0;
+    border-radius: 12px;
+}
+
+.explore-dialog entry {
+    background-color: rgba(0, 0, 0, 0.05);
+    border: 1px solid #c8c8c8;
+    border-radius: 6px;
+    color: #1a1a1a;
+    padding: 6px 10px;
+}
+
+.explore-dialog entry:focus {
+    border-color: #0066cc;
+}
+
+button.empty-trash-btn {
+    color: #dc2626 !important;
+}
+
+button.empty-trash-btn:hover {
+    background-color: rgba(220, 38, 38, 0.1) !important;
+    color: #ef4444 !important;
+}
+
+.explore-window .rubberband {

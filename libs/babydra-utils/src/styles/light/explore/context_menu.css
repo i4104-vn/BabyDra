@@ -1,0 +1,71 @@
+popover.explore-popover,
+popover.explore-popover>contents {
+    background: none;
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+}
+
+popover.explore-popover>arrow {
+    background: none;
+    border: none;
+}
+
+.context-menu-box {
+    background-color: rgb(255, 255, 255);
+    background-image: none;
+    color: #1a1a1a;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    border-top: 1px solid rgba(0, 0, 0, 0.14);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    padding: 4px;
+}
+
+button.context-menu-item {
+    background-image: none;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: #1a1a1a;
+    font-size: 13px;
+    min-height: 30px;
+    transition: background-color 0.1s ease;
+}
+
+button.context-menu-item:focus,
+button.context-menu-item:hover {
+    background-image: none;
+    background-color: rgba(0, 0, 0, 0.04);
+    color: #000000;
+    outline: none;
+    box-shadow: none;
+}
+
+button.context-menu-item label {
+    color: #1a1a1a;
+}
+
+button.context-menu-item:focus label,
+button.context-menu-item:hover label {
+    color: #000000;
+}
+
+.explore-window .group-header-label {
+    font-weight: 700;
+    font-size: 11px;
+    color: #0066cc;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-top: 6px;
+    margin-bottom: 2px;
+}
+
+button.suggested-action {

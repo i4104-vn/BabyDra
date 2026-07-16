@@ -1,0 +1,160 @@
+/* ── Content Area ───────────────────────────────────────────────── */
+.explore-window .content-view {
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    margin: 8px 8px 8px 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Scoped: set GTK4 internal widget backgrounds to solid color within content-view */
+.explore-window .content-view viewport,
+.explore-window .content-view flowbox,
+.explore-window .content-view flowboxchild,
+.explore-window .content-view listbox,
+.explore-window .content-view row,
+.explore-window .content-view stack {
+    background-color: transparent;
+}
+
+.explore-window .section-title {
+    color: #e8e8e8;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 16px 20px 8px 20px;
+}
+
+.explore-window .subsection-tab-btn {
+    background: transparent;
+    border: none;
+    border-radius: 20px;
+    padding: 5px 14px;
+    color: #999;
+    font-size: 12px;
+    margin: 0 2px;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.explore-window .subsection-tab-btn:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: #e8e8e8;
+}
+
+.explore-window .subsection-tab-btn.active-subsection {
+    background-color: rgba(96, 205, 255, 0.15);
+    color: #60cdff;
+}
+
+/* Quick Access Cards */
+.explore-window .qa-card {
+    background-color: #2b2b2b;
+    border: 1px solid #363636;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 6px;
+    min-width: 180px;
+    transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.explore-window .qa-card:hover {
+    background-color: #333;
+    border-color: #454545;
+}
+
+.explore-window .qa-card-name {
+    color: #e8e8e8;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.explore-window .qa-card-sub {
+    color: #888;
+    font-size: 11px;
+    margin-top: 2px;
+}
+
+/* Icon view file items */
+.explore-window .file-item {
+    border-radius: 6px;
+    padding: 8px;
+    cursor: pointer;
+    transition: background 0.1s ease;
+}
+
+.explore-window .file-item:hover {
+    background-color: rgba(255, 255, 255, 0.07);
+}
+
+.explore-window .file-item:active {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.explore-window flowboxchild:selected {
+    background-color: transparent;
+    outline: none;
+}
+
+.explore-window flowboxchild:selected .file-item {
+    background-color: rgba(255, 255, 255, 0.15);
+    outline: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.explore-window listrow:selected {
+    background-color: transparent;
+    outline: none;
+}
+
+.explore-window listrow:selected .list-row {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    outline: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.explore-window .file-item-label {
+    color: #e8e8e8;
+    font-size: 12px;
+}
+
+/* List view rows */
+.explore-window .list-row {
+    background: transparent;
+    border-radius: 6px;
+    padding: 6px 12px;
+    margin: 1px 6px;
+    color: #ccc;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.1s ease;
+}
+
+.explore-window .list-row:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: #e8e8e8;
+}
+
+.explore-window .list-col-meta {
+    color: #888;
+    font-size: 12px;
+}
+
+/* Active split pane */
+.explore-window .active-pane {
+    outline: none;
+}
+
+.explore-window .rubberband {
+    background-color: rgba(52, 152, 219, 0.18);
+    border: 1.5px solid rgba(52, 152, 219, 0.6);
+    border-radius: 2px;
+}
+
+/* ── Cut Item (dim when cut to clipboard) ───────────────────────── */
+.explore-window .cut-item {
+    opacity: 0.45;
+    filter: saturate(0.4);
+    transition: opacity 0.15s ease, filter 0.15s ease;
+}
+
+.explore-window .cut-item:hover {
+    opacity: 0.6;
+}

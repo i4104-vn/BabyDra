@@ -1,0 +1,48 @@
+button.suggested-action {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    color: #ffffff;
+    padding: 4px 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    transition: all 150ms ease;
+}
+
+button.suggested-action:hover {
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+}
+
+button.suggested-action:active {
+    background: #1d4ed8;
+}
+
+window.explore-dialog,
+window.explore-dialog>box {
+    background-color: #1a1a1e;
+    border: 1px solid #3a3a3e;
+    border-radius: 12px;
+}
+
+.explore-dialog entry {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid #4a4a4a;
+    border-radius: 6px;
+    color: #e8e8e8;
+    padding: 6px 10px;
+}
+
+.explore-dialog entry:focus {
+    border-color: #3b82f6;
+}
+
+button.empty-trash-btn {
+    color: #ef4444 !important;
+}
+
+button.empty-trash-btn:hover {
+    background-color: rgba(239, 68, 68, 0.15) !important;
+    color: #f87171 !important;
+}
+
