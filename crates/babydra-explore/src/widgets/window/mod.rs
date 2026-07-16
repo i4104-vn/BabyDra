@@ -318,6 +318,7 @@ pub fn create_explore_window(
     let view_mode_callback = {
         let left = left_content_handle.clone();
         let right = right_content_handle.clone();
+        let header_widgets_c = header_widgets_cell.clone();
         move |mode: String| {
             crate::widgets::content_view::set_content_view_mode(&left, &mode);
             if let Some(ref r) = *right.borrow() {
@@ -327,8 +328,19 @@ pub fn create_explore_window(
             // Save updated settings
             {
                 let mut current_settings = babydra_common::load_explore_settings();
-                current_settings.view_mode = mode;
+                current_settings.view_mode = mode.clone();
                 babydra_common::save_explore_settings(&current_settings);
+            }
+
+            // Update button active classes in HeaderBar
+            if let Some(ref hw) = *header_widgets_c.borrow() {
+                if mode == "list" {
+                    hw.btn_view_list.add_css_class("toolbar-btn-active");
+                    hw.btn_view_icons.remove_css_class("toolbar-btn-active");
+                } else {
+                    hw.btn_view_icons.add_css_class("toolbar-btn-active");
+                    hw.btn_view_list.remove_css_class("toolbar-btn-active");
+                }
             }
         }
     };
@@ -372,6 +384,15 @@ pub fn create_explore_window(
     );
     ui.vbox.insert_child_after(&header_box, None::<&gtk4::Widget>);
     header_widgets_cell.replace(Some(header_widgets.clone()));
+
+    // Apply initial view mode class to header buttons based on settings
+    if settings.view_mode == "list" {
+        header_widgets.btn_view_list.add_css_class("toolbar-btn-active");
+        header_widgets.btn_view_icons.remove_css_class("toolbar-btn-active");
+    } else {
+        header_widgets.btn_view_icons.add_css_class("toolbar-btn-active");
+        header_widgets.btn_view_list.remove_css_class("toolbar-btn-active");
+    }
 
     // Wire btn_new_folder click (dynamically handles New Folder or Empty Trash depending on path)
     {
