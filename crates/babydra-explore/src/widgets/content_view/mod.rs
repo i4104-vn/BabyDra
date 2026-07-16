@@ -10,6 +10,8 @@ mod update;
 pub mod helpers;
 mod gestures;
 
+pub use update::update_content_view_ui;
+
 /// Creates the content view area widgets and returns the scroll container and ContentViewHandle state handle.
 pub fn create_content_view(
     nav_callback: impl Fn(PathBuf) + 'static,
