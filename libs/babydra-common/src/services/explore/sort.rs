@@ -6,34 +6,15 @@ pub fn sort_entries(entries: &mut [FileEntry], sort_mode: &str) {
         let b_is_dir = matches!(b.file_type, crate::models::explore::FileType::Directory);
 
         if sort_mode == "date" {
-            let get_weight = |e: &FileEntry| -> u32 {
-                if let Some(modified) = e.modified {
-                    let datetime: chrono::DateTime<chrono::Local> = modified.into();
-                    let now = chrono::Local::now();
-                    let date_naive = datetime.date_naive();
-                    let now_naive = now.date_naive();
-                    if date_naive == now_naive {
-                        0
-                    } else if date_naive == now_naive - chrono::Duration::days(1) {
-                        1
-                    } else {
-                        let diff = (now_naive - date_naive).num_days();
-                        if diff >= 2 && diff <= 7 {
-                            diff as u32
-                        } else if diff > 7 {
-                            8
-                        } else {
-                            0
-                        }
+            match (a.modified, b.modified) {
+                (Some(ma), Some(mb)) => {
+                    if ma != mb {
+                        return mb.cmp(&ma); // reverse to get newest first
                     }
-                } else {
-                    9
                 }
-            };
-            let w_a = get_weight(a);
-            let w_b = get_weight(b);
-            if w_a != w_b {
-                return w_a.cmp(&w_b);
+                (Some(_), None) => return std::cmp::Ordering::Less,
+                (None, Some(_)) => return std::cmp::Ordering::Greater,
+                (None, None) => {}
             }
         }
 
