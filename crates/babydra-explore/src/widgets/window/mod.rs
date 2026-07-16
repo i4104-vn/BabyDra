@@ -14,12 +14,22 @@ pub fn create_explore_window(
     app: &gtk4::Application,
     session: Rc<RefCell<SessionState>>,
 ) -> ApplicationWindow {
+    let settings = babydra_common::load_explore_settings();
+    
+    // Apply settings to initial tab
+    {
+        let mut s = session.borrow_mut();
+        let tab = s.active_tab_mut();
+        tab.view_mode = settings.view_mode.clone();
+        tab.show_hidden = settings.show_hidden;
+    }
+
     let ui = render::build_window_ui(app);
 
     // Active state variables
     let is_split = Rc::new(Cell::new(false));
     let active_pane = Rc::new(Cell::new(ActivePane::Left));
-    let preview_visible = Rc::new(Cell::new(true));
+    let preview_visible = Rc::new(Cell::new(settings.preview_visible));
     let watcher = Rc::new(RefCell::new(None::<babydra_common::FileWatcher>));
 
     // Channels for file watching/reloading
@@ -28,7 +38,13 @@ pub fn create_explore_window(
 
     // Create InfoPanel
     let (info_panel_container, info_widgets) = crate::widgets::info_panel::create_info_panel();
-    ui.layout_paned.set_end_child(Some(&info_panel_container));
+    let revealer = gtk4::Revealer::builder()
+        .transition_type(gtk4::RevealerTransitionType::SlideLeft)
+        .transition_duration(250)
+        .build();
+    revealer.set_child(Some(&info_panel_container));
+    revealer.set_reveal_child(preview_visible.get());
+    ui.layout_paned.set_end_child(Some(&revealer));
 
     let info_widgets_rc = Rc::new(info_widgets);
 
@@ -92,6 +108,13 @@ pub fn create_explore_window(
                 tab.show_hidden = !tab.show_hidden;
                 tab.show_hidden
             };
+
+            // Save updated settings
+            {
+                let mut current_settings = babydra_common::load_explore_settings();
+                current_settings.show_hidden = show_hidden_now;
+                babydra_common::save_explore_settings(&current_settings);
+            }
 
             if let Some(ref sw) = *status_widgets_c.borrow() {
                 if show_hidden_now {
@@ -286,6 +309,13 @@ pub fn create_explore_window(
             if let Some(ref r) = *right.borrow() {
                 crate::widgets::content_view::set_content_view_mode(r, &mode);
             }
+
+            // Save updated settings
+            {
+                let mut current_settings = babydra_common::load_explore_settings();
+                current_settings.view_mode = mode;
+                babydra_common::save_explore_settings(&current_settings);
+            }
         }
     };
 
@@ -359,18 +389,20 @@ pub fn create_explore_window(
 
     // Preview toggle closure
     let toggle_preview = {
-        let layout_paned = ui.layout_paned.clone();
-        let info_panel_container = info_panel_container.clone();
+        let revealer_c = revealer.clone();
         let preview_visible = preview_visible.clone();
         let status_widgets_c = status_bar_widgets_cell.clone();
         move || {
             let now_visible = !preview_visible.get();
             preview_visible.set(now_visible);
 
-            if now_visible {
-                layout_paned.set_end_child(Some(&info_panel_container));
-            } else {
-                layout_paned.set_end_child(None::<&gtk4::Widget>);
+            revealer_c.set_reveal_child(now_visible);
+
+            // Save updated settings
+            {
+                let mut current_settings = babydra_common::load_explore_settings();
+                current_settings.preview_visible = now_visible;
+                babydra_common::save_explore_settings(&current_settings);
             }
 
             if let Some(ref sw) = *status_widgets_c.borrow() {
@@ -449,20 +481,19 @@ pub fn create_explore_window(
 
     // Auto-hide preview when window is too narrow (< 700px)
     {
-        let layout_paned = ui.layout_paned.clone();
-        let info_panel_ref = info_panel_container.clone();
+        let revealer_c = revealer.clone();
         let preview_visible = preview_visible.clone();
         let status_widgets_c = status_bar_widgets_cell.clone();
         ui.window.connect_default_width_notify(move |window| {
             let w = window.width();
             if w < 700 && preview_visible.get() {
-                layout_paned.set_end_child(None::<&gtk4::Widget>);
+                revealer_c.set_reveal_child(false);
                 preview_visible.set(false);
                 if let Some(ref sw) = *status_widgets_c.borrow() {
                     sw.btn_toggle_preview.remove_css_class("status-bar-btn-active");
                 }
             } else if w >= 700 && !preview_visible.get() {
-                layout_paned.set_end_child(Some(&info_panel_ref));
+                revealer_c.set_reveal_child(true);
                 preview_visible.set(true);
                 if let Some(ref sw) = *status_widgets_c.borrow() {
                     sw.btn_toggle_preview.add_css_class("status-bar-btn-active");

@@ -73,16 +73,17 @@
     margin-top: 2px;
 }
 
-/* Icon view file items */
 .explore-window .file-item {
     border-radius: 6px;
     padding: 8px;
     cursor: pointer;
-    transition: background 0.1s ease;
+    transition: background-color 0.15s ease, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s ease;
 }
 
 .explore-window .file-item:hover {
-    background-color: rgba(255, 255, 255, 0.07);
+    background-color: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .explore-window .file-item:active {

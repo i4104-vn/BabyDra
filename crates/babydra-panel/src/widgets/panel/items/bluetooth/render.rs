@@ -1,5 +1,3 @@
-use gtk4::prelude::*;
-
 pub fn create_bluetooth_tile() -> gtk4::Button {
     let title = babydra_common::i18n::t("control.bluetooth");
     let subtitle = babydra_common::i18n::t("control.not_connected");

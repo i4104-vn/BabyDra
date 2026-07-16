@@ -120,7 +120,7 @@ pub fn val_to_str(val: &Value<'_>) -> Option<String> {
     if let Ok(s) = <&str>::try_from(val) {
         return Some(s.to_string());
     }
-    if let Ok(s) = String::try_from(val.clone()) {
+    if let Ok(s) = String::try_from(val) {
         return Some(s);
     }
     None

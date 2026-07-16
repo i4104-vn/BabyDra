@@ -26,25 +26,43 @@ pub fn create_grid_file_item(
     };
 
     if has_preview {
-        if let Ok(pixbuf) = load_cropped_square_pixbuf(&entry.path, 85) {
-            let texture = gtk4::gdk::Texture::for_pixbuf(&pixbuf);
-            let picture = Picture::for_paintable(&texture);
-            picture.set_size_request(85, 85);
-            picture.set_halign(Align::Center);
-            picture.set_valign(Align::Center);
-            picture.set_hexpand(true);
-            picture.set_vexpand(true);
-            picture.set_content_fit(gtk4::ContentFit::Cover);
-            item_box.append(&picture);
-        } else {
-            let icon = crate::ui::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
-            icon.set_pixel_size(52);
-            icon.set_halign(Align::Center);
-            icon.set_valign(Align::Center);
-            icon.set_hexpand(true);
-            icon.set_vexpand(true);
-            item_box.append(&icon);
-        }
+        // Create an overlay to show default/placeholder icon first, then switch to picture once loaded asynchronously
+        let overlay = gtk4::Overlay::new();
+        
+        let temp_icon = crate::ui::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
+        temp_icon.set_pixel_size(52);
+        temp_icon.set_halign(Align::Center);
+        temp_icon.set_valign(Align::Center);
+        temp_icon.set_hexpand(true);
+        temp_icon.set_vexpand(true);
+        
+        overlay.set_child(Some(&temp_icon));
+        item_box.append(&overlay);
+
+        struct SendWrapper<T>(T);
+        unsafe impl<T> Send for SendWrapper<T> {}
+
+        let path_clone = entry.path.clone();
+        let overlay_c = overlay.clone();
+        
+        glib::spawn_future_local(async move {
+            let res = tokio::task::spawn_blocking(move || {
+                load_cropped_square_pixbuf(&path_clone, 85).map(|pb| SendWrapper(pb))
+            }).await;
+
+            if let Ok(Ok(wrapper)) = res {
+                let pixbuf = wrapper.0;
+                let texture = gtk4::gdk::Texture::for_pixbuf(&pixbuf);
+                let picture = Picture::for_paintable(&texture);
+                picture.set_size_request(85, 85);
+                picture.set_halign(Align::Center);
+                picture.set_valign(Align::Center);
+                picture.set_hexpand(true);
+                picture.set_vexpand(true);
+                picture.set_content_fit(gtk4::ContentFit::Cover);
+                overlay_c.set_child(Some(&picture));
+            }
+        });
     } else {
         let icon = crate::ui::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
         icon.set_pixel_size(52);

@@ -4,6 +4,9 @@ use std::path::PathBuf;
 
 pub use crate::models::{ThemeConfig, ShellConfig};
 
+pub mod settings;
+pub use settings::{ExploreSettings, load_explore_settings, save_explore_settings};
+
 /// Resolves the absolute directory path to the user's config folder: `~/.config/babydra/`.
 pub fn get_babydra_config_dir() -> PathBuf {
     dirs::config_dir()
