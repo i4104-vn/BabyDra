@@ -8,6 +8,8 @@ use babydra_common::{SessionState, ActivePane};
 mod render;
 pub mod tabs;
 pub mod split;
+mod navigation;
+mod events;
 
 /// Creates and configures the main file explorer window, wires all component widgets (header, sidebar, content panes, tabs, info panel, status bar), and launches the navigation loops.
 pub fn create_explore_window(
@@ -31,11 +33,9 @@ pub fn create_explore_window(
     let active_pane = Rc::new(Cell::new(ActivePane::Left));
     let preview_visible = Rc::new(Cell::new(settings.preview_visible));
     let user_wants_preview = Rc::new(Cell::new(settings.preview_visible));
-    let watcher = Rc::new(RefCell::new(None::<babydra_common::FileWatcher>));
 
     // Channels for file watching/reloading
-    let (watch_tx, mut watch_rx) = tokio::sync::mpsc::unbounded_channel::<()>();
-    let _watch_tx_clone = watch_tx.clone();
+    let (watch_tx, watch_rx) = tokio::sync::mpsc::unbounded_channel::<()>();
 
     // Create InfoPanel
     let (info_panel_container, info_widgets) = crate::widgets::info_panel::create_info_panel();
@@ -53,19 +53,15 @@ pub fn create_explore_window(
 
     let info_widgets_rc = Rc::new(info_widgets);
 
-    // Navigation callbacks & cells
-    let navigate_pane_ref: Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>> = Rc::new(RefCell::new(None));
-    let navigate_pane_no_watch_ref: Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>> = Rc::new(RefCell::new(None));
-
-    // Left pane navigation channels
-    let (left_nav_tx, mut left_rx) = tokio::sync::mpsc::unbounded_channel::<PathBuf>();
-    let left_nav_cb = move |path: PathBuf| {
-        let _ = left_nav_tx.send(path);
-    };
-
     // Scrolled window cells to resolve ordering in closure capture
     let left_scroll_cell = Rc::new(RefCell::new(None::<gtk4::Box>));
     let right_scroll_cell = Rc::new(RefCell::new(None::<gtk4::Box>));
+
+    // Left pane navigation channels
+    let (left_nav_tx, left_rx) = tokio::sync::mpsc::unbounded_channel::<PathBuf>();
+    let left_nav_cb = move |path: PathBuf| {
+        let _ = left_nav_tx.send(path);
+    };
 
     // Create Left ContentView
     let (left_content_scroll, left_content_handle) = crate::widgets::content_view::create_content_view(
@@ -96,9 +92,34 @@ pub fn create_explore_window(
     // Right pane content variables
     let right_content_handle = Rc::new(RefCell::new(None::<Rc<crate::widgets::content_view::ContentViewHandle>>));
 
-    // Create HeaderBar
+    // Create HeaderBar & StatusBar cells
     let header_widgets_cell = Rc::new(RefCell::new(None::<crate::widgets::header_bar::HeaderBarWidgets>));
     let status_bar_widgets_cell = Rc::new(RefCell::new(None::<crate::widgets::status_bar::StatusBarWidgets>));
+
+    // Create TabBar Container
+    let tab_bar_box = Rc::new(RefCell::new(None::<gtk4::Box>));
+
+    // Create StatusBar
+    let status_bar_widgets = crate::widgets::status_bar::create_status_bar();
+    ui.vbox.append(&status_bar_widgets.container);
+    let status_bar_lbl_rc = Rc::new(status_bar_widgets.lbl_status.clone());
+    status_bar_widgets_cell.replace(Some(status_bar_widgets.clone()));
+
+    // Setup navigation closures
+    let (navigate_pane_ref, navigate_pane_no_watch_ref, _watcher) = navigation::setup_navigation(
+        session.clone(),
+        active_pane.clone(),
+        left_content_handle.clone(),
+        right_content_handle.clone(),
+        left_scroll_cell.clone(),
+        right_scroll_cell.clone(),
+        status_bar_widgets_cell.clone(),
+        header_widgets_cell.clone(),
+        tab_bar_box.clone(),
+        status_bar_lbl_rc.clone(),
+        watch_tx.clone(),
+        left_rx,
+    );
 
     // Toggle hidden files closure
     let toggle_hidden = {
@@ -137,172 +158,6 @@ pub fn create_explore_window(
     };
     let toggle_hidden_rc = Rc::new(toggle_hidden) as Rc<dyn Fn()>;
 
-    // Create TabBar Container
-    let tab_bar_box = Rc::new(RefCell::new(None::<gtk4::Box>));
-
-    // Create StatusBar
-    let status_bar_widgets = crate::widgets::status_bar::create_status_bar();
-    ui.vbox.append(&status_bar_widgets.container);
-    let status_bar_lbl_rc = Rc::new(status_bar_widgets.lbl_status.clone());
-    status_bar_widgets_cell.replace(Some(status_bar_widgets.clone()));
-
-    // Define navigate_pane_no_watch closure
-    {
-        let session = session.clone();
-        let active_pane = active_pane.clone();
-        let left_handle = left_content_handle.clone();
-        let right_handle = right_content_handle.clone();
-        let right_s = right_scroll_cell.clone();
-        let left_s = left_scroll_cell.clone();
-        let status_bar_widgets_cell = status_bar_widgets_cell.clone();
-        let header_widgets_cell = header_widgets_cell.clone();
-        let tab_bar_box = tab_bar_box.clone();
-        let status_bar_lbl = status_bar_lbl_rc.clone();
-        let navigate_pane_no_watch_ref_c = navigate_pane_no_watch_ref.clone();
-
-        *navigate_pane_no_watch_ref.borrow_mut() = Some(Rc::new(move |pane: ActivePane, path: PathBuf| {
-            // Highlight active pane
-            active_pane.set(pane);
-            if pane == ActivePane::Left {
-                if let Some(ref ls) = *left_s.borrow() {
-                    ls.add_css_class("active-pane");
-                }
-                if let Some(ref rs) = *right_s.borrow() {
-                    rs.remove_css_class("active-pane");
-                }
-            } else {
-                if let Some(ref ls) = *left_s.borrow() {
-                    ls.remove_css_class("active-pane");
-                }
-                if let Some(ref rs) = *right_s.borrow() {
-                    rs.add_css_class("active-pane");
-                }
-            }
-
-            let show_hidden = session.borrow().active_tab().show_hidden;
-
-            // Sync toggle button active class in StatusBar
-            if let Some(ref sw) = *status_bar_widgets_cell.borrow() {
-                if show_hidden {
-                    sw.btn_toggle_hidden.add_css_class("status-bar-btn-active");
-                } else {
-                    sw.btn_toggle_hidden.remove_css_class("status-bar-btn-active");
-                }
-            }
-
-            let content_handle = if pane == ActivePane::Left {
-                Some(left_handle.clone())
-            } else {
-                right_handle.borrow().clone()
-            };
-
-            // Update session path
-            session.borrow_mut().active_tab_mut().current_path = path.clone();
-
-            if let Some(ref handle) = content_handle {
-                handle.widgets.progress_bar.set_visible(true);
-                handle.widgets.progress_bar.set_fraction(0.0);
-            }
-
-            let header_widgets_c = header_widgets_cell.clone();
-            let session_c = session.clone();
-            let nav_no_watch_c = navigate_pane_no_watch_ref_c.clone();
-            let tab_bar_box_c = tab_bar_box.clone();
-            let status_lbl_c = status_bar_lbl.clone();
-            let content_handle_err = content_handle.clone();
-
-            glib::spawn_future_local(async move {
-                match babydra_common::load_directory(path.clone(), show_hidden).await {
-                    Ok(entries) => {
-                        // Update Header breadcrumbs
-                        if let Some(ref hw) = *header_widgets_c.borrow() {
-                            let is_in_trash = path.to_string_lossy().ends_with("Trash/files");
-                              babydra_utils::explore::update_new_folder_button(&hw.btn_new_folder, is_in_trash);
-
-                            let nav_cb: Rc<dyn Fn(PathBuf)> = Rc::new(move |p: PathBuf| {
-                                if let Some(ref f) = *nav_no_watch_c.borrow() {
-                                    f(pane, p);
-                                }
-                            });
-                            crate::widgets::header_bar::update_address_bar(
-                                &hw.breadcrumb_box,
-                                &hw.address_stack,
-                                &session_c,
-                                &path,
-                                &nav_cb,
-                            );
-                        }
-
-                        // Calculate size
-                        let total_size: u64 = entries.iter().map(|e| e.size).sum();
-
-                        // Update Content
-                        if let Some(ref handle) = content_handle {
-                            crate::widgets::content_view::update_content_view(handle, &entries, path);
-                        }
-
-                        // Update Status Bar
-                        crate::widgets::status_bar::update_status_bar(&status_lbl_c, entries.len(), total_size);
-
-                        // Update Tab Bar titles
-                        if let Some(ref _tbb) = *tab_bar_box_c.borrow() {
-                            // Trigger TabBar rebuild
-                            // Re-borrow tabs callbacks inside rebuild
-                        }
-                    }
-                    Err(err) => {
-                        eprintln!("Failed to load directory: {}", err);
-                        if let Some(ref handle) = content_handle_err {
-                            handle.widgets.progress_bar.set_visible(false);
-                        }
-                    }
-                }
-            });
-        }));
-    }
-
-    // Define navigate_pane closure (which handles watcher)
-    {
-        let watcher = watcher.clone();
-        let watch_tx = watch_tx.clone();
-        let nav_no_watch_ref = navigate_pane_no_watch_ref.clone();
-
-        *navigate_pane_ref.borrow_mut() = Some(Rc::new(move |pane: ActivePane, path: PathBuf| {
-            let mut watcher_borrow = watcher.borrow_mut();
-            if let Some(ref mut w) = *watcher_borrow {
-                let _ = w.watch(&path);
-            } else {
-                let tx_clone = watch_tx.clone();
-                if let Ok(w) = babydra_common::FileWatcher::new(path.clone(), move |_event| {
-                    let _ = tx_clone.send(());
-                }) {
-                    *watcher_borrow = Some(w);
-                }
-            }
-
-            if let Some(ref f) = *nav_no_watch_ref.borrow() {
-                f(pane, path);
-            }
-        }));
-    }
-
-    // Wire left pane navigation loop
-    {
-        let nav = navigate_pane_ref.clone();
-        let session_c = session.clone();
-        glib::MainContext::default().spawn_local(async move {
-            while let Some(path) = left_rx.recv().await {
-                {
-                    let mut s = session_c.borrow_mut();
-                    s.active_tab_mut().navigate_to(path.clone());
-                }
-                if let Some(ref f) = *nav.borrow() {
-                    f(ActivePane::Left, path);
-                }
-            }
-        });
-    }
-
     // Setup global window navigation callback
     let nav_ref_for_header = navigate_pane_ref.clone();
     let active_pane_for_header = active_pane.clone();
@@ -311,7 +166,6 @@ pub fn create_explore_window(
             f(active_pane_for_header.get(), path);
         }
     };
-
     let nav_callback_rc = Rc::new(nav_callback) as Rc<dyn Fn(PathBuf)>;
 
     // HeaderBar event callbacks
@@ -505,114 +359,32 @@ pub fn create_explore_window(
         left_content_scroll.clone(),
     );
 
-    // Wire F3 key controller (split view) and F4 (preview toggle)
-    {
-        let toggle_split = toggle_split_view_rc.clone();
-        let toggle_preview = toggle_preview_rc.clone();
-        let toggle_hidden = toggle_hidden_rc.clone();
-        let key_controller = gtk4::EventControllerKey::new();
-        key_controller.connect_key_pressed(move |_, keyval, _, state| {
-            let has_ctrl = state.contains(gtk4::gdk::ModifierType::CONTROL_MASK);
-            if keyval == gtk4::gdk::Key::F3 {
-                toggle_split();
-                glib::Propagation::Stop
-            } else if keyval == gtk4::gdk::Key::F4 {
-                toggle_preview();
-                glib::Propagation::Stop
-            } else if has_ctrl && (keyval == gtk4::gdk::Key::h || keyval == gtk4::gdk::Key::H) {
-                toggle_hidden();
-                glib::Propagation::Stop
-            } else {
-                glib::Propagation::Proceed
-            }
-        });
-        ui.window.add_controller(key_controller);
-    }
+    // Wire keyboard shortcut listeners
+    events::setup_key_shortcuts(&ui.window, toggle_split_view_rc, toggle_preview_rc, toggle_hidden_rc);
 
-    // Auto-hide preview when window is too narrow (< 700px)
-    {
-        let layout_paned = ui.layout_paned.clone();
-        let revealer_c = revealer.clone();
-        let preview_visible = preview_visible.clone();
-        let user_wants_preview = user_wants_preview.clone();
-        let status_widgets_c = status_bar_widgets_cell.clone();
-        ui.window.connect_default_width_notify(move |window| {
-            let w = window.width();
-            if w < 700 && preview_visible.get() {
-                revealer_c.set_reveal_child(false);
-                preview_visible.set(false);
-                let layout_paned_c = layout_paned.clone();
-                let revealer_cc = revealer_c.clone();
-                glib::timeout_add_local_once(std::time::Duration::from_millis(250), move || {
-                    if !revealer_cc.reveals_child() {
-                        layout_paned_c.set_end_child(None::<&gtk4::Widget>);
-                    }
-                });
-                if let Some(ref sw) = *status_widgets_c.borrow() {
-                    sw.btn_toggle_preview.remove_css_class("status-bar-btn-active");
-                }
-            } else if w >= 700 && !preview_visible.get() && user_wants_preview.get() {
-                layout_paned.set_end_child(Some(&revealer_c));
-                revealer_c.set_reveal_child(true);
-                preview_visible.set(true);
-                if let Some(ref sw) = *status_widgets_c.borrow() {
-                    sw.btn_toggle_preview.add_css_class("status-bar-btn-active");
-                }
-            }
-        });
-    }
+    // Set up window resize response logic
+    events::setup_window_resize_handler(
+        &ui.window,
+        ui.layout_paned.clone(),
+        revealer.clone(),
+        preview_visible.clone(),
+        user_wants_preview.clone(),
+        status_bar_widgets_cell.clone(),
+    );
 
-    // Connect file watcher hot-reload channel receiver
-    {
-        let session_c = session.clone();
-        let nav_no_watch_c = navigate_pane_no_watch_ref.clone();
-        let active_pane_c = active_pane.clone();
-        glib::MainContext::default().spawn_local(async move {
-            while let Some(_) = watch_rx.recv().await {
-                let path = session_c.borrow().active_tab().current_path.clone();
-                if let Some(ref f) = *nav_no_watch_c.borrow() {
-                    f(active_pane_c.get(), path);
-                }
-            }
-        });
-    }
+    // Watcher event receiver loop
+    events::setup_file_watcher_receiver(session.clone(), navigate_pane_no_watch_ref.clone(), active_pane.clone(), watch_rx);
 
-    // Connect D-Bus receiver loop
-    {
-        let (dbus_tx, mut dbus_rx) = tokio::sync::mpsc::unbounded_channel::<std::path::PathBuf>();
-        let nav_no_watch_c = navigate_pane_no_watch_ref.clone();
-        let active_pane_c = active_pane.clone();
-        glib::MainContext::default().spawn_local(async move {
-            while let Some(path) = dbus_rx.recv().await {
-                if let Some(ref f) = *nav_no_watch_c.borrow() {
-                    f(active_pane_c.get(), path);
-                }
-            }
-        });
+    // D-Bus service loop
+    events::setup_dbus_receiver(navigate_pane_no_watch_ref.clone(), active_pane.clone());
 
-        tokio::spawn(async move {
-            if let Err(e) = babydra_common::start_dbus_service(dbus_tx).await {
-                eprintln!("Failed to start D-Bus service: {}", e);
-            }
-        });
-    }
+    // Connect theme preference notifier
+    events::setup_theme_listener(left_content_handle.clone(), right_content_handle.clone());
 
     // Start initial navigation
     let path = session.borrow().active_tab().current_path.clone();
     if let Some(ref f) = *navigate_pane_ref.borrow() {
         f(ActivePane::Left, path);
-    }
-
-    // Connect theme-change listener to rebuild content views
-    if let Some(settings) = gtk4::Settings::default() {
-        let left_handle = left_content_handle.clone();
-        let right_handle = right_content_handle.clone();
-        settings.connect_gtk_application_prefer_dark_theme_notify(move |_| {
-            crate::widgets::content_view::update_content_view_ui(&left_handle);
-            if let Some(ref rh) = *right_handle.borrow() {
-                crate::widgets::content_view::update_content_view_ui(rh);
-            }
-        });
     }
 
     ui.window
