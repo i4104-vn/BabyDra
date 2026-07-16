@@ -1,4 +1,3 @@
-use gtk4::ScrolledWindow;
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -16,7 +15,7 @@ pub use update::update_content_view_ui;
 pub fn create_content_view(
     nav_callback: impl Fn(PathBuf) + 'static,
     selection_callback: impl Fn(Vec<FileEntry>) + 'static,
-) -> (ScrolledWindow, ContentViewHandle) {
+) -> (gtk4::Box, ContentViewHandle) {
     let widgets = render::build_content_view_ui();
 
     let entries: Rc<RefCell<Vec<FileEntry>>> = Rc::new(RefCell::new(Vec::new()));

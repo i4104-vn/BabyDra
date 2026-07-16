@@ -39,7 +39,7 @@ pub struct HeaderBarWidgets {
 
 #[derive(Clone)]
 pub struct ContentViewWidgets {
-    pub container: ScrolledWindow,
+    pub container: Box,
     pub flowbox: gtk4::FlowBox,
     pub listbox: gtk4::ListBox,
     pub grid_container: gtk4::Box,
@@ -48,6 +48,7 @@ pub struct ContentViewWidgets {
     pub grid_rubberband: gtk4::Box,
     pub list_fixed: gtk4::Fixed,
     pub list_rubberband: gtk4::Box,
+    pub progress_bar: gtk4::ProgressBar,
 }
 
 #[derive(Clone)]

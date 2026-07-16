@@ -24,6 +24,10 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
         *g
     };
 
+    // Reset and show progress bar at start of layout transaction
+    widgets.progress_bar.set_visible(true);
+    widgets.progress_bar.set_fraction(0.0);
+
     // Clear grid_container (for icons/grid view)
     while let Some(child) = widgets.grid_container.first_child() {
         widgets.grid_container.remove(&child);
@@ -54,6 +58,9 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
                         return;
                     }
                     
+                    let fraction = if entries.is_empty() { 1.0 } else { (idx + 1) as f64 / entries.len() as f64 };
+                    handle_c.widgets.progress_bar.set_fraction(fraction);
+                    
                     let flow_child = create_flow_child(idx, entry, &current_path, &nav_callback, selected_paths.clone());
                     flowbox.append(&flow_child);
                     
@@ -77,6 +84,9 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
                     if *handle_c.current_path.borrow() != start_path || *handle_c.render_generation.borrow() != gen {
                         return;
                     }
+
+                    let fraction = if entries.is_empty() { 1.0 } else { (idx + 1) as f64 / entries.len() as f64 };
+                    handle_c.widgets.progress_bar.set_fraction(fraction);
 
                     let group_name = get_group_name(entry);
                     if group_name != current_group_name {
@@ -122,6 +132,9 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
                 if *handle_c.current_path.borrow() != start_path || *handle_c.render_generation.borrow() != gen {
                     return;
                 }
+
+                let fraction = if entries.is_empty() { 1.0 } else { (idx + 1) as f64 / entries.len() as f64 };
+                handle_c.widgets.progress_bar.set_fraction(fraction);
 
                 let target_entry = entry.clone();
                 let cp = current_path.clone();
@@ -208,6 +221,11 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
                     }
                 });
             }
+        }
+
+        // Hide progress bar when layout completes successfully
+        if *handle_c.current_path.borrow() == start_path && *handle_c.render_generation.borrow() == gen {
+            handle_c.widgets.progress_bar.set_visible(false);
         }
     });
 }

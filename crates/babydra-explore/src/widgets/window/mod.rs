@@ -64,8 +64,8 @@ pub fn create_explore_window(
     };
 
     // Scrolled window cells to resolve ordering in closure capture
-    let left_scroll_cell = Rc::new(RefCell::new(None::<gtk4::ScrolledWindow>));
-    let right_scroll_cell = Rc::new(RefCell::new(None::<gtk4::ScrolledWindow>));
+    let left_scroll_cell = Rc::new(RefCell::new(None::<gtk4::Box>));
+    let right_scroll_cell = Rc::new(RefCell::new(None::<gtk4::Box>));
 
     // Create Left ContentView
     let (left_content_scroll, left_content_handle) = crate::widgets::content_view::create_content_view(
@@ -200,7 +200,8 @@ pub fn create_explore_window(
             session.borrow_mut().active_tab_mut().current_path = path.clone();
 
             if let Some(ref handle) = content_handle {
-                handle.widgets.stack.set_visible_child_name("loading");
+                handle.widgets.progress_bar.set_visible(true);
+                handle.widgets.progress_bar.set_fraction(0.0);
             }
 
             let header_widgets_c = header_widgets_cell.clone();
@@ -252,8 +253,7 @@ pub fn create_explore_window(
                     Err(err) => {
                         eprintln!("Failed to load directory: {}", err);
                         if let Some(ref handle) = content_handle_err {
-                            let mode = handle.current_mode.borrow().clone();
-                            handle.widgets.stack.set_visible_child_name(&mode);
+                            handle.widgets.progress_bar.set_visible(false);
                         }
                     }
                 }
