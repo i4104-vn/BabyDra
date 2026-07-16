@@ -4,6 +4,7 @@ use std::rc::Rc;
 use std::cell::RefCell;
 use std::path::PathBuf;
 use babydra_common::SessionState;
+use babydra_common::i18n::t;
 
 mod render;
 
@@ -16,22 +17,22 @@ pub fn create_sidebar(
     let nav_cb = Rc::new(nav_callback) as Rc<dyn Fn(PathBuf)>;
 
     // ── Section: Places ────────────────────────────────────────
-    let places_lbl = render::create_section_title("Places");
+    let places_lbl = render::create_section_title(&t("explore.places"));
     vbox.append(&places_lbl);
 
-    add_sidebar_item(&vbox, "Home", "user-home", glib::home_dir(), &session, &nav_cb);
+    add_sidebar_item(&vbox, &t("explore.home"), "user-home", glib::home_dir(), &session, &nav_cb);
 
     let home = glib::home_dir();
 
     // Folders that MUST be shown and auto-created at Home if not exist
     let folders_to_ensure = [
-        ("Downloads", "folder-download", glib::UserDirectory::Downloads, "Downloads"),
-        ("Documents", "folder-documents", glib::UserDirectory::Documents, "Documents"),
-        ("Pictures", "folder-pictures", glib::UserDirectory::Pictures, "Pictures"),
-        ("Musics",    "folder-music",     glib::UserDirectory::Music, "Music"),
+        ("explore.downloads", "folder-download", glib::UserDirectory::Downloads, "Downloads"),
+        ("explore.documents", "folder-documents", glib::UserDirectory::Documents, "Documents"),
+        ("explore.pictures", "folder-pictures", glib::UserDirectory::Pictures, "Pictures"),
+        ("explore.music",    "folder-music",     glib::UserDirectory::Music, "Music"),
     ];
 
-    for (label, icon, user_dir, fallback_sub) in &folders_to_ensure {
+    for (key, icon, user_dir, fallback_sub) in &folders_to_ensure {
         let path = if let Some(p) = glib::user_special_dir(*user_dir) {
             p
         } else {
@@ -43,24 +44,24 @@ pub fn create_sidebar(
             let _ = std::fs::create_dir_all(&path);
         }
 
-        add_sidebar_item(&vbox, label, icon, path, &session, &nav_cb);
+        add_sidebar_item(&vbox, &t(key), icon, path, &session, &nav_cb);
     }
 
     // Add Trash quick link
     let trash_path = glib::user_data_dir().join("Trash/files");
     let _ = std::fs::create_dir_all(&trash_path);
     let _ = std::fs::create_dir_all(glib::user_data_dir().join("Trash/info"));
-    add_sidebar_item(&vbox, "Trash", "user-trash", trash_path, &session, &nav_cb);
+    add_sidebar_item(&vbox, &t("explore.trash"), "user-trash", trash_path, &session, &nav_cb);
 
     // Other optional folders
     let optional_dirs = [
-        ("Desktop", "folder-desktop", glib::UserDirectory::Desktop),
-        ("Videos",  "folder-videos",  glib::UserDirectory::Videos),
+        ("explore.desktop", "folder-desktop", glib::UserDirectory::Desktop),
+        ("explore.videos",  "folder-videos",  glib::UserDirectory::Videos),
     ];
-    for (name, icon, dir) in &optional_dirs {
+    for (key, icon, dir) in &optional_dirs {
         if let Some(path) = glib::user_special_dir(*dir) {
             if path.exists() {
-                add_sidebar_item(&vbox, name, icon, path, &session, &nav_cb);
+                add_sidebar_item(&vbox, &t(key), icon, path, &session, &nav_cb);
             }
         }
     }
@@ -69,10 +70,10 @@ pub fn create_sidebar(
     vbox.append(&render::create_sidebar_separator());
 
     // ── Section: This PC ───────────────────────────────────────
-    let pc_lbl = render::create_section_title("This PC");
+    let pc_lbl = render::create_section_title(&t("explore.this_pc"));
     vbox.append(&pc_lbl);
 
-    add_sidebar_item(&vbox, "Local Disk (/)", "drive-harddisk", PathBuf::from("/"), &session, &nav_cb);
+    add_sidebar_item(&vbox, &t("explore.local_disk"), "drive-harddisk", PathBuf::from("/"), &session, &nav_cb);
 
     container
 }

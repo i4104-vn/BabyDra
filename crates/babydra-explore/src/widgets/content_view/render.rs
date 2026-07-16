@@ -1,6 +1,7 @@
 use gtk4::prelude::*;
 use gtk4::{ScrolledWindow, FlowBox, ListBox, Stack, Align};
 use babydra_common::ContentViewWidgets;
+use babydra_common::i18n::t;
 
 /// Builds the Content Area UI (FlowBox grid layout and ListBox list layout wrapped in a Stack).
 pub fn build_content_view_ui() -> ContentViewWidgets {
@@ -73,7 +74,7 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
     spinner.start();
     loading_box.append(&spinner);
 
-    let loading_lbl = gtk4::Label::new(Some("Đang tải danh sách..."));
+    let loading_lbl = gtk4::Label::new(Some(&t("explore.loading")));
     loading_lbl.add_css_class("loading-label");
     loading_box.append(&loading_lbl);
 

@@ -1,5 +1,6 @@
 use gtk4::prelude::*;
 use gtk4::Button;
+use babydra_common::i18n::t;
 
 /// Dynamically morphs the button layout/icons between "New Folder" and "Empty Trash".
 pub fn update_new_folder_button(btn: &Button, is_in_trash: bool) {
@@ -9,7 +10,7 @@ pub fn update_new_folder_button(btn: &Button, is_in_trash: bool) {
                 img.set_icon_name(Some("user-trash-full-symbolic"));
             }
             if let Some(lbl) = box_child.first_child().and_then(|w| w.next_sibling()).and_downcast::<gtk4::Label>() {
-                lbl.set_text("Empty Trash");
+                lbl.set_text(&t("explore.empty_trash"));
             }
         }
         btn.add_css_class("empty-trash-btn");
@@ -19,7 +20,7 @@ pub fn update_new_folder_button(btn: &Button, is_in_trash: bool) {
                 img.set_icon_name(Some("folder-new-symbolic"));
             }
             if let Some(lbl) = box_child.first_child().and_then(|w| w.next_sibling()).and_downcast::<gtk4::Label>() {
-                lbl.set_text("New Folder");
+                lbl.set_text(&t("explore.new_folder"));
             }
         }
         btn.remove_css_class("empty-trash-btn");
