@@ -46,6 +46,13 @@ pub fn update_address_bar(
         let target = current.clone();
         let session_clone = session.clone();
         let nav_cb = nav_callback.clone();
+
+        let btn_gesture = gtk4::GestureClick::new();
+        btn_gesture.connect_pressed(|g, _, _, _| {
+            g.set_state(gtk4::EventSequenceState::Claimed);
+        });
+        btn.add_controller(btn_gesture);
+
         btn.connect_clicked(move |_| {
             { session_clone.borrow_mut().active_tab_mut().navigate_to(target.clone()); }
             nav_cb(target.clone());
