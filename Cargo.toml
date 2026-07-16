@@ -6,7 +6,6 @@ members = [
     "libs/babydra-launcher",
     "libs/baby-utils",
     "crates/babydra-panel",
-    "crates/babydra-menu",
     "crates/babydra-switcher",
     "crates/babydra-screenshot",
     "crates/babydra-lock",
