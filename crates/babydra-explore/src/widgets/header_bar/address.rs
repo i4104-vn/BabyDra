@@ -48,15 +48,15 @@ pub fn update_address_bar(
         let nav_cb = nav_callback.clone();
 
         let btn_gesture = gtk4::GestureClick::new();
-        btn_gesture.connect_pressed(|g, _, _, _| {
+        let target_c = target.clone();
+        let session_clone2 = session_clone.clone();
+        let nav_cb2 = nav_cb.clone();
+        btn_gesture.connect_pressed(move |g, _, _, _| {
             g.set_state(gtk4::EventSequenceState::Claimed);
+            { session_clone2.borrow_mut().active_tab_mut().navigate_to(target_c.clone()); }
+            nav_cb2(target_c.clone());
         });
         btn.add_controller(btn_gesture);
-
-        btn.connect_clicked(move |_| {
-            { session_clone.borrow_mut().active_tab_mut().navigate_to(target.clone()); }
-            nav_cb(target.clone());
-        });
 
         breadcrumb_box.append(&btn);
 
