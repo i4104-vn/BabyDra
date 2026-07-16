@@ -18,10 +18,13 @@ pub fn create_content_view(
 ) -> (gtk4::Box, ContentViewHandle) {
     let widgets = render::build_content_view_ui();
 
+    let settings = babydra_common::load_explore_settings();
+    widgets.stack.set_visible_child_name(&settings.view_mode);
+
     let entries: Rc<RefCell<Vec<FileEntry>>> = Rc::new(RefCell::new(Vec::new()));
     let all_entries: Rc<RefCell<Vec<FileEntry>>> = Rc::new(RefCell::new(Vec::new()));
     let current_path = Rc::new(RefCell::new(PathBuf::new()));
-    let current_mode = Rc::new(RefCell::new("icons".to_string()));
+    let current_mode = Rc::new(RefCell::new(settings.view_mode));
     let sort_mode = Rc::new(RefCell::new("auto".to_string()));
     let nav_cb = Rc::new(nav_callback) as Rc<dyn Fn(PathBuf)>;
 

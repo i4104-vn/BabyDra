@@ -30,16 +30,44 @@ pub fn sort_entries(entries: &mut [FileEntry], sort_mode: &str) {
                     9
                 }
             };
+
             let w_a = get_weight(a);
             let w_b = get_weight(b);
+
             if w_a != w_b {
                 return w_a.cmp(&w_b);
             }
+
+            // Within the same group/category, directories always go first!
+            match (a_is_dir, b_is_dir) {
+                (true, false) => return std::cmp::Ordering::Less,
+                (false, true) => return std::cmp::Ordering::Greater,
+                _ => {}
+            }
+
+            // Within the same type and category, sort by exact modified time descending (newest first)
+            match (a.modified, b.modified) {
+                (Some(ma), Some(mb)) => {
+                    if ma != mb {
+                        return mb.cmp(&ma); // reverse to get newest first
+                    }
+                }
+                (Some(_), None) => return std::cmp::Ordering::Less,
+                (None, Some(_)) => return std::cmp::Ordering::Greater,
+                (None, None) => {}
+            }
+        } else {
+            // Non-date sort modes (e.g. name or auto):
+            // Always put directories at the top of the entire list!
+            match (a_is_dir, b_is_dir) {
+                (true, false) => return std::cmp::Ordering::Less,
+                (false, true) => return std::cmp::Ordering::Greater,
+                _ => {}
+            }
         }
 
+        // Fallback sorting (alphabetical / extension)
         match (a_is_dir, b_is_dir) {
-            (true, false) => std::cmp::Ordering::Less,
-            (false, true) => std::cmp::Ordering::Greater,
             (true, true) => {
                 a.display_name.to_lowercase().cmp(&b.display_name.to_lowercase())
             }
@@ -53,6 +81,7 @@ pub fn sort_entries(entries: &mut [FileEntry], sort_mode: &str) {
                     cmp_type
                 }
             }
+            _ => std::cmp::Ordering::Equal,
         }
     });
 }

@@ -181,9 +181,9 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
                     }
 
                     let get_group = |r: &gtk4::ListBoxRow| -> String {
-                        let idx = r.property::<String>("name").parse::<usize>().unwrap_or(usize::MAX);
-                        if idx < entries_clone.len() {
-                            let entry = &entries_clone[idx];
+                        let path_str = r.widget_name();
+                        let path = std::path::Path::new(path_str.as_str());
+                        if let Some(entry) = entries_clone.iter().find(|e| e.path == path) {
                             babydra_common::get_group_name(entry, &sort_mode_clone)
                         } else {
                             "".to_string()

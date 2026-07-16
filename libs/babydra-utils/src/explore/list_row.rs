@@ -28,6 +28,7 @@ pub fn create_list_row(
         .label(&entry.display_name)
         .halign(Align::Start)
         .hexpand(true)
+        .ellipsize(gtk4::pango::EllipsizeMode::End)
         .build();
     item_box.append(&lbl_name);
 
