@@ -18,6 +18,11 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     let btn_up      = Button::from_icon_name("go-up-symbolic");
     let btn_refresh = Button::from_icon_name("view-refresh-symbolic");
 
+    btn_back.set_tooltip_text(Some("Quay lại"));
+    btn_forward.set_tooltip_text(Some("Đi tiếp"));
+    btn_up.set_tooltip_text(Some("Lên thư mục cha"));
+    btn_refresh.set_tooltip_text(Some("Tải lại"));
+
     for btn in &[&btn_back, &btn_forward, &btn_up, &btn_refresh] {
         btn.set_css_classes(&["nav-btn"]);
     }
@@ -84,6 +89,15 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     sep2.set_css_classes(&["toolbar-sep"]);
     let btn_view_icons   = Button::from_icon_name("view-grid-symbolic");
     let btn_view_list    = Button::from_icon_name("view-list-symbolic");
+
+    btn_new_folder.set_tooltip_text(Some("Tạo thư mục mới"));
+    btn_cut.set_tooltip_text(Some("Cắt"));
+    btn_copy.set_tooltip_text(Some("Sao chép"));
+    btn_paste.set_tooltip_text(Some("Dán"));
+    btn_rename.set_tooltip_text(Some("Đổi tên"));
+    btn_delete.set_tooltip_text(Some("Xóa"));
+    btn_view_icons.set_tooltip_text(Some("Xem dạng lưới"));
+    btn_view_list.set_tooltip_text(Some("Xem dạng danh sách"));
 
     btn_new_folder.set_css_classes(&["toolbar-btn", "new-btn"]);
 
