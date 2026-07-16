@@ -30,6 +30,7 @@ pub fn create_explore_window(
     let is_split = Rc::new(Cell::new(false));
     let active_pane = Rc::new(Cell::new(ActivePane::Left));
     let preview_visible = Rc::new(Cell::new(settings.preview_visible));
+    let user_wants_preview = Rc::new(Cell::new(settings.preview_visible));
     let watcher = Rc::new(RefCell::new(None::<babydra_common::FileWatcher>));
 
     // Channels for file watching/reloading
@@ -405,10 +406,12 @@ pub fn create_explore_window(
         let layout_paned = ui.layout_paned.clone();
         let revealer_c = revealer.clone();
         let preview_visible = preview_visible.clone();
+        let user_wants_preview = user_wants_preview.clone();
         let status_widgets_c = status_bar_widgets_cell.clone();
         move || {
             let now_visible = !preview_visible.get();
             preview_visible.set(now_visible);
+            user_wants_preview.set(now_visible);
 
             if now_visible {
                 layout_paned.set_end_child(Some(&revealer_c));
@@ -510,6 +513,7 @@ pub fn create_explore_window(
         let layout_paned = ui.layout_paned.clone();
         let revealer_c = revealer.clone();
         let preview_visible = preview_visible.clone();
+        let user_wants_preview = user_wants_preview.clone();
         let status_widgets_c = status_bar_widgets_cell.clone();
         ui.window.connect_default_width_notify(move |window| {
             let w = window.width();
@@ -526,7 +530,7 @@ pub fn create_explore_window(
                 if let Some(ref sw) = *status_widgets_c.borrow() {
                     sw.btn_toggle_preview.remove_css_class("status-bar-btn-active");
                 }
-            } else if w >= 700 && !preview_visible.get() {
+            } else if w >= 700 && !preview_visible.get() && user_wants_preview.get() {
                 layout_paned.set_end_child(Some(&revealer_c));
                 revealer_c.set_reveal_child(true);
                 preview_visible.set(true);
