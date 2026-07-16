@@ -46,7 +46,7 @@ pub fn create_volume_row(
         })
     };
 
-    let mute_btn = baby_utils::components::create_colored_icon_button(
+    let mute_btn = babydra_utils::components::create_colored_icon_button(
         if muted_state.get() { "volume-mute" } else { "volume" },
         16,
         "rgba(255,255,255,0.9)",
@@ -129,7 +129,7 @@ pub fn create_volume_row(
     row_box.append(&overlay);
     row_box.append(&menu_btn);
 
-    let popover = baby_utils::components::create_popover(&menu_btn, gtk4::PositionType::Bottom, "taskbar-popover");
+    let popover = babydra_utils::components::create_popover(&menu_btn, gtk4::PositionType::Bottom, "taskbar-popover");
     popover.set_has_arrow(true);
 
     let popover_clone = popover.clone();

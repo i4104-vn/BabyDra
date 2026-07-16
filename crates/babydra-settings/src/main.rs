@@ -50,11 +50,11 @@ fn main() {
         sidebar_list.set_selection_mode(gtk4::SelectionMode::Single);
         sidebar.append(&sidebar_list);
 
-        let wifi_row = baby_utils::components::create_sidebar_row("Wi-Fi & Mạng", "network-wireless-symbolic");
-        let bt_row = baby_utils::components::create_sidebar_row("Bluetooth", "bluetooth-active-symbolic");
-        let vpn_row = baby_utils::components::create_sidebar_row("VPN & Mạng ảo", "network-vpn-symbolic");
-        let app_row = baby_utils::components::create_sidebar_row("Giao diện & Hình nền", "preferences-desktop-wallpaper-symbolic");
-        let sys_row = baby_utils::components::create_sidebar_row("Hệ thống", "preferences-system-symbolic");
+        let wifi_row = babydra_utils::components::create_sidebar_row("Wi-Fi & Mạng", "network-wireless-symbolic");
+        let bt_row = babydra_utils::components::create_sidebar_row("Bluetooth", "bluetooth-active-symbolic");
+        let vpn_row = babydra_utils::components::create_sidebar_row("VPN & Mạng ảo", "network-vpn-symbolic");
+        let app_row = babydra_utils::components::create_sidebar_row("Giao diện & Hình nền", "preferences-desktop-wallpaper-symbolic");
+        let sys_row = babydra_utils::components::create_sidebar_row("Hệ thống", "preferences-system-symbolic");
 
         sidebar_list.append(&wifi_row);
         sidebar_list.append(&bt_row);

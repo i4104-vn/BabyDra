@@ -10,7 +10,7 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
     
     let (is_active, ssid) = get_wifi_state();
     
-    let (left_btn, sub_label) = baby_utils::components::create_toggle_tile(
+    let (left_btn, sub_label) = babydra_utils::components::create_toggle_tile(
         "wifi",
         &babydra_common::i18n::t("control.network"),
         &ssid,
@@ -30,7 +30,7 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
         .and_then(|img| img.downcast::<gtk4::Image>().ok())
         .unwrap();
 
-    let right_btn = baby_utils::components::create_colored_icon_button(
+    let right_btn = babydra_utils::components::create_colored_icon_button(
         "go-next-symbolic",
         12,
         "rgba(255, 255, 255, 0.7)",
@@ -39,7 +39,7 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
         || {},
     );
     
-    let popover = baby_utils::components::create_popover(&container, gtk4::PositionType::Right, "taskbar-popover");
+    let popover = babydra_utils::components::create_popover(&container, gtk4::PositionType::Right, "taskbar-popover");
     popover.set_has_arrow(false);
     
     setup_wifi_popover(&popover, sub_label.clone(), left_btn.clone(), circle.clone(), icon_widget.clone());

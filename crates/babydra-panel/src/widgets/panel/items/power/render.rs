@@ -17,7 +17,7 @@ pub fn create_header_row() -> gtk4::Box {
     let theme_icon_name = if is_dark { "dark-mode" } else { "brightness" };
     let theme_icon_color = if is_dark { "#ffffff" } else { "rgba(255,255,255,0.8)" };
     let theme_tooltip = babydra_common::i18n::t("control.dark_mode");
-    let theme_btn = baby_utils::components::create_colored_icon_button(
+    let theme_btn = babydra_utils::components::create_colored_icon_button(
         theme_icon_name,
         16,
         theme_icon_color,
@@ -40,7 +40,7 @@ pub fn create_header_row() -> gtk4::Box {
         });
     }
 
-    let settings_btn = baby_utils::components::create_icon_button(
+    let settings_btn = babydra_utils::components::create_icon_button(
         "settings",
         16,
         &["circle-btn"],

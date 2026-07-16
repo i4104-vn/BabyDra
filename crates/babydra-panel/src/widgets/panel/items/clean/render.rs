@@ -24,7 +24,7 @@ enum CleanState {
 }
 
 pub fn create_clean_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) -> gtk4::Button {
-    let btn = baby_utils::components::create_colored_icon_button(
+    let btn = babydra_utils::components::create_colored_icon_button(
         "broom",
         18,
         "rgba(255, 255, 255, 0.8)",
@@ -38,7 +38,7 @@ pub fn create_clean_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>)
     btn.set_hexpand(false);
     btn.set_vexpand(false);
 
-    let popover = baby_utils::components::create_popover(&btn, gtk4::PositionType::Bottom, "media-popover");
+    let popover = babydra_utils::components::create_popover(&btn, gtk4::PositionType::Bottom, "media-popover");
     popover.set_has_arrow(false);
 
     let popover_box = setup_clean_popover(&popover);
@@ -173,7 +173,7 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
     btn_container.set_margin_top(8);
     btn_container.set_margin_bottom(8);
 
-    let action_btn = baby_utils::components::create_accent_button(&babydra_common::i18n::t("control.scan"));
+    let action_btn = babydra_utils::components::create_accent_button(&babydra_common::i18n::t("control.scan"));
     action_btn.add_css_class("wifi-btn-primary");
     action_btn.set_size_request(120, -1);
     btn_container.append(&action_btn);

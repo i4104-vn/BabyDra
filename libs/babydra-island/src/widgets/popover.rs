@@ -14,7 +14,7 @@ pub fn create_media_popover(
     gtk4::Label,
     gtk4::Image,
 ) {
-    let popover = baby_utils::components::create_popover(notch_capsule, gtk4::PositionType::Bottom, "media-popover");
+    let popover = babydra_utils::components::create_popover(notch_capsule, gtk4::PositionType::Bottom, "media-popover");
     popover.set_has_arrow(false);
     popover.set_offset(0, 10);
 

@@ -7,19 +7,19 @@ pub fn build_wifi_ui() -> (gtk4::Box, gtk4::Switch, gtk4::ListBox) {
     main_box.set_margin_start(10);
     main_box.set_margin_end(10);
 
-    let title_lbl = baby_utils::components::create_title("Wi-Fi & Mạng");
+    let title_lbl = babydra_utils::components::create_title("Wi-Fi & Mạng");
     main_box.append(&title_lbl);
 
-    let (switch_card, wifi_switch) = baby_utils::components::create_switch_card(
+    let (switch_card, wifi_switch) = babydra_utils::components::create_switch_card(
         "Bật/Tắt Wi-Fi",
         "Bật hoặc tắt bộ thu phát mạng không dây"
     );
     main_box.append(&switch_card);
 
-    let list_title = baby_utils::components::create_subtitle("Danh sách mạng khả dụng");
+    let list_title = babydra_utils::components::create_subtitle("Danh sách mạng khả dụng");
     main_box.append(&list_title);
 
-    let list_container = baby_utils::components::create_card(gtk4::Orientation::Vertical, 8);
+    let list_container = babydra_utils::components::create_card(gtk4::Orientation::Vertical, 8);
     list_container.set_vexpand(true);
 
     let scroll = gtk4::ScrolledWindow::new();

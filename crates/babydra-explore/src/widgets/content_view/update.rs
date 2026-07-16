@@ -94,7 +94,7 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
             let cp = current_path.clone();
             let nav = nav_callback.clone();
             let sel_paths = handle.selected_paths.clone();
-            let list_row = baby_utils::explore::create_list_row(
+            let list_row = babydra_utils::explore::create_list_row(
                 idx,
                 entry,
                 handle.selected_paths.clone(),

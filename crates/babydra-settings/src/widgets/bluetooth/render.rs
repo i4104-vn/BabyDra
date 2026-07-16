@@ -7,19 +7,19 @@ pub fn build_bluetooth_ui() -> (gtk4::Box, gtk4::Switch, gtk4::ListBox) {
     main_box.set_margin_start(10);
     main_box.set_margin_end(10);
 
-    let title_lbl = baby_utils::components::create_title("Bluetooth");
+    let title_lbl = babydra_utils::components::create_title("Bluetooth");
     main_box.append(&title_lbl);
 
-    let (switch_card, bt_switch) = baby_utils::components::create_switch_card(
+    let (switch_card, bt_switch) = babydra_utils::components::create_switch_card(
         "Bật/Tắt Bluetooth",
         "Quản lý kết nối tai nghe, chuột, bàn phím và thiết bị không dây khác"
     );
     main_box.append(&switch_card);
 
-    let list_title = baby_utils::components::create_subtitle("Danh sách thiết bị ghép nối");
+    let list_title = babydra_utils::components::create_subtitle("Danh sách thiết bị ghép nối");
     main_box.append(&list_title);
 
-    let list_container = baby_utils::components::create_card(gtk4::Orientation::Vertical, 8);
+    let list_container = babydra_utils::components::create_card(gtk4::Orientation::Vertical, 8);
     list_container.set_vexpand(true);
 
     let scroll = gtk4::ScrolledWindow::new();
