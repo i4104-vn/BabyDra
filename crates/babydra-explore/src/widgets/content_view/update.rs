@@ -17,6 +17,13 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
     let selected_paths = handle.selected_paths.clone();
     let handle_c = handle.clone();
 
+    // Increment and capture the render generation
+    let gen = {
+        let mut g = handle.render_generation.borrow_mut();
+        *g += 1;
+        *g
+    };
+
     // Clear grid_container (for icons/grid view)
     while let Some(child) = widgets.grid_container.first_child() {
         widgets.grid_container.remove(&child);
@@ -43,7 +50,7 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
                 
                 let mut counter = 0;
                 for (idx, entry) in entries.iter().enumerate() {
-                    if *handle_c.current_path.borrow() != start_path {
+                    if *handle_c.current_path.borrow() != start_path || *handle_c.render_generation.borrow() != gen {
                         return;
                     }
                     
@@ -67,7 +74,7 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
                 
                 let mut counter = 0;
                 for (idx, entry) in entries.iter().enumerate() {
-                    if *handle_c.current_path.borrow() != start_path {
+                    if *handle_c.current_path.borrow() != start_path || *handle_c.render_generation.borrow() != gen {
                         return;
                     }
 
@@ -112,7 +119,7 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
             // Render list/details view
             let mut counter = 0;
             for (idx, entry) in entries.iter().enumerate() {
-                if *handle_c.current_path.borrow() != start_path {
+                if *handle_c.current_path.borrow() != start_path || *handle_c.render_generation.borrow() != gen {
                     return;
                 }
 
@@ -151,7 +158,7 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
             }
 
             // Set header function for grouping in ListBox
-            if *handle_c.current_path.borrow() == start_path {
+            if *handle_c.current_path.borrow() == start_path && *handle_c.render_generation.borrow() == gen {
                 let entries_clone = entries.clone();
                 let sort_mode_clone = sort_mode.to_string();
                 widgets.listbox.set_header_func(move |row, before| {

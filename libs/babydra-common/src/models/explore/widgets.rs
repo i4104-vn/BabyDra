@@ -61,6 +61,7 @@ pub struct ContentViewHandle {
     pub nav_callback: Rc<dyn Fn(PathBuf)>,
     pub selection_callback: Rc<dyn Fn(Vec<PathBuf>)>,
     pub selected_paths: Rc<RefCell<Vec<PathBuf>>>,
+    pub render_generation: Rc<RefCell<u64>>,
 }
 
 #[derive(Clone)]

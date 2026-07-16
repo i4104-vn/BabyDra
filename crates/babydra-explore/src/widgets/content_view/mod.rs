@@ -43,6 +43,8 @@ pub fn create_content_view(
         sel_cb(list);
     }) as Rc<dyn Fn(Vec<PathBuf>)>;
 
+    let render_generation = Rc::new(RefCell::new(0u64));
+
     let handle = ContentViewHandle {
         widgets: widgets.clone(),
         entries: entries.clone(),
@@ -53,6 +55,7 @@ pub fn create_content_view(
         nav_callback: nav_cb.clone(),
         selection_callback: sc_fn.clone(),
         selected_paths: selected_paths.clone(),
+        render_generation: render_generation.clone(),
     };
 
     // Wire all controllers/gestures for ListBox and overlay background
