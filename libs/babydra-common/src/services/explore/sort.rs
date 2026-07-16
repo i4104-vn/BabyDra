@@ -5,6 +5,12 @@ pub fn sort_entries(entries: &mut [FileEntry], sort_mode: &str) {
         let a_is_dir = matches!(a.file_type, crate::models::explore::FileType::Directory);
         let b_is_dir = matches!(b.file_type, crate::models::explore::FileType::Directory);
 
+        match (a_is_dir, b_is_dir) {
+            (true, false) => return std::cmp::Ordering::Less,
+            (false, true) => return std::cmp::Ordering::Greater,
+            _ => {}
+        }
+
         if sort_mode == "date" {
             match (a.modified, b.modified) {
                 (Some(ma), Some(mb)) => {
