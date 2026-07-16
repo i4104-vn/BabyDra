@@ -27,11 +27,14 @@ pub fn wire_listbox_controllers(
 
     // 2. Pane activation click on empty space
     {
+        let lb_clone = widgets.listbox.clone();
         let sc = sc_fn.clone();
         let gesture = gtk4::GestureClick::new();
         gesture.set_button(1);
-        gesture.connect_pressed(move |_, _, _, _| {
-            sc(Vec::new());
+        gesture.connect_pressed(move |_, _, _, y| {
+            if lb_clone.row_at_y(y as i32).is_none() {
+                sc(Vec::new());
+            }
         });
         widgets.listbox.add_controller(gesture);
     }

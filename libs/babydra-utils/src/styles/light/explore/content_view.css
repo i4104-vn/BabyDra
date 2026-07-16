@@ -97,12 +97,12 @@
     outline: 2px solid rgba(0, 0, 0, 0.15);
 }
 
-.explore-window listrow:selected {
+.explore-window row:selected {
     background-color: transparent;
     outline: none;
 }
 
-.explore-window listrow:selected .list-row {
+.explore-window row:selected .list-row {
     background-color: rgba(0, 0, 0, 0.08);
     color: #000000;
     outline: 2px solid rgba(0, 0, 0, 0.15);
@@ -140,7 +140,8 @@
     outline: none;
 }
 
-/* ── Info Panel ─────────────────────────────────────────────────── */
+/* Rubberband selection box overlay */
+.explore-window .rubberband {
     background-color: rgba(52, 152, 219, 0.18);
     border: 1.5px solid rgba(52, 152, 219, 0.6);
     border-radius: 2px;
@@ -170,7 +171,7 @@
 }
 
 .explore-window flowboxchild,
-.explore-window listrow {
+.explore-window row {
     animation-name: list-item-slide-in;
     animation-duration: 250ms;
     animation-timing-function: ease-out;
