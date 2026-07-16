@@ -44,7 +44,11 @@ pub fn create_explore_window(
         .build();
     revealer.set_child(Some(&info_panel_container));
     revealer.set_reveal_child(preview_visible.get());
-    ui.layout_paned.set_end_child(Some(&revealer));
+    if preview_visible.get() {
+        ui.layout_paned.set_end_child(Some(&revealer));
+    } else {
+        ui.layout_paned.set_end_child(None::<&gtk4::Widget>);
+    }
 
     let info_widgets_rc = Rc::new(info_widgets);
 
@@ -389,6 +393,7 @@ pub fn create_explore_window(
 
     // Preview toggle closure
     let toggle_preview = {
+        let layout_paned = ui.layout_paned.clone();
         let revealer_c = revealer.clone();
         let preview_visible = preview_visible.clone();
         let status_widgets_c = status_bar_widgets_cell.clone();
@@ -396,7 +401,19 @@ pub fn create_explore_window(
             let now_visible = !preview_visible.get();
             preview_visible.set(now_visible);
 
-            revealer_c.set_reveal_child(now_visible);
+            if now_visible {
+                layout_paned.set_end_child(Some(&revealer_c));
+                revealer_c.set_reveal_child(true);
+            } else {
+                revealer_c.set_reveal_child(false);
+                let layout_paned_c = layout_paned.clone();
+                let revealer_cc = revealer_c.clone();
+                glib::timeout_add_local_once(std::time::Duration::from_millis(250), move || {
+                    if !revealer_cc.reveals_child() {
+                        layout_paned_c.set_end_child(None::<&gtk4::Widget>);
+                    }
+                });
+            }
 
             // Save updated settings
             {
@@ -481,6 +498,7 @@ pub fn create_explore_window(
 
     // Auto-hide preview when window is too narrow (< 700px)
     {
+        let layout_paned = ui.layout_paned.clone();
         let revealer_c = revealer.clone();
         let preview_visible = preview_visible.clone();
         let status_widgets_c = status_bar_widgets_cell.clone();
@@ -489,10 +507,18 @@ pub fn create_explore_window(
             if w < 700 && preview_visible.get() {
                 revealer_c.set_reveal_child(false);
                 preview_visible.set(false);
+                let layout_paned_c = layout_paned.clone();
+                let revealer_cc = revealer_c.clone();
+                glib::timeout_add_local_once(std::time::Duration::from_millis(250), move || {
+                    if !revealer_cc.reveals_child() {
+                        layout_paned_c.set_end_child(None::<&gtk4::Widget>);
+                    }
+                });
                 if let Some(ref sw) = *status_widgets_c.borrow() {
                     sw.btn_toggle_preview.remove_css_class("status-bar-btn-active");
                 }
             } else if w >= 700 && !preview_visible.get() {
+                layout_paned.set_end_child(Some(&revealer_c));
                 revealer_c.set_reveal_child(true);
                 preview_visible.set(true);
                 if let Some(ref sw) = *status_widgets_c.borrow() {
