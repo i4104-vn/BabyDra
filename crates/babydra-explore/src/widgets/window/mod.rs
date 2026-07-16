@@ -352,7 +352,7 @@ pub fn create_explore_window(
                         }
                     })
                 };
-                crate::widgets::dialogs::show_new_folder_dialog(path, nav_cb);
+                babydra_utils::explore::dialogs::show_new_folder_dialog(path, nav_cb);
             }
         });
     }

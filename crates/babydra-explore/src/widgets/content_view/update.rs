@@ -105,7 +105,7 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
                         target_paths = vec![target_entry.path.clone()];
                     }
 
-                    crate::widgets::context_menu::show_for_file(
+                    babydra_utils::explore::context_menu::show_for_file(
                         widget,
                         x,
                         y,

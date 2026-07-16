@@ -30,7 +30,7 @@ pub fn wire_background_controllers(
         gesture.connect_pressed(move |gesture, _, x, y| {
             gesture.set_state(gtk4::EventSequenceState::Claimed);
             let path = cp.borrow().clone();
-            crate::widgets::context_menu::show_for_empty(
+            babydra_utils::explore::context_menu::show_for_empty(
                 container_widget.upcast_ref(),
                 x,
                 y,

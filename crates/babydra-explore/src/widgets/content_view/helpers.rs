@@ -27,7 +27,7 @@ pub fn create_flow_child(
                 target_paths = vec![target_entry.path.clone()];
             }
 
-            crate::widgets::context_menu::show_for_file(
+            babydra_utils::explore::context_menu::show_for_file(
                 widget,
                 x,
                 y,
