@@ -1,5 +1,6 @@
 use gtk4::prelude::*;
 use gtk4::{Box, Orientation, Label, Align, Button};
+use babydra_common::i18n::t;
 
 #[derive(Clone)]
 pub struct StatusBarWidgets {
@@ -15,7 +16,7 @@ pub fn create_status_bar() -> StatusBarWidgets {
     container.set_css_classes(&["status-bar"]);
 
     let lbl_status = Label::builder()
-        .label("0 items")
+        .label(&format!("0 {}", t("explore.items")))
         .halign(Align::Start)
         .hexpand(true)
         .build();
@@ -23,12 +24,12 @@ pub fn create_status_bar() -> StatusBarWidgets {
 
     let btn_toggle_hidden = Button::from_icon_name("view-conceal-symbolic");
     btn_toggle_hidden.set_css_classes(&["status-bar-btn"]);
-    btn_toggle_hidden.set_tooltip_text(Some("Toggle Hidden Files (Ctrl+H)"));
+    btn_toggle_hidden.set_tooltip_text(Some(&t("explore.toggle_hidden")));
     container.append(&btn_toggle_hidden);
 
     let btn_toggle_preview = Button::from_icon_name("view-sidebar-symbolic");
     btn_toggle_preview.set_css_classes(&["status-bar-btn", "status-bar-btn-active"]);
-    btn_toggle_preview.set_tooltip_text(Some("Toggle Preview (F4)"));
+    btn_toggle_preview.set_tooltip_text(Some(&t("explore.toggle_preview")));
     container.append(&btn_toggle_preview);
 
     StatusBarWidgets {
@@ -42,5 +43,11 @@ pub fn create_status_bar() -> StatusBarWidgets {
 /// Updates the status bar label content.
 pub fn update_status_bar(lbl_status: &Label, count: usize, total_size: u64) {
     let size_str = babydra_utils::explore::format_size(total_size);
-    lbl_status.set_text(&format!("{} items | Total size: {}", count, size_str));
+    lbl_status.set_text(&format!(
+        "{} {} | {}: {}",
+        count,
+        t("explore.items"),
+        t("explore.total_size"),
+        size_str
+    ));
 }

@@ -1,8 +1,6 @@
 //! Native Arch Linux settings manager built with GTK4 + Rust.
 
 use gtk4::prelude::*;
-use std::cell::RefCell;
-use std::rc::Rc;
 
 mod widgets;
 

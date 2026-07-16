@@ -59,14 +59,7 @@ pub fn get_logo_png(size: i32) -> gtk4::Image {
 }
 
 pub fn get_logo_path() -> std::path::PathBuf {
-    let logo_dir = babydra_common::config::get_babydra_config_dir();
-    let logo_path = logo_dir.join("logo.png");
-    if !logo_path.exists() {
-        let _ = std::fs::create_dir_all(&logo_dir);
-        const PNG_BYTES: &[u8] = include_bytes!("../logo.png");
-        let _ = std::fs::write(&logo_path, PNG_BYTES);
-    }
-    logo_path
+    std::path::PathBuf::from("/usr/share/babydra/logo.png")
 }
 
 static ICON_PATH_CACHE: OnceLock<HashMap<String, PathBuf>> = OnceLock::new();

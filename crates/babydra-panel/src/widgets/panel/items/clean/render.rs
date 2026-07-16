@@ -2,8 +2,6 @@ use gtk4::prelude::*;
 use std::rc::Rc;
 use std::cell::RefCell;
 use tokio::sync::mpsc;
-use std::path::Path;
-use std::fs;
 use super::{clean_all_native, format_bytes, cache, logs, temp};
 
 #[derive(Clone)]

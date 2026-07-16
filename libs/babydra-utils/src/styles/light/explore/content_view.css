@@ -72,16 +72,15 @@
     margin-top: 2px;
 }
 
-/* Icon view file items */
 .explore-window .file-item {
     border-radius: 6px;
     padding: 8px;
     cursor: pointer;
-    transition: background 0.1s ease;
+    transition: background-color 0.15s ease;
 }
 
 .explore-window .file-item:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .explore-window .file-item:active {
@@ -98,12 +97,12 @@
     outline: 2px solid rgba(0, 0, 0, 0.15);
 }
 
-.explore-window listrow:selected {
+.explore-window row:selected {
     background-color: transparent;
     outline: none;
 }
 
-.explore-window listrow:selected .list-row {
+.explore-window row:selected .list-row {
     background-color: rgba(0, 0, 0, 0.08);
     color: #000000;
     outline: 2px solid rgba(0, 0, 0, 0.15);
@@ -141,7 +140,8 @@
     outline: none;
 }
 
-/* ── Info Panel ─────────────────────────────────────────────────── */
+/* Rubberband selection box overlay */
+.explore-window .rubberband {
     background-color: rgba(52, 152, 219, 0.18);
     border: 1.5px solid rgba(52, 152, 219, 0.6);
     border-radius: 2px;
@@ -156,4 +156,54 @@
 
 .explore-window .cut-item:hover {
     opacity: 0.6;
+}
+
+/* Loading & Slide Animation Effects */
+@keyframes list-item-slide-in {
+    from {
+        opacity: 0;
+        margin-top: 15px;
+    }
+    to {
+        opacity: 1;
+        margin-top: 0px;
+    }
+}
+
+.explore-window flowboxchild,
+.explore-window row {
+    animation-name: list-item-slide-in;
+    animation-duration: 250ms;
+    animation-timing-function: ease-out;
+}
+
+.explore-window .loading-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #0066cc;
+}
+
+.explore-window .content-loading-progress {
+    margin: 0px;
+    padding: 0px;
+    border: none;
+    background: transparent;
+    border-bottom-left-radius: 13px;
+    border-bottom-right-radius: 13px;
+}
+
+.explore-window .content-loading-progress trough {
+    background-color: transparent;
+    border: none;
+    border-bottom-left-radius: 13px;
+    border-bottom-right-radius: 13px;
+    min-height: 3px;
+}
+
+.explore-window .content-loading-progress progress {
+    background-color: #0066cc;
+    border: none;
+    border-bottom-left-radius: 13px;
+    border-bottom-right-radius: 13px;
+    min-height: 3px;
 }

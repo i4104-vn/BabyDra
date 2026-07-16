@@ -14,7 +14,7 @@ pub use models::explore::{
 };
 
 // Flat re-exports at root for convenience and backward compatibility
-pub use config::{ThemeConfig, ShellConfig, get_babydra_config_dir};
+pub use config::{ThemeConfig, ShellConfig, get_babydra_config_dir, ExploreSettings, load_explore_settings, save_explore_settings};
 pub use services::icon::get_logo_path;
 pub use services::notification::island::{IslandState, update_island_state, clear_island_state, get_island_state_path};
 pub use services::system::volume::AudioDevice;
@@ -71,10 +71,4 @@ pub mod helper {
     pub use crate::services::system::backlight;
     pub use crate::services::system::storage;
     pub use crate::services::system::clean;
-}
-
-pub mod core {
-    pub use crate::config;
-    pub use crate::services::apps as desktop;
-    pub use crate::services::system::power;
 }

@@ -1,4 +1,3 @@
-use gtk4::ScrolledWindow;
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -10,11 +9,13 @@ mod update;
 pub mod helpers;
 mod gestures;
 
+pub use update::update_content_view_ui;
+
 /// Creates the content view area widgets and returns the scroll container and ContentViewHandle state handle.
 pub fn create_content_view(
     nav_callback: impl Fn(PathBuf) + 'static,
     selection_callback: impl Fn(Vec<FileEntry>) + 'static,
-) -> (ScrolledWindow, ContentViewHandle) {
+) -> (gtk4::Box, ContentViewHandle) {
     let widgets = render::build_content_view_ui();
 
     let entries: Rc<RefCell<Vec<FileEntry>>> = Rc::new(RefCell::new(Vec::new()));
@@ -41,6 +42,8 @@ pub fn create_content_view(
         sel_cb(list);
     }) as Rc<dyn Fn(Vec<PathBuf>)>;
 
+    let render_generation = Rc::new(RefCell::new(0u64));
+
     let handle = ContentViewHandle {
         widgets: widgets.clone(),
         entries: entries.clone(),
@@ -51,6 +54,7 @@ pub fn create_content_view(
         nav_callback: nav_cb.clone(),
         selection_callback: sc_fn.clone(),
         selected_paths: selected_paths.clone(),
+        render_generation: render_generation.clone(),
     };
 
     // Wire all controllers/gestures for ListBox and overlay background

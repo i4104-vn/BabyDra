@@ -14,12 +14,23 @@ pub fn create_explore_window(
     app: &gtk4::Application,
     session: Rc<RefCell<SessionState>>,
 ) -> ApplicationWindow {
+    let settings = babydra_common::load_explore_settings();
+    
+    // Apply settings to initial tab
+    {
+        let mut s = session.borrow_mut();
+        let tab = s.active_tab_mut();
+        tab.view_mode = settings.view_mode.clone();
+        tab.show_hidden = settings.show_hidden;
+    }
+
     let ui = render::build_window_ui(app);
 
     // Active state variables
     let is_split = Rc::new(Cell::new(false));
     let active_pane = Rc::new(Cell::new(ActivePane::Left));
-    let preview_visible = Rc::new(Cell::new(true));
+    let preview_visible = Rc::new(Cell::new(settings.preview_visible));
+    let user_wants_preview = Rc::new(Cell::new(settings.preview_visible));
     let watcher = Rc::new(RefCell::new(None::<babydra_common::FileWatcher>));
 
     // Channels for file watching/reloading
@@ -28,7 +39,17 @@ pub fn create_explore_window(
 
     // Create InfoPanel
     let (info_panel_container, info_widgets) = crate::widgets::info_panel::create_info_panel();
-    ui.layout_paned.set_end_child(Some(&info_panel_container));
+    let revealer = gtk4::Revealer::builder()
+        .transition_type(gtk4::RevealerTransitionType::SlideLeft)
+        .transition_duration(250)
+        .build();
+    revealer.set_child(Some(&info_panel_container));
+    revealer.set_reveal_child(preview_visible.get());
+    if preview_visible.get() {
+        ui.layout_paned.set_end_child(Some(&revealer));
+    } else {
+        ui.layout_paned.set_end_child(None::<&gtk4::Widget>);
+    }
 
     let info_widgets_rc = Rc::new(info_widgets);
 
@@ -43,8 +64,8 @@ pub fn create_explore_window(
     };
 
     // Scrolled window cells to resolve ordering in closure capture
-    let left_scroll_cell = Rc::new(RefCell::new(None::<gtk4::ScrolledWindow>));
-    let right_scroll_cell = Rc::new(RefCell::new(None::<gtk4::ScrolledWindow>));
+    let left_scroll_cell = Rc::new(RefCell::new(None::<gtk4::Box>));
+    let right_scroll_cell = Rc::new(RefCell::new(None::<gtk4::Box>));
 
     // Create Left ContentView
     let (left_content_scroll, left_content_handle) = crate::widgets::content_view::create_content_view(
@@ -92,6 +113,13 @@ pub fn create_explore_window(
                 tab.show_hidden = !tab.show_hidden;
                 tab.show_hidden
             };
+
+            // Save updated settings
+            {
+                let mut current_settings = babydra_common::load_explore_settings();
+                current_settings.show_hidden = show_hidden_now;
+                babydra_common::save_explore_settings(&current_settings);
+            }
 
             if let Some(ref sw) = *status_widgets_c.borrow() {
                 if show_hidden_now {
@@ -171,11 +199,17 @@ pub fn create_explore_window(
             // Update session path
             session.borrow_mut().active_tab_mut().current_path = path.clone();
 
+            if let Some(ref handle) = content_handle {
+                handle.widgets.progress_bar.set_visible(true);
+                handle.widgets.progress_bar.set_fraction(0.0);
+            }
+
             let header_widgets_c = header_widgets_cell.clone();
             let session_c = session.clone();
             let nav_no_watch_c = navigate_pane_no_watch_ref_c.clone();
             let tab_bar_box_c = tab_bar_box.clone();
             let status_lbl_c = status_bar_lbl.clone();
+            let content_handle_err = content_handle.clone();
 
             glib::spawn_future_local(async move {
                 match babydra_common::load_directory(path.clone(), show_hidden).await {
@@ -218,6 +252,9 @@ pub fn create_explore_window(
                     }
                     Err(err) => {
                         eprintln!("Failed to load directory: {}", err);
+                        if let Some(ref handle) = content_handle_err {
+                            handle.widgets.progress_bar.set_visible(false);
+                        }
                     }
                 }
             });
@@ -285,6 +322,13 @@ pub fn create_explore_window(
             crate::widgets::content_view::set_content_view_mode(&left, &mode);
             if let Some(ref r) = *right.borrow() {
                 crate::widgets::content_view::set_content_view_mode(r, &mode);
+            }
+
+            // Save updated settings
+            {
+                let mut current_settings = babydra_common::load_explore_settings();
+                current_settings.view_mode = mode;
+                babydra_common::save_explore_settings(&current_settings);
             }
         }
     };
@@ -360,17 +404,34 @@ pub fn create_explore_window(
     // Preview toggle closure
     let toggle_preview = {
         let layout_paned = ui.layout_paned.clone();
-        let info_panel_container = info_panel_container.clone();
+        let revealer_c = revealer.clone();
         let preview_visible = preview_visible.clone();
+        let user_wants_preview = user_wants_preview.clone();
         let status_widgets_c = status_bar_widgets_cell.clone();
         move || {
             let now_visible = !preview_visible.get();
             preview_visible.set(now_visible);
+            user_wants_preview.set(now_visible);
 
             if now_visible {
-                layout_paned.set_end_child(Some(&info_panel_container));
+                layout_paned.set_end_child(Some(&revealer_c));
+                revealer_c.set_reveal_child(true);
             } else {
-                layout_paned.set_end_child(None::<&gtk4::Widget>);
+                revealer_c.set_reveal_child(false);
+                let layout_paned_c = layout_paned.clone();
+                let revealer_cc = revealer_c.clone();
+                glib::timeout_add_local_once(std::time::Duration::from_millis(250), move || {
+                    if !revealer_cc.reveals_child() {
+                        layout_paned_c.set_end_child(None::<&gtk4::Widget>);
+                    }
+                });
+            }
+
+            // Save updated settings
+            {
+                let mut current_settings = babydra_common::load_explore_settings();
+                current_settings.preview_visible = now_visible;
+                babydra_common::save_explore_settings(&current_settings);
             }
 
             if let Some(ref sw) = *status_widgets_c.borrow() {
@@ -450,19 +511,28 @@ pub fn create_explore_window(
     // Auto-hide preview when window is too narrow (< 700px)
     {
         let layout_paned = ui.layout_paned.clone();
-        let info_panel_ref = info_panel_container.clone();
+        let revealer_c = revealer.clone();
         let preview_visible = preview_visible.clone();
+        let user_wants_preview = user_wants_preview.clone();
         let status_widgets_c = status_bar_widgets_cell.clone();
         ui.window.connect_default_width_notify(move |window| {
             let w = window.width();
             if w < 700 && preview_visible.get() {
-                layout_paned.set_end_child(None::<&gtk4::Widget>);
+                revealer_c.set_reveal_child(false);
                 preview_visible.set(false);
+                let layout_paned_c = layout_paned.clone();
+                let revealer_cc = revealer_c.clone();
+                glib::timeout_add_local_once(std::time::Duration::from_millis(250), move || {
+                    if !revealer_cc.reveals_child() {
+                        layout_paned_c.set_end_child(None::<&gtk4::Widget>);
+                    }
+                });
                 if let Some(ref sw) = *status_widgets_c.borrow() {
                     sw.btn_toggle_preview.remove_css_class("status-bar-btn-active");
                 }
-            } else if w >= 700 && !preview_visible.get() {
-                layout_paned.set_end_child(Some(&info_panel_ref));
+            } else if w >= 700 && !preview_visible.get() && user_wants_preview.get() {
+                layout_paned.set_end_child(Some(&revealer_c));
+                revealer_c.set_reveal_child(true);
                 preview_visible.set(true);
                 if let Some(ref sw) = *status_widgets_c.borrow() {
                     sw.btn_toggle_preview.add_css_class("status-bar-btn-active");
@@ -510,6 +580,18 @@ pub fn create_explore_window(
     let path = session.borrow().active_tab().current_path.clone();
     if let Some(ref f) = *navigate_pane_ref.borrow() {
         f(ActivePane::Left, path);
+    }
+
+    // Connect theme-change listener to rebuild content views
+    if let Some(settings) = gtk4::Settings::default() {
+        let left_handle = left_content_handle.clone();
+        let right_handle = right_content_handle.clone();
+        settings.connect_gtk_application_prefer_dark_theme_notify(move |_| {
+            crate::widgets::content_view::update_content_view_ui(&left_handle);
+            if let Some(ref rh) = *right_handle.borrow() {
+                crate::widgets::content_view::update_content_view_ui(rh);
+            }
+        });
     }
 
     ui.window

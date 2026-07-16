@@ -1,6 +1,7 @@
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Entry, Orientation, Stack, Separator};
 use babydra_common::HeaderBarWidgets;
+use babydra_common::i18n::t;
 
 /// Builds all header bar items including the navigation buttons, address breadcrumbs stack, search bar, and edit toolbar.
 pub fn build_header_bar_ui() -> HeaderBarWidgets {
@@ -17,6 +18,11 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     let btn_forward = Button::from_icon_name("go-next-symbolic");
     let btn_up      = Button::from_icon_name("go-up-symbolic");
     let btn_refresh = Button::from_icon_name("view-refresh-symbolic");
+
+    btn_back.set_tooltip_text(Some(&t("explore.back")));
+    btn_forward.set_tooltip_text(Some(&t("explore.forward")));
+    btn_up.set_tooltip_text(Some(&t("explore.up")));
+    btn_refresh.set_tooltip_text(Some(&t("explore.refresh")));
 
     for btn in &[&btn_back, &btn_forward, &btn_up, &btn_refresh] {
         btn.set_css_classes(&["nav-btn"]);
@@ -50,7 +56,7 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
 
     // Search entry
     let search = Entry::builder()
-        .placeholder_text("Search")
+        .placeholder_text(&t("explore.search_placeholder"))
         .primary_icon_name("system-search-symbolic")
         .css_classes(vec!["search-entry".to_string()])
         .build();
@@ -66,7 +72,7 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
 
     let new_folder_box = Box::new(Orientation::Horizontal, 6);
     let new_folder_img = gtk4::Image::from_icon_name("folder-new-symbolic");
-    let new_folder_lbl = gtk4::Label::new(Some("New Folder"));
+    let new_folder_lbl = gtk4::Label::new(Some(&t("explore.new_folder")));
     new_folder_box.append(&new_folder_img);
     new_folder_box.append(&new_folder_lbl);
 
@@ -84,6 +90,15 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     sep2.set_css_classes(&["toolbar-sep"]);
     let btn_view_icons   = Button::from_icon_name("view-grid-symbolic");
     let btn_view_list    = Button::from_icon_name("view-list-symbolic");
+
+    btn_new_folder.set_tooltip_text(Some(&t("explore.new_folder")));
+    btn_cut.set_tooltip_text(Some(&t("explore.cut")));
+    btn_copy.set_tooltip_text(Some(&t("explore.copy")));
+    btn_paste.set_tooltip_text(Some(&t("explore.paste")));
+    btn_rename.set_tooltip_text(Some(&t("explore.rename")));
+    btn_delete.set_tooltip_text(Some(&t("explore.delete")));
+    btn_view_icons.set_tooltip_text(Some(&t("explore.view_grid")));
+    btn_view_list.set_tooltip_text(Some(&t("explore.view_list")));
 
     btn_new_folder.set_css_classes(&["toolbar-btn", "new-btn"]);
 
@@ -107,9 +122,15 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     toolbar.append(&spacer);
 
     // DropDown for sorting (Auto, Theo ngày, Theo group)
-    let dropdown_sort = gtk4::DropDown::from_strings(&["Auto", "Theo ngày", "Theo group"]);
+    let sort_options = [
+        t("explore.sort_auto"),
+        t("explore.sort_date"),
+        t("explore.sort_group"),
+    ];
+    let sort_options_strs: Vec<&str> = sort_options.iter().map(|s| s.as_str()).collect();
+    let dropdown_sort = gtk4::DropDown::from_strings(&sort_options_strs);
     dropdown_sort.set_css_classes(&["toolbar-dropdown"]);
-    dropdown_sort.set_tooltip_text(Some("Sắp xếp theo"));
+    dropdown_sort.set_tooltip_text(Some(&t("explore.sort_by")));
     toolbar.append(&dropdown_sort);
 
     toolbar.append(&btn_view_icons);

@@ -8,13 +8,13 @@ use babydra_common::{SessionState, ActivePane};
 pub fn setup_split_view(
     split_paned: gtk4::Paned,
     is_split: Rc<Cell<bool>>,
-    right_scroll_cell: Rc<RefCell<Option<gtk4::ScrolledWindow>>>,
+    right_scroll_cell: Rc<RefCell<Option<gtk4::Box>>>,
     right_content_handle: Rc<RefCell<Option<Rc<crate::widgets::content_view::ContentViewHandle>>>>,
     session: Rc<RefCell<SessionState>>,
     active_pane: Rc<Cell<ActivePane>>,
     navigate_pane_ref: Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>,
     info_widgets: Rc<crate::widgets::info_panel::InfoPanelWidgets>,
-    left_content_scroll: gtk4::ScrolledWindow,
+    left_content_scroll: gtk4::Box,
 ) -> Rc<dyn Fn()> {
     let split_paned_c = split_paned.clone();
     let is_split_c = is_split.clone();

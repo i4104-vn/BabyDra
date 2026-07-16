@@ -2,14 +2,12 @@ use gtk4::prelude::*;
 use gtk4::{ScrolledWindow, FlowBox, ListBox, Stack, Align};
 use babydra_common::ContentViewWidgets;
 
-/// Builds the Content Area UI (FlowBox grid layout and ListBox list layout wrapped in a Stack).
 pub fn build_content_view_ui() -> ContentViewWidgets {
-    let container = ScrolledWindow::new();
-    container.set_css_classes(&["content-view"]);
+    let scroll_win = ScrolledWindow::new();
 
     let stack = Stack::new();
     stack.set_transition_type(gtk4::StackTransitionType::Crossfade);
-    container.set_child(Some(&stack));
+    scroll_win.set_child(Some(&stack));
 
     // View Mode: Icons (FlowBox)
     let flowbox = FlowBox::new();
@@ -61,6 +59,18 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
     list_scroll.set_child(Some(&list_overlay));
     stack.add_named(&list_scroll, Some("list"));
 
+    // Bottom progress bar for loading
+    let progress_bar = gtk4::ProgressBar::builder()
+        .visible(false)
+        .css_classes(vec!["content-loading-progress".to_string()])
+        .build();
+
+    let container = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    container.set_css_classes(&["content-view"]);
+    scroll_win.set_vexpand(true);
+    container.append(&scroll_win);
+    container.append(&progress_bar);
+
     ContentViewWidgets {
         container,
         flowbox,
@@ -71,5 +81,6 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
         grid_rubberband,
         list_fixed,
         list_rubberband,
+        progress_bar,
     }
 }

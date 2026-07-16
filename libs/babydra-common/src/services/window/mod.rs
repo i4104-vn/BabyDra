@@ -2,9 +2,6 @@
 
 pub mod tracker;
 pub mod mru;
-
-use gtk4::prelude::*;
-
 /// Queries the compositor via `wlrctl` for all running window instances.
 /// Returns a list of (app_id, window_title) pairs.
 pub fn get_running_windows() -> Vec<(String, String)> {

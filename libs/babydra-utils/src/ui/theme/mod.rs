@@ -28,7 +28,8 @@ const DARK_CSS: &str = concat!(
     include_str!("../../styles/dark/explore/info_panel.css"), "\n",
     include_str!("../../styles/dark/explore/status_bar.css"), "\n",
     include_str!("../../styles/dark/explore/context_menu.css"), "\n",
-    include_str!("../../styles/dark/explore/dialogs.css")
+    include_str!("../../styles/dark/explore/dialogs.css"), "\n",
+    include_str!("../../styles/dark/shared/scrollbar.css")
 );
 
 const LIGHT_CSS: &str = concat!(
@@ -58,7 +59,8 @@ const LIGHT_CSS: &str = concat!(
     include_str!("../../styles/light/explore/info_panel.css"), "\n",
     include_str!("../../styles/light/explore/status_bar.css"), "\n",
     include_str!("../../styles/light/explore/context_menu.css"), "\n",
-    include_str!("../../styles/light/explore/dialogs.css")
+    include_str!("../../styles/light/explore/dialogs.css"), "\n",
+    include_str!("../../styles/light/shared/scrollbar.css")
 );
 
 thread_local! {
@@ -110,6 +112,29 @@ pub fn init_theme() {
                 );
                 REGISTERED.with(|r| r.set(true));
             }
+
+            let gsettings = gio::Settings::new("org.gnome.desktop.interface");
+            
+            let gsettings_c = gsettings.clone();
+            gsettings.connect_changed(Some("color-scheme"), move |_, _| {
+                let value = gsettings_c.string("color-scheme");
+                if let Some(settings) = gtk4::Settings::default() {
+                    if value == "prefer-dark" {
+                        settings.set_gtk_application_prefer_dark_theme(true);
+                    } else {
+                        settings.set_gtk_application_prefer_dark_theme(false);
+                    }
+                }
+            });
+
+            let gsettings_c2 = gsettings.clone();
+            gsettings.connect_changed(Some("icon-theme"), move |_, _| {
+                let user_icon_theme = gsettings_c2.string("icon-theme");
+                let user_icon_theme = user_icon_theme.trim();
+                if let Some(settings) = gtk4::Settings::default() {
+                    settings.set_gtk_icon_theme_name(Some(user_icon_theme));
+                }
+            });
         }
 
         if let Some(settings) = gtk4::Settings::default() {

@@ -34,7 +34,7 @@ pub fn wire_rubberband_listbox(
             }
         }
 
-        if !is_item {
+        if !is_item || x > 200.0 {
             drag_select_active_begin.replace(true);
             start_pos_c.replace(Some((x, y)));
             rb_begin.set_visible(true);

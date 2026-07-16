@@ -1,7 +1,7 @@
 pub mod render;
 
 pub use babydra_common::helper::volume::{
-    AudioDevice, is_muted, get_current_volume, set_volume, get_audio_devices,
+    is_muted, get_current_volume, set_volume, get_audio_devices,
 };
 
 pub fn update_topbar_volume_icon(vol_icon: &gtk4::Image) {
