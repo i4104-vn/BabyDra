@@ -69,8 +69,8 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
 
     let container = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     scroll_win.set_vexpand(true);
-    container.append(&scroll_win);
     container.append(&progress_bar);
+    container.append(&scroll_win);
 
     ContentViewWidgets {
         container,
