@@ -2,10 +2,8 @@ use gtk4::prelude::*;
 use gtk4::{ScrolledWindow, FlowBox, ListBox, Stack, Align};
 use babydra_common::ContentViewWidgets;
 
-/// Builds the Content Area UI (FlowBox grid layout and ListBox list layout wrapped in a Stack).
 pub fn build_content_view_ui() -> ContentViewWidgets {
     let scroll_win = ScrolledWindow::new();
-    scroll_win.set_css_classes(&["content-view"]);
 
     let stack = Stack::new();
     stack.set_transition_type(gtk4::StackTransitionType::Crossfade);
@@ -68,9 +66,10 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
         .build();
 
     let container = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    container.set_css_classes(&["content-view"]);
     scroll_win.set_vexpand(true);
-    container.append(&progress_bar);
     container.append(&scroll_win);
+    container.append(&progress_bar);
 
     ContentViewWidgets {
         container,

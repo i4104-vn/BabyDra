@@ -189,3 +189,19 @@
     font-weight: 500;
     color: #60cdff;
 }
+
+.explore-window .content-loading-progress {
+    margin: 0px 12px 8px 12px;
+}
+
+.explore-window .content-loading-progress trough {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    min-height: 4px;
+}
+
+.explore-window .content-loading-progress progress {
+    background-color: #60cdff;
+    border-radius: 4px;
+    min-height: 4px;
+}
