@@ -13,10 +13,10 @@ use crate::widgets::list::build_apps_list;
 /// Builds and runs the Alt-Tab overlay switcher window.
 /// Listens to key release events (specifically Alt release) or socket messages to commit selection.
 pub fn build_switcher_ui(app: &gtk4::Application, apps: Vec<DesktopApp>) {
-    babydra_common::init_theme();
+    babydra_utils::ui::theme::init_theme();
 
     let window = gtk4::ApplicationWindow::new(app);
-    babydra_common::apply_theme_class(&window);
+    babydra_utils::ui::theme::apply_theme_class(&window);
     window.init_layer_shell();
     window.set_layer(Layer::Overlay);
     window.set_keyboard_mode(KeyboardMode::Exclusive);

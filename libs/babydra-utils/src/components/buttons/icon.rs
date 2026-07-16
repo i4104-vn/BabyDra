@@ -17,7 +17,7 @@ pub fn create_icon_button(
     if let Some(tip) = tooltip {
         btn.set_tooltip_text(Some(tip));
     }
-    let icon = babydra_common::icon::get_icon(icon_name, size);
+    let icon = crate::ui::icon::get_icon(icon_name, size);
     btn.set_child(Some(&icon));
     btn.connect_clicked(move |_| on_click());
     btn
@@ -41,7 +41,7 @@ pub fn create_colored_icon_button(
     if let Some(tip) = tooltip {
         btn.set_tooltip_text(Some(tip));
     }
-    let icon = babydra_common::icon::get_icon_colored(icon_name, size, color);
+    let icon = crate::ui::icon::get_icon_colored(icon_name, size, color);
     btn.set_child(Some(&icon));
     btn.connect_clicked(move |_| on_click());
     btn
@@ -54,7 +54,7 @@ pub fn create_icon_label_button(icon_name: &str, label_text: &str, css_class: &s
         btn.add_css_class(css_class);
     }
     let content = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
-    let icon = babydra_common::icon::get_icon(icon_name, 16);
+    let icon = crate::ui::icon::get_icon(icon_name, 16);
     let label = gtk4::Label::new(Some(label_text));
     content.append(&icon);
     content.append(&label);

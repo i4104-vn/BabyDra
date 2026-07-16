@@ -37,7 +37,7 @@ pub fn create_grid_file_item(
             picture.set_content_fit(gtk4::ContentFit::Cover);
             item_box.append(&picture);
         } else {
-            let icon = babydra_common::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
+            let icon = crate::ui::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
             icon.set_pixel_size(52);
             icon.set_halign(Align::Center);
             icon.set_valign(Align::Center);
@@ -46,7 +46,7 @@ pub fn create_grid_file_item(
             item_box.append(&icon);
         }
     } else {
-        let icon = babydra_common::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
+        let icon = crate::ui::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
         icon.set_pixel_size(52);
         icon.set_halign(Align::Center);
         icon.set_valign(Align::Center);

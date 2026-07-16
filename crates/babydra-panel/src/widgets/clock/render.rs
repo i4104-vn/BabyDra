@@ -13,7 +13,7 @@ pub fn build_clock_ui() -> (gtk4::Button, gtk4::Label, gtk4::Widget) {
     overlay.set_valign(gtk4::Align::Center);
     overlay.set_halign(gtk4::Align::Center);
 
-    let bell_icon = babydra_common::icon::get_icon("bell", 14);
+    let bell_icon = babydra_utils::ui::icon::get_icon("bell", 14);
     bell_icon.add_css_class("clock-bell-icon");
     overlay.set_child(Some(&bell_icon));
 
@@ -46,7 +46,7 @@ pub fn build_calendar_window_ui(
     gtk4::Box,
 ) {
     let c_win = gtk4::ApplicationWindow::new(app);
-    babydra_common::apply_theme_class(&c_win);
+    babydra_utils::ui::theme::apply_theme_class(&c_win);
     c_win.init_layer_shell();
     c_win.set_layer(Layer::Overlay);
     c_win.set_keyboard_mode(KeyboardMode::OnDemand);

@@ -14,7 +14,7 @@ pub fn create_list_row(
     row.set_margin_end(8);
 
     if !icon_name.is_empty() {
-        let icon = babydra_common::icon::get_icon(icon_name, 20);
+        let icon = crate::ui::icon::get_icon(icon_name, 20);
         icon.set_valign(gtk4::Align::Center);
         row.append(&icon);
     }

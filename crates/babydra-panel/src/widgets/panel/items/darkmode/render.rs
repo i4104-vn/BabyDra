@@ -10,7 +10,7 @@ pub fn create_small_theme_toggle_tile() -> gtk4::Button {
         &babydra_common::i18n::t("control.dark_mode"),
         is_dark_init,
         |new_dark| {
-            babydra_common::set_dark_mode(new_dark);
+            babydra_utils::ui::theme::set_dark_mode(new_dark);
         }
     )
 }

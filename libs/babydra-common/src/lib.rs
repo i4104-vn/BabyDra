@@ -34,23 +34,18 @@ pub use models::explore::{
 
 // Flat re-exports at root for backward compatibility
 pub use desktop::config::{ThemeConfig, ShellConfig, get_babydra_config_dir};
+pub use desktop::icon::get_logo_path;
 pub use notification::island::{IslandState, update_island_state, clear_island_state, get_island_state_path};
 pub use system::volume::AudioDevice;
 pub use system::storage::DiskInfo;
 pub use notification::service::{ActiveNotification, NotificationMsg};
-pub use desktop::icon::get_logo_path;
-pub use desktop::theme::{init_theme, apply_theme_class, is_dark_mode, set_dark_mode, apply_explore_theme};
 pub use desktop::apps::{find_desktop_apps, refresh_desktop_apps_cache, DesktopApp};
 pub use system::power::{poweroff, reboot, suspend};
 pub use system::auth::verify_password;
-pub use desktop::window::{init_layer_window, setup_click_outside_dismiss, close_window, focus_window};
+pub use desktop::window::{close_window, focus_window};
 pub use desktop::screenshot::{capture_screen_to_temp, get_screenshot_save_path, trigger_save, trigger_copy, handle_fullscreen_capture};
 pub use desktop::window::tracker::spawn_switcher_tracker;
 pub use desktop::window::mru::{get_history, save_history, get_running_apps, activate_app};
-
-pub use desktop::theme;
-pub use desktop::animation;
-pub use desktop::icon;
 pub use notification::island;
 pub use desktop::window;
 pub use desktop::tray;

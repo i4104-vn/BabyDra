@@ -395,7 +395,7 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
     let state = Rc::new(RefCell::new(EditorState::new(pixbuf)));
 
     let window = gtk4::ApplicationWindow::new(app);
-    babydra_common::apply_theme_class(&window);
+    babydra_utils::ui::theme::apply_theme_class(&window);
     window.init_layer_shell();
     window.set_layer(Layer::Overlay);
     window.set_keyboard_mode(KeyboardMode::Exclusive);

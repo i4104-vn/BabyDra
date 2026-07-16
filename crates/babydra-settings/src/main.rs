@@ -29,7 +29,7 @@ fn main() {
 
     app.connect_activate(move |app| {
         // Load custom styles
-        babydra_common::init_theme();
+        babydra_utils::ui::theme::init_theme();
 
         let window = gtk4::ApplicationWindow::new(app);
         window.set_title(Some("BabyDra Settings"));

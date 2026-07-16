@@ -27,12 +27,12 @@ fn main() {
 
     application.connect_activate(|app| {
         // Initialize style provider
-        babydra_common::init_theme();
+        babydra_utils::ui::theme::init_theme();
 
         // Sync system color-scheme changes (GSettings) to GTK settings in real-time
         let gsettings = gtk4::gio::Settings::new("org.gnome.desktop.interface");
         gsettings.connect_changed(Some("color-scheme"), |_, _| {
-            babydra_common::init_theme();
+            babydra_utils::ui::theme::init_theme();
         });
 
         // Define shared window states for mutual exclusivity

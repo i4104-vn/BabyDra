@@ -32,7 +32,7 @@ pub fn create_toggle_tile(
     }
 
     let color = if initial_active { "#ffffff" } else { "rgba(255, 255, 255, 0.7)" };
-    let icon_widget = babydra_common::icon::get_icon_colored(icon_name, 14, color);
+    let icon_widget = crate::ui::icon::get_icon_colored(icon_name, 14, color);
     circle.append(&icon_widget);
     main_box.append(&circle);
 
@@ -69,7 +69,7 @@ pub fn create_toggle_tile(
             circle_clone.remove(&old);
         }
         let color = if is_now_active { "#ffffff" } else { "rgba(255, 255, 255, 0.7)" };
-        let new_img = babydra_common::icon::get_icon_colored(&icon_name_str, 14, color);
+        let new_img = crate::ui::icon::get_icon_colored(&icon_name_str, 14, color);
         circle_clone.append(&new_img);
 
         on_click(is_now_active);
@@ -105,7 +105,7 @@ pub fn create_square_toggle_tile(
     icon_container.set_halign(gtk4::Align::Center);
 
     let color = if initial_active { "#ffffff" } else { "rgba(255, 255, 255, 0.8)" };
-    let icon_widget = babydra_common::icon::get_icon_colored(icon_name, 18, color);
+    let icon_widget = crate::ui::icon::get_icon_colored(icon_name, 18, color);
     icon_container.append(&icon_widget);
 
     main_box.append(&icon_container);
@@ -135,7 +135,7 @@ pub fn create_square_toggle_tile(
             icon_container.remove(&old);
         }
         let color = if is_now_active { "#ffffff" } else { "rgba(255, 255, 255, 0.8)" };
-        let new_img = babydra_common::icon::get_icon_colored(&icon_name_str, 18, color);
+        let new_img = crate::ui::icon::get_icon_colored(&icon_name_str, 18, color);
         icon_container.append(&new_img);
 
         on_click(is_now_active);

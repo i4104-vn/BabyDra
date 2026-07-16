@@ -18,9 +18,9 @@ pub fn build_launcher_ui(
     launcher_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
 ) -> gtk4::ApplicationWindow {
     let window = gtk4::ApplicationWindow::new(app);
-    babydra_common::apply_theme_class(&window);
+    babydra_utils::ui::theme::apply_theme_class(&window);
     
-    babydra_common::window::init_layer_window(
+    babydra_utils::ui::window::init_layer_window(
         &window,
         Layer::Overlay,
         KeyboardMode::OnDemand,
@@ -223,9 +223,9 @@ pub fn build_launcher_ui(
         }
         let win_cb = win_clone_close.clone();
         let box_layout_cb = box_layout_clone_close.clone();
-        babydra_common::animation::slide_out_cb(
+        babydra_utils::ui::animation::slide_out_cb(
             box_layout_cb.upcast_ref(),
-            babydra_common::animation::SlideDirection::Up,
+            babydra_utils::ui::animation::SlideDirection::Up,
             40,
             450,
             false,
@@ -236,7 +236,7 @@ pub fn build_launcher_ui(
         gtk4::glib::Propagation::Stop
     });
 
-    babydra_common::window::setup_click_outside_dismiss(&window, &box_layout);
+    babydra_utils::ui::window::setup_click_outside_dismiss(&window, &box_layout);
 
     window.connect_is_active_notify(|win| {
         if !win.is_active() {
@@ -347,9 +347,9 @@ pub fn build_launcher_ui(
         });
     });
 
-    babydra_common::animation::slide_in(
+    babydra_utils::ui::animation::slide_in(
         box_layout.upcast_ref(),
-        babydra_common::animation::SlideDirection::Down,
+        babydra_utils::ui::animation::SlideDirection::Down,
         40,
         450,
     );

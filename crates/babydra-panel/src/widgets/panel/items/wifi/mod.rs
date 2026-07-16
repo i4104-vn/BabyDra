@@ -38,7 +38,7 @@ pub fn connect_wifi_async(
                 sub_label_c.set_text(&ssid_str2);
                 left_btn_c.add_css_class("active");
                 circle_c.add_css_class("active");
-                let new_img = babydra_common::icon::get_icon_colored("wifi", 14, "#ffffff");
+                let new_img = babydra_utils::ui::icon::get_icon_colored("wifi", 14, "#ffffff");
                 if let Some(paintable) = new_img.paintable() {
                     icon_widget_c.set_paintable(Some(&paintable));
                 }

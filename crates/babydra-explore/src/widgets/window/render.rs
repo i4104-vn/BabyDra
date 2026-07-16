@@ -13,7 +13,7 @@ pub fn build_window_ui(app: &gtk4::Application) -> MainWindowWidgets {
     window.add_css_class("explore-window");
 
     // Apply Windows 11 dark theme
-    babydra_common::apply_explore_theme();
+    babydra_utils::ui::theme::apply_explore_theme();
 
     let vbox = Box::new(Orientation::Vertical, 0);
     window.set_child(Some(&vbox));

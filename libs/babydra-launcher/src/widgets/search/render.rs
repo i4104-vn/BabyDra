@@ -18,7 +18,7 @@ pub fn build_browser_search_button(query: &str) -> (gtk4::Button, gtk4::Label) {
     icon_wrapper.set_halign(gtk4::Align::Center);
     icon_wrapper.set_valign(gtk4::Align::Center);
 
-    let web_icon = babydra_common::icon::get_system_or_file_icon("web-browser", "text-html");
+    let web_icon = babydra_utils::ui::icon::get_system_or_file_icon("web-browser", "text-html");
     web_icon.set_pixel_size(24);
     web_icon.set_halign(gtk4::Align::Center);
     web_icon.set_valign(gtk4::Align::Center);

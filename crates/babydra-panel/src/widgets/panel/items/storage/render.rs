@@ -6,7 +6,7 @@ pub fn create_disk_list_box() -> gtk4::Box {
     card.add_css_class("control-disk-card");
 
     let title_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
-    let disk_icon = babydra_common::icon::get_icon_colored("server", 12, "#10b981");
+    let disk_icon = babydra_utils::ui::icon::get_icon_colored("server", 12, "#10b981");
     let title_label = gtk4::Label::new(Some(&babydra_common::i18n::t("panel.storage_usage")));
     title_label.add_css_class("control-slider-title");
     

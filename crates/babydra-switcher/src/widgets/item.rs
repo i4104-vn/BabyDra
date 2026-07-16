@@ -70,7 +70,7 @@ pub fn create_app_button(app_item: &DesktopApp) -> gtk4::Button {
     icon_container.set_margin_top(8);
     icon_container.set_margin_start(8);
 
-    let icon_widget = babydra_common::icon::get_system_or_file_icon(
+    let icon_widget = babydra_utils::ui::icon::get_system_or_file_icon(
         app_icon_str,
         "application-x-executable",
     );
@@ -108,7 +108,7 @@ fn create_placeholder_preview(app_icon_str: &str, width: i32, height: i32) -> gt
     placeholder_box.set_valign(gtk4::Align::Center);
     placeholder_box.set_halign(gtk4::Align::Center);
 
-    let icon_widget = babydra_common::icon::get_system_or_file_icon(
+    let icon_widget = babydra_utils::ui::icon::get_system_or_file_icon(
         app_icon_str,
         "application-x-executable",
     );

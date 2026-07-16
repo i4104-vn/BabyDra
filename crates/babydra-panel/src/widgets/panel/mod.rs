@@ -142,7 +142,7 @@ fn create_control_center_window(
     }
 
     // Dismiss when clicking outside the control center box area
-    babydra_common::window::setup_click_outside_dismiss(&q_win, &main_box);
+    babydra_utils::ui::window::setup_click_outside_dismiss(&q_win, &main_box);
 
     let popover_active_for_notify = popover_active.clone();
     q_win.connect_is_active_notify(move |win| {
@@ -165,7 +165,7 @@ fn create_control_center_window(
             *borrow = None;
         }
         let q_win_cb = q_win_clone.clone();
-        babydra_common::animation::genie_out(
+        babydra_utils::ui::animation::genie_out(
             main_box_clone.upcast_ref(),
             360,
             480,
@@ -178,7 +178,7 @@ fn create_control_center_window(
     });
 
     q_win.present();
-    babydra_common::animation::genie_in(main_box.upcast_ref(), 360, 480, 450);
+    babydra_utils::ui::animation::genie_in(main_box.upcast_ref(), 360, 480, 450);
 
     q_win
 }

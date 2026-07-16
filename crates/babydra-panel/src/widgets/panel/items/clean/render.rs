@@ -54,16 +54,16 @@ pub fn create_clean_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>)
     let on_popover_toggled_c_map = on_popover_toggled.clone();
     popover.connect_map(move |_| {
         btn_c.add_css_class("active");
-        let active_icon = babydra_common::icon::get_icon_colored("broom", 18, "#ffffff");
+        let active_icon = babydra_utils::ui::icon::get_icon_colored("broom", 18, "#ffffff");
         btn_c.set_child(Some(&active_icon));
 
         if let Some(ref cb) = on_popover_toggled_c_map {
             cb(true);
         }
 
-        babydra_common::animation::slide_in(
+        babydra_utils::ui::animation::slide_in(
             popover_box_clone.upcast_ref(),
-            babydra_common::animation::SlideDirection::Down,
+            babydra_utils::ui::animation::SlideDirection::Down,
             15,
             450,
         );
@@ -72,7 +72,7 @@ pub fn create_clean_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>)
     let btn_c2 = btn.clone();
     popover.connect_closed(move |_| {
         btn_c2.remove_css_class("active");
-        let inactive_icon = babydra_common::icon::get_icon_colored("broom", 18, "rgba(255, 255, 255, 0.8)");
+        let inactive_icon = babydra_utils::ui::icon::get_icon_colored("broom", 18, "rgba(255, 255, 255, 0.8)");
         btn_c2.set_child(Some(&inactive_icon));
 
         if let Some(ref cb) = on_popover_toggled_c {
@@ -93,7 +93,7 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
     let popover_header = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
     popover_header.add_css_class("media-popover-header");
     popover_header.set_valign(gtk4::Align::Center);
-    let popover_app_icon = babydra_common::icon::get_icon_colored("broom", 14, "#ef4444");
+    let popover_app_icon = babydra_utils::ui::icon::get_icon_colored("broom", 14, "#ef4444");
     let popover_app_name = gtk4::Label::new(Some(&babydra_common::i18n::t("control.clean_my_linux")));
     popover_app_name.add_css_class("media-popover-app-name");
     popover_header.append(&popover_app_icon);
