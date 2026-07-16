@@ -61,6 +61,24 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
     list_scroll.set_child(Some(&list_overlay));
     stack.add_named(&list_scroll, Some("list"));
 
+    // View Mode: Loading (Spinner & Label)
+    let loading_box = gtk4::Box::new(gtk4::Orientation::Vertical, 12);
+    loading_box.set_halign(Align::Center);
+    loading_box.set_valign(Align::Center);
+
+    let spinner = gtk4::Spinner::builder()
+        .width_request(36)
+        .height_request(36)
+        .build();
+    spinner.start();
+    loading_box.append(&spinner);
+
+    let loading_lbl = gtk4::Label::new(Some("Đang tải danh sách..."));
+    loading_lbl.add_css_class("loading-label");
+    loading_box.append(&loading_lbl);
+
+    stack.add_named(&loading_box, Some("loading"));
+
     ContentViewWidgets {
         container,
         flowbox,

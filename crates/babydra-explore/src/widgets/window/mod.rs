@@ -198,11 +198,16 @@ pub fn create_explore_window(
             // Update session path
             session.borrow_mut().active_tab_mut().current_path = path.clone();
 
+            if let Some(ref handle) = content_handle {
+                handle.widgets.stack.set_visible_child_name("loading");
+            }
+
             let header_widgets_c = header_widgets_cell.clone();
             let session_c = session.clone();
             let nav_no_watch_c = navigate_pane_no_watch_ref_c.clone();
             let tab_bar_box_c = tab_bar_box.clone();
             let status_lbl_c = status_bar_lbl.clone();
+            let content_handle_err = content_handle.clone();
 
             glib::spawn_future_local(async move {
                 match babydra_common::load_directory(path.clone(), show_hidden).await {
@@ -245,6 +250,10 @@ pub fn create_explore_window(
                     }
                     Err(err) => {
                         eprintln!("Failed to load directory: {}", err);
+                        if let Some(ref handle) = content_handle_err {
+                            let mode = handle.current_mode.borrow().clone();
+                            handle.widgets.stack.set_visible_child_name(&mode);
+                        }
                     }
                 }
             });
