@@ -188,18 +188,22 @@
     padding: 0px;
     border: none;
     background: transparent;
+    border-bottom-left-radius: 13px;
+    border-bottom-right-radius: 13px;
 }
 
 .explore-window .content-loading-progress trough {
     background-color: transparent;
     border: none;
-    border-radius: 0px;
+    border-bottom-left-radius: 13px;
+    border-bottom-right-radius: 13px;
     min-height: 3px;
 }
 
 .explore-window .content-loading-progress progress {
     background-color: #0066cc;
     border: none;
-    border-radius: 0px;
+    border-bottom-left-radius: 13px;
+    border-bottom-right-radius: 13px;
     min-height: 3px;
 }
