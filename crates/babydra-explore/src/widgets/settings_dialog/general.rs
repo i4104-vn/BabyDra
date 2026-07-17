@@ -22,10 +22,10 @@ pub fn build_general_page() -> Box {
     let add_switch_row = |listbox: &ListBox, label_title: &str, label_desc: &str, active: bool, on_toggle: std::boxed::Box<dyn Fn(bool)>| {
         let row = ListBoxRow::new();
         let hbox = Box::new(Orientation::Horizontal, 12);
-        hbox.set_margin_top(14);
-        hbox.set_margin_bottom(14);
-        hbox.set_margin_start(16);
-        hbox.set_margin_end(16);
+        hbox.set_margin_top(8);
+        hbox.set_margin_bottom(8);
+        hbox.set_margin_start(12);
+        hbox.set_margin_end(12);
 
         let vbox_lbl = Box::new(Orientation::Vertical, 2);
         vbox_lbl.set_hexpand(true);

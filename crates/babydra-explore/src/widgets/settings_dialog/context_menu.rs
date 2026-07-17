@@ -43,10 +43,10 @@ pub fn build_context_menu_page() -> Box {
 
         // 1. VIEW MODE LAYOUT
         let hbox_view = Box::new(Orientation::Horizontal, 10);
-        hbox_view.set_margin_top(10);
-        hbox_view.set_margin_bottom(10);
-        hbox_view.set_margin_start(14);
-        hbox_view.set_margin_end(14);
+        hbox_view.set_margin_top(6);
+        hbox_view.set_margin_bottom(6);
+        hbox_view.set_margin_start(10);
+        hbox_view.set_margin_end(10);
 
         let vbox_text = Box::new(Orientation::Vertical, 2);
         let lbl_name = Label::builder()
@@ -81,10 +81,10 @@ pub fn build_context_menu_page() -> Box {
 
         // 2. EDIT MODE LAYOUT
         let hbox_edit = Box::new(Orientation::Horizontal, 10);
-        hbox_edit.set_margin_top(10);
-        hbox_edit.set_margin_bottom(10);
-        hbox_edit.set_margin_start(14);
-        hbox_edit.set_margin_end(14);
+        hbox_edit.set_margin_top(6);
+        hbox_edit.set_margin_bottom(6);
+        hbox_edit.set_margin_start(10);
+        hbox_edit.set_margin_end(10);
 
         let grid_edit = Grid::new();
         grid_edit.set_row_spacing(6);

@@ -47,10 +47,10 @@ button.empty-trash-btn:hover {
 }
 
 .settings-title-label {
-    font-size: 20px;
+    font-size: 15px;
     font-weight: bold;
     color: #ffffff;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .settings-listbox {
@@ -68,15 +68,15 @@ button.empty-trash-btn:hover {
 }
 
 .settings-section-title {
-    font-size: 15px;
+    font-size: 12px;
     font-weight: 700;
     color: #e2e8f0;
-    margin-top: 10px;
-    margin-bottom: 5px;
+    margin-top: 6px;
+    margin-bottom: 3px;
 }
 
 .settings-section-subtitle {
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 600;
     color: #94a3b8;
     margin-top: 5px;
@@ -84,13 +84,13 @@ button.empty-trash-btn:hover {
 }
 
 .settings-item-name {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 600;
     color: #f8fafc;
 }
 
 .settings-item-command {
-    font-size: 11px;
+    font-size: 10px;
     color: #94a3b8;
 }
 
@@ -102,13 +102,13 @@ button.empty-trash-btn:hover {
 }
 
 .settings-row-title {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 600;
     color: #f1f5f9;
 }
 
 .settings-row-desc {
-    font-size: 11px;
+    font-size: 10px;
     color: #94a3b8;
 }
 
@@ -141,11 +141,11 @@ button.empty-trash-btn:hover {
 }
 
 .placeholder-btn {
-    font-size: 11px;
-    padding: 2px 6px;
+    font-size: 9px;
+    padding: 1px 4px;
     background-color: #27272a;
-    border: 1px solid #3f3f46;
-    border-radius: 12px;
+    border: none;
+    border-radius: 10px;
     color: #a1a1aa;
 }
 .placeholder-btn:hover {
@@ -154,11 +154,11 @@ button.empty-trash-btn:hover {
 }
 
 .placeholder-btn-small {
-    font-size: 10px;
-    padding: 1px 4px;
+    font-size: 8px;
+    padding: 0px 2px;
     background-color: #27272a;
-    border: 1px solid #3f3f46;
-    border-radius: 8px;
+    border: none;
+    border-radius: 6px;
     color: #a1a1aa;
 }
 .placeholder-btn-small:hover {
@@ -196,10 +196,10 @@ button.empty-trash-btn:hover {
     background: transparent;
     border: none;
     border-radius: 6px;
-    padding: 8px 14px;
+    padding: 5px 10px;
     color: #ccc;
-    font-size: 13px;
-    margin: 2px 4px;
+    font-size: 11px;
+    margin: 1px 3px;
     transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -213,6 +213,24 @@ button.empty-trash-btn:hover {
     background-color: rgba(59, 130, 246, 0.12);
     color: #60a5fa;
     font-weight: 600;
+}
+
+/* Strip default button borders, focus lines, outlines in settings dialog */
+.explore-dialog button,
+.explore-dialog button:hover,
+.explore-dialog button:focus,
+.explore-dialog button:active {
+    border: none;
+    border-image: none;
+    outline: none;
+    box-shadow: none;
+}
+
+.explore-dialog button.suggested-action {
+    padding: 4px 10px;
+    font-size: 12px;
+    border: none;
+    box-shadow: none;
 }
 
 
