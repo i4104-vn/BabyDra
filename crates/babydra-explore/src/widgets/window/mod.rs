@@ -276,6 +276,26 @@ pub fn create_explore_window(
         });
     }
 
+    // Wire btn_settings click
+    {
+        let win = ui.window.clone();
+        let nav = navigate_pane_ref.clone();
+        let active = active_pane.clone();
+        let session_c = session.clone();
+        header_widgets.btn_settings.connect_clicked(move |_| {
+            let nav_c = nav.clone();
+            let act_c = active.clone();
+            let session_cc = session_c.clone();
+            let parent_win = win.clone().upcast::<gtk4::Window>();
+            crate::widgets::settings_dialog::show_settings_dialog(&parent_win, move || {
+                let path = session_cc.borrow().active_tab().current_path.clone();
+                if let Some(ref f) = *nav_c.borrow() {
+                    f(act_c.get(), path);
+                }
+            });
+        });
+    }
+
     // Preview toggle closure
     let toggle_preview = {
         let layout_paned = ui.layout_paned.clone();

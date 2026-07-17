@@ -35,6 +35,7 @@ pub struct HeaderBarWidgets {
     pub btn_paste: Button,
     pub btn_rename: Button,
     pub btn_delete: Button,
+    pub btn_settings: Button,
 }
 
 #[derive(Clone)]

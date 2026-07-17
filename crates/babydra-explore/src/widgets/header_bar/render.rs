@@ -90,6 +90,7 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     sep2.set_css_classes(&["toolbar-sep"]);
     let btn_view_icons   = Button::from_icon_name("view-grid-symbolic");
     let btn_view_list    = Button::from_icon_name("view-list-symbolic");
+    let btn_settings     = Button::from_icon_name("preferences-system-symbolic");
 
     btn_new_folder.set_tooltip_text(Some(&t("explore.new_folder")));
     btn_cut.set_tooltip_text(Some(&t("explore.cut")));
@@ -99,11 +100,12 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     btn_delete.set_tooltip_text(Some(&t("explore.delete")));
     btn_view_icons.set_tooltip_text(Some(&t("explore.view_grid")));
     btn_view_list.set_tooltip_text(Some(&t("explore.view_list")));
+    btn_settings.set_tooltip_text(Some(&t("explore.settings")));
 
     btn_new_folder.set_css_classes(&["toolbar-btn", "new-btn"]);
 
     for btn in &[&btn_cut, &btn_copy, &btn_paste, &btn_rename, &btn_delete,
-                 &btn_view_icons, &btn_view_list] {
+                 &btn_view_icons, &btn_view_list, &btn_settings] {
         btn.set_css_classes(&["toolbar-btn"]);
     }
 
@@ -136,6 +138,11 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     toolbar.append(&btn_view_icons);
     toolbar.append(&btn_view_list);
 
+    let sep3 = Separator::new(Orientation::Vertical);
+    sep3.set_css_classes(&["toolbar-sep"]);
+    toolbar.append(&sep3);
+    toolbar.append(&btn_settings);
+
     HeaderBarWidgets {
         container,
         btn_back,
@@ -156,5 +163,6 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
         btn_paste,
         btn_rename,
         btn_delete,
+        btn_settings,
     }
 }
