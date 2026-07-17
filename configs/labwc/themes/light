@@ -1,0 +1,79 @@
+# BabyDra Window Titlebar Theme Override (Light)
+
+# ── General ──────────────────────────────────────────────
+border.width: 1
+border.color: #d0d0da
+
+# ── Corner Radius ────────────────────────────────────────
+window.active.border.corner-radius: 12
+window.inactive.border.corner-radius: 12
+
+# ── Padding ─────────────────────────────────────────────
+window.titlebar.padding.width: 14
+window.titlebar.padding.height: 8
+
+# ── Window Border Colors ────────────────────────────────
+window.active.border.color: #c0c0cc
+window.inactive.border.color: #d8d8e0
+
+# ── Titlebar Background ────────────────────────────────
+window.active.title.bg: Solid
+window.active.title.bg.color: #f2f2f8
+window.inactive.title.bg: Solid
+window.inactive.title.bg.color: #e8e8ee
+
+# ── Titlebar Text ──────────────────────────────────────
+window.active.label.text.color: #1a1a28
+window.inactive.label.text.color: #70707e
+window.label.text.justify: center
+
+# ── Window Button Sizes ─────────────────────────────────
+window.button.width: 16
+window.button.height: 16
+window.button.spacing: 10
+
+# ── Window Button Hover Overlay ──────────────────────────
+window.button.hover.bg: Solid
+window.button.hover.bg.color: #00000008
+window.button.hover.bg.corner-radius: 8
+
+# ── Active Window Buttons (Mac-like colored dots) ────────
+window.active.button.close.unpressed.image.color: #ff5f56
+window.active.button.max.unpressed.image.color: #27c93f
+window.active.button.iconify.unpressed.image.color: #ffbd2e
+
+# ── Inactive Window Buttons (Muted) ─────────────────────
+window.inactive.button.close.unpressed.image.color: #c0c0cc
+window.inactive.button.max.unpressed.image.color: #c0c0cc
+window.inactive.button.iconify.unpressed.image.color: #c0c0cc
+
+# ── Toggled (Maximized) Button Icons — hidden (SVG handles it) ──
+window.active.button.max.toggled.unpressed.image.color: #00000000
+window.active.button.max.toggled.hover.image.color: #00000000
+window.active.button.max.toggled.pressed.image.color: #00000000
+window.inactive.button.max.toggled.unpressed.image.color: #00000000
+window.inactive.button.max.toggled.hover.image.color: #00000000
+window.inactive.button.max.toggled.pressed.image.color: #00000000
+
+# ── OSD ─────────────────────────────────────────────────
+osd.bg: Solid
+osd.bg.color: #f2f2f8ee
+osd.border.width: 1
+osd.border.color: #c0c0cc
+osd.label.text.color: #1a1a28
+
+# ── Menu ────────────────────────────────────────────────
+menu.items.bg: Solid
+menu.items.bg.color: #f2f2f8
+menu.items.text.color: #2a2a38
+menu.items.active.bg: Solid
+menu.items.active.bg.color: #dcdce8
+menu.items.active.text.color: #1a1a28
+menu.title.bg: Solid
+menu.title.bg.color: #f2f2f8
+menu.title.text.color: #1a1a28
+menu.title.text.justify: center
+menu.border.width: 1
+menu.border.color: #c0c0cc
+menu.border.corner-radius: 10
+menu.separator.color: #d0d0da

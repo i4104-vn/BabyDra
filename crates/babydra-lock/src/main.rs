@@ -2,7 +2,6 @@
 //! Sets up GTK Application, parses command line arguments for a custom wallpaper,
 //! initializes theme context, and maps locker windows to all connected monitors.
 
-mod pam;
 mod widgets;
 mod render;
 
@@ -43,7 +42,7 @@ fn main() {
     );
 
     application.connect_activate(move |app| {
-        babydra_common::init_theme();
+        babydra_utils::ui::theme::init_theme();
         render::build_lock_ui(app, &wallpaper_path);
     });
 

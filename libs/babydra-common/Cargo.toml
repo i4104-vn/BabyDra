@@ -3,8 +3,6 @@ name = "babydra-common"
 version.workspace = true
 edition = "2021"
 
-
-
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"
@@ -19,5 +17,22 @@ gdk-pixbuf = "0.20"
 gdk4 = "0.9"
 dirs = "5.0"
 serde_json = "1.0"
-zbus = "4.0"
+zbus = { version = "4.0", features = ["blocking"] }
+tokio = { version = "1.0", features = ["rt", "rt-multi-thread", "time", "sync", "macros"] }
+libc = "0.2"
+cairo-rs = { version = "0.20", features = ["use_glib", "png"] }
+chrono = "0.4"
+kamadak-exif = "0.5"
+
+# File Manager dependencies
+notify = "6.0"
+trash = "3.0"
+mime_guess = "2.0"
+walkdir = "2.0"
+uuid = { version = "1.0", features = ["v4", "serde"] }
+rayon = "1.10"
+rustc-hash = "2.0"
+lazy_static = "1.4"
+fuzzy-matcher = "0.3.7"
+
 

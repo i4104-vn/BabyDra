@@ -1,0 +1,297 @@
+/* Settings Dark Mode stylesheet */
+
+window.settings-window,
+window.settings-window > overlay,
+window.settings-window > overlay > box {
+    background-color: #121212;
+    background-image: none;
+    transition: all 250ms ease;
+}
+
+.settings-sidebar {
+    background-color: #0c0c14;
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 18px 12px;
+}
+
+.settings-sidebar-row {
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 4px;
+    color: #a0a0a8;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 250ms ease-out;
+}
+
+.settings-sidebar-row:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #f5f5f7;
+    transform: translateX(2px);
+}
+
+.settings-sidebar-row:selected {
+    background-color: rgba(229, 193, 151, 0.16);
+    border: 1px solid rgba(229, 193, 151, 0.25);
+    border-top: 1px solid rgba(229, 193, 151, 0.35);
+    color: #e5c197;
+    font-weight: 600;
+}
+
+.settings-content {
+    background-color: transparent;
+    padding: 24px;
+}
+
+.settings-title {
+    font-size: 22px;
+    font-weight: bold;
+    color: #f5f5f7;
+    margin-bottom: 20px;
+}
+
+.settings-subtitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: #f5f5f7;
+    margin-bottom: 12px;
+}
+
+.settings-card {
+    background-color: #1c1c1e;
+    border: 1px solid #2c2c2e;
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.settings-card:hover {
+    background-color: #2c2c2e;
+    border-color: #3a3a3c;
+}
+
+.settings-row {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.settings-row:last-child {
+    border-bottom: none;
+}
+
+.settings-label {
+    font-size: 14px;
+    color: #f5f5f7;
+    font-weight: 500;
+}
+
+.settings-desc {
+    font-size: 12px;
+    color: #a0a0a8;
+}
+
+button.suggested-action {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    color: #ffffff;
+    padding: 6px 16px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    transition: all 250ms ease;
+}
+
+button.suggested-action:hover {
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+}
+
+button.suggested-action:active {
+    transform: translateY(0px);
+}
+
+button {
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: #f5f5f7;
+    padding: 6px 16px;
+    font-weight: 500;
+    transition: all 200ms ease;
+}
+
+button:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Custom GTK Switch Slider style */
+switch {
+    background-color: #3a3a3c;
+    border: none;
+    border-radius: 34px;
+    min-height: 28px;
+    min-width: 50px;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+switch:checked {
+    background-color: #0a84ff;
+    background-image: none;
+    border-color: transparent;
+}
+
+switch slider {
+    background-color: #ffffff;
+    border-radius: 50%;
+    min-width: 24px;
+    min-height: 24px;
+    margin: 2px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Premium Floating Action Button (FAB) */
+.baby-fab {
+    background-color: #0a84ff;
+    border: none;
+    border-radius: 50%;
+    min-width: 56px;
+    min-height: 56px;
+    padding: 0;
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(10, 132, 255, 0.4);
+    transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 16px;
+}
+
+.baby-fab:hover {
+    background-color: #359aff;
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(10, 132, 255, 0.6);
+}
+
+.baby-fab:active {
+    transform: scale(0.95);
+}
+
+.baby-fab image {
+    -gtk-icon-size: 24px;
+}
+
+.cheatsheet-overlay {
+    background-color: rgba(15, 15, 15, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.cheatsheet-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+}
+
+.cheatsheet-label {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 13px;
+}
+
+.cheatsheet-value {
+    color: #ffffff;
+    font-family: monospace;
+    font-size: 13px;
+}
+
+/* --- System Info & Dashboard Cards Layouts --- */
+.os-logo {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 16px;
+}
+
+.hero-hostname {
+    font-size: 26px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+progressbar.disk-progress trough {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    min-height: 8px;
+}
+
+progressbar.disk-progress progress {
+    background: linear-gradient(135deg, #e5c197, #d4a96a);
+    border-radius: 6px;
+}
+
+.card-icon-wrapper {
+    background: linear-gradient(135deg, #e5c197, #8e2de2);
+    border-radius: 14px;
+    color: #ffffff;
+    box-shadow: 0 4px 16px rgba(229, 193, 151, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- Appearance View Layouts --- */
+.wallpaper-preview-frame {
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.choose-file-card {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 14px;
+    transition: all 250ms ease;
+}
+
+.choose-file-card:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: scale(1.02);
+}
+
+.theme-option-card {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    transition: all 250ms ease;
+}
+
+.theme-option-card:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.theme-option-card.active {
+    background-color: rgba(229, 193, 151, 0.16);
+    border: 1px solid rgba(229, 193, 151, 0.35);
+    color: #e5c197;
+}
+
+.settings-row-item {
+    padding: 12px 16px;
+    border-radius: 14px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+

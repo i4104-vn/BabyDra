@@ -9,7 +9,7 @@ fn main() {
     );
 
     application.connect_activate(|app| {
-        babydra_common::init_theme();
+        babydra_utils::ui::theme::init_theme();
         let launcher_window = Rc::new(RefCell::new(None));
         let window = babydra_launcher::build_launcher_ui(app, launcher_window.clone());
         window.present();

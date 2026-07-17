@@ -1,3 +1,3 @@
 pub mod render;
 
-pub use babydra_common::helper::storage::{DiskInfo, get_disk_list};
+pub use babydra_common::helper::storage::get_disk_list;

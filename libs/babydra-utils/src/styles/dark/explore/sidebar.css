@@ -1,0 +1,47 @@
+/* ── Sidebar ─────────────────────────────────────────────────────── */
+.explore-window .sidebar {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    margin: 8px 4px 8px 8px;
+    min-width: 200px;
+    max-width: 200px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.explore-window .sidebar>viewport,
+.explore-window .sidebar>viewport>box {
+    background-color: transparent;
+    padding: 4px 0;
+}
+
+.explore-window .sidebar-section-label {
+    color: #888;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 10px 16px 4px 16px;
+    letter-spacing: 0.5px;
+}
+
+.explore-window .sidebar-item {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: #ccc;
+    font-size: 13px;
+    margin: 1px 6px;
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.explore-window .sidebar-item:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: #e8e8e8;
+    transform: translateX(3px);
+}
+
+.explore-window .sidebar-item.active-nav {
+    background-color: rgba(59, 130, 246, 0.12);
+    color: #60a5fa;
+}
+

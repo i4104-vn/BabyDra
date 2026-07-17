@@ -13,3 +13,4 @@ gio = "0.20"
 dirs = "5.0"
 chrono = "0.4"
 babydra-common = { workspace = true }
+babydra-utils = { workspace = true }

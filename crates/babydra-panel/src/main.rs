@@ -7,7 +7,7 @@ use std::rc::Rc;
 
 fn main() {
     // Initialize D-Bus StatusNotifierWatcher system tray listener daemon
-    babydra_common::desktop::tray::spawn_watcher_service();
+    babydra_common::tray::spawn_watcher_service();
 
     // Detect DDC/CI bus for desktop monitors on startup
     widgets::panel::detect_ddc_bus();
@@ -18,112 +18,7 @@ fn main() {
     });
 
     // Spawn background thread to track focused app and capture screenshots
-    std::thread::spawn(|| {
-        use std::process::Command;
-        use std::time::{Instant, Duration};
-        use std::fs;
-
-        let cache_dir = "/tmp/babydra-switcher-cache";
-        let _ = fs::create_dir_all(cache_dir);
-
-        let mut current_focused_window: Option<(String, String)> = None;
-        let mut focus_start = Instant::now();
-        let mut screenshot_taken = false;
-
-        loop {
-            std::thread::sleep(Duration::from_millis(500));
-
-            let switcher_open = std::path::Path::new("/tmp/babydra-switcher.socket").exists();
-            if switcher_open {
-                if let Some((ref old_app, ref old_title)) = current_focused_window {
-                    if screenshot_taken {
-                        let temp_file = format!("{}/temp_active.png", cache_dir);
-                        // Save window-specific screenshot
-                        let hash = babydra_common::desktop::get_window_hash(old_app, old_title);
-                        let dest_file = format!("{}/{}.png", cache_dir, hash);
-                        let _ = fs::copy(&temp_file, &dest_file);
-                        // Save generic fallback screenshot
-                        let dest_generic = format!("{}/{}.png", cache_dir, old_app);
-                        let _ = fs::copy(&temp_file, &dest_generic);
-                    }
-                }
-                current_focused_window = None;
-                screenshot_taken = false;
-                continue;
-            }
-
-            // Get the currently focused window
-            let active_window = babydra_common::helper::window::get_active_window();
-
-            // Ignore the switcher itself if it gets focused
-            let is_switcher = active_window.as_ref().map(|(s, _)| s == "babydra-switcher" || s == "org.babydra.switcher").unwrap_or(false);
-            if is_switcher {
-                continue;
-            }
-
-            if active_window != current_focused_window {
-                // User switched away from current_focused_window
-                if let Some((ref old_app, ref old_title)) = current_focused_window {
-                    if screenshot_taken {
-                        // Copy the temp screenshot to the old window's cache file
-                        let temp_file = format!("{}/temp_active.png", cache_dir);
-                        let hash = babydra_common::desktop::get_window_hash(old_app, old_title);
-                        let dest_file = format!("{}/{}.png", cache_dir, hash);
-                        let _ = fs::copy(&temp_file, &dest_file);
-                        // Copy to generic fallback screenshot
-                        let dest_generic = format!("{}/{}.png", cache_dir, old_app);
-                        let _ = fs::copy(&temp_file, &dest_generic);
-                    }
-                }
-
-                // Clean up stale cache files for windows that are no longer running
-                if let Ok(entries) = fs::read_dir(cache_dir) {
-                    let mut running_hashes = std::collections::HashSet::new();
-                    let mut running_app_ids = std::collections::HashSet::new();
-                    let running_windows = babydra_common::helper::window::get_running_windows();
-                    for (id, title) in running_windows {
-                        running_hashes.insert(babydra_common::desktop::get_window_hash(&id, &title));
-                        running_app_ids.insert(id);
-                    }
-                    for entry in entries {
-                        if let Ok(entry) = entry {
-                            let path = entry.path();
-                            if path.is_file() {
-                                if let Some(file_name) = path.file_name() {
-                                    let name_str = file_name.to_string_lossy().to_string();
-                                    if name_str != "temp_active.png" && name_str.ends_with(".png") {
-                                        let key = name_str.trim_end_matches(".png").to_string();
-                                        if !running_hashes.contains(&key) && !running_app_ids.contains(&key) {
-                                            let _ = fs::remove_file(&path);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Reset for the new active window
-                current_focused_window = active_window;
-                focus_start = Instant::now();
-                screenshot_taken = false;
-            } else if current_focused_window.is_some() && !screenshot_taken {
-                // If they have stayed in the same window for >= 5 seconds, take a screenshot
-                if focus_start.elapsed() >= Duration::from_secs(5) {
-                    let temp_file = format!("{}/temp_active.png", cache_dir);
-                    // Run grim to capture the screen
-                    let status = Command::new("grim")
-                        .arg(&temp_file)
-                        .status();
-                    if let Ok(s) = status {
-                        if s.success() {
-                            screenshot_taken = true;
-                        }
-                    }
-                }
-            }
-        }
-    });
+    babydra_common::spawn_switcher_tracker();
 
     let application = gtk4::Application::new(
         Some("org.babydra.panel"),
@@ -132,7 +27,13 @@ fn main() {
 
     application.connect_activate(|app| {
         // Initialize style provider
-        babydra_common::init_theme();
+        babydra_utils::ui::theme::init_theme();
+
+        // Sync system color-scheme changes (GSettings) to GTK settings in real-time
+        let gsettings = gtk4::gio::Settings::new("org.gnome.desktop.interface");
+        gsettings.connect_changed(Some("color-scheme"), |_, _| {
+            babydra_utils::ui::theme::init_theme();
+        });
 
         // Define shared window states for mutual exclusivity
         let control_center_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>> = Rc::new(RefCell::new(None));

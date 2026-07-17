@@ -1,10 +1,9 @@
-mod apps;
 mod preview;
 mod render;
 
 use gtk4::prelude::*;
-use babydra_common::desktop::DesktopApp;
-use apps::get_running_windows;
+use babydra_common::DesktopApp;
+use babydra_common::{get_running_apps, focus_window};
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -17,21 +16,7 @@ pub struct PopoverState {
 }
 
 fn get_active_app_id() -> Option<String> {
-    if let Ok(output) = std::process::Command::new("wlrctl")
-        .args(&["window", "list", "state:focused"])
-        .output()
-    {
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        if let Some(line) = stdout.lines().next() {
-            if let Some(pos) = line.find(':') {
-                let app_id = line[..pos].trim().to_string();
-                if !app_id.is_empty() {
-                    return Some(app_id);
-                }
-            }
-        }
-    }
-    None
+    babydra_common::helper::window::get_active_window().map(|(app_id, _)| app_id)
 }
 
 /// Helper to generate a signature representing current taskbar state (apps only, not active).
@@ -121,7 +106,7 @@ fn rebuild_taskbar(
             } else if let Some(single_window) = app_windows.first() {
                 let target_app_id = single_window.app_id.as_deref().unwrap_or(&app_id_clone);
                 let target_title = single_window.window_title.as_deref().unwrap_or("");
-                apps::focus_window(target_app_id, target_title);
+                focus_window(target_app_id, target_title);
             }
         });
 
@@ -176,7 +161,7 @@ pub fn create_workspace_switcher() -> gtk4::Box {
     let apps_shared_clone = running_apps_shared.clone();
     thread::spawn(move || {
         loop {
-            let apps = get_running_windows();
+            let apps = get_running_apps();
             if let Ok(mut lock) = apps_shared_clone.lock() {
                 *lock = apps;
             }

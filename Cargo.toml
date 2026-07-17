@@ -3,13 +3,15 @@ resolver = "2"
 members = [
     "libs/babydra-common",
     "libs/babydra-island",
-    "libs/babydra-wallpaper",
     "libs/babydra-launcher",
+    "libs/babydra-utils",
     "crates/babydra-panel",
-    "crates/babydra-menu",
     "crates/babydra-switcher",
     "crates/babydra-screenshot",
     "crates/babydra-lock",
+    "crates/babydra-preview",
+    "crates/babydra-settings",
+    "crates/babydra-explore",
 ]
 
 [workspace.package]
@@ -19,4 +21,4 @@ version = "1.0.0"
 babydra-common = { path = "libs/babydra-common" }
 babydra-launcher = { path = "libs/babydra-launcher" }
 babydra-island = { path = "libs/babydra-island" }
-babydra-wallpaper = { path = "libs/babydra-wallpaper" }
+babydra-utils = { path = "libs/babydra-utils" }

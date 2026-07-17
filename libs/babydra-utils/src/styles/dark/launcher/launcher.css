@@ -1,0 +1,273 @@
+.launcher-window {
+    background-color: transparent;
+    background-image: none;
+}
+
+.launcher-box {
+    background-color: rgba(24, 24, 28, 0.95); /* Neutral sleek dark glass */
+    border: 1px solid rgba(59, 130, 246, 0.22);
+    border-radius: 20px;
+    color: #cdd6f4;
+    padding: 0px;
+    overflow: hidden;
+}
+
+/* Header style */
+.menu-header {
+    margin-bottom: 0px;
+}
+
+.brand-text {
+    font-size: 16px;
+    font-weight: bold;
+    color: #3b82f6; /* Blue Accent */
+    letter-spacing: 0.5px;
+}
+
+.brand-icon {
+    color: #3b82f6;
+    margin-right: 8px;
+}
+
+.close-btn {
+    background-color: rgba(59, 130, 246, 0.08); /* Translucent blue background */
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 20px;
+    color: #3b82f6;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 200ms ease;
+}
+
+.close-btn:hover {
+    background-color: rgba(59, 130, 246, 0.16);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.15);
+}
+
+/* Search bar style */
+entry.launcher-search {
+    background-color: rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(59, 130, 246, 0.12);
+    border-radius: 14px;
+    color: #cdd6f4;
+    padding: 12px 16px;
+    font-size: 14px;
+    transition: all 200ms ease;
+    box-shadow: none;
+}
+
+entry.launcher-search>text {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+entry.launcher-search:focus {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-color: #3b82f6;
+    box-shadow: 0 0 16px rgba(59, 130, 246, 0.15);
+}
+
+entry.launcher-search placeholder,
+entry.launcher-search>text>placeholder {
+    color: rgba(205, 214, 244, 0.35);
+}
+
+/* List container */
+.list-container {
+    margin-top: 12px;
+    background: transparent;
+}
+
+/* Section Title */
+.launcher-section-title {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #6c7086;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    margin-left: 8px;
+}
+
+/* List Item */
+.launcher-list-item {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    border-radius: 12px;
+    padding: 8px 12px;
+    margin: 3px 0;
+    transition: all 200ms ease;
+    color: #bac2de;
+    box-shadow: none;
+}
+
+.launcher-list-item:hover,
+.launcher-list-item:focus,
+.launcher-list-item.selected {
+    background-color: rgba(59, 130, 246, 0.06); /* Soft glass reflection with blue tint */
+    border-left: 3px solid #3b82f6; /* Active indicator on the left */
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+    padding-left: 9px;
+    color: #ffffff;
+    box-shadow: none;
+}
+
+.app-icon-wrapper {
+    background-color: rgba(59, 130, 246, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.08);
+    border-radius: 12px;
+    padding: 6px;
+    margin-right: 12px;
+    transition: all 200ms ease;
+}
+
+.launcher-list-item:hover .app-icon-wrapper,
+.launcher-list-item:focus .app-icon-wrapper,
+.launcher-list-item.selected .app-icon-wrapper {
+    background-color: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.2);
+    transform: scale(1.05);
+}
+
+.app-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #cdd6f4;
+}
+
+.launcher-list-item:hover .app-title,
+.launcher-list-item:focus .app-title,
+.launcher-list-item.selected .app-title {
+    color: #ffffff;
+}
+
+.app-desc {
+    font-size: 11px;
+    color: #6c7086;
+}
+
+.launcher-list-item:hover .app-desc,
+.launcher-list-item:focus .app-desc,
+.launcher-list-item.selected .app-desc {
+    color: #bac2de;
+}
+
+/* Badges */
+.item-badge {
+    font-size: 9px;
+    font-weight: bold;
+    padding: 2px 7px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background-color: rgba(59, 130, 246, 0.12);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.22);
+}
+
+/* Other apps toggle button */
+.launcher-toggle-btn {
+    background-color: transparent;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin: 10px 0;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #6c7086;
+    box-shadow: none;
+}
+
+.launcher-toggle-btn:hover,
+.launcher-toggle-btn:focus,
+.launcher-toggle-btn.selected {
+    background-color: rgba(59, 130, 246, 0.06);
+    color: #3b82f6;
+    box-shadow: none;
+}
+
+/* Status message */
+.status-msg {
+    font-size: 13px;
+    color: #6c7086;
+    margin: 40px 0;
+}
+
+/* Footer styling */
+.launcher-footer-separator {
+    background-color: rgba(59, 130, 246, 0.15);
+    margin: 12px 0;
+}
+
+.launcher-footer-box {
+    padding: 8px 12px;
+    background-color: rgba(59, 130, 246, 0.03);
+    border: 1px solid rgba(59, 130, 246, 0.08);
+    border-radius: 14px;
+}
+
+.launcher-profile-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #bac2de;
+}
+
+.launcher-power-btn {
+    background-color: rgba(59, 130, 246, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.1);
+    border-radius: 8px;
+    padding: 6px;
+    transition: all 200ms ease;
+    box-shadow: none;
+}
+
+.launcher-power-btn:hover {
+    background-color: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #f87171;
+    box-shadow: none;
+}
+
+/* Sliding power options */
+.launcher-power-option-btn {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 9999px;
+    padding: 6px;
+    width: 34px;
+    height: 34px;
+    transition: all 200ms ease;
+    box-shadow: none;
+}
+
+.launcher-power-option-btn:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.launcher-power-option-btn.shutdown:hover {
+    background-color: rgba(239, 68, 68, 0.25);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+.launcher-power-option-btn.reboot:hover {
+    background-color: rgba(245, 158, 11, 0.25);
+    border-color: rgba(245, 158, 11, 0.5);
+}
+
+.launcher-power-option-btn.suspend:hover {
+    background-color: rgba(59, 130, 246, 0.25);
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+.launcher-power-option-btn.logout:hover {
+    background-color: rgba(137, 180, 250, 0.25);
+    border-color: rgba(137, 180, 250, 0.5);
+}

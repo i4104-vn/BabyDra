@@ -1,8 +1,0 @@
-[package]
-name = "babydra-wallpaper"
-version.workspace = true
-edition = "2021"
-
-
-
-[dependencies]

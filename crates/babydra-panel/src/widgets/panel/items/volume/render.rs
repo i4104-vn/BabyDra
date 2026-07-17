@@ -37,47 +37,39 @@ pub fn create_volume_row(
                 icon_container.remove(&old);
             }
             let icon_widget = if is_muted_val {
-                babydra_common::icon::get_icon("volume-mute", 16)
+                babydra_utils::ui::icon::get_icon("volume-mute", 16)
             } else {
-                babydra_common::icon::get_icon("volume", 16)
+                babydra_utils::ui::icon::get_icon("volume", 16)
             };
             icon_widget.add_css_class("slider-icon");
             icon_container.append(&icon_widget);
         })
     };
 
-    let mute_btn = gtk4::Button::new();
-    mute_btn.add_css_class("slider-overlay-mute-btn");
-    mute_btn.set_child(Some(&icon_container));
+    let mute_btn = babydra_utils::components::create_colored_icon_button(
+        if muted_state.get() { "volume-mute" } else { "volume" },
+        16,
+        "rgba(255,255,255,0.9)",
+        &["slider-overlay-mute-btn"],
+        None,
+        {
+            let update_mute_icon_clone = update_mute_icon.clone();
+            let muted_state_clone = muted_state.clone();
+            let vol_icon_c = vol_icon.clone();
+            move || {
+                let new_mute = !muted_state_clone.get();
+                muted_state_clone.set(new_mute);
+                babydra_common::volume::set_muted(new_mute);
+                update_mute_icon_clone(new_mute);
+                update_topbar_volume_icon(&vol_icon_c);
+            }
+        },
+    );
     mute_btn.set_halign(gtk4::Align::Start);
     mute_btn.set_valign(gtk4::Align::Center);
     mute_btn.set_margin_start(10);
     mute_btn.set_can_focus(false);
     mute_btn.set_focus_on_click(false);
-    
-    let update_mute_icon_clone = update_mute_icon.clone();
-    let muted_state_clone = muted_state.clone();
-    let vol_icon_c = vol_icon.clone();
-    
-    mute_btn.connect_clicked(move |_| {
-        let new_mute = !muted_state_clone.get();
-        muted_state_clone.set(new_mute);
-
-        let mute_val = if new_mute { "1" } else { "0" };
-        let _ = std::process::Command::new("wpctl")
-            .args(&["set-mute", "@DEFAULT_AUDIO_SINK@", mute_val])
-            .spawn();
-        let _ = std::process::Command::new("pactl")
-            .args(&["set-sink-mute", "@DEFAULT_SINK@", mute_val])
-            .spawn();
-        let _ = std::process::Command::new("amixer")
-            .args(&["set", "Master", if new_mute { "mute" } else { "unmute" }])
-            .spawn();
-
-        update_mute_icon_clone(new_mute);
-        update_topbar_volume_icon(&vol_icon_c);
-    });
-
     update_mute_icon(muted_state.get());
 
     let scale = gtk4::Scale::with_range(gtk4::Orientation::Horizontal, 0.0, 100.0, 1.0);
@@ -124,7 +116,7 @@ pub fn create_volume_row(
     let menu_btn = gtk4::Button::new();
     menu_btn.add_css_class("slider-popover-btn");
     menu_btn.set_valign(gtk4::Align::Center);
-    let menu_icon = babydra_common::icon::get_system_or_file_icon("go-up-symbolic", "image-missing");
+    let menu_icon = babydra_utils::ui::icon::get_system_or_file_icon("go-up-symbolic", "image-missing");
     menu_icon.set_pixel_size(12);
     menu_btn.set_child(Some(&menu_icon));
 
@@ -137,10 +129,7 @@ pub fn create_volume_row(
     row_box.append(&overlay);
     row_box.append(&menu_btn);
 
-    let popover = gtk4::Popover::new();
-    popover.add_css_class("taskbar-popover");
-    popover.set_parent(&menu_btn);
-    popover.set_position(gtk4::PositionType::Bottom);
+    let popover = babydra_utils::components::create_popover(&menu_btn, gtk4::PositionType::Bottom, "taskbar-popover");
     popover.set_has_arrow(true);
 
     let popover_clone = popover.clone();
@@ -161,7 +150,7 @@ pub fn create_volume_row(
             cb(true);
         }
         
-        let down_icon = babydra_common::icon::get_system_or_file_icon("go-down-symbolic", "image-missing");
+        let down_icon = babydra_utils::ui::icon::get_system_or_file_icon("go-down-symbolic", "image-missing");
         down_icon.set_pixel_size(12);
         menu_btn_clone.set_child(Some(&down_icon));
     });
@@ -172,8 +161,7 @@ pub fn create_volume_row(
         if let Some(ref cb) = on_popover_toggled_c2 {
             cb(false);
         }
-        let up_icon = babydra_common::icon::get_system_or_file_icon("go-up-symbolic", "image-missing");
-        up_icon.set_pixel_size(12);
+        let up_icon = babydra_utils::ui::icon::get_icon("go-up-symbolic", 12);
         menu_btn_c2.set_child(Some(&up_icon));
     });
 
@@ -206,7 +194,7 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
             }
             
             let btn_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
-            let icon = babydra_common::icon::get_icon_colored(
+            let icon = babydra_utils::ui::icon::get_icon_colored(
                 "volume", 14, 
                 if sink.is_default { "#ffffff" } else { "rgba(255, 255, 255, 0.5)" }
             );
@@ -230,10 +218,12 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
             let pop_clone = popover.clone();
             let update_mute_clone = update_mute_btn.clone();
             btn.connect_clicked(move |_| {
-                let _ = std::process::Command::new("wpctl")
-                    .args(&["set-default", &name])
-                    .status();
-                populate_audio_menu(&pop_clone, update_mute_clone.clone());
+                babydra_common::volume::select_audio_device(&name);
+                let pop_c = pop_clone.clone();
+                let update_mute_c = update_mute_clone.clone();
+                gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(150), move || {
+                    populate_audio_menu(&pop_c, update_mute_c);
+                });
             });
             container.append(&btn);
         }
@@ -263,7 +253,7 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
         }
         
         let btn_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
-        let icon = babydra_common::icon::get_icon_colored(
+        let icon = babydra_utils::ui::icon::get_icon_colored(
             "microphone", 14, 
             if source.is_default { "#ffffff" } else { "rgba(255, 255, 255, 0.5)" }
         );
@@ -287,10 +277,12 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
         let pop_clone = popover.clone();
         let update_mute_clone = update_mute_btn.clone();
         btn.connect_clicked(move |_| {
-            let _ = std::process::Command::new("wpctl")
-                .args(&["set-default", &name])
-                .status();
-            populate_audio_menu(&pop_clone, update_mute_clone.clone());
+            babydra_common::volume::select_audio_device(&name);
+            let pop_c = pop_clone.clone();
+            let update_mute_c = update_mute_clone.clone();
+            gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(150), move || {
+                populate_audio_menu(&pop_c, update_mute_c);
+            });
         });
         container.append(&btn);
     }

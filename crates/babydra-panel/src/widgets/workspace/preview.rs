@@ -1,6 +1,5 @@
 use gtk4::prelude::*;
-use babydra_common::desktop::DesktopApp;
-use super::apps::{focus_window, close_window};
+use babydra_common::{DesktopApp, focus_window, close_window};
 use super::render;
 
 /// Populates a Popover widget containing a vertical list of window titles grouped by app

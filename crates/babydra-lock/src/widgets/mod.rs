@@ -2,7 +2,7 @@
 
 use gtk4::prelude::*;
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
-use crate::pam::verify_password;
+use babydra_common::verify_password;
 
 /// Spawns a lock window assigned to a specific monitor.
 pub fn create_lock_window(
@@ -11,9 +11,12 @@ pub fn create_lock_window(
     is_primary: bool,
 ) {
     let window = gtk4::ApplicationWindow::new(app);
-    babydra_common::apply_theme_class(&window);
+    babydra_utils::ui::theme::apply_theme_class(&window);
     window.init_layer_shell();
     window.set_layer(Layer::Overlay);
+    window.set_exclusive_zone(-1);
+    // Ensure the window is fully opaque — prevents Wayland compositor from rendering it transparent
+    window.set_opacity(1.0);
 
     if let Some(m) = monitor {
         window.set_monitor(m);
@@ -47,8 +50,7 @@ pub fn create_lock_window(
     center_box.set_vexpand(true);
 
     if is_primary {
-        let card_box = gtk4::Box::new(gtk4::Orientation::Vertical, 20);
-        card_box.add_css_class("lock-card");
+        let card_box = babydra_utils::components::create_card_with_class(gtk4::Orientation::Vertical, 20, "lock-card");
         card_box.set_valign(gtk4::Align::Center);
         card_box.set_halign(gtk4::Align::Center);
 
@@ -82,7 +84,7 @@ pub fn create_lock_window(
         update_clock();
         glib::timeout_add_local(std::time::Duration::from_secs(1), update_clock);
 
-        let avatar_icon = babydra_common::icon::get_icon("avatar-default", 80);
+        let avatar_icon = babydra_utils::ui::icon::get_icon("avatar-default", 80);
         avatar_icon.add_css_class("lock-avatar");
         avatar_icon.set_halign(gtk4::Align::Center);
 
@@ -91,6 +93,7 @@ pub fn create_lock_window(
         user_label.add_css_class("lock-username");
 
         let entry = gtk4::Entry::new();
+        entry.set_property("im-module", "none");
         entry.set_visibility(false);
         entry.set_placeholder_text(Some(&babydra_common::i18n::t("lock.placeholder")));
         entry.add_css_class("lock-input");
@@ -139,6 +142,13 @@ pub fn create_lock_window(
         glib::timeout_add_local_once(std::time::Duration::from_millis(100), move || {
             entry_focus.grab_focus();
         });
+
+        let entry_click = entry.clone();
+        let click_gesture = gtk4::GestureClick::new();
+        click_gesture.connect_pressed(move |_, _, _, _| {
+            entry_click.grab_focus();
+        });
+        window.add_controller(click_gesture);
     } else {
         let clock_label = gtk4::Label::new(None);
         clock_label.add_css_class("lock-clock");

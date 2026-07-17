@@ -70,6 +70,7 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("launcher.shutdown", "Shut Down");
             map.insert("launcher.restart", "Restart");
             map.insert("launcher.suspend", "Suspend");
+            map.insert("launcher.logout", "Log Out");
 
             // Panel / Clock
             map.insert("panel.no_notifications", "No new notifications");
@@ -168,6 +169,42 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             // Taskbar
             map.insert("taskbar.tasks", "Tasks");
             map.insert("taskbar.close_all", "Close All");
+
+            // Explore / File Explorer
+            map.insert("explore.new_folder", "New Folder");
+            map.insert("explore.empty_trash", "Empty Trash");
+            map.insert("explore.cut", "Cut");
+            map.insert("explore.copy", "Copy");
+            map.insert("explore.paste", "Paste");
+            map.insert("explore.rename", "Rename");
+            map.insert("explore.delete", "Delete");
+            map.insert("explore.view_grid", "View as Grid");
+            map.insert("explore.view_list", "View as List");
+            map.insert("explore.search_placeholder", "Search");
+            map.insert("explore.sort_by", "Sort by");
+            map.insert("explore.sort_auto", "Auto");
+            map.insert("explore.sort_date", "By Date");
+            map.insert("explore.sort_group", "By Group");
+            map.insert("explore.places", "Places");
+            map.insert("explore.this_pc", "This PC");
+            map.insert("explore.home", "Home");
+            map.insert("explore.downloads", "Downloads");
+            map.insert("explore.documents", "Documents");
+            map.insert("explore.pictures", "Pictures");
+            map.insert("explore.music", "Music");
+            map.insert("explore.videos", "Videos");
+            map.insert("explore.desktop", "Desktop");
+            map.insert("explore.trash", "Trash");
+            map.insert("explore.local_disk", "Local Disk (/)");
+            map.insert("explore.toggle_hidden", "Toggle Hidden Files (Ctrl+H)");
+            map.insert("explore.toggle_preview", "Toggle Preview (F4)");
+            map.insert("explore.items", "items");
+            map.insert("explore.total_size", "Total size");
+            map.insert("explore.back", "Back");
+            map.insert("explore.forward", "Forward");
+            map.insert("explore.up", "Up");
+            map.insert("explore.refresh", "Refresh");
+            map.insert("explore.loading", "Loading directory...");
         }
         _ => {
             // Menu
@@ -188,6 +225,7 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("launcher.shutdown", "Tắt máy");
             map.insert("launcher.restart", "Khởi động lại");
             map.insert("launcher.suspend", "Tạm dừng");
+            map.insert("launcher.logout", "Đăng xuất");
 
             // Panel / Clock
             map.insert("panel.no_notifications", "Không có thông báo mới");
@@ -286,6 +324,42 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             // Taskbar
             map.insert("taskbar.tasks", "Cửa sổ");
             map.insert("taskbar.close_all", "Đóng tất cả");
+
+            // Explore / File Explorer
+            map.insert("explore.new_folder", "Tạo thư mục mới");
+            map.insert("explore.empty_trash", "Xóa sạch thùng rác");
+            map.insert("explore.cut", "Cắt");
+            map.insert("explore.copy", "Sao chép");
+            map.insert("explore.paste", "Dán");
+            map.insert("explore.rename", "Đổi tên");
+            map.insert("explore.delete", "Xóa");
+            map.insert("explore.view_grid", "Xem dạng lưới");
+            map.insert("explore.view_list", "Xem dạng danh sách");
+            map.insert("explore.search_placeholder", "Tìm kiếm");
+            map.insert("explore.sort_by", "Sắp xếp theo");
+            map.insert("explore.sort_auto", "Tự động");
+            map.insert("explore.sort_date", "Theo ngày");
+            map.insert("explore.sort_group", "Theo nhóm");
+            map.insert("explore.places", "Vị trí");
+            map.insert("explore.this_pc", "Máy tính này");
+            map.insert("explore.home", "Thư mục cá nhân");
+            map.insert("explore.downloads", "Tải về");
+            map.insert("explore.documents", "Tài liệu");
+            map.insert("explore.pictures", "Hình ảnh");
+            map.insert("explore.music", "Nhạc");
+            map.insert("explore.videos", "Video");
+            map.insert("explore.desktop", "Màn hình nền");
+            map.insert("explore.trash", "Thùng rác");
+            map.insert("explore.local_disk", "Ổ đĩa cục bộ (/)");
+            map.insert("explore.toggle_hidden", "Ẩn/hiện tệp ẩn (Ctrl+H)");
+            map.insert("explore.toggle_preview", "Ẩn/hiện xem trước (F4)");
+            map.insert("explore.items", "đối tượng");
+            map.insert("explore.total_size", "Tổng dung lượng");
+            map.insert("explore.back", "Quay lại");
+            map.insert("explore.forward", "Đi tiếp");
+            map.insert("explore.up", "Lên thư mục cha");
+            map.insert("explore.refresh", "Tải lại");
+            map.insert("explore.loading", "Đang tải thư mục...");
         }
     }
     map

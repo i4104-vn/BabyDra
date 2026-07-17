@@ -1,0 +1,21 @@
+/* ── Base Window ───────────────────────────────────────────────── */
+window.explore-window {
+    background-color: transparent;
+    background-image: none;
+    box-shadow: none;
+    border: none;
+}
+
+.explore-window>box {
+    background-color: rgba(245, 245, 247, 0.97);
+    background-image: repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.015) 0px, rgba(0, 0, 0, 0.015) 1px, transparent 1px, transparent 2px),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(0, 0, 0, 0.05) 100%);
+    -gtk-background-blur: 24;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    color: #1a1a1a;
+    font-family: "Segoe UI Variable", "Inter", "Cantarell", sans-serif;
+    font-size: 13px;
+}
+

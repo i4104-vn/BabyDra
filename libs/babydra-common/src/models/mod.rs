@@ -7,6 +7,8 @@ pub mod volume;
 pub mod storage;
 pub mod notification;
 pub mod tray_item;
+pub mod screenshot;
+pub mod explore;
 
 pub use theme_config::ThemeConfig;
 pub use shell_config::ShellConfig;
@@ -15,3 +17,6 @@ pub use volume::AudioDevice;
 pub use storage::DiskInfo;
 pub use notification::{ActiveNotification, NotificationMsg};
 pub use tray_item::TrayItem;
+pub use screenshot::{Drawing, Tool, EditorState};
+pub use explore::{FileEntry, FileType, DirectoryModel, SortColumn, SortOrder, TabState, SessionState};
+

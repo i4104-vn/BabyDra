@@ -7,8 +7,12 @@ echo "============================================="
 
 # 1. Install all dependencies, the Rust toolchain, and system fonts via pacman
 echo "Installing Arch Linux packages..."
-sudo pacman -Syu --needed --noconfirm base-devel git pkgconf gtk4 gtk4-layer-shell rust labwc meson ninja playerctl grim wl-clipboard libnotify gammastep wlsunset wireplumber
+sudo pacman -Syu --needed --noconfirm base-devel git pkgconf gtk4 gtk4-layer-shell rust labwc meson ninja playerctl grim wl-clipboard libnotify gammastep wlsunset wireplumber pipewire-pulse pipewire-alsa ddcutil
 
+# Ensure i2c-dev kernel module is loaded and configured to load on boot
+echo "Configuring i2c-dev kernel module..."
+sudo modprobe i2c-dev || true
+echo "i2c-dev" | sudo tee /etc/modules-load.d/i2c.conf > /dev/null || true
 
 # Check if yay is installed, and install it from AUR if missing
 if ! command -v yay &> /dev/null; then
@@ -21,8 +25,23 @@ if ! command -v yay &> /dev/null; then
 fi
 
 # Install AUR packages using yay
-yay -S --noconfirm dolphin github-desktop fastfetch neovim awww brightnessctl 
-yay -S --noconfirm inter-font ttf-ubuntu-font-family ttf-jetbrains-mono-nerd otf-font-awesome ttf-nerd-fonts-symbols
+yay -S --noconfirm dolphin github-desktop fastfetch neovim awww ddcutil-service
+# Core UI fonts
+yay -S --noconfirm inter-font ttf-ubuntu-font-family ttf-jetbrains-mono-nerd
+
+# Nerd Font symbols (icons in terminal and panel)
+yay -S --noconfirm ttf-nerd-fonts-symbols ttf-nerd-fonts-symbols-mono
+
+# Font Awesome icons (used by many GTK/Qt apps)
+yay -S --noconfirm otf-font-awesome ttf-font-awesome
+
+# Noto font family — covers virtually all Unicode ranges
+yay -S --noconfirm noto-fonts noto-fonts-cjk noto-fonts-emoji noto-fonts-extra
+
+# Liberation fonts (metric-compatible fallback for Arial/Times/Courier)
+yay -S --noconfirm ttf-liberation
+
+# Icon theme and Qt theming
 yay -S --noconfirm papirus-icon-theme kvantum-qt5
 
 # 2. Install wlrctl from AUR if not present (required by the window switcher)
@@ -57,24 +76,35 @@ cargo build --release
 # 5. Stop running panel/menu/switcher/lock instances
 echo "Stopping active processes..."
 killall babydra-panel || true
-killall babydra-menu || true
 killall babydra-switcher || true
 killall babydra-screenshot || true
 killall babydra-lock || true
 killall babydra-launcher || true
+killall babydra-image-preview || true
+killall babydra-preview || true
+killall babydra-settings || true
+killall babydra-explore || true
 
 # 6. Install the binaries
 echo "Installing binaries to $LOCAL_BIN..."
 cp target/release/babydra-panel "$LOCAL_BIN/babydra-panel"
-cp target/release/babydra-menu "$LOCAL_BIN/babydra-menu"
 cp target/release/babydra-switcher "$LOCAL_BIN/babydra-switcher"
 cp target/release/babydra-screenshot "$LOCAL_BIN/babydra-screenshot"
 cp target/release/babydra-lock "$LOCAL_BIN/babydra-lock"
 cp target/release/babydra-launcher "$LOCAL_BIN/babydra-launcher"
+cp target/release/babydra-preview "$LOCAL_BIN/babydra-preview"
+cp target/release/babydra-settings "$LOCAL_BIN/babydra-settings"
+cp target/release/babydra-explore "$LOCAL_BIN/babydra-explore"
 
 # Copy wallpaper to standard config dir
 mkdir -p "$HOME/.config/babydra"
 cp wallpaper.png "$HOME/.config/babydra/wallpaper.png"
+
+# Copy custom transparent logos to babydra resource dir
+sudo mkdir -p /usr/share/babydra
+sudo cp crates/babydra-preview/logo.png /usr/share/babydra/babydra-preview.png
+sudo cp crates/babydra-settings/logo.png /usr/share/babydra/babydra-settings.png
+sudo cp crates/babydra-settings/logo.png /usr/share/babydra/logo.png
 
 # 7. Copy labwc configuration files from configs/labwc/
 echo "Configuring labwc compositor integrations..."
@@ -84,6 +114,22 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cp "$SCRIPT_DIR/configs/labwc/autostart" "$HOME/.config/labwc/autostart"
 chmod +x "$HOME/.config/labwc/autostart"
 cp "$SCRIPT_DIR/configs/labwc/rc.xml" "$HOME/.config/labwc/rc.xml"
+cp "$SCRIPT_DIR/configs/labwc/themerc-override" "$HOME/.config/labwc/themerc-override"
+mkdir -p "$HOME/.config/labwc/themes"
+cp -r "$SCRIPT_DIR/configs/labwc/themes/"* "$HOME/.config/labwc/themes/"
+cp "$SCRIPT_DIR/configs/labwc/switcher.sh" "$HOME/.config/labwc/switcher.sh"
+chmod +x "$HOME/.config/labwc/switcher.sh"
+
+mkdir -p "$HOME/.local/share/themes"
+cp -r "$SCRIPT_DIR/configs/themes/BabyDra" "$HOME/.local/share/themes/"
+
+mkdir -p "$HOME/.local/share/icons"
+cp -r "$SCRIPT_DIR/configs/themes/cursor/aosp-cursors" "$HOME/.local/share/icons/"
+cp -r "$SCRIPT_DIR/configs/themes/icons/We10X" "$HOME/.local/share/icons/"
+cp -r "$SCRIPT_DIR/configs/themes/icons/We10X-blue" "$HOME/.local/share/icons/"
+cp -r "$SCRIPT_DIR/configs/themes/icons/We10X-blue-dark" "$HOME/.local/share/icons/"
+cp -r "$SCRIPT_DIR/configs/themes/icons/We10X-dark" "$HOME/.local/share/icons/"
+cp -r "$SCRIPT_DIR/configs/themes/cursor/Twilight-cursors" "$HOME/.local/share/icons/"
 
 # 8. Reload configuration and restart panel
 echo "Reloading labwc configuration and starting panel..."
@@ -108,6 +154,60 @@ cp "$SCRIPT_DIR/configs/fastfetch/logo.png" "$HOME/.config/fastfetch/logo.png"
 # Rebuild font cache
 echo "Rebuilding font cache..."
 fc-cache -fv || true
+
+# 11. Configure default applications for image previews
+echo "Registering default image handler..."
+mkdir -p "$HOME/.local/share/applications"
+cat << EOF > "$HOME/.local/share/applications/babydra-preview.desktop"
+[Desktop Entry]
+Type=Application
+Name=BabyDra Preview
+Comment=Viewer for images
+Exec=/home/i4104/.local/bin/babydra-preview %f
+Icon=/usr/share/babydra/babydra-preview.png
+Terminal=false
+Categories=Graphics;Viewer;GTK;
+MimeType=image/png;image/jpeg;image/gif;image/webp;image/bmp;
+NoDisplay=false
+EOF
+
+chmod +x "$HOME/.local/share/applications/babydra-preview.desktop"
+update-desktop-database "$HOME/.local/share/applications" || true
+xdg-mime default babydra-preview.desktop image/png image/jpeg image/gif image/webp image/bmp || true
+
+# 12. Configure Settings application entry
+echo "Registering settings manager entry..."
+cat << EOF > "$HOME/.local/share/applications/babydra-settings.desktop"
+[Desktop Entry]
+Type=Application
+Name=BabyDra Settings
+Comment=Configure system settings
+Exec=/home/i4104/.local/bin/babydra-settings
+Icon=/usr/share/babydra/babydra-settings.png
+Terminal=false
+Categories=Settings;HardwareSettings;GTK;
+NoDisplay=false
+EOF
+chmod +x "$HOME/.local/share/applications/babydra-settings.desktop"
+update-desktop-database "$HOME/.local/share/applications" || true
+
+# 13. Configure default applications for folder explore
+echo "Registering default folder handler..."
+cat << EOF > "$HOME/.local/share/applications/babydra-explore.desktop"
+[Desktop Entry]
+Type=Application
+Name=BabyDra Explore
+Comment=Explore files and folders
+Exec=/home/i4104/.local/bin/babydra-explore %u
+Icon=system-file-manager
+Terminal=false
+Categories=System;FileTools;FileManager;GTK;
+MimeType=inode/directory;
+NoDisplay=false
+EOF
+chmod +x "$HOME/.local/share/applications/babydra-explore.desktop"
+update-desktop-database "$HOME/.local/share/applications" || true
+xdg-mime default babydra-explore.desktop inode/directory || true
 
 echo "============================================="
 echo "Installation & Setup complete!"

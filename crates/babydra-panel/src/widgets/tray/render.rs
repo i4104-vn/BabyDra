@@ -16,7 +16,7 @@ pub fn build_tray_button(icon_name: &str, title: &str) -> gtk4::Button {
     btn.set_halign(gtk4::Align::Center);
     btn.set_receives_default(false);
 
-    let icon = babydra_common::icon::get_system_or_file_icon(icon_name, "image-missing");
+    let icon = babydra_utils::ui::icon::get_system_or_file_icon(icon_name, "image-missing");
     icon.set_pixel_size(16);
     btn.set_child(Some(&icon));
 
