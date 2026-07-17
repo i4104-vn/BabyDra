@@ -51,6 +51,7 @@ pub fn build_general_page() -> Box {
             .halign(Align::End)
             .valign(Align::Center)
             .build();
+        sw.set_cursor_from_name(Some("pointer"));
         
         sw.connect_active_notify(move |switch| {
             let state = switch.is_active();

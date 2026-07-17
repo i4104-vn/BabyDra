@@ -71,12 +71,14 @@ pub fn build_context_menu_page() -> Box {
         btn_edit.set_tooltip_text(Some(&t("explore.settings_edit")));
         btn_edit.add_css_class("flat");
         btn_edit.add_css_class("edit-btn");
+        btn_edit.set_cursor_from_name(Some("pointer"));
         hbox_view.append(&btn_edit);
 
         let btn_del = Button::from_icon_name("user-trash-symbolic");
         btn_del.set_tooltip_text(Some(&t("explore.settings_delete")));
         btn_del.add_css_class("flat");
         btn_del.add_css_class("destructive-action");
+        btn_del.set_cursor_from_name(Some("pointer"));
         hbox_view.append(&btn_del);
 
         // 2. EDIT MODE LAYOUT
@@ -116,6 +118,7 @@ pub fn build_context_menu_page() -> Box {
                 .tooltip_text(&t(desc_key))
                 .css_classes(vec!["flat".to_string(), "placeholder-btn-small".to_string()])
                 .build();
+            btn_ph.set_cursor_from_name(Some("pointer"));
             let entry_edit_cmd_c = entry_edit_cmd.clone();
             btn_ph.connect_clicked(move |_| {
                 let mut pos = entry_edit_cmd_c.position();
@@ -134,10 +137,12 @@ pub fn build_context_menu_page() -> Box {
             .label(&t("explore.settings_save"))
             .css_classes(vec!["suggested-action".to_string(), "small-btn".to_string()])
             .build();
+        btn_save.set_cursor_from_name(Some("pointer"));
         let btn_cancel = Button::builder()
             .label(&t("explore.settings_cancel"))
             .css_classes(vec!["flat".to_string(), "small-btn".to_string()])
             .build();
+        btn_cancel.set_cursor_from_name(Some("pointer"));
 
         vbox_buttons.append(&btn_save);
         vbox_buttons.append(&btn_cancel);
@@ -284,6 +289,7 @@ pub fn build_context_menu_page() -> Box {
             .tooltip_text(&t(desc_key))
             .css_classes(vec!["flat".to_string(), "placeholder-btn".to_string()])
             .build();
+        btn_p.set_cursor_from_name(Some("pointer"));
         let entry_cmd_c = entry_cmd.clone();
         btn_p.connect_clicked(move |_| {
             let mut pos = entry_cmd_c.position();
@@ -302,6 +308,7 @@ pub fn build_context_menu_page() -> Box {
         .halign(Align::End)
         .css_classes(vec!["suggested-action".to_string()])
         .build();
+    btn_add.set_cursor_from_name(Some("pointer"));
     form_box.append(&btn_add);
 
     // Add button logic

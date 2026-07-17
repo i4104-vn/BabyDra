@@ -44,12 +44,14 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         .halign(Align::Fill)
         .css_classes(vec!["sidebar-item".to_string(), "active-nav".to_string()])
         .build();
+    btn_general.set_cursor_from_name(Some("pointer"));
 
     let btn_context = Button::builder()
         .label(&t("explore.settings_context_menu"))
         .halign(Align::Fill)
         .css_classes(vec!["sidebar-item".to_string()])
         .build();
+    btn_context.set_cursor_from_name(Some("pointer"));
 
     sidebar_box.append(&btn_general);
     sidebar_box.append(&btn_context);

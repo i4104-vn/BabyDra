@@ -182,9 +182,20 @@ button.empty-trash-btn:hover {
 
 .edit-btn {
     color: #3b82f6;
+    border-radius: 50%;
+    min-width: 28px;
+    min-height: 28px;
+    padding: 0;
 }
 .edit-btn:hover {
     background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+.destructive-action {
+    border-radius: 50%;
+    min-width: 28px;
+    min-height: 28px;
+    padding: 0;
 }
 
 /* Sidebar inside Explore Settings Dialog */
