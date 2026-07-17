@@ -11,7 +11,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         .modal(true)
         .resizable(true)
         .default_width(550)
-        .default_height(450)
+        .default_height(550)
         .css_classes(vec!["explore-dialog".to_string()])
         .build();
 
@@ -139,15 +139,162 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     let lbl_general_tab = Label::new(Some(&t("explore.settings_general")));
     notebook.append_page(&tab_general, Some(&lbl_general_tab));
 
-    // ── Tab 2: Context Menu Configuration (Placeholder for Phase 4) ──
+    // ── Tab 2: Context Menu Configuration ──────────────────────
     let tab_context = Box::new(Orientation::Vertical, 10);
     tab_context.set_margin_top(10);
     tab_context.set_margin_bottom(10);
     tab_context.set_margin_start(10);
     tab_context.set_margin_end(10);
 
-    let lbl_placeholder = Label::new(Some("Context Menu Customization (Phase 4)"));
-    tab_context.append(&lbl_placeholder);
+    let lbl_context_title = Label::builder()
+        .label(&t("explore.settings_custom_options"))
+        .halign(Align::Start)
+        .build();
+    lbl_context_title.add_css_class("settings-section-title");
+    tab_context.append(&lbl_context_title);
+
+    let scroll = gtk4::ScrolledWindow::builder()
+        .hscrollbar_policy(gtk4::PolicyType::Never)
+        .vscrollbar_policy(gtk4::PolicyType::Automatic)
+        .vexpand(true)
+        .min_content_height(150)
+        .build();
+    tab_context.append(&scroll);
+
+    let context_listbox = ListBox::new();
+    context_listbox.set_selection_mode(gtk4::SelectionMode::None);
+    context_listbox.add_css_class("settings-listbox");
+    scroll.set_child(Some(&context_listbox));
+
+    // Helper to render custom option row
+    let listbox_c = context_listbox.clone();
+    let render_option_row = move |listbox: &ListBox, item: babydra_common::config::settings::CustomContextItem| {
+        let row = ListBoxRow::new();
+        let hbox = Box::new(Orientation::Horizontal, 10);
+        hbox.set_margin_top(8);
+        hbox.set_margin_bottom(8);
+        hbox.set_margin_start(12);
+        hbox.set_margin_end(12);
+
+        let vbox_text = Box::new(Orientation::Vertical, 2);
+        let lbl_name = Label::builder()
+            .label(&item.name)
+            .halign(Align::Start)
+            .build();
+        lbl_name.add_css_class("settings-item-name");
+        
+        let lbl_cmd = Label::builder()
+            .label(&item.command)
+            .halign(Align::Start)
+            .build();
+        lbl_cmd.add_css_class("settings-item-command");
+        
+        vbox_text.append(&lbl_name);
+        vbox_text.append(&lbl_cmd);
+        hbox.append(&vbox_text);
+
+        // Spacer to push delete button to right
+        let spacer = Box::new(Orientation::Horizontal, 0);
+        spacer.set_hexpand(true);
+        hbox.append(&spacer);
+
+        let btn_del = Button::from_icon_name("user-trash-symbolic");
+        btn_del.set_tooltip_text(Some(&t("explore.settings_delete")));
+        btn_del.add_css_class("flat");
+        btn_del.add_css_class("destructive-action");
+        hbox.append(&btn_del);
+
+        row.set_child(Some(&hbox));
+
+        // Delete logic
+        let name_val = item.name.clone();
+        let cmd_val = item.command.clone();
+        let listbox_c2 = listbox.clone();
+        let row_c = row.clone();
+        btn_del.connect_clicked(move |_| {
+            listbox_c2.remove(&row_c);
+            let mut s = babydra_common::load_explore_settings();
+            s.custom_context_items.retain(|i| i.name != name_val || i.command != cmd_val);
+            babydra_common::save_explore_settings(&s);
+        });
+
+        listbox.append(&row);
+    };
+
+    // Populate existing custom options
+    for item in settings.custom_context_items {
+        render_option_row(&context_listbox, item);
+    }
+
+    let sep = gtk4::Separator::new(Orientation::Horizontal);
+    tab_context.append(&sep);
+
+    // Form to add new option
+    let form_box = Box::new(Orientation::Vertical, 8);
+    tab_context.append(&form_box);
+
+    let lbl_add_title = Label::builder()
+        .label(&t("explore.settings_add_option"))
+        .halign(Align::Start)
+        .build();
+    lbl_add_title.add_css_class("settings-section-subtitle");
+    form_box.append(&lbl_add_title);
+
+    let grid = gtk4::Grid::new();
+    grid.set_row_spacing(8);
+    grid.set_column_spacing(12);
+    form_box.append(&grid);
+
+    let lbl_name_field = Label::new(Some(&t("explore.settings_option_name")));
+    lbl_name_field.set_halign(Align::Start);
+    let entry_name = gtk4::Entry::builder()
+        .placeholder_text(&t("explore.settings_placeholder_name"))
+        .hexpand(true)
+        .build();
+    grid.attach(&lbl_name_field, 0, 0, 1, 1);
+    grid.attach(&entry_name, 1, 0, 1, 1);
+
+    let lbl_cmd_field = Label::new(Some(&t("explore.settings_option_command")));
+    lbl_cmd_field.set_halign(Align::Start);
+    let entry_cmd = gtk4::Entry::builder()
+        .placeholder_text(&t("explore.settings_placeholder_command"))
+        .hexpand(true)
+        .build();
+    grid.attach(&lbl_cmd_field, 0, 1, 1, 1);
+    grid.attach(&entry_cmd, 1, 1, 1, 1);
+
+    let btn_add = Button::builder()
+        .label(&t("explore.settings_add"))
+        .halign(Align::End)
+        .css_classes(vec!["suggested-action".to_string()])
+        .build();
+    form_box.append(&btn_add);
+
+    // Add button logic
+    let entry_name_c = entry_name.clone();
+    let entry_cmd_c = entry_cmd.clone();
+    btn_add.connect_clicked(move |_| {
+        let name_str = entry_name_c.text().to_string();
+        let cmd_str = entry_cmd_c.text().to_string();
+        if !name_str.is_empty() && !cmd_str.is_empty() {
+            let item = babydra_common::config::settings::CustomContextItem {
+                name: name_str.clone(),
+                command: cmd_str.clone(),
+            };
+            
+            // Append and save setting
+            let mut s = babydra_common::load_explore_settings();
+            s.custom_context_items.push(item.clone());
+            babydra_common::save_explore_settings(&s);
+
+            // Add row to UI
+            render_option_row(&listbox_c, item);
+
+            // Clear entry inputs
+            entry_name_c.set_text("");
+            entry_cmd_c.set_text("");
+        }
+    });
 
     let lbl_context_tab = Label::new(Some(&t("explore.settings_context_menu")));
     notebook.append_page(&tab_context, Some(&lbl_context_tab));
