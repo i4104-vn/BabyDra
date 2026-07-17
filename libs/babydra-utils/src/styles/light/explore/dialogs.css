@@ -6,213 +6,221 @@
     font-weight: 600;
     box-shadow: 0 4px 12px rgba(0, 102, 204, 0.2);
     transition: all 150ms ease;
-}
+    }
 
-button.suggested-action:hover {
-    background: linear-gradient(135deg, #3399ff, #0066cc);
-    box-shadow: 0 6px 16px rgba(0, 102, 204, 0.3);
-}
+    button.suggested-action:hover {
+        background: linear-gradient(135deg, #3399ff, #0066cc);
+        box-shadow: 0 6px 16px rgba(0, 102, 204, 0.3);
+    }
 
-button.suggested-action:active {
-    background: #0044aa;
-}
+    button.suggested-action:active {
+        background: #0044aa;
+    }
 
-window.explore-dialog,
-window.explore-dialog>box {
-    background-color: #f5f5f7;
-    border: 1px solid #d0d0d0;
-    border-radius: 12px;
-}
+    window.explore-dialog,
+    window.explore-dialog>box {
+        background-color: #f5f5f7;
+        border: 1px solid #d0d0d0;
+        border-radius: 12px;
+    }
 
-.explore-dialog entry {
-    background-color: rgba(0, 0, 0, 0.05);
-    border: 1px solid #c8c8c8;
-    border-radius: 6px;
-    color: #1a1a1a;
-    padding: 6px 10px;
-}
+    .explore-dialog entry {
+        background-color: rgba(0, 0, 0, 0.05);
+        border: 1px solid #c8c8c8;
+        border-radius: 6px;
+        color: #1a1a1a;
+        padding: 6px 10px;
+    }
 
-.explore-dialog entry:focus {
-    border-color: #0066cc;
-}
+    .explore-dialog entry:focus {
+        border-color: #0066cc;
+    }
 
-button.empty-trash-btn {
-    color: #dc2626 !important;
-}
+    button.empty-trash-btn {
+        color: #dc2626 !important;
+    }
 
-button.empty-trash-btn:hover {
-    background-color: rgba(220, 38, 38, 0.1) !important;
-    color: #ef4444 !important;
-}
+    button.empty-trash-btn:hover {
+        background-color: rgba(220, 38, 38, 0.1) !important;
+        color: #ef4444 !important;
+    }
 
-.settings-title-label {
-    font-size: 20px;
-    font-weight: bold;
-    color: #1a1a1a;
-    margin-bottom: 8px;
-}
+    .settings-title-label {
+        font-size: 20px;
+        font-weight: bold;
+        color: #1a1a1a;
+        margin-bottom: 8px;
+    }
 
-.settings-listbox {
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-}
+    .settings-listbox {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+    }
 
-.settings-listbox row {
-    border-bottom: 1px solid #e2e8f0;
-}
+    .settings-listbox row {
+        border-bottom: 1px solid #e2e8f0;
+    }
 
-.settings-listbox row:last-child {
-    border-bottom: none;
-}
+    .settings-listbox row:last-child {
+        border-bottom: none;
+    }
 
-.settings-section-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: #1a202c;
-    margin-top: 10px;
-    margin-bottom: 5px;
-}
+    .settings-section-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #1a202c;
+        margin-top: 10px;
+        margin-bottom: 5px;
+    }
 
-.settings-section-subtitle {
-    font-size: 13px;
-    font-weight: 600;
-    color: #64748b;
-    margin-top: 5px;
-    margin-bottom: 2px;
-}
+    .settings-section-subtitle {
+        font-size: 13px;
+        font-weight: 600;
+        color: #64748b;
+        margin-top: 5px;
+        margin-bottom: 2px;
+    }
 
-.settings-item-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: #0f172a;
-}
+    .settings-item-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #0f172a;
+    }
 
-.settings-item-command {
-    font-size: 11px;
-    color: #64748b;
-}
+    .settings-item-command {
+        font-size: 11px;
+        color: #64748b;
+    }
 
-.destructive-action {
-    color: #dc2626;
-}
-.destructive-action:hover {
-    background-color: rgba(220, 38, 38, 0.1) !important;
-}
+    .destructive-action {
+        color: #dc2626;
+    }
 
-.settings-row-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #0f172a;
-}
+    .destructive-action:hover {
+        background-color: rgba(220, 38, 38, 0.1) !important;
+    }
 
-.settings-row-desc {
-    font-size: 11px;
-    color: #64748b;
-}
+    .settings-row-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #0f172a;
+    }
 
-/* Notebook styling in light */
-.settings-notebook {
-    background-color: transparent;
-    border: none;
-}
-.settings-notebook header tabs {
-    border-bottom: 1px solid #e2e8f0;
-    margin-bottom: 8px;
-}
-.settings-notebook header tabs tab {
-    padding: 6px 12px;
-    font-weight: 600;
-    color: #64748b;
-    border-radius: 6px 6px 0 0;
-}
-.settings-notebook header tabs tab:checked {
-    color: #0066cc;
-    border-bottom: 2px solid #0066cc;
-}
-.settings-notebook header tabs tab:hover {
-    background-color: rgba(0, 0, 0, 0.02);
-    color: #0f172a;
-}
+    .settings-row-desc {
+        font-size: 11px;
+        color: #64748b;
+    }
 
-.settings-listbox row:hover {
-    background-color: rgba(0, 0, 0, 0.01);
-}
+    /* Notebook styling in light */
+    .settings-notebook {
+        background-color: transparent;
+        border: none;
+    }
 
-.placeholder-btn {
-    font-size: 11px;
-    padding: 2px 6px;
-    background-color: #f1f5f9;
-    border: 1px solid #cbd5e1;
-    border-radius: 12px;
-    color: #475569;
-}
-.placeholder-btn:hover {
-    background-color: #e2e8f0;
-    color: #0f172a;
-}
+    .settings-notebook header tabs {
+        border-bottom: 1px solid #e2e8f0;
+        margin-bottom: 8px;
+    }
 
-.placeholder-btn-small {
-    font-size: 10px;
-    padding: 1px 4px;
-    background-color: #f1f5f9;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    color: #475569;
-}
-.placeholder-btn-small:hover {
-    background-color: #e2e8f0;
-    color: #0f172a;
-}
+    .settings-notebook header tabs tab {
+        padding: 6px 12px;
+        font-weight: 600;
+        color: #64748b;
+        border-radius: 6px 6px 0 0;
+    }
 
-.inline-entry {
-    font-size: 12px;
-    padding: 4px 8px;
-    background-color: #ffffff;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    color: #0f172a;
-}
+    .settings-notebook header tabs tab:checked {
+        color: #0066cc;
+        border-bottom: 2px solid #0066cc;
+    }
 
-.small-btn {
-    font-size: 12px;
-    padding: 4px 10px;
-}
+    .settings-notebook header tabs tab:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+        color: #0f172a;
+    }
 
-.edit-btn {
-    color: #0066cc;
-}
-.edit-btn:hover {
-    background-color: rgba(0, 102, 204, 0.1) !important;
-}
+    .settings-listbox row:hover {
+        background-color: rgba(0, 0, 0, 0.01);
+    }
 
-/* Sidebar inside Explore Settings Dialog */
-.explore-dialog .settings-sidebar {
-    background-color: rgba(0, 0, 0, 0.01);
-}
+    .placeholder-btn {
+        font-size: 11px;
+        padding: 2px 6px;
+        background-color: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        color: #475569;
+    }
 
-.explore-dialog .sidebar-item {
-    background: transparent;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 14px;
-    color: #475569;
-    font-size: 13px;
-    margin: 2px 4px;
-    text-align: left;
-    transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-}
+    .placeholder-btn:hover {
+        background-color: #e2e8f0;
+        color: #0f172a;
+    }
 
-.explore-dialog .sidebar-item:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-    color: #0f172a;
-    transform: translateX(2px);
-}
+    .placeholder-btn-small {
+        font-size: 10px;
+        padding: 1px 4px;
+        background-color: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        color: #475569;
+    }
 
-.explore-dialog .sidebar-item.active-nav {
-    background-color: rgba(0, 102, 204, 0.1);
-    color: #0066cc;
-    font-weight: 600;
-}
+    .placeholder-btn-small:hover {
+        background-color: #e2e8f0;
+        color: #0f172a;
+    }
 
-.explore-window .rubberband {
+    .inline-entry {
+        font-size: 12px;
+        padding: 4px 8px;
+        background-color: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        color: #0f172a;
+    }
+
+    .small-btn {
+        font-size: 12px;
+        padding: 4px 10px;
+    }
+
+    .edit-btn {
+        color: #0066cc;
+    }
+
+    .edit-btn:hover {
+        background-color: rgba(0, 102, 204, 0.1) !important;
+    }
+
+    /* Sidebar inside Explore Settings Dialog */
+    .explore-dialog .settings-sidebar {
+        background-color: rgba(0, 0, 0, 0.01);
+    }
+
+    .explore-dialog .sidebar-item {
+        background: transparent;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 14px;
+        color: #475569;
+        font-size: 13px;
+        margin: 2px 4px;
+        text-align: left;
+        transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .explore-dialog .sidebar-item:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+        color: #0f172a;
+        transform: translateX(2px);
+    }
+
+    .explore-dialog .sidebar-item.active-nav {
+        background-color: rgba(0, 102, 204, 0.1);
+        color: #0066cc;
+        font-weight: 600;
+    }
+
+    .explore-window .rubberband {
