@@ -220,6 +220,15 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.settings_delete", "Delete");
             map.insert("explore.settings_placeholder_name", "e.g., Open with Code");
             map.insert("explore.settings_placeholder_command", "e.g., code {path}");
+            map.insert("explore.settings_toggle_hidden_desc", "Show files and folders that start with a dot (.)");
+            map.insert("explore.settings_toggle_preview_desc", "Show detailed file previews on the right sidebar (F4)");
+            map.insert("explore.settings_double_click_desc", "Requires two clicks to open files and folders");
+            map.insert("explore.settings_permanent_delete_desc", "Bypass the Trash bin and delete files permanently");
+            map.insert("explore.settings_calculate_size_desc", "Show total size of directories in list view (may impact performance)");
+            map.insert("explore.settings_edit", "Edit");
+            map.insert("explore.settings_save", "Save");
+            map.insert("explore.settings_cancel", "Cancel");
+            map.insert("explore.settings_close", "Close");
         }
         _ => {
             // Menu
@@ -390,6 +399,15 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.settings_delete", "Xóa");
             map.insert("explore.settings_placeholder_name", "Ví dụ: Mở bằng Code");
             map.insert("explore.settings_placeholder_command", "Ví dụ: code {path}");
+            map.insert("explore.settings_toggle_hidden_desc", "Hiển thị các tệp và thư mục bắt đầu bằng dấu chấm (.)");
+            map.insert("explore.settings_toggle_preview_desc", "Hiển thị bảng xem chi tiết tệp ở thanh bên phải (F4)");
+            map.insert("explore.settings_double_click_desc", "Yêu cầu nhấp chuột hai lần để mở tệp và thư mục");
+            map.insert("explore.settings_permanent_delete_desc", "Bỏ qua Thùng rác và xóa tệp vĩnh viễn ngay lập tức");
+            map.insert("explore.settings_calculate_size_desc", "Hiển thị tổng dung lượng của thư mục trong danh sách (có thể làm chậm)");
+            map.insert("explore.settings_edit", "Chỉnh sửa");
+            map.insert("explore.settings_save", "Lưu");
+            map.insert("explore.settings_cancel", "Hủy");
+            map.insert("explore.settings_close", "Đóng");
         }
     }
     map

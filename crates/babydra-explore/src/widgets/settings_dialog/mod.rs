@@ -89,13 +89,11 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         listbox.append(&row);
     };
 
-    let is_vi = babydra_common::i18n::get_locale() == "vi";
-
     // 1. Show hidden files
     add_switch_row(
         &listbox,
         &t("explore.toggle_hidden"),
-        if is_vi { "Hiển thị các tệp và thư mục bắt đầu bằng dấu chấm (.)" } else { "Show files and folders that start with a dot (.)" },
+        &t("explore.settings_toggle_hidden_desc"),
         settings.show_hidden,
         std::boxed::Box::new(|state| {
             let mut s = babydra_common::load_explore_settings();
@@ -108,7 +106,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     add_switch_row(
         &listbox,
         &t("explore.toggle_preview"),
-        if is_vi { "Hiển thị bảng xem chi tiết tệp ở thanh bên phải (F4)" } else { "Show detailed file previews on the right sidebar (F4)" },
+        &t("explore.settings_toggle_preview_desc"),
         settings.preview_visible,
         std::boxed::Box::new(|state| {
             let mut s = babydra_common::load_explore_settings();
@@ -121,7 +119,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     add_switch_row(
         &listbox,
         &t("explore.settings_double_click"),
-        if is_vi { "Yêu cầu nhấp chuột hai lần để mở tệp và thư mục" } else { "Requires two clicks to open files and folders" },
+        &t("explore.settings_double_click_desc"),
         settings.double_click_to_open,
         std::boxed::Box::new(|state| {
             let mut s = babydra_common::load_explore_settings();
@@ -134,7 +132,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     add_switch_row(
         &listbox,
         &t("explore.settings_permanent_delete"),
-        if is_vi { "Bỏ qua Thùng rác và xóa tệp vĩnh viễn ngay lập tức" } else { "Bypass the Trash bin and delete files permanently" },
+        &t("explore.settings_permanent_delete_desc"),
         settings.permanent_delete,
         std::boxed::Box::new(|state| {
             let mut s = babydra_common::load_explore_settings();
@@ -147,7 +145,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     add_switch_row(
         &listbox,
         &t("explore.settings_calculate_size"),
-        if is_vi { "Hiển thị tổng dung lượng của thư mục trong danh sách (có thể làm chậm)" } else { "Show total size of directories in list view (may impact performance)" },
+        &t("explore.settings_calculate_size_desc"),
         settings.calculate_dir_size,
         std::boxed::Box::new(|state| {
             let mut s = babydra_common::load_explore_settings();
@@ -221,7 +219,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         hbox_view.append(&spacer1);
 
         let btn_edit = Button::from_icon_name("document-edit-symbolic");
-        btn_edit.set_tooltip_text(Some(if is_vi { "Chỉnh sửa" } else { "Edit" }));
+        btn_edit.set_tooltip_text(Some(&t("explore.settings_edit")));
         btn_edit.add_css_class("flat");
         btn_edit.add_css_class("edit-btn");
         hbox_view.append(&btn_edit);
@@ -277,11 +275,11 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         hbox_edit.append(&vbox_buttons);
 
         let btn_save = Button::builder()
-            .label(if is_vi { "Lưu" } else { "Save" })
+            .label(&t("explore.settings_save"))
             .css_classes(vec!["suggested-action".to_string(), "small-btn".to_string()])
             .build();
         let btn_cancel = Button::builder()
-            .label(if is_vi { "Hủy" } else { "Cancel" })
+            .label(&t("explore.settings_cancel"))
             .css_classes(vec!["flat".to_string(), "small-btn".to_string()])
             .build();
 
@@ -477,9 +475,8 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     bbox.set_halign(Align::End);
     vbox.append(&bbox);
 
-    let close_text = if is_vi { "Đóng" } else { "Close" };
     let btn_close = Button::builder()
-        .label(close_text)
+        .label(&t("explore.settings_close"))
         .css_classes(vec!["suggested-action".to_string()])
         .build();
     bbox.append(&btn_close);
