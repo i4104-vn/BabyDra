@@ -18,9 +18,9 @@
     border-top: 1px solid rgba(0, 0, 0, 0.06);
     border-radius: 9999px;
     min-width: 0;
-    min-height: 0;
-    padding: 3px 10px;
-    margin-top: 4px;
+    min-height: 24px;
+    padding: 3px 12px;
+    margin-top: 3px;
     box-shadow: none;
 }
 

@@ -244,4 +244,9 @@ button.empty-trash-btn:hover {
     box-shadow: none;
 }
 
+.explore-dialog .edit-btn image,
+.explore-dialog .destructive-action image {
+    -gtk-icon-size: 12px;
+}
+
 
