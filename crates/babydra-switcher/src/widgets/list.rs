@@ -6,19 +6,21 @@ use crate::widgets::item::create_app_button;
 
 /// Populates a horizontal list of window switcher preview buttons from the list of running apps.
 pub fn build_apps_list(apps: &[DesktopApp]) -> (gtk4::Box, Vec<gtk4::Button>) {
-    let icons_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    icons_row.add_css_class("switcher-list-row");
-    icons_row.set_halign(gtk4::Align::Center);
-    icons_row.set_valign(gtk4::Align::Fill);
+    let icons_column = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
+    icons_column.add_css_class("stage-manager-list");
+    icons_column.set_halign(gtk4::Align::Start);
+    icons_column.set_valign(gtk4::Align::Center);
 
     let mut item_buttons = Vec::new();
 
-    for app_item in apps {
+    for (i, app_item) in apps.iter().enumerate() {
         let btn = create_app_button(app_item);
-        icons_row.append(&btn);
+        let stagger_idx = std::cmp::min(i, 9);
+        btn.add_css_class(&format!("switcher-item-stagger-{}", stagger_idx));
+        icons_column.append(&btn);
         item_buttons.push(btn);
     }
 
-    (icons_row, item_buttons)
+    (icons_column, item_buttons)
 }
 
