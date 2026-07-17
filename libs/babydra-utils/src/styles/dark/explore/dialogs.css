@@ -46,3 +46,58 @@ button.empty-trash-btn:hover {
     color: #f87171 !important;
 }
 
+.settings-title-label {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 8px;
+}
+
+.settings-listbox {
+    background-color: #222226;
+    border: 1px solid #333337;
+    border-radius: 10px;
+}
+
+.settings-listbox row {
+    border-bottom: 1px solid #333337;
+}
+
+.settings-listbox row:last-child {
+    border-bottom: none;
+}
+
+.settings-section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.settings-section-subtitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: #94a3b8;
+    margin-top: 5px;
+    margin-bottom: 2px;
+}
+
+.settings-item-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #f8fafc;
+}
+
+.settings-item-command {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.destructive-action {
+    color: #ef4444;
+}
+.destructive-action:hover {
+    background-color: rgba(239, 68, 68, 0.15) !important;
+}
+

@@ -45,4 +45,59 @@ button.empty-trash-btn:hover {
     color: #ef4444 !important;
 }
 
+.settings-title-label {
+    font-size: 20px;
+    font-weight: bold;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+}
+
+.settings-listbox {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+}
+
+.settings-listbox row {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.settings-listbox row:last-child {
+    border-bottom: none;
+}
+
+.settings-section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a202c;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.settings-section-subtitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    margin-top: 5px;
+    margin-bottom: 2px;
+}
+
+.settings-item-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.settings-item-command {
+    font-size: 11px;
+    color: #64748b;
+}
+
+.destructive-action {
+    color: #dc2626;
+}
+.destructive-action:hover {
+    background-color: rgba(220, 38, 38, 0.1) !important;
+}
+
 .explore-window .rubberband {
