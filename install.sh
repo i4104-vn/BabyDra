@@ -25,7 +25,7 @@ if ! command -v yay &> /dev/null; then
 fi
 
 # Install AUR packages using yay
-yay -S --noconfirm dolphin github-desktop fastfetch neovim awww ddcutil-service
+yay -S --noconfirm github-desktop fastfetch neovim awww ddcutil-service
 # Core UI fonts
 yay -S --noconfirm inter-font ttf-ubuntu-font-family ttf-jetbrains-mono-nerd
 

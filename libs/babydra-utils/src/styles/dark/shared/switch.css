@@ -12,7 +12,7 @@ switch slider {
     min-width: 14px;
     min-height: 14px;
     border-radius: 50%;
-    background-color: #ffffff !important;
+    background-color: #ffffff;
     margin: 1px;
     transition: all 150ms ease;
 }
