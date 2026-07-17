@@ -38,12 +38,12 @@ window.explore-dialog>box {
 }
 
 button.empty-trash-btn {
-    color: #dc2626 !important;
+    color: #dc2626;
 }
 
 button.empty-trash-btn:hover {
-    background-color: rgba(220, 38, 38, 0.1) !important;
-    color: #ef4444 !important;
+    background-color: rgba(220, 38, 38, 0.1);
+    color: #ef4444;
 }
 
 .settings-title-label {
@@ -200,7 +200,6 @@ button.empty-trash-btn:hover {
     color: #475569;
     font-size: 13px;
     margin: 2px 4px;
-    text-align: left;
     transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
