@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Label, Button, Window, Align, Notebook, Switch, ListBox, ListBoxRow};
+use gtk4::{Box, Orientation, Label, Button, Window, Align, Notebook, Switch, ListBox, ListBoxRow, Entry, Grid, Separator};
 use babydra_common::i18n::t;
 
 pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn() + 'static) {
@@ -10,16 +10,16 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         .transient_for(parent)
         .modal(true)
         .resizable(true)
-        .default_width(550)
-        .default_height(550)
+        .default_width(600)
+        .default_height(580)
         .css_classes(vec!["explore-dialog".to_string()])
         .build();
 
     let vbox = Box::new(Orientation::Vertical, 12);
     vbox.set_margin_top(16);
     vbox.set_margin_bottom(16);
-    vbox.set_margin_start(16);
-    vbox.set_margin_end(16);
+    vbox.set_margin_start(20);
+    vbox.set_margin_end(20);
     window.set_child(Some(&vbox));
 
     let lbl_title = Label::builder()
@@ -30,35 +30,48 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     vbox.append(&lbl_title);
 
     let notebook = Notebook::new();
+    notebook.add_css_class("settings-notebook");
     vbox.append(&notebook);
 
     // ── Tab 1: General Settings ───────────────────────────────
     let tab_general = Box::new(Orientation::Vertical, 10);
-    tab_general.set_margin_top(10);
-    tab_general.set_margin_bottom(10);
-    tab_general.set_margin_start(10);
-    tab_general.set_margin_end(10);
+    tab_general.set_margin_top(12);
+    tab_general.set_margin_bottom(12);
+    tab_general.set_margin_start(12);
+    tab_general.set_margin_end(12);
 
     let listbox = ListBox::new();
     listbox.set_selection_mode(gtk4::SelectionMode::None);
     listbox.add_css_class("settings-listbox");
     tab_general.append(&listbox);
 
-    // Helper to add switch row
-    let add_switch_row = |listbox: &ListBox, label_text: &str, active: bool, on_toggle: std::boxed::Box<dyn Fn(bool)>| {
+    // Helper to add switch row with a description
+    let add_switch_row = |listbox: &ListBox, label_title: &str, label_desc: &str, active: bool, on_toggle: std::boxed::Box<dyn Fn(bool)>| {
         let row = ListBoxRow::new();
         let hbox = Box::new(Orientation::Horizontal, 12);
-        hbox.set_margin_top(12);
-        hbox.set_margin_bottom(12);
-        hbox.set_margin_start(12);
-        hbox.set_margin_end(12);
+        hbox.set_margin_top(14);
+        hbox.set_margin_bottom(14);
+        hbox.set_margin_start(16);
+        hbox.set_margin_end(16);
 
-        let lbl = Label::builder()
-            .label(label_text)
+        let vbox_lbl = Box::new(Orientation::Vertical, 2);
+        vbox_lbl.set_hexpand(true);
+
+        let lbl_title = Label::builder()
+            .label(label_title)
             .halign(Align::Start)
-            .hexpand(true)
             .build();
-        hbox.append(&lbl);
+        lbl_title.add_css_class("settings-row-title");
+
+        let lbl_desc = Label::builder()
+            .label(label_desc)
+            .halign(Align::Start)
+            .build();
+        lbl_desc.add_css_class("settings-row-desc");
+
+        vbox_lbl.append(&lbl_title);
+        vbox_lbl.append(&lbl_desc);
+        hbox.append(&vbox_lbl);
 
         let sw = Switch::builder()
             .active(active)
@@ -76,10 +89,13 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         listbox.append(&row);
     };
 
+    let is_vi = babydra_common::i18n::get_locale() == "vi";
+
     // 1. Show hidden files
     add_switch_row(
         &listbox,
-        &t("explore.toggle_hidden"), // "Ẩn/hiện tệp ẩn"
+        &t("explore.toggle_hidden"),
+        if is_vi { "Hiển thị các tệp và thư mục bắt đầu bằng dấu chấm (.)" } else { "Show files and folders that start with a dot (.)" },
         settings.show_hidden,
         std::boxed::Box::new(|state| {
             let mut s = babydra_common::load_explore_settings();
@@ -91,7 +107,8 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     // 2. Preview Visible
     add_switch_row(
         &listbox,
-        &t("explore.toggle_preview"), // "Ẩn/hiện xem trước"
+        &t("explore.toggle_preview"),
+        if is_vi { "Hiển thị bảng xem chi tiết tệp ở thanh bên phải (F4)" } else { "Show detailed file previews on the right sidebar (F4)" },
         settings.preview_visible,
         std::boxed::Box::new(|state| {
             let mut s = babydra_common::load_explore_settings();
@@ -104,6 +121,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     add_switch_row(
         &listbox,
         &t("explore.settings_double_click"),
+        if is_vi { "Yêu cầu nhấp chuột hai lần để mở tệp và thư mục" } else { "Requires two clicks to open files and folders" },
         settings.double_click_to_open,
         std::boxed::Box::new(|state| {
             let mut s = babydra_common::load_explore_settings();
@@ -116,6 +134,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     add_switch_row(
         &listbox,
         &t("explore.settings_permanent_delete"),
+        if is_vi { "Bỏ qua Thùng rác và xóa tệp vĩnh viễn ngay lập tức" } else { "Bypass the Trash bin and delete files permanently" },
         settings.permanent_delete,
         std::boxed::Box::new(|state| {
             let mut s = babydra_common::load_explore_settings();
@@ -128,6 +147,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     add_switch_row(
         &listbox,
         &t("explore.settings_calculate_size"),
+        if is_vi { "Hiển thị tổng dung lượng của thư mục trong danh sách (có thể làm chậm)" } else { "Show total size of directories in list view (may impact performance)" },
         settings.calculate_dir_size,
         std::boxed::Box::new(|state| {
             let mut s = babydra_common::load_explore_settings();
@@ -141,10 +161,10 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
 
     // ── Tab 2: Context Menu Configuration ──────────────────────
     let tab_context = Box::new(Orientation::Vertical, 10);
-    tab_context.set_margin_top(10);
-    tab_context.set_margin_bottom(10);
-    tab_context.set_margin_start(10);
-    tab_context.set_margin_end(10);
+    tab_context.set_margin_top(12);
+    tab_context.set_margin_bottom(12);
+    tab_context.set_margin_start(12);
+    tab_context.set_margin_end(12);
 
     let lbl_context_title = Label::builder()
         .label(&t("explore.settings_custom_options"))
@@ -157,7 +177,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         .hscrollbar_policy(gtk4::PolicyType::Never)
         .vscrollbar_policy(gtk4::PolicyType::Automatic)
         .vexpand(true)
-        .min_content_height(150)
+        .min_content_height(180)
         .build();
     tab_context.append(&scroll);
 
@@ -166,58 +186,188 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     context_listbox.add_css_class("settings-listbox");
     scroll.set_child(Some(&context_listbox));
 
-    // Helper to render custom option row
+    // Helper to render custom option row with inline edit support
     let listbox_c = context_listbox.clone();
     let render_option_row = move |listbox: &ListBox, item: babydra_common::config::settings::CustomContextItem| {
         let row = ListBoxRow::new();
-        let hbox = Box::new(Orientation::Horizontal, 10);
-        hbox.set_margin_top(8);
-        hbox.set_margin_bottom(8);
-        hbox.set_margin_start(12);
-        hbox.set_margin_end(12);
+        row.add_css_class("settings-custom-item-row");
+
+        let saved_item = std::cell::RefCell::new(item);
+
+        // 1. VIEW MODE LAYOUT
+        let hbox_view = Box::new(Orientation::Horizontal, 10);
+        hbox_view.set_margin_top(10);
+        hbox_view.set_margin_bottom(10);
+        hbox_view.set_margin_start(14);
+        hbox_view.set_margin_end(14);
 
         let vbox_text = Box::new(Orientation::Vertical, 2);
         let lbl_name = Label::builder()
-            .label(&item.name)
             .halign(Align::Start)
             .build();
         lbl_name.add_css_class("settings-item-name");
         
         let lbl_cmd = Label::builder()
-            .label(&item.command)
             .halign(Align::Start)
             .build();
         lbl_cmd.add_css_class("settings-item-command");
         
         vbox_text.append(&lbl_name);
         vbox_text.append(&lbl_cmd);
-        hbox.append(&vbox_text);
+        hbox_view.append(&vbox_text);
 
-        // Spacer to push delete button to right
-        let spacer = Box::new(Orientation::Horizontal, 0);
-        spacer.set_hexpand(true);
-        hbox.append(&spacer);
+        let spacer1 = Box::new(Orientation::Horizontal, 0);
+        spacer1.set_hexpand(true);
+        hbox_view.append(&spacer1);
+
+        let btn_edit = Button::from_icon_name("document-edit-symbolic");
+        btn_edit.set_tooltip_text(Some(if is_vi { "Chỉnh sửa" } else { "Edit" }));
+        btn_edit.add_css_class("flat");
+        btn_edit.add_css_class("edit-btn");
+        hbox_view.append(&btn_edit);
 
         let btn_del = Button::from_icon_name("user-trash-symbolic");
         btn_del.set_tooltip_text(Some(&t("explore.settings_delete")));
         btn_del.add_css_class("flat");
         btn_del.add_css_class("destructive-action");
-        hbox.append(&btn_del);
+        hbox_view.append(&btn_del);
 
-        row.set_child(Some(&hbox));
+        // 2. EDIT MODE LAYOUT
+        let hbox_edit = Box::new(Orientation::Horizontal, 10);
+        hbox_edit.set_margin_top(10);
+        hbox_edit.set_margin_bottom(10);
+        hbox_edit.set_margin_start(14);
+        hbox_edit.set_margin_end(14);
 
-        // Delete logic
-        let name_val = item.name.clone();
-        let cmd_val = item.command.clone();
-        let listbox_c2 = listbox.clone();
+        let grid_edit = Grid::new();
+        grid_edit.set_row_spacing(6);
+        grid_edit.set_column_spacing(8);
+        grid_edit.set_hexpand(true);
+        hbox_edit.append(&grid_edit);
+
+        let entry_edit_name = Entry::builder().hexpand(true).build();
+        entry_edit_name.add_css_class("inline-entry");
+        let entry_edit_cmd = Entry::builder().hexpand(true).build();
+        entry_edit_cmd.add_css_class("inline-entry");
+
+        grid_edit.attach(&entry_edit_name, 0, 0, 1, 1);
+        grid_edit.attach(&entry_edit_cmd, 0, 1, 1, 1);
+
+        // Helper placeholders for inline edit command entry
+        let inline_placeholders = Box::new(Orientation::Horizontal, 4);
+        inline_placeholders.set_margin_top(2);
+        let ph_list = ["{path}", "{dir}", "{name}", "{stem}", "{ext}"];
+        for ph in ph_list {
+            let btn_ph = Button::builder()
+                .label(ph)
+                .css_classes(vec!["flat".to_string(), "placeholder-btn-small".to_string()])
+                .build();
+            let entry_edit_cmd_c = entry_edit_cmd.clone();
+            btn_ph.connect_clicked(move |_| {
+                let mut pos = entry_edit_cmd_c.position();
+                entry_edit_cmd_c.insert_text(ph, &mut pos);
+                entry_edit_cmd_c.grab_focus();
+            });
+            inline_placeholders.append(&btn_ph);
+        }
+        grid_edit.attach(&inline_placeholders, 0, 2, 1, 1);
+
+        let vbox_buttons = Box::new(Orientation::Vertical, 6);
+        vbox_buttons.set_valign(Align::Center);
+        hbox_edit.append(&vbox_buttons);
+
+        let btn_save = Button::builder()
+            .label(if is_vi { "Lưu" } else { "Save" })
+            .css_classes(vec!["suggested-action".to_string(), "small-btn".to_string()])
+            .build();
+        let btn_cancel = Button::builder()
+            .label(if is_vi { "Hủy" } else { "Cancel" })
+            .css_classes(vec!["flat".to_string(), "small-btn".to_string()])
+            .build();
+
+        vbox_buttons.append(&btn_save);
+        vbox_buttons.append(&btn_cancel);
+
+        // Sync view content helper
+        let update_view_labels = {
+            let lbl_n = lbl_name.clone();
+            let lbl_c = lbl_cmd.clone();
+            let saved = saved_item.clone();
+            move || {
+                let item = saved.borrow();
+                lbl_n.set_label(&item.name);
+                lbl_c.set_label(&item.command);
+            }
+        };
+        update_view_labels();
+
+        // Wire View Mode Edit click
         let row_c = row.clone();
+        let hb_edit = hbox_edit.clone();
+        let ent_name = entry_edit_name.clone();
+        let ent_cmd = entry_edit_cmd.clone();
+        let saved = saved_item.clone();
+        btn_edit.connect_clicked(move |_| {
+            let current = saved.borrow();
+            ent_name.set_text(&current.name);
+            ent_cmd.set_text(&current.command);
+            row_c.set_child(Some(&hb_edit));
+            ent_name.grab_focus();
+        });
+
+        // Wire Edit Mode Cancel click
+        let row_c2 = row.clone();
+        let hb_view = hbox_view.clone();
+        btn_cancel.connect_clicked(move |_| {
+            row_c2.set_child(Some(&hb_view));
+        });
+
+        // Wire Edit Mode Save click
+        let row_c3 = row.clone();
+        let hb_view2 = hbox_view.clone();
+        let ent_name2 = entry_edit_name.clone();
+        let ent_cmd2 = entry_edit_cmd.clone();
+        let saved2 = saved_item.clone();
+        let update_lbls = update_view_labels.clone();
+        btn_save.connect_clicked(move |_| {
+            let new_name = ent_name2.text().to_string();
+            let new_cmd = ent_cmd2.text().to_string();
+            if !new_name.is_empty() && !new_cmd.is_empty() {
+                let old_name = saved2.borrow().name.clone();
+                let old_cmd = saved2.borrow().command.clone();
+
+                {
+                    let mut s = saved2.borrow_mut();
+                    s.name = new_name.clone();
+                    s.command = new_cmd.clone();
+                }
+
+                // Update settings file
+                let mut s = babydra_common::load_explore_settings();
+                if let Some(idx) = s.custom_context_items.iter().position(|i| i.name == old_name && i.command == old_cmd) {
+                    s.custom_context_items[idx].name = new_name;
+                    s.custom_context_items[idx].command = new_cmd;
+                    babydra_common::save_explore_settings(&s);
+                }
+
+                update_lbls();
+                row_c3.set_child(Some(&hb_view2));
+            }
+        });
+
+        // Wire view mode Delete click
+        let saved3 = saved_item.clone();
+        let listbox_c2 = listbox.clone();
+        let row_c4 = row.clone();
         btn_del.connect_clicked(move |_| {
-            listbox_c2.remove(&row_c);
+            listbox_c2.remove(&row_c4);
+            let item = saved3.borrow();
             let mut s = babydra_common::load_explore_settings();
-            s.custom_context_items.retain(|i| i.name != name_val || i.command != cmd_val);
+            s.custom_context_items.retain(|i| i.name != item.name || i.command != item.command);
             babydra_common::save_explore_settings(&s);
         });
 
+        row.set_child(Some(&hbox_view));
         listbox.append(&row);
     };
 
@@ -226,7 +376,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         render_option_row(&context_listbox, item);
     }
 
-    let sep = gtk4::Separator::new(Orientation::Horizontal);
+    let sep = Separator::new(Orientation::Horizontal);
     tab_context.append(&sep);
 
     // Form to add new option
@@ -240,14 +390,14 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     lbl_add_title.add_css_class("settings-section-subtitle");
     form_box.append(&lbl_add_title);
 
-    let grid = gtk4::Grid::new();
+    let grid = Grid::new();
     grid.set_row_spacing(8);
     grid.set_column_spacing(12);
     form_box.append(&grid);
 
     let lbl_name_field = Label::new(Some(&t("explore.settings_option_name")));
     lbl_name_field.set_halign(Align::Start);
-    let entry_name = gtk4::Entry::builder()
+    let entry_name = Entry::builder()
         .placeholder_text(&t("explore.settings_placeholder_name"))
         .hexpand(true)
         .build();
@@ -256,12 +406,35 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
 
     let lbl_cmd_field = Label::new(Some(&t("explore.settings_option_command")));
     lbl_cmd_field.set_halign(Align::Start);
-    let entry_cmd = gtk4::Entry::builder()
+    
+    let entry_cmd_vbox = Box::new(Orientation::Vertical, 4);
+    let entry_cmd = Entry::builder()
         .placeholder_text(&t("explore.settings_placeholder_command"))
         .hexpand(true)
         .build();
+    entry_cmd_vbox.append(&entry_cmd);
+
+    // Add clickable placeholders row
+    let placeholders_box = Box::new(Orientation::Horizontal, 6);
+    placeholders_box.set_margin_top(2);
+    let placeholders = ["{path}", "{dir}", "{name}", "{stem}", "{ext}"];
+    for p in placeholders {
+        let btn_p = Button::builder()
+            .label(p)
+            .css_classes(vec!["flat".to_string(), "placeholder-btn".to_string()])
+            .build();
+        let entry_cmd_c = entry_cmd.clone();
+        btn_p.connect_clicked(move |_| {
+            let mut pos = entry_cmd_c.position();
+            entry_cmd_c.insert_text(p, &mut pos);
+            entry_cmd_c.grab_focus();
+        });
+        placeholders_box.append(&btn_p);
+    }
+    entry_cmd_vbox.append(&placeholders_box);
+
     grid.attach(&lbl_cmd_field, 0, 1, 1, 1);
-    grid.attach(&entry_cmd, 1, 1, 1, 1);
+    grid.attach(&entry_cmd_vbox, 1, 1, 1, 1);
 
     let btn_add = Button::builder()
         .label(&t("explore.settings_add"))
@@ -304,7 +477,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     bbox.set_halign(Align::End);
     vbox.append(&bbox);
 
-    let close_text = if babydra_common::i18n::get_locale() == "vi" { "Đóng" } else { "Close" };
+    let close_text = if is_vi { "Đóng" } else { "Close" };
     let btn_close = Button::builder()
         .label(close_text)
         .css_classes(vec!["suggested-action".to_string()])

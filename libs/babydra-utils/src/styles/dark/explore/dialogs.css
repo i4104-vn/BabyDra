@@ -101,3 +101,89 @@ button.empty-trash-btn:hover {
     background-color: rgba(239, 68, 68, 0.15) !important;
 }
 
+.settings-row-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #f1f5f9;
+}
+
+.settings-row-desc {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+/* Notebook styling in dark */
+.settings-notebook {
+    background-color: transparent;
+    border: none;
+}
+.settings-notebook header tabs {
+    border-bottom: 1px solid #333337;
+    margin-bottom: 8px;
+}
+.settings-notebook header tabs tab {
+    padding: 6px 12px;
+    font-weight: 600;
+    color: #94a3b8;
+    border-radius: 6px 6px 0 0;
+}
+.settings-notebook header tabs tab:checked {
+    color: #3b82f6;
+    border-bottom: 2px solid #3b82f6;
+}
+.settings-notebook header tabs tab:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+    color: #f1f5f9;
+}
+
+.settings-listbox row:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.placeholder-btn {
+    font-size: 11px;
+    padding: 2px 6px;
+    background-color: #27272a;
+    border: 1px solid #3f3f46;
+    border-radius: 12px;
+    color: #a1a1aa;
+}
+.placeholder-btn:hover {
+    background-color: #3f3f46;
+    color: #f4f4f5;
+}
+
+.placeholder-btn-small {
+    font-size: 10px;
+    padding: 1px 4px;
+    background-color: #27272a;
+    border: 1px solid #3f3f46;
+    border-radius: 8px;
+    color: #a1a1aa;
+}
+.placeholder-btn-small:hover {
+    background-color: #3f3f46;
+    color: #f4f4f5;
+}
+
+.inline-entry {
+    font-size: 12px;
+    padding: 4px 8px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid #3f3f46;
+    border-radius: 6px;
+    color: #e2e8f0;
+}
+
+.small-btn {
+    font-size: 12px;
+    padding: 4px 10px;
+}
+
+.edit-btn {
+    color: #3b82f6;
+}
+.edit-btn:hover {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+}
+

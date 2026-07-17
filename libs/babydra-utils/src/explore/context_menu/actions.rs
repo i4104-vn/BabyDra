@@ -143,9 +143,16 @@ pub fn show_for_file(
                 for path in paths {
                     let path_str = path.to_string_lossy().to_string();
                     let parent_str = path.parent().map(|p| p.to_string_lossy().to_string()).unwrap_or_else(|| "".to_string());
+                    let name_str = path.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default();
+                    let stem_str = path.file_stem().map(|s| s.to_string_lossy().to_string()).unwrap_or_default();
+                    let ext_str = path.extension().map(|e| e.to_string_lossy().to_string()).unwrap_or_default();
+
                     let cmd_str = command_tmpl_c
                         .replace("{path}", &path_str)
-                        .replace("{dir}", &parent_str);
+                        .replace("{dir}", &parent_str)
+                        .replace("{name}", &name_str)
+                        .replace("{stem}", &stem_str)
+                        .replace("{ext}", &ext_str);
                     
                     let _ = std::process::Command::new("sh")
                         .arg("-c")
@@ -241,9 +248,16 @@ pub fn show_for_empty(
             btn_custom.connect_clicked(move |_| {
                 pop_c.popdown();
                 let path_str = current_path_c.to_string_lossy().to_string();
+                let name_str = current_path_c.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default();
+                let stem_str = current_path_c.file_stem().map(|s| s.to_string_lossy().to_string()).unwrap_or_default();
+                let ext_str = current_path_c.extension().map(|e| e.to_string_lossy().to_string()).unwrap_or_default();
+
                 let cmd_str = command_tmpl
                     .replace("{path}", &path_str)
-                    .replace("{dir}", &path_str);
+                    .replace("{dir}", &path_str)
+                    .replace("{name}", &name_str)
+                    .replace("{stem}", &stem_str)
+                    .replace("{ext}", &ext_str);
                 
                 let _ = std::process::Command::new("sh")
                     .arg("-c")

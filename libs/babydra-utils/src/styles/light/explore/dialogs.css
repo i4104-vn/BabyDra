@@ -100,4 +100,90 @@ button.empty-trash-btn:hover {
     background-color: rgba(220, 38, 38, 0.1) !important;
 }
 
+.settings-row-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.settings-row-desc {
+    font-size: 11px;
+    color: #64748b;
+}
+
+/* Notebook styling in light */
+.settings-notebook {
+    background-color: transparent;
+    border: none;
+}
+.settings-notebook header tabs {
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 8px;
+}
+.settings-notebook header tabs tab {
+    padding: 6px 12px;
+    font-weight: 600;
+    color: #64748b;
+    border-radius: 6px 6px 0 0;
+}
+.settings-notebook header tabs tab:checked {
+    color: #0066cc;
+    border-bottom: 2px solid #0066cc;
+}
+.settings-notebook header tabs tab:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+    color: #0f172a;
+}
+
+.settings-listbox row:hover {
+    background-color: rgba(0, 0, 0, 0.01);
+}
+
+.placeholder-btn {
+    font-size: 11px;
+    padding: 2px 6px;
+    background-color: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    color: #475569;
+}
+.placeholder-btn:hover {
+    background-color: #e2e8f0;
+    color: #0f172a;
+}
+
+.placeholder-btn-small {
+    font-size: 10px;
+    padding: 1px 4px;
+    background-color: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    color: #475569;
+}
+.placeholder-btn-small:hover {
+    background-color: #e2e8f0;
+    color: #0f172a;
+}
+
+.inline-entry {
+    font-size: 12px;
+    padding: 4px 8px;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    color: #0f172a;
+}
+
+.small-btn {
+    font-size: 12px;
+    padding: 4px 10px;
+}
+
+.edit-btn {
+    color: #0066cc;
+}
+.edit-btn:hover {
+    background-color: rgba(0, 102, 204, 0.1) !important;
+}
+
 .explore-window .rubberband {
