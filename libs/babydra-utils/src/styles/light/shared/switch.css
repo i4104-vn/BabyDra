@@ -2,7 +2,7 @@
 switch {
     min-width: 28px;
     min-height: 16px;
-    border-radius: 8px;
+    border-radius: 20px;
     border: 1px solid #cbd5e1;
     background-color: #cbd5e1;
     transition: all 150ms ease;
