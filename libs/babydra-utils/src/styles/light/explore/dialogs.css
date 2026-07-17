@@ -215,3 +215,27 @@ button.empty-trash-btn:hover {
     color: #0066cc;
     font-weight: 600;
 }
+
+/* Custom Switch styling in light settings dialog */
+.explore-dialog switch {
+    min-width: 36px;
+    min-height: 20px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    background-color: #cbd5e1;
+    transition: all 150ms ease;
+}
+
+.explore-dialog switch slider {
+    min-width: 16px;
+    min-height: 16px;
+    border-radius: 50%;
+    background-color: #ffffff !important;
+    margin: 1px;
+    transition: all 150ms ease;
+}
+
+.explore-dialog switch:checked {
+    background-color: #0066cc;
+    border-color: #0066cc;
+}
