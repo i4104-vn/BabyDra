@@ -186,4 +186,33 @@ button.empty-trash-btn:hover {
     background-color: rgba(0, 102, 204, 0.1) !important;
 }
 
+/* Sidebar inside Explore Settings Dialog */
+.explore-dialog .settings-sidebar {
+    background-color: rgba(0, 0, 0, 0.01);
+}
+
+.explore-dialog .sidebar-item {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 14px;
+    color: #475569;
+    font-size: 13px;
+    margin: 2px 4px;
+    text-align: left;
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.explore-dialog .sidebar-item:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    color: #0f172a;
+    transform: translateX(2px);
+}
+
+.explore-dialog .sidebar-item.active-nav {
+    background-color: rgba(0, 102, 204, 0.1);
+    color: #0066cc;
+    font-weight: 600;
+}
+
 .explore-window .rubberband {

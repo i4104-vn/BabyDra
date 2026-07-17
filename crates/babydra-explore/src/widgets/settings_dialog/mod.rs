@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Label, Button, Window, Align, Notebook, Switch, ListBox, ListBoxRow, Entry, Grid, Separator};
+use gtk4::{Box, Orientation, Label, Button, Window, Align, Stack, Switch, ListBox, ListBoxRow, Entry, Grid, Separator};
 use babydra_common::i18n::t;
 
 pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn() + 'static) {
@@ -10,35 +10,74 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         .transient_for(parent)
         .modal(true)
         .resizable(true)
-        .default_width(600)
-        .default_height(580)
+        .default_width(750)
+        .default_height(550)
         .css_classes(vec!["explore-dialog".to_string()])
         .build();
 
-    let vbox = Box::new(Orientation::Vertical, 12);
-    vbox.set_margin_top(16);
-    vbox.set_margin_bottom(16);
-    vbox.set_margin_start(20);
-    vbox.set_margin_end(20);
-    window.set_child(Some(&vbox));
+    let main_vbox = Box::new(Orientation::Vertical, 0);
+    window.set_child(Some(&main_vbox));
 
-    let lbl_title = Label::builder()
-        .label(&t("explore.settings"))
+    let content_hbox = Box::new(Orientation::Horizontal, 0);
+    content_hbox.set_vexpand(true);
+    main_vbox.append(&content_hbox);
+
+    // ── Left: Sidebar ──────────────────────────────────────────
+    let sidebar_box = Box::new(Orientation::Vertical, 4);
+    sidebar_box.set_size_request(180, -1);
+    sidebar_box.set_margin_top(16);
+    sidebar_box.set_margin_bottom(16);
+    sidebar_box.set_margin_start(8);
+    sidebar_box.set_margin_end(8);
+    sidebar_box.add_css_class("settings-sidebar");
+    content_hbox.append(&sidebar_box);
+
+    let stack = Stack::new();
+    stack.set_transition_type(gtk4::StackTransitionType::SlideLeftRight);
+    stack.set_hexpand(true);
+    stack.set_vexpand(true);
+
+    // Sidebar items list
+    let btn_general = Button::builder()
+        .label(&t("explore.settings_general"))
+        .halign(Align::Fill)
+        .css_classes(vec!["sidebar-item".to_string(), "active-nav".to_string()])
+        .build();
+
+    let btn_context = Button::builder()
+        .label(&t("explore.settings_context_menu"))
+        .halign(Align::Fill)
+        .css_classes(vec!["sidebar-item".to_string()])
+        .build();
+
+    sidebar_box.append(&btn_general);
+    sidebar_box.append(&btn_context);
+
+    // Separator between sidebar and content stack
+    let sep_sidebar = Separator::new(Orientation::Vertical);
+    content_hbox.append(&sep_sidebar);
+
+    // Right content area wrapper box
+    let right_vbox = Box::new(Orientation::Vertical, 10);
+    right_vbox.set_margin_top(16);
+    right_vbox.set_margin_bottom(16);
+    right_vbox.set_margin_start(20);
+    right_vbox.set_margin_end(20);
+    right_vbox.set_hexpand(true);
+    right_vbox.set_vexpand(true);
+    content_hbox.append(&right_vbox);
+
+    right_vbox.append(&stack);
+
+    // ── Tab 1: General Settings Page ──────────────────────────
+    let tab_general = Box::new(Orientation::Vertical, 10);
+
+    let lbl_general_title = Label::builder()
+        .label(&t("explore.settings_general"))
         .halign(Align::Start)
         .build();
-    lbl_title.add_css_class("settings-title-label");
-    vbox.append(&lbl_title);
-
-    let notebook = Notebook::new();
-    notebook.add_css_class("settings-notebook");
-    vbox.append(&notebook);
-
-    // ── Tab 1: General Settings ───────────────────────────────
-    let tab_general = Box::new(Orientation::Vertical, 10);
-    tab_general.set_margin_top(12);
-    tab_general.set_margin_bottom(12);
-    tab_general.set_margin_start(12);
-    tab_general.set_margin_end(12);
+    lbl_general_title.add_css_class("settings-title-label");
+    tab_general.append(&lbl_general_title);
 
     let listbox = ListBox::new();
     listbox.set_selection_mode(gtk4::SelectionMode::None);
@@ -154,28 +193,30 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         }),
     );
 
-    let lbl_general_tab = Label::new(Some(&t("explore.settings_general")));
-    notebook.append_page(&tab_general, Some(&lbl_general_tab));
+    stack.add_named(&tab_general, Some("general"));
 
-    // ── Tab 2: Context Menu Configuration ──────────────────────
+    // ── Tab 2: Context Menu Configuration Page ────────────────
     let tab_context = Box::new(Orientation::Vertical, 10);
-    tab_context.set_margin_top(12);
-    tab_context.set_margin_bottom(12);
-    tab_context.set_margin_start(12);
-    tab_context.set_margin_end(12);
 
     let lbl_context_title = Label::builder()
+        .label(&t("explore.settings_context_menu"))
+        .halign(Align::Start)
+        .build();
+    lbl_context_title.add_css_class("settings-title-label");
+    tab_context.append(&lbl_context_title);
+
+    let lbl_section_title = Label::builder()
         .label(&t("explore.settings_custom_options"))
         .halign(Align::Start)
         .build();
-    lbl_context_title.add_css_class("settings-section-title");
-    tab_context.append(&lbl_context_title);
+    lbl_section_title.add_css_class("settings-section-title");
+    tab_context.append(&lbl_section_title);
 
     let scroll = gtk4::ScrolledWindow::builder()
         .hscrollbar_policy(gtk4::PolicyType::Never)
         .vscrollbar_policy(gtk4::PolicyType::Automatic)
         .vexpand(true)
-        .min_content_height(180)
+        .min_content_height(140)
         .build();
     tab_context.append(&scroll);
 
@@ -183,6 +224,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     context_listbox.set_selection_mode(gtk4::SelectionMode::None);
     context_listbox.add_css_class("settings-listbox");
     scroll.set_child(Some(&context_listbox));
+
 
     // Helper to render custom option row with inline edit support
     let listbox_c = context_listbox.clone();
@@ -481,13 +523,38 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         }
     });
 
-    let lbl_context_tab = Label::new(Some(&t("explore.settings_context_menu")));
-    notebook.append_page(&tab_context, Some(&lbl_context_tab));
+    stack.add_named(&tab_context, Some("context_menu"));
+
+    // ── Switch tabs closures ─────────────────────────────────
+    let btn_gen_c = btn_general.clone();
+    let btn_con_c = btn_context.clone();
+    let stack_c = stack.clone();
+    btn_general.connect_clicked(move |_| {
+        btn_gen_c.add_css_class("active-nav");
+        btn_con_c.remove_css_class("active-nav");
+        stack_c.set_visible_child_name("general");
+    });
+
+    let btn_gen_c2 = btn_general.clone();
+    let btn_con_c2 = btn_context.clone();
+    let stack_c2 = stack.clone();
+    btn_context.connect_clicked(move |_| {
+        btn_con_c2.add_css_class("active-nav");
+        btn_gen_c2.remove_css_class("active-nav");
+        stack_c2.set_visible_child_name("context_menu");
+    });
 
     // ── Bottom Action Area ─────────────────────────────────────
+    let separator_bottom = Separator::new(Orientation::Horizontal);
+    main_vbox.append(&separator_bottom);
+
     let bbox = Box::new(Orientation::Horizontal, 8);
     bbox.set_halign(Align::End);
-    vbox.append(&bbox);
+    bbox.set_margin_top(12);
+    bbox.set_margin_bottom(12);
+    bbox.set_margin_start(16);
+    bbox.set_margin_end(16);
+    main_vbox.append(&bbox);
 
     let btn_close = Button::builder()
         .label(&t("explore.settings_close"))
