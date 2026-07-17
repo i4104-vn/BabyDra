@@ -544,34 +544,8 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         stack_c2.set_visible_child_name("context_menu");
     });
 
-    // ── Bottom Action Area ─────────────────────────────────────
-    let separator_bottom = Separator::new(Orientation::Horizontal);
-    main_vbox.append(&separator_bottom);
-
-    let bbox = Box::new(Orientation::Horizontal, 8);
-    bbox.set_halign(Align::End);
-    bbox.set_margin_top(12);
-    bbox.set_margin_bottom(12);
-    bbox.set_margin_start(16);
-    bbox.set_margin_end(16);
-    main_vbox.append(&bbox);
-
-    let btn_close = Button::builder()
-        .label(&t("explore.settings_close"))
-        .css_classes(vec!["suggested-action".to_string()])
-        .build();
-    bbox.append(&btn_close);
-
-    // Wire close and callback
-    let on_change = std::rc::Rc::new(on_change_callback);
-    let win_c = window.clone();
-    let on_change_c = on_change.clone();
-    btn_close.connect_clicked(move |_| {
-        on_change_c();
-        win_c.close();
-    });
-
     // Also trigger on_change when window is destroyed/closed
+    let on_change = std::rc::Rc::new(on_change_callback);
     let on_change_destroy = on_change.clone();
     window.connect_destroy(move |_| {
         on_change_destroy();
