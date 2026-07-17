@@ -21,8 +21,8 @@ button.suggested-action:active {
 window.explore-dialog,
 window.explore-dialog>box {
     background-color: #f5f5f7;
-    border: 1px solid #d0d0d0;
-    border-radius: 12px;
+    border: none;
+    border-radius: 0;
 }
 
 .explore-dialog entry {
