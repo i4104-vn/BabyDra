@@ -122,6 +122,40 @@ pub fn show_for_file(
         });
     });
 
+    // Custom Context Options
+    let settings = babydra_common::load_explore_settings();
+    if !settings.custom_context_items.is_empty() {
+        let sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
+        sep.add_css_class("menu-sep");
+        vbox.append(&sep);
+
+        for item in settings.custom_context_items {
+            let btn_custom = create_menu_button(&item.name, "system-run");
+            vbox.append(&btn_custom);
+
+            let pop_c = popover.clone();
+            let command_tmpl = item.command.clone();
+            let target_paths_c = target_paths.clone();
+            btn_custom.connect_clicked(move |_| {
+                pop_c.popdown();
+                let command_tmpl_c = command_tmpl.clone();
+                let paths = target_paths_c.clone();
+                for path in paths {
+                    let path_str = path.to_string_lossy().to_string();
+                    let parent_str = path.parent().map(|p| p.to_string_lossy().to_string()).unwrap_or_else(|| "".to_string());
+                    let cmd_str = command_tmpl_c
+                        .replace("{path}", &path_str)
+                        .replace("{dir}", &parent_str);
+                    
+                    let _ = std::process::Command::new("sh")
+                        .arg("-c")
+                        .arg(&cmd_str)
+                        .spawn();
+                }
+            });
+        }
+    }
+
     popover.popup();
 }
 
@@ -189,6 +223,35 @@ pub fn show_for_empty(
         pop_c.popdown();
         crate::explore::dialogs::show_new_folder_dialog(current_p.clone(), nav.clone());
     });
+
+    // Custom Context Options for empty area
+    let settings = babydra_common::load_explore_settings();
+    if !settings.custom_context_items.is_empty() {
+        let sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
+        sep.add_css_class("menu-sep");
+        vbox.append(&sep);
+
+        for item in settings.custom_context_items {
+            let btn_custom = create_menu_button(&item.name, "system-run");
+            vbox.append(&btn_custom);
+
+            let pop_c = popover.clone();
+            let command_tmpl = item.command.clone();
+            let current_path_c = current_path.clone();
+            btn_custom.connect_clicked(move |_| {
+                pop_c.popdown();
+                let path_str = current_path_c.to_string_lossy().to_string();
+                let cmd_str = command_tmpl
+                    .replace("{path}", &path_str)
+                    .replace("{dir}", &path_str);
+                
+                let _ = std::process::Command::new("sh")
+                    .arg("-c")
+                    .arg(&cmd_str)
+                    .spawn();
+            });
+        }
+    }
 
     popover.popup();
 }
