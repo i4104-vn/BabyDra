@@ -128,29 +128,7 @@ button:hover {
     border-color: rgba(0, 0, 0, 0.14);
 }
 
-/* Custom GTK Switch Slider style */
-switch {
-    background-color: rgba(0, 0, 0, 0.06);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 34px;
-    min-height: 24px;
-    min-width: 44px;
-    transition: all 250ms ease;
-}
 
-switch:checked {
-    background-color: #8a6747;
-    border-color: rgba(0, 0, 0, 0.10);
-}
-
-switch slider {
-    background-color: #ffffff;
-    border-radius: 50%;
-    min-width: 20px;
-    min-height: 20px;
-    margin: 1px;
-    transition: all 250ms ease;
-}
 
 .cheatsheet-overlay {
     background-color: rgba(245, 240, 230, 0.98);

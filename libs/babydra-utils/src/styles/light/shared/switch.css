@@ -1,16 +1,16 @@
 /* Global Custom Switch styling in light theme */
 switch {
-    min-width: 32px;
-    min-height: 18px;
-    border-radius: 9px;
+    min-width: 28px;
+    min-height: 16px;
+    border-radius: 8px;
     border: 1px solid #cbd5e1;
     background-color: #cbd5e1;
     transition: all 150ms ease;
 }
 
 switch slider {
-    min-width: 14px;
-    min-height: 14px;
+    min-width: 12px;
+    min-height: 12px;
     border-radius: 50%;
     background-color: #ffffff;
     margin: 1px;
