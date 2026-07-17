@@ -76,12 +76,15 @@ pub fn create_grid_flowbox(
     current_path: Rc<RefCell<PathBuf>>,
     selected_paths: Rc<RefCell<Vec<PathBuf>>>,
 ) -> gtk4::FlowBox {
+    let settings = babydra_common::load_explore_settings();
+    let activate_on_single = !settings.double_click_to_open;
+
     let flowbox = gtk4::FlowBox::builder()
         .valign(gtk4::Align::Start)
         .max_children_per_line(20)
         .min_children_per_line(1)
         .selection_mode(gtk4::SelectionMode::Multiple)
-        .activate_on_single_click(false)
+        .activate_on_single_click(activate_on_single)
         .row_spacing(10)
         .column_spacing(10)
         .build();

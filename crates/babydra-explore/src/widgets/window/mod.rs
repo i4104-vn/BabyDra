@@ -276,25 +276,7 @@ pub fn create_explore_window(
         });
     }
 
-    // Wire btn_settings click
-    {
-        let win = ui.window.clone();
-        let nav = navigate_pane_ref.clone();
-        let active = active_pane.clone();
-        let session_c = session.clone();
-        header_widgets.btn_settings.connect_clicked(move |_| {
-            let nav_c = nav.clone();
-            let act_c = active.clone();
-            let session_cc = session_c.clone();
-            let parent_win = win.clone().upcast::<gtk4::Window>();
-            crate::widgets::settings_dialog::show_settings_dialog(&parent_win, move || {
-                let path = session_cc.borrow().active_tab().current_path.clone();
-                if let Some(ref f) = *nav_c.borrow() {
-                    f(act_c.get(), path);
-                }
-            });
-        });
-    }
+
 
     // Preview toggle closure
     let toggle_preview = {
@@ -352,6 +334,48 @@ pub fn create_explore_window(
                 toggle_h();
             });
         }
+    }
+
+    // Wire btn_settings click (with live setting refresh)
+    {
+        let win = ui.window.clone();
+        let nav = navigate_pane_ref.clone();
+        let active = active_pane.clone();
+        let session_c = session.clone();
+        let preview_visible = preview_visible.clone();
+        let toggle_p = toggle_preview_rc.clone();
+        header_widgets.btn_settings.connect_clicked(move |_| {
+            let nav_c = nav.clone();
+            let act_c = active.clone();
+            let session_cc = session_c.clone();
+            let preview_v = preview_visible.clone();
+            let toggle_p_c = toggle_p.clone();
+            let parent_win = win.clone().upcast::<gtk4::Window>();
+            crate::widgets::settings_dialog::show_settings_dialog(&parent_win, move || {
+                let settings = babydra_common::load_explore_settings();
+                
+                // 1. Sync hidden files visibility setting in tab state
+                let _hidden_changed = {
+                    let mut s = session_cc.borrow_mut();
+                    let tab = s.active_tab_mut();
+                    let old_val = tab.show_hidden;
+                    tab.show_hidden = settings.show_hidden;
+                    old_val != settings.show_hidden
+                };
+
+                // 2. Sync preview panel visibility
+                let preview_changed = preview_v.get() != settings.preview_visible;
+                if preview_changed {
+                    toggle_p_c();
+                }
+
+                // 3. Trigger navigate refresh
+                let path = session_cc.borrow().active_tab().current_path.clone();
+                if let Some(ref f) = *nav_c.borrow() {
+                    f(act_c.get(), path);
+                }
+            });
+        });
     }
 
     let _rebuild_tabs_rc = tabs::setup_tab_bar(&ui.vbox, session.clone(), navigate_pane_ref.clone(), tab_bar_box.clone());
