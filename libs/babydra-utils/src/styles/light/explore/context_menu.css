@@ -22,7 +22,7 @@ popover.explore-popover>arrow {
     border: 1px solid rgba(0, 0, 0, 0.10);
     border-top: 1px solid rgba(0, 0, 0, 0.14);
     border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    box-shadow: none;
     padding: 4px;
 }
 

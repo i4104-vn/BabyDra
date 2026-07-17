@@ -5,13 +5,13 @@ button.suggested-action {
     color: #ffffff;
     padding: 4px 14px;
     font-weight: 600;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: none;
     transition: all 150ms ease;
 }
 
 button.suggested-action:hover {
     background-color: rgba(96, 165, 250, 0.9);
-    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.25);
+    box-shadow: none;
 }
 
 button.suggested-action:active {

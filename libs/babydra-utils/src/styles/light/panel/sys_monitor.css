@@ -29,7 +29,7 @@ popover.sys-monitor-popover progressbar trough {
 popover.sys-monitor-popover progressbar progress {
     border-radius: 9999px;
     background-color: #007aff;
-    background-image: linear-gradient(90deg, #3498db 0%, #007aff 100%);
+    background-color: #3b82f6;
 }
 
 popover.sys-monitor-popover .sys-chart {
