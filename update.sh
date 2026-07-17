@@ -7,7 +7,7 @@ echo "============================================="
 
 # 1. Pull latest code
 echo "Pulling latest code changes..."
-git pull origin main || git pull || true
+# git pull origin || true
 
 # 2. Rebuild in release mode
 echo "Rebuilding in release mode..."
