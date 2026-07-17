@@ -7,7 +7,7 @@ use babydra_common::DesktopApp;
 /// Creates a card button displaying a window preview screenshot or a placeholder icon.
 pub fn create_app_button(app_item: &DesktopApp) -> gtk4::Button {
     let btn = gtk4::Button::new();
-    btn.add_css_class("switcher-item-btn");
+    btn.add_css_class("stage-manager-item-btn");
 
     let app_icon_str = app_item.icon.as_deref().unwrap_or("application-x-executable");
 
@@ -33,31 +33,18 @@ pub fn create_app_button(app_item: &DesktopApp) -> gtk4::Button {
         }
     }
 
-    let preview_width = 310;
-    let preview_height = 260;
-
-    if let Some(ref path) = screenshot_path {
-        let css_provider = gtk4::CssProvider::new();
-        let css = format!(
-            "button {{ \
-                background-image: url('file://{}'); \
-                background-size: cover; \
-                background-position: center; \
-                background-repeat: no-repeat; \
-            }}",
-            path
-        );
-        css_provider.load_from_data(&css);
-        btn.style_context()
-            .add_provider(&css_provider, gtk4::STYLE_PROVIDER_PRIORITY_APPLICATION);
-    }
+    let preview_width = 200;
+    let preview_height = 130;
 
     let overlay = gtk4::Overlay::new();
 
-    let base_widget: gtk4::Widget = if screenshot_path.is_some() {
-        let spacer = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
-        spacer.set_size_request(preview_width, preview_height);
-        spacer.upcast()
+    let base_widget: gtk4::Widget = if let Some(ref path) = screenshot_path {
+        let picture = gtk4::Picture::for_filename(path);
+        picture.set_content_fit(gtk4::ContentFit::Cover);
+        picture.set_can_shrink(true);
+        picture.set_size_request(preview_width, preview_height);
+        picture.add_css_class("switcher-preview-image");
+        picture.upcast()
     } else {
         create_placeholder_preview(app_icon_str, preview_width, preview_height)
     };
@@ -96,6 +83,10 @@ pub fn create_app_button(app_item: &DesktopApp) -> gtk4::Button {
     overlay.add_overlay(&title_container);
 
     btn.set_child(Some(&overlay));
+    btn.set_size_request(preview_width, preview_height);
+    btn.set_hexpand(false);
+    btn.set_vexpand(false);
+    btn.set_halign(gtk4::Align::Start);
 
     btn
 }
@@ -105,8 +96,8 @@ fn create_placeholder_preview(app_icon_str: &str, width: i32, height: i32) -> gt
     let placeholder_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     placeholder_box.add_css_class("switcher-item-placeholder");
     placeholder_box.set_size_request(width, height);
-    placeholder_box.set_valign(gtk4::Align::Center);
-    placeholder_box.set_halign(gtk4::Align::Center);
+    placeholder_box.set_halign(gtk4::Align::Fill);
+    placeholder_box.set_valign(gtk4::Align::Fill);
 
     let icon_widget = babydra_utils::ui::icon::get_system_or_file_icon(
         app_icon_str,
@@ -120,4 +111,3 @@ fn create_placeholder_preview(app_icon_str: &str, width: i32, height: i32) -> gt
     placeholder_box.append(&icon_widget);
     placeholder_box.upcast()
 }
-

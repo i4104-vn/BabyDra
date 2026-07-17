@@ -13,10 +13,11 @@ pub fn spawn_switcher_tracker() {
 
         let mut current_focused_window: Option<(String, String)> = None;
         let mut focus_start = Instant::now();
+        let mut last_screenshot_time = Instant::now();
         let mut screenshot_taken = false;
 
         loop {
-            std::thread::sleep(Duration::from_millis(500));
+            std::thread::sleep(Duration::from_millis(300));
 
             let switcher_open = std::path::Path::new("/tmp/babydra-switcher.socket").exists();
             if switcher_open {
@@ -91,18 +92,34 @@ pub fn spawn_switcher_tracker() {
                 // Reset for the new active window
                 current_focused_window = active_window;
                 focus_start = Instant::now();
+                last_screenshot_time = Instant::now();
                 screenshot_taken = false;
-            } else if current_focused_window.is_some() && !screenshot_taken {
-                // If they have stayed in the same window for >= 5 seconds, take a screenshot
-                if focus_start.elapsed() >= Duration::from_secs(5) {
+            } else if current_focused_window.is_some() {
+                // If they have stayed in the same window for >= 2 seconds, take a screenshot
+                let now = Instant::now();
+                let should_take = if !screenshot_taken {
+                    now.duration_since(focus_start) >= Duration::from_secs(2)
+                } else {
+                    now.duration_since(last_screenshot_time) >= Duration::from_secs(30)
+                };
+
+                if should_take {
                     let temp_file = format!("{}/temp_active.png", cache_dir);
-                    // Run grim to capture the screen
                     let status = Command::new("grim")
                         .arg(&temp_file)
                         .status();
                     if let Ok(s) = status {
                         if s.success() {
                             screenshot_taken = true;
+                            last_screenshot_time = now;
+                            // Copy to active cache immediately so switcher can use it right away
+                            if let Some((ref app, ref title)) = current_focused_window {
+                                let hash = crate::services::apps::get_window_hash(app, title);
+                                let dest_file = format!("{}/{}.png", cache_dir, hash);
+                                let _ = fs::copy(&temp_file, &dest_file);
+                                let dest_generic = format!("{}/{}.png", cache_dir, app);
+                                let _ = fs::copy(&temp_file, &dest_generic);
+                            }
                         }
                     }
                 }

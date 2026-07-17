@@ -21,20 +21,45 @@ pub fn build_switcher_ui(app: &gtk4::Application, apps: Vec<DesktopApp>) {
     window.set_layer(Layer::Overlay);
     window.set_keyboard_mode(KeyboardMode::Exclusive);
 
-    // Setup window geometry: stretch horizontally across the screen
-    window.set_anchor(Edge::Top, false);
-    window.set_anchor(Edge::Bottom, false);
+    // Setup window geometry: stretch fullscreen across the entire screen
+    window.set_anchor(Edge::Top, true);
+    window.set_anchor(Edge::Bottom, true);
     window.set_anchor(Edge::Left, true);
     window.set_anchor(Edge::Right, true);
     window.add_css_class("switcher-window");
 
-    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
-    main_box.add_css_class("switcher-box");
-    main_box.set_valign(gtk4::Align::Center);
+    let main_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    main_box.add_css_class("stage-manager-container");
+    main_box.set_valign(gtk4::Align::Fill);
     main_box.set_halign(gtk4::Align::Fill);
 
-    let (icons_row, item_buttons) = build_apps_list(&apps);
-    main_box.append(&icons_row);
+    let panel = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    panel.add_css_class("stage-manager-panel");
+    panel.set_valign(gtk4::Align::Fill);
+    panel.set_halign(gtk4::Align::Start);
+
+    let (icons_column, item_buttons) = build_apps_list(&apps);
+    
+    let scrolled = gtk4::ScrolledWindow::new();
+    scrolled.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
+    scrolled.set_kinetic_scrolling(true);
+    scrolled.set_child(Some(&icons_column));
+    scrolled.set_vexpand(true);
+
+    panel.append(&scrolled);
+    main_box.append(&panel);
+
+    // Dismiss on click outside of panel (width of panel is ~250px)
+    let click_gesture = gtk4::GestureClick::new();
+    let window_close = window.clone();
+    click_gesture.connect_pressed(move |gesture, _, x, _y| {
+        if x > 250.0 {
+            gesture.set_state(gtk4::EventSequenceState::Claimed);
+            window_close.close();
+        }
+    });
+    main_box.add_controller(click_gesture);
+
     window.set_child(Some(&main_box));
 
     let current_index = Rc::new(RefCell::new(0));
@@ -53,6 +78,7 @@ pub fn build_switcher_ui(app: &gtk4::Application, apps: Vec<DesktopApp>) {
             for (i, btn) in item_buttons.iter().enumerate() {
                 if i == idx {
                     btn.add_css_class("selected");
+                    btn.grab_focus();
                 } else {
                     btn.remove_css_class("selected");
                 }
@@ -155,12 +181,12 @@ pub fn build_switcher_ui(app: &gtk4::Application, apps: Vec<DesktopApp>) {
     key_controller.connect_key_pressed(move |_, key, _, _modifiers| {
         let idx = *current_idx_key.borrow();
         match key {
-            gtk4::gdk::Key::Tab | gtk4::gdk::Key::Right => {
+            gtk4::gdk::Key::Tab | gtk4::gdk::Key::Down => {
                 let next = (idx + 1) % apps_key.len();
                 update_sel_key(next);
                 gtk4::glib::Propagation::Stop
             }
-            gtk4::gdk::Key::ISO_Left_Tab | gtk4::gdk::Key::Left => {
+            gtk4::gdk::Key::ISO_Left_Tab | gtk4::gdk::Key::Up => {
                 let prev = if idx == 0 { apps_key.len() - 1 } else { idx - 1 };
                 update_sel_key(prev);
                 gtk4::glib::Propagation::Stop
