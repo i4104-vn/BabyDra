@@ -205,6 +205,21 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.up", "Up");
             map.insert("explore.refresh", "Refresh");
             map.insert("explore.loading", "Loading directory...");
+            map.insert("explore.settings", "Settings");
+            map.insert("explore.settings_general", "General");
+            map.insert("explore.settings_behavior", "Behavior");
+            map.insert("explore.settings_double_click", "Double-click to open");
+            map.insert("explore.settings_permanent_delete", "Permanently delete immediately");
+            map.insert("explore.settings_calculate_size", "Calculate folder sizes");
+            map.insert("explore.settings_context_menu", "Context Menu");
+            map.insert("explore.settings_custom_options", "Custom Context Options");
+            map.insert("explore.settings_add_option", "Add Option");
+            map.insert("explore.settings_option_name", "Option Name");
+            map.insert("explore.settings_option_command", "Command");
+            map.insert("explore.settings_add", "Add");
+            map.insert("explore.settings_delete", "Delete");
+            map.insert("explore.settings_placeholder_name", "e.g., Open with Code");
+            map.insert("explore.settings_placeholder_command", "e.g., code {path}");
         }
         _ => {
             // Menu
@@ -360,6 +375,21 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.up", "Lên thư mục cha");
             map.insert("explore.refresh", "Tải lại");
             map.insert("explore.loading", "Đang tải thư mục...");
+            map.insert("explore.settings", "Cài đặt");
+            map.insert("explore.settings_general", "Chung");
+            map.insert("explore.settings_behavior", "Hành vi");
+            map.insert("explore.settings_double_click", "Nhấp đúp để mở");
+            map.insert("explore.settings_permanent_delete", "Xóa vĩnh viễn trực tiếp");
+            map.insert("explore.settings_calculate_size", "Tính dung lượng thư mục");
+            map.insert("explore.settings_context_menu", "Menu chuột phải");
+            map.insert("explore.settings_custom_options", "Tùy chọn menu chuột phải");
+            map.insert("explore.settings_add_option", "Thêm tùy chọn");
+            map.insert("explore.settings_option_name", "Tên tùy chọn");
+            map.insert("explore.settings_option_command", "Lệnh thực thi");
+            map.insert("explore.settings_add", "Thêm");
+            map.insert("explore.settings_delete", "Xóa");
+            map.insert("explore.settings_placeholder_name", "Ví dụ: Mở bằng Code");
+            map.insert("explore.settings_placeholder_command", "Ví dụ: code {path}");
         }
     }
     map
