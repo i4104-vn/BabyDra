@@ -254,10 +254,17 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         // Helper placeholders for inline edit command entry
         let inline_placeholders = Box::new(Orientation::Horizontal, 4);
         inline_placeholders.set_margin_top(2);
-        let ph_list = ["{path}", "{dir}", "{name}", "{stem}", "{ext}"];
-        for ph in ph_list {
+        let ph_list = [
+            ("{path}", "explore.placeholder_path_desc"),
+            ("{dir}",  "explore.placeholder_dir_desc"),
+            ("{name}", "explore.placeholder_name_desc"),
+            ("{stem}", "explore.placeholder_stem_desc"),
+            ("{ext}",  "explore.placeholder_ext_desc"),
+        ];
+        for (ph, desc_key) in ph_list {
             let btn_ph = Button::builder()
                 .label(ph)
+                .tooltip_text(&t(desc_key))
                 .css_classes(vec!["flat".to_string(), "placeholder-btn-small".to_string()])
                 .build();
             let entry_edit_cmd_c = entry_edit_cmd.clone();
@@ -415,10 +422,17 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     // Add clickable placeholders row
     let placeholders_box = Box::new(Orientation::Horizontal, 6);
     placeholders_box.set_margin_top(2);
-    let placeholders = ["{path}", "{dir}", "{name}", "{stem}", "{ext}"];
-    for p in placeholders {
+    let placeholders = [
+        ("{path}", "explore.placeholder_path_desc"),
+        ("{dir}",  "explore.placeholder_dir_desc"),
+        ("{name}", "explore.placeholder_name_desc"),
+        ("{stem}", "explore.placeholder_stem_desc"),
+        ("{ext}",  "explore.placeholder_ext_desc"),
+    ];
+    for (p, desc_key) in placeholders {
         let btn_p = Button::builder()
             .label(p)
+            .tooltip_text(&t(desc_key))
             .css_classes(vec!["flat".to_string(), "placeholder-btn".to_string()])
             .build();
         let entry_cmd_c = entry_cmd.clone();

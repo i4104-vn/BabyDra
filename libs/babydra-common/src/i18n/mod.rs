@@ -229,6 +229,11 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.settings_save", "Save");
             map.insert("explore.settings_cancel", "Cancel");
             map.insert("explore.settings_close", "Close");
+            map.insert("explore.placeholder_path_desc", "Full path of the selected item");
+            map.insert("explore.placeholder_dir_desc", "Parent directory of the selected item (or current directory)");
+            map.insert("explore.placeholder_name_desc", "File/Folder name with extension");
+            map.insert("explore.placeholder_stem_desc", "File/Folder name without extension");
+            map.insert("explore.placeholder_ext_desc", "File extension");
         }
         _ => {
             // Menu
@@ -408,6 +413,11 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.settings_save", "Lưu");
             map.insert("explore.settings_cancel", "Hủy");
             map.insert("explore.settings_close", "Đóng");
+            map.insert("explore.placeholder_path_desc", "Đường dẫn đầy đủ của đối tượng được chọn");
+            map.insert("explore.placeholder_dir_desc", "Thư mục cha của đối tượng được chọn (hoặc thư mục hiện tại)");
+            map.insert("explore.placeholder_name_desc", "Tên tệp/thư mục kèm theo phần mở rộng");
+            map.insert("explore.placeholder_stem_desc", "Tên tệp/thư mục không kèm phần mở rộng");
+            map.insert("explore.placeholder_ext_desc", "Phần mở rộng của tệp");
         }
     }
     map
