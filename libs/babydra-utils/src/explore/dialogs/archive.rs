@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Label, Entry, Button, Align, Window, CheckButton};
+use gtk4::{Box, Orientation, Label, Entry, Button, Align, Window, CheckButton, Spinner, TextView, ScrolledWindow};
 use std::path::PathBuf;
 use std::rc::Rc;
 
@@ -161,11 +161,7 @@ pub fn perform_decompress_async(
         if is_zip && is_zip_encrypted(&archive_path_c).await {
             show_password_dialog(archive_path_c, cp_c, nav_c);
         } else {
-            let success = perform_decompress(archive_path_c).await;
-            if !success {
-                eprintln!("Decompression failed!");
-            }
-            nav_c(cp_c);
+            show_decompress_log_dialog(archive_path_c, cp_c, nav_c, None);
         }
     });
 }
@@ -199,65 +195,167 @@ async fn is_zip_encrypted(archive_path: &PathBuf) -> bool {
     }
 }
 
-async fn perform_decompress(archive_path: PathBuf) -> bool {
+async fn check_password_correct(archive_path: &PathBuf, password: &str) -> bool {
     let parent_dir = match archive_path.parent() {
-        Some(p) => p,
+        Some(p) => p.to_path_buf(),
         None => return false,
+    };
+    let filename = archive_path.file_name().unwrap().to_string_lossy().to_string();
+    let password_esc = password.replace("'", "'\\''");
+    
+    let output = tokio::task::spawn_blocking(move || {
+        std::process::Command::new("sh")
+            .current_dir(parent_dir)
+            .arg("-c")
+            .arg(format!("unzip -t -P '{}' '{}'", password_esc, filename))
+            .output()
+    }).await;
+    
+    if let Ok(Ok(out)) = output {
+        out.status.success()
+    } else {
+        false
+    }
+}
+
+async fn perform_decompress_get_logs(archive_path: PathBuf, password: Option<String>) -> (bool, String) {
+    let parent_dir = match archive_path.parent() {
+        Some(p) => p.to_path_buf(),
+        None => return (false, "Invalid parent directory path".to_string()),
     };
     
     let filename = archive_path.file_name().unwrap().to_string_lossy().to_string();
     let is_zip = filename.ends_with(".zip");
-    let is_tar = filename.ends_with(".tar") || filename.ends_with(".tar.xz") || filename.ends_with(".tar.gz") || filename.ends_with(".tgz") ||
-                 filename.ends_with(".txz") || filename.ends_with(".tar.bz2") || filename.ends_with(".tbz2");
-    
-    if !is_zip && !is_tar {
-        return false;
-    }
-    
-    let mut cmd = std::process::Command::new("sh");
-    cmd.current_dir(parent_dir);
     
     let cmd_str = if is_zip {
-        format!("unzip -o '{}'", filename)
+        if let Some(pass) = password {
+            let pass_esc = pass.replace("'", "'\\''");
+            format!("unzip -o -P '{}' '{}'", pass_esc, filename)
+        } else {
+            format!("unzip -o '{}'", filename)
+        }
     } else {
-        format!("tar -xf '{}'", filename)
+        format!("tar -xvf '{}'", filename)
     };
     
-    cmd.arg("-c").arg(&cmd_str);
+    let output = tokio::task::spawn_blocking(move || {
+        std::process::Command::new("sh")
+            .current_dir(parent_dir)
+            .arg("-c")
+            .arg(&cmd_str)
+            .output()
+    }).await;
     
-    match cmd.spawn() {
-        Ok(mut child) => {
-            match tokio::task::spawn_blocking(move || child.wait()).await {
-                Ok(Ok(status)) => status.success(),
-                _ => false,
+    match output {
+        Ok(Ok(out)) => {
+            let success = out.status.success();
+            let mut logs = String::from_utf8_lossy(&out.stdout).to_string();
+            let errs = String::from_utf8_lossy(&out.stderr).to_string();
+            if !errs.is_empty() {
+                logs.push_str("\n--- Errors ---\n");
+                logs.push_str(&errs);
             }
+            (success, logs)
         }
-        Err(_) => false,
+        _ => (false, "Failed to spawn decompression command".to_string()),
     }
 }
 
-async fn perform_decompress_with_password(archive_path: PathBuf, password: &str) -> bool {
-    let parent_dir = match archive_path.parent() {
-        Some(p) => p,
-        None => return false,
-    };
+pub fn show_decompress_log_dialog(
+    archive_path: PathBuf,
+    current_path: PathBuf,
+    nav_callback: Rc<dyn Fn(PathBuf)>,
+    password: Option<String>,
+) {
+    let window = Window::builder()
+        .title(&t("explore.dialog_decompress_title"))
+        .modal(true)
+        .resizable(true)
+        .default_width(450)
+        .default_height(300)
+        .css_classes(vec!["explore-dialog".to_string()])
+        .build();
+
+    let vbox = Box::new(Orientation::Vertical, 10);
+    vbox.set_margin_top(16);
+    vbox.set_margin_bottom(16);
+    vbox.set_margin_start(16);
+    vbox.set_margin_end(16);
+    window.set_child(Some(&vbox));
+
+    let status_box = Box::new(Orientation::Horizontal, 10);
+    let lbl_status = Label::builder()
+        .label(&t("explore.decompressing_running"))
+        .halign(Align::Start)
+        .hexpand(true)
+        .build();
+    let spinner = Spinner::new();
+    spinner.start();
+
+    status_box.append(&lbl_status);
+    status_box.append(&spinner);
+    vbox.append(&status_box);
+
+    let scroll = ScrolledWindow::builder()
+        .hexpand(true)
+        .vexpand(true)
+        .min_content_height(180)
+        .build();
+    scroll.add_css_class("log-scroller");
+
+    let text_view = TextView::builder()
+        .editable(false)
+        .cursor_visible(false)
+        .wrap_mode(gtk4::WrapMode::WordChar)
+        .build();
+    text_view.add_css_class("log-textview");
     
-    let filename = archive_path.file_name().unwrap().to_string_lossy().to_string();
-    let password_esc = password.replace("'", "'\\''");
+    let buffer = text_view.buffer();
+    buffer.set_text(&format!("$ Decompressing {}...\n", archive_path.file_name().unwrap().to_string_lossy()));
     
-    let mut cmd = std::process::Command::new("sh");
-    cmd.current_dir(parent_dir);
-    cmd.arg("-c").arg(format!("unzip -o -P '{}' '{}'", password_esc, filename));
-    
-    match cmd.spawn() {
-        Ok(mut child) => {
-            match tokio::task::spawn_blocking(move || child.wait()).await {
-                Ok(Ok(status)) => status.success(),
-                _ => false,
-            }
+    scroll.set_child(Some(&text_view));
+    vbox.append(&scroll);
+
+    let btn_close = Button::builder()
+        .label(&t("explore.settings_close"))
+        .sensitive(false)
+        .halign(Align::End)
+        .build();
+    vbox.append(&btn_close);
+
+    let win_c = window.clone();
+    btn_close.connect_clicked(move |_| {
+        win_c.close();
+    });
+
+    let archive_path_c = archive_path.clone();
+    let current_path_c = current_path.clone();
+    let nav_c = nav_callback.clone();
+    let spinner_c = spinner.clone();
+    let lbl_status_c = lbl_status.clone();
+    let buffer_c = buffer.clone();
+    let btn_close_c = btn_close.clone();
+
+    glib::spawn_future_local(async move {
+        let (success, logs) = perform_decompress_get_logs(archive_path_c, password).await;
+        
+        spinner_c.stop();
+        spinner_c.set_visible(false);
+        
+        let current_text = buffer_c.text(&buffer_c.start_iter(), &buffer_c.end_iter(), false);
+        if success {
+            lbl_status_c.set_markup(&format!("<b><span color='#22c55e'>{}</span></b>", t("explore.decompress_success")));
+            buffer_c.set_text(&format!("{}{}\n\nDecompression completed successfully!", current_text, logs));
+        } else {
+            lbl_status_c.set_markup(&format!("<b><span color='#ef4444'>{}</span></b>", t("explore.decompress_failed")));
+            buffer_c.set_text(&format!("{}{}\n\nDecompression failed with error:\n{}", current_text, logs, logs));
         }
-        Err(_) => false,
-    }
+        
+        btn_close_c.set_sensitive(true);
+        nav_c(current_path_c);
+    });
+
+    window.present();
 }
 
 pub fn show_password_dialog(
@@ -335,10 +433,10 @@ pub fn show_password_dialog(
         let lbl_err_f = lbl_error_c.clone();
 
         glib::spawn_future_local(async move {
-            let success = perform_decompress_with_password(archive_path_f, &password).await;
-            if success {
+            let correct = check_password_correct(&archive_path_f, &password).await;
+            if correct {
                 win_f.close();
-                nav_f(current_path_f);
+                show_decompress_log_dialog(archive_path_f, current_path_f, nav_f, Some(password));
             } else {
                 lbl_err_f.set_markup(&format!("<span color='#ef4444'>{}</span>", t("explore.dialog_password_incorrect")));
             }

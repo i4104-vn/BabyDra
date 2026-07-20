@@ -279,6 +279,10 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.dialog_password_title", "Enter Password");
             map.insert("explore.dialog_password_label", "This archive is password-protected. Please enter password:");
             map.insert("explore.dialog_password_incorrect", "Incorrect password. Please try again.");
+            map.insert("explore.dialog_decompress_title", "Decompression Log");
+            map.insert("explore.decompressing_running", "Decompressing...");
+            map.insert("explore.decompress_success", "Decompression Succeeded");
+            map.insert("explore.decompress_failed", "Decompression Failed");
         }
         _ => {
             // Menu
@@ -508,6 +512,10 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.dialog_password_title", "Nhập mật khẩu");
             map.insert("explore.dialog_password_label", "Tệp này được bảo vệ bằng mật khẩu. Vui lòng nhập mật khẩu:");
             map.insert("explore.dialog_password_incorrect", "Mật khẩu không chính xác. Vui lòng thử lại.");
+            map.insert("explore.dialog_decompress_title", "Nhật ký giải nén");
+            map.insert("explore.decompressing_running", "Đang giải nén...");
+            map.insert("explore.decompress_success", "Giải nén thành công");
+            map.insert("explore.decompress_failed", "Giải nén thất bại");
         }
     }
     map
