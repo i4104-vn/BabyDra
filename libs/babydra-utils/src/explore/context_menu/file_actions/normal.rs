@@ -13,16 +13,30 @@ pub fn show_for_file_normal(
 ) {
     // Create vertical menu buttons
     let btn_open = create_menu_button("Open", "folder-new");
+    let btn_compress = create_menu_button("Compress...", "folder");
+    let has_archive = target_paths.iter().any(|path| {
+        let name = path.to_string_lossy().to_lowercase();
+        name.ends_with(".zip") || name.ends_with(".tar") || name.ends_with(".tar.gz") || name.ends_with(".tgz")
+    });
+    let btn_decompress = if has_archive {
+        Some(create_menu_button("Decompress", "download"))
+    } else {
+        None
+    };
     let btn_delete = create_menu_button("Delete Permanently", "trash");
 
     vbox.append(&btn_open);
+    vbox.append(&btn_compress);
+    if let Some(ref btn) = btn_decompress {
+        vbox.append(btn);
+    }
     vbox.append(&btn_delete);
 
     // Create horizontal footer box for clipboard & file operations
     let footer_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
     footer_box.add_css_class("context-menu-footer");
-    footer_box.set_halign(gtk4::Align::Fill);
-    footer_box.set_homogeneous(true);
+    footer_box.set_halign(gtk4::Align::Start);
+    footer_box.set_homogeneous(false);
 
     let btn_cut = create_footer_icon_button("cut", "Cut");
     let btn_copy = create_footer_icon_button("copy", "Copy");
@@ -179,6 +193,33 @@ pub fn show_for_file_normal(
             nav_c(cp_c);
         });
     });
+
+    // Compress action
+    let target_paths_compress = target_paths.clone();
+    let nav = nav_callback.clone();
+    let current_p = current_path.clone();
+    let pop_c = popover.clone();
+    btn_compress.connect_clicked(move |_| {
+        pop_c.popdown();
+        crate::explore::dialogs::show_compress_dialog(target_paths_compress.clone(), current_p.clone(), nav.clone());
+    });
+
+    // Decompress action
+    if let Some(ref btn) = btn_decompress {
+        let target_paths_decompress = target_paths.clone();
+        let nav = nav_callback.clone();
+        let current_p = current_path.clone();
+        let pop_c = popover.clone();
+        btn.connect_clicked(move |_| {
+            pop_c.popdown();
+            for path in &target_paths_decompress {
+                let name = path.to_string_lossy().to_lowercase();
+                if name.ends_with(".zip") || name.ends_with(".tar") || name.ends_with(".tar.gz") || name.ends_with(".tgz") {
+                    crate::explore::dialogs::perform_decompress_async(path.clone(), current_p.clone(), nav.clone());
+                }
+            }
+        });
+    }
 
     // Custom Context Options
     let settings = babydra_common::load_explore_settings();

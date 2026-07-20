@@ -42,8 +42,8 @@ pub fn create_menu_button(label: &str, icon: &str) -> Button {
 }
 
 pub fn create_footer_icon_button(icon: &str, tooltip: &str) -> Button {
-    let img = crate::ui::icon::get_icon(icon, 16);
-    img.set_pixel_size(16);
+    let img = crate::ui::icon::get_icon(icon, 14);
+    img.set_pixel_size(14);
 
     Button::builder()
         .child(&img)

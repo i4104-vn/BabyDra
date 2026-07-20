@@ -82,10 +82,10 @@ button.context-menu-footer-btn {
     outline: none;
     box-shadow: none;
     border-radius: 6px;
-    padding: 6px;
+    padding: 4px;
     color: #e8e8e8;
-    min-width: 32px;
-    min-height: 32px;
+    min-width: 26px;
+    min-height: 26px;
     transition: background-color 0.1s ease;
 }
 
