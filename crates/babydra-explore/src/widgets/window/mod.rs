@@ -422,25 +422,10 @@ pub fn create_explore_window(
     // D-Bus service loop
     events::setup_dbus_receiver(navigate_pane_no_watch_ref.clone(), active_pane.clone());
 
-    // Connect theme preference notifier
-    events::setup_theme_listener(left_content_handle.clone(), right_content_handle.clone());
-
     // Start initial navigation
     let path = session.borrow().active_tab().current_path.clone();
     if let Some(ref f) = *navigate_pane_ref.borrow() {
         f(ActivePane::Left, path);
-    }
-
-    // Connect theme-change listener to rebuild content views
-    if let Some(settings) = gtk4::Settings::default() {
-        let left_handle = left_content_handle.clone();
-        let right_handle = right_content_handle.clone();
-        settings.connect_gtk_application_prefer_dark_theme_notify(move |_| {
-            crate::widgets::content_view::update_content_view_ui(&left_handle);
-            if let Some(ref rh) = *right_handle.borrow() {
-                crate::widgets::content_view::update_content_view_ui(rh);
-            }
-        });
     }
 
     ui.window
