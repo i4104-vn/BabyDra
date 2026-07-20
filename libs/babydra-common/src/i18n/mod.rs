@@ -198,6 +198,10 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.local_disk", "Local Disk (/)");
             map.insert("explore.toggle_hidden", "Toggle Hidden Files (Ctrl+H)");
             map.insert("explore.toggle_preview", "Toggle Preview (F4)");
+            map.insert("explore.preview_no_selection", "Select a file to preview");
+            map.insert("explore.previewing", "Previewing: {}");
+            map.insert("explore.preview_too_large", "[File is too large to preview (> 1MB)]");
+            map.insert("explore.preview_failed", "[Failed to load file contents / Binary file]");
             map.insert("explore.items", "items");
             map.insert("explore.total_size", "Total size");
             map.insert("explore.back", "Back");
@@ -243,6 +247,38 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.placeholder_name_desc", "File/Folder name with extension");
             map.insert("explore.placeholder_stem_desc", "File/Folder name without extension");
             map.insert("explore.placeholder_ext_desc", "File extension");
+
+            // Context Menu & Dialogs
+            map.insert("explore.menu_open", "Open");
+            map.insert("explore.menu_compress", "Compress...");
+            map.insert("explore.menu_decompress", "Decompress");
+            map.insert("explore.menu_new", "New");
+            map.insert("explore.menu_new_folder", "Folder");
+            map.insert("explore.menu_new_file", "File");
+            map.insert("explore.menu_cut", "Cut");
+            map.insert("explore.menu_copy", "Copy");
+            map.insert("explore.menu_paste", "Paste");
+            map.insert("explore.menu_rename", "Rename");
+            map.insert("explore.menu_trash", "Move to Trash");
+            map.insert("explore.menu_restore", "Restore");
+            map.insert("explore.menu_delete_perm", "Delete Permanently");
+
+            map.insert("explore.dialog_rename_title", "Rename File");
+            map.insert("explore.dialog_rename_label", "Enter new name:");
+            map.insert("explore.dialog_new_file_title", "New File");
+            map.insert("explore.dialog_new_file_label", "Enter file name:");
+            map.insert("explore.dialog_new_folder_title", "New Folder");
+            map.insert("explore.dialog_new_folder_label", "Enter folder name:");
+            map.insert("explore.dialog_archive_title", "Compress File");
+            map.insert("explore.dialog_archive_label", "Enter archive name:");
+            map.insert("explore.dialog_confirm_title", "Are you sure?");
+            map.insert("explore.dialog_confirm_body", "This action cannot be undone.");
+            map.insert("explore.dialog_confirm_delete_title", "Confirm Delete");
+            map.insert("explore.dialog_confirm_delete_single", "Are you sure you want to permanently delete '{}'?");
+            map.insert("explore.dialog_confirm_delete_multi", "Are you sure you want to permanently delete these {} items?");
+            map.insert("explore.dialog_password_title", "Enter Password");
+            map.insert("explore.dialog_password_label", "This archive is password-protected. Please enter password:");
+            map.insert("explore.dialog_password_incorrect", "Incorrect password. Please try again.");
         }
         _ => {
             // Menu
@@ -391,6 +427,10 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.local_disk", "Ổ đĩa cục bộ (/)");
             map.insert("explore.toggle_hidden", "Ẩn/hiện tệp ẩn (Ctrl+H)");
             map.insert("explore.toggle_preview", "Ẩn/hiện xem trước (F4)");
+            map.insert("explore.preview_no_selection", "Chọn một tệp để xem trước");
+            map.insert("explore.previewing", "Đang xem trước: {}");
+            map.insert("explore.preview_too_large", "[Tệp quá lớn để xem trước (> 1MB)]");
+            map.insert("explore.preview_failed", "[Không tải được nội dung tệp / Tệp nhị phân]");
             map.insert("explore.items", "đối tượng");
             map.insert("explore.total_size", "Tổng dung lượng");
             map.insert("explore.back", "Quay lại");
@@ -436,6 +476,38 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.placeholder_name_desc", "Tên tệp/thư mục kèm theo phần mở rộng");
             map.insert("explore.placeholder_stem_desc", "Tên tệp/thư mục không kèm phần mở rộng");
             map.insert("explore.placeholder_ext_desc", "Phần mở rộng của tệp");
+
+            // Context Menu & Dialogs
+            map.insert("explore.menu_open", "Mở");
+            map.insert("explore.menu_compress", "Nén...");
+            map.insert("explore.menu_decompress", "Giải nén");
+            map.insert("explore.menu_new", "Tạo mới");
+            map.insert("explore.menu_new_folder", "Thư mục");
+            map.insert("explore.menu_new_file", "Tệp tin");
+            map.insert("explore.menu_cut", "Cắt");
+            map.insert("explore.menu_copy", "Sao chép");
+            map.insert("explore.menu_paste", "Dán");
+            map.insert("explore.menu_rename", "Đổi tên");
+            map.insert("explore.menu_trash", "Di chuyển vào Thùng rác");
+            map.insert("explore.menu_restore", "Khôi phục");
+            map.insert("explore.menu_delete_perm", "Xóa vĩnh viễn");
+
+            map.insert("explore.dialog_rename_title", "Đổi tên tệp");
+            map.insert("explore.dialog_rename_label", "Nhập tên mới:");
+            map.insert("explore.dialog_new_file_title", "Tệp mới");
+            map.insert("explore.dialog_new_file_label", "Nhập tên tệp:");
+            map.insert("explore.dialog_new_folder_title", "Thư mục mới");
+            map.insert("explore.dialog_new_folder_label", "Nhập tên thư mục:");
+            map.insert("explore.dialog_archive_title", "Nén tệp");
+            map.insert("explore.dialog_archive_label", "Nhập tên tệp nén:");
+            map.insert("explore.dialog_confirm_title", "Bạn có chắc chắn không?");
+            map.insert("explore.dialog_confirm_body", "Hành động này không thể hoàn tác.");
+            map.insert("explore.dialog_confirm_delete_title", "Xác nhận xóa");
+            map.insert("explore.dialog_confirm_delete_single", "Bạn có chắc chắn muốn xóa vĩnh viễn '{}' không?");
+            map.insert("explore.dialog_confirm_delete_multi", "Bạn có chắc chắn muốn xóa vĩnh viễn {} đối tượng này không?");
+            map.insert("explore.dialog_password_title", "Nhập mật khẩu");
+            map.insert("explore.dialog_password_label", "Tệp này được bảo vệ bằng mật khẩu. Vui lòng nhập mật khẩu:");
+            map.insert("explore.dialog_password_incorrect", "Mật khẩu không chính xác. Vui lòng thử lại.");
         }
     }
     map

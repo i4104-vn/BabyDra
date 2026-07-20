@@ -3,6 +3,8 @@ use std::rc::Rc;
 use gtk4::prelude::*;
 use crate::explore::context_menu::{CLIPBOARD, create_menu_popover, create_menu_button};
 
+use babydra_common::i18n::t;
+
 /// Renders the context menu when right-clicking on an empty space inside a folder directory.
 pub fn show_for_empty(
     parent: &gtk4::Widget,
@@ -16,8 +18,8 @@ pub fn show_for_empty(
     }
     let (popover, vbox) = create_menu_popover(parent, x, y);
 
-    let btn_create_new = create_menu_button("New", "plus");
-    let btn_paste = create_menu_button("Paste", "paste");
+    let btn_create_new = create_menu_button(&t("explore.menu_new"), "plus");
+    let btn_paste = create_menu_button(&t("explore.menu_paste"), "paste");
 
     vbox.append(&btn_create_new);
     vbox.append(&btn_paste);
@@ -28,8 +30,8 @@ pub fn show_for_empty(
     sub_vbox.set_css_classes(&["context-menu-box"]);
     sub_vbox.set_width_request(150);
 
-    let btn_new_folder = create_menu_button("Folder", "folder-new");
-    let btn_new_file = create_menu_button("File", "text");
+    let btn_new_folder = create_menu_button(&t("explore.menu_new_folder"), "folder-new");
+    let btn_new_file = create_menu_button(&t("explore.menu_new_file"), "text");
 
     sub_vbox.append(&btn_new_folder);
     sub_vbox.append(&btn_new_file);

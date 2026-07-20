@@ -3,8 +3,10 @@ use std::fs;
 use babydra_common::PreviewPanelWidgets;
 use super::render::render_markdown_to_pango;
 
+use babydra_common::i18n::t;
+
 pub fn clear_preview(widgets: &PreviewPanelWidgets) {
-    widgets.lbl_status.set_text("Select a file to preview");
+    widgets.lbl_status.set_text(&t("explore.preview_no_selection"));
     widgets.lbl_content.set_text("");
     widgets.current_file.replace(None);
     widgets.watcher.replace(None);
@@ -12,13 +14,13 @@ pub fn clear_preview(widgets: &PreviewPanelWidgets) {
 
 pub fn show_file_preview(widgets: &PreviewPanelWidgets, path: &Path) {
     let filename = path.file_name().unwrap_or_default().to_string_lossy();
-    widgets.lbl_status.set_text(&format!("Previewing: {}", filename));
+    widgets.lbl_status.set_text(&t("explore.previewing").replace("{}", &filename));
     widgets.current_file.replace(Some(path.to_path_buf()));
 
     // Read file contents (limit to 1MB to avoid freezing)
     if let Ok(metadata) = fs::metadata(path) {
         if metadata.len() > 1024 * 1024 {
-            widgets.lbl_content.set_text("[File is too large to preview (> 1MB)]");
+            widgets.lbl_content.set_text(&t("explore.preview_too_large"));
             widgets.watcher.replace(None);
             return;
         }
@@ -34,7 +36,7 @@ pub fn show_file_preview(widgets: &PreviewPanelWidgets, path: &Path) {
             widgets.lbl_content.set_markup(&escaped);
         }
     } else {
-        widgets.lbl_content.set_text("[Failed to load file contents / Binary file]");
+        widgets.lbl_content.set_text(&t("explore.preview_failed"));
     }
 
     // Setup unbounded channel for thread-safe UI updates

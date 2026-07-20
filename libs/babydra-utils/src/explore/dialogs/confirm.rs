@@ -35,9 +35,9 @@ pub fn show_delete_confirm_dialog(
     bbox.set_halign(Align::End);
     vbox.append(&bbox);
 
-    let btn_cancel = Button::with_label("Cancel");
+    let btn_cancel = Button::with_label(&babydra_common::i18n::t("explore.settings_cancel"));
     let btn_confirm = Button::builder()
-        .label("Delete")
+        .label(&babydra_common::i18n::t("explore.settings_delete"))
         .css_classes(vec!["destructive-action".to_string()])
         .build();
 

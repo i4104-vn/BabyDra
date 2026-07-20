@@ -3,10 +3,12 @@ use gtk4::{Box, Orientation, Label, Entry, Button, Align, Window};
 use std::path::PathBuf;
 use std::rc::Rc;
 
+use babydra_common::i18n::t;
+
 /// Presents a dialog window to create a new folder under a directory.
 pub fn show_new_folder_dialog(current_path: PathBuf, nav_callback: Rc<dyn Fn(PathBuf)>) {
     let window = Window::builder()
-        .title("Create New Folder")
+        .title(&t("explore.dialog_new_folder_title"))
         .modal(true)
         .resizable(false)
         .default_width(320)
@@ -22,13 +24,13 @@ pub fn show_new_folder_dialog(current_path: PathBuf, nav_callback: Rc<dyn Fn(Pat
     window.set_child(Some(&vbox));
 
     let lbl = Label::builder()
-        .label("Folder name:")
+        .label(&t("explore.dialog_new_folder_label"))
         .halign(Align::Start)
         .build();
     vbox.append(&lbl);
 
     let entry = Entry::new();
-    entry.set_text("New Folder");
+    entry.set_text(&t("explore.menu_new_folder"));
     entry.set_hexpand(true);
     vbox.append(&entry);
 
@@ -36,9 +38,9 @@ pub fn show_new_folder_dialog(current_path: PathBuf, nav_callback: Rc<dyn Fn(Pat
     bbox.set_halign(Align::End);
     vbox.append(&bbox);
 
-    let btn_cancel = Button::with_label("Cancel");
+    let btn_cancel = Button::with_label(&t("explore.settings_cancel"));
     let btn_create = Button::builder()
-        .label("Create")
+        .label(&t("explore.settings_add"))
         .css_classes(vec!["suggested-action".to_string()])
         .build();
 

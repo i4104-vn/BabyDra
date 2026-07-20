@@ -3,10 +3,12 @@ use gtk4::{Box, Orientation, Label, Entry, Button, Align, Window};
 use std::path::PathBuf;
 use std::rc::Rc;
 
+use babydra_common::i18n::t;
+
 /// Presents a dialog window to rename a target file or folder.
 pub fn show_rename_dialog(path: &PathBuf, current_path: PathBuf, nav_callback: Rc<dyn Fn(PathBuf)>) {
     let window = Window::builder()
-        .title("Rename File")
+        .title(&t("explore.dialog_rename_title"))
         .modal(true)
         .resizable(false)
         .default_width(320)
@@ -22,7 +24,7 @@ pub fn show_rename_dialog(path: &PathBuf, current_path: PathBuf, nav_callback: R
     window.set_child(Some(&vbox));
 
     let lbl = Label::builder()
-        .label("Enter new name:")
+        .label(&t("explore.dialog_rename_label"))
         .halign(Align::Start)
         .build();
     vbox.append(&lbl);
@@ -36,9 +38,9 @@ pub fn show_rename_dialog(path: &PathBuf, current_path: PathBuf, nav_callback: R
     bbox.set_halign(Align::End);
     vbox.append(&bbox);
 
-    let btn_cancel = Button::with_label("Cancel");
+    let btn_cancel = Button::with_label(&t("explore.settings_cancel"));
     let btn_rename = Button::builder()
-        .label("Rename")
+        .label(&t("explore.menu_rename"))
         .css_classes(vec!["suggested-action".to_string()])
         .build();
 

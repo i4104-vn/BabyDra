@@ -3,6 +3,8 @@ use std::rc::Rc;
 use gtk4::prelude::*;
 use crate::explore::context_menu::{create_menu_button};
 
+use babydra_common::i18n::t;
+
 /// Renders the context menu for files/directories inside the Trash (Restore, Delete Permanently).
 pub fn show_for_file_trash(
     popover: &gtk4::Popover,
@@ -11,8 +13,8 @@ pub fn show_for_file_trash(
     current_path: PathBuf,
     nav_callback: Rc<dyn Fn(PathBuf)>,
 ) {
-    let btn_restore = create_menu_button("Restore", "restart");
-    let btn_delete = create_menu_button("Delete Permanently", "trash");
+    let btn_restore = create_menu_button(&t("explore.menu_restore"), "restart");
+    let btn_delete = create_menu_button(&t("explore.menu_delete_perm"), "trash");
 
     vbox.append(&btn_restore);
     vbox.append(&btn_delete);
@@ -49,13 +51,13 @@ pub fn show_for_file_trash(
         let paths_c = target_paths_del.clone();
         
         let message = if paths_c.len() == 1 {
-            format!("Are you sure you want to permanently delete '{}'?", paths_c[0].file_name().unwrap().to_string_lossy())
+            t("explore.dialog_confirm_delete_single").replace("{}", &paths_c[0].file_name().unwrap().to_string_lossy())
         } else {
-            format!("Are you sure you want to permanently delete these {} items?", paths_c.len())
+            t("explore.dialog_confirm_delete_multi").replace("{}", &paths_c.len().to_string())
         };
         
         crate::explore::dialogs::show_delete_confirm_dialog(
-            "Confirm Delete",
+            &t("explore.dialog_confirm_delete_title"),
             &message,
             move || {
                 let nav_f = nav_c.clone();

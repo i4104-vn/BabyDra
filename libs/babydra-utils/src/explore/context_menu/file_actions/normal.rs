@@ -3,6 +3,8 @@ use std::rc::Rc;
 use gtk4::prelude::*;
 use crate::explore::context_menu::{CLIPBOARD, create_menu_button, create_footer_icon_button};
 
+use babydra_common::i18n::t;
+
 /// Renders the standard context menu for files/directories outside the Trash.
 pub fn show_for_file_normal(
     popover: &gtk4::Popover,
@@ -12,14 +14,14 @@ pub fn show_for_file_normal(
     nav_callback: Rc<dyn Fn(PathBuf)>,
 ) {
     // Create vertical menu buttons
-    let btn_open = create_menu_button("Open", "folder-new");
-    let btn_compress = create_menu_button("Compress...", "folder");
+    let btn_open = create_menu_button(&t("explore.menu_open"), "folder-new");
+    let btn_compress = create_menu_button(&t("explore.menu_compress"), "folder");
     let has_archive = target_paths.iter().any(|path| {
         let name = path.to_string_lossy().to_lowercase();
         name.ends_with(".zip") || name.ends_with(".tar") || name.ends_with(".tar.gz") || name.ends_with(".tgz")
     });
     let btn_decompress = if has_archive {
-        Some(create_menu_button("Decompress", "download"))
+        Some(create_menu_button(&t("explore.menu_decompress"), "download"))
     } else {
         None
     };
@@ -39,25 +41,25 @@ pub fn show_for_file_normal(
     footer_box.set_halign(gtk4::Align::Start);
     footer_box.set_homogeneous(false);
 
-    let btn_cut = create_footer_icon_button("cut", "Cut");
-    let btn_copy = create_footer_icon_button("copy", "Copy");
+    let btn_cut = create_footer_icon_button("cut", &t("explore.menu_cut"));
+    let btn_copy = create_footer_icon_button("copy", &t("explore.menu_copy"));
     
     footer_box.append(&btn_cut);
     footer_box.append(&btn_copy);
 
     // Paste button (always visible if clipboard is not empty)
     let clipboard_data = CLIPBOARD.with(|cb| cb.borrow().clone());
-    let btn_paste = create_footer_icon_button("paste", "Paste");
+    let btn_paste = create_footer_icon_button("paste", &t("explore.menu_paste"));
     btn_paste.set_sensitive(clipboard_data.is_some());
     footer_box.append(&btn_paste);
 
     // Rename button (only if 1 target is selected)
-    let btn_rename = create_footer_icon_button("rename", "Rename");
+    let btn_rename = create_footer_icon_button("rename", &t("explore.menu_rename"));
     if target_paths.len() == 1 {
         footer_box.append(&btn_rename);
     }
 
-    let btn_trash = create_footer_icon_button("trash", "Move to Trash");
+    let btn_trash = create_footer_icon_button("trash", &t("explore.menu_trash"));
     footer_box.append(&btn_trash);
 
     footer_container.append(&footer_box);
