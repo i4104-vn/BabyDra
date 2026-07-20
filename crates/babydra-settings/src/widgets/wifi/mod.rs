@@ -56,12 +56,7 @@ pub fn create_wifi_widget() -> gtk4::Box {
                 row.set_margin_start(8);
                 row.set_margin_end(8);
 
-                let icon_name = if *is_connected {
-                    "network-wireless-connected-symbolic"
-                } else {
-                    "network-wireless-signal-excellent-symbolic"
-                };
-                let wifi_icon = gtk4::Image::from_icon_name(icon_name);
+                let wifi_icon = babydra_utils::ui::icon::get_icon("wifi", 16);
                 wifi_icon.set_valign(gtk4::Align::Center);
                 row.append(&wifi_icon);
 

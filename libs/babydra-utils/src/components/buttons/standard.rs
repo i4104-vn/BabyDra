@@ -18,7 +18,7 @@ pub fn create_accent_button(label: &str) -> gtk4::Button {
 pub fn create_fab(icon_name: &str) -> gtk4::Button {
     let btn = gtk4::Button::new();
     btn.add_css_class("baby-fab");
-    let icon = gtk4::Image::from_icon_name(icon_name);
+    let icon = crate::ui::icon::get_icon(icon_name, 24);
     btn.set_child(Some(&icon));
     btn.set_halign(gtk4::Align::End);
     btn.set_valign(gtk4::Align::End);

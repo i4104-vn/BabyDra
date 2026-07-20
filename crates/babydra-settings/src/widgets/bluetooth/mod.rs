@@ -59,7 +59,7 @@ pub fn create_bluetooth_widget() -> gtk4::Box {
                 row.set_margin_start(8);
                 row.set_margin_end(8);
 
-                let icon = gtk4::Image::from_icon_name("bluetooth-active-symbolic");
+                let icon = babydra_utils::ui::icon::get_icon("bluetooth", 16);
                 icon.set_valign(gtk4::Align::Center);
                 row.append(&icon);
 

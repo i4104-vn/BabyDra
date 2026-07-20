@@ -29,7 +29,7 @@ pub fn build_system_ui(
     logo_container.add_css_class("os-logo");
     logo_container.set_size_request(100, 100);
     
-    let logo_img = gtk4::Image::from_icon_name("computer-symbolic");
+    let logo_img = babydra_utils::ui::icon::get_icon("logo", 72);
     logo_img.set_pixel_size(72);
     logo_img.set_valign(gtk4::Align::Center);
     logo_img.set_halign(gtk4::Align::Center);
@@ -82,7 +82,7 @@ pub fn build_system_ui(
         icon_box.set_size_request(46, 46);
         icon_box.set_valign(gtk4::Align::Center);
         
-        let icon_img = gtk4::Image::from_icon_name(icon_name);
+        let icon_img = babydra_utils::ui::icon::get_icon(icon_name, 20);
         icon_img.set_pixel_size(20);
         icon_box.append(&icon_img);
         card.append(&icon_box);
@@ -103,10 +103,10 @@ pub fn build_system_ui(
         card
     };
 
-    let card_kernel = create_info_card("preferences-system-symbolic", "Kernel", kernel_version);
-    let card_cpu = create_info_card("cpu-symbolic", "Processor", cpu_model);
-    let card_mem = create_info_card("media-flash-symbolic", "Memory", memory_text);
-    let card_gpu = create_info_card("video-display-symbolic", "Graphics", gpu_info);
+    let card_kernel = create_info_card("info", "Kernel", kernel_version);
+    let card_cpu = create_info_card("performance", "Processor", cpu_model);
+    let card_mem = create_info_card("activity", "Memory", memory_text);
+    let card_gpu = create_info_card("display", "Graphics", gpu_info);
 
     grid.attach(&card_kernel, 0, 0, 1, 1);
     grid.attach(&card_cpu, 1, 0, 1, 1);
