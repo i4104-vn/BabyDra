@@ -4,7 +4,9 @@ use babydra_common::i18n::t;
 
 mod general;
 mod context_menu;
+mod keybinds;
 
+/// Displays the main settings dialog with tabs for general settings, keyboard shortcuts, and custom context menus.
 pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn() + 'static) {
     let window = Window::builder()
         .title(&t("explore.settings"))
@@ -47,6 +49,14 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         .build();
     btn_general.set_cursor_from_name(Some("pointer"));
 
+    let btn_keybinds = Button::builder()
+        .label(&t("explore.settings_keybinds"))
+        .hexpand(true)
+        .halign(Align::Fill)
+        .css_classes(vec!["sidebar-item".to_string()])
+        .build();
+    btn_keybinds.set_cursor_from_name(Some("pointer"));
+
     let btn_context = Button::builder()
         .label(&t("explore.settings_context_menu"))
         .hexpand(true)
@@ -56,6 +66,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     btn_context.set_cursor_from_name(Some("pointer"));
 
     sidebar_box.append(&btn_general);
+    sidebar_box.append(&btn_keybinds);
     sidebar_box.append(&btn_context);
 
     // Separator between sidebar and content stack
@@ -76,28 +87,45 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
 
     // ── Build pages ──────────────────────────────────────────
     let tab_general = general::build_general_page();
+    let tab_keybinds = keybinds::build_keybinds_page();
     let tab_context = context_menu::build_context_menu_page();
 
     stack.add_named(&tab_general, Some("general"));
+    stack.add_named(&tab_keybinds, Some("keybinds"));
     stack.add_named(&tab_context, Some("context_menu"));
 
     // ── Switch tabs closures ─────────────────────────────────
     let btn_gen_c = btn_general.clone();
+    let btn_key_c = btn_keybinds.clone();
     let btn_con_c = btn_context.clone();
     let stack_c = stack.clone();
     btn_general.connect_clicked(move |_| {
         btn_gen_c.add_css_class("active-nav");
+        btn_key_c.remove_css_class("active-nav");
         btn_con_c.remove_css_class("active-nav");
         stack_c.set_visible_child_name("general");
     });
 
     let btn_gen_c2 = btn_general.clone();
+    let btn_key_c2 = btn_keybinds.clone();
     let btn_con_c2 = btn_context.clone();
     let stack_c2 = stack.clone();
-    btn_context.connect_clicked(move |_| {
-        btn_con_c2.add_css_class("active-nav");
+    btn_keybinds.connect_clicked(move |_| {
+        btn_key_c2.add_css_class("active-nav");
         btn_gen_c2.remove_css_class("active-nav");
-        stack_c2.set_visible_child_name("context_menu");
+        btn_con_c2.remove_css_class("active-nav");
+        stack_c2.set_visible_child_name("keybinds");
+    });
+
+    let btn_gen_c3 = btn_general.clone();
+    let btn_key_c3 = btn_keybinds.clone();
+    let btn_con_c3 = btn_context.clone();
+    let stack_c3 = stack.clone();
+    btn_context.connect_clicked(move |_| {
+        btn_con_c3.add_css_class("active-nav");
+        btn_gen_c3.remove_css_class("active-nav");
+        btn_key_c3.remove_css_class("active-nav");
+        stack_c3.set_visible_child_name("context_menu");
     });
 
     // Also trigger on_change when window is destroyed/closed
