@@ -2,7 +2,7 @@ use std::rc::Rc;
 use std::cell::{RefCell, Cell};
 use std::path::PathBuf;
 use gtk4::prelude::*;
-use babydra_common::{SessionState, ActivePane, ContentViewHandle};
+use babydra_common::{SessionState, ActivePane};
 use crate::widgets::status_bar::StatusBarWidgets;
 
 /// Registers keyboard shortcut events (F3 for split view, F4 for preview pane, Ctrl+H for hidden files).
@@ -103,5 +103,3 @@ pub fn setup_dbus_receiver(
         }
     });
 }
-
-

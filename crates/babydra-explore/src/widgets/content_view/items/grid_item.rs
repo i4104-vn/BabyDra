@@ -5,6 +5,7 @@ use std::rc::Rc;
 use babydra_common::FileEntry;
 use std::cell::RefCell;
 
+/// Creates an explore-specific flowbox child grid cell representing a single file/folder.
 pub fn create_flow_child(
     idx: usize,
     entry: &FileEntry,

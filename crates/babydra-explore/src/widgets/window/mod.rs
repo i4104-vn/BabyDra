@@ -6,10 +6,9 @@ use std::path::PathBuf;
 use babydra_common::{SessionState, ActivePane};
 
 mod render;
-pub mod tabs;
-pub mod split;
-mod navigation;
-mod events;
+pub mod handlers;
+pub mod layout;
+pub mod widgets;
 
 /// Creates and configures the main file explorer window, wires all component widgets (header, sidebar, content panes, tabs, info panel, status bar), and launches the navigation loops.
 pub fn create_explore_window(
@@ -106,7 +105,7 @@ pub fn create_explore_window(
     status_bar_widgets_cell.replace(Some(status_bar_widgets.clone()));
 
     // Setup navigation closures
-    let (navigate_pane_ref, navigate_pane_no_watch_ref, _watcher) = navigation::setup_navigation(
+    let (navigate_pane_ref, navigate_pane_no_watch_ref, _watcher) = handlers::setup_navigation(
         session.clone(),
         active_pane.clone(),
         left_content_handle.clone(),
@@ -248,79 +247,17 @@ pub fn create_explore_window(
         header_widgets.btn_view_list.remove_css_class("toolbar-btn-active");
     }
 
-    // Wire btn_new_folder click (dynamically handles New Folder or Empty Trash depending on path)
-    {
-        let session_c = session.clone();
-        let nav = navigate_pane_ref.clone();
-        let active = active_pane.clone();
-        header_widgets.btn_new_folder.connect_clicked(move |_| {
-            let path = session_c.borrow().active_tab().current_path.clone();
-            let is_in_trash = path.to_string_lossy().ends_with("Trash/files");
-            if is_in_trash {
-                babydra_common::helper::clean::remove_trash();
-                if let Some(ref f) = *nav.borrow() {
-                    f(active.get(), path);
-                }
-            } else {
-                let nav_cb = {
-                    let nav = nav.clone();
-                    let act = active.clone();
-                    Rc::new(move |p| {
-                        if let Some(ref f) = *nav.borrow() {
-                            f(act.get(), p);
-                        }
-                    })
-                };
-                babydra_utils::explore::dialogs::show_new_folder_dialog(path, nav_cb);
-            }
-        });
-    }
+    // Wire toolbar buttons click
+    widgets::wire_toolbar_buttons(&header_widgets, session.clone(), navigate_pane_ref.clone(), active_pane.clone());
 
-
-
-    // Preview toggle closure
-    let toggle_preview = {
-        let layout_paned = ui.layout_paned.clone();
-        let revealer_c = revealer.clone();
-        let preview_visible = preview_visible.clone();
-        let user_wants_preview = user_wants_preview.clone();
-        let status_widgets_c = status_bar_widgets_cell.clone();
-        move || {
-            let now_visible = !preview_visible.get();
-            preview_visible.set(now_visible);
-            user_wants_preview.set(now_visible);
-
-            if now_visible {
-                layout_paned.set_end_child(Some(&revealer_c));
-                revealer_c.set_reveal_child(true);
-            } else {
-                revealer_c.set_reveal_child(false);
-                let layout_paned_c = layout_paned.clone();
-                let revealer_cc = revealer_c.clone();
-                glib::timeout_add_local_once(std::time::Duration::from_millis(250), move || {
-                    if !revealer_cc.reveals_child() {
-                        layout_paned_c.set_end_child(None::<&gtk4::Widget>);
-                    }
-                });
-            }
-
-            // Save updated settings
-            {
-                let mut current_settings = babydra_common::load_explore_settings();
-                current_settings.preview_visible = now_visible;
-                babydra_common::save_explore_settings(&current_settings);
-            }
-
-            if let Some(ref sw) = *status_widgets_c.borrow() {
-                if now_visible {
-                    sw.btn_toggle_preview.add_css_class("status-bar-btn-active");
-                } else {
-                    sw.btn_toggle_preview.remove_css_class("status-bar-btn-active");
-                }
-            }
-        }
-    };
-    let toggle_preview_rc = Rc::new(toggle_preview);
+    // Setup preview panel visibility toggle closure
+    let toggle_preview_rc = layout::setup_preview_toggle(
+        ui.layout_paned.clone(),
+        revealer.clone(),
+        preview_visible.clone(),
+        user_wants_preview.clone(),
+        status_bar_widgets_cell.clone(),
+    );
 
     // Wire status bar buttons click
     {
@@ -336,49 +273,18 @@ pub fn create_explore_window(
         }
     }
 
-    // Wire btn_settings click (with live setting refresh)
-    {
-        let win = ui.window.clone();
-        let nav = navigate_pane_ref.clone();
-        let active = active_pane.clone();
-        let session_c = session.clone();
-        let preview_visible = preview_visible.clone();
-        let toggle_p = toggle_preview_rc.clone();
-        header_widgets.btn_settings.connect_clicked(move |_| {
-            let nav_c = nav.clone();
-            let act_c = active.clone();
-            let session_cc = session_c.clone();
-            let preview_v = preview_visible.clone();
-            let toggle_p_c = toggle_p.clone();
-            let parent_win = win.clone().upcast::<gtk4::Window>();
-            crate::widgets::settings_dialog::show_settings_dialog(&parent_win, move || {
-                let settings = babydra_common::load_explore_settings();
-                
-                // 1. Sync hidden files visibility setting in tab state
-                let _hidden_changed = {
-                    let mut s = session_cc.borrow_mut();
-                    let tab = s.active_tab_mut();
-                    let old_val = tab.show_hidden;
-                    tab.show_hidden = settings.show_hidden;
-                    old_val != settings.show_hidden
-                };
+    // Wire settings button click
+    handlers::wire_settings_button(
+        &header_widgets.btn_settings,
+        &ui.window,
+        navigate_pane_ref.clone(),
+        active_pane.clone(),
+        session.clone(),
+        preview_visible.clone(),
+        toggle_preview_rc.clone(),
+    );
 
-                // 2. Sync preview panel visibility
-                let preview_changed = preview_v.get() != settings.preview_visible;
-                if preview_changed {
-                    toggle_p_c();
-                }
-
-                // 3. Trigger navigate refresh
-                let path = session_cc.borrow().active_tab().current_path.clone();
-                if let Some(ref f) = *nav_c.borrow() {
-                    f(act_c.get(), path);
-                }
-            });
-        });
-    }
-
-    let _rebuild_tabs_rc = tabs::setup_tab_bar(&ui.vbox, session.clone(), navigate_pane_ref.clone(), tab_bar_box.clone());
+    let _rebuild_tabs_rc = widgets::setup_tab_bar(&ui.vbox, session.clone(), navigate_pane_ref.clone(), tab_bar_box.clone());
 
     // Sidebar creation
     let sidebar = crate::widgets::sidebar::create_sidebar(
@@ -391,7 +297,7 @@ pub fn create_explore_window(
     ui.main_paned.prepend(&sidebar);
 
     // Active split toggling handler
-    let toggle_split_view_rc = split::setup_split_view(
+    let toggle_split_view_rc = layout::setup_split_view(
         ui.split_paned.clone(),
         is_split.clone(),
         right_scroll_cell.clone(),
@@ -404,10 +310,10 @@ pub fn create_explore_window(
     );
 
     // Wire keyboard shortcut listeners
-    events::setup_key_shortcuts(&ui.window, toggle_split_view_rc, toggle_preview_rc, toggle_hidden_rc);
+    handlers::setup_key_shortcuts(&ui.window, toggle_split_view_rc, toggle_preview_rc, toggle_hidden_rc);
 
     // Set up window resize response logic
-    events::setup_window_resize_handler(
+    handlers::setup_window_resize_handler(
         &ui.window,
         ui.layout_paned.clone(),
         revealer.clone(),
@@ -417,10 +323,10 @@ pub fn create_explore_window(
     );
 
     // Watcher event receiver loop
-    events::setup_file_watcher_receiver(session.clone(), navigate_pane_no_watch_ref.clone(), active_pane.clone(), watch_rx);
+    handlers::setup_file_watcher_receiver(session.clone(), navigate_pane_no_watch_ref.clone(), active_pane.clone(), watch_rx);
 
     // D-Bus service loop
-    events::setup_dbus_receiver(navigate_pane_no_watch_ref.clone(), active_pane.clone());
+    handlers::setup_dbus_receiver(navigate_pane_no_watch_ref.clone(), active_pane.clone());
 
     // Start initial navigation
     let path = session.borrow().active_tab().current_path.clone();
