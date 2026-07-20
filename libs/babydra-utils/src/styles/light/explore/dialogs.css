@@ -206,24 +206,24 @@ button.empty-trash-btn:hover {
 .explore-dialog .sidebar-item {
     background: transparent;
     border: none;
-    border-radius: 6px;
-    padding: 5px 10px;
+    border-radius: 0px;
+    padding: 10px 14px;
     color: #475569;
-    font-size: 11px;
-    margin: 1px 3px;
-    transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    font-size: 12px;
+    margin: 0px;
+    transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .explore-dialog .sidebar-item:hover {
     background-color: rgba(0, 0, 0, 0.04);
     color: #0f172a;
-    transform: translateX(2px);
 }
 
 .explore-dialog .sidebar-item.active-nav {
-    background-color: rgba(0, 102, 204, 0.1);
+    background-color: rgba(0, 102, 204, 0.08);
     color: #0066cc;
     font-weight: 600;
+    border-left: 3px solid #0066cc;
 }
 
 /* Strip default button borders, focus lines, outlines in settings dialog */

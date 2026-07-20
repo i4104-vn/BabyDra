@@ -112,6 +112,50 @@ pub fn get_icon(name: &str, size: i32) -> gtk4::Image {
         ("volume-mute", true) | ("volume_mute", true) => Some(LIGHT_VOLUME_MUTE_SVG),
         ("wifi", false) => Some(DARK_WIFI_SVG),
         ("wifi", true) => Some(LIGHT_WIFI_SVG),
+        ("back", false) => Some(DARK_BACK_SVG),
+        ("back", true) => Some(LIGHT_BACK_SVG),
+        ("forward", false) => Some(DARK_FORWARD_SVG),
+        ("forward", true) => Some(LIGHT_FORWARD_SVG),
+        ("up", false) => Some(DARK_UP_SVG),
+        ("up", true) => Some(LIGHT_UP_SVG),
+        ("refresh", false) => Some(DARK_REFRESH_SVG),
+        ("refresh", true) => Some(LIGHT_REFRESH_SVG),
+        ("folder-new", false) | ("folder-new-symbolic", false) => Some(DARK_FOLDER_NEW_SVG),
+        ("folder-new", true) | ("folder-new-symbolic", true) => Some(LIGHT_FOLDER_NEW_SVG),
+        ("cut", false) => Some(DARK_CUT_SVG),
+        ("cut", true) => Some(LIGHT_CUT_SVG),
+        ("copy", false) => Some(DARK_COPY_SVG),
+        ("copy", true) => Some(LIGHT_COPY_SVG),
+        ("paste", false) => Some(DARK_PASTE_SVG),
+        ("paste", true) => Some(LIGHT_PASTE_SVG),
+        ("rename", false) => Some(DARK_RENAME_SVG),
+        ("rename", true) => Some(LIGHT_RENAME_SVG),
+        ("view-grid", false) => Some(DARK_VIEW_GRID_SVG),
+        ("view-grid", true) => Some(LIGHT_VIEW_GRID_SVG),
+        ("view-list", false) => Some(DARK_VIEW_LIST_SVG),
+        ("view-list", true) => Some(LIGHT_VIEW_LIST_SVG),
+        ("eye-off", false) => Some(DARK_EYE_OFF_SVG),
+        ("eye-off", true) => Some(LIGHT_EYE_OFF_SVG),
+        ("sidebar", false) => Some(DARK_SIDEBAR_SVG),
+        ("sidebar", true) => Some(LIGHT_SIDEBAR_SVG),
+        ("user-home", false) | ("user_home", false) => Some(DARK_USER_HOME_SVG),
+        ("user-home", true) | ("user_home", true) => Some(LIGHT_USER_HOME_SVG),
+        ("folder-download", false) | ("folder_download", false) => Some(DARK_FOLDER_DOWNLOAD_SVG),
+        ("folder-download", true) | ("folder_download", true) => Some(LIGHT_FOLDER_DOWNLOAD_SVG),
+        ("folder-documents", false) | ("folder_documents", false) => Some(DARK_FOLDER_DOCUMENTS_SVG),
+        ("folder-documents", true) | ("folder_documents", true) => Some(LIGHT_FOLDER_DOCUMENTS_SVG),
+        ("folder-pictures", false) | ("folder_pictures", false) => Some(DARK_FOLDER_PICTURES_SVG),
+        ("folder-pictures", true) | ("folder_pictures", true) => Some(LIGHT_FOLDER_PICTURES_SVG),
+        ("folder-music", false) | ("folder_music", false) => Some(DARK_FOLDER_MUSIC_SVG),
+        ("folder-music", true) | ("folder_music", true) => Some(LIGHT_FOLDER_MUSIC_SVG),
+        ("user-trash", false) | ("user_trash", false) | ("user-trash-full-symbolic", false) => Some(DARK_USER_TRASH_SVG),
+        ("user-trash", true) | ("user_trash", true) | ("user-trash-full-symbolic", true) => Some(LIGHT_USER_TRASH_SVG),
+        ("folder-desktop", false) | ("folder_desktop", false) => Some(DARK_FOLDER_DESKTOP_SVG),
+        ("folder-desktop", true) | ("folder_desktop", true) => Some(LIGHT_FOLDER_DESKTOP_SVG),
+        ("folder-videos", false) | ("folder_videos", false) => Some(DARK_FOLDER_VIDEOS_SVG),
+        ("folder-videos", true) | ("folder_videos", true) => Some(LIGHT_FOLDER_VIDEOS_SVG),
+        ("drive-harddisk", false) | ("drive_harddisk", false) => Some(DARK_DRIVE_HARDDISK_SVG),
+        ("drive-harddisk", true) | ("drive_harddisk", true) => Some(LIGHT_DRIVE_HARDDISK_SVG),
         _ => None,
     };
 
@@ -122,4 +166,11 @@ pub fn get_icon(name: &str, size: i32) -> gtk4::Image {
         img.set_pixel_size(size);
         img
     }
+}
+
+/// Sets the image content from local SVG or system icon theme.
+pub fn set_image_from_icon(img: &gtk4::Image, name: &str, size: i32) {
+    let new_img = get_icon(name, size);
+    img.set_paintable(new_img.paintable().as_ref());
+    img.set_pixel_size(size);
 }

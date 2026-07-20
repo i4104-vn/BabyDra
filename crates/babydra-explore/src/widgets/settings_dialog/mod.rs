@@ -24,12 +24,12 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     main_vbox.append(&content_hbox);
 
     // ── Left: Sidebar ──────────────────────────────────────────
-    let sidebar_box = Box::new(Orientation::Vertical, 4);
-    sidebar_box.set_size_request(180, -1);
-    sidebar_box.set_margin_top(16);
-    sidebar_box.set_margin_bottom(16);
-    sidebar_box.set_margin_start(8);
-    sidebar_box.set_margin_end(8);
+    let sidebar_box = Box::new(Orientation::Vertical, 0);
+    sidebar_box.set_size_request(140, -1);
+    sidebar_box.set_margin_top(0);
+    sidebar_box.set_margin_bottom(0);
+    sidebar_box.set_margin_start(0);
+    sidebar_box.set_margin_end(0);
     sidebar_box.add_css_class("settings-sidebar");
     content_hbox.append(&sidebar_box);
 
@@ -41,6 +41,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     // Sidebar items list
     let btn_general = Button::builder()
         .label(&t("explore.settings_general"))
+        .hexpand(true)
         .halign(Align::Fill)
         .css_classes(vec!["sidebar-item".to_string(), "active-nav".to_string()])
         .build();
@@ -48,6 +49,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
 
     let btn_context = Button::builder()
         .label(&t("explore.settings_context_menu"))
+        .hexpand(true)
         .halign(Align::Fill)
         .css_classes(vec!["sidebar-item".to_string()])
         .build();

@@ -75,8 +75,7 @@ pub fn create_sidebar_item_button(
     hbox.set_margin_top(1);
     hbox.set_margin_bottom(1);
 
-    let img = gtk4::Image::from_icon_name(icon_name);
-    img.set_pixel_size(18);
+    let img = crate::ui::icon::get_icon(icon_name, 18);
 
     let lbl = gtk4::Label::builder()
         .label(name)

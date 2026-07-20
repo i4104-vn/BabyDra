@@ -67,14 +67,18 @@ pub fn build_context_menu_page() -> Box {
         spacer1.set_hexpand(true);
         hbox_view.append(&spacer1);
 
-        let btn_edit = Button::from_icon_name("document-edit-symbolic");
+        let btn_edit = Button::builder()
+            .child(&babydra_utils::ui::icon::get_icon("rename", 16))
+            .build();
         btn_edit.set_tooltip_text(Some(&t("explore.settings_edit")));
         btn_edit.add_css_class("flat");
         btn_edit.add_css_class("edit-btn");
         btn_edit.set_cursor_from_name(Some("pointer"));
         hbox_view.append(&btn_edit);
 
-        let btn_del = Button::from_icon_name("user-trash-symbolic");
+        let btn_del = Button::builder()
+            .child(&babydra_utils::ui::icon::get_icon("trash", 16))
+            .build();
         btn_del.set_tooltip_text(Some(&t("explore.settings_delete")));
         btn_del.add_css_class("flat");
         btn_del.add_css_class("destructive-action");

@@ -14,12 +14,12 @@ pub fn show_for_file(
     let (popover, vbox) = create_menu_popover(parent, x, y);
 
     // Create buttons
-    let btn_open = create_menu_button("Open", "document-open");
-    let btn_cut = create_menu_button("Cut", "edit-cut");
-    let btn_copy = create_menu_button("Copy", "edit-copy");
-    let btn_rename = create_menu_button("Rename", "edit-clear"); // standard rename fallback
-    let btn_trash = create_menu_button("Move to Trash", "user-trash");
-    let btn_delete = create_menu_button("Delete Permanently", "edit-delete");
+    let btn_open = create_menu_button("Open", "folder-new");
+    let btn_cut = create_menu_button("Cut", "cut");
+    let btn_copy = create_menu_button("Copy", "copy");
+    let btn_rename = create_menu_button("Rename", "rename");
+    let btn_trash = create_menu_button("Move to Trash", "trash");
+    let btn_delete = create_menu_button("Delete Permanently", "trash");
 
     vbox.append(&btn_open);
     vbox.append(&btn_cut);
@@ -130,7 +130,12 @@ pub fn show_for_file(
         vbox.append(&sep);
 
         for item in settings.custom_context_items {
-            let btn_custom = create_menu_button(&item.name, "system-run");
+            let icon_key = if item.name.to_lowercase().contains("terminal") {
+                "terminal"
+            } else {
+                "settings"
+            };
+            let btn_custom = create_menu_button(&item.name, icon_key);
             vbox.append(&btn_custom);
 
             let pop_c = popover.clone();
@@ -176,7 +181,7 @@ pub fn show_for_empty(
     let (popover, vbox) = create_menu_popover(parent, x, y);
 
     let btn_new_folder = create_menu_button("New Folder", "folder-new");
-    let btn_paste = create_menu_button("Paste", "edit-paste");
+    let btn_paste = create_menu_button("Paste", "paste");
 
     vbox.append(&btn_new_folder);
     vbox.append(&btn_paste);
@@ -239,7 +244,12 @@ pub fn show_for_empty(
         vbox.append(&sep);
 
         for item in settings.custom_context_items {
-            let btn_custom = create_menu_button(&item.name, "system-run");
+            let icon_key = if item.name.to_lowercase().contains("terminal") {
+                "terminal"
+            } else {
+                "settings"
+            };
+            let btn_custom = create_menu_button(&item.name, icon_key);
             vbox.append(&btn_custom);
 
             let pop_c = popover.clone();

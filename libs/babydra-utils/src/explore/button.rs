@@ -7,7 +7,7 @@ pub fn update_new_folder_button(btn: &Button, is_in_trash: bool) {
     if is_in_trash {
         if let Some(box_child) = btn.child().and_downcast::<gtk4::Box>() {
             if let Some(img) = box_child.first_child().and_downcast::<gtk4::Image>() {
-                img.set_icon_name(Some("user-trash-full-symbolic"));
+                crate::ui::icon::set_image_from_icon(&img, "user-trash-full-symbolic", 16);
             }
             if let Some(lbl) = box_child.first_child().and_then(|w| w.next_sibling()).and_downcast::<gtk4::Label>() {
                 lbl.set_text(&t("explore.empty_trash"));
@@ -17,7 +17,7 @@ pub fn update_new_folder_button(btn: &Button, is_in_trash: bool) {
     } else {
         if let Some(box_child) = btn.child().and_downcast::<gtk4::Box>() {
             if let Some(img) = box_child.first_child().and_downcast::<gtk4::Image>() {
-                img.set_icon_name(Some("folder-new-symbolic"));
+                crate::ui::icon::set_image_from_icon(&img, "folder-new-symbolic", 16);
             }
             if let Some(lbl) = box_child.first_child().and_then(|w| w.next_sibling()).and_downcast::<gtk4::Label>() {
                 lbl.set_text(&t("explore.new_folder"));
