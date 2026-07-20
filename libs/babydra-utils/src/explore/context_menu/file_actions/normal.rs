@@ -45,15 +45,11 @@ pub fn show_for_file_normal(
     footer_box.append(&btn_cut);
     footer_box.append(&btn_copy);
 
-    // Paste button (only if target is a single directory and clipboard is not empty)
-    let is_target_dir = target_paths.len() == 1 && target_paths[0].is_dir();
+    // Paste button (always visible if clipboard is not empty)
     let clipboard_data = CLIPBOARD.with(|cb| cb.borrow().clone());
-    
     let btn_paste = create_footer_icon_button("paste", "Paste");
-    if is_target_dir {
-        btn_paste.set_sensitive(clipboard_data.is_some());
-        footer_box.append(&btn_paste);
-    }
+    btn_paste.set_sensitive(clipboard_data.is_some());
+    footer_box.append(&btn_paste);
 
     // Rename button (only if 1 target is selected)
     let btn_rename = create_footer_icon_button("rename", "Rename");
@@ -106,44 +102,47 @@ pub fn show_for_file_normal(
         nav_c(current_p.clone());
     });
 
-    // Paste handler (if folder selected)
-    if is_target_dir {
-        let pop_c = popover.clone();
-        let dest_dir = target_paths[0].clone();
-        let nav = nav_callback.clone();
-        let current_p = current_path.clone();
-        btn_paste.connect_clicked(move |_| {
-            pop_c.popdown();
-            if let Some((sources, is_cut)) = clipboard_data.clone() {
-                let nav_f = nav.clone();
-                let cp_f = current_p.clone();
-                let dest_dir_c = dest_dir.clone();
-                glib::spawn_future_local(async move {
-                    let mut all_success = true;
-                    for src in sources {
-                        if let Some(filename) = src.file_name() {
-                            let dest = dest_dir_c.join(filename);
-                            if is_cut {
-                                if let Err(e) = babydra_common::move_path(src, dest).await {
-                                    eprintln!("Failed to move file: {}", e);
-                                    all_success = false;
-                                }
-                            } else {
-                                if let Err(e) = babydra_common::copy_path(src, dest).await {
-                                    eprintln!("Failed to copy file: {}", e);
-                                    all_success = false;
-                                }
+    // Paste handler
+    let pop_c = popover.clone();
+    let is_target_dir = target_paths.len() == 1 && target_paths[0].is_dir();
+    let dest_dir = if is_target_dir {
+        target_paths[0].clone()
+    } else {
+        current_path.clone()
+    };
+    let nav = nav_callback.clone();
+    let current_p = current_path.clone();
+    btn_paste.connect_clicked(move |_| {
+        pop_c.popdown();
+        if let Some((sources, is_cut)) = clipboard_data.clone() {
+            let nav_f = nav.clone();
+            let cp_f = current_p.clone();
+            let dest_dir_c = dest_dir.clone();
+            glib::spawn_future_local(async move {
+                let mut all_success = true;
+                for src in sources {
+                    if let Some(filename) = src.file_name() {
+                        let dest = dest_dir_c.join(filename);
+                        if is_cut {
+                            if let Err(e) = babydra_common::move_path(src, dest).await {
+                                eprintln!("Failed to move file: {}", e);
+                                all_success = false;
+                            }
+                        } else {
+                            if let Err(e) = babydra_common::copy_path(src, dest).await {
+                                eprintln!("Failed to copy file: {}", e);
+                                all_success = false;
                             }
                         }
                     }
-                    if is_cut && all_success {
-                        CLIPBOARD.with(|cb| cb.replace(None));
-                    }
-                    nav_f(cp_f);
-                });
-            }
-        });
-    }
+                }
+                if is_cut && all_success {
+                    CLIPBOARD.with(|cb| cb.replace(None));
+                }
+                nav_f(cp_f);
+            });
+        }
+    });
 
     // Rename dialog trigger
     if target_paths.len() == 1 {
