@@ -207,7 +207,8 @@ async fn perform_decompress(archive_path: PathBuf) -> bool {
     
     let filename = archive_path.file_name().unwrap().to_string_lossy().to_string();
     let is_zip = filename.ends_with(".zip");
-    let is_tar = filename.ends_with(".tar") || filename.ends_with(".tar.xz") || filename.ends_with(".tar.gz") || filename.ends_with(".tgz");
+    let is_tar = filename.ends_with(".tar") || filename.ends_with(".tar.xz") || filename.ends_with(".tar.gz") || filename.ends_with(".tgz") ||
+                 filename.ends_with(".txz") || filename.ends_with(".tar.bz2") || filename.ends_with(".tbz2");
     
     if !is_zip && !is_tar {
         return false;

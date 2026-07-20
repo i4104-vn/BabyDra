@@ -18,7 +18,8 @@ pub fn show_for_file_normal(
     let btn_compress = create_menu_button(&t("explore.menu_compress"), "folder");
     let has_archive = target_paths.iter().any(|path| {
         let name = path.to_string_lossy().to_lowercase();
-        name.ends_with(".zip") || name.ends_with(".tar") || name.ends_with(".tar.gz") || name.ends_with(".tgz")
+        name.ends_with(".zip") || name.ends_with(".tar") || name.ends_with(".tar.gz") || name.ends_with(".tgz") ||
+        name.ends_with(".tar.xz") || name.ends_with(".txz") || name.ends_with(".tar.bz2") || name.ends_with(".tbz2")
     });
     let btn_decompress = if has_archive {
         Some(create_menu_button(&t("explore.menu_decompress"), "download"))
