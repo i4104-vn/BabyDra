@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use std::rc::Rc;
 use gtk4::prelude::*;
-use super::{CLIPBOARD, create_menu_button, create_footer_icon_button};
+use crate::explore::context_menu::{CLIPBOARD, create_menu_button, create_footer_icon_button};
 
 /// Renders the standard context menu for files/directories outside the Trash.
 pub fn show_for_file_normal(
@@ -19,7 +19,6 @@ pub fn show_for_file_normal(
     vbox.append(&btn_delete);
 
     // Create horizontal footer box for clipboard & file operations
-
     let footer_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
     footer_box.add_css_class("context-menu-footer");
     footer_box.set_halign(gtk4::Align::Fill);

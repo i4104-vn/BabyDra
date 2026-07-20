@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use std::rc::Rc;
 use gtk4::prelude::*;
-use super::{CLIPBOARD, create_menu_popover, create_menu_button};
+use crate::explore::context_menu::{CLIPBOARD, create_menu_popover, create_menu_button};
 
 /// Renders the context menu when right-clicking on an empty space inside a folder directory.
 pub fn show_for_empty(

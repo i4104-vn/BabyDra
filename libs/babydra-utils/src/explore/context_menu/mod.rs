@@ -1,7 +1,6 @@
-mod file_actions;
-mod trash_actions;
-mod empty_actions;
-mod render;
+pub mod file_actions;
+pub mod empty_actions;
+pub mod render;
 
 pub use empty_actions::show_for_empty;
 pub use render::{create_menu_popover, create_menu_button, create_footer_icon_button};
@@ -25,7 +24,7 @@ pub fn show_for_file(
     let (popover, vbox) = create_menu_popover(parent, x, y);
     let is_in_trash = current_path.to_string_lossy().contains("Trash/files");
     if is_in_trash {
-        trash_actions::show_for_file_trash(&popover, &vbox, target_paths, current_path, nav_callback);
+        file_actions::show_for_file_trash(&popover, &vbox, target_paths, current_path, nav_callback);
     } else {
         file_actions::show_for_file_normal(&popover, &vbox, target_paths, current_path, nav_callback);
     }

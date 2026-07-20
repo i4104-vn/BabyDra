@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use std::rc::Rc;
 use gtk4::prelude::*;
-use super::{create_menu_button};
+use crate::explore::context_menu::{create_menu_button};
 
 /// Renders the context menu for files/directories inside the Trash (Restore, Delete Permanently).
 pub fn show_for_file_trash(
@@ -99,26 +99,18 @@ pub async fn restore_from_trash(trash_file_path: PathBuf) -> Result<(), String> 
 
 fn percent_decode(s: &str) -> String {
     let mut bytes = Vec::new();
-    let mut chars = s.as_bytes().iter().copied();
-    while let Some(b) = chars.next() {
-        if b == b'%' {
-            let mut hex_bytes = Vec::new();
-            if let Some(h1) = chars.next() {
-                hex_bytes.push(h1);
+    let mut chars = s.chars();
+    while let Some(c) = chars.next() {
+        if c == '%' {
+            let h1 = chars.next().unwrap_or('0');
+            let h2 = chars.next().unwrap_or('0');
+            let hex_str = format!("{}{}", h1, h2);
+            if let Ok(b) = u8::from_str_radix(&hex_str, 16) {
+                bytes.push(b);
             }
-            if let Some(h2) = chars.next() {
-                hex_bytes.push(h2);
-            }
-            if hex_bytes.len() == 2 {
-                if let Ok(hex) = String::from_utf8(hex_bytes) {
-                    if let Ok(val) = u8::from_str_radix(&hex, 16) {
-                        bytes.push(val);
-                        continue;
-                    }
-                }
-            }
+        } else {
+            bytes.push(c as u8);
         }
-        bytes.push(b);
     }
     String::from_utf8_lossy(&bytes).into_owned()
 }
