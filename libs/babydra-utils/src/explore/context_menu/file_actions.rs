@@ -19,9 +19,6 @@ pub fn show_for_file_normal(
     vbox.append(&btn_delete);
 
     // Create horizontal footer box for clipboard & file operations
-    let sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
-    sep.add_css_class("menu-sep");
-    vbox.append(&sep);
 
     let footer_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
     footer_box.add_css_class("context-menu-footer");
@@ -52,8 +49,6 @@ pub fn show_for_file_normal(
 
     let btn_trash = create_footer_icon_button("trash", "Move to Trash");
     footer_box.append(&btn_trash);
-
-    vbox.append(&footer_box);
 
     // Event handling
     let pop_c = popover.clone();
@@ -231,6 +226,11 @@ pub fn show_for_file_normal(
             });
         }
     }
+
+    let sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
+    sep.add_css_class("menu-sep");
+    vbox.append(&sep);
+    vbox.append(&footer_box);
 
     popover.popup();
 }

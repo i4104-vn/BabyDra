@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Orientation, Align, Label, Image, Popover};
+use gtk4::{Box, Button, Orientation, Align, Label, Popover};
 
 pub fn create_menu_popover(parent: &gtk4::Widget, x: f64, y: f64) -> (Popover, Box) {
     let popover = Popover::builder()
