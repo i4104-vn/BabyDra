@@ -4,6 +4,8 @@ use serde::{Serialize, Deserialize};
 pub struct CustomContextItem {
     pub name: String,
     pub command: String,
+    #[serde(default)]
+    pub icon: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

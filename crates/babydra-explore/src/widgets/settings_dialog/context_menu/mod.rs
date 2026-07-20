@@ -4,6 +4,11 @@ use babydra_common::i18n::t;
 
 pub mod row;
 
+const AVAILABLE_ICONS: &[&str] = &[
+    "settings", "terminal", "folder", "text", "camera", "music", "user",
+    "activity", "lock", "wifi", "refresh", "power", "search", "logo"
+];
+
 /// Builds the context menu options page inside the Settings Dialog, displaying list of custom options and a new item form.
 pub fn build_context_menu_page() -> Box {
     let settings = babydra_common::load_explore_settings();
@@ -111,6 +116,42 @@ pub fn build_context_menu_page() -> Box {
     grid.attach(&lbl_cmd_field, 0, 1, 1, 1);
     grid.attach(&entry_cmd_vbox, 1, 1, 1, 1);
 
+    // Icon Selector & Preview Row
+    let lbl_icon_field = Label::new(Some("Icon:"));
+    lbl_icon_field.set_halign(Align::Start);
+
+    let icon_hbox = Box::new(Orientation::Horizontal, 8);
+    let combo_icon = gtk4::ComboBoxText::new();
+    for icon in AVAILABLE_ICONS {
+        combo_icon.append(Some(icon), icon);
+    }
+    combo_icon.set_active_id(Some("settings"));
+    combo_icon.set_hexpand(true);
+
+    let preview_img = babydra_utils::ui::icon::get_icon("settings", 16);
+    preview_img.set_pixel_size(16);
+
+    icon_hbox.append(&combo_icon);
+    icon_hbox.append(&preview_img);
+
+    grid.attach(&lbl_icon_field, 0, 2, 1, 1);
+    grid.attach(&icon_hbox, 1, 2, 1, 1);
+
+    // Live preview update
+    let preview_img_ref = std::cell::RefCell::new(preview_img.clone());
+    let icon_hbox_c = icon_hbox.clone();
+    combo_icon.connect_changed(move |combo| {
+        if let Some(selected_id) = combo.active_id() {
+            let new_img = babydra_utils::ui::icon::get_icon(&selected_id, 16);
+            new_img.set_pixel_size(16);
+            
+            let old_img = preview_img_ref.borrow().clone();
+            icon_hbox_c.remove(&old_img);
+            icon_hbox_c.append(&new_img);
+            preview_img_ref.replace(new_img);
+        }
+    });
+
     let btn_add = Button::builder()
         .label(&t("explore.settings_add"))
         .halign(Align::End)
@@ -122,13 +163,16 @@ pub fn build_context_menu_page() -> Box {
     // Add button logic
     let entry_name_c = entry_name.clone();
     let entry_cmd_c = entry_cmd.clone();
+    let combo_icon_c = combo_icon.clone();
     btn_add.connect_clicked(move |_| {
         let name_str = entry_name_c.text().to_string();
         let cmd_str = entry_cmd_c.text().to_string();
+        let icon_str = combo_icon_c.active_id().map(|s| s.to_string());
         if !name_str.is_empty() && !cmd_str.is_empty() {
             let item = babydra_common::config::settings::CustomContextItem {
                 name: name_str.clone(),
                 command: cmd_str.clone(),
+                icon: icon_str,
             };
             
             // Append and save setting
@@ -142,6 +186,7 @@ pub fn build_context_menu_page() -> Box {
             // Clear entry inputs
             entry_name_c.set_text("");
             entry_cmd_c.set_text("");
+            combo_icon_c.set_active_id(Some("settings"));
         }
     });
 

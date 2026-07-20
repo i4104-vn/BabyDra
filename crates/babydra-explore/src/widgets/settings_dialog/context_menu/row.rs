@@ -8,7 +8,7 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
     let row = ListBoxRow::new();
     row.add_css_class("settings-custom-item-row");
 
-    let saved_item = std::cell::RefCell::new(item);
+    let saved_item = std::cell::RefCell::new(item.clone());
 
     // 1. VIEW MODE LAYOUT
     let hbox_view = Box::new(Orientation::Horizontal, 10);
@@ -27,9 +27,14 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
         .halign(Align::Start)
         .build();
     lbl_cmd.add_css_class("settings-item-command");
-    
+
+    let icon_name = item.icon.as_deref().unwrap_or("settings");
+    let img_icon = babydra_utils::ui::icon::get_icon(icon_name, 16);
+    img_icon.set_pixel_size(16);
+
     vbox_text.append(&lbl_name);
     vbox_text.append(&lbl_cmd);
+    hbox_view.append(&img_icon);
     hbox_view.append(&vbox_text);
 
     let spacer1 = Box::new(Orientation::Horizontal, 0);
@@ -125,10 +130,17 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
         let lbl_n = lbl_name.clone();
         let lbl_c = lbl_cmd.clone();
         let saved = saved_item.clone();
+        let img_icon_c = img_icon.clone();
         move || {
             let item = saved.borrow();
             lbl_n.set_label(&item.name);
             lbl_c.set_label(&item.command);
+            
+            let icon_name = item.icon.as_deref().unwrap_or("settings");
+            let temp_img = babydra_utils::ui::icon::get_icon(icon_name, 16);
+            if let Some(paintable) = temp_img.paintable() {
+                img_icon_c.set_paintable(Some(&paintable));
+            }
         }
     };
     update_view_labels();

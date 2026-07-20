@@ -110,11 +110,13 @@ pub fn show_for_empty(
         vbox.append(&sep);
 
         for item in settings.custom_context_items {
-            let icon_key = if item.name.to_lowercase().contains("terminal") {
-                "terminal"
-            } else {
-                "settings"
-            };
+            let icon_key = item.icon.as_deref().unwrap_or_else(|| {
+                if item.name.to_lowercase().contains("terminal") {
+                    "terminal"
+                } else {
+                    "settings"
+                }
+            });
             let btn_custom = create_menu_button(&item.name, icon_key);
             vbox.append(&btn_custom);
 
