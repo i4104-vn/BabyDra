@@ -3,8 +3,8 @@ switch {
     min-width: 28px;
     min-height: 16px;
     border-radius: 20px;
-    border: 1px solid #cbd5e1;
-    background-color: #cbd5e1;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background-color: rgba(0, 0, 0, 0.15);
     transition: all 150ms ease;
 }
 
@@ -18,6 +18,6 @@ switch slider {
 }
 
 switch:checked {
-    background-color: #0066cc;
-    border-color: #0066cc;
+    background-color: #3b82f6;
+    border-color: #3b82f6;
 }
