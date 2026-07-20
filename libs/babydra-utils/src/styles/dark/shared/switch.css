@@ -1,0 +1,23 @@
+/* Global Custom Switch styling in dark theme */
+switch {
+    min-width: 28px;
+    min-height: 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: rgba(255, 255, 255, 0.15);
+    transition: all 150ms ease;
+}
+
+switch slider {
+    min-width: 12px;
+    min-height: 12px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    margin: 1px;
+    transition: all 150ms ease;
+}
+
+switch:checked {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+}

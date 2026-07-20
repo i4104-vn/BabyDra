@@ -5,11 +5,13 @@ use babydra_common::FileEntry;
 pub use babydra_common::{ContentViewWidgets, ContentViewHandle, sort_entries};
 
 mod render;
-mod update;
-pub mod helpers;
+pub mod items;
 mod gestures;
+mod rendering;
+mod actions;
 
-pub use update::update_content_view_ui;
+pub use rendering::renderer::update_content_view_ui;
+pub use actions::{set_content_view_mode, set_content_view_sort, update_content_view, filter_content_view};
 
 /// Creates the content view area widgets and returns the scroll container and ContentViewHandle state handle.
 pub fn create_content_view(
@@ -76,12 +78,15 @@ pub fn create_grid_flowbox(
     current_path: Rc<RefCell<PathBuf>>,
     selected_paths: Rc<RefCell<Vec<PathBuf>>>,
 ) -> gtk4::FlowBox {
+    let settings = babydra_common::load_explore_settings();
+    let activate_on_single = !settings.double_click_to_open;
+
     let flowbox = gtk4::FlowBox::builder()
         .valign(gtk4::Align::Start)
         .max_children_per_line(20)
         .min_children_per_line(1)
         .selection_mode(gtk4::SelectionMode::Multiple)
-        .activate_on_single_click(false)
+        .activate_on_single_click(activate_on_single)
         .row_spacing(10)
         .column_spacing(10)
         .build();
@@ -89,64 +94,4 @@ pub fn create_grid_flowbox(
     gestures::wire_grid_flowbox_controllers(&flowbox, entries, nav_cb, sc_fn, grid_container, current_path, selected_paths);
 
     flowbox
-}
-
-/// Changes the layout layout style of content view stack.
-pub fn set_content_view_mode(handle: &ContentViewHandle, mode: &str) {
-    handle.current_mode.replace(mode.to_string());
-    handle.widgets.stack.set_visible_child_name(mode);
-    
-    let mut e = handle.entries.borrow().clone();
-    let sort = handle.sort_mode.borrow().clone();
-    
-    // Sort with the new mode
-    sort_entries(&mut e, &sort);
-    handle.entries.replace(e.clone());
-    
-    update::update_content_view_ui(handle);
-}
-
-/// Changes the sorting mode of the content view and updates the layout.
-pub fn set_content_view_sort(handle: &ContentViewHandle, sort_mode: &str) {
-    handle.sort_mode.replace(sort_mode.to_string());
-    
-    // Sort current entries
-    let mut e = handle.entries.borrow().clone();
-    sort_entries(&mut e, sort_mode);
-    handle.entries.replace(e.clone());
-    
-    // Sort all entries
-    let mut all = handle.all_entries.borrow().clone();
-    sort_entries(&mut all, sort_mode);
-    handle.all_entries.replace(all);
-
-    update::update_content_view_ui(handle);
-}
-
-/// Updates files in view area.
-pub fn update_content_view(handle: &ContentViewHandle, entries: &[FileEntry], current_path: PathBuf) {
-    let sort = handle.sort_mode.borrow().clone();
-    let mode = handle.current_mode.borrow().clone();
-    
-    let mut sorted = entries.to_vec();
-    sort_entries(&mut sorted, &sort);
-    handle.all_entries.replace(sorted.clone());
-    handle.entries.replace(sorted.clone());
-    handle.current_path.replace(current_path);
-
-    handle.widgets.stack.set_visible_child_name(&mode);
-
-    update::update_content_view_ui(handle);
-}
-
-/// Filters content files list.
-pub fn filter_content_view(handle: &ContentViewHandle, query: &str) {
-    let sort = handle.sort_mode.borrow().clone();
-    
-    let all = handle.all_entries.borrow().clone();
-    let mut filtered = babydra_common::filter_entries(&all, query);
-    sort_entries(&mut filtered, &sort);
-    handle.entries.replace(filtered.clone());
-
-    update::update_content_view_ui(handle);
 }

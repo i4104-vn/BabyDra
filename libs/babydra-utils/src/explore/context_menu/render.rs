@@ -24,7 +24,7 @@ pub fn create_menu_popover(parent: &gtk4::Widget, x: f64, y: f64) -> (Popover, B
 
 pub fn create_menu_button(label: &str, icon: &str) -> Button {
     let hbox = Box::new(Orientation::Horizontal, 8);
-    let img = Image::from_icon_name(icon);
+    let img = crate::ui::icon::get_icon(icon, 16);
     img.set_pixel_size(16);
     let lbl = Label::builder()
         .label(label)

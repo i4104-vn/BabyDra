@@ -257,7 +257,7 @@
     border: 1px solid rgba(0, 0, 0, 0.15);
     border-radius: 12px;
     padding: 6px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    box-shadow: none;
 }
 
 .explore-window dropdown>popover>contents listview {
