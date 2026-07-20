@@ -17,8 +17,8 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
 
     // 1. VIEW MODE LAYOUT
     let hbox_view = Box::new(Orientation::Horizontal, 10);
-    hbox_view.set_margin_top(6);
-    hbox_view.set_margin_bottom(6);
+    hbox_view.set_margin_top(2);
+    hbox_view.set_margin_bottom(2);
     hbox_view.set_margin_start(10);
     hbox_view.set_margin_end(10);
 
@@ -64,8 +64,8 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
 
     // 2. EDIT MODE LAYOUT
     let hbox_edit = Box::new(Orientation::Horizontal, 10);
-    hbox_edit.set_margin_top(6);
-    hbox_edit.set_margin_bottom(6);
+    hbox_edit.set_margin_top(2);
+    hbox_edit.set_margin_bottom(2);
     hbox_edit.set_margin_start(10);
     hbox_edit.set_margin_end(10);
 
