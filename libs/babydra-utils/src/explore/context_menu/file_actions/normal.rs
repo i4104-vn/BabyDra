@@ -30,10 +30,13 @@ pub fn show_for_file_normal(
         vbox.append(btn);
     }
 
-    // Create horizontal footer box for clipboard & file operations
+    // Create horizontal footer container & box for clipboard & file operations
+    let footer_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    footer_container.add_css_class("context-menu-footer");
+    footer_container.set_halign(gtk4::Align::Fill);
+
     let footer_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
-    footer_box.add_css_class("context-menu-footer");
-    footer_box.set_halign(gtk4::Align::Fill);
+    footer_box.set_halign(gtk4::Align::Start);
     footer_box.set_homogeneous(false);
 
     let btn_cut = create_footer_icon_button("cut", "Cut");
@@ -60,6 +63,8 @@ pub fn show_for_file_normal(
 
     let btn_trash = create_footer_icon_button("trash", "Move to Trash");
     footer_box.append(&btn_trash);
+
+    footer_container.append(&footer_box);
 
     // Event handling
     let pop_c = popover.clone();
@@ -250,7 +255,7 @@ pub fn show_for_file_normal(
     let sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
     sep.add_css_class("menu-sep");
     vbox.append(&sep);
-    vbox.append(&footer_box);
+    vbox.append(&footer_container);
 
     popover.popup();
 }
