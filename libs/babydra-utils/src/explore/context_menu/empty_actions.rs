@@ -16,11 +16,29 @@ pub fn show_for_empty(
     }
     let (popover, vbox) = create_menu_popover(parent, x, y);
 
-    let btn_new_folder = create_menu_button("New Folder", "folder-new");
+    let btn_create_new = create_menu_button("New", "plus");
     let btn_paste = create_menu_button("Paste", "paste");
 
-    vbox.append(&btn_new_folder);
+    vbox.append(&btn_create_new);
     vbox.append(&btn_paste);
+
+    // Sub-popover containing create options
+    let sub_popover = crate::components::popovers::create_popover(&btn_create_new, gtk4::PositionType::Right, "explore-popover");
+    let sub_vbox = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
+    sub_vbox.set_css_classes(&["context-menu-box"]);
+    sub_vbox.set_width_request(150);
+
+    let btn_new_folder = create_menu_button("Folder", "folder-new");
+    let btn_new_file = create_menu_button("File", "text");
+
+    sub_vbox.append(&btn_new_folder);
+    sub_vbox.append(&btn_new_file);
+    sub_popover.set_child(Some(&sub_vbox));
+
+    let sub_popover_c = sub_popover.clone();
+    btn_create_new.connect_clicked(move |_| {
+        sub_popover_c.popup();
+    });
 
     // Check clipboard state for paste sensitivity
     let clipboard_data = CLIPBOARD.with(|cb| cb.borrow().clone());
@@ -63,13 +81,25 @@ pub fn show_for_empty(
         }
     });
 
-    // New folder action
-    let pop_c = popover.clone();
+    // Sub-popover click actions
+    let pop_c1 = popover.clone();
+    let sub_pop_c1 = sub_popover.clone();
     let nav = nav_callback.clone();
     let current_p = current_path.clone();
     btn_new_folder.connect_clicked(move |_| {
-        pop_c.popdown();
+        sub_pop_c1.popdown();
+        pop_c1.popdown();
         crate::explore::dialogs::show_new_folder_dialog(current_p.clone(), nav.clone());
+    });
+
+    let pop_c2 = popover.clone();
+    let sub_pop_c2 = sub_popover.clone();
+    let nav2 = nav_callback.clone();
+    let current_p2 = current_path.clone();
+    btn_new_file.connect_clicked(move |_| {
+        sub_pop_c2.popdown();
+        pop_c2.popdown();
+        crate::explore::dialogs::show_new_file_dialog(current_p2.clone(), nav2.clone());
     });
 
     // Custom Context Options for empty area
