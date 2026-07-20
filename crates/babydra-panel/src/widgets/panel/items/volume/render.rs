@@ -46,30 +46,27 @@ pub fn create_volume_row(
         })
     };
 
-    let mute_btn = babydra_utils::components::create_colored_icon_button(
-        if muted_state.get() { "volume-mute" } else { "volume" },
-        16,
-        "rgba(255,255,255,0.9)",
-        &["slider-overlay-mute-btn"],
-        None,
-        {
-            let update_mute_icon_clone = update_mute_icon.clone();
-            let muted_state_clone = muted_state.clone();
-            let vol_icon_c = vol_icon.clone();
-            move || {
-                let new_mute = !muted_state_clone.get();
-                muted_state_clone.set(new_mute);
-                babydra_common::volume::set_muted(new_mute);
-                update_mute_icon_clone(new_mute);
-                update_topbar_volume_icon(&vol_icon_c);
-            }
-        },
-    );
+    let mute_btn = gtk4::Button::new();
+    mute_btn.add_css_class("slider-overlay-mute-btn");
+    mute_btn.set_child(Some(&icon_container));
     mute_btn.set_halign(gtk4::Align::Start);
     mute_btn.set_valign(gtk4::Align::Center);
     mute_btn.set_margin_start(10);
     mute_btn.set_can_focus(false);
     mute_btn.set_focus_on_click(false);
+
+    {
+        let update_mute_icon_clone = update_mute_icon.clone();
+        let muted_state_clone = muted_state.clone();
+        let vol_icon_c = vol_icon.clone();
+        mute_btn.connect_clicked(move |_| {
+            let new_mute = !muted_state_clone.get();
+            muted_state_clone.set(new_mute);
+            babydra_common::volume::set_muted(new_mute);
+            update_mute_icon_clone(new_mute);
+            update_topbar_volume_icon(&vol_icon_c);
+        });
+    }
     update_mute_icon(muted_state.get());
 
     let scale = gtk4::Scale::with_range(gtk4::Orientation::Horizontal, 0.0, 100.0, 1.0);
@@ -116,8 +113,7 @@ pub fn create_volume_row(
     let menu_btn = gtk4::Button::new();
     menu_btn.add_css_class("slider-popover-btn");
     menu_btn.set_valign(gtk4::Align::Center);
-    let menu_icon = babydra_utils::ui::icon::get_system_or_file_icon("go-up-symbolic", "image-missing");
-    menu_icon.set_pixel_size(12);
+    let menu_icon = babydra_utils::ui::icon::get_icon("go-up-symbolic", 12);
     menu_btn.set_child(Some(&menu_icon));
 
     let overlay = gtk4::Overlay::new();
@@ -150,8 +146,7 @@ pub fn create_volume_row(
             cb(true);
         }
         
-        let down_icon = babydra_utils::ui::icon::get_system_or_file_icon("go-down-symbolic", "image-missing");
-        down_icon.set_pixel_size(12);
+        let down_icon = babydra_utils::ui::icon::get_icon("go-down-symbolic", 12);
         menu_btn_clone.set_child(Some(&down_icon));
     });
 
