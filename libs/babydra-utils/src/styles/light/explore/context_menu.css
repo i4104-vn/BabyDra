@@ -82,17 +82,28 @@ button.context-menu-footer-btn {
     box-shadow: none;
     border-radius: 6px;
     padding: 4px;
+    margin: 2px;
     color: #1a1a1a;
     min-width: 26px;
     min-height: 26px;
     transition: background-color 0.1s ease;
 }
 
-button.context-menu-footer-btn:focus,
-button.context-menu-footer-btn:hover {
+button.context-menu-footer-btn:hover,
+button.context-menu-footer-btn:active {
     background-image: none;
     background-color: rgba(0, 0, 0, 0.04);
     color: #000000;
+    border: none;
+    outline: none;
+    box-shadow: none;
+}
+
+button.context-menu-footer-btn:focus {
+    background-image: none;
+    background-color: transparent;
+    color: #1a1a1a;
+    border: none;
     outline: none;
     box-shadow: none;
 }

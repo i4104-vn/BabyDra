@@ -33,7 +33,7 @@ pub fn show_for_file_normal(
     // Create horizontal footer box for clipboard & file operations
     let footer_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
     footer_box.add_css_class("context-menu-footer");
-    footer_box.set_halign(gtk4::Align::Start);
+    footer_box.set_halign(gtk4::Align::Fill);
     footer_box.set_homogeneous(false);
 
     let btn_cut = create_footer_icon_button("cut", "Cut");

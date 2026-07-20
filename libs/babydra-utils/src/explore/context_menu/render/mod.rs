@@ -38,6 +38,7 @@ pub fn create_menu_button(label: &str, icon: &str) -> Button {
         .child(&hbox)
         .css_classes(vec!["flat".to_string(), "context-menu-item".to_string()])
         .halign(Align::Fill)
+        .focusable(false)
         .build()
 }
 
@@ -51,5 +52,6 @@ pub fn create_footer_icon_button(icon: &str, tooltip: &str) -> Button {
         .css_classes(vec!["flat".to_string(), "context-menu-footer-btn".to_string()])
         .halign(Align::Center)
         .valign(Align::Center)
+        .focusable(false)
         .build()
 }
