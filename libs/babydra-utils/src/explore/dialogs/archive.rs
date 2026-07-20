@@ -112,34 +112,68 @@ pub fn show_compress_dialog(
 
 async fn perform_compress(paths: Vec<PathBuf>, archive_path: PathBuf, is_zip: bool) -> bool {
     let parent_dir = match archive_path.parent() {
-        Some(p) => p,
+        Some(p) => p.to_path_buf(),
         None => return false,
     };
-    
-    let mut cmd = std::process::Command::new("sh");
-    cmd.current_dir(parent_dir);
     
     let archive_filename = archive_path.file_name().unwrap().to_string_lossy().to_string();
     
     let files: Vec<String> = paths.iter()
         .filter_map(|p| p.file_name().map(|f| f.to_string_lossy().to_string()))
         .collect();
+    
+    if files.is_empty() {
+        eprintln!("Compress: no valid files to compress");
+        return false;
+    }
         
     let cmd_str = if is_zip {
-        format!("zip -r '{}' {}", archive_filename, files.iter().map(|f| format!("'{}'", f)).collect::<Vec<_>>().join(" "))
+        format!(
+            "zip -r {} {}",
+            shell_quote(&archive_filename),
+            files.iter().map(|f| shell_quote(f)).collect::<Vec<_>>().join(" ")
+        )
     } else {
-        format!("tar -cf '{}' {}", archive_filename, files.iter().map(|f| format!("'{}'", f)).collect::<Vec<_>>().join(" "))
+        format!(
+            "tar -cf {} {}",
+            shell_quote(&archive_filename),
+            files.iter().map(|f| shell_quote(f)).collect::<Vec<_>>().join(" ")
+        )
     };
     
-    cmd.arg("-c").arg(&cmd_str);
+    eprintln!("Compress command: {}", cmd_str);
     
-    match cmd.spawn() {
-        Ok(mut child) => {
-            match tokio::task::spawn_blocking(move || child.wait()).await {
-                Ok(Ok(status)) => status.success(),
-                _ => false,
+    let output = tokio::task::spawn_blocking(move || {
+        std::process::Command::new("sh")
+            .current_dir(&parent_dir)
+            .arg("-c")
+            .arg(&cmd_str)
+            .output()
+    }).await;
+    
+    match output {
+        Ok(Ok(out)) => {
+            if !out.status.success() {
+                eprintln!("Compress failed (exit {:?}):\nstdout: {}\nstderr: {}",
+                    out.status.code(),
+                    String::from_utf8_lossy(&out.stdout),
+                    String::from_utf8_lossy(&out.stderr),
+                );
             }
+            out.status.success()
         }
-        Err(_) => false,
+        Ok(Err(e)) => {
+            eprintln!("Compress IO error: {}", e);
+            false
+        }
+        Err(e) => {
+            eprintln!("Compress spawn_blocking error: {}", e);
+            false
+        }
     }
+}
+
+/// Properly quote a string for use in a shell single-quoted argument.
+fn shell_quote(s: &str) -> String {
+    format!("'{}'", s.replace('\'', "'\\''"))
 }

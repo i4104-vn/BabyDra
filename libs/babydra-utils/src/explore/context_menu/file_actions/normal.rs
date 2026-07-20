@@ -16,11 +16,7 @@ pub fn show_for_file_normal(
     // Create vertical menu buttons
     let btn_open = create_menu_button(&t("explore.menu_open"), "folder-new");
     let btn_compress = create_menu_button(&t("explore.menu_compress"), "folder");
-    let has_archive = target_paths.iter().any(|path| {
-        let name = path.to_string_lossy().to_lowercase();
-        name.ends_with(".zip") || name.ends_with(".tar") || name.ends_with(".tar.gz") || name.ends_with(".tgz") ||
-        name.ends_with(".tar.xz") || name.ends_with(".txz") || name.ends_with(".tar.bz2") || name.ends_with(".tbz2")
-    });
+    let has_archive = target_paths.iter().any(|path| is_archive_file(path));
     let btn_decompress = if has_archive {
         Some(create_menu_button(&t("explore.menu_decompress"), "download"))
     } else {
@@ -200,8 +196,7 @@ pub fn show_for_file_normal(
         btn.connect_clicked(move |_| {
             pop_c.popdown();
             for path in &target_paths_decompress {
-                let name = path.to_string_lossy().to_lowercase();
-                if name.ends_with(".zip") || name.ends_with(".tar") || name.ends_with(".tar.gz") || name.ends_with(".tgz") {
+                if is_archive_file(path) {
                     crate::explore::dialogs::perform_decompress_async(path.clone(), current_p.clone(), nav.clone());
                 }
             }
@@ -258,4 +253,20 @@ pub fn show_for_file_normal(
 
     vbox.append(&footer_container);
     popover.popup();
+}
+
+fn is_archive_file(path: &std::path::Path) -> bool {
+    let name = path.to_string_lossy().to_lowercase();
+    name.ends_with(".zip")
+        || name.ends_with(".tar")
+        || name.ends_with(".tar.gz")
+        || name.ends_with(".tgz")
+        || name.ends_with(".tar.xz")
+        || name.ends_with(".txz")
+        || name.ends_with(".tar.bz2")
+        || name.ends_with(".tbz2")
+        || name.ends_with(".tar.zst")
+        || name.ends_with(".tar.lz4")
+        || name.ends_with(".rar")
+        || name.ends_with(".7z")
 }
