@@ -269,4 +269,30 @@ button.destructive-action:active {
     background-color: #b91c1c;
 }
 
+button.icon-select-btn {
+    border-radius: 9999px;
+    padding: 6px;
+    min-width: 32px;
+    min-height: 32px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: none;
+}
+
+button.icon-select-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+button.icon-grid-item {
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+    box-shadow: none;
+    background-color: transparent;
+}
+
+button.icon-grid-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
 
