@@ -3,6 +3,11 @@ use gtk4::{Box, Orientation, Label, Button, Align, ListBox, ListBoxRow, Entry, G
 use babydra_common::i18n::t;
 use babydra_common::config::settings::CustomContextItem;
 
+const AVAILABLE_ICONS: &[&str] = &[
+    "settings", "terminal", "folder", "text", "camera", "music", "user",
+    "activity", "lock", "wifi", "refresh", "power", "search", "logo"
+];
+
 /// Renders a custom context menu item list row with inline editing and delete capabilities.
 pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
     let row = ListBoxRow::new();
@@ -43,19 +48,17 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
 
     let btn_edit = Button::builder()
         .child(&babydra_utils::ui::icon::get_icon("rename", 16))
+        .css_classes(vec!["flat".to_string(), "circular".to_string(), "row-action-btn".to_string(), "edit-btn".to_string()])
         .build();
     btn_edit.set_tooltip_text(Some(&t("explore.settings_edit")));
-    btn_edit.add_css_class("flat");
-    btn_edit.add_css_class("edit-btn");
     btn_edit.set_cursor_from_name(Some("pointer"));
     hbox_view.append(&btn_edit);
 
     let btn_del = Button::builder()
         .child(&babydra_utils::ui::icon::get_icon("trash", 16))
+        .css_classes(vec!["flat".to_string(), "circular".to_string(), "row-action-btn".to_string(), "delete-btn".to_string()])
         .build();
     btn_del.set_tooltip_text(Some(&t("explore.settings_delete")));
-    btn_del.add_css_class("flat");
-    btn_del.add_css_class("destructive-action");
     btn_del.set_cursor_from_name(Some("pointer"));
     hbox_view.append(&btn_del);
 
@@ -72,12 +75,90 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
     grid_edit.set_hexpand(true);
     hbox_edit.append(&grid_edit);
 
-    let entry_edit_name = Entry::builder().hexpand(true).build();
-    entry_edit_name.add_css_class("inline-entry");
-    let entry_edit_cmd = Entry::builder().hexpand(true).build();
-    entry_edit_cmd.add_css_class("inline-entry");
+    let name_edit_hbox = Box::new(Orientation::Horizontal, 8);
+    let entry_edit_name = Entry::builder()
+        .hexpand(true)
+        .css_classes(vec!["inline-entry".to_string(), "small-entry".to_string()])
+        .build();
+    
+    // State for edited icon selection
+    let edit_selected_icon = std::rc::Rc::new(std::cell::RefCell::new(item.icon.clone().unwrap_or_else(|| "settings".to_string())));
 
-    grid_edit.attach(&entry_edit_name, 0, 0, 1, 1);
+    let btn_edit_icon = Button::builder()
+        .css_classes(vec!["circular".to_string(), "icon-select-btn".to_string()])
+        .valign(Align::Center)
+        .build();
+    btn_edit_icon.set_cursor_from_name(Some("pointer"));
+
+    // Set initial icon image
+    let initial_icon = item.icon.unwrap_or_else(|| "settings".to_string());
+    let edit_icon_img = babydra_utils::ui::icon::get_icon(&initial_icon, 16);
+    edit_icon_img.set_pixel_size(16);
+    btn_edit_icon.set_child(Some(&edit_icon_img));
+
+    // Popover setup for editing icon
+    let popover_edit_icon = gtk4::Popover::builder()
+        .has_arrow(true)
+        .autohide(true)
+        .build();
+    popover_edit_icon.set_parent(&btn_edit_icon);
+
+    let edit_icon_grid = Grid::new();
+    edit_icon_grid.set_row_spacing(6);
+    edit_icon_grid.set_column_spacing(6);
+    edit_icon_grid.set_margin_top(8);
+    edit_icon_grid.set_margin_bottom(8);
+    edit_icon_grid.set_margin_start(8);
+    edit_icon_grid.set_margin_end(8);
+
+    let cols = 4;
+    for (idx, icon_name) in AVAILABLE_ICONS.iter().enumerate() {
+        let r = (idx / cols) as i32;
+        let c = (idx % cols) as i32;
+        
+        let img = babydra_utils::ui::icon::get_icon(icon_name, 20);
+        img.set_pixel_size(20);
+        
+        let btn_item = Button::builder()
+            .child(&img)
+            .css_classes(vec!["flat".to_string(), "icon-grid-item".to_string()])
+            .tooltip_text(*icon_name)
+            .build();
+        btn_item.set_cursor_from_name(Some("pointer"));
+
+        let icon_name_str = icon_name.to_string();
+        let edit_selected_icon_c = edit_selected_icon.clone();
+        let btn_edit_icon_c = btn_edit_icon.clone();
+        let popover_edit_icon_c = popover_edit_icon.clone();
+        
+        btn_item.connect_clicked(move |_| {
+            edit_selected_icon_c.replace(icon_name_str.clone());
+            
+            let new_img = babydra_utils::ui::icon::get_icon(&icon_name_str, 16);
+            new_img.set_pixel_size(16);
+            btn_edit_icon_c.set_child(Some(&new_img));
+            
+            popover_edit_icon_c.popdown();
+        });
+        
+        edit_icon_grid.attach(&btn_item, c, r, 1, 1);
+    }
+    popover_edit_icon.set_child(Some(&edit_icon_grid));
+
+    let popover_edit_icon_c = popover_edit_icon.clone();
+    btn_edit_icon.connect_clicked(move |_| {
+        popover_edit_icon_c.popup();
+    });
+
+    name_edit_hbox.append(&entry_edit_name);
+    name_edit_hbox.append(&btn_edit_icon);
+
+    let entry_edit_cmd = Entry::builder()
+        .hexpand(true)
+        .css_classes(vec!["inline-entry".to_string(), "small-entry".to_string()])
+        .build();
+
+    grid_edit.attach(&name_edit_hbox, 0, 0, 1, 1);
     grid_edit.attach(&entry_edit_cmd, 0, 1, 1, 1);
 
     // Helper placeholders for inline edit command entry
@@ -150,11 +231,20 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
     let hb_edit = hbox_edit.clone();
     let ent_name = entry_edit_name.clone();
     let ent_cmd = entry_edit_cmd.clone();
+    let btn_edit_icon_c = btn_edit_icon.clone();
+    let edit_selected_icon_c = edit_selected_icon.clone();
     let saved = saved_item.clone();
     btn_edit.connect_clicked(move |_| {
         let current = saved.borrow();
         ent_name.set_text(&current.name);
         ent_cmd.set_text(&current.command);
+        
+        let cur_icon = current.icon.clone().unwrap_or_else(|| "settings".to_string());
+        edit_selected_icon_c.replace(cur_icon.clone());
+        let cur_icon_img = babydra_utils::ui::icon::get_icon(&cur_icon, 16);
+        cur_icon_img.set_pixel_size(16);
+        btn_edit_icon_c.set_child(Some(&cur_icon_img));
+
         row_c.set_child(Some(&hb_edit));
         ent_name.grab_focus();
     });
@@ -171,11 +261,13 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
     let hb_view2 = hbox_view.clone();
     let ent_name2 = entry_edit_name.clone();
     let ent_cmd2 = entry_edit_cmd.clone();
+    let edit_selected_icon2 = edit_selected_icon.clone();
     let saved2 = saved_item.clone();
     let update_lbls = update_view_labels.clone();
     btn_save.connect_clicked(move |_| {
         let new_name = ent_name2.text().to_string();
         let new_cmd = ent_cmd2.text().to_string();
+        let new_icon = edit_selected_icon2.borrow().clone();
         if !new_name.is_empty() && !new_cmd.is_empty() {
             let old_name = saved2.borrow().name.clone();
             let old_cmd = saved2.borrow().command.clone();
@@ -184,6 +276,7 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
                 let mut s = saved2.borrow_mut();
                 s.name = new_name.clone();
                 s.command = new_cmd.clone();
+                s.icon = Some(new_icon.clone());
             }
 
             // Update settings file
@@ -191,6 +284,7 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
             if let Some(idx) = s.custom_context_items.iter().position(|i| i.name == old_name && i.command == old_cmd) {
                 s.custom_context_items[idx].name = new_name;
                 s.custom_context_items[idx].command = new_cmd;
+                s.custom_context_items[idx].icon = Some(new_icon);
                 babydra_common::save_explore_settings(&s);
             }
 

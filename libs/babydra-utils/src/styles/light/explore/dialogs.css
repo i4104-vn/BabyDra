@@ -300,3 +300,26 @@ entry.small-entry {
     padding: 2px 8px;
     font-size: 13px;
 }
+
+button.row-action-btn {
+    border-radius: 9999px;
+    padding: 6px;
+    min-width: 32px;
+    min-height: 32px;
+    box-shadow: none;
+    border: none;
+    background-color: transparent;
+    transition: background-color 0.15s ease;
+}
+
+button.row-action-btn.edit-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+button.row-action-btn.delete-btn {
+    color: #dc2626;
+}
+
+button.row-action-btn.delete-btn:hover {
+    background-color: rgba(220, 38, 38, 0.1);
+}
