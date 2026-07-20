@@ -69,3 +69,32 @@ button.context-menu-item:hover label {
     margin-bottom: 2px;
 }
 
+.context-menu-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin-top: 4px;
+    padding-top: 4px;
+}
+
+button.context-menu-footer-btn {
+    background-image: none;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    border-radius: 6px;
+    padding: 6px;
+    color: #e8e8e8;
+    min-width: 32px;
+    min-height: 32px;
+    transition: background-color 0.1s ease;
+}
+
+button.context-menu-footer-btn:focus,
+button.context-menu-footer-btn:hover {
+    background-image: none;
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    outline: none;
+    box-shadow: none;
+}
+

@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use std::rc::Rc;
 use gtk4::prelude::*;
-use super::{CLIPBOARD, create_menu_popover, create_menu_button};
+use super::{CLIPBOARD, create_menu_button, create_footer_icon_button};
 
 /// Renders the standard context menu for files/directories outside the Trash.
 pub fn show_for_file_normal(
@@ -11,22 +11,49 @@ pub fn show_for_file_normal(
     current_path: PathBuf,
     nav_callback: Rc<dyn Fn(PathBuf)>,
 ) {
-    // Create buttons
+    // Create vertical menu buttons
     let btn_open = create_menu_button("Open", "folder-new");
-    let btn_cut = create_menu_button("Cut", "cut");
-    let btn_copy = create_menu_button("Copy", "copy");
-    let btn_rename = create_menu_button("Rename", "rename");
-    let btn_trash = create_menu_button("Move to Trash", "trash");
     let btn_delete = create_menu_button("Delete Permanently", "trash");
 
     vbox.append(&btn_open);
-    vbox.append(&btn_cut);
-    vbox.append(&btn_copy);
-    if target_paths.len() == 1 {
-        vbox.append(&btn_rename);
-    }
-    vbox.append(&btn_trash);
     vbox.append(&btn_delete);
+
+    // Create horizontal footer box for clipboard & file operations
+    let sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
+    sep.add_css_class("menu-sep");
+    vbox.append(&sep);
+
+    let footer_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
+    footer_box.add_css_class("context-menu-footer");
+    footer_box.set_halign(gtk4::Align::Fill);
+    footer_box.set_homogeneous(true);
+
+    let btn_cut = create_footer_icon_button("cut", "Cut");
+    let btn_copy = create_footer_icon_button("copy", "Copy");
+    
+    footer_box.append(&btn_cut);
+    footer_box.append(&btn_copy);
+
+    // Paste button (only if target is a single directory and clipboard is not empty)
+    let is_target_dir = target_paths.len() == 1 && target_paths[0].is_dir();
+    let clipboard_data = CLIPBOARD.with(|cb| cb.borrow().clone());
+    
+    let btn_paste = create_footer_icon_button("paste", "Paste");
+    if is_target_dir {
+        btn_paste.set_sensitive(clipboard_data.is_some());
+        footer_box.append(&btn_paste);
+    }
+
+    // Rename button (only if 1 target is selected)
+    let btn_rename = create_footer_icon_button("rename", "Rename");
+    if target_paths.len() == 1 {
+        footer_box.append(&btn_rename);
+    }
+
+    let btn_trash = create_footer_icon_button("trash", "Move to Trash");
+    footer_box.append(&btn_trash);
+
+    vbox.append(&footer_box);
 
     // Event handling
     let pop_c = popover.clone();
@@ -68,7 +95,46 @@ pub fn show_for_file_normal(
         nav_c(current_p.clone());
     });
 
-    // Rename dialog trigger (only if 1 item selected)
+    // Paste handler (if folder selected)
+    if is_target_dir {
+        let pop_c = popover.clone();
+        let dest_dir = target_paths[0].clone();
+        let nav = nav_callback.clone();
+        let current_p = current_path.clone();
+        btn_paste.connect_clicked(move |_| {
+            pop_c.popdown();
+            if let Some((sources, is_cut)) = clipboard_data.clone() {
+                let nav_f = nav.clone();
+                let cp_f = current_p.clone();
+                let dest_dir_c = dest_dir.clone();
+                glib::spawn_future_local(async move {
+                    let mut all_success = true;
+                    for src in sources {
+                        if let Some(filename) = src.file_name() {
+                            let dest = dest_dir_c.join(filename);
+                            if is_cut {
+                                if let Err(e) = babydra_common::move_path(src, dest).await {
+                                    eprintln!("Failed to move file: {}", e);
+                                    all_success = false;
+                                }
+                            } else {
+                                if let Err(e) = babydra_common::copy_path(src, dest).await {
+                                    eprintln!("Failed to copy file: {}", e);
+                                    all_success = false;
+                                }
+                            }
+                        }
+                    }
+                    if is_cut && all_success {
+                        CLIPBOARD.with(|cb| cb.replace(None));
+                    }
+                    nav_f(cp_f);
+                });
+            }
+        });
+    }
+
+    // Rename dialog trigger
     if target_paths.len() == 1 {
         let pop_c = popover.clone();
         let rename_path = target_paths[0].clone();

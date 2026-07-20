@@ -4,7 +4,7 @@ mod empty_actions;
 mod render;
 
 pub use empty_actions::show_for_empty;
-pub use render::{create_menu_popover, create_menu_button};
+pub use render::{create_menu_popover, create_menu_button, create_footer_icon_button};
 
 use std::path::PathBuf;
 use std::rc::Rc;
