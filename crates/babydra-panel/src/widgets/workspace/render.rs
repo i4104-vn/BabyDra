@@ -88,7 +88,9 @@ pub fn render_popover_previews(
         title_lbl.set_text(&label_text);
         preview_btn.set_child(Some(&title_lbl));
 
-        let kill_btn = gtk4::Button::from_icon_name("window-close-symbolic");
+        let kill_btn = gtk4::Button::builder()
+            .child(&babydra_utils::ui::icon::get_icon("window-close-symbolic", 16))
+            .build();
         kill_btn.add_css_class("taskbar-preview-list-kill-btn");
 
         item_box.append(&preview_btn);
@@ -143,7 +145,7 @@ pub fn render_popover_previews(
         let close_all_content = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
         close_all_content.set_halign(gtk4::Align::Start);
         
-        let close_all_icon = gtk4::Image::from_icon_name("window-close-symbolic");
+        let close_all_icon = babydra_utils::ui::icon::get_icon("window-close-symbolic", 16);
         close_all_icon.set_pixel_size(16);
         close_all_icon.add_css_class("taskbar-preview-action-icon");
 

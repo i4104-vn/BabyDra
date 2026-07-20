@@ -44,7 +44,7 @@ pub fn build_appearance_ui(
         let clean_path = current_wallpaper_path.replace("file://", "");
         preview_img.set_from_file(Some(&clean_path));
     } else {
-        preview_img.set_icon_name(Some("image-missing"));
+        babydra_utils::ui::icon::set_image_from_icon(&preview_img, "display", 100);
     }
     preview_img.set_pixel_size(100);
     preview_img.set_valign(gtk4::Align::Center);
@@ -61,7 +61,7 @@ pub fn build_appearance_ui(
     pick_content.set_valign(gtk4::Align::Center);
     pick_content.set_halign(gtk4::Align::Center);
 
-    let pick_icon = gtk4::Image::from_icon_name("folder-open-symbolic");
+    let pick_icon = babydra_utils::ui::icon::get_icon("folder", 24);
     pick_icon.set_pixel_size(24);
     pick_content.append(&pick_icon);
 
@@ -80,7 +80,7 @@ pub fn build_appearance_ui(
     light_card.add_css_class("theme-option-card");
     let light_content = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
     light_content.set_halign(gtk4::Align::Center);
-    let light_icon = gtk4::Image::from_icon_name("weather-clear-symbolic");
+    let light_icon = babydra_utils::ui::icon::get_icon("brightness", 16);
     light_icon.set_pixel_size(16);
     light_content.append(&light_icon);
     let light_lbl = gtk4::Label::new(Some("Light"));
@@ -93,7 +93,7 @@ pub fn build_appearance_ui(
     dark_card.add_css_class("theme-option-card");
     let dark_content = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
     dark_content.set_halign(gtk4::Align::Center);
-    let dark_icon = gtk4::Image::from_icon_name("weather-clear-night-symbolic");
+    let dark_icon = babydra_utils::ui::icon::get_icon("dark-mode", 16);
     dark_icon.set_pixel_size(16);
     dark_content.append(&dark_icon);
     let dark_lbl = gtk4::Label::new(Some("Dark"));
@@ -119,7 +119,7 @@ pub fn build_appearance_ui(
     gtk_row.set_margin_top(8);
 
     let gtk_left = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    let palette_icon = gtk4::Image::from_icon_name("preferences-desktop-theme-symbolic");
+    let palette_icon = babydra_utils::ui::icon::get_icon("settings", 16);
     palette_icon.set_pixel_size(16);
     gtk_left.append(&palette_icon);
 

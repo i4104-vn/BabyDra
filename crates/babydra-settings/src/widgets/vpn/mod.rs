@@ -39,7 +39,7 @@ pub fn create_vpn_widget() -> gtk4::Box {
                 row.set_margin_start(8);
                 row.set_margin_end(8);
 
-                let icon = gtk4::Image::from_icon_name("network-vpn-symbolic");
+                let icon = babydra_utils::ui::icon::get_icon("shield", 16);
                 icon.set_valign(gtk4::Align::Center);
                 row.append(&icon);
 
