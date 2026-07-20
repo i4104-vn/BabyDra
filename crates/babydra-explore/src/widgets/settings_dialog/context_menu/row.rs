@@ -23,6 +23,7 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
     hbox_view.set_margin_end(10);
 
     let vbox_text = Box::new(Orientation::Vertical, 2);
+    vbox_text.set_valign(Align::Center);
     let lbl_name = Label::builder()
         .halign(Align::Start)
         .build();
@@ -36,6 +37,7 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
     let icon_name = item.icon.as_deref().unwrap_or("settings");
     let img_icon = babydra_utils::ui::icon::get_icon(icon_name, 16);
     img_icon.set_pixel_size(16);
+    img_icon.set_valign(Align::Center);
 
     vbox_text.append(&lbl_name);
     vbox_text.append(&lbl_cmd);
@@ -49,6 +51,7 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
     let btn_edit = Button::builder()
         .child(&babydra_utils::ui::icon::get_icon("rename", 16))
         .css_classes(vec!["flat".to_string(), "circular".to_string(), "row-action-btn".to_string(), "edit-btn".to_string()])
+        .valign(Align::Center)
         .build();
     btn_edit.set_tooltip_text(Some(&t("explore.settings_edit")));
     btn_edit.set_cursor_from_name(Some("pointer"));
@@ -57,6 +60,7 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
     let btn_del = Button::builder()
         .child(&babydra_utils::ui::icon::get_icon("trash", 16))
         .css_classes(vec!["flat".to_string(), "circular".to_string(), "row-action-btn".to_string(), "delete-btn".to_string()])
+        .valign(Align::Center)
         .build();
     btn_del.set_tooltip_text(Some(&t("explore.settings_delete")));
     btn_del.set_cursor_from_name(Some("pointer"));
