@@ -248,3 +248,23 @@ button.empty-trash-btn:hover {
 .explore-dialog .destructive-action image {
     -gtk-icon-size: 12px;
 }
+
+button.destructive-action {
+    background-color: rgba(220, 38, 38, 0.85);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    color: #ffffff;
+    padding: 4px 14px;
+    font-weight: 600;
+    box-shadow: none;
+    transition: all 150ms ease;
+}
+
+button.destructive-action:hover {
+    background-color: rgba(239, 68, 68, 0.9);
+    box-shadow: none;
+}
+
+button.destructive-action:active {
+    background-color: #991b1b;
+}

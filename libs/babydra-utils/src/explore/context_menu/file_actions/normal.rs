@@ -23,14 +23,12 @@ pub fn show_for_file_normal(
     } else {
         None
     };
-    let btn_delete = create_menu_button("Delete Permanently", "trash");
 
     vbox.append(&btn_open);
     vbox.append(&btn_compress);
     if let Some(ref btn) = btn_decompress {
         vbox.append(btn);
     }
-    vbox.append(&btn_delete);
 
     // Create horizontal footer box for clipboard & file operations
     let footer_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
@@ -174,25 +172,7 @@ pub fn show_for_file_normal(
         });
     });
 
-    // Permanent delete
-    let pop_c = popover.clone();
-    let target_paths_del = target_paths.clone();
-    let nav = nav_callback.clone();
-    let current_p = current_path.clone();
-    btn_delete.connect_clicked(move |_| {
-        pop_c.popdown();
-        let nav_c = nav.clone();
-        let cp_c = current_p.clone();
-        let paths_c = target_paths_del.clone();
-        glib::spawn_future_local(async move {
-            for path in paths_c {
-                if let Err(err) = babydra_common::delete_path(path).await {
-                    eprintln!("Failed to delete file: {}", err);
-                }
-            }
-            nav_c(cp_c);
-        });
-    });
+
 
     // Compress action
     let target_paths_compress = target_paths.clone();

@@ -47,14 +47,30 @@ pub fn show_for_file_trash(
         let nav_c = nav.clone();
         let cp_c = current_p.clone();
         let paths_c = target_paths_del.clone();
-        glib::spawn_future_local(async move {
-            for path in paths_c {
-                if let Err(err) = babydra_common::delete_path(path).await {
-                    eprintln!("Failed to delete file: {}", err);
-                }
+        
+        let message = if paths_c.len() == 1 {
+            format!("Are you sure you want to permanently delete '{}'?", paths_c[0].file_name().unwrap().to_string_lossy())
+        } else {
+            format!("Are you sure you want to permanently delete these {} items?", paths_c.len())
+        };
+        
+        crate::explore::dialogs::show_delete_confirm_dialog(
+            "Confirm Delete",
+            &message,
+            move || {
+                let nav_f = nav_c.clone();
+                let cp_f = cp_c.clone();
+                let paths_f = paths_c.clone();
+                glib::spawn_future_local(async move {
+                    for path in paths_f {
+                        if let Err(err) = babydra_common::delete_path(path).await {
+                            eprintln!("Failed to delete file: {}", err);
+                        }
+                    }
+                    nav_f(cp_f);
+                });
             }
-            nav_c(cp_c);
-        });
+        );
     });
 
     popover.popup();
