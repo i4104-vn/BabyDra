@@ -294,3 +294,9 @@ button.icon-grid-item {
 button.icon-grid-item:hover {
     background-color: rgba(0, 0, 0, 0.05);
 }
+
+entry.small-entry {
+    min-height: 28px;
+    padding: 2px 8px;
+    font-size: 13px;
+}

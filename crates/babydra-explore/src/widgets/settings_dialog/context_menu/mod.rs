@@ -75,6 +75,7 @@ pub fn build_context_menu_page() -> Box {
     let entry_name = Entry::builder()
         .placeholder_text(&t("explore.settings_placeholder_name"))
         .hexpand(true)
+        .css_classes(vec!["small-entry".to_string()])
         .build();
     
     // State to store currently selected icon
@@ -160,6 +161,7 @@ pub fn build_context_menu_page() -> Box {
     let entry_cmd = Entry::builder()
         .placeholder_text(&t("explore.settings_placeholder_command"))
         .hexpand(true)
+        .css_classes(vec!["small-entry".to_string()])
         .build();
     entry_cmd_vbox.append(&entry_cmd);
 
