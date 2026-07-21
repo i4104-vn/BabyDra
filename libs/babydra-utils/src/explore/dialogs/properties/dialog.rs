@@ -66,6 +66,11 @@ pub fn show_properties_dialog(
     let btn_cancel = Button::with_label(&t("explore.settings_cancel"));
     bbox.append(&btn_cancel);
 
+    let win_cancel_btn = window.clone();
+    btn_cancel.connect_clicked(move |_| {
+        win_cancel_btn.close();
+    });
+
     let height = count_dialog_height(&target_paths);
     let win_cancel = window.clone();
     let vbox_cancel = vbox.clone();

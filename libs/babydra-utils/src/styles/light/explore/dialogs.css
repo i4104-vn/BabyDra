@@ -20,18 +20,11 @@ button.suggested-action:active {
 
 .explore-dialog {
     background-color: #f5f5f7;
-    background-image: none;
     box-shadow: none;
-    border: none;
+    border-radius: 0 0 12px 12px;
 }
 
 .explore-dialog-box {
-    background-color: #f5f5f7;
-    background-image: repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.015) 0px, rgba(0, 0, 0, 0.015) 1px, transparent 1px, transparent 2px);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-top: none;
-    border-radius: 0 0 12px 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
     color: #1a1a1a;
 }
 
@@ -236,8 +229,8 @@ button.settings-pill {
     color: rgba(0, 0, 0, 0.6);
     border-radius: 9999px;
     padding: 10px;
-    min-width: 38px;
-    min-height: 38px;
+    min-width: 20px;
+    min-height: 20px;
     font-size: 12px;
     font-weight: 600;
     transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;

@@ -50,6 +50,11 @@ pub fn show_delete_confirm_dialog(
     bbox.append(&btn_cancel);
     bbox.append(&btn_confirm);
 
+    let win_cancel_btn = window.clone();
+    btn_cancel.connect_clicked(move |_| {
+        win_cancel_btn.close();
+    });
+
     let win_cancel = window.clone();
     let vbox_cancel = vbox.clone();
     let is_animating = Rc::new(std::cell::Cell::new(false));
