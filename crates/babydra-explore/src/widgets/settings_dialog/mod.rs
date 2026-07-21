@@ -1,6 +1,7 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Button, Window, Align, Stack, Separator};
+use gtk4::{Box, Orientation, Button, Window, Align, Stack};
 use babydra_common::i18n::t;
+use std::rc::Rc;
 
 mod general;
 mod context_menu;
@@ -12,78 +13,60 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         .title(&t("explore.settings"))
         .transient_for(parent)
         .modal(true)
-        .resizable(true)
-        .default_width(750)
-        .default_height(550)
+        .resizable(false)
+        .default_width(600)
+        .default_height(500)
         .css_classes(vec!["explore-dialog".to_string()])
         .build();
 
     let main_vbox = Box::new(Orientation::Vertical, 0);
     window.set_child(Some(&main_vbox));
 
-    let content_hbox = Box::new(Orientation::Horizontal, 0);
-    content_hbox.set_vexpand(true);
-    main_vbox.append(&content_hbox);
+    // ── Top: Capsule Navigation ────────────────────────────────
+    let nav_container = Box::new(Orientation::Horizontal, 0);
+    nav_container.set_halign(Align::Center);
+    nav_container.set_margin_top(16);
+    nav_container.set_margin_bottom(16);
+    nav_container.add_css_class("settings-capsule-nav");
+    main_vbox.append(&nav_container);
 
-    // ── Left: Sidebar ──────────────────────────────────────────
-    let sidebar_box = Box::new(Orientation::Vertical, 0);
-    sidebar_box.set_size_request(140, -1);
-    sidebar_box.set_margin_top(0);
-    sidebar_box.set_margin_bottom(0);
-    sidebar_box.set_margin_start(0);
-    sidebar_box.set_margin_end(0);
-    sidebar_box.add_css_class("settings-sidebar");
-    content_hbox.append(&sidebar_box);
-
-    let stack = Stack::new();
-    stack.set_transition_type(gtk4::StackTransitionType::SlideLeftRight);
-    stack.set_hexpand(true);
-    stack.set_vexpand(true);
-
-    // Sidebar items list
     let btn_general = Button::builder()
         .label(&t("explore.settings_general"))
-        .hexpand(true)
-        .halign(Align::Fill)
-        .css_classes(vec!["sidebar-item".to_string(), "active-nav".to_string()])
+        .css_classes(vec!["settings-pill".to_string(), "active-pill".to_string()])
         .build();
     btn_general.set_cursor_from_name(Some("pointer"));
 
     let btn_keybinds = Button::builder()
         .label(&t("explore.settings_keybinds"))
-        .hexpand(true)
-        .halign(Align::Fill)
-        .css_classes(vec!["sidebar-item".to_string()])
+        .css_classes(vec!["settings-pill".to_string()])
         .build();
     btn_keybinds.set_cursor_from_name(Some("pointer"));
 
     let btn_context = Button::builder()
         .label(&t("explore.settings_context_menu"))
-        .hexpand(true)
-        .halign(Align::Fill)
-        .css_classes(vec!["sidebar-item".to_string()])
+        .css_classes(vec!["settings-pill".to_string()])
         .build();
     btn_context.set_cursor_from_name(Some("pointer"));
 
-    sidebar_box.append(&btn_general);
-    sidebar_box.append(&btn_keybinds);
-    sidebar_box.append(&btn_context);
+    nav_container.append(&btn_general);
+    nav_container.append(&btn_keybinds);
+    nav_container.append(&btn_context);
 
-    // Separator between sidebar and content stack
-    let sep_sidebar = Separator::new(Orientation::Vertical);
-    content_hbox.append(&sep_sidebar);
+    // ── Content: Stack ─────────────────────────────────────────
+    let stack = Stack::new();
+    stack.set_transition_type(gtk4::StackTransitionType::Crossfade);
+    stack.set_transition_duration(300);
+    stack.set_hexpand(true);
+    stack.set_vexpand(true);
 
-    // Right content area wrapper box
-    let right_vbox = Box::new(Orientation::Vertical, 10);
-    right_vbox.set_margin_top(16);
-    right_vbox.set_margin_bottom(16);
-    right_vbox.set_margin_start(20);
-    right_vbox.set_margin_end(20);
-    right_vbox.set_hexpand(true);
-    right_vbox.set_vexpand(true);
-    content_hbox.append(&right_vbox);
-
-    right_vbox.append(&stack);
+    let stack_container = Box::new(Orientation::Vertical, 0);
+    stack_container.set_margin_start(16);
+    stack_container.set_margin_end(16);
+    stack_container.set_margin_bottom(16);
+    stack_container.set_hexpand(true);
+    stack_container.set_vexpand(true);
+    stack_container.append(&stack);
+    main_vbox.append(&stack_container);
 
     // ── Build pages ──────────────────────────────────────────
     let tab_general = general::build_general_page();
@@ -100,9 +83,9 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     let btn_con_c = btn_context.clone();
     let stack_c = stack.clone();
     btn_general.connect_clicked(move |_| {
-        btn_gen_c.add_css_class("active-nav");
-        btn_key_c.remove_css_class("active-nav");
-        btn_con_c.remove_css_class("active-nav");
+        btn_gen_c.add_css_class("active-pill");
+        btn_key_c.remove_css_class("active-pill");
+        btn_con_c.remove_css_class("active-pill");
         stack_c.set_visible_child_name("general");
     });
 
@@ -111,9 +94,9 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     let btn_con_c2 = btn_context.clone();
     let stack_c2 = stack.clone();
     btn_keybinds.connect_clicked(move |_| {
-        btn_key_c2.add_css_class("active-nav");
-        btn_gen_c2.remove_css_class("active-nav");
-        btn_con_c2.remove_css_class("active-nav");
+        btn_key_c2.add_css_class("active-pill");
+        btn_gen_c2.remove_css_class("active-pill");
+        btn_con_c2.remove_css_class("active-pill");
         stack_c2.set_visible_child_name("keybinds");
     });
 
@@ -122,13 +105,36 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     let btn_con_c3 = btn_context.clone();
     let stack_c3 = stack.clone();
     btn_context.connect_clicked(move |_| {
-        btn_con_c3.add_css_class("active-nav");
-        btn_gen_c3.remove_css_class("active-nav");
-        btn_key_c3.remove_css_class("active-nav");
+        btn_con_c3.add_css_class("active-pill");
+        btn_gen_c3.remove_css_class("active-pill");
+        btn_key_c3.remove_css_class("active-pill");
         stack_c3.set_visible_child_name("context_menu");
     });
 
-    // Also trigger on_change when window is destroyed/closed
+    // Close Request & Animation Setup
+    let win_cancel = window.clone();
+    let vbox_cancel = main_vbox.clone();
+    let is_animating = Rc::new(std::cell::Cell::new(false));
+    let is_animating_cancel = is_animating.clone();
+    window.connect_close_request(move |_| {
+        if is_animating_cancel.get() {
+            return glib::Propagation::Stop;
+        }
+        is_animating_cancel.set(true);
+        let win_cb = win_cancel.clone();
+        babydra_utils::ui::animation::genie_out(
+            vbox_cancel.upcast_ref(),
+            600,
+            500,
+            300,
+            move || {
+                win_cb.destroy();
+            }
+        );
+        glib::Propagation::Stop
+    });
+
+    // Trigger on_change when window is destroyed/closed
     let on_change = std::rc::Rc::new(on_change_callback);
     let on_change_destroy = on_change.clone();
     window.connect_destroy(move |_| {
@@ -136,4 +142,5 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     });
 
     window.present();
+    babydra_utils::ui::animation::genie_in(main_vbox.upcast_ref(), 600, 500, 300);
 }

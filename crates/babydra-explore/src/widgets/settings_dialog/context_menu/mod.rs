@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Label, Button, Align, ListBox, Entry, Grid, Separator};
+use gtk4::{Box, Orientation, Label, Button, Align, ListBox, Entry, Grid};
 use babydra_common::i18n::t;
 
 pub mod row;
@@ -13,20 +13,8 @@ const AVAILABLE_ICONS: &[&str] = &[
 pub fn build_context_menu_page() -> Box {
     let settings = babydra_common::load_explore_settings();
     let tab_context = Box::new(Orientation::Vertical, 10);
-
-    let lbl_context_title = Label::builder()
-        .label(&t("explore.settings_context_menu"))
-        .halign(Align::Start)
-        .build();
-    lbl_context_title.add_css_class("settings-title-label");
-    tab_context.append(&lbl_context_title);
-
-    let lbl_section_title = Label::builder()
-        .label(&t("explore.settings_custom_options"))
-        .halign(Align::Start)
-        .build();
-    lbl_section_title.add_css_class("settings-section-title");
-    tab_context.append(&lbl_section_title);
+    tab_context.set_margin_top(8);
+    tab_context.set_margin_bottom(8);
 
     let scroll = gtk4::ScrolledWindow::builder()
         .hscrollbar_policy(gtk4::PolicyType::Never)
@@ -38,7 +26,7 @@ pub fn build_context_menu_page() -> Box {
 
     let context_listbox = ListBox::new();
     context_listbox.set_selection_mode(gtk4::SelectionMode::None);
-    context_listbox.add_css_class("settings-listbox");
+    context_listbox.add_css_class("settings-card");
     scroll.set_child(Some(&context_listbox));
 
     let listbox_c = context_listbox.clone();
@@ -48,34 +36,43 @@ pub fn build_context_menu_page() -> Box {
         row::render_option_row(&context_listbox, item);
     }
 
-    let sep = Separator::new(Orientation::Horizontal);
-    tab_context.append(&sep);
-
-    // Form to add new option
-    let form_box = Box::new(Orientation::Vertical, 8);
+    // Form to add new option (wrapped in a clean settings card)
+    let form_box = Box::new(Orientation::Vertical, 12);
+    form_box.add_css_class("settings-card");
+    form_box.set_margin_top(12);
+    form_box.set_margin_bottom(12);
+    
+    // Internal margins for form_box
+    let form_inner = Box::new(Orientation::Vertical, 8);
+    form_inner.set_margin_top(12);
+    form_inner.set_margin_bottom(12);
+    form_inner.set_margin_start(16);
+    form_inner.set_margin_end(16);
+    form_box.append(&form_inner);
     tab_context.append(&form_box);
 
     let lbl_add_title = Label::builder()
         .label(&t("explore.settings_add_option"))
         .halign(Align::Start)
         .build();
-    lbl_add_title.add_css_class("settings-section-subtitle");
-    form_box.append(&lbl_add_title);
+    lbl_add_title.add_css_class("settings-row-title");
+    form_inner.append(&lbl_add_title);
 
     let grid = Grid::new();
     grid.set_row_spacing(8);
     grid.set_column_spacing(12);
-    form_box.append(&grid);
+    form_inner.append(&grid);
 
     // Row 0: Option Name & Circular Icon Button
     let lbl_name_field = Label::new(Some(&t("explore.settings_option_name")));
     lbl_name_field.set_halign(Align::Start);
+    lbl_name_field.add_css_class("settings-row-desc");
 
     let name_hbox = Box::new(Orientation::Horizontal, 8);
     let entry_name = Entry::builder()
         .placeholder_text(&t("explore.settings_placeholder_name"))
         .hexpand(true)
-        .css_classes(vec!["small-entry".to_string()])
+        .css_classes(vec!["small-entry".to_string(), "inline-entry".to_string()])
         .build();
     
     // State to store currently selected icon
@@ -156,12 +153,13 @@ pub fn build_context_menu_page() -> Box {
     // Row 1: Command
     let lbl_cmd_field = Label::new(Some(&t("explore.settings_option_command")));
     lbl_cmd_field.set_halign(Align::Start);
+    lbl_cmd_field.add_css_class("settings-row-desc");
     
     let entry_cmd_vbox = Box::new(Orientation::Vertical, 4);
     let entry_cmd = Entry::builder()
         .placeholder_text(&t("explore.settings_placeholder_command"))
         .hexpand(true)
-        .css_classes(vec!["small-entry".to_string()])
+        .css_classes(vec!["small-entry".to_string(), "inline-entry".to_string()])
         .build();
     entry_cmd_vbox.append(&entry_cmd);
 
@@ -201,7 +199,7 @@ pub fn build_context_menu_page() -> Box {
         .css_classes(vec!["suggested-action".to_string()])
         .build();
     btn_add.set_cursor_from_name(Some("pointer"));
-    form_box.append(&btn_add);
+    form_inner.append(&btn_add);
 
     // Add button logic
     let entry_name_c = entry_name.clone();

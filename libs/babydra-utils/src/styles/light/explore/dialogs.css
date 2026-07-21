@@ -18,11 +18,22 @@ button.suggested-action:active {
     background-color: #0044aa;
 }
 
-window.explore-dialog,
-window.explore-dialog>box {
-    background-color: #f5f5f7;
+window.explore-dialog {
+    background-color: transparent;
+    background-image: none;
+    box-shadow: none;
     border: none;
-    border-radius: 0;
+}
+
+window.explore-dialog>box {
+    background-color: rgba(245, 245, 247, 0.94);
+    background-image: none;
+    -gtk-background-blur: 24;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.40);
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    color: #1a1a1a;
 }
 
 .explore-dialog entry {
@@ -201,32 +212,98 @@ button.empty-trash-btn:hover {
     padding: 0;
 }
 
-/* Sidebar inside Explore Settings Dialog */
-.explore-dialog .settings-sidebar {
+/* ── Settings Capsule Navigation ──────────────────────────────── */
+.settings-capsule-nav {
+    background-color: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 9999px;
+    padding: 3px;
+}
+
+button.settings-pill {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    color: rgba(0, 0, 0, 0.6);
+    border-radius: 9999px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 150ms ease;
+}
+
+button.settings-pill:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #000000;
+}
+
+button.settings-pill.active-pill {
+    background-color: rgba(0, 102, 204, 0.1);
+    border: 1px solid rgba(0, 102, 204, 0.08);
+    color: #0066cc;
+    box-shadow: none;
+}
+
+button.settings-pill.active-pill:hover {
+    background-color: rgba(0, 102, 204, 0.15);
+    color: #0066cc;
+}
+
+/* ── Settings Cards & ListBox Redesign ────────────────────────── */
+.settings-card {
+    background-color: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    padding: 4px;
+}
+
+.settings-card-row,
+.settings-custom-item-row {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    background: transparent;
+    background-color: transparent;
+}
+
+.settings-card-row:last-child,
+.settings-custom-item-row:last-child {
+    border-bottom: none;
+}
+
+.settings-card-row:hover,
+.settings-custom-item-row:hover {
     background-color: rgba(0, 0, 0, 0.01);
 }
 
-.explore-dialog .sidebar-item {
-    background: transparent;
-    border: none;
-    border-radius: 0px;
-    padding: 10px 14px;
-    color: #475569;
-    font-size: 12px;
-    margin: 0px;
-    transition: background-color 0.15s ease, color 0.15s ease;
+.settings-row-icon {
+    color: rgba(0, 0, 0, 0.7);
 }
 
-.explore-dialog .sidebar-item:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-    color: #0f172a;
-}
-
-.explore-dialog .sidebar-item.active-nav {
-    background-color: rgba(0, 102, 204, 0.08);
+.keybind-pill {
+    font-size: 11px;
+    font-weight: 700;
+    background-color: rgba(0, 102, 204, 0.1);
     color: #0066cc;
-    font-weight: 600;
-    border-left: 3px solid #0066cc;
+    border-radius: 9999px;
+    padding: 3px 10px;
+}
+
+/* Form placeholder button styling */
+button.placeholder-btn {
+    font-size: 10px;
+    padding: 3px 8px;
+    background-color: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 9999px;
+    color: rgba(0, 0, 0, 0.6);
+    transition: all 120ms ease;
+}
+
+button.placeholder-btn:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    color: #000000;
 }
 
 /* Strip default button borders, focus lines, outlines in settings dialog */

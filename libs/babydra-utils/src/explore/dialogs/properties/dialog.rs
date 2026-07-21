@@ -1,3 +1,4 @@
+use std::rc::Rc;
 use gtk4::prelude::*;
 use gtk4::{Box, Orientation, Button, Align, Window, Grid};
 use std::path::PathBuf;
@@ -64,9 +65,27 @@ pub fn show_properties_dialog(
     let btn_cancel = Button::with_label(&t("explore.settings_cancel"));
     bbox.append(&btn_cancel);
 
-    let win_c = window.clone();
-    btn_cancel.connect_clicked(move |_| {
-        win_c.close();
+    let height = count_dialog_height(&target_paths);
+    let win_cancel = window.clone();
+    let vbox_cancel = vbox.clone();
+    let is_animating = Rc::new(std::cell::Cell::new(false));
+    let is_animating_cancel = is_animating.clone();
+    window.connect_close_request(move |_| {
+        if is_animating_cancel.get() {
+            return glib::Propagation::Stop;
+        }
+        is_animating_cancel.set(true);
+        let win_cb = win_cancel.clone();
+        crate::ui::animation::genie_out(
+            vbox_cancel.upcast_ref(),
+            360,
+            height,
+            300,
+            move || {
+                win_cb.destroy();
+            }
+        );
+        glib::Propagation::Stop
     });
 
     if target_paths.len() == 1 {
@@ -87,4 +106,5 @@ pub fn show_properties_dialog(
     }
 
     window.present();
+    crate::ui::animation::genie_in(vbox.upcast_ref(), 360, height, 300);
 }

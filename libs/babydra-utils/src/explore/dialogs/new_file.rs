@@ -56,8 +56,25 @@ pub fn show_new_file_dialog(
     bbox.append(&btn_create);
 
     let win_cancel = window.clone();
-    btn_cancel.connect_clicked(move |_| {
-        win_cancel.close();
+    let vbox_cancel = vbox.clone();
+    let is_animating = Rc::new(std::cell::Cell::new(false));
+    let is_animating_cancel = is_animating.clone();
+    window.connect_close_request(move |_| {
+        if is_animating_cancel.get() {
+            return glib::Propagation::Stop;
+        }
+        is_animating_cancel.set(true);
+        let win_cb = win_cancel.clone();
+        crate::ui::animation::genie_out(
+            vbox_cancel.upcast_ref(),
+            320,
+            140,
+            300,
+            move || {
+                win_cb.destroy();
+            }
+        );
+        glib::Propagation::Stop
     });
 
     let win_create = window.clone();
@@ -84,5 +101,6 @@ pub fn show_new_file_dialog(
     });
 
     window.present();
+    crate::ui::animation::genie_in(vbox.upcast_ref(), 320, 140, 300);
     entry_trigger.grab_focus();
 }

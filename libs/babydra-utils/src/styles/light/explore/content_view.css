@@ -175,7 +175,25 @@
     animation-name: list-item-slide-in;
     animation-duration: 250ms;
     animation-timing-function: ease-out;
+    animation-fill-mode: backwards;
 }
+
+.explore-window flowboxchild:nth-child(1), .explore-window row:nth-child(1) { animation-delay: 0ms; }
+.explore-window flowboxchild:nth-child(2), .explore-window row:nth-child(2) { animation-delay: 15ms; }
+.explore-window flowboxchild:nth-child(3), .explore-window row:nth-child(3) { animation-delay: 30ms; }
+.explore-window flowboxchild:nth-child(4), .explore-window row:nth-child(4) { animation-delay: 45ms; }
+.explore-window flowboxchild:nth-child(5), .explore-window row:nth-child(5) { animation-delay: 60ms; }
+.explore-window flowboxchild:nth-child(6), .explore-window row:nth-child(6) { animation-delay: 75ms; }
+.explore-window flowboxchild:nth-child(7), .explore-window row:nth-child(7) { animation-delay: 90ms; }
+.explore-window flowboxchild:nth-child(8), .explore-window row:nth-child(8) { animation-delay: 105ms; }
+.explore-window flowboxchild:nth-child(9), .explore-window row:nth-child(9) { animation-delay: 120ms; }
+.explore-window flowboxchild:nth-child(10), .explore-window row:nth-child(10) { animation-delay: 135ms; }
+.explore-window flowboxchild:nth-child(11), .explore-window row:nth-child(11) { animation-delay: 150ms; }
+.explore-window flowboxchild:nth-child(12), .explore-window row:nth-child(12) { animation-delay: 165ms; }
+.explore-window flowboxchild:nth-child(13), .explore-window row:nth-child(13) { animation-delay: 180ms; }
+.explore-window flowboxchild:nth-child(14), .explore-window row:nth-child(14) { animation-delay: 195ms; }
+.explore-window flowboxchild:nth-child(15), .explore-window row:nth-child(15) { animation-delay: 210ms; }
+.explore-window flowboxchild:nth-child(n+16), .explore-window row:nth-child(n+16) { animation-delay: 220ms; }
 
 .explore-window .loading-label {
     font-size: 14px;
