@@ -19,16 +19,15 @@ button.suggested-action:active {
 }
 
 window.explore-dialog {
-    background-color: transparent;
+    background-color: #f5f5f7;
     background-image: none;
     box-shadow: none;
     border: none;
 }
 
 window.explore-dialog>box {
-    background-color: rgba(245, 245, 247, 0.94);
-    background-image: none;
-    -gtk-background-blur: 24;
+    background-color: #f5f5f7;
+    background-image: repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.015) 0px, rgba(0, 0, 0, 0.015) 1px, transparent 1px, transparent 2px);
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-top: none;
     border-radius: 0 0 12px 12px;

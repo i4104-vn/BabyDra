@@ -94,23 +94,6 @@ chmod +x "$HOME/.local/share/applications/babydra-explore.desktop"
 update-desktop-database "$HOME/.local/share/applications" || true
 xdg-mime default babydra-explore.desktop inode/directory || true
 
-
-# 6. Reload labwc settings
-echo "Reloading labwc compositor..."
-mkdir -p "$HOME/.config/labwc/themes"
-cp -r "$SCRIPT_DIR/configs/labwc/themes/"* "$HOME/.config/labwc/themes/"
-cp "$SCRIPT_DIR/configs/labwc/switcher.sh" "$HOME/.config/labwc/switcher.sh"
-chmod +x "$HOME/.config/labwc/switcher.sh"
-
-VAL=$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null | tr -d "'")
-if [ "$VAL" = "prefer-light" ]; then
-    cp "$HOME/.config/labwc/themes/light" "$HOME/.config/labwc/themerc-override"
-else
-    cp "$HOME/.config/labwc/themes/dark" "$HOME/.config/labwc/themerc-override"
-fi
-
-labwc --reconfigure || true
-
 # 7. Start the panel and redirect stdout/stderr to log file
 echo "Starting babydra-panel..."
 killall fnott || true
