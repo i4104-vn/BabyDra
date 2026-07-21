@@ -30,12 +30,14 @@
     color: #444;
     font-size: 13px;
     margin: 1px 6px;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+    transform: none;
 }
 
 .explore-window .sidebar-item:hover {
     background-color: rgba(0, 0, 0, 0.04);
     color: #1a1a1a;
+    transform: translateX(4px);
 }
 
 .explore-window .sidebar-item.active-nav {
