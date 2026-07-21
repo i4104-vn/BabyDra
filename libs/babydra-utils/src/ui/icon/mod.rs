@@ -1,4 +1,5 @@
-//! Built-in theme SVG assets loader and system tray/desktop icon parser.
+use gio::prelude::*;
+use glib::object::ObjectExt;
 
 pub mod assets;
 pub mod resolver;
@@ -9,9 +10,14 @@ pub use assets::*;
 
 /// Whether dark mode is currently active.
 pub fn is_dark_mode() -> bool {
-    gtk4::Settings::default()
-        .map(|s| s.is_gtk_application_prefer_dark_theme())
-        .unwrap_or(true)
+    if let Some(settings) = gtk4::Settings::default() {
+        if !settings.is_gtk_application_prefer_dark_theme() {
+            return false;
+        }
+    }
+    let gsettings = gio::Settings::new("org.gnome.desktop.interface");
+    let val = gsettings.string("color-scheme");
+    val != "prefer-light"
 }
 
 /// Helper function to retrieve an SVG icon widget by name. Relies on the active theme.
@@ -19,10 +25,12 @@ pub fn get_icon_colored(name: &str, size: i32, _color_hex: &str) -> gtk4::Image 
     get_icon(name, size)
 }
 
-/// Helper function to retrieve an SVG icon widget by name. Defaults to white in dark mode and dark gray in light mode.
-pub fn get_icon(name: &str, size: i32) -> gtk4::Image {
+fn load_icon_image_data(img: &gtk4::Image, name: &str, size: i32) {
     if name == "logo" {
-        return get_logo_png(size);
+        let logo_img = get_logo_png(size);
+        img.set_paintable(logo_img.paintable().as_ref());
+        img.set_pixel_size(size);
+        return;
     }
     let is_dark = is_dark_mode();
     let use_light_folder = !is_dark;
@@ -162,17 +170,36 @@ pub fn get_icon(name: &str, size: i32) -> gtk4::Image {
     };
 
     if let Some(svg_content) = svg {
-        get_icon_from_svg(svg_content, size)
-    } else {
-        let img = get_system_or_file_icon(name, "image-missing");
+        let icon_img = get_icon_from_svg(svg_content, size);
+        img.set_paintable(icon_img.paintable().as_ref());
         img.set_pixel_size(size);
-        img
+    } else {
+        let icon_img = get_system_or_file_icon(name, "image-missing");
+        img.set_paintable(icon_img.paintable().as_ref());
+        img.set_pixel_size(size);
     }
 }
 
 /// Sets the image content from local SVG or system icon theme.
 pub fn set_image_from_icon(img: &gtk4::Image, name: &str, size: i32) {
-    let new_img = get_icon(name, size);
-    img.set_paintable(new_img.paintable().as_ref());
-    img.set_pixel_size(size);
+    load_icon_image_data(img, name, size);
+}
+
+/// Helper function to retrieve an SVG icon widget by name. Defaults to white in dark mode and dark gray in light mode.
+/// Automatically updates icon paintable when theme switches between Dark and Light mode.
+pub fn get_icon(name: &str, size: i32) -> gtk4::Image {
+    let img = gtk4::Image::new();
+    load_icon_image_data(&img, name, size);
+
+    let name_string = name.to_string();
+    if let Some(settings) = gtk4::Settings::default() {
+        let img_weak = img.downgrade();
+        settings.connect_gtk_application_prefer_dark_theme_notify(move |_| {
+            if let Some(img) = img_weak.upgrade() {
+                load_icon_image_data(&img, &name_string, size);
+            }
+        });
+    }
+
+    img
 }

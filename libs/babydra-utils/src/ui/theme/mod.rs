@@ -77,11 +77,8 @@ pub fn init_theme() {
     if let Some(settings) = gtk4::Settings::default() {
         let gsettings = gio::Settings::new("org.gnome.desktop.interface");
         let value = gsettings.string("color-scheme");
-        if value == "prefer-dark" {
-            settings.set_gtk_application_prefer_dark_theme(true);
-        } else if value == "prefer-light" {
-            settings.set_gtk_application_prefer_dark_theme(false);
-        }
+        let is_dark = value != "prefer-light";
+        settings.set_gtk_application_prefer_dark_theme(is_dark);
 
         let user_icon_theme = gsettings.string("icon-theme");
         let user_icon_theme = user_icon_theme.trim();
