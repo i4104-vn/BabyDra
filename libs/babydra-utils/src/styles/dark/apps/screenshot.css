@@ -97,14 +97,12 @@ button.color-dot-btn {
 }
 
 button.color-dot-btn:hover {
-    transform: scale(1.2);
     border-color: rgba(255, 255, 255, 0.6);
     box-shadow: none;
 }
 
 button.color-dot-btn.color-active {
     border: 2px solid #ffffff;
-    transform: scale(1.1);
 }
 
 /* Color Palette - each must explicitly clear background-image */

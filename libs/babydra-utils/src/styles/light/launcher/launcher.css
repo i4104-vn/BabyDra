@@ -131,7 +131,6 @@ entry.launcher-search>text>placeholder {
 .launcher-list-item.selected .app-icon-wrapper {
     background-color: rgba(59, 130, 246, 0.1);
     border-color: rgba(59, 130, 246, 0.2);
-    transform: scale(1.05);
 }
 
 .app-title {

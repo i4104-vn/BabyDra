@@ -88,7 +88,6 @@
 }
 
 .panel-notch.active-music:not(.popover-open):hover {
-    transform: scale(1.04);
     background-color: rgba(24, 24, 30, 0.96);
     box-shadow: none;
 }

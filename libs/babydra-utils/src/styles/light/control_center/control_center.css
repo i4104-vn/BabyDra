@@ -34,7 +34,6 @@ button.quick-tile:hover {
     background-color: rgba(0, 0, 0, 0.08);
     background-image: none;
     border-color: rgba(0, 0, 0, 0.08);
-    transform: translateY(-1px);
     box-shadow: none;
 }
 
@@ -79,7 +78,6 @@ button.quick-tile.active:hover {
     background-color: rgba(0, 0, 0, 0.18);
     background-image: none;
     box-shadow: none;
-    transform: translateY(-1px);
 }
 
 button.quick-tile.active .tile-subtitle {
@@ -100,7 +98,6 @@ button.quick-tile.active-light {
 button.quick-tile.active-light:hover {
     background-color: rgba(255, 255, 255, 0.95);
     background-image: none;
-    transform: translateY(-1px);
 }
 
 button.quick-tile.active-light .tile-icon {
@@ -164,12 +161,11 @@ scale slider {
     background-image: none;
     box-shadow: none;
     border: none;
-    transition: transform 100ms ease, background-color 150ms ease;
+    transition: background-color 200ms ease;
 }
 
 scale slider:hover {
     background-color: #ffffff;
-    transform: scale(1.15);
     box-shadow: none;
 }
 
@@ -232,7 +228,6 @@ button.control-dnd-tile {
 button.control-dnd-tile:hover {
     background-color: rgba(0, 0, 0, 0.06);
     background-image: none;
-    transform: translateY(-1px);
 }
 
 button.control-dnd-tile.active {
@@ -269,7 +264,6 @@ button.control-square-tile {
 button.control-square-tile:hover {
     background-color: rgba(0, 0, 0, 0.06);
     background-image: none;
-    transform: translateY(-1px);
 }
 
 button.control-square-tile.active {
