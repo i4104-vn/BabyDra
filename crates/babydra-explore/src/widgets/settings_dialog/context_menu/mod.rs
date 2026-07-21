@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Label, Button, Align, ListBox, Entry, Grid, Overlay, Window};
+use gtk4::{Box, Orientation, Label, Align, ListBox, Entry, Grid, Overlay, Window};
 use babydra_common::i18n::t;
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -38,20 +38,12 @@ pub fn build_context_menu_page(parent_window: &Window) -> Overlay {
         row::render_option_row(&context_listbox, item);
     }
 
-    // Floating Action Button (FAB) positioned at bottom-right corner
-    let btn_fab = Button::builder()
-        .css_classes(vec!["fab-add-btn".to_string(), "circular".to_string(), "suggested-action".to_string()])
-        .halign(Align::End)
-        .valign(Align::End)
-        .margin_bottom(16)
-        .margin_end(16)
-        .tooltip_text(&t("explore.settings_add_option"))
-        .build();
+    let btn_fab = babydra_utils::components::create_fab("plus");
+    btn_fab.add_css_class("circular");
+    btn_fab.set_margin_bottom(10);
+    btn_fab.set_margin_end(10);
+    btn_fab.set_tooltip_text(Some(&t("explore.settings_add_option")));
     btn_fab.set_cursor_from_name(Some("pointer"));
-
-    let icon_plus = babydra_utils::ui::icon::get_icon("plus", 20);
-    icon_plus.set_pixel_size(20);
-    btn_fab.set_child(Some(&icon_plus));
 
     overlay.add_overlay(&btn_fab);
 
@@ -110,20 +102,15 @@ fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
 
     let selected_icon = Rc::new(RefCell::new("settings".to_string()));
 
-    let btn_select_icon = Button::builder()
-        .css_classes(vec!["circular".to_string(), "icon-select-btn".to_string()])
-        .valign(Align::Center)
-        .build();
-    btn_select_icon.set_cursor_from_name(Some("pointer"));
-
-    let current_icon_img = babydra_utils::ui::icon::get_icon("settings", 16);
-    current_icon_img.set_pixel_size(16);
-    btn_select_icon.set_child(Some(&current_icon_img));
-
     let popover_icon = gtk4::Popover::builder()
         .has_arrow(true)
         .autohide(true)
         .build();
+
+    let popover_icon_c = popover_icon.clone();
+    let btn_select_icon = babydra_utils::components::create_icon_button("settings", 16, &["circular", "icon-select-btn"], None, move || popover_icon_c.popup());
+    btn_select_icon.set_valign(Align::Center);
+    btn_select_icon.set_cursor_from_name(Some("pointer"));
     popover_icon.set_parent(&btn_select_icon);
 
     let icon_grid = Grid::new();
@@ -139,37 +126,17 @@ fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
         let r = (idx / cols) as i32;
         let c = (idx % cols) as i32;
 
-        let img = babydra_utils::ui::icon::get_icon(icon_name, 20);
-        img.set_pixel_size(20);
-
-        let btn_item = Button::builder()
-            .child(&img)
-            .css_classes(vec!["flat".to_string(), "icon-grid-item".to_string()])
-            .tooltip_text(*icon_name)
-            .build();
-        btn_item.set_cursor_from_name(Some("pointer"));
-
         let icon_name_str = icon_name.to_string();
         let selected_icon_c = selected_icon.clone();
         let btn_select_icon_c = btn_select_icon.clone();
         let popover_icon_c = popover_icon.clone();
 
-        btn_item.connect_clicked(move |_| {
-            selected_icon_c.replace(icon_name_str.clone());
-            let new_img = babydra_utils::ui::icon::get_icon(&icon_name_str, 16);
-            new_img.set_pixel_size(16);
-            btn_select_icon_c.set_child(Some(&new_img));
-            popover_icon_c.popdown();
-        });
+        let btn_item = babydra_utils::components::create_icon_button(icon_name, 20, &["flat", "icon-grid-item"], Some(*icon_name), move || { selected_icon_c.replace(icon_name_str.clone()); let new_img = babydra_utils::ui::icon::get_icon(&icon_name_str, 16); new_img.set_pixel_size(16); btn_select_icon_c.set_child(Some(&new_img)); popover_icon_c.popdown(); });
+        btn_item.set_cursor_from_name(Some("pointer"));
 
         icon_grid.attach(&btn_item, c, r, 1, 1);
     }
     popover_icon.set_child(Some(&icon_grid));
-
-    let popover_icon_c = popover_icon.clone();
-    btn_select_icon.connect_clicked(move |_| {
-        popover_icon_c.popup();
-    });
 
     name_hbox.append(&entry_name);
     name_hbox.append(&btn_select_icon);
@@ -200,11 +167,11 @@ fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
         ("{ext}",  "explore.placeholder_ext_desc"),
     ];
     for (p, desc_key) in placeholders {
-        let btn_p = Button::builder()
-            .label(p)
-            .tooltip_text(&t(desc_key))
-            .css_classes(vec!["flat".to_string(), "placeholder-btn".to_string()])
-            .build();
+        let btn_p = babydra_utils::components::create_button(p);
+        btn_p.remove_css_class("baby-button");
+        btn_p.add_css_class("flat");
+        btn_p.add_css_class("placeholder-btn");
+        btn_p.set_tooltip_text(Some(&t(desc_key)));
         btn_p.set_cursor_from_name(Some("pointer"));
         let entry_cmd_c = entry_cmd.clone();
         btn_p.connect_clicked(move |_| {
@@ -225,11 +192,8 @@ fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
     bbox.set_margin_top(8);
     vbox.append(&bbox);
 
-    let btn_cancel = Button::with_label(&t("explore.settings_cancel"));
-    let btn_add = Button::builder()
-        .label(&t("explore.settings_add"))
-        .css_classes(vec!["suggested-action".to_string()])
-        .build();
+    let btn_cancel = babydra_utils::components::create_button(&t("explore.settings_cancel"));
+    let btn_add = babydra_utils::components::create_accent_button(&t("explore.settings_add"));
     btn_add.set_cursor_from_name(Some("pointer"));
 
     bbox.append(&btn_cancel);

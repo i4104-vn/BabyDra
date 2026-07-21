@@ -1,13 +1,13 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Label, Align, Button};
+use gtk4::{Box, Orientation, Label, Align};
 use babydra_common::i18n::t;
 
 #[derive(Clone)]
 pub struct StatusBarWidgets {
     pub container: Box,
     pub lbl_status: Label,
-    pub btn_toggle_hidden: Button,
-    pub btn_toggle_preview: Button,
+    pub btn_toggle_hidden: gtk4::Button,
+    pub btn_toggle_preview: gtk4::Button,
 }
 
 /// Creates the status bar widgets and returns a StatusBarWidgets struct.
@@ -22,18 +22,10 @@ pub fn create_status_bar() -> StatusBarWidgets {
         .build();
     container.append(&lbl_status);
 
-    let btn_toggle_hidden = Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("eye-off", 16))
-        .build();
-    btn_toggle_hidden.set_css_classes(&["status-bar-btn"]);
-    btn_toggle_hidden.set_tooltip_text(Some(&t("explore.toggle_hidden")));
+    let btn_toggle_hidden = babydra_utils::components::create_icon_button("eye-off", 16, &["status-bar-btn"], Some(&t("explore.toggle_hidden")), || {});
     container.append(&btn_toggle_hidden);
 
-    let btn_toggle_preview = Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("sidebar", 16))
-        .build();
-    btn_toggle_preview.set_css_classes(&["status-bar-btn", "status-bar-btn-active"]);
-    btn_toggle_preview.set_tooltip_text(Some(&t("explore.toggle_preview")));
+    let btn_toggle_preview = babydra_utils::components::create_icon_button("sidebar", 16, &["status-bar-btn", "status-bar-btn-active"], Some(&t("explore.toggle_preview")), || {});
     container.append(&btn_toggle_preview);
 
     StatusBarWidgets {

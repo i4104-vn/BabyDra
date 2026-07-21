@@ -412,26 +412,3 @@ button.row-action-btn.delete-btn {
 button.row-action-btn.delete-btn:hover {
     background-color: rgba(220, 38, 38, 0.1);
 }
-
-/* ── Floating Action Button (FAB) ─────────────────────────────────── */
-button.fab-add-btn {
-    min-width: 44px;
-    min-height: 44px;
-    border-radius: 9999px;
-    padding: 0;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    background-color: #0066cc;
-    color: #ffffff;
-    border: none;
-    transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-button.fab-add-btn:hover {
-    background-color: #0052a3;
-    box-shadow: 0 6px 20px rgba(0, 102, 204, 0.35);
-}
-
-button.fab-add-btn:active {
-    background-color: #003d7a;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}

@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Label};
+use gtk4::{Box, Label};
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -38,10 +38,9 @@ pub fn update_address_bar(
             comp_str.clone()
         };
 
-        let btn = Button::builder()
-            .label(&display)
-            .css_classes(vec!["breadcrumb-btn".to_string()])
-            .build();
+        let btn = babydra_utils::components::create_button(&display);
+        btn.remove_css_class("baby-button");
+        btn.add_css_class("breadcrumb-btn");
 
         let target = current.clone();
         let session_clone = session.clone();

@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Label, Button, Align, ListBox, ListBoxRow, Entry, Grid};
+use gtk4::{Box, Orientation, Label, Align, ListBox, ListBoxRow, Entry, Grid};
 use babydra_common::i18n::t;
 use babydra_common::config::settings::CustomContextItem;
 
@@ -48,21 +48,13 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
     spacer1.set_hexpand(true);
     hbox_view.append(&spacer1);
 
-    let btn_edit = Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("rename", 16))
-        .css_classes(vec!["flat".to_string(), "circular".to_string(), "row-action-btn".to_string(), "edit-btn".to_string()])
-        .valign(Align::Center)
-        .build();
-    btn_edit.set_tooltip_text(Some(&t("explore.settings_edit")));
+    let btn_edit = babydra_utils::components::create_icon_button("rename", 16, &["flat", "circular", "row-action-btn", "edit-btn"], Some(&t("explore.settings_edit")), || {});
+    btn_edit.set_valign(Align::Center);
     btn_edit.set_cursor_from_name(Some("pointer"));
     hbox_view.append(&btn_edit);
 
-    let btn_del = Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("trash", 16))
-        .css_classes(vec!["flat".to_string(), "circular".to_string(), "row-action-btn".to_string(), "delete-btn".to_string()])
-        .valign(Align::Center)
-        .build();
-    btn_del.set_tooltip_text(Some(&t("explore.settings_delete")));
+    let btn_del = babydra_utils::components::create_icon_button("trash", 16, &["flat", "circular", "row-action-btn", "delete-btn"], Some(&t("explore.settings_delete")), || {});
+    btn_del.set_valign(Align::Center);
     btn_del.set_cursor_from_name(Some("pointer"));
     hbox_view.append(&btn_del);
 
@@ -88,23 +80,16 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
     // State for edited icon selection
     let edit_selected_icon = std::rc::Rc::new(std::cell::RefCell::new(item.icon.clone().unwrap_or_else(|| "settings".to_string())));
 
-    let btn_edit_icon = Button::builder()
-        .css_classes(vec!["circular".to_string(), "icon-select-btn".to_string()])
-        .valign(Align::Center)
-        .build();
-    btn_edit_icon.set_cursor_from_name(Some("pointer"));
-
-    // Set initial icon image
-    let initial_icon = item.icon.unwrap_or_else(|| "settings".to_string());
-    let edit_icon_img = babydra_utils::ui::icon::get_icon(&initial_icon, 16);
-    edit_icon_img.set_pixel_size(16);
-    btn_edit_icon.set_child(Some(&edit_icon_img));
-
-    // Popover setup for editing icon
+    let initial_icon = item.icon.clone().unwrap_or_else(|| "settings".to_string());
     let popover_edit_icon = gtk4::Popover::builder()
         .has_arrow(true)
         .autohide(true)
         .build();
+
+    let popover_edit_icon_c = popover_edit_icon.clone();
+    let btn_edit_icon = babydra_utils::components::create_icon_button(&initial_icon, 16, &["circular", "icon-select-btn"], None, move || popover_edit_icon_c.popup());
+    btn_edit_icon.set_valign(Align::Center);
+    btn_edit_icon.set_cursor_from_name(Some("pointer"));
     popover_edit_icon.set_parent(&btn_edit_icon);
 
     let edit_icon_grid = Grid::new();
@@ -120,39 +105,17 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
         let r = (idx / cols) as i32;
         let c = (idx % cols) as i32;
         
-        let img = babydra_utils::ui::icon::get_icon(icon_name, 20);
-        img.set_pixel_size(20);
-        
-        let btn_item = Button::builder()
-            .child(&img)
-            .css_classes(vec!["flat".to_string(), "icon-grid-item".to_string()])
-            .tooltip_text(*icon_name)
-            .build();
-        btn_item.set_cursor_from_name(Some("pointer"));
-
         let icon_name_str = icon_name.to_string();
         let edit_selected_icon_c = edit_selected_icon.clone();
         let btn_edit_icon_c = btn_edit_icon.clone();
         let popover_edit_icon_c = popover_edit_icon.clone();
         
-        btn_item.connect_clicked(move |_| {
-            edit_selected_icon_c.replace(icon_name_str.clone());
-            
-            let new_img = babydra_utils::ui::icon::get_icon(&icon_name_str, 16);
-            new_img.set_pixel_size(16);
-            btn_edit_icon_c.set_child(Some(&new_img));
-            
-            popover_edit_icon_c.popdown();
-        });
+        let btn_item = babydra_utils::components::create_icon_button(icon_name, 20, &["flat", "icon-grid-item"], Some(*icon_name), move || { edit_selected_icon_c.replace(icon_name_str.clone()); let new_img = babydra_utils::ui::icon::get_icon(&icon_name_str, 16); new_img.set_pixel_size(16); btn_edit_icon_c.set_child(Some(&new_img)); popover_edit_icon_c.popdown(); });
+        btn_item.set_cursor_from_name(Some("pointer"));
         
         edit_icon_grid.attach(&btn_item, c, r, 1, 1);
     }
     popover_edit_icon.set_child(Some(&edit_icon_grid));
-
-    let popover_edit_icon_c = popover_edit_icon.clone();
-    btn_edit_icon.connect_clicked(move |_| {
-        popover_edit_icon_c.popup();
-    });
 
     name_edit_hbox.append(&entry_edit_name);
     name_edit_hbox.append(&btn_edit_icon);
@@ -176,11 +139,11 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
         ("{ext}",  "explore.placeholder_ext_desc"),
     ];
     for (ph, desc_key) in ph_list {
-        let btn_ph = Button::builder()
-            .label(ph)
-            .tooltip_text(&t(desc_key))
-            .css_classes(vec!["flat".to_string(), "placeholder-btn-small".to_string()])
-            .build();
+        let btn_ph = babydra_utils::components::create_button(ph);
+        btn_ph.remove_css_class("baby-button");
+        btn_ph.add_css_class("flat");
+        btn_ph.add_css_class("placeholder-btn-small");
+        btn_ph.set_tooltip_text(Some(&t(desc_key)));
         btn_ph.set_cursor_from_name(Some("pointer"));
         let entry_edit_cmd_c = entry_edit_cmd.clone();
         btn_ph.connect_clicked(move |_| {
@@ -196,15 +159,13 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
     vbox_buttons.set_valign(Align::Center);
     hbox_edit.append(&vbox_buttons);
 
-    let btn_save = Button::builder()
-        .label(&t("explore.settings_save"))
-        .css_classes(vec!["suggested-action".to_string(), "small-btn".to_string()])
-        .build();
+    let btn_save = babydra_utils::components::create_accent_button(&t("explore.settings_save"));
+    btn_save.add_css_class("small-btn");
     btn_save.set_cursor_from_name(Some("pointer"));
-    let btn_cancel = Button::builder()
-        .label(&t("explore.settings_cancel"))
-        .css_classes(vec!["flat".to_string(), "small-btn".to_string()])
-        .build();
+    let btn_cancel = babydra_utils::components::create_button(&t("explore.settings_cancel"));
+    btn_cancel.remove_css_class("baby-button");
+    btn_cancel.add_css_class("flat");
+    btn_cancel.add_css_class("small-btn");
     btn_cancel.set_cursor_from_name(Some("pointer"));
 
     vbox_buttons.append(&btn_save);

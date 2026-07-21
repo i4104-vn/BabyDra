@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Button, Window, Align, Stack};
+use gtk4::{Box, Orientation, Window, Align, Stack};
 use babydra_common::i18n::t;
 use std::rc::Rc;
 
@@ -33,33 +33,15 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     main_hbox.append(&nav_container);
 
     // 1. General (Settings Icon)
-    let img_gen = babydra_utils::ui::icon::get_icon("settings", 18);
-    img_gen.set_pixel_size(18);
-    let btn_general = Button::builder()
-        .child(&img_gen)
-        .tooltip_text(&t("explore.settings_general"))
-        .css_classes(vec!["settings-pill".to_string(), "active-pill".to_string()])
-        .build();
+    let btn_general = babydra_utils::components::create_icon_button("settings", 18, &["settings-pill", "active-pill"], Some(&t("explore.settings_general")), || {});
     btn_general.set_cursor_from_name(Some("pointer"));
 
     // 2. Keybinds (Terminal/Command Icon)
-    let img_key = babydra_utils::ui::icon::get_icon("terminal", 18);
-    img_key.set_pixel_size(18);
-    let btn_keybinds = Button::builder()
-        .child(&img_key)
-        .tooltip_text(&t("explore.settings_keybinds"))
-        .css_classes(vec!["settings-pill".to_string()])
-        .build();
+    let btn_keybinds = babydra_utils::components::create_icon_button("terminal", 18, &["settings-pill"], Some(&t("explore.settings_keybinds")), || {});
     btn_keybinds.set_cursor_from_name(Some("pointer"));
 
     // 3. Context Menu (Folder/Menu Icon)
-    let img_con = babydra_utils::ui::icon::get_icon("folder", 18);
-    img_con.set_pixel_size(18);
-    let btn_context = Button::builder()
-        .child(&img_con)
-        .tooltip_text(&t("explore.settings_context_menu"))
-        .css_classes(vec!["settings-pill".to_string()])
-        .build();
+    let btn_context = babydra_utils::components::create_icon_button("folder", 18, &["settings-pill"], Some(&t("explore.settings_context_menu")), || {});
     btn_context.set_cursor_from_name(Some("pointer"));
 
     nav_container.append(&btn_general);
