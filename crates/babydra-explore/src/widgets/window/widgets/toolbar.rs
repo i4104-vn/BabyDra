@@ -76,7 +76,8 @@ pub fn wire_toolbar_buttons(
     header_widgets.btn_cut.connect_clicked(move |_| {
         let paths = get_sel_cut();
         if !paths.is_empty() {
-            babydra_utils::explore::CLIPBOARD.with(|cb| cb.replace(Some((paths, true))));
+            babydra_utils::explore::CLIPBOARD.with(|cb| cb.replace(Some((paths.clone(), true))));
+            babydra_utils::explore::context_menu::clipboard::set_system_clipboard_files(&paths, true);
             // Refresh to show dim effect
             let path = session_cut.borrow().active_tab().current_path.clone();
             get_nav_cut()(path);
@@ -90,7 +91,8 @@ pub fn wire_toolbar_buttons(
     header_widgets.btn_copy.connect_clicked(move |_| {
         let paths = get_sel_copy();
         if !paths.is_empty() {
-            babydra_utils::explore::CLIPBOARD.with(|cb| cb.replace(Some((paths, false))));
+            babydra_utils::explore::CLIPBOARD.with(|cb| cb.replace(Some((paths.clone(), false))));
+            babydra_utils::explore::context_menu::clipboard::set_system_clipboard_files(&paths, false);
             let path = session_copy.borrow().active_tab().current_path.clone();
             get_nav_copy()(path);
         }
@@ -100,17 +102,12 @@ pub fn wire_toolbar_buttons(
     let session_paste = session.clone();
     let get_nav_paste = get_nav_cb.clone();
     header_widgets.btn_paste.connect_clicked(move |_| {
-        let clipboard_data = babydra_utils::explore::CLIPBOARD.with(|cb| cb.borrow().clone());
-        if let Some((sources, is_cut)) = clipboard_data {
-            let dest_dir = session_paste.borrow().active_tab().current_path.clone();
-            babydra_utils::explore::context_menu::clipboard::execute_paste(
-                sources,
-                dest_dir.clone(),
-                is_cut,
-                dest_dir.clone(),
-                get_nav_paste(),
-            );
-        }
+        let dest_dir = session_paste.borrow().active_tab().current_path.clone();
+        babydra_utils::explore::context_menu::clipboard::execute_paste_from_system_clipboard(
+            dest_dir.clone(),
+            dest_dir,
+            get_nav_paste(),
+        );
     });
 
     // 5. Rename
@@ -215,7 +212,12 @@ pub fn wire_toolbar_buttons(
             hw.btn_rename.set_sensitive(selected_count == 1);
             hw.btn_delete.set_sensitive(selected_count > 0);
 
-            let has_clipboard = babydra_utils::explore::CLIPBOARD.with(|cb| cb.borrow().is_some());
+            let display = gtk4::gdk::Display::default().unwrap();
+            let clipboard = display.clipboard();
+            let formats = clipboard.formats();
+            let has_clipboard = babydra_utils::explore::CLIPBOARD.with(|cb| cb.borrow().is_some())
+                || formats.contain_mime_type("text/uri-list")
+                || formats.contain_mime_type("x-special/gnome-copied-files");
             hw.btn_paste.set_sensitive(has_clipboard);
         }
 

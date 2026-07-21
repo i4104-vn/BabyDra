@@ -5,12 +5,16 @@ use gtk4::prelude::*;
 use babydra_common::{SessionState, ActivePane};
 use crate::widgets::status_bar::StatusBarWidgets;
 
-/// Registers keyboard shortcut events (F3 for split view, F4 for preview pane, Ctrl+H for hidden files).
+/// Registers keyboard shortcut events.
 pub fn setup_key_shortcuts(
     window: &gtk4::ApplicationWindow,
     toggle_split: Rc<dyn Fn()>,
     toggle_preview: Rc<dyn Fn()>,
     toggle_hidden: Rc<dyn Fn()>,
+    cut_cb: Rc<dyn Fn()>,
+    copy_cb: Rc<dyn Fn()>,
+    paste_cb: Rc<dyn Fn()>,
+    undo_cb: Rc<dyn Fn()>,
 ) {
     let key_controller = gtk4::EventControllerKey::new();
     key_controller.connect_key_pressed(move |_, keyval, _, state| {
@@ -23,6 +27,18 @@ pub fn setup_key_shortcuts(
             glib::Propagation::Stop
         } else if has_ctrl && (keyval == gtk4::gdk::Key::h || keyval == gtk4::gdk::Key::H) {
             toggle_hidden();
+            glib::Propagation::Stop
+        } else if has_ctrl && (keyval == gtk4::gdk::Key::x || keyval == gtk4::gdk::Key::X) {
+            cut_cb();
+            glib::Propagation::Stop
+        } else if has_ctrl && (keyval == gtk4::gdk::Key::c || keyval == gtk4::gdk::Key::C) {
+            copy_cb();
+            glib::Propagation::Stop
+        } else if has_ctrl && (keyval == gtk4::gdk::Key::v || keyval == gtk4::gdk::Key::V) {
+            paste_cb();
+            glib::Propagation::Stop
+        } else if has_ctrl && (keyval == gtk4::gdk::Key::z || keyval == gtk4::gdk::Key::Z) {
+            undo_cb();
             glib::Propagation::Stop
         } else {
             glib::Propagation::Proceed

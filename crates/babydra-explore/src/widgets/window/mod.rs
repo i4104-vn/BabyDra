@@ -318,8 +318,114 @@ pub fn create_explore_window(
         left_content_scroll.clone(),
     );
 
+    // Define clipboard and undo callbacks
+    let cut_cb = {
+        let left = left_content_handle.clone();
+        let right = right_content_handle.clone();
+        let act = active_pane.clone();
+        let session = session.clone();
+        let nav = navigate_pane_ref.clone();
+        move || {
+            let paths = if act.get() == ActivePane::Left {
+                left.selected_paths.borrow().clone()
+            } else {
+                right.borrow().as_ref()
+                    .map(|r| r.selected_paths.borrow().clone())
+                    .unwrap_or_default()
+            };
+            if !paths.is_empty() {
+                let current_path = session.borrow().active_tab().current_path.clone();
+                babydra_utils::explore::context_menu::clipboard::set_system_clipboard_files(&paths, true);
+                babydra_utils::explore::CLIPBOARD.with(|cb| cb.replace(Some((paths, true))));
+                if let Some(ref f) = *nav.borrow() {
+                    f(act.get(), current_path);
+                }
+            }
+        }
+    };
+    let cut_cb_rc = Rc::new(cut_cb) as Rc<dyn Fn()>;
+
+    let copy_cb = {
+        let left = left_content_handle.clone();
+        let right = right_content_handle.clone();
+        let act = active_pane.clone();
+        let session = session.clone();
+        let nav = navigate_pane_ref.clone();
+        move || {
+            let paths = if act.get() == ActivePane::Left {
+                left.selected_paths.borrow().clone()
+            } else {
+                right.borrow().as_ref()
+                    .map(|r| r.selected_paths.borrow().clone())
+                    .unwrap_or_default()
+            };
+            if !paths.is_empty() {
+                let current_path = session.borrow().active_tab().current_path.clone();
+                babydra_utils::explore::context_menu::clipboard::set_system_clipboard_files(&paths, false);
+                babydra_utils::explore::CLIPBOARD.with(|cb| cb.replace(Some((paths, false))));
+                if let Some(ref f) = *nav.borrow() {
+                    f(act.get(), current_path);
+                }
+            }
+        }
+    };
+    let copy_cb_rc = Rc::new(copy_cb) as Rc<dyn Fn()>;
+
+    let paste_cb = {
+        let session = session.clone();
+        let act = active_pane.clone();
+        let nav = navigate_pane_ref.clone();
+        move || {
+            let current_path = session.borrow().active_tab().current_path.clone();
+            let nav_cb = {
+                let nav = nav.clone();
+                let act = act.clone();
+                Rc::new(move |p| {
+                    if let Some(ref f) = *nav.borrow() {
+                        f(act.get(), p);
+                    }
+                }) as Rc<dyn Fn(PathBuf)>
+            };
+            babydra_utils::explore::context_menu::clipboard::execute_paste_from_system_clipboard(
+                current_path.clone(),
+                current_path,
+                nav_cb,
+            );
+        }
+    };
+    let paste_cb_rc = Rc::new(paste_cb) as Rc<dyn Fn()>;
+
+    let undo_cb = {
+        let session = session.clone();
+        let act = active_pane.clone();
+        let nav = navigate_pane_ref.clone();
+        move || {
+            let current_path = session.borrow().active_tab().current_path.clone();
+            let nav_cb = {
+                let nav = nav.clone();
+                let act = act.clone();
+                Rc::new(move |p| {
+                    if let Some(ref f) = *nav.borrow() {
+                        f(act.get(), p);
+                    }
+                }) as Rc<dyn Fn(PathBuf)>
+            };
+            babydra_utils::explore::context_menu::clipboard::execute_undo(nav_cb, current_path);
+        }
+    };
+    let undo_cb_rc = Rc::new(undo_cb) as Rc<dyn Fn()>;
+
     // Wire keyboard shortcut listeners
-    handlers::setup_key_shortcuts(&ui.window, toggle_split_view_rc, toggle_preview_rc, toggle_hidden_rc);
+    handlers::setup_key_shortcuts(
+        &ui.window,
+        toggle_split_view_rc,
+        toggle_preview_rc,
+        toggle_hidden_rc,
+        cut_cb_rc,
+        copy_cb_rc,
+        paste_cb_rc,
+        undo_cb_rc,
+    );
 
     // Set up window resize response logic
     handlers::setup_window_resize_handler(

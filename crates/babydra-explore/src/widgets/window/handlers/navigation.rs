@@ -15,7 +15,7 @@ pub fn setup_navigation(
     right_scroll_cell: Rc<RefCell<Option<gtk4::Box>>>,
     status_bar_widgets_cell: Rc<RefCell<Option<StatusBarWidgets>>>,
     header_widgets_cell: Rc<RefCell<Option<HeaderBarWidgets>>>,
-    tab_bar_box: Rc<RefCell<Option<gtk4::Box>>>,
+    _tab_bar_box: Rc<RefCell<Option<gtk4::Box>>>,
     status_bar_lbl: Rc<gtk4::Label>,
     rebuild_tabs_cell: Rc<RefCell<Option<Rc<dyn Fn()>>>>,
     watch_tx: tokio::sync::mpsc::UnboundedSender<()>,
