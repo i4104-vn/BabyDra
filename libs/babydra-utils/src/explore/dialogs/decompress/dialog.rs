@@ -4,8 +4,8 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 use babydra_common::i18n::t;
+use babydra_common::services::explore::check_zip_password as check_password_correct;
 use super::log_dialog::show_decompress_log_dialog;
-use super::zip_utils::check_password_correct;
 
 pub fn show_password_dialog(
     archive_path: PathBuf,

@@ -2,11 +2,11 @@ use gtk4::prelude::*;
 use gtk4::{Box, Orientation, Label, Button, Align, Window, Spinner, TextView, ScrolledWindow, ProgressBar};
 use std::path::PathBuf;
 use std::rc::Rc;
-use std::process::Stdio;
 use tokio::io::{AsyncBufReadExt, BufReader};
 
 use babydra_common::i18n::t;
-use crate::explore::dialogs::shared::{shell_quote, scroll_to_end};
+use babydra_common::services::explore::spawn_decompress_command;
+use crate::explore::dialogs::shared::scroll_to_end;
 
 pub fn show_decompress_log_dialog(
     archive_path: PathBuf,
@@ -118,36 +118,8 @@ pub fn show_decompress_log_dialog(
         };
 
         let filename = archive_path.file_name().unwrap_or_default().to_string_lossy().to_string();
-        let name_lower = filename.to_lowercase();
-        
-        let cmd_str = if name_lower.ends_with(".zip") {
-            match password {
-                Some(ref pass) => format!("unzip -o -P {} {}", shell_quote(pass), shell_quote(&filename)),
-                None => format!("unzip -o {}", shell_quote(&filename)),
-            }
-        } else if name_lower.ends_with(".tar.gz") || name_lower.ends_with(".tgz") {
-            format!("tar -xzvf {}", shell_quote(&filename))
-        } else if name_lower.ends_with(".tar.bz2") || name_lower.ends_with(".tbz2") {
-            format!("tar -xjvf {}", shell_quote(&filename))
-        } else if name_lower.ends_with(".tar.xz") || name_lower.ends_with(".txz") {
-            format!("tar -xJvf {}", shell_quote(&filename))
-        } else if name_lower.ends_with(".tar.zst") {
-            format!("tar -xavf {}", shell_quote(&filename))
-        } else if name_lower.ends_with(".rar") {
-            format!("unrar x {}", shell_quote(&filename))
-        } else if name_lower.ends_with(".7z") {
-            format!("7z x {}", shell_quote(&filename))
-        } else {
-            format!("tar -xvf {}", shell_quote(&filename))
-        };
 
-        let mut cmd = tokio::process::Command::new("sh");
-        cmd.current_dir(parent_dir);
-        cmd.arg("-c").arg(&cmd_str);
-        cmd.stdout(Stdio::piped());
-        cmd.stderr(Stdio::piped());
-
-        match cmd.spawn() {
+        match spawn_decompress_command(&parent_dir, &filename, password.as_deref()) {
             Ok(mut child) => {
                 let stdout = child.stdout.take().unwrap();
                 let stderr = child.stderr.take().unwrap();

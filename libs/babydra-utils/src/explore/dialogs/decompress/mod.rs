@@ -1,13 +1,12 @@
 pub mod dialog;
 pub mod log_dialog;
-pub mod zip_utils;
 
 pub use dialog::show_password_dialog;
 pub use log_dialog::show_decompress_log_dialog;
-pub use zip_utils::{is_zip_encrypted, check_password_correct};
 
 use std::path::PathBuf;
 use std::rc::Rc;
+use babydra_common::services::explore::is_zip_encrypted;
 
 pub fn perform_decompress_async(
     archive_path: PathBuf,

@@ -1,10 +1,7 @@
 use gtk4::prelude::*;
 use gtk4::TextView;
 
-/// Properly quote a string for use in a shell single-quoted argument.
-pub fn shell_quote(s: &str) -> String {
-    format!("'{}'", s.replace('\'', "'\\''"))
-}
+pub use babydra_common::services::explore::shell_quote;
 
 /// Scroll TextView buffer to the bottom.
 pub fn scroll_to_end(text_view: &TextView) {

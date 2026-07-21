@@ -2,11 +2,11 @@ use gtk4::prelude::*;
 use gtk4::{Box, Orientation, Label, Button, Align, Window, Spinner, TextView, ScrolledWindow, ProgressBar};
 use std::path::PathBuf;
 use std::rc::Rc;
-use std::process::Stdio;
 use tokio::io::{AsyncBufReadExt, BufReader};
 
 use babydra_common::i18n::t;
-use crate::explore::dialogs::shared::{shell_quote, scroll_to_end};
+use babydra_common::services::explore::spawn_compress_command;
+use crate::explore::dialogs::shared::scroll_to_end;
 
 pub fn show_compress_log_dialog(
     target_paths: Vec<PathBuf>,
@@ -123,27 +123,7 @@ pub fn show_compress_log_dialog(
             .filter_map(|p| p.file_name().map(|f| f.to_string_lossy().to_string()))
             .collect();
             
-        let cmd_str = if is_zip {
-            format!(
-                "zip -r {} {}",
-                shell_quote(&archive_filename),
-                files.iter().map(|f| shell_quote(f)).collect::<Vec<_>>().join(" ")
-            )
-        } else {
-            format!(
-                "tar -cvf {} {}",
-                shell_quote(&archive_filename),
-                files.iter().map(|f| shell_quote(f)).collect::<Vec<_>>().join(" ")
-            )
-        };
-        
-        let mut cmd = tokio::process::Command::new("sh");
-        cmd.current_dir(parent_dir);
-        cmd.arg("-c").arg(&cmd_str);
-        cmd.stdout(Stdio::piped());
-        cmd.stderr(Stdio::piped());
-        
-        match cmd.spawn() {
+        match spawn_compress_command(&parent_dir, &archive_filename, &files, is_zip) {
             Ok(mut child) => {
                 let stdout = child.stdout.take().unwrap();
                 let stderr = child.stderr.take().unwrap();

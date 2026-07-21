@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 use gtk4::prelude::*;
+use babydra_common::services::explore::execute_custom_command;
 use crate::explore::context_menu::widgets::create_menu_button;
 
 /// Appends user-defined custom context menu items to the vbox.
@@ -54,10 +55,7 @@ pub fn append_custom_context_items(
                     .replace("{stem}", &stem_str)
                     .replace("{ext}", &ext_str);
                 
-                let _ = std::process::Command::new("sh")
-                    .arg("-c")
-                    .arg(&cmd_str)
-                    .spawn();
+                let _ = execute_custom_command(&cmd_str);
             }
         });
     }

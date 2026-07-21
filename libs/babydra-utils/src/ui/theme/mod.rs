@@ -171,10 +171,7 @@ pub fn is_dark_mode() -> bool {
 
 /// Sets the color scheme preference in GSettings.
 pub fn set_dark_mode(dark: bool) {
-    let scheme = if dark { "prefer-dark" } else { "prefer-light" };
-    let _ = std::process::Command::new("gsettings")
-        .args(&["set", "org.gnome.desktop.interface", "color-scheme", scheme])
-        .output();
+    let _ = babydra_common::services::system::set_gsettings_color_scheme(dark);
 
     if let Some(settings) = gtk4::Settings::default() {
         settings.set_gtk_application_prefer_dark_theme(dark);

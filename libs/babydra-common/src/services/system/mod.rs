@@ -8,3 +8,6 @@ pub mod auth;
 pub mod monitor;
 pub mod bluetooth;
 pub mod vpn;
+pub mod gsettings;
+
+pub use gsettings::set_gsettings_color_scheme;
