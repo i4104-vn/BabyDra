@@ -1,6 +1,7 @@
 use gtk4::prelude::*;
-use gtk4::{ScrolledWindow, FlowBox, ListBox, Stack, Align};
+use gtk4::{ScrolledWindow, FlowBox, ListBox, Stack, Align, Button, Box, Entry, Orientation};
 use babydra_common::ContentViewWidgets;
+use babydra_common::i18n::t;
 
 pub fn build_content_view_ui() -> ContentViewWidgets {
     let settings = babydra_common::load_explore_settings();
@@ -62,15 +63,62 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
     list_scroll.set_child(Some(&list_overlay));
     stack.add_named(&list_scroll, Some("list"));
 
+    // Create navigation widgets for this pane
+    let pane_nav_row = Box::new(Orientation::Horizontal, 4);
+    pane_nav_row.set_css_classes(&["nav-bar"]);
+    pane_nav_row.set_margin_start(6);
+    pane_nav_row.set_margin_end(6);
+    pane_nav_row.set_margin_bottom(4);
+    pane_nav_row.set_margin_top(4);
+
+    let btn_back = babydra_utils::components::create_icon_button("back", 16, &["nav-btn"], Some(&t("explore.back")), || {});
+    let btn_forward = babydra_utils::components::create_icon_button("forward", 16, &["nav-btn"], Some(&t("explore.forward")), || {});
+    let btn_up = babydra_utils::components::create_icon_button("up", 16, &["nav-btn"], Some(&t("explore.up")), || {});
+    let btn_refresh = babydra_utils::components::create_icon_button("refresh", 16, &["nav-btn"], Some(&t("explore.refresh")), || {});
+
+    pane_nav_row.append(&btn_back);
+    pane_nav_row.append(&btn_forward);
+    pane_nav_row.append(&btn_up);
+    pane_nav_row.append(&btn_refresh);
+
+    let address_wrap = Box::new(Orientation::Horizontal, 0);
+    address_wrap.set_css_classes(&["address-bar-wrap"]);
+    address_wrap.set_hexpand(true);
+    address_wrap.set_valign(Align::Center);
+
+    let address_stack = Stack::new();
+    address_stack.set_hexpand(true);
+
+    let breadcrumb_box = Box::new(Orientation::Horizontal, 2);
+    breadcrumb_box.set_valign(Align::Center);
+    address_stack.add_named(&breadcrumb_box, Some("breadcrumbs"));
+
+    let entry_address = Entry::new();
+    entry_address.set_hexpand(true);
+    entry_address.set_css_classes(&["address-entry"]);
+    address_stack.add_named(&entry_address, Some("address"));
+
+    address_wrap.append(&address_stack);
+    pane_nav_row.append(&address_wrap);
+
+    let search = Entry::builder()
+        .placeholder_text(&t("explore.search_placeholder"))
+        .primary_icon_name("system-search-symbolic")
+        .css_classes(vec!["search-entry".to_string()])
+        .build();
+    search.set_size_request(160, -1);
+    pane_nav_row.append(&search);
+
     // Bottom progress bar for loading
     let progress_bar = gtk4::ProgressBar::builder()
         .visible(false)
         .css_classes(vec!["content-loading-progress".to_string()])
         .build();
 
-    let container = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    let container = Box::new(Orientation::Vertical, 0);
     container.set_css_classes(&["content-view"]);
     scroll_win.set_vexpand(true);
+    container.append(&pane_nav_row);
     container.append(&scroll_win);
     container.append(&progress_bar);
 
@@ -85,5 +133,14 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
         list_fixed,
         list_rubberband,
         progress_bar,
+        btn_back,
+        btn_forward,
+        btn_up,
+        btn_refresh,
+        breadcrumb_box,
+        entry_address,
+        address_stack,
+        address_wrap,
+        search,
     }
 }

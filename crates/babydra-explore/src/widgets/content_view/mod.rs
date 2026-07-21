@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::cell::RefCell;
+use gtk4::prelude::*;
 use babydra_common::FileEntry;
 pub use babydra_common::{ContentViewWidgets, ContentViewHandle, sort_entries};
 
@@ -48,6 +49,100 @@ pub fn create_content_view(
     }) as Rc<dyn Fn(Vec<PathBuf>)>;
 
     let render_generation = Rc::new(RefCell::new(0u64));
+    let history = Rc::new(RefCell::new(Vec::<PathBuf>::new()));
+    let history_index = Rc::new(RefCell::new(0usize));
+
+    // Wire pane navigation button clicks
+    {
+        let history_c = history.clone();
+        let history_index_c = history_index.clone();
+        let nav_c = nav_cb.clone();
+        widgets.btn_back.connect_clicked(move |_| {
+            let path_opt = {
+                let hist = history_c.borrow();
+                let mut idx = history_index_c.borrow_mut();
+                if *idx > 0 {
+                    *idx -= 1;
+                    Some(hist[*idx].clone())
+                } else {
+                    None
+                }
+            };
+            if let Some(path) = path_opt {
+                nav_c(path);
+            }
+        });
+    }
+    {
+        let history_c = history.clone();
+        let history_index_c = history_index.clone();
+        let nav_c = nav_cb.clone();
+        widgets.btn_forward.connect_clicked(move |_| {
+            let path_opt = {
+                let hist = history_c.borrow();
+                let mut idx = history_index_c.borrow_mut();
+                if *idx + 1 < hist.len() {
+                    *idx += 1;
+                    Some(hist[*idx].clone())
+                } else {
+                    None
+                }
+            };
+            if let Some(path) = path_opt {
+                nav_c(path);
+            }
+        });
+    }
+    {
+        let current_path_c = current_path.clone();
+        let nav_c = nav_cb.clone();
+        widgets.btn_up.connect_clicked(move |_| {
+            let current = current_path_c.borrow().clone();
+            if let Some(parent) = current.parent() {
+                nav_c(parent.to_path_buf());
+            }
+        });
+    }
+    {
+        let current_path_c = current_path.clone();
+        let nav_c = nav_cb.clone();
+        widgets.btn_refresh.connect_clicked(move |_| {
+            let current = current_path_c.borrow().clone();
+            nav_c(current);
+        });
+    }
+
+    // Address bar toggle on click
+    {
+        let current_path_c = current_path.clone();
+        let address_stack_c = widgets.address_stack.clone();
+        let entry_address_c = widgets.entry_address.clone();
+        let address_wrap_c = widgets.address_wrap.clone();
+        let gesture = gtk4::GestureClick::new();
+        gesture.connect_pressed(move |_, _, _, _| {
+            if address_stack_c.visible_child_name().as_deref() == Some("breadcrumbs") {
+                let path = current_path_c.borrow().clone();
+                entry_address_c.set_text(&path.to_string_lossy());
+                address_stack_c.set_visible_child_name("address");
+                entry_address_c.grab_focus();
+            }
+        });
+        address_wrap_c.add_controller(gesture);
+    }
+
+    // Address Entry activated (Enter key pressed)
+    {
+        let nav_c = nav_cb.clone();
+        let address_stack_c = widgets.address_stack.clone();
+        widgets.entry_address.connect_activate(move |entry| {
+            let text = entry.text().to_string();
+            let p = PathBuf::from(text);
+            if p.exists() {
+                nav_c(p);
+            }
+            address_stack_c.set_visible_child_name("breadcrumbs");
+        });
+    }
 
     let handle = ContentViewHandle {
         widgets: widgets.clone(),
@@ -60,7 +155,17 @@ pub fn create_content_view(
         selection_callback: sc_fn.clone(),
         selected_paths: selected_paths.clone(),
         render_generation: render_generation.clone(),
+        history: history.clone(),
+        history_index: history_index.clone(),
     };
+
+    // Wire search filter change callback
+    {
+        let handle_c = handle.clone();
+        widgets.search.connect_changed(move |entry| {
+            filter_content_view(&handle_c, &entry.text());
+        });
+    }
 
     // Wire all controllers/gestures for ListBox and overlay background
     gestures::wire_listbox_controllers(&widgets, entries.clone(), nav_cb.clone(), sc_fn.clone(), current_path.clone(), selected_paths.clone());

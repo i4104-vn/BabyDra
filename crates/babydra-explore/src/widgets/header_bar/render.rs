@@ -7,22 +7,11 @@ use babydra_common::i18n::t;
 pub fn build_header_bar_ui() -> HeaderBarWidgets {
     let container = Box::new(Orientation::Vertical, 0);
 
-    // ── Row 1: Navigation Bar ──────────────────────────────────
-    let nav_row = Box::new(Orientation::Horizontal, 4);
-    nav_row.set_css_classes(&["nav-bar"]);
-    nav_row.set_margin_start(6);
-    nav_row.set_margin_end(6);
-    container.append(&nav_row);
-
+    // ── Dummy Navigation Bar (Created but not appended to global container) ──
     let btn_back = babydra_utils::components::create_icon_button("back", 16, &["nav-btn"], Some(&t("explore.back")), || {});
     let btn_forward = babydra_utils::components::create_icon_button("forward", 16, &["nav-btn"], Some(&t("explore.forward")), || {});
     let btn_up = babydra_utils::components::create_icon_button("up", 16, &["nav-btn"], Some(&t("explore.up")), || {});
     let btn_refresh = babydra_utils::components::create_icon_button("refresh", 16, &["nav-btn"], Some(&t("explore.refresh")), || {});
-
-    nav_row.append(&btn_back);
-    nav_row.append(&btn_forward);
-    nav_row.append(&btn_up);
-    nav_row.append(&btn_refresh);
 
     // Address bar wrapper
     let address_wrap = Box::new(Orientation::Horizontal, 0);
@@ -43,7 +32,6 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     address_stack.add_named(&entry_address, Some("address"));
 
     address_wrap.append(&address_stack);
-    nav_row.append(&address_wrap);
 
     // Search entry
     let search = Entry::builder()
@@ -52,7 +40,6 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
         .css_classes(vec!["search-entry".to_string()])
         .build();
     search.set_size_request(200, -1);
-    nav_row.append(&search);
 
     // ── Row 2: Command Toolbar ─────────────────────────────────
     let toolbar = Box::new(Orientation::Horizontal, 2);

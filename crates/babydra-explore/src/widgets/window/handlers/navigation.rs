@@ -86,6 +86,17 @@ pub fn setup_navigation(
             if let Some(ref handle) = content_handle {
                 handle.widgets.progress_bar.set_visible(true);
                 handle.widgets.progress_bar.set_fraction(0.0);
+
+                // Update pane history stack
+                let mut hist = handle.history.borrow_mut();
+                let mut idx = handle.history_index.borrow_mut();
+                if hist.is_empty() || hist[*idx] != path {
+                    if *idx + 1 < hist.len() {
+                        hist.truncate(*idx + 1);
+                    }
+                    hist.push(path.clone());
+                    *idx = hist.len() - 1;
+                }
             }
 
             let header_widgets_c = header_widgets_cell.clone();
@@ -98,19 +109,22 @@ pub fn setup_navigation(
             glib::spawn_future_local(async move {
                 match babydra_common::load_directory(path.clone(), show_hidden).await {
                     Ok(entries) => {
-                        // Update Header breadcrumbs
+                        // Update Header new folder state
                         if let Some(ref hw) = *header_widgets_c.borrow() {
                             let is_in_trash = path.to_string_lossy().ends_with("Trash/files");
                             babydra_utils::explore::update_new_folder_button(&hw.btn_new_folder, is_in_trash);
+                        }
 
+                        // Update Pane-specific breadcrumbs
+                        if let Some(ref handle) = content_handle {
                             let nav_cb: Rc<dyn Fn(PathBuf)> = Rc::new(move |p: PathBuf| {
                                 if let Some(ref f) = *nav_no_watch_c.borrow() {
                                     f(pane, p);
                                 }
                             });
                             crate::widgets::header_bar::update_address_bar(
-                                &hw.breadcrumb_box,
-                                &hw.address_stack,
+                                &handle.widgets.breadcrumb_box,
+                                &handle.widgets.address_stack,
                                 &session_c,
                                 &path,
                                 &nav_cb,
