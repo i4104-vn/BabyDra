@@ -29,7 +29,7 @@ button.workspace-dot:hover {
 
 button.workspace-dot.active {
     background-color: #3498db;
-    background-image: linear-gradient(135deg, #93c5fd 0%, #007aff 100%);
+    background-color: #3b82f6;
     min-width: 14px;
     min-height: 6px;
     box-shadow: none;

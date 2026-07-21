@@ -177,7 +177,7 @@ fn render_expanded_group(
     title_lbl.set_halign(gtk4::Align::Start);
     title_lbl.set_hexpand(true);
 
-    let chevron = gtk4::Image::from_icon_name("pan-up-symbolic");
+    let chevron = babydra_utils::ui::icon::get_icon("up", 12);
     chevron.set_pixel_size(12);
     chevron.set_opacity(0.4);
     chevron.set_valign(gtk4::Align::Center);

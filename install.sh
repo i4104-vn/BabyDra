@@ -25,7 +25,7 @@ if ! command -v yay &> /dev/null; then
 fi
 
 # Install AUR packages using yay
-yay -S --noconfirm dolphin github-desktop fastfetch neovim awww ddcutil-service
+yay -S --noconfirm github-desktop fastfetch neovim awww ddcutil-service
 # Core UI fonts
 yay -S --noconfirm inter-font ttf-ubuntu-font-family ttf-jetbrains-mono-nerd
 
@@ -124,12 +124,12 @@ mkdir -p "$HOME/.local/share/themes"
 cp -r "$SCRIPT_DIR/configs/themes/BabyDra" "$HOME/.local/share/themes/"
 
 mkdir -p "$HOME/.local/share/icons"
-cp -r "$SCRIPT_DIR/configs/themes/cursor/aosp-cursors" "$HOME/.local/share/icons/"
-cp -r "$SCRIPT_DIR/configs/themes/icons/We10X" "$HOME/.local/share/icons/"
-cp -r "$SCRIPT_DIR/configs/themes/icons/We10X-blue" "$HOME/.local/share/icons/"
-cp -r "$SCRIPT_DIR/configs/themes/icons/We10X-blue-dark" "$HOME/.local/share/icons/"
-cp -r "$SCRIPT_DIR/configs/themes/icons/We10X-dark" "$HOME/.local/share/icons/"
-cp -r "$SCRIPT_DIR/configs/themes/cursor/Twilight-cursors" "$HOME/.local/share/icons/"
+tar -xf "$SCRIPT_DIR/configs/themes/cursor/aosp-cursors.tar" -C "$HOME/.local/share/icons/"
+tar -xf "$SCRIPT_DIR/configs/themes/icons/We10X.tar" -C "$HOME/.local/share/icons/"
+tar -xf "$SCRIPT_DIR/configs/themes/icons/We10X-blue.tar" -C "$HOME/.local/share/icons/"
+tar -xf "$SCRIPT_DIR/configs/themes/icons/We10X-blue-dark.tar" -C "$HOME/.local/share/icons/"
+tar -xf "$SCRIPT_DIR/configs/themes/icons/We10X-dark.tar" -C "$HOME/.local/share/icons/"
+tar -xf "$SCRIPT_DIR/configs/themes/cursor/Twilight-cursors.tar" -C "$HOME/.local/share/icons/"
 
 # 8. Reload configuration and restart panel
 echo "Reloading labwc configuration and starting panel..."

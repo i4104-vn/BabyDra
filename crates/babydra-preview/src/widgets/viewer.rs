@@ -172,17 +172,23 @@ pub fn build_ui(app: &gtk4::Application, path: PathBuf) {
     controls_box.set_valign(gtk4::Align::End);
     controls_box.set_margin_bottom(20);
 
-    let zoom_out_btn = gtk4::Button::from_icon_name("zoom-out-symbolic");
+    let zoom_out_btn = gtk4::Button::builder()
+        .child(&babydra_utils::ui::icon::get_icon("zoom-out-symbolic", 16))
+        .build();
     zoom_out_btn.add_css_class("control-btn");
     zoom_out_btn.set_cursor_from_name(Some("pointer"));
     controls_box.append(&zoom_out_btn);
 
-    let reset_btn = gtk4::Button::from_icon_name("zoom-original-symbolic");
+    let reset_btn = gtk4::Button::builder()
+        .child(&babydra_utils::ui::icon::get_icon("zoom-original-symbolic", 16))
+        .build();
     reset_btn.add_css_class("control-btn");
     reset_btn.set_cursor_from_name(Some("pointer"));
     controls_box.append(&reset_btn);
 
-    let zoom_in_btn = gtk4::Button::from_icon_name("zoom-in-symbolic");
+    let zoom_in_btn = gtk4::Button::builder()
+        .child(&babydra_utils::ui::icon::get_icon("zoom-in-symbolic", 16))
+        .build();
     zoom_in_btn.add_css_class("control-btn");
     zoom_in_btn.set_cursor_from_name(Some("pointer"));
     controls_box.append(&zoom_in_btn);

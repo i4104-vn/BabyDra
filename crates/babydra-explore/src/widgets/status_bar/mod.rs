@@ -22,12 +22,16 @@ pub fn create_status_bar() -> StatusBarWidgets {
         .build();
     container.append(&lbl_status);
 
-    let btn_toggle_hidden = Button::from_icon_name("view-conceal-symbolic");
+    let btn_toggle_hidden = Button::builder()
+        .child(&babydra_utils::ui::icon::get_icon("eye-off", 16))
+        .build();
     btn_toggle_hidden.set_css_classes(&["status-bar-btn"]);
     btn_toggle_hidden.set_tooltip_text(Some(&t("explore.toggle_hidden")));
     container.append(&btn_toggle_hidden);
 
-    let btn_toggle_preview = Button::from_icon_name("view-sidebar-symbolic");
+    let btn_toggle_preview = Button::builder()
+        .child(&babydra_utils::ui::icon::get_icon("sidebar", 16))
+        .build();
     btn_toggle_preview.set_css_classes(&["status-bar-btn", "status-bar-btn-active"]);
     btn_toggle_preview.set_tooltip_text(Some(&t("explore.toggle_preview")));
     container.append(&btn_toggle_preview);

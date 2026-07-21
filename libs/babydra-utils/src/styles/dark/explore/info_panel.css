@@ -7,7 +7,7 @@
     padding: 16px;
     min-width: 250px;
     max-width: 250px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: none;
 }
 
 .explore-window .info-panel viewport,

@@ -14,10 +14,18 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     nav_row.set_margin_end(6);
     container.append(&nav_row);
 
-    let btn_back    = Button::from_icon_name("go-previous-symbolic");
-    let btn_forward = Button::from_icon_name("go-next-symbolic");
-    let btn_up      = Button::from_icon_name("go-up-symbolic");
-    let btn_refresh = Button::from_icon_name("view-refresh-symbolic");
+    let btn_back = Button::builder()
+        .child(&babydra_utils::ui::icon::get_icon("back", 16))
+        .build();
+    let btn_forward = Button::builder()
+        .child(&babydra_utils::ui::icon::get_icon("forward", 16))
+        .build();
+    let btn_up = Button::builder()
+        .child(&babydra_utils::ui::icon::get_icon("up", 16))
+        .build();
+    let btn_refresh = Button::builder()
+        .child(&babydra_utils::ui::icon::get_icon("refresh", 16))
+        .build();
 
     btn_back.set_tooltip_text(Some(&t("explore.back")));
     btn_forward.set_tooltip_text(Some(&t("explore.forward")));
@@ -71,7 +79,7 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     container.append(&toolbar);
 
     let new_folder_box = Box::new(Orientation::Horizontal, 6);
-    let new_folder_img = gtk4::Image::from_icon_name("folder-new-symbolic");
+    let new_folder_img = babydra_utils::ui::icon::get_icon("folder-new", 16);
     let new_folder_lbl = gtk4::Label::new(Some(&t("explore.new_folder")));
     new_folder_box.append(&new_folder_img);
     new_folder_box.append(&new_folder_lbl);
@@ -79,17 +87,34 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     let btn_new_folder = Button::builder()
         .child(&new_folder_box)
         .build();
-    let btn_cut          = Button::from_icon_name("edit-cut-symbolic");
-    let btn_copy         = Button::from_icon_name("edit-copy-symbolic");
-    let btn_paste        = Button::from_icon_name("edit-paste-symbolic");
-    let btn_rename       = Button::from_icon_name("edit-rename-symbolic");
-    let btn_delete       = Button::from_icon_name("edit-delete-symbolic");
+    let btn_cut = Button::builder()
+        .child(&babydra_utils::ui::icon::get_icon("cut", 16))
+        .build();
+    let btn_copy = Button::builder()
+        .child(&babydra_utils::ui::icon::get_icon("copy", 16))
+        .build();
+    let btn_paste = Button::builder()
+        .child(&babydra_utils::ui::icon::get_icon("paste", 16))
+        .build();
+    let btn_rename = Button::builder()
+        .child(&babydra_utils::ui::icon::get_icon("rename", 16))
+        .build();
+    let btn_delete = Button::builder()
+        .child(&babydra_utils::ui::icon::get_icon("trash", 16))
+        .build();
     let sep1 = Separator::new(Orientation::Vertical);
     sep1.set_css_classes(&["toolbar-sep"]);
     let sep2 = Separator::new(Orientation::Vertical);
     sep2.set_css_classes(&["toolbar-sep"]);
-    let btn_view_icons   = Button::from_icon_name("view-grid-symbolic");
-    let btn_view_list    = Button::from_icon_name("view-list-symbolic");
+    let btn_view_icons = Button::builder()
+        .child(&babydra_utils::ui::icon::get_icon("view-grid", 16))
+        .build();
+    let btn_view_list = Button::builder()
+        .child(&babydra_utils::ui::icon::get_icon("view-list", 16))
+        .build();
+    let btn_settings = Button::builder()
+        .child(&babydra_utils::ui::icon::get_icon("settings", 16))
+        .build();
 
     btn_new_folder.set_tooltip_text(Some(&t("explore.new_folder")));
     btn_cut.set_tooltip_text(Some(&t("explore.cut")));
@@ -99,11 +124,12 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     btn_delete.set_tooltip_text(Some(&t("explore.delete")));
     btn_view_icons.set_tooltip_text(Some(&t("explore.view_grid")));
     btn_view_list.set_tooltip_text(Some(&t("explore.view_list")));
+    btn_settings.set_tooltip_text(Some(&t("explore.settings")));
 
     btn_new_folder.set_css_classes(&["toolbar-btn", "new-btn"]);
 
     for btn in &[&btn_cut, &btn_copy, &btn_paste, &btn_rename, &btn_delete,
-                 &btn_view_icons, &btn_view_list] {
+                 &btn_view_icons, &btn_view_list, &btn_settings] {
         btn.set_css_classes(&["toolbar-btn"]);
     }
 
@@ -136,6 +162,11 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     toolbar.append(&btn_view_icons);
     toolbar.append(&btn_view_list);
 
+    let sep3 = Separator::new(Orientation::Vertical);
+    sep3.set_css_classes(&["toolbar-sep"]);
+    toolbar.append(&sep3);
+    toolbar.append(&btn_settings);
+
     HeaderBarWidgets {
         container,
         btn_back,
@@ -156,5 +187,6 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
         btn_paste,
         btn_rename,
         btn_delete,
+        btn_settings,
     }
 }

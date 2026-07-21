@@ -1,10 +1,20 @@
 use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct CustomContextItem {
+    pub name: String,
+    pub command: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ExploreSettings {
     pub view_mode: String,       // "icons" | "list"
     pub preview_visible: bool,   // true | false
     pub show_hidden: bool,       // true | false
+    pub double_click_to_open: bool, // true | false
+    pub permanent_delete: bool,   // true | false
+    pub calculate_dir_size: bool, // true | false
+    pub custom_context_items: Vec<CustomContextItem>,
 }
 
 impl Default for ExploreSettings {
@@ -13,6 +23,10 @@ impl Default for ExploreSettings {
             view_mode: "icons".to_string(),
             preview_visible: true,
             show_hidden: false,
+            double_click_to_open: true,
+            permanent_delete: false,
+            calculate_dir_size: true,
+            custom_context_items: Vec::new(),
         }
     }
 }

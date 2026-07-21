@@ -113,36 +113,13 @@ pub fn wire_grid_flowbox_controllers(
                 }
                 glib::Propagation::Stop
             } else if has_ctrl && (keyval == gtk4::gdk::Key::x || keyval == gtk4::gdk::Key::X) {
-                let paths = sel_paths.borrow().clone();
-                if !paths.is_empty() {
-                    babydra_utils::explore::CLIPBOARD.with(|cb| {
-                        cb.replace(Some((paths, true)));
-                    });
-                    nav(cp_ref.borrow().clone());
-                }
+                super::handle_cut(sel_paths.borrow().clone(), cp_ref.borrow().clone(), nav.clone());
                 glib::Propagation::Stop
             } else if has_ctrl && (keyval == gtk4::gdk::Key::c || keyval == gtk4::gdk::Key::C) {
-                let paths = sel_paths.borrow().clone();
-                if !paths.is_empty() {
-                    babydra_utils::explore::CLIPBOARD.with(|cb| {
-                        cb.replace(Some((paths, false)));
-                    });
-                    nav(cp_ref.borrow().clone());
-                }
+                super::handle_copy(sel_paths.borrow().clone(), cp_ref.borrow().clone(), nav.clone());
                 glib::Propagation::Stop
             } else if has_ctrl && (keyval == gtk4::gdk::Key::v || keyval == gtk4::gdk::Key::V) {
-                let clipboard_data = babydra_utils::explore::CLIPBOARD.with(|cb| cb.borrow().clone());
-                if let Some((sources, is_cut)) = clipboard_data {
-                    let dest_dir_c = cp_ref.borrow().clone();
-                    let nav_c = nav.clone();
-                    glib::spawn_future_local(async move {
-                        let success = super::perform_paste(sources, is_cut, dest_dir_c.clone()).await;
-                        if is_cut && success {
-                            babydra_utils::explore::CLIPBOARD.with(|cb| cb.replace(None));
-                        }
-                        nav_c(dest_dir_c);
-                    });
-                }
+                super::handle_paste(cp_ref.borrow().clone(), nav.clone());
                 glib::Propagation::Stop
             } else {
                 glib::Propagation::Proceed

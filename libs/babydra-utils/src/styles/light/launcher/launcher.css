@@ -42,7 +42,7 @@
 
 .close-btn:hover {
     background-color: rgba(59, 130, 246, 0.16);
-    box-shadow: 0 0 10px rgba(59, 130, 246, 0.15);
+    box-shadow: none;
 }
 
 /* Search bar style */
@@ -66,7 +66,7 @@ entry.launcher-search>text {
 entry.launcher-search:focus {
     background-color: rgba(0, 0, 0, 0.05);
     border-color: #3b82f6;
-    box-shadow: 0 0 16px rgba(59, 130, 246, 0.15);
+    box-shadow: none;
 }
 
 entry.launcher-search placeholder,

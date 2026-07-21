@@ -11,7 +11,7 @@ pub use assets::*;
 pub fn is_dark_mode() -> bool {
     gtk4::Settings::default()
         .map(|s| s.is_gtk_application_prefer_dark_theme())
-        .unwrap_or(false)
+        .unwrap_or(true)
 }
 
 /// Helper function to retrieve an SVG icon widget by name. Relies on the active theme.
@@ -38,8 +38,8 @@ pub fn get_icon(name: &str, size: i32) -> gtk4::Image {
         ("bell", true) => Some(LIGHT_BELL_SVG),
         ("bell-off", false) => Some(DARK_BELL_OFF_SVG),
         ("bell-off", true) => Some(LIGHT_BELL_OFF_SVG),
-        ("bluetooth", false) => Some(DARK_BLUETOOTH_SVG),
-        ("bluetooth", true) => Some(LIGHT_BLUETOOTH_SVG),
+        ("bluetooth", false) | ("bluetooth-active-symbolic", false) => Some(DARK_BLUETOOTH_SVG),
+        ("bluetooth", true) | ("bluetooth-active-symbolic", true) => Some(LIGHT_BLUETOOTH_SVG),
         ("brightness", false) => Some(DARK_BRIGHTNESS_SVG),
         ("brightness", true) => Some(LIGHT_BRIGHTNESS_SVG),
         ("caffeine", false) => Some(DARK_CAFFEINE_SVG),
@@ -50,18 +50,18 @@ pub fn get_icon(name: &str, size: i32) -> gtk4::Image {
         ("clock", true) => Some(LIGHT_CLOCK_SVG),
         ("dark-mode", false) => Some(DARK_DARK_MODE_SVG),
         ("dark-mode", true) => Some(LIGHT_DARK_MODE_SVG),
-        ("display", false) => Some(DARK_DISPLAY_SVG),
-        ("display", true) => Some(LIGHT_DISPLAY_SVG),
-        ("download", false) => Some(DARK_DOWNLOAD_SVG),
-        ("download", true) => Some(LIGHT_DOWNLOAD_SVG),
+        ("display", false) | ("preferences-desktop-wallpaper-symbolic", false) => Some(DARK_DISPLAY_SVG),
+        ("display", true) | ("preferences-desktop-wallpaper-symbolic", true) => Some(LIGHT_DISPLAY_SVG),
+        ("download", false) | ("document-save-symbolic", false) => Some(DARK_DOWNLOAD_SVG),
+        ("download", true) | ("document-save-symbolic", true) => Some(LIGHT_DOWNLOAD_SVG),
         ("ethernet", false) => Some(DARK_ETHERNET_SVG),
         ("ethernet", true) => Some(LIGHT_ETHERNET_SVG),
         ("folder", false) => Some(DARK_FOLDER_SVG),
         ("folder", true) => Some(LIGHT_FOLDER_SVG),
         ("gsconnect", false) => Some(DARK_GSCONNECT_SVG),
         ("gsconnect", true) => Some(LIGHT_GSCONNECT_SVG),
-        ("info", false) => Some(DARK_INFO_SVG),
-        ("info", true) => Some(LIGHT_INFO_SVG),
+        ("info", false) | ("preferences-system-symbolic", false) => Some(DARK_INFO_SVG),
+        ("info", true) | ("preferences-system-symbolic", true) => Some(LIGHT_INFO_SVG),
         ("lock", false) => Some(DARK_LOCK_SVG),
         ("lock", true) => Some(LIGHT_LOCK_SVG),
         ("logo", false) => Some(DARK_LOGO_SVG),
@@ -92,16 +92,16 @@ pub fn get_icon(name: &str, size: i32) -> gtk4::Image {
         ("server", true) => Some(LIGHT_SERVER_SVG),
         ("settings", false) => Some(DARK_SETTINGS_SVG),
         ("settings", true) => Some(LIGHT_SETTINGS_SVG),
-        ("shield", false) => Some(DARK_SHIELD_SVG),
-        ("shield", true) => Some(LIGHT_SHIELD_SVG),
+        ("shield", false) | ("network-vpn-symbolic", false) => Some(DARK_SHIELD_SVG),
+        ("shield", true) | ("network-vpn-symbolic", true) => Some(LIGHT_SHIELD_SVG),
         ("terminal", false) => Some(DARK_TERMINAL_SVG),
         ("terminal", true) => Some(LIGHT_TERMINAL_SVG),
         ("text", false) => Some(DARK_TEXT_SVG),
         ("text", true) => Some(LIGHT_TEXT_SVG),
         ("trash", false) => Some(DARK_TRASH_SVG),
         ("trash", true) => Some(LIGHT_TRASH_SVG),
-        ("broom", false) => Some(DARK_BROOM_SVG),
-        ("broom", true) => Some(LIGHT_BROOM_SVG),
+        ("broom", false) | ("edit-clear-all-symbolic", false) => Some(DARK_BROOM_SVG),
+        ("broom", true) | ("edit-clear-all-symbolic", true) => Some(LIGHT_BROOM_SVG),
         ("unlock", false) => Some(DARK_UNLOCK_SVG),
         ("unlock", true) => Some(LIGHT_UNLOCK_SVG),
         ("user", false) => Some(DARK_USER_SVG),
@@ -110,8 +110,54 @@ pub fn get_icon(name: &str, size: i32) -> gtk4::Image {
         ("volume", true) => Some(LIGHT_VOLUME_SVG),
         ("volume-mute", false) | ("volume_mute", false) => Some(DARK_VOLUME_MUTE_SVG),
         ("volume-mute", true) | ("volume_mute", true) => Some(LIGHT_VOLUME_MUTE_SVG),
-        ("wifi", false) => Some(DARK_WIFI_SVG),
-        ("wifi", true) => Some(LIGHT_WIFI_SVG),
+        ("wifi", false) | ("network-wireless-symbolic", false) | ("network-wireless-connected-symbolic", false) | ("network-wireless-signal-excellent-symbolic", false) => Some(DARK_WIFI_SVG),
+        ("wifi", true) | ("network-wireless-symbolic", true) | ("network-wireless-connected-symbolic", true) | ("network-wireless-signal-excellent-symbolic", true) => Some(LIGHT_WIFI_SVG),
+        ("back", false) | ("go-previous-symbolic", false) | ("go-previous", false) => Some(DARK_BACK_SVG),
+        ("back", true) | ("go-previous-symbolic", true) | ("go-previous", true) => Some(LIGHT_BACK_SVG),
+        ("forward", false) | ("go-next-symbolic", false) | ("go-next", false) => Some(DARK_FORWARD_SVG),
+        ("forward", true) | ("go-next-symbolic", true) | ("go-next", true) => Some(LIGHT_FORWARD_SVG),
+        ("up", false) | ("go-up-symbolic", false) | ("go-up", false) => Some(DARK_UP_SVG),
+        ("up", true) | ("go-up-symbolic", true) | ("go-up", true) => Some(LIGHT_UP_SVG),
+        ("down", false) | ("go-down-symbolic", false) | ("go-down", false) => Some(DARK_DOWN_SVG),
+        ("down", true) | ("go-down-symbolic", true) | ("go-down", true) => Some(LIGHT_DOWN_SVG),
+        ("refresh", false) | ("view-refresh-symbolic", false) => Some(DARK_REFRESH_SVG),
+        ("refresh", true) | ("view-refresh-symbolic", true) => Some(LIGHT_REFRESH_SVG),
+        ("folder-new", false) | ("folder-new-symbolic", false) => Some(DARK_FOLDER_NEW_SVG),
+        ("folder-new", true) | ("folder-new-symbolic", true) => Some(LIGHT_FOLDER_NEW_SVG),
+        ("cut", false) | ("edit-cut-symbolic", false) | ("edit-cut", false) => Some(DARK_CUT_SVG),
+        ("cut", true) | ("edit-cut-symbolic", true) | ("edit-cut", true) => Some(LIGHT_CUT_SVG),
+        ("copy", false) | ("edit-copy-symbolic", false) | ("edit-copy", false) => Some(DARK_COPY_SVG),
+        ("copy", true) | ("edit-copy-symbolic", true) | ("edit-copy", true) => Some(LIGHT_COPY_SVG),
+        ("paste", false) | ("edit-paste-symbolic", false) | ("edit-paste", false) => Some(DARK_PASTE_SVG),
+        ("paste", true) | ("edit-paste-symbolic", true) | ("edit-paste", true) => Some(LIGHT_PASTE_SVG),
+        ("rename", false) | ("document-edit-symbolic", false) | ("document-edit", false) | ("edit-rename-symbolic", false) | ("edit-rename", false) => Some(DARK_RENAME_SVG),
+        ("rename", true) | ("document-edit-symbolic", true) | ("document-edit", true) | ("edit-rename-symbolic", true) | ("edit-rename", true) => Some(LIGHT_RENAME_SVG),
+        ("view-grid", false) | ("view-grid-symbolic", false) => Some(DARK_VIEW_GRID_SVG),
+        ("view-grid", true) | ("view-grid-symbolic", true) => Some(LIGHT_VIEW_GRID_SVG),
+        ("view-list", false) | ("view-list-symbolic", false) => Some(DARK_VIEW_LIST_SVG),
+        ("view-list", true) | ("view-list-symbolic", true) => Some(LIGHT_VIEW_LIST_SVG),
+        ("eye-off", false) | ("eye-off-symbolic", false) => Some(DARK_EYE_OFF_SVG),
+        ("eye-off", true) | ("eye-off-symbolic", true) => Some(LIGHT_EYE_OFF_SVG),
+        ("sidebar", false) | ("sidebar-symbolic", false) | ("view-sidebar-symbolic", false) => Some(DARK_SIDEBAR_SVG),
+        ("sidebar", true) | ("sidebar-symbolic", true) | ("view-sidebar-symbolic", true) => Some(LIGHT_SIDEBAR_SVG),
+        ("user-home", false) | ("user_home", false) | ("user-home-symbolic", false) | ("go-home-symbolic", false) | ("go-home", false) => Some(DARK_USER_HOME_SVG),
+        ("user-home", true) | ("user_home", true) | ("user-home-symbolic", true) | ("go-home-symbolic", true) | ("go-home", true) => Some(LIGHT_USER_HOME_SVG),
+        ("folder-download", false) | ("folder_download", false) => Some(DARK_FOLDER_DOWNLOAD_SVG),
+        ("folder-download", true) | ("folder_download", true) => Some(LIGHT_FOLDER_DOWNLOAD_SVG),
+        ("folder-documents", false) | ("folder_documents", false) => Some(DARK_FOLDER_DOCUMENTS_SVG),
+        ("folder-documents", true) | ("folder_documents", true) => Some(LIGHT_FOLDER_DOCUMENTS_SVG),
+        ("folder-pictures", false) | ("folder_pictures", false) => Some(DARK_FOLDER_PICTURES_SVG),
+        ("folder-pictures", true) | ("folder_pictures", true) => Some(LIGHT_FOLDER_PICTURES_SVG),
+        ("folder-music", false) | ("folder_music", false) => Some(DARK_FOLDER_MUSIC_SVG),
+        ("folder-music", true) | ("folder_music", true) => Some(LIGHT_FOLDER_MUSIC_SVG),
+        ("user-trash", false) | ("user_trash", false) | ("user-trash-full-symbolic", false) | ("user-trash-symbolic", false) | ("edit-delete-symbolic", false) | ("edit-delete", false) | ("trash-symbolic", false) => Some(DARK_USER_TRASH_SVG),
+        ("user-trash", true) | ("user_trash", true) | ("user-trash-full-symbolic", true) | ("user-trash-symbolic", true) | ("edit-delete-symbolic", true) | ("edit-delete", true) | ("trash-symbolic", true) => Some(LIGHT_USER_TRASH_SVG),
+        ("folder-desktop", false) | ("folder_desktop", false) => Some(DARK_FOLDER_DESKTOP_SVG),
+        ("folder-desktop", true) | ("folder_desktop", true) => Some(LIGHT_FOLDER_DESKTOP_SVG),
+        ("folder-videos", false) | ("folder_videos", false) => Some(DARK_FOLDER_VIDEOS_SVG),
+        ("folder-videos", true) | ("folder_videos", true) => Some(LIGHT_FOLDER_VIDEOS_SVG),
+        ("drive-harddisk", false) | ("drive_harddisk", false) => Some(DARK_DRIVE_HARDDISK_SVG),
+        ("drive-harddisk", true) | ("drive_harddisk", true) => Some(LIGHT_DRIVE_HARDDISK_SVG),
         _ => None,
     };
 
@@ -122,4 +168,11 @@ pub fn get_icon(name: &str, size: i32) -> gtk4::Image {
         img.set_pixel_size(size);
         img
     }
+}
+
+/// Sets the image content from local SVG or system icon theme.
+pub fn set_image_from_icon(img: &gtk4::Image, name: &str, size: i32) {
+    let new_img = get_icon(name, size);
+    img.set_paintable(new_img.paintable().as_ref());
+    img.set_pixel_size(size);
 }

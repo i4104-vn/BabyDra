@@ -26,7 +26,7 @@ button.panel-clock-btn:hover {
 
 .clock-bell-dot {
     background-color: #ef4444;
-    background-image: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+    background-color: #dc2626;
     border-radius: 9999px;
     min-width: 6px;
     min-height: 6px;
