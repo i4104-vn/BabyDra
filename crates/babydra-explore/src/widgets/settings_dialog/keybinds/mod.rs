@@ -70,14 +70,15 @@ pub fn build_keybinds_page(
         row.set_child(Some(&hbox));
         listbox.append(&row);
 
-        // Row activation action
+        // Row click gesture action
+        let click_gesture = gtk4::GestureClick::new();
         let parent_win_c = parent_win.clone();
         let action_id_c = action_id.to_string();
         let action_desc_c = action_desc.to_string();
         let lbl_shortcut_c = lbl_shortcut.clone();
         let on_changed_c = on_changed.clone();
 
-        row.connect_activate(move |_| {
+        click_gesture.connect_pressed(move |_, _, _, _| {
             let action_id_inner = action_id_c.clone();
             let lbl_inner = lbl_shortcut_c.clone();
             let on_changed_inner = on_changed_c.clone();
@@ -94,6 +95,7 @@ pub fn build_keybinds_page(
                 on_changed_inner();
             });
         });
+        row.add_controller(click_gesture);
     };
 
     // Add dynamic keybind rows
