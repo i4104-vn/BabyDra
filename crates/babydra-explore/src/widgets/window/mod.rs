@@ -94,6 +94,7 @@ pub fn create_explore_window(
     // Create HeaderBar & StatusBar cells
     let header_widgets_cell = Rc::new(RefCell::new(None::<crate::widgets::header_bar::HeaderBarWidgets>));
     let status_bar_widgets_cell = Rc::new(RefCell::new(None::<crate::widgets::status_bar::StatusBarWidgets>));
+    let rebuild_shortcuts_cell = Rc::new(RefCell::new(None::<Rc<dyn Fn()>>));
 
     // Create TabBar Container
     let tab_bar_box = Rc::new(RefCell::new(None::<gtk4::Box>));
@@ -191,7 +192,7 @@ pub fn create_explore_window(
     let view_mode_callback = {
         let left = left_content_handle.clone();
         let right = right_content_handle.clone();
-        let header_widgets_c = header_widgets_cell.clone();
+        let status_bar_widgets_c = status_bar_widgets_cell.clone();
         move |mode: String| {
             crate::widgets::content_view::set_content_view_mode(&left, &mode);
             if let Some(ref r) = *right.borrow() {
@@ -205,18 +206,19 @@ pub fn create_explore_window(
                 babydra_common::save_explore_settings(&current_settings);
             }
 
-            // Update button active classes in HeaderBar
-            if let Some(ref hw) = *header_widgets_c.borrow() {
+            // Update button active classes in status bar
+            if let Some(ref sw) = *status_bar_widgets_c.borrow() {
                 if mode == "list" {
-                    hw.btn_view_list.add_css_class("toolbar-btn-active");
-                    hw.btn_view_icons.remove_css_class("toolbar-btn-active");
+                    sw.btn_view_list.add_css_class("status-bar-btn-active");
+                    sw.btn_view_icons.remove_css_class("status-bar-btn-active");
                 } else {
-                    hw.btn_view_icons.add_css_class("toolbar-btn-active");
-                    hw.btn_view_list.remove_css_class("toolbar-btn-active");
+                    sw.btn_view_icons.add_css_class("status-bar-btn-active");
+                    sw.btn_view_list.remove_css_class("status-bar-btn-active");
                 }
             }
         }
     };
+    let view_mode_callback_rc = Rc::new(view_mode_callback) as Rc<dyn Fn(String)>;
 
     let search_callback = {
         let left = left_content_handle.clone();
@@ -243,29 +245,27 @@ pub fn create_explore_window(
             }
         }
     };
+    let sort_callback_rc = Rc::new(sort_callback) as Rc<dyn Fn(String)>;
 
     // Create Header Bar Box
-    let (header_box, header_widgets) = crate::widgets::header_bar::create_header_bar(
+    let (_header_box, header_widgets) = crate::widgets::header_bar::create_header_bar(
         session.clone(),
         {
             let nav = nav_callback_rc.clone();
             move |p| nav(p)
         },
-        view_mode_callback,
+        {
+            let cb = view_mode_callback_rc.clone();
+            move |m| cb(m)
+        },
         search_callback,
-        sort_callback,
+        {
+            let cb = sort_callback_rc.clone();
+            move |s| cb(s)
+        },
     );
-    ui.vbox.insert_child_after(&header_box, None::<&gtk4::Widget>);
+    // ui.vbox.insert_child_after(&header_box, None::<&gtk4::Widget>);
     header_widgets_cell.replace(Some(header_widgets.clone()));
-
-    // Apply initial view mode class to header buttons based on settings
-    if settings.view_mode == "list" {
-        header_widgets.btn_view_list.add_css_class("toolbar-btn-active");
-        header_widgets.btn_view_icons.remove_css_class("toolbar-btn-active");
-    } else {
-        header_widgets.btn_view_icons.add_css_class("toolbar-btn-active");
-        header_widgets.btn_view_list.remove_css_class("toolbar-btn-active");
-    }
 
     // Wire toolbar buttons click
     widgets::wire_toolbar_buttons(
@@ -290,6 +290,11 @@ pub fn create_explore_window(
     {
         let toggle_p = toggle_preview_rc.clone();
         let toggle_h = toggle_hidden_rc.clone();
+        let view_mode_cb = view_mode_callback_rc.clone();
+        let sort_cb = sort_callback_rc.clone();
+        let parent_win = ui.window.clone().upcast::<gtk4::Window>();
+        let rebuild_cell_c = rebuild_shortcuts_cell.clone();
+
         if let Some(ref sw) = *status_bar_widgets_cell.borrow() {
             sw.btn_toggle_preview.connect_clicked(move |_| {
                 toggle_p();
@@ -297,6 +302,58 @@ pub fn create_explore_window(
             sw.btn_toggle_hidden.connect_clicked(move |_| {
                 toggle_h();
             });
+
+            // View modes (Grid / List)
+            {
+                let cb = view_mode_cb.clone();
+                sw.btn_view_icons.connect_clicked(move |_| {
+                    cb("icons".to_string());
+                });
+            }
+            {
+                let cb = view_mode_cb.clone();
+                sw.btn_view_list.connect_clicked(move |_| {
+                    cb("list".to_string());
+                });
+            }
+
+            // Sort Dropdown
+            {
+                let cb = sort_cb.clone();
+                sw.dropdown_sort.connect_selected_notify(move |dd| {
+                    let selected = dd.selected();
+                    let mode = match selected {
+                        0 => "auto".to_string(),
+                        1 => "date".to_string(),
+                        2 => "group".to_string(),
+                        _ => "auto".to_string(),
+                    };
+                    cb(mode);
+                });
+            }
+
+            // Settings button
+            {
+                let parent_win_c = parent_win.clone();
+                let rebuild_c = rebuild_cell_c.clone();
+                sw.btn_settings.connect_clicked(move |_| {
+                    let rebuild_inner = rebuild_c.clone();
+                    crate::widgets::settings_dialog::show_settings_dialog(&parent_win_c, move || {
+                        if let Some(ref rebuild) = *rebuild_inner.borrow() {
+                            rebuild();
+                        }
+                    });
+                });
+            }
+
+            // Sync initial view mode class for status bar buttons
+            if settings.view_mode == "list" {
+                sw.btn_view_list.add_css_class("status-bar-btn-active");
+                sw.btn_view_icons.remove_css_class("status-bar-btn-active");
+            } else {
+                sw.btn_view_icons.add_css_class("status-bar-btn-active");
+                sw.btn_view_list.remove_css_class("status-bar-btn-active");
+            }
         }
     }
 
@@ -479,7 +536,8 @@ pub fn create_explore_window(
             current_controller.replace(Some(new_controller));
         }
     };
-    let rebuild_shortcuts_rc = Rc::new(rebuild_shortcuts);
+    let rebuild_shortcuts_rc = Rc::new(rebuild_shortcuts) as Rc<dyn Fn()>;
+    rebuild_shortcuts_cell.replace(Some(rebuild_shortcuts_rc.clone()));
 
     // Install initial shortcuts
     rebuild_shortcuts_rc();
