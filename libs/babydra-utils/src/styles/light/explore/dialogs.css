@@ -31,7 +31,7 @@ window.explore-dialog>box {
     -gtk-background-blur: 24;
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-top: none;
-    border-radius: 20px;
+    border-radius: 0 0 12px 12px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
     color: #1a1a1a;
 }
