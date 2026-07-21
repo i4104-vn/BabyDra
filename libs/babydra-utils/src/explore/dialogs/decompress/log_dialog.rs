@@ -13,6 +13,7 @@ pub fn show_decompress_log_dialog(
     current_path: PathBuf,
     nav_callback: Rc<dyn Fn(PathBuf)>,
     password: Option<String>,
+    parent: Option<&gtk4::Window>,
 ) {
     let window = Window::builder()
         .title(&t("explore.dialog_decompress_title"))
@@ -22,6 +23,10 @@ pub fn show_decompress_log_dialog(
         .default_height(320)
         .css_classes(vec!["explore-dialog".to_string()])
         .build();
+
+    if let Some(p) = parent {
+        window.set_transient_for(Some(p));
+    }
 
     let vbox = Box::new(Orientation::Vertical, 10);
     vbox.set_margin_top(16);

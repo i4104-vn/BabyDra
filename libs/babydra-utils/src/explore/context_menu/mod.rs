@@ -22,12 +22,13 @@ pub fn show_for_file(
     target_paths: Vec<PathBuf>,
     current_path: PathBuf,
     nav_callback: Rc<dyn Fn(PathBuf)>,
+    parent_window: &gtk4::Window,
 ) {
     let (popover, vbox) = create_menu_popover(parent, x, y);
     let is_in_trash = current_path.to_string_lossy().contains("Trash/files");
     if is_in_trash {
-        file_actions::show_for_file_trash(&popover, &vbox, target_paths, current_path, nav_callback);
+        file_actions::show_for_file_trash(&popover, &vbox, target_paths, current_path, nav_callback, parent_window);
     } else {
-        file_actions::show_for_file_normal(&popover, &vbox, target_paths, current_path, nav_callback);
+        file_actions::show_for_file_normal(&popover, &vbox, target_paths, current_path, nav_callback, parent_window);
     }
 }

@@ -11,6 +11,7 @@ pub fn show_compress_dialog(
     target_paths: Vec<PathBuf>,
     current_path: PathBuf,
     nav_callback: Rc<dyn Fn(PathBuf)>,
+    parent: Option<&gtk4::Window>,
 ) {
     if target_paths.is_empty() {
         return;
@@ -24,6 +25,10 @@ pub fn show_compress_dialog(
         .default_height(180)
         .css_classes(vec!["explore-dialog".to_string()])
         .build();
+
+    if let Some(p) = parent {
+        window.set_transient_for(Some(p));
+    }
 
     let vbox = Box::new(Orientation::Vertical, 12);
     vbox.set_margin_top(16);
@@ -79,6 +84,7 @@ pub fn show_compress_dialog(
     let entry_c = entry.clone();
     let opt_zip_c = opt_zip.clone();
     let paths = target_paths.clone();
+    let parent_c = parent.cloned();
     
     btn_create.connect_clicked(move |_| {
         let name = entry_c.text().to_string();
@@ -88,7 +94,14 @@ pub fn show_compress_dialog(
             let archive_name = format!("{}.{}", name, ext);
             let archive_path = current_p.join(archive_name);
             
-            show_compress_log_dialog(paths.clone(), archive_path, current_p.clone(), nav.clone(), is_zip);
+            show_compress_log_dialog(
+                paths.clone(),
+                archive_path,
+                current_p.clone(),
+                nav.clone(),
+                is_zip,
+                parent_c.as_ref(),
+            );
         }
         win_create.close();
     });

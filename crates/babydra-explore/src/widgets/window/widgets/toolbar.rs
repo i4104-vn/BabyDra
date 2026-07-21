@@ -15,6 +15,7 @@ pub fn wire_toolbar_buttons(
     let nav = navigate_pane_ref;
     let active = active_pane;
 
+    let btn_new_folder_c = header_widgets.btn_new_folder.clone();
     header_widgets.btn_new_folder.connect_clicked(move |_| {
         let path = session_c.borrow().active_tab().current_path.clone();
         let is_in_trash = path.to_string_lossy().ends_with("Trash/files");
@@ -33,7 +34,8 @@ pub fn wire_toolbar_buttons(
                     }
                 })
             };
-            babydra_utils::explore::dialogs::show_new_folder_dialog(path, nav_cb);
+            let win = btn_new_folder_c.root().and_then(|r| r.downcast::<gtk4::Window>().ok());
+            babydra_utils::explore::dialogs::show_new_folder_dialog(path, nav_cb, win.as_ref());
         }
     });
 }

@@ -6,7 +6,11 @@ use std::rc::Rc;
 use babydra_common::i18n::t;
 
 /// Presents a dialog window to create a new empty file under a directory.
-pub fn show_new_file_dialog(current_path: PathBuf, nav_callback: Rc<dyn Fn(PathBuf)>) {
+pub fn show_new_file_dialog(
+    current_path: PathBuf,
+    nav_callback: Rc<dyn Fn(PathBuf)>,
+    parent: Option<&impl IsA<gtk4::Window>>,
+) {
     let window = Window::builder()
         .title(&t("explore.dialog_new_file_title"))
         .modal(true)
@@ -15,6 +19,10 @@ pub fn show_new_file_dialog(current_path: PathBuf, nav_callback: Rc<dyn Fn(PathB
         .default_height(140)
         .css_classes(vec!["explore-dialog".to_string()])
         .build();
+
+    if let Some(p) = parent {
+        window.set_transient_for(Some(p));
+    }
 
     let vbox = Box::new(Orientation::Vertical, 12);
     vbox.set_margin_top(16);

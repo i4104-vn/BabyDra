@@ -12,16 +12,17 @@ use babydra_common::i18n::t;
 
 /// Renders the context menu when right-clicking on an empty space inside a folder directory.
 pub fn show_for_empty(
-    parent: &gtk4::Widget,
+    parent_widget: &gtk4::Widget,
     x: f64,
     y: f64,
     current_path: PathBuf,
     nav_callback: Rc<dyn Fn(PathBuf)>,
+    parent_window: &gtk4::Window,
 ) {
     if current_path.to_string_lossy().contains("Trash/files") {
         return;
     }
-    let (popover, vbox) = create_menu_popover(parent, x, y);
+    let (popover, vbox) = create_menu_popover(parent_widget, x, y);
 
     let btn_create_new = create_menu_button(&t("explore.menu_new"), "plus");
     let btn_paste = create_menu_button(&t("explore.menu_paste"), "paste");
@@ -80,26 +81,28 @@ pub fn show_for_empty(
     let sub_pop_c1 = sub_popover.clone();
     let nav = nav_callback.clone();
     let current_p = current_path.clone();
+    let parent_win_c1 = parent_window.clone();
     btn_new_folder.connect_clicked(move |_| {
         sub_pop_c1.popdown();
         pop_c1.popdown();
-        crate::explore::dialogs::show_new_folder_dialog(current_p.clone(), nav.clone());
+        crate::explore::dialogs::show_new_folder_dialog(current_p.clone(), nav.clone(), Some(&parent_win_c1));
     });
 
     let pop_c2 = popover.clone();
     let sub_pop_c2 = sub_popover.clone();
     let nav2 = nav_callback.clone();
     let current_p2 = current_path.clone();
+    let parent_win_c2 = parent_window.clone();
     btn_new_file.connect_clicked(move |_| {
         sub_pop_c2.popdown();
         pop_c2.popdown();
-        crate::explore::dialogs::show_new_file_dialog(current_p2.clone(), nav2.clone());
+        crate::explore::dialogs::show_new_file_dialog(current_p2.clone(), nav2.clone(), Some(&parent_win_c2));
     });
 
     // Custom Context Options for empty area
     append_custom_context_items(&vbox, &popover, vec![current_path.clone()], true);
 
-    // Footer Container (same as file context menu, but disabled buttons except paste and refresh)
+    // Footer Container (same as file context menu, but disabled buttons except paste)
     let (footer_container, footer_box) = create_footer_container();
     
     let btn_footer_cut = create_footer_icon_button("cut", &t("explore.menu_cut"));
@@ -107,7 +110,6 @@ pub fn show_for_empty(
     let btn_footer_paste = create_footer_icon_button("paste", &t("explore.menu_paste"));
     let btn_footer_rename = create_footer_icon_button("rename", &t("explore.menu_rename"));
     let btn_footer_trash = create_footer_icon_button("trash", &t("explore.menu_trash"));
-    let btn_footer_refresh = create_footer_icon_button("refresh", &t("explore.menu_refresh"));
 
     // Set sensitivities
     btn_footer_cut.set_sensitive(false);
@@ -115,14 +117,12 @@ pub fn show_for_empty(
     btn_footer_paste.set_sensitive(clipboard_data.is_some());
     btn_footer_rename.set_sensitive(false);
     btn_footer_trash.set_sensitive(false);
-    btn_footer_refresh.set_sensitive(true);
 
     footer_box.append(&btn_footer_cut);
     footer_box.append(&btn_footer_copy);
     footer_box.append(&btn_footer_paste);
     footer_box.append(&btn_footer_rename);
     footer_box.append(&btn_footer_trash);
-    footer_box.append(&btn_footer_refresh);
 
     // Paste handler for footer paste button
     let pop_c = popover.clone();
@@ -135,15 +135,6 @@ pub fn show_for_empty(
         if let Some((sources, is_cut)) = clipboard_data_c2.clone() {
             execute_paste(sources, dest_dir.clone(), is_cut, current_p.clone(), nav.clone());
         }
-    });
-
-    // Refresh handler for footer refresh button
-    let pop_c = popover.clone();
-    let nav_refresh_footer = nav_callback.clone();
-    let current_path_refresh_footer = current_path.clone();
-    btn_footer_refresh.connect_clicked(move |_| {
-        pop_c.popdown();
-        nav_refresh_footer(current_path_refresh_footer.clone());
     });
 
     vbox.append(&footer_container);

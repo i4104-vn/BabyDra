@@ -11,6 +11,7 @@ pub fn show_password_dialog(
     archive_path: PathBuf,
     current_path: PathBuf,
     nav_callback: Rc<dyn Fn(PathBuf)>,
+    parent: Option<&gtk4::Window>,
 ) {
     let window = Window::builder()
         .title(&t("explore.dialog_password_title"))
@@ -20,6 +21,10 @@ pub fn show_password_dialog(
         .default_height(180)
         .css_classes(vec!["explore-dialog".to_string()])
         .build();
+
+    if let Some(p) = parent {
+        window.set_transient_for(Some(p));
+    }
 
     let vbox = Box::new(Orientation::Vertical, 10);
     vbox.set_margin_top(16);
@@ -70,6 +75,7 @@ pub fn show_password_dialog(
     let nav_c = nav_callback.clone();
     let entry_c = entry.clone();
     let lbl_error_c = lbl_error.clone();
+    let parent_c = parent.cloned();
 
     btn_extract.connect_clicked(move |_| {
         let password = entry_c.text().to_string();
@@ -78,12 +84,19 @@ pub fn show_password_dialog(
         let nav_f = nav_c.clone();
         let win_f = win_c2.clone();
         let lbl_err_f = lbl_error_c.clone();
+        let parent_f = parent_c.clone();
 
         glib::spawn_future_local(async move {
             let correct = check_password_correct(&archive_path_f, &password).await;
             if correct {
                 win_f.close();
-                show_decompress_log_dialog(archive_path_f, current_path_f, nav_f, Some(password));
+                show_decompress_log_dialog(
+                    archive_path_f,
+                    current_path_f,
+                    nav_f,
+                    Some(password),
+                    parent_f.as_ref(),
+                );
             } else {
                 lbl_err_f.set_markup(&format!(
                     "<span foreground='#ef4444'>{}</span>",

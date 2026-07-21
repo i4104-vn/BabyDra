@@ -13,6 +13,7 @@ pub fn show_for_file_trash(
     target_paths: Vec<PathBuf>,
     current_path: PathBuf,
     nav_callback: Rc<dyn Fn(PathBuf)>,
+    parent: &gtk4::Window,
 ) {
     let btn_restore = create_menu_button(&t("explore.menu_restore"), "restart");
     let btn_delete = create_menu_button(&t("explore.menu_delete_perm"), "trash");
@@ -45,6 +46,7 @@ pub fn show_for_file_trash(
     let target_paths_del = target_paths.clone();
     let nav = nav_callback.clone();
     let current_p = current_path.clone();
+    let parent_c = parent.clone();
     btn_delete.connect_clicked(move |_| {
         pop_c.popdown();
         let nav_c = nav.clone();
@@ -72,7 +74,8 @@ pub fn show_for_file_trash(
                     }
                     nav_f(cp_f);
                 });
-            }
+            },
+            Some(&parent_c),
         );
     });
 

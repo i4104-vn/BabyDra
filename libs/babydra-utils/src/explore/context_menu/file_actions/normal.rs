@@ -18,6 +18,7 @@ pub fn show_for_file_normal(
     target_paths: Vec<PathBuf>,
     current_path: PathBuf,
     nav_callback: Rc<dyn Fn(PathBuf)>,
+    parent: &gtk4::Window,
 ) {
     // Create vertical menu buttons
     let btn_open = create_menu_button(&t("explore.menu_open"), "folder-new");
@@ -28,12 +29,14 @@ pub fn show_for_file_normal(
     } else {
         None
     };
+    let btn_refresh = create_menu_button(&t("explore.menu_refresh"), "refresh");
 
     vbox.append(&btn_open);
     vbox.append(&btn_compress);
     if let Some(ref btn) = btn_decompress {
         vbox.append(btn);
     }
+    vbox.append(&btn_refresh);
 
     // Create horizontal footer container & box for clipboard & file operations
     let footer_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
@@ -64,9 +67,6 @@ pub fn show_for_file_normal(
 
     let btn_trash = create_footer_icon_button("trash", &t("explore.menu_trash"));
     footer_box.append(&btn_trash);
-
-    let btn_refresh = create_footer_icon_button("refresh", &t("explore.menu_refresh"));
-    footer_box.append(&btn_refresh);
 
     footer_container.append(&footer_box);
 
@@ -133,9 +133,10 @@ pub fn show_for_file_normal(
         let rename_path = target_paths[0].clone();
         let nav = nav_callback.clone();
         let current_p = current_path.clone();
+        let parent_c = parent.clone();
         btn_rename.connect_clicked(move |_| {
             pop_c.popdown();
-            crate::explore::dialogs::show_rename_dialog(&rename_path, current_p.clone(), nav.clone());
+            crate::explore::dialogs::show_rename_dialog(&rename_path, current_p.clone(), nav.clone(), Some(&parent_c));
         });
     }
 
@@ -164,9 +165,10 @@ pub fn show_for_file_normal(
     let nav = nav_callback.clone();
     let current_p = current_path.clone();
     let pop_c = popover.clone();
+    let parent_c = parent.clone();
     btn_compress.connect_clicked(move |_| {
         pop_c.popdown();
-        crate::explore::dialogs::show_compress_dialog(target_paths_compress.clone(), current_p.clone(), nav.clone());
+        crate::explore::dialogs::show_compress_dialog(target_paths_compress.clone(), current_p.clone(), nav.clone(), Some(&parent_c));
     });
 
     // Decompress action
@@ -175,11 +177,12 @@ pub fn show_for_file_normal(
         let nav = nav_callback.clone();
         let current_p = current_path.clone();
         let pop_c = popover.clone();
+        let parent_c = parent.clone();
         btn.connect_clicked(move |_| {
             pop_c.popdown();
             for path in &target_paths_decompress {
                 if is_archive_file(path) {
-                    crate::explore::dialogs::perform_decompress_async(path.clone(), current_p.clone(), nav.clone());
+                    crate::explore::dialogs::perform_decompress_async(path.clone(), current_p.clone(), nav.clone(), Some(&parent_c));
                 }
             }
         });
@@ -207,9 +210,10 @@ pub fn show_for_file_normal(
 
     let pop_c = popover.clone();
     let target_paths_props = target_paths.clone();
+    let parent_c = parent.clone();
     btn_properties.connect_clicked(move |_| {
         pop_c.popdown();
-        crate::explore::dialogs::show_properties_dialog(target_paths_props.clone());
+        crate::explore::dialogs::show_properties_dialog(target_paths_props.clone(), Some(&parent_c));
     });
 
     vbox.append(&footer_container);
