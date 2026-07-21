@@ -190,6 +190,7 @@ pub fn wire_toolbar_buttons(
     let right = right_content_handle;
     let act = active;
     let hw = header_widgets.clone();
+    let session_sync = session.clone();
     glib::timeout_add_local(std::time::Duration::from_millis(100), move || {
         let selected_count = if act.get() == ActivePane::Left {
             left.selected_paths.borrow().len()
@@ -199,13 +200,24 @@ pub fn wire_toolbar_buttons(
                 .unwrap_or(0)
         };
 
-        hw.btn_cut.set_sensitive(selected_count > 0);
-        hw.btn_copy.set_sensitive(selected_count > 0);
-        hw.btn_rename.set_sensitive(selected_count == 1);
-        hw.btn_delete.set_sensitive(selected_count > 0);
+        let current_path = session_sync.borrow().active_tab().current_path.clone();
+        let is_in_trash = current_path.to_string_lossy().contains("Trash/files");
 
-        let has_clipboard = babydra_utils::explore::CLIPBOARD.with(|cb| cb.borrow().is_some());
-        hw.btn_paste.set_sensitive(has_clipboard);
+        if is_in_trash {
+            hw.btn_cut.set_sensitive(false);
+            hw.btn_copy.set_sensitive(false);
+            hw.btn_rename.set_sensitive(false);
+            hw.btn_paste.set_sensitive(false);
+            hw.btn_delete.set_sensitive(selected_count > 0);
+        } else {
+            hw.btn_cut.set_sensitive(selected_count > 0);
+            hw.btn_copy.set_sensitive(selected_count > 0);
+            hw.btn_rename.set_sensitive(selected_count == 1);
+            hw.btn_delete.set_sensitive(selected_count > 0);
+
+            let has_clipboard = babydra_utils::explore::CLIPBOARD.with(|cb| cb.borrow().is_some());
+            hw.btn_paste.set_sensitive(has_clipboard);
+        }
 
         glib::ControlFlow::Continue
     });
