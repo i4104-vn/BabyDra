@@ -55,3 +55,17 @@ pub fn create_footer_icon_button(icon: &str, tooltip: &str) -> Button {
         .focusable(false)
         .build()
 }
+
+pub fn create_footer_container() -> (Box, Box) {
+    let footer_container = Box::new(Orientation::Horizontal, 0);
+    footer_container.add_css_class("context-menu-footer");
+    footer_container.set_halign(Align::Fill);
+
+    let footer_box = Box::new(Orientation::Horizontal, 6);
+    footer_box.set_halign(Align::Start);
+    footer_box.set_homogeneous(false);
+    
+    footer_container.append(&footer_box);
+    
+    (footer_container, footer_box)
+}

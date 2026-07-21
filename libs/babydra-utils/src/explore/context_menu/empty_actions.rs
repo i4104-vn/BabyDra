@@ -3,7 +3,7 @@ use std::rc::Rc;
 use gtk4::prelude::*;
 use crate::explore::context_menu::{
     CLIPBOARD,
-    widgets::{create_menu_popover, create_menu_button},
+    widgets::{create_menu_popover, create_menu_button, create_footer_icon_button, create_footer_container},
     clipboard::execute_paste,
     custom_items::append_custom_context_items,
 };
@@ -25,9 +25,11 @@ pub fn show_for_empty(
 
     let btn_create_new = create_menu_button(&t("explore.menu_new"), "plus");
     let btn_paste = create_menu_button(&t("explore.menu_paste"), "paste");
+    let btn_refresh = create_menu_button(&t("explore.menu_refresh"), "refresh");
 
     vbox.append(&btn_create_new);
     vbox.append(&btn_paste);
+    vbox.append(&btn_refresh);
 
     // Sub-popover containing create options
     let sub_popover = crate::components::popovers::create_popover(&btn_create_new, gtk4::PositionType::Right, "explore-popover");
@@ -56,11 +58,21 @@ pub fn show_for_empty(
     let dest_dir = current_path.clone();
     let nav = nav_callback.clone();
     let current_p = current_path.clone();
+    let clipboard_data_c1 = clipboard_data.clone();
     btn_paste.connect_clicked(move |_| {
         pop_c.popdown();
-        if let Some((sources, is_cut)) = clipboard_data.clone() {
+        if let Some((sources, is_cut)) = clipboard_data_c1.clone() {
             execute_paste(sources, dest_dir.clone(), is_cut, current_p.clone(), nav.clone());
         }
+    });
+
+    // Refresh action implementation (menu button)
+    let pop_c = popover.clone();
+    let nav_refresh = nav_callback.clone();
+    let current_path_refresh = current_path.clone();
+    btn_refresh.connect_clicked(move |_| {
+        pop_c.popdown();
+        nav_refresh(current_path_refresh.clone());
     });
 
     // Sub-popover click actions
@@ -85,7 +97,56 @@ pub fn show_for_empty(
     });
 
     // Custom Context Options for empty area
-    append_custom_context_items(&vbox, &popover, vec![current_path], true);
+    append_custom_context_items(&vbox, &popover, vec![current_path.clone()], true);
+
+    // Footer Container (same as file context menu, but disabled buttons except paste and refresh)
+    let (footer_container, footer_box) = create_footer_container();
+    
+    let btn_footer_cut = create_footer_icon_button("cut", &t("explore.menu_cut"));
+    let btn_footer_copy = create_footer_icon_button("copy", &t("explore.menu_copy"));
+    let btn_footer_paste = create_footer_icon_button("paste", &t("explore.menu_paste"));
+    let btn_footer_rename = create_footer_icon_button("rename", &t("explore.menu_rename"));
+    let btn_footer_trash = create_footer_icon_button("trash", &t("explore.menu_trash"));
+    let btn_footer_refresh = create_footer_icon_button("refresh", &t("explore.menu_refresh"));
+
+    // Set sensitivities
+    btn_footer_cut.set_sensitive(false);
+    btn_footer_copy.set_sensitive(false);
+    btn_footer_paste.set_sensitive(clipboard_data.is_some());
+    btn_footer_rename.set_sensitive(false);
+    btn_footer_trash.set_sensitive(false);
+    btn_footer_refresh.set_sensitive(true);
+
+    footer_box.append(&btn_footer_cut);
+    footer_box.append(&btn_footer_copy);
+    footer_box.append(&btn_footer_paste);
+    footer_box.append(&btn_footer_rename);
+    footer_box.append(&btn_footer_trash);
+    footer_box.append(&btn_footer_refresh);
+
+    // Paste handler for footer paste button
+    let pop_c = popover.clone();
+    let dest_dir = current_path.clone();
+    let nav = nav_callback.clone();
+    let current_p = current_path.clone();
+    let clipboard_data_c2 = clipboard_data.clone();
+    btn_footer_paste.connect_clicked(move |_| {
+        pop_c.popdown();
+        if let Some((sources, is_cut)) = clipboard_data_c2.clone() {
+            execute_paste(sources, dest_dir.clone(), is_cut, current_p.clone(), nav.clone());
+        }
+    });
+
+    // Refresh handler for footer refresh button
+    let pop_c = popover.clone();
+    let nav_refresh_footer = nav_callback.clone();
+    let current_path_refresh_footer = current_path.clone();
+    btn_footer_refresh.connect_clicked(move |_| {
+        pop_c.popdown();
+        nav_refresh_footer(current_path_refresh_footer.clone());
+    });
+
+    vbox.append(&footer_container);
 
     popover.popup();
 }

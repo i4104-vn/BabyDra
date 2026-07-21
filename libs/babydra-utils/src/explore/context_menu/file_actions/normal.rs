@@ -65,6 +65,9 @@ pub fn show_for_file_normal(
     let btn_trash = create_footer_icon_button("trash", &t("explore.menu_trash"));
     footer_box.append(&btn_trash);
 
+    let btn_refresh = create_footer_icon_button("refresh", &t("explore.menu_refresh"));
+    footer_box.append(&btn_refresh);
+
     footer_container.append(&footer_box);
 
     // Event handling
@@ -182,8 +185,32 @@ pub fn show_for_file_normal(
         });
     }
 
+    // Refresh action
+    let pop_c = popover.clone();
+    let nav_refresh = nav_callback.clone();
+    let current_p = current_path.clone();
+    btn_refresh.connect_clicked(move |_| {
+        pop_c.popdown();
+        nav_refresh(current_p.clone());
+    });
+
     // Custom Context Options
-    append_custom_context_items(vbox, popover, target_paths, false);
+    append_custom_context_items(vbox, popover, target_paths.clone(), false);
+
+    // Separator and Properties button
+    let sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
+    sep.add_css_class("menu-sep");
+    vbox.append(&sep);
+
+    let btn_properties = create_menu_button(&t("explore.menu_properties"), "info");
+    vbox.append(&btn_properties);
+
+    let pop_c = popover.clone();
+    let target_paths_props = target_paths.clone();
+    btn_properties.connect_clicked(move |_| {
+        pop_c.popdown();
+        crate::explore::dialogs::show_properties_dialog(target_paths_props.clone());
+    });
 
     vbox.append(&footer_container);
     popover.popup();
