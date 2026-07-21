@@ -226,7 +226,7 @@ button.empty-trash-btn:hover {
 button.settings-pill {
     background-color: transparent;
     background-image: none;
-    border: 1px solid transparent;
+    border: none;
     box-shadow: none;
     color: rgba(255, 255, 255, 0.6);
     border-radius: 9999px;
@@ -241,14 +241,14 @@ button.settings-pill {
 
 button.settings-pill:hover {
     background-color: rgba(255, 255, 255, 0.08);
-    border: 1px solid transparent;
+    border: none;
     color: #ffffff;
     transform: none;
 }
 
 button.settings-pill.active-pill {
     background-color: rgba(59, 130, 246, 0.2);
-    border: 1px solid rgba(59, 130, 246, 0.25);
+    border: none;
     color: #60a5fa;
     box-shadow: none;
     transform: none;
@@ -256,7 +256,7 @@ button.settings-pill.active-pill {
 
 button.settings-pill.active-pill:hover {
     background-color: rgba(59, 130, 246, 0.28);
-    border: 1px solid rgba(59, 130, 246, 0.35);
+    border: none;
     color: #60a5fa;
     transform: none;
 }
@@ -413,4 +413,27 @@ button.row-action-btn.delete-btn {
 
 button.row-action-btn.delete-btn:hover {
     background-color: rgba(239, 68, 68, 0.15);
+}
+
+/* ── Floating Action Button (FAB) ─────────────────────────────────── */
+button.fab-add-btn {
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 9999px;
+    padding: 0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    background-color: #3b82f6;
+    color: #ffffff;
+    border: none;
+    transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+button.fab-add-btn:hover {
+    background-color: #2563eb;
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.45);
+}
+
+button.fab-add-btn:active {
+    background-color: #1d4ed8;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }

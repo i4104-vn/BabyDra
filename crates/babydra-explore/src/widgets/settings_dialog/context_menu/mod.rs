@@ -1,6 +1,8 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Label, Button, Align, ListBox, Entry, Grid};
+use gtk4::{Box, Orientation, Label, Button, Align, ListBox, Entry, Grid, Overlay, Window};
 use babydra_common::i18n::t;
+use std::rc::Rc;
+use std::cell::RefCell;
 
 pub mod row;
 
@@ -9,59 +11,90 @@ const AVAILABLE_ICONS: &[&str] = &[
     "activity", "lock", "wifi", "refresh", "power", "search", "logo"
 ];
 
-/// Builds the context menu options page inside the Settings Dialog, displaying list of custom options and a new item form.
-pub fn build_context_menu_page() -> Box {
+/// Builds the context menu options page inside the Settings Dialog.
+/// Features a full-height scrolled list of options and a floating action button (FAB)
+/// at the bottom-right corner to open the "Add Option" dialog.
+pub fn build_context_menu_page(parent_window: &Window) -> Overlay {
     let settings = babydra_common::load_explore_settings();
-    let tab_context = Box::new(Orientation::Vertical, 10);
-    tab_context.set_margin_top(8);
-    tab_context.set_margin_bottom(8);
+    let overlay = Overlay::new();
+    overlay.set_hexpand(true);
+    overlay.set_vexpand(true);
 
     let scroll = gtk4::ScrolledWindow::builder()
         .hscrollbar_policy(gtk4::PolicyType::Never)
         .vscrollbar_policy(gtk4::PolicyType::Automatic)
+        .hexpand(true)
         .vexpand(true)
-        .min_content_height(140)
         .build();
-    tab_context.append(&scroll);
+    overlay.set_child(Some(&scroll));
 
     let context_listbox = ListBox::new();
     context_listbox.set_selection_mode(gtk4::SelectionMode::None);
     context_listbox.add_css_class("settings-card");
     scroll.set_child(Some(&context_listbox));
 
-    let listbox_c = context_listbox.clone();
-
     // Populate existing custom options
     for item in settings.custom_context_items {
         row::render_option_row(&context_listbox, item);
     }
 
-    // Form to add new option (wrapped in a clean settings card)
-    let form_box = Box::new(Orientation::Vertical, 12);
-    form_box.add_css_class("settings-card");
-    form_box.set_margin_top(12);
-    form_box.set_margin_bottom(12);
-    
-    // Internal margins for form_box
-    let form_inner = Box::new(Orientation::Vertical, 8);
-    form_inner.set_margin_top(12);
-    form_inner.set_margin_bottom(12);
-    form_inner.set_margin_start(16);
-    form_inner.set_margin_end(16);
-    form_box.append(&form_inner);
-    tab_context.append(&form_box);
+    // Floating Action Button (FAB) positioned at bottom-right corner
+    let btn_fab = Button::builder()
+        .css_classes(vec!["fab-add-btn".to_string(), "circular".to_string(), "suggested-action".to_string()])
+        .halign(Align::End)
+        .valign(Align::End)
+        .margin_bottom(16)
+        .margin_end(16)
+        .tooltip_text(&t("explore.settings_add_option"))
+        .build();
+    btn_fab.set_cursor_from_name(Some("pointer"));
+
+    let icon_plus = babydra_utils::ui::icon::get_icon("plus", 20);
+    icon_plus.set_pixel_size(20);
+    btn_fab.set_child(Some(&icon_plus));
+
+    overlay.add_overlay(&btn_fab);
+
+    let listbox_c = context_listbox.clone();
+    let parent_win_c = parent_window.clone();
+    btn_fab.connect_clicked(move |_| {
+        show_add_option_dialog(&parent_win_c, &listbox_c);
+    });
+
+    overlay
+}
+
+/// Displays a dedicated modal dialog for adding a new custom context menu option.
+fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
+    let dialog = Window::builder()
+        .title(&t("explore.settings_add_option"))
+        .transient_for(parent)
+        .modal(true)
+        .resizable(false)
+        .default_width(420)
+        .default_height(280)
+        .css_classes(vec!["explore-dialog".to_string()])
+        .build();
+
+    let vbox = Box::new(Orientation::Vertical, 12);
+    vbox.add_css_class("explore-dialog-box");
+    vbox.set_margin_top(16);
+    vbox.set_margin_bottom(16);
+    vbox.set_margin_start(16);
+    vbox.set_margin_end(16);
+    dialog.set_child(Some(&vbox));
 
     let lbl_add_title = Label::builder()
         .label(&t("explore.settings_add_option"))
         .halign(Align::Start)
         .build();
     lbl_add_title.add_css_class("settings-row-title");
-    form_inner.append(&lbl_add_title);
+    vbox.append(&lbl_add_title);
 
     let grid = Grid::new();
-    grid.set_row_spacing(8);
+    grid.set_row_spacing(10);
     grid.set_column_spacing(12);
-    form_inner.append(&grid);
+    vbox.append(&grid);
 
     // Row 0: Option Name & Circular Icon Button
     let lbl_name_field = Label::new(Some(&t("explore.settings_option_name")));
@@ -74,22 +107,19 @@ pub fn build_context_menu_page() -> Box {
         .hexpand(true)
         .css_classes(vec!["small-entry".to_string(), "inline-entry".to_string()])
         .build();
-    
-    // State to store currently selected icon
-    let selected_icon = std::rc::Rc::new(std::cell::RefCell::new("settings".to_string()));
+
+    let selected_icon = Rc::new(RefCell::new("settings".to_string()));
 
     let btn_select_icon = Button::builder()
         .css_classes(vec!["circular".to_string(), "icon-select-btn".to_string()])
         .valign(Align::Center)
         .build();
     btn_select_icon.set_cursor_from_name(Some("pointer"));
-    
-    // Set initial icon image
+
     let current_icon_img = babydra_utils::ui::icon::get_icon("settings", 16);
     current_icon_img.set_pixel_size(16);
     btn_select_icon.set_child(Some(&current_icon_img));
 
-    // Popover setup
     let popover_icon = gtk4::Popover::builder()
         .has_arrow(true)
         .autohide(true)
@@ -108,10 +138,10 @@ pub fn build_context_menu_page() -> Box {
     for (idx, icon_name) in AVAILABLE_ICONS.iter().enumerate() {
         let r = (idx / cols) as i32;
         let c = (idx % cols) as i32;
-        
+
         let img = babydra_utils::ui::icon::get_icon(icon_name, 20);
         img.set_pixel_size(20);
-        
+
         let btn_item = Button::builder()
             .child(&img)
             .css_classes(vec!["flat".to_string(), "icon-grid-item".to_string()])
@@ -123,18 +153,15 @@ pub fn build_context_menu_page() -> Box {
         let selected_icon_c = selected_icon.clone();
         let btn_select_icon_c = btn_select_icon.clone();
         let popover_icon_c = popover_icon.clone();
-        
+
         btn_item.connect_clicked(move |_| {
             selected_icon_c.replace(icon_name_str.clone());
-            
-            // Update button child with selected icon
             let new_img = babydra_utils::ui::icon::get_icon(&icon_name_str, 16);
             new_img.set_pixel_size(16);
             btn_select_icon_c.set_child(Some(&new_img));
-            
             popover_icon_c.popdown();
         });
-        
+
         icon_grid.attach(&btn_item, c, r, 1, 1);
     }
     popover_icon.set_child(Some(&icon_grid));
@@ -150,11 +177,11 @@ pub fn build_context_menu_page() -> Box {
     grid.attach(&lbl_name_field, 0, 0, 1, 1);
     grid.attach(&name_hbox, 1, 0, 1, 1);
 
-    // Row 1: Command
+    // Row 1: Command & Placeholders
     let lbl_cmd_field = Label::new(Some(&t("explore.settings_option_command")));
     lbl_cmd_field.set_halign(Align::Start);
     lbl_cmd_field.add_css_class("settings-row-desc");
-    
+
     let entry_cmd_vbox = Box::new(Orientation::Vertical, 4);
     let entry_cmd = Entry::builder()
         .placeholder_text(&t("explore.settings_placeholder_command"))
@@ -163,7 +190,6 @@ pub fn build_context_menu_page() -> Box {
         .build();
     entry_cmd_vbox.append(&entry_cmd);
 
-    // Add clickable placeholders row
     let placeholders_box = Box::new(Orientation::Horizontal, 6);
     placeholders_box.set_margin_top(2);
     let placeholders = [
@@ -193,49 +219,75 @@ pub fn build_context_menu_page() -> Box {
     grid.attach(&lbl_cmd_field, 0, 1, 1, 1);
     grid.attach(&entry_cmd_vbox, 1, 1, 1, 1);
 
+    // Action buttons (Cancel & Add)
+    let bbox = Box::new(Orientation::Horizontal, 8);
+    bbox.set_halign(Align::End);
+    bbox.set_margin_top(8);
+    vbox.append(&bbox);
+
+    let btn_cancel = Button::with_label(&t("explore.settings_cancel"));
     let btn_add = Button::builder()
         .label(&t("explore.settings_add"))
-        .halign(Align::End)
         .css_classes(vec!["suggested-action".to_string()])
         .build();
     btn_add.set_cursor_from_name(Some("pointer"));
-    form_inner.append(&btn_add);
 
-    // Add button logic
+    bbox.append(&btn_cancel);
+    bbox.append(&btn_add);
+
+    let win_cancel_btn = dialog.clone();
+    btn_cancel.connect_clicked(move |_| {
+        win_cancel_btn.close();
+    });
+
+    let win_cancel = dialog.clone();
+    let vbox_cancel = vbox.clone();
+    let is_animating = Rc::new(std::cell::Cell::new(false));
+    let is_animating_cancel = is_animating.clone();
+    dialog.connect_close_request(move |_| {
+        if is_animating_cancel.get() {
+            return glib::Propagation::Stop;
+        }
+        is_animating_cancel.set(true);
+        let win_cb = win_cancel.clone();
+        babydra_utils::ui::animation::genie_out(
+            vbox_cancel.upcast_ref(),
+            420,
+            280,
+            200,
+            move || {
+                win_cb.destroy();
+            }
+        );
+        glib::Propagation::Stop
+    });
+
     let entry_name_c = entry_name.clone();
     let entry_cmd_c = entry_cmd.clone();
     let selected_icon_c = selected_icon.clone();
-    let btn_select_icon_c = btn_select_icon.clone();
+    let listbox_c = listbox.clone();
+    let win_add = dialog.clone();
+
     btn_add.connect_clicked(move |_| {
         let name_str = entry_name_c.text().to_string();
         let cmd_str = entry_cmd_c.text().to_string();
         let icon_str = selected_icon_c.borrow().clone();
         if !name_str.is_empty() && !cmd_str.is_empty() {
             let item = babydra_common::config::settings::CustomContextItem {
-                name: name_str.clone(),
-                command: cmd_str.clone(),
+                name: name_str,
+                command: cmd_str,
                 icon: Some(icon_str),
             };
-            
-            // Append and save setting
+
             let mut s = babydra_common::load_explore_settings();
             s.custom_context_items.push(item.clone());
             babydra_common::save_explore_settings(&s);
 
-            // Add row to UI
             row::render_option_row(&listbox_c, item);
-
-            // Clear entry inputs
-            entry_name_c.set_text("");
-            entry_cmd_c.set_text("");
-            
-            // Reset selected icon to "settings"
-            selected_icon_c.replace("settings".to_string());
-            let reset_img = babydra_utils::ui::icon::get_icon("settings", 16);
-            reset_img.set_pixel_size(16);
-            btn_select_icon_c.set_child(Some(&reset_img));
+            win_add.close();
         }
     });
 
-    tab_context
+    dialog.present();
+    babydra_utils::ui::animation::genie_in(vbox.upcast_ref(), 420, 280, 200);
 }

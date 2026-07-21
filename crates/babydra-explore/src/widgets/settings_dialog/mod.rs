@@ -86,7 +86,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     // ── Build pages ──────────────────────────────────────────
     let tab_general = general::build_general_page();
     let tab_keybinds = keybinds::build_keybinds_page();
-    let tab_context = context_menu::build_context_menu_page();
+    let tab_context = context_menu::build_context_menu_page(&window);
 
     stack.add_named(&tab_general, Some("general"));
     stack.add_named(&tab_keybinds, Some("keybinds"));
