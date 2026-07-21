@@ -17,6 +17,7 @@ pub fn setup_navigation(
     header_widgets_cell: Rc<RefCell<Option<HeaderBarWidgets>>>,
     tab_bar_box: Rc<RefCell<Option<gtk4::Box>>>,
     status_bar_lbl: Rc<gtk4::Label>,
+    rebuild_tabs_cell: Rc<RefCell<Option<Rc<dyn Fn()>>>>,
     watch_tx: tokio::sync::mpsc::UnboundedSender<()>,
     mut left_rx: tokio::sync::mpsc::UnboundedReceiver<PathBuf>,
 ) -> (
@@ -38,9 +39,9 @@ pub fn setup_navigation(
         let left_s = left_scroll_cell.clone();
         let status_bar_widgets_cell = status_bar_widgets_cell.clone();
         let header_widgets_cell = header_widgets_cell.clone();
-        let tab_bar_box = tab_bar_box.clone();
         let status_bar_lbl = status_bar_lbl.clone();
         let navigate_pane_no_watch_ref_c = navigate_pane_no_watch_ref.clone();
+        let rebuild_tabs_cell_c = rebuild_tabs_cell.clone();
 
         *navigate_pane_no_watch_ref.borrow_mut() = Some(Rc::new(move |pane: ActivePane, path: PathBuf| {
             // Highlight active pane
@@ -89,7 +90,7 @@ pub fn setup_navigation(
             let header_widgets_c = header_widgets_cell.clone();
             let session_c = session.clone();
             let nav_no_watch_c = navigate_pane_no_watch_ref_c.clone();
-            let tab_bar_box_c = tab_bar_box.clone();
+            let rebuild_tabs_cell_c2 = rebuild_tabs_cell_c.clone();
             let status_lbl_c = status_bar_lbl.clone();
             let content_handle_err = content_handle.clone();
 
@@ -126,10 +127,8 @@ pub fn setup_navigation(
                         // Update Status Bar
                         crate::widgets::status_bar::update_status_bar(&status_lbl_c, entries.len(), total_size);
 
-                        // Update Tab Bar titles
-                        if let Some(ref _tbb) = *tab_bar_box_c.borrow() {
-                            // Trigger TabBar rebuild
-                            // Re-borrow tabs callbacks inside rebuild
+                        if let Some(ref rebuild) = *rebuild_tabs_cell_c2.borrow() {
+                            rebuild();
                         }
                     }
                     Err(err) => {

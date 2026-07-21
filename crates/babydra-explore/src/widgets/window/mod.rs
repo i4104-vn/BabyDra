@@ -105,6 +105,7 @@ pub fn create_explore_window(
     status_bar_widgets_cell.replace(Some(status_bar_widgets.clone()));
 
     // Setup navigation closures
+    let rebuild_tabs_cell = Rc::new(RefCell::new(None::<Rc<dyn Fn()>>));
     let (navigate_pane_ref, navigate_pane_no_watch_ref, _watcher) = handlers::setup_navigation(
         session.clone(),
         active_pane.clone(),
@@ -116,6 +117,7 @@ pub fn create_explore_window(
         header_widgets_cell.clone(),
         tab_bar_box.clone(),
         status_bar_lbl_rc.clone(),
+        rebuild_tabs_cell.clone(),
         watch_tx.clone(),
         left_rx,
     );
@@ -291,7 +293,7 @@ pub fn create_explore_window(
         toggle_preview_rc.clone(),
     );
 
-    let _rebuild_tabs_rc = widgets::setup_tab_bar(&ui.vbox, session.clone(), navigate_pane_ref.clone(), tab_bar_box.clone());
+    let _rebuild_tabs_rc = widgets::setup_tab_bar(&ui.vbox, session.clone(), navigate_pane_ref.clone(), tab_bar_box.clone(), rebuild_tabs_cell.clone());
 
     // Sidebar creation
     let sidebar = crate::widgets::sidebar::create_sidebar(

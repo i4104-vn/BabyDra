@@ -57,14 +57,10 @@ pub fn rebuild_tab_bar(
             tab_box.add_css_class("active-tab");
         }
 
-        let display_name = if tab.current_path == glib::home_dir() {
-            "Home".to_string()
-        } else {
-            tab.current_path
-                .file_name()
-                .map(|f| f.to_string_lossy().to_string())
-                .unwrap_or_else(|| "/".to_string())
-        };
+        let display_name = tab.current_path
+            .file_name()
+            .map(|f| f.to_string_lossy().to_string())
+            .unwrap_or_else(|| "/".to_string());
 
         let lbl = Label::new(Some(&display_name));
         lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);

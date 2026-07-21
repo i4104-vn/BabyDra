@@ -156,7 +156,7 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
     grid_edit.attach(&inline_placeholders, 0, 2, 1, 1);
 
     let vbox_buttons = Box::new(Orientation::Vertical, 6);
-    vbox_buttons.set_valign(Align::Center);
+    vbox_buttons.set_valign(Align::Start);
     hbox_edit.append(&vbox_buttons);
 
     let btn_save = babydra_utils::components::create_accent_button(&t("explore.settings_save"));

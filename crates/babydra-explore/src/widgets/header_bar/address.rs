@@ -18,7 +18,6 @@ pub fn update_address_bar(
         breadcrumb_box.remove(&child);
     }
 
-    let home = glib::home_dir();
     let components: Vec<_> = path.components().collect();
 
     let mut current = PathBuf::new();
@@ -31,12 +30,7 @@ pub fn update_address_bar(
 
         current.push(comp);
 
-        // Friendly name for home
-        let display = if current == home {
-            "Home".to_string()
-        } else {
-            comp_str.clone()
-        };
+        let display = comp_str.clone();
 
         let btn = babydra_utils::components::create_button(&display);
         btn.remove_css_class("baby-button");
