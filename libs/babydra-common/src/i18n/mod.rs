@@ -283,6 +283,9 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.decompressing_running", "Decompressing...");
             map.insert("explore.decompress_success", "Decompression Succeeded");
             map.insert("explore.decompress_failed", "Decompression Failed");
+            map.insert("explore.menu_refresh", "Refresh");
+            map.insert("explore.menu_properties", "Properties");
+            map.insert("explore.dialog_properties_title", "Properties");
         }
         _ => {
             // Menu
@@ -516,6 +519,9 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.decompressing_running", "Đang giải nén...");
             map.insert("explore.decompress_success", "Giải nén thành công");
             map.insert("explore.decompress_failed", "Giải nén thất bại");
+            map.insert("explore.menu_refresh", "Làm mới");
+            map.insert("explore.menu_properties", "Thuộc tính");
+            map.insert("explore.dialog_properties_title", "Thuộc tính");
         }
     }
     map
