@@ -2,7 +2,7 @@ use std::rc::Rc;
 use std::cell::{RefCell, Cell};
 use std::path::PathBuf;
 use gtk4::prelude::*;
-use babydra_common::{SessionState, ActivePane, ContentViewHandle, HeaderBarWidgets, FileWatcher};
+use babydra_common::{SessionState, ActivePane, ContentViewHandle, FileWatcher};
 use crate::widgets::status_bar::StatusBarWidgets;
 
 /// Sets up the primary navigation closures (`navigate_pane` and `navigate_pane_no_watch`) and registers the left-pane channel watcher.
@@ -13,8 +13,7 @@ pub fn setup_navigation(
     right_content_handle: Rc<RefCell<Option<Rc<ContentViewHandle>>>>,
     left_scroll_cell: Rc<RefCell<Option<gtk4::Box>>>,
     right_scroll_cell: Rc<RefCell<Option<gtk4::Box>>>,
-    status_bar_widgets_cell: Rc<RefCell<Option<StatusBarWidgets>>>,
-    header_widgets_cell: Rc<RefCell<Option<HeaderBarWidgets>>>,
+    _status_bar_widgets_cell: Rc<RefCell<Option<StatusBarWidgets>>>,
     _tab_bar_box: Rc<RefCell<Option<gtk4::Box>>>,
     status_bar_lbl: Rc<gtk4::Label>,
     rebuild_tabs_cell: Rc<RefCell<Option<Rc<dyn Fn()>>>>,
@@ -38,8 +37,6 @@ pub fn setup_navigation(
         let right_handle = right_content_handle.clone();
         let right_s = right_scroll_cell.clone();
         let left_s = left_scroll_cell.clone();
-        let status_bar_widgets_cell = status_bar_widgets_cell.clone();
-        let header_widgets_cell = header_widgets_cell.clone();
         let status_bar_lbl = status_bar_lbl.clone();
         let navigate_pane_no_watch_ref_c = navigate_pane_no_watch_ref.clone();
         let rebuild_tabs_cell_c = rebuild_tabs_cell.clone();
@@ -64,15 +61,6 @@ pub fn setup_navigation(
             }
 
             let show_hidden = session.borrow().active_tab().show_hidden;
-
-            // Sync toggle button active class in StatusBar
-            if let Some(ref sw) = *status_bar_widgets_cell.borrow() {
-                if show_hidden {
-                    sw.btn_toggle_hidden.add_css_class("status-bar-btn-active");
-                } else {
-                    sw.btn_toggle_hidden.remove_css_class("status-bar-btn-active");
-                }
-            }
 
             let content_handle = if pane == ActivePane::Left {
                 Some(left_handle.clone())
@@ -99,7 +87,6 @@ pub fn setup_navigation(
                 }
             }
 
-            let header_widgets_c = header_widgets_cell.clone();
             let session_c = session.clone();
             let nav_no_watch_c = navigate_pane_no_watch_ref_c.clone();
             let rebuild_tabs_cell_c2 = rebuild_tabs_cell_c.clone();
@@ -109,12 +96,6 @@ pub fn setup_navigation(
             glib::spawn_future_local(async move {
                 match babydra_common::load_directory(path.clone(), show_hidden).await {
                     Ok(entries) => {
-                        // Update Header new folder state
-                        if let Some(ref hw) = *header_widgets_c.borrow() {
-                            let is_in_trash = path.to_string_lossy().ends_with("Trash/files");
-                            babydra_utils::explore::update_new_folder_button(&hw.btn_new_folder, is_in_trash);
-                        }
-
                         // Update Pane-specific breadcrumbs
                         if let Some(ref handle) = content_handle {
                             let nav_cb: Rc<dyn Fn(PathBuf)> = Rc::new(move |p: PathBuf| {

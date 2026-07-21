@@ -6,7 +6,6 @@ use babydra_common::i18n::t;
 pub struct StatusBarWidgets {
     pub container: Box,
     pub lbl_status: Label,
-    pub btn_toggle_hidden: gtk4::Button,
     pub btn_toggle_preview: gtk4::Button,
     pub btn_view_icons: gtk4::Button,
     pub btn_view_list: gtk4::Button,
@@ -44,11 +43,13 @@ pub fn create_status_bar() -> StatusBarWidgets {
     let btn_view_list = babydra_utils::components::create_icon_button("view-list", 16, &["status-bar-btn"], Some(&t("explore.view_list")), || {});
     container.append(&btn_view_list);
 
-    let btn_toggle_hidden = babydra_utils::components::create_icon_button("eye-off", 16, &["status-bar-btn"], Some(&t("explore.toggle_hidden")), || {});
-    container.append(&btn_toggle_hidden);
-
     let btn_toggle_preview = babydra_utils::components::create_icon_button("sidebar", 16, &["status-bar-btn", "status-bar-btn-active"], Some(&t("explore.toggle_preview")), || {});
     container.append(&btn_toggle_preview);
+
+    // Separator before settings
+    let sep = gtk4::Separator::new(Orientation::Vertical);
+    sep.set_css_classes(&["status-bar-separator"]);
+    container.append(&sep);
 
     let btn_settings = babydra_utils::components::create_icon_button("settings", 16, &["status-bar-btn"], Some(&t("explore.settings")), || {});
     container.append(&btn_settings);
@@ -56,7 +57,6 @@ pub fn create_status_bar() -> StatusBarWidgets {
     StatusBarWidgets {
         container,
         lbl_status,
-        btn_toggle_hidden,
         btn_toggle_preview,
         btn_view_icons,
         btn_view_list,

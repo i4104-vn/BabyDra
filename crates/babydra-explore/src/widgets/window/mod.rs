@@ -91,8 +91,7 @@ pub fn create_explore_window(
     // Right pane content variables
     let right_content_handle = Rc::new(RefCell::new(None::<Rc<crate::widgets::content_view::ContentViewHandle>>));
 
-    // Create HeaderBar & StatusBar cells
-    let header_widgets_cell = Rc::new(RefCell::new(None::<crate::widgets::header_bar::HeaderBarWidgets>));
+    // Create StatusBar cells
     let status_bar_widgets_cell = Rc::new(RefCell::new(None::<crate::widgets::status_bar::StatusBarWidgets>));
     let rebuild_shortcuts_cell = Rc::new(RefCell::new(None::<Rc<dyn Fn()>>));
 
@@ -115,7 +114,6 @@ pub fn create_explore_window(
         left_scroll_cell.clone(),
         right_scroll_cell.clone(),
         status_bar_widgets_cell.clone(),
-        header_widgets_cell.clone(),
         tab_bar_box.clone(),
         status_bar_lbl_rc.clone(),
         rebuild_tabs_cell.clone(),
@@ -128,7 +126,6 @@ pub fn create_explore_window(
         let session_c = session.clone();
         let nav = navigate_pane_ref.clone();
         let active = active_pane.clone();
-        let status_widgets_c = status_bar_widgets_cell.clone();
         move || {
             let show_hidden_now = {
                 let mut s = session_c.borrow_mut();
@@ -144,13 +141,7 @@ pub fn create_explore_window(
                 babydra_common::save_explore_settings(&current_settings);
             }
 
-            if let Some(ref sw) = *status_widgets_c.borrow() {
-                if show_hidden_now {
-                    sw.btn_toggle_hidden.add_css_class("status-bar-btn-active");
-                } else {
-                    sw.btn_toggle_hidden.remove_css_class("status-bar-btn-active");
-                }
-            }
+
 
             let path = session_c.borrow().active_tab().current_path.clone();
             if let Some(ref f) = *nav.borrow() {
@@ -220,19 +211,6 @@ pub fn create_explore_window(
     };
     let view_mode_callback_rc = Rc::new(view_mode_callback) as Rc<dyn Fn(String)>;
 
-    let search_callback = {
-        let left = left_content_handle.clone();
-        let right = right_content_handle.clone();
-        let active = active_pane.clone();
-        move |query: String| {
-            if active.get() == ActivePane::Left {
-                crate::widgets::content_view::filter_content_view(&left, &query);
-            } else if let Some(ref r) = *right.borrow() {
-                crate::widgets::content_view::filter_content_view(r, &query);
-            }
-        }
-    };
-
     let sort_callback = {
         let left = left_content_handle.clone();
         let right = right_content_handle.clone();
@@ -247,36 +225,6 @@ pub fn create_explore_window(
     };
     let sort_callback_rc = Rc::new(sort_callback) as Rc<dyn Fn(String)>;
 
-    // Create Header Bar Box
-    let (_header_box, header_widgets) = crate::widgets::header_bar::create_header_bar(
-        session.clone(),
-        {
-            let nav = nav_callback_rc.clone();
-            move |p| nav(p)
-        },
-        {
-            let cb = view_mode_callback_rc.clone();
-            move |m| cb(m)
-        },
-        search_callback,
-        {
-            let cb = sort_callback_rc.clone();
-            move |s| cb(s)
-        },
-    );
-    // ui.vbox.insert_child_after(&header_box, None::<&gtk4::Widget>);
-    header_widgets_cell.replace(Some(header_widgets.clone()));
-
-    // Wire toolbar buttons click
-    widgets::wire_toolbar_buttons(
-        &header_widgets,
-        session.clone(),
-        navigate_pane_ref.clone(),
-        active_pane.clone(),
-        left_content_handle.clone(),
-        right_content_handle.clone(),
-    );
-
     // Setup preview panel visibility toggle closure
     let toggle_preview_rc = layout::setup_preview_toggle(
         ui.layout_paned.clone(),
@@ -289,18 +237,19 @@ pub fn create_explore_window(
     // Wire status bar buttons click
     {
         let toggle_p = toggle_preview_rc.clone();
-        let toggle_h = toggle_hidden_rc.clone();
         let view_mode_cb = view_mode_callback_rc.clone();
         let sort_cb = sort_callback_rc.clone();
         let parent_win = ui.window.clone().upcast::<gtk4::Window>();
         let rebuild_cell_c = rebuild_shortcuts_cell.clone();
+        let session_cc = session.clone();
+        let nav_c = navigate_pane_ref.clone();
+        let act_c = active_pane.clone();
+        let preview_vc = preview_visible.clone();
+        let toggle_p_c = toggle_preview_rc.clone();
 
         if let Some(ref sw) = *status_bar_widgets_cell.borrow() {
             sw.btn_toggle_preview.connect_clicked(move |_| {
                 toggle_p();
-            });
-            sw.btn_toggle_hidden.connect_clicked(move |_| {
-                toggle_h();
             });
 
             // View modes (Grid / List)
@@ -336,10 +285,44 @@ pub fn create_explore_window(
             {
                 let parent_win_c = parent_win.clone();
                 let rebuild_c = rebuild_cell_c.clone();
+                let session_inner = session_cc.clone();
+                let nav_inner = nav_c.clone();
+                let act_inner = act_c.clone();
+                let preview_inner = preview_vc.clone();
+                let toggle_p_inner = toggle_p_c.clone();
+
                 sw.btn_settings.connect_clicked(move |_| {
-                    let rebuild_inner = rebuild_c.clone();
+                    let rebuild_inner_cb = rebuild_c.clone();
+                    let session_inner_cb = session_inner.clone();
+                    let nav_inner_cb = nav_inner.clone();
+                    let act_inner_cb = act_inner.clone();
+                    let preview_inner_cb = preview_inner.clone();
+                    let toggle_p_inner_cb = toggle_p_inner.clone();
+
                     crate::widgets::settings_dialog::show_settings_dialog(&parent_win_c, move || {
-                        if let Some(ref rebuild) = *rebuild_inner.borrow() {
+                        let settings = babydra_common::load_explore_settings();
+                        
+                        // 1. Sync hidden files visibility setting in tab state
+                        {
+                            let mut s = session_inner_cb.borrow_mut();
+                            let tab = s.active_tab_mut();
+                            tab.show_hidden = settings.show_hidden;
+                        }
+
+                        // 2. Sync preview panel visibility
+                        let preview_changed = preview_inner_cb.get() != settings.preview_visible;
+                        if preview_changed {
+                            toggle_p_inner_cb();
+                        }
+
+                        // 3. Trigger navigate refresh
+                        let path = session_inner_cb.borrow().active_tab().current_path.clone();
+                        if let Some(ref f) = *nav_inner_cb.borrow() {
+                            f(act_inner_cb.get(), path);
+                        }
+
+                        // 4. Rebuild shortcuts
+                        if let Some(ref rebuild) = *rebuild_inner_cb.borrow() {
                             rebuild();
                         }
                     });
@@ -541,21 +524,6 @@ pub fn create_explore_window(
 
     // Install initial shortcuts
     rebuild_shortcuts_rc();
-
-    // Wire settings button click
-    let rebuild_shortcuts_c = rebuild_shortcuts_rc.clone();
-    handlers::wire_settings_button(
-        &header_widgets.btn_settings,
-        &ui.window,
-        navigate_pane_ref.clone(),
-        active_pane.clone(),
-        session.clone(),
-        preview_visible.clone(),
-        toggle_preview_rc.clone(),
-        move || {
-            rebuild_shortcuts_c();
-        }
-    );
 
     // Set up window resize response logic
     handlers::setup_window_resize_handler(

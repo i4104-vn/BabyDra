@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{ScrolledWindow, FlowBox, ListBox, Stack, Align, Button, Box, Entry, Orientation};
+use gtk4::{ScrolledWindow, FlowBox, ListBox, Stack, Align, Box, Entry, Orientation};
 use babydra_common::ContentViewWidgets;
 use babydra_common::i18n::t;
 
@@ -72,9 +72,24 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
     pane_nav_row.set_margin_top(4);
 
     let btn_back = babydra_utils::components::create_icon_button("back", 16, &["nav-btn"], Some(&t("explore.back")), || {});
+    btn_back.set_size_request(28, 28);
+    btn_back.set_hexpand(false);
+    btn_back.set_vexpand(false);
+
     let btn_forward = babydra_utils::components::create_icon_button("forward", 16, &["nav-btn"], Some(&t("explore.forward")), || {});
+    btn_forward.set_size_request(28, 28);
+    btn_forward.set_hexpand(false);
+    btn_forward.set_vexpand(false);
+
     let btn_up = babydra_utils::components::create_icon_button("up", 16, &["nav-btn"], Some(&t("explore.up")), || {});
+    btn_up.set_size_request(28, 28);
+    btn_up.set_hexpand(false);
+    btn_up.set_vexpand(false);
+
     let btn_refresh = babydra_utils::components::create_icon_button("refresh", 16, &["nav-btn"], Some(&t("explore.refresh")), || {});
+    btn_refresh.set_size_request(28, 28);
+    btn_refresh.set_hexpand(false);
+    btn_refresh.set_vexpand(false);
 
     pane_nav_row.append(&btn_back);
     pane_nav_row.append(&btn_forward);
@@ -106,7 +121,8 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
         .primary_icon_name("system-search-symbolic")
         .css_classes(vec!["search-entry".to_string()])
         .build();
-    search.set_size_request(160, -1);
+    search.set_size_request(120, -1);
+    search.set_hexpand(false);
     pane_nav_row.append(&search);
 
     // Bottom progress bar for loading

@@ -69,3 +69,9 @@
     padding-right: 0;
 }
 
+.explore-window .status-bar-separator {
+    background-color: #3a3a3a;
+    min-width: 1px;
+    margin: 4px 6px;
+}
+
