@@ -1,7 +1,7 @@
 button.suggested-action {
     background-color: rgba(59, 130, 246, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
+    border-radius: 0 0 8px 8px;
     color: #ffffff;
     padding: 4px 14px;
     font-weight: 600;
@@ -30,7 +30,7 @@ window.explore-dialog>box {
     background-image: none;
     -gtk-background-blur: 24;
     border: 1px solid rgba(255, 255, 255, 0.10);
-    border-top: 1px solid rgba(255, 255, 255, 0.20);
+    border-top: none;
     border-radius: 20px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
     color: #e8e8e8;
@@ -110,6 +110,7 @@ button.empty-trash-btn:hover {
 .destructive-action {
     color: #ef4444;
 }
+
 .destructive-action:hover {
     background-color: rgba(239, 68, 68, 0.15) !important;
 }
@@ -130,20 +131,24 @@ button.empty-trash-btn:hover {
     background-color: transparent;
     border: none;
 }
+
 .settings-notebook header tabs {
     border-bottom: 1px solid #333337;
     margin-bottom: 8px;
 }
+
 .settings-notebook header tabs tab {
     padding: 6px 12px;
     font-weight: 600;
     color: #94a3b8;
     border-radius: 6px 6px 0 0;
 }
+
 .settings-notebook header tabs tab:checked {
     color: #3b82f6;
     border-bottom: 2px solid #3b82f6;
 }
+
 .settings-notebook header tabs tab:hover {
     background-color: rgba(255, 255, 255, 0.03);
     color: #f1f5f9;
@@ -161,6 +166,7 @@ button.empty-trash-btn:hover {
     border-radius: 10px;
     color: #a1a1aa;
 }
+
 .placeholder-btn:hover {
     background-color: #3f3f46;
     color: #f4f4f5;
@@ -174,6 +180,7 @@ button.empty-trash-btn:hover {
     border-radius: 6px;
     color: #a1a1aa;
 }
+
 .placeholder-btn-small:hover {
     background-color: #3f3f46;
     color: #f4f4f5;
@@ -201,6 +208,7 @@ button.empty-trash-btn:hover {
     min-height: 28px;
     padding: 0;
 }
+
 .edit-btn:hover {
     background-color: rgba(59, 130, 246, 0.15) !important;
 }
@@ -212,49 +220,61 @@ button.empty-trash-btn:hover {
     padding: 0;
 }
 
-/* ── Settings Capsule Navigation ──────────────────────────────── */
-.settings-capsule-nav {
+/* ── Settings Capsule Navigation (Vertical Icon-Only) ──────────── */
+.settings-capsule-nav-vertical {
     background-color: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.06);
-    border-top: 1px solid rgba(255, 255, 255, 0.10);
+    border-top: none;
     border-radius: 9999px;
-    padding: 3px;
+    padding: 6px 4px;
 }
 
 button.settings-pill {
     background-color: transparent;
     background-image: none;
-    border: none;
+    border: 1px solid transparent;
     box-shadow: none;
     color: rgba(255, 255, 255, 0.6);
     border-radius: 9999px;
-    padding: 6px 16px;
+    padding: 10px;
+    min-width: 38px;
+    min-height: 38px;
     font-size: 12px;
     font-weight: 600;
-    transition: all 150ms ease;
+    transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+    transform: none;
 }
 
 button.settings-pill:hover {
     background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid transparent;
     color: #ffffff;
+    transform: none;
 }
 
 button.settings-pill.active-pill {
     background-color: rgba(59, 130, 246, 0.2);
-    border: 1px solid rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.25);
     color: #60a5fa;
     box-shadow: none;
+    transform: none;
 }
 
 button.settings-pill.active-pill:hover {
-    background-color: rgba(59, 130, 246, 0.25);
+    background-color: rgba(59, 130, 246, 0.28);
+    border: 1px solid rgba(59, 130, 246, 0.35);
     color: #60a5fa;
+    transform: none;
 }
 
 /* ── Settings Cards & ListBox Redesign ────────────────────────── */
 .settings-card {
     background-color: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: none;
+    border-radius: 16px;
+    padding: 4px;
+}
     border-top: 1px solid rgba(255, 255, 255, 0.10);
     border-radius: 16px;
     padding: 4px;
@@ -376,7 +396,7 @@ button.icon-grid-item:hover {
 }
 
 entry.small-entry,
-entry.small-entry > text {
+entry.small-entry>text {
     min-height: 28px;
     padding: 2px 8px;
     font-size: 13px;
@@ -404,5 +424,3 @@ button.row-action-btn.delete-btn {
 button.row-action-btn.delete-btn:hover {
     background-color: rgba(239, 68, 68, 0.15);
 }
-
-

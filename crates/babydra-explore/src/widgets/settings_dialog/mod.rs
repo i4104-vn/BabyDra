@@ -7,43 +7,56 @@ mod general;
 mod context_menu;
 mod keybinds;
 
-/// Displays the main settings dialog with tabs for general settings, keyboard shortcuts, and custom context menus.
+/// Displays the main settings dialog with vertical icon-only pill navigation and card content stack.
 pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn() + 'static) {
     let window = Window::builder()
         .title(&t("explore.settings"))
         .transient_for(parent)
         .modal(true)
         .resizable(false)
-        .default_width(600)
-        .default_height(500)
+        .default_width(560)
+        .default_height(420)
         .css_classes(vec!["explore-dialog".to_string()])
         .build();
 
-    let main_vbox = Box::new(Orientation::Vertical, 0);
-    window.set_child(Some(&main_vbox));
+    let main_hbox = Box::new(Orientation::Horizontal, 0);
+    window.set_child(Some(&main_hbox));
 
-    // ── Top: Capsule Navigation ────────────────────────────────
-    let nav_container = Box::new(Orientation::Horizontal, 0);
-    nav_container.set_halign(Align::Center);
+    // ── Left: Vertical Capsule Pill Navigation (Icon Only) ─────
+    let nav_container = Box::new(Orientation::Vertical, 8);
+    nav_container.set_valign(Align::Start);
     nav_container.set_margin_top(16);
     nav_container.set_margin_bottom(16);
-    nav_container.add_css_class("settings-capsule-nav");
-    main_vbox.append(&nav_container);
+    nav_container.set_margin_start(16);
+    nav_container.add_css_class("settings-capsule-nav-vertical");
+    main_hbox.append(&nav_container);
 
+    // 1. General (Settings Icon)
+    let img_gen = babydra_utils::ui::icon::get_icon("settings", 18);
+    img_gen.set_pixel_size(18);
     let btn_general = Button::builder()
-        .label(&t("explore.settings_general"))
+        .child(&img_gen)
+        .tooltip_text(&t("explore.settings_general"))
         .css_classes(vec!["settings-pill".to_string(), "active-pill".to_string()])
         .build();
     btn_general.set_cursor_from_name(Some("pointer"));
 
+    // 2. Keybinds (Terminal/Command Icon)
+    let img_key = babydra_utils::ui::icon::get_icon("terminal", 18);
+    img_key.set_pixel_size(18);
     let btn_keybinds = Button::builder()
-        .label(&t("explore.settings_keybinds"))
+        .child(&img_key)
+        .tooltip_text(&t("explore.settings_keybinds"))
         .css_classes(vec!["settings-pill".to_string()])
         .build();
     btn_keybinds.set_cursor_from_name(Some("pointer"));
 
+    // 3. Context Menu (Folder/Menu Icon)
+    let img_con = babydra_utils::ui::icon::get_icon("folder", 18);
+    img_con.set_pixel_size(18);
     let btn_context = Button::builder()
-        .label(&t("explore.settings_context_menu"))
+        .child(&img_con)
+        .tooltip_text(&t("explore.settings_context_menu"))
         .css_classes(vec!["settings-pill".to_string()])
         .build();
     btn_context.set_cursor_from_name(Some("pointer"));
@@ -52,7 +65,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     nav_container.append(&btn_keybinds);
     nav_container.append(&btn_context);
 
-    // ── Content: Stack ─────────────────────────────────────────
+    // ── Right: Content Stack ───────────────────────────────────
     let stack = Stack::new();
     stack.set_transition_type(gtk4::StackTransitionType::Crossfade);
     stack.set_transition_duration(300);
@@ -60,13 +73,14 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     stack.set_vexpand(true);
 
     let stack_container = Box::new(Orientation::Vertical, 0);
+    stack_container.set_margin_top(16);
     stack_container.set_margin_start(16);
     stack_container.set_margin_end(16);
     stack_container.set_margin_bottom(16);
     stack_container.set_hexpand(true);
     stack_container.set_vexpand(true);
     stack_container.append(&stack);
-    main_vbox.append(&stack_container);
+    main_hbox.append(&stack_container);
 
     // ── Build pages ──────────────────────────────────────────
     let tab_general = general::build_general_page();
@@ -113,7 +127,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
 
     // Close Request & Animation Setup
     let win_cancel = window.clone();
-    let vbox_cancel = main_vbox.clone();
+    let hbox_cancel = main_hbox.clone();
     let is_animating = Rc::new(std::cell::Cell::new(false));
     let is_animating_cancel = is_animating.clone();
     window.connect_close_request(move |_| {
@@ -123,9 +137,9 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         is_animating_cancel.set(true);
         let win_cb = win_cancel.clone();
         babydra_utils::ui::animation::genie_out(
-            vbox_cancel.upcast_ref(),
-            600,
-            500,
+            hbox_cancel.upcast_ref(),
+            560,
+            420,
             300,
             move || {
                 win_cb.destroy();
@@ -142,5 +156,5 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     });
 
     window.present();
-    babydra_utils::ui::animation::genie_in(main_vbox.upcast_ref(), 600, 500, 300);
+    babydra_utils::ui::animation::genie_in(main_hbox.upcast_ref(), 560, 420, 300);
 }
