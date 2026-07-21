@@ -415,17 +415,78 @@ pub fn create_explore_window(
     };
     let undo_cb_rc = Rc::new(undo_cb) as Rc<dyn Fn()>;
 
+    // Build shortcuts configuration vector
+    let mut shortcuts = Vec::new();
+
+    shortcuts.push(handlers::events::KeyShortcut {
+        keyval: gtk4::gdk::Key::F3,
+        modifiers: gtk4::gdk::ModifierType::empty(),
+        callback: toggle_split_view_rc,
+    });
+
+    shortcuts.push(handlers::events::KeyShortcut {
+        keyval: gtk4::gdk::Key::F4,
+        modifiers: gtk4::gdk::ModifierType::empty(),
+        callback: toggle_preview_rc,
+    });
+
+    shortcuts.push(handlers::events::KeyShortcut {
+        keyval: gtk4::gdk::Key::h,
+        modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
+        callback: toggle_hidden_rc.clone(),
+    });
+    shortcuts.push(handlers::events::KeyShortcut {
+        keyval: gtk4::gdk::Key::H,
+        modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
+        callback: toggle_hidden_rc,
+    });
+
+    shortcuts.push(handlers::events::KeyShortcut {
+        keyval: gtk4::gdk::Key::x,
+        modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
+        callback: cut_cb_rc.clone(),
+    });
+    shortcuts.push(handlers::events::KeyShortcut {
+        keyval: gtk4::gdk::Key::X,
+        modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
+        callback: cut_cb_rc,
+    });
+
+    shortcuts.push(handlers::events::KeyShortcut {
+        keyval: gtk4::gdk::Key::c,
+        modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
+        callback: copy_cb_rc.clone(),
+    });
+    shortcuts.push(handlers::events::KeyShortcut {
+        keyval: gtk4::gdk::Key::C,
+        modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
+        callback: copy_cb_rc,
+    });
+
+    shortcuts.push(handlers::events::KeyShortcut {
+        keyval: gtk4::gdk::Key::v,
+        modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
+        callback: paste_cb_rc.clone(),
+    });
+    shortcuts.push(handlers::events::KeyShortcut {
+        keyval: gtk4::gdk::Key::V,
+        modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
+        callback: paste_cb_rc,
+    });
+
+    shortcuts.push(handlers::events::KeyShortcut {
+        keyval: gtk4::gdk::Key::z,
+        modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
+        callback: undo_cb_rc.clone(),
+    });
+    shortcuts.push(handlers::events::KeyShortcut {
+        keyval: gtk4::gdk::Key::Z,
+        modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
+        callback: undo_cb_rc,
+    });
+
     // Wire keyboard shortcut listeners
-    handlers::setup_key_shortcuts(
-        &ui.window,
-        toggle_split_view_rc,
-        toggle_preview_rc,
-        toggle_hidden_rc,
-        cut_cb_rc,
-        copy_cb_rc,
-        paste_cb_rc,
-        undo_cb_rc,
-    );
+    handlers::setup_key_shortcuts(&ui.window, shortcuts);
 
     // Set up window resize response logic
     handlers::setup_window_resize_handler(
