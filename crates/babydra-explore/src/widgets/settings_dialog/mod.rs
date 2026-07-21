@@ -65,9 +65,15 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     stack_container.append(&stack);
     main_hbox.append(&stack_container);
 
+    // Trigger on_change when window is destroyed/closed
+    let on_change = std::rc::Rc::new(on_change_callback);
+
     // ── Build pages ──────────────────────────────────────────
     let tab_general = general::build_general_page();
-    let tab_keybinds = keybinds::build_keybinds_page();
+    let on_change_k = on_change.clone();
+    let tab_keybinds = keybinds::build_keybinds_page(&window, move || {
+        on_change_k();
+    });
     let tab_context = context_menu::build_context_menu_page(&window);
 
     stack.add_named(&tab_general, Some("general"));
@@ -131,8 +137,6 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         glib::Propagation::Stop
     });
 
-    // Trigger on_change when window is destroyed/closed
-    let on_change = std::rc::Rc::new(on_change_callback);
     let on_change_destroy = on_change.clone();
     window.connect_destroy(move |_| {
         on_change_destroy();

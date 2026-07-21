@@ -13,6 +13,7 @@ pub fn wire_settings_button(
     session: Rc<RefCell<SessionState>>,
     preview_visible: Rc<Cell<bool>>,
     toggle_preview: Rc<dyn Fn()>,
+    on_settings_changed: impl Fn() + 'static,
 ) {
     let win = window.clone();
     let nav = navigate_pane_ref;
@@ -20,6 +21,7 @@ pub fn wire_settings_button(
     let session_c = session;
     let preview_v = preview_visible;
     let toggle_p = toggle_preview;
+    let on_settings_c = Rc::new(on_settings_changed);
     
     btn_settings.connect_clicked(move |_| {
         let nav_c = nav.clone();
@@ -28,6 +30,7 @@ pub fn wire_settings_button(
         let preview_vc = preview_v.clone();
         let toggle_p_c = toggle_p.clone();
         let parent_win = win.clone().upcast::<gtk4::Window>();
+        let on_settings_inner = on_settings_c.clone();
         crate::widgets::settings_dialog::show_settings_dialog(&parent_win, move || {
             let settings = babydra_common::load_explore_settings();
             
@@ -51,6 +54,9 @@ pub fn wire_settings_button(
             if let Some(ref f) = *nav_c.borrow() {
                 f(act_c.get(), path);
             }
+
+            // 4. Trigger the settings changed callback
+            on_settings_inner();
         });
     });
 }

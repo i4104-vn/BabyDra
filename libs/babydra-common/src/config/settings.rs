@@ -17,6 +17,25 @@ pub struct ExploreSettings {
     pub permanent_delete: bool,   // true | false
     pub calculate_dir_size: bool, // true | false
     pub custom_context_items: Vec<CustomContextItem>,
+    #[serde(default)]
+    pub keybinds: std::collections::HashMap<String, String>,
+}
+
+impl ExploreSettings {
+    pub fn get_keybind(&self, action: &str) -> String {
+        self.keybinds.get(action).cloned().unwrap_or_else(|| {
+            match action {
+                "toggle_split" => "F3".to_string(),
+                "toggle_preview" => "F4".to_string(),
+                "toggle_hidden" => "Ctrl + H".to_string(),
+                "cut" => "Ctrl + X".to_string(),
+                "copy" => "Ctrl + C".to_string(),
+                "paste" => "Ctrl + V".to_string(),
+                "undo" => "Ctrl + Z".to_string(),
+                _ => "".to_string(),
+            }
+        })
+    }
 }
 
 impl Default for ExploreSettings {
@@ -29,6 +48,7 @@ impl Default for ExploreSettings {
             permanent_delete: false,
             calculate_dir_size: true,
             custom_context_items: Vec::new(),
+            keybinds: std::collections::HashMap::new(),
         }
     }
 }

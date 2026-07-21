@@ -282,16 +282,6 @@ pub fn create_explore_window(
         }
     }
 
-    // Wire settings button click
-    handlers::wire_settings_button(
-        &header_widgets.btn_settings,
-        &ui.window,
-        navigate_pane_ref.clone(),
-        active_pane.clone(),
-        session.clone(),
-        preview_visible.clone(),
-        toggle_preview_rc.clone(),
-    );
 
     let _rebuild_tabs_rc = widgets::setup_tab_bar(&ui.vbox, session.clone(), navigate_pane_ref.clone(), tab_bar_box.clone(), rebuild_tabs_cell.clone());
 
@@ -415,78 +405,81 @@ pub fn create_explore_window(
     };
     let undo_cb_rc = Rc::new(undo_cb) as Rc<dyn Fn()>;
 
-    // Build shortcuts configuration vector
-    let mut shortcuts = Vec::new();
+    let current_key_controller = Rc::new(RefCell::new(None::<gtk4::EventControllerKey>));
 
-    shortcuts.push(handlers::events::KeyShortcut {
-        keyval: gtk4::gdk::Key::F3,
-        modifiers: gtk4::gdk::ModifierType::empty(),
-        callback: toggle_split_view_rc,
-    });
+    let rebuild_shortcuts = {
+        let window = ui.window.clone();
+        let current_controller = current_key_controller.clone();
+        let toggle_split_view_rc = toggle_split_view_rc.clone();
+        let toggle_preview_rc = toggle_preview_rc.clone();
+        let toggle_hidden_rc = toggle_hidden_rc.clone();
+        let cut_cb_rc = cut_cb_rc.clone();
+        let copy_cb_rc = copy_cb_rc.clone();
+        let paste_cb_rc = paste_cb_rc.clone();
+        let undo_cb_rc = undo_cb_rc.clone();
+        move || {
+            if let Some(ref old_controller) = *current_controller.borrow() {
+                window.remove_controller(old_controller);
+            }
 
-    shortcuts.push(handlers::events::KeyShortcut {
-        keyval: gtk4::gdk::Key::F4,
-        modifiers: gtk4::gdk::ModifierType::empty(),
-        callback: toggle_preview_rc,
-    });
+            let settings = babydra_common::load_explore_settings();
+            let mut shortcuts = Vec::new();
 
-    shortcuts.push(handlers::events::KeyShortcut {
-        keyval: gtk4::gdk::Key::h,
-        modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
-        callback: toggle_hidden_rc.clone(),
-    });
-    shortcuts.push(handlers::events::KeyShortcut {
-        keyval: gtk4::gdk::Key::H,
-        modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
-        callback: toggle_hidden_rc,
-    });
+            let mut add_shortcut = |action: &str, cb: Rc<dyn Fn()>| {
+                let shortcut_str = settings.get_keybind(action);
+                if let Some((keyval, modifiers)) = handlers::events::parse_shortcut(&shortcut_str) {
+                    shortcuts.push(handlers::events::KeyShortcut {
+                        keyval: keyval.clone(),
+                        modifiers,
+                        callback: cb.clone(),
+                    });
+                    
+                    if let Some(name) = keyval.name() {
+                        if name.len() == 1 {
+                            let upper_name = name.to_uppercase();
+                            if let Some(upper_key) = gtk4::gdk::Key::from_name(&upper_name) {
+                                shortcuts.push(handlers::events::KeyShortcut {
+                                    keyval: upper_key,
+                                    modifiers,
+                                    callback: cb.clone(),
+                                });
+                            }
+                        }
+                    }
+                }
+            };
 
-    shortcuts.push(handlers::events::KeyShortcut {
-        keyval: gtk4::gdk::Key::x,
-        modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
-        callback: cut_cb_rc.clone(),
-    });
-    shortcuts.push(handlers::events::KeyShortcut {
-        keyval: gtk4::gdk::Key::X,
-        modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
-        callback: cut_cb_rc,
-    });
+            add_shortcut("toggle_split", toggle_split_view_rc.clone());
+            add_shortcut("toggle_preview", toggle_preview_rc.clone());
+            add_shortcut("toggle_hidden", toggle_hidden_rc.clone());
+            add_shortcut("cut", cut_cb_rc.clone());
+            add_shortcut("copy", copy_cb_rc.clone());
+            add_shortcut("paste", paste_cb_rc.clone());
+            add_shortcut("undo", undo_cb_rc.clone());
 
-    shortcuts.push(handlers::events::KeyShortcut {
-        keyval: gtk4::gdk::Key::c,
-        modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
-        callback: copy_cb_rc.clone(),
-    });
-    shortcuts.push(handlers::events::KeyShortcut {
-        keyval: gtk4::gdk::Key::C,
-        modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
-        callback: copy_cb_rc,
-    });
+            let new_controller = handlers::events::setup_key_shortcuts(&window, shortcuts);
+            current_controller.replace(Some(new_controller));
+        }
+    };
+    let rebuild_shortcuts_rc = Rc::new(rebuild_shortcuts);
 
-    shortcuts.push(handlers::events::KeyShortcut {
-        keyval: gtk4::gdk::Key::v,
-        modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
-        callback: paste_cb_rc.clone(),
-    });
-    shortcuts.push(handlers::events::KeyShortcut {
-        keyval: gtk4::gdk::Key::V,
-        modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
-        callback: paste_cb_rc,
-    });
+    // Install initial shortcuts
+    rebuild_shortcuts_rc();
 
-    shortcuts.push(handlers::events::KeyShortcut {
-        keyval: gtk4::gdk::Key::z,
-        modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
-        callback: undo_cb_rc.clone(),
-    });
-    shortcuts.push(handlers::events::KeyShortcut {
-        keyval: gtk4::gdk::Key::Z,
-        modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
-        callback: undo_cb_rc,
-    });
-
-    // Wire keyboard shortcut listeners
-    handlers::setup_key_shortcuts(&ui.window, shortcuts);
+    // Wire settings button click
+    let rebuild_shortcuts_c = rebuild_shortcuts_rc.clone();
+    handlers::wire_settings_button(
+        &header_widgets.btn_settings,
+        &ui.window,
+        navigate_pane_ref.clone(),
+        active_pane.clone(),
+        session.clone(),
+        preview_visible.clone(),
+        toggle_preview_rc.clone(),
+        move || {
+            rebuild_shortcuts_c();
+        }
+    );
 
     // Set up window resize response logic
     handlers::setup_window_resize_handler(
