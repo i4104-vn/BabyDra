@@ -16,6 +16,7 @@ pub fn build_window_ui(app: &gtk4::Application) -> MainWindowWidgets {
     babydra_utils::ui::theme::apply_explore_theme();
 
     let vbox = Box::new(Orientation::Vertical, 0);
+    vbox.add_css_class("explore-window-box");
     window.set_child(Some(&vbox));
 
     // Create Split Paned container for left/right file panes

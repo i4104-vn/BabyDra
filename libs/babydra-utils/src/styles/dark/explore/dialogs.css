@@ -18,15 +18,15 @@ button.suggested-action:active {
     background-color: #1d4ed8;
 }
 
-window.explore-dialog {
-    background-color: rgba(54, 54, 54, 0.95);
+.explore-dialog {
+    background-color: rgba(20, 20, 22, 0.95);
     background-image: none;
     box-shadow: none;
     border: none;
 }
 
-window.explore-dialog>box {
-    background-color: rgba(54, 54, 54, 0.95);
+.explore-dialog-box {
+    background-color: rgba(20, 20, 22, 0.95);
     background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.015) 0px, rgba(255, 255, 255, 0.015) 1px, transparent 1px, transparent 2px);
     border: 1px solid rgba(255, 255, 255, 0.10);
     border-top: none;

@@ -25,6 +25,7 @@ pub fn show_new_folder_dialog(
     }
 
     let vbox = Box::new(Orientation::Vertical, 12);
+    vbox.add_css_class("explore-dialog-box");
     vbox.set_margin_top(16);
     vbox.set_margin_bottom(16);
     vbox.set_margin_start(16);

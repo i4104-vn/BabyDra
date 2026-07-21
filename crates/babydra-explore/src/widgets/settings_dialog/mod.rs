@@ -20,6 +20,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         .build();
 
     let main_hbox = Box::new(Orientation::Horizontal, 0);
+    main_hbox.add_css_class("explore-dialog-box");
     window.set_child(Some(&main_hbox));
 
     // ── Left: Vertical Capsule Pill Navigation (Icon Only) ─────
