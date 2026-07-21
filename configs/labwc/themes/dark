@@ -18,9 +18,9 @@ window.inactive.border.color: #161622
 
 # ── Titlebar Background ────────────────────────────────
 window.active.title.bg: Solid
-window.active.title.bg.color: #12121e
+window.active.title.bg.color: #363636
 window.inactive.title.bg: Solid
-window.inactive.title.bg.color: #0a0a14
+window.inactive.title.bg.color: #2b2b2b
 
 # ── Titlebar Text ──────────────────────────────────────
 window.active.label.text.color: #e8e8f0

@@ -274,10 +274,6 @@ button.settings-pill.active-pill:hover {
     border-radius: 16px;
     padding: 4px;
 }
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 16px;
-    padding: 4px;
-}
 
 .settings-card-row,
 .settings-custom-item-row {

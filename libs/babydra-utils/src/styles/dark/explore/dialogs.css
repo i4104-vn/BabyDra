@@ -19,14 +19,14 @@ button.suggested-action:active {
 }
 
 window.explore-dialog {
-    background-color: #14141a;
+    background-color: rgba(54, 54, 54, 0.95);
     background-image: none;
     box-shadow: none;
     border: none;
 }
 
 window.explore-dialog>box {
-    background-color: #14141a;
+    background-color: rgba(54, 54, 54, 0.95);
     background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.015) 0px, rgba(255, 255, 255, 0.015) 1px, transparent 1px, transparent 2px);
     border: 1px solid rgba(255, 255, 255, 0.10);
     border-top: none;
@@ -271,10 +271,6 @@ button.settings-pill.active-pill:hover {
     background-color: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-top: none;
-    border-radius: 16px;
-    padding: 4px;
-}
-    border-top: 1px solid rgba(255, 255, 255, 0.10);
     border-radius: 16px;
     padding: 4px;
 }
