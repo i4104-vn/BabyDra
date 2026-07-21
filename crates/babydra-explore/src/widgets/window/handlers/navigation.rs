@@ -23,11 +23,12 @@ pub fn setup_navigation(
 ) -> (
     Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>, // navigate_pane_ref
     Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>, // navigate_pane_no_watch_ref
-    Rc<RefCell<Option<FileWatcher>>>,
+    (Rc<RefCell<Option<FileWatcher>>>, Rc<RefCell<Option<FileWatcher>>>),
 ) {
     let navigate_pane_ref = Rc::new(RefCell::new(None::<Rc<dyn Fn(ActivePane, PathBuf)>>));
     let navigate_pane_no_watch_ref = Rc::new(RefCell::new(None::<Rc<dyn Fn(ActivePane, PathBuf)>>));
-    let watcher = Rc::new(RefCell::new(None::<FileWatcher>));
+    let left_watcher = Rc::new(RefCell::new(None::<FileWatcher>));
+    let right_watcher = Rc::new(RefCell::new(None::<FileWatcher>));
 
     // Define navigate_pane_no_watch closure
     {
@@ -144,12 +145,19 @@ pub fn setup_navigation(
 
     // Define navigate_pane closure (which handles watcher)
     {
-        let watcher = watcher.clone();
+        let left_w = left_watcher.clone();
+        let right_w = right_watcher.clone();
         let watch_tx = watch_tx.clone();
         let nav_no_watch_ref = navigate_pane_no_watch_ref.clone();
-
+ 
         *navigate_pane_ref.borrow_mut() = Some(Rc::new(move |pane: ActivePane, path: PathBuf| {
-            let mut watcher_borrow = watcher.borrow_mut();
+            let target_watcher = if pane == ActivePane::Left {
+                left_w.clone()
+            } else {
+                right_w.clone()
+            };
+
+            let mut watcher_borrow = target_watcher.borrow_mut();
             if let Some(ref mut w) = *watcher_borrow {
                 let _ = w.watch(&path);
             } else {
@@ -160,13 +168,13 @@ pub fn setup_navigation(
                     *watcher_borrow = Some(w);
                 }
             }
-
+ 
             if let Some(ref f) = *nav_no_watch_ref.borrow() {
                 f(pane, path);
             }
         }));
     }
-
+ 
     // Wire left pane navigation loop
     {
         let nav = navigate_pane_ref.clone();
@@ -183,6 +191,6 @@ pub fn setup_navigation(
             }
         });
     }
-
-    (navigate_pane_ref, navigate_pane_no_watch_ref, watcher)
+ 
+    (navigate_pane_ref, navigate_pane_no_watch_ref, (left_watcher, right_watcher))
 }

@@ -106,7 +106,7 @@ pub fn create_explore_window(
 
     // Setup navigation closures
     let rebuild_tabs_cell = Rc::new(RefCell::new(None::<Rc<dyn Fn()>>));
-    let (navigate_pane_ref, navigate_pane_no_watch_ref, _watcher) = handlers::setup_navigation(
+    let (navigate_pane_ref, navigate_pane_no_watch_ref, _watchers) = handlers::setup_navigation(
         session.clone(),
         active_pane.clone(),
         left_content_handle.clone(),
@@ -162,9 +162,27 @@ pub fn create_explore_window(
     // Setup global window navigation callback
     let nav_ref_for_header = navigate_pane_ref.clone();
     let active_pane_for_header = active_pane.clone();
+    let left_handle_for_nav = left_content_handle.clone();
+    let right_handle_for_nav = right_content_handle.clone();
     let nav_callback = move |path: PathBuf| {
         if let Some(ref f) = *nav_ref_for_header.borrow() {
-            f(active_pane_for_header.get(), path);
+            let active = active_pane_for_header.get();
+            f(active, path);
+            
+            // If split view is open, refresh the other pane too to keep listings in sync
+            if let Some(ref right) = *right_handle_for_nav.borrow() {
+                let other_pane = if active == ActivePane::Left {
+                    ActivePane::Right
+                } else {
+                    ActivePane::Left
+                };
+                let other_path = if other_pane == ActivePane::Left {
+                    left_handle_for_nav.current_path.borrow().clone()
+                } else {
+                    right.current_path.borrow().clone()
+                };
+                f(other_pane, other_path);
+            }
         }
     };
     let nav_callback_rc = Rc::new(nav_callback) as Rc<dyn Fn(PathBuf)>;
@@ -492,7 +510,14 @@ pub fn create_explore_window(
     );
 
     // Watcher event receiver loop
-    handlers::setup_file_watcher_receiver(session.clone(), navigate_pane_no_watch_ref.clone(), active_pane.clone(), watch_rx);
+    handlers::setup_file_watcher_receiver(
+        session.clone(),
+        navigate_pane_no_watch_ref.clone(),
+        active_pane.clone(),
+        left_content_handle.clone(),
+        right_content_handle.clone(),
+        watch_rx,
+    );
 
     // D-Bus service loop
     handlers::setup_dbus_receiver(navigate_pane_no_watch_ref.clone(), active_pane.clone());

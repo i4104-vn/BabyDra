@@ -119,16 +119,28 @@ pub fn setup_window_resize_handler(
 
 /// Sets up the hot-reload receiver loop responding to directory watcher triggers.
 pub fn setup_file_watcher_receiver(
-    session: Rc<RefCell<SessionState>>,
+    _session: Rc<RefCell<SessionState>>,
     navigate_pane_no_watch_ref: Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>,
-    active_pane: Rc<Cell<ActivePane>>,
+    _active_pane: Rc<Cell<ActivePane>>,
+    left_content_handle: Rc<babydra_common::ContentViewHandle>,
+    right_content_handle: Rc<RefCell<Option<Rc<babydra_common::ContentViewHandle>>>>,
     mut watch_rx: tokio::sync::mpsc::UnboundedReceiver<()>,
 ) {
+    let left = left_content_handle;
+    let right = right_content_handle;
+    let nav_no_watch = navigate_pane_no_watch_ref;
     glib::MainContext::default().spawn_local(async move {
         while let Some(_) = watch_rx.recv().await {
-            let path = session.borrow().active_tab().current_path.clone();
-            if let Some(ref f) = *navigate_pane_no_watch_ref.borrow() {
-                f(active_pane.get(), path);
+            if let Some(ref f) = *nav_no_watch.borrow() {
+                // Refresh left pane
+                let left_path = left.current_path.borrow().clone();
+                f(ActivePane::Left, left_path);
+
+                // Refresh right pane if split view is open
+                if let Some(ref r_handle) = *right.borrow() {
+                    let right_path = r_handle.current_path.borrow().clone();
+                    f(ActivePane::Right, right_path);
+                }
             }
         }
     });

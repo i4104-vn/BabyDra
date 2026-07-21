@@ -241,6 +241,7 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.settings_edit", "Edit");
             map.insert("explore.settings_save", "Save");
             map.insert("explore.settings_cancel", "Cancel");
+            map.insert("explore.settings_capture_title", "Record Shortcut");
             map.insert("explore.settings_close", "Close");
             map.insert("explore.placeholder_path_desc", "Full path of the selected item");
             map.insert("explore.placeholder_dir_desc", "Parent directory of the selected item (or current directory)");
@@ -477,6 +478,7 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.settings_edit", "Chỉnh sửa");
             map.insert("explore.settings_save", "Lưu");
             map.insert("explore.settings_cancel", "Hủy");
+            map.insert("explore.settings_capture_title", "Ghi nhận phím tắt");
             map.insert("explore.settings_close", "Đóng");
             map.insert("explore.placeholder_path_desc", "Đường dẫn đầy đủ của đối tượng được chọn");
             map.insert("explore.placeholder_dir_desc", "Thư mục cha của đối tượng được chọn (hoặc thư mục hiện tại)");

@@ -74,11 +74,11 @@ pub fn show_capture_dialog(
     bbox.set_halign(Align::Center);
     vbox.append(&bbox);
 
-    let btn_save = Button::builder().label(&t("explore.save")).build();
+    let btn_save = Button::builder().label(&t("explore.settings_save")).build();
     btn_save.add_css_class("baby-button");
     btn_save.set_cursor_from_name(Some("pointer"));
 
-    let btn_cancel = Button::builder().label(&t("explore.cancel")).build();
+    let btn_cancel = Button::builder().label(&t("explore.settings_cancel")).build();
     btn_cancel.add_css_class("baby-button");
     btn_cancel.set_cursor_from_name(Some("pointer"));
 
