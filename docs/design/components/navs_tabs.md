@@ -1,35 +1,30 @@
-# Thiết kế Component: Navs & Tabs (`navs_tabs.md`)
-
-Tài liệu này đặc tả chi tiết hướng thiết kế cho Thanh điều hướng danh mục chính (Center Nav Pill) và Thanh quản lý phiên làm việc dọc ở mép phải (Session Sidebar Bar).
+# Hướng dẫn Thiết kế: Navs & Tabs
 
 ---
 
-## 📌 1. Ý tưởng & Định hướng Thiết kế (Design Concept)
+## 1. Cách tạo Center Nav Pill
 
-Hệ thống điều hướng sử dụng ngôn ngữ thiết kế dạng **Khoang nhộng nổi (Pill-shaped Navigation)** nhằm tối giản các chi tiết rườm rà, tạo cảm giác di chuyển mượt mà và trực quan cho người dùng:
-1. **Center Navigation Pill**: Thanh điều hướng ngang ở Header cho phép chuyển đổi giữa các góc độ làm việc chính.
-2. **Right Session Sidebar Bar**: Thanh bên dọc đặt ở sát mép phải màn hình giúp người dùng chuyển đổi nhanh giữa các phiên sinh ảnh nghệ thuật khác nhau.
+Tạo khung ngang đặt `border-radius: 9999px`. Nền dùng `surface` token với blur `24` (Glassmorphism). Viền dùng `border` token.
 
----
+Bên trong xếp 5 icon danh mục ngang đều (Home, Chat, Gallery, Video, Files). Icon dùng `text-secondary`.
 
-## 🎨 2. Đặc tả Trực quan & Bố cục (Visual Specs)
-
-### 2.1. Thanh Điều hướng Trung tâm (Center Nav Pill)
-- **Kiểu dáng**: Khung nhộng nằm ngang bo tròn tuyệt đối ở hai đầu.
-- **Tông màu**: Khung màu xám tối mờ, các icon đại diện có tông màu trắng sáng dịu.
-- **Biểu tượng**: 5 biểu tượng danh mục chính xếp đều từ trái qua phải (Trang chủ, Chat, Thư viện ảnh, Video, Thư mục tệp).
-
-### 2.2. Thanh Quản lý Phiên bên phải (Right Session Sidebar Bar)
-- **Kiểu dáng**: Một thanh đứng hình nhộng màu trắng tinh khiết đặt nổi ở rìa phải màn hình.
-- **Nút tạo mới (`+`)**: Đặt ở đầu trên cùng của thanh, hiển thị biểu tượng cộng đen đơn giản để mở một phiên làm việc mới.
-- **Danh sách Avatar Phiên (Session Items)**:
-  - Xếp dọc bên dưới nút `+` là các ảnh đại diện tròn của các dự án hiện tại (Ví dụ: Chú cáo suit xanh, Chú gấu đội mũ, Chú tắc kè đeo kính).
-  - Avatar đại diện cho phiên đang mở sẽ có chỉ báo viền hoặc hiệu ứng nổi bật.
+- **Tab active**: icon đổi sang `text-primary`, thêm nền tròn nhỏ `hover-bg` phía sau.
+- **Hover**: đổi icon sang `text-primary`, `transition: all 200ms ease`. Không dùng `translateY` hay `scale`.
 
 ---
 
-## 👆 3. Trạng thái Tương tác (UX States)
+## 2. Cách tạo Session Sidebar (thanh dọc bên phải)
 
-- **Hover vào nút `+` trên Session Bar**: Nút đổi màu nhạt nhẹ báo hiệu hành động sẵn sàng tạo dự án mới.
-- **Hover vào từng Avatar phiên**: Hiển thị hộp chú thích (Tooltip) ghi tên dự án tương ứng.
-- **Switch Session**: Nhấp chuột vào bất kỳ Avatar nào để chuyển toàn bộ không gian làm việc sang dự án sinh ảnh đó.
+Tạo thanh đứng `border-radius: 9999px` (dạng pill dọc). Nền trắng `#ffffff` (Light) hoặc `surface` (Dark). Đặt cố định ở rìa phải màn hình.
+
+### Nút tạo mới (`+`)
+
+Đặt ở đầu trên cùng. `border-radius: 50%`, icon dấu cộng căn giữa. Hover: đổi nền sang `hover-bg`.
+
+### Danh sách Avatar phiên
+
+Xếp dọc bên dưới nút `+`. Mỗi avatar dùng `border-radius: 50%`.
+
+- **Phiên đang mở**: thêm `border: 2px solid #3b82f6` (accent).
+- **Hover**: hiển thị tooltip tên dự án (xem `tooltips.md`).
+- **Click**: chuyển toàn bộ workspace sang phiên tương ứng.

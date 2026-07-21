@@ -1,57 +1,99 @@
-# Quy chuẩn Thiết kế (Design Tokens & Visual Guidelines)
+# Design Tokens
 
-Tài liệu này định nghĩa hệ thống biến thiết kế (Design Tokens), quy chuẩn thẩm mỹ và hướng dẫn thị giác cho toàn bộ giao diện ứng dụng **BabyDra**.
-
----
-
-## 🎨 1. Hệ thống Bảng màu (Color System & Palette)
-
-### 1.1. Màu nền & Bề mặt (Background & Surface Colors)
-
-- **Màu nền ứng dụng (App Canvas Background)**: Tone xám kem hồng ấm (`Warm Pinkish Gray`). Tạo cảm giác dễ chịu, nghệ thuật và làm nổi bật tác phẩm chính ở trung tâm.
-- **Màu bề mặt Card (White Surface)**: Màu trắng tuyền tinh khiết. Dùng cho thẻ ảnh chính, thanh nhập liệu, thanh side-bar và các thẻ thông tin.
-- **Màu bề mặt mờ nhạt (Subtle Surface)**: Màu xám kem nhạt mờ. Dùng cho các chip từ khóa, nút lựa chọn thông số và hiệu ứng hover.
-- **Màu nền tương phản cao (Dark Surface)**: Màu đen tuyền nhám. Dùng cho nút hành động chính (`Generate`), nút nâng cấp (`Upgrade now`) và thanh điều hướng trung tâm.
-
-### 1.2. Màu điểm nhấn & Trạng thái (Accent & Status Colors)
-
-- **Màu điểm nhấn chính (Green Accent)**: Màu xanh lá cây trang nhã (lấy cảm hứng từ bộ suit xanh của nhân vật mẫu). Dùng cho vòng tiến trình credit và các icon điểm nhấn.
-- **Màu hồng Pastel (Pink Accent)**: Dùng cho phông nền ảnh tạo không gian hiện đại, siêu thực.
-- **Màu viền Active (Active Border Color)**: Viền đen đậm sắc nét. Dùng để đánh dấu biến thể ảnh đang được chọn.
+Áp dụng các giá trị dưới đây cho mọi thành phần giao diện. Không tự ý đặt giá trị ngoài hệ thống này.
 
 ---
 
-## ✏️ 2. Quy chuẩn Chữ & Phân cấp Thị giác (Typography Scale)
+## 1. Bảng màu Nền & Bề mặt
 
-- **Phông chữ chủ đạo**: Chữ không chân hiện đại (Sans-serif) với nét bo tròn nhẹ ở các góc chữ, mang lại cảm giác thân thiện và cao cấp.
+### Dark Theme
 
-### Phân cấp Typography:
+| Token | Giá trị | Dùng cho |
+| :--- | :--- | :--- |
+| `surface` | `rgba(14, 14, 18, 0.96)` | Nền chính của mọi bề mặt: card, popover, panel, input shell |
+| `blur` | `-gtk-background-blur: 24` | Đặt kèm `surface` để tạo hiệu ứng Acrylic |
+| `border` | `1px solid rgba(255, 255, 255, 0.14)` | Viền ngoài của mọi bề mặt |
+| `border-top-bevel` | `rgba(255, 255, 255, 0.28)` | Chỉ dùng cho viền cạnh trên để tạo phản quang |
+| `text-primary` | `#ffffff` / `rgba(255, 255, 255, 0.95)` | Tiêu đề, tên người dùng, nhãn chức năng |
+| `text-secondary` | `rgba(255, 255, 255, 0.50)` | Email, mô tả phụ, placeholder |
+| `hover-bg` | `rgba(255, 255, 255, 0.08)` | Nền khi hover dòng menu, nút, chip |
+| `separator` | `1px solid rgba(255, 255, 255, 0.10)` | Đường phân cách giữa các nhóm chức năng |
 
-1. **Heading (Tiêu đề lớn)**: Cỡ chữ lớn, nét đậm (Bold). Dùng cho các tiêu đề trang hoặc nhóm nội dung chính.
-2. **Body Text (Văn bản nội dung)**: Cỡ chữ vừa, nét vừa (Medium). Dùng cho ô nhập liệu prompt và đoạn văn bản mô tả ý tưởng.
-3. **Chip / Label Text**: Cỡ chữ nhỏ, nét đậm vừa (Semi-bold). Dùng cho các tag từ khóa prompt, nút điều chỉnh tỷ lệ `4:3`, `4K`.
-4. **Caption Text**: Cỡ chữ siêu nhỏ, dùng cho bộ đếm credit phần trăm `18%` và các nhãn ghi chú phụ.
+### Light Theme
+
+| Token | Giá trị | Dùng cho |
+| :--- | :--- | :--- |
+| `surface` | `rgba(255, 255, 255, 0.98)` / `#ffffff` | Nền chính của mọi bề mặt |
+| `blur` | `-gtk-background-blur: 24` | Đặt kèm `surface` để tạo hiệu ứng Acrylic |
+| `border` | `1px solid rgba(0, 0, 0, 0.08)` | Viền ngoài của mọi bề mặt |
+| `border-top-bevel` | `rgba(0, 0, 0, 0.06)` | Chỉ dùng cho viền cạnh trên |
+| `text-primary` | `#1c1c1e` / `rgba(28, 28, 30, 0.95)` | Tiêu đề, tên người dùng, nhãn chức năng |
+| `text-secondary` | `rgba(28, 28, 30, 0.50)` | Email, mô tả phụ, placeholder |
+| `hover-bg` | `rgba(0, 0, 0, 0.05)` / `#f4f4f5` | Nền khi hover dòng menu, nút, chip |
+| `separator` | `1px solid rgba(0, 0, 0, 0.06)` | Đường phân cách giữa các nhóm chức năng |
 
 ---
 
-## 🔲 3. Quy chuẩn Bo góc & Tỉ lệ (Border Radius & Spacing)
+## 2. Bảng màu Điểm nhấn & Trạng thái
 
-### 3.1. Độ Bo góc (Border Radius Hierarchy)
-
-- **Khoang nhộng tròn (Pill Shape - Full Radius)**: Áp dụng cho nút bấm (`Generate`, `Upgrade`), thanh Nav Pills, thanh nhập liệu chính và các tag từ khóa. Giúp giao diện mềm mại, mượt mà.
-- **Bo góc cực lớn (XL Radius - 24px)**: Áp dụng cho Khung xem ảnh kết quả chính (Main Preview Card) và Khung chứa ô nhập liệu nổi ở phía dưới.
-- **Bo góc vừa (Large Radius - 16px)**: Áp dụng cho các ô xem ảnh biến thể (Variations) và thẻ ảnh tham chiếu (Reference Card).
-
-### 3.2. Thang Khoảng cách (Spacing Scale)
-
-- **Khoảng cách siêu nhỏ (Micro Spacing - 4px to 8px)**: Khoảng cách giữa icon và chữ trong cùng một nút bấm/chip.
-- **Khoảng cách tiêu chuẩn (Standard Spacing - 12px to 16px)**: Khoảng cách giữa các ô ảnh biến thể, khoảng cách giữa các chip prompt.
-- **Khoảng cách khu vực (Section Spacing - 24px to 32px)**: Lề phân tách giữa cột bên trái, khung ảnh trung tâm và cột bên phải.
+| Token | Giá trị | Dùng cho |
+| :--- | :--- | :--- |
+| `accent` | `#3b82f6` | Viền active, checkmark, nút primary, thanh tiến trình |
+| `accent-pressed` | `#2563eb` | Nền nút khi nhấn (pressed state) |
+| `success` | `#10b981` / `#4ade80` | Vòng credit, badge PRO xanh lá |
+| `pink` | `#f472b6` | Badge PRO hồng, thành phần trong rainbow ring |
+| `badge-pink-bg` | `#fce7f3` | Nền badge PRO biến thể hồng |
+| `badge-pink-fg` | `#be185d` | Chữ và icon badge PRO biến thể hồng |
+| `badge-green-bg` | `#dcfce7` | Nền badge PRO biến thể xanh lá |
+| `badge-green-fg` | `#15803d` | Chữ và icon badge PRO biến thể xanh lá |
+| `rainbow-ring` | `conic-gradient(#3b82f6, #f472b6, #fbbf24, #3b82f6)` | Viền avatar người dùng |
 
 ---
 
-## 🌫️ 4. Độ Đổ bóng & Phân tầng Không gian (Elevation & Shadows)
+## 3. Typography
 
-- **Shadow nhẹ (Subtle Elevation)**: Đổ bóng mờ nhạt cho các nút bấm phẳng, tạo cảm giác bề mặt hơi nổi nhẹ so với nền.
-- **Shadow trung bình (Card Elevation)**: Đổ bóng dịu cho Khung xem ảnh chính và các ô biến thể, giúp tách biệt ảnh khỏi phông nền ứng dụng.
-- **Shadow cao (Floating Elevation)**: Đổ bóng sâu và rộng cho Khung nhập liệu nổi ở phía dưới màn hình và các Menu Dropdown xổ xuống, tạo cảm giác lơ lửng trên cùng của không gian giao diện.
+Dùng phông `Inter` (Sans-serif) làm phông duy nhất cho toàn bộ ứng dụng.
+
+| Cấp bậc | font-size | font-weight | Dùng cho |
+| :--- | :--- | :--- | :--- |
+| Header Name | `14px` - `15px` | 700 (Bold) | Tên người dùng trong dropdown, tiêu đề section |
+| Body / Label | `13px` - `14px` | 500 (Medium) | Nhãn dòng menu, nhãn nút bấm, tiêu đề chip |
+| Subtext | `12px` | 400 (Regular) | Email, mô tả phụ, tooltip |
+| Badge | `10px` - `11px` | 800 (Extra-bold) | Nhãn PRO, chữ viết hoa trong badge |
+
+---
+
+## 4. Border Radius
+
+| Token | Giá trị | Dùng cho |
+| :--- | :--- | :--- |
+| `radius-pill` | `9999px` | Nút bấm chính, nút Share, nav pill, badge, chip |
+| `radius-lg` | `20px` | Popover dropdown, khung preview lớn |
+| `radius-xl` | `24px` | Khung ảnh chính, input floating shell |
+| `radius-md` | `10px` - `12px` | Dòng menu hover, thẻ biến thể, nút chức năng nhỏ |
+| `radius-circle` | `50%` | Avatar, nút biểu tượng tròn |
+
+---
+
+## 5. Spacing
+
+| Token | Giá trị | Dùng cho |
+| :--- | :--- | :--- |
+| `space-micro` | `4px` - `6px` | Khoảng cách giữa icon và chữ cùng dòng |
+| `space-standard` | `8px` - `12px` | Padding bên trong dòng menu, gap giữa phần tử cùng cấp |
+| `space-section` | `16px` - `20px` | Padding viền trong popover, khoảng cách giữa các nhóm chức năng |
+
+---
+
+## 6. Shadow & Elevation
+
+Dùng shadow duy nhất cho mọi bề mặt nổi (popover, card, input shell):
+
+- **Light Theme**: `box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08)`
+- **Dark Theme**: `box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35)`
+
+---
+
+## 7. Quy tắc Hover (Bắt buộc)
+
+Không dùng `translateY`, `scale`, `transform` hay bất kỳ dịch chuyển hình học nào khi hover. Chỉ thay đổi `background-color` và/hoặc `color` với `transition: all 200ms ease`.

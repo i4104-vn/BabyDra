@@ -1,32 +1,37 @@
-# Thiết kế Component: Khung thẻ Card (`card.md`)
-
-Tài liệu này đặc tả chi tiết hướng thiết kế cho các Khung thẻ chứa nội dung (Card Containers) trên giao diện.
+# Hướng dẫn Thiết kế: Cards
 
 ---
 
-## 📌 1. Ý tưởng & Định hướng Thiết kế (Design Concept)
+## 1. Nguyên tắc chung
 
-Các thẻ **Card** đóng vai trò đóng gói và phân định ranh giới không gian cho từng nội dung hình ảnh hoặc cụm tính năng. Định hướng thiết kế nhất quán với nguyên tắc bo góc lớn, đổ bóng mềm và nền màu trắng tuyền để làm nổi bật tác phẩm nghệ thuật.
+Mọi card đều dùng nền `surface` token, viền `border` token, shadow hệ thống và `-gtk-background-blur: 24` khi cần Acrylic. Không dùng bóng đổ tự ý ngoài token.
 
----
-
-## 🎨 2. Phân loại các Khung Thẻ Card
-
-1. **Khung Xem Ảnh chính (Main Preview Card)**:
-   - Khung hình trung tâm lớn nhất, bo góc cực đại (`24px`).
-   - Đổ bóng phân tầng giúp tách biệt tác phẩm chính khỏi bề mặt nền ứng dụng.
-2. **Khung Ô ảnh Biến thể (Variation Cards)**:
-   - Các ô hình vuông bo góc vừa (`16px`), xếp thành cột bên phải.
-   - Thẻ đang được chọn có viền màu đen đậm sắc nét bao quanh.
-3. **Khung Ảnh Tham chiếu (Reference Image Card)**:
-   - Khung nằm ở cột bên trái góc nhìn fisheye lens, tỷ lệ chữ nhật ngang.
-4. **Khung Nhập liệu Nổi (Input Floating Card)**:
-   - Khung nổi hình chữ nhật bo tròn chứa cụm nhập prompt và thanh công cụ.
+Khi hover lên card: chỉ đổi `background-color` hoặc `border-color`, `transition: all 200ms ease`. Không dùng `translateY`, `scale`.
 
 ---
 
-## 👆 3. Trạng thái Trực quan (Visual States)
+## 2. Cách tạo từng loại card
 
-- **Unselected Card**: Mặt phẳng trắng mịn, viền mờ hoặc không viền.
-- **Selected Active Card**: Xuất hiện đường viền bao quanh màu đen đậm 2.5px nổi bật.
-- **Hover Card**: Thẻ nhấc nhẹ lên khỏi bề mặt phông nền.
+### 2.1. Khung Ảnh chính (Main Preview Card)
+
+Đặt `border-radius: 24px`. Thêm shadow hệ thống. Kích thước lớn, chiếm trung tâm màn hình. Tỷ lệ hiển thị tự động theo lựa chọn (1:1, 4:3, 3:4).
+
+### 2.2. Khung Popover Dropdown
+
+Đặt `border-radius: 20px`. Nền `surface`, viền `border`, shadow hệ thống, blur `24`. Padding `12px` - `16px`. Chi tiết bên trong xem `dropdowns.md`.
+
+### 2.3. Khung Ảnh Biến thể (Variation Card)
+
+Đặt `border-radius: 16px`. Hình vuông, xếp cột dọc 4 ô bên phải khung ảnh chính.
+
+- **Ô đang chọn (active)**: thêm `border: 2px solid #3b82f6`.
+- **Ô chưa chọn**: không viền màu nhấn, chỉ hiển thị ảnh bình thường.
+- **Hover**: đậm viền nhẹ hoặc tăng brightness, `transition: all 200ms ease`. Không dùng `translateY`.
+
+### 2.4. Khung Ảnh Tham chiếu (Reference Image Card)
+
+Đặt `border-radius: 16px`. Tỷ lệ ngang `16:9` (fisheye lens view). Đặt Floating Icon Badge ở góc dưới trái (xem `badge.md` mục 4).
+
+### 2.5. Khung Nhập liệu Nổi (Input Floating Shell)
+
+Đặt `border-radius: 24px`. Nền `surface`, viền `border`, shadow hệ thống. Chi tiết bên trong xem `input_group.md`.

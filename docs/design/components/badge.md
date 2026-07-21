@@ -1,26 +1,44 @@
-# Thiết kế Component: Badges & Chips (`badge.md`)
-
-Tài liệu này đặc tả chi tiết hướng thiết kế cho các Thẻ nhãn từ khóa (Chips/Tokens) và Huy hiệu biểu tượng (Badges).
+# Hướng dẫn Thiết kế: Badges & Chips
 
 ---
 
-## 📌 1. Định hướng Thiết kế (Design Concept)
+## 1. Nguyên tắc chung
 
-Badge và Chip giúp phân loại thông tin và trực quan hóa các từ khóa cốt lõi của Prompt sinh ảnh:
-- **Prompt Token Chips**: Đóng gói các cụm từ quan trọng trong Prompt (`dapper fox`, `in a green suit`).
-- **Floating Icon Badge**: Huy hiệu tròn biểu tượng bảng màu đính ở góc ảnh tham chiếu.
+Badge và Chip đều dùng `border-radius: 9999px` (dạng khoang nhộng). Không dùng bo góc vuông.
 
----
-
-## 🎨 2. Phân loại & Đặc tả Trực quan
-
-1. **Highlight Keyword Chip**: Dạng khoang nhộng bo tròn, nền xám mờ nhạt, chữ nét đậm màu đen tuyền.
-2. **Static Text Chip**: Chữ tĩnh màu xám mờ không có khung nền (`Create a`).
-3. **Floating Icon Badge**: Hình tròn nhỏ màu trắng tinh khiết đính ở góc ảnh, chứa biểu tượng icon bảng màu đen.
+Đặt `transition: all 200ms ease`. Khi hover chỉ đổi `background-color`, không dùng `translateY` hay `scale`.
 
 ---
 
-## 👆 3. Trạng thái Tương tác (UX States)
+## 2. Cách tạo Badge PRO
 
-- **Hover vào Highlight Chip**: Nền chip đậm hơn nhẹ, báo hiệu khả năng tương tác.
-- **Active Chip**: Đổi sang tông nền tương phản cao khi được nhấn chọn.
+Đặt `border-radius: 9999px`, `padding: 2px 8px`. Bên trong gồm icon tia sét/bolt (bên trái) và chữ "PRO" viết hoa (`font-size: 10px` - `11px`, `font-weight: 800`).
+
+Chọn một trong các biến thể:
+
+| Biến thể | background | color (chữ & icon) |
+| :--- | :--- | :--- |
+| Hồng Pastel | `#fce7f3` | `#be185d` |
+| Xanh lá Pastel | `#dcfce7` | `#15803d` |
+| Xanh dương Accent | `#dbeafe` | `#1e40af` |
+
+---
+
+## 3. Cách tạo Keyword Chip (Prompt Token)
+
+### Chip có khung nền (Highlight Chip)
+
+Đặt `border-radius: 9999px`, `padding: 4px 12px`. Nền dùng `rgba(0, 0, 0, 0.05)` (Light) hoặc `rgba(255, 255, 255, 0.08)` (Dark). Chữ dùng `font-weight: 600`, màu `text-primary`.
+
+Khi hover: đậm nền thêm 6%.
+Khi được chọn (active): đổi nền sang `#1c1c1e` (Light) hoặc `accent` `#3b82f6`, chữ trắng.
+
+### Chip không khung (Static Text)
+
+Không đặt nền. Chữ dùng `text-secondary`, `font-weight: 400`. Dùng cho các cụm từ nối giữa các keyword chip.
+
+---
+
+## 4. Cách tạo Floating Icon Badge
+
+Dùng `border-radius: 50%`, kích thước cố định (ví dụ `24px` x `24px`). Nền trắng `#ffffff`. Icon đen sẫm căn giữa. Đặt `position: absolute` vào góc dưới trái của ảnh tham chiếu.

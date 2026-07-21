@@ -1,40 +1,37 @@
-# Thiết kế Component: Nút bấm (`buttons.md`)
-
-Tài liệu này đặc tả chi tiết hướng thiết kế cho tất cả các loại Nút bấm (Buttons) trong ứng dụng.
+# Hướng dẫn Thiết kế: Nút bấm (Buttons)
 
 ---
 
-## 📌 1. Ý tưởng & Định hướng Thiết kế (Design Concept)
+## 1. Nguyên tắc chung
 
-Nút bấm được thiết kế theo phong cách **Khoang nhộng bo tròn hiện đại (Modern Rounded Pill Button)** với độ tương phản thị giác rõ ràng để định hướng hành động chính và hành động phụ của người dùng một cách hiệu quả.
+Mọi nút bấm đều dùng dạng khoang nhộng bo tròn (`border-radius: 9999px`). Không dùng góc vuông hay bo góc nhỏ cho nút bấm. Chữ trong nút dùng `font-weight: 500` - `600`, cỡ `13px` - `14px`.
 
-Các nhóm nút bấm bao gồm:
-1. **Primary Button (`Generate`)**: Nút bấm quan trọng nhất đặt ở mép phải thanh nhập liệu.
-2. **Secondary Button (`Upgrade now`)**: Nút kêu gọi hành động nâng cấp dịch vụ trên Header.
-3. **Icon Buttons (`+`, Theme Toggle)**: Các nút dạng tròn hoặc vuông bo góc chứa biểu tượng đơn.
+Đặt `transition: all 200ms ease` cho mọi nút. Không dùng `translateY`, `scale` hay bất kỳ dịch chuyển hình học nào khi hover.
 
 ---
 
-## 🎨 2. Phân loại & Đặc tả Trực quan (Button Variants)
+## 2. Cách tạo từng loại nút
 
-### 2.1. Nút bấm Chức năng chính (Primary Generate Button)
-- **Tông màu**: Nền màu đen tuyền tương phản cao hoàn toàn với nền trắng của thanh nhập liệu.
-- **Chữ**: Màu trắng sáng, font chữ đậm vừa (Semi-bold).
-- **Kiểu dáng**: Bo góc dạng khoang nhộng tròn tuyệt đối ở 2 đầu.
+### 2.1. Nút Primary (Generate / Action)
 
-### 2.2. Nút bấm Nâng cấp (Secondary Upgrade Button)
-- **Tông màu**: Nền màu đen tuyền.
-- **Biểu tượng & Chữ**: Tích hợp icon kim cương/trái tim tinh tế đi kèm dòng chữ `"Upgrade now"`.
+Đặt `border-radius: 9999px`. Nền dùng `#3b82f6` (accent) hoặc `#1c1c1e` (đen sẫm) tùy theo ngữ cảnh. Chữ trắng `#ffffff`, `font-weight: 600`.
 
-### 2.3. Nút bấm Biểu tượng (Icon Buttons)
-- **Nút Tạo mới Session (`+`)**: Hình tròn màu trắng đặt trên thanh Session bar.
-- **Nút Chuyển đổi Chế độ (`Theme Toggle`)**: Hình tròn nhỏ chứa icon Mặt trời màu đen mờ.
+Khi hover: tối nền thêm 10% (ví dụ `#2563eb`). Khi pressed: tối thêm một bậc nữa. Khi disabled: chuyển nền sang `rgba(0, 0, 0, 0.20)` (Light) hoặc `rgba(255, 255, 255, 0.20)` (Dark), bỏ nhận click.
 
----
+### 2.2. Nút Share (Pill Button phụ)
 
-## 👆 3. Trạng thái Tương tác (UX States)
+Đặt `border-radius: 9999px`. Nền dùng `rgba(0, 0, 0, 0.05)` / `#f2f2f2` (Light) hoặc `rgba(255, 255, 255, 0.08)` (Dark). Chữ dùng `text-primary`. Bên trong chứa nhãn "Share" kèm icon dấu cộng bên phải.
 
-- **Trạng thái Thường (Normal)**: Nút hiển thị màu sắc chuẩn, sắc nét.
-- **Trạng thái Hover**: Nền nút chuyển màu nhạt hơn 10%, nút nảy nhẹ tạo cảm giác phản hồi tích cực.
-- **Trạng thái Click (Pressed)**: Nút hơi co nhẹ lại (Scale down) thể hiện sự nhấp bấm vật lý.
-- **Trạng thái Vô hiệu hóa (Disabled)**: Nút chuyển sang tông xám mờ đục, không nhận thao tác click.
+Khi hover: đậm nền thêm 6% - 8%.
+
+### 2.3. Nút Upgrade (Secondary)
+
+Đặt `border-radius: 9999px`. Nền đen tuyền `#1c1c1e` hoặc xanh sẫm. Chữ trắng. Tích hợp icon kim cương/trái tim bên trái chữ "Upgrade now".
+
+Khi hover: sáng nền nhẹ.
+
+### 2.4. Nút Biểu tượng (Icon Button)
+
+Đặt `border-radius: 50%` cho nút tròn chứa icon đơn (nút `+`, nút theme toggle). Kích thước cố định (ví dụ `32px` x `32px`). Nền trong suốt hoặc xám mờ nhẹ. Icon căn giữa.
+
+Khi hover: đổi nền sang `hover-bg` token.

@@ -1,44 +1,32 @@
-# Thiết kế Component: Cụm Nhập liệu & Control Center (`input_group.md`)
-
-Tài liệu này đặc tả chi tiết hướng thiết kế cho Cụm khung nhập liệu Prompt chính và Thanh công cụ điều chỉnh thông số ở mép dưới màn hình.
+# Hướng dẫn Thiết kế: Input Group & Control Center
 
 ---
 
-## 📌 1. Ý tưởng & Định hướng Thiết kế (Design Concept)
+## 1. Bố cục tổng thể
 
-**Input Group** là trung tâm điều khiển chính tương tác với ứng dụng. Thiết kế áp dụng phong cách **Khung nổi (Floating Card Panel)** đặt lơ lửng ở giữa phía dưới của màn hình làm việc.
-
-Cụm điều khiển được chia thành 2 tầng phân cấp rõ ràng:
-1. **Tầng trên (Dòng Nhập liệu & Nút Sinh ảnh)**: Nơi người dùng gõ ý tưởng văn bản và nhấn nút `Generate` màu đen nổi bật.
-2. **Tầng dưới (Thanh Công cụ Thông số)**: Dãy các nút dạng chip cho phép nhanh chóng chọn tỷ lệ khung hình, độ phân giải, phong cách nghệ thuật và ảnh nguồn.
+Đặt cụm điều khiển nổi lơ lửng ở giữa phía dưới màn hình (`position: fixed` hoặc `absolute`, `bottom`, `left: 50%`, `transform: translateX(-50%)`). Chia làm 2 tầng xếp dọc bên trong.
 
 ---
 
-## 🎨 2. Đặc tả Trực quan & Bố cục (Visual & Layout Specs)
+## 2. Cách tạo khung nổi ngoài cùng (Outer Shell)
 
-### 2.1. Khung chứa Nổi ngoài cùng (Outer Floating Shell)
-- **Hình dáng**: Hộp chữ nhật bo góc tròn lớn (`24px`), bề mặt màu trắng tuyền.
-- **Đổ bóng Nổi (Floating Elevation)**: Sử dụng độ đổ bóng rộng và sâu bên dưới khung, tạo hiệu ứng thị giác lơ lửng trên phông nền chính.
-- **Bố cục bên trong**: Khoảng cách căn lề trong vừa vặn, phân tách 2 tầng bằng khoảng trống tự nhiên.
-
-### 2.2. Tầng Nhập liệu Prompt & Nút Generate
-- **Ô văn bản Prompt (Prompt Text Field)**:
-  - Nằm ở bên trái tầng trên, giao diện không đường viền phẳng hoàn toàn.
-  - Chữ gợi ý mờ (Placeholder): `"What do you want to see?"` sử dụng tông màu xám nhạt dịu mắt.
-- **Nút bấm Generate**:
-  - Đặt ở mép phải tầng trên, có kiểu dáng khoang nhộng (Pill shape) màu đen tuyền tương phản cao.
-  - Văn bản chữ màu trắng tinh khiết, nét chữ đậm nét giúp nổi bật hành động quan trọng nhất.
-
-### 2.3. Tầng Thanh Công cụ Thông số (Parameter Toolbar Row)
-- **Các chip tính năng (Setting Chips)**:
-  - Xếp thành hàng ngang gồm các tùy chọn: Aspect Ratio `4:3`, Quality `4K`, `Style`, `Image prompt`, `Image style`.
-  - Mỗi chip có khung nền màu xám kem mờ nhạt, bo góc khoang nhộng tròn.
-  - Bên trong tích hợp biểu tượng minh họa nhỏ (như icon khung hình, icon kim cương, icon đồng hồ, icon nét vẽ) đi kèm nhãn chữ ngắn gọn.
+Đặt `border-radius: 24px`. Nền dùng `surface` token, viền `border` token, shadow hệ thống, blur `24`. Padding bên trong `12px` - `16px`.
 
 ---
 
-## 👆 3. Trạng thái Tương tác & Trải nghiệm (UX States)
+## 3. Cách tạo Tầng trên (Prompt Input + Generate Button)
 
-- **Trạng thái Focus vào ô nhập liệu**: Dòng chữ mờ ẩn đi khi người dùng bắt đầu gõ, chữ gõ hiển thị nét rõ ràng màu đen.
-- **Hover vào nút Generate**: Nút chuyển sang tông đen nhạt hơn một chút kèm độ nảy nhẹ, báo hiệu sẵn sàng kích hoạt lệnh sinh ảnh.
-- **Click vào chip công cụ thông số**: Mở một menu dạng Popover nhỏ xổ lên ngay phía trên chip tương ứng để người dùng lựa chọn các tùy chọn con.
+Bố cục ngang: ô nhập liệu bên trái + nút Generate bên phải.
+
+- **Ô nhập liệu Prompt**: không viền, không nền riêng, phẳng hoàn toàn. Placeholder dùng `text-secondary`. Chữ gõ dùng `text-primary`.
+- **Nút Generate**: tạo theo hướng dẫn `buttons.md` mục 2.1 (Primary Button). Đặt `border-radius: 9999px`, nền `accent` hoặc `#1c1c1e`.
+
+---
+
+## 4. Cách tạo Tầng dưới (Parameter Toolbar)
+
+Xếp ngang các chip tùy chọn (Aspect Ratio, Quality, Style, Image prompt, Image style). Mỗi chip dùng `border-radius: 9999px`, nền mờ nhẹ, bên trong chứa icon nhỏ + nhãn chữ ngắn.
+
+Hover: đậm nền 6% - 8%, `transition: all 200ms ease`. Không dùng `translateY` hay `scale`.
+
+Click chip: mở Popover nhỏ ngay phía trên chip (xem `dropdowns.md`).

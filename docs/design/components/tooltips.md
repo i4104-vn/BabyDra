@@ -1,17 +1,18 @@
-# Thiết kế Component: Tooltips (`tooltips.md`)
-
-Tài liệu này đặc tả chi tiết hướng thiết kế cho các Khung chú thích ngắn hiển thị khi rê chuột (Tooltips).
+# Hướng dẫn Thiết kế: Tooltips
 
 ---
 
-## 📌 1. Định hướng Thiết kế (Design Concept)
+## 1. Cách tạo Tooltip
 
-Tooltip giúp cung cấp thông tin giải thích nhanh khi người dùng rê chuột qua các icon hoặc Avatar dự án mà không làm tốn diện tích giao diện.
+Đặt `border-radius: 8px`. Padding `4px 8px` - `6px 12px`.
+
+- **Dark Theme**: nền `rgba(14, 14, 18, 0.95)`, chữ trắng, viền `rgba(255, 255, 255, 0.10)`.
+- **Light Theme**: nền `rgba(255, 255, 255, 0.98)`, chữ `text-primary`, viền `rgba(0, 0, 0, 0.06)`.
+
+Thêm shadow nhẹ. Chữ `font-size: 12px`, `font-weight: 400`.
 
 ---
 
-## 🎨 2. Phân loại & Đặc tả Trực quan
+## 2. Cách hiển thị
 
-- **Màu sắc & Khung**: Hộp nhỏ màu đen tuyền chữ trắng, bo góc 6px.
-- **Đổ bóng**: Đổ bóng nhẹ phía sau để tách khỏi bề mặt giao diện.
-- **Thời gian xuất hiện**: Tự động hiển thị sau 300ms hover chuột.
+Hiện sau `300ms` hover (delay). Dùng hiệu ứng mờ hiện dần: `opacity: 0` -> `1`, `transition: opacity 150ms ease`. Đặt vị trí tự động phía trên hoặc phía dưới phần tử kích hoạt.

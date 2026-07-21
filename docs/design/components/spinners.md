@@ -1,18 +1,19 @@
-# Thiết kế Component: Spinners & Loaders (`spinners.md`)
-
-Tài liệu này đặc tả chi tiết hướng thiết kế cho các hiệu ứng phản hồi trạng thái chờ khi AI đang trong quá trình sinh ảnh.
+# Hướng dẫn Thiết kế: Spinners & Loaders
 
 ---
 
-## 📌 1. Định hướng Thiết kế (Design Concept)
+## 1. Cách tạo Skeleton Pulse Loading
 
-Khi người dùng nhấn nút `Generate`, giao diện cần phản hồi ngay lập tức để người dùng biết hệ thống đang xử lý:
-1. **Pulse Skeleton Loading**: Khung ảnh chính chuyển sang nền mờ nhấp nháy nhịp nhàng (Pulse effect).
-2. **Button Spinner**: Nút `Generate` hiển thị icon xoay tròn nhỏ thay cho dòng chữ.
+Khi đang sinh ảnh, đặt khung ảnh chính sang trạng thái loading:
+
+- Dùng nền xám mờ nhẹ.
+- Áp dụng animation: `animation: pulse 1.2s ease-in-out infinite` (nền mờ dần sáng lên liên tục).
+- Không hiển thị nội dung ảnh trong lúc loading.
 
 ---
 
-## 🎨 2. Phân loại & Đặc tả Trực quan
+## 2. Cách tạo Button Spinner
 
-- **Hiệu ứng Skeleton Pulse**: Nền khung ảnh mờ dần và sáng lên liên tục nhẹ nhàng.
-- **Biểu tượng Spinner**: Vòng tròn nhỏ xoay liên tục 360 độ màu trắng.
+Khi nút Generate đang xử lý: ẩn chữ, hiển thị vòng tròn spinner nhỏ xoay 360 độ (`animation: spin 0.8s linear infinite`).
+
+Spinner dùng màu trắng `#ffffff` (trên nền nút tối) hoặc `accent` `#3b82f6` (trên nền nút sáng). Đường viền spinner: `border: 2px solid`, `border-top-color: transparent`.

@@ -1,17 +1,12 @@
-# Thiết kế Component: Progress (`progress.md`)
-
-Tài liệu này đặc tả chi tiết hướng thiết kế cho Vòng hiển thị tiến trình phần trăm Credit (`18% Daily Credits`).
+# Hướng dẫn Thiết kế: Progress (Tiến trình & Chỉ số)
 
 ---
 
-## 📌 1. Định hướng Thiết kế (Design Concept)
+## 1. Cách tạo Credit Meter
 
-Chỉ số phần trăm Credit ngày được thể hiện dưới dạng một widget khoang nhộng mờ tinh tế kết hợp giữa vòng tròn tiến trình màu xanh lá và dòng chữ phần trăm.
+Tạo khung chứa `border-radius: 9999px` (pill). Nền mờ nhẹ (`hover-bg` token hoặc nhạt hơn). Bên trong chứa:
 
----
+- **Vòng tròn tiến trình**: SVG hoặc conic-gradient nhỏ, viền `#10b981` / `#4ade80` (success), track nền xám mờ. Tỷ lệ hiển thị phần trăm đã dùng.
+- **Nhãn chữ**: "18% Daily Credits", `font-size: 12px`, `font-weight: 400`, màu `text-secondary`.
 
-## 🎨 2. Phân loại & Đặc tả Trực quan
-
-- **Vòng tròn Tiến trình (Progress Ring Track)**: Vòng tròn mảnh viền màu xanh lá cây đại diện cho tỷ lệ `18%` tài nguyên đã dùng.
-- **Khung chứa Pill**: Nền xám mờ nhẹ bo tròn tuyệt đối ở 2 đầu.
-- **Nhãn chữ**: Chữ mờ nhỏ gọn gàng ghi `"18% Daily Credits"`.
+Hover: đậm nền khung pill nhẹ, `transition: all 200ms ease`. Không dùng `translateY` hay `scale`. Hiển thị tooltip số lượt sinh ảnh còn lại.
