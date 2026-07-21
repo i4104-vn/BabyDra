@@ -12,13 +12,27 @@ pub fn create_dir_drop_target(dest_path: PathBuf) -> gtk4::DropTarget {
     );
     drop_target.connect_drop(move |_, value, _, _| {
         if let Ok(file_list) = value.get::<FileList>() {
+            let mut destinations = Vec::new();
+            let mut sources = Vec::new();
             for file in file_list.files() {
                 if let Some(src_path) = file.path() {
                     let dest = dest_path.join(src_path.file_name().unwrap());
                     if src_path != dest {
-                        let _ = std::fs::rename(&src_path, &dest);
+                        if std::fs::rename(&src_path, &dest).is_ok() {
+                            destinations.push(dest);
+                            sources.push(src_path);
+                        }
                     }
                 }
+            }
+            if !destinations.is_empty() {
+                crate::explore::context_menu::clipboard::UNDO_STACK.with(|stack| {
+                    stack.borrow_mut().push(crate::explore::context_menu::clipboard::UndoOperation {
+                        is_cut: true,
+                        sources,
+                        destinations,
+                    });
+                });
             }
             return true;
         }
@@ -36,13 +50,27 @@ pub fn create_background_drop_target(current_path: Rc<RefCell<PathBuf>>) -> gtk4
     drop_target.connect_drop(move |_, value, _, _| {
         let dest_dir = current_path.borrow().clone();
         if let Ok(file_list) = value.get::<FileList>() {
+            let mut destinations = Vec::new();
+            let mut sources = Vec::new();
             for file in file_list.files() {
                 if let Some(src_path) = file.path() {
                     let dest = dest_dir.join(src_path.file_name().unwrap());
                     if src_path != dest {
-                        let _ = std::fs::rename(&src_path, &dest);
+                        if std::fs::rename(&src_path, &dest).is_ok() {
+                            destinations.push(dest);
+                            sources.push(src_path);
+                        }
                     }
                 }
+            }
+            if !destinations.is_empty() {
+                crate::explore::context_menu::clipboard::UNDO_STACK.with(|stack| {
+                    stack.borrow_mut().push(crate::explore::context_menu::clipboard::UndoOperation {
+                        is_cut: true,
+                        sources,
+                        destinations,
+                    });
+                });
             }
             return true;
         }
