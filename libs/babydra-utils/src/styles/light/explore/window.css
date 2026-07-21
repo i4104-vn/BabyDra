@@ -13,7 +13,7 @@ window.explore-window {
     -gtk-background-blur: 24;
     border: none;
     border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-    border-radius: 0 0 16px 16px;
+    border-radius: 0 0 12px 12px;
     box-shadow: none;
     color: #1a1a1a;
     font-family: "Segoe UI Variable", "Inter", "Cantarell", sans-serif;
