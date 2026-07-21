@@ -24,13 +24,13 @@ pub fn show_for_empty(
     }
     let (popover, vbox) = create_menu_popover(parent_widget, x, y);
 
+    let btn_refresh = create_menu_button(&t("explore.menu_refresh"), "refresh");
     let btn_create_new = create_menu_button(&t("explore.menu_new"), "plus");
     let btn_paste = create_menu_button(&t("explore.menu_paste"), "paste");
-    let btn_refresh = create_menu_button(&t("explore.menu_refresh"), "refresh");
-
+    
+    vbox.append(&btn_refresh);
     vbox.append(&btn_create_new);
     vbox.append(&btn_paste);
-    vbox.append(&btn_refresh);
 
     // Sub-popover containing create options
     let sub_popover = crate::components::popovers::create_popover(&btn_create_new, gtk4::PositionType::Right, "explore-popover");

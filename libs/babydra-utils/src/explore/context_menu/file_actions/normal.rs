@@ -30,13 +30,13 @@ pub fn show_for_file_normal(
         None
     };
     let btn_refresh = create_menu_button(&t("explore.menu_refresh"), "refresh");
+    vbox.append(&btn_refresh);
 
     vbox.append(&btn_open);
     vbox.append(&btn_compress);
     if let Some(ref btn) = btn_decompress {
         vbox.append(btn);
     }
-    vbox.append(&btn_refresh);
 
     // Create horizontal footer container & box for clipboard & file operations
     let footer_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
