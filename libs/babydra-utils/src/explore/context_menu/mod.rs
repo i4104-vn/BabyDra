@@ -1,9 +1,11 @@
-pub mod file_actions;
+pub mod clipboard;
+pub mod custom_items;
 pub mod empty_actions;
-pub mod render;
+pub mod file_actions;
+pub mod widgets;
 
 pub use empty_actions::show_for_empty;
-pub use render::{create_menu_popover, create_menu_button, create_footer_icon_button};
+pub use widgets::{create_menu_popover, create_menu_button, create_footer_icon_button};
 
 use std::path::PathBuf;
 use std::rc::Rc;

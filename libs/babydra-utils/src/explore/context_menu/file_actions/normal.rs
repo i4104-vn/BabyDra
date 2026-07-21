@@ -1,7 +1,13 @@
 use std::path::PathBuf;
 use std::rc::Rc;
 use gtk4::prelude::*;
-use crate::explore::context_menu::{CLIPBOARD, create_menu_button, create_footer_icon_button};
+use crate::explore::context_menu::{
+    CLIPBOARD,
+    widgets::{create_menu_button, create_footer_icon_button},
+    clipboard::execute_paste,
+    custom_items::append_custom_context_items,
+};
+use crate::explore::helpers::is_archive_file;
 
 use babydra_common::i18n::t;
 
@@ -114,32 +120,7 @@ pub fn show_for_file_normal(
     btn_paste.connect_clicked(move |_| {
         pop_c.popdown();
         if let Some((sources, is_cut)) = clipboard_data.clone() {
-            let nav_f = nav.clone();
-            let cp_f = current_p.clone();
-            let dest_dir_c = dest_dir.clone();
-            glib::spawn_future_local(async move {
-                let mut all_success = true;
-                for src in sources {
-                    if let Some(filename) = src.file_name() {
-                        let dest = dest_dir_c.join(filename);
-                        if is_cut {
-                            if let Err(e) = babydra_common::move_path(src, dest).await {
-                                eprintln!("Failed to move file: {}", e);
-                                all_success = false;
-                            }
-                        } else {
-                            if let Err(e) = babydra_common::copy_path(src, dest).await {
-                                eprintln!("Failed to copy file: {}", e);
-                                all_success = false;
-                            }
-                        }
-                    }
-                }
-                if is_cut && all_success {
-                    CLIPBOARD.with(|cb| cb.replace(None));
-                }
-                nav_f(cp_f);
-            });
+            execute_paste(sources, dest_dir.clone(), is_cut, current_p.clone(), nav.clone());
         }
     });
 
@@ -175,8 +156,6 @@ pub fn show_for_file_normal(
         });
     });
 
-
-
     // Compress action
     let target_paths_compress = target_paths.clone();
     let nav = nav_callback.clone();
@@ -204,69 +183,8 @@ pub fn show_for_file_normal(
     }
 
     // Custom Context Options
-    let settings = babydra_common::load_explore_settings();
-    if !settings.custom_context_items.is_empty() {
-        let sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
-        sep.add_css_class("menu-sep");
-        vbox.append(&sep);
-
-        for item in settings.custom_context_items {
-            let icon_key = item.icon.as_deref().unwrap_or_else(|| {
-                if item.name.to_lowercase().contains("terminal") {
-                    "terminal"
-                } else {
-                    "settings"
-                }
-            });
-            let btn_custom = create_menu_button(&item.name, icon_key);
-            vbox.append(&btn_custom);
-
-            let pop_c = popover.clone();
-            let command_tmpl = item.command.clone();
-            let target_paths_c = target_paths.clone();
-            btn_custom.connect_clicked(move |_| {
-                pop_c.popdown();
-                let command_tmpl_c = command_tmpl.clone();
-                let paths = target_paths_c.clone();
-                for path in paths {
-                    let path_str = path.to_string_lossy().to_string();
-                    let parent_str = path.parent().map(|p| p.to_string_lossy().to_string()).unwrap_or_else(|| "".to_string());
-                    let name_str = path.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default();
-                    let stem_str = path.file_stem().map(|s| s.to_string_lossy().to_string()).unwrap_or_default();
-                    let ext_str = path.extension().map(|e| e.to_string_lossy().to_string()).unwrap_or_default();
-
-                    let cmd_str = command_tmpl_c
-                        .replace("{path}", &path_str)
-                        .replace("{dir}", &parent_str)
-                        .replace("{name}", &name_str)
-                        .replace("{stem}", &stem_str)
-                        .replace("{ext}", &ext_str);
-                    
-                    let _ = std::process::Command::new("sh")
-                        .arg("-c")
-                        .arg(&cmd_str)
-                        .spawn();
-                }
-            });
-        }
-    }
+    append_custom_context_items(vbox, popover, target_paths, false);
 
     vbox.append(&footer_container);
     popover.popup();
-}
-
-fn is_archive_file(path: &std::path::Path) -> bool {
-    let name = path.to_string_lossy().to_lowercase();
-    name.ends_with(".zip")
-        || name.ends_with(".tar")
-        || name.ends_with(".tar.gz")
-        || name.ends_with(".tgz")
-        || name.ends_with(".tar.xz")
-        || name.ends_with(".txz")
-        || name.ends_with(".tar.bz2")
-        || name.ends_with(".tbz2")
-        || name.ends_with(".tar.zst")
-        || name.ends_with(".tar.lz4")
-        || name.ends_with(".rar")
-        || name.ends_with(".7z")
 }
