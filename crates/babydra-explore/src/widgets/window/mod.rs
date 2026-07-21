@@ -364,6 +364,7 @@ pub fn create_explore_window(
         navigate_pane_ref.clone(),
         info_widgets_rc.clone(),
         left_content_scroll.clone(),
+        left_content_handle.clone(),
     );
 
     // Define clipboard and undo callbacks
