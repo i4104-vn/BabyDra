@@ -248,7 +248,14 @@ pub fn create_explore_window(
     }
 
     // Wire toolbar buttons click
-    widgets::wire_toolbar_buttons(&header_widgets, session.clone(), navigate_pane_ref.clone(), active_pane.clone());
+    widgets::wire_toolbar_buttons(
+        &header_widgets,
+        session.clone(),
+        navigate_pane_ref.clone(),
+        active_pane.clone(),
+        left_content_handle.clone(),
+        right_content_handle.clone(),
+    );
 
     // Setup preview panel visibility toggle closure
     let toggle_preview_rc = layout::setup_preview_toggle(
