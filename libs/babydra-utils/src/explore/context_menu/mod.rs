@@ -1,4 +1,5 @@
 pub mod clipboard;
+pub mod dimming;
 pub mod custom_items;
 pub mod empty_actions;
 pub mod file_actions;
@@ -6,6 +7,7 @@ pub mod widgets;
 
 pub use empty_actions::show_for_empty;
 pub use widgets::{create_menu_popover, create_menu_button, create_footer_icon_button};
+pub use dimming::{apply_cut_dimming, apply_cut_dimming_global};
 
 use std::path::PathBuf;
 use std::rc::Rc;

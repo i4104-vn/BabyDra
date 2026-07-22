@@ -1,9 +1,8 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Label, Entry, Button, Align, Window};
 use std::path::PathBuf;
 use std::rc::Rc;
 
-use babydra_common::i18n::t;
+mod render;
 
 /// Presents a dialog window to create a new empty file under a directory.
 pub fn show_new_file_dialog(
@@ -11,53 +10,14 @@ pub fn show_new_file_dialog(
     nav_callback: Rc<dyn Fn(PathBuf)>,
     parent: Option<&impl IsA<gtk4::Window>>,
 ) {
-    let window = Window::builder()
-        .title(&t("explore.dialog_new_file_title"))
-        .modal(true)
-        .resizable(false)
-        .default_width(320)
-        .default_height(140)
-        .css_classes(vec!["explore-dialog".to_string()])
-        .build();
-
-    if let Some(p) = parent {
-        window.set_transient_for(Some(p));
-    }
-
-    let vbox = Box::new(Orientation::Vertical, 12);
-    vbox.add_css_class("explore-dialog-box");
-    vbox.set_margin_top(16);
-    vbox.set_margin_bottom(16);
-    vbox.set_margin_start(16);
-    vbox.set_margin_end(16);
-    window.set_child(Some(&vbox));
-
-    let lbl = Label::builder()
-        .label(&t("explore.dialog_new_file_label"))
-        .halign(Align::Start)
-        .build();
-    vbox.append(&lbl);
-
-    let entry = Entry::new();
-    entry.set_text(&t("explore.menu_new_file"));
-    entry.set_hexpand(true);
-    vbox.append(&entry);
-
-    let bbox = Box::new(Orientation::Horizontal, 8);
-    bbox.set_halign(Align::End);
-    vbox.append(&bbox);
-
-    let btn_cancel = Button::with_label(&t("explore.settings_cancel"));
-    let btn_create = Button::builder()
-        .label(&t("explore.settings_add"))
-        .css_classes(vec!["suggested-action".to_string()])
-        .build();
-
-    bbox.append(&btn_cancel);
-    bbox.append(&btn_create);
+    let widgets = render::build_new_file_dialog_ui(parent);
+    let window = widgets.window;
+    let vbox = widgets.vbox;
+    let entry = widgets.entry;
+    let btn_create = widgets.btn_create;
 
     let win_cancel_btn = window.clone();
-    btn_cancel.connect_clicked(move |_| {
+    widgets.btn_cancel.connect_clicked(move |_| {
         win_cancel_btn.close();
     });
 
