@@ -53,17 +53,40 @@ pub fn show_for_file_normal(
     footer_box.append(&btn_cut);
     footer_box.append(&btn_copy);
 
-    // Paste button (always visible if clipboard is not empty)
+    // Paste button (only rendered if clipboard contains items to paste/move)
     let clipboard_data = CLIPBOARD.with(|cb| cb.borrow().clone());
-    let btn_paste = create_footer_icon_button("paste", &t("explore.menu_paste"));
-    btn_paste.set_sensitive(clipboard_data.is_some());
-    footer_box.append(&btn_paste);
+    let has_paste_items = clipboard_data.as_ref().map_or(false, |(sources, _)| !sources.is_empty());
+
+    if has_paste_items {
+        let btn_paste = create_footer_icon_button("paste", &t("explore.menu_paste"));
+        footer_box.append(&btn_paste);
+
+        let pop_c = popover.clone();
+        let is_target_dir = target_paths.len() == 1 && target_paths[0].is_dir();
+        let dest_dir = if is_target_dir {
+            target_paths[0].clone()
+        } else {
+            current_path.clone()
+        };
+        let nav = nav_callback.clone();
+        let current_p = current_path.clone();
+        let clipboard_data_c = clipboard_data.clone();
+        btn_paste.connect_clicked(move |_| {
+            pop_c.popdown();
+            if let Some((sources, is_cut)) = clipboard_data_c.clone() {
+                execute_paste(sources, dest_dir.clone(), is_cut, current_p.clone(), nav.clone());
+            }
+        });
+    }
 
     // Rename button (only if 1 target is selected)
-    let btn_rename = create_footer_icon_button("rename", &t("explore.menu_rename"));
-    if target_paths.len() == 1 {
-        footer_box.append(&btn_rename);
-    }
+    let btn_rename = if target_paths.len() == 1 {
+        let btn = create_footer_icon_button("rename", &t("explore.menu_rename"));
+        footer_box.append(&btn);
+        Some(btn)
+    } else {
+        None
+    };
 
     let btn_trash = create_footer_icon_button("trash", &t("explore.menu_trash"));
     footer_box.append(&btn_trash);
@@ -110,25 +133,8 @@ pub fn show_for_file_normal(
         nav_c(current_p.clone());
     });
 
-    // Paste handler
-    let pop_c = popover.clone();
-    let is_target_dir = target_paths.len() == 1 && target_paths[0].is_dir();
-    let dest_dir = if is_target_dir {
-        target_paths[0].clone()
-    } else {
-        current_path.clone()
-    };
-    let nav = nav_callback.clone();
-    let current_p = current_path.clone();
-    btn_paste.connect_clicked(move |_| {
-        pop_c.popdown();
-        if let Some((sources, is_cut)) = clipboard_data.clone() {
-            execute_paste(sources, dest_dir.clone(), is_cut, current_p.clone(), nav.clone());
-        }
-    });
-
     // Rename dialog trigger
-    if target_paths.len() == 1 {
+    if let Some(btn_rename) = btn_rename {
         let pop_c = popover.clone();
         let rename_path = target_paths[0].clone();
         let nav = nav_callback.clone();
