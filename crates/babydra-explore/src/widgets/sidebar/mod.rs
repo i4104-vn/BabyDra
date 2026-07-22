@@ -103,5 +103,12 @@ fn add_sidebar_item(
         },
     );
 
+    // Attach Drop Target so files can be dragged and moved into sidebar folders
+    let drop_target = babydra_utils::explore::create_dir_drop_target_with_nav(
+        path.clone(),
+        Some(nav_callback.clone()),
+    );
+    btn.add_controller(drop_target);
+
     container.append(&btn);
 }
