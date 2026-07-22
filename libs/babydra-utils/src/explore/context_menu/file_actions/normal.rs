@@ -111,26 +111,20 @@ pub fn show_for_file_normal(
 
     let pop_c = popover.clone();
     let target_paths_copy = target_paths.clone();
-    let nav_c = nav_callback.clone();
-    let current_p = current_path.clone();
     btn_copy.connect_clicked(move |_| {
         pop_c.popdown();
         CLIPBOARD.with(|cb| {
             cb.replace(Some((target_paths_copy.clone(), false)));
         });
-        nav_c(current_p.clone());
     });
 
     let pop_c = popover.clone();
     let target_paths_cut = target_paths.clone();
-    let nav_c = nav_callback.clone();
-    let current_p = current_path.clone();
     btn_cut.connect_clicked(move |_| {
         pop_c.popdown();
         CLIPBOARD.with(|cb| {
             cb.replace(Some((target_paths_cut.clone(), true)));
         });
-        nav_c(current_p.clone());
     });
 
     // Rename dialog trigger
