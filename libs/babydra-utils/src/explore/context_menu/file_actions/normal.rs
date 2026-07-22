@@ -49,18 +49,18 @@ pub fn show_for_file_normal(
 
     let btn_cut = create_footer_icon_button("cut", &t("explore.menu_cut"));
     let btn_copy = create_footer_icon_button("copy", &t("explore.menu_copy"));
-    
+    let btn_paste = create_footer_icon_button("paste", &t("explore.menu_paste"));
+
     footer_box.append(&btn_cut);
     footer_box.append(&btn_copy);
+    footer_box.append(&btn_paste);
 
-    // Paste button (only rendered if clipboard contains items to paste/move)
+    // Check clipboard state for paste sensitivity
     let clipboard_data = CLIPBOARD.with(|cb| cb.borrow().clone());
     let has_paste_items = clipboard_data.as_ref().map_or(false, |(sources, _)| !sources.is_empty());
+    btn_paste.set_sensitive(has_paste_items);
 
     if has_paste_items {
-        let btn_paste = create_footer_icon_button("paste", &t("explore.menu_paste"));
-        footer_box.append(&btn_paste);
-
         let pop_c = popover.clone();
         let is_target_dir = target_paths.len() == 1 && target_paths[0].is_dir();
         let dest_dir = if is_target_dir {

@@ -52,7 +52,7 @@ pub fn show_for_empty(
     let clipboard_data = CLIPBOARD.with(|cb| cb.borrow().clone());
     let has_paste_items = clipboard_data.as_ref().map_or(false, |(sources, _)| !sources.is_empty());
 
-    // Only render Paste button if clipboard has files to move/paste
+    // Only render top Paste menu button if clipboard has files to move/paste (Hidden if empty)
     if has_paste_items {
         let btn_paste = create_menu_button(&t("explore.menu_paste"), "paste");
         vbox.append(&btn_paste);
@@ -105,27 +105,28 @@ pub fn show_for_empty(
     // Custom Context Options for empty area
     append_custom_context_items(&vbox, &popover, vec![current_path.clone()], true);
 
-    // Footer Container
+    // Footer Container (Footer buttons remain visible, paste is disabled if clipboard is empty)
     let (footer_container, footer_box) = create_footer_container();
     
     let btn_footer_cut = create_footer_icon_button("cut", &t("explore.menu_cut"));
     let btn_footer_copy = create_footer_icon_button("copy", &t("explore.menu_copy"));
+    let btn_footer_paste = create_footer_icon_button("paste", &t("explore.menu_paste"));
     let btn_footer_rename = create_footer_icon_button("rename", &t("explore.menu_rename"));
     let btn_footer_trash = create_footer_icon_button("trash", &t("explore.menu_trash"));
 
     btn_footer_cut.set_sensitive(false);
     btn_footer_copy.set_sensitive(false);
+    btn_footer_paste.set_sensitive(has_paste_items);
     btn_footer_rename.set_sensitive(false);
     btn_footer_trash.set_sensitive(false);
 
     footer_box.append(&btn_footer_cut);
     footer_box.append(&btn_footer_copy);
+    footer_box.append(&btn_footer_paste);
+    footer_box.append(&btn_footer_rename);
+    footer_box.append(&btn_footer_trash);
 
     if has_paste_items {
-        let btn_footer_paste = create_footer_icon_button("paste", &t("explore.menu_paste"));
-        btn_footer_paste.set_sensitive(true);
-        footer_box.append(&btn_footer_paste);
-
         let pop_c = popover.clone();
         let dest_dir = current_path.clone();
         let nav = nav_callback.clone();
@@ -138,9 +139,6 @@ pub fn show_for_empty(
             }
         });
     }
-
-    footer_box.append(&btn_footer_rename);
-    footer_box.append(&btn_footer_trash);
 
     vbox.append(&footer_container);
 
