@@ -50,10 +50,18 @@ pub fn show_for_file_normal(
     let btn_cut = create_footer_icon_button("cut", &t("explore.menu_cut"));
     let btn_copy = create_footer_icon_button("copy", &t("explore.menu_copy"));
     let btn_paste = create_footer_icon_button("paste", &t("explore.menu_paste"));
+    let btn_rename = create_footer_icon_button("rename", &t("explore.menu_rename"));
+    let btn_trash = create_footer_icon_button("trash", &t("explore.menu_trash"));
+
+    btn_cut.set_sensitive(!target_paths.is_empty());
+    btn_copy.set_sensitive(!target_paths.is_empty());
+    btn_trash.set_sensitive(!target_paths.is_empty());
 
     footer_box.append(&btn_cut);
     footer_box.append(&btn_copy);
     footer_box.append(&btn_paste);
+    footer_box.append(&btn_rename);
+    footer_box.append(&btn_trash);
 
     // Check clipboard state for paste sensitivity
     let clipboard_data = CLIPBOARD.with(|cb| cb.borrow().clone());
@@ -79,17 +87,9 @@ pub fn show_for_file_normal(
         });
     }
 
-    // Rename button (only if 1 target is selected)
-    let btn_rename = if target_paths.len() == 1 {
-        let btn = create_footer_icon_button("rename", &t("explore.menu_rename"));
-        footer_box.append(&btn);
-        Some(btn)
-    } else {
-        None
-    };
-
-    let btn_trash = create_footer_icon_button("trash", &t("explore.menu_trash"));
-    footer_box.append(&btn_trash);
+    // Rename button sensitivity (only enabled if exactly 1 target is selected)
+    let is_single = target_paths.len() == 1;
+    btn_rename.set_sensitive(is_single);
 
     footer_container.append(&footer_box);
 
@@ -128,7 +128,7 @@ pub fn show_for_file_normal(
     });
 
     // Rename dialog trigger
-    if let Some(btn_rename) = btn_rename {
+    if is_single {
         let pop_c = popover.clone();
         let rename_path = target_paths[0].clone();
         let nav = nav_callback.clone();
