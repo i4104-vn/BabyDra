@@ -77,11 +77,8 @@ pub fn init_theme() {
     if let Some(settings) = gtk4::Settings::default() {
         let gsettings = gio::Settings::new("org.gnome.desktop.interface");
         let value = gsettings.string("color-scheme");
-        if value == "prefer-dark" {
-            settings.set_gtk_application_prefer_dark_theme(true);
-        } else if value == "prefer-light" {
-            settings.set_gtk_application_prefer_dark_theme(false);
-        }
+        let is_dark = value != "prefer-light";
+        settings.set_gtk_application_prefer_dark_theme(is_dark);
 
         let user_icon_theme = gsettings.string("icon-theme");
         let user_icon_theme = user_icon_theme.trim();
@@ -171,10 +168,7 @@ pub fn is_dark_mode() -> bool {
 
 /// Sets the color scheme preference in GSettings.
 pub fn set_dark_mode(dark: bool) {
-    let scheme = if dark { "prefer-dark" } else { "prefer-light" };
-    let _ = std::process::Command::new("gsettings")
-        .args(&["set", "org.gnome.desktop.interface", "color-scheme", scheme])
-        .output();
+    let _ = babydra_common::services::system::set_gsettings_color_scheme(dark);
 
     if let Some(settings) = gtk4::Settings::default() {
         settings.set_gtk_application_prefer_dark_theme(dark);

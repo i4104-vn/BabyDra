@@ -233,7 +233,6 @@ scrolledwindow.notif-scroll viewport {
 .notif-stack-item:hover {
     background-color: rgba(255, 255, 255, 0.09);
     border-color: rgba(0, 0, 0, 0.08);
-    transform: translateY(-1px);
     box-shadow: none;
 }
 

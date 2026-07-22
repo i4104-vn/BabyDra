@@ -10,6 +10,7 @@ pub fn setup_tab_bar(
     session: Rc<RefCell<SessionState>>,
     nav: Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>,
     tab_bar_box: Rc<RefCell<Option<gtk4::Box>>>,
+    rebuild_tabs_cell: Rc<RefCell<Option<Rc<dyn Fn()>>>>,
 ) -> Rc<dyn Fn()> {
     let session_c = session.clone();
     let nav_c = nav.clone();
@@ -108,6 +109,7 @@ pub fn setup_tab_bar(
     };
 
     let rebuild_tabs_rc = Rc::new(rebuild_tabs);
+    rebuild_tabs_cell.replace(Some(rebuild_tabs_rc.clone()));
 
     // Initial TabBar creation
     {

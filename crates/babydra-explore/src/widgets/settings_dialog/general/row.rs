@@ -4,20 +4,30 @@ use gtk4::{Box, Orientation, ListBox, ListBoxRow, Label, Switch, Align};
 /// Helper to render a settings row with a switch toggle.
 pub fn add_switch_row(
     listbox: &ListBox,
+    icon_name: &str,
     label_title: &str,
     label_desc: &str,
     active: bool,
     on_toggle: std::boxed::Box<dyn Fn(bool)>,
 ) {
     let row = ListBoxRow::new();
+    row.add_css_class("settings-card-row");
+
     let hbox = Box::new(Orientation::Horizontal, 12);
-    hbox.set_margin_top(8);
-    hbox.set_margin_bottom(8);
-    hbox.set_margin_start(12);
-    hbox.set_margin_end(12);
+    hbox.set_margin_top(12);
+    hbox.set_margin_bottom(12);
+    hbox.set_margin_start(16);
+    hbox.set_margin_end(16);
+
+    // Left Icon
+    let icon = babydra_utils::ui::icon::get_icon(icon_name, 16);
+    icon.set_valign(Align::Center);
+    icon.add_css_class("settings-row-icon");
+    hbox.append(&icon);
 
     let vbox_lbl = Box::new(Orientation::Vertical, 2);
     vbox_lbl.set_hexpand(true);
+    vbox_lbl.set_valign(Align::Center);
 
     let lbl_title = Label::builder()
         .label(label_title)

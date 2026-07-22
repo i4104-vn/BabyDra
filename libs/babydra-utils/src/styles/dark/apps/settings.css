@@ -27,7 +27,6 @@ window.settings-window > overlay > box {
 .settings-sidebar-row:hover {
     background-color: rgba(255, 255, 255, 0.08);
     color: #f5f5f7;
-    transform: translateX(2px);
 }
 
 .settings-sidebar-row:selected {
@@ -105,12 +104,11 @@ button.suggested-action {
 
 button.suggested-action:hover {
     background-color: rgba(96, 165, 250, 0.9);
-    transform: translateY(-1px);
     box-shadow: none;
 }
 
 button.suggested-action:active {
-    transform: translateY(0px);
+    background-color: #2563eb;
 }
 
 button {
@@ -145,13 +143,12 @@ button:hover {
 }
 
 .baby-fab:hover {
-    background-color: #359aff;
-    transform: scale(1.05);
+    background-color: #3b82f6;
     box-shadow: none;
 }
 
 .baby-fab:active {
-    transform: scale(0.95);
+    background-color: #2563eb;
 }
 
 .baby-fab image {
@@ -240,7 +237,6 @@ progressbar.disk-progress progress {
 .choose-file-card:hover {
     background-color: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.15);
-    transform: scale(1.02);
 }
 
 .theme-option-card {

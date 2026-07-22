@@ -2,7 +2,7 @@ use std::rc::Rc;
 use std::cell::{RefCell, Cell};
 use std::path::PathBuf;
 use gtk4::prelude::*;
-use babydra_common::{SessionState, ActivePane, ContentViewHandle, HeaderBarWidgets, FileWatcher};
+use babydra_common::{SessionState, ActivePane, ContentViewHandle, FileWatcher};
 use crate::widgets::status_bar::StatusBarWidgets;
 
 /// Sets up the primary navigation closures (`navigate_pane` and `navigate_pane_no_watch`) and registers the left-pane channel watcher.
@@ -13,20 +13,21 @@ pub fn setup_navigation(
     right_content_handle: Rc<RefCell<Option<Rc<ContentViewHandle>>>>,
     left_scroll_cell: Rc<RefCell<Option<gtk4::Box>>>,
     right_scroll_cell: Rc<RefCell<Option<gtk4::Box>>>,
-    status_bar_widgets_cell: Rc<RefCell<Option<StatusBarWidgets>>>,
-    header_widgets_cell: Rc<RefCell<Option<HeaderBarWidgets>>>,
-    tab_bar_box: Rc<RefCell<Option<gtk4::Box>>>,
+    _status_bar_widgets_cell: Rc<RefCell<Option<StatusBarWidgets>>>,
+    _tab_bar_box: Rc<RefCell<Option<gtk4::Box>>>,
     status_bar_lbl: Rc<gtk4::Label>,
+    rebuild_tabs_cell: Rc<RefCell<Option<Rc<dyn Fn()>>>>,
     watch_tx: tokio::sync::mpsc::UnboundedSender<()>,
     mut left_rx: tokio::sync::mpsc::UnboundedReceiver<PathBuf>,
 ) -> (
     Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>, // navigate_pane_ref
     Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>, // navigate_pane_no_watch_ref
-    Rc<RefCell<Option<FileWatcher>>>,
+    (Rc<RefCell<Option<FileWatcher>>>, Rc<RefCell<Option<FileWatcher>>>),
 ) {
     let navigate_pane_ref = Rc::new(RefCell::new(None::<Rc<dyn Fn(ActivePane, PathBuf)>>));
     let navigate_pane_no_watch_ref = Rc::new(RefCell::new(None::<Rc<dyn Fn(ActivePane, PathBuf)>>));
-    let watcher = Rc::new(RefCell::new(None::<FileWatcher>));
+    let left_watcher = Rc::new(RefCell::new(None::<FileWatcher>));
+    let right_watcher = Rc::new(RefCell::new(None::<FileWatcher>));
 
     // Define navigate_pane_no_watch closure
     {
@@ -36,11 +37,9 @@ pub fn setup_navigation(
         let right_handle = right_content_handle.clone();
         let right_s = right_scroll_cell.clone();
         let left_s = left_scroll_cell.clone();
-        let status_bar_widgets_cell = status_bar_widgets_cell.clone();
-        let header_widgets_cell = header_widgets_cell.clone();
-        let tab_bar_box = tab_bar_box.clone();
         let status_bar_lbl = status_bar_lbl.clone();
         let navigate_pane_no_watch_ref_c = navigate_pane_no_watch_ref.clone();
+        let rebuild_tabs_cell_c = rebuild_tabs_cell.clone();
 
         *navigate_pane_no_watch_ref.borrow_mut() = Some(Rc::new(move |pane: ActivePane, path: PathBuf| {
             // Highlight active pane
@@ -63,15 +62,6 @@ pub fn setup_navigation(
 
             let show_hidden = session.borrow().active_tab().show_hidden;
 
-            // Sync toggle button active class in StatusBar
-            if let Some(ref sw) = *status_bar_widgets_cell.borrow() {
-                if show_hidden {
-                    sw.btn_toggle_hidden.add_css_class("status-bar-btn-active");
-                } else {
-                    sw.btn_toggle_hidden.remove_css_class("status-bar-btn-active");
-                }
-            }
-
             let content_handle = if pane == ActivePane::Left {
                 Some(left_handle.clone())
             } else {
@@ -84,31 +74,38 @@ pub fn setup_navigation(
             if let Some(ref handle) = content_handle {
                 handle.widgets.progress_bar.set_visible(true);
                 handle.widgets.progress_bar.set_fraction(0.0);
+
+                // Update pane history stack
+                let mut hist = handle.history.borrow_mut();
+                let mut idx = handle.history_index.borrow_mut();
+                if hist.is_empty() || hist[*idx] != path {
+                    if *idx + 1 < hist.len() {
+                        hist.truncate(*idx + 1);
+                    }
+                    hist.push(path.clone());
+                    *idx = hist.len() - 1;
+                }
             }
 
-            let header_widgets_c = header_widgets_cell.clone();
             let session_c = session.clone();
             let nav_no_watch_c = navigate_pane_no_watch_ref_c.clone();
-            let tab_bar_box_c = tab_bar_box.clone();
+            let rebuild_tabs_cell_c2 = rebuild_tabs_cell_c.clone();
             let status_lbl_c = status_bar_lbl.clone();
             let content_handle_err = content_handle.clone();
 
             glib::spawn_future_local(async move {
                 match babydra_common::load_directory(path.clone(), show_hidden).await {
                     Ok(entries) => {
-                        // Update Header breadcrumbs
-                        if let Some(ref hw) = *header_widgets_c.borrow() {
-                            let is_in_trash = path.to_string_lossy().ends_with("Trash/files");
-                            babydra_utils::explore::update_new_folder_button(&hw.btn_new_folder, is_in_trash);
-
+                        // Update Pane-specific breadcrumbs
+                        if let Some(ref handle) = content_handle {
                             let nav_cb: Rc<dyn Fn(PathBuf)> = Rc::new(move |p: PathBuf| {
                                 if let Some(ref f) = *nav_no_watch_c.borrow() {
                                     f(pane, p);
                                 }
                             });
                             crate::widgets::header_bar::update_address_bar(
-                                &hw.breadcrumb_box,
-                                &hw.address_stack,
+                                &handle.widgets.breadcrumb_box,
+                                &handle.widgets.address_stack,
                                 &session_c,
                                 &path,
                                 &nav_cb,
@@ -126,10 +123,8 @@ pub fn setup_navigation(
                         // Update Status Bar
                         crate::widgets::status_bar::update_status_bar(&status_lbl_c, entries.len(), total_size);
 
-                        // Update Tab Bar titles
-                        if let Some(ref _tbb) = *tab_bar_box_c.borrow() {
-                            // Trigger TabBar rebuild
-                            // Re-borrow tabs callbacks inside rebuild
+                        if let Some(ref rebuild) = *rebuild_tabs_cell_c2.borrow() {
+                            rebuild();
                         }
                     }
                     Err(err) => {
@@ -145,12 +140,19 @@ pub fn setup_navigation(
 
     // Define navigate_pane closure (which handles watcher)
     {
-        let watcher = watcher.clone();
+        let left_w = left_watcher.clone();
+        let right_w = right_watcher.clone();
         let watch_tx = watch_tx.clone();
         let nav_no_watch_ref = navigate_pane_no_watch_ref.clone();
-
+ 
         *navigate_pane_ref.borrow_mut() = Some(Rc::new(move |pane: ActivePane, path: PathBuf| {
-            let mut watcher_borrow = watcher.borrow_mut();
+            let target_watcher = if pane == ActivePane::Left {
+                left_w.clone()
+            } else {
+                right_w.clone()
+            };
+
+            let mut watcher_borrow = target_watcher.borrow_mut();
             if let Some(ref mut w) = *watcher_borrow {
                 let _ = w.watch(&path);
             } else {
@@ -161,13 +163,13 @@ pub fn setup_navigation(
                     *watcher_borrow = Some(w);
                 }
             }
-
+ 
             if let Some(ref f) = *nav_no_watch_ref.borrow() {
                 f(pane, path);
             }
         }));
     }
-
+ 
     // Wire left pane navigation loop
     {
         let nav = navigate_pane_ref.clone();
@@ -184,6 +186,6 @@ pub fn setup_navigation(
             }
         });
     }
-
-    (navigate_pane_ref, navigate_pane_no_watch_ref, watcher)
+ 
+    (navigate_pane_ref, navigate_pane_no_watch_ref, (left_watcher, right_watcher))
 }

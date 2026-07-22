@@ -18,12 +18,9 @@ pub fn build_info_panel_ui() -> InfoPanelWidgets {
     container.set_child(Some(&vbox));
 
     // Preview Section
-    let preview_frame = Frame::new(Some("Preview"));
-    preview_frame.set_size_request(-1, 240);
-    
     let stack = Stack::new();
+    stack.set_size_request(-1, 240);
     stack.set_transition_type(gtk4::StackTransitionType::Crossfade);
-    preview_frame.set_child(Some(&stack));
 
     let img_preview = Image::from_icon_name("text-x-generic");
     img_preview.set_pixel_size(96);
@@ -34,7 +31,7 @@ pub fn build_info_panel_ui() -> InfoPanelWidgets {
     let (preview_container, preview_widgets) = create_preview_panel();
     stack.add_named(&preview_container, Some("text"));
 
-    vbox.append(&preview_frame);
+    vbox.append(&stack);
 
     // Details Section
     let details_frame = Frame::new(Some("Details"));

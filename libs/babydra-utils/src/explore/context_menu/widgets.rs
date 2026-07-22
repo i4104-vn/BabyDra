@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Orientation, Align, Label, Image, Popover};
+use gtk4::{Box, Button, Orientation, Align, Label, Popover};
 
 pub fn create_menu_popover(parent: &gtk4::Widget, x: f64, y: f64) -> (Popover, Box) {
     let popover = Popover::builder()
@@ -38,5 +38,34 @@ pub fn create_menu_button(label: &str, icon: &str) -> Button {
         .child(&hbox)
         .css_classes(vec!["flat".to_string(), "context-menu-item".to_string()])
         .halign(Align::Fill)
+        .focusable(false)
         .build()
+}
+
+pub fn create_footer_icon_button(icon: &str, tooltip: &str) -> Button {
+    let img = crate::ui::icon::get_icon(icon, 14);
+    img.set_pixel_size(14);
+
+    Button::builder()
+        .child(&img)
+        .tooltip_text(tooltip)
+        .css_classes(vec!["flat".to_string(), "context-menu-footer-btn".to_string()])
+        .halign(Align::Center)
+        .valign(Align::Center)
+        .focusable(false)
+        .build()
+}
+
+pub fn create_footer_container() -> (Box, Box) {
+    let footer_container = Box::new(Orientation::Horizontal, 0);
+    footer_container.add_css_class("context-menu-footer");
+    footer_container.set_halign(Align::Fill);
+
+    let footer_box = Box::new(Orientation::Horizontal, 6);
+    footer_box.set_halign(Align::Start);
+    footer_box.set_homogeneous(false);
+    
+    footer_container.append(&footer_box);
+    
+    (footer_container, footer_box)
 }

@@ -30,13 +30,16 @@ pub fn wire_background_controllers(
         gesture.connect_pressed(move |gesture, _, x, y| {
             gesture.set_state(gtk4::EventSequenceState::Claimed);
             let path = cp.borrow().clone();
-            babydra_utils::explore::context_menu::show_for_empty(
-                container_widget.upcast_ref(),
-                x,
-                y,
-                path,
-                nav.clone(),
-            );
+            if let Some(win) = container_widget.root().and_then(|r| r.downcast::<gtk4::Window>().ok()) {
+                babydra_utils::explore::context_menu::show_for_empty(
+                    container_widget.upcast_ref(),
+                    x,
+                    y,
+                    path,
+                    nav.clone(),
+                    &win,
+                );
+            }
         });
         widgets.container.add_controller(gesture);
     }

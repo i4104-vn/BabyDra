@@ -28,14 +28,17 @@ pub fn create_flow_child(
                 target_paths = vec![target_entry.path.clone()];
             }
 
-            babydra_utils::explore::context_menu::show_for_file(
-                widget,
-                x,
-                y,
-                target_paths,
-                cp.clone(),
-                nav.clone(),
-            );
+            if let Some(win) = widget.root().and_then(|r| r.downcast::<gtk4::Window>().ok()) {
+                babydra_utils::explore::context_menu::show_for_file(
+                    widget,
+                    x,
+                    y,
+                    target_paths,
+                    cp.clone(),
+                    nav.clone(),
+                    &win,
+                );
+            }
         },
     );
 

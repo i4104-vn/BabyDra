@@ -94,11 +94,6 @@ chmod +x "$HOME/.local/share/applications/babydra-explore.desktop"
 update-desktop-database "$HOME/.local/share/applications" || true
 xdg-mime default babydra-explore.desktop inode/directory || true
 
-
-# 6. Reload labwc settings
-echo "Reloading labwc compositor..."
-labwc --reconfigure || true
-
 # 7. Start the panel and redirect stdout/stderr to log file
 echo "Starting babydra-panel..."
 killall fnott || true

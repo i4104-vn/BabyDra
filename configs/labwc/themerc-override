@@ -1,8 +1,8 @@
 # BabyDra Premium Window Titlebar Theme Override for Labwc
 
 # ── General ──────────────────────────────────────────────
-border.width: 1
-border.color: #1a1a2e
+border.width: 0
+border.color: #3d3d5c
 
 # ── Corner Radius ────────────────────────────────────────
 window.active.border.corner-radius: 12
@@ -18,9 +18,9 @@ window.inactive.border.color: #161622
 
 # ── Titlebar Background ────────────────────────────────
 window.active.title.bg: Solid
-window.active.title.bg.color: #12121e
+window.active.title.bg.color: #141416
 window.inactive.title.bg: Solid
-window.inactive.title.bg.color: #0a0a14
+window.inactive.title.bg.color: #0d0d0f
 
 # ── Titlebar Text ──────────────────────────────────────
 window.active.label.text.color: #e8e8f0

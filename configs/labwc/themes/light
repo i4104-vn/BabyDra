@@ -1,7 +1,7 @@
 # BabyDra Window Titlebar Theme Override (Light)
 
 # ── General ──────────────────────────────────────────────
-border.width: 1
+border.width: 0
 border.color: #d0d0da
 
 # ── Corner Radius ────────────────────────────────────────

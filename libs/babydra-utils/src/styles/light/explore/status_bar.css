@@ -1,6 +1,7 @@
 .explore-window .status-bar {
     background-color: rgba(255, 255, 255, 0.25);
     border-top: 1px solid #d0d0d0;
+    border-radius: 0 0 12px 12px;
     padding: 4px 12px;
     color: #666;
     font-size: 12px;
@@ -30,6 +31,47 @@
 .explore-window .status-bar button.status-bar-btn-active:hover {
     background-color: rgba(0, 102, 204, 0.15);
     color: #0066cc;
+}
+
+.explore-window dropdown.status-bar-dropdown {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.explore-window dropdown.status-bar-dropdown>button {
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    padding: 2px 6px;
+    color: #555555;
+    font-size: 12px;
+    transition: all 150ms ease;
+}
+
+.explore-window dropdown.status-bar-dropdown>button:hover {
+    background-color: rgba(0, 0, 0, 0.06);
+    color: #000000;
+}
+
+.explore-window dropdown.status-bar-dropdown>button arrow,
+.explore-window dropdown.status-bar-dropdown>button image {
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+    min-height: 0;
+    opacity: 0;
+}
+
+.explore-window dropdown.status-bar-dropdown>button label {
+    margin-right: 0;
+    padding-right: 0;
+}
+
+.explore-window .status-bar-separator {
+    background-color: #d0d0d0;
+    min-width: 1px;
+    margin: 4px 6px;
 }
 
 
