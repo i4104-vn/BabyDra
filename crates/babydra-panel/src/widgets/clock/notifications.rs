@@ -203,22 +203,15 @@ fn render_expanded_group(
         let text_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
         text_box.set_hexpand(true);
 
+        let title_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+        title_box.set_hexpand(true);
+
         let title_lbl = gtk4::Label::new(Some(&notif.title));
         title_lbl.add_css_class("notif-item-title");
         title_lbl.set_halign(gtk4::Align::Start);
+        title_lbl.set_hexpand(true);
         title_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
         title_lbl.set_lines(1);
-
-        let body_lbl = gtk4::Label::new(Some(&notif.body));
-        body_lbl.add_css_class("notif-item-body");
-        body_lbl.set_halign(gtk4::Align::Start);
-        body_lbl.set_wrap(true);
-        body_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
-        body_lbl.set_lines(2);
-        body_lbl.set_max_width_chars(28);
-
-        text_box.append(&title_lbl);
-        text_box.append(&body_lbl);
 
         let time_str = format_elapsed_time(notif.timestamp);
         let time_lbl = gtk4::Label::new(Some(&time_str));
@@ -226,9 +219,23 @@ fn render_expanded_group(
         time_lbl.set_halign(gtk4::Align::End);
         time_lbl.set_valign(gtk4::Align::Center);
 
+        title_box.append(&title_lbl);
+        title_box.append(&time_lbl);
+
+        let body_lbl = gtk4::Label::new(Some(&notif.body));
+        body_lbl.add_css_class("notif-item-body");
+        body_lbl.set_halign(gtk4::Align::Start);
+        body_lbl.set_hexpand(true);
+        body_lbl.set_wrap(true);
+        body_lbl.set_wrap_mode(gtk4::pango::WrapMode::WordChar);
+        body_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
+        body_lbl.set_lines(3);
+
+        text_box.append(&title_box);
+        text_box.append(&body_lbl);
+
         item_box.append(&icon_widget);
         item_box.append(&text_box);
-        item_box.append(&time_lbl);
         sub_box.append(&item_box);
     }
 
@@ -295,23 +302,14 @@ fn render_collapsed_group(
     text_box.set_hexpand(true);
 
     let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+    header_box.set_hexpand(true);
     let app_title = gtk4::Label::new(Some(display_app_name));
     app_title.add_css_class("notif-item-title");
     app_title.set_halign(gtk4::Align::Start);
+    app_title.set_hexpand(true);
     app_title.set_ellipsize(gtk4::pango::EllipsizeMode::End);
     app_title.set_lines(1);
     header_box.append(&app_title);
-
-    let body_lbl = gtk4::Label::new(Some(&latest_notif.body));
-    body_lbl.add_css_class("notif-item-body");
-    body_lbl.set_halign(gtk4::Align::Start);
-    body_lbl.set_wrap(true);
-    body_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
-    body_lbl.set_lines(2);
-    body_lbl.set_max_width_chars(28);
-
-    text_box.append(&header_box);
-    text_box.append(&body_lbl);
 
     let right_widget = if list.len() > 1 {
         let badge = gtk4::Label::new(Some(&format!("{}", list.len())));
@@ -328,10 +326,22 @@ fn render_collapsed_group(
         time_lbl.set_valign(gtk4::Align::Center);
         time_lbl.upcast::<gtk4::Widget>()
     };
+    header_box.append(&right_widget);
+
+    let body_lbl = gtk4::Label::new(Some(&latest_notif.body));
+    body_lbl.add_css_class("notif-item-body");
+    body_lbl.set_halign(gtk4::Align::Start);
+    body_lbl.set_hexpand(true);
+    body_lbl.set_wrap(true);
+    body_lbl.set_wrap_mode(gtk4::pango::WrapMode::WordChar);
+    body_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
+    body_lbl.set_lines(3);
+
+    text_box.append(&header_box);
+    text_box.append(&body_lbl);
 
     main_item.append(&icon_widget);
     main_item.append(&text_box);
-    main_item.append(&right_widget);
     group_container.append(&main_item);
 
     if list.len() > 1 {
