@@ -7,7 +7,7 @@ pub mod widgets;
 pub mod items;
 
 pub use helpers::{format_size, format_date, sanitize_path, parse_target_dir, is_in_trash};
-pub use dialogs::{show_rename_dialog, show_new_folder_dialog};
+pub use dialogs::{show_rename_dialog, show_new_folder_dialog, show_conflict_dialog};
 pub use selection::{wire_rubberband_listbox, wire_rubberband_grid};
 pub use items::{create_list_row, create_grid_file_item};
 pub use widgets::update_new_folder_button;

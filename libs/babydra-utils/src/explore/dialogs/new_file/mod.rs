@@ -50,15 +50,29 @@ pub fn show_new_file_dialog(
     btn_create.connect_clicked(move |_| {
         let name = entry_c.text().to_string();
         if !name.is_empty() {
-            let file_path = current_p.join(name);
+            let file_path = current_p.join(&name);
             let nav_c = nav.clone();
             let cp_c = current_p.clone();
-            glib::spawn_future_local(async move {
-                let _ = tokio::fs::write(&file_path, "").await;
-                nav_c(cp_c);
-            });
+            let file_path_c = file_path.clone();
+            
+            let do_write = move || {
+                let nav_inner = nav_c.clone();
+                let cp_inner = cp_c.clone();
+                let fp_inner = file_path_c.clone();
+                glib::spawn_future_local(async move {
+                    let _ = tokio::fs::write(&fp_inner, "").await;
+                    nav_inner(cp_inner);
+                });
+            };
+
+            if file_path.exists() {
+                let msg = format!("Tệp \"{}\" đã tồn tại tại vị trí này. Vui lòng chọn tên khác.", name);
+                super::alert::show_alert_dialog("Tệp đã tồn tại", &msg, Some(&win_create));
+            } else {
+                do_write();
+                win_create.close();
+            }
         }
-        win_create.close();
     });
 
     let entry_trigger = entry.clone();

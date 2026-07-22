@@ -55,6 +55,50 @@ pub fn execute_paste(
     current_path: PathBuf,
     nav_callback: Rc<dyn Fn(PathBuf)>,
 ) {
+    let conflicts: Vec<String> = sources
+        .iter()
+        .filter_map(|src| {
+            if let Some(filename) = src.file_name() {
+                let dest = dest_dir.join(filename);
+                if dest.exists() {
+                    Some(filename.to_string_lossy().to_string())
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        })
+        .collect();
+
+    let sources_c = sources.clone();
+    let dest_dir_c = dest_dir.clone();
+    let current_path_c = current_path.clone();
+    let nav_callback_c = nav_callback.clone();
+
+    let do_paste = move || {
+        perform_execute_paste(sources_c, dest_dir_c, is_cut, current_path_c, nav_callback_c);
+    };
+
+    if !conflicts.is_empty() {
+        let conflict_name = if conflicts.len() == 1 {
+            conflicts[0].clone()
+        } else {
+            format!("{} đối tượng", conflicts.len())
+        };
+        crate::explore::dialogs::show_conflict_dialog(&conflict_name, do_paste, None::<&gtk4::Window>);
+    } else {
+        do_paste();
+    }
+}
+
+fn perform_execute_paste(
+    sources: Vec<PathBuf>,
+    dest_dir: PathBuf,
+    is_cut: bool,
+    current_path: PathBuf,
+    nav_callback: Rc<dyn Fn(PathBuf)>,
+) {
     glib::spawn_future_local(async move {
         let mut all_success = true;
         let mut destinations = Vec::new();
@@ -94,7 +138,6 @@ pub fn execute_paste(
 
         if is_cut && all_success {
             CLIPBOARD.with(|cb| cb.replace(None));
-            // Clear system clipboard
             let display = gtk4::gdk::Display::default().unwrap();
             let _ = display.clipboard().set_content(None::<&gtk4::gdk::ContentProvider>);
             apply_cut_dimming_global(&[]);

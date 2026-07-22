@@ -50,15 +50,29 @@ pub fn show_new_folder_dialog(
     btn_create.connect_clicked(move |_| {
         let name = entry_c.text().to_string();
         if !name.is_empty() {
-            let folder_path = current_p.join(name);
+            let folder_path = current_p.join(&name);
             let nav_c = nav.clone();
             let cp_c = current_p.clone();
-            glib::spawn_future_local(async move {
-                let _ = tokio::fs::create_dir_all(folder_path).await;
-                nav_c(cp_c);
-            });
+            let folder_path_c = folder_path.clone();
+
+            let do_create = move || {
+                let nav_inner = nav_c.clone();
+                let cp_inner = cp_c.clone();
+                let fp_inner = folder_path_c.clone();
+                glib::spawn_future_local(async move {
+                    let _ = tokio::fs::create_dir_all(fp_inner).await;
+                    nav_inner(cp_inner);
+                });
+            };
+
+            if folder_path.exists() {
+                let msg = format!("Thư mục \"{}\" đã tồn tại tại vị trí này. Vui lòng chọn tên khác.", name);
+                super::alert::show_alert_dialog("Thư mục đã tồn tại", &msg, Some(&win_create));
+            } else {
+                do_create();
+                win_create.close();
+            }
         }
-        win_create.close();
     });
 
     let entry_trigger = entry.clone();

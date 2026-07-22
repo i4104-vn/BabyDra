@@ -52,17 +52,34 @@ pub fn show_rename_dialog(
     btn_rename.connect_clicked(move |_| {
         let new_name = entry_c.text().to_string();
         if !new_name.is_empty() {
+            let target_dest = path.parent().map(|p| p.join(&new_name)).unwrap_or_else(|| PathBuf::from(&new_name));
             let path_c = path.clone();
+            let new_name_c = new_name.clone();
             let nav_c = nav.clone();
             let cp_c = current_p.clone();
-            glib::spawn_future_local(async move {
-                if let Err(e) = babydra_common::rename_path(path_c, new_name).await {
-                    eprintln!("Rename failed: {}", e);
-                }
-                nav_c(cp_c);
-            });
+
+            let do_rename = move || {
+                let path_inner = path_c.clone();
+                let new_name_inner = new_name_c.clone();
+                let nav_inner = nav_c.clone();
+                let cp_inner = cp_c.clone();
+                glib::spawn_future_local(async move {
+                    if let Err(e) = babydra_common::rename_path(path_inner, new_name_inner).await {
+                        eprintln!("Rename failed: {}", e);
+                    }
+                    nav_inner(cp_inner);
+                });
+            };
+
+            let old_name = path.file_name().unwrap_or_default().to_string_lossy();
+            if new_name != old_name && target_dest.exists() {
+                let msg = format!("Mục \"{}\" đã tồn tại tại vị trí này. Vui lòng chọn tên khác.", new_name);
+                super::alert::show_alert_dialog("Mục đã tồn tại", &msg, Some(&win_rename));
+            } else {
+                do_rename();
+                win_rename.close();
+            }
         }
-        win_rename.close();
     });
 
     let entry_trigger = entry.clone();

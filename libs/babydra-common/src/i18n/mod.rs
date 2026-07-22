@@ -287,6 +287,9 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.menu_refresh", "Refresh");
             map.insert("explore.menu_properties", "Properties");
             map.insert("explore.dialog_properties_title", "Properties");
+            map.insert("explore.dialog_conflict_title", "Item Already Exists");
+            map.insert("explore.dialog_conflict_msg", "An item named '{}' already exists in this location. Do you want to replace it?");
+            map.insert("explore.dialog_override", "Replace");
         }
         _ => {
             // Menu
@@ -524,6 +527,9 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.menu_refresh", "Làm mới");
             map.insert("explore.menu_properties", "Thuộc tính");
             map.insert("explore.dialog_properties_title", "Thuộc tính");
+            map.insert("explore.dialog_conflict_title", "Mục đã tồn tại");
+            map.insert("explore.dialog_conflict_msg", "Mục '{}' đã tồn tại tại vị trí này. Bạn có muốn ghi đè lên nó không?");
+            map.insert("explore.dialog_override", "Ghi đè");
         }
     }
     map
