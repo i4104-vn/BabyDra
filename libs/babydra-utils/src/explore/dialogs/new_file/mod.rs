@@ -1,6 +1,7 @@
 use gtk4::prelude::*;
 use std::path::PathBuf;
 use std::rc::Rc;
+use babydra_common::i18n::t;
 
 mod render;
 
@@ -14,6 +15,7 @@ pub fn show_new_file_dialog(
     let window = widgets.window;
     let vbox = widgets.vbox;
     let entry = widgets.entry;
+    let lbl_error = widgets.lbl_error;
     let btn_create = widgets.btn_create;
 
     let win_cancel_btn = window.clone();
@@ -34,7 +36,7 @@ pub fn show_new_file_dialog(
         crate::ui::animation::genie_out(
             vbox_cancel.upcast_ref(),
             320,
-            140,
+            150,
             300,
             move || {
                 win_cb.destroy();
@@ -43,33 +45,35 @@ pub fn show_new_file_dialog(
         glib::Propagation::Stop
     });
 
+    let lbl_err_c = lbl_error.clone();
+    let entry_err_c = entry.clone();
+    entry.connect_changed(move |_| {
+        if lbl_err_c.is_visible() {
+            lbl_err_c.set_visible(false);
+            entry_err_c.remove_css_class("error-entry");
+        }
+    });
+
     let win_create = window.clone();
     let nav = nav_callback.clone();
     let current_p = current_path.clone();
     let entry_c = entry.clone();
+    let lbl_err_create = lbl_error.clone();
     btn_create.connect_clicked(move |_| {
         let name = entry_c.text().to_string();
         if !name.is_empty() {
             let file_path = current_p.join(&name);
-            let nav_c = nav.clone();
-            let cp_c = current_p.clone();
-            let file_path_c = file_path.clone();
-            
-            let do_write = move || {
-                let nav_inner = nav_c.clone();
-                let cp_inner = cp_c.clone();
-                let fp_inner = file_path_c.clone();
-                glib::spawn_future_local(async move {
-                    let _ = tokio::fs::write(&fp_inner, "").await;
-                    nav_inner(cp_inner);
-                });
-            };
-
             if file_path.exists() {
-                let msg = format!("Tệp \"{}\" đã tồn tại tại vị trí này. Vui lòng chọn tên khác.", name);
-                super::alert::show_alert_dialog("Tệp đã tồn tại", &msg, Some(&win_create));
+                lbl_err_create.set_text(&t("explore.error_file_exists"));
+                lbl_err_create.set_visible(true);
+                entry_c.add_css_class("error-entry");
             } else {
-                do_write();
+                let nav_c = nav.clone();
+                let cp_c = current_p.clone();
+                glib::spawn_future_local(async move {
+                    let _ = tokio::fs::write(&file_path, "").await;
+                    nav_c(cp_c);
+                });
                 win_create.close();
             }
         }
@@ -81,6 +85,6 @@ pub fn show_new_file_dialog(
     });
 
     window.present();
-    crate::ui::animation::genie_in(vbox.upcast_ref(), 320, 140, 300);
+    crate::ui::animation::genie_in(vbox.upcast_ref(), 320, 150, 300);
     entry_trigger.grab_focus();
 }

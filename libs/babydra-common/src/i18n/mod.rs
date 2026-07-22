@@ -290,6 +290,9 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.dialog_conflict_title", "Item Already Exists");
             map.insert("explore.dialog_conflict_msg", "An item named '{}' already exists in this location. Do you want to replace it?");
             map.insert("explore.dialog_override", "Replace");
+            map.insert("explore.error_file_exists", "A file with this name already exists.");
+            map.insert("explore.error_folder_exists", "A folder with this name already exists.");
+            map.insert("explore.error_item_exists", "An item with this name already exists.");
         }
         _ => {
             // Menu
@@ -530,6 +533,9 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.dialog_conflict_title", "Mục đã tồn tại");
             map.insert("explore.dialog_conflict_msg", "Mục '{}' đã tồn tại tại vị trí này. Bạn có muốn ghi đè lên nó không?");
             map.insert("explore.dialog_override", "Ghi đè");
+            map.insert("explore.error_file_exists", "Tệp với tên này đã tồn tại.");
+            map.insert("explore.error_folder_exists", "Thư mục với tên này đã tồn tại.");
+            map.insert("explore.error_item_exists", "Mục với tên này đã tồn tại.");
         }
     }
     map

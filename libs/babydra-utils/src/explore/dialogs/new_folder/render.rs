@@ -6,6 +6,7 @@ pub struct NewFolderDialogWidgets {
     pub window: Window,
     pub vbox: Box,
     pub entry: Entry,
+    pub lbl_error: Label,
     pub btn_cancel: Button,
     pub btn_create: Button,
 }
@@ -16,7 +17,7 @@ pub fn build_new_folder_dialog_ui(parent: Option<&impl IsA<gtk4::Window>>) -> Ne
         .modal(true)
         .resizable(false)
         .default_width(320)
-        .default_height(140)
+        .default_height(150)
         .css_classes(vec!["explore-dialog".to_string()])
         .build();
 
@@ -24,7 +25,7 @@ pub fn build_new_folder_dialog_ui(parent: Option<&impl IsA<gtk4::Window>>) -> Ne
         window.set_transient_for(Some(p));
     }
 
-    let vbox = Box::new(Orientation::Vertical, 12);
+    let vbox = Box::new(Orientation::Vertical, 10);
     vbox.add_css_class("explore-dialog-box");
     vbox.set_margin_top(16);
     vbox.set_margin_bottom(16);
@@ -43,6 +44,15 @@ pub fn build_new_folder_dialog_ui(parent: Option<&impl IsA<gtk4::Window>>) -> Ne
     entry.set_hexpand(true);
     vbox.append(&entry);
 
+    let lbl_error = Label::builder()
+        .halign(Align::Start)
+        .visible(false)
+        .css_classes(vec!["dialog-error-text".to_string()])
+        .wrap(true)
+        .max_width_chars(35)
+        .build();
+    vbox.append(&lbl_error);
+
     let bbox = Box::new(Orientation::Horizontal, 8);
     bbox.set_halign(Align::End);
     vbox.append(&bbox);
@@ -60,6 +70,7 @@ pub fn build_new_folder_dialog_ui(parent: Option<&impl IsA<gtk4::Window>>) -> Ne
         window,
         vbox,
         entry,
+        lbl_error,
         btn_cancel,
         btn_create,
     }

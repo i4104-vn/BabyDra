@@ -51,6 +51,18 @@ button.suggested-action:active {
     background-color: rgba(59, 130, 246, 0.04);
 }
 
+.explore-dialog entry.error-entry {
+    border-color: rgba(239, 68, 68, 0.7);
+    background-color: rgba(239, 68, 68, 0.06);
+}
+
+.dialog-error-text {
+    color: #f87171;
+    font-size: 11px;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
 /* Strip GTK decorations from all explore-dialog buttons */
 .explore-dialog button,
 .explore-dialog button:hover,

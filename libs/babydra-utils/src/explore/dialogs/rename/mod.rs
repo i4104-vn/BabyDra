@@ -1,6 +1,7 @@
 use gtk4::prelude::*;
 use std::path::PathBuf;
 use std::rc::Rc;
+use babydra_common::i18n::t;
 
 mod render;
 
@@ -15,6 +16,7 @@ pub fn show_rename_dialog(
     let window = widgets.window;
     let vbox = widgets.vbox;
     let entry = widgets.entry;
+    let lbl_error = widgets.lbl_error;
     let btn_rename = widgets.btn_rename;
 
     let win_cancel_btn = window.clone();
@@ -35,7 +37,7 @@ pub fn show_rename_dialog(
         crate::ui::animation::genie_out(
             vbox_cancel.upcast_ref(),
             320,
-            140,
+            150,
             300,
             move || {
                 win_cb.destroy();
@@ -44,39 +46,41 @@ pub fn show_rename_dialog(
         glib::Propagation::Stop
     });
 
+    let lbl_err_c = lbl_error.clone();
+    let entry_err_c = entry.clone();
+    entry.connect_changed(move |_| {
+        if lbl_err_c.is_visible() {
+            lbl_err_c.set_visible(false);
+            entry_err_c.remove_css_class("error-entry");
+        }
+    });
+
     let win_rename = window.clone();
     let path = path.clone();
     let nav = nav_callback.clone();
     let current_p = current_path.clone();
     let entry_c = entry.clone();
+    let lbl_err_rename = lbl_error.clone();
     btn_rename.connect_clicked(move |_| {
         let new_name = entry_c.text().to_string();
         if !new_name.is_empty() {
             let target_dest = path.parent().map(|p| p.join(&new_name)).unwrap_or_else(|| PathBuf::from(&new_name));
-            let path_c = path.clone();
-            let new_name_c = new_name.clone();
-            let nav_c = nav.clone();
-            let cp_c = current_p.clone();
+            let old_name = path.file_name().unwrap_or_default().to_string_lossy();
 
-            let do_rename = move || {
-                let path_inner = path_c.clone();
-                let new_name_inner = new_name_c.clone();
-                let nav_inner = nav_c.clone();
-                let cp_inner = cp_c.clone();
+            if new_name != old_name && target_dest.exists() {
+                lbl_err_rename.set_text(&t("explore.error_item_exists"));
+                lbl_err_rename.set_visible(true);
+                entry_c.add_css_class("error-entry");
+            } else {
+                let path_c = path.clone();
+                let nav_c = nav.clone();
+                let cp_c = current_p.clone();
                 glib::spawn_future_local(async move {
-                    if let Err(e) = babydra_common::rename_path(path_inner, new_name_inner).await {
+                    if let Err(e) = babydra_common::rename_path(path_c, new_name).await {
                         eprintln!("Rename failed: {}", e);
                     }
-                    nav_inner(cp_inner);
+                    nav_c(cp_c);
                 });
-            };
-
-            let old_name = path.file_name().unwrap_or_default().to_string_lossy();
-            if new_name != old_name && target_dest.exists() {
-                let msg = format!("Mục \"{}\" đã tồn tại tại vị trí này. Vui lòng chọn tên khác.", new_name);
-                super::alert::show_alert_dialog("Mục đã tồn tại", &msg, Some(&win_rename));
-            } else {
-                do_rename();
                 win_rename.close();
             }
         }
@@ -88,6 +92,6 @@ pub fn show_rename_dialog(
     });
 
     window.present();
-    crate::ui::animation::genie_in(vbox.upcast_ref(), 320, 140, 300);
+    crate::ui::animation::genie_in(vbox.upcast_ref(), 320, 150, 300);
     entry_trigger.grab_focus();
 }
