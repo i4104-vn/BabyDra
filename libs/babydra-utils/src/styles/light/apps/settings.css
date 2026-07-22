@@ -1,153 +1,271 @@
-/* Settings Light Mode stylesheet */
+/* Settings Light Mode stylesheet - Synchronized with explore settings_dialog */
 
-window.settings-window,
-window.settings-window > overlay,
-window.settings-window > overlay > box {
-    background-color: #f7f5f0;
+window.settings-window {
+    background-color: #f8f9fa;
     background-image: none;
-    transition: all 250ms ease;
-}
-
-.settings-sidebar {
-    background-color: #ededeb;
-    border-right: 1px solid rgba(0, 0, 0, 0.1);
-    padding: 18px 12px;
-}
-
-.settings-sidebar-row {
-    border-radius: 12px;
-    padding: 10px 14px;
-    margin-bottom: 4px;
-    color: #5c5c5e;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 250ms ease-out;
-}
-
-.settings-sidebar-row:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     color: #1c1c1e;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12),
+                0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-.settings-sidebar-row:selected {
-    background-color: rgba(138, 103, 71, 0.12);
-    border: 1px solid rgba(138, 103, 71, 0.2);
-    color: #8a6747;
+window.settings-window > overlay > box {
+    background-color: transparent;
+}
+
+/* ── Settings Capsule Navigation (Vertical Icon-Only) ──────────── */
+.settings-capsule-nav-vertical {
+    background-color: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    border-radius: 9999px;
+    padding: 6px 5px;
+}
+
+button.settings-pill {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    color: rgba(28, 28, 30, 0.50);
+    border-radius: 9999px;
+    padding: 10px;
+    min-width: 22px;
+    min-height: 22px;
+    font-size: 12px;
     font-weight: 600;
+    transition: background-color 180ms ease, color 180ms ease;
+    transform: none;
 }
 
+button.settings-pill:hover {
+    background-color: rgba(0, 0, 0, 0.06);
+    border: none;
+    color: rgba(28, 28, 30, 0.85);
+    transform: none;
+}
+
+button.settings-pill.active-pill {
+    background-color: rgba(59, 130, 246, 0.12);
+    border: none;
+    color: #2563eb;
+    box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.20);
+    transform: none;
+}
+
+button.settings-pill.active-pill:hover {
+    background-color: rgba(59, 130, 246, 0.20);
+    border: none;
+    color: #1d4ed8;
+    transform: none;
+}
+
+/* ── Text Labels ──────────────────────────────────────────────── */
 .settings-content {
     background-color: transparent;
-    padding: 24px;
+    padding: 16px 20px;
 }
 
-.settings-title {
-    font-size: 22px;
-    font-weight: bold;
-    color: #1c1c1e;
-    margin-bottom: 20px;
-}
-
-.settings-subtitle {
+.settings-title-label {
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 700;
     color: #1c1c1e;
-    margin-bottom: 12px;
+    margin-bottom: 2px;
+    letter-spacing: 0.01em;
 }
 
+.settings-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #71717a;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.settings-row-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1c1c1e;
+    letter-spacing: 0.01em;
+}
+
+.settings-row-desc {
+    font-size: 11px;
+    color: #71717a;
+}
+
+.settings-row-icon {
+    color: rgba(28, 28, 30, 0.65);
+}
+
+/* ── Settings Cards & ListBox ─────────────────────────────────── */
 .settings-card {
-    background-color: rgba(0, 0, 0, 0.02);
-    background-image: none;
+    background-color: #ffffff;
     border: 1px solid rgba(0, 0, 0, 0.08);
-    border-top: 1px solid rgba(0, 0, 0, 0.12);
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 16px;
-    transition: all 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border-top: 1px solid rgba(0, 0, 0, 0.04);
+    border-radius: 14px;
+    padding: 2px;
 }
 
-.settings-card:hover {
-    border-color: rgba(0, 0, 0, 0.14);
-    background-color: rgba(0, 0, 0, 0.04);
+.settings-card list {
+    background-color: transparent;
 }
 
-.settings-row {
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+.settings-card row,
+.settings-card-row {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    background: transparent;
+    background-color: transparent;
+    border-radius: 0;
+    transition: background-color 120ms ease;
 }
 
-.settings-row:last-child {
+.settings-card row:first-child,
+.settings-card-row:first-child {
+    border-radius: 12px 12px 0 0;
+}
+
+.settings-card row:last-child,
+.settings-card-row:last-child {
     border-bottom: none;
+    border-radius: 0 0 12px 12px;
 }
 
-.settings-label {
-    font-size: 14px;
-    color: #1c1c1e;
-    font-weight: 500;
-}
-
-.settings-desc {
-    font-size: 12px;
-    color: #5c5c5e;
-}
-
-button.suggested-action {
-    background-color: #3b82f6;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+.settings-card row:only-child,
+.settings-card-row:only-child {
     border-radius: 12px;
-    color: #ffffff;
-    padding: 6px 16px;
+}
+
+.settings-card row:hover,
+.settings-card-row:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* Connect / Pill Buttons */
+.connect-pill-btn {
+    background-color: rgba(59, 130, 246, 0.10);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    border-radius: 9999px;
+    color: #2563eb;
+    padding: 4px 12px;
+    font-size: 11px;
     font-weight: 600;
-    box-shadow: none;
-    transition: all 250ms ease;
+    transition: all 150ms ease;
 }
 
-button.suggested-action:hover {
-    background-color: #2563eb;
-    box-shadow: none;
+.connect-pill-btn:hover {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
 }
 
-button.suggested-action:active {
-    background-color: #1d4ed8;
+.connected-pill {
+    background-color: rgba(16, 185, 129, 0.10);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 9999px;
+    padding: 3px 10px;
 }
 
-button {
-    background-color: rgba(0, 0, 0, 0.04);
+.connected-text {
+    font-size: 11px;
+    font-weight: 600;
+    color: #059669;
+}
+
+/* Wallpaper Preview Frame */
+.wallpaper-preview-frame {
+    border-radius: 14px;
     border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 12px;
-    color: #1c1c1e;
-    padding: 6px 16px;
-    font-weight: 500;
-    transition: all 200ms ease;
+    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 50%, #a5b4fc 100%);
+    overflow: hidden;
+    color: #4338ca;
 }
 
-button:hover {
-    background-color: rgba(0, 0, 0, 0.08);
+.choose-file-card {
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 14px;
+    transition: all 150ms ease;
+    color: #1c1c1e;
+}
+
+.choose-file-card:hover {
+    background-color: #f4f4f5;
     border-color: rgba(0, 0, 0, 0.14);
 }
 
+.theme-option-card {
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    transition: all 150ms ease;
+    color: #1c1c1e;
+}
 
+.theme-option-card:hover {
+    background-color: #f4f4f5;
+}
 
+.theme-option-card.active {
+    background-color: rgba(59, 130, 246, 0.10);
+    border: 1px solid rgba(59, 130, 246, 0.30);
+    color: #2563eb;
+}
+
+.settings-row-item {
+    padding: 10px 14px;
+    border-radius: 12px;
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* System Info */
+.os-logo {
+    background-color: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 14px;
+}
+
+.hero-hostname {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1c1c1e;
+    letter-spacing: -0.3px;
+}
+
+progressbar.disk-progress trough {
+    background-color: rgba(0, 0, 0, 0.06);
+    border-radius: 6px;
+    min-height: 8px;
+}
+
+progressbar.disk-progress progress {
+    background-color: #3b82f6;
+    border-radius: 6px;
+}
+
+/* Cheatsheet Overlay */
 .cheatsheet-overlay {
-    background-color: rgba(245, 240, 230, 0.98);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 16px;
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 18px;
     padding: 24px;
-    box-shadow: none;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
 }
 
 .cheatsheet-title {
-    font-size: 16px;
-    font-weight: bold;
+    font-size: 15px;
+    font-weight: 700;
     color: #1c1c1e;
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     padding-bottom: 8px;
     margin-bottom: 16px;
-}
-
-.cheatsheet-label {
-    color: rgba(0, 0, 0, 0.5);
-    font-size: 13px;
 }
 
 .cheatsheet-value {
@@ -155,87 +273,3 @@ button:hover {
     font-family: monospace;
     font-size: 13px;
 }
-
-/* --- System Info & Dashboard Cards Layouts --- */
-.os-logo {
-    background-color: rgba(0, 0, 0, 0.04);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 16px;
-}
-
-.hero-hostname {
-    font-size: 26px;
-    font-weight: 700;
-    color: #1c1c1e;
-}
-
-progressbar.disk-progress trough {
-    background-color: rgba(0, 0, 0, 0.04);
-    border-radius: 6px;
-    min-height: 8px;
-}
-
-progressbar.disk-progress progress {
-    background-color: #8a6747;
-    border-radius: 6px;
-}
-
-.card-icon-wrapper {
-    background-color: #8a6747;
-    border-radius: 14px;
-    color: #ffffff;
-    box-shadow: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* --- Appearance View Layouts --- */
-.wallpaper-preview-frame {
-    border-radius: 14px;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-    background-color: rgba(255, 255, 255, 0.5);
-}
-
-.choose-file-card {
-    background-color: rgba(0, 0, 0, 0.02);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 14px;
-    transition: all 250ms ease;
-}
-
-.choose-file-card:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-    border-color: rgba(0, 0, 0, 0.12);
-}
-
-.theme-option-card {
-    background-color: rgba(0, 0, 0, 0.02);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 10px;
-    padding: 8px 12px;
-    margin-bottom: 6px;
-    transition: all 250ms ease;
-}
-
-.theme-option-card:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-}
-
-.theme-option-card.active {
-    background-color: rgba(138, 103, 71, 0.12);
-    border: 1px solid rgba(138, 103, 71, 0.25);
-    color: #8a6747;
-}
-
-.settings-row-item {
-    padding: 12px 16px;
-    border-radius: 14px;
-    background-color: rgba(0, 0, 0, 0.02);
-    border: 1px solid rgba(0, 0, 0, 0.04);
-}
-
-

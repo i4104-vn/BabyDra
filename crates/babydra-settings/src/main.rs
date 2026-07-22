@@ -39,32 +39,39 @@ fn main() {
         // Main sidebar + content layout split box
         let main_layout = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
 
-        // Sidebar Panel
-        let sidebar = gtk4::Box::new(gtk4::Orientation::Vertical, 12);
-        sidebar.add_css_class("settings-sidebar");
-        sidebar.set_width_request(240);
+        // ── Left: Vertical Capsule Pill Navigation (Icon Only) ─────
+        let nav_container = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
+        nav_container.set_valign(gtk4::Align::Start);
+        nav_container.set_margin_top(16);
+        nav_container.set_margin_bottom(16);
+        nav_container.set_margin_start(16);
+        nav_container.add_css_class("settings-capsule-nav-vertical");
+        main_layout.append(&nav_container);
 
-        let sidebar_list = gtk4::ListBox::new();
-        sidebar_list.set_selection_mode(gtk4::SelectionMode::Single);
-        sidebar.append(&sidebar_list);
+        let btn_wifi = babydra_utils::components::create_icon_button("wifi", 18, &["settings-pill", "active-pill"], Some("Wi-Fi & Mạng"), || {});
+        btn_wifi.set_cursor_from_name(Some("pointer"));
 
-        let wifi_row = babydra_utils::components::create_sidebar_row("Wi-Fi & Mạng", "wifi");
-        let bt_row = babydra_utils::components::create_sidebar_row("Bluetooth", "bluetooth");
-        let vpn_row = babydra_utils::components::create_sidebar_row("VPN & Mạng ảo", "shield");
-        let app_row = babydra_utils::components::create_sidebar_row("Giao diện & Hình nền", "display");
-        let sys_row = babydra_utils::components::create_sidebar_row("Hệ thống", "info");
+        let btn_bt = babydra_utils::components::create_icon_button("bluetooth", 18, &["settings-pill"], Some("Bluetooth"), || {});
+        btn_bt.set_cursor_from_name(Some("pointer"));
 
-        sidebar_list.append(&wifi_row);
-        sidebar_list.append(&bt_row);
-        sidebar_list.append(&vpn_row);
-        sidebar_list.append(&app_row);
-        sidebar_list.append(&sys_row);
+        let btn_vpn = babydra_utils::components::create_icon_button("shield", 18, &["settings-pill"], Some("VPN & Mạng ảo"), || {});
+        btn_vpn.set_cursor_from_name(Some("pointer"));
 
-        main_layout.append(&sidebar);
+        let btn_app = babydra_utils::components::create_icon_button("display", 18, &["settings-pill"], Some("Giao diện & Hình nền"), || {});
+        btn_app.set_cursor_from_name(Some("pointer"));
+
+        let btn_sys = babydra_utils::components::create_icon_button("info", 18, &["settings-pill"], Some("Thông tin Hệ thống"), || {});
+        btn_sys.set_cursor_from_name(Some("pointer"));
+
+        nav_container.append(&btn_wifi);
+        nav_container.append(&btn_bt);
+        nav_container.append(&btn_vpn);
+        nav_container.append(&btn_app);
+        nav_container.append(&btn_sys);
 
         // Content Stack Panel
         let content_stack = gtk4::Stack::new();
-        content_stack.set_transition_type(gtk4::StackTransitionType::SlideLeftRight);
+        content_stack.set_transition_type(gtk4::StackTransitionType::Crossfade);
         content_stack.set_transition_duration(250);
         content_stack.set_hexpand(true);
         content_stack.set_vexpand(true);
@@ -108,46 +115,95 @@ fn main() {
 
         overlay.add_overlay(&cheatsheet_box);
 
-        // --- Sidebar Selection Handling ---
-        let content_stack_clone = content_stack.clone();
-        sidebar_list.connect_row_selected(move |_, row| {
-            if let Some(r) = row {
-                match r.index() {
-                    0 => content_stack_clone.set_visible_child_name("wifi"),
-                    1 => content_stack_clone.set_visible_child_name("bluetooth"),
-                    2 => content_stack_clone.set_visible_child_name("vpn"),
-                    3 => content_stack_clone.set_visible_child_name("appearance"),
-                    4 => content_stack_clone.set_visible_child_name("system"),
-                    _ => {}
-                }
-            }
+        // --- Capsule Navigation Handling ---
+        let btn_wifi_c = btn_wifi.clone();
+        let btn_bt_c = btn_bt.clone();
+        let btn_vpn_c = btn_vpn.clone();
+        let btn_app_c = btn_app.clone();
+        let btn_sys_c = btn_sys.clone();
+
+        let stack_c = content_stack.clone();
+
+        let clear_active = move || {
+            btn_wifi_c.remove_css_class("active-pill");
+            btn_bt_c.remove_css_class("active-pill");
+            btn_vpn_c.remove_css_class("active-pill");
+            btn_app_c.remove_css_class("active-pill");
+            btn_sys_c.remove_css_class("active-pill");
+        };
+
+        let clear1 = clear_active.clone();
+        let btn_wifi_active = btn_wifi.clone();
+        let stack1 = stack_c.clone();
+        btn_wifi.connect_clicked(move |_| {
+            clear1();
+            btn_wifi_active.add_css_class("active-pill");
+            stack1.set_visible_child_name("wifi");
         });
 
-        // Select Wi-Fi by default
-        sidebar_list.select_row(sidebar_list.row_at_index(0).as_ref());
+        let clear2 = clear_active.clone();
+        let btn_bt_active = btn_bt.clone();
+        let stack2 = stack_c.clone();
+        btn_bt.connect_clicked(move |_| {
+            clear2();
+            btn_bt_active.add_css_class("active-pill");
+            stack2.set_visible_child_name("bluetooth");
+        });
+
+        let clear3 = clear_active.clone();
+        let btn_vpn_active = btn_vpn.clone();
+        let stack3 = stack_c.clone();
+        btn_vpn.connect_clicked(move |_| {
+            clear3();
+            btn_vpn_active.add_css_class("active-pill");
+            stack3.set_visible_child_name("vpn");
+        });
+
+        let clear4 = clear_active.clone();
+        let btn_app_active = btn_app.clone();
+        let stack4 = stack_c.clone();
+        btn_app.connect_clicked(move |_| {
+            clear4();
+            btn_app_active.add_css_class("active-pill");
+            stack4.set_visible_child_name("appearance");
+        });
+
+        let clear5 = clear_active.clone();
+        let btn_sys_active = btn_sys.clone();
+        let stack5 = stack_c.clone();
+        btn_sys.connect_clicked(move |_| {
+            clear5();
+            btn_sys_active.add_css_class("active-pill");
+            stack5.set_visible_child_name("system");
+        });
 
         // --- Shortcuts Keyboard Controls ---
         let key_controller = gtk4::EventControllerKey::new();
-        let sidebar_list_key = sidebar_list.clone();
         let cheatsheet_box_key = cheatsheet_box.clone();
+
+        let btn_wifi_k = btn_wifi.clone();
+        let btn_bt_k = btn_bt.clone();
+        let btn_vpn_k = btn_vpn.clone();
+        let btn_app_k = btn_app.clone();
+        let btn_sys_k = btn_sys.clone();
 
         key_controller.connect_key_pressed(move |_, keyval, _, state| {
             let is_alt = state.contains(gtk4::gdk::ModifierType::ALT_MASK);
             match keyval.name().as_deref() {
                 Some("1") if is_alt => {
-                    sidebar_list_key.select_row(sidebar_list_key.row_at_index(0).as_ref());
+                    btn_wifi_k.emit_clicked();
                 }
                 Some("2") if is_alt => {
-                    sidebar_list_key.select_row(sidebar_list_key.row_at_index(1).as_ref());
+                    btn_bt_k.emit_clicked();
                 }
                 Some("3") if is_alt => {
-                    sidebar_list_key.select_row(sidebar_list_key.row_at_index(2).as_ref());
+                    btn_vpn_k.emit_clicked();
                 }
                 Some("4") if is_alt => {
-                    sidebar_list_key.select_row(sidebar_list_key.row_at_index(3).as_ref());
+                    btn_app_k.emit_clicked();
                 }
                 Some("5") if is_alt => {
-                    sidebar_list_key.select_row(sidebar_list_key.row_at_index(4).as_ref());
+                    btn_sys_k.emit_clicked();
                 }
                 Some("h") if is_alt => {
                     cheatsheet_box_key.set_visible(!cheatsheet_box_key.is_visible());

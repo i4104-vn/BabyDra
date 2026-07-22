@@ -15,20 +15,21 @@ pub fn build_appearance_ui(
     gtk4::Button,
     gtk4::DropDown,
 ) {
-    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 20);
-    main_box.set_margin_start(16);
-    main_box.set_margin_end(16);
+    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
 
-    // Title
-    let title_lbl = babydra_utils::components::create_title("Wallpaper & Colors");
-    main_box.append(&title_lbl);
+    let header_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
+    let title_lbl = babydra_utils::components::create_title("Giao diện & Hình nền");
+    let desc_lbl = gtk4::Label::new(Some("Tùy chỉnh hình nền, chủ đề sáng/tối và giao diện ứng dụng"));
+    desc_lbl.add_css_class("settings-header-desc");
+    desc_lbl.set_halign(gtk4::Align::Start);
+
+    header_box.append(&title_lbl);
+    header_box.append(&desc_lbl);
+    main_box.append(&header_box);
 
     // Dashboard glass panel container
     let cc_box = babydra_utils::components::create_card(gtk4::Orientation::Vertical, 20);
-    cc_box.set_margin_top(24);
-    cc_box.set_margin_bottom(24);
-    cc_box.set_margin_start(24);
-    cc_box.set_margin_end(24);
+    cc_box.add_css_class("settings-card");
 
     // Three columns config row
     let config_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 16);
@@ -40,13 +41,17 @@ pub fn build_appearance_ui(
     preview_col.set_size_request(160, 110);
 
     let preview_img = gtk4::Image::new();
-    if !current_wallpaper_path.is_empty() {
-        let clean_path = current_wallpaper_path.replace("file://", "");
+    let clean_path = current_wallpaper_path.replace("file://", "");
+    if !clean_path.is_empty() && std::path::Path::new(&clean_path).exists() {
         preview_img.set_from_file(Some(&clean_path));
+        preview_img.set_pixel_size(110);
     } else {
-        babydra_utils::ui::icon::set_image_from_icon(&preview_img, "display", 100);
+        let display_icon = babydra_utils::ui::icon::get_icon("display", 48);
+        display_icon.set_pixel_size(48);
+        display_icon.set_valign(gtk4::Align::Center);
+        display_icon.set_halign(gtk4::Align::Center);
+        preview_col.append(&display_icon);
     }
-    preview_img.set_pixel_size(100);
     preview_img.set_valign(gtk4::Align::Center);
     preview_img.set_halign(gtk4::Align::Center);
     preview_col.append(&preview_img);
@@ -65,7 +70,7 @@ pub fn build_appearance_ui(
     pick_icon.set_pixel_size(24);
     pick_content.append(&pick_icon);
 
-    let pick_lbl = gtk4::Label::new(Some("Choose File"));
+    let pick_lbl = gtk4::Label::new(Some("Chọn hình nền"));
     pick_lbl.add_css_class("settings-label");
     pick_content.append(&pick_lbl);
 
@@ -83,7 +88,7 @@ pub fn build_appearance_ui(
     let light_icon = babydra_utils::ui::icon::get_icon("brightness", 16);
     light_icon.set_pixel_size(16);
     light_content.append(&light_icon);
-    let light_lbl = gtk4::Label::new(Some("Light"));
+    let light_lbl = gtk4::Label::new(Some("Chế độ Sáng"));
     light_lbl.add_css_class("settings-label");
     light_content.append(&light_lbl);
     light_card.set_child(Some(&light_content));
@@ -96,7 +101,7 @@ pub fn build_appearance_ui(
     let dark_icon = babydra_utils::ui::icon::get_icon("dark-mode", 16);
     dark_icon.set_pixel_size(16);
     dark_content.append(&dark_icon);
-    let dark_lbl = gtk4::Label::new(Some("Dark"));
+    let dark_lbl = gtk4::Label::new(Some("Chế độ Tối"));
     dark_lbl.add_css_class("settings-label");
     dark_content.append(&dark_lbl);
     dark_card.set_child(Some(&dark_content));
@@ -119,11 +124,18 @@ pub fn build_appearance_ui(
     gtk_row.set_margin_top(8);
 
     let gtk_left = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+
+    let icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    icon_badge.add_css_class("sidebar-icon-badge");
+    icon_badge.add_css_class("badge-pink");
+    icon_badge.set_valign(gtk4::Align::Center);
+
     let palette_icon = babydra_utils::ui::icon::get_icon("settings", 16);
     palette_icon.set_pixel_size(16);
-    gtk_left.append(&palette_icon);
+    icon_badge.append(&palette_icon);
+    gtk_left.append(&icon_badge);
 
-    let gtk_lbl = gtk4::Label::new(Some("GTK Theme"));
+    let gtk_lbl = gtk4::Label::new(Some("Giao diện GTK Theme"));
     gtk_lbl.add_css_class("settings-label");
     gtk_left.append(&gtk_lbl);
     gtk_row.append(&gtk_left);
