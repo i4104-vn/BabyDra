@@ -1,6 +1,7 @@
 use gtk4::prelude::*;
 use gtk4::{Box, Orientation, Label, Align};
 use std::path::PathBuf;
+use babydra_common::i18n::t;
 use super::helpers::count_dir_contents_recursive;
 use crate::explore::helpers::{format_size, format_date};
 
@@ -43,14 +44,14 @@ pub fn build_info_grid(
         header_text_box.append(&lbl_name);
 
         let file_type_desc = if is_dir {
-            "Folder".to_string()
+            t("explore.prop_folder")
         } else if path.is_symlink() {
-            "Symlink".to_string()
+            t("explore.prop_symlink")
         } else {
             path.extension()
                 .and_then(|ext| ext.to_str())
-                .map(|ext| format!("{} File", ext.to_uppercase()))
-                .unwrap_or_else(|| "File".to_string())
+                .map(|ext| format!("{} {}", ext.to_uppercase(), t("explore.prop_file")))
+                .unwrap_or_else(|| t("explore.prop_file"))
         };
 
         let lbl_subtitle = Label::builder()
@@ -70,17 +71,17 @@ pub fn build_info_grid(
         general_card.set_css_classes(&["properties-card"]);
 
         let lbl_section_title = Label::builder()
-            .label("GENERAL INFORMATION")
+            .label(&t("explore.prop_general_info"))
             .halign(Align::Start)
             .build();
         lbl_section_title.set_css_classes(&["properties-section-title"]);
         general_card.append(&lbl_section_title);
 
-        let lbl_val_size = create_prop_row(&general_card, "drive-harddisk", "Size:", "Calculating...");
+        let lbl_val_size = create_prop_row(&general_card, "drive-harddisk", &t("explore.prop_size"), &t("explore.prop_calculating"));
         
         let mut lbl_val_contents = None;
         if is_dir {
-            let lbl_contents = create_prop_row(&general_card, "info", "Contents:", "Counting...");
+            let lbl_contents = create_prop_row(&general_card, "info", &t("explore.prop_contents"), &t("explore.prop_counting"));
             lbl_val_contents = Some(lbl_contents);
         }
 
@@ -90,9 +91,9 @@ pub fn build_info_grid(
             let (owner, group) = babydra_common::services::explore::get_owner_group(&meta);
             let owner_group_desc = format!("{}:{}", owner, group);
 
-            let _ = create_prop_row(&general_card, "clock", "Created:", &created_desc);
-            let _ = create_prop_row(&general_card, "clock", "Modified:", &modified_desc);
-            let _ = create_prop_row(&general_card, "user", "Owner/Group:", &owner_group_desc);
+            let _ = create_prop_row(&general_card, "clock", &t("explore.prop_created"), &created_desc);
+            let _ = create_prop_row(&general_card, "clock", &t("explore.prop_modified"), &modified_desc);
+            let _ = create_prop_row(&general_card, "user", &t("explore.prop_owner_group"), &owner_group_desc);
 
             let path_c = path.clone();
             let path_c_contents = path.clone();
@@ -115,7 +116,11 @@ pub fn build_info_grid(
                         let counts = tokio::task::spawn_blocking(move || {
                             count_dir_contents_recursive(&path_c2)
                         }).await.unwrap_or((0, 0));
-                        lbl_contents.set_text(&format!("{} files, {} folders", counts.0, counts.1));
+                        let contents_template = t("explore.prop_contents_format");
+                        let formatted_contents = contents_template
+                            .replacen("{}", &counts.0.to_string(), 1)
+                            .replacen("{}", &counts.1.to_string(), 1);
+                        lbl_contents.set_text(&formatted_contents);
                     }
                 }
             });
@@ -141,16 +146,18 @@ pub fn build_info_grid(
         header_text_box.set_hexpand(true);
         header_text_box.set_valign(Align::Center);
 
+        let selected_title = t("explore.prop_selected_items").replace("{}", &count.to_string());
         let lbl_name = Label::builder()
-            .label(&format!("{} Selected Items", count))
+            .label(&selected_title)
             .halign(Align::Start)
             .selectable(false)
             .build();
         lbl_name.set_css_classes(&["properties-title-label"]);
         header_text_box.append(&lbl_name);
 
+        let subtitle_text = format!("{} {}", t("explore.prop_location"), location);
         let lbl_subtitle = Label::builder()
-            .label(&format!("Location: {}", location))
+            .label(&subtitle_text)
             .halign(Align::Start)
             .ellipsize(gtk4::pango::EllipsizeMode::End)
             .selectable(false)
@@ -165,14 +172,15 @@ pub fn build_info_grid(
         general_card.set_css_classes(&["properties-card"]);
 
         let lbl_section_title = Label::builder()
-            .label("SELECTION DETAILS")
+            .label(&t("explore.prop_selection_details"))
             .halign(Align::Start)
             .build();
         lbl_section_title.set_css_classes(&["properties-section-title"]);
         general_card.append(&lbl_section_title);
 
-        let _ = create_prop_row(&general_card, "info", "Count:", &format!("{} items", count));
-        let lbl_val_size = create_prop_row(&general_card, "drive-harddisk", "Total Size:", "Calculating...");
+        let items_count_str = t("explore.prop_items_count").replace("{}", &count.to_string());
+        let _ = create_prop_row(&general_card, "info", &t("explore.prop_count"), &items_count_str);
+        let lbl_val_size = create_prop_row(&general_card, "drive-harddisk", &t("explore.prop_total_size"), &t("explore.prop_calculating"));
 
         let paths_c = target_paths.to_vec();
         let lbl_size_c = lbl_val_size.clone();

@@ -293,6 +293,24 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.error_file_exists", "A file with this name already exists.");
             map.insert("explore.error_folder_exists", "A folder with this name already exists.");
             map.insert("explore.error_item_exists", "An item with this name already exists.");
+            map.insert("explore.prop_folder", "Folder");
+            map.insert("explore.prop_symlink", "Symlink");
+            map.insert("explore.prop_file", "File");
+            map.insert("explore.prop_general_info", "GENERAL INFORMATION");
+            map.insert("explore.prop_selection_details", "SELECTION DETAILS");
+            map.insert("explore.prop_size", "Size:");
+            map.insert("explore.prop_total_size", "Total Size:");
+            map.insert("explore.prop_calculating", "Calculating...");
+            map.insert("explore.prop_contents", "Contents:");
+            map.insert("explore.prop_counting", "Counting...");
+            map.insert("explore.prop_created", "Created:");
+            map.insert("explore.prop_modified", "Modified:");
+            map.insert("explore.prop_owner_group", "Owner/Group:");
+            map.insert("explore.prop_count", "Count:");
+            map.insert("explore.prop_location", "Location:");
+            map.insert("explore.prop_contents_format", "{} files, {} folders");
+            map.insert("explore.prop_selected_items", "{} Selected Items");
+            map.insert("explore.prop_items_count", "{} items");
         }
         _ => {
             // Menu
@@ -536,6 +554,24 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.error_file_exists", "Tệp với tên này đã tồn tại.");
             map.insert("explore.error_folder_exists", "Thư mục với tên này đã tồn tại.");
             map.insert("explore.error_item_exists", "Mục với tên này đã tồn tại.");
+            map.insert("explore.prop_folder", "Thư mục");
+            map.insert("explore.prop_symlink", "Liên kết mềm");
+            map.insert("explore.prop_file", "Tệp");
+            map.insert("explore.prop_general_info", "THÔNG TIN CHUNG");
+            map.insert("explore.prop_selection_details", "CHI TIẾT MỤC ĐÃ CHỌN");
+            map.insert("explore.prop_size", "Dung lượng:");
+            map.insert("explore.prop_total_size", "Tổng dung lượng:");
+            map.insert("explore.prop_calculating", "Đang tính toán...");
+            map.insert("explore.prop_contents", "Nội dung:");
+            map.insert("explore.prop_counting", "Đang đếm...");
+            map.insert("explore.prop_created", "Ngày tạo:");
+            map.insert("explore.prop_modified", "Ngày sửa:");
+            map.insert("explore.prop_owner_group", "Chủ sở hữu/Nhóm:");
+            map.insert("explore.prop_count", "Số lượng:");
+            map.insert("explore.prop_location", "Vị trí:");
+            map.insert("explore.prop_contents_format", "{} tệp, {} thư mục");
+            map.insert("explore.prop_selected_items", "{} mục đã chọn");
+            map.insert("explore.prop_items_count", "{} đối tượng");
         }
     }
     map
