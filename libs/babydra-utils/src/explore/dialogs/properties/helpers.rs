@@ -45,11 +45,11 @@ pub fn count_dialog_height(target_paths: &[PathBuf]) -> i32 {
     if target_paths.len() == 1 {
         if let Ok(meta) = std::fs::metadata(&target_paths[0]) {
             if meta.is_dir() {
-                return 380;
+                return 530;
             }
         }
-        350
+        490
     } else {
-        150
+        250
     }
 }

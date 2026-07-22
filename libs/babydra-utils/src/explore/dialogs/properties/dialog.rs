@@ -1,6 +1,6 @@
 use std::rc::Rc;
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Button, Align, Window, Grid};
+use gtk4::{Box, Orientation, Button, Align, Window};
 use std::path::PathBuf;
 
 use babydra_common::i18n::t;
@@ -16,13 +16,15 @@ pub fn show_properties_dialog(
         return;
     }
 
+    let dialog_height = count_dialog_height(&target_paths);
+
     let window = Window::builder()
         .title(&t("explore.dialog_properties_title"))
         .modal(true)
         .resizable(false)
-        .default_width(360)
-        .default_height(count_dialog_height(&target_paths))
-        .css_classes(vec!["explore-dialog".to_string()])
+        .default_width(400)
+        .default_height(dialog_height)
+        .css_classes(vec!["explore-dialog".to_string(), "properties-dialog".to_string()])
         .build();
 
     if let Some(p) = parent {
@@ -37,33 +39,28 @@ pub fn show_properties_dialog(
     vbox.set_margin_end(16);
     window.set_child(Some(&vbox));
 
-    let grid = Grid::builder()
-        .row_spacing(8)
-        .column_spacing(12)
-        .build();
-    vbox.append(&grid);
+    // Build Header & General Info Cards
+    build_info_grid(&vbox, &target_paths);
 
-    let mut row_idx = 0;
-
-    // Build the main info grid
-    build_info_grid(&grid, &target_paths, &mut row_idx);
-
-    // Build permission checkboxes matrix if exactly 1 path selected
+    // Build Permissions Card if exactly 1 path selected
     let mut checkboxes = None;
     if target_paths.len() == 1 {
         let path = &target_paths[0];
         if let Ok(meta) = std::fs::metadata(path) {
             use std::os::unix::fs::MetadataExt;
             let mode = meta.mode();
-            checkboxes = Some(build_permission_matrix(&grid, mode, &mut row_idx));
+            checkboxes = Some(build_permission_matrix(&vbox, mode));
         }
     }
 
-    let bbox = Box::new(Orientation::Horizontal, 8);
+    // Action Buttons Footer
+    let bbox = Box::new(Orientation::Horizontal, 10);
     bbox.set_halign(Align::End);
+    bbox.set_margin_top(4);
     vbox.append(&bbox);
 
     let btn_cancel = Button::with_label(&t("explore.settings_cancel"));
+    btn_cancel.add_css_class("properties-btn-cancel");
     bbox.append(&btn_cancel);
 
     let win_cancel_btn = window.clone();
@@ -71,7 +68,7 @@ pub fn show_properties_dialog(
         win_cancel_btn.close();
     });
 
-    let height = count_dialog_height(&target_paths);
+    let height = dialog_height;
     let win_cancel = window.clone();
     let vbox_cancel = vbox.clone();
     let is_animating = Rc::new(std::cell::Cell::new(false));
@@ -84,7 +81,7 @@ pub fn show_properties_dialog(
         let win_cb = win_cancel.clone();
         crate::ui::animation::genie_out(
             vbox_cancel.upcast_ref(),
-            360,
+            400,
             height,
             300,
             move || {
@@ -112,5 +109,5 @@ pub fn show_properties_dialog(
     }
 
     window.present();
-    crate::ui::animation::genie_in(vbox.upcast_ref(), 360, height, 300);
+    crate::ui::animation::genie_in(vbox.upcast_ref(), 400, height, 300);
 }
