@@ -166,3 +166,165 @@ pub fn setup_dbus_receiver(
         }
     });
 }
+
+/// Connects status bar button signals (view modes, sort dropdown, toggle preview, settings dialog).
+pub fn setup_status_bar_wiring(
+    status_bar_widgets_cell: Rc<RefCell<Option<StatusBarWidgets>>>,
+    toggle_preview_rc: Rc<dyn Fn()>,
+    view_mode_callback_rc: Rc<dyn Fn(String)>,
+    sort_callback_rc: Rc<dyn Fn(String)>,
+    parent_win: gtk4::Window,
+    rebuild_shortcuts_cell: Rc<RefCell<Option<Rc<dyn Fn()>>>>,
+    session: Rc<RefCell<SessionState>>,
+    nav_c: Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>,
+    act_c: Rc<Cell<ActivePane>>,
+    preview_vc: Rc<Cell<bool>>,
+) {
+    if let Some(ref sw) = *status_bar_widgets_cell.borrow() {
+        let toggle_p = toggle_preview_rc.clone();
+        sw.btn_toggle_preview.connect_clicked(move |_| {
+            toggle_p();
+        });
+
+        // View modes (Grid / List)
+        let cb1 = view_mode_callback_rc.clone();
+        sw.btn_view_icons.connect_clicked(move |_| {
+            cb1("icons".to_string());
+        });
+        let cb2 = view_mode_callback_rc.clone();
+        sw.btn_view_list.connect_clicked(move |_| {
+            cb2("list".to_string());
+        });
+
+        // Sort Dropdown
+        let sort_cb = sort_callback_rc.clone();
+        sw.dropdown_sort.connect_selected_notify(move |dd| {
+            let selected = dd.selected();
+            let mode = match selected {
+                0 => "auto".to_string(),
+                1 => "date".to_string(),
+                2 => "group".to_string(),
+                _ => "auto".to_string(),
+            };
+            sort_cb(mode);
+        });
+
+        // Settings button
+        let parent_win_c = parent_win.clone();
+        let rebuild_c = rebuild_shortcuts_cell.clone();
+        let session_inner = session.clone();
+        let nav_inner = nav_c.clone();
+        let act_inner = act_c.clone();
+        let preview_inner = preview_vc.clone();
+        let toggle_p_inner = toggle_preview_rc.clone();
+
+        sw.btn_settings.connect_clicked(move |_| {
+            let rebuild_inner_cb = rebuild_c.clone();
+            let session_inner_cb = session_inner.clone();
+            let nav_inner_cb = nav_inner.clone();
+            let act_inner_cb = act_inner.clone();
+            let preview_inner_cb = preview_inner.clone();
+            let toggle_p_inner_cb = toggle_p_inner.clone();
+
+            crate::widgets::settings_dialog::show_settings_dialog(&parent_win_c, move || {
+                let settings = babydra_common::load_explore_settings();
+                
+                {
+                    let mut s = session_inner_cb.borrow_mut();
+                    let tab = s.active_tab_mut();
+                    tab.show_hidden = settings.show_hidden;
+                }
+
+                let preview_changed = preview_inner_cb.get() != settings.preview_visible;
+                if preview_changed {
+                    toggle_p_inner_cb();
+                }
+
+                let path = session_inner_cb.borrow().active_tab().current_path.clone();
+                if let Some(ref f) = *nav_inner_cb.borrow() {
+                    f(act_inner_cb.get(), path);
+                }
+
+                if let Some(ref rebuild) = *rebuild_inner_cb.borrow() {
+                    rebuild();
+                }
+            });
+        });
+
+        // Sync initial view mode class
+        let settings = babydra_common::load_explore_settings();
+        if settings.view_mode == "list" {
+            sw.btn_view_list.add_css_class("status-bar-btn-active");
+            sw.btn_view_icons.remove_css_class("status-bar-btn-active");
+        } else {
+            sw.btn_view_icons.add_css_class("status-bar-btn-active");
+            sw.btn_view_list.remove_css_class("status-bar-btn-active");
+        }
+    }
+}
+
+/// Connects global application key shortcuts and rebuild callback.
+pub fn setup_window_shortcuts(
+    window: &gtk4::ApplicationWindow,
+    toggle_split_view_rc: Rc<dyn Fn()>,
+    toggle_preview_rc: Rc<dyn Fn()>,
+    toggle_hidden_rc: Rc<dyn Fn()>,
+    cut_cb_rc: Rc<dyn Fn()>,
+    copy_cb_rc: Rc<dyn Fn()>,
+    paste_cb_rc: Rc<dyn Fn()>,
+    undo_cb_rc: Rc<dyn Fn()>,
+    rebuild_shortcuts_cell: Rc<RefCell<Option<Rc<dyn Fn()>>>>,
+) -> Rc<dyn Fn()> {
+    let window = window.clone();
+    let current_key_controller = Rc::new(RefCell::new(None::<gtk4::EventControllerKey>));
+    let current_controller = current_key_controller.clone();
+
+    let rebuild_shortcuts = move || {
+        if let Some(ref old_controller) = *current_controller.borrow() {
+            window.remove_controller(old_controller);
+        }
+
+        let settings = babydra_common::load_explore_settings();
+        let mut shortcuts = Vec::new();
+
+        let mut add_shortcut = |action: &str, cb: Rc<dyn Fn()>| {
+            let shortcut_str = settings.get_keybind(action);
+            if let Some((keyval, modifiers)) = parse_shortcut(&shortcut_str) {
+                shortcuts.push(KeyShortcut {
+                    keyval: keyval.clone(),
+                    modifiers,
+                    callback: cb.clone(),
+                });
+                
+                if let Some(name) = keyval.name() {
+                    if name.len() == 1 {
+                        let upper_name = name.to_uppercase();
+                        if let Some(upper_key) = gtk4::gdk::Key::from_name(&upper_name) {
+                            shortcuts.push(KeyShortcut {
+                                keyval: upper_key,
+                                modifiers,
+                                callback: cb.clone(),
+                            });
+                        }
+                    }
+                }
+            }
+        };
+
+        add_shortcut("toggle_split", toggle_split_view_rc.clone());
+        add_shortcut("toggle_preview", toggle_preview_rc.clone());
+        add_shortcut("toggle_hidden", toggle_hidden_rc.clone());
+        add_shortcut("cut", cut_cb_rc.clone());
+        add_shortcut("copy", copy_cb_rc.clone());
+        add_shortcut("paste", paste_cb_rc.clone());
+        add_shortcut("undo", undo_cb_rc.clone());
+
+        let new_controller = setup_key_shortcuts(&window, shortcuts);
+        current_controller.replace(Some(new_controller));
+    };
+
+    let rebuild_shortcuts_rc = Rc::new(rebuild_shortcuts) as Rc<dyn Fn()>;
+    rebuild_shortcuts_cell.replace(Some(rebuild_shortcuts_rc.clone()));
+    rebuild_shortcuts_rc();
+    rebuild_shortcuts_rc
+}

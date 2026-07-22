@@ -235,110 +235,18 @@ pub fn create_explore_window(
     );
 
     // Wire status bar buttons click
-    {
-        let toggle_p = toggle_preview_rc.clone();
-        let view_mode_cb = view_mode_callback_rc.clone();
-        let sort_cb = sort_callback_rc.clone();
-        let parent_win = ui.window.clone().upcast::<gtk4::Window>();
-        let rebuild_cell_c = rebuild_shortcuts_cell.clone();
-        let session_cc = session.clone();
-        let nav_c = navigate_pane_ref.clone();
-        let act_c = active_pane.clone();
-        let preview_vc = preview_visible.clone();
-        let toggle_p_c = toggle_preview_rc.clone();
-
-        if let Some(ref sw) = *status_bar_widgets_cell.borrow() {
-            sw.btn_toggle_preview.connect_clicked(move |_| {
-                toggle_p();
-            });
-
-            // View modes (Grid / List)
-            {
-                let cb = view_mode_cb.clone();
-                sw.btn_view_icons.connect_clicked(move |_| {
-                    cb("icons".to_string());
-                });
-            }
-            {
-                let cb = view_mode_cb.clone();
-                sw.btn_view_list.connect_clicked(move |_| {
-                    cb("list".to_string());
-                });
-            }
-
-            // Sort Dropdown
-            {
-                let cb = sort_cb.clone();
-                sw.dropdown_sort.connect_selected_notify(move |dd| {
-                    let selected = dd.selected();
-                    let mode = match selected {
-                        0 => "auto".to_string(),
-                        1 => "date".to_string(),
-                        2 => "group".to_string(),
-                        _ => "auto".to_string(),
-                    };
-                    cb(mode);
-                });
-            }
-
-            // Settings button
-            {
-                let parent_win_c = parent_win.clone();
-                let rebuild_c = rebuild_cell_c.clone();
-                let session_inner = session_cc.clone();
-                let nav_inner = nav_c.clone();
-                let act_inner = act_c.clone();
-                let preview_inner = preview_vc.clone();
-                let toggle_p_inner = toggle_p_c.clone();
-
-                sw.btn_settings.connect_clicked(move |_| {
-                    let rebuild_inner_cb = rebuild_c.clone();
-                    let session_inner_cb = session_inner.clone();
-                    let nav_inner_cb = nav_inner.clone();
-                    let act_inner_cb = act_inner.clone();
-                    let preview_inner_cb = preview_inner.clone();
-                    let toggle_p_inner_cb = toggle_p_inner.clone();
-
-                    crate::widgets::settings_dialog::show_settings_dialog(&parent_win_c, move || {
-                        let settings = babydra_common::load_explore_settings();
-                        
-                        // 1. Sync hidden files visibility setting in tab state
-                        {
-                            let mut s = session_inner_cb.borrow_mut();
-                            let tab = s.active_tab_mut();
-                            tab.show_hidden = settings.show_hidden;
-                        }
-
-                        // 2. Sync preview panel visibility
-                        let preview_changed = preview_inner_cb.get() != settings.preview_visible;
-                        if preview_changed {
-                            toggle_p_inner_cb();
-                        }
-
-                        // 3. Trigger navigate refresh
-                        let path = session_inner_cb.borrow().active_tab().current_path.clone();
-                        if let Some(ref f) = *nav_inner_cb.borrow() {
-                            f(act_inner_cb.get(), path);
-                        }
-
-                        // 4. Rebuild shortcuts
-                        if let Some(ref rebuild) = *rebuild_inner_cb.borrow() {
-                            rebuild();
-                        }
-                    });
-                });
-            }
-
-            // Sync initial view mode class for status bar buttons
-            if settings.view_mode == "list" {
-                sw.btn_view_list.add_css_class("status-bar-btn-active");
-                sw.btn_view_icons.remove_css_class("status-bar-btn-active");
-            } else {
-                sw.btn_view_icons.add_css_class("status-bar-btn-active");
-                sw.btn_view_list.remove_css_class("status-bar-btn-active");
-            }
-        }
-    }
+    handlers::events::setup_status_bar_wiring(
+        status_bar_widgets_cell.clone(),
+        toggle_preview_rc.clone(),
+        view_mode_callback_rc.clone(),
+        sort_callback_rc.clone(),
+        ui.window.clone().upcast::<gtk4::Window>(),
+        rebuild_shortcuts_cell.clone(),
+        session.clone(),
+        navigate_pane_ref.clone(),
+        active_pane.clone(),
+        preview_visible.clone(),
+    );
 
 
     let _rebuild_tabs_rc = widgets::setup_tab_bar(&ui.vbox, session.clone(), navigate_pane_ref.clone(), tab_bar_box.clone(), rebuild_tabs_cell.clone());
@@ -464,67 +372,18 @@ pub fn create_explore_window(
     };
     let undo_cb_rc = Rc::new(undo_cb) as Rc<dyn Fn()>;
 
-    let current_key_controller = Rc::new(RefCell::new(None::<gtk4::EventControllerKey>));
-
-    let rebuild_shortcuts = {
-        let window = ui.window.clone();
-        let current_controller = current_key_controller.clone();
-        let toggle_split_view_rc = toggle_split_view_rc.clone();
-        let toggle_preview_rc = toggle_preview_rc.clone();
-        let toggle_hidden_rc = toggle_hidden_rc.clone();
-        let cut_cb_rc = cut_cb_rc.clone();
-        let copy_cb_rc = copy_cb_rc.clone();
-        let paste_cb_rc = paste_cb_rc.clone();
-        let undo_cb_rc = undo_cb_rc.clone();
-        move || {
-            if let Some(ref old_controller) = *current_controller.borrow() {
-                window.remove_controller(old_controller);
-            }
-
-            let settings = babydra_common::load_explore_settings();
-            let mut shortcuts = Vec::new();
-
-            let mut add_shortcut = |action: &str, cb: Rc<dyn Fn()>| {
-                let shortcut_str = settings.get_keybind(action);
-                if let Some((keyval, modifiers)) = handlers::events::parse_shortcut(&shortcut_str) {
-                    shortcuts.push(handlers::events::KeyShortcut {
-                        keyval: keyval.clone(),
-                        modifiers,
-                        callback: cb.clone(),
-                    });
-                    
-                    if let Some(name) = keyval.name() {
-                        if name.len() == 1 {
-                            let upper_name = name.to_uppercase();
-                            if let Some(upper_key) = gtk4::gdk::Key::from_name(&upper_name) {
-                                shortcuts.push(handlers::events::KeyShortcut {
-                                    keyval: upper_key,
-                                    modifiers,
-                                    callback: cb.clone(),
-                                });
-                            }
-                        }
-                    }
-                }
-            };
-
-            add_shortcut("toggle_split", toggle_split_view_rc.clone());
-            add_shortcut("toggle_preview", toggle_preview_rc.clone());
-            add_shortcut("toggle_hidden", toggle_hidden_rc.clone());
-            add_shortcut("cut", cut_cb_rc.clone());
-            add_shortcut("copy", copy_cb_rc.clone());
-            add_shortcut("paste", paste_cb_rc.clone());
-            add_shortcut("undo", undo_cb_rc.clone());
-
-            let new_controller = handlers::events::setup_key_shortcuts(&window, shortcuts);
-            current_controller.replace(Some(new_controller));
-        }
-    };
-    let rebuild_shortcuts_rc = Rc::new(rebuild_shortcuts) as Rc<dyn Fn()>;
-    rebuild_shortcuts_cell.replace(Some(rebuild_shortcuts_rc.clone()));
-
-    // Install initial shortcuts
-    rebuild_shortcuts_rc();
+    // Install keyboard shortcuts
+    handlers::events::setup_window_shortcuts(
+        &ui.window,
+        toggle_split_view_rc.clone(),
+        toggle_preview_rc.clone(),
+        toggle_hidden_rc.clone(),
+        cut_cb_rc.clone(),
+        copy_cb_rc.clone(),
+        paste_cb_rc.clone(),
+        undo_cb_rc.clone(),
+        rebuild_shortcuts_cell.clone(),
+    );
 
     // Set up window resize response logic
     handlers::setup_window_resize_handler(
