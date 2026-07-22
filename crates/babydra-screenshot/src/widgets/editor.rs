@@ -120,14 +120,14 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
     btn_pen.add_css_class("screenshot-toolbar-btn");
 
     let btn_rect = gtk4::Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("draw-rectangle-symbolic", 16))
+        .child(&babydra_utils::ui::icon::get_icon("rect", 16))
         .build();
     btn_rect.set_tooltip_text(Some(&babydra_common::i18n::t("screenshot.rect_tooltip")));
     btn_rect.add_css_class("flat");
     btn_rect.add_css_class("screenshot-toolbar-btn");
 
     let btn_blur = gtk4::Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("view-conceal-symbolic", 16))
+        .child(&babydra_utils::ui::icon::get_icon("blur", 16))
         .build();
     btn_blur.set_tooltip_text(Some(&babydra_common::i18n::t("screenshot.blur_tooltip")));
     btn_blur.add_css_class("flat");
@@ -244,7 +244,7 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
     });
 
     let btn_cancel = gtk4::Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("window-close-symbolic", 16))
+        .child(&babydra_utils::ui::icon::get_icon("close", 16))
         .build();
     btn_cancel.set_tooltip_text(Some(&babydra_common::i18n::t("screenshot.cancel_tooltip")));
     btn_cancel.add_css_class("flat");
