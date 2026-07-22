@@ -59,8 +59,7 @@ pub fn create_media_popover(
 
     let prev_btn = gtk4::Button::new();
     prev_btn.add_css_class("media-control-btn");
-    let prev_img = gtk4::Image::from_icon_name("media-skip-backward-symbolic");
-    prev_img.set_pixel_size(16);
+    let prev_img = babydra_utils::ui::icon::get_icon("previous", 16);
     prev_btn.set_child(Some(&prev_img));
     prev_btn.connect_clicked(|_| {
         let _ = std::process::Command::new("playerctl").arg("previous").spawn();
@@ -68,18 +67,15 @@ pub fn create_media_popover(
 
     let play_btn = gtk4::Button::new();
     play_btn.add_css_class("media-control-btn");
-    let play_btn_icon = gtk4::Image::from_icon_name("media-playback-start-symbolic");
-    play_btn_icon.set_pixel_size(22);
+    let play_btn_icon = babydra_utils::ui::icon::get_icon("play", 22);
     play_btn.set_child(Some(&play_btn_icon));
-    let play_btn_icon_clone = play_btn_icon.clone();
     play_btn.connect_clicked(move |_| {
         let _ = std::process::Command::new("playerctl").arg("play-pause").spawn();
     });
 
     let next_btn = gtk4::Button::new();
     next_btn.add_css_class("media-control-btn");
-    let next_img = gtk4::Image::from_icon_name("media-skip-forward-symbolic");
-    next_img.set_pixel_size(16);
+    let next_img = babydra_utils::ui::icon::get_icon("next", 16);
     next_btn.set_child(Some(&next_img));
     next_btn.connect_clicked(|_| {
         let _ = std::process::Command::new("playerctl").arg("next").spawn();
@@ -169,7 +165,7 @@ pub fn create_media_popover(
         popover_artist,
         popover_art_container,
         popover_app_name,
-        play_btn_icon_clone,
+        play_btn_icon,
     )
 }
 

@@ -134,4 +134,26 @@ pub const LIGHT_FOLDER_VIDEOS_SVG: &str = include_str!("../../assets/light/folde
 pub const DARK_DRIVE_HARDDISK_SVG: &str = include_str!("../../assets/dark/drive-harddisk.svg");
 pub const LIGHT_DRIVE_HARDDISK_SVG: &str = include_str!("../../assets/light/drive-harddisk.svg");
 
+pub const DARK_CALENDAR_SVG: &str = include_str!("../../assets/dark/calendar.svg");
+pub const LIGHT_CALENDAR_SVG: &str = include_str!("../../assets/light/calendar.svg");
+pub const DARK_PLAY_SVG: &str = include_str!("../../assets/dark/play.svg");
+pub const LIGHT_PLAY_SVG: &str = include_str!("../../assets/light/play.svg");
+pub const DARK_PAUSE_SVG: &str = include_str!("../../assets/dark/pause.svg");
+pub const LIGHT_PAUSE_SVG: &str = include_str!("../../assets/light/pause.svg");
+pub const DARK_PREVIOUS_SVG: &str = include_str!("../../assets/dark/previous.svg");
+pub const LIGHT_PREVIOUS_SVG: &str = include_str!("../../assets/light/previous.svg");
+pub const DARK_NEXT_SVG: &str = include_str!("../../assets/dark/next.svg");
+pub const LIGHT_NEXT_SVG: &str = include_str!("../../assets/light/next.svg");
+pub const DARK_EYE_SVG: &str = include_str!("../../assets/dark/eye.svg");
+pub const LIGHT_EYE_SVG: &str = include_str!("../../assets/light/eye.svg");
+pub const DARK_CHECK_SVG: &str = include_str!("../../assets/dark/check.svg");
+pub const LIGHT_CHECK_SVG: &str = include_str!("../../assets/light/check.svg");
+pub const DARK_CLOSE_SVG: &str = include_str!("../../assets/dark/close.svg");
+pub const LIGHT_CLOSE_SVG: &str = include_str!("../../assets/light/close.svg");
+pub const DARK_EDIT_SVG: &str = include_str!("../../assets/dark/edit.svg");
+pub const LIGHT_EDIT_SVG: &str = include_str!("../../assets/light/edit.svg");
+pub const DARK_MINUS_SVG: &str = include_str!("../../assets/dark/minus.svg");
+pub const LIGHT_MINUS_SVG: &str = include_str!("../../assets/light/minus.svg");
+
+
 
