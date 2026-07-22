@@ -113,7 +113,7 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
     btn_reset.add_css_class("screenshot-toolbar-btn");
 
     let btn_pen = gtk4::Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("rename", 16))
+        .child(&babydra_utils::ui::icon::get_icon("edit", 16))
         .build();
     btn_pen.set_tooltip_text(Some(&babydra_common::i18n::t("screenshot.pen_tooltip")));
     btn_pen.add_css_class("flat");

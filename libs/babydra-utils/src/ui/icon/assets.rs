@@ -154,6 +154,10 @@ pub const DARK_EDIT_SVG: &str = include_str!("../../assets/dark/edit.svg");
 pub const LIGHT_EDIT_SVG: &str = include_str!("../../assets/light/edit.svg");
 pub const DARK_MINUS_SVG: &str = include_str!("../../assets/dark/minus.svg");
 pub const LIGHT_MINUS_SVG: &str = include_str!("../../assets/light/minus.svg");
+pub const DARK_RECT_SVG: &str = include_str!("../../assets/dark/rect.svg");
+pub const LIGHT_RECT_SVG: &str = include_str!("../../assets/light/rect.svg");
+pub const DARK_BLUR_SVG: &str = include_str!("../../assets/dark/blur.svg");
+pub const LIGHT_BLUR_SVG: &str = include_str!("../../assets/light/blur.svg");
 
 
 

@@ -194,6 +194,10 @@ fn load_icon_image_data(img: &gtk4::Image, name: &str, size: i32) {
         ("pan-up-symbolic", true) | ("pan-up", true) => Some(LIGHT_UP_SVG),
         ("pan-down-symbolic", false) | ("pan-down", false) => Some(DARK_DOWN_SVG),
         ("pan-down-symbolic", true) | ("pan-down", true) => Some(LIGHT_DOWN_SVG),
+        ("rect", false) | ("draw-rectangle-symbolic", false) => Some(DARK_RECT_SVG),
+        ("rect", true) | ("draw-rectangle-symbolic", true) => Some(LIGHT_RECT_SVG),
+        ("blur", false) | ("view-conceal-symbolic", false) => Some(DARK_BLUR_SVG),
+        ("blur", true) | ("view-conceal-symbolic", true) => Some(LIGHT_BLUR_SVG),
         _ => None,
     };
 
