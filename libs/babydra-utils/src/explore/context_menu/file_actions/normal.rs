@@ -112,6 +112,9 @@ pub fn show_for_file_normal(
     let pop_c = popover.clone();
     let target_paths_copy = target_paths.clone();
     btn_copy.connect_clicked(move |_| {
+        if let Some(root) = pop_c.root() {
+            crate::explore::context_menu::clipboard::apply_cut_dimming(&root, &[]);
+        }
         pop_c.popdown();
         CLIPBOARD.with(|cb| {
             cb.replace(Some((target_paths_copy.clone(), false)));
@@ -121,6 +124,9 @@ pub fn show_for_file_normal(
     let pop_c = popover.clone();
     let target_paths_cut = target_paths.clone();
     btn_cut.connect_clicked(move |_| {
+        if let Some(root) = pop_c.root() {
+            crate::explore::context_menu::clipboard::apply_cut_dimming(&root, &target_paths_cut);
+        }
         pop_c.popdown();
         CLIPBOARD.with(|cb| {
             cb.replace(Some((target_paths_cut.clone(), true)));

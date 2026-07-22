@@ -14,6 +14,7 @@ pub fn handle_cut(paths: Vec<PathBuf>, current_path: PathBuf, _nav_cb: Rc<dyn Fn
             cb.replace(Some((paths.clone(), true)));
         });
         babydra_utils::explore::context_menu::clipboard::set_system_clipboard_files(&paths, true);
+        babydra_utils::explore::context_menu::clipboard::apply_cut_dimming_global(&paths);
     }
 }
 
@@ -24,6 +25,7 @@ pub fn handle_copy(paths: Vec<PathBuf>, current_path: PathBuf, _nav_cb: Rc<dyn F
             cb.replace(Some((paths.clone(), false)));
         });
         babydra_utils::explore::context_menu::clipboard::set_system_clipboard_files(&paths, false);
+        babydra_utils::explore::context_menu::clipboard::apply_cut_dimming_global(&[]);
     }
 }
 
