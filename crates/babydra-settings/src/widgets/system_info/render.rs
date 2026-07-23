@@ -1,4 +1,4 @@
-//! System specifications UI layout generator matching Windows 11 / Acrylic About page.
+//! System specifications UI layout generator matching Windows 11 / About page layout.
 
 use gtk4::prelude::*;
 
@@ -87,22 +87,12 @@ pub fn build_system_ui(
     dev_header_title.set_valign(gtk4::Align::Center);
     dev_header_row.append(&dev_header_title);
 
-    let dev_spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    dev_spacer.set_hexpand(true);
-    dev_header_row.append(&dev_spacer);
-
-    let copy_dev_btn = gtk4::Button::with_label("Copy");
-    copy_dev_btn.add_css_class("placeholder-btn");
-    copy_dev_btn.set_valign(gtk4::Align::Center);
-    copy_dev_btn.set_cursor_from_name(Some("pointer"));
-    dev_header_row.append(&copy_dev_btn);
-
     dev_group_card.append(&dev_header_row);
 
     // Device Specs Grid (Key-Value aligned)
     let dev_specs_grid = gtk4::Grid::new();
-    dev_specs_grid.set_column_spacing(24);
-    dev_specs_grid.set_row_spacing(8);
+    dev_specs_grid.set_column_spacing(32);
+    dev_specs_grid.set_row_spacing(10);
     dev_specs_grid.set_margin_start(30);
     dev_specs_grid.set_margin_top(4);
     dev_specs_grid.set_margin_bottom(8);
@@ -155,22 +145,12 @@ pub fn build_system_ui(
     os_header_title.set_valign(gtk4::Align::Center);
     os_header_row.append(&os_header_title);
 
-    let os_spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    os_spacer.set_hexpand(true);
-    os_header_row.append(&os_spacer);
-
-    let copy_os_btn = gtk4::Button::with_label("Copy");
-    copy_os_btn.add_css_class("placeholder-btn");
-    copy_os_btn.set_valign(gtk4::Align::Center);
-    copy_os_btn.set_cursor_from_name(Some("pointer"));
-    os_header_row.append(&copy_os_btn);
-
     os_group_card.append(&os_header_row);
 
     // OS Specs Grid
     let os_specs_grid = gtk4::Grid::new();
-    os_specs_grid.set_column_spacing(24);
-    os_specs_grid.set_row_spacing(8);
+    os_specs_grid.set_column_spacing(32);
+    os_specs_grid.set_row_spacing(10);
     os_specs_grid.set_margin_start(30);
     os_specs_grid.set_margin_top(4);
     os_specs_grid.set_margin_bottom(8);

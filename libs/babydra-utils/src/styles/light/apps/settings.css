@@ -1,11 +1,11 @@
-/* Settings Light Mode stylesheet - Windows 11 Specs & Acrylic Theme */
+/* Settings Light Mode stylesheet - Synchronized with design_tokens.md */
 
 window.settings-window {
-    background-color: #f6f8fa;
+    background-color: rgba(255, 255, 255, 0.98);
     background-image: none;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     color: #1c1c1e;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 16px;
 }
@@ -23,7 +23,7 @@ window.settings-window > overlay > box {
 
 .sidebar-search-entry,
 .sidebar-search-entry > text {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: rgba(0, 0, 0, 0.03);
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 8px;
     color: #1c1c1e;
@@ -33,7 +33,7 @@ window.settings-window > overlay > box {
 
 .sidebar-search-entry:focus,
 .sidebar-search-entry > text:focus {
-    border-color: rgba(59, 130, 246, 0.5);
+    border-color: #3b82f6;
     background-color: rgba(59, 130, 246, 0.04);
 }
 
@@ -46,13 +46,13 @@ window.settings-window > overlay > box {
 .settings-breadcrumb-parent {
     font-size: 18px;
     font-weight: 600;
-    color: rgba(28, 28, 30, 0.60);
+    color: rgba(28, 28, 30, 0.50);
 }
 
 .settings-breadcrumb-arrow {
     font-size: 18px;
     font-weight: 400;
-    color: rgba(28, 28, 30, 0.35);
+    color: rgba(28, 28, 30, 0.30);
 }
 
 .settings-breadcrumb-current {
@@ -71,7 +71,7 @@ window.settings-window > overlay > box {
 .settings-section-title {
     font-size: 11px;
     font-weight: 700;
-    color: rgba(28, 28, 30, 0.45);
+    color: rgba(28, 28, 30, 0.50);
     margin-top: 16px;
     margin-bottom: 8px;
     letter-spacing: 0.6px;
@@ -85,7 +85,7 @@ window.settings-window > overlay > box {
 
 .settings-row-desc {
     font-size: 12px;
-    color: #71717a;
+    color: rgba(28, 28, 30, 0.50);
 }
 
 .settings-row-icon {
@@ -106,9 +106,9 @@ window.settings-window > overlay > box {
 
 .settings-card row,
 .settings-card-row {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     background: transparent;
-    transition: background-color 150ms ease;
+    transition: background-color 200ms ease;
 }
 
 .settings-card row:first-child,
@@ -129,24 +129,24 @@ window.settings-window > overlay > box {
 
 .settings-card row:hover,
 .settings-card-row:hover {
-    background-color: rgba(0, 0, 0, 0.03);
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 /* Connect / Pill Buttons */
 .connect-pill-btn {
     background-color: rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.10);
-    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 9999px;
     color: #1c1c1e;
     padding: 6px 16px;
     font-size: 12px;
     font-weight: 500;
-    transition: background-color 150ms ease, border-color 150ms ease;
+    transition: background-color 200ms ease, border-color 200ms ease;
 }
 
 .connect-pill-btn:hover {
-    background-color: rgba(0, 0, 0, 0.09);
-    border-color: rgba(0, 0, 0, 0.16);
+    background-color: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.14);
 }
 
 .connected-pill {
@@ -185,7 +185,7 @@ button.theme-option-card {
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 10px;
     padding: 12px 16px;
-    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+    transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
     color: #1c1c1e;
 }
 
@@ -196,7 +196,7 @@ button.theme-option-card:hover {
 
 button.theme-option-card.active {
     background-color: rgba(59, 130, 246, 0.10);
-    border: 1px solid rgba(59, 130, 246, 0.35);
+    border: 1px solid #3b82f6;
     color: #2563eb;
 }
 
@@ -209,18 +209,18 @@ dropdown,
 dropdown button {
     background-color: rgba(0, 0, 0, 0.04);
     background-image: none;
-    border: 1px solid rgba(0, 0, 0, 0.10);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 8px;
     color: #1c1c1e;
     padding: 5px 12px;
     box-shadow: none;
-    transition: background-color 150ms ease, border-color 150ms ease;
+    transition: background-color 200ms ease, border-color 200ms ease;
 }
 
 dropdown:hover,
 dropdown button:hover {
     background-color: rgba(0, 0, 0, 0.08);
-    border-color: rgba(0, 0, 0, 0.16);
+    border-color: rgba(0, 0, 0, 0.14);
 }
 
 /* System Info */
@@ -251,17 +251,17 @@ progressbar.disk-progress progress {
 /* Cheatsheet Overlay */
 .cheatsheet-overlay {
     background-color: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 18px;
     padding: 24px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
 .cheatsheet-title {
     font-size: 15px;
     font-weight: 700;
     color: #1c1c1e;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     padding-bottom: 8px;
     margin-bottom: 16px;
 }
