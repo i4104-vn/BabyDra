@@ -74,21 +74,21 @@
 }
 
 .explore-window flowboxchild {
-    min-width: 108px;
-    max-width: 108px;
-    min-height: 108px;
-    max-height: 108px;
+    min-width: 114px;
+    max-width: 114px;
+    min-height: 114px;
+    max-height: 114px;
     padding: 0;
     margin: 4px;
-    border-radius: 10px;
+    border-radius: 12px;
 }
 
 .explore-window .file-item {
-    min-width: 108px;
-    max-width: 108px;
-    min-height: 108px;
-    max-height: 108px;
-    border-radius: 10px;
+    min-width: 114px;
+    max-width: 114px;
+    min-height: 114px;
+    max-height: 114px;
+    border-radius: 12px;
     padding: 6px;
     cursor: pointer;
     transition: background-color 0.15s ease;
