@@ -119,8 +119,8 @@ pub fn setup_window_resize_handler(
 
 /// Sets up the hot-reload receiver loop responding to directory watcher triggers.
 pub fn setup_file_watcher_receiver(
-    _session: Rc<RefCell<SessionState>>,
-    navigate_pane_no_watch_ref: Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>,
+    session: Rc<RefCell<SessionState>>,
+    _navigate_pane_no_watch_ref: Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>,
     _active_pane: Rc<Cell<ActivePane>>,
     left_content_handle: Rc<babydra_common::ContentViewHandle>,
     right_content_handle: Rc<RefCell<Option<Rc<babydra_common::ContentViewHandle>>>>,
@@ -128,7 +128,6 @@ pub fn setup_file_watcher_receiver(
 ) {
     let left = left_content_handle;
     let right = right_content_handle;
-    let nav_no_watch = navigate_pane_no_watch_ref;
     glib::MainContext::default().spawn_local(async move {
         let pending_timer = Rc::new(RefCell::new(None::<glib::SourceId>));
         while let Some(_) = watch_rx.recv().await {
@@ -140,24 +139,38 @@ pub fn setup_file_watcher_receiver(
                 source_id.remove();
             }
 
-            let nav_no_watch_c = nav_no_watch.clone();
             let left_c = left.clone();
             let right_c = right.clone();
             let timer_ref = pending_timer.clone();
+            let session_c = session.clone();
 
-            // Schedule refresh after 300ms of quiet time
+            // Schedule quiet background refresh after 350ms of quiet time
             let source_id = glib::timeout_add_local_once(
-                std::time::Duration::from_millis(300),
+                std::time::Duration::from_millis(350),
                 move || {
                     timer_ref.borrow_mut().take();
-                    if let Some(ref f) = *nav_no_watch_c.borrow() {
-                        let left_path = left_c.current_path.borrow().clone();
-                        f(ActivePane::Left, left_path);
+                    let show_hidden = session_c.borrow().active_tab().show_hidden;
 
-                        if let Some(ref r_handle) = *right_c.borrow() {
-                            let right_path = r_handle.current_path.borrow().clone();
-                            f(ActivePane::Right, right_path);
+                    let left_path = left_c.current_path.borrow().clone();
+                    let left_handle = left_c.clone();
+                    glib::spawn_future_local(async move {
+                        if let Ok(entries) = babydra_common::load_directory(left_path.clone(), show_hidden).await {
+                            if *left_handle.current_path.borrow() == left_path {
+                                crate::widgets::content_view::update_content_view_silent(&left_handle, &entries, left_path);
+                            }
                         }
+                    });
+
+                    if let Some(ref r_handle) = *right_c.borrow() {
+                        let right_path = r_handle.current_path.borrow().clone();
+                        let r_handle_c = r_handle.clone();
+                        glib::spawn_future_local(async move {
+                            if let Ok(entries) = babydra_common::load_directory(right_path.clone(), show_hidden).await {
+                                if *r_handle_c.current_path.borrow() == right_path {
+                                    crate::widgets::content_view::update_content_view_silent(&r_handle_c, &entries, right_path);
+                                }
+                            }
+                        });
                     }
                 },
             );
