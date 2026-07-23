@@ -173,6 +173,16 @@
     border-radius: 2px;
 }
 
+/* ── Hidden Item (dim files starting with dot when shown) ───────── */
+.explore-window .hidden-item {
+    opacity: 0.65;
+    transition: opacity 0.15s ease;
+}
+
+.explore-window .hidden-item:hover {
+    opacity: 0.85;
+}
+
 /* ── Cut Item (dim when cut to clipboard) ───────────────────────── */
 .explore-window .cut-item {
     opacity: 0.45;

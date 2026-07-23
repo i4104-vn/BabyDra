@@ -6,6 +6,9 @@ use babydra_common::FileEntry;
 pub fn build_list_row_ui(entry: &FileEntry) -> Box {
     let item_box = Box::new(Orientation::Horizontal, 12);
     item_box.set_css_classes(&["list-row"]);
+    if entry.is_hidden || entry.display_name.starts_with('.') {
+        item_box.add_css_class("hidden-item");
+    }
     item_box.set_margin_top(2);
     item_box.set_margin_bottom(2);
     item_box.set_margin_start(6);

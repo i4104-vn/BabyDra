@@ -7,6 +7,9 @@ pub fn build_grid_card_ui(entry: &FileEntry) -> Box {
     let item_box = Box::new(Orientation::Vertical, 4);
     item_box.set_size_request(110, 110);
     item_box.set_css_classes(&["file-item"]);
+    if entry.is_hidden || entry.display_name.starts_with('.') {
+        item_box.add_css_class("hidden-item");
+    }
     item_box.set_halign(Align::Center);
     item_box.set_valign(Align::Center);
     item_box.set_hexpand(false);
