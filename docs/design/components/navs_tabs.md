@@ -33,7 +33,7 @@ Xếp dọc bên dưới nút `+`. Mỗi avatar dùng `border-radius: 50%`.
 
 ## 3. Sidebar Điều hướng Chuẩn (Shared Sidebar)
 
-Sidebar điều hướng được sử dụng thống nhất cho `babydra-explore`, `babydra-settings` và các hộp thoại cài đặt (`settings_dialog`).
+Sidebar điều hướng được sử dụng thống nhất.
 
 - **Khung chứa (`.sidebar`)**: Dùng `ScrolledWindow` hoặc `Box` với bo góc `14px`, nền bán trong suốt, viền mờ `1px solid rgba(255, 255, 255, 0.06)`, chiều rộng cố định `180px` - `220px`.
 - **Mục danh mục (`.sidebar-item`)**: Nút bấm kết hợp Icon (18px) và nhãn văn bản (Label) xếp ngang.
