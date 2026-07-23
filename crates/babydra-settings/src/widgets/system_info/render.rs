@@ -38,6 +38,7 @@ pub fn build_system_ui(
     let logo_container = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     logo_container.add_css_class("os-logo");
     logo_container.set_valign(gtk4::Align::Center);
+    logo_container.set_margin_start(4);
 
     let logo_img = babydra_utils::ui::icon::get_icon("logo", 48);
     logo_img.set_pixel_size(48);
@@ -64,6 +65,7 @@ pub fn build_system_ui(
     let rename_btn = gtk4::Button::with_label("Rename this PC");
     rename_btn.add_css_class("connect-pill-btn");
     rename_btn.set_valign(gtk4::Align::Center);
+    rename_btn.set_margin_end(8);
     rename_btn.set_cursor_from_name(Some("pointer"));
     host_card.append(&rename_btn);
 
@@ -73,10 +75,11 @@ pub fn build_system_ui(
     let dev_group_card = babydra_utils::components::create_card(gtk4::Orientation::Vertical, 0);
     dev_group_card.add_css_class("settings-card");
 
-    // Group Header Row
+    // Group Header Row (Pushed inward with margin_start)
     let dev_header_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    dev_header_row.set_margin_top(2);
+    dev_header_row.set_margin_top(4);
     dev_header_row.set_margin_bottom(18);
+    dev_header_row.set_margin_start(12);
 
     let dev_icon = babydra_utils::ui::icon::get_icon("info", 20);
     dev_icon.set_valign(gtk4::Align::Center);
@@ -91,17 +94,17 @@ pub fn build_system_ui(
 
     dev_group_card.append(&dev_header_row);
 
-    // Device Specs Grid (Key-Value aligned with generous padding & spacing)
+    // Device Specs Grid (Pushed inward & aligned with title text)
     let dev_specs_grid = gtk4::Grid::new();
     dev_specs_grid.set_column_spacing(48);
     dev_specs_grid.set_row_spacing(14);
-    dev_specs_grid.set_margin_start(32);
+    dev_specs_grid.set_margin_start(44);
     dev_specs_grid.set_margin_bottom(8);
 
     let dev_rows = [
         ("Device name", hostname.to_string()),
         ("Processor", cpu_model.to_string()),
-        ("Installed RAM", memory_text.to_string()),
+        ("RAM", memory_text.to_string()),
         ("Graphics", gpu_info.to_string()),
         ("Storage", disk_text.to_string()),
     ];
@@ -130,10 +133,11 @@ pub fn build_system_ui(
     let os_group_card = babydra_utils::components::create_card(gtk4::Orientation::Vertical, 0);
     os_group_card.add_css_class("settings-card");
 
-    // Group Header Row
+    // Group Header Row (Pushed inward with margin_start)
     let os_header_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    os_header_row.set_margin_top(2);
+    os_header_row.set_margin_top(4);
     os_header_row.set_margin_bottom(18);
+    os_header_row.set_margin_start(12);
 
     let os_icon = babydra_utils::ui::icon::get_icon("display", 20);
     os_icon.set_valign(gtk4::Align::Center);
@@ -148,11 +152,11 @@ pub fn build_system_ui(
 
     os_group_card.append(&os_header_row);
 
-    // OS Specs Grid
+    // OS Specs Grid (Pushed inward & aligned with title text)
     let os_specs_grid = gtk4::Grid::new();
     os_specs_grid.set_column_spacing(48);
     os_specs_grid.set_row_spacing(14);
-    os_specs_grid.set_margin_start(32);
+    os_specs_grid.set_margin_start(44);
     os_specs_grid.set_margin_bottom(8);
 
     let os_rows = [
