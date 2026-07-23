@@ -99,31 +99,7 @@ pub fn show_capture_dialog(
         win_save.close();
     });
 
-    // Close Request & Animation Setup
-    let win_cancel = window.clone();
-    let vbox_cancel = vbox.clone();
-    let is_animating = Rc::new(std::cell::Cell::new(false));
-    let is_animating_cancel = is_animating.clone();
-    window.connect_close_request(move |_| {
-        if is_animating_cancel.get() {
-            return glib::Propagation::Stop;
-        }
-        is_animating_cancel.set(true);
-        let win_cb = win_cancel.clone();
-        babydra_utils::ui::animation::genie_out(
-            vbox_cancel.upcast_ref(),
-            360,
-            200,
-            200,
-            move || {
-                win_cb.destroy();
-            }
-        );
-        glib::Propagation::Stop
-    });
-
     window.present();
-    babydra_utils::ui::animation::genie_in(vbox.upcast_ref(), 360, 200, 200);
 }
 
 fn keyval_to_string(keyval: &gtk4::gdk::Key, state: gtk4::gdk::ModifierType) -> String {

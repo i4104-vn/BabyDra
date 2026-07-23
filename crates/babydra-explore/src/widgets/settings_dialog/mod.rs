@@ -1,7 +1,6 @@
 use gtk4::prelude::*;
 use gtk4::{Box, Orientation, Window, Stack};
 use babydra_common::i18n::t;
-use std::rc::Rc;
 
 mod general;
 mod context_menu;
@@ -123,34 +122,10 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         stack_c3.set_visible_child_name("context_menu");
     });
 
-    // Close Request & Animation Setup
-    let win_cancel = window.clone();
-    let hbox_cancel = main_hbox.clone();
-    let is_animating = Rc::new(std::cell::Cell::new(false));
-    let is_animating_cancel = is_animating.clone();
-    window.connect_close_request(move |_| {
-        if is_animating_cancel.get() {
-            return glib::Propagation::Stop;
-        }
-        is_animating_cancel.set(true);
-        let win_cb = win_cancel.clone();
-        babydra_utils::ui::animation::genie_out(
-            hbox_cancel.upcast_ref(),
-            680,
-            460,
-            300,
-            move || {
-                win_cb.destroy();
-            }
-        );
-        glib::Propagation::Stop
-    });
-
     let on_change_destroy = on_change.clone();
     window.connect_destroy(move |_| {
         on_change_destroy();
     });
 
     window.present();
-    babydra_utils::ui::animation::genie_in(main_hbox.upcast_ref(), 680, 460, 300);
 }

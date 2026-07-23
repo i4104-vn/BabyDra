@@ -58,12 +58,6 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
         // Hide progress bar when layout completes successfully
         if *handle_c.current_path.borrow() == start_path && *handle_c.render_generation.borrow() == gen {
             handle_c.widgets.progress_bar.set_visible(false);
-            babydra_utils::ui::animation::slide_in(
-                handle_c.widgets.stack.upcast_ref(),
-                babydra_utils::ui::animation::SlideDirection::Down,
-                10,
-                200,
-            );
         }
     });
 }

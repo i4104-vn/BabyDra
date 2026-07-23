@@ -38,21 +38,7 @@ pub fn setup_split_view(
 
     let toggle_split_view = move || {
         if is_split_c.get() {
-            let split_paned_c_close = split_paned_c.clone();
-            if let Some(right_scroll) = right_scroll_c.borrow().clone() {
-                babydra_utils::ui::animation::slide_out_cb(
-                    right_scroll.upcast_ref(),
-                    babydra_utils::ui::animation::SlideDirection::Right,
-                    200,
-                    250,
-                    true,
-                    move || {
-                        split_paned_c_close.set_end_child(None::<&gtk4::Widget>);
-                    }
-                );
-            } else {
-                split_paned_c.set_end_child(None::<&gtk4::Widget>);
-            }
+            split_paned_c.set_end_child(None::<&gtk4::Widget>);
             right_handle_c.replace(None);
             right_scroll_c.replace(None);
             is_split_c.set(false);
@@ -103,13 +89,6 @@ pub fn setup_split_view(
 
             split_paned_c.set_end_child(Some(&right_scroll));
             split_paned_c.set_position(390);
-
-            babydra_utils::ui::animation::slide_in(
-                right_scroll.upcast_ref(),
-                babydra_utils::ui::animation::SlideDirection::Right,
-                200,
-                250,
-            );
 
             right_scroll_c.borrow_mut().replace(right_scroll);
             right_handle_c.replace(Some(Rc::new(right_handle)));
