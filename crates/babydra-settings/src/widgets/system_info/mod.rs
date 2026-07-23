@@ -1,6 +1,5 @@
 //! System specifications overview and update tab.
 
-use gtk4::prelude::*;
 use std::process::Command;
 use sysinfo::System;
 
@@ -16,8 +15,7 @@ pub fn create_system_widget() -> gtk4::Box {
     let cpu_model = sys.cpus().first().map(|cpu| cpu.brand()).unwrap_or("Intel/AMD CPU").trim().to_string();
 
     let total_mem_gb = sys.total_memory() as f64 / (1024.0 * 1024.0 * 1024.0);
-    let used_mem_gb = sys.used_memory() as f64 / (1024.0 * 1024.0 * 1024.0);
-    let memory_text = format!("{:.1} GB / {:.1} GB ({:.0}%)", used_mem_gb, total_mem_gb, (used_mem_gb / total_mem_gb) * 100.0);
+    let memory_text = format!("{:.1} GB", total_mem_gb);
 
     let mut gpu_info = "lspci lookup failed".to_string();
     if let Ok(output) = Command::new("sh")

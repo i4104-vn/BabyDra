@@ -28,3 +28,15 @@ Xếp dọc bên dưới nút `+`. Mỗi avatar dùng `border-radius: 50%`.
 - **Phiên đang mở**: thêm `border: 2px solid #3b82f6` (accent).
 - **Hover**: hiển thị tooltip tên dự án (xem `tooltips.md`).
 - **Click**: chuyển toàn bộ workspace sang phiên tương ứng.
+
+---
+
+## 3. Sidebar Điều hướng Chuẩn (Shared Sidebar)
+
+Sidebar điều hướng được sử dụng thống nhất.
+
+- **Khung chứa (`.sidebar`)**: Dùng `ScrolledWindow` hoặc `Box` với bo góc `14px`, nền bán trong suốt, viền mờ `1px solid rgba(255, 255, 255, 0.06)`, chiều rộng cố định `180px` - `220px`.
+- **Mục danh mục (`.sidebar-item`)**: Nút bấm kết hợp Icon (18px) và nhãn văn bản (Label) xếp ngang.
+- **Trạng thái Active (`.sidebar-item.active-nav`)**: Nền xanh dương trong suốt `rgba(59, 130, 246, 0.15)`, chữ và icon đổi sang màu Accent `#60a5fa` (`#3b82f6` đối với Light Mode).
+- **Vị trí stylesheet**: Được lưu trữ chung tại `libs/babydra-utils/src/styles/{dark,light}/shared/sidebar.css`.
+

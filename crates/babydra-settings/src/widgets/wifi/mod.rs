@@ -32,37 +32,79 @@ pub fn create_wifi_widget() -> gtk4::Box {
 
             let st = state_clone.borrow();
             if !st.enabled {
-                let placeholder = gtk4::Label::new(Some("Wi-Fi đang tắt"));
-                placeholder.add_css_class("settings-desc");
-                placeholder.set_margin_top(20);
-                placeholder.set_margin_bottom(20);
-                list_box_clone.append(&placeholder);
+                let row = gtk4::ListBoxRow::new();
+                row.add_css_class("settings-card-row");
+
+                let placeholder_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
+                placeholder_box.set_valign(gtk4::Align::Center);
+                placeholder_box.set_halign(gtk4::Align::Center);
+                placeholder_box.set_margin_top(30);
+                placeholder_box.set_margin_bottom(30);
+
+                let wifi_icon = babydra_utils::ui::icon::get_icon("wifi", 24);
+                wifi_icon.set_pixel_size(24);
+                wifi_icon.add_css_class("settings-row-icon");
+                placeholder_box.append(&wifi_icon);
+
+                let lbl = gtk4::Label::new(Some("Wi-Fi đang tắt"));
+                lbl.add_css_class("settings-row-title");
+                placeholder_box.append(&lbl);
+
+                let desc = gtk4::Label::new(Some("Bật công tắc phía trên để tìm kiếm các mạng Wi-Fi khả dụng"));
+                desc.add_css_class("settings-row-desc");
+                placeholder_box.append(&desc);
+
+                row.set_child(Some(&placeholder_box));
+                list_box_clone.append(&row);
                 return;
             }
 
             if st.networks.is_empty() {
-                let placeholder = gtk4::Label::new(Some("Không tìm thấy mạng nào..."));
-                placeholder.add_css_class("settings-desc");
-                placeholder.set_margin_top(20);
-                placeholder.set_margin_bottom(20);
-                list_box_clone.append(&placeholder);
+                let row = gtk4::ListBoxRow::new();
+                row.add_css_class("settings-card-row");
+
+                let placeholder_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
+                placeholder_box.set_valign(gtk4::Align::Center);
+                placeholder_box.set_halign(gtk4::Align::Center);
+                placeholder_box.set_margin_top(30);
+                placeholder_box.set_margin_bottom(30);
+
+                let wifi_icon = babydra_utils::ui::icon::get_icon("wifi", 24);
+                wifi_icon.set_pixel_size(24);
+                wifi_icon.add_css_class("settings-row-icon");
+                placeholder_box.append(&wifi_icon);
+
+                let lbl = gtk4::Label::new(Some("Đang tìm kiếm mạng Wi-Fi..."));
+                lbl.add_css_class("settings-row-title");
+                placeholder_box.append(&lbl);
+
+                row.set_child(Some(&placeholder_box));
+                list_box_clone.append(&row);
                 return;
             }
 
             for (ssid, security, strength, is_connected) in &st.networks {
-                let row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-                row.set_margin_top(8);
-                row.set_margin_bottom(8);
-                row.set_margin_start(8);
-                row.set_margin_end(8);
+                let row = gtk4::ListBoxRow::new();
+                row.add_css_class("settings-card-row");
+
+                let hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+                hbox.set_margin_top(10);
+                hbox.set_margin_bottom(10);
+                hbox.set_margin_start(16);
+                hbox.set_margin_end(16);
 
                 let wifi_icon = babydra_utils::ui::icon::get_icon("wifi", 16);
+                wifi_icon.set_pixel_size(16);
                 wifi_icon.set_valign(gtk4::Align::Center);
-                row.append(&wifi_icon);
+                wifi_icon.add_css_class("settings-row-icon");
+                hbox.append(&wifi_icon);
 
                 let text_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
+                text_box.set_valign(gtk4::Align::Center);
+                text_box.set_hexpand(true);
+
                 let ssid_lbl = gtk4::Label::new(Some(ssid));
-                ssid_lbl.add_css_class("settings-label");
+                ssid_lbl.add_css_class("settings-row-title");
                 ssid_lbl.set_halign(gtk4::Align::Start);
                 text_box.append(&ssid_lbl);
 
@@ -72,25 +114,30 @@ pub fn create_wifi_widget() -> gtk4::Box {
                     format!("Bảo mật ({}) • Tín hiệu {}%", security.to_uppercase(), strength)
                 };
                 let sec_lbl = gtk4::Label::new(Some(&sec_text));
-                sec_lbl.add_css_class("settings-desc");
+                sec_lbl.add_css_class("settings-row-desc");
                 sec_lbl.set_halign(gtk4::Align::Start);
                 text_box.append(&sec_lbl);
 
-                row.append(&text_box);
-
-                let spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-                spacer.set_hexpand(true);
-                row.append(&spacer);
+                hbox.append(&text_box);
 
                 if *is_connected {
+                    let connected_badge = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
+                    connected_badge.add_css_class("connected-pill");
+                    connected_badge.set_valign(gtk4::Align::Center);
+
+                    let check_icon = babydra_utils::ui::icon::get_icon("check", 14);
+                    check_icon.set_pixel_size(14);
+                    connected_badge.append(&check_icon);
+
                     let connected_lbl = gtk4::Label::new(Some("Đã kết nối"));
-                    connected_lbl.add_css_class("success-text");
-                    connected_lbl.set_valign(gtk4::Align::Center);
-                    row.append(&connected_lbl);
+                    connected_lbl.add_css_class("connected-text");
+                    connected_badge.append(&connected_lbl);
+
+                    hbox.append(&connected_badge);
                 } else {
                     let connect_btn = gtk4::Button::with_label("Kết nối");
                     connect_btn.set_valign(gtk4::Align::Center);
-                    connect_btn.add_css_class("suggested-action");
+                    connect_btn.add_css_class("connect-pill-btn");
 
                     let ssid_clone = ssid.clone();
                     let security_clone = security.clone();
@@ -152,9 +199,10 @@ pub fn create_wifi_widget() -> gtk4::Box {
                             }
                         }
                     });
-                    row.append(&connect_btn);
+                    hbox.append(&connect_btn);
                 }
 
+                row.set_child(Some(&hbox));
                 list_box_clone.append(&row);
             }
         }
