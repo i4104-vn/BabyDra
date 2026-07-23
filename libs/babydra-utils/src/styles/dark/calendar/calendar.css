@@ -226,7 +226,7 @@ scrolledwindow.notif-scroll viewport {
     border-radius: 14px;
     padding: 10px 12px;
     transition: all 200ms ease;
-    width: 310px;
+    width: 100%;
     box-shadow: none;
 }
 

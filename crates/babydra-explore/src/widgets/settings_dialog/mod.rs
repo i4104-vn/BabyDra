@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Window, Align, Stack};
+use gtk4::{Box, Orientation, Window, Stack};
 use babydra_common::i18n::t;
 use std::rc::Rc;
 
@@ -14,8 +14,8 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         .transient_for(parent)
         .modal(true)
         .resizable(false)
-        .default_width(560)
-        .default_height(420)
+        .default_width(680)
+        .default_height(460)
         .css_classes(vec!["explore-dialog".to_string()])
         .build();
 
@@ -23,25 +23,34 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     main_hbox.add_css_class("explore-dialog-box");
     window.set_child(Some(&main_hbox));
 
-    // ── Left: Vertical Capsule Pill Navigation (Icon Only) ─────
-    let nav_container = Box::new(Orientation::Vertical, 8);
-    nav_container.set_valign(Align::Start);
-    nav_container.set_margin_top(16);
-    nav_container.set_margin_bottom(16);
-    nav_container.set_margin_start(16);
-    nav_container.add_css_class("settings-capsule-nav-vertical");
-    main_hbox.append(&nav_container);
+    // ── Left: Sidebar Navigation (Explore-style) ───────────────
+    let sidebar = gtk4::ScrolledWindow::new();
+    sidebar.set_hscrollbar_policy(gtk4::PolicyType::Never);
+    sidebar.add_css_class("sidebar");
+    sidebar.set_width_request(190);
+    sidebar.set_hexpand(false);
+    sidebar.set_vexpand(true);
+    sidebar.set_margin_top(8);
+    sidebar.set_margin_bottom(8);
+    sidebar.set_margin_start(8);
+
+    let nav_container = Box::new(Orientation::Vertical, 2);
+    nav_container.set_margin_top(4);
+    nav_container.set_margin_bottom(4);
+    sidebar.set_child(Some(&nav_container));
+    main_hbox.append(&sidebar);
 
     // 1. General (Settings Icon)
-    let btn_general = babydra_utils::components::create_icon_button("settings", 18, &["settings-pill", "active-pill"], Some(&t("explore.settings_general")), || {});
+    let btn_general = babydra_utils::components::create_sidebar_item_button(&t("explore.settings_general"), "settings", "sidebar-item", || {});
+    btn_general.add_css_class("active-nav");
     btn_general.set_cursor_from_name(Some("pointer"));
 
     // 2. Keybinds (Terminal/Command Icon)
-    let btn_keybinds = babydra_utils::components::create_icon_button("terminal", 18, &["settings-pill"], Some(&t("explore.settings_keybinds")), || {});
+    let btn_keybinds = babydra_utils::components::create_sidebar_item_button(&t("explore.settings_keybinds"), "terminal", "sidebar-item", || {});
     btn_keybinds.set_cursor_from_name(Some("pointer"));
 
     // 3. Context Menu (Folder/Menu Icon)
-    let btn_context = babydra_utils::components::create_icon_button("folder", 18, &["settings-pill"], Some(&t("explore.settings_context_menu")), || {});
+    let btn_context = babydra_utils::components::create_sidebar_item_button(&t("explore.settings_context_menu"), "folder", "sidebar-item", || {});
     btn_context.set_cursor_from_name(Some("pointer"));
 
     nav_container.append(&btn_general);
@@ -86,9 +95,9 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     let btn_con_c = btn_context.clone();
     let stack_c = stack.clone();
     btn_general.connect_clicked(move |_| {
-        btn_gen_c.add_css_class("active-pill");
-        btn_key_c.remove_css_class("active-pill");
-        btn_con_c.remove_css_class("active-pill");
+        btn_gen_c.add_css_class("active-nav");
+        btn_key_c.remove_css_class("active-nav");
+        btn_con_c.remove_css_class("active-nav");
         stack_c.set_visible_child_name("general");
     });
 
@@ -97,9 +106,9 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     let btn_con_c2 = btn_context.clone();
     let stack_c2 = stack.clone();
     btn_keybinds.connect_clicked(move |_| {
-        btn_key_c2.add_css_class("active-pill");
-        btn_gen_c2.remove_css_class("active-pill");
-        btn_con_c2.remove_css_class("active-pill");
+        btn_key_c2.add_css_class("active-nav");
+        btn_gen_c2.remove_css_class("active-nav");
+        btn_con_c2.remove_css_class("active-nav");
         stack_c2.set_visible_child_name("keybinds");
     });
 
@@ -108,9 +117,9 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     let btn_con_c3 = btn_context.clone();
     let stack_c3 = stack.clone();
     btn_context.connect_clicked(move |_| {
-        btn_con_c3.add_css_class("active-pill");
-        btn_gen_c3.remove_css_class("active-pill");
-        btn_key_c3.remove_css_class("active-pill");
+        btn_con_c3.add_css_class("active-nav");
+        btn_gen_c3.remove_css_class("active-nav");
+        btn_key_c3.remove_css_class("active-nav");
         stack_c3.set_visible_child_name("context_menu");
     });
 
@@ -127,8 +136,8 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         let win_cb = win_cancel.clone();
         babydra_utils::ui::animation::genie_out(
             hbox_cancel.upcast_ref(),
-            560,
-            420,
+            680,
+            460,
             300,
             move || {
                 win_cb.destroy();
@@ -143,5 +152,5 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     });
 
     window.present();
-    babydra_utils::ui::animation::genie_in(main_hbox.upcast_ref(), 560, 420, 300);
+    babydra_utils::ui::animation::genie_in(main_hbox.upcast_ref(), 680, 460, 300);
 }

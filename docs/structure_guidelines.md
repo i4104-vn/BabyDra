@@ -66,4 +66,5 @@ babydra-panel (Crate ứng dụng)
 
 1. **Không lạm dụng `mod.rs`:** Hạn chế viết logic tính toán hoặc giao diện dài quá 150 dòng trong `mod.rs`. Hãy tạo file con chuyên biệt (như `render.rs`, `helper.rs`) và gọi chúng từ `mod.rs`.
 2. **Re-export trực quan:** Sử dụng `pub use` tại `mod.rs` hoặc `lib.rs` cấp cha để tạo ra giao diện API phẳng (flat access), giúp các crate ứng dụng gọi thư viện một cách ngắn gọn nhất (ví dụ: `babydra_common::verify_password` thay vì đường dẫn dài `babydra_common::services::system::auth::verify_password`).
-3. **Cách ly hoàn toàn CSS:** Toàn bộ CSS định dạng giao diện của toàn bộ dự án **phải** được đặt trong thư mục `libs/babydra-utils/src/styles/` và nạp thông qua [ui/theme/mod.rs](file:///home/i4104/BabyDra/libs/babydra-utils/src/ui/theme/mod.rs), không viết mã CSS inline cứng trực tiếp trong Rust code.
+3. **Cách ly hoàn toàn CSS:** Toàn bộ CSS định dạng giao diện của toàn bộ dự án **phải** được đặt trong thư mục `libs/babydra-utils/src/styles/` và nạp thông qua [ui/theme/mod.rs](file:///home/i4104/BabyDra/libs/babydra-utils/src/ui/theme/mod.rs), không viết mã CSS inline cứng trực tiếp trong Rust code. Các tệp CSS dùng chung (`button.css`, `switch.css`, `sidebar.css`, `scrollbar.css`) được lưu trữ tập trung tại thư mục `styles/<theme>/shared/`.
+

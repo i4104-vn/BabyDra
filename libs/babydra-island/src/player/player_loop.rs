@@ -302,7 +302,7 @@ pub fn start_player_polling_loop(
                             } else {
                                 state_clone.set(IslandState::ZoomingOut);
                                 is_playing_clone.set(false);
-                                widgets_clone.play_btn_icon.set_icon_name(Some("media-playback-start-symbolic"));
+                                babydra_utils::ui::icon::set_image_from_icon(&widgets_clone.play_btn_icon, "play", 22);
                                 if let Some(child) = widgets_clone.art_container.first_child() {
                                     widgets_clone.art_container.remove(&child);
                                 }
@@ -631,9 +631,9 @@ fn update_player_view(
     }
 
     if playing {
-        widgets.play_btn_icon.set_icon_name(Some("media-playback-pause-symbolic"));
+        babydra_utils::ui::icon::set_image_from_icon(&widgets.play_btn_icon, "pause", 22);
     } else {
-        widgets.play_btn_icon.set_icon_name(Some("media-playback-start-symbolic"));
+        babydra_utils::ui::icon::set_image_from_icon(&widgets.play_btn_icon, "play", 22);
     }
 
     widgets.default_view.set_visible(false);

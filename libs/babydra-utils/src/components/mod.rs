@@ -19,7 +19,7 @@ pub use buttons::{create_button, create_accent_button, create_fab, create_icon_b
 pub use card::{create_card, create_card_with_class, create_title, create_subtitle, create_item_row, create_switch_card, create_scrollable_list, create_grid_file_item};
 pub use close_button::{create_close_button, create_close_button_with_label};
 pub use modal::create_dialog_box;
-pub use navbar::create_sidebar_row;
+pub use navbar::{create_sidebar_row, create_sidebar_row_with_badge};
 pub use popovers::{create_popover, create_popover_with_content};
 pub use progress::{create_progress_bar, create_disk_progress};
 pub use spinners::{create_spinner, create_loading_box};

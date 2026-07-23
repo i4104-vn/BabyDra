@@ -1,269 +1,292 @@
-/* Settings Dark Mode stylesheet */
+/* Settings Dark Mode stylesheet - Generous Padding & Spacing */
 
-window.settings-window,
-window.settings-window > overlay,
-window.settings-window > overlay > box {
-    background-color: #121212;
+window.settings-window {
+    background-color: rgba(14, 14, 18, 0.96);
     background-image: none;
-    transition: all 250ms ease;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 0 0 16px 16px;
 }
 
-.settings-sidebar {
-    background-color: #0c0c14;
-    border-right: 1px solid rgba(255, 255, 255, 0.12);
-    padding: 18px 12px;
+window.settings-window>overlay>box {
+    background-color: transparent;
 }
 
-.settings-sidebar-row {
-    border-radius: 12px;
-    padding: 10px 14px;
-    margin-bottom: 4px;
-    color: #a0a0a8;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 250ms ease-out;
-}
-
-.settings-sidebar-row:hover {
+/* ── Profile Avatar & Sidebar ─────────────────────────────────── */
+.profile-avatar {
+    border-radius: 50%;
     background-color: rgba(255, 255, 255, 0.08);
-    color: #f5f5f7;
+    border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
-.settings-sidebar-row:selected {
-    background-color: rgba(229, 193, 151, 0.16);
-    border: 1px solid rgba(229, 193, 151, 0.25);
-    border-top: 1px solid rgba(229, 193, 151, 0.35);
-    color: #e5c197;
-    font-weight: 600;
+.profile-user-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
 }
 
+.profile-separator {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+    margin: 4px 8px 8px 8px;
+}
+
+.sidebar-search-entry,
+.sidebar-search-entry>text {
+    background-color: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 12px;
+    padding: 8px 12px;
+}
+
+.sidebar-search-entry:focus,
+.sidebar-search-entry>text:focus {
+    border-color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.06);
+}
+
+/* ── Content & Breadcrumbs ────────────────────────────────────── */
 .settings-content {
     background-color: transparent;
-    padding: 24px;
+    padding: 28px 36px;
 }
 
-.settings-title {
+.settings-breadcrumb-parent {
+    font-size: 15px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.50);
+}
+
+.settings-breadcrumb-arrow {
+    font-size: 15px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.30);
+}
+
+.settings-breadcrumb-current {
     font-size: 22px;
-    font-weight: bold;
-    color: #f5f5f7;
-    margin-bottom: 20px;
+    font-weight: 700;
+    color: #ffffff;
 }
 
-.settings-subtitle {
-    font-size: 16px;
+.settings-group-header-title {
+    font-size: 15px;
     font-weight: 600;
-    color: #f5f5f7;
-    margin-bottom: 12px;
+    color: rgba(255, 255, 255, 0.95);
 }
 
-.settings-card {
-    background-color: #1c1c1e;
-    border: 1px solid #2c2c2e;
-    border-radius: 16px;
-    padding: 18px;
-    margin-bottom: 16px;
-    box-shadow: none;
-    transition: all 250ms cubic-bezier(0.16, 1, 0.3, 1);
+.settings-title-label {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 4px;
 }
 
-.settings-card:hover {
-    background-color: #2c2c2e;
-    border-color: #3a3a3c;
+.settings-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.50);
+    margin-top: 20px;
+    margin-bottom: 10px;
+    letter-spacing: 0.6px;
 }
 
-.settings-row {
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.settings-row:last-child {
-    border-bottom: none;
-}
-
-.settings-label {
-    font-size: 14px;
-    color: #f5f5f7;
+.settings-row-title {
+    font-size: 13px;
     font-weight: 500;
+    color: rgba(255, 255, 255, 0.95);
 }
 
-.settings-desc {
+.settings-row-desc {
     font-size: 12px;
-    color: #a0a0a8;
+    color: rgba(255, 255, 255, 0.50);
 }
 
-button.suggested-action {
-    background-color: rgba(59, 130, 246, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    color: #ffffff;
-    padding: 6px 16px;
-    font-weight: 600;
-    box-shadow: none;
-    transition: all 250ms ease;
+.settings-row-icon {
+    color: rgba(255, 255, 255, 0.65);
 }
 
-button.suggested-action:hover {
-    background-color: rgba(96, 165, 250, 0.9);
-    box-shadow: none;
+/* ── Settings Cards & ListBox ─────────────────────────────────── */
+.settings-card {
+    background-color: rgba(255, 255, 255, 0.035);
+    -gtk-background-blur: 24;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 14px;
+    padding: 20px 24px;
 }
 
-button.suggested-action:active {
-    background-color: #2563eb;
+.settings-card list {
+    background-color: transparent;
 }
 
-button {
-    background-color: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    color: #f5f5f7;
-    padding: 6px 16px;
-    font-weight: 500;
-    transition: all 200ms ease;
+.settings-card row,
+.settings-card-row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+    background: transparent;
+    transition: background-color 200ms ease;
 }
 
-button:hover {
-    background-color: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.2);
+.settings-card row:first-child,
+.settings-card-row:first-child {
+    border-radius: 10px 10px 0 0;
 }
 
-
-
-/* Premium Floating Action Button (FAB) */
-.baby-fab {
-    background-color: #0a84ff;
-    border: none;
-    border-radius: 50%;
-    min-width: 56px;
-    min-height: 56px;
-    padding: 0;
-    color: #ffffff;
-    box-shadow: none;
-    transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
-    margin: 16px;
+.settings-card row:last-child,
+.settings-card-row:last-child {
+    border-bottom: none;
+    border-radius: 0 0 10px 10px;
 }
 
-.baby-fab:hover {
-    background-color: #3b82f6;
-    box-shadow: none;
+.settings-card row:only-child,
+.settings-card-row:only-child {
+    border-radius: 10px;
 }
 
-.baby-fab:active {
-    background-color: #2563eb;
-}
-
-.baby-fab image {
-    -gtk-icon-size: 24px;
-}
-
-.cheatsheet-overlay {
-    background-color: rgba(15, 15, 15, 0.96);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: none;
-}
-
-.cheatsheet-title {
-    font-size: 16px;
-    font-weight: bold;
-    color: #ffffff;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 8px;
-    margin-bottom: 16px;
-}
-
-.cheatsheet-label {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 13px;
-}
-
-.cheatsheet-value {
-    color: #ffffff;
-    font-family: monospace;
-    font-size: 13px;
-}
-
-/* --- System Info & Dashboard Cards Layouts --- */
-.os-logo {
+.settings-card row:hover,
+.settings-card-row:hover {
     background-color: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-top: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 16px;
+}
+
+/* Connect / Pill Buttons */
+.connect-pill-btn {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 9999px;
+    color: #ffffff;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background-color 200ms ease, border-color 200ms ease;
+}
+
+.connect-pill-btn:hover {
+    background-color: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.20);
+}
+
+.connected-pill {
+    background-color: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.30);
+    border-radius: 9999px;
+    padding: 4px 12px;
+}
+
+.connected-text {
+    font-size: 11px;
+    font-weight: 600;
+    color: #34d399;
+}
+
+/* Wallpaper Preview Frame */
+.wallpaper-preview-frame {
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background-color: rgba(255, 255, 255, 0.035);
+}
+
+/* Theme Option Cards */
+button.theme-option-card,
+button.theme-option-card:hover,
+button.theme-option-card:focus,
+button.theme-option-card:active {
+    background-image: none;
+    box-shadow: none;
+    outline: none;
+    border-image: none;
+}
+
+button.theme-option-card {
+    background-color: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 10px;
+    padding: 14px 20px;
+    transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+    color: rgba(255, 255, 255, 0.70);
+}
+
+button.theme-option-card:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.20);
+    color: #ffffff;
+}
+
+button.theme-option-card.active {
+    background-color: rgba(59, 130, 246, 0.15);
+    border: 1px solid #3b82f6;
+    color: #60a5fa;
+}
+
+button.theme-option-card.active label,
+button.theme-option-card.active image {
+    color: #60a5fa;
+}
+
+dropdown,
+dropdown button {
+    background-color: rgba(255, 255, 255, 0.035);
+    background-image: none;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 10px;
+    color: #ffffff;
+    padding: 6px 14px;
+    box-shadow: none;
+    transition: background-color 200ms ease, border-color 200ms ease;
+}
+
+dropdown:hover,
+dropdown button:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.20);
+}
+
+/* System Info OS Logo Badge */
+.os-logo {
+    background-color: transparent;
+    border: none;
+    border-radius: 14px;
+    padding: 12px 14px;
 }
 
 .hero-hostname {
-    font-size: 26px;
+    font-size: 19px;
     font-weight: 700;
     color: #ffffff;
 }
 
 progressbar.disk-progress trough {
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: rgba(255, 255, 255, 0.10);
     border-radius: 6px;
-    min-height: 8px;
+    min-height: 6px;
 }
 
 progressbar.disk-progress progress {
-    background-color: #8a6747;
+    background-color: #3b82f6;
     border-radius: 6px;
 }
 
-.card-icon-wrapper {
-    background-image: none;
-    border-radius: 14px;
+/* Cheatsheet Overlay */
+.cheatsheet-overlay {
+    background-color: rgba(14, 14, 18, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.cheatsheet-title {
+    font-size: 15px;
+    font-weight: 700;
     color: #ffffff;
-    box-shadow: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+    padding-bottom: 8px;
+    margin-bottom: 16px;
 }
 
-/* --- Appearance View Layouts --- */
-.wallpaper-preview-frame {
-    border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    overflow: hidden;
-    background-color: rgba(0, 0, 0, 0.2);
+.cheatsheet-value {
+    color: rgba(255, 255, 255, 0.90);
+    font-family: monospace;
+    font-size: 13px;
 }
-
-.choose-file-card {
-    background-color: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-top: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 14px;
-    transition: all 250ms ease;
-}
-
-.choose-file-card:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.15);
-}
-
-.theme-option-card {
-    background-color: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-top: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 10px;
-    padding: 8px 12px;
-    margin-bottom: 6px;
-    transition: all 250ms ease;
-}
-
-.theme-option-card:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-}
-
-.theme-option-card.active {
-    background-color: rgba(229, 193, 151, 0.16);
-    border: 1px solid rgba(229, 193, 151, 0.35);
-    color: #e5c197;
-}
-
-.settings-row-item {
-    padding: 12px 16px;
-    border-radius: 14px;
-    background-color: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-

@@ -1,153 +1,287 @@
-/* Settings Light Mode stylesheet */
+/* Settings Light Mode stylesheet - Generous Padding & Spacing */
 
-window.settings-window,
-window.settings-window > overlay,
-window.settings-window > overlay > box {
-    background-color: #f7f5f0;
+window.settings-window {
+    background-color: rgba(255, 255, 255, 0.98);
     background-image: none;
-    transition: all 250ms ease;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #1c1c1e;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 0 0 16px 16px;
 }
 
-.settings-sidebar {
-    background-color: #ededeb;
-    border-right: 1px solid rgba(0, 0, 0, 0.1);
-    padding: 18px 12px;
+window.settings-window>overlay>box {
+    background-color: transparent;
 }
 
-.settings-sidebar-row {
-    border-radius: 12px;
-    padding: 10px 14px;
-    margin-bottom: 4px;
-    color: #5c5c5e;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 250ms ease-out;
-}
-
-.settings-sidebar-row:hover {
+/* ── Profile Avatar & Sidebar ─────────────────────────────────── */
+.profile-avatar {
+    border-radius: 50%;
     background-color: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.profile-user-name {
+    font-size: 14px;
+    font-weight: 700;
     color: #1c1c1e;
 }
 
-.settings-sidebar-row:selected {
-    background-color: rgba(138, 103, 71, 0.12);
-    border: 1px solid rgba(138, 103, 71, 0.2);
-    color: #8a6747;
-    font-weight: 600;
+.profile-separator {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    margin: 4px 8px 8px 8px;
 }
 
+.sidebar-search-entry,
+.sidebar-search-entry>text {
+    background-color: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    color: #1c1c1e;
+    font-size: 12px;
+    padding: 8px 12px;
+}
+
+.sidebar-search-entry:focus,
+.sidebar-search-entry>text:focus {
+    border-color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.04);
+}
+
+/* ── Content & Breadcrumbs ────────────────────────────────────── */
 .settings-content {
     background-color: transparent;
-    padding: 24px;
+    padding: 28px 36px;
 }
 
-.settings-title {
+.settings-breadcrumb-parent {
+    font-size: 15px;
+    font-weight: 500;
+    color: rgba(28, 28, 30, 0.50);
+}
+
+.settings-breadcrumb-arrow {
+    font-size: 15px;
+    font-weight: 400;
+    color: rgba(28, 28, 30, 0.30);
+}
+
+.settings-breadcrumb-current {
     font-size: 22px;
-    font-weight: bold;
+    font-weight: 700;
     color: #1c1c1e;
-    margin-bottom: 20px;
 }
 
-.settings-subtitle {
-    font-size: 16px;
+.settings-group-header-title {
+    font-size: 15px;
     font-weight: 600;
     color: #1c1c1e;
-    margin-bottom: 12px;
 }
 
-.settings-card {
-    background-color: rgba(0, 0, 0, 0.02);
-    background-image: none;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-top: 1px solid rgba(0, 0, 0, 0.12);
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 16px;
-    transition: all 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.settings-card:hover {
-    border-color: rgba(0, 0, 0, 0.14);
-    background-color: rgba(0, 0, 0, 0.04);
-}
-
-.settings-row {
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.settings-row:last-child {
-    border-bottom: none;
-}
-
-.settings-label {
-    font-size: 14px;
+.settings-title-label {
+    font-size: 20px;
+    font-weight: 700;
     color: #1c1c1e;
-    font-weight: 500;
+    margin-bottom: 4px;
 }
 
-.settings-desc {
+.settings-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(28, 28, 30, 0.50);
+    margin-top: 20px;
+    margin-bottom: 10px;
+    letter-spacing: 0.6px;
+}
+
+.settings-row-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1c1c1e;
+}
+
+.settings-row-desc {
     font-size: 12px;
-    color: #5c5c5e;
+    color: rgba(28, 28, 30, 0.50);
 }
 
-button.suggested-action {
-    background-color: #3b82f6;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 12px;
-    color: #ffffff;
-    padding: 6px 16px;
-    font-weight: 600;
-    box-shadow: none;
-    transition: all 250ms ease;
+.settings-row-icon {
+    color: rgba(28, 28, 30, 0.65);
 }
 
-button.suggested-action:hover {
-    background-color: #2563eb;
-    box-shadow: none;
-}
-
-button.suggested-action:active {
-    background-color: #1d4ed8;
-}
-
-button {
-    background-color: rgba(0, 0, 0, 0.04);
+/* ── Settings Cards & ListBox ─────────────────────────────────── */
+.settings-card {
+    background-color: #ffffff;
+    -gtk-background-blur: 24;
     border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 12px;
-    color: #1c1c1e;
-    padding: 6px 16px;
-    font-weight: 500;
-    transition: all 200ms ease;
+    border-radius: 14px;
+    padding: 20px 24px;
 }
 
-button:hover {
+.settings-card list {
+    background-color: transparent;
+}
+
+.settings-card row,
+.settings-card-row {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    background: transparent;
+    transition: background-color 200ms ease;
+}
+
+.settings-card row:first-child,
+.settings-card-row:first-child {
+    border-radius: 10px 10px 0 0;
+}
+
+.settings-card row:last-child,
+.settings-card-row:last-child {
+    border-bottom: none;
+    border-radius: 0 0 10px 10px;
+}
+
+.settings-card row:only-child,
+.settings-card-row:only-child {
+    border-radius: 10px;
+}
+
+.settings-card row:hover,
+.settings-card-row:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Connect / Pill Buttons */
+.connect-pill-btn {
+    background-color: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 9999px;
+    color: #1c1c1e;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background-color 200ms ease, border-color 200ms ease;
+}
+
+.connect-pill-btn:hover {
     background-color: rgba(0, 0, 0, 0.08);
     border-color: rgba(0, 0, 0, 0.14);
 }
 
+.connected-pill {
+    background-color: rgba(16, 185, 129, 0.10);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 9999px;
+    padding: 4px 12px;
+}
 
+.connected-text {
+    font-size: 11px;
+    font-weight: 600;
+    color: #059669;
+}
 
-.cheatsheet-overlay {
-    background-color: rgba(245, 240, 230, 0.98);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 16px;
-    padding: 24px;
+/* Wallpaper Preview Frame */
+.wallpaper-preview-frame {
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* Theme Option Cards */
+button.theme-option-card,
+button.theme-option-card:hover,
+button.theme-option-card:focus,
+button.theme-option-card:active {
+    background-image: none;
     box-shadow: none;
+    outline: none;
+    border-image: none;
+}
+
+button.theme-option-card {
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    padding: 14px 20px;
+    transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+    color: #1c1c1e;
+}
+
+button.theme-option-card:hover {
+    background-color: #f4f4f5;
+    border-color: rgba(0, 0, 0, 0.14);
+}
+
+button.theme-option-card.active {
+    background-color: rgba(59, 130, 246, 0.10);
+    border: 1px solid #3b82f6;
+    color: #2563eb;
+}
+
+button.theme-option-card.active label,
+button.theme-option-card.active image {
+    color: #2563eb;
+}
+
+dropdown,
+dropdown button {
+    background-color: rgba(0, 0, 0, 0.04);
+    background-image: none;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    color: #1c1c1e;
+    padding: 6px 14px;
+    box-shadow: none;
+    transition: background-color 200ms ease, border-color 200ms ease;
+}
+
+dropdown:hover,
+dropdown button:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.14);
+}
+
+/* System Info OS Logo Badge */
+.os-logo {
+    background-color: transparent;
+    border: none;
+    border-radius: 14px;
+    padding: 12px 14px;
+}
+
+.hero-hostname {
+    font-size: 19px;
+    font-weight: 700;
+    color: #1c1c1e;
+}
+
+progressbar.disk-progress trough {
+    background-color: rgba(0, 0, 0, 0.06);
+    border-radius: 6px;
+    min-height: 6px;
+}
+
+progressbar.disk-progress progress {
+    background-color: #3b82f6;
+    border-radius: 6px;
+}
+
+/* Cheatsheet Overlay */
+.cheatsheet-overlay {
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
 .cheatsheet-title {
-    font-size: 16px;
-    font-weight: bold;
+    font-size: 15px;
+    font-weight: 700;
     color: #1c1c1e;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     padding-bottom: 8px;
     margin-bottom: 16px;
-}
-
-.cheatsheet-label {
-    color: rgba(0, 0, 0, 0.5);
-    font-size: 13px;
 }
 
 .cheatsheet-value {
@@ -155,87 +289,3 @@ button:hover {
     font-family: monospace;
     font-size: 13px;
 }
-
-/* --- System Info & Dashboard Cards Layouts --- */
-.os-logo {
-    background-color: rgba(0, 0, 0, 0.04);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 16px;
-}
-
-.hero-hostname {
-    font-size: 26px;
-    font-weight: 700;
-    color: #1c1c1e;
-}
-
-progressbar.disk-progress trough {
-    background-color: rgba(0, 0, 0, 0.04);
-    border-radius: 6px;
-    min-height: 8px;
-}
-
-progressbar.disk-progress progress {
-    background-color: #8a6747;
-    border-radius: 6px;
-}
-
-.card-icon-wrapper {
-    background-color: #8a6747;
-    border-radius: 14px;
-    color: #ffffff;
-    box-shadow: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* --- Appearance View Layouts --- */
-.wallpaper-preview-frame {
-    border-radius: 14px;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-    background-color: rgba(255, 255, 255, 0.5);
-}
-
-.choose-file-card {
-    background-color: rgba(0, 0, 0, 0.02);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 14px;
-    transition: all 250ms ease;
-}
-
-.choose-file-card:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-    border-color: rgba(0, 0, 0, 0.12);
-}
-
-.theme-option-card {
-    background-color: rgba(0, 0, 0, 0.02);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 10px;
-    padding: 8px 12px;
-    margin-bottom: 6px;
-    transition: all 250ms ease;
-}
-
-.theme-option-card:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-}
-
-.theme-option-card.active {
-    background-color: rgba(138, 103, 71, 0.12);
-    border: 1px solid rgba(138, 103, 71, 0.25);
-    color: #8a6747;
-}
-
-.settings-row-item {
-    padding: 12px 16px;
-    border-radius: 14px;
-    background-color: rgba(0, 0, 0, 0.02);
-    border: 1px solid rgba(0, 0, 0, 0.04);
-}
-
-
