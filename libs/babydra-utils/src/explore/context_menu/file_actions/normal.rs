@@ -21,8 +21,9 @@ pub fn show_for_file_normal(
     parent: &gtk4::Window,
 ) {
     // Create vertical menu buttons
-    let btn_open_new_window = create_menu_button(&t("explore.menu_open_new_window"), "external-link");
     let btn_open = create_menu_button(&t("explore.menu_open"), "folder-new");
+    let btn_open_new_window = create_menu_button(&t("explore.menu_open_new_window"), "external-link");
+    let btn_refresh = create_menu_button(&t("explore.menu_refresh"), "refresh");
     let btn_copy_location = create_menu_button(&t("explore.menu_copy_location"), "copy");
     let btn_compress = create_menu_button(&t("explore.menu_compress"), "folder");
     let has_archive = target_paths.iter().any(|path| is_archive_file(path));
@@ -31,16 +32,15 @@ pub fn show_for_file_normal(
     } else {
         None
     };
-    let btn_refresh = create_menu_button(&t("explore.menu_refresh"), "refresh");
 
-    vbox.append(&btn_open_new_window);
     vbox.append(&btn_open);
+    vbox.append(&btn_open_new_window);
+    vbox.append(&btn_refresh);
     vbox.append(&btn_copy_location);
     vbox.append(&btn_compress);
     if let Some(ref btn) = btn_decompress {
         vbox.append(btn);
     }
-    vbox.append(&btn_refresh);
 
     // Open in new window event
     let pop_c = popover.clone();
