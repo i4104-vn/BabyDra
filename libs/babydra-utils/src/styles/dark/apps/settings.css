@@ -178,44 +178,65 @@ button.settings-pill.active-pill:hover {
 
 /* Wallpaper Preview Frame */
 .wallpaper-preview-frame {
-    border-radius: 14px;
+    border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.10);
-    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+    background: linear-gradient(135deg, rgba(30, 27, 75, 0.8) 0%, rgba(49, 46, 129, 0.8) 50%, rgba(67, 56, 202, 0.8) 100%);
     overflow: hidden;
     color: rgba(255, 255, 255, 0.70);
 }
 
-.choose-file-card {
-    background-color: rgba(255, 255, 255, 0.03);
+button.choose-file-card,
+button.choose-file-card:hover,
+button.choose-file-card:focus,
+button.choose-file-card:active,
+button.theme-option-card,
+button.theme-option-card:hover,
+button.theme-option-card:focus,
+button.theme-option-card:active {
+    background-image: none;
+    box-shadow: none;
+    outline: none;
+    border-image: none;
+}
+
+button.choose-file-card {
+    background-color: rgba(255, 255, 255, 0.035);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-top: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 14px;
-    transition: all 150ms ease;
+    border-radius: 16px;
+    transition: background-color 200ms ease, border-color 200ms ease;
     color: rgba(255, 255, 255, 0.90);
 }
 
-.choose-file-card:hover {
+button.choose-file-card:hover {
     background-color: rgba(255, 255, 255, 0.07);
     border-color: rgba(255, 255, 255, 0.16);
 }
 
-.theme-option-card {
-    background-color: rgba(255, 255, 255, 0.03);
+button.theme-option-card {
+    background-color: rgba(255, 255, 255, 0.035);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 10px;
-    padding: 8px 12px;
-    margin-bottom: 6px;
-    transition: all 150ms ease;
-    color: rgba(255, 255, 255, 0.80);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 4px;
+    transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+    color: rgba(255, 255, 255, 0.70);
 }
 
-.theme-option-card:hover {
-    background-color: rgba(255, 255, 255, 0.07);
+button.theme-option-card:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
 }
 
-.theme-option-card.active {
+button.theme-option-card.active {
     background-color: rgba(59, 130, 246, 0.15);
     border: 1px solid rgba(59, 130, 246, 0.40);
+    color: #60a5fa;
+}
+
+button.theme-option-card.active label,
+button.theme-option-card.active image {
     color: #60a5fa;
 }
 
@@ -226,11 +247,75 @@ button.settings-pill.active-pill:hover {
     border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* System Info */
-.os-logo {
+/* ── Card Icon Wrapper & Badges ──────────────────────────────── */
+.card-icon-wrapper,
+.sidebar-icon-badge {
+    border-radius: 12px;
+    padding: 8px;
+    min-width: 38px;
+    min-height: 38px;
     background-color: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 14px;
+    transition: background-color 200ms ease;
+}
+
+.card-icon-wrapper image,
+.sidebar-icon-badge image {
+    -gtk-icon-size: 20px;
+}
+
+.card-icon-wrapper.badge-blue,
+.sidebar-icon-badge.badge-blue {
+    background-color: rgba(59, 130, 246, 0.14);
+    border: 1px solid rgba(59, 130, 246, 0.30);
+    color: #60a5fa;
+}
+
+.card-icon-wrapper.badge-indigo,
+.sidebar-icon-badge.badge-indigo {
+    background-color: rgba(99, 102, 241, 0.14);
+    border: 1px solid rgba(99, 102, 241, 0.30);
+    color: #818cf8;
+}
+
+.card-icon-wrapper.badge-emerald,
+.sidebar-icon-badge.badge-emerald {
+    background-color: rgba(16, 185, 129, 0.14);
+    border: 1px solid rgba(16, 185, 129, 0.30);
+    color: #34d399;
+}
+
+.card-icon-wrapper.badge-pink,
+.sidebar-icon-badge.badge-pink {
+    background-color: rgba(244, 114, 182, 0.14);
+    border: 1px solid rgba(244, 114, 182, 0.30);
+    color: #f472b6;
+}
+
+dropdown,
+dropdown button {
+    background-color: rgba(255, 255, 255, 0.05);
+    background-image: none;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 10px;
+    color: #e4e4e7;
+    padding: 4px 10px;
+    box-shadow: none;
+    transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+dropdown:hover,
+dropdown button:hover {
+    background-color: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+/* System Info */
+.os-logo {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 8px;
 }
 
 .hero-hostname {
