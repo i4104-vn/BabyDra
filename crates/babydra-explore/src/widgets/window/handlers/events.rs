@@ -130,18 +130,39 @@ pub fn setup_file_watcher_receiver(
     let right = right_content_handle;
     let nav_no_watch = navigate_pane_no_watch_ref;
     glib::MainContext::default().spawn_local(async move {
+        let pending_timer = Rc::new(RefCell::new(None::<glib::SourceId>));
         while let Some(_) = watch_rx.recv().await {
-            if let Some(ref f) = *nav_no_watch.borrow() {
-                // Refresh left pane
-                let left_path = left.current_path.borrow().clone();
-                f(ActivePane::Left, left_path);
+            // Drain all queued events
+            while watch_rx.try_recv().is_ok() {}
 
-                // Refresh right pane if split view is open
-                if let Some(ref r_handle) = *right.borrow() {
-                    let right_path = r_handle.current_path.borrow().clone();
-                    f(ActivePane::Right, right_path);
-                }
+            // Cancel any previously scheduled refresh timer
+            if let Some(source_id) = pending_timer.borrow_mut().take() {
+                source_id.remove();
             }
+
+            let nav_no_watch_c = nav_no_watch.clone();
+            let left_c = left.clone();
+            let right_c = right.clone();
+            let timer_ref = pending_timer.clone();
+
+            // Schedule refresh after 300ms of quiet time
+            let source_id = glib::timeout_add_local_once(
+                std::time::Duration::from_millis(300),
+                move || {
+                    timer_ref.borrow_mut().take();
+                    if let Some(ref f) = *nav_no_watch_c.borrow() {
+                        let left_path = left_c.current_path.borrow().clone();
+                        f(ActivePane::Left, left_path);
+
+                        if let Some(ref r_handle) = *right_c.borrow() {
+                            let right_path = r_handle.current_path.borrow().clone();
+                            f(ActivePane::Right, right_path);
+                        }
+                    }
+                },
+            );
+
+            *pending_timer.borrow_mut() = Some(source_id);
         }
     });
 }

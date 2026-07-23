@@ -12,7 +12,9 @@ impl FileWatcher {
     {
         let mut watcher = notify::recommended_watcher(move |res: Result<Event, notify::Error>| {
             if let Ok(event) = res {
-                callback(event);
+                if !matches!(event.kind, notify::EventKind::Access(_)) {
+                    callback(event);
+                }
             }
         })?;
 
