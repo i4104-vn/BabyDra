@@ -73,9 +73,23 @@
     margin-top: 2px;
 }
 
+.explore-window flowboxchild {
+    min-width: 114px;
+    max-width: 114px;
+    min-height: 114px;
+    max-height: 114px;
+    padding: 0;
+    margin: 4px;
+    border-radius: 12px;
+}
+
 .explore-window .file-item {
-    border-radius: 6px;
-    padding: 8px;
+    min-width: 114px;
+    max-width: 114px;
+    min-height: 114px;
+    max-height: 114px;
+    border-radius: 12px;
+    padding: 6px;
     cursor: pointer;
     transition: background-color 0.15s ease;
 }
@@ -136,6 +150,11 @@
     font-size: 12px;
 }
 
+.explore-window .icon-padding {
+    padding-top: 12px;
+    padding-bottom: 18px;
+}
+
 /* Active split pane */
 .explore-window .active-pane {
     outline: none;
@@ -154,6 +173,16 @@
     border-radius: 2px;
 }
 
+/* ── Hidden Item (dim files starting with dot when shown) ───────── */
+.explore-window .hidden-item {
+    opacity: 0.65;
+    transition: opacity 0.15s ease;
+}
+
+.explore-window .hidden-item:hover {
+    opacity: 0.85;
+}
+
 /* ── Cut Item (dim when cut to clipboard) ───────────────────────── */
 .explore-window .cut-item {
     opacity: 0.45;
@@ -163,25 +192,6 @@
 
 .explore-window .cut-item:hover {
     opacity: 0.6;
-}
-
-/* Loading & Slide Animation Effects */
-@keyframes list-item-slide-in {
-    from {
-        opacity: 0;
-        margin-top: 15px;
-    }
-    to {
-        opacity: 1;
-        margin-top: 0px;
-    }
-}
-
-.explore-window flowboxchild,
-.explore-window row {
-    animation-name: list-item-slide-in;
-    animation-duration: 250ms;
-    animation-timing-function: ease-out;
 }
 
 .explore-window .loading-label {

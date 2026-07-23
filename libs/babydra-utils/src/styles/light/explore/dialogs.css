@@ -1,232 +1,57 @@
+/* ── Suggested Action Buttons ─────────────────────────────────── */
 button.suggested-action {
-    background-color: rgba(0, 102, 204, 0.85);
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: #0066cc;
+    background-image: none;
+    border: none;
     border-radius: 8px;
     color: #ffffff;
-    padding: 4px 14px;
+    padding: 6px 16px;
     font-weight: 600;
+    font-size: 12px;
     box-shadow: none;
-    transition: all 150ms ease;
+    transition: background-color 150ms ease;
 }
 
 button.suggested-action:hover {
-    background-color: rgba(51, 153, 255, 0.9);
+    background-color: #0052a3;
     box-shadow: none;
 }
 
 button.suggested-action:active {
-    background-color: #0044aa;
+    background-color: #003d7a;
 }
 
-window.explore-dialog,
-window.explore-dialog>box {
-    background-color: #f5f5f7;
-    border: none;
-    border-radius: 0;
+/* ── Explore Dialog Window ────────────────────────────────────── */
+.explore-dialog {
+    background-color: #f7f7f9;
+    background-image: none;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15),
+        0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid rgba(0, 0, 0, 0.04);
+    border-radius: 0 0 14px 14px;
+}
+
+.explore-dialog-box {
+    color: #1f2937;
 }
 
 .explore-dialog entry {
-    background-color: rgba(0, 0, 0, 0.05);
-    border: 1px solid #c8c8c8;
-    border-radius: 6px;
-    color: #1a1a1a;
-    padding: 6px 10px;
+    background-color: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    color: #111827;
+    padding: 7px 10px;
+    caret-color: #0066cc;
+    transition: border-color 150ms ease, background-color 150ms ease;
 }
 
 .explore-dialog entry:focus {
-    border-color: #0066cc;
-}
-
-button.empty-trash-btn {
-    color: #dc2626;
-}
-
-button.empty-trash-btn:hover {
-    background-color: rgba(220, 38, 38, 0.1);
-    color: #ef4444;
-}
-
-.settings-title-label {
-    font-size: 15px;
-    font-weight: bold;
-    color: #1a1a1a;
-    margin-bottom: 4px;
-}
-
-.settings-listbox {
+    border-color: rgba(0, 102, 204, 0.6);
     background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
 }
 
-.settings-listbox row {
-    border-bottom: 1px solid #e2e8f0;
-}
-
-.settings-listbox row:last-child {
-    border-bottom: none;
-}
-
-.settings-section-title {
-    font-size: 12px;
-    font-weight: 700;
-    color: #1a202c;
-    margin-top: 6px;
-    margin-bottom: 3px;
-}
-
-.settings-section-subtitle {
-    font-size: 11px;
-    font-weight: 600;
-    color: #64748b;
-    margin-top: 5px;
-    margin-bottom: 2px;
-}
-
-.settings-item-name {
-    font-size: 12px;
-    font-weight: 600;
-    color: #0f172a;
-}
-
-.settings-item-command {
-    font-size: 10px;
-    color: #64748b;
-}
-
-.destructive-action {
-    color: #dc2626;
-}
-.destructive-action:hover {
-    background-color: rgba(220, 38, 38, 0.1) !important;
-}
-
-.settings-row-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: #0f172a;
-}
-
-.settings-row-desc {
-    font-size: 10px;
-    color: #64748b;
-}
-
-/* Notebook styling in light */
-.settings-notebook {
-    background-color: transparent;
-    border: none;
-}
-.settings-notebook header tabs {
-    border-bottom: 1px solid #e2e8f0;
-    margin-bottom: 8px;
-}
-.settings-notebook header tabs tab {
-    padding: 6px 12px;
-    font-weight: 600;
-    color: #64748b;
-    border-radius: 6px 6px 0 0;
-}
-.settings-notebook header tabs tab:checked {
-    color: #0066cc;
-    border-bottom: 2px solid #0066cc;
-}
-.settings-notebook header tabs tab:hover {
-    background-color: rgba(0, 0, 0, 0.02);
-    color: #0f172a;
-}
-
-.settings-listbox row:hover {
-    background-color: rgba(0, 0, 0, 0.01);
-}
-
-.placeholder-btn {
-    font-size: 9px;
-    padding: 1px 4px;
-    background-color: #f1f5f9;
-    border: none;
-    border-radius: 10px;
-    color: #475569;
-}
-.placeholder-btn:hover {
-    background-color: #e2e8f0;
-    color: #0f172a;
-}
-
-.placeholder-btn-small {
-    font-size: 8px;
-    padding: 0px 2px;
-    background-color: #f1f5f9;
-    border: none;
-    border-radius: 6px;
-    color: #475569;
-}
-.placeholder-btn-small:hover {
-    background-color: #e2e8f0;
-    color: #0f172a;
-}
-
-.inline-entry {
-    font-size: 12px;
-    padding: 4px 8px;
-    background-color: #ffffff;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    color: #0f172a;
-}
-
-.small-btn {
-    font-size: 12px;
-    padding: 4px 10px;
-}
-
-.edit-btn {
-    color: #0066cc;
-    border-radius: 50%;
-    min-width: 28px;
-    min-height: 28px;
-    padding: 0;
-}
-.edit-btn:hover {
-    background-color: rgba(0, 102, 204, 0.1) !important;
-}
-
-.destructive-action {
-    border-radius: 50%;
-    min-width: 28px;
-    min-height: 28px;
-    padding: 0;
-}
-
-/* Sidebar inside Explore Settings Dialog */
-.explore-dialog .settings-sidebar {
-    background-color: rgba(0, 0, 0, 0.01);
-}
-
-.explore-dialog .sidebar-item {
-    background: transparent;
-    border: none;
-    border-radius: 0px;
-    padding: 10px 14px;
-    color: #475569;
-    font-size: 12px;
-    margin: 0px;
-    transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.explore-dialog .sidebar-item:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-    color: #0f172a;
-}
-
-.explore-dialog .sidebar-item.active-nav {
-    background-color: rgba(0, 102, 204, 0.08);
-    color: #0066cc;
-    font-weight: 600;
-    border-left: 3px solid #0066cc;
-}
-
-/* Strip default button borders, focus lines, outlines in settings dialog */
+/* Strip GTK decorations from all explore-dialog buttons */
 .explore-dialog button,
 .explore-dialog button:hover,
 .explore-dialog button:focus,
@@ -235,10 +60,11 @@ button.empty-trash-btn:hover {
     border-image: none;
     outline: none;
     box-shadow: none;
+    background-image: none;
 }
 
 .explore-dialog button.suggested-action {
-    padding: 4px 10px;
+    padding: 6px 14px;
     font-size: 12px;
     border: none;
     box-shadow: none;
@@ -246,5 +72,539 @@ button.empty-trash-btn:hover {
 
 .explore-dialog .edit-btn image,
 .explore-dialog .destructive-action image {
-    -gtk-icon-size: 12px;
+    -gtk-icon-size: 13px;
+}
+
+/* ── Trash Button ─────────────────────────────────────────────── */
+button.empty-trash-btn {
+    color: #dc2626;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 8px;
+    padding: 4px 10px;
+    transition: background-color 150ms ease;
+}
+
+button.empty-trash-btn:hover {
+    background-color: rgba(220, 38, 38, 0.08);
+    color: #ef4444;
+}
+
+/* ── Text Labels ──────────────────────────────────────────────── */
+.settings-title-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 6px;
+    letter-spacing: 0.01em;
+}
+
+.settings-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #4b5563;
+    margin-top: 6px;
+    margin-bottom: 3px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.settings-section-subtitle {
+    font-size: 11px;
+    font-weight: 500;
+    color: #9ca3af;
+    margin-top: 5px;
+    margin-bottom: 2px;
+}
+
+.settings-item-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.settings-item-command {
+    font-size: 11px;
+    color: #4b5563;
+    font-family: "JetBrains Mono", "Fira Code", monospace;
+}
+
+.settings-row-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1f2937;
+    letter-spacing: 0.01em;
+}
+
+.settings-row-desc {
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.settings-row-icon {
+    color: rgba(0, 0, 0, 0.55);
+}
+
+/* ── Legacy ListBox ───────────────────────────────────────────── */
+.settings-listbox {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+}
+
+.settings-listbox row {
+    border-bottom: 1px solid #f3f4f6;
+    padding: 0;
+    min-height: 0;
+}
+
+.settings-listbox row:last-child {
+    border-bottom: none;
+}
+
+.settings-listbox row:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* ── Notebook ─────────────────────────────────────────────────── */
+.settings-notebook {
+    background-color: transparent;
+    border: none;
+}
+
+.settings-notebook header tabs {
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 8px;
+}
+
+.settings-notebook header tabs tab {
+    padding: 6px 12px;
+    font-weight: 600;
+    color: #4b5563;
+    border-radius: 6px 6px 0 0;
+}
+
+.settings-notebook header tabs tab:checked {
+    color: #0066cc;
+    border-bottom: 2px solid #0066cc;
+}
+
+.settings-notebook header tabs tab:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+    color: #111827;
+}
+
+/* ── Small Utility Buttons ────────────────────────────────────── */
+.placeholder-btn {
+    font-size: 9px;
+    padding: 2px 6px;
+    background-color: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 6px;
+    color: #4b5563;
+    transition: all 120ms ease;
+}
+
+.placeholder-btn:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    color: #111827;
+}
+
+button.placeholder-btn {
+    font-size: 10px;
+    padding: 3px 8px;
+    background-color: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 9999px;
+    color: rgba(0, 0, 0, 0.55);
+    transition: all 120ms ease;
+}
+
+button.placeholder-btn:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    color: #000000;
+}
+
+.placeholder-btn-small {
+    font-size: 8px;
+    padding: 1px 4px;
+    background-color: rgba(0, 0, 0, 0.03);
+    border: none;
+    border-radius: 5px;
+    color: #4b5563;
+}
+
+.placeholder-btn-small:hover {
+    background-color: rgba(0, 0, 0, 0.07);
+    color: #111827;
+}
+
+/* ── Inline Entry ─────────────────────────────────────────────── */
+.inline-entry {
+    font-size: 12px;
+    padding: 5px 9px;
+    background-color: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    color: #111827;
+    caret-color: #0066cc;
+}
+
+.small-btn {
+    font-size: 12px;
+    padding: 3px 8px;
+    min-height: 26px;
+}
+
+/* ── Edit / Destructive Icon Buttons (row-level) ──────────────── */
+.edit-btn {
+    color: #0066cc;
+    border-radius: 50%;
+    min-width: 28px;
+    min-height: 28px;
+    padding: 0;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    transition: background-color 150ms ease;
+}
+
+.edit-btn:hover {
+    background-color: rgba(0, 102, 204, 0.10);
+}
+
+.destructive-action {
+    color: #dc2626;
+}
+
+.destructive-action:hover {
+    background-color: rgba(220, 38, 38, 0.10);
+}
+
+/* Labelled button (e.g. confirm delete) */
+button.destructive-action {
+    background-color: rgba(220, 38, 38, 0.85);
+    border: none;
+    border-radius: 8px;
+    color: #ffffff;
+    padding: 6px 16px;
+    font-weight: 600;
+    font-size: 12px;
+    box-shadow: none;
+    transition: background-color 150ms ease;
+}
+
+button.destructive-action:hover {
+    background-color: rgba(239, 68, 68, 0.90);
+}
+
+button.destructive-action:active {
+    background-color: #991b1b;
+}
+
+/* ── Settings Capsule Navigation (Vertical Icon-Only) ──────────── */
+.settings-capsule-nav-vertical {
+    background-color: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 9999px;
+    padding: 6px 5px;
+}
+
+button.settings-pill {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    color: rgba(0, 0, 0, 0.45);
+    border-radius: 9999px;
+    padding: 10px;
+    min-width: 22px;
+    min-height: 22px;
+    font-size: 12px;
+    font-weight: 600;
+    transition: background-color 180ms ease, color 180ms ease;
+    transform: none;
+}
+
+button.settings-pill:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    border: none;
+    color: rgba(0, 0, 0, 0.75);
+    transform: none;
+}
+
+button.settings-pill.active-pill {
+    background-color: rgba(0, 102, 204, 0.12);
+    border: none;
+    color: #0066cc;
+    box-shadow: inset 0 0 0 1px rgba(0, 102, 204, 0.18);
+    transform: none;
+}
+
+button.settings-pill.active-pill:hover {
+    background-color: rgba(0, 102, 204, 0.18);
+    border: none;
+    color: #0052a3;
+    transform: none;
+}
+
+/* ── Settings Cards & ListBox ─────────────────────────────────── */
+.settings-card {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-top: 1px solid #f3f4f6;
+    border-radius: 14px;
+    padding: 2px;
+}
+
+.settings-card-row,
+.settings-custom-item-row {
+    border-bottom: 1px solid #f3f4f6;
+    background: transparent;
+    background-color: transparent;
+    border-radius: 0;
+    transition: background-color 120ms ease;
+}
+
+.settings-card-row:first-child,
+.settings-custom-item-row:first-child {
+    border-radius: 12px 12px 0 0;
+}
+
+.settings-card-row:last-child,
+.settings-custom-item-row:last-child {
+    border-bottom: none;
+    border-radius: 0 0 12px 12px;
+}
+
+.settings-card-row:only-child,
+.settings-custom-item-row:only-child {
+    border-radius: 12px;
+}
+
+.settings-card-row:hover,
+.settings-custom-item-row:hover {
+    background-color: rgba(0, 0, 0, 0.015);
+}
+
+/* ── Keybind Pill ─────────────────────────────────────────────── */
+.keybind-pill {
+    font-size: 10px;
+    font-weight: 600;
+    font-family: "JetBrains Mono", "Fira Code", monospace;
+    background-color: rgba(0, 102, 204, 0.08);
+    color: #0066cc;
+    border-radius: 6px;
+    padding: 3px 8px;
+    letter-spacing: 0.02em;
+    border: 1px solid rgba(0, 102, 204, 0.12);
+}
+
+/* ── Icon Select Button ───────────────────────────────────────── */
+button.icon-select-btn {
+    border-radius: 9999px;
+    padding: 5px;
+    min-width: 30px;
+    min-height: 30px;
+    background-color: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: none;
+    transition: background-color 120ms ease;
+}
+
+button.icon-select-btn:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.12);
+}
+
+/* ── Icon Grid ────────────────────────────────────────────────── */
+button.icon-grid-item {
+    padding: 8px;
+    border-radius: 8px;
+    border: none;
+    box-shadow: none;
+    background-color: transparent;
+    transition: background-color 100ms ease;
+}
+
+button.icon-grid-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* ── Small Entry ──────────────────────────────────────────────── */
+entry.small-entry,
+entry.small-entry>text {
+    min-height: 28px;
+    padding: 2px 8px;
+    font-size: 13px;
+}
+
+/* ── Row Action Buttons (edit/delete per-row) ─────────────────── */
+button.row-action-btn {
+    border-radius: 9999px;
+    padding: 5px;
+    min-width: 30px;
+    min-height: 30px;
+    box-shadow: none;
+    border: none;
+    background-color: transparent;
+    transition: opacity 150ms ease, background-color 150ms ease;
+    opacity: 0.6;
+}
+
+button.row-action-btn:hover {
+    opacity: 1.0;
+}
+
+button.row-action-btn.edit-btn {
+    color: #0066cc;
+}
+
+button.row-action-btn.edit-btn:hover {
+    background-color: rgba(0, 102, 204, 0.08);
+}
+
+button.row-action-btn.delete-btn {
+    color: #dc2626;
+}
+
+button.row-action-btn.delete-btn:hover {
+    background-color: rgba(220, 38, 38, 0.08);
+}
+
+/* ── Floating Action Button (FAB) ─────────────────────────────── */
+.explore-dialog button.baby-fab,
+.explore-dialog button.baby-fab.circular {
+    background-color: #0066cc;
+    background-image: none;
+    border: none;
+    border-radius: 50%;
+    min-width: 48px;
+    min-height: 48px;
+    padding: 0;
+    color: #ffffff;
+    box-shadow: 0 4px 16px rgba(0, 102, 204, 0.35);
+    transition: background-color 200ms ease, box-shadow 200ms ease;
+}
+
+.explore-dialog button.baby-fab:hover,
+.explore-dialog button.baby-fab.circular:hover {
+    background-color: #0052a3;
+    box-shadow: 0 6px 22px rgba(0, 102, 204, 0.48);
+}
+
+.explore-dialog button.baby-fab:active,
+.explore-dialog button.baby-fab.circular:active {
+    background-color: #003d7a;
+    box-shadow: 0 2px 8px rgba(0, 102, 204, 0.22);
+}
+
+.explore-dialog button.baby-fab image,
+.explore-dialog button.baby-fab.circular image {
+    color: #ffffff;
+    -gtk-icon-size: 20px;
+}
+
+/* ── Properties Dialog Custom Modern Styling (Light) ──────────── */
+
+.explore-dialog.properties-dialog {
+    background-color: rgba(255, 255, 255, 0.98);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: none;
+    border-radius: 0 0 16px 16px;
+    box-shadow: none;
+}
+
+.properties-header-card {
+    background-color: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 14px;
+    padding: 12px 14px;
+}
+
+.properties-icon-wrap {
+    background-color: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    border-radius: 12px;
+    padding: 8px;
+}
+
+.properties-title-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.properties-subtitle-badge {
+    font-size: 11px;
+    font-weight: 500;
+    color: #4b5563;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 6px;
+    padding: 3px 8px;
+}
+
+.properties-card {
+    background-color: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    border-radius: 12px;
+    padding: 12px 14px;
+}
+
+.properties-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: #9ca3af;
+    letter-spacing: 0.6px;
+    margin-bottom: 4px;
+}
+
+.properties-row {
+    padding: 4px 0;
+}
+
+.properties-key-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #6b7280;
+}
+
+.properties-val-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.properties-perm-badge {
+    font-size: 11px;
+    font-weight: 600;
+    font-family: "JetBrains Mono", "Fira Code", monospace;
+    background-color: rgba(59, 130, 246, 0.10);
+    color: #2563eb;
+    border-radius: 6px;
+    padding: 3px 8px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.properties-matrix-col-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+button.properties-btn-cancel {
+    background-color: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    color: #374151;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    transition: background-color 150ms ease;
+}
+
+button.properties-btn-cancel:hover {
+    background-color: rgba(0, 0, 0, 0.09);
+    color: #111827;
 }

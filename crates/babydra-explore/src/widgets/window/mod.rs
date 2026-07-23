@@ -91,9 +91,9 @@ pub fn create_explore_window(
     // Right pane content variables
     let right_content_handle = Rc::new(RefCell::new(None::<Rc<crate::widgets::content_view::ContentViewHandle>>));
 
-    // Create HeaderBar & StatusBar cells
-    let header_widgets_cell = Rc::new(RefCell::new(None::<crate::widgets::header_bar::HeaderBarWidgets>));
+    // Create StatusBar cells
     let status_bar_widgets_cell = Rc::new(RefCell::new(None::<crate::widgets::status_bar::StatusBarWidgets>));
+    let rebuild_shortcuts_cell = Rc::new(RefCell::new(None::<Rc<dyn Fn()>>));
 
     // Create TabBar Container
     let tab_bar_box = Rc::new(RefCell::new(None::<gtk4::Box>));
@@ -105,7 +105,8 @@ pub fn create_explore_window(
     status_bar_widgets_cell.replace(Some(status_bar_widgets.clone()));
 
     // Setup navigation closures
-    let (navigate_pane_ref, navigate_pane_no_watch_ref, _watcher) = handlers::setup_navigation(
+    let rebuild_tabs_cell = Rc::new(RefCell::new(None::<Rc<dyn Fn()>>));
+    let (navigate_pane_ref, navigate_pane_no_watch_ref, _watchers) = handlers::setup_navigation(
         session.clone(),
         active_pane.clone(),
         left_content_handle.clone(),
@@ -113,9 +114,9 @@ pub fn create_explore_window(
         left_scroll_cell.clone(),
         right_scroll_cell.clone(),
         status_bar_widgets_cell.clone(),
-        header_widgets_cell.clone(),
         tab_bar_box.clone(),
         status_bar_lbl_rc.clone(),
+        rebuild_tabs_cell.clone(),
         watch_tx.clone(),
         left_rx,
     );
@@ -125,7 +126,6 @@ pub fn create_explore_window(
         let session_c = session.clone();
         let nav = navigate_pane_ref.clone();
         let active = active_pane.clone();
-        let status_widgets_c = status_bar_widgets_cell.clone();
         move || {
             let show_hidden_now = {
                 let mut s = session_c.borrow_mut();
@@ -141,13 +141,7 @@ pub fn create_explore_window(
                 babydra_common::save_explore_settings(&current_settings);
             }
 
-            if let Some(ref sw) = *status_widgets_c.borrow() {
-                if show_hidden_now {
-                    sw.btn_toggle_hidden.add_css_class("status-bar-btn-active");
-                } else {
-                    sw.btn_toggle_hidden.remove_css_class("status-bar-btn-active");
-                }
-            }
+
 
             let path = session_c.borrow().active_tab().current_path.clone();
             if let Some(ref f) = *nav.borrow() {
@@ -160,9 +154,27 @@ pub fn create_explore_window(
     // Setup global window navigation callback
     let nav_ref_for_header = navigate_pane_ref.clone();
     let active_pane_for_header = active_pane.clone();
+    let left_handle_for_nav = left_content_handle.clone();
+    let right_handle_for_nav = right_content_handle.clone();
     let nav_callback = move |path: PathBuf| {
         if let Some(ref f) = *nav_ref_for_header.borrow() {
-            f(active_pane_for_header.get(), path);
+            let active = active_pane_for_header.get();
+            f(active, path);
+            
+            // If split view is open, refresh the other pane too to keep listings in sync
+            if let Some(ref right) = *right_handle_for_nav.borrow() {
+                let other_pane = if active == ActivePane::Left {
+                    ActivePane::Right
+                } else {
+                    ActivePane::Left
+                };
+                let other_path = if other_pane == ActivePane::Left {
+                    left_handle_for_nav.current_path.borrow().clone()
+                } else {
+                    right.current_path.borrow().clone()
+                };
+                f(other_pane, other_path);
+            }
         }
     };
     let nav_callback_rc = Rc::new(nav_callback) as Rc<dyn Fn(PathBuf)>;
@@ -171,7 +183,7 @@ pub fn create_explore_window(
     let view_mode_callback = {
         let left = left_content_handle.clone();
         let right = right_content_handle.clone();
-        let header_widgets_c = header_widgets_cell.clone();
+        let status_bar_widgets_c = status_bar_widgets_cell.clone();
         move |mode: String| {
             crate::widgets::content_view::set_content_view_mode(&left, &mode);
             if let Some(ref r) = *right.borrow() {
@@ -185,31 +197,19 @@ pub fn create_explore_window(
                 babydra_common::save_explore_settings(&current_settings);
             }
 
-            // Update button active classes in HeaderBar
-            if let Some(ref hw) = *header_widgets_c.borrow() {
+            // Update button active classes in status bar
+            if let Some(ref sw) = *status_bar_widgets_c.borrow() {
                 if mode == "list" {
-                    hw.btn_view_list.add_css_class("toolbar-btn-active");
-                    hw.btn_view_icons.remove_css_class("toolbar-btn-active");
+                    sw.btn_view_list.add_css_class("status-bar-btn-active");
+                    sw.btn_view_icons.remove_css_class("status-bar-btn-active");
                 } else {
-                    hw.btn_view_icons.add_css_class("toolbar-btn-active");
-                    hw.btn_view_list.remove_css_class("toolbar-btn-active");
+                    sw.btn_view_icons.add_css_class("status-bar-btn-active");
+                    sw.btn_view_list.remove_css_class("status-bar-btn-active");
                 }
             }
         }
     };
-
-    let search_callback = {
-        let left = left_content_handle.clone();
-        let right = right_content_handle.clone();
-        let active = active_pane.clone();
-        move |query: String| {
-            if active.get() == ActivePane::Left {
-                crate::widgets::content_view::filter_content_view(&left, &query);
-            } else if let Some(ref r) = *right.borrow() {
-                crate::widgets::content_view::filter_content_view(r, &query);
-            }
-        }
-    };
+    let view_mode_callback_rc = Rc::new(view_mode_callback) as Rc<dyn Fn(String)>;
 
     let sort_callback = {
         let left = left_content_handle.clone();
@@ -223,32 +223,7 @@ pub fn create_explore_window(
             }
         }
     };
-
-    // Create Header Bar Box
-    let (header_box, header_widgets) = crate::widgets::header_bar::create_header_bar(
-        session.clone(),
-        {
-            let nav = nav_callback_rc.clone();
-            move |p| nav(p)
-        },
-        view_mode_callback,
-        search_callback,
-        sort_callback,
-    );
-    ui.vbox.insert_child_after(&header_box, None::<&gtk4::Widget>);
-    header_widgets_cell.replace(Some(header_widgets.clone()));
-
-    // Apply initial view mode class to header buttons based on settings
-    if settings.view_mode == "list" {
-        header_widgets.btn_view_list.add_css_class("toolbar-btn-active");
-        header_widgets.btn_view_icons.remove_css_class("toolbar-btn-active");
-    } else {
-        header_widgets.btn_view_icons.add_css_class("toolbar-btn-active");
-        header_widgets.btn_view_list.remove_css_class("toolbar-btn-active");
-    }
-
-    // Wire toolbar buttons click
-    widgets::wire_toolbar_buttons(&header_widgets, session.clone(), navigate_pane_ref.clone(), active_pane.clone());
+    let sort_callback_rc = Rc::new(sort_callback) as Rc<dyn Fn(String)>;
 
     // Setup preview panel visibility toggle closure
     let toggle_preview_rc = layout::setup_preview_toggle(
@@ -260,31 +235,21 @@ pub fn create_explore_window(
     );
 
     // Wire status bar buttons click
-    {
-        let toggle_p = toggle_preview_rc.clone();
-        let toggle_h = toggle_hidden_rc.clone();
-        if let Some(ref sw) = *status_bar_widgets_cell.borrow() {
-            sw.btn_toggle_preview.connect_clicked(move |_| {
-                toggle_p();
-            });
-            sw.btn_toggle_hidden.connect_clicked(move |_| {
-                toggle_h();
-            });
-        }
-    }
-
-    // Wire settings button click
-    handlers::wire_settings_button(
-        &header_widgets.btn_settings,
-        &ui.window,
+    handlers::events::setup_status_bar_wiring(
+        status_bar_widgets_cell.clone(),
+        toggle_preview_rc.clone(),
+        view_mode_callback_rc.clone(),
+        sort_callback_rc.clone(),
+        ui.window.clone().upcast::<gtk4::Window>(),
+        rebuild_shortcuts_cell.clone(),
+        session.clone(),
         navigate_pane_ref.clone(),
         active_pane.clone(),
-        session.clone(),
         preview_visible.clone(),
-        toggle_preview_rc.clone(),
     );
 
-    let _rebuild_tabs_rc = widgets::setup_tab_bar(&ui.vbox, session.clone(), navigate_pane_ref.clone(), tab_bar_box.clone());
+
+    let _rebuild_tabs_rc = widgets::setup_tab_bar(&ui.vbox, session.clone(), navigate_pane_ref.clone(), tab_bar_box.clone(), rebuild_tabs_cell.clone());
 
     // Sidebar creation
     let sidebar = crate::widgets::sidebar::create_sidebar(
@@ -307,10 +272,118 @@ pub fn create_explore_window(
         navigate_pane_ref.clone(),
         info_widgets_rc.clone(),
         left_content_scroll.clone(),
+        left_content_handle.clone(),
     );
 
-    // Wire keyboard shortcut listeners
-    handlers::setup_key_shortcuts(&ui.window, toggle_split_view_rc, toggle_preview_rc, toggle_hidden_rc);
+    // Define clipboard and undo callbacks
+    let cut_cb = {
+        let left = left_content_handle.clone();
+        let right = right_content_handle.clone();
+        let act = active_pane.clone();
+        let session = session.clone();
+        let nav = navigate_pane_ref.clone();
+        move || {
+            let paths = if act.get() == ActivePane::Left {
+                left.selected_paths.borrow().clone()
+            } else {
+                right.borrow().as_ref()
+                    .map(|r| r.selected_paths.borrow().clone())
+                    .unwrap_or_default()
+            };
+            if !paths.is_empty() {
+                let current_path = session.borrow().active_tab().current_path.clone();
+                babydra_utils::explore::context_menu::clipboard::set_system_clipboard_files(&paths, true);
+                babydra_utils::explore::CLIPBOARD.with(|cb| cb.replace(Some((paths, true))));
+                if let Some(ref f) = *nav.borrow() {
+                    f(act.get(), current_path);
+                }
+            }
+        }
+    };
+    let cut_cb_rc = Rc::new(cut_cb) as Rc<dyn Fn()>;
+
+    let copy_cb = {
+        let left = left_content_handle.clone();
+        let right = right_content_handle.clone();
+        let act = active_pane.clone();
+        let session = session.clone();
+        let nav = navigate_pane_ref.clone();
+        move || {
+            let paths = if act.get() == ActivePane::Left {
+                left.selected_paths.borrow().clone()
+            } else {
+                right.borrow().as_ref()
+                    .map(|r| r.selected_paths.borrow().clone())
+                    .unwrap_or_default()
+            };
+            if !paths.is_empty() {
+                let current_path = session.borrow().active_tab().current_path.clone();
+                babydra_utils::explore::context_menu::clipboard::set_system_clipboard_files(&paths, false);
+                babydra_utils::explore::CLIPBOARD.with(|cb| cb.replace(Some((paths, false))));
+                if let Some(ref f) = *nav.borrow() {
+                    f(act.get(), current_path);
+                }
+            }
+        }
+    };
+    let copy_cb_rc = Rc::new(copy_cb) as Rc<dyn Fn()>;
+
+    let paste_cb = {
+        let session = session.clone();
+        let act = active_pane.clone();
+        let nav = navigate_pane_ref.clone();
+        move || {
+            let current_path = session.borrow().active_tab().current_path.clone();
+            let nav_cb = {
+                let nav = nav.clone();
+                let act = act.clone();
+                Rc::new(move |p| {
+                    if let Some(ref f) = *nav.borrow() {
+                        f(act.get(), p);
+                    }
+                }) as Rc<dyn Fn(PathBuf)>
+            };
+            babydra_utils::explore::context_menu::clipboard::execute_paste_from_system_clipboard(
+                current_path.clone(),
+                current_path,
+                nav_cb,
+            );
+        }
+    };
+    let paste_cb_rc = Rc::new(paste_cb) as Rc<dyn Fn()>;
+
+    let undo_cb = {
+        let session = session.clone();
+        let act = active_pane.clone();
+        let nav = navigate_pane_ref.clone();
+        move || {
+            let current_path = session.borrow().active_tab().current_path.clone();
+            let nav_cb = {
+                let nav = nav.clone();
+                let act = act.clone();
+                Rc::new(move |p| {
+                    if let Some(ref f) = *nav.borrow() {
+                        f(act.get(), p);
+                    }
+                }) as Rc<dyn Fn(PathBuf)>
+            };
+            babydra_utils::explore::context_menu::clipboard::execute_undo(nav_cb, current_path);
+        }
+    };
+    let undo_cb_rc = Rc::new(undo_cb) as Rc<dyn Fn()>;
+
+    // Install keyboard shortcuts
+    handlers::events::setup_window_shortcuts(
+        &ui.window,
+        toggle_split_view_rc.clone(),
+        toggle_preview_rc.clone(),
+        toggle_hidden_rc.clone(),
+        cut_cb_rc.clone(),
+        copy_cb_rc.clone(),
+        paste_cb_rc.clone(),
+        undo_cb_rc.clone(),
+        rebuild_shortcuts_cell.clone(),
+    );
 
     // Set up window resize response logic
     handlers::setup_window_resize_handler(
@@ -323,7 +396,14 @@ pub fn create_explore_window(
     );
 
     // Watcher event receiver loop
-    handlers::setup_file_watcher_receiver(session.clone(), navigate_pane_no_watch_ref.clone(), active_pane.clone(), watch_rx);
+    handlers::setup_file_watcher_receiver(
+        session.clone(),
+        navigate_pane_no_watch_ref.clone(),
+        active_pane.clone(),
+        left_content_handle.clone(),
+        right_content_handle.clone(),
+        watch_rx,
+    );
 
     // D-Bus service loop
     handlers::setup_dbus_receiver(navigate_pane_no_watch_ref.clone(), active_pane.clone());

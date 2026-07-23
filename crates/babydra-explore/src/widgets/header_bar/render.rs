@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Entry, Orientation, Stack, Separator};
+use gtk4::{Box, Entry, Orientation, Stack, Separator};
 use babydra_common::HeaderBarWidgets;
 use babydra_common::i18n::t;
 
@@ -7,39 +7,11 @@ use babydra_common::i18n::t;
 pub fn build_header_bar_ui() -> HeaderBarWidgets {
     let container = Box::new(Orientation::Vertical, 0);
 
-    // ── Row 1: Navigation Bar ──────────────────────────────────
-    let nav_row = Box::new(Orientation::Horizontal, 4);
-    nav_row.set_css_classes(&["nav-bar"]);
-    nav_row.set_margin_start(6);
-    nav_row.set_margin_end(6);
-    container.append(&nav_row);
-
-    let btn_back = Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("back", 16))
-        .build();
-    let btn_forward = Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("forward", 16))
-        .build();
-    let btn_up = Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("up", 16))
-        .build();
-    let btn_refresh = Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("refresh", 16))
-        .build();
-
-    btn_back.set_tooltip_text(Some(&t("explore.back")));
-    btn_forward.set_tooltip_text(Some(&t("explore.forward")));
-    btn_up.set_tooltip_text(Some(&t("explore.up")));
-    btn_refresh.set_tooltip_text(Some(&t("explore.refresh")));
-
-    for btn in &[&btn_back, &btn_forward, &btn_up, &btn_refresh] {
-        btn.set_css_classes(&["nav-btn"]);
-    }
-
-    nav_row.append(&btn_back);
-    nav_row.append(&btn_forward);
-    nav_row.append(&btn_up);
-    nav_row.append(&btn_refresh);
+    // ── Dummy Navigation Bar (Created but not appended to global container) ──
+    let btn_back = babydra_utils::components::create_icon_button("back", 16, &["nav-btn"], Some(&t("explore.back")), || {});
+    let btn_forward = babydra_utils::components::create_icon_button("forward", 16, &["nav-btn"], Some(&t("explore.forward")), || {});
+    let btn_up = babydra_utils::components::create_icon_button("up", 16, &["nav-btn"], Some(&t("explore.up")), || {});
+    let btn_refresh = babydra_utils::components::create_icon_button("refresh", 16, &["nav-btn"], Some(&t("explore.refresh")), || {});
 
     // Address bar wrapper
     let address_wrap = Box::new(Orientation::Horizontal, 0);
@@ -60,7 +32,6 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     address_stack.add_named(&entry_address, Some("address"));
 
     address_wrap.append(&address_stack);
-    nav_row.append(&address_wrap);
 
     // Search entry
     let search = Entry::builder()
@@ -69,7 +40,6 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
         .css_classes(vec!["search-entry".to_string()])
         .build();
     search.set_size_request(200, -1);
-    nav_row.append(&search);
 
     // ── Row 2: Command Toolbar ─────────────────────────────────
     let toolbar = Box::new(Orientation::Horizontal, 2);
@@ -78,60 +48,26 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     toolbar.set_margin_end(6);
     container.append(&toolbar);
 
-    let new_folder_box = Box::new(Orientation::Horizontal, 6);
-    let new_folder_img = babydra_utils::ui::icon::get_icon("folder-new", 16);
-    let new_folder_lbl = gtk4::Label::new(Some(&t("explore.new_folder")));
-    new_folder_box.append(&new_folder_img);
-    new_folder_box.append(&new_folder_lbl);
+    let btn_new_folder = babydra_utils::components::create_icon_label_button(
+        "folder-new",
+        &t("explore.new_folder"),
+        "toolbar-btn"
+    );
+    btn_new_folder.add_css_class("new-btn");
+    btn_new_folder.set_tooltip_text(Some(&t("explore.new_folder")));
 
-    let btn_new_folder = Button::builder()
-        .child(&new_folder_box)
-        .build();
-    let btn_cut = Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("cut", 16))
-        .build();
-    let btn_copy = Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("copy", 16))
-        .build();
-    let btn_paste = Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("paste", 16))
-        .build();
-    let btn_rename = Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("rename", 16))
-        .build();
-    let btn_delete = Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("trash", 16))
-        .build();
+    let btn_cut = babydra_utils::components::create_icon_button("cut", 16, &["toolbar-btn"], Some(&t("explore.cut")), || {});
+    let btn_copy = babydra_utils::components::create_icon_button("copy", 16, &["toolbar-btn"], Some(&t("explore.copy")), || {});
+    let btn_paste = babydra_utils::components::create_icon_button("paste", 16, &["toolbar-btn"], Some(&t("explore.paste")), || {});
+    let btn_rename = babydra_utils::components::create_icon_button("rename", 16, &["toolbar-btn"], Some(&t("explore.rename")), || {});
+    let btn_delete = babydra_utils::components::create_icon_button("trash", 16, &["toolbar-btn"], Some(&t("explore.delete")), || {});
     let sep1 = Separator::new(Orientation::Vertical);
     sep1.set_css_classes(&["toolbar-sep"]);
     let sep2 = Separator::new(Orientation::Vertical);
     sep2.set_css_classes(&["toolbar-sep"]);
-    let btn_view_icons = Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("view-grid", 16))
-        .build();
-    let btn_view_list = Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("view-list", 16))
-        .build();
-    let btn_settings = Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("settings", 16))
-        .build();
-
-    btn_new_folder.set_tooltip_text(Some(&t("explore.new_folder")));
-    btn_cut.set_tooltip_text(Some(&t("explore.cut")));
-    btn_copy.set_tooltip_text(Some(&t("explore.copy")));
-    btn_paste.set_tooltip_text(Some(&t("explore.paste")));
-    btn_rename.set_tooltip_text(Some(&t("explore.rename")));
-    btn_delete.set_tooltip_text(Some(&t("explore.delete")));
-    btn_view_icons.set_tooltip_text(Some(&t("explore.view_grid")));
-    btn_view_list.set_tooltip_text(Some(&t("explore.view_list")));
-    btn_settings.set_tooltip_text(Some(&t("explore.settings")));
-
-    btn_new_folder.set_css_classes(&["toolbar-btn", "new-btn"]);
-
-    for btn in &[&btn_cut, &btn_copy, &btn_paste, &btn_rename, &btn_delete,
-                 &btn_view_icons, &btn_view_list, &btn_settings] {
-        btn.set_css_classes(&["toolbar-btn"]);
-    }
+    let btn_view_icons = babydra_utils::components::create_icon_button("view-grid", 16, &["toolbar-btn"], Some(&t("explore.view_grid")), || {});
+    let btn_view_list = babydra_utils::components::create_icon_button("view-list", 16, &["toolbar-btn"], Some(&t("explore.view_list")), || {});
+    let btn_settings = babydra_utils::components::create_icon_button("settings", 16, &["toolbar-btn"], Some(&t("explore.settings")), || {});
 
     toolbar.append(&btn_new_folder);
     toolbar.append(&sep1);

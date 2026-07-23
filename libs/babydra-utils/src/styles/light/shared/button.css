@@ -1,21 +1,112 @@
-button.circle-btn {
+/* Shared Button Styles - Light Theme */
+
+button,
+.btn {
+    font-family: 'Inter', sans-serif;
+    transition: all 200ms ease;
+}
+
+button.circle-btn,
+button.icon-btn-circle {
     background-color: rgba(255, 255, 255, 0.98);
     background-image: none;
     border: 1px solid rgba(0, 0, 0, 0.08);
-    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
     color: #1c1c1e;
-    border-radius: 9999px;
-    min-width: 34px;
-    min-height: 34px;
+    border-radius: 50%;
+    min-width: 32px;
+    min-height: 32px;
     padding: 0;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 500;
+    box-shadow: none;
+    transition: all 200ms ease;
+}
+
+button.circle-btn:hover,
+button.icon-btn-circle:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.12);
     box-shadow: none;
 }
 
-button.circle-btn:hover {
-    background-color: rgba(255, 255, 255, 0.98);
-    border-color: rgba(255, 255, 255, 0.18);
-    border-top-color: rgba(255, 255, 255, 0.26);
+/* 2.1 Primary Button (Generate / Main Action) */
+button.btn-primary {
+    border-radius: 9999px;
+    background-color: #3b82f6;
+    background-image: none;
+    border: none;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 8px 20px;
     box-shadow: none;
+    transition: all 200ms ease;
+}
+
+button.btn-primary:hover {
+    background-color: #2563eb;
+    background-image: none;
+    box-shadow: none;
+}
+
+button.btn-primary:disabled,
+button.btn-primary.disabled {
+    background-color: rgba(0, 0, 0, 0.20);
+    color: rgba(255, 255, 255, 0.60);
+    box-shadow: none;
+}
+
+/* 2.2 Share Pill Button */
+button.btn-share-pill {
+    border-radius: 9999px;
+    background-color: rgba(0, 0, 0, 0.05);
+    background-image: none;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: rgba(28, 28, 30, 0.95);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    box-shadow: none;
+    transition: all 200ms ease;
+}
+
+button.btn-share-pill:hover {
+    background-color: rgba(0, 0, 0, 0.10);
+    box-shadow: none;
+}
+
+/* 2.3 Secondary Upgrade Button */
+button.btn-upgrade-secondary {
+    border-radius: 9999px;
+    background-color: #1c1c1e;
+    background-image: none;
+    border: none;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    box-shadow: none;
+    transition: all 200ms ease;
+}
+
+button.btn-upgrade-secondary:hover {
+    background-color: rgba(28, 28, 30, 0.85);
+    box-shadow: none;
+}
+
+/* Floating Icon Badge */
+.floating-icon-badge {
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    background-color: #ffffff;
+    color: #1c1c1e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }

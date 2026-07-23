@@ -1,9 +1,15 @@
 use gtk4::prelude::*;
 use babydra_common::ContentViewHandle;
 
-/// Refreshes the FlowBox or ListBox view with the latest directories and file entries.
-/// Orchestrates rendering by delegating to grid_renderer or list_renderer.
+pub fn update_content_view_ui_silent(handle: &ContentViewHandle) {
+    update_content_view_ui_internal(handle, true);
+}
+
 pub fn update_content_view_ui(handle: &ContentViewHandle) {
+    update_content_view_ui_internal(handle, false);
+}
+
+fn update_content_view_ui_internal(handle: &ContentViewHandle, silent: bool) {
     let widgets = handle.widgets.clone();
     let entries = handle.entries.borrow().clone();
     let nav_callback = handle.nav_callback.clone();
@@ -21,9 +27,10 @@ pub fn update_content_view_ui(handle: &ContentViewHandle) {
         *g
     };
 
-    // Reset and show progress bar at start of layout transaction
-    widgets.progress_bar.set_visible(true);
-    widgets.progress_bar.set_fraction(0.0);
+    if !silent {
+        widgets.progress_bar.set_visible(true);
+        widgets.progress_bar.set_fraction(0.0);
+    }
 
     // Clear grid_container (for icons/grid view)
     while let Some(child) = widgets.grid_container.first_child() {

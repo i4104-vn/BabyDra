@@ -50,7 +50,7 @@ button.screenshot-toolbar-btn:active {
 }
 
 button.screenshot-toolbar-btn.selected {
-    background-color: rgba(0, 122, 255, 0.70);
+    background-color: rgba(59, 130, 246, 0.70);
     background-image: none;
     border: 1px solid rgba(147, 197, 253, 0.25);
     border-top: 1px solid rgba(147, 197, 253, 0.45);
@@ -98,14 +98,12 @@ button.color-dot-btn {
 }
 
 button.color-dot-btn:hover {
-    transform: scale(1.2);
     border-color: rgba(255, 255, 255, 0.6);
     box-shadow: none;
 }
 
 button.color-dot-btn.color-active {
-    border: 2px solid #007aff;
-    transform: scale(1.1);
+    border: 2px solid #3b82f6;
 }
 
 /* Color Palette - each must explicitly clear background-image */
@@ -113,7 +111,7 @@ button.color-dot-btn.color-dot-red { background-color: #ef4444; background-image
 button.color-dot-btn.color-dot-orange { background-color: #f97316; background-image: none; }
 button.color-dot-btn.color-dot-yellow { background-color: #eab308; background-image: none; }
 button.color-dot-btn.color-dot-green { background-color: #22c55e; background-image: none; }
-button.color-dot-btn.color-dot-blue { background-color: #007aff; background-image: none; }
+button.color-dot-btn.color-dot-blue { background-color: #3b82f6; background-image: none; }
 button.color-dot-btn.color-dot-purple { background-color: #a855f7; background-image: none; }
 button.color-dot-btn.color-dot-white { background-color: #1c1c1e; background-image: none; }
 button.color-dot-btn.color-dot-black { background-color: #000000; background-image: none; }

@@ -2,19 +2,28 @@ use std::rc::Rc;
 use std::cell::{RefCell, Cell};
 use std::path::PathBuf;
 use gtk4::prelude::*;
-use babydra_common::{SessionState, ActivePane};
+use babydra_common::{SessionState, ActivePane, ContentViewHandle};
+
+fn update_pane_nav_visibility(handle: &ContentViewHandle, is_split: bool) {
+    let widgets = &handle.widgets;
+    widgets.btn_back.set_visible(!is_split);
+    widgets.btn_forward.set_visible(!is_split);
+    widgets.btn_up.set_visible(!is_split);
+    widgets.search.set_visible(!is_split);
+}
 
 /// Configures split pane layout toggling, creating the right pane content view and sync callbacks dynamically.
 pub fn setup_split_view(
     split_paned: gtk4::Paned,
     is_split: Rc<Cell<bool>>,
     right_scroll_cell: Rc<RefCell<Option<gtk4::Box>>>,
-    right_content_handle: Rc<RefCell<Option<Rc<crate::widgets::content_view::ContentViewHandle>>>>,
+    right_content_handle: Rc<RefCell<Option<Rc<ContentViewHandle>>>>,
     session: Rc<RefCell<SessionState>>,
     active_pane: Rc<Cell<ActivePane>>,
     navigate_pane_ref: Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>,
     info_widgets: Rc<crate::widgets::info_panel::InfoPanelWidgets>,
     left_content_scroll: gtk4::Box,
+    left_content_handle: Rc<ContentViewHandle>,
 ) -> Rc<dyn Fn()> {
     let split_paned_c = split_paned.clone();
     let is_split_c = is_split.clone();
@@ -25,6 +34,7 @@ pub fn setup_split_view(
     let nav_c = navigate_pane_ref.clone();
     let info_widgets_c = info_widgets.clone();
     let left_scroll_c = left_content_scroll.clone();
+    let left_handle_c = left_content_handle.clone();
 
     let toggle_split_view = move || {
         if is_split_c.get() {
@@ -33,6 +43,9 @@ pub fn setup_split_view(
             right_scroll_c.replace(None);
             is_split_c.set(false);
             active_pane_c.set(ActivePane::Left);
+
+            // Restore buttons/search on left pane
+            update_pane_nav_visibility(&left_handle_c, false);
         } else {
             let current_p = session_c.borrow().active_tab().current_path.clone();
             let (tx_right, mut rx_right) = tokio::sync::mpsc::unbounded_channel::<PathBuf>();
@@ -71,12 +84,18 @@ pub fn setup_split_view(
                 }
             );
 
+            // Hide buttons/search on right pane
+            update_pane_nav_visibility(&right_handle, true);
+
             split_paned_c.set_end_child(Some(&right_scroll));
             split_paned_c.set_position(390);
 
             right_scroll_c.borrow_mut().replace(right_scroll);
             right_handle_c.replace(Some(Rc::new(right_handle)));
             is_split_c.set(true);
+
+            // Hide buttons/search on left pane
+            update_pane_nav_visibility(&left_handle_c, true);
 
             active_pane_c.set(ActivePane::Right);
             if let Some(ref f) = *nav_c.borrow() {

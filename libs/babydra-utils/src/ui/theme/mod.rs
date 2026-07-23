@@ -17,6 +17,7 @@ const DARK_CSS: &str = concat!(
     include_str!("../../styles/dark/calendar/calendar.css"), "\n",
     include_str!("../../styles/dark/shared/button.css"), "\n",
     include_str!("../../styles/dark/shared/switch.css"), "\n",
+    include_str!("../../styles/dark/shared/sidebar.css"), "\n",
     include_str!("../../styles/dark/apps/screenshot.css"), "\n",
     include_str!("../../styles/dark/apps/lock.css"), "\n",
     include_str!("../../styles/dark/apps/preview.css"), "\n",
@@ -24,7 +25,6 @@ const DARK_CSS: &str = concat!(
     include_str!("../../styles/dark/apps/switcher.css"), "\n",
     include_str!("../../styles/dark/explore/window.css"), "\n",
     include_str!("../../styles/dark/explore/header_bar.css"), "\n",
-    include_str!("../../styles/dark/explore/sidebar.css"), "\n",
     include_str!("../../styles/dark/explore/content_view.css"), "\n",
     include_str!("../../styles/dark/explore/info_panel.css"), "\n",
     include_str!("../../styles/dark/explore/status_bar.css"), "\n",
@@ -49,6 +49,7 @@ const LIGHT_CSS: &str = concat!(
     include_str!("../../styles/light/calendar/calendar.css"), "\n",
     include_str!("../../styles/light/shared/button.css"), "\n",
     include_str!("../../styles/light/shared/switch.css"), "\n",
+    include_str!("../../styles/light/shared/sidebar.css"), "\n",
     include_str!("../../styles/light/apps/screenshot.css"), "\n",
     include_str!("../../styles/light/apps/lock.css"), "\n",
     include_str!("../../styles/light/apps/preview.css"), "\n",
@@ -56,7 +57,6 @@ const LIGHT_CSS: &str = concat!(
     include_str!("../../styles/light/apps/switcher.css"), "\n",
     include_str!("../../styles/light/explore/window.css"), "\n",
     include_str!("../../styles/light/explore/header_bar.css"), "\n",
-    include_str!("../../styles/light/explore/sidebar.css"), "\n",
     include_str!("../../styles/light/explore/content_view.css"), "\n",
     include_str!("../../styles/light/explore/info_panel.css"), "\n",
     include_str!("../../styles/light/explore/status_bar.css"), "\n",
@@ -77,11 +77,8 @@ pub fn init_theme() {
     if let Some(settings) = gtk4::Settings::default() {
         let gsettings = gio::Settings::new("org.gnome.desktop.interface");
         let value = gsettings.string("color-scheme");
-        if value == "prefer-dark" {
-            settings.set_gtk_application_prefer_dark_theme(true);
-        } else if value == "prefer-light" {
-            settings.set_gtk_application_prefer_dark_theme(false);
-        }
+        let is_dark = value != "prefer-light";
+        settings.set_gtk_application_prefer_dark_theme(is_dark);
 
         let user_icon_theme = gsettings.string("icon-theme");
         let user_icon_theme = user_icon_theme.trim();
@@ -171,10 +168,7 @@ pub fn is_dark_mode() -> bool {
 
 /// Sets the color scheme preference in GSettings.
 pub fn set_dark_mode(dark: bool) {
-    let scheme = if dark { "prefer-dark" } else { "prefer-light" };
-    let _ = std::process::Command::new("gsettings")
-        .args(&["set", "org.gnome.desktop.interface", "color-scheme", scheme])
-        .output();
+    let _ = babydra_common::services::system::set_gsettings_color_scheme(dark);
 
     if let Some(settings) = gtk4::Settings::default() {
         settings.set_gtk_application_prefer_dark_theme(dark);

@@ -77,7 +77,7 @@
 .badge-title {
     font-size: 12px;
     font-weight: 700;
-    color: #007aff;
+    color: #3b82f6;
     margin-bottom: 2px;
 }
 
@@ -88,7 +88,6 @@
 }
 
 .panel-notch.active-music:not(.popover-open):hover {
-    transform: scale(1.04);
     background-color: rgba(255, 255, 255, 1.0);
     box-shadow: none;
 }
@@ -186,7 +185,7 @@ scale.media-timeline-scale trough {
 
 scale.media-timeline-scale trough highlight {
     border-radius: 2px;
-    background-color: #007aff;
+    background-color: #3b82f6;
     background-image: none;
     min-height: 4px;
 }
@@ -196,7 +195,7 @@ scale.media-timeline-scale slider {
     min-height: 10px;
     margin: -3px;
     border-radius: 5px;
-    background-color: #007aff;
+    background-color: #3b82f6;
     box-shadow: none;
     border: none;
     opacity: 0;

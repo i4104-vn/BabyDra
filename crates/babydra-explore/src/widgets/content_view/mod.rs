@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::cell::RefCell;
+use gtk4::prelude::*;
 use babydra_common::FileEntry;
 pub use babydra_common::{ContentViewWidgets, ContentViewHandle, sort_entries};
 
@@ -10,8 +11,8 @@ mod gestures;
 mod rendering;
 mod actions;
 
-pub use rendering::renderer::update_content_view_ui;
-pub use actions::{set_content_view_mode, set_content_view_sort, update_content_view, filter_content_view};
+pub use rendering::renderer::{update_content_view_ui, update_content_view_ui_silent};
+pub use actions::{set_content_view_mode, set_content_view_sort, update_content_view, update_content_view_silent, filter_content_view};
 
 /// Creates the content view area widgets and returns the scroll container and ContentViewHandle state handle.
 pub fn create_content_view(
@@ -48,6 +49,11 @@ pub fn create_content_view(
     }) as Rc<dyn Fn(Vec<PathBuf>)>;
 
     let render_generation = Rc::new(RefCell::new(0u64));
+    let history = Rc::new(RefCell::new(Vec::<PathBuf>::new()));
+    let history_index = Rc::new(RefCell::new(0usize));
+
+    // Wire pane navigation & address bar entry
+    actions::wire_content_view_navigation(&widgets, nav_cb.clone(), current_path.clone(), history.clone(), history_index.clone());
 
     let handle = ContentViewHandle {
         widgets: widgets.clone(),
@@ -60,7 +66,17 @@ pub fn create_content_view(
         selection_callback: sc_fn.clone(),
         selected_paths: selected_paths.clone(),
         render_generation: render_generation.clone(),
+        history: history.clone(),
+        history_index: history_index.clone(),
     };
+
+    // Wire search filter change callback
+    {
+        let handle_c = handle.clone();
+        widgets.search.connect_changed(move |entry| {
+            filter_content_view(&handle_c, &entry.text());
+        });
+    }
 
     // Wire all controllers/gestures for ListBox and overlay background
     gestures::wire_listbox_controllers(&widgets, entries.clone(), nav_cb.clone(), sc_fn.clone(), current_path.clone(), selected_paths.clone());

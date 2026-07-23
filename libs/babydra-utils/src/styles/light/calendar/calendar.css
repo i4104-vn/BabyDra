@@ -226,14 +226,13 @@ scrolledwindow.notif-scroll viewport {
     border-radius: 14px;
     padding: 10px 12px;
     transition: all 200ms ease;
-    width: 310px;
+    width: 100%;
     box-shadow: none;
 }
 
 .notif-stack-item:hover {
     background-color: rgba(255, 255, 255, 0.09);
     border-color: rgba(0, 0, 0, 0.08);
-    transform: translateY(-1px);
     box-shadow: none;
 }
 

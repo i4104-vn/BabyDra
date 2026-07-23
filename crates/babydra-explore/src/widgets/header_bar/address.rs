@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Label};
+use gtk4::{Box, Label};
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -18,28 +18,53 @@ pub fn update_address_bar(
         breadcrumb_box.remove(&child);
     }
 
-    let home = glib::home_dir();
     let components: Vec<_> = path.components().collect();
+    let total = components.len();
+    let should_collapse = total > 4;
 
     let mut current = PathBuf::new();
     for (i, comp) in components.iter().enumerate() {
+        current.push(comp);
+
+        if should_collapse && i > 0 && i < total - 2 {
+            if i == 1 {
+                let btn = gtk4::Button::builder()
+                    .label("…")
+                    .css_classes(vec!["breadcrumb-btn".to_string()])
+                    .build();
+                let target = current.clone();
+                let session_clone = session.clone();
+                let nav_cb = nav_callback.clone();
+                let btn_gesture = gtk4::GestureClick::new();
+                btn_gesture.connect_pressed(move |g, _, _, _| {
+                    g.set_state(gtk4::EventSequenceState::Claimed);
+                    { session_clone.borrow_mut().active_tab_mut().navigate_to(target.clone()); }
+                    nav_cb(target.clone());
+                });
+                btn.add_controller(btn_gesture);
+                breadcrumb_box.append(&btn);
+
+                let sep = Label::new(Some("›"));
+                sep.set_css_classes(&["breadcrumb-sep"]);
+                breadcrumb_box.append(&sep);
+            }
+            continue;
+        }
+
         let comp_str = match comp {
             std::path::Component::RootDir => "/".to_string(),
             std::path::Component::Normal(s) => s.to_string_lossy().to_string(),
             _ => continue,
         };
 
-        current.push(comp);
+        let lbl = Label::builder()
+            .label(&comp_str)
+            .ellipsize(gtk4::pango::EllipsizeMode::End)
+            .max_width_chars(12)
+            .build();
 
-        // Friendly name for home
-        let display = if current == home {
-            "Home".to_string()
-        } else {
-            comp_str.clone()
-        };
-
-        let btn = Button::builder()
-            .label(&display)
+        let btn = gtk4::Button::builder()
+            .child(&lbl)
             .css_classes(vec!["breadcrumb-btn".to_string()])
             .build();
 
@@ -60,7 +85,7 @@ pub fn update_address_bar(
 
         breadcrumb_box.append(&btn);
 
-        if i + 1 < components.len() {
+        if i + 1 < total {
             let sep = Label::new(Some("›"));
             sep.set_css_classes(&["breadcrumb-sep"]);
             breadcrumb_box.append(&sep);

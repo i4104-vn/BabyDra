@@ -14,6 +14,13 @@
     background-color: transparent;
 }
 
+.explore-window .info-panel frame,
+.explore-window .info-panel frame>border {
+    border: none;
+    box-shadow: none;
+    background-color: transparent;
+}
+
 .explore-window .info-row-key {
     color: #666;
     font-size: 12px;

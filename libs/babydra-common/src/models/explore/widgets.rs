@@ -50,6 +50,15 @@ pub struct ContentViewWidgets {
     pub list_fixed: gtk4::Fixed,
     pub list_rubberband: gtk4::Box,
     pub progress_bar: gtk4::ProgressBar,
+    pub btn_back: Button,
+    pub btn_forward: Button,
+    pub btn_up: Button,
+    pub btn_refresh: Button,
+    pub breadcrumb_box: Box,
+    pub entry_address: Entry,
+    pub address_stack: Stack,
+    pub address_wrap: Box,
+    pub search: Entry,
 }
 
 #[derive(Clone)]
@@ -64,6 +73,8 @@ pub struct ContentViewHandle {
     pub selection_callback: Rc<dyn Fn(Vec<PathBuf>)>,
     pub selected_paths: Rc<RefCell<Vec<PathBuf>>>,
     pub render_generation: Rc<RefCell<u64>>,
+    pub history: Rc<RefCell<Vec<PathBuf>>>,
+    pub history_index: Rc<RefCell<usize>>,
 }
 
 #[derive(Clone)]

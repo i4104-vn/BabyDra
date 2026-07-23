@@ -1,4 +1,5 @@
-//! Built-in theme SVG assets loader and system tray/desktop icon parser.
+use gio::prelude::*;
+use glib::object::ObjectExt;
 
 pub mod assets;
 pub mod resolver;
@@ -9,9 +10,14 @@ pub use assets::*;
 
 /// Whether dark mode is currently active.
 pub fn is_dark_mode() -> bool {
-    gtk4::Settings::default()
-        .map(|s| s.is_gtk_application_prefer_dark_theme())
-        .unwrap_or(true)
+    if let Some(settings) = gtk4::Settings::default() {
+        if !settings.is_gtk_application_prefer_dark_theme() {
+            return false;
+        }
+    }
+    let gsettings = gio::Settings::new("org.gnome.desktop.interface");
+    let val = gsettings.string("color-scheme");
+    val != "prefer-light"
 }
 
 /// Helper function to retrieve an SVG icon widget by name. Relies on the active theme.
@@ -19,10 +25,12 @@ pub fn get_icon_colored(name: &str, size: i32, _color_hex: &str) -> gtk4::Image 
     get_icon(name, size)
 }
 
-/// Helper function to retrieve an SVG icon widget by name. Defaults to white in dark mode and dark gray in light mode.
-pub fn get_icon(name: &str, size: i32) -> gtk4::Image {
+fn load_icon_image_data(img: &gtk4::Image, name: &str, size: i32) {
     if name == "logo" {
-        return get_logo_png(size);
+        let logo_img = get_logo_png(size);
+        img.set_paintable(logo_img.paintable().as_ref());
+        img.set_pixel_size(size);
+        return;
     }
     let is_dark = is_dark_mode();
     let use_light_folder = !is_dark;
@@ -56,6 +64,8 @@ pub fn get_icon(name: &str, size: i32) -> gtk4::Image {
         ("download", true) | ("document-save-symbolic", true) => Some(LIGHT_DOWNLOAD_SVG),
         ("ethernet", false) => Some(DARK_ETHERNET_SVG),
         ("ethernet", true) => Some(LIGHT_ETHERNET_SVG),
+        ("external-link", false) | ("external-link-symbolic", false) | ("window-new-symbolic", false) => Some(DARK_EXTERNAL_LINK_SVG),
+        ("external-link", true) | ("external-link-symbolic", true) | ("window-new-symbolic", true) => Some(LIGHT_EXTERNAL_LINK_SVG),
         ("folder", false) => Some(DARK_FOLDER_SVG),
         ("folder", true) => Some(LIGHT_FOLDER_SVG),
         ("gsconnect", false) => Some(DARK_GSCONNECT_SVG),
@@ -158,21 +168,72 @@ pub fn get_icon(name: &str, size: i32) -> gtk4::Image {
         ("folder-videos", true) | ("folder_videos", true) => Some(LIGHT_FOLDER_VIDEOS_SVG),
         ("drive-harddisk", false) | ("drive_harddisk", false) => Some(DARK_DRIVE_HARDDISK_SVG),
         ("drive-harddisk", true) | ("drive_harddisk", true) => Some(LIGHT_DRIVE_HARDDISK_SVG),
+        ("calendar", false) | ("calendar-symbolic", false) | ("x-office-calendar-symbolic", false) | ("office-calendar", false) => Some(DARK_CALENDAR_SVG),
+        ("calendar", true) | ("calendar-symbolic", true) | ("x-office-calendar-symbolic", true) | ("office-calendar", true) => Some(LIGHT_CALENDAR_SVG),
+        ("play", false) | ("media-playback-start-symbolic", false) | ("media-playback-start", false) => Some(DARK_PLAY_SVG),
+        ("play", true) | ("media-playback-start-symbolic", true) | ("media-playback-start", true) => Some(LIGHT_PLAY_SVG),
+        ("pause", false) | ("media-playback-pause-symbolic", false) | ("media-playback-pause", false) => Some(DARK_PAUSE_SVG),
+        ("pause", true) | ("media-playback-pause-symbolic", true) | ("media-playback-pause", true) => Some(LIGHT_PAUSE_SVG),
+        ("previous", false) | ("media-skip-backward-symbolic", false) | ("media-skip-backward", false) => Some(DARK_PREVIOUS_SVG),
+        ("previous", true) | ("media-skip-backward-symbolic", true) | ("media-skip-backward", true) => Some(LIGHT_PREVIOUS_SVG),
+        ("next", false) | ("media-skip-forward-symbolic", false) | ("media-skip-forward", false) => Some(DARK_NEXT_SVG),
+        ("next", true) | ("media-skip-forward-symbolic", true) | ("media-skip-forward", true) => Some(LIGHT_NEXT_SVG),
+        ("eye", false) | ("eye-symbolic", false) => Some(DARK_EYE_SVG),
+        ("eye", true) | ("eye-symbolic", true) => Some(LIGHT_EYE_SVG),
+        ("check", false) | ("check-symbolic", false) => Some(DARK_CHECK_SVG),
+        ("check", true) | ("check-symbolic", true) => Some(LIGHT_CHECK_SVG),
+        ("close", false) | ("close-symbolic", false) | ("window-close-symbolic", false) => Some(DARK_CLOSE_SVG),
+        ("close", true) | ("close-symbolic", true) | ("window-close-symbolic", true) => Some(LIGHT_CLOSE_SVG),
+        ("edit", false) | ("edit-symbolic", false) => Some(DARK_EDIT_SVG),
+        ("edit", true) | ("edit-symbolic", true) => Some(LIGHT_EDIT_SVG),
+        ("minus", false) | ("minus-symbolic", false) => Some(DARK_MINUS_SVG),
+        ("minus", true) | ("minus-symbolic", true) => Some(LIGHT_MINUS_SVG),
+        ("pan-start-symbolic", false) | ("pan-start", false) => Some(DARK_BACK_SVG),
+        ("pan-start-symbolic", true) | ("pan-start", true) => Some(LIGHT_BACK_SVG),
+        ("pan-end-symbolic", false) | ("pan-end", false) => Some(DARK_FORWARD_SVG),
+        ("pan-end-symbolic", true) | ("pan-end", true) => Some(LIGHT_FORWARD_SVG),
+        ("pan-up-symbolic", false) | ("pan-up", false) => Some(DARK_UP_SVG),
+        ("pan-up-symbolic", true) | ("pan-up", true) => Some(LIGHT_UP_SVG),
+        ("pan-down-symbolic", false) | ("pan-down", false) => Some(DARK_DOWN_SVG),
+        ("pan-down-symbolic", true) | ("pan-down", true) => Some(LIGHT_DOWN_SVG),
+        ("rect", false) | ("draw-rectangle-symbolic", false) => Some(DARK_RECT_SVG),
+        ("rect", true) | ("draw-rectangle-symbolic", true) => Some(LIGHT_RECT_SVG),
+        ("blur", false) | ("view-conceal-symbolic", false) => Some(DARK_BLUR_SVG),
+        ("blur", true) | ("view-conceal-symbolic", true) => Some(LIGHT_BLUR_SVG),
         _ => None,
     };
 
     if let Some(svg_content) = svg {
-        get_icon_from_svg(svg_content, size)
-    } else {
-        let img = get_system_or_file_icon(name, "image-missing");
+        let icon_img = get_icon_from_svg(svg_content, size);
+        img.set_paintable(icon_img.paintable().as_ref());
         img.set_pixel_size(size);
-        img
+    } else {
+        let icon_img = get_system_or_file_icon(name, "image-missing");
+        img.set_paintable(icon_img.paintable().as_ref());
+        img.set_pixel_size(size);
     }
 }
 
 /// Sets the image content from local SVG or system icon theme.
 pub fn set_image_from_icon(img: &gtk4::Image, name: &str, size: i32) {
-    let new_img = get_icon(name, size);
-    img.set_paintable(new_img.paintable().as_ref());
-    img.set_pixel_size(size);
+    load_icon_image_data(img, name, size);
+}
+
+/// Helper function to retrieve an SVG icon widget by name. Defaults to white in dark mode and dark gray in light mode.
+/// Automatically updates icon paintable when theme switches between Dark and Light mode.
+pub fn get_icon(name: &str, size: i32) -> gtk4::Image {
+    let img = gtk4::Image::new();
+    load_icon_image_data(&img, name, size);
+
+    let name_string = name.to_string();
+    if let Some(settings) = gtk4::Settings::default() {
+        let img_weak = img.downgrade();
+        settings.connect_gtk_application_prefer_dark_theme_notify(move |_| {
+            if let Some(img) = img_weak.upgrade() {
+                load_icon_image_data(&img, &name_string, size);
+            }
+        });
+    }
+
+    img
 }
