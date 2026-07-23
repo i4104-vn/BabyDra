@@ -3,29 +3,32 @@
 use gtk4::prelude::*;
 
 pub fn build_vpn_ui() -> (gtk4::Box, gtk4::Button, gtk4::ListBox) {
-    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 12);
+    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 20);
 
-    let header_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-    let title_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    let title_lbl = babydra_utils::components::create_title("VPN & Mạng ảo");
-    title_lbl.add_css_class("settings-title-label");
-    title_box.append(&title_lbl);
+    // Breadcrumb Header (Network & internet > VPN)
+    let breadcrumb_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+    breadcrumb_box.set_margin_bottom(4);
 
-    let spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    spacer.set_hexpand(true);
-    title_box.append(&spacer);
+    let bc_parent = gtk4::Label::new(Some("Network & internet"));
+    bc_parent.add_css_class("settings-breadcrumb-parent");
+    let bc_arrow = gtk4::Label::new(Some("›"));
+    bc_arrow.add_css_class("settings-breadcrumb-arrow");
+    let bc_current = gtk4::Label::new(Some("VPN"));
+    bc_current.add_css_class("settings-breadcrumb-current");
+
+    breadcrumb_box.append(&bc_parent);
+    breadcrumb_box.append(&bc_arrow);
+    breadcrumb_box.append(&bc_current);
+
+    let spacer_bc = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    spacer_bc.set_hexpand(true);
+    breadcrumb_box.append(&spacer_bc);
 
     let import_btn = babydra_utils::components::create_accent_button("Nhập file cấu hình");
     import_btn.set_valign(gtk4::Align::Center);
-    title_box.append(&import_btn);
-    header_box.append(&title_box);
+    breadcrumb_box.append(&import_btn);
 
-    let desc_lbl = gtk4::Label::new(Some("Quản lý các đường truyền bảo mật VPN và WireGuard/OpenVPN"));
-    desc_lbl.add_css_class("settings-row-desc");
-    desc_lbl.set_halign(gtk4::Align::Start);
-    header_box.append(&desc_lbl);
-
-    main_box.append(&header_box);
+    main_box.append(&breadcrumb_box);
 
     let list_title = gtk4::Label::new(Some("DANH SÁCH MẠNG VPN KHẢ DỤNG"));
     list_title.add_css_class("settings-section-title");

@@ -3,19 +3,24 @@
 use gtk4::prelude::*;
 
 pub fn build_wifi_ui() -> (gtk4::Box, gtk4::Switch, gtk4::ListBox) {
-    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 12);
+    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 20);
 
-    let header_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-    let title_lbl = babydra_utils::components::create_title("Wi-Fi & Mạng");
-    title_lbl.add_css_class("settings-title-label");
+    // Breadcrumb Header (Network & internet > Wi-Fi)
+    let breadcrumb_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+    breadcrumb_box.set_margin_bottom(4);
 
-    let desc_lbl = gtk4::Label::new(Some("Quản lý kết nối mạng không dây và danh sách các mạng xung quanh"));
-    desc_lbl.add_css_class("settings-row-desc");
-    desc_lbl.set_halign(gtk4::Align::Start);
+    let bc_parent = gtk4::Label::new(Some("Network & internet"));
+    bc_parent.add_css_class("settings-breadcrumb-parent");
+    let bc_arrow = gtk4::Label::new(Some("›"));
+    bc_arrow.add_css_class("settings-breadcrumb-arrow");
+    let bc_current = gtk4::Label::new(Some("Wi-Fi"));
+    bc_current.add_css_class("settings-breadcrumb-current");
 
-    header_box.append(&title_lbl);
-    header_box.append(&desc_lbl);
-    main_box.append(&header_box);
+    breadcrumb_box.append(&bc_parent);
+    breadcrumb_box.append(&bc_arrow);
+    breadcrumb_box.append(&bc_current);
+    breadcrumb_box.set_halign(gtk4::Align::Start);
+    main_box.append(&breadcrumb_box);
 
     // Switch Card ListBox
     let switch_listbox = gtk4::ListBox::new();
@@ -26,12 +31,10 @@ pub fn build_wifi_ui() -> (gtk4::Box, gtk4::Switch, gtk4::ListBox) {
     row.add_css_class("settings-card-row");
 
     let hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    hbox.set_margin_top(12);
-    hbox.set_margin_bottom(12);
-    hbox.set_margin_start(16);
-    hbox.set_margin_end(16);
+    hbox.set_margin_top(4);
+    hbox.set_margin_bottom(4);
 
-    let icon = babydra_utils::ui::icon::get_icon("wifi", 16);
+    let icon = babydra_utils::ui::icon::get_icon("wifi", 18);
     icon.set_valign(gtk4::Align::Center);
     icon.add_css_class("settings-row-icon");
     hbox.append(&icon);
