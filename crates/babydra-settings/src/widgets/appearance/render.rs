@@ -15,18 +15,22 @@ pub fn build_appearance_ui(
     gtk4::Button,
     gtk4::DropDown,
 ) {
-    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
+    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 18);
 
-    // Header
-    let header_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
-    let title_lbl = babydra_utils::components::create_title("Giao diện & Hình nền");
-    let desc_lbl = gtk4::Label::new(Some("Tùy chỉnh hình nền, chủ đề sáng/tối và giao diện ứng dụng"));
-    desc_lbl.add_css_class("settings-row-desc");
-    desc_lbl.set_halign(gtk4::Align::Start);
+    // Breadcrumb Header (System > Personalization)
+    let breadcrumb_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+    let bc_parent = gtk4::Label::new(Some("System"));
+    bc_parent.add_css_class("settings-breadcrumb-parent");
+    let bc_arrow = gtk4::Label::new(Some("›"));
+    bc_arrow.add_css_class("settings-breadcrumb-arrow");
+    let bc_current = gtk4::Label::new(Some("Personalization"));
+    bc_current.add_css_class("settings-breadcrumb-current");
 
-    header_box.append(&title_lbl);
-    header_box.append(&desc_lbl);
-    main_box.append(&header_box);
+    breadcrumb_box.append(&bc_parent);
+    breadcrumb_box.append(&bc_arrow);
+    breadcrumb_box.append(&bc_current);
+    breadcrumb_box.set_halign(gtk4::Align::Start);
+    main_box.append(&breadcrumb_box);
 
     // ── Section 1: System Theme Mode (Light / Dark Cards) ─────
     let theme_section_lbl = gtk4::Label::new(Some("CHỦ ĐỀ HỆ THỐNG"));
