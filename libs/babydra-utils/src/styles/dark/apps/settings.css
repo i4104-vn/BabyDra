@@ -1,67 +1,19 @@
-/* Settings Dark Mode stylesheet - Synchronized with explore settings_dialog */
+/* Settings Dark Mode stylesheet - Fully compliant GTK4 CSS */
 
 window.settings-window {
     background-color: rgba(22, 22, 26, 0.97);
     background-image: none;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     color: #e8e8e8;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45),
-                0 2px 8px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-top: 1px solid rgba(255, 255, 255, 0.14);
 }
 
 window.settings-window > overlay > box {
     background-color: transparent;
 }
 
-/* ── Settings Capsule Navigation (Vertical Icon-Only) ──────────── */
-.settings-capsule-nav-vertical {
-    background-color: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 9999px;
-    padding: 6px 5px;
-}
-
-button.settings-pill {
-    background-color: transparent;
-    background-image: none;
-    border: none;
-    box-shadow: none;
-    color: rgba(255, 255, 255, 0.50);
-    border-radius: 9999px;
-    padding: 10px;
-    min-width: 22px;
-    min-height: 22px;
-    font-size: 12px;
-    font-weight: 600;
-    transition: background-color 180ms ease, color 180ms ease;
-    transform: none;
-}
-
-button.settings-pill:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-    border: none;
-    color: rgba(255, 255, 255, 0.85);
-    transform: none;
-}
-
-button.settings-pill.active-pill {
-    background-color: rgba(59, 130, 246, 0.20);
-    border: none;
-    color: #60a5fa;
-    box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.25);
-    transform: none;
-}
-
-button.settings-pill.active-pill:hover {
-    background-color: rgba(59, 130, 246, 0.28);
-    border: none;
-    color: #93c5fd;
-    transform: none;
-}
-
-/* ── Text Labels ──────────────────────────────────────────────── */
+/* ── Content & Labels ─────────────────────────────────────────── */
 .settings-content {
     background-color: transparent;
     padding: 16px 20px;
@@ -72,7 +24,6 @@ button.settings-pill.active-pill:hover {
     font-weight: 700;
     color: #f4f4f5;
     margin-bottom: 2px;
-    letter-spacing: 0.01em;
 }
 
 .settings-section-title {
@@ -81,20 +32,18 @@ button.settings-pill.active-pill:hover {
     color: #a1a1aa;
     margin-top: 14px;
     margin-bottom: 6px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .settings-row-title {
     font-size: 13px;
     font-weight: 500;
     color: #e4e4e7;
-    letter-spacing: 0.01em;
 }
 
 .settings-row-desc {
     font-size: 11px;
-    color: #71717a;
+    color: #8e8e93;
 }
 
 .settings-row-icon {
@@ -105,7 +54,6 @@ button.settings-pill.active-pill:hover {
 .settings-card {
     background-color: rgba(255, 255, 255, 0.035);
     border: 1px solid rgba(255, 255, 255, 0.07);
-    border-top: 1px solid rgba(255, 255, 255, 0.10);
     border-radius: 14px;
     padding: 2px;
 }
@@ -118,9 +66,7 @@ button.settings-pill.active-pill:hover {
 .settings-card-row {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     background: transparent;
-    background-color: transparent;
-    border-radius: 0;
-    transition: background-color 120ms ease;
+    transition: background-color 150ms ease;
 }
 
 .settings-card row:first-child,
@@ -153,14 +99,13 @@ button.settings-pill.active-pill:hover {
     padding: 4px 12px;
     font-size: 11px;
     font-weight: 600;
-    transition: all 150ms ease;
+    transition: background-color 150ms ease;
 }
 
 .connect-pill-btn:hover {
     background-color: #3b82f6;
     border-color: #3b82f6;
     color: #ffffff;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
 }
 
 .connected-pill {
@@ -178,17 +123,12 @@ button.settings-pill.active-pill:hover {
 
 /* Wallpaper Preview Frame */
 .wallpaper-preview-frame {
-    border-radius: 16px;
+    border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.10);
-    background: linear-gradient(135deg, rgba(30, 27, 75, 0.8) 0%, rgba(49, 46, 129, 0.8) 50%, rgba(67, 56, 202, 0.8) 100%);
-    overflow: hidden;
-    color: rgba(255, 255, 255, 0.70);
+    background-color: rgba(255, 255, 255, 0.04);
 }
 
-button.choose-file-card,
-button.choose-file-card:hover,
-button.choose-file-card:focus,
-button.choose-file-card:active,
+/* Theme Option Cards */
 button.theme-option-card,
 button.theme-option-card:hover,
 button.theme-option-card:focus,
@@ -199,32 +139,17 @@ button.theme-option-card:active {
     border-image: none;
 }
 
-button.choose-file-card {
-    background-color: rgba(255, 255, 255, 0.035);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 16px;
-    transition: background-color 200ms ease, border-color 200ms ease;
-    color: rgba(255, 255, 255, 0.90);
-}
-
-button.choose-file-card:hover {
-    background-color: rgba(255, 255, 255, 0.07);
-    border-color: rgba(255, 255, 255, 0.16);
-}
-
 button.theme-option-card {
-    background-color: rgba(255, 255, 255, 0.035);
+    background-color: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    padding: 10px 14px;
-    margin-bottom: 4px;
-    transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+    border-radius: 10px;
+    padding: 10px 16px;
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
     color: rgba(255, 255, 255, 0.70);
 }
 
 button.theme-option-card:hover {
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: rgba(255, 255, 255, 0.07);
     border-color: rgba(255, 255, 255, 0.14);
     color: #ffffff;
 }
@@ -238,58 +163,6 @@ button.theme-option-card.active {
 button.theme-option-card.active label,
 button.theme-option-card.active image {
     color: #60a5fa;
-}
-
-.settings-row-item {
-    padding: 10px 14px;
-    border-radius: 12px;
-    background-color: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-/* ── Card Icon Wrapper & Badges ──────────────────────────────── */
-.card-icon-wrapper,
-.sidebar-icon-badge {
-    border-radius: 12px;
-    padding: 8px;
-    min-width: 38px;
-    min-height: 38px;
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    transition: background-color 200ms ease;
-}
-
-.card-icon-wrapper image,
-.sidebar-icon-badge image {
-    -gtk-icon-size: 20px;
-}
-
-.card-icon-wrapper.badge-blue,
-.sidebar-icon-badge.badge-blue {
-    background-color: rgba(59, 130, 246, 0.14);
-    border: 1px solid rgba(59, 130, 246, 0.30);
-    color: #60a5fa;
-}
-
-.card-icon-wrapper.badge-indigo,
-.sidebar-icon-badge.badge-indigo {
-    background-color: rgba(99, 102, 241, 0.14);
-    border: 1px solid rgba(99, 102, 241, 0.30);
-    color: #818cf8;
-}
-
-.card-icon-wrapper.badge-emerald,
-.sidebar-icon-badge.badge-emerald {
-    background-color: rgba(16, 185, 129, 0.14);
-    border: 1px solid rgba(16, 185, 129, 0.30);
-    color: #34d399;
-}
-
-.card-icon-wrapper.badge-pink,
-.sidebar-icon-badge.badge-pink {
-    background-color: rgba(244, 114, 182, 0.14);
-    border: 1px solid rgba(244, 114, 182, 0.30);
-    color: #f472b6;
 }
 
 dropdown,
@@ -314,15 +187,14 @@ dropdown button:hover {
 .os-logo {
     background-color: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
+    border-radius: 14px;
     padding: 8px;
 }
 
 .hero-hostname {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
     color: #ffffff;
-    letter-spacing: -0.3px;
 }
 
 progressbar.disk-progress trough {

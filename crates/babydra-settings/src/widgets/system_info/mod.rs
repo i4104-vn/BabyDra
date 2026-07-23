@@ -1,6 +1,5 @@
 //! System specifications overview and update tab.
 
-use gtk4::prelude::*;
 use std::process::Command;
 use sysinfo::System;
 
