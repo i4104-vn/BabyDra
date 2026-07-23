@@ -61,6 +61,12 @@ window.settings-window > overlay > box {
     color: #ffffff;
 }
 
+.settings-group-header-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+}
+
 .settings-title-label {
     font-size: 20px;
     font-weight: 700;
@@ -97,7 +103,7 @@ window.settings-window > overlay > box {
     background-color: rgba(255, 255, 255, 0.035);
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 12px;
-    padding: 16px 20px;
+    padding: 20px 24px;
 }
 
 .settings-card list {
@@ -136,9 +142,9 @@ window.settings-window > overlay > box {
 .connect-pill-btn {
     background-color: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 9999px;
+    border-radius: 8px;
     color: #ffffff;
-    padding: 6px 16px;
+    padding: 8px 18px;
     font-size: 12px;
     font-weight: 500;
     transition: background-color 200ms ease, border-color 200ms ease;
