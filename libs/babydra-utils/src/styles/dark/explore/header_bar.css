@@ -166,7 +166,8 @@
     color: #e8e8e8;
     padding: 3px 8px;
     font-size: 12px;
-    min-width: 200px;
+    min-width: 80px;
+    max-width: 150px;
     transition: border-color 0.15s ease;
 }
 

@@ -49,6 +49,22 @@ pub fn update_content_view(handle: &ContentViewHandle, entries: &[FileEntry], cu
     super::rendering::renderer::update_content_view_ui(handle);
 }
 
+/// Updates files in view area silently without resetting progress bar or layout flash.
+pub fn update_content_view_silent(handle: &ContentViewHandle, entries: &[FileEntry], current_path: PathBuf) {
+    let sort = handle.sort_mode.borrow().clone();
+    let mode = handle.current_mode.borrow().clone();
+    
+    let mut sorted = entries.to_vec();
+    sort_entries(&mut sorted, &sort);
+    handle.all_entries.replace(sorted.clone());
+    handle.entries.replace(sorted.clone());
+    handle.current_path.replace(current_path);
+
+    handle.widgets.stack.set_visible_child_name(&mode);
+
+    super::rendering::renderer::update_content_view_ui_silent(handle);
+}
+
 /// Filters content files list.
 pub fn filter_content_view(handle: &ContentViewHandle, query: &str) {
     let sort = handle.sort_mode.borrow().clone();

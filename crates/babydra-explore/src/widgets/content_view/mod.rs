@@ -11,8 +11,8 @@ mod gestures;
 mod rendering;
 mod actions;
 
-pub use rendering::renderer::update_content_view_ui;
-pub use actions::{set_content_view_mode, set_content_view_sort, update_content_view, filter_content_view};
+pub use rendering::renderer::{update_content_view_ui, update_content_view_ui_silent};
+pub use actions::{set_content_view_mode, set_content_view_sort, update_content_view, update_content_view_silent, filter_content_view};
 
 /// Creates the content view area widgets and returns the scroll container and ContentViewHandle state handle.
 pub fn create_content_view(

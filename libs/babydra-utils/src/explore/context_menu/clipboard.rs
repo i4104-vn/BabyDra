@@ -92,6 +92,9 @@ pub fn execute_paste(
     }
 }
 
+use babydra_common::i18n::t;
+use gtk4::{Window, Box, Orientation, Label, ProgressBar, Align};
+
 fn perform_execute_paste(
     sources: Vec<PathBuf>,
     dest_dir: PathBuf,
@@ -99,12 +102,65 @@ fn perform_execute_paste(
     current_path: PathBuf,
     nav_callback: Rc<dyn Fn(PathBuf)>,
 ) {
+    if sources.is_empty() {
+        return;
+    }
+
+    let title_str = if is_cut { t("explore.moving_title") } else { t("explore.copying_title") };
+
+    let dialog = Window::builder()
+        .title(&title_str)
+        .modal(false)
+        .resizable(false)
+        .default_width(400)
+        .default_height(120)
+        .css_classes(vec!["explore-dialog".to_string()])
+        .build();
+
+    let vbox = Box::new(Orientation::Vertical, 10);
+    vbox.set_margin_top(16);
+    vbox.set_margin_bottom(16);
+    vbox.set_margin_start(16);
+    vbox.set_margin_end(16);
+    dialog.set_child(Some(&vbox));
+
+    let lbl_status = Label::builder()
+        .label(&title_str)
+        .halign(Align::Start)
+        .css_classes(vec!["settings-row-title".to_string()])
+        .build();
+    vbox.append(&lbl_status);
+
+    let lbl_detail = Label::builder()
+        .label("")
+        .halign(Align::Start)
+        .css_classes(vec!["settings-row-desc".to_string()])
+        .build();
+    vbox.append(&lbl_detail);
+
+    let progress_bar = ProgressBar::builder()
+        .hexpand(true)
+        .fraction(0.0)
+        .css_classes(vec!["content-loading-progress".to_string()])
+        .build();
+    vbox.append(&progress_bar);
+
+    dialog.present();
+
+    let dialog_c = dialog.clone();
     glib::spawn_future_local(async move {
+        let total = sources.len();
         let mut all_success = true;
         let mut destinations = Vec::new();
         let mut actual_sources = Vec::new();
-        for src in sources {
+
+        for (idx, src) in sources.into_iter().enumerate() {
             if let Some(filename) = src.file_name() {
+                let name_str = filename.to_string_lossy();
+                lbl_detail.set_text(&format!("{} ({}/{})", name_str, idx + 1, total));
+                let fraction = (idx + 1) as f64 / total as f64;
+                progress_bar.set_fraction(fraction);
+
                 let dest = dest_dir.join(filename);
                 if is_cut {
                     if let Err(e) = babydra_common::move_path(src.clone(), dest.clone()).await {
@@ -124,6 +180,7 @@ fn perform_execute_paste(
                     }
                 }
             }
+            glib::timeout_future(std::time::Duration::from_millis(5)).await;
         }
 
         if all_success && (!destinations.is_empty()) {
@@ -142,6 +199,8 @@ fn perform_execute_paste(
             let _ = display.clipboard().set_content(None::<&gtk4::gdk::ContentProvider>);
             apply_cut_dimming_global(&[]);
         }
+
+        dialog_c.close();
         nav_callback(current_path);
     });
 }

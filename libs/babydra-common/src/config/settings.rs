@@ -68,19 +68,18 @@ pub fn save_explore_settings(settings: &ExploreSettings) {
     let dir = super::get_babydra_config_dir();
     let path = dir.join("explore.json");
 
+    let _ = std::fs::create_dir_all(&dir);
+
     #[cfg(unix)]
     {
+        use std::os::unix::fs::PermissionsExt;
         if dir.exists() {
-            use std::os::unix::fs::PermissionsExt;
-            let _ = std::fs::set_permissions(&dir, std::fs::Permissions::from_mode(0o700));
+            let _ = std::fs::set_permissions(&dir, std::fs::Permissions::from_mode(0o755));
         }
         if path.exists() {
-            use std::os::unix::fs::PermissionsExt;
-            let _ = std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o600));
+            let _ = std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o644));
         }
     }
-
-    let _ = std::fs::create_dir_all(&dir);
 
     if let Ok(content) = serde_json::to_string_pretty(settings) {
         let _ = std::fs::write(&path, content);
@@ -89,7 +88,11 @@ pub fn save_explore_settings(settings: &ExploreSettings) {
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
-        let _ = std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o400));
-        let _ = std::fs::set_permissions(&dir, std::fs::Permissions::from_mode(0o500));
+        if dir.exists() {
+            let _ = std::fs::set_permissions(&dir, std::fs::Permissions::from_mode(0o755));
+        }
+        if path.exists() {
+            let _ = std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o644));
+        }
     }
 }

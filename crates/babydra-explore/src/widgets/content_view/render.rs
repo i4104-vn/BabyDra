@@ -121,7 +121,7 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
         .primary_icon_name("system-search-symbolic")
         .css_classes(vec!["search-entry".to_string()])
         .build();
-    search.set_size_request(120, -1);
+    search.set_size_request(80, -1);
     search.set_hexpand(false);
     pane_nav_row.append(&search);
 

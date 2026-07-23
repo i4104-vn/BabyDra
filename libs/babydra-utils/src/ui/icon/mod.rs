@@ -64,6 +64,8 @@ fn load_icon_image_data(img: &gtk4::Image, name: &str, size: i32) {
         ("download", true) | ("document-save-symbolic", true) => Some(LIGHT_DOWNLOAD_SVG),
         ("ethernet", false) => Some(DARK_ETHERNET_SVG),
         ("ethernet", true) => Some(LIGHT_ETHERNET_SVG),
+        ("external-link", false) | ("external-link-symbolic", false) | ("window-new-symbolic", false) => Some(DARK_EXTERNAL_LINK_SVG),
+        ("external-link", true) | ("external-link-symbolic", true) | ("window-new-symbolic", true) => Some(LIGHT_EXTERNAL_LINK_SVG),
         ("folder", false) => Some(DARK_FOLDER_SVG),
         ("folder", true) => Some(LIGHT_FOLDER_SVG),
         ("gsconnect", false) => Some(DARK_GSCONNECT_SVG),
