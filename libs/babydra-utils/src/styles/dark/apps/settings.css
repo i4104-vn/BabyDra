@@ -1,4 +1,4 @@
-/* Settings Dark Mode stylesheet - Synchronized with design_tokens.md */
+/* Settings Dark Mode stylesheet - Generous Padding & Spacing */
 
 window.settings-window {
     background-color: rgba(14, 14, 18, 0.96);
@@ -28,7 +28,7 @@ window.settings-window > overlay > box {
     border-radius: 8px;
     color: #ffffff;
     font-size: 12px;
-    padding: 6px 10px;
+    padding: 8px 12px;
 }
 
 .sidebar-search-entry:focus,
@@ -40,7 +40,7 @@ window.settings-window > overlay > box {
 /* ── Content & Breadcrumbs ────────────────────────────────────── */
 .settings-content {
     background-color: transparent;
-    padding: 24px 28px;
+    padding: 28px 36px;
 }
 
 .settings-breadcrumb-parent {
@@ -62,7 +62,7 @@ window.settings-window > overlay > box {
 }
 
 .settings-group-header-title {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.95);
 }
@@ -71,15 +71,15 @@ window.settings-window > overlay > box {
     font-size: 20px;
     font-weight: 700;
     color: #ffffff;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
 }
 
 .settings-section-title {
     font-size: 11px;
     font-weight: 700;
     color: rgba(255, 255, 255, 0.50);
-    margin-top: 16px;
-    margin-bottom: 8px;
+    margin-top: 20px;
+    margin-bottom: 10px;
     letter-spacing: 0.6px;
 }
 
@@ -102,8 +102,8 @@ window.settings-window > overlay > box {
 .settings-card {
     background-color: rgba(255, 255, 255, 0.035);
     border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 12px;
-    padding: 20px 24px;
+    border-radius: 14px;
+    padding: 24px 28px;
 }
 
 .settings-card list {
@@ -144,8 +144,8 @@ window.settings-window > overlay > box {
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 8px;
     color: #ffffff;
-    padding: 8px 18px;
-    font-size: 12px;
+    padding: 10px 20px;
+    font-size: 13px;
     font-weight: 500;
     transition: background-color 200ms ease, border-color 200ms ease;
 }
@@ -159,7 +159,7 @@ window.settings-window > overlay > box {
     background-color: rgba(16, 185, 129, 0.12);
     border: 1px solid rgba(16, 185, 129, 0.30);
     border-radius: 9999px;
-    padding: 3px 10px;
+    padding: 4px 12px;
 }
 
 .connected-text {
@@ -190,7 +190,7 @@ button.theme-option-card {
     background-color: rgba(255, 255, 255, 0.035);
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 10px;
-    padding: 12px 16px;
+    padding: 14px 20px;
     transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
     color: rgba(255, 255, 255, 0.70);
 }
@@ -219,7 +219,7 @@ dropdown button {
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 8px;
     color: #ffffff;
-    padding: 5px 12px;
+    padding: 6px 14px;
     box-shadow: none;
     transition: background-color 200ms ease, border-color 200ms ease;
 }
@@ -230,16 +230,16 @@ dropdown button:hover {
     border-color: rgba(255, 255, 255, 0.20);
 }
 
-/* System Info */
+/* System Info OS Logo Badge */
 .os-logo {
-    background-color: rgba(255, 255, 255, 0.035);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 12px;
-    padding: 8px;
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 12px 14px;
 }
 
 .hero-hostname {
-    font-size: 18px;
+    font-size: 19px;
     font-weight: 700;
     color: #ffffff;
 }

@@ -12,10 +12,12 @@ pub fn build_system_ui(
     disk_text: &str,
     _disk_percent: f64,
 ) -> gtk4::Box {
-    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 20);
+    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 24);
 
     // Breadcrumb Header (System > About)
     let breadcrumb_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+    breadcrumb_box.set_margin_bottom(4);
+
     let bc_parent = gtk4::Label::new(Some("System"));
     bc_parent.add_css_class("settings-breadcrumb-parent");
     let bc_arrow = gtk4::Label::new(Some("›"));
@@ -30,14 +32,19 @@ pub fn build_system_ui(
     main_box.append(&breadcrumb_box);
 
     // ── Card 1: Top Host Header Card ───────────────────────────
-    let host_card = babydra_utils::components::create_card(gtk4::Orientation::Horizontal, 16);
+    let host_card = babydra_utils::components::create_card(gtk4::Orientation::Horizontal, 20);
     host_card.add_css_class("settings-card");
+
+    let logo_container = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    logo_container.add_css_class("os-logo");
+    logo_container.set_valign(gtk4::Align::Center);
 
     let logo_img = babydra_utils::ui::icon::get_icon("logo", 48);
     logo_img.set_pixel_size(48);
     logo_img.set_valign(gtk4::Align::Center);
     logo_img.set_halign(gtk4::Align::Center);
-    host_card.append(&logo_img);
+    logo_container.append(&logo_img);
+    host_card.append(&logo_container);
 
     let host_info_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
     host_info_box.set_hexpand(true);
@@ -67,8 +74,9 @@ pub fn build_system_ui(
     dev_group_card.add_css_class("settings-card");
 
     // Group Header Row
-    let dev_header_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
-    dev_header_row.set_margin_bottom(14);
+    let dev_header_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+    dev_header_row.set_margin_top(2);
+    dev_header_row.set_margin_bottom(18);
 
     let dev_icon = babydra_utils::ui::icon::get_icon("info", 20);
     dev_icon.set_valign(gtk4::Align::Center);
@@ -83,11 +91,12 @@ pub fn build_system_ui(
 
     dev_group_card.append(&dev_header_row);
 
-    // Device Specs Grid (Key-Value aligned)
+    // Device Specs Grid (Key-Value aligned with generous padding & spacing)
     let dev_specs_grid = gtk4::Grid::new();
-    dev_specs_grid.set_column_spacing(36);
-    dev_specs_grid.set_row_spacing(10);
-    dev_specs_grid.set_margin_start(30);
+    dev_specs_grid.set_column_spacing(48);
+    dev_specs_grid.set_row_spacing(14);
+    dev_specs_grid.set_margin_start(32);
+    dev_specs_grid.set_margin_bottom(8);
 
     let dev_rows = [
         ("Device name", hostname.to_string()),
@@ -122,8 +131,9 @@ pub fn build_system_ui(
     os_group_card.add_css_class("settings-card");
 
     // Group Header Row
-    let os_header_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
-    os_header_row.set_margin_bottom(14);
+    let os_header_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+    os_header_row.set_margin_top(2);
+    os_header_row.set_margin_bottom(18);
 
     let os_icon = babydra_utils::ui::icon::get_icon("display", 20);
     os_icon.set_valign(gtk4::Align::Center);
@@ -140,9 +150,10 @@ pub fn build_system_ui(
 
     // OS Specs Grid
     let os_specs_grid = gtk4::Grid::new();
-    os_specs_grid.set_column_spacing(36);
-    os_specs_grid.set_row_spacing(10);
-    os_specs_grid.set_margin_start(30);
+    os_specs_grid.set_column_spacing(48);
+    os_specs_grid.set_row_spacing(14);
+    os_specs_grid.set_margin_start(32);
+    os_specs_grid.set_margin_bottom(8);
 
     let os_rows = [
         ("Edition", os_name.to_string()),
