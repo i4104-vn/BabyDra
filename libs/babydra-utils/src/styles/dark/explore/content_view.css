@@ -150,6 +150,11 @@
     font-size: 12px;
 }
 
+.explore-window .icon-padding {
+    padding-top: 12px;
+    padding-bottom: 18px;
+}
+
 /* Active split pane */
 .explore-window .active-pane {
     outline: none;

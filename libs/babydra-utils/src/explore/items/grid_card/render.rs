@@ -5,7 +5,7 @@ use babydra_common::{FileEntry, load_cropped_square_pixbuf};
 /// Builds the visual GTK layout box for a grid item card.
 pub fn build_grid_card_ui(entry: &FileEntry) -> Box {
     let item_box = Box::new(Orientation::Vertical, 4);
-    item_box.set_size_request(114, 114);
+    item_box.set_size_request(110, 110);
     item_box.set_css_classes(&["file-item"]);
     item_box.set_halign(Align::Center);
     item_box.set_valign(Align::Center);
@@ -33,7 +33,7 @@ pub fn build_grid_card_ui(entry: &FileEntry) -> Box {
         overlay.set_valign(Align::Center);
         
         let temp_icon = crate::ui::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
-        temp_icon.set_pixel_size(58);
+        temp_icon.set_pixel_size(64);
         temp_icon.set_halign(Align::Center);
         temp_icon.set_valign(Align::Center);
         
@@ -64,9 +64,11 @@ pub fn build_grid_card_ui(entry: &FileEntry) -> Box {
         });
     } else {
         let icon = crate::ui::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
-        icon.set_pixel_size(58);
+        icon.set_pixel_size(68);
         icon.set_halign(Align::Center);
         icon.set_valign(Align::Center);
+        icon.set_hexpand(true);
+        icon.add_css_class("icon-padding");
         icon_frame.append(&icon);
     };
 
