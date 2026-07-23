@@ -7,10 +7,10 @@ window.settings-window {
     color: rgba(255, 255, 255, 0.95);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
     border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 16px;
+    border-radius: 0 0 16px 16px;
 }
 
-window.settings-window > overlay > box {
+window.settings-window>overlay>box {
     background-color: transparent;
 }
 
@@ -21,8 +21,19 @@ window.settings-window > overlay > box {
     border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
+.profile-user-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.profile-separator {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+    margin: 4px 8px 8px 8px;
+}
+
 .sidebar-search-entry,
-.sidebar-search-entry > text {
+.sidebar-search-entry>text {
     background-color: rgba(255, 255, 255, 0.035);
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 8px;
@@ -32,7 +43,7 @@ window.settings-window > overlay > box {
 }
 
 .sidebar-search-entry:focus,
-.sidebar-search-entry > text:focus {
+.sidebar-search-entry>text:focus {
     border-color: #3b82f6;
     background-color: rgba(59, 130, 246, 0.06);
 }
@@ -44,13 +55,13 @@ window.settings-window > overlay > box {
 }
 
 .settings-breadcrumb-parent {
-    font-size: 18px;
-    font-weight: 600;
+    font-size: 15px;
+    font-weight: 500;
     color: rgba(255, 255, 255, 0.50);
 }
 
 .settings-breadcrumb-arrow {
-    font-size: 18px;
+    font-size: 15px;
     font-weight: 400;
     color: rgba(255, 255, 255, 0.30);
 }
@@ -101,9 +112,10 @@ window.settings-window > overlay > box {
 /* ── Settings Cards & ListBox ─────────────────────────────────── */
 .settings-card {
     background-color: rgba(255, 255, 255, 0.035);
+    -gtk-background-blur: 24;
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 14px;
-    padding: 24px 28px;
+    padding: 20px 24px;
 }
 
 .settings-card list {
@@ -142,9 +154,9 @@ window.settings-window > overlay > box {
 .connect-pill-btn {
     background-color: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 8px;
+    border-radius: 9999px;
     color: #ffffff;
-    padding: 10px 20px;
+    padding: 8px 18px;
     font-size: 13px;
     font-weight: 500;
     transition: background-color 200ms ease, border-color 200ms ease;
@@ -217,7 +229,7 @@ dropdown button {
     background-color: rgba(255, 255, 255, 0.035);
     background-image: none;
     border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 8px;
+    border-radius: 10px;
     color: #ffffff;
     padding: 6px 14px;
     box-shadow: none;
@@ -232,8 +244,8 @@ dropdown button:hover {
 
 /* System Info OS Logo Badge */
 .os-logo {
-    background-color: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background-color: transparent;
+    border: none;
     border-radius: 14px;
     padding: 12px 14px;
 }

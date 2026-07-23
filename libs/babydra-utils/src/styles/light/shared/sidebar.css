@@ -1,6 +1,7 @@
 /* ── Sidebar ─────────────────────────────────────────────────────── */
 .sidebar {
     background-color: rgba(255, 255, 255, 0.6);
+    -gtk-background-blur: 24;
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 14px;
     margin: 8px 4px 8px 8px;
@@ -27,17 +28,17 @@
     background: transparent;
     background-image: none;
     border: none;
-    border-radius: 8px;
-    padding: 6px 12px;
-    color: #444;
+    border-radius: 10px;
+    padding: 8px 12px;
+    color: rgba(28, 28, 30, 0.65);
     font-size: 13px;
     margin: 1px 6px;
     transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .sidebar-item:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-    color: #1a1a1a;
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #1c1c1e;
 }
 
 .sidebar-item.active-nav,

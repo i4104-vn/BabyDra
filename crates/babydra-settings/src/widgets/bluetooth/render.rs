@@ -31,8 +31,10 @@ pub fn build_bluetooth_ui() -> (gtk4::Box, gtk4::Switch, gtk4::ListBox) {
     row.add_css_class("settings-card-row");
 
     let hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    hbox.set_margin_top(4);
-    hbox.set_margin_bottom(4);
+    hbox.set_margin_start(16);
+    hbox.set_margin_end(16);
+    hbox.set_margin_top(8);
+    hbox.set_margin_bottom(8);
 
     let icon = babydra_utils::ui::icon::get_icon("bluetooth", 18);
     icon.set_valign(gtk4::Align::Center);

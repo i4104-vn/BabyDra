@@ -66,7 +66,7 @@ fn main() {
         user_info_box.set_valign(gtk4::Align::Center);
 
         let user_name_lbl = gtk4::Label::new(Some("admin"));
-        user_name_lbl.add_css_class("settings-row-title");
+        user_name_lbl.add_css_class("profile-user-name");
         user_name_lbl.set_halign(gtk4::Align::Start);
 
         let user_type_lbl = gtk4::Label::new(Some("Local Account"));
@@ -78,16 +78,11 @@ fn main() {
         profile_box.append(&user_info_box);
         sidebar_box.append(&profile_box);
 
-        // 2. Search Entry
-        let search_entry = gtk4::SearchEntry::new();
-        search_entry.set_placeholder_text(Some("Find a setting"));
-        search_entry.add_css_class("sidebar-search-entry");
-        search_entry.set_margin_start(10);
-        search_entry.set_margin_end(10);
-        search_entry.set_margin_bottom(6);
-        sidebar_box.append(&search_entry);
+        let profile_sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
+        profile_sep.add_css_class("profile-separator");
+        sidebar_box.append(&profile_sep);
 
-        // 3. Navigation Scrolled List
+        // 2. Navigation Scrolled List
         let sidebar_scroll = gtk4::ScrolledWindow::new();
         sidebar_scroll.set_hscrollbar_policy(gtk4::PolicyType::Never);
         sidebar_scroll.set_vexpand(true);
@@ -234,24 +229,6 @@ fn main() {
             clear5();
             btn_sys_active.add_css_class("active-nav");
             stack5.set_visible_child_name("system");
-        });
-
-        // --- Search Entry Filtering ---
-        let btn_w_s = btn_wifi.clone();
-        let btn_b_s = btn_bt.clone();
-        let btn_v_s = btn_vpn.clone();
-        let btn_a_s = btn_app.clone();
-        let btn_s_s = btn_sys.clone();
-
-        search_entry.connect_search_changed(move |entry| {
-            let query = entry.text().to_lowercase();
-            let matches = |title: &str| query.is_empty() || title.to_lowercase().contains(&query);
-
-            btn_w_s.set_visible(matches("wi-fi") || matches("mạng") || matches("wifi"));
-            btn_b_s.set_visible(matches("bluetooth") || matches("thiết bị"));
-            btn_v_s.set_visible(matches("vpn") || matches("mạng ảo") || matches("wireguard"));
-            btn_a_s.set_visible(matches("giao diện") || matches("hình nền") || matches("chủ đề") || matches("theme"));
-            btn_s_s.set_visible(matches("thông tin") || matches("hệ thống") || matches("about") || matches("system") || matches("cpu") || matches("ram"));
         });
 
         // --- Shortcuts Keyboard Controls ---
