@@ -21,7 +21,9 @@ pub fn show_for_file_normal(
     parent: &gtk4::Window,
 ) {
     // Create vertical menu buttons
+    let btn_open_new_window = create_menu_button(&t("explore.menu_open_new_window"), "external-link");
     let btn_open = create_menu_button(&t("explore.menu_open"), "folder-new");
+    let btn_copy_location = create_menu_button(&t("explore.menu_copy_location"), "copy");
     let btn_compress = create_menu_button(&t("explore.menu_compress"), "folder");
     let has_archive = target_paths.iter().any(|path| is_archive_file(path));
     let btn_decompress = if has_archive {
@@ -30,13 +32,53 @@ pub fn show_for_file_normal(
         None
     };
     let btn_refresh = create_menu_button(&t("explore.menu_refresh"), "refresh");
-    vbox.append(&btn_refresh);
 
+    vbox.append(&btn_open_new_window);
     vbox.append(&btn_open);
+    vbox.append(&btn_copy_location);
     vbox.append(&btn_compress);
     if let Some(ref btn) = btn_decompress {
         vbox.append(btn);
     }
+    vbox.append(&btn_refresh);
+
+    // Open in new window event
+    let pop_c = popover.clone();
+    let target_paths_win = target_paths.clone();
+    let current_path_win = current_path.clone();
+    btn_open_new_window.connect_clicked(move |_| {
+        pop_c.popdown();
+        let path_to_open = if let Some(dir) = target_paths_win.iter().find(|p| p.is_dir()) {
+            dir.clone()
+        } else if let Some(first) = target_paths_win.first() {
+            first.parent().unwrap_or(&current_path_win).to_path_buf()
+        } else {
+            current_path_win.clone()
+        };
+        if let Ok(exe) = std::env::current_exe() {
+            let _ = std::process::Command::new(exe).arg(&path_to_open).spawn();
+        } else {
+            let _ = std::process::Command::new("babydra-explore").arg(&path_to_open).spawn();
+        }
+    });
+
+    // Copy location event
+    let pop_c = popover.clone();
+    let target_paths_loc = target_paths.clone();
+    let current_path_loc = current_path.clone();
+    btn_copy_location.connect_clicked(move |_| {
+        pop_c.popdown();
+        let text = if target_paths_loc.is_empty() {
+            current_path_loc.to_string_lossy().to_string()
+        } else if target_paths_loc.len() == 1 {
+            target_paths_loc[0].to_string_lossy().to_string()
+        } else {
+            target_paths_loc.iter().map(|p| p.to_string_lossy().to_string()).collect::<Vec<_>>().join("\n")
+        };
+        if let Some(display) = gtk4::gdk::Display::default() {
+            display.clipboard().set_text(&text);
+        }
+    });
 
     // Create horizontal footer container & box for clipboard & file operations
     let footer_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);

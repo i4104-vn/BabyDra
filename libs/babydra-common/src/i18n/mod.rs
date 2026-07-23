@@ -250,6 +250,8 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.placeholder_ext_desc", "File extension");
 
             // Context Menu & Dialogs
+            map.insert("explore.menu_open_new_window", "Open in New Window");
+            map.insert("explore.menu_copy_location", "Copy Location");
             map.insert("explore.menu_open", "Open");
             map.insert("explore.menu_compress", "Compress...");
             map.insert("explore.menu_decompress", "Decompress");
@@ -513,6 +515,8 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.placeholder_ext_desc", "Phần mở rộng của tệp");
 
             // Context Menu & Dialogs
+            map.insert("explore.menu_open_new_window", "Mở trong cửa sổ mới");
+            map.insert("explore.menu_copy_location", "Sao chép đường dẫn");
             map.insert("explore.menu_open", "Mở");
             map.insert("explore.menu_compress", "Nén...");
             map.insert("explore.menu_decompress", "Giải nén");

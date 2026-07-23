@@ -24,11 +24,35 @@ pub fn show_for_empty(
     }
     let (popover, vbox) = create_menu_popover(parent_widget, x, y);
 
+    let btn_open_new_window = create_menu_button(&t("explore.menu_open_new_window"), "external-link");
     let btn_refresh = create_menu_button(&t("explore.menu_refresh"), "refresh");
+    let btn_copy_location = create_menu_button(&t("explore.menu_copy_location"), "copy");
     let btn_create_new = create_menu_button(&t("explore.menu_new"), "plus");
-    
+
+    vbox.append(&btn_open_new_window);
     vbox.append(&btn_refresh);
+    vbox.append(&btn_copy_location);
     vbox.append(&btn_create_new);
+
+    let pop_c = popover.clone();
+    let cur_p_win = current_path.clone();
+    btn_open_new_window.connect_clicked(move |_| {
+        pop_c.popdown();
+        if let Ok(exe) = std::env::current_exe() {
+            let _ = std::process::Command::new(exe).arg(&cur_p_win).spawn();
+        } else {
+            let _ = std::process::Command::new("babydra-explore").arg(&cur_p_win).spawn();
+        }
+    });
+
+    let pop_c = popover.clone();
+    let cur_p_loc = current_path.clone();
+    btn_copy_location.connect_clicked(move |_| {
+        pop_c.popdown();
+        if let Some(display) = gtk4::gdk::Display::default() {
+            display.clipboard().set_text(&cur_p_loc.to_string_lossy());
+        }
+    });
 
     // Sub-popover containing create options
     let sub_popover = crate::components::popovers::create_popover(&btn_create_new, gtk4::PositionType::Right, "explore-popover");
