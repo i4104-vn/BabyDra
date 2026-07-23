@@ -1,4 +1,4 @@
-//! System specifications UI layout generator.
+//! System specifications UI layout generator matching Windows 11 / Acrylic About page.
 
 use gtk4::prelude::*;
 
@@ -10,122 +10,196 @@ pub fn build_system_ui(
     gpu_info: &str,
     memory_text: &str,
     disk_text: &str,
-    disk_percent: f64,
+    _disk_percent: f64,
 ) -> gtk4::Box {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
 
-    // Header
-    let header_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
-    let title_lbl = babydra_utils::components::create_title("Thông tin Hệ thống");
-    let desc_lbl = gtk4::Label::new(Some("Xem chi tiết thông số phần cứng, dung lượng đĩa và hệ điều hành"));
-    desc_lbl.add_css_class("settings-row-desc");
-    desc_lbl.set_halign(gtk4::Align::Start);
+    // Breadcrumb Header (System > About)
+    let breadcrumb_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+    let bc_parent = gtk4::Label::new(Some("System"));
+    bc_parent.add_css_class("settings-breadcrumb-parent");
+    let bc_arrow = gtk4::Label::new(Some("›"));
+    bc_arrow.add_css_class("settings-breadcrumb-arrow");
+    let bc_current = gtk4::Label::new(Some("About"));
+    bc_current.add_css_class("settings-breadcrumb-current");
 
-    header_box.append(&title_lbl);
-    header_box.append(&desc_lbl);
-    main_box.append(&header_box);
+    breadcrumb_box.append(&bc_parent);
+    breadcrumb_box.append(&bc_arrow);
+    breadcrumb_box.append(&bc_current);
+    breadcrumb_box.set_halign(gtk4::Align::Start);
+    main_box.append(&breadcrumb_box);
 
-    // Hero Section Card (Hostname & OS Info & Disk Usage)
-    let hero_section = babydra_utils::components::create_card(gtk4::Orientation::Horizontal, 16);
-    hero_section.add_css_class("settings-card");
+    // ── Card 1: Top Host Header Card ───────────────────────────
+    let host_card = babydra_utils::components::create_card(gtk4::Orientation::Horizontal, 16);
+    host_card.add_css_class("settings-card");
 
     let logo_container = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     logo_container.add_css_class("os-logo");
     logo_container.set_valign(gtk4::Align::Center);
     
-    let logo_img = babydra_utils::ui::icon::get_icon("logo", 48);
-    logo_img.set_pixel_size(48);
+    let logo_img = babydra_utils::ui::icon::get_icon("logo", 44);
+    logo_img.set_pixel_size(44);
     logo_img.set_valign(gtk4::Align::Center);
     logo_img.set_halign(gtk4::Align::Center);
     logo_container.append(&logo_img);
-    hero_section.append(&logo_container);
+    host_card.append(&logo_container);
 
-    let os_title_box = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
-    os_title_box.set_hexpand(true);
-    os_title_box.set_valign(gtk4::Align::Center);
+    let host_info_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
+    host_info_box.set_hexpand(true);
+    host_info_box.set_valign(gtk4::Align::Center);
 
     let hostname_lbl = gtk4::Label::new(Some(hostname));
     hostname_lbl.add_css_class("hero-hostname");
     hostname_lbl.set_halign(gtk4::Align::Start);
-    os_title_box.append(&hostname_lbl);
+    host_info_box.append(&hostname_lbl);
 
-    let disk_info_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    let os_kernel_lbl = gtk4::Label::new(Some(&format!("{} • {}", os_name, kernel_version)));
-    os_kernel_lbl.add_css_class("settings-row-desc");
-    os_kernel_lbl.set_halign(gtk4::Align::Start);
-    disk_info_row.append(&os_kernel_lbl);
+    let os_sub_lbl = gtk4::Label::new(Some(&format!("{} • {}", os_name, kernel_version)));
+    os_sub_lbl.add_css_class("settings-row-desc");
+    os_sub_lbl.set_halign(gtk4::Align::Start);
+    host_info_box.append(&os_sub_lbl);
+    host_card.append(&host_info_box);
 
-    let spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    spacer.set_hexpand(true);
-    disk_info_row.append(&spacer);
+    let rename_btn = gtk4::Button::with_label("Rename this PC");
+    rename_btn.add_css_class("connect-pill-btn");
+    rename_btn.set_valign(gtk4::Align::Center);
+    rename_btn.set_cursor_from_name(Some("pointer"));
+    host_card.append(&rename_btn);
 
-    let disk_stats_lbl = gtk4::Label::new(Some(disk_text));
-    disk_stats_lbl.add_css_class("settings-row-title");
-    disk_stats_lbl.set_halign(gtk4::Align::End);
-    disk_info_row.append(&disk_stats_lbl);
-    os_title_box.append(&disk_info_row);
+    main_box.append(&host_card);
 
-    let progress_bar = babydra_utils::components::create_disk_progress(disk_percent / 100.0, "");
-    os_title_box.append(&progress_bar);
+    // ── Card 2: Device Specifications Group Card ───────────────
+    let dev_group_card = babydra_utils::components::create_card(gtk4::Orientation::Vertical, 12);
+    dev_group_card.add_css_class("settings-card");
 
-    hero_section.append(&os_title_box);
-    main_box.append(&hero_section);
+    // Group Header Row
+    let dev_header_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+    dev_header_row.set_margin_top(4);
+    dev_header_row.set_margin_bottom(4);
 
-    // Section Title
-    let specs_title = gtk4::Label::new(Some("THÔNG SỐ PHẦN CỨNG"));
-    specs_title.add_css_class("settings-section-title");
-    specs_title.set_halign(gtk4::Align::Start);
-    main_box.append(&specs_title);
+    let dev_icon = babydra_utils::ui::icon::get_icon("info", 18);
+    dev_icon.set_valign(gtk4::Align::Center);
+    dev_icon.add_css_class("settings-row-icon");
+    dev_header_row.append(&dev_icon);
 
-    // Hardware Specs Card ListBox
-    let specs_listbox = gtk4::ListBox::new();
-    specs_listbox.set_selection_mode(gtk4::SelectionMode::None);
-    specs_listbox.add_css_class("settings-card");
+    let dev_header_title = gtk4::Label::new(Some("Device specifications"));
+    dev_header_title.add_css_class("settings-row-title");
+    dev_header_title.set_halign(gtk4::Align::Start);
+    dev_header_title.set_valign(gtk4::Align::Center);
+    dev_header_row.append(&dev_header_title);
 
-    let specs = [
-        ("performance", "Bộ vi xử lý (CPU)", cpu_model),
-        ("display", "Đồ họa (GPU)", gpu_info),
-        ("activity", "Bộ nhớ RAM", memory_text),
-        ("info", "Phiên bản Kernel", kernel_version),
+    let dev_spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    dev_spacer.set_hexpand(true);
+    dev_header_row.append(&dev_spacer);
+
+    let copy_dev_btn = gtk4::Button::with_label("Copy");
+    copy_dev_btn.add_css_class("placeholder-btn");
+    copy_dev_btn.set_valign(gtk4::Align::Center);
+    copy_dev_btn.set_cursor_from_name(Some("pointer"));
+    dev_header_row.append(&copy_dev_btn);
+
+    dev_group_card.append(&dev_header_row);
+
+    // Device Specs Grid (Key-Value aligned)
+    let dev_specs_grid = gtk4::Grid::new();
+    dev_specs_grid.set_column_spacing(24);
+    dev_specs_grid.set_row_spacing(8);
+    dev_specs_grid.set_margin_start(30);
+    dev_specs_grid.set_margin_top(4);
+    dev_specs_grid.set_margin_bottom(8);
+
+    let dev_rows = [
+        ("Device name", hostname.to_string()),
+        ("Processor", cpu_model.to_string()),
+        ("Installed RAM", memory_text.to_string()),
+        ("Graphics", gpu_info.to_string()),
+        ("Storage", disk_text.to_string()),
     ];
 
-    for (icon_name, label_text, val_text) in &specs {
-        let row = gtk4::ListBoxRow::new();
-        row.add_css_class("settings-card-row");
+    for (idx, (key, val)) in dev_rows.iter().enumerate() {
+        let key_lbl = gtk4::Label::new(Some(*key));
+        key_lbl.add_css_class("settings-row-desc");
+        key_lbl.set_halign(gtk4::Align::Start);
+        key_lbl.set_valign(gtk4::Align::Center);
 
-        let hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-        hbox.set_margin_top(10);
-        hbox.set_margin_bottom(10);
-        hbox.set_margin_start(16);
-        hbox.set_margin_end(16);
-
-        let icon = babydra_utils::ui::icon::get_icon(icon_name, 18);
-        icon.set_valign(gtk4::Align::Center);
-        icon.add_css_class("settings-row-icon");
-        hbox.append(&icon);
-
-        let lbl = gtk4::Label::new(Some(*label_text));
-        lbl.add_css_class("settings-row-title");
-        lbl.set_halign(gtk4::Align::Start);
-        lbl.set_valign(gtk4::Align::Center);
-        hbox.append(&lbl);
-
-        let spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-        spacer.set_hexpand(true);
-        hbox.append(&spacer);
-
-        let val_lbl = gtk4::Label::new(Some(*val_text));
-        val_lbl.add_css_class("settings-row-desc");
-        val_lbl.set_halign(gtk4::Align::End);
+        let val_lbl = gtk4::Label::new(Some(val));
+        val_lbl.add_css_class("settings-row-title");
+        val_lbl.set_halign(gtk4::Align::Start);
         val_lbl.set_valign(gtk4::Align::Center);
+        val_lbl.set_wrap(true);
         val_lbl.set_selectable(true);
-        hbox.append(&val_lbl);
 
-        row.set_child(Some(&hbox));
-        specs_listbox.append(&row);
+        dev_specs_grid.attach(&key_lbl, 0, idx as i32, 1, 1);
+        dev_specs_grid.attach(&val_lbl, 1, idx as i32, 1, 1);
     }
 
-    main_box.append(&specs_listbox);
+    dev_group_card.append(&dev_specs_grid);
+    main_box.append(&dev_group_card);
+
+    // ── Card 3: OS Specifications Group Card ───────────────────
+    let os_group_card = babydra_utils::components::create_card(gtk4::Orientation::Vertical, 12);
+    os_group_card.add_css_class("settings-card");
+
+    // Group Header Row
+    let os_header_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+    os_header_row.set_margin_top(4);
+    os_header_row.set_margin_bottom(4);
+
+    let os_icon = babydra_utils::ui::icon::get_icon("display", 18);
+    os_icon.set_valign(gtk4::Align::Center);
+    os_icon.add_css_class("settings-row-icon");
+    os_header_row.append(&os_icon);
+
+    let os_header_title = gtk4::Label::new(Some("Arch Linux specifications"));
+    os_header_title.add_css_class("settings-row-title");
+    os_header_title.set_halign(gtk4::Align::Start);
+    os_header_title.set_valign(gtk4::Align::Center);
+    os_header_row.append(&os_header_title);
+
+    let os_spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    os_spacer.set_hexpand(true);
+    os_header_row.append(&os_spacer);
+
+    let copy_os_btn = gtk4::Button::with_label("Copy");
+    copy_os_btn.add_css_class("placeholder-btn");
+    copy_os_btn.set_valign(gtk4::Align::Center);
+    copy_os_btn.set_cursor_from_name(Some("pointer"));
+    os_header_row.append(&copy_os_btn);
+
+    os_group_card.append(&os_header_row);
+
+    // OS Specs Grid
+    let os_specs_grid = gtk4::Grid::new();
+    os_specs_grid.set_column_spacing(24);
+    os_specs_grid.set_row_spacing(8);
+    os_specs_grid.set_margin_start(30);
+    os_specs_grid.set_margin_top(4);
+    os_specs_grid.set_margin_bottom(8);
+
+    let os_rows = [
+        ("Edition", os_name.to_string()),
+        ("Kernel version", kernel_version.to_string()),
+        ("System type", "64-bit operating system, x86_64".to_string()),
+        ("Desktop environment", "BabyDra Desktop System".to_string()),
+    ];
+
+    for (idx, (key, val)) in os_rows.iter().enumerate() {
+        let key_lbl = gtk4::Label::new(Some(*key));
+        key_lbl.add_css_class("settings-row-desc");
+        key_lbl.set_halign(gtk4::Align::Start);
+        key_lbl.set_valign(gtk4::Align::Center);
+
+        let val_lbl = gtk4::Label::new(Some(val));
+        val_lbl.add_css_class("settings-row-title");
+        val_lbl.set_halign(gtk4::Align::Start);
+        val_lbl.set_valign(gtk4::Align::Center);
+        val_lbl.set_selectable(true);
+
+        os_specs_grid.attach(&key_lbl, 0, idx as i32, 1, 1);
+        os_specs_grid.attach(&val_lbl, 1, idx as i32, 1, 1);
+    }
+
+    os_group_card.append(&os_specs_grid);
+    main_box.append(&os_group_card);
 
     main_box
 }

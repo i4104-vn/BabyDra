@@ -1,26 +1,69 @@
-/* Settings Light Mode stylesheet - Fully compliant GTK4 CSS */
+/* Settings Light Mode stylesheet - Windows 11 Acrylic Glassmorphism Theme */
 
 window.settings-window {
-    background-color: #f8f9fa;
+    background-color: rgba(248, 249, 250, 0.90);
     background-image: none;
+    -gtk-background-blur: 28;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     color: #1c1c1e;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
     border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
 }
 
 window.settings-window > overlay > box {
     background-color: transparent;
 }
 
-/* ── Content & Labels ─────────────────────────────────────────── */
+/* ── Profile Avatar & Sidebar ─────────────────────────────────── */
+.profile-avatar {
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.sidebar-search-entry,
+.sidebar-search-entry > text {
+    background-color: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    color: #1c1c1e;
+    font-size: 12px;
+    padding: 4px 8px;
+}
+
+.sidebar-search-entry:focus,
+.sidebar-search-entry > text:focus {
+    border-color: rgba(59, 130, 246, 0.5);
+    background-color: rgba(59, 130, 246, 0.04);
+}
+
+/* ── Content & Breadcrumbs ────────────────────────────────────── */
 .settings-content {
     background-color: transparent;
-    padding: 16px 20px;
+    padding: 20px 24px;
+}
+
+.settings-breadcrumb-parent {
+    font-size: 20px;
+    font-weight: 600;
+    color: rgba(28, 28, 30, 0.60);
+}
+
+.settings-breadcrumb-arrow {
+    font-size: 20px;
+    font-weight: 400;
+    color: rgba(28, 28, 30, 0.35);
+}
+
+.settings-breadcrumb-current {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1c1c1e;
 }
 
 .settings-title-label {
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 700;
     color: #1c1c1e;
     margin-bottom: 2px;
@@ -29,7 +72,7 @@ window.settings-window > overlay > box {
 .settings-section-title {
     font-size: 11px;
     font-weight: 700;
-    color: #71717a;
+    color: rgba(28, 28, 30, 0.45);
     margin-top: 14px;
     margin-bottom: 6px;
     letter-spacing: 0.5px;
@@ -42,7 +85,7 @@ window.settings-window > overlay > box {
 }
 
 .settings-row-desc {
-    font-size: 11px;
+    font-size: 12px;
     color: #71717a;
 }
 
@@ -54,8 +97,8 @@ window.settings-window > overlay > box {
 .settings-card {
     background-color: #ffffff;
     border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 14px;
-    padding: 2px;
+    border-radius: 12px;
+    padding: 12px 16px;
 }
 
 .settings-card list {
@@ -71,18 +114,18 @@ window.settings-window > overlay > box {
 
 .settings-card row:first-child,
 .settings-card-row:first-child {
-    border-radius: 12px 12px 0 0;
+    border-radius: 10px 10px 0 0;
 }
 
 .settings-card row:last-child,
 .settings-card-row:last-child {
     border-bottom: none;
-    border-radius: 0 0 12px 12px;
+    border-radius: 0 0 10px 10px;
 }
 
 .settings-card row:only-child,
 .settings-card-row:only-child {
-    border-radius: 12px;
+    border-radius: 10px;
 }
 
 .settings-card row:hover,
@@ -92,20 +135,19 @@ window.settings-window > overlay > box {
 
 /* Connect / Pill Buttons */
 .connect-pill-btn {
-    background-color: rgba(59, 130, 246, 0.10);
-    border: 1px solid rgba(59, 130, 246, 0.25);
-    border-radius: 9999px;
-    color: #2563eb;
-    padding: 4px 12px;
-    font-size: 11px;
-    font-weight: 600;
-    transition: background-color 150ms ease;
+    background-color: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    color: #1c1c1e;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    transition: background-color 150ms ease, border-color 150ms ease;
 }
 
 .connect-pill-btn:hover {
-    background-color: #3b82f6;
-    border-color: #3b82f6;
-    color: #ffffff;
+    background-color: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.14);
 }
 
 .connected-pill {
@@ -123,7 +165,7 @@ window.settings-window > overlay > box {
 
 /* Wallpaper Preview Frame */
 .wallpaper-preview-frame {
-    border-radius: 12px;
+    border-radius: 10px;
     border: 1px solid rgba(0, 0, 0, 0.08);
     background-color: rgba(0, 0, 0, 0.03);
 }
@@ -143,7 +185,7 @@ button.theme-option-card {
     background-color: #ffffff;
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 10px;
-    padding: 10px 16px;
+    padding: 12px 16px;
     transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
     color: #1c1c1e;
 }
@@ -169,9 +211,9 @@ dropdown button {
     background-color: rgba(0, 0, 0, 0.04);
     background-image: none;
     border: 1px solid rgba(0, 0, 0, 0.10);
-    border-radius: 10px;
+    border-radius: 8px;
     color: #1c1c1e;
-    padding: 4px 10px;
+    padding: 5px 12px;
     box-shadow: none;
     transition: background-color 150ms ease, border-color 150ms ease;
 }
@@ -186,12 +228,12 @@ dropdown button:hover {
 .os-logo {
     background-color: rgba(0, 0, 0, 0.04);
     border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 14px;
-    padding: 8px;
+    border-radius: 12px;
+    padding: 6px;
 }
 
 .hero-hostname {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     color: #1c1c1e;
 }
@@ -199,7 +241,7 @@ dropdown button:hover {
 progressbar.disk-progress trough {
     background-color: rgba(0, 0, 0, 0.06);
     border-radius: 6px;
-    min-height: 8px;
+    min-height: 6px;
 }
 
 progressbar.disk-progress progress {

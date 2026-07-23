@@ -30,43 +30,83 @@ fn main() {
         babydra_utils::ui::theme::init_theme();
 
         let window = gtk4::ApplicationWindow::new(app);
-        window.set_title(Some("BabyDra Settings"));
-        window.set_default_size(900, 600);
+        window.set_title(Some("Settings"));
+        window.set_default_size(960, 640);
         window.add_css_class("settings-window");
 
         let overlay = gtk4::Overlay::new();
 
-        // Main sidebar + content layout split box
+        // Main layout split box
         let main_layout = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
 
-        // ── Left: Sidebar Navigation (Explore-style) ───────────────
-        let sidebar = gtk4::ScrolledWindow::new();
-        sidebar.set_hscrollbar_policy(gtk4::PolicyType::Never);
-        sidebar.add_css_class("sidebar");
-        sidebar.set_width_request(220);
-        sidebar.set_hexpand(false);
-        sidebar.set_vexpand(true);
-        sidebar.set_margin_top(8);
-        sidebar.set_margin_bottom(8);
-        sidebar.set_margin_start(8);
+        // ── Left: Windows 11 / Acrylic Sidebar Navigation ───────────
+        let sidebar_box = gtk4::Box::new(gtk4::Orientation::Vertical, 10);
+        sidebar_box.add_css_class("sidebar");
+        sidebar_box.set_width_request(240);
+        sidebar_box.set_hexpand(false);
+        sidebar_box.set_vexpand(true);
+        sidebar_box.set_margin_top(8);
+        sidebar_box.set_margin_bottom(8);
+        sidebar_box.set_margin_start(8);
+
+        // 1. User Profile Header Box
+        let profile_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+        profile_box.set_margin_top(12);
+        profile_box.set_margin_bottom(6);
+        profile_box.set_margin_start(12);
+        profile_box.set_margin_end(12);
+
+        let avatar_img = babydra_utils::ui::icon::get_icon("user-home", 32);
+        avatar_img.set_pixel_size(32);
+        avatar_img.set_valign(gtk4::Align::Center);
+        avatar_img.add_css_class("profile-avatar");
+        profile_box.append(&avatar_img);
+
+        let user_info_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+        user_info_box.set_valign(gtk4::Align::Center);
+
+        let user_name_lbl = gtk4::Label::new(Some("admin"));
+        user_name_lbl.add_css_class("settings-row-title");
+        user_name_lbl.set_halign(gtk4::Align::Start);
+
+        let user_type_lbl = gtk4::Label::new(Some("Local Account"));
+        user_type_lbl.add_css_class("settings-row-desc");
+        user_type_lbl.set_halign(gtk4::Align::Start);
+
+        user_info_box.append(&user_name_lbl);
+        user_info_box.append(&user_type_lbl);
+        profile_box.append(&user_info_box);
+        sidebar_box.append(&profile_box);
+
+        // 2. Search Entry
+        let search_entry = gtk4::SearchEntry::new();
+        search_entry.set_placeholder_text(Some("Find a setting"));
+        search_entry.add_css_class("sidebar-search-entry");
+        search_entry.set_margin_start(10);
+        search_entry.set_margin_end(10);
+        search_entry.set_margin_bottom(6);
+        sidebar_box.append(&search_entry);
+
+        // 3. Navigation Scrolled List
+        let sidebar_scroll = gtk4::ScrolledWindow::new();
+        sidebar_scroll.set_hscrollbar_policy(gtk4::PolicyType::Never);
+        sidebar_scroll.set_vexpand(true);
 
         let nav_container = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-        nav_container.set_margin_top(4);
-        nav_container.set_margin_bottom(4);
-        sidebar.set_child(Some(&nav_container));
-        main_layout.append(&sidebar);
+        nav_container.set_margin_start(4);
+        nav_container.set_margin_end(4);
 
         let btn_wifi = babydra_utils::components::create_sidebar_item_button("Wi-Fi & Mạng", "wifi", "sidebar-item", || {});
         btn_wifi.add_css_class("active-nav");
         btn_wifi.set_cursor_from_name(Some("pointer"));
 
-        let btn_bt = babydra_utils::components::create_sidebar_item_button("Bluetooth", "bluetooth", "sidebar-item", || {});
+        let btn_bt = babydra_utils::components::create_sidebar_item_button("Bluetooth & thiết bị", "bluetooth", "sidebar-item", || {});
         btn_bt.set_cursor_from_name(Some("pointer"));
 
-        let btn_vpn = babydra_utils::components::create_sidebar_item_button("VPN & Mạng ảo", "shield", "sidebar-item", || {});
+        let btn_vpn = babydra_utils::components::create_sidebar_item_button("Mạng ảo & VPN", "shield", "sidebar-item", || {});
         btn_vpn.set_cursor_from_name(Some("pointer"));
 
-        let btn_app = babydra_utils::components::create_sidebar_item_button("Giao diện & Hình nền", "display", "sidebar-item", || {});
+        let btn_app = babydra_utils::components::create_sidebar_item_button("Giao diện & Cá nhân hóa", "display", "sidebar-item", || {});
         btn_app.set_cursor_from_name(Some("pointer"));
 
         let btn_sys = babydra_utils::components::create_sidebar_item_button("Thông tin Hệ thống", "info", "sidebar-item", || {});
@@ -78,10 +118,14 @@ fn main() {
         nav_container.append(&btn_app);
         nav_container.append(&btn_sys);
 
-        // Content Stack Panel
+        sidebar_scroll.set_child(Some(&nav_container));
+        sidebar_box.append(&sidebar_scroll);
+        main_layout.append(&sidebar_box);
+
+        // ── Right: Content Stack Panel ──────────────────────────────
         let content_stack = gtk4::Stack::new();
         content_stack.set_transition_type(gtk4::StackTransitionType::Crossfade);
-        content_stack.set_transition_duration(250);
+        content_stack.set_transition_duration(200);
         content_stack.set_hexpand(true);
         content_stack.set_vexpand(true);
         content_stack.add_css_class("settings-content");
@@ -98,7 +142,13 @@ fn main() {
         content_stack.add_named(&app_widget, Some("appearance"));
         content_stack.add_named(&sys_widget, Some("system"));
 
-        main_layout.append(&content_stack);
+        let content_scroll = gtk4::ScrolledWindow::new();
+        content_scroll.set_hscrollbar_policy(gtk4::PolicyType::Never);
+        content_scroll.set_hexpand(true);
+        content_scroll.set_vexpand(true);
+        content_scroll.set_child(Some(&content_stack));
+
+        main_layout.append(&content_scroll);
         overlay.set_child(Some(&main_layout));
 
         // --- Cheatsheet Dialog Overlay ---
@@ -184,6 +234,24 @@ fn main() {
             clear5();
             btn_sys_active.add_css_class("active-nav");
             stack5.set_visible_child_name("system");
+        });
+
+        // --- Search Entry Filtering ---
+        let btn_w_s = btn_wifi.clone();
+        let btn_b_s = btn_bt.clone();
+        let btn_v_s = btn_vpn.clone();
+        let btn_a_s = btn_app.clone();
+        let btn_s_s = btn_sys.clone();
+
+        search_entry.connect_search_changed(move |entry| {
+            let query = entry.text().to_lowercase();
+            let matches = |title: &str| query.is_empty() || title.to_lowercase().contains(&query);
+
+            btn_w_s.set_visible(matches("wi-fi") || matches("mạng") || matches("wifi"));
+            btn_b_s.set_visible(matches("bluetooth") || matches("thiết bị"));
+            btn_v_s.set_visible(matches("vpn") || matches("mạng ảo") || matches("wireguard"));
+            btn_a_s.set_visible(matches("giao diện") || matches("hình nền") || matches("chủ đề") || matches("theme"));
+            btn_s_s.set_visible(matches("thông tin") || matches("hệ thống") || matches("about") || matches("system") || matches("cpu") || matches("ram"));
         });
 
         // --- Shortcuts Keyboard Controls ---
