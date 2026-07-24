@@ -1,0 +1,203 @@
+window.settings-window {
+    background-image: none;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    border-radius: 0 0 16px 16px;
+}
+
+window.settings-window>overlay>box {
+    background-color: transparent;
+}
+
+.profile-avatar {
+    border-radius: 50%;
+}
+
+.profile-user-name {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.profile-separator {
+    margin: 4px 8px 8px 8px;
+}
+
+.sidebar-search-entry,
+.sidebar-search-entry>text {
+    border-radius: 8px;
+    font-size: 12px;
+    padding: 8px 12px;
+}
+
+.sidebar-search-entry:focus,
+.sidebar-search-entry>text:focus {
+    border-color: #3b82f6;
+}
+
+.settings-content {
+    background-color: transparent;
+    padding: 28px 36px;
+}
+
+.settings-breadcrumb-parent {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.settings-breadcrumb-arrow {
+    font-size: 15px;
+    font-weight: 400;
+}
+
+.settings-breadcrumb-current {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.settings-group-header-title {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.settings-title-label {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.settings-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    letter-spacing: 0.6px;
+}
+
+.settings-row-title {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.settings-row-desc {
+    font-size: 12px;
+}
+
+.settings-card {
+    border-radius: 14px;
+    padding: 20px 24px;
+}
+
+.settings-card list {
+    background-color: transparent;
+}
+
+.settings-card row,
+.settings-card-row {
+    background: transparent;
+    transition: background-color 200ms ease;
+}
+
+.settings-card row:first-child,
+.settings-card-row:first-child {
+    border-radius: 10px 10px 0 0;
+}
+
+.settings-card row:last-child,
+.settings-card-row:last-child {
+    border-bottom: none;
+    border-radius: 0 0 10px 10px;
+}
+
+.settings-card row:only-child,
+.settings-card-row:only-child {
+    border-radius: 10px;
+}
+
+.connect-pill-btn {
+    border-radius: 9999px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background-color 200ms ease, border-color 200ms ease;
+}
+
+.connected-pill {
+    border-radius: 9999px;
+    padding: 4px 12px;
+}
+
+.connected-text {
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.wallpaper-preview-frame {
+    border-radius: 10px;
+}
+
+button.theme-option-card,
+button.theme-option-card:hover,
+button.theme-option-card:focus,
+button.theme-option-card:active {
+    background-image: none;
+    box-shadow: none;
+    outline: none;
+    border-image: none;
+}
+
+button.theme-option-card {
+    border-radius: 10px;
+    padding: 14px 20px;
+    transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+}
+
+button.theme-option-card.active {
+    border: 1px solid #3b82f6;
+}
+
+dropdown,
+dropdown button {
+    background-image: none;
+    border-radius: 10px;
+    padding: 6px 14px;
+    box-shadow: none;
+    transition: background-color 200ms ease, border-color 200ms ease;
+}
+
+.os-logo {
+    background-color: transparent;
+    border: none;
+    border-radius: 14px;
+    padding: 12px 14px;
+}
+
+.hero-hostname {
+    font-size: 19px;
+    font-weight: 700;
+}
+
+progressbar.disk-progress trough {
+    border-radius: 6px;
+    min-height: 6px;
+}
+
+progressbar.disk-progress progress {
+    background-color: #3b82f6;
+    border-radius: 6px;
+}
+
+.cheatsheet-overlay {
+    border-radius: 18px;
+    padding: 24px;
+}
+
+.cheatsheet-title {
+    font-size: 15px;
+    font-weight: 700;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+}
+
+.cheatsheet-value {
+    font-family: monospace;
+    font-size: 13px;
+}

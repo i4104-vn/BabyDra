@@ -1,107 +1,64 @@
-/* Settings Dark Mode stylesheet - Generous Padding & Spacing */
-
 window.settings-window {
     background-color: rgba(14, 14, 18, 0.96);
-    background-image: none;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     color: rgba(255, 255, 255, 0.95);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
     border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 0 0 16px 16px;
 }
 
-window.settings-window>overlay>box {
-    background-color: transparent;
-}
-
-/* ── Profile Avatar & Sidebar ─────────────────────────────────── */
 .profile-avatar {
-    border-radius: 50%;
     background-color: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
 .profile-user-name {
-    font-size: 14px;
-    font-weight: 700;
     color: rgba(255, 255, 255, 0.95);
 }
 
 .profile-separator {
     border-bottom: 1px solid rgba(255, 255, 255, 0.10);
-    margin: 4px 8px 8px 8px;
 }
 
 .sidebar-search-entry,
 .sidebar-search-entry>text {
     background-color: rgba(255, 255, 255, 0.035);
     border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 8px;
     color: #ffffff;
-    font-size: 12px;
-    padding: 8px 12px;
 }
 
 .sidebar-search-entry:focus,
 .sidebar-search-entry>text:focus {
-    border-color: #3b82f6;
     background-color: rgba(59, 130, 246, 0.06);
 }
 
-/* ── Content & Breadcrumbs ────────────────────────────────────── */
-.settings-content {
-    background-color: transparent;
-    padding: 28px 36px;
-}
-
 .settings-breadcrumb-parent {
-    font-size: 15px;
-    font-weight: 500;
     color: rgba(255, 255, 255, 0.50);
 }
 
 .settings-breadcrumb-arrow {
-    font-size: 15px;
-    font-weight: 400;
     color: rgba(255, 255, 255, 0.30);
 }
 
 .settings-breadcrumb-current {
-    font-size: 22px;
-    font-weight: 700;
     color: #ffffff;
 }
 
 .settings-group-header-title {
-    font-size: 15px;
-    font-weight: 600;
     color: rgba(255, 255, 255, 0.95);
 }
 
 .settings-title-label {
-    font-size: 20px;
-    font-weight: 700;
     color: #ffffff;
-    margin-bottom: 4px;
 }
 
 .settings-section-title {
-    font-size: 11px;
-    font-weight: 700;
     color: rgba(255, 255, 255, 0.50);
-    margin-top: 20px;
-    margin-bottom: 10px;
-    letter-spacing: 0.6px;
 }
 
 .settings-row-title {
-    font-size: 13px;
-    font-weight: 500;
     color: rgba(255, 255, 255, 0.95);
 }
 
 .settings-row-desc {
-    font-size: 12px;
     color: rgba(255, 255, 255, 0.50);
 }
 
@@ -109,40 +66,14 @@ window.settings-window>overlay>box {
     color: rgba(255, 255, 255, 0.65);
 }
 
-/* ── Settings Cards & ListBox ─────────────────────────────────── */
 .settings-card {
     background-color: rgba(255, 255, 255, 0.035);
-    -gtk-background-blur: 24;
     border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 14px;
-    padding: 20px 24px;
-}
-
-.settings-card list {
-    background-color: transparent;
 }
 
 .settings-card row,
 .settings-card-row {
     border-bottom: 1px solid rgba(255, 255, 255, 0.10);
-    background: transparent;
-    transition: background-color 200ms ease;
-}
-
-.settings-card row:first-child,
-.settings-card-row:first-child {
-    border-radius: 10px 10px 0 0;
-}
-
-.settings-card row:last-child,
-.settings-card-row:last-child {
-    border-bottom: none;
-    border-radius: 0 0 10px 10px;
-}
-
-.settings-card row:only-child,
-.settings-card-row:only-child {
-    border-radius: 10px;
 }
 
 .settings-card row:hover,
@@ -150,16 +81,10 @@ window.settings-window>overlay>box {
     background-color: rgba(255, 255, 255, 0.08);
 }
 
-/* Connect / Pill Buttons */
 .connect-pill-btn {
     background-color: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 9999px;
     color: #ffffff;
-    padding: 8px 18px;
-    font-size: 13px;
-    font-weight: 500;
-    transition: background-color 200ms ease, border-color 200ms ease;
 }
 
 .connect-pill-btn:hover {
@@ -170,40 +95,20 @@ window.settings-window>overlay>box {
 .connected-pill {
     background-color: rgba(16, 185, 129, 0.12);
     border: 1px solid rgba(16, 185, 129, 0.30);
-    border-radius: 9999px;
-    padding: 4px 12px;
 }
 
 .connected-text {
-    font-size: 11px;
-    font-weight: 600;
     color: #34d399;
 }
 
-/* Wallpaper Preview Frame */
 .wallpaper-preview-frame {
-    border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.14);
     background-color: rgba(255, 255, 255, 0.035);
-}
-
-/* Theme Option Cards */
-button.theme-option-card,
-button.theme-option-card:hover,
-button.theme-option-card:focus,
-button.theme-option-card:active {
-    background-image: none;
-    box-shadow: none;
-    outline: none;
-    border-image: none;
 }
 
 button.theme-option-card {
     background-color: rgba(255, 255, 255, 0.035);
     border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 10px;
-    padding: 14px 20px;
-    transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
     color: rgba(255, 255, 255, 0.70);
 }
 
@@ -215,7 +120,6 @@ button.theme-option-card:hover {
 
 button.theme-option-card.active {
     background-color: rgba(59, 130, 246, 0.15);
-    border: 1px solid #3b82f6;
     color: #60a5fa;
 }
 
@@ -227,13 +131,8 @@ button.theme-option-card.active image {
 dropdown,
 dropdown button {
     background-color: rgba(255, 255, 255, 0.035);
-    background-image: none;
     border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 10px;
     color: #ffffff;
-    padding: 6px 14px;
-    box-shadow: none;
-    transition: background-color 200ms ease, border-color 200ms ease;
 }
 
 dropdown:hover,
@@ -242,51 +141,25 @@ dropdown button:hover {
     border-color: rgba(255, 255, 255, 0.20);
 }
 
-/* System Info OS Logo Badge */
-.os-logo {
-    background-color: transparent;
-    border: none;
-    border-radius: 14px;
-    padding: 12px 14px;
-}
-
 .hero-hostname {
-    font-size: 19px;
-    font-weight: 700;
     color: #ffffff;
 }
 
 progressbar.disk-progress trough {
     background-color: rgba(255, 255, 255, 0.10);
-    border-radius: 6px;
-    min-height: 6px;
 }
 
-progressbar.disk-progress progress {
-    background-color: #3b82f6;
-    border-radius: 6px;
-}
-
-/* Cheatsheet Overlay */
 .cheatsheet-overlay {
     background-color: rgba(14, 14, 18, 0.96);
     border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 18px;
-    padding: 24px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
 .cheatsheet-title {
-    font-size: 15px;
-    font-weight: 700;
     color: #ffffff;
     border-bottom: 1px solid rgba(255, 255, 255, 0.10);
-    padding-bottom: 8px;
-    margin-bottom: 16px;
 }
 
 .cheatsheet-value {
     color: rgba(255, 255, 255, 0.90);
-    font-family: monospace;
-    font-size: 13px;
 }

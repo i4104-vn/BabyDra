@@ -1,0 +1,91 @@
+button,
+.btn {
+    font-family: 'Inter', sans-serif;
+    transition: all 200ms ease;
+}
+
+button.circle-btn,
+button.icon-btn-circle {
+    background-image: none;
+    border-radius: 50%;
+    min-width: 32px;
+    min-height: 32px;
+    padding: 0;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: none;
+    transition: all 200ms ease;
+}
+
+button.circle-btn:hover,
+button.icon-btn-circle:hover {
+    box-shadow: none;
+}
+
+button.btn-primary {
+    border-radius: 9999px;
+    background-color: #3b82f6;
+    background-image: none;
+    border: none;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 8px 20px;
+    box-shadow: none;
+    transition: all 200ms ease;
+}
+
+button.btn-primary:hover {
+    background-color: #2563eb;
+    background-image: none;
+    box-shadow: none;
+}
+
+button.btn-primary:disabled,
+button.btn-primary.disabled {
+    box-shadow: none;
+}
+
+button.btn-share-pill {
+    border-radius: 9999px;
+    background-image: none;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    box-shadow: none;
+    transition: all 200ms ease;
+}
+
+button.btn-share-pill:hover {
+    box-shadow: none;
+}
+
+button.btn-upgrade-secondary {
+    border-radius: 9999px;
+    background-color: #1c1c1e;
+    background-image: none;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    box-shadow: none;
+    transition: all 200ms ease;
+}
+
+button.btn-upgrade-secondary:hover {
+    box-shadow: none;
+}
+
+.floating-icon-badge {
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    background-color: #ffffff;
+    color: #1c1c1e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+}

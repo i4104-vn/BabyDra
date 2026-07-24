@@ -1,13 +1,7 @@
 .sys-monitor-box {
-    background-color: rgb(20, 20, 26);
-    background-image: none;
+    background-color: rgba(14, 14, 18, 0.96);
     border: 1px solid rgba(255, 255, 255, 0.10);
     border-top: 1px solid rgba(255, 255, 255, 0.20);
-    border-radius: 9999px;
-    padding: 3px 12px;
-    min-height: 24px;
-    box-shadow: none;
-    transition: all 200ms ease;
 }
 
 .sys-monitor-box:hover {
@@ -15,27 +9,10 @@
     border-color: rgba(255, 255, 255, 0.14);
 }
 
-popover.sys-monitor-popover>contents {
-    padding: 14px;
-}
-
 popover.sys-monitor-popover progressbar trough {
-    min-height: 6px;
-    border-radius: 9999px;
     background-color: rgba(255, 255, 255, 0.08);
-    border: none;
-}
-
-popover.sys-monitor-popover progressbar progress {
-    border-radius: 9999px;
-    background-color: #3b82f6;
-    background-color: #3b82f6;
 }
 
 popover.sys-monitor-popover .sys-chart {
     background-color: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 10px;
-    margin-top: 6px;
-    margin-bottom: 10px;
 }

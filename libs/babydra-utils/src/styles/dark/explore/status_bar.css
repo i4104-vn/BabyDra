@@ -1,22 +1,11 @@
-/* ── Status Bar ─────────────────────────────────────────────────── */
 .explore-window .status-bar {
     background-color: rgba(0, 0, 0, 0.2);
     border-top: 1px solid #3a3a3a;
-    border-radius: 0 0 12px 12px;
-    padding: 4px 12px;
     color: #888;
-    font-size: 12px;
-    min-height: 26px;
 }
 
 .explore-window .status-bar button.status-bar-btn {
-    background: none;
-    border: none;
-    border-radius: 4px;
     color: #888888;
-    padding: 2px 6px;
-    box-shadow: none;
-    transition: all 150ms ease;
 }
 
 .explore-window .status-bar button.status-bar-btn:hover {
@@ -34,20 +23,8 @@
     color: #60a5fa;
 }
 
-.explore-window dropdown.status-bar-dropdown {
-    background: transparent;
-    border: none;
-    padding: 0;
-}
-
 .explore-window dropdown.status-bar-dropdown>button {
-    background: transparent;
-    border: none;
-    border-radius: 4px;
-    padding: 2px 6px;
     color: #888888;
-    font-size: 12px;
-    transition: all 150ms ease;
 }
 
 .explore-window dropdown.status-bar-dropdown>button:hover {
@@ -55,23 +32,6 @@
     color: #ffffff;
 }
 
-.explore-window dropdown.status-bar-dropdown>button arrow,
-.explore-window dropdown.status-bar-dropdown>button image {
-    margin: 0;
-    padding: 0;
-    min-width: 0;
-    min-height: 0;
-    opacity: 0;
-}
-
-.explore-window dropdown.status-bar-dropdown>button label {
-    margin-right: 0;
-    padding-right: 0;
-}
-
 .explore-window .status-bar-separator {
     background-color: #3a3a3a;
-    min-width: 1px;
-    margin: 4px 6px;
 }
-

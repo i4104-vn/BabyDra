@@ -1,0 +1,27 @@
+.workspace-box {
+    margin-left: 4px;
+    margin-right: 4px;
+    background-image: none;
+    border-radius: 9999px;
+    padding: 3px 8px;
+    min-height: 24px;
+    box-shadow: none;
+}
+
+button.workspace-dot {
+    background-image: none;
+    border: none;
+    border-radius: 9999px;
+    min-width: 6px;
+    min-height: 6px;
+    margin: 0px 3px;
+    padding: 0;
+    box-shadow: none;
+}
+
+button.workspace-dot.active {
+    background-color: #3b82f6;
+    min-width: 14px;
+    min-height: 6px;
+    box-shadow: none;
+}

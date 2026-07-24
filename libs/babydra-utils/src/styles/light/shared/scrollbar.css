@@ -1,37 +1,8 @@
-/* Sleek custom scrollbars for light mode */
-scrollbar {
-    background: transparent;
-    border: none;
-}
-
-scrollbar trough {
-    background-color: transparent;
-    border: none;
-}
-
 scrollbar slider {
     background-color: rgba(0, 0, 0, 0.15);
-    border: 4px solid transparent;
-    background-clip: padding-box;
-    border-radius: 10px;
-    min-width: 6px;
-    min-height: 6px;
-    transition: background-color 0.2s ease, border-width 0.2s ease;
 }
 
 scrollbar slider:hover,
 scrollbar slider:hover:active {
     background-color: rgba(0, 0, 0, 0.35);
-    border-width: 2px;
-}
-
-/* Hide scrollbar arrow buttons */
-scrollbar button {
-    min-width: 0;
-    min-height: 0;
-    opacity: 0;
-    padding: 0;
-    margin: 0;
-    border: none;
-    background: none;
 }
