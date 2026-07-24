@@ -71,4 +71,5 @@ pub mod helper {
     pub use crate::services::system::backlight;
     pub use crate::services::system::storage;
     pub use crate::services::system::clean;
+    pub use crate::services::system::network;
 }

@@ -20,7 +20,42 @@ pub fn create_status_indicators(
     calendar_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
     launcher_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
 ) -> gtk4::Box {
-    let (status_box, status_button, separator, vol_icon) = render::build_status_indicators_ui();
+    let (status_box, status_button, separator, vol_icon, net_icon) = render::build_status_indicators_ui();
+
+    // Initial update of volume & network tooltips on load
+    items::volume::update_topbar_volume_icon(&vol_icon);
+
+    let update_network_tooltip = {
+        let net_icon_c = net_icon.clone();
+        move || {
+            let (enabled, ssid) = babydra_common::helper::wifi::get_wifi_state();
+            let speed = babydra_common::helper::network::get_network_speed();
+
+            let net_tooltip = if !enabled {
+                "Network: Disabled".to_string()
+            } else if ssid == "Disconnected" || ssid == "Off" {
+                "Network: Disconnected".to_string()
+            } else {
+                format!(
+                    "Network: {}\n↓ {}   ↑ {}",
+                    ssid,
+                    babydra_common::helper::network::format_speed(speed.rx_speed),
+                    babydra_common::helper::network::format_speed(speed.tx_speed)
+                )
+            };
+            net_icon_c.set_tooltip_text(Some(&net_tooltip));
+        }
+    };
+
+    update_network_tooltip();
+
+    let vol_icon_timer = vol_icon.clone();
+    let update_net_timer = update_network_tooltip;
+    gtk4::glib::timeout_add_local(std::time::Duration::from_millis(1500), move || {
+        items::volume::update_topbar_volume_icon(&vol_icon_timer);
+        update_net_timer();
+        gtk4::glib::ControlFlow::Continue
+    });
 
     let app_clone = app.clone();
     let ccw_clone = control_center_window.clone();

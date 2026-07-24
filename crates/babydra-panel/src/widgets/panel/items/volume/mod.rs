@@ -1,4 +1,5 @@
 pub mod render;
+use gtk4::prelude::*;
 
 pub use babydra_common::helper::volume::{
     is_muted, get_current_volume, set_volume, get_audio_devices,
@@ -6,6 +7,7 @@ pub use babydra_common::helper::volume::{
 
 pub fn update_topbar_volume_icon(vol_icon: &gtk4::Image) {
     let is_m = is_muted();
+    let vol_pct = get_current_volume();
     let is_dark = babydra_utils::ui::icon::is_dark_mode();
     let svg_content = if is_m {
         if is_dark {
@@ -25,4 +27,11 @@ pub fn update_topbar_volume_icon(vol_icon: &gtk4::Image) {
     if let Some(paintable) = new_icon.paintable() {
         vol_icon.set_paintable(Some(&paintable));
     }
+
+    let tooltip = if is_m {
+        format!("Volume: Muted ({:.0}%)", vol_pct)
+    } else {
+        format!("Volume: {:.0}%", vol_pct)
+    };
+    vol_icon.set_tooltip_text(Some(&tooltip));
 }
