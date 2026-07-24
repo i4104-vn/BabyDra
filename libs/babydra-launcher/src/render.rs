@@ -101,7 +101,20 @@ pub fn build_launcher_ui(
     footer.set_margin_bottom(14);
     box_layout.append(&footer);
 
-    window.set_child(Some(&box_layout));
+    let frosted = babydra_utils::ui::blur::wrap_with_acrylic_blur(
+        &box_layout,
+        16,
+        50,
+        420,
+        600,
+        20.0,
+    );
+    frosted.set_halign(gtk4::Align::Start);
+    frosted.set_valign(gtk4::Align::Start);
+    frosted.set_margin_top(50);
+    frosted.set_margin_start(16);
+
+    window.set_child(Some(&frosted));
 
     // Apps list
     let apps = find_desktop_apps();

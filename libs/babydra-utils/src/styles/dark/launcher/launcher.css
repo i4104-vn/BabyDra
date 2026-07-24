@@ -4,8 +4,8 @@
 }
 
 .launcher-box {
-    background-color: rgba(24, 24, 28, 0.95); /* Neutral sleek dark glass */
-    border: 1px solid rgba(59, 130, 246, 0.22);
+    background-color: transparent;
+    border: none;
     border-radius: 20px;
     color: #cdd6f4;
     padding: 0px;

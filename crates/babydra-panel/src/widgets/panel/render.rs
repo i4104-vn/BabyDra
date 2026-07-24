@@ -75,13 +75,32 @@ pub fn build_control_center_window_ui(
 
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 14);
     main_box.add_css_class("control-center-box");
-    main_box.set_halign(gtk4::Align::End);
-    main_box.set_valign(gtk4::Align::Start);
-    main_box.set_size_request(360, 480);
-    main_box.set_margin_top(6);
-    main_box.set_margin_end(12);
 
-    q_win.set_child(Some(&main_box));
+    let display = gtk4::gdk::Display::default();
+    let screen_w = display
+        .as_ref()
+        .and_then(|d| d.monitors().item(0))
+        .and_then(|m| m.downcast::<gtk4::gdk::Monitor>().ok())
+        .map(|m| m.geometry().width())
+        .unwrap_or(1920);
+
+    let crop_x = screen_w - 360 - 12;
+    let crop_y = 6;
+
+    let frosted = babydra_utils::ui::blur::wrap_with_acrylic_blur(
+        &main_box,
+        crop_x,
+        crop_y,
+        360,
+        480,
+        24.0,
+    );
+    frosted.set_halign(gtk4::Align::End);
+    frosted.set_valign(gtk4::Align::Start);
+    frosted.set_margin_top(6);
+    frosted.set_margin_end(12);
+
+    q_win.set_child(Some(&frosted));
 
     (q_win, main_box)
 }
