@@ -20,7 +20,7 @@ pub fn create_status_indicators(
     calendar_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
     launcher_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
 ) -> gtk4::Box {
-    let (status_box, status_button, separator, vol_icon, net_icon) = render::build_status_indicators_ui();
+    let (status_box, status_button, separator, vol_icon, net_icon, bat_widget) = render::build_status_indicators_ui();
 
     // Initial update of volume & network tooltips on load
     items::volume::update_topbar_volume_icon(&vol_icon);
@@ -84,9 +84,17 @@ pub fn create_status_indicators(
 
     let vol_icon_timer = vol_icon.clone();
     let update_net_timer = update_network_tooltip.clone();
+    let bat_widget_timer = bat_widget.clone();
     gtk4::glib::timeout_add_local(std::time::Duration::from_millis(1500), move || {
         items::volume::update_topbar_volume_icon(&vol_icon_timer);
         update_net_timer();
+        if let Some(ref bat_area) = bat_widget_timer {
+            if let Some(info) = render::get_battery_info() {
+                let status_str = if info.is_charging { "Charging" } else { "Discharging" };
+                bat_area.set_tooltip_text(Some(&format!("Battery: {}% ({})", info.percentage, status_str)));
+                bat_area.queue_draw();
+            }
+        }
         gtk4::glib::ControlFlow::Continue
     });
 
