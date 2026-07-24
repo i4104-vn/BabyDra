@@ -81,6 +81,7 @@ button.sidebar-item.active-nav image {
     border-top: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 16px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    padding: 24px;
 }
 
 /* Blue Icon Square Badge (Matching Reference Images) */

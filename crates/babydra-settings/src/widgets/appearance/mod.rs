@@ -154,7 +154,7 @@ pub fn create_appearance_widget() -> gtk4::Box {
                 let flow = gtk4::FlowBox::new();
                 flow.set_selection_mode(gtk4::SelectionMode::None);
                 flow.set_max_children_per_line(4);
-                flow.set_min_children_per_line(2);
+                flow.set_min_children_per_line(4);
                 flow.set_column_spacing(12);
                 flow.set_row_spacing(12);
                 flow.set_homogeneous(true);
@@ -165,7 +165,7 @@ pub fn create_appearance_widget() -> gtk4::Box {
                     btn.set_cursor_from_name(Some("pointer"));
 
                     let pic = gtk4::Picture::for_filename(&wp);
-                    pic.set_size_request(120, 75);
+                    pic.set_size_request(130, 75);
                     pic.set_content_fit(gtk4::ContentFit::Cover);
 
                     btn.set_child(Some(&pic));
