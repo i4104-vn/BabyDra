@@ -25,8 +25,14 @@ pub fn set_performance_profile(profile: PerformanceProfile) {
         PerformanceProfile::HighPerformance => "performance",
     };
     
-    let cmd = format!("echo '{}' | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor 2>/dev/null || true", governor);
-    let _ = std::process::Command::new("sh").arg("-c").arg(cmd).spawn();
+    if let Ok(entries) = std::fs::read_dir("/sys/devices/system/cpu") {
+        for entry in entries.flatten() {
+            let gov_path = entry.path().join("cpufreq/scaling_governor");
+            if gov_path.exists() {
+                let _ = std::fs::write(gov_path, governor);
+            }
+        }
+    }
 }
 
 pub fn get_profile_config_path() -> std::path::PathBuf {
