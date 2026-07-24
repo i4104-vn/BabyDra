@@ -49,6 +49,29 @@ pub fn create_status_indicators(
 
     update_network_tooltip();
 
+    let scroll_controller = gtk4::EventControllerScroll::new(
+        gtk4::EventControllerScrollFlags::VERTICAL
+    );
+    let vol_icon_scroll = vol_icon.clone();
+    scroll_controller.connect_scroll(move |_, _dx, dy| {
+        let current_vol = items::volume::get_current_volume();
+        let step = 5.0;
+        let new_vol = if dy < 0.0 {
+            (current_vol + step).min(100.0)
+        } else if dy > 0.0 {
+            (current_vol - step).max(0.0)
+        } else {
+            current_vol
+        };
+
+        if (new_vol - current_vol).abs() > 0.1 {
+            items::volume::set_volume(new_vol);
+            items::volume::update_topbar_volume_icon(&vol_icon_scroll);
+        }
+        gtk4::glib::Propagation::Stop
+    });
+    status_button.add_controller(scroll_controller);
+
     let vol_icon_timer = vol_icon.clone();
     let update_net_timer = update_network_tooltip;
     gtk4::glib::timeout_add_local(std::time::Duration::from_millis(1500), move || {

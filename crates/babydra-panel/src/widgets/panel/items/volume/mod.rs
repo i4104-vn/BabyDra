@@ -9,11 +9,17 @@ pub fn update_topbar_volume_icon(vol_icon: &gtk4::Image) {
     let is_m = is_muted();
     let vol_pct = get_current_volume();
     let is_dark = babydra_utils::ui::icon::is_dark_mode();
-    let svg_content = if is_m {
+    let svg_content = if is_m || vol_pct == 0.0 {
         if is_dark {
             babydra_utils::ui::icon::DARK_VOLUME_MUTE_SVG
         } else {
             babydra_utils::ui::icon::LIGHT_VOLUME_MUTE_SVG
+        }
+    } else if vol_pct <= 45.0 {
+        if is_dark {
+            babydra_utils::ui::icon::DARK_VOLUME_LOW_SVG
+        } else {
+            babydra_utils::ui::icon::LIGHT_VOLUME_LOW_SVG
         }
     } else {
         if is_dark {
