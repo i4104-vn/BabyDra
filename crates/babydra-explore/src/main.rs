@@ -10,6 +10,7 @@ fn main() {
 
     let app = Application::builder()
         .application_id("org.babydra.explore")
+        .flags(gtk4::gio::ApplicationFlags::NON_UNIQUE)
         .build();
 
     app.connect_activate(|app| {

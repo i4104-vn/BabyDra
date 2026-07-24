@@ -1,113 +1,39 @@
-/* Light theme for Stage Manager Switcher */
-
-@keyframes switcher-window-fade {
-    from {
-        background-color: rgba(0, 0, 0, 0);
-    }
-
-    to {
-        background-color: rgba(0, 0, 0, 0.2);
-    }
-}
-
-@keyframes panel-slide-in {
-    from {
-        margin-left: -280px;
-        opacity: 0;
-    }
-
-    to {
-        margin-left: 0px;
-        opacity: 1;
-    }
-}
-
 .switcher-window {
     background-color: rgba(0, 0, 0, 0.2);
-    animation: switcher-window-fade 200ms ease-out;
-}
-
-.stage-manager-container {
-    background: transparent;
 }
 
 .stage-manager-panel {
     background-color: rgba(245, 245, 250, 0.8);
     border-right: 1px solid rgba(0, 0, 0, 0.08);
-    padding: 24px 16px;
-    min-width: 250px;
-    min-height: 1000px;
-    animation: panel-slide-in 250ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.stage-manager-list {
-    /* Container for the items */
-}
-
-/* Individual item button styling */
 .stage-manager-item-btn {
     background-color: rgba(0, 0, 0, 0.02);
     border: 2px solid rgba(0, 0, 0, 0.08);
-    border-radius: 12px;
-    padding: 0px;
-    margin-top: 6px;
-    margin-bottom: 6px;
-    margin-right: 24px;
-    margin-left: 0;
-    opacity: 0.6;
-    transition: margin-left 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
-        margin-right 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
-        opacity 150ms ease-out,
-        border-color 150ms ease-out,
-        background-color 150ms ease-out;
-    transition-delay: 50ms;
 }
 
 .stage-manager-item-btn:hover {
     background-color: rgba(0, 0, 0, 0.04);
     border-color: rgba(0, 0, 0, 0.15);
-    opacity: 0.8;
 }
 
-/* Selected item state */
 .stage-manager-item-btn.selected {
     background-color: rgba(0, 0, 0, 0.06);
-    border-color: #3498db;
-    margin-left: 24px;
-    margin-right: 0;
-    opacity: 1.0;
+    border-color: #3b82f6;
 }
 
-/* Preview image widget inside button */
-.switcher-preview-image {
-    border-radius: 10px;
-}
-
-/* Fallback placeholder */
 .switcher-item-placeholder {
     background-color: rgba(0, 0, 0, 0.03);
-    border-radius: 10px;
 }
 
-/* Icon style */
-.switcher-item-icon {
-    opacity: 0.9;
-}
-
-/* App title and container */
 .switcher-item-title-container {
     background-color: rgba(255, 255, 255, 0.75);
-    border-radius: 0 0 10px 10px;
-    padding: 4px 8px;
 }
 
 .switcher-app-title {
-    font-size: 11px;
-    font-weight: 500;
     color: rgba(0, 0, 0, 0.85);
 }
 
 .stage-manager-item-btn.selected .switcher-app-title {
     color: #000000;
-    font-weight: bold;
 }

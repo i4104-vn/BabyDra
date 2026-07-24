@@ -18,6 +18,10 @@ enum IslandState {
     ZoomingOut,
 }
 
+thread_local! {
+    pub static IS_NOTIF_HOVERED: Cell<bool> = Cell::new(false);
+}
+
 /// Starts a background timer loop that polls active D-Bus notifications and playerctl
 /// state every second. It orchestrates the Dynamic Island layout updates (compact logo,
 /// active notification, or media player) and updates their corresponding widgets.
@@ -155,11 +159,15 @@ pub fn start_player_polling_loop(
     let island_state = Rc::new(Cell::new(IslandState::Hidden));
 
     // Main thread loop to check notifications and update player view from the cached metadata
-    glib::timeout_add_local(std::time::Duration::from_millis(1000), move || {
+    glib::timeout_add_local(std::time::Duration::from_millis(100), move || {
+        let is_hovering = IS_NOTIF_HOVERED.with(|h| h.get());
         let mut active_notif = None;
         crate::widgets::notification::SHARED_NOTIFICATION.with(|sn| {
-            if let Some(ref notif) = *sn.borrow() {
-                if notif.timestamp.elapsed() < std::time::Duration::from_secs(5) {
+            if let Some(ref mut notif) = *sn.borrow_mut() {
+                if is_hovering {
+                    notif.timestamp = std::time::Instant::now();
+                    active_notif = Some(notif.clone());
+                } else if notif.timestamp.elapsed() < std::time::Duration::from_secs(5) {
                     active_notif = Some(notif.clone());
                 }
             }
@@ -270,14 +278,26 @@ pub fn start_player_polling_loop(
                     let is_playing_clone = is_playing_state.clone();
                     let latest_metadata_clone = latest_metadata.clone();
                     
+                    let cur_w = widgets.notch_capsule.width().max(300);
+                    let cur_h = widgets.notch_capsule.height().max(70);
+
+                    widgets.notification_view.set_opacity(0.0);
+
+                    let target_w = if player_active { 200 } else { 0 };
+                    let target_h = if player_active { 30 } else { 0 };
+
                     babydra_utils::ui::animation::island_animate_size(
                         widgets.notch_capsule.clone().upcast_ref(),
-                        280,
-                        200,
-                        70,
-                        30,
-                        400,
+                        cur_w,
+                        target_w,
+                        cur_h,
+                        target_h,
+                        250,
                         move || {
+                            widgets_clone.notification_view.set_visible(false);
+                            widgets_clone.notification_view.set_opacity(1.0);
+                            widgets_clone.notch_capsule.remove_css_class("notification-mode");
+
                             let metadata_fresh = latest_metadata_clone.borrow().clone();
                             let mut player_active_fresh = false;
                             if let Some(ref line) = metadata_fresh {
@@ -290,9 +310,6 @@ pub fn start_player_polling_loop(
                                 }
                             }
 
-                            widgets_clone.notification_view.set_visible(false);
-                            widgets_clone.notch_capsule.remove_css_class("notification-mode");
-
                             if player_active_fresh {
                                 state_clone.set(IslandState::PlayerActive);
                                 last_title_clone.borrow_mut().clear();
@@ -300,8 +317,10 @@ pub fn start_player_polling_loop(
                                 widgets_clone.music_view.set_visible(true);
                                 widgets_clone.visualizer_box.set_visible(true);
                             } else {
-                                state_clone.set(IslandState::ZoomingOut);
+                                state_clone.set(IslandState::Hidden);
                                 is_playing_clone.set(false);
+                                widgets_clone.notch_capsule.set_visible(false);
+                                widgets_clone.notch_capsule.remove_css_class("active-music");
                                 babydra_utils::ui::icon::set_image_from_icon(&widgets_clone.play_btn_icon, "play", 22);
                                 if let Some(child) = widgets_clone.art_container.first_child() {
                                     widgets_clone.art_container.remove(&child);
@@ -309,21 +328,6 @@ pub fn start_player_polling_loop(
                                 if let Some(child) = widgets_clone.popover_art_container.first_child() {
                                     widgets_clone.popover_art_container.remove(&child);
                                 }
-
-                                babydra_utils::ui::animation::island_zoom_out(
-                                    widgets_clone.notch_capsule.clone().upcast_ref(),
-                                    200,
-                                    500,
-                                    true,
-                                );
-                                
-                                let state_final = state_clone.clone();
-                                let notch_clone = widgets_clone.notch_capsule.clone();
-                                glib::timeout_add_local_once(std::time::Duration::from_millis(500), move || {
-                                    state_final.set(IslandState::Hidden);
-                                    notch_clone.remove_css_class("active-music");
-                                    notch_clone.remove_css_class("notification-mode");
-                                });
                             }
                         }
                     );

@@ -250,6 +250,8 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.placeholder_ext_desc", "File extension");
 
             // Context Menu & Dialogs
+            map.insert("explore.menu_open_new_window", "Open in New Window");
+            map.insert("explore.menu_copy_location", "Copy Location");
             map.insert("explore.menu_open", "Open");
             map.insert("explore.menu_compress", "Compress...");
             map.insert("explore.menu_decompress", "Decompress");
@@ -284,6 +286,8 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.decompressing_running", "Decompressing...");
             map.insert("explore.decompress_success", "Decompression Succeeded");
             map.insert("explore.decompress_failed", "Decompression Failed");
+            map.insert("explore.copying_title", "Copying Files");
+            map.insert("explore.moving_title", "Moving Files");
             map.insert("explore.menu_refresh", "Refresh");
             map.insert("explore.menu_properties", "Properties");
             map.insert("explore.dialog_properties_title", "Properties");
@@ -511,6 +515,8 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.placeholder_ext_desc", "Phần mở rộng của tệp");
 
             // Context Menu & Dialogs
+            map.insert("explore.menu_open_new_window", "Mở trong cửa sổ mới");
+            map.insert("explore.menu_copy_location", "Sao chép đường dẫn");
             map.insert("explore.menu_open", "Mở");
             map.insert("explore.menu_compress", "Nén...");
             map.insert("explore.menu_decompress", "Giải nén");
@@ -545,6 +551,8 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.decompressing_running", "Đang giải nén...");
             map.insert("explore.decompress_success", "Giải nén thành công");
             map.insert("explore.decompress_failed", "Giải nén thất bại");
+            map.insert("explore.copying_title", "Đang sao chép tập tin");
+            map.insert("explore.moving_title", "Đang di chuyển tập tin");
             map.insert("explore.menu_refresh", "Làm mới");
             map.insert("explore.menu_properties", "Thuộc tính");
             map.insert("explore.dialog_properties_title", "Thuộc tính");

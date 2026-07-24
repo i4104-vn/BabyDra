@@ -1,83 +1,49 @@
 .control-center-box {
     background-color: rgba(255, 255, 255, 0.98);
-    background-image: none;
-    -gtk-background-blur: 24;
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-top: 1px solid rgba(0, 0, 0, 0.06);
-    border-radius: 24px;
     color: rgba(28, 28, 30, 0.95);
-    padding: 20px;
-    box-shadow: none;
 }
 
 .control-center-title {
-    font-weight: 800;
     color: #1c1c1e;
-    font-size: 16px;
 }
 
 button.quick-tile {
     background-color: rgba(0, 0, 0, 0.05);
-    background-image: none;
-    border: 1px solid rgba(255, 255, 255, 0.08);
     border-top: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 14px;
     color: rgba(28, 28, 30, 0.85);
-    padding: 8px 12px;
-    box-shadow: none;
-    min-width: 120px;
-    min-height: 46px;
-    transition: all 200ms ease;
 }
 
 button.quick-tile:hover {
     background-color: rgba(0, 0, 0, 0.08);
-    background-image: none;
     border-color: rgba(0, 0, 0, 0.08);
-    box-shadow: none;
 }
 
 .tile-icon {
-    font-size: 16px;
-    margin-right: 8px;
     color: #1c1c1e;
 }
 
 .tile-title {
-    font-weight: 700;
-    font-size: 12px;
     color: #1c1c1e;
 }
 
 .tile-subtitle {
-    font-size: 10px;
     color: rgba(28, 28, 30, 0.50);
 }
 
 .tile-chevron {
-    font-size: 14px;
     color: rgba(28, 28, 30, 0.30);
-    margin-left: 4px;
 }
 
 button.quick-tile.active {
     background-color: rgba(0, 0, 0, 0.12);
-    background-image: none;
     border: 1px solid rgba(0, 0, 0, 0.18);
     border-top: 1px solid rgba(0, 0, 0, 0.26);
-    box-shadow: none;
-}
-
-button.quick-tile.active label,
-button.quick-tile.active .tile-title,
-button.quick-tile.active .tile-subtitle {
-    color: #1c1c1e !important;
 }
 
 button.quick-tile.active:hover {
     background-color: rgba(0, 0, 0, 0.18);
-    background-image: none;
-    box-shadow: none;
 }
 
 button.quick-tile.active .tile-subtitle {
@@ -88,205 +54,75 @@ button.quick-tile.active .tile-chevron {
     color: rgba(28, 28, 30, 0.60);
 }
 
-button.quick-tile.active-light {
-    background-color: rgba(255, 255, 255, 0.88);
-    background-image: none;
-    border: 1px solid rgba(255, 255, 255, 0.40);
-    box-shadow: none;
-}
-
-button.quick-tile.active-light:hover {
-    background-color: rgba(255, 255, 255, 0.95);
-    background-image: none;
-}
-
-button.quick-tile.active-light .tile-icon {
-    color: #161a26;
-}
-
-button.quick-tile.active-light .tile-title {
-    color: #161a26;
-}
-
-button.quick-tile.active-light .tile-subtitle {
-    color: rgba(22, 26, 38, 0.65);
-}
-
-button.quick-tile.active-light .tile-chevron {
-    color: rgba(22, 26, 38, 0.40);
-}
-
 .slider-label {
     color: rgba(28, 28, 30, 0.6);
-    font-size: 14px;
-    font-weight: 600;
-    min-width: 28px;
 }
 
 .slider-icon {
     color: rgba(28, 28, 30, 0.65);
-    margin: 0;
-}
-
-scale {
-    margin: 0;
-    padding: 0;
 }
 
 scale trough {
-    margin: 0;
-    padding: 0;
-    min-height: 24px;
-    border-radius: 12px;
     background-color: rgba(0, 0, 0, 0.06);
-    background-image: none;
-    border: none;
-    box-shadow: none;
-}
-
-scale trough highlight {
-    border-radius: 12px;
-    background-color: #007aff;
-    background-color: #3b82f6;
-    min-height: 24px;
-    box-shadow: none;
-}
-
-scale slider {
-    min-width: 12px;
-    min-height: 12px;
-    margin: 6px;
-    border-radius: 6px;
-    background-color: #ffffff;
-    background-image: none;
-    box-shadow: none;
-    border: none;
-    transition: background-color 200ms ease;
-}
-
-scale slider:hover {
-    background-color: #ffffff;
-    box-shadow: none;
 }
 
 .control-left-toggles-box {
     background-color: rgba(0, 0, 0, 0.03);
     border: 1px solid rgba(0, 0, 0, 0.05);
     border-top: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 16px;
-    padding: 6px;
 }
 
 button.control-tile-row {
-    background-color: transparent;
-    background-image: none;
-    border: none;
-    border-radius: 12px;
-    padding: 8px 10px;
     color: #1c1c1e;
-    box-shadow: none;
-    transition: all 150ms ease;
-    margin: 2px 0;
 }
 
 button.control-tile-row:hover {
     background-color: rgba(0, 0, 0, 0.05);
-    background-image: none;
 }
 
 .control-icon-circle {
     background-color: rgba(0, 0, 0, 0.06);
     border: 1px solid rgba(0, 0, 0, 0.05);
-    border-radius: 50%;
-    padding: 8px;
-    min-width: 14px;
-    min-height: 14px;
-    transition: all 150ms ease;
-    align-self: center;
 }
 
 .control-icon-circle.active {
-    background-color: #3b82f6;
-    background-image: none;
     border-color: rgba(0, 0, 0, 0.10);
-    box-shadow: none;
     color: #ffffff;
 }
 
 button.control-dnd-tile {
     background-color: rgba(0, 0, 0, 0.03);
-    background-image: none;
     border: 1px solid rgba(0, 0, 0, 0.05);
     border-top: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 16px;
-    padding: 10px 12px;
     color: #1c1c1e;
-    box-shadow: none;
-    transition: all 150ms ease;
 }
 
 button.control-dnd-tile:hover {
     background-color: rgba(0, 0, 0, 0.06);
-    background-image: none;
 }
 
 button.control-dnd-tile.active {
-    background-color: #3b82f6;
-    background-image: none;
     border-color: rgba(0, 0, 0, 0.10);
     color: #ffffff;
-}
-
-button.control-dnd-tile.active:hover {
-    background-color: #2563eb;
-    background-image: none;
-}
-
-button.control-dnd-tile.active .control-icon-circle {
-    background-color: rgba(255, 255, 255, 0.20);
-    background-image: none;
-    border-color: rgba(255, 255, 255, 0.30);
-    box-shadow: none;
 }
 
 button.control-square-tile {
     background-color: rgba(0, 0, 0, 0.03);
-    background-image: none;
     border: 1px solid rgba(0, 0, 0, 0.05);
     border-top: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 16px;
-    padding: 12px 6px;
     color: #1c1c1e;
-    box-shadow: none;
-    transition: all 150ms ease;
 }
 
 button.control-square-tile:hover {
     background-color: rgba(0, 0, 0, 0.06);
-    background-image: none;
 }
 
 button.control-square-tile.active {
-    background-color: #3b82f6;
-    background-image: none;
     border-color: rgba(0, 0, 0, 0.10);
     color: #ffffff;
 }
 
-button.control-square-tile.active:hover {
-    background-color: #2563eb;
-    background-image: none;
-}
-
-button.control-square-tile.active image {
-    color: #ffffff;
-}
-
 .control-square-label {
-    font-size: 10px;
-    font-weight: 600;
-    text-align: center;
-    line-height: 1.2;
     color: rgba(28, 28, 30, 0.9);
 }
 
@@ -294,95 +130,40 @@ button.control-square-tile.active image {
     background-color: rgba(0, 0, 0, 0.03);
     border: 1px solid rgba(0, 0, 0, 0.06);
     border-top: 1px solid rgba(0, 0, 0, 0.10);
-    border-radius: 18px;
-    padding: 12px 14px 10px 14px;
 }
 
 .control-slider-title {
-    font-size: 11px;
-    font-weight: 700;
     color: rgba(28, 28, 30, 0.50);
-    margin-bottom: 4px;
 }
-
-.control-slider-value {
-    font-size: 11px;
-    font-weight: 700;
-    color: #007aff;
-    margin-bottom: 2px;
-}
-
 
 .control-disk-card {
     background-color: rgba(0, 0, 0, 0.03);
     border: 1px solid rgba(0, 0, 0, 0.05);
     border-top: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 16px;
-    padding: 12px 14px;
-}
-
-.control-disk-item {
-    margin-bottom: 8px;
-}
-
-.control-disk-item:last-child {
-    margin-bottom: 0;
-}
-
-.control-disk-title-box {
-    margin-bottom: 4px;
 }
 
 .control-disk-name {
-    font-size: 11px;
-    font-weight: 700;
     color: #1c1c1e;
 }
 
 .control-disk-usage {
-    font-size: 10px;
     color: rgba(28, 28, 30, 0.50);
 }
 
 .control-disk-card progressbar trough {
-    min-height: 5px;
-    border-radius: 9999px;
     background-color: rgba(0, 0, 0, 0.06);
-    border: none;
-}
-
-.control-disk-card progressbar progress {
-    border-radius: 9999px;
-    background-color: #10b981;
-    background-color: #10b981;
 }
 
 .control-lang-label {
-    font-size: 11px;
-    font-weight: 800;
     color: #1c1c1e;
-    text-align: center;
 }
 
-/* --- Audio Control & Menu Styling --- */
 button.slider-overlay-mute-btn {
-    background: transparent;
-    background-color: transparent;
-    background-image: none;
-    border: none;
-    box-shadow: none;
-    padding: 0;
-    margin: 0;
-    min-width: 20px;
-    min-height: 20px;
-    border-radius: 9999px;
     color: rgba(28, 28, 30, 0.70);
-    transition: background-color 150ms ease;
 }
 
 button.slider-overlay-mute-btn:hover {
     background-color: rgba(0, 0, 0, 0.06);
-    background-image: none;
 }
 
 .slider-overlay-icon {
@@ -391,50 +172,22 @@ button.slider-overlay-mute-btn:hover {
 
 button.slider-popover-btn {
     background-color: rgba(0, 0, 0, 0.06);
-    background-image: none;
     border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 12px;
-    padding: 0;
-    margin: 0;
-    min-width: 24px;
-    min-height: 24px;
     color: rgba(28, 28, 30, 0.55);
-    box-shadow: none;
-    transition: all 150ms ease;
 }
 
 button.slider-popover-btn:hover {
     background-color: rgba(0, 0, 0, 0.10);
-    background-image: none;
     color: rgba(28, 28, 30, 0.85);
     border-color: rgba(0, 0, 0, 0.12);
 }
 
-.audio-menu-popover {
-    padding: 4px;
-}
-
 .audio-menu-section-title {
-    font-size: 9px;
-    font-weight: 800;
     color: rgba(28, 28, 30, 0.45);
-    text-transform: uppercase;
-    margin-bottom: 6px;
-    margin-top: 4px;
-    padding-left: 6px;
-    letter-spacing: 0.5px;
 }
 
 button.audio-menu-item-btn {
-    background-color: transparent;
-    background-image: none;
-    border: none;
-    border-radius: 6px;
-    padding: 5px 8px;
     color: rgba(28, 28, 30, 0.80);
-    box-shadow: none;
-    transition: all 120ms ease;
-    margin-bottom: 2px;
 }
 
 button.audio-menu-item-btn:hover {
@@ -448,97 +201,35 @@ button.audio-menu-item-btn.active {
 }
 
 button.audio-menu-item-btn.active label {
-    font-weight: 600;
     color: #1c1c1e;
-}
-.audio-menu-item-check {
-    font-size: 11px;
-    font-weight: bold;
-    color: #007aff;
-    margin-right: 4px;
-}
-
-/* WiFi Split Tile and Popover Input Forms */
-.control-tile-container {
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
-    border-radius: 12px;
-    margin: 2px 0;
-    transition: all 150ms ease;
-    display: flex;
 }
 
 button.control-tile-left-btn {
-    background-color: transparent;
-    background-image: none;
-    border: none;
-    border-radius: 12px 0 0 12px;
-    padding: 8px 10px;
     color: #1c1c1e;
-    box-shadow: none;
-    outline: none;
-    transition: all 150ms ease;
 }
 
 button.control-tile-left-btn:hover,
 button.control-tile-left-btn:focus,
 button.control-tile-left-btn:active {
     background-color: rgba(0, 0, 0, 0.04);
-    background-image: none;
-    border: none;
-    box-shadow: none;
-    outline: none;
 }
 
 button.control-tile-right-btn {
-    background-color: transparent;
-    background-image: none;
-    border: none;
-    border-left: none;
-    border-radius: 0 12px 12px 0;
-    padding: 8px 12px;
     color: #1c1c1e;
-    box-shadow: none;
-    outline: none;
-    transition: all 150ms ease;
 }
 
 button.control-tile-right-btn:hover,
 button.control-tile-right-btn:focus,
 button.control-tile-right-btn:active {
     background-color: rgba(0, 0, 0, 0.08);
-    background-image: none;
-    border: none;
-    border-left: none;
-    box-shadow: none;
-    outline: none;
-}
-
-.wifi-popover-box {
-    padding: 10px;
-    min-width: 250px;
-    max-width: 320px;
 }
 
 .wifi-popover-title {
-    font-size: 13px;
-    font-weight: 600;
     color: #1c1c1e;
-    margin-bottom: 8px;
 }
 
 .wifi-network-item {
-    background-color: transparent;
-    background-image: none;
-    border: none !important;
-    border-radius: 8px;
-    padding: 6px 10px;
     color: rgba(28, 28, 30, 0.85);
-    box-shadow: none;
-    outline: none !important;
-    transition: all 120ms ease;
-    margin-bottom: 2px;
 }
 
 .wifi-network-item:hover,
@@ -546,205 +237,59 @@ button.control-tile-right-btn:active {
 .wifi-network-item:active {
     background-color: rgba(0, 0, 0, 0.06);
     color: #1c1c1e;
-    border: none;
-    box-shadow: none;
-    outline: none;
 }
 
 .wifi-network-item.active {
     background-color: rgba(0, 122, 255, 0.15);
     border: 1px solid rgba(0, 122, 255, 0.3);
-    color: #007aff;
-    box-shadow: none;
-    outline: none;
+    color: #3b82f6;
 }
 
 .wifi-network-item.active label {
-    font-weight: 600;
-    color: #007aff;
+    color: #3b82f6;
 }
 
 .wifi-input-field {
     background-color: rgba(0, 0, 0, 0.04);
     border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 6px;
-    padding: 6px 10px;
     color: #1c1c1e;
-    font-size: 12px;
-    margin-bottom: 8px;
-    box-shadow: none;
-    outline: none !important;
-}
-
-.wifi-input-field:focus {
-    border-color: #007aff;
-    box-shadow: none;
-    outline: none !important;
-}
-
-.wifi-button-row {
-    margin-top: 10px;
-}
-
-.wifi-btn-primary {
-    background-color: #007aff;
-    background-image: none;
-    border: none !important;
-    border-radius: 6px;
-    padding: 6px 12px;
-    color: #ffffff;
-    font-size: 12px;
-    font-weight: 600;
-    box-shadow: none;
-    outline: none !important;
-}
-
-.wifi-btn-primary:hover,
-.wifi-btn-primary:focus,
-.wifi-btn-primary:active {
-    background-color: #0062cc;
-    background-image: none;
-    border: none !important;
-    box-shadow: none;
-    outline: none !important;
 }
 
 .wifi-btn-secondary {
     background-color: rgba(0, 0, 0, 0.06);
-    background-image: none;
-    border: none !important;
-    border-radius: 6px;
-    padding: 6px 12px;
     color: rgba(28, 28, 30, 0.85);
-    font-size: 12px;
-    box-shadow: none;
-    outline: none !important;
 }
 
 .wifi-btn-secondary:hover,
 .wifi-btn-secondary:focus,
 .wifi-btn-secondary:active {
     background-color: rgba(0, 0, 0, 0.10);
-    background-image: none;
-    border: none !important;
-    box-shadow: none;
-    outline: none !important;
 }
 
-scrolledwindow {
-    background: transparent;
-    background-color: transparent;
-    border: none;
-    border-color: transparent;
-    box-shadow: none;
-    outline: none;
+.clean-popover-size {
+    color: rgba(28, 28, 30, 0.6);
 }
 
-scrolledwindow trough,
-scrolledwindow slider,
-scrollbar,
-scrollbar button,
-scrollbar trough,
-scrollbar slider {
-    background: transparent;
-    background-color: transparent;
-    border: none;
-    border-color: transparent;
-    box-shadow: none;
-    outline: none;
-    min-width: 0;
-    min-height: 0;
-    opacity: 0;
+.clean-target-list {
+    background-color: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-listbox,
-listrow,
-list,
-row,
-popover list,
-popover row,
-popover scrolledwindow,
-listrow:hover,
-listrow:focus,
-listrow:active,
-listrow:selected,
-row:hover,
-row:focus,
-row:active,
-row:selected {
-    background-color: transparent;
-    background: transparent;
-    border: none;
-    border-color: transparent;
-    box-shadow: none;
-    outline: none;
-    outline-color: transparent;
+.clean-target-name {
+    color: rgba(28, 28, 30, 0.7);
 }
 
-popover,
-popover.taskbar-popover {
-    background-color: transparent;
-    background-image: none;
-    border: none;
-    box-shadow: none;
+.clean-target-value {
+    color: rgba(28, 28, 30, 0.95);
+}
+
+button.quick-tile.active label,
+button.quick-tile.active .tile-title,
+button.quick-tile.active .tile-subtitle {
+    color: #1c1c1e !important;
 }
 
 popover > arrow {
     background-color: transparent;
     border: none;
-}
-
-/* Clean popover progress circle text styling */
-.clean-popover-percent {
-    font-size: 26px;
-    font-weight: 800;
-    color: #007aff;
-    margin: 0;
-    padding: 0;
-}
-
-.clean-popover-percent.scanning {
-    color: #007aff;
-}
-
-.clean-popover-percent.cleaning {
-    color: #ef4444;
-}
-
-.clean-popover-percent.finished {
-    color: #10b981;
-}
-
-.clean-popover-size {
-    font-size: 13px;
-    font-weight: 600;
-    color: rgba(28, 28, 30, 0.6);
-    margin: 0;
-    padding: 0;
-}
-
-.clean-target-list {
-    margin: 10px 0;
-    padding: 8px 12px;
-    background-color: rgba(0, 0, 0, 0.03);
-    border-radius: 8px;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-}
-.clean-target-row {
-    margin: 2px 0;
-}
-.clean-target-bullet {
-    font-size: 14px;
-    color: #007aff;
-    margin-right: 6px;
-}
-.clean-target-name {
-    font-size: 12px;
-    font-weight: 500;
-    color: rgba(28, 28, 30, 0.7);
-}
-.clean-target-value {
-    font-size: 12px;
-    font-weight: 600;
-    color: rgba(28, 28, 30, 0.95);
 }

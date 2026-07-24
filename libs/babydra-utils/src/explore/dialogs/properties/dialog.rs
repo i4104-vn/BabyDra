@@ -68,29 +68,6 @@ pub fn show_properties_dialog(
         win_cancel_btn.close();
     });
 
-    let height = dialog_height;
-    let win_cancel = window.clone();
-    let vbox_cancel = vbox.clone();
-    let is_animating = Rc::new(std::cell::Cell::new(false));
-    let is_animating_cancel = is_animating.clone();
-    window.connect_close_request(move |_| {
-        if is_animating_cancel.get() {
-            return glib::Propagation::Stop;
-        }
-        is_animating_cancel.set(true);
-        let win_cb = win_cancel.clone();
-        crate::ui::animation::genie_out(
-            vbox_cancel.upcast_ref(),
-            400,
-            height,
-            300,
-            move || {
-                win_cb.destroy();
-            }
-        );
-        glib::Propagation::Stop
-    });
-
     if target_paths.len() == 1 {
         let btn_save = Button::builder()
             .label(&t("explore.settings_save"))
@@ -109,5 +86,4 @@ pub fn show_properties_dialog(
     }
 
     window.present();
-    crate::ui::animation::genie_in(vbox.upcast_ref(), 400, height, 300);
 }

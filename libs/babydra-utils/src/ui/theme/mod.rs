@@ -1,6 +1,38 @@
 //! Theme and styling system coordinator.
 //! Concatenates component stylesheets and registers them with the GDK Display context.
 
+const SHARED_CSS: &str = concat!(
+    include_str!("../../styles/shared/panel/panel.css"), "\n",
+    include_str!("../../styles/shared/panel/workspaces.css"), "\n",
+    include_str!("../../styles/shared/panel/clock.css"), "\n",
+    include_str!("../../styles/shared/panel/status.css"), "\n",
+    include_str!("../../styles/shared/panel/sys_monitor.css"), "\n",
+    include_str!("../../styles/shared/panel/tray.css"), "\n",
+    include_str!("../../styles/shared/panel/taskbar.css"), "\n",
+    include_str!("../../styles/shared/control_center/control_center.css"), "\n",
+    include_str!("../../styles/shared/control_center/power.css"), "\n",
+    include_str!("../../styles/shared/island/system_island.css"), "\n",
+    include_str!("../../styles/shared/island/notification.css"), "\n",
+    include_str!("../../styles/shared/launcher/launcher.css"), "\n",
+    include_str!("../../styles/shared/calendar/calendar.css"), "\n",
+    include_str!("../../styles/shared/shared/button.css"), "\n",
+    include_str!("../../styles/shared/shared/switch.css"), "\n",
+    include_str!("../../styles/shared/shared/sidebar.css"), "\n",
+    include_str!("../../styles/shared/apps/screenshot.css"), "\n",
+    include_str!("../../styles/shared/apps/lock.css"), "\n",
+    include_str!("../../styles/shared/apps/preview.css"), "\n",
+    include_str!("../../styles/shared/apps/settings.css"), "\n",
+    include_str!("../../styles/shared/apps/switcher.css"), "\n",
+    include_str!("../../styles/shared/explore/window.css"), "\n",
+    include_str!("../../styles/shared/explore/header_bar.css"), "\n",
+    include_str!("../../styles/shared/explore/content_view.css"), "\n",
+    include_str!("../../styles/shared/explore/info_panel.css"), "\n",
+    include_str!("../../styles/shared/explore/status_bar.css"), "\n",
+    include_str!("../../styles/shared/explore/context_menu.css"), "\n",
+    include_str!("../../styles/shared/explore/dialogs.css"), "\n",
+    include_str!("../../styles/shared/shared/scrollbar.css")
+);
+
 const DARK_CSS: &str = concat!(
     include_str!("../../styles/dark/panel/panel.css"), "\n",
     include_str!("../../styles/dark/panel/workspaces.css"), "\n",
@@ -138,19 +170,22 @@ pub fn init_theme() {
 
         if let Some(settings) = gtk4::Settings::default() {
             let is_dark = super::icon::is_dark_mode();
-            let css = if is_dark { DARK_CSS } else { LIGHT_CSS };
+            let theme_css = if is_dark { DARK_CSS } else { LIGHT_CSS };
+            let css = format!("{SHARED_CSS}\n{theme_css}");
             let cleaned_css = css.replace("\r", "");
             provider.load_from_data(&cleaned_css);
 
             let provider_clone = provider.clone();
             settings.connect_gtk_application_prefer_dark_theme_notify(move |_s| {
                 let is_dark = super::icon::is_dark_mode();
-                let css = if is_dark { DARK_CSS } else { LIGHT_CSS };
+                let theme_css = if is_dark { DARK_CSS } else { LIGHT_CSS };
+                let css = format!("{SHARED_CSS}\n{theme_css}");
                 let cleaned_css = css.replace("\r", "");
                 provider_clone.load_from_data(&cleaned_css);
             });
         } else {
-            let cleaned_css = DARK_CSS.replace("\r", "");
+            let css = format!("{SHARED_CSS}\n{DARK_CSS}");
+            let cleaned_css = css.replace("\r", "");
             provider.load_from_data(&cleaned_css);
         }
     });

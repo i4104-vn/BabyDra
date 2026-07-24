@@ -14,6 +14,14 @@ echo "Configuring i2c-dev kernel module..."
 sudo modprobe i2c-dev || true
 echo "i2c-dev" | sudo tee /etc/modules-load.d/i2c.conf > /dev/null || true
 
+# Configure CPU governor / EPP permissions for non-root user performance profile switching
+echo "Configuring CPU performance profile permissions..."
+echo "z /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor 0666 root root -" | sudo tee /etc/tmpfiles.d/babydra-perf.conf > /dev/null || true
+echo "z /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference 0666 root root -" | sudo tee -a /etc/tmpfiles.d/babydra-perf.conf > /dev/null || true
+sudo systemd-tmpfiles --create /etc/tmpfiles.d/babydra-perf.conf || true
+sudo chmod 666 /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor 2>/dev/null || true
+sudo chmod 666 /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference 2>/dev/null || true
+
 # Check if yay is installed, and install it from AUR if missing
 if ! command -v yay &> /dev/null; then
     echo "yay not found, installing yay-bin from AUR..."

@@ -20,6 +20,21 @@ pub fn create_system_island() -> gtk4::Box {
     notch_capsule.set_halign(gtk4::Align::Center);
     notch_capsule.set_visible(false);
 
+    let motion_controller = gtk4::EventControllerMotion::new();
+    motion_controller.connect_enter(move |_, _, _| {
+        crate::player::player_loop::IS_NOTIF_HOVERED.with(|h| h.set(true));
+    });
+    motion_controller.connect_leave(move |_| {
+        let was_hovered = crate::player::player_loop::IS_NOTIF_HOVERED.with(|h| h.get());
+        crate::player::player_loop::IS_NOTIF_HOVERED.with(|h| h.set(false));
+        if was_hovered {
+            widgets::notification::SHARED_NOTIFICATION.with(|sn| {
+                *sn.borrow_mut() = None;
+            });
+        }
+    });
+    notch_capsule.add_controller(motion_controller);
+
     let notch_content = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     notch_content.add_css_class("notch-content");
     notch_content.set_valign(gtk4::Align::Center);

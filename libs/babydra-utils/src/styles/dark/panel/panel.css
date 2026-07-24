@@ -1,76 +1,21 @@
-* {
-    font-family: 'Inter', sans-serif;
-    -gtk-icon-style: symbolic;
-}
-
-button,
-.workspace-dot,
-.panel-notch {
-    transition: all 200ms ease;
-}
-
-popover {
-    background-color: transparent;
-    padding: 0;
-    margin: 0;
-    box-shadow: none;
-    border: none;
-}
-
 popover>contents {
     background-color: rgba(14, 14, 18, 0.96);
-    background-image: none;
-    -gtk-background-blur: 24;
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-top: 1px solid rgba(255, 255, 255, 0.28);
-    border-radius: 20px;
-    box-shadow: none;
-    transition: all 200ms ease;
-}
-
-window,
-window.background,
-window.panel-window,
-window.control-center-window,
-window.launcher-window,
-window.notification-card {
-    background-color: transparent;
-    background-image: none;
-    box-shadow: none;
-    border: none;
 }
 
 .panel-box {
-    background-color: transparent;
-    background-image: none;
     color: rgba(255, 255, 255, 0.95);
-    margin: 0;
-    padding: 0px 4px;
-    min-height: 36px;
-    border: none;
-    box-shadow: none;
 }
 
 button.panel-logo-btn {
-    background-color: transparent;
-    background-image: none;
-    border: none;
     color: #ffffff;
-    padding: 2px 6px;
-    margin: 0;
-    border-radius: 6px;
-    box-shadow: none;
-    min-height: 20px;
-    min-width: 20px;
 }
 
 button.panel-logo-btn:hover {
     background-color: rgba(255, 255, 255, 0.10);
-    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .capsule-separator {
     color: rgba(255, 255, 255, 0.14);
-    font-size: 11px;
-    margin: 0 2px;
 }
