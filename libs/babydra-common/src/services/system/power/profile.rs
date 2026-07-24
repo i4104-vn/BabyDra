@@ -25,17 +25,7 @@ pub fn set_performance_profile(profile: PerformanceProfile) {
         PerformanceProfile::HighPerformance => ("performance", "performance"),
     };
 
-    // 1. Try powerprofilesctl (non-root DBus service if running)
-    let _ = std::process::Command::new("powerprofilesctl")
-        .arg("set")
-        .arg(match profile {
-            PerformanceProfile::Normal => "power-saver",
-            PerformanceProfile::Balanced => "balanced",
-            PerformanceProfile::HighPerformance => "performance",
-        })
-        .spawn();
-
-    // 2. Direct write to sysfs scaling_governor and energy_performance_preference (zero sudo/password needed!)
+    // Direct write to sysfs scaling_governor and energy_performance_preference using pure Rust I/O
     if let Ok(entries) = std::fs::read_dir("/sys/devices/system/cpu") {
         for entry in entries.flatten() {
             let path = entry.path();
