@@ -66,24 +66,35 @@ entry.launcher-search>text>placeholder {
     background-color: rgba(59, 130, 246, 0.25);
 }
 
-.launcher-profile-label {
-    color: #5c5f77;
+.launcher-footer-box {
+    background-color: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-.launcher-power-btn:hover {
-    background-color: rgba(239, 68, 68, 0.12);
-    border-color: rgba(239, 68, 68, 0.25);
+.launcher-profile-label {
+    color: #4c4f69;
+}
+
+.launcher-power-btn {
+    background-color: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
     color: #dc2626;
 }
 
+.launcher-power-btn:hover {
+    background-color: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #b91c1c;
+}
+
 .launcher-power-option-btn {
-    background-color: rgba(0, 0, 0, 0.03);
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    background-color: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .launcher-power-option-btn:hover {
     background-color: rgba(0, 0, 0, 0.08);
-    border-color: rgba(0, 0, 0, 0.15);
+    border-color: rgba(0, 0, 0, 0.18);
 }
 
 .launcher-power-option-btn.shutdown:hover {
@@ -102,6 +113,6 @@ entry.launcher-search>text>placeholder {
 }
 
 .launcher-power-option-btn.logout:hover {
-    background-color: rgba(137, 180, 250, 0.2);
-    border-color: rgba(137, 180, 250, 0.4);
+    background-color: rgba(136, 57, 239, 0.2);
+    border-color: rgba(136, 57, 239, 0.4);
 }
