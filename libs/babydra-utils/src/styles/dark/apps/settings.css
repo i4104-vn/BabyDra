@@ -32,8 +32,8 @@ entry.sidebar-search-entry {
 }
 
 entry.sidebar-search-entry:focus-within {
-    background-color: rgba(229, 193, 151, 0.08);
-    border-color: #e5c197;
+    background-color: rgba(59, 130, 246, 0.08);
+    border-color: #3b82f6;
 }
 
 entry.sidebar-search-entry > text {
@@ -45,15 +45,25 @@ entry.sidebar-search-entry > text {
 
 /* Active navigation item */
 button.sidebar-item.active-nav {
-    background-color: rgba(229, 193, 151, 0.16);
-    color: #e5c197;
+    background-color: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
     border-radius: 10px;
     font-weight: 600;
 }
 
 button.sidebar-item.active-nav label,
 button.sidebar-item.active-nav image {
-    color: #e5c197;
+    color: #60a5fa;
+}
+
+button.sidebar-item.active-nav:hover {
+    background-color: rgba(59, 130, 246, 0.22);
+    color: #93c5fd;
+}
+
+button.sidebar-item.active-nav:hover label,
+button.sidebar-item.active-nav:hover image {
+    color: #93c5fd;
 }
 
 /* Content Area */
@@ -176,16 +186,16 @@ button.theme-card-option:hover {
 }
 
 button.theme-card-option.active-dark {
-    background-color: #e8c495;
-    color: #121214;
-    border-color: #e8c495;
+    background-color: rgba(59, 130, 246, 0.20);
+    color: #60a5fa;
+    border-color: #3b82f6;
     font-weight: 700;
-    box-shadow: 0 4px 16px rgba(232, 196, 149, 0.3);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
 }
 
 button.theme-card-option.active-dark label,
 button.theme-card-option.active-dark image {
-    color: #121214;
+    color: #60a5fa;
 }
 
 button.choose-file-card {
@@ -199,7 +209,7 @@ button.choose-file-card {
 
 button.choose-file-card:hover {
     background-color: rgba(255, 255, 255, 0.08);
-    border-color: #e8c495;
+    border-color: #3b82f6;
     color: #ffffff;
 }
 
@@ -214,22 +224,23 @@ button.choose-file-card:hover {
     font-weight: 500;
 }
 
-/* Primary Golden Button */
+/* Primary Accent Button */
 button.btn-golden,
 button.suggested-action {
-    background-image: linear-gradient(135deg, #e8c495, #d4a96a);
-    color: #121214;
+    background-color: #3b82f6;
+    background-image: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #ffffff;
     font-weight: 700;
     border: none;
     border-radius: 10px;
     padding: 10px 20px;
-    box-shadow: 0 4px 16px rgba(232, 196, 149, 0.25);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
     transition: all 200ms ease;
 }
 
 button.btn-golden:hover,
 button.suggested-action:hover {
-    background-image: linear-gradient(135deg, #f0d0a8, #e8c495);
+    background-image: linear-gradient(135deg, #60a5fa, #3b82f6);
     transform: translateY(-1px);
 }
 
@@ -244,9 +255,9 @@ button.app-tab-btn {
 }
 
 button.app-tab-btn.active {
-    color: #e5c197;
+    color: #3b82f6;
     font-weight: 700;
-    border-bottom: 2px solid #e5c197;
+    border-bottom: 2px solid #3b82f6;
 }
 
 /* Wi-Fi & App Rows */
@@ -272,6 +283,79 @@ button.wallpaper-thumb-card {
 button.wallpaper-thumb-card:hover {
     background-color: rgba(255, 255, 255, 0.10);
     border-color: #3b82f6;
+}
+
+/* Dropdown Select Controls (Matching Search Input Style) */
+dropdown {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+dropdown > button {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 8px 14px;
+    color: #ffffff;
+    transition: all 200ms ease;
+    box-shadow: none;
+}
+
+dropdown > button:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.20);
+}
+
+dropdown:focus-within > button,
+dropdown > button:focus {
+    border-color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.08);
+}
+
+dropdown > popover,
+popover.menu {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+}
+
+dropdown > popover > contents,
+popover.menu > contents {
+    background-color: rgba(20, 20, 28, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55);
+    padding: 6px;
+}
+
+dropdown > popover > contents listview,
+dropdown > popover > contents list {
+    background: transparent;
+    background-color: transparent;
+}
+
+dropdown > popover > contents row,
+dropdown > popover > contents listview > row {
+    background-color: transparent;
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: rgba(255, 255, 255, 0.90);
+    transition: background-color 150ms ease;
+}
+
+dropdown > popover > contents row:hover,
+dropdown > popover > contents listview > row:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+dropdown > popover > contents row:selected,
+dropdown > popover > contents listview > row:selected {
+    background-color: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    font-weight: 600;
 }
 
 

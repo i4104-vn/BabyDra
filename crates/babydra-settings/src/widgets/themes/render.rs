@@ -6,6 +6,7 @@ use gtk4::{Box, Button, DropDown, Grid, Label, Orientation, StringList};
 pub struct ThemesWidget {
     pub container: Box,
     pub gtk_theme_dropdown: DropDown,
+    pub icon_theme_dropdown: DropDown,
     pub cursor_theme_dropdown: DropDown,
     pub cursor_size_dropdown: DropDown,
     pub apply_btn: Button,
@@ -13,14 +14,18 @@ pub struct ThemesWidget {
 
 pub fn build(
     gtk_themes: &[String],
+    icon_themes: &[String],
     cursor_themes: &[String],
     cursor_sizes: &[u32],
 ) -> ThemesWidget {
-    let container = Box::new(Orientation::Vertical, 20);
+    let container = Box::new(Orientation::Vertical, 16);
+    container.set_vexpand(true);
+    container.set_valign(gtk4::Align::Fill);
 
     // Glass Panel Card Container
     let card = Box::new(Orientation::Vertical, 20);
     card.add_css_class("glass-panel");
+    card.set_valign(gtk4::Align::Start);
 
     // Card Header Row (Gradient Icon + Title + Description)
     let header_row = Box::new(Orientation::Horizontal, 16);
@@ -48,7 +53,7 @@ pub fn build(
     title_lbl.set_halign(gtk4::Align::Start);
     header_text_box.append(&title_lbl);
 
-    let desc_lbl = Label::new(Some("Customize color scheme, GTK themes, mouse cursors, and cursor sizes"));
+    let desc_lbl = Label::new(Some("Customize color scheme, GTK themes, icon themes, mouse cursors, and cursor sizes"));
     desc_lbl.add_css_class("settings-page-subtitle");
     desc_lbl.set_halign(gtk4::Align::Start);
     header_text_box.append(&desc_lbl);
@@ -81,7 +86,21 @@ pub fn build(
     gtk_box.append(&gtk_theme_dropdown);
     grid.attach(&gtk_box, 0, 0, 1, 1);
 
-    // Field 2: Cursor Theme
+    // Field 2: Icon Theme
+    let icon_box = Box::new(Orientation::Vertical, 6);
+    let icon_lbl = Label::new(Some("Icon Theme"));
+    icon_lbl.add_css_class("spec-label");
+    icon_lbl.set_halign(gtk4::Align::Start);
+    icon_box.append(&icon_lbl);
+
+    let icon_items: Vec<&str> = icon_themes.iter().map(|s| s.as_str()).collect();
+    let icon_model = StringList::new(&icon_items);
+    let icon_theme_dropdown = DropDown::new(Some(icon_model), Option::<gtk4::Expression>::None);
+    icon_theme_dropdown.set_cursor_from_name(Some("pointer"));
+    icon_box.append(&icon_theme_dropdown);
+    grid.attach(&icon_box, 1, 0, 1, 1);
+
+    // Field 3: Cursor Theme
     let cursor_box = Box::new(Orientation::Vertical, 6);
     let cursor_lbl = Label::new(Some("Cursor Theme"));
     cursor_lbl.add_css_class("spec-label");
@@ -93,9 +112,9 @@ pub fn build(
     let cursor_theme_dropdown = DropDown::new(Some(cursor_model), Option::<gtk4::Expression>::None);
     cursor_theme_dropdown.set_cursor_from_name(Some("pointer"));
     cursor_box.append(&cursor_theme_dropdown);
-    grid.attach(&cursor_box, 1, 0, 1, 1);
+    grid.attach(&cursor_box, 0, 1, 1, 1);
 
-    // Field 3: Cursor Size
+    // Field 4: Cursor Size
     let size_box = Box::new(Orientation::Vertical, 6);
     let size_lbl = Label::new(Some("Cursor Size"));
     size_lbl.add_css_class("spec-label");
@@ -108,7 +127,7 @@ pub fn build(
     let cursor_size_dropdown = DropDown::new(Some(size_model), Option::<gtk4::Expression>::None);
     cursor_size_dropdown.set_cursor_from_name(Some("pointer"));
     size_box.append(&cursor_size_dropdown);
-    grid.attach(&size_box, 0, 1, 1, 1);
+    grid.attach(&size_box, 1, 1, 1, 1);
 
     card.append(&grid);
 
@@ -132,13 +151,20 @@ pub fn build(
     apply_btn.set_child(Some(&btn_content));
     footer_box.append(&apply_btn);
     footer_box.set_halign(gtk4::Align::End);
-
     card.append(&footer_box);
-    container.append(&card);
+
+    let scroll = gtk4::ScrolledWindow::new();
+    scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
+    scroll.set_vexpand(true);
+    scroll.set_valign(gtk4::Align::Fill);
+    scroll.set_child(Some(&card));
+
+    container.append(&scroll);
 
     ThemesWidget {
         container,
         gtk_theme_dropdown,
+        icon_theme_dropdown,
         cursor_theme_dropdown,
         cursor_size_dropdown,
         apply_btn,

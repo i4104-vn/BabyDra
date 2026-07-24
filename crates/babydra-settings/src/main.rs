@@ -197,17 +197,16 @@ fn main() {
         content_stack.add_named(&update_widget, Some("system_update"));
         content_stack.add_named(&sys_widget, Some("system"));
 
-        let content_scroll = gtk4::ScrolledWindow::new();
-        content_scroll.set_hscrollbar_policy(gtk4::PolicyType::Never);
-        content_scroll.set_hexpand(true);
-        content_scroll.set_vexpand(true);
-        content_scroll.set_margin_top(8);
-        content_scroll.set_margin_bottom(8);
-        content_scroll.set_margin_start(8);
-        content_scroll.set_margin_end(8);
-        content_scroll.set_child(Some(&content_stack));
+        let right_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+        right_box.set_hexpand(true);
+        right_box.set_vexpand(true);
+        right_box.set_margin_top(8);
+        right_box.set_margin_bottom(8);
+        right_box.set_margin_start(8);
+        right_box.set_margin_end(8);
+        right_box.append(&content_stack);
 
-        main_layout.append(&content_scroll);
+        main_layout.append(&right_box);
         overlay.set_child(Some(&main_layout));
 
         // --- Cheatsheet Dialog Overlay ---

@@ -15,7 +15,9 @@ pub struct AppsWidget {
 }
 
 pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> AppsWidget {
-    let container = Box::new(Orientation::Vertical, 20);
+    let container = Box::new(Orientation::Vertical, 16);
+    container.set_vexpand(true);
+    container.set_valign(gtk4::Align::Fill);
 
     // Title + Search Input Header Row
     let header_box = Box::new(Orientation::Horizontal, 12);
@@ -53,13 +55,21 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> AppsWidget {
     // Stack for Apps vs Packages view
     let stack = Stack::new();
     stack.set_transition_type(gtk4::StackTransitionType::Crossfade);
+    stack.set_vexpand(true);
+    stack.set_valign(gtk4::Align::Fill);
 
     // 1. Apps List (Glass Panel List Box)
+    let apps_glass_card = Box::new(Orientation::Vertical, 0);
+    apps_glass_card.add_css_class("glass-panel");
+    apps_glass_card.set_vexpand(true);
+    apps_glass_card.set_valign(gtk4::Align::Fill);
+
     let apps_scrolled = ScrolledWindow::new();
+    apps_scrolled.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
     apps_scrolled.set_vexpand(true);
+    apps_scrolled.set_valign(gtk4::Align::Fill);
 
     let apps_list_box = ListBox::new();
-    apps_list_box.add_css_class("glass-panel");
     apps_list_box.set_selection_mode(gtk4::SelectionMode::None);
 
     for app in apps {
@@ -116,14 +126,21 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> AppsWidget {
         apps_list_box.append(&row_box);
     }
     apps_scrolled.set_child(Some(&apps_list_box));
-    stack.add_named(&apps_scrolled, Some("apps"));
+    apps_glass_card.append(&apps_scrolled);
+    stack.add_named(&apps_glass_card, Some("apps"));
 
     // 2. Packages List
+    let pkgs_glass_card = Box::new(Orientation::Vertical, 0);
+    pkgs_glass_card.add_css_class("glass-panel");
+    pkgs_glass_card.set_vexpand(true);
+    pkgs_glass_card.set_valign(gtk4::Align::Fill);
+
     let pkgs_scrolled = ScrolledWindow::new();
+    pkgs_scrolled.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
     pkgs_scrolled.set_vexpand(true);
+    pkgs_scrolled.set_valign(gtk4::Align::Fill);
 
     let pkgs_list_box = ListBox::new();
-    pkgs_list_box.add_css_class("glass-panel");
     pkgs_list_box.set_selection_mode(gtk4::SelectionMode::None);
 
     for pkg in pkgs.iter().take(100) {
@@ -158,7 +175,8 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> AppsWidget {
         pkgs_list_box.append(&row_box);
     }
     pkgs_scrolled.set_child(Some(&pkgs_list_box));
-    stack.add_named(&pkgs_scrolled, Some("packages"));
+    pkgs_glass_card.append(&pkgs_scrolled);
+    stack.add_named(&pkgs_glass_card, Some("packages"));
 
     container.append(&stack);
 

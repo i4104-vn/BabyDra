@@ -12,13 +12,17 @@ pub fn build_system_ui(
     disk_text: &str,
     disk_percent: f64,
 ) -> gtk4::Box {
-    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 24);
+    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
+    main_box.set_vexpand(true);
+    main_box.set_valign(gtk4::Align::Fill);
 
     // Page Title
     let page_title = gtk4::Label::new(Some("About System"));
     page_title.add_css_class("settings-page-title");
     page_title.set_halign(gtk4::Align::Start);
     main_box.append(&page_title);
+
+    let content_box = gtk4::Box::new(gtk4::Orientation::Vertical, 20);
 
     // ── Card 1: Top Hero Card (Avatar, OS Title, Storage Progress) ──
     let hero_card = gtk4::Box::new(gtk4::Orientation::Horizontal, 24);
@@ -75,7 +79,7 @@ pub fn build_system_ui(
     info_box.append(&progress_bar);
 
     hero_card.append(&info_box);
-    main_box.append(&hero_card);
+    content_box.append(&hero_card);
 
     // ── 2x2 Grid of Hardware Spec Cards ─────────────────────────
     let grid = gtk4::Grid::new();
@@ -131,7 +135,15 @@ pub fn build_system_ui(
         grid.attach(&card, col, row, 1, 1);
     }
 
-    main_box.append(&grid);
+    content_box.append(&grid);
+
+    let scroll = gtk4::ScrolledWindow::new();
+    scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
+    scroll.set_vexpand(true);
+    scroll.set_valign(gtk4::Align::Fill);
+    scroll.set_child(Some(&content_box));
+
+    main_box.append(&scroll);
     main_box
 }
 

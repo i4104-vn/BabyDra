@@ -15,7 +15,9 @@ pub fn build_appearance_ui(
     gtk4::Button,
     gtk4::Box,
 ) {
-    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 20);
+    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
+    main_box.set_vexpand(true);
+    main_box.set_valign(gtk4::Align::Fill);
 
     // Header Title: Icon + Wallpaper & Colors
     let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
@@ -33,6 +35,8 @@ pub fn build_appearance_ui(
     // Dashboard Main Glass Panel
     let dashboard_panel = gtk4::Box::new(gtk4::Orientation::Vertical, 20);
     dashboard_panel.add_css_class("glass-panel");
+    dashboard_panel.set_vexpand(true);
+    dashboard_panel.set_valign(gtk4::Align::Fill);
 
     // Top Configuration Grid (3 Columns)
     let config_grid = gtk4::Grid::new();
@@ -138,32 +142,6 @@ pub fn build_appearance_ui(
     config_grid.attach(&theme_cards_box, 2, 0, 1, 1);
     dashboard_panel.append(&config_grid);
 
-    // Transparency Control Row
-    let trans_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    trans_row.set_margin_top(8);
-    trans_row.set_margin_bottom(8);
-
-    let eye_icon = babydra_utils::ui::icon::get_icon("info", 18);
-    eye_icon.set_pixel_size(18);
-    eye_icon.set_valign(gtk4::Align::Center);
-    eye_icon.add_css_class("settings-row-icon");
-    trans_row.append(&eye_icon);
-
-    let trans_lbl = gtk4::Label::new(Some("Transparency"));
-    trans_lbl.add_css_class("settings-row-title");
-    trans_lbl.set_valign(gtk4::Align::Center);
-    trans_lbl.set_hexpand(true);
-    trans_lbl.set_halign(gtk4::Align::Start);
-    trans_row.append(&trans_lbl);
-
-    let trans_switch = gtk4::Switch::new();
-    trans_switch.set_active(true);
-    trans_switch.set_valign(gtk4::Align::Center);
-    trans_switch.set_cursor_from_name(Some("pointer"));
-    trans_row.append(&trans_switch);
-
-    dashboard_panel.append(&trans_row);
-
     // Separator Line
     let sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
     sep.add_css_class("profile-separator");
@@ -180,7 +158,13 @@ pub fn build_appearance_ui(
     quick_select_box.set_margin_top(8);
     dashboard_panel.append(&quick_select_box);
 
-    main_box.append(&dashboard_panel);
+    let scroll = gtk4::ScrolledWindow::new();
+    scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
+    scroll.set_vexpand(true);
+    scroll.set_valign(gtk4::Align::Fill);
+    scroll.set_child(Some(&dashboard_panel));
+
+    main_box.append(&scroll);
 
     (
         main_box,

@@ -19,15 +19,13 @@ pub struct DisplaysWidget {
 
 pub fn build(monitors: &[MonitorConfig]) -> DisplaysWidget {
     let container = Box::new(Orientation::Vertical, 16);
-    container.set_margin_top(16);
-    container.set_margin_bottom(16);
-    container.set_margin_start(16);
-    container.set_margin_end(16);
+    container.set_vexpand(true);
+    container.set_valign(gtk4::Align::Fill);
 
     // Title and Actions
     let header_box = Box::new(Orientation::Horizontal, 12);
     let title_label = Label::new(Some("Displays"));
-    title_label.add_css_class("settings-title-label");
+    title_label.add_css_class("settings-page-title");
     title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);
 
@@ -42,11 +40,15 @@ pub fn build(monitors: &[MonitorConfig]) -> DisplaysWidget {
     header_box.append(&save_btn);
     container.append(&header_box);
 
+    let cards_box = Box::new(Orientation::Vertical, 16);
+    cards_box.set_vexpand(true);
+    cards_box.set_valign(gtk4::Align::Fill);
+
     let mut card_rows = Vec::new();
 
     for mon in monitors {
         let card = Box::new(Orientation::Vertical, 12);
-        card.add_css_class("settings-card");
+        card.add_css_class("glass-panel");
 
         // Card Header
         let card_header = Box::new(Orientation::Horizontal, 8);
@@ -111,7 +113,7 @@ pub fn build(monitors: &[MonitorConfig]) -> DisplaysWidget {
         orient_row.append(&orientation_dropdown);
         card.append(&orient_row);
 
-        container.append(&card);
+        cards_box.append(&card);
 
         card_rows.push(DisplayCardRow {
             container: card,
@@ -121,6 +123,14 @@ pub fn build(monitors: &[MonitorConfig]) -> DisplaysWidget {
             orientation_dropdown,
         });
     }
+
+    let scroll = gtk4::ScrolledWindow::new();
+    scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
+    scroll.set_vexpand(true);
+    scroll.set_valign(gtk4::Align::Fill);
+    scroll.set_child(Some(&cards_box));
+
+    container.append(&scroll);
 
     DisplaysWidget {
         container,

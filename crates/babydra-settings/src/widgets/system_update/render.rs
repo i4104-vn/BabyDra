@@ -12,15 +12,13 @@ pub struct SystemUpdateWidget {
 
 pub fn build(updates: &[PackageUpdate]) -> SystemUpdateWidget {
     let container = Box::new(Orientation::Vertical, 16);
-    container.set_margin_top(16);
-    container.set_margin_bottom(16);
-    container.set_margin_start(16);
-    container.set_margin_end(16);
+    container.set_vexpand(true);
+    container.set_valign(gtk4::Align::Fill);
 
     // Header
     let header_box = Box::new(Orientation::Horizontal, 12);
     let title_label = Label::new(Some("System Update"));
-    title_label.add_css_class("settings-title-label");
+    title_label.add_css_class("settings-page-title");
     title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);
 
@@ -33,7 +31,7 @@ pub fn build(updates: &[PackageUpdate]) -> SystemUpdateWidget {
 
     // Hero Summary Card
     let hero_card = Box::new(Orientation::Horizontal, 16);
-    hero_card.add_css_class("settings-card");
+    hero_card.add_css_class("glass-panel");
     hero_card.set_margin_bottom(12);
 
     let count_box = Box::new(Orientation::Vertical, 4);
@@ -55,9 +53,14 @@ pub fn build(updates: &[PackageUpdate]) -> SystemUpdateWidget {
     hero_card.append(&update_all_btn);
     container.append(&hero_card);
 
-    // Package List
+    // Package List Glass Card
+    let glass_card = Box::new(Orientation::Vertical, 0);
+    glass_card.add_css_class("glass-panel");
+    glass_card.set_vexpand(true);
+    glass_card.set_valign(gtk4::Align::Fill);
+
     let list_box = ListBox::new();
-    list_box.add_css_class("settings-card");
+    list_box.set_selection_mode(gtk4::SelectionMode::None);
 
     for pkg in updates {
         let row_box = Box::new(Orientation::Horizontal, 12);
@@ -80,7 +83,14 @@ pub fn build(updates: &[PackageUpdate]) -> SystemUpdateWidget {
         list_box.append(&row_box);
     }
 
-    container.append(&list_box);
+    let scroll = gtk4::ScrolledWindow::new();
+    scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
+    scroll.set_vexpand(true);
+    scroll.set_valign(gtk4::Align::Fill);
+    scroll.set_child(Some(&list_box));
+
+    glass_card.append(&scroll);
+    container.append(&glass_card);
 
     SystemUpdateWidget {
         container,
