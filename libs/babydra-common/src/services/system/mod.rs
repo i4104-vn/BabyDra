@@ -10,5 +10,6 @@ pub mod bluetooth;
 pub mod vpn;
 pub mod network;
 pub mod gsettings;
+pub mod battery;
 
 pub use gsettings::set_gsettings_color_scheme;

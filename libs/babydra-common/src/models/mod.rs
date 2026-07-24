@@ -7,6 +7,8 @@ pub mod volume;
 pub mod storage;
 pub mod notification;
 pub mod tray_item;
+pub mod screenshot;
+pub mod explore;
 pub mod network;
 pub mod battery;
 pub mod power;
@@ -23,4 +25,3 @@ pub use explore::{FileEntry, FileType, DirectoryModel, SortColumn, SortOrder, Ta
 pub use network::{NetStats, NetSpeed};
 pub use battery::BatteryInfo;
 pub use power::PerformanceProfile;
-

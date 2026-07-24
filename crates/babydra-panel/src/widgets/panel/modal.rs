@@ -52,7 +52,7 @@ pub fn rebuild_control_center_contents(
     }
 
     // 2. Append header
-    main_box.append(&create_header_row());
+    main_box.append(&create_header_row(on_popover_toggled.clone()));
 
     // 3. Append grid
     main_box.append(&create_control_center_grid(on_popover_toggled.clone()));
