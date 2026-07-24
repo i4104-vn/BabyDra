@@ -201,6 +201,10 @@ fn main() {
         content_scroll.set_hscrollbar_policy(gtk4::PolicyType::Never);
         content_scroll.set_hexpand(true);
         content_scroll.set_vexpand(true);
+        content_scroll.set_margin_top(8);
+        content_scroll.set_margin_bottom(8);
+        content_scroll.set_margin_start(8);
+        content_scroll.set_margin_end(8);
         content_scroll.set_child(Some(&content_stack));
 
         main_layout.append(&content_scroll);
