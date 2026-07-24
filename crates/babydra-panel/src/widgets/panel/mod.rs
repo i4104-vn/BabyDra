@@ -27,7 +27,7 @@ pub fn create_status_indicators(
 
     let update_network_tooltip = {
         let net_icon_c = net_icon.clone();
-        move || {
+        Rc::new(move || {
             let (enabled, ssid) = babydra_common::helper::wifi::get_wifi_state();
             let speed = babydra_common::helper::network::get_network_speed();
 
@@ -44,7 +44,7 @@ pub fn create_status_indicators(
                 )
             };
             net_icon_c.set_tooltip_text(Some(&net_tooltip));
-        }
+        })
     };
 
     update_network_tooltip();
@@ -72,8 +72,22 @@ pub fn create_status_indicators(
     });
     status_button.add_controller(scroll_controller);
 
+    if let Some(settings) = gtk4::Settings::default() {
+        settings.set_property("gtk-tooltip-timeout", 50i32);
+        settings.set_property("gtk-tooltip-browse-timeout", 20i32);
+    }
+
+    let motion_controller = gtk4::EventControllerMotion::new();
+    let update_net_enter = update_network_tooltip.clone();
+    let vol_icon_enter = vol_icon.clone();
+    motion_controller.connect_enter(move |_, _, _| {
+        items::volume::update_topbar_volume_icon(&vol_icon_enter);
+        update_net_enter();
+    });
+    status_button.add_controller(motion_controller);
+
     let vol_icon_timer = vol_icon.clone();
-    let update_net_timer = update_network_tooltip;
+    let update_net_timer = update_network_tooltip.clone();
     gtk4::glib::timeout_add_local(std::time::Duration::from_millis(1500), move || {
         items::volume::update_topbar_volume_icon(&vol_icon_timer);
         update_net_timer();

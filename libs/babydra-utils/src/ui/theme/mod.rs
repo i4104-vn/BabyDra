@@ -111,6 +111,8 @@ pub fn init_theme() {
         let value = gsettings.string("color-scheme");
         let is_dark = value != "prefer-light";
         settings.set_gtk_application_prefer_dark_theme(is_dark);
+        settings.set_property("gtk-tooltip-timeout", 50i32);
+        settings.set_property("gtk-tooltip-browse-timeout", 20i32);
 
         let user_icon_theme = gsettings.string("icon-theme");
         let user_icon_theme = user_icon_theme.trim();
