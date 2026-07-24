@@ -65,53 +65,47 @@ entry.launcher-search>text>placeholder {
     background-color: rgba(59, 130, 246, 0.15);
 }
 
-.launcher-footer-box {
-    background-color: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
 .launcher-profile-label {
-    color: #cdd6f4;
+    color: #bac2de;
 }
 
 .launcher-power-btn {
-    background-color: rgba(239, 68, 68, 0.12);
-    border: 1px solid rgba(239, 68, 68, 0.25);
-    color: #f87171;
+    background-color: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .launcher-power-btn:hover {
-    background-color: rgba(239, 68, 68, 0.25);
+    background-color: rgba(239, 68, 68, 0.3);
     border-color: rgba(239, 68, 68, 0.5);
     color: #fca5a5;
 }
 
 .launcher-power-option-btn {
-    background-color: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .launcher-power-option-btn:hover {
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: rgba(255, 255, 255, 0.18);
     border-color: rgba(255, 255, 255, 0.3);
 }
 
 .launcher-power-option-btn.shutdown:hover {
-    background-color: rgba(239, 68, 68, 0.28);
-    border-color: rgba(239, 68, 68, 0.6);
+    background-color: rgba(239, 68, 68, 0.35);
+    border-color: rgba(239, 68, 68, 0.7);
 }
 
 .launcher-power-option-btn.reboot:hover {
-    background-color: rgba(245, 158, 11, 0.28);
-    border-color: rgba(245, 158, 11, 0.6);
+    background-color: rgba(245, 158, 11, 0.35);
+    border-color: rgba(245, 158, 11, 0.7);
 }
 
 .launcher-power-option-btn.suspend:hover {
-    background-color: rgba(59, 130, 246, 0.28);
-    border-color: rgba(59, 130, 246, 0.6);
+    background-color: rgba(59, 130, 246, 0.35);
+    border-color: rgba(59, 130, 246, 0.7);
 }
 
 .launcher-power-option-btn.logout:hover {
-    background-color: rgba(203, 166, 247, 0.28);
-    border-color: rgba(203, 166, 247, 0.6);
+    background-color: rgba(203, 166, 247, 0.35);
+    border-color: rgba(203, 166, 247, 0.7);
 }

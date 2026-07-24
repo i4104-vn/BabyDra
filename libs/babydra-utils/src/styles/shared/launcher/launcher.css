@@ -169,9 +169,10 @@ entry.launcher-search:focus {
 }
 
 .launcher-footer-box {
-    padding: 8px 14px;
-    border-radius: 16px;
-    transition: all 200ms ease;
+    padding: 8px 12px;
+    background-color: rgba(59, 130, 246, 0.03);
+    border: 1px solid rgba(59, 130, 246, 0.08);
+    border-radius: 14px;
 }
 
 .launcher-profile-label {
@@ -180,27 +181,23 @@ entry.launcher-search:focus {
 }
 
 .launcher-power-btn {
-    border-radius: 9999px;
+    background-color: rgba(59, 130, 246, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.1);
+    border-radius: 8px;
     padding: 6px;
-    min-width: 36px;
-    min-height: 36px;
-    width: 36px;
-    height: 36px;
-    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 200ms ease;
     box-shadow: none;
 }
 
 .launcher-power-btn:hover {
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
+    box-shadow: none;
 }
 
 .launcher-power-option-btn {
     border-radius: 9999px;
     padding: 6px;
-    min-width: 36px;
-    min-height: 36px;
-    width: 36px;
-    height: 36px;
-    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    width: 34px;
+    height: 34px;
+    transition: all 200ms ease;
     box-shadow: none;
 }
