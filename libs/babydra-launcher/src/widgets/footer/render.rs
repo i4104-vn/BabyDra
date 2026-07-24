@@ -79,6 +79,12 @@ pub fn build_footer_layout() -> (
     power_container_box.append(&revealer);
     power_container_box.append(&power_btn);
 
+    let revealer_click = revealer.clone();
+    power_btn.connect_clicked(move |_| {
+        let is_revealed = revealer_click.reveals_child();
+        revealer_click.set_reveal_child(!is_revealed);
+    });
+
     let motion = gtk4::EventControllerMotion::new();
     let revealer_clone = revealer.clone();
     motion.connect_enter(move |_, _, _| {

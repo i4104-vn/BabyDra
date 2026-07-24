@@ -21,7 +21,10 @@ pub use services::system::volume::AudioDevice;
 pub use services::system::storage::DiskInfo;
 pub use services::notification::service::{ActiveNotification, NotificationMsg};
 pub use services::apps::{find_desktop_apps, refresh_desktop_apps_cache, DesktopApp};
-pub use services::system::power::{poweroff, reboot, suspend};
+pub use models::battery::BatteryInfo;
+pub use models::power::PerformanceProfile;
+pub use services::system::battery::get_battery_info;
+pub use services::system::power::{poweroff, reboot, suspend, get_current_profile, set_performance_profile};
 pub use services::system::auth::verify_password;
 pub use services::window::{close_window, focus_window};
 pub use services::screenshot::{capture_screen_to_temp, get_screenshot_save_path, trigger_save, trigger_copy, handle_fullscreen_capture};
@@ -33,6 +36,7 @@ pub use services::window;
 pub use services::tray;
 pub use services::system::volume;
 pub use services::system::storage;
+pub use services::system::battery;
 pub use services::system::power;
 pub use services::system::auth;
 pub use services::system::monitor;
@@ -71,4 +75,5 @@ pub mod helper {
     pub use crate::services::system::backlight;
     pub use crate::services::system::storage;
     pub use crate::services::system::clean;
+    pub use crate::services::system::network;
 }
