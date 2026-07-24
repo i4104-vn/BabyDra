@@ -1,0 +1,183 @@
+@keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+* {
+    font-family: 'Inter', sans-serif;
+}
+
+.viewer-window {
+    background-color: transparent;
+}
+
+.main-preview-card {
+    background-image: none;
+    border-radius: 24px;
+    overflow: hidden;
+}
+
+.variation-column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.variation-card {
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 200ms ease;
+}
+
+.variation-card.active {
+    border: 2px solid #3b82f6;
+}
+
+.prompt-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.reference-image-card {
+    border-radius: 16px;
+    aspect-ratio: 16 / 9;
+    position: relative;
+    overflow: hidden;
+    transition: all 200ms ease;
+}
+
+.keyword-chips-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.keyword-chip,
+.chip-highlight {
+    border-radius: 9999px;
+    padding: 4px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 200ms ease;
+}
+
+.keyword-chip.active,
+.chip-highlight.active {
+    color: #ffffff;
+}
+
+.chip-static {
+    background: none;
+    background-color: transparent;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.prompt-narrative {
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.input-floating-shell {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 24px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.parameter-toolbar-chip {
+    border-radius: 9999px;
+    font-size: 12px;
+    padding: 4px 12px;
+    transition: all 200ms ease;
+}
+
+.badge-pro {
+    border-radius: 9999px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.badge-pink {
+    background-color: #fce7f3;
+    color: #be185d;
+}
+
+.badge-green {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+.badge-blue {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.rainbow-ring {
+    background: conic-gradient(#3b82f6, #f472b6, #fbbf24, #3b82f6);
+    border-radius: 50%;
+    padding: 2px;
+    display: inline-block;
+}
+
+.rainbow-ring-avatar {
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.credit-meter {
+    border-radius: 9999px;
+    padding: 4px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 200ms ease;
+}
+
+.credit-meter-text {
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.skeleton-pulse {
+    animation: pulse 1.2s ease-in-out infinite;
+    border-radius: 16px;
+}
+
+.btn-spinner {
+    width: 16px;
+    height: 16px;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.tooltip-box {
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: 400;
+    transition: opacity 150ms ease;
+}
+
+.info-card {
+    border-radius: 12px;
+    padding: 12px 18px;
+    font-size: 13px;
+    box-shadow: none;
+}

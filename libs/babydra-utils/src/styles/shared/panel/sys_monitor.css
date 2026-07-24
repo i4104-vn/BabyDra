@@ -1,0 +1,30 @@
+.sys-monitor-box {
+    background-image: none;
+    border-radius: 9999px;
+    padding: 3px 12px;
+    min-height: 24px;
+    box-shadow: none;
+    transition: all 200ms ease;
+}
+
+popover.sys-monitor-popover>contents {
+    padding: 14px;
+}
+
+popover.sys-monitor-popover progressbar trough {
+    min-height: 6px;
+    border-radius: 9999px;
+    border: none;
+}
+
+popover.sys-monitor-popover progressbar progress {
+    border-radius: 9999px;
+    background-color: #3b82f6;
+}
+
+popover.sys-monitor-popover .sys-chart {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    margin-top: 6px;
+    margin-bottom: 10px;
+}

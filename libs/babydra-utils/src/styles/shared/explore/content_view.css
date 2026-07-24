@@ -1,0 +1,158 @@
+.explore-window .content-view {
+    border-radius: 14px;
+    margin: 8px 8px 8px 4px;
+    box-shadow: none;
+}
+
+.explore-window .content-view viewport,
+.explore-window .content-view flowbox,
+.explore-window .content-view flowboxchild,
+.explore-window .content-view listbox,
+.explore-window .content-view row,
+.explore-window .content-view stack {
+    background-color: transparent;
+}
+
+.explore-window .section-title {
+    font-size: 15px;
+    font-weight: 600;
+    padding: 16px 20px 8px 20px;
+}
+
+.explore-window .subsection-tab-btn {
+    background: transparent;
+    border: none;
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    margin: 0 2px;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.explore-window .qa-card {
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 6px;
+    min-width: 180px;
+    transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.explore-window .qa-card-name {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.explore-window .qa-card-sub {
+    font-size: 11px;
+    margin-top: 2px;
+}
+
+.explore-window flowboxchild {
+    min-width: 114px;
+    max-width: 114px;
+    min-height: 114px;
+    max-height: 114px;
+    padding: 0;
+    margin: 4px;
+    border-radius: 12px;
+}
+
+.explore-window .file-item {
+    min-width: 114px;
+    max-width: 114px;
+    min-height: 114px;
+    max-height: 114px;
+    border-radius: 12px;
+    padding: 6px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.explore-window flowboxchild:selected {
+    background-color: transparent;
+    outline: none;
+}
+
+.explore-window row:selected {
+    background-color: transparent;
+    outline: none;
+}
+
+.explore-window .file-item-label {
+    font-size: 12px;
+}
+
+.explore-window .list-row {
+    background: transparent;
+    border-radius: 6px;
+    padding: 6px 12px;
+    margin: 1px 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.1s ease;
+}
+
+.explore-window .list-col-meta {
+    font-size: 12px;
+}
+
+.explore-window .icon-padding {
+    padding-top: 12px;
+    padding-bottom: 18px;
+}
+
+.explore-window .active-pane {
+    outline: none;
+}
+
+.explore-window .rubberband {
+    border-radius: 2px;
+}
+
+.explore-window .hidden-item {
+    opacity: 0.65;
+    transition: opacity 0.15s ease;
+}
+
+.explore-window .hidden-item:hover {
+    opacity: 0.85;
+}
+
+.explore-window .cut-item {
+    opacity: 0.45;
+    filter: saturate(0.4);
+    transition: opacity 0.15s ease, filter 0.15s ease;
+}
+
+.explore-window .cut-item:hover {
+    opacity: 0.6;
+}
+
+.explore-window .loading-label {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.explore-window .content-loading-progress {
+    margin: 0px;
+    padding: 0px;
+    border: none;
+    background: transparent;
+    border-bottom-left-radius: 13px;
+    border-bottom-right-radius: 13px;
+}
+
+.explore-window .content-loading-progress trough {
+    background-color: transparent;
+    border: none;
+    border-bottom-left-radius: 13px;
+    border-bottom-right-radius: 13px;
+    min-height: 3px;
+}
+
+.explore-window .content-loading-progress progress {
+    border: none;
+    border-bottom-left-radius: 13px;
+    border-bottom-right-radius: 13px;
+    min-height: 3px;
+}

@@ -1,36 +1,13 @@
 .workspace-box {
-    margin-left: 4px;
-    margin-right: 4px;
-    background-color: rgb(20, 20, 26);
-    background-image: none;
+    background-color: rgba(14, 14, 18, 0.96);
     border: 1px solid rgba(255, 255, 255, 0.10);
     border-top: 1px solid rgba(255, 255, 255, 0.20);
-    border-radius: 9999px;
-    padding: 3px 8px;
-    min-height: 24px;
-    box-shadow: none;
 }
 
 button.workspace-dot {
     background-color: rgba(255, 255, 255, 0.35);
-    background-image: none;
-    border: none;
-    border-radius: 9999px;
-    min-width: 6px;
-    min-height: 6px;
-    margin: 0px 3px;
-    padding: 0;
-    box-shadow: none;
 }
 
 button.workspace-dot:hover {
     background-color: rgba(255, 255, 255, 0.75);
-}
-
-button.workspace-dot.active {
-    background-color: #60a5fa;
-    background-color: #3b82f6;
-    min-width: 14px;
-    min-height: 6px;
-    box-shadow: none;
 }
