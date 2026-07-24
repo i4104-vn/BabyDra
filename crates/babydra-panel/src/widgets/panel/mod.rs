@@ -72,10 +72,6 @@ pub fn create_status_indicators(
     });
     status_button.add_controller(scroll_controller);
 
-    if let Some(settings) = gtk4::Settings::default() {
-        settings.set_property("gtk-tooltip-timeout", 50i32);
-        settings.set_property("gtk-tooltip-browse-timeout", 20i32);
-    }
 
     let motion_controller = gtk4::EventControllerMotion::new();
     let update_net_enter = update_network_tooltip.clone();
