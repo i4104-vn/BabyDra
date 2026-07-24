@@ -69,17 +69,21 @@ pub fn create_sidebar_item_button(
     css_class: &str,
     on_click: impl Fn() + 'static,
 ) -> gtk4::Button {
-    let hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
-    hbox.set_margin_start(8);
-    hbox.set_margin_end(8);
-    hbox.set_margin_top(1);
-    hbox.set_margin_bottom(1);
+    let hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+    hbox.set_margin_start(10);
+    hbox.set_margin_end(10);
+    hbox.set_margin_top(8);
+    hbox.set_margin_bottom(8);
 
     let img = crate::ui::icon::get_icon(icon_name, 18);
+    img.set_pixel_size(18);
+    img.set_valign(gtk4::Align::Center);
+    img.set_halign(gtk4::Align::Center);
 
     let lbl = gtk4::Label::builder()
         .label(name)
         .halign(gtk4::Align::Start)
+        .valign(gtk4::Align::Center)
         .hexpand(true)
         .build();
 

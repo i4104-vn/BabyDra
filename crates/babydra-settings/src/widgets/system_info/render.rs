@@ -1,4 +1,4 @@
-//! System specifications UI layout generator matching Windows 11 / About page layout.
+//! System specifications UI layout generator matching reference design Image 1.
 
 use gtk4::prelude::*;
 
@@ -10,121 +10,128 @@ pub fn build_system_ui(
     gpu_info: &str,
     memory_text: &str,
     disk_text: &str,
-    _disk_percent: f64,
+    disk_percent: f64,
 ) -> gtk4::Box {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 24);
 
-    // Breadcrumb Header (System > About)
-    let breadcrumb_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
-    breadcrumb_box.set_margin_bottom(4);
+    // Page Title
+    let page_title = gtk4::Label::new(Some("About System"));
+    page_title.add_css_class("settings-page-title");
+    page_title.set_halign(gtk4::Align::Start);
+    main_box.append(&page_title);
 
-    let bc_parent = gtk4::Label::new(Some("System"));
-    bc_parent.add_css_class("settings-breadcrumb-parent");
-    let bc_arrow = gtk4::Label::new(Some("›"));
-    bc_arrow.add_css_class("settings-breadcrumb-arrow");
-    let bc_current = gtk4::Label::new(Some("About"));
-    bc_current.add_css_class("settings-breadcrumb-current");
+    // ── Card 1: Top Hero Card (Avatar, OS Title, Storage Progress) ──
+    let hero_card = gtk4::Box::new(gtk4::Orientation::Horizontal, 24);
+    hero_card.add_css_class("glass-panel");
+    hero_card.set_margin_top(4);
+    hero_card.set_margin_bottom(4);
+    hero_card.set_margin_start(4);
+    hero_card.set_margin_end(4);
 
-    breadcrumb_box.append(&bc_parent);
-    breadcrumb_box.append(&bc_arrow);
-    breadcrumb_box.append(&bc_current);
-    breadcrumb_box.set_halign(gtk4::Align::Start);
-    main_box.append(&breadcrumb_box);
+    // Mascot / Avatar Container
+    let avatar_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    avatar_box.add_css_class("hero-avatar-box");
+    avatar_box.set_size_request(100, 100);
+    avatar_box.set_valign(gtk4::Align::Center);
 
-    // ── Card 1: Top Host Header Card ───────────────────────────
-    let host_card = babydra_utils::components::create_card(gtk4::Orientation::Horizontal, 20);
-    host_card.add_css_class("settings-card");
+    let avatar_img = babydra_utils::ui::icon::get_icon("logo", 96);
+    avatar_img.set_pixel_size(96);
+    avatar_img.set_valign(gtk4::Align::Center);
+    avatar_img.set_halign(gtk4::Align::Center);
+    avatar_box.append(&avatar_img);
+    hero_card.append(&avatar_box);
 
-    let logo_container = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
-    logo_container.add_css_class("os-logo");
-    logo_container.set_valign(gtk4::Align::Center);
-    logo_container.set_margin_start(4);
+    // Right Side Information
+    let info_box = gtk4::Box::new(gtk4::Orientation::Vertical, 12);
+    info_box.set_hexpand(true);
+    info_box.set_valign(gtk4::Align::Center);
 
-    let logo_img = babydra_utils::ui::icon::get_icon("logo", 48);
-    logo_img.set_pixel_size(48);
-    logo_img.set_valign(gtk4::Align::Center);
-    logo_img.set_halign(gtk4::Align::Center);
-    logo_container.append(&logo_img);
-    host_card.append(&logo_container);
+    // Hostname / OS Header
+    let display_title = if !hostname.is_empty() && hostname != "localhost" {
+        format!("{} - {} {}", hostname, os_name, kernel_version)
+    } else {
+        format!("{} - Linux {}", os_name, kernel_version)
+    };
 
-    let host_info_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
-    host_info_box.set_hexpand(true);
-    host_info_box.set_valign(gtk4::Align::Center);
+    let title_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    let os_label = gtk4::Label::new(Some(&display_title));
+    os_label.add_css_class("hero-hostname");
+    os_label.set_halign(gtk4::Align::Start);
+    os_label.set_hexpand(true);
+    title_row.append(&os_label);
 
-    let hostname_lbl = gtk4::Label::new(Some(hostname));
-    hostname_lbl.add_css_class("hero-hostname");
-    hostname_lbl.set_halign(gtk4::Align::Start);
-    host_info_box.append(&hostname_lbl);
+    let disk_stats_lbl = gtk4::Label::new(Some(disk_text));
+    disk_stats_lbl.add_css_class("hero-stats-label");
+    disk_stats_lbl.set_halign(gtk4::Align::End);
+    title_row.append(&disk_stats_lbl);
 
-    let os_sub_lbl = gtk4::Label::new(Some(&format!("{} • {}", os_name, kernel_version)));
-    os_sub_lbl.add_css_class("settings-row-desc");
-    os_sub_lbl.set_halign(gtk4::Align::Start);
-    host_info_box.append(&os_sub_lbl);
-    host_card.append(&host_info_box);
+    info_box.append(&title_row);
 
-    main_box.append(&host_card);
+    // Disk Progress Bar
+    let progress_bar = gtk4::ProgressBar::new();
+    progress_bar.add_css_class("disk-progress");
+    progress_bar.set_fraction(disk_percent / 100.0);
+    progress_bar.set_hexpand(true);
+    info_box.append(&progress_bar);
 
-    // ── Card 2: Device Specifications Group Card ───────────────
-    let dev_group_card = babydra_utils::components::create_card(gtk4::Orientation::Vertical, 0);
-    dev_group_card.add_css_class("settings-card");
+    hero_card.append(&info_box);
+    main_box.append(&hero_card);
 
-    let dev_header_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    dev_header_row.set_margin_top(16);
-    dev_header_row.set_margin_bottom(16);
-    dev_header_row.set_margin_start(16);
+    // ── 2x2 Grid of Hardware Spec Cards ─────────────────────────
+    let grid = gtk4::Grid::new();
+    grid.set_column_spacing(20);
+    grid.set_row_spacing(20);
+    grid.set_column_homogeneous(true);
 
-    let dev_icon = babydra_utils::ui::icon::get_icon("info", 20);
-    dev_icon.set_valign(gtk4::Align::Center);
-    dev_icon.add_css_class("settings-row-icon");
-    dev_header_row.append(&dev_icon);
-
-    let dev_header_title = gtk4::Label::new(Some("Device specifications"));
-    dev_header_title.add_css_class("settings-group-header-title");
-    dev_header_title.set_halign(gtk4::Align::Start);
-    dev_header_title.set_valign(gtk4::Align::Start);
-    dev_header_row.append(&dev_header_title);
-
-    dev_group_card.append(&dev_header_row);
-
-    // Device Specs Grid (Key-Value aligned without RAM wrapping)
-    let dev_specs_grid = gtk4::Grid::new();
-    dev_specs_grid.set_column_spacing(32);
-    dev_specs_grid.set_row_spacing(16);
-    dev_specs_grid.set_margin_start(24);
-    dev_specs_grid.set_margin_bottom(24);
-
-    let dev_rows = [
-        ("Edition", os_name.to_string()),
-        ("RAM", memory_text.to_string()),
-        ("Storage", disk_text.to_string()),
-        ("Processor", cpu_model.to_string()),
-        ("Graphics", gpu_info.to_string()),
+    let specs = [
+        ("cog", "KERNEL", kernel_version),
+        ("sliders", "PROCESSOR", cpu_model),
+        ("history", "MEMORY", memory_text),
+        ("palette", "GRAPHICS", gpu_info),
     ];
 
-    for (idx, (key, val)) in dev_rows.iter().enumerate() {
-        let key_lbl = gtk4::Label::new(Some(*key));
-        key_lbl.add_css_class("settings-row-desc");
-        key_lbl.set_halign(gtk4::Align::Start);
-        key_lbl.set_valign(gtk4::Align::Start);
-        key_lbl.set_width_request(80);
+    for (idx, (icon_name, label, value)) in specs.iter().enumerate() {
+        let card = gtk4::Box::new(gtk4::Orientation::Vertical, 12);
+        card.add_css_class("spec-card");
+        card.set_halign(gtk4::Align::Fill);
+        card.set_valign(gtk4::Align::Fill);
 
-        let val_lbl = gtk4::Label::new(Some(val));
-        val_lbl.add_css_class("settings-row-title");
-        val_lbl.set_halign(gtk4::Align::Start);
-        val_lbl.set_valign(gtk4::Align::Start);
-        val_lbl.set_selectable(false);
-        if *key == "Processor" || *key == "Graphics" {
-            val_lbl.set_wrap(true);
-        } else {
-            val_lbl.set_wrap(false);
-        }
+        // Centered Blue Icon Badge
+        let icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+        icon_badge.add_css_class("blue-icon-badge");
+        icon_badge.set_halign(gtk4::Align::Center);
+        icon_badge.set_valign(gtk4::Align::Center);
+        icon_badge.set_size_request(44, 44);
 
-        dev_specs_grid.attach(&key_lbl, 0, idx as i32, 1, 1);
-        dev_specs_grid.attach(&val_lbl, 1, idx as i32, 1, 1);
+        let icon_img = babydra_utils::ui::icon::get_icon(icon_name, 22);
+        icon_img.set_pixel_size(22);
+        icon_img.set_vexpand(true);
+        icon_img.set_hexpand(true);
+        icon_img.set_valign(gtk4::Align::Center);
+        icon_img.set_halign(gtk4::Align::Center);
+        icon_badge.append(&icon_img);
+        card.append(&icon_badge);
+
+        // Label (e.g. KERNEL, PROCESSOR, MEMORY, GRAPHICS)
+        let label_widget = gtk4::Label::new(Some(*label));
+        label_widget.add_css_class("spec-label");
+        label_widget.set_halign(gtk4::Align::Center);
+        card.append(&label_widget);
+
+        // Value (e.g. Linux 7.1.3-arch1-1, Intel Core i5...)
+        let value_widget = gtk4::Label::new(Some(*value));
+        value_widget.add_css_class("spec-value");
+        value_widget.set_halign(gtk4::Align::Center);
+        value_widget.set_justify(gtk4::Justification::Center);
+        value_widget.set_wrap(true);
+        card.append(&value_widget);
+
+        let col = (idx % 2) as i32;
+        let row = (idx / 2) as i32;
+        grid.attach(&card, col, row, 1, 1);
     }
 
-    dev_group_card.append(&dev_specs_grid);
-    main_box.append(&dev_group_card);
-
+    main_box.append(&grid);
     main_box
 }
+

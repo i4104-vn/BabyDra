@@ -1,20 +1,28 @@
 switch {
-    min-width: 28px;
-    min-height: 16px;
+    min-width: 38px;
+    min-height: 20px;
     border-radius: 20px;
-    transition: all 150ms ease;
+    background-color: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transition: all 200ms ease;
 }
 
 switch slider {
-    min-width: 12px;
-    min-height: 12px;
+    min-width: 16px;
+    min-height: 16px;
     border-radius: 50%;
     background-color: #ffffff;
-    margin: 1px;
-    transition: all 150ms ease;
+    margin: 2px;
+    transition: all 200ms ease;
 }
 
 switch:checked {
     background-color: #3b82f6;
     border-color: #3b82f6;
 }
+
+switch:checked slider {
+    background-color: #1a1a24;
+}
+
+

@@ -62,9 +62,10 @@ pub fn scan_networks() -> Vec<(String, String, String, bool)> {
     std::thread::sleep(std::time::Duration::from_millis(300));
 
     let active_ap_path = wifi_dev.active_access_point().ok();
-
     let aps = wifi_dev.get_access_points().unwrap_or_default();
-    let mut seen_ssids = std::collections::HashSet::new();
+
+    // Map SSID -> (Security, Signal Strength, IsConnected)
+    let mut ap_map: std::collections::HashMap<String, (String, u32, bool)> = std::collections::HashMap::new();
 
     for ap_path in aps {
         if let Some(ap) = AccessPointProxyBlocking::builder(&conn).path(ap_path.clone()).ok().and_then(|b| b.build().ok()) {
@@ -74,11 +75,7 @@ pub fn scan_networks() -> Vec<(String, String, String, bool)> {
                 continue;
             }
 
-            if !seen_ssids.insert(ssid.clone()) {
-                continue;
-            }
-
-            let signal = ap.strength().unwrap_or(0).to_string();
+            let signal = ap.strength().unwrap_or(0) as u32;
             let wpa = ap.wpa_flags().unwrap_or(0);
             let rsn = ap.rsn_flags().unwrap_or(0);
 
@@ -91,8 +88,35 @@ pub fn scan_networks() -> Vec<(String, String, String, bool)> {
             };
 
             let is_connected = active_ap_path.as_ref().map(|path| path == &ap_path).unwrap_or(false);
-            networks.push((ssid, security, signal, is_connected));
+
+            ap_map.entry(ssid.clone())
+                .and_modify(|(sec, sig, conn_flag)| {
+                    if is_connected {
+                        *conn_flag = true;
+                    }
+                    if signal > *sig {
+                        *sig = signal;
+                        *sec = security.clone();
+                    }
+                })
+                .or_insert((security, signal, is_connected));
         }
     }
+
+    for (ssid, (security, signal, is_connected)) in ap_map {
+        networks.push((ssid, security, signal.to_string(), is_connected));
+    }
+
+    // Sort: Connected Wi-Fi at top (index 0), then descending signal strength
+    networks.sort_by(|a, b| {
+        if a.3 != b.3 {
+            b.3.cmp(&a.3)
+        } else {
+            let sig_a: u32 = a.2.parse().unwrap_or(0);
+            let sig_b: u32 = b.2.parse().unwrap_or(0);
+            sig_b.cmp(&sig_a)
+        }
+    });
+
     networks
 }

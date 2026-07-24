@@ -21,16 +21,19 @@ window.settings-window>overlay>box {
     margin: 4px 8px 8px 8px;
 }
 
-.sidebar-search-entry,
-.sidebar-search-entry>text {
-    border-radius: 8px;
+entry.sidebar-search-entry {
+    border-radius: 10px;
     font-size: 12px;
-    padding: 8px 12px;
+    padding: 0;
+    min-height: 32px;
 }
 
-.sidebar-search-entry:focus,
-.sidebar-search-entry>text:focus {
-    border-color: #3b82f6;
+entry.sidebar-search-entry > text {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 6px 12px;
+    border-radius: 10px;
 }
 
 .settings-content {

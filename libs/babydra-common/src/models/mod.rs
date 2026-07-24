@@ -13,6 +13,11 @@ pub mod network;
 pub mod battery;
 pub mod power;
 
+pub mod display;
+pub mod app_info;
+pub mod system_update;
+pub mod startup_command;
+
 pub use theme_config::ThemeConfig;
 pub use shell_config::ShellConfig;
 pub use island_state::IslandState;
@@ -25,3 +30,9 @@ pub use explore::{FileEntry, FileType, DirectoryModel, SortColumn, SortOrder, Ta
 pub use network::{NetStats, NetSpeed};
 pub use battery::BatteryInfo;
 pub use power::PerformanceProfile;
+pub use display::MonitorConfig;
+pub use app_info::{InstalledApp, InstalledPackage};
+pub use system_update::PackageUpdate;
+pub use startup_command::StartupCommand;
+
+

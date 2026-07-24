@@ -83,124 +83,70 @@ pub fn create_wifi_widget() -> gtk4::Box {
                 return;
             }
 
-            for (ssid, security, strength, is_connected) in &st.networks {
+            for (ssid, security, _strength, is_connected) in &st.networks {
                 let row = gtk4::ListBoxRow::new();
                 row.add_css_class("settings-card-row");
 
-                let hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-                hbox.set_margin_top(10);
-                hbox.set_margin_bottom(10);
+                let hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 14);
+                hbox.set_margin_top(12);
+                hbox.set_margin_bottom(12);
                 hbox.set_margin_start(16);
                 hbox.set_margin_end(16);
 
-                let wifi_icon = babydra_utils::ui::icon::get_icon("wifi", 16);
-                wifi_icon.set_pixel_size(16);
-                wifi_icon.set_valign(gtk4::Align::Center);
-                wifi_icon.add_css_class("settings-row-icon");
-                hbox.append(&wifi_icon);
+                // Blue Rounded Square Badge with Wi-Fi Icon
+                let icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+                icon_badge.add_css_class("blue-icon-badge-sm");
+                icon_badge.set_valign(gtk4::Align::Center);
+                icon_badge.set_halign(gtk4::Align::Start);
 
-                let text_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-                text_box.set_valign(gtk4::Align::Center);
-                text_box.set_hexpand(true);
+                let wifi_icon = babydra_utils::ui::icon::get_icon("wifi", 18);
+                wifi_icon.set_pixel_size(18);
+                wifi_icon.set_valign(gtk4::Align::Center);
+                wifi_icon.set_halign(gtk4::Align::Center);
+                wifi_icon.set_vexpand(true);
+                icon_badge.append(&wifi_icon);
+                hbox.append(&icon_badge);
+
+                // SSID Title + Lock Icon Row (Aligned to Left)
+                let name_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+                name_box.set_valign(gtk4::Align::Center);
+                name_box.set_halign(gtk4::Align::Start);
+                name_box.set_hexpand(true);
 
                 let ssid_lbl = gtk4::Label::new(Some(ssid));
                 ssid_lbl.add_css_class("settings-row-title");
                 ssid_lbl.set_halign(gtk4::Align::Start);
-                text_box.append(&ssid_lbl);
+                ssid_lbl.set_valign(gtk4::Align::Center);
+                name_box.append(&ssid_lbl);
 
-                let sec_text = if security == "open" {
-                    format!("Mạng mở • Tín hiệu {}%", strength)
-                } else {
-                    format!("Bảo mật ({}) • Tín hiệu {}%", security.to_uppercase(), strength)
-                };
-                let sec_lbl = gtk4::Label::new(Some(&sec_text));
-                sec_lbl.add_css_class("settings-row-desc");
-                sec_lbl.set_halign(gtk4::Align::Start);
-                text_box.append(&sec_lbl);
-
-                hbox.append(&text_box);
-
-                if *is_connected {
-                    let connected_badge = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
-                    connected_badge.add_css_class("connected-pill");
-                    connected_badge.set_valign(gtk4::Align::Center);
-
-                    let check_icon = babydra_utils::ui::icon::get_icon("check", 14);
-                    check_icon.set_pixel_size(14);
-                    connected_badge.append(&check_icon);
-
-                    let connected_lbl = gtk4::Label::new(Some("Đã kết nối"));
-                    connected_lbl.add_css_class("connected-text");
-                    connected_badge.append(&connected_lbl);
-
-                    hbox.append(&connected_badge);
-                } else {
-                    let connect_btn = gtk4::Button::with_label("Kết nối");
-                    connect_btn.set_valign(gtk4::Align::Center);
-                    connect_btn.add_css_class("connect-pill-btn");
-
-                    let ssid_clone = ssid.clone();
-                    let security_clone = security.clone();
-                    let list_box_parent = list_box_clone.clone();
-                    connect_btn.connect_clicked(move |_| {
-                        if security_clone == "open" {
-                            let _ = babydra_common::helper::wifi::connect_wifi(&ssid_clone, None, None);
-                        } else {
-                            if let Some(win) = list_box_parent.root().and_then(|r| r.downcast::<gtk4::Window>().ok()) {
-                                let dialog = gtk4::Dialog::with_buttons(
-                                    Some(&format!("Kết nối đến {}", ssid_clone)),
-                                    Some(&win),
-                                    gtk4::DialogFlags::MODAL,
-                                    &[("Hủy", gtk4::ResponseType::Cancel), ("Kết nối", gtk4::ResponseType::Accept)],
-                                );
-
-                                let content_area = dialog.content_area();
-                                content_area.set_margin_top(12);
-                                content_area.set_margin_bottom(12);
-                                content_area.set_margin_start(12);
-                                content_area.set_margin_end(12);
-                                content_area.set_spacing(10);
-
-                                let user_entry = if security_clone == "8021x" {
-                                    let user_lbl = gtk4::Label::new(Some("Tài khoản (Identity):"));
-                                    user_lbl.set_halign(gtk4::Align::Start);
-                                    content_area.append(&user_lbl);
-
-                                    let entry = gtk4::Entry::new();
-                                    content_area.append(&entry);
-                                    Some(entry)
-                                } else {
-                                    None
-                                };
-
-                                let entry_lbl = gtk4::Label::new(Some("Nhập mật khẩu cho mạng này:"));
-                                entry_lbl.set_halign(gtk4::Align::Start);
-                                content_area.append(&entry_lbl);
-
-                                let pw_entry = gtk4::Entry::new();
-                                pw_entry.set_visibility(false);
-                                content_area.append(&pw_entry);
-
-                                let ssid_btn = ssid_clone.clone();
-                                let user_entry_btn = user_entry.clone();
-                                dialog.connect_response(move |d, res| {
-                                    if res == gtk4::ResponseType::Accept {
-                                        let password = pw_entry.text().to_string();
-                                        let username = user_entry_btn.as_ref().map(|e| e.text().to_string());
-                                        let _ = babydra_common::helper::wifi::connect_wifi(
-                                            &ssid_btn,
-                                            username.as_deref(),
-                                            Some(&password),
-                                        );
-                                    }
-                                    d.destroy();
-                                });
-                                dialog.present();
-                            }
-                        }
-                    });
-                    hbox.append(&connect_btn);
+                if security != "open" {
+                    let lock_icon = babydra_utils::ui::icon::get_icon("lock", 12);
+                    lock_icon.set_pixel_size(12);
+                    lock_icon.add_css_class("settings-row-desc");
+                    lock_icon.set_valign(gtk4::Align::Center);
+                    name_box.append(&lock_icon);
                 }
+
+                hbox.append(&name_box);
+
+                // Checkmark for Active/Connected Network
+                if *is_connected {
+                    let check_icon = babydra_utils::ui::icon::get_icon("check", 18);
+                    check_icon.set_pixel_size(18);
+                    check_icon.set_valign(gtk4::Align::Center);
+                    check_icon.add_css_class("connected-text");
+                    hbox.append(&check_icon);
+                }
+
+                // (i) Info Button on Right
+                let info_btn = gtk4::Button::new();
+                info_btn.add_css_class("icon-btn");
+                info_btn.set_valign(gtk4::Align::Center);
+
+                let info_icon = babydra_utils::ui::icon::get_icon("info", 16);
+                info_icon.set_pixel_size(16);
+                info_btn.set_child(Some(&info_icon));
+                hbox.append(&info_btn);
 
                 row.set_child(Some(&hbox));
                 list_box_clone.append(&row);
