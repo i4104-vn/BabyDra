@@ -1,59 +1,5 @@
 use gtk4::prelude::*;
-use gtk4_layer_shell::{KeyboardMode, Layer, Edge, LayerShell};
-
-#[derive(Debug, Clone, Copy)]
-pub struct BatteryInfo {
-    pub percentage: u32,
-    pub is_charging: bool,
-}
-
-pub fn get_battery_info() -> Option<BatteryInfo> {
-    let power_dir = std::path::Path::new("/sys/class/power_supply");
-    if !power_dir.exists() { return None; }
-    if let Ok(entries) = std::fs::read_dir(power_dir) {
-        for entry in entries.flatten() {
-            let path = entry.path();
-            if let Ok(kind) = std::fs::read_to_string(path.join("type")) {
-                if kind.trim() == "Battery" {
-                    if let Ok(scope) = std::fs::read_to_string(path.join("scope")) {
-                        if scope.trim().eq_ignore_ascii_case("Device") {
-                            continue;
-                        }
-                    }
-                    let mut capacity_opt = std::fs::read_to_string(path.join("capacity"))
-                        .ok()
-                        .and_then(|s| s.trim().parse::<u32>().ok());
-                    
-                    if capacity_opt.is_none() {
-                        let energy_now = std::fs::read_to_string(path.join("energy_now"))
-                            .or_else(|_| std::fs::read_to_string(path.join("charge_now")))
-                            .ok()
-                            .and_then(|s| s.trim().parse::<f64>().ok());
-                        let energy_full = std::fs::read_to_string(path.join("energy_full"))
-                            .or_else(|_| std::fs::read_to_string(path.join("charge_full")))
-                            .ok()
-                            .and_then(|s| s.trim().parse::<f64>().ok());
-                        if let (Some(now), Some(full)) = (energy_now, energy_full) {
-                            if full > 0.0 {
-                                capacity_opt = Some(((now / full) * 100.0) as u32);
-                            }
-                        }
-                    }
-
-                    let capacity = capacity_opt.unwrap_or(100);
-                    let status = std::fs::read_to_string(path.join("status"))
-                        .unwrap_or_default();
-                    let is_charging = status.trim().eq_ignore_ascii_case("Charging");
-                    return Some(BatteryInfo {
-                        percentage: capacity.min(100),
-                        is_charging,
-                    });
-                }
-            }
-        }
-    }
-    None
-}
+pub use babydra_common::get_battery_info;
 
 fn draw_rounded_rectangle(cr: &gtk4::cairo::Context, x: f64, y: f64, w: f64, h: f64, r: f64) {
     let degrees = std::f64::consts::PI / 180.0;
@@ -188,33 +134,4 @@ pub fn build_status_indicators_ui() -> (gtk4::Box, gtk4::Button, gtk4::Label, gt
     separator.add_css_class("capsule-separator");
 
     (status_box, status_button, separator, vol_icon, net_icon, bat_widget)
-}
-
-pub fn build_control_center_window_ui(
-    app: &gtk4::Application,
-) -> (gtk4::ApplicationWindow, gtk4::Box) {
-    let q_win = gtk4::ApplicationWindow::new(app);
-    babydra_utils::ui::theme::apply_theme_class(&q_win);
-    q_win.init_layer_shell();
-    q_win.set_layer(Layer::Overlay);
-    q_win.set_keyboard_mode(KeyboardMode::OnDemand);
-
-    // Anchor to all 4 edges to cover the entire screen transparently
-    q_win.set_anchor(Edge::Top, true);
-    q_win.set_anchor(Edge::Bottom, true);
-    q_win.set_anchor(Edge::Left, true);
-    q_win.set_anchor(Edge::Right, true);
-    q_win.add_css_class("control-center-window");
-
-    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 14);
-    main_box.add_css_class("control-center-box");
-    main_box.set_halign(gtk4::Align::End);
-    main_box.set_valign(gtk4::Align::Start);
-    main_box.set_size_request(360, 480);
-    main_box.set_margin_top(6);
-    main_box.set_margin_end(12);
-
-    q_win.set_child(Some(&main_box));
-
-    (q_win, main_box)
 }
