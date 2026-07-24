@@ -2,18 +2,7 @@
 
 use std::sync::Mutex;
 use std::time::Instant;
-
-#[derive(Clone, Debug, Default)]
-pub struct NetStats {
-    pub rx_bytes: u64,
-    pub tx_bytes: u64,
-}
-
-#[derive(Clone, Debug)]
-pub struct NetSpeed {
-    pub rx_speed: f64,
-    pub tx_speed: f64,
-}
+pub use crate::models::{NetStats, NetSpeed};
 
 static LAST_NET_STATS: Mutex<Option<(Instant, NetStats)>> = Mutex::new(None);
 
