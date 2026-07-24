@@ -26,10 +26,16 @@ pub fn create_vpn_widget() -> gtk4::Box {
             if vpns.is_empty() {
                 let row = gtk4::ListBoxRow::new();
                 row.add_css_class("settings-card-row");
+                row.set_selectable(false);
+                row.set_activatable(false);
+                row.set_vexpand(true);
+                row.set_valign(gtk4::Align::Fill);
 
-                let placeholder_box = gtk4::Box::new(gtk4::Orientation::Vertical, 12);
+                let placeholder_box = gtk4::Box::new(gtk4::Orientation::Vertical, 14);
                 placeholder_box.set_valign(gtk4::Align::Center);
                 placeholder_box.set_halign(gtk4::Align::Center);
+                placeholder_box.set_vexpand(true);
+                placeholder_box.set_hexpand(true);
                 placeholder_box.set_margin_top(48);
                 placeholder_box.set_margin_bottom(48);
 

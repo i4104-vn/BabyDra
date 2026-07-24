@@ -41,14 +41,17 @@ pub fn build_vpn_ui() -> (gtk4::Box, gtk4::Switch, gtk4::Button, gtk4::ListBox) 
     overlay.set_vexpand(true);
     overlay.set_hexpand(true);
 
-    // Glass Panel List Container
+    // Glass Panel List Container (Fills Full Height)
     let list_box = gtk4::ListBox::new();
     list_box.add_css_class("glass-panel");
     list_box.set_selection_mode(gtk4::SelectionMode::None);
+    list_box.set_vexpand(true);
+    list_box.set_valign(gtk4::Align::Fill);
 
     let scroll = gtk4::ScrolledWindow::new();
     scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
     scroll.set_vexpand(true);
+    scroll.set_valign(gtk4::Align::Fill);
     scroll.set_child(Some(&list_box));
 
     overlay.set_child(Some(&scroll));

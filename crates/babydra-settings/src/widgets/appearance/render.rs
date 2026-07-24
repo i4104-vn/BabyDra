@@ -1,4 +1,4 @@
-//! Appearance UI layout generator matching reference design Image 3.
+//! Appearance UI layout generator with local ~/.babydra/wallpaper grid.
 
 use gtk4::prelude::*;
 
@@ -13,7 +13,7 @@ pub fn build_appearance_ui(
     gtk4::Button,
     gtk4::Button,
     gtk4::Button,
-    gtk4::DropDown,
+    gtk4::Box,
 ) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 20);
 
@@ -61,7 +61,7 @@ pub fn build_appearance_ui(
         preview_img.set_halign(gtk4::Align::Center);
         preview_box.append(&preview_img);
     } else {
-        let question_icon = babydra_utils::ui::icon::get_icon("help", 32);
+        let question_icon = babydra_utils::ui::icon::get_icon("display", 32);
         question_icon.set_pixel_size(32);
         question_icon.set_valign(gtk4::Align::Center);
         question_icon.set_halign(gtk4::Align::Center);
@@ -175,25 +175,12 @@ pub fn build_appearance_ui(
     quick_lbl.set_halign(gtk4::Align::Start);
     dashboard_panel.append(&quick_lbl);
 
-    // Warning Alert Card (Matching Image 3)
-    let warning_card = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
-    warning_card.add_css_class("warning-alert-card");
-    warning_card.set_halign(gtk4::Align::Fill);
-    warning_card.set_valign(gtk4::Align::Center);
+    // Quick Select Box container for ~/.babydra/wallpaper grid
+    let quick_select_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    quick_select_box.set_margin_top(8);
+    dashboard_panel.append(&quick_select_box);
 
-    let warn_icon = babydra_utils::ui::icon::get_icon("warning", 28);
-    warn_icon.set_pixel_size(28);
-    warn_icon.set_halign(gtk4::Align::Center);
-    warning_card.append(&warn_icon);
-
-    let warn_msg = gtk4::Label::new(Some("Failed to load wallpapers from online source."));
-    warn_msg.set_halign(gtk4::Align::Center);
-    warning_card.append(&warn_msg);
-
-    dashboard_panel.append(&warning_card);
     main_box.append(&dashboard_panel);
-
-    let dummy_dropdown = gtk4::DropDown::from_strings(&["Default"]);
 
     (
         main_box,
@@ -201,7 +188,6 @@ pub fn build_appearance_ui(
         pick_btn,
         light_card,
         dark_card,
-        dummy_dropdown,
+        quick_select_box,
     )
 }
-

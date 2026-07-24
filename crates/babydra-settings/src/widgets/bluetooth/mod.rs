@@ -37,23 +37,37 @@ pub fn create_bluetooth_widget() -> gtk4::Box {
             if !st.enabled {
                 let row = gtk4::ListBoxRow::new();
                 row.add_css_class("settings-card-row");
+                row.set_selectable(false);
+                row.set_activatable(false);
+                row.set_vexpand(true);
+                row.set_valign(gtk4::Align::Fill);
 
-                let placeholder_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
+                let placeholder_box = gtk4::Box::new(gtk4::Orientation::Vertical, 14);
                 placeholder_box.set_valign(gtk4::Align::Center);
                 placeholder_box.set_halign(gtk4::Align::Center);
-                placeholder_box.set_margin_top(30);
-                placeholder_box.set_margin_bottom(30);
+                placeholder_box.set_vexpand(true);
+                placeholder_box.set_hexpand(true);
+                placeholder_box.set_margin_top(48);
+                placeholder_box.set_margin_bottom(48);
+
+                let icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+                icon_badge.add_css_class("blue-icon-badge");
+                icon_badge.set_valign(gtk4::Align::Center);
+                icon_badge.set_halign(gtk4::Align::Center);
 
                 let bt_icon = babydra_utils::ui::icon::get_icon("bluetooth", 24);
                 bt_icon.set_pixel_size(24);
-                bt_icon.add_css_class("settings-row-icon");
-                placeholder_box.append(&bt_icon);
+                bt_icon.set_valign(gtk4::Align::Center);
+                bt_icon.set_halign(gtk4::Align::Center);
+                bt_icon.set_vexpand(true);
+                icon_badge.append(&bt_icon);
+                placeholder_box.append(&icon_badge);
 
-                let lbl = gtk4::Label::new(Some("Bluetooth đang tắt"));
+                let lbl = gtk4::Label::new(Some("Bluetooth is turned off"));
                 lbl.add_css_class("settings-row-title");
                 placeholder_box.append(&lbl);
 
-                let desc = gtk4::Label::new(Some("Bật công tắc phía trên để kết nối các thiết bị ngoại vi"));
+                let desc = gtk4::Label::new(Some("Toggle the switch above to enable Bluetooth and discover devices"));
                 desc.add_css_class("settings-row-desc");
                 placeholder_box.append(&desc);
 
@@ -65,21 +79,39 @@ pub fn create_bluetooth_widget() -> gtk4::Box {
             if st.devices.is_empty() {
                 let row = gtk4::ListBoxRow::new();
                 row.add_css_class("settings-card-row");
+                row.set_selectable(false);
+                row.set_activatable(false);
+                row.set_vexpand(true);
+                row.set_valign(gtk4::Align::Fill);
 
-                let placeholder_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
+                let placeholder_box = gtk4::Box::new(gtk4::Orientation::Vertical, 14);
                 placeholder_box.set_valign(gtk4::Align::Center);
                 placeholder_box.set_halign(gtk4::Align::Center);
-                placeholder_box.set_margin_top(30);
-                placeholder_box.set_margin_bottom(30);
+                placeholder_box.set_vexpand(true);
+                placeholder_box.set_hexpand(true);
+                placeholder_box.set_margin_top(48);
+                placeholder_box.set_margin_bottom(48);
+
+                let icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+                icon_badge.add_css_class("blue-icon-badge");
+                icon_badge.set_valign(gtk4::Align::Center);
+                icon_badge.set_halign(gtk4::Align::Center);
 
                 let bt_icon = babydra_utils::ui::icon::get_icon("bluetooth", 24);
                 bt_icon.set_pixel_size(24);
-                bt_icon.add_css_class("settings-row-icon");
-                placeholder_box.append(&bt_icon);
+                bt_icon.set_valign(gtk4::Align::Center);
+                bt_icon.set_halign(gtk4::Align::Center);
+                bt_icon.set_vexpand(true);
+                icon_badge.append(&bt_icon);
+                placeholder_box.append(&icon_badge);
 
-                let lbl = gtk4::Label::new(Some("Không tìm thấy thiết bị nào đã lưu"));
+                let lbl = gtk4::Label::new(Some("No paired Bluetooth devices found"));
                 lbl.add_css_class("settings-row-title");
                 placeholder_box.append(&lbl);
+
+                let desc = gtk4::Label::new(Some("Make sure your Bluetooth device is turned on and ready to pair"));
+                desc.add_css_class("settings-row-desc");
+                placeholder_box.append(&desc);
 
                 row.set_child(Some(&placeholder_box));
                 list_box_clone.append(&row);
@@ -90,20 +122,30 @@ pub fn create_bluetooth_widget() -> gtk4::Box {
                 let row = gtk4::ListBoxRow::new();
                 row.add_css_class("settings-card-row");
 
-                let hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-                hbox.set_margin_top(10);
-                hbox.set_margin_bottom(10);
+                let hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 14);
+                hbox.set_margin_top(12);
+                hbox.set_margin_bottom(12);
                 hbox.set_margin_start(16);
                 hbox.set_margin_end(16);
 
-                let icon = babydra_utils::ui::icon::get_icon("bluetooth", 16);
-                icon.set_pixel_size(16);
-                icon.set_valign(gtk4::Align::Center);
-                icon.add_css_class("settings-row-icon");
-                hbox.append(&icon);
+                // Blue Rounded Square Badge with Bluetooth Icon (Matching Wi-Fi)
+                let icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+                icon_badge.add_css_class("blue-icon-badge-sm");
+                icon_badge.set_valign(gtk4::Align::Center);
+                icon_badge.set_halign(gtk4::Align::Start);
 
+                let icon = babydra_utils::ui::icon::get_icon("bluetooth", 18);
+                icon.set_pixel_size(18);
+                icon.set_valign(gtk4::Align::Center);
+                icon.set_halign(gtk4::Align::Center);
+                icon.set_vexpand(true);
+                icon_badge.append(&icon);
+                hbox.append(&icon_badge);
+
+                // Device Name + MAC (Aligned Left)
                 let text_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
                 text_box.set_valign(gtk4::Align::Center);
+                text_box.set_halign(gtk4::Align::Start);
                 text_box.set_hexpand(true);
 
                 let name_lbl = gtk4::Label::new(Some(&dev.name));
@@ -119,21 +161,17 @@ pub fn create_bluetooth_widget() -> gtk4::Box {
                 hbox.append(&text_box);
 
                 if dev.connected {
-                    let connected_badge = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
-                    connected_badge.add_css_class("connected-pill");
-                    connected_badge.set_valign(gtk4::Align::Center);
+                    // Connected Checkmark Badge (Matching Wi-Fi)
+                    let check_badge = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+                    check_badge.add_css_class("active-check-badge");
+                    check_badge.set_valign(gtk4::Align::Center);
 
                     let check_icon = babydra_utils::ui::icon::get_icon("check", 14);
                     check_icon.set_pixel_size(14);
-                    connected_badge.append(&check_icon);
+                    check_badge.append(&check_icon);
+                    hbox.append(&check_badge);
 
-                    let connected_lbl = gtk4::Label::new(Some("Đã kết nối"));
-                    connected_lbl.add_css_class("connected-text");
-                    connected_badge.append(&connected_lbl);
-
-                    hbox.append(&connected_badge);
-
-                    let disconnect_btn = gtk4::Button::with_label("Ngắt");
+                    let disconnect_btn = gtk4::Button::with_label("Disconnect");
                     disconnect_btn.set_valign(gtk4::Align::Center);
                     disconnect_btn.add_css_class("connect-pill-btn");
                     let mac_clone = dev.mac.clone();
@@ -142,7 +180,7 @@ pub fn create_bluetooth_widget() -> gtk4::Box {
                     });
                     hbox.append(&disconnect_btn);
                 } else {
-                    let connect_btn = gtk4::Button::with_label("Kết nối");
+                    let connect_btn = gtk4::Button::with_label("Connect");
                     connect_btn.set_valign(gtk4::Align::Center);
                     connect_btn.add_css_class("connect-pill-btn");
                     let mac_clone = dev.mac.clone();
