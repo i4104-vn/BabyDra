@@ -108,6 +108,34 @@ pub fn rebuild_panel_window(
     box_layout.set_end_widget(Some(&right_wrapper));
 
     window.set_child(Some(&box_layout));
+
+    // Input region handler: Ensure transparent areas outside top bar and notch capsule pass mouse clicks to underlying windows
+    let notch_clone = notch_capsule.clone();
+    window.add_tick_callback(move |win, _| {
+        if let Some(surface) = win.surface() {
+            let win_w = win.width();
+            let region = gtk4::cairo::Region::create();
+            
+            // Top bar panel rect (height 36px)
+            let top_rect = gtk4::cairo::RectangleInt::new(0, 0, win_w, 36);
+            let _ = region.union_rectangle(&top_rect);
+
+            // Notch capsule rect when expanded
+            if notch_clone.is_visible() {
+                if let Some((nx, ny)) = notch_clone.translate_coordinates(win, 0.0, 0.0) {
+                    let nw = notch_clone.width();
+                    let nh = notch_clone.height();
+                    if nh > 36 && nw > 0 {
+                        let notch_rect = gtk4::cairo::RectangleInt::new(nx as i32, ny as i32, nw, nh);
+                        let _ = region.union_rectangle(&notch_rect);
+                    }
+                }
+            }
+
+            surface.set_input_region(&region);
+        }
+        glib::ControlFlow::Continue
+    });
 }
 
 pub fn build_panel_ui(

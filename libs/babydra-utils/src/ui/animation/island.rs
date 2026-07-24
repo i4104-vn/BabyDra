@@ -143,6 +143,9 @@ pub fn island_animate_size<F>(
 ) where
     F: FnOnce() + 'static,
 {
+    widget.set_opacity(1.0);
+    widget.set_visible(true);
+
     let start_time = std::cell::Cell::new(0i64);
     let dur_us = duration_ms as i64 * 1000;
     let on_complete_opt = std::cell::RefCell::new(Some(on_complete));
@@ -155,6 +158,7 @@ pub fn island_animate_size<F>(
         let elapsed_us = now - start_time.get();
         if elapsed_us >= dur_us {
             w.set_size_request(target_width, target_height);
+            w.set_opacity(if target_width == 0 || target_height == 0 { 0.0 } else { 1.0 });
             if let Some(cb) = on_complete_opt.borrow_mut().take() {
                 cb();
             }
@@ -165,7 +169,14 @@ pub fn island_animate_size<F>(
         let eased = easing::ease_out_cubic(t);
         let current_w = start_width + ((target_width - start_width) as f64 * eased) as i32;
         let current_h = start_height + ((target_height - start_height) as f64 * eased) as i32;
-        w.set_size_request(current_w, current_h);
+        w.set_size_request(current_w.max(0), current_h.max(0));
+
+        if target_width == 0 || target_height == 0 {
+            let opacity = (1.0 - eased).max(0.0).min(1.0);
+            w.set_opacity(opacity);
+        } else {
+            w.set_opacity(1.0);
+        }
 
         glib::ControlFlow::Continue
     });
