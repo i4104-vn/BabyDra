@@ -43,6 +43,7 @@ pub fn get_battery_info() -> Option<BatteryInfo> {
                     let capacity = capacity_opt.unwrap_or(100);
                     let status = std::fs::read_to_string(path.join("status"))
                         .unwrap_or_default();
+                    let is_charging = status.trim().eq_ignore_ascii_case("Charging");
                     return Some(BatteryInfo {
                         percentage: capacity.min(100),
                         is_charging,
@@ -51,12 +52,7 @@ pub fn get_battery_info() -> Option<BatteryInfo> {
             }
         }
     }
-
-    // Mock battery data (75% charging) for testing/preview
-    Some(BatteryInfo {
-        percentage: 75,
-        is_charging: true,
-    })
+    None
 }
 
 fn draw_rounded_rectangle(cr: &gtk4::cairo::Context, x: f64, y: f64, w: f64, h: f64, r: f64) {
