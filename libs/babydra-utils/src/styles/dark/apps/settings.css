@@ -206,37 +206,20 @@ button.theme-card-option.active-dark image {
     color: #60a5fa;
 }
 
-.wallpaper-preview-overlay {
+button.choose-file-vertical-btn {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px dashed rgba(255, 255, 255, 0.20);
     border-radius: 14px;
-    overflow: hidden;
-}
-
-picture.wallpaper-preview-picture,
-.wallpaper-preview-picture picture,
-.wallpaper-preview-picture {
-    border-radius: 14px;
-    overflow: hidden;
-}
-
-button.wallpaper-pick-overlay-btn,
-button.wallpaper-pick-floating-btn {
-    background-color: rgba(0, 0, 0, 0.60);
-    backdrop-filter: blur(14px);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    border-radius: 9999px;
-    min-width: 38px;
-    min-height: 38px;
+    color: rgba(255, 255, 255, 0.80);
+    min-width: 48px;
     padding: 0;
     transition: all 200ms ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
-button.wallpaper-pick-overlay-btn:hover,
-button.wallpaper-pick-floating-btn:hover {
-    background-color: rgba(59, 130, 246, 0.85);
+button.choose-file-vertical-btn:hover {
+    background-color: rgba(255, 255, 255, 0.10);
     border-color: #3b82f6;
     color: #ffffff;
-    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.40);
 }
 
 /* Warning alert container */

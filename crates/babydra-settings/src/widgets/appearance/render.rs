@@ -46,40 +46,44 @@ pub fn build_appearance_ui(
     config_grid.set_row_spacing(16);
     config_grid.set_column_homogeneous(true);
 
-    // Column 1: Wallpaper Preview Card with Overlay Choose File Button
-    let preview_overlay = gtk4::Overlay::new();
-    preview_overlay.add_css_class("wallpaper-preview-overlay");
-    preview_overlay.set_size_request(-1, 120);
-    preview_overlay.set_valign(gtk4::Align::Center);
+    // Column 1: Wallpaper Preview Picture (Left) + Vertical Plus Button Standing on Right
+    let preview_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
+    preview_box.set_valign(gtk4::Align::Center);
 
     let preview_pic = gtk4::Picture::new();
+    preview_pic.set_hexpand(true);
     preview_pic.set_size_request(-1, 120);
     preview_pic.set_content_fit(gtk4::ContentFit::Cover);
-    preview_pic.add_css_class("wallpaper-preview-picture");
+    preview_pic.add_css_class("wallpaper-thumb-card");
 
     let clean_path = current_wallpaper_path.replace("file://", "");
     if !clean_path.is_empty() && std::path::Path::new(&clean_path).exists() {
         preview_pic.set_filename(Some(&clean_path));
     }
-    preview_overlay.set_child(Some(&preview_pic));
+    preview_box.append(&preview_pic);
 
-    // Plus Icon Button standing on the right (No text)
+    // Vertical Plus Button standing on the right side
     let pick_btn = gtk4::Button::new();
-    pick_btn.add_css_class("wallpaper-pick-floating-btn");
+    pick_btn.add_css_class("choose-file-vertical-btn");
     pick_btn.set_cursor_from_name(Some("pointer"));
-    pick_btn.set_valign(gtk4::Align::Center);
-    pick_btn.set_halign(gtk4::Align::End);
-    pick_btn.set_margin_end(12);
+    pick_btn.set_valign(gtk4::Align::Fill);
+    pick_btn.set_vexpand(true);
+    pick_btn.set_size_request(48, 120);
 
-    let plus_icon = babydra_utils::ui::icon::get_icon("plus", 20);
-    plus_icon.set_pixel_size(20);
+    let plus_content = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    plus_content.set_halign(gtk4::Align::Center);
+    plus_content.set_valign(gtk4::Align::Center);
+
+    let plus_icon = babydra_utils::ui::icon::get_icon("plus", 22);
+    plus_icon.set_pixel_size(22);
     plus_icon.set_valign(gtk4::Align::Center);
     plus_icon.set_halign(gtk4::Align::Center);
+    plus_content.append(&plus_icon);
 
-    pick_btn.set_child(Some(&plus_icon));
-    preview_overlay.add_overlay(&pick_btn);
+    pick_btn.set_child(Some(&plus_content));
+    preview_box.append(&pick_btn);
 
-    config_grid.attach(&preview_overlay, 0, 0, 1, 1);
+    config_grid.attach(&preview_box, 0, 0, 1, 1);
 
     // Column 2: Light & Dark Theme Cards (Increased size)
     let theme_cards_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);

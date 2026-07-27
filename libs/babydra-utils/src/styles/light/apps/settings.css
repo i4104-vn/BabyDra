@@ -172,37 +172,20 @@ button.theme-card-option.active-dark image {
     color: #2563eb;
 }
 
-.wallpaper-preview-overlay {
+button.choose-file-vertical-btn {
+    background-color: rgba(0, 0, 0, 0.03);
+    border: 1px dashed rgba(0, 0, 0, 0.20);
     border-radius: 14px;
-    overflow: hidden;
-}
-
-picture.wallpaper-preview-picture,
-.wallpaper-preview-picture picture,
-.wallpaper-preview-picture {
-    border-radius: 14px;
-    overflow: hidden;
-}
-
-button.wallpaper-pick-overlay-btn,
-button.wallpaper-pick-floating-btn {
-    background-color: rgba(255, 255, 255, 0.75);
-    backdrop-filter: blur(14px);
-    border: 1px solid rgba(0, 0, 0, 0.14);
-    border-radius: 9999px;
-    min-width: 38px;
-    min-height: 38px;
+    color: rgba(0, 0, 0, 0.80);
+    min-width: 48px;
     padding: 0;
     transition: all 200ms ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
-button.wallpaper-pick-overlay-btn:hover,
-button.wallpaper-pick-floating-btn:hover {
-    background-color: rgba(59, 130, 246, 0.90);
+button.choose-file-vertical-btn:hover {
+    background-color: rgba(59, 130, 246, 0.08);
     border-color: #2563eb;
-    color: #ffffff;
-    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.30);
+    color: #1c1c1e;
 }
 
 /* Primary Accent Button */
