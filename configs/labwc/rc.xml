@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <labwc_config>
+  <core>
+    <gap>10</gap>
+  </core>
+
+  <!-- Reserved screen space around workspace edges (top accounts for status panel + gap) -->
+  <margin top="38" bottom="10" left="10" right="10" />
+
+  <!-- Default placement policy for newly spawned windows -->
+  <placement>
+    <policy>center</policy>
+  </placement>
+
   <keyboard>
     <default />
     <!-- Override Alt-Tab with custom babydra-switcher -->
@@ -21,6 +33,7 @@
       <action name="Execute" command="~/.local/bin/babydra-lock" />
     </keybind>
   </keyboard>
+
   <mouse>
     <default />
     <!-- Custom context menu for desktop right-click -->
@@ -34,33 +47,34 @@
   <theme>
     <name>BabyDra</name>
     <cornerRadius>12</cornerRadius>
+    <dropShadows>yes</dropShadows>
     <titlebar>
       <layout>iconify,max,close</layout>
       <showTitle>yes</showTitle>
     </titlebar>
     <font place="ActiveWindow">
       <name>Inter</name>
-      <size>12</size>
+      <size>11</size>
       <weight>bold</weight>
     </font>
     <font place="InactiveWindow">
       <name>Inter</name>
-      <size>12</size>
+      <size>11</size>
       <weight>normal</weight>
     </font>
     <font place="MenuItem">
       <name>Inter</name>
-      <size>12</size>
+      <size>11</size>
     </font>
     <font place="OnScreenDisplay">
       <name>Inter</name>
-      <size>12</size>
+      <size>11</size>
     </font>
   </theme>
 
   <!-- Window snapping behavior -->
   <snapping>
-    <range>12</range>
+    <range>10</range>
     <topMaximize>yes</topMaximize>
   </snapping>
 </labwc_config>

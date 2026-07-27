@@ -1,20 +1,20 @@
 # BabyDra Window Titlebar Theme Override (Light)
 
 # ── General ──────────────────────────────────────────────
-border.width: 0
-border.color: #d0d0da
+border.width: 1
+border.color: #c0c0d0
 
 # ── Corner Radius ────────────────────────────────────────
 window.active.border.corner-radius: 12
 window.inactive.border.corner-radius: 12
 
 # ── Padding ─────────────────────────────────────────────
-window.titlebar.padding.width: 14
-window.titlebar.padding.height: 8
+window.titlebar.padding.width: 16
+window.titlebar.padding.height: 10
 
 # ── Window Border Colors ────────────────────────────────
-window.active.border.color: #c0c0cc
-window.inactive.border.color: #d8d8e0
+window.active.border.color: #b0b0c2
+window.inactive.border.color: #d8d8e5
 
 # ── Titlebar Background ────────────────────────────────
 window.active.title.bg: Solid

@@ -1,26 +1,26 @@
 # BabyDra Window Titlebar Theme Override (Dark)
 
 # ── General ──────────────────────────────────────────────
-border.width: 0
-border.color: #1a1a2e
+border.width: 1
+border.color: #38384d
 
 # ── Corner Radius ────────────────────────────────────────
 window.active.border.corner-radius: 12
 window.inactive.border.corner-radius: 12
 
 # ── Padding ─────────────────────────────────────────────
-window.titlebar.padding.width: 14
-window.titlebar.padding.height: 8
+window.titlebar.padding.width: 16
+window.titlebar.padding.height: 10
 
 # ── Window Border Colors ────────────────────────────────
-window.active.border.color: #3d3d5c
-window.inactive.border.color: #161622
+window.active.border.color: #38384d
+window.inactive.border.color: #1e1e2c
 
 # ── Titlebar Background ────────────────────────────────
 window.active.title.bg: Solid
-window.active.title.bg.color: #141416
+window.active.title.bg.color: #14141c
 window.inactive.title.bg: Solid
-window.inactive.title.bg.color: #0d0d0f
+window.inactive.title.bg.color: #0f0f15
 
 # ── Titlebar Text ──────────────────────────────────────
 window.active.label.text.color: #e8e8f0
@@ -34,7 +34,7 @@ window.button.spacing: 10
 
 # ── Window Button Hover Overlay ──────────────────────────
 window.button.hover.bg: Solid
-window.button.hover.bg.color: #ffffff10
+window.button.hover.bg.color: #ffffff15
 window.button.hover.bg.corner-radius: 8
 
 # ── Active Window Buttons (Mac-like colored dots) ────────
