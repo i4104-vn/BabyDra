@@ -15,7 +15,7 @@ sleep 0.5
 
 # Start BabyDra status panel
 mkdir -p "$HOME/.cache/babydra"
-~/.local/bin/babydra-panel > "$HOME/.cache/babydra/panel.log" 2>&1 &
+~/.local/bin/babydra-panel &
 
 # Start dynamic dark/light titlebar theme monitor
 $HOME/.config/labwc/switcher.sh &

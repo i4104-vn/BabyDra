@@ -16,6 +16,10 @@ cargo build --release
 # 3. Create local bin and log directories if needed
 LOCAL_BIN="$HOME/.local/bin"
 LOG_DIR="$HOME/.cache/babydra"
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_SOURCE="$REPO_DIR/configs/labwc"
+DEST_DIR="$HOME/.config/labwc"
+
 mkdir -p "$LOCAL_BIN"
 mkdir -p "$LOG_DIR"
 
@@ -94,16 +98,30 @@ chmod +x "$HOME/.local/share/applications/babydra-explore.desktop"
 update-desktop-database "$HOME/.local/share/applications" || true
 xdg-mime default babydra-explore.desktop inode/directory || true
 
+echo "Syncing labwc config from $CONFIG_SOURCE to $DEST_DIR..."
+
+mkdir -p "$DEST_DIR"
+
+# Copy all files and directories to ~/.config/labwc
+cp -r "$CONFIG_SOURCE"/* "$DEST_DIR"/
+
+# Ensure scripts have execute permission
+chmod +x "$DEST_DIR"/autostart 2>/dev/null || true
+chmod +x "$DEST_DIR"/switcher.sh 2>/dev/null || true
+
+# Reconfigure labwc if running
+if pgrep -x "labwc" > /dev/null; then
+  labwc --reconfigure 2>/dev/null || true
+  echo "✓ labwc reconfigured successfully!"
+else
+  echo "i labwc is not currently running."
+fi
+
+echo "✓ Done! Labwc configuration updated in $DEST_DIR."
+
 # 7. Start the panel and redirect stdout/stderr to log file
 echo "Starting babydra-panel..."
 killall fnott || true
 killall xfce4-notifyd || true
-~/.local/bin/babydra-panel > "$LOG_DIR/panel.log" 2>&1 &
-disown
 
-echo "============================================="
-echo "Update complete! Streaming panel logs below..."
-echo "Press Ctrl+C to exit log streaming."
-echo "============================================="
-sleep 1
-tail -n 30 -f "$LOG_DIR/panel.log"
+~/.local/bin/babydra-panel &
