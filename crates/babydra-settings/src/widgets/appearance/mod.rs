@@ -172,7 +172,7 @@ pub fn create_appearance_widget() -> gtk4::Box {
                     btn.set_cursor_from_name(Some("pointer"));
 
                     let pic = gtk4::Picture::for_filename(&wp);
-                    pic.set_size_request(130, 75);
+                    pic.set_size_request(130, 105);
                     pic.set_content_fit(gtk4::ContentFit::Cover);
 
                     btn.set_child(Some(&pic));
