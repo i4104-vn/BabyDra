@@ -15,7 +15,6 @@ cp -r "$CONFIG_SOURCE"/* "$DEST_DIR"/
 # Ensure scripts have execute permission
 chmod +x "$DEST_DIR"/autostart 2>/dev/null || true
 chmod +x "$DEST_DIR"/switcher.sh 2>/dev/null || true
-chmod +x "$DEST_DIR"/update_labwc.sh 2>/dev/null || true
 
 # Reconfigure labwc if running
 if pgrep -x "labwc" > /dev/null; then
