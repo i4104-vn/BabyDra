@@ -185,19 +185,22 @@ picture.wallpaper-preview-picture,
 }
 
 button.wallpaper-pick-overlay-vertical-btn,
-button.wallpaper-pick-overlay-inside-btn {
+button.wallpaper-pick-overlay-inside-btn,
+button.wallpaper-action-btn {
     background-color: rgba(255, 255, 255, 0.75);
     backdrop-filter: blur(14px);
     border: 1px solid rgba(0, 0, 0, 0.14);
-    border-radius: 10px;
-    color: #1c1c1e;
+    border-radius: 9999px;
+    min-width: 38px;
+    min-height: 38px;
     padding: 0;
     transition: all 200ms ease;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 button.wallpaper-pick-overlay-vertical-btn:hover,
-button.wallpaper-pick-overlay-inside-btn:hover {
+button.wallpaper-pick-overlay-inside-btn:hover,
+button.wallpaper-action-btn:hover {
     background-color: rgba(59, 130, 246, 0.90);
     border-color: #2563eb;
     color: #ffffff;

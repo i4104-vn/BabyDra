@@ -88,29 +88,24 @@ pub fn create_appearance_widget() -> gtk4::Box {
         main_box,
         preview_pic,
         pick_btn,
-        light_card,
-        dark_card,
+        theme_toggle_btn,
         quick_select_box,
     ) = render::build_appearance_ui(&wp_path, is_dark, &themes, &current_theme);
 
-    // Light theme button
-    let light_card_clone = light_card.clone();
-    let dark_card_clone = dark_card.clone();
-    light_card.connect_clicked(move |_| {
-        babydra_utils::ui::theme::set_dark_mode(false);
+    // Theme Toggle Icon Button Click Handler
+    let theme_btn_clone = theme_toggle_btn.clone();
+    theme_toggle_btn.connect_clicked(move |_| {
+        let currently_dark = babydra_utils::ui::theme::is_dark_mode();
+        let new_dark = !currently_dark;
+        babydra_utils::ui::theme::set_dark_mode(new_dark);
         babydra_utils::ui::theme::init_theme();
-        light_card_clone.add_css_class("active-dark");
-        dark_card_clone.remove_css_class("active-dark");
-    });
 
-    // Dark theme button
-    let light_card_clone2 = light_card.clone();
-    let dark_card_clone2 = dark_card.clone();
-    dark_card.connect_clicked(move |_| {
-        babydra_utils::ui::theme::set_dark_mode(true);
-        babydra_utils::ui::theme::init_theme();
-        dark_card_clone2.add_css_class("active-dark");
-        light_card_clone2.remove_css_class("active-dark");
+        let new_icon_name = if new_dark { "brightness" } else { "dark-mode" };
+        let new_icon = babydra_utils::ui::icon::get_icon(new_icon_name, 18);
+        new_icon.set_pixel_size(18);
+        new_icon.set_valign(gtk4::Align::Center);
+        new_icon.set_halign(gtk4::Align::Center);
+        theme_btn_clone.set_child(Some(&new_icon));
     });
 
     // Helper closure to render wallpapers grid in quick_select_box
