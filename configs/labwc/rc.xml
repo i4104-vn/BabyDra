@@ -40,21 +40,21 @@
     </titlebar>
     <font place="ActiveWindow">
       <name>Inter</name>
-      <size>10</size>
+      <size>12</size>
       <weight>bold</weight>
     </font>
     <font place="InactiveWindow">
       <name>Inter</name>
-      <size>10</size>
+      <size>12</size>
       <weight>normal</weight>
     </font>
     <font place="MenuItem">
       <name>Inter</name>
-      <size>10</size>
+      <size>12</size>
     </font>
     <font place="OnScreenDisplay">
       <name>Inter</name>
-      <size>10</size>
+      <size>12</size>
     </font>
   </theme>
 
