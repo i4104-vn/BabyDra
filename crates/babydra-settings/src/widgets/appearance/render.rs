@@ -105,12 +105,12 @@ pub fn build_appearance_ui(
     // Column 1 (Right): System Themes Configuration Dropdowns (2x2 Grid)
     let theme_grid = gtk4::Grid::new();
     theme_grid.set_column_spacing(16);
-    theme_grid.set_row_spacing(12);
+    theme_grid.set_row_spacing(24);
     theme_grid.set_column_homogeneous(true);
     theme_grid.set_valign(gtk4::Align::Center);
 
     // Field 1: GTK Theme
-    let gtk_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
+    let gtk_box = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
     let gtk_lbl = gtk4::Label::new(Some("GTK THEME"));
     gtk_lbl.add_css_class("spec-label");
     gtk_lbl.set_halign(gtk4::Align::Start);
@@ -124,7 +124,7 @@ pub fn build_appearance_ui(
     theme_grid.attach(&gtk_box, 0, 0, 1, 1);
 
     // Field 2: Icon Theme
-    let icon_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
+    let icon_box = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
     let icon_lbl = gtk4::Label::new(Some("ICON THEME"));
     icon_lbl.add_css_class("spec-label");
     icon_lbl.set_halign(gtk4::Align::Start);
@@ -138,7 +138,7 @@ pub fn build_appearance_ui(
     theme_grid.attach(&icon_box, 1, 0, 1, 1);
 
     // Field 3: Cursor Theme
-    let cursor_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
+    let cursor_box = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
     let cursor_lbl = gtk4::Label::new(Some("CURSOR THEME"));
     cursor_lbl.add_css_class("spec-label");
     cursor_lbl.set_halign(gtk4::Align::Start);
@@ -152,7 +152,7 @@ pub fn build_appearance_ui(
     theme_grid.attach(&cursor_box, 0, 1, 1, 1);
 
     // Field 4: Cursor Size
-    let size_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
+    let size_box = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
     let size_lbl = gtk4::Label::new(Some("CURSOR SIZE"));
     size_lbl.add_css_class("spec-label");
     size_lbl.set_halign(gtk4::Align::Start);
