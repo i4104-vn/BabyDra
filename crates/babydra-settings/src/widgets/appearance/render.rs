@@ -42,11 +42,11 @@ pub fn build_appearance_ui(
     // Wallpaper Preview Picture with Overlay Actions (Plus Button & Theme Toggle Button)
     let preview_overlay = gtk4::Overlay::new();
     preview_overlay.add_css_class("wallpaper-preview-overlay");
-    preview_overlay.set_size_request(-1, 140);
+    preview_overlay.set_size_request(-1, 100);
     preview_overlay.set_valign(gtk4::Align::Start);
 
     let preview_pic = gtk4::Picture::new();
-    preview_pic.set_size_request(-1, 140);
+    preview_pic.set_size_request(-1, 100);
     preview_pic.set_content_fit(gtk4::ContentFit::Cover);
     preview_pic.add_css_class("wallpaper-preview-picture");
 
@@ -57,20 +57,20 @@ pub fn build_appearance_ui(
     preview_overlay.set_child(Some(&preview_pic));
 
     // Vertical Overlay Actions Column on the Right Edge (Plus Button + Theme Toggle Button)
-    let actions_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
+    let actions_box = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
     actions_box.set_valign(gtk4::Align::End);
     actions_box.set_halign(gtk4::Align::End);
-    actions_box.set_margin_end(10);
-    actions_box.set_margin_bottom(10);
+    actions_box.set_margin_end(8);
+    actions_box.set_margin_bottom(8);
 
     // 1. Shorter Add Wallpaper Button (Plus icon only)
     let pick_btn = gtk4::Button::new();
     pick_btn.add_css_class("wallpaper-action-btn");
     pick_btn.set_cursor_from_name(Some("pointer"));
-    pick_btn.set_size_request(38, 38);
+    pick_btn.set_size_request(34, 34);
 
-    let plus_icon = babydra_utils::ui::icon::get_icon("plus", 18);
-    plus_icon.set_pixel_size(18);
+    let plus_icon = babydra_utils::ui::icon::get_icon("plus", 16);
+    plus_icon.set_pixel_size(16);
     plus_icon.set_valign(gtk4::Align::Center);
     plus_icon.set_halign(gtk4::Align::Center);
     pick_btn.set_child(Some(&plus_icon));
@@ -80,11 +80,11 @@ pub fn build_appearance_ui(
     let theme_toggle_btn = gtk4::Button::new();
     theme_toggle_btn.add_css_class("wallpaper-action-btn");
     theme_toggle_btn.set_cursor_from_name(Some("pointer"));
-    theme_toggle_btn.set_size_request(38, 38);
+    theme_toggle_btn.set_size_request(34, 34);
 
     let initial_theme_icon = if is_dark { "brightness" } else { "dark-mode" };
-    let theme_icon = babydra_utils::ui::icon::get_icon(initial_theme_icon, 18);
-    theme_icon.set_pixel_size(18);
+    let theme_icon = babydra_utils::ui::icon::get_icon(initial_theme_icon, 16);
+    theme_icon.set_pixel_size(16);
     theme_icon.set_valign(gtk4::Align::Center);
     theme_icon.set_halign(gtk4::Align::Center);
     theme_toggle_btn.set_child(Some(&theme_icon));
@@ -108,6 +108,8 @@ pub fn build_appearance_ui(
     let quick_select_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     quick_select_box.set_margin_top(4);
     quick_select_box.set_margin_end(4);
+    quick_select_box.set_vexpand(true);
+    quick_select_box.set_valign(gtk4::Align::Fill);
 
     let scroll = gtk4::ScrolledWindow::new();
     scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
