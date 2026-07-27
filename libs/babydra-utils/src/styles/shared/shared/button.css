@@ -89,3 +89,22 @@ button.btn-upgrade-secondary:hover {
     bottom: 8px;
     left: 8px;
 }
+
+/* Floating Action Button (FAB) Component */
+button.baby-fab,
+button.baby-fab.circular {
+    background-image: none;
+    border: none;
+    border-radius: 50%;
+    min-width: 48px;
+    min-height: 48px;
+    padding: 0;
+    color: #ffffff;
+    transition: background-color 200ms ease, transform 200ms ease, box-shadow 200ms ease;
+}
+
+button.baby-fab image,
+button.baby-fab.circular image {
+    color: #ffffff;
+    -gtk-icon-size: 24px;
+}

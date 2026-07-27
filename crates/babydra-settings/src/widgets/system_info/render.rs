@@ -9,8 +9,8 @@ pub fn build_system_ui(
     cpu_model: &str,
     gpu_info: &str,
     memory_text: &str,
-    disk_text: &str,
-    disk_percent: f64,
+    uptime_text: &str,
+    cpu_arch: &str,
 ) -> gtk4::Box {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
     main_box.set_vexpand(true);
@@ -24,8 +24,8 @@ pub fn build_system_ui(
 
     let content_box = gtk4::Box::new(gtk4::Orientation::Vertical, 20);
 
-    // ── Card 1: Top Hero Card (Avatar, OS Title, Storage Progress) ──
-    let hero_card = gtk4::Box::new(gtk4::Orientation::Horizontal, 24);
+    // ── Card 1: Top Hero Card (Avatar, OS Title, Uptime Badge) ──
+    let hero_card = gtk4::Box::new(gtk4::Orientation::Horizontal, 20);
     hero_card.add_css_class("glass-panel");
     hero_card.set_margin_top(4);
     hero_card.set_margin_bottom(4);
@@ -35,48 +35,60 @@ pub fn build_system_ui(
     // Mascot / Avatar Container
     let avatar_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     avatar_box.add_css_class("hero-avatar-box");
-    avatar_box.set_size_request(100, 100);
+    avatar_box.set_size_request(80, 80);
     avatar_box.set_valign(gtk4::Align::Center);
 
-    let avatar_img = babydra_utils::ui::icon::get_icon("logo", 96);
-    avatar_img.set_pixel_size(96);
+    let avatar_img = babydra_utils::ui::icon::get_icon("logo", 80);
+    avatar_img.set_pixel_size(80);
     avatar_img.set_valign(gtk4::Align::Center);
     avatar_img.set_halign(gtk4::Align::Center);
     avatar_box.append(&avatar_img);
     hero_card.append(&avatar_box);
 
     // Right Side Information
-    let info_box = gtk4::Box::new(gtk4::Orientation::Vertical, 12);
+    let info_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
     info_box.set_hexpand(true);
     info_box.set_valign(gtk4::Align::Center);
 
-    // Hostname / OS Header
-    let display_title = if !hostname.is_empty() && hostname != "localhost" {
-        format!("{} - {} {}", hostname, os_name, kernel_version)
+    // Top Row: Hostname + Uptime Pill Badge
+    let title_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+
+    let display_host = if !hostname.is_empty() && hostname != "localhost" {
+        hostname
     } else {
-        format!("{} - Linux {}", os_name, kernel_version)
+        "BabyDra Linux"
     };
 
-    let title_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    let os_label = gtk4::Label::new(Some(&display_title));
+    let os_label = gtk4::Label::new(Some(display_host));
     os_label.add_css_class("hero-hostname");
     os_label.set_halign(gtk4::Align::Start);
     os_label.set_hexpand(true);
     title_row.append(&os_label);
 
-    let disk_stats_lbl = gtk4::Label::new(Some(disk_text));
-    disk_stats_lbl.add_css_class("hero-stats-label");
-    disk_stats_lbl.set_halign(gtk4::Align::End);
-    title_row.append(&disk_stats_lbl);
+    // Sleek Uptime Badge (e.g. "Up 2h 15m")
+    let uptime_badge = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
+    uptime_badge.add_css_class("hero-uptime-badge");
+    uptime_badge.set_valign(gtk4::Align::Center);
 
+    let clock_icon = babydra_utils::ui::icon::get_icon("history", 14);
+    clock_icon.set_pixel_size(14);
+    clock_icon.set_valign(gtk4::Align::Center);
+    uptime_badge.append(&clock_icon);
+
+    let uptime_lbl = gtk4::Label::new(Some(&format!("Up {}", uptime_text)));
+    uptime_lbl.add_css_class("hero-uptime-label");
+    uptime_lbl.set_valign(gtk4::Align::Center);
+    uptime_badge.append(&uptime_lbl);
+
+    title_row.append(&uptime_badge);
     info_box.append(&title_row);
 
-    // Disk Progress Bar
-    let progress_bar = gtk4::ProgressBar::new();
-    progress_bar.add_css_class("disk-progress");
-    progress_bar.set_fraction(disk_percent / 100.0);
-    progress_bar.set_hexpand(true);
-    info_box.append(&progress_bar);
+    // Subtitle Row: OS Name (Architecture) • Kernel Version
+    let sub_title = format!("{} ({}) • Kernel {}", os_name, cpu_arch, kernel_version);
+    let sub_label = gtk4::Label::new(Some(&sub_title));
+    sub_label.add_css_class("hero-subtitle");
+    sub_label.set_halign(gtk4::Align::Start);
+    info_box.append(&sub_label);
 
     hero_card.append(&info_box);
     content_box.append(&hero_card);

@@ -29,21 +29,20 @@ pub fn create_system_widget() -> gtk4::Box {
         }
     }
 
-    let mut disk_text = "Unknown".to_string();
-    let mut disk_percent = 0.0;
-    if let Ok(output) = Command::new("df").arg("-h").arg("/").output() {
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        let lines: Vec<&str> = stdout.lines().collect();
-        if lines.len() >= 2 {
-            let parts: Vec<&str> = lines[1].split_whitespace().collect();
-            if parts.len() >= 5 {
-                disk_text = format!("{} / {}", parts[2], parts[1]);
-                if let Ok(val) = parts[4].replace("%", "").parse::<f64>() {
-                    disk_percent = val;
-                }
-            }
-        }
-    }
+    let uptime_secs = System::uptime();
+    let days = uptime_secs / 86400;
+    let hours = (uptime_secs % 86400) / 3600;
+    let mins = (uptime_secs % 3600) / 60;
+
+    let uptime_text = if days > 0 {
+        format!("{}d {}h {}m", days, hours, mins)
+    } else if hours > 0 {
+        format!("{}h {}m", hours, mins)
+    } else {
+        format!("{}m", mins)
+    };
+
+    let cpu_arch = System::cpu_arch().unwrap_or_else(|| "x86_64".to_string());
 
     render::build_system_ui(
         &hostname,
@@ -52,7 +51,7 @@ pub fn create_system_widget() -> gtk4::Box {
         &cpu_model,
         &gpu_info,
         &memory_text,
-        &disk_text,
-        disk_percent,
+        &uptime_text,
+        &cpu_arch,
     )
 }

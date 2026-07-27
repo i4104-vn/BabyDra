@@ -22,49 +22,30 @@ pub fn build(
     container.set_vexpand(true);
     container.set_valign(gtk4::Align::Fill);
 
-    // Glass Panel Card Container
-    let card = Box::new(Orientation::Vertical, 20);
-    card.add_css_class("glass-panel");
-    card.set_valign(gtk4::Align::Start);
-
-    // Card Header Row (Gradient Icon + Title + Description)
-    let header_row = Box::new(Orientation::Horizontal, 16);
-    header_row.set_margin_bottom(8);
-
-    // Gradient Icon Container
-    let icon_badge = Box::new(Orientation::Vertical, 0);
-    icon_badge.add_css_class("blue-icon-badge");
-    icon_badge.set_valign(gtk4::Align::Center);
-    icon_badge.set_halign(gtk4::Align::Start);
-
-    let palette_img = babydra_utils::ui::icon::get_icon("palette", 24);
-    palette_img.set_pixel_size(24);
-    palette_img.set_valign(gtk4::Align::Center);
-    palette_img.set_halign(gtk4::Align::Center);
-    palette_img.set_vexpand(true);
-    icon_badge.append(&palette_img);
-    header_row.append(&icon_badge);
-
-    let header_text_box = Box::new(Orientation::Vertical, 4);
-    header_text_box.set_valign(gtk4::Align::Center);
+    // Page Header Row (System Theme Title synchronized with VPN & Bluetooth layout)
+    let header_row = Box::new(Orientation::Horizontal, 12);
+    header_row.set_margin_bottom(4);
 
     let title_lbl = Label::new(Some("System Theme"));
     title_lbl.add_css_class("settings-page-title");
     title_lbl.set_halign(gtk4::Align::Start);
-    header_text_box.append(&title_lbl);
+    header_row.append(&title_lbl);
 
-    let desc_lbl = Label::new(Some("Customize color scheme, GTK themes, icon themes, mouse cursors, and cursor sizes"));
-    desc_lbl.add_css_class("settings-page-subtitle");
-    desc_lbl.set_halign(gtk4::Align::Start);
-    header_text_box.append(&desc_lbl);
+    let spacer = Box::new(Orientation::Horizontal, 0);
+    spacer.set_hexpand(true);
+    header_row.append(&spacer);
 
-    header_row.append(&header_text_box);
-    card.append(&header_row);
+    container.append(&header_row);
 
-    // Separator
-    let sep = gtk4::Separator::new(Orientation::Horizontal);
-    sep.add_css_class("profile-separator");
-    card.append(&sep);
+    // Overlay to place Floating Action Button (FAB) at bottom-right
+    let overlay = gtk4::Overlay::new();
+    overlay.set_vexpand(true);
+    overlay.set_hexpand(true);
+
+    // Glass Panel Card Container
+    let card = Box::new(Orientation::Vertical, 20);
+    card.add_css_class("glass-panel");
+    card.set_valign(gtk4::Align::Start);
 
     // 2-Column Form Grid
     let grid = Grid::new();
@@ -131,35 +112,23 @@ pub fn build(
 
     card.append(&grid);
 
-    // Bottom Right Action Footer: Apply Themes Button
-    let footer_box = Box::new(Orientation::Horizontal, 0);
-    footer_box.set_margin_top(12);
-
-    let apply_btn = Button::new();
-    apply_btn.add_css_class("btn-golden");
-    apply_btn.set_cursor_from_name(Some("pointer"));
-
-    let btn_content = Box::new(Orientation::Horizontal, 8);
-    let check_icon = babydra_utils::ui::icon::get_icon("check", 16);
-    check_icon.set_pixel_size(16);
-    btn_content.append(&check_icon);
-
-    let btn_lbl = Label::new(Some("Apply Themes"));
-    btn_lbl.add_css_class("spec-value");
-    btn_content.append(&btn_lbl);
-
-    apply_btn.set_child(Some(&btn_content));
-    footer_box.append(&apply_btn);
-    footer_box.set_halign(gtk4::Align::End);
-    card.append(&footer_box);
-
     let scroll = gtk4::ScrolledWindow::new();
     scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
     scroll.set_vexpand(true);
     scroll.set_valign(gtk4::Align::Fill);
     scroll.set_child(Some(&card));
 
-    container.append(&scroll);
+    overlay.set_child(Some(&scroll));
+
+    // Floating Action Button (FAB) for Apply / Save Themes (matching VPN FAB component)
+    let apply_btn = babydra_utils::components::create_fab("check");
+    apply_btn.set_tooltip_text(Some("Apply Themes"));
+    apply_btn.set_margin_end(24);
+    apply_btn.set_margin_bottom(24);
+
+    overlay.add_overlay(&apply_btn);
+
+    container.append(&overlay);
 
     ThemesWidget {
         container,

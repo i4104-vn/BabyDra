@@ -183,14 +183,18 @@ dropdown > button {
     font-weight: 700;
 }
 
+progressbar.disk-progress {
+    min-height: 12px;
+}
+
 progressbar.disk-progress trough {
     border-radius: 6px;
-    min-height: 6px;
+    min-height: 12px;
 }
 
 progressbar.disk-progress progress {
-    background-color: #3b82f6;
     border-radius: 6px;
+    min-height: 12px;
 }
 
 .cheatsheet-overlay {

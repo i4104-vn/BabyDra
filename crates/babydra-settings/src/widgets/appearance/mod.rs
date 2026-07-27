@@ -65,16 +65,10 @@ fn set_gtk_theme(theme_name: &str) {
 }
 
 fn get_current_wallpaper() -> String {
-    let output = Command::new("gsettings")
-        .args(&["get", "org.gnome.desktop.background", "picture-uri"])
-        .output();
-    match output {
-        Ok(o) => {
-            let stdout = String::from_utf8_lossy(&o.stdout);
-            stdout.trim().replace("'", "").replace("file://", "")
-        }
-        Err(_) => "".to_string(),
+    if let Some(path) = babydra_common::get_current_wallpaper() {
+        return path.to_string_lossy().to_string();
     }
+    "".to_string()
 }
 
 pub fn create_appearance_widget() -> gtk4::Box {
@@ -92,7 +86,7 @@ pub fn create_appearance_widget() -> gtk4::Box {
 
     let (
         main_box,
-        preview_img,
+        preview_pic,
         pick_btn,
         light_card,
         dark_card,
@@ -122,7 +116,7 @@ pub fn create_appearance_widget() -> gtk4::Box {
     // Helper closure to render wallpapers grid in quick_select_box
     let render_wallpapers_grid = {
         let quick_select_box_clone = quick_select_box.clone();
-        let preview_img_clone = preview_img.clone();
+        let preview_pic_clone = preview_pic.clone();
         move || {
             while let Some(child) = quick_select_box_clone.first_child() {
                 quick_select_box_clone.remove(&child);
@@ -171,10 +165,10 @@ pub fn create_appearance_widget() -> gtk4::Box {
                     btn.set_child(Some(&pic));
 
                     let wp_clone = wp.clone();
-                    let preview_cb = preview_img_clone.clone();
+                    let preview_cb = preview_pic_clone.clone();
                     btn.connect_clicked(move |_| {
                         let _ = babydra_common::set_wallpaper(&wp_clone);
-                        preview_cb.set_from_file(Some(&wp_clone));
+                        preview_cb.set_filename(Some(&wp_clone));
                     });
 
                     flow.insert(&btn, -1);
@@ -189,7 +183,7 @@ pub fn create_appearance_widget() -> gtk4::Box {
     render_wallpapers_grid();
 
     // Pick Wallpaper Button Click
-    let preview_clone = preview_img.clone();
+    let preview_clone = preview_pic.clone();
     let parent_box = main_box.clone();
     let render_grid_cb = render_wallpapers_grid.clone();
     pick_btn.connect_clicked(move |_| {
@@ -216,7 +210,7 @@ pub fn create_appearance_widget() -> gtk4::Box {
                                 let _ = std::fs::copy(&path, &dest_path);
                             }
                             let _ = babydra_common::set_wallpaper(&dest_path);
-                            preview_cb.set_from_file(Some(&dest_path));
+                            preview_cb.set_filename(Some(&dest_path));
                             render_grid_after_pick();
                         }
                     }

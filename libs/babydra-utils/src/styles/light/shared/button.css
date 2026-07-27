@@ -39,3 +39,25 @@ button.btn-upgrade-secondary:hover {
 .floating-icon-badge {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
+
+/* Floating Action Button (FAB) Component */
+button.baby-fab,
+button.baby-fab.circular {
+    background-color: #3b82f6;
+    background-image: linear-gradient(135deg, #3b82f6, #2563eb);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+}
+
+button.baby-fab:hover,
+button.baby-fab.circular:hover {
+    background-image: linear-gradient(135deg, #60a5fa, #3b82f6);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.45);
+}
+
+button.baby-fab:active,
+button.baby-fab.circular:active {
+    background-image: linear-gradient(135deg, #1d4ed8, #1e40af);
+    transform: translateY(0);
+    box-shadow: 0 3px 10px rgba(59, 130, 246, 0.25);
+}

@@ -9,7 +9,7 @@ pub fn build_appearance_ui(
     _current_theme: &str,
 ) -> (
     gtk4::Box,
-    gtk4::Image,
+    gtk4::Picture,
     gtk4::Button,
     gtk4::Button,
     gtk4::Button,
@@ -19,17 +19,19 @@ pub fn build_appearance_ui(
     main_box.set_vexpand(true);
     main_box.set_valign(gtk4::Align::Fill);
 
-    // Header Title: Icon + Wallpaper & Colors
+    // Header Title: Wallpaper & Colors (matching VPN, Bluetooth & Themes header)
     let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    let palette_icon = babydra_utils::ui::icon::get_icon("palette", 22);
-    palette_icon.set_pixel_size(22);
-    palette_icon.add_css_class("settings-row-icon");
-    header_box.append(&palette_icon);
+    header_box.set_margin_bottom(4);
 
     let page_title = gtk4::Label::new(Some("Wallpaper & Colors"));
     page_title.add_css_class("settings-page-title");
     page_title.set_halign(gtk4::Align::Start);
     header_box.append(&page_title);
+
+    let spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    spacer.set_hexpand(true);
+    header_box.append(&spacer);
+
     main_box.append(&header_box);
 
     // Dashboard Main Glass Panel
@@ -38,75 +40,61 @@ pub fn build_appearance_ui(
     dashboard_panel.set_vexpand(true);
     dashboard_panel.set_valign(gtk4::Align::Fill);
 
-    // Top Configuration Grid (3 Columns)
+    // Top Configuration Grid (2 Columns)
     let config_grid = gtk4::Grid::new();
-    config_grid.set_column_spacing(16);
+    config_grid.set_column_spacing(20);
     config_grid.set_row_spacing(16);
     config_grid.set_column_homogeneous(true);
 
-    // Column 1: Current Wallpaper Preview
-    let preview_box = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
-    preview_box.add_css_class("wallpaper-preview-frame");
-    preview_box.set_size_request(140, 100);
+    // Column 1: Wallpaper Preview Card with Overlay Choose File Button
+    let preview_overlay = gtk4::Overlay::new();
+    preview_overlay.add_css_class("wallpaper-preview-overlay");
+    preview_overlay.set_size_request(-1, 120);
+    preview_overlay.set_valign(gtk4::Align::Center);
 
-    let preview_lbl = gtk4::Label::new(Some("Current Wallpaper Preview"));
-    preview_lbl.add_css_class("settings-row-desc");
-    preview_lbl.set_halign(gtk4::Align::Start);
-    preview_lbl.set_margin_start(8);
-    preview_lbl.set_margin_top(6);
-    preview_box.append(&preview_lbl);
+    let preview_pic = gtk4::Picture::new();
+    preview_pic.set_size_request(-1, 120);
+    preview_pic.set_content_fit(gtk4::ContentFit::Cover);
+    preview_pic.add_css_class("wallpaper-preview-picture");
 
-    let preview_img = gtk4::Image::new();
     let clean_path = current_wallpaper_path.replace("file://", "");
     if !clean_path.is_empty() && std::path::Path::new(&clean_path).exists() {
-        preview_img.set_from_file(Some(&clean_path));
-        preview_img.set_pixel_size(64);
-        preview_img.set_valign(gtk4::Align::Center);
-        preview_img.set_halign(gtk4::Align::Center);
-        preview_box.append(&preview_img);
-    } else {
-        let question_icon = babydra_utils::ui::icon::get_icon("display", 32);
-        question_icon.set_pixel_size(32);
-        question_icon.set_valign(gtk4::Align::Center);
-        question_icon.set_halign(gtk4::Align::Center);
-        preview_box.append(&question_icon);
+        preview_pic.set_filename(Some(&clean_path));
     }
-    config_grid.attach(&preview_box, 0, 0, 1, 1);
+    preview_overlay.set_child(Some(&preview_pic));
 
-    // Column 2: Choose File Button Card
+    // Plus Icon Button standing on the right (No text)
     let pick_btn = gtk4::Button::new();
-    pick_btn.add_css_class("choose-file-card");
+    pick_btn.add_css_class("wallpaper-pick-floating-btn");
     pick_btn.set_cursor_from_name(Some("pointer"));
+    pick_btn.set_valign(gtk4::Align::Center);
+    pick_btn.set_halign(gtk4::Align::End);
+    pick_btn.set_margin_end(12);
 
-    let pick_content = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
-    pick_content.set_halign(gtk4::Align::Center);
-    pick_content.set_valign(gtk4::Align::Center);
+    let plus_icon = babydra_utils::ui::icon::get_icon("plus", 20);
+    plus_icon.set_pixel_size(20);
+    plus_icon.set_valign(gtk4::Align::Center);
+    plus_icon.set_halign(gtk4::Align::Center);
 
-    let choose_icon = babydra_utils::ui::icon::get_icon("display", 24);
-    choose_icon.set_pixel_size(24);
-    choose_icon.set_halign(gtk4::Align::Center);
-    pick_content.append(&choose_icon);
+    pick_btn.set_child(Some(&plus_icon));
+    preview_overlay.add_overlay(&pick_btn);
 
-    let choose_lbl = gtk4::Label::new(Some("Choose File"));
-    choose_lbl.add_css_class("settings-row-title");
-    pick_content.append(&choose_lbl);
+    config_grid.attach(&preview_overlay, 0, 0, 1, 1);
 
-    pick_btn.set_child(Some(&pick_content));
-    config_grid.attach(&pick_btn, 1, 0, 1, 1);
-
-    // Column 3: Light & Dark Theme Cards
-    let theme_cards_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
+    // Column 2: Light & Dark Theme Cards (Increased size)
+    let theme_cards_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+    theme_cards_box.set_valign(gtk4::Align::Center);
 
     let light_card = gtk4::Button::new();
     light_card.add_css_class("theme-card-option");
     light_card.set_hexpand(true);
     light_card.set_cursor_from_name(Some("pointer"));
 
-    let light_content = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
+    let light_content = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
     light_content.set_halign(gtk4::Align::Center);
     light_content.set_valign(gtk4::Align::Center);
-    let light_icon = babydra_utils::ui::icon::get_icon("brightness", 20);
-    light_icon.set_pixel_size(20);
+    let light_icon = babydra_utils::ui::icon::get_icon("brightness", 28);
+    light_icon.set_pixel_size(28);
     light_content.append(&light_icon);
     let light_lbl = gtk4::Label::new(Some("Light"));
     light_lbl.add_css_class("settings-row-title");
@@ -119,11 +107,11 @@ pub fn build_appearance_ui(
     dark_card.set_hexpand(true);
     dark_card.set_cursor_from_name(Some("pointer"));
 
-    let dark_content = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
+    let dark_content = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
     dark_content.set_halign(gtk4::Align::Center);
     dark_content.set_valign(gtk4::Align::Center);
-    let dark_icon = babydra_utils::ui::icon::get_icon("dark-mode", 20);
-    dark_icon.set_pixel_size(20);
+    let dark_icon = babydra_utils::ui::icon::get_icon("dark-mode", 28);
+    dark_icon.set_pixel_size(28);
     dark_content.append(&dark_icon);
     let dark_lbl = gtk4::Label::new(Some("Dark"));
     dark_lbl.add_css_class("settings-row-title");
@@ -139,7 +127,7 @@ pub fn build_appearance_ui(
         dark_card.remove_css_class("active-dark");
     }
 
-    config_grid.attach(&theme_cards_box, 2, 0, 1, 1);
+    config_grid.attach(&theme_cards_box, 1, 0, 1, 1);
     dashboard_panel.append(&config_grid);
 
     // Separator Line
@@ -155,20 +143,21 @@ pub fn build_appearance_ui(
 
     // Quick Select Box container for ~/.babydra/wallpaper grid
     let quick_select_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
-    quick_select_box.set_margin_top(8);
-    dashboard_panel.append(&quick_select_box);
+    quick_select_box.set_margin_top(4);
+    quick_select_box.set_margin_end(4);
 
     let scroll = gtk4::ScrolledWindow::new();
     scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
     scroll.set_vexpand(true);
     scroll.set_valign(gtk4::Align::Fill);
-    scroll.set_child(Some(&dashboard_panel));
+    scroll.set_child(Some(&quick_select_box));
 
-    main_box.append(&scroll);
+    dashboard_panel.append(&scroll);
+    main_box.append(&dashboard_panel);
 
     (
         main_box,
-        preview_img,
+        preview_pic,
         pick_btn,
         light_card,
         dark_card,

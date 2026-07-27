@@ -297,24 +297,6 @@ button.row-action-btn:hover {
     opacity: 1.0;
 }
 
-.explore-dialog button.baby-fab,
-.explore-dialog button.baby-fab.circular {
-    background-image: none;
-    border: none;
-    border-radius: 50%;
-    min-width: 48px;
-    min-height: 48px;
-    padding: 0;
-    color: #ffffff;
-    transition: background-color 200ms ease, box-shadow 200ms ease;
-}
-
-.explore-dialog button.baby-fab image,
-.explore-dialog button.baby-fab.circular image {
-    color: #ffffff;
-    -gtk-icon-size: 20px;
-}
-
 .explore-dialog.properties-dialog {
     border-top: none;
     border-radius: 0 0 16px 16px;

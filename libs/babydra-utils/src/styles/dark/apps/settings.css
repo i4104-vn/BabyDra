@@ -141,43 +141,51 @@ button.sidebar-item.active-nav:hover image {
 
 /* Hero Section (About System) */
 .hero-avatar-box {
-    background-color: #ffffff;
-    border-radius: 16px;
-    padding: 2px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    background-color: transparent;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
 }
 
 .hero-hostname {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 700;
     color: #ffffff;
 }
 
-.hero-stats-label {
+.hero-subtitle {
     font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.hero-uptime-badge {
+    background-color: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.30);
+    border-radius: 20px;
+    padding: 4px 12px;
+}
+
+.hero-uptime-label {
+    font-size: 12px;
     font-weight: 600;
-    color: #ffffff;
-}
-
-progressbar.disk-progress trough {
-    background-color: rgba(255, 255, 255, 0.12);
-    border-radius: 6px;
-    min-height: 8px;
-}
-
-progressbar.disk-progress progress {
-    background-image: linear-gradient(90deg, #0099ff, #00cbff);
-    border-radius: 6px;
+    color: #60a5fa;
 }
 
 /* Theme Option Cards */
 button.theme-card-option {
     background-color: rgba(255, 255, 255, 0.035);
     border: 1px solid rgba(255, 255, 255, 0.10);
-    border-radius: 12px;
+    border-radius: 14px;
     color: rgba(255, 255, 255, 0.70);
-    padding: 16px 20px;
+    padding: 24px 20px;
+    min-height: 120px;
     transition: all 200ms ease;
+}
+
+button.theme-card-option label {
+    font-size: 15px;
+    font-weight: 700;
 }
 
 button.theme-card-option:hover {
@@ -198,19 +206,37 @@ button.theme-card-option.active-dark image {
     color: #60a5fa;
 }
 
-button.choose-file-card {
-    background-color: rgba(255, 255, 255, 0.03);
-    border: 1px dashed rgba(255, 255, 255, 0.20);
-    border-radius: 12px;
-    color: rgba(255, 255, 255, 0.70);
-    padding: 16px;
-    transition: all 200ms ease;
+.wallpaper-preview-overlay {
+    border-radius: 14px;
+    overflow: hidden;
 }
 
-button.choose-file-card:hover {
-    background-color: rgba(255, 255, 255, 0.08);
+picture.wallpaper-preview-picture,
+.wallpaper-preview-picture picture,
+.wallpaper-preview-picture {
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+button.wallpaper-pick-overlay-btn,
+button.wallpaper-pick-floating-btn {
+    background-color: rgba(0, 0, 0, 0.60);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 9999px;
+    min-width: 38px;
+    min-height: 38px;
+    padding: 0;
+    transition: all 200ms ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+button.wallpaper-pick-overlay-btn:hover,
+button.wallpaper-pick-floating-btn:hover {
+    background-color: rgba(59, 130, 246, 0.85);
     border-color: #3b82f6;
     color: #ffffff;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.40);
 }
 
 /* Warning alert container */
