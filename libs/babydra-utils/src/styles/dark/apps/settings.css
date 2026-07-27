@@ -218,24 +218,24 @@ picture.wallpaper-preview-picture,
     overflow: hidden;
 }
 
-button.wallpaper-pick-overlay-vertical-btn {
-    background-color: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(12px);
-    border: none;
-    border-left: 1px solid rgba(255, 255, 255, 0.16);
-    border-top-right-radius: 14px;
-    border-bottom-right-radius: 14px;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
+button.wallpaper-pick-overlay-vertical-btn,
+button.wallpaper-pick-overlay-inside-btn {
+    background-color: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.20);
+    border-radius: 10px;
     color: #ffffff;
     padding: 0;
     transition: all 200ms ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.30);
 }
 
-button.wallpaper-pick-overlay-vertical-btn:hover {
+button.wallpaper-pick-overlay-vertical-btn:hover,
+button.wallpaper-pick-overlay-inside-btn:hover {
     background-color: rgba(59, 130, 246, 0.85);
-    border-left-color: #3b82f6;
+    border-color: #3b82f6;
     color: #ffffff;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.40);
 }
 
 /* Warning alert container */

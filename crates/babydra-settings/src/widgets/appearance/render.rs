@@ -63,13 +63,16 @@ pub fn build_appearance_ui(
     }
     preview_overlay.set_child(Some(&preview_pic));
 
-    // Vertical Plus Button overlayed inside the right edge
+    // Vertical Plus Button overlayed INSIDE the right edge
     let pick_btn = gtk4::Button::new();
-    pick_btn.add_css_class("wallpaper-pick-overlay-vertical-btn");
+    pick_btn.add_css_class("wallpaper-pick-overlay-inside-btn");
     pick_btn.set_cursor_from_name(Some("pointer"));
     pick_btn.set_valign(gtk4::Align::Fill);
     pick_btn.set_halign(gtk4::Align::End);
-    pick_btn.set_size_request(44, -1);
+    pick_btn.set_margin_top(8);
+    pick_btn.set_margin_bottom(8);
+    pick_btn.set_margin_end(8);
+    pick_btn.set_size_request(40, -1);
 
     let plus_content = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     plus_content.set_halign(gtk4::Align::Center);
