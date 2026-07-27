@@ -53,3 +53,22 @@ pub fn get_bluetooth_devices() -> Vec<BtDevice> {
     
     devices
 }
+
+pub fn connect_device(mac: &str) -> bool {
+    Command::new("bluetoothctl")
+        .arg("connect")
+        .arg(mac)
+        .status()
+        .map(|s| s.success())
+        .unwrap_or(false)
+}
+
+pub fn disconnect_device(mac: &str) -> bool {
+    Command::new("bluetoothctl")
+        .arg("disconnect")
+        .arg(mac)
+        .status()
+        .map(|s| s.success())
+        .unwrap_or(false)
+}
+

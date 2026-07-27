@@ -2,6 +2,7 @@
 
 use std::collections::HashMap;
 use zbus::blocking::Connection;
+use crate::models::wifi::WifiNetwork;
 use super::client::{
     get_wifi_device, AccessPointProxyBlocking, DeviceWifiProxyBlocking, SettingsProxyBlocking,
     ConnectionSettingsProxyBlocking, val_to_str,
@@ -39,7 +40,7 @@ pub fn known_networks() -> Vec<String> {
     ssids
 }
 
-pub fn scan_networks() -> Vec<(String, String, String, bool)> {
+pub fn scan_networks() -> Vec<WifiNetwork> {
     let mut networks = Vec::new();
     let conn = match Connection::system() {
         Ok(c) => c,
@@ -104,16 +105,21 @@ pub fn scan_networks() -> Vec<(String, String, String, bool)> {
     }
 
     for (ssid, (security, signal, is_connected)) in ap_map {
-        networks.push((ssid, security, signal.to_string(), is_connected));
+        networks.push(WifiNetwork {
+            ssid,
+            security,
+            strength: signal.to_string(),
+            is_connected,
+        });
     }
 
     // Sort: Connected Wi-Fi at top (index 0), then descending signal strength
     networks.sort_by(|a, b| {
-        if a.3 != b.3 {
-            b.3.cmp(&a.3)
+        if a.is_connected != b.is_connected {
+            b.is_connected.cmp(&a.is_connected)
         } else {
-            let sig_a: u32 = a.2.parse().unwrap_or(0);
-            let sig_b: u32 = b.2.parse().unwrap_or(0);
+            let sig_a: u32 = a.strength.parse().unwrap_or(0);
+            let sig_b: u32 = b.strength.parse().unwrap_or(0);
             sig_b.cmp(&sig_a)
         }
     });

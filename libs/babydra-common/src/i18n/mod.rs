@@ -305,6 +305,46 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
 
             map.insert("settings.about_title", "About System");
             map.insert("settings.up_time", "Up {}");
+            map.insert("settings.on", "On");
+            map.insert("settings.connect", "Connect");
+            map.insert("settings.disconnect", "Disconnect");
+            map.insert("settings.apps_tab_apps", "Apps");
+            map.insert("settings.apps_tab_packages", "Packages");
+            map.insert("settings.startup_add_new", "+ Add New");
+            map.insert("settings.save_changes", "Save Changes");
+            map.insert("settings.refresh", "Refresh");
+            map.insert("settings.save", "Save");
+            map.insert("settings.update_check", "Check for Updates");
+            map.insert("settings.pick_wallpaper", "Select Wallpaper");
+            map.insert("settings.image_filter", "Images (*.png, *.jpg, *.jpeg, *.webp)");
+            map.insert("settings.vpn_filter", "VPN Configurations (*.ovpn, *.conf)");
+            map.insert("settings.open_vpn_profile", "Open VPN Profile");
+
+            // Settings – sidebar header
+            map.insert("settings.title", "Settings");
+            map.insert("settings.subtitle", "i4arch system settings");
+            map.insert("settings.search_placeholder", "Search settings... (Ctrl+/)");
+
+            // Settings – startup widget
+            map.insert("settings.startup_exec_badge", "exec-once");
+            map.insert("settings.startup_remove", "Remove");
+            map.insert("settings.startup_command_placeholder", "Enter command (e.g. waybar)");
+
+            // Settings – VPN type label & tooltip
+            map.insert("settings.vpn_type", "Type");
+            map.insert("settings.vpn_add_tooltip", "Add VPN Profile");
+
+            // Settings – system info spec card labels
+            map.insert("settings.spec_kernel", "KERNEL");
+            map.insert("settings.spec_processor", "PROCESSOR");
+            map.insert("settings.spec_memory", "MEMORY");
+            map.insert("settings.spec_graphics", "GRAPHICS");
+
+            // Settings – display orientation options
+            map.insert("settings.orientation_normal", "Normal");
+            map.insert("settings.orientation_left", "Left (90°)");
+            map.insert("settings.orientation_inverted", "Inverted (180°)");
+            map.insert("settings.orientation_right", "Right (270°)");
 
             // Context Menu & Dialogs
             map.insert("explore.menu_open_new_window", "Open in New Window");
@@ -627,6 +667,46 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
 
             map.insert("settings.about_title", "Thông tin hệ thống");
             map.insert("settings.up_time", "Hoạt động {}");
+            map.insert("settings.on", "Bật");
+            map.insert("settings.connect", "Kết nối");
+            map.insert("settings.disconnect", "Ngắt kết nối");
+            map.insert("settings.apps_tab_apps", "Ứng dụng");
+            map.insert("settings.apps_tab_packages", "Gói phần mềm");
+            map.insert("settings.startup_add_new", "+ Thêm mới");
+            map.insert("settings.save_changes", "Lưu thay đổi");
+            map.insert("settings.refresh", "Làm mới");
+            map.insert("settings.save", "Lưu");
+            map.insert("settings.update_check", "Kiểm tra cập nhật");
+            map.insert("settings.pick_wallpaper", "Chọn hình nền");
+            map.insert("settings.image_filter", "Hình ảnh (*.png, *.jpg, *.jpeg, *.webp)");
+            map.insert("settings.vpn_filter", "Cấu hình VPN (*.ovpn, *.conf)");
+            map.insert("settings.open_vpn_profile", "Mở tệp cấu hình VPN");
+
+            // Settings – sidebar header
+            map.insert("settings.title", "Cài đặt");
+            map.insert("settings.subtitle", "Cài đặt hệ thống i4arch");
+            map.insert("settings.search_placeholder", "Tìm cài đặt... (Ctrl+/)");
+
+            // Settings – startup widget
+            map.insert("settings.startup_exec_badge", "exec-once");
+            map.insert("settings.startup_remove", "Xóa");
+            map.insert("settings.startup_command_placeholder", "Nhập lệnh (vd. waybar)");
+
+            // Settings – VPN type label & tooltip
+            map.insert("settings.vpn_type", "Loại");
+            map.insert("settings.vpn_add_tooltip", "Thêm cấu hình VPN");
+
+            // Settings – system info spec card labels
+            map.insert("settings.spec_kernel", "KERNEL");
+            map.insert("settings.spec_processor", "VI XỬ LÝ");
+            map.insert("settings.spec_memory", "BỘ NHỚ");
+            map.insert("settings.spec_graphics", "ĐỒ HỌA");
+
+            // Settings – display orientation options
+            map.insert("settings.orientation_normal", "Bình thường");
+            map.insert("settings.orientation_left", "Xoay trái (90°)");
+            map.insert("settings.orientation_inverted", "Đảo ngược (180°)");
+            map.insert("settings.orientation_right", "Xoay phải (270°)");
 
             // Context Menu & Dialogs
             map.insert("explore.menu_open_new_window", "Mở trong cửa sổ mới");

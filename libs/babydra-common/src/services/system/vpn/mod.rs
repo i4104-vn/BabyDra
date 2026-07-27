@@ -32,3 +32,33 @@ pub fn get_vpn_connections() -> Vec<VpnConn> {
     }
     connections
 }
+
+pub fn connect_vpn(name: &str) -> bool {
+    Command::new("nmcli")
+        .args(&["connection", "up", name])
+        .status()
+        .map(|s| s.success())
+        .unwrap_or(false)
+}
+
+pub fn disconnect_vpn(name: &str) -> bool {
+    Command::new("nmcli")
+        .args(&["connection", "down", name])
+        .status()
+        .map(|s| s.success())
+        .unwrap_or(false)
+}
+
+pub fn import_vpn_profile(path: &str) -> bool {
+    let type_str = if path.ends_with(".ovpn") {
+        "openvpn"
+    } else {
+        "wireguard"
+    };
+    Command::new("nmcli")
+        .args(&["connection", "import", "type", type_str, "file", path])
+        .status()
+        .map(|s| s.success())
+        .unwrap_or(false)
+}
+

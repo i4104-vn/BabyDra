@@ -45,7 +45,6 @@ pub fn set_wallpaper(path: &Path) -> Result<(), String> {
     let _ = std::fs::create_dir_all(&config_dir);
     let _ = std::fs::write(config_dir.join("current_wallpaper"), path_str);
 
-    // 1. Try awww (Primary Wayland backend)
     if has_binary("awww") {
         let _ = Command::new("awww-daemon").spawn();
         let status = Command::new("awww")
@@ -55,48 +54,13 @@ pub fn set_wallpaper(path: &Path) -> Result<(), String> {
         if status.success() {
             return Ok(());
         }
-    }
+    } 
 
-    // 2. Try swww (Alternative Wayland backend)
-    if has_binary("swww") {
-        let _ = Command::new("swww-daemon").spawn();
-        let status = Command::new("swww")
-            .args(["img", path_str])
-            .status()
-            .map_err(|e| e.to_string())?;
-        if status.success() {
-            return Ok(());
-        }
-    }
-
-    // 3. Try swaybg (standard Wayland background setter)
-    if has_binary("swaybg") {
-        let _ = Command::new("killall").arg("swaybg").output();
-        let status = Command::new("swaybg")
-            .args(["-i", path_str, "-m", "fill"])
-            .spawn();
-        if status.is_ok() {
-            return Ok(());
-        }
-    }
-
-    // 4. Try feh (X11 backend fallback)
-    if has_binary("feh") {
-        let status = Command::new("feh")
-            .args(["--bg-fill", path_str])
-            .status()
-            .map_err(|e| e.to_string())?;
-        if status.success() {
-            return Ok(());
-        }
-    }
-
-    Err("No compatible wallpaper backend (awww, swww, swaybg, or feh) was found in PATH".to_string())
+    Err("No compatible wallpaper backend - awww was found in PATH".to_string())
 }
 
 /// Retrieves the path to the currently active wallpaper from user configuration or daemon query.
 pub fn get_current_wallpaper() -> Option<PathBuf> {
-    // 1. Query awww daemon for active image
     if let Ok(output) = Command::new("awww").arg("query").output() {
         let stdout = String::from_utf8_lossy(&output.stdout);
         for line in stdout.lines() {
@@ -110,21 +74,6 @@ pub fn get_current_wallpaper() -> Option<PathBuf> {
         }
     }
 
-    // 2. Query swww daemon for active image
-    if let Ok(output) = Command::new("swww").arg("query").output() {
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        for line in stdout.lines() {
-            if let Some(idx) = line.find("image:") {
-                let raw_path = line[idx + "image:".len()..].trim();
-                let path = PathBuf::from(raw_path);
-                if path.exists() {
-                    return Some(path);
-                }
-            }
-        }
-    }
-
-    // 3. Read saved configuration file ~/.config/babydra/current_wallpaper
     if let Ok(home) = std::env::var("HOME") {
         let saved_file = PathBuf::from(&home).join(".config/babydra/current_wallpaper");
         if let Ok(content) = std::fs::read_to_string(&saved_file) {
@@ -134,7 +83,6 @@ pub fn get_current_wallpaper() -> Option<PathBuf> {
             }
         }
 
-        // 4. Fallback: return first wallpaper found in ~/.babydra/wallpaper
         let wp_dir = PathBuf::from(&home).join(".babydra/wallpaper");
         if let Ok(entries) = std::fs::read_dir(wp_dir) {
             let mut files: Vec<PathBuf> = entries
@@ -157,3 +105,33 @@ pub fn get_current_wallpaper() -> Option<PathBuf> {
 
     None
 }
+
+/// Returns the path to the user's wallpaper directory (~/.babydra/wallpaper).
+pub fn get_wallpaper_dir() -> PathBuf {
+    let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".to_string());
+    let dir = PathBuf::from(home).join(".babydra").join("wallpaper");
+    let _ = std::fs::create_dir_all(&dir);
+    dir
+}
+
+/// Retrieves all local wallpaper image files from ~/.babydra/wallpaper.
+pub fn get_local_wallpapers() -> Vec<PathBuf> {
+    let dir = get_wallpaper_dir();
+    let mut files = Vec::new();
+    if let Ok(entries) = std::fs::read_dir(dir) {
+        for entry in entries.filter_map(Result::ok) {
+            let path = entry.path();
+            if path.is_file() {
+                if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
+                    let ext_lower = ext.to_lowercase();
+                    if matches!(ext_lower.as_str(), "png" | "jpg" | "jpeg" | "webp") {
+                        files.push(path);
+                    }
+                }
+            }
+        }
+    }
+    files.sort();
+    files
+}
+

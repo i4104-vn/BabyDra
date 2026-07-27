@@ -17,6 +17,7 @@ pub mod display;
 pub mod app_info;
 pub mod system_update;
 pub mod startup_command;
+pub mod wifi;
 
 pub use theme_config::ThemeConfig;
 pub use shell_config::ShellConfig;
@@ -34,5 +35,6 @@ pub use display::MonitorConfig;
 pub use app_info::{InstalledApp, InstalledPackage};
 pub use system_update::PackageUpdate;
 pub use startup_command::StartupCommand;
+pub use wifi::WifiNetwork;
 
 
