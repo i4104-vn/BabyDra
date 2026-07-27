@@ -209,6 +209,7 @@ button.theme-card-option.active-dark image {
 .wallpaper-preview-overlay {
     border-radius: 14px;
     overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 picture.wallpaper-preview-picture,
@@ -301,16 +302,25 @@ button.app-tab-btn.active {
 
 /* Wallpaper Thumbnail Card */
 button.wallpaper-thumb-card {
-    background-color: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    border-radius: 12px;
-    padding: 6px;
+    background-color: transparent;
+    border: none;
+    border-radius: 10px;
+    padding: 0;
+    margin: 0;
     transition: all 200ms ease;
+    box-shadow: none;
 }
 
-button.wallpaper-thumb-card:hover {
-    background-color: rgba(255, 255, 255, 0.10);
+button.wallpaper-thumb-card picture {
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transition: all 200ms ease;
+    overflow: hidden;
+}
+
+button.wallpaper-thumb-card:hover picture {
     border-color: #3b82f6;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
 }
 
 /* Dropdown Select Controls (Matching Search Input Style) */

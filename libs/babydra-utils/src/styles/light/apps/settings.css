@@ -175,6 +175,7 @@ button.theme-card-option.active-dark image {
 .wallpaper-preview-overlay {
     border-radius: 14px;
     overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
 picture.wallpaper-preview-picture,
@@ -182,6 +183,29 @@ picture.wallpaper-preview-picture,
 .wallpaper-preview-picture {
     border-radius: 14px;
     overflow: hidden;
+}
+
+/* Wallpaper Thumbnail Card */
+button.wallpaper-thumb-card {
+    background-color: transparent;
+    border: none;
+    border-radius: 10px;
+    padding: 0;
+    margin: 0;
+    transition: all 200ms ease;
+    box-shadow: none;
+}
+
+button.wallpaper-thumb-card picture {
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    transition: all 200ms ease;
+    overflow: hidden;
+}
+
+button.wallpaper-thumb-card:hover picture {
+    border-color: #2563eb;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
 }
 
 button.wallpaper-pick-overlay-vertical-btn,
