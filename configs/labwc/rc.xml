@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <labwc_config>
   <core>
-    <gap>10</gap>
+    <!-- Gap between windows -->
+    <gap>16</gap>
   </core>
 
-  <!-- Reserved screen space around workspace edges (top accounts for status panel + gap) -->
-  <margin top="38" bottom="10" left="10" right="10" />
+  <!-- Outer margins reserved on screen edges around windows (top includes space for panel) -->
+  <margin top="42" bottom="16" left="16" right="16" />
 
   <!-- Default placement policy for newly spawned windows -->
   <placement>
@@ -74,7 +75,13 @@
 
   <!-- Window snapping behavior -->
   <snapping>
-    <range>10</range>
+    <range>16</range>
     <topMaximize>yes</topMaximize>
   </snapping>
+
+  <!-- Window edge resistance -->
+  <resistance>
+    <screenEdgeStrength>20</screenEdgeStrength>
+    <windowEdgeStrength>10</windowEdgeStrength>
+  </resistance>
 </labwc_config>

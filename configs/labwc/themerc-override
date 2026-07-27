@@ -8,9 +8,9 @@ border.color: #38384d
 window.active.border.corner-radius: 12
 window.inactive.border.corner-radius: 12
 
-# ── Padding ─────────────────────────────────────────────
-window.titlebar.padding.width: 16
-window.titlebar.padding.height: 10
+# ── Titlebar Padding ─────────────────────────────────────
+window.titlebar.padding.width: 12
+window.titlebar.padding.height: 6
 
 # ── Window Border Colors ────────────────────────────────
 window.active.border.color: #38384d
@@ -28,9 +28,9 @@ window.inactive.label.text.color: #5c5c6e
 window.label.text.justify: center
 
 # ── Window Button Sizes ─────────────────────────────────
-window.button.width: 16
-window.button.height: 16
-window.button.spacing: 10
+window.button.width: 14
+window.button.height: 14
+window.button.spacing: 8
 
 # ── Window Button Hover Overlay ──────────────────────────
 window.button.hover.bg: Solid
