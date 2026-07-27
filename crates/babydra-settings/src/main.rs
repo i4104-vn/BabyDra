@@ -103,38 +103,36 @@ fn main() {
 
         // 2. Navigation Scrolled List
         let sidebar_scroll = gtk4::ScrolledWindow::new();
-        sidebar_scroll.set_hscrollbar_policy(gtk4::PolicyType::Never);
+        sidebar_scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
         sidebar_scroll.set_vexpand(true);
 
-        let nav_container = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-        nav_container.set_margin_start(4);
-        nav_container.set_margin_end(4);
+        let nav_container = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
 
-        let btn_wifi = babydra_utils::components::create_sidebar_item_button("Wi-Fi", "wifi", "sidebar-item", || {});
+        let btn_wifi = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_wifi"), "wifi", "sidebar-item", || {});
         btn_wifi.set_cursor_from_name(Some("pointer"));
 
-        let btn_vpn = babydra_utils::components::create_sidebar_item_button("VPN", "shield", "sidebar-item", || {});
+        let btn_vpn = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_vpn"), "lock", "sidebar-item", || {});
         btn_vpn.set_cursor_from_name(Some("pointer"));
 
-        let btn_bt = babydra_utils::components::create_sidebar_item_button("Bluetooth", "bluetooth", "sidebar-item", || {});
+        let btn_bt = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_bluetooth"), "bluetooth", "sidebar-item", || {});
         btn_bt.set_cursor_from_name(Some("pointer"));
 
-        let btn_app = babydra_utils::components::create_sidebar_item_button("Wallpaper & Themes", "palette", "sidebar-item", || {});
+        let btn_app = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_wallpaper_themes"), "palette", "sidebar-item", || {});
         btn_app.set_cursor_from_name(Some("pointer"));
 
-        let btn_displays = babydra_utils::components::create_sidebar_item_button("Displays", "desktop", "sidebar-item", || {});
+        let btn_displays = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_displays"), "desktop", "sidebar-item", || {});
         btn_displays.set_cursor_from_name(Some("pointer"));
 
-        let btn_apps = babydra_utils::components::create_sidebar_item_button("Installed Apps", "th-large", "sidebar-item", || {});
+        let btn_apps = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_installed_apps"), "th-large", "sidebar-item", || {});
         btn_apps.set_cursor_from_name(Some("pointer"));
 
-        let btn_startup = babydra_utils::components::create_sidebar_item_button("Startup Apps", "cog", "sidebar-item", || {});
+        let btn_startup = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_startup_apps"), "cog", "sidebar-item", || {});
         btn_startup.set_cursor_from_name(Some("pointer"));
 
-        let btn_update = babydra_utils::components::create_sidebar_item_button("System Update", "history", "sidebar-item", || {});
+        let btn_update = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_system_update"), "history", "sidebar-item", || {});
         btn_update.set_cursor_from_name(Some("pointer"));
 
-        let btn_sys = babydra_utils::components::create_sidebar_item_button("About System", "info", "sidebar-item", || {});
+        let btn_sys = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_about_system"), "info", "sidebar-item", || {});
         btn_sys.add_css_class("active-nav");
         btn_sys.set_cursor_from_name(Some("pointer"));
 
@@ -210,7 +208,7 @@ fn main() {
         cheatsheet_box.set_valign(gtk4::Align::Center);
         cheatsheet_box.set_visible(false);
 
-        let cheatsheet_title = gtk4::Label::new(Some("Bảng phím tắt cài đặt"));
+        let cheatsheet_title = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.shortcuts_title")));
         cheatsheet_title.add_css_class("cheatsheet-title");
         cheatsheet_box.append(&cheatsheet_title);
 
@@ -219,7 +217,7 @@ fn main() {
         cheatsheet_lbl.set_justify(gtk4::Justification::Left);
         cheatsheet_box.append(&cheatsheet_lbl);
 
-        let close_btn = gtk4::Button::with_label("Tôi đã rõ!");
+        let close_btn = gtk4::Button::with_label(&babydra_common::i18n::t("settings.shortcuts_close"));
         close_btn.set_halign(gtk4::Align::Center);
         close_btn.add_css_class("suggested-action");
         cheatsheet_box.append(&close_btn);

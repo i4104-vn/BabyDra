@@ -52,11 +52,11 @@ pub fn create_vpn_widget() -> gtk4::Box {
                 icon_badge.append(&shield_icon);
                 placeholder_box.append(&icon_badge);
 
-                let lbl = gtk4::Label::new(Some("No VPN connections found"));
+                let lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.vpn_no_profiles")));
                 lbl.add_css_class("settings-row-title");
                 placeholder_box.append(&lbl);
 
-                let desc = gtk4::Label::new(Some("Click '+ Add Profile' above to import OpenVPN (.ovpn) or WireGuard (.conf) profiles"));
+                let desc = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.vpn_no_profiles_sub")));
                 desc.add_css_class("settings-row-desc");
                 placeholder_box.append(&desc);
 

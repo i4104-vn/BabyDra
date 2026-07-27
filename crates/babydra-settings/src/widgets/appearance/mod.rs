@@ -148,11 +148,11 @@ pub fn create_appearance_widget() -> gtk4::Box {
                 icon.set_halign(gtk4::Align::Center);
                 empty_box.append(&icon);
 
-                let title = gtk4::Label::new(Some("Chưa có hình nền trong ~/.babydra/wallpaper"));
+                let title = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.no_wallpapers")));
                 title.add_css_class("settings-row-title");
                 empty_box.append(&title);
 
-                let sub = gtk4::Label::new(Some("Bấm 'Choose File' phía trên để thêm hình nền mới"));
+                let sub = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.no_wallpapers_sub")));
                 sub.add_css_class("settings-row-desc");
                 empty_box.append(&sub);
 

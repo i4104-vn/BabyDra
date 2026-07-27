@@ -46,11 +46,11 @@ pub fn create_wifi_widget() -> gtk4::Box {
                 wifi_icon.add_css_class("settings-row-icon");
                 placeholder_box.append(&wifi_icon);
 
-                let lbl = gtk4::Label::new(Some("Wi-Fi đang tắt"));
+                let lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.wifi_disabled")));
                 lbl.add_css_class("settings-row-title");
                 placeholder_box.append(&lbl);
 
-                let desc = gtk4::Label::new(Some("Bật công tắc phía trên để tìm kiếm các mạng Wi-Fi khả dụng"));
+                let desc = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.wifi_disabled_sub")));
                 desc.add_css_class("settings-row-desc");
                 placeholder_box.append(&desc);
 
@@ -74,7 +74,7 @@ pub fn create_wifi_widget() -> gtk4::Box {
                 wifi_icon.add_css_class("settings-row-icon");
                 placeholder_box.append(&wifi_icon);
 
-                let lbl = gtk4::Label::new(Some("Đang tìm kiếm mạng Wi-Fi..."));
+                let lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.wifi_no_networks")));
                 lbl.add_css_class("settings-row-title");
                 placeholder_box.append(&lbl);
 

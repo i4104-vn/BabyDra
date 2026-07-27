@@ -24,7 +24,7 @@ pub fn build(monitors: &[MonitorConfig]) -> DisplaysWidget {
 
     // Title and Actions
     let header_box = Box::new(Orientation::Horizontal, 12);
-    let title_label = Label::new(Some("Displays"));
+    let title_label = Label::new(Some(&babydra_common::i18n::t("settings.displays_title")));
     title_label.add_css_class("settings-page-title");
     title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);
@@ -47,27 +47,29 @@ pub fn build(monitors: &[MonitorConfig]) -> DisplaysWidget {
     let mut card_rows = Vec::new();
 
     for mon in monitors {
-        let card = Box::new(Orientation::Vertical, 12);
+        let card = Box::new(Orientation::Vertical, 0);
         card.add_css_class("glass-panel");
 
-        // Card Header
-        let card_header = Box::new(Orientation::Horizontal, 8);
-        let mon_title = Label::new(Some(&format!("{} ({})", mon.name, mon.description)));
-        mon_title.add_css_class("settings-group-header-title");
-        mon_title.set_hexpand(true);
-        mon_title.set_halign(gtk4::Align::Start);
+        // Monitor Name and Enable Switch
+        let header = Box::new(Orientation::Horizontal, 12);
+        header.add_css_class("settings-card-row");
+
+        let name_lbl = Label::new(Some(&mon.name));
+        name_lbl.add_css_class("settings-row-title");
+        name_lbl.set_hexpand(true);
+        name_lbl.set_halign(gtk4::Align::Start);
 
         let enable_switch = Switch::new();
         enable_switch.set_active(mon.enabled);
 
-        card_header.append(&mon_title);
-        card_header.append(&enable_switch);
-        card.append(&card_header);
+        header.append(&name_lbl);
+        header.append(&enable_switch);
+        card.append(&header);
 
         // Resolution Row
         let res_row = Box::new(Orientation::Horizontal, 12);
         res_row.add_css_class("settings-card-row");
-        let res_lbl = Label::new(Some("Resolution"));
+        let res_lbl = Label::new(Some(&babydra_common::i18n::t("settings.display_resolution")));
         res_lbl.add_css_class("settings-row-title");
         res_lbl.set_hexpand(true);
         res_lbl.set_halign(gtk4::Align::Start);
@@ -83,7 +85,7 @@ pub fn build(monitors: &[MonitorConfig]) -> DisplaysWidget {
         // Refresh Rate Row
         let rate_row = Box::new(Orientation::Horizontal, 12);
         rate_row.add_css_class("settings-card-row");
-        let rate_lbl = Label::new(Some("Refresh Rate"));
+        let rate_lbl = Label::new(Some(&babydra_common::i18n::t("settings.display_refresh_rate")));
         rate_lbl.add_css_class("settings-row-title");
         rate_lbl.set_hexpand(true);
         rate_lbl.set_halign(gtk4::Align::Start);
@@ -100,7 +102,7 @@ pub fn build(monitors: &[MonitorConfig]) -> DisplaysWidget {
         // Orientation Row
         let orient_row = Box::new(Orientation::Horizontal, 12);
         orient_row.add_css_class("settings-card-row");
-        let orient_lbl = Label::new(Some("Orientation"));
+        let orient_lbl = Label::new(Some(&babydra_common::i18n::t("settings.display_orientation")));
         orient_lbl.add_css_class("settings-row-title");
         orient_lbl.set_hexpand(true);
         orient_lbl.set_halign(gtk4::Align::Start);

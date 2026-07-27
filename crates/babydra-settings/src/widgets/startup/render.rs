@@ -17,7 +17,7 @@ pub fn build(commands: &[StartupCommand]) -> StartupWidget {
 
     // Header
     let header_box = Box::new(Orientation::Horizontal, 12);
-    let title_label = Label::new(Some("Startup Applications"));
+    let title_label = Label::new(Some(&babydra_common::i18n::t("settings.startup_title")));
     title_label.add_css_class("settings-page-title");
     title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);

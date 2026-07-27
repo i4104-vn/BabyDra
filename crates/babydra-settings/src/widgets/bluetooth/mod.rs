@@ -63,11 +63,11 @@ pub fn create_bluetooth_widget() -> gtk4::Box {
                 icon_badge.append(&bt_icon);
                 placeholder_box.append(&icon_badge);
 
-                let lbl = gtk4::Label::new(Some("Bluetooth is turned off"));
+                let lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.bt_off")));
                 lbl.add_css_class("settings-row-title");
                 placeholder_box.append(&lbl);
 
-                let desc = gtk4::Label::new(Some("Toggle the switch above to enable Bluetooth and discover devices"));
+                let desc = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.bt_off_sub")));
                 desc.add_css_class("settings-row-desc");
                 placeholder_box.append(&desc);
 
@@ -105,11 +105,11 @@ pub fn create_bluetooth_widget() -> gtk4::Box {
                 icon_badge.append(&bt_icon);
                 placeholder_box.append(&icon_badge);
 
-                let lbl = gtk4::Label::new(Some("No paired Bluetooth devices found"));
+                let lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.bt_no_devices")));
                 lbl.add_css_class("settings-row-title");
                 placeholder_box.append(&lbl);
 
-                let desc = gtk4::Label::new(Some("Make sure your Bluetooth device is turned on and ready to pair"));
+                let desc = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.bt_no_devices_sub")));
                 desc.add_css_class("settings-row-desc");
                 placeholder_box.append(&desc);
 

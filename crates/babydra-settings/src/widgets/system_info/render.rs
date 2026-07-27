@@ -17,7 +17,7 @@ pub fn build_system_ui(
     main_box.set_valign(gtk4::Align::Fill);
 
     // Page Title
-    let page_title = gtk4::Label::new(Some("About System"));
+    let page_title = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.about_title")));
     page_title.add_css_class("settings-page-title");
     page_title.set_halign(gtk4::Align::Start);
     main_box.append(&page_title);
@@ -75,7 +75,8 @@ pub fn build_system_ui(
     clock_icon.set_valign(gtk4::Align::Center);
     uptime_badge.append(&clock_icon);
 
-    let uptime_lbl = gtk4::Label::new(Some(&format!("Up {}", uptime_text)));
+    let formatted_uptime = babydra_common::i18n::t("settings.up_time").replace("{}", uptime_text);
+    let uptime_lbl = gtk4::Label::new(Some(&formatted_uptime));
     uptime_lbl.add_css_class("hero-uptime-label");
     uptime_lbl.set_valign(gtk4::Align::Center);
     uptime_badge.append(&uptime_lbl);

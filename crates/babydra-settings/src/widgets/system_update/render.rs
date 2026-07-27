@@ -17,7 +17,7 @@ pub fn build(updates: &[PackageUpdate]) -> SystemUpdateWidget {
 
     // Header
     let header_box = Box::new(Orientation::Horizontal, 12);
-    let title_label = Label::new(Some("System Update"));
+    let title_label = Label::new(Some(&babydra_common::i18n::t("settings.update_title")));
     title_label.add_css_class("settings-page-title");
     title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);
@@ -38,7 +38,7 @@ pub fn build(updates: &[PackageUpdate]) -> SystemUpdateWidget {
     count_box.set_hexpand(true);
     let count_label = Label::new(Some(&format!("{}", updates.len())));
     count_label.add_css_class("hero-hostname");
-    let sub_lbl = Label::new(Some("Updates Available"));
+    let sub_lbl = Label::new(Some(&babydra_common::i18n::t("settings.updates_available")));
     sub_lbl.add_css_class("settings-row-desc");
     sub_lbl.set_halign(gtk4::Align::Start);
 

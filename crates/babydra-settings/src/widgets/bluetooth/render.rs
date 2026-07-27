@@ -11,7 +11,7 @@ pub fn build_bluetooth_ui() -> (gtk4::Box, gtk4::Switch, gtk4::ListBox) {
     let header_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
     header_row.set_margin_bottom(4);
 
-    let title_lbl = gtk4::Label::new(Some("Bluetooth"));
+    let title_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.bt_title")));
     title_lbl.add_css_class("settings-page-title");
     title_lbl.set_halign(gtk4::Align::Start);
     header_row.append(&title_lbl);

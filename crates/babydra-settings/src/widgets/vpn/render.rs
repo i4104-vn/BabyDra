@@ -9,7 +9,7 @@ pub fn build_vpn_ui() -> (gtk4::Box, gtk4::Switch, gtk4::Button, gtk4::ListBox) 
     let header_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
     header_row.set_margin_bottom(4);
 
-    let title_lbl = gtk4::Label::new(Some("VPN"));
+    let title_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.vpn_title")));
     title_lbl.add_css_class("settings-page-title");
     title_lbl.set_halign(gtk4::Align::Start);
     header_row.append(&title_lbl);
@@ -18,9 +18,17 @@ pub fn build_vpn_ui() -> (gtk4::Box, gtk4::Switch, gtk4::Button, gtk4::ListBox) 
     spacer.set_hexpand(true);
     header_row.append(&spacer);
 
+    // 1. "+ Add Profile" Button in header
+    let add_btn = gtk4::Button::with_label(&babydra_common::i18n::t("settings.vpn_add_profile"));
+    add_btn.add_css_class("suggested-action");
+    add_btn.set_cursor_from_name(Some("pointer"));
+    add_btn.set_valign(gtk4::Align::Center);
+    header_row.append(&add_btn);
+
     // Toggle Switch (On)
     let switch_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
     switch_box.set_valign(gtk4::Align::Center);
+    switch_box.set_margin_start(8);
 
     let switch_lbl = gtk4::Label::new(Some("On"));
     switch_lbl.add_css_class("settings-page-subtitle");

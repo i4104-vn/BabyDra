@@ -23,13 +23,13 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> AppsWidget {
     let header_box = Box::new(Orientation::Horizontal, 12);
     header_box.set_margin_bottom(4);
 
-    let title_label = Label::new(Some("Application Manager"));
+    let title_label = Label::new(Some(&babydra_common::i18n::t("settings.apps_title")));
     title_label.add_css_class("settings-page-title");
     title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);
 
     let search_entry = Entry::new();
-    search_entry.set_placeholder_text(Some("Search..."));
+    search_entry.set_placeholder_text(Some(&babydra_common::i18n::t("settings.apps_search_placeholder")));
     search_entry.add_css_class("sidebar-search-entry");
     search_entry.set_width_request(220);
 

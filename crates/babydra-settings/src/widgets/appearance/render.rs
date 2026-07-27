@@ -28,7 +28,7 @@ pub fn build_appearance_ui(
     let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
     header_box.set_margin_bottom(4);
 
-    let page_title = gtk4::Label::new(Some("Wallpaper & Colors"));
+    let page_title = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.appearance_title")));
     page_title.add_css_class("settings-page-title");
     page_title.set_halign(gtk4::Align::Start);
     header_box.append(&page_title);
@@ -105,13 +105,13 @@ pub fn build_appearance_ui(
     // Column 1 (Right): System Themes Configuration Dropdowns (2x2 Grid)
     let theme_grid = gtk4::Grid::new();
     theme_grid.set_column_spacing(16);
-    theme_grid.set_row_spacing(24);
+    theme_grid.set_row_spacing(28);
     theme_grid.set_column_homogeneous(true);
     theme_grid.set_valign(gtk4::Align::Center);
 
     // Field 1: GTK Theme
-    let gtk_box = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
-    let gtk_lbl = gtk4::Label::new(Some("GTK THEME"));
+    let gtk_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
+    let gtk_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.gtk_theme")));
     gtk_lbl.add_css_class("spec-label");
     gtk_lbl.set_halign(gtk4::Align::Start);
     gtk_box.append(&gtk_lbl);
@@ -124,8 +124,8 @@ pub fn build_appearance_ui(
     theme_grid.attach(&gtk_box, 0, 0, 1, 1);
 
     // Field 2: Icon Theme
-    let icon_box = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
-    let icon_lbl = gtk4::Label::new(Some("ICON THEME"));
+    let icon_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
+    let icon_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.icon_theme")));
     icon_lbl.add_css_class("spec-label");
     icon_lbl.set_halign(gtk4::Align::Start);
     icon_box.append(&icon_lbl);
@@ -138,8 +138,8 @@ pub fn build_appearance_ui(
     theme_grid.attach(&icon_box, 1, 0, 1, 1);
 
     // Field 3: Cursor Theme
-    let cursor_box = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
-    let cursor_lbl = gtk4::Label::new(Some("CURSOR THEME"));
+    let cursor_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
+    let cursor_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.cursor_theme")));
     cursor_lbl.add_css_class("spec-label");
     cursor_lbl.set_halign(gtk4::Align::Start);
     cursor_box.append(&cursor_lbl);
@@ -152,8 +152,8 @@ pub fn build_appearance_ui(
     theme_grid.attach(&cursor_box, 0, 1, 1, 1);
 
     // Field 4: Cursor Size
-    let size_box = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
-    let size_lbl = gtk4::Label::new(Some("CURSOR SIZE"));
+    let size_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
+    let size_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.cursor_size")));
     size_lbl.add_css_class("spec-label");
     size_lbl.set_halign(gtk4::Align::Start);
     size_box.append(&size_lbl);
@@ -175,7 +175,7 @@ pub fn build_appearance_ui(
     dashboard_panel.append(&sep);
 
     // Quick Select Section Title
-    let quick_lbl = gtk4::Label::new(Some("Quick select"));
+    let quick_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.quick_select")));
     quick_lbl.add_css_class("settings-row-title");
     quick_lbl.set_halign(gtk4::Align::Start);
     dashboard_panel.append(&quick_lbl);

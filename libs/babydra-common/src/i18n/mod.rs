@@ -249,6 +249,63 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.placeholder_stem_desc", "File/Folder name without extension");
             map.insert("explore.placeholder_ext_desc", "File extension");
 
+            // Settings App
+            map.insert("settings.nav_wifi", "Wi-Fi");
+            map.insert("settings.nav_vpn", "VPN");
+            map.insert("settings.nav_bluetooth", "Bluetooth");
+            map.insert("settings.nav_wallpaper_themes", "Wallpaper & Themes");
+            map.insert("settings.nav_displays", "Displays");
+            map.insert("settings.nav_installed_apps", "Installed Apps");
+            map.insert("settings.nav_startup_apps", "Startup Apps");
+            map.insert("settings.nav_system_update", "System Update");
+            map.insert("settings.nav_about_system", "About System");
+            map.insert("settings.shortcuts_title", "Settings Shortcuts Cheatsheet");
+            map.insert("settings.shortcuts_close", "Got it!");
+
+            map.insert("settings.appearance_title", "Wallpaper & Colors");
+            map.insert("settings.gtk_theme", "GTK THEME");
+            map.insert("settings.icon_theme", "ICON THEME");
+            map.insert("settings.cursor_theme", "CURSOR THEME");
+            map.insert("settings.cursor_size", "CURSOR SIZE");
+            map.insert("settings.quick_select", "Quick select");
+            map.insert("settings.no_wallpapers", "No wallpapers found in ~/.babydra/wallpaper");
+            map.insert("settings.no_wallpapers_sub", "Click '+' above to add new wallpapers");
+
+            map.insert("settings.wifi_title", "Wi-Fi");
+            map.insert("settings.wifi_no_networks", "No Wi-Fi networks found");
+            map.insert("settings.wifi_disabled", "Wi-Fi is turned off");
+            map.insert("settings.wifi_disabled_sub", "Toggle the switch above to turn on Wi-Fi and scan for available networks");
+
+            map.insert("settings.vpn_title", "VPN");
+            map.insert("settings.vpn_no_profiles", "No VPN connections found");
+            map.insert("settings.vpn_no_profiles_sub", "Click '+ Add Profile' above to import OpenVPN (.ovpn) or WireGuard (.conf) profiles");
+            map.insert("settings.vpn_add_profile", "Add Profile");
+
+            map.insert("settings.bt_title", "Bluetooth");
+            map.insert("settings.bt_off", "Bluetooth is turned off");
+            map.insert("settings.bt_off_sub", "Toggle the switch above to enable Bluetooth and discover devices");
+            map.insert("settings.bt_no_devices", "No paired Bluetooth devices found");
+            map.insert("settings.bt_no_devices_sub", "Make sure your Bluetooth device is turned on and ready to pair");
+
+            map.insert("settings.displays_title", "Displays");
+            map.insert("settings.display_resolution", "Resolution");
+            map.insert("settings.display_refresh_rate", "Refresh Rate");
+            map.insert("settings.display_orientation", "Orientation");
+
+            map.insert("settings.apps_title", "Application Manager");
+            map.insert("settings.apps_search_placeholder", "Search installed applications or packages...");
+
+            map.insert("settings.startup_title", "Startup Applications");
+            map.insert("settings.startup_add", "Add App");
+
+            map.insert("settings.update_title", "System Update");
+            map.insert("settings.updates_available", "Updates Available");
+            map.insert("settings.update_all", "Update All");
+            map.insert("settings.up_to_date", "Your system is up to date!");
+
+            map.insert("settings.about_title", "About System");
+            map.insert("settings.up_time", "Up {}");
+
             // Context Menu & Dialogs
             map.insert("explore.menu_open_new_window", "Open in New Window");
             map.insert("explore.menu_copy_location", "Copy Location");
@@ -513,6 +570,63 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.placeholder_name_desc", "Tên tệp/thư mục kèm theo phần mở rộng");
             map.insert("explore.placeholder_stem_desc", "Tên tệp/thư mục không kèm phần mở rộng");
             map.insert("explore.placeholder_ext_desc", "Phần mở rộng của tệp");
+
+            // Settings App
+            map.insert("settings.nav_wifi", "Wi-Fi");
+            map.insert("settings.nav_vpn", "VPN");
+            map.insert("settings.nav_bluetooth", "Bluetooth");
+            map.insert("settings.nav_wallpaper_themes", "Hình nền & Giao diện");
+            map.insert("settings.nav_displays", "Màn hình");
+            map.insert("settings.nav_installed_apps", "Ứng dụng đã cài");
+            map.insert("settings.nav_startup_apps", "Ứng dụng tự chạy");
+            map.insert("settings.nav_system_update", "Cập nhật hệ thống");
+            map.insert("settings.nav_about_system", "Thông tin hệ thống");
+            map.insert("settings.shortcuts_title", "Bảng phím tắt cài đặt");
+            map.insert("settings.shortcuts_close", "Tôi đã rõ!");
+
+            map.insert("settings.appearance_title", "Hình nền & Màu sắc");
+            map.insert("settings.gtk_theme", "GIAO DIỆN GTK");
+            map.insert("settings.icon_theme", "BỘ ICON");
+            map.insert("settings.cursor_theme", "CON TRỎ CHUỘT");
+            map.insert("settings.cursor_size", "KÍCH THƯỚC CON TRỎ");
+            map.insert("settings.quick_select", "Chọn nhanh");
+            map.insert("settings.no_wallpapers", "Chưa có hình nền trong ~/.babydra/wallpaper");
+            map.insert("settings.no_wallpapers_sub", "Bấm nút '+' phía trên để thêm hình nền mới");
+
+            map.insert("settings.wifi_title", "Wi-Fi");
+            map.insert("settings.wifi_no_networks", "Không tìm thấy mạng Wi-Fi");
+            map.insert("settings.wifi_disabled", "Wi-Fi đang tắt");
+            map.insert("settings.wifi_disabled_sub", "Bật công tắc phía trên để bật Wi-Fi và quét các mạng khả dụng");
+
+            map.insert("settings.vpn_title", "VPN");
+            map.insert("settings.vpn_no_profiles", "Không tìm thấy kết nối VPN");
+            map.insert("settings.vpn_no_profiles_sub", "Nhấp vào '+ Thêm cấu hình' ở trên để nhập cấu hình OpenVPN (.ovpn) hoặc WireGuard (.conf)");
+            map.insert("settings.vpn_add_profile", "Thêm cấu hình");
+
+            map.insert("settings.bt_title", "Bluetooth");
+            map.insert("settings.bt_off", "Bluetooth đang tắt");
+            map.insert("settings.bt_off_sub", "Bật công tắc phía trên để bật Bluetooth và tìm kiếm thiết bị");
+            map.insert("settings.bt_no_devices", "Không tìm thấy thiết bị Bluetooth đã ghép nối");
+            map.insert("settings.bt_no_devices_sub", "Đảm bảo thiết bị Bluetooth của bạn đã bật và sẵn sàng ghép nối");
+
+            map.insert("settings.displays_title", "Màn hình");
+            map.insert("settings.display_resolution", "Độ phân giải");
+            map.insert("settings.display_refresh_rate", "Tần số quét");
+            map.insert("settings.display_orientation", "Hướng màn hình");
+
+            map.insert("settings.apps_title", "Quản lý ứng dụng");
+            map.insert("settings.apps_search_placeholder", "Tìm kiếm ứng dụng hoặc gói đã cài...");
+
+            map.insert("settings.startup_title", "Ứng dụng tự chạy");
+            map.insert("settings.startup_add", "Thêm ứng dụng");
+
+            map.insert("settings.update_title", "Cập nhật hệ thống");
+            map.insert("settings.updates_available", "Có bản cập nhật");
+            map.insert("settings.update_all", "Cập nhật tất cả");
+            map.insert("settings.up_to_date", "Hệ thống của bạn đã ở bản mới nhất!");
+
+            map.insert("settings.about_title", "Thông tin hệ thống");
+            map.insert("settings.up_time", "Hoạt động {}");
 
             // Context Menu & Dialogs
             map.insert("explore.menu_open_new_window", "Mở trong cửa sổ mới");
