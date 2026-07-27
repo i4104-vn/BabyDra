@@ -34,19 +34,13 @@ pub fn build_appearance_ui(
     main_box.append(&header_box);
 
     // Dashboard Main Glass Panel
-    let dashboard_panel = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    let dashboard_panel = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
     dashboard_panel.add_css_class("glass-panel");
-    dashboard_panel.set_vexpand(true);
-    dashboard_panel.set_valign(gtk4::Align::Fill);
-
-    // Inner Scrollable Content Box inside Glass Panel
-    let content_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
 
     // Wallpaper Preview Picture with Overlay Actions (Plus Button & Theme Toggle Button)
     let preview_overlay = gtk4::Overlay::new();
     preview_overlay.add_css_class("wallpaper-preview-overlay");
     preview_overlay.set_size_request(-1, 140);
-    preview_overlay.set_valign(gtk4::Align::Start);
 
     let preview_pic = gtk4::Picture::new();
     preview_pic.set_size_request(-1, 140);
@@ -94,33 +88,32 @@ pub fn build_appearance_ui(
     actions_box.append(&theme_toggle_btn);
 
     preview_overlay.add_overlay(&actions_box);
-    content_box.append(&preview_overlay);
+    dashboard_panel.append(&preview_overlay);
 
     // Separator Line
     let sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
     sep.add_css_class("profile-separator");
-    content_box.append(&sep);
+    dashboard_panel.append(&sep);
 
     // Quick Select Section Title
     let quick_lbl = gtk4::Label::new(Some("Quick select"));
     quick_lbl.add_css_class("settings-row-title");
     quick_lbl.set_halign(gtk4::Align::Start);
-    content_box.append(&quick_lbl);
+    dashboard_panel.append(&quick_lbl);
 
     // Quick Select Box container for ~/.babydra/wallpaper grid
     let quick_select_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     quick_select_box.set_margin_top(4);
     quick_select_box.set_margin_end(4);
-    content_box.append(&quick_select_box);
+    dashboard_panel.append(&quick_select_box);
 
     let scroll = gtk4::ScrolledWindow::new();
     scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
     scroll.set_vexpand(true);
     scroll.set_valign(gtk4::Align::Fill);
-    scroll.set_child(Some(&content_box));
+    scroll.set_child(Some(&dashboard_panel));
 
-    dashboard_panel.append(&scroll);
-    main_box.append(&dashboard_panel);
+    main_box.append(&scroll);
 
     (
         main_box,
