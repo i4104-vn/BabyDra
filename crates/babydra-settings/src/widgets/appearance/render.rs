@@ -40,10 +40,10 @@ pub fn build_appearance_ui(
     // Wallpaper Preview Picture with Overlay Actions (Plus Button & Theme Toggle Button)
     let preview_overlay = gtk4::Overlay::new();
     preview_overlay.add_css_class("wallpaper-preview-overlay");
-    preview_overlay.set_size_request(-1, 140);
+    preview_overlay.set_size_request(-1, 220);
 
     let preview_pic = gtk4::Picture::new();
-    preview_pic.set_size_request(-1, 140);
+    preview_pic.set_size_request(-1, 220);
     preview_pic.set_content_fit(gtk4::ContentFit::Cover);
     preview_pic.add_css_class("wallpaper-preview-picture");
 
