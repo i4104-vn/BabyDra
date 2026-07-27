@@ -1,44 +1,9 @@
 //! Appearance and themes personalization panel.
 
 use gtk4::prelude::*;
-use std::process::Command;
-use std::path::PathBuf;
+use babydra_common::services::wallpaper::{get_wallpaper_dir, get_local_wallpapers};
 
 mod render;
-
-fn get_wallpaper_dir() -> PathBuf {
-    let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".to_string());
-    let dir = PathBuf::from(home).join(".babydra").join("wallpaper");
-    let _ = std::fs::create_dir_all(&dir);
-    dir
-}
-
-fn get_local_wallpapers() -> Vec<PathBuf> {
-    let dir = get_wallpaper_dir();
-    let mut files = Vec::new();
-    if let Ok(entries) = std::fs::read_dir(dir) {
-        for entry in entries.filter_map(Result::ok) {
-            let path = entry.path();
-            if path.is_file() {
-                if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
-                    let ext_lower = ext.to_lowercase();
-                    if matches!(ext_lower.as_str(), "png" | "jpg" | "jpeg" | "webp") {
-                        files.push(path);
-                    }
-                }
-            }
-        }
-    }
-    files.sort();
-    files
-}
-
-fn get_current_wallpaper() -> String {
-    if let Some(path) = babydra_common::get_current_wallpaper() {
-        return path.to_string_lossy().to_string();
-    }
-    "".to_string()
-}
 
 pub fn create_appearance_widget() -> gtk4::Box {
     let gtk_themes = babydra_common::services::system::theme::get_gtk_themes();
@@ -46,7 +11,9 @@ pub fn create_appearance_widget() -> gtk4::Box {
     let cursor_themes = babydra_common::services::system::theme::get_cursor_themes();
     let cursor_sizes = vec![16, 24, 32, 48, 64];
 
-    let wp_path = get_current_wallpaper();
+    let wp_path = babydra_common::get_current_wallpaper()
+        .map(|p| p.to_string_lossy().to_string())
+        .unwrap_or_default();
     let is_dark = babydra_utils::ui::theme::is_dark_mode();
 
     let (
@@ -202,10 +169,10 @@ pub fn create_appearance_widget() -> gtk4::Box {
     pick_btn.connect_clicked(move |_| {
         if let Some(win) = parent_box.root().and_then(|r| r.downcast::<gtk4::Window>().ok()) {
             let file_dialog = gtk4::FileDialog::new();
-            file_dialog.set_title("Chọn hình nền");
+            file_dialog.set_title(&babydra_common::i18n::t("settings.pick_wallpaper"));
 
             let filter = gtk4::FileFilter::new();
-            filter.set_name(Some("Hình ảnh (*.png, *.jpg, *.jpeg, *.webp)"));
+            filter.set_name(Some(&babydra_common::i18n::t("settings.image_filter")));
             filter.add_mime_type("image/png");
             filter.add_mime_type("image/jpeg");
             filter.add_mime_type("image/webp");

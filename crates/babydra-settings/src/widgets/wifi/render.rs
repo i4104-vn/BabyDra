@@ -20,7 +20,7 @@ pub fn build_wifi_ui() -> (gtk4::Box, gtk4::Switch, gtk4::ListBox) {
     let switch_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
     switch_box.set_valign(gtk4::Align::Center);
 
-    let status_label = gtk4::Label::new(Some("On"));
+    let status_label = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.on")));
     status_label.add_css_class("wifi-status-on");
     switch_box.append(&status_label);
 

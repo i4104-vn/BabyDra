@@ -18,19 +18,12 @@ pub fn build_vpn_ui() -> (gtk4::Box, gtk4::Switch, gtk4::Button, gtk4::ListBox) 
     spacer.set_hexpand(true);
     header_row.append(&spacer);
 
-    // 1. "+ Add Profile" Button in header
-    let add_btn = gtk4::Button::with_label(&babydra_common::i18n::t("settings.vpn_add_profile"));
-    add_btn.add_css_class("suggested-action");
-    add_btn.set_cursor_from_name(Some("pointer"));
-    add_btn.set_valign(gtk4::Align::Center);
-    header_row.append(&add_btn);
-
     // Toggle Switch (On)
     let switch_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
     switch_box.set_valign(gtk4::Align::Center);
     switch_box.set_margin_start(8);
 
-    let switch_lbl = gtk4::Label::new(Some("On"));
+    let switch_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.on")));
     switch_lbl.add_css_class("settings-page-subtitle");
     switch_lbl.set_valign(gtk4::Align::Center);
 
@@ -66,7 +59,7 @@ pub fn build_vpn_ui() -> (gtk4::Box, gtk4::Switch, gtk4::Button, gtk4::ListBox) 
 
     // Existing Floating Action Button Component (create_fab)
     let import_btn = babydra_utils::components::create_fab("plus");
-    import_btn.set_tooltip_text(Some("Add VPN Profile"));
+    import_btn.set_tooltip_text(Some(&babydra_common::i18n::t("settings.vpn_add_tooltip")));
     import_btn.set_margin_end(24);
     import_btn.set_margin_bottom(24);
 

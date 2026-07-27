@@ -29,10 +29,10 @@ pub fn build(monitors: &[MonitorConfig]) -> DisplaysWidget {
     title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);
 
-    let refresh_btn = Button::with_label("Refresh");
+    let refresh_btn = Button::with_label(&babydra_common::i18n::t("settings.refresh"));
     refresh_btn.add_css_class("connect-pill-btn");
 
-    let save_btn = Button::with_label("Save");
+    let save_btn = Button::with_label(&babydra_common::i18n::t("settings.save"));
     save_btn.add_css_class("connect-pill-btn");
 
     header_box.append(&title_label);
@@ -107,7 +107,13 @@ pub fn build(monitors: &[MonitorConfig]) -> DisplaysWidget {
         orient_lbl.set_hexpand(true);
         orient_lbl.set_halign(gtk4::Align::Start);
 
-        let orient_items = vec!["Normal", "Left (90°)", "Inverted (180°)", "Right (270°)"];
+        let orient_items_owned = vec![
+            babydra_common::i18n::t("settings.orientation_normal"),
+            babydra_common::i18n::t("settings.orientation_left"),
+            babydra_common::i18n::t("settings.orientation_inverted"),
+            babydra_common::i18n::t("settings.orientation_right"),
+        ];
+        let orient_items: Vec<&str> = orient_items_owned.iter().map(|s| s.as_str()).collect();
         let orient_model = StringList::new(&orient_items);
         let orientation_dropdown = DropDown::new(Some(orient_model), Option::<gtk4::Expression>::None);
 

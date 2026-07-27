@@ -24,7 +24,7 @@ pub fn build_bluetooth_ui() -> (gtk4::Box, gtk4::Switch, gtk4::ListBox) {
     let switch_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
     switch_box.set_valign(gtk4::Align::Center);
 
-    let switch_lbl = gtk4::Label::new(Some("On"));
+    let switch_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.on")));
     switch_lbl.add_css_class("settings-page-subtitle");
     switch_lbl.set_valign(gtk4::Align::Center);
 

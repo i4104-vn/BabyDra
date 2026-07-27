@@ -1,7 +1,7 @@
 //! System specifications overview and update tab.
 
-use std::process::Command;
 use sysinfo::System;
+use babydra_common::services::system::gpu::get_gpu_info;
 
 mod render;
 
@@ -17,17 +17,7 @@ pub fn create_system_widget() -> gtk4::Box {
     let total_mem_gb = sys.total_memory() as f64 / (1024.0 * 1024.0 * 1024.0);
     let memory_text = format!("{:.1} GB", total_mem_gb);
 
-    let mut gpu_info = "lspci lookup failed".to_string();
-    if let Ok(output) = Command::new("sh")
-        .arg("-c")
-        .arg("lspci | grep -i 'vga\\|3d' | cut -d: -f3 | head -n 1")
-        .output()
-    {
-        let raw = String::from_utf8_lossy(&output.stdout).trim().to_string();
-        if !raw.is_empty() {
-            gpu_info = raw;
-        }
-    }
+    let gpu_info = get_gpu_info();
 
     let uptime_secs = System::uptime();
     let days = uptime_secs / 86400;

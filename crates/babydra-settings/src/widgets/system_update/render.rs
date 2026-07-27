@@ -22,7 +22,7 @@ pub fn build(updates: &[PackageUpdate]) -> SystemUpdateWidget {
     title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);
 
-    let refresh_btn = Button::with_label("Check for Updates");
+    let refresh_btn = Button::with_label(&babydra_common::i18n::t("settings.update_check"));
     refresh_btn.add_css_class("connect-pill-btn");
 
     header_box.append(&title_label);
@@ -45,7 +45,7 @@ pub fn build(updates: &[PackageUpdate]) -> SystemUpdateWidget {
     count_box.append(&count_label);
     count_box.append(&sub_lbl);
 
-    let update_all_btn = Button::with_label("Update All");
+    let update_all_btn = Button::with_label(&babydra_common::i18n::t("settings.update_all"));
     update_all_btn.add_css_class("connect-pill-btn");
     update_all_btn.set_valign(gtk4::Align::Center);
 

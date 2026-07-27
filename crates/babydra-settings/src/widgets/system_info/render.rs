@@ -100,11 +100,11 @@ pub fn build_system_ui(
     grid.set_row_spacing(20);
     grid.set_column_homogeneous(true);
 
-    let specs = [
-        ("cog", "KERNEL", kernel_version),
-        ("sliders", "PROCESSOR", cpu_model),
-        ("history", "MEMORY", memory_text),
-        ("palette", "GRAPHICS", gpu_info),
+    let specs: Vec<(&str, String, String)> = vec![
+        ("cog", babydra_common::i18n::t("settings.spec_kernel"), kernel_version.to_string()),
+        ("sliders", babydra_common::i18n::t("settings.spec_processor"), cpu_model.to_string()),
+        ("history", babydra_common::i18n::t("settings.spec_memory"), memory_text.to_string()),
+        ("palette", babydra_common::i18n::t("settings.spec_graphics"), gpu_info.to_string()),
     ];
 
     for (idx, (icon_name, label, value)) in specs.iter().enumerate() {
@@ -120,7 +120,7 @@ pub fn build_system_ui(
         icon_badge.set_valign(gtk4::Align::Center);
         icon_badge.set_size_request(44, 44);
 
-        let icon_img = babydra_utils::ui::icon::get_icon(icon_name, 22);
+        let icon_img = babydra_utils::ui::icon::get_icon(*icon_name, 22);
         icon_img.set_pixel_size(22);
         icon_img.set_vexpand(true);
         icon_img.set_hexpand(true);
@@ -130,13 +130,13 @@ pub fn build_system_ui(
         card.append(&icon_badge);
 
         // Label (e.g. KERNEL, PROCESSOR, MEMORY, GRAPHICS)
-        let label_widget = gtk4::Label::new(Some(*label));
+        let label_widget = gtk4::Label::new(Some(label.as_str()));
         label_widget.add_css_class("spec-label");
         label_widget.set_halign(gtk4::Align::Center);
         card.append(&label_widget);
 
         // Value (e.g. Linux 7.1.3-arch1-1, Intel Core i5...)
-        let value_widget = gtk4::Label::new(Some(*value));
+        let value_widget = gtk4::Label::new(Some(value.as_str()));
         value_widget.add_css_class("spec-value");
         value_widget.set_halign(gtk4::Align::Center);
         value_widget.set_justify(gtk4::Justification::Center);

@@ -22,10 +22,10 @@ pub fn build(commands: &[StartupCommand]) -> StartupWidget {
     title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);
 
-    let add_btn = Button::with_label("+ Add New");
+    let add_btn = Button::with_label(&babydra_common::i18n::t("settings.startup_add_new"));
     add_btn.add_css_class("connect-pill-btn");
 
-    let save_btn = Button::with_label("Save Changes");
+    let save_btn = Button::with_label(&babydra_common::i18n::t("settings.save_changes"));
     save_btn.add_css_class("connect-pill-btn");
 
     header_box.append(&title_label);
@@ -47,7 +47,7 @@ pub fn build(commands: &[StartupCommand]) -> StartupWidget {
         let row = Box::new(Orientation::Horizontal, 12);
         row.add_css_class("settings-card-row");
 
-        let badge = Label::new(Some("exec-once"));
+        let badge = Label::new(Some(&babydra_common::i18n::t("settings.startup_exec_badge")));
         badge.add_css_class("connected-pill");
 
         let entry = Entry::new();
@@ -55,7 +55,7 @@ pub fn build(commands: &[StartupCommand]) -> StartupWidget {
         entry.set_hexpand(true);
         entry.add_css_class("sidebar-search-entry");
 
-        let delete_btn = Button::with_label("Remove");
+        let delete_btn = Button::with_label(&babydra_common::i18n::t("settings.startup_remove"));
         delete_btn.add_css_class("connect-pill-btn");
 
         let row_copy = row.clone();

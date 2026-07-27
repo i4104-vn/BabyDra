@@ -152,7 +152,7 @@ fn refresh_wifi_popover_list(
     let icon_widget_clone = icon_widget.clone();
     let popover_clone = popover.clone();
 
-    let (tx, mut rx) = mpsc::unbounded_channel::<Option<(Vec<(String, String, String, bool)>, Vec<String>)>>();
+    let (tx, mut rx) = mpsc::unbounded_channel::<Option<(Vec<babydra_common::models::wifi::WifiNetwork>, Vec<String>)>>();
 
     std::thread::spawn(move || {
         let nets = scan_networks();
@@ -178,7 +178,7 @@ fn refresh_wifi_popover_list(
 
 fn build_wifi_list_ui(
     main_box: &gtk4::Box,
-    networks: Vec<(String, String, String, bool)>,
+    networks: Vec<babydra_common::models::wifi::WifiNetwork>,
     known: Vec<String>,
     sub_label: gtk4::Label,
     left_btn: gtk4::Button,
@@ -201,7 +201,10 @@ fn build_wifi_list_ui(
     let list_box = gtk4::ListBox::new();
     list_box.set_selection_mode(gtk4::SelectionMode::None);
 
-    for (ssid, security, _signal, is_connected) in networks {
+    for net in networks {
+        let ssid = net.ssid;
+        let security = net.security;
+        let is_connected = net.is_connected;
         let row_btn = gtk4::Button::new();
         row_btn.add_css_class("audio-menu-item-btn");
         if is_connected {

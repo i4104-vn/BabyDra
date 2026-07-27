@@ -39,12 +39,12 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> AppsWidget {
 
     // Tabs Bar Row
     let tabs_box = Box::new(Orientation::Horizontal, 12);
-    let tab_apps_btn = Button::with_label("Apps");
+    let tab_apps_btn = Button::with_label(&babydra_common::i18n::t("settings.apps_tab_apps"));
     tab_apps_btn.add_css_class("app-tab-btn");
     tab_apps_btn.add_css_class("active");
     tab_apps_btn.set_cursor_from_name(Some("pointer"));
 
-    let tab_packages_btn = Button::with_label("Packages");
+    let tab_packages_btn = Button::with_label(&babydra_common::i18n::t("settings.apps_tab_packages"));
     tab_packages_btn.add_css_class("app-tab-btn");
     tab_packages_btn.set_cursor_from_name(Some("pointer"));
 
