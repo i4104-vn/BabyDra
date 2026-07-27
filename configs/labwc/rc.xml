@@ -5,8 +5,8 @@
     <gap>16</gap>
   </core>
 
-  <!-- Outer margins reserved on screen edges around windows (top includes space for panel) -->
-  <margin top="42" bottom="16" left="16" right="16" />
+  <!-- Outer margins reserved on screen edges so windows have an equal 16px gap on all 4 sides (top=58px to account for 42px panel + 16px gap) -->
+  <margin top="58" bottom="16" left="16" right="16" />
 
   <!-- Default placement policy for newly spawned windows -->
   <placement>
