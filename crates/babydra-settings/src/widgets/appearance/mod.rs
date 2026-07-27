@@ -33,37 +33,6 @@ fn get_local_wallpapers() -> Vec<PathBuf> {
     files
 }
 
-fn get_gtk_themes() -> Vec<String> {
-    let mut themes = vec!["Adwaita".to_string(), "Adwaita-dark".to_string()];
-    if let Ok(entries) = std::fs::read_dir("/usr/share/themes") {
-        for entry in entries.filter_map(Result::ok) {
-            let name = entry.file_name().to_string_lossy().to_string();
-            if !themes.contains(&name) && !name.starts_with('.') {
-                themes.push(name);
-            }
-        }
-    }
-    themes.sort();
-    themes
-}
-
-fn set_gtk_theme(theme_name: &str) {
-    let _ = Command::new("gsettings")
-        .args(&["set", "org.gnome.desktop.interface", "gtk-theme", theme_name])
-        .output();
-
-    let home = std::env::var("HOME").unwrap_or_default();
-    let set_ini = |path: &str| {
-        let full_path = std::path::PathBuf::from(&home).join(path);
-        let _ = std::fs::create_dir_all(full_path.parent().unwrap());
-        let content = format!("[Settings]\ngtk-theme-name={}\ngtk-font-name=Inter 11\n", theme_name);
-        let _ = std::fs::write(full_path, content);
-    };
-
-    set_ini(".config/gtk-3.0/settings.ini");
-    set_ini(".config/gtk-4.0/settings.ini");
-}
-
 fn get_current_wallpaper() -> String {
     if let Some(path) = babydra_common::get_current_wallpaper() {
         return path.to_string_lossy().to_string();
@@ -72,14 +41,10 @@ fn get_current_wallpaper() -> String {
 }
 
 pub fn create_appearance_widget() -> gtk4::Box {
-    let themes = get_gtk_themes();
-    let current_theme = match Command::new("gsettings")
-        .args(&["get", "org.gnome.desktop.interface", "gtk-theme"])
-        .output() 
-    {
-        Ok(o) => String::from_utf8_lossy(&o.stdout).trim().replace("'", ""),
-        Err(_) => "Adwaita".to_string(),
-    };
+    let gtk_themes = babydra_common::services::system::theme::get_gtk_themes();
+    let icon_themes = babydra_common::services::system::theme::get_icon_themes();
+    let cursor_themes = babydra_common::services::system::theme::get_cursor_themes();
+    let cursor_sizes = vec![16, 24, 32, 48, 64];
 
     let wp_path = get_current_wallpaper();
     let is_dark = babydra_utils::ui::theme::is_dark_mode();
@@ -89,8 +54,61 @@ pub fn create_appearance_widget() -> gtk4::Box {
         preview_pic,
         pick_btn,
         theme_toggle_btn,
+        gtk_dropdown,
+        icon_dropdown,
+        cursor_dropdown,
+        size_dropdown,
         quick_select_box,
-    ) = render::build_appearance_ui(&wp_path, is_dark, &themes, &current_theme);
+    ) = render::build_appearance_ui(
+        &wp_path,
+        is_dark,
+        &gtk_themes,
+        &icon_themes,
+        &cursor_themes,
+        &cursor_sizes,
+    );
+
+    // Auto-apply system theme when dropdown selection changes
+    let gtk_themes_c = gtk_themes.clone();
+    let icon_themes_c = icon_themes.clone();
+    let cursor_themes_c = cursor_themes.clone();
+    let cursor_sizes_c = cursor_sizes.clone();
+
+    let gtk_d = gtk_dropdown.clone();
+    let icon_d = icon_dropdown.clone();
+    let cursor_d = cursor_dropdown.clone();
+    let size_d = size_dropdown.clone();
+
+    let apply_theme_settings = move || {
+        let gtk_idx = gtk_d.selected() as usize;
+        let icon_idx = icon_d.selected() as usize;
+        let cursor_idx = cursor_d.selected() as usize;
+        let size_idx = size_d.selected() as usize;
+
+        let selected_gtk = gtk_themes_c.get(gtk_idx).cloned().unwrap_or_else(|| "Adwaita".to_string());
+        let selected_icon = icon_themes_c.get(icon_idx).cloned().unwrap_or_else(|| "Adwaita".to_string());
+        let selected_cursor = cursor_themes_c.get(cursor_idx).cloned().unwrap_or_else(|| "Adwaita".to_string());
+        let selected_size = cursor_sizes_c.get(size_idx).cloned().unwrap_or(24);
+
+        let _ = babydra_common::services::system::theme::apply_appearance(
+            &selected_gtk,
+            &selected_icon,
+            &selected_cursor,
+            selected_size,
+        );
+    };
+
+    let apply_cb1 = apply_theme_settings.clone();
+    gtk_dropdown.connect_selected_notify(move |_| apply_cb1());
+
+    let apply_cb2 = apply_theme_settings.clone();
+    icon_dropdown.connect_selected_notify(move |_| apply_cb2());
+
+    let apply_cb3 = apply_theme_settings.clone();
+    cursor_dropdown.connect_selected_notify(move |_| apply_cb3());
+
+    let apply_cb4 = apply_theme_settings.clone();
+    size_dropdown.connect_selected_notify(move |_| apply_cb4());
 
     // Theme Toggle Icon Button Click Handler
     let theme_btn_clone = theme_toggle_btn.clone();

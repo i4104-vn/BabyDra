@@ -5,20 +5,26 @@ use gtk4::prelude::*;
 pub fn build_appearance_ui(
     current_wallpaper_path: &str,
     is_dark: bool,
-    _themes: &[String],
-    _current_theme: &str,
+    gtk_themes: &[String],
+    icon_themes: &[String],
+    cursor_themes: &[String],
+    cursor_sizes: &[u32],
 ) -> (
     gtk4::Box,
     gtk4::Picture,
     gtk4::Button,
     gtk4::Button,
+    gtk4::DropDown,
+    gtk4::DropDown,
+    gtk4::DropDown,
+    gtk4::DropDown,
     gtk4::Box,
 ) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
     main_box.set_vexpand(true);
     main_box.set_valign(gtk4::Align::Fill);
 
-    // Header Title: Wallpaper & Colors (matching VPN, Bluetooth & Themes header)
+    // Header Title: Wallpaper & Colors
     let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
     header_box.set_margin_bottom(4);
 
@@ -37,13 +43,19 @@ pub fn build_appearance_ui(
     let dashboard_panel = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
     dashboard_panel.add_css_class("glass-panel");
 
-    // Wallpaper Preview Picture with Overlay Actions (Plus Button & Theme Toggle Button)
+    // Top 2-Column Configuration Grid
+    let top_grid = gtk4::Grid::new();
+    top_grid.set_column_spacing(20);
+    top_grid.set_row_spacing(16);
+    top_grid.set_column_homogeneous(true);
+
+    // Column 0 (Left): Narrowed Wallpaper Preview Overlay with Floating Controls
     let preview_overlay = gtk4::Overlay::new();
     preview_overlay.add_css_class("wallpaper-preview-overlay");
-    preview_overlay.set_size_request(-1, 220);
+    preview_overlay.set_size_request(-1, 180);
 
     let preview_pic = gtk4::Picture::new();
-    preview_pic.set_size_request(-1, 220);
+    preview_pic.set_size_request(-1, 180);
     preview_pic.set_content_fit(gtk4::ContentFit::Cover);
     preview_pic.add_css_class("wallpaper-preview-picture");
 
@@ -88,7 +100,74 @@ pub fn build_appearance_ui(
     actions_box.append(&theme_toggle_btn);
 
     preview_overlay.add_overlay(&actions_box);
-    dashboard_panel.append(&preview_overlay);
+    top_grid.attach(&preview_overlay, 0, 0, 1, 1);
+
+    // Column 1 (Right): System Themes Configuration Dropdowns (2x2 Grid)
+    let theme_grid = gtk4::Grid::new();
+    theme_grid.set_column_spacing(16);
+    theme_grid.set_row_spacing(12);
+    theme_grid.set_column_homogeneous(true);
+    theme_grid.set_valign(gtk4::Align::Center);
+
+    // Field 1: GTK Theme
+    let gtk_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
+    let gtk_lbl = gtk4::Label::new(Some("GTK THEME"));
+    gtk_lbl.add_css_class("spec-label");
+    gtk_lbl.set_halign(gtk4::Align::Start);
+    gtk_box.append(&gtk_lbl);
+
+    let gtk_items: Vec<&str> = gtk_themes.iter().map(|s| s.as_str()).collect();
+    let gtk_model = gtk4::StringList::new(&gtk_items);
+    let gtk_dropdown = gtk4::DropDown::new(Some(gtk_model), Option::<gtk4::Expression>::None);
+    gtk_dropdown.set_cursor_from_name(Some("pointer"));
+    gtk_box.append(&gtk_dropdown);
+    theme_grid.attach(&gtk_box, 0, 0, 1, 1);
+
+    // Field 2: Icon Theme
+    let icon_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
+    let icon_lbl = gtk4::Label::new(Some("ICON THEME"));
+    icon_lbl.add_css_class("spec-label");
+    icon_lbl.set_halign(gtk4::Align::Start);
+    icon_box.append(&icon_lbl);
+
+    let icon_items: Vec<&str> = icon_themes.iter().map(|s| s.as_str()).collect();
+    let icon_model = gtk4::StringList::new(&icon_items);
+    let icon_dropdown = gtk4::DropDown::new(Some(icon_model), Option::<gtk4::Expression>::None);
+    icon_dropdown.set_cursor_from_name(Some("pointer"));
+    icon_box.append(&icon_dropdown);
+    theme_grid.attach(&icon_box, 1, 0, 1, 1);
+
+    // Field 3: Cursor Theme
+    let cursor_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
+    let cursor_lbl = gtk4::Label::new(Some("CURSOR THEME"));
+    cursor_lbl.add_css_class("spec-label");
+    cursor_lbl.set_halign(gtk4::Align::Start);
+    cursor_box.append(&cursor_lbl);
+
+    let cursor_items: Vec<&str> = cursor_themes.iter().map(|s| s.as_str()).collect();
+    let cursor_model = gtk4::StringList::new(&cursor_items);
+    let cursor_dropdown = gtk4::DropDown::new(Some(cursor_model), Option::<gtk4::Expression>::None);
+    cursor_dropdown.set_cursor_from_name(Some("pointer"));
+    cursor_box.append(&cursor_dropdown);
+    theme_grid.attach(&cursor_box, 0, 1, 1, 1);
+
+    // Field 4: Cursor Size
+    let size_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
+    let size_lbl = gtk4::Label::new(Some("CURSOR SIZE"));
+    size_lbl.add_css_class("spec-label");
+    size_lbl.set_halign(gtk4::Align::Start);
+    size_box.append(&size_lbl);
+
+    let size_strs: Vec<String> = cursor_sizes.iter().map(|s| format!("{} px", s)).collect();
+    let size_items: Vec<&str> = size_strs.iter().map(|s| s.as_str()).collect();
+    let size_model = gtk4::StringList::new(&size_items);
+    let size_dropdown = gtk4::DropDown::new(Some(size_model), Option::<gtk4::Expression>::None);
+    size_dropdown.set_cursor_from_name(Some("pointer"));
+    size_box.append(&size_dropdown);
+    theme_grid.attach(&size_box, 1, 1, 1, 1);
+
+    top_grid.attach(&theme_grid, 1, 0, 1, 1);
+    dashboard_panel.append(&top_grid);
 
     // Separator Line
     let sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
@@ -120,6 +199,10 @@ pub fn build_appearance_ui(
         preview_pic,
         pick_btn,
         theme_toggle_btn,
+        gtk_dropdown,
+        icon_dropdown,
+        cursor_dropdown,
+        size_dropdown,
         quick_select_box,
     )
 }
