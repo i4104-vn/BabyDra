@@ -77,3 +77,76 @@ pub fn update_system() -> Result<(), String> {
 
     Err("No supported terminal emulator found".to_string())
 }
+
+/// Executes a privileged command and streams stdout/stderr lines via channel.
+pub fn execute_cmd_with_log_stream(args: &[&str], password: Option<&str>, sender: std::sync::mpsc::Sender<String>) -> Result<(), String> {
+    use std::io::{BufRead, BufReader, Write};
+    use std::process::Stdio;
+
+    let mut command = if password.is_some() {
+        let mut c = Command::new("sudo");
+        c.arg("-S");
+        c.args(args);
+        c
+    } else {
+        let mut c = Command::new("pkexec");
+        c.args(args);
+        c
+    };
+
+    command.stdout(Stdio::piped());
+    command.stderr(Stdio::piped());
+    if password.is_some() {
+        command.stdin(Stdio::piped());
+    }
+
+    let mut child = command.spawn().map_err(|e| e.to_string())?;
+
+    if let Some(pwd) = password {
+        if let Some(mut stdin) = child.stdin.take() {
+            let _ = writeln!(stdin, "{}", pwd);
+        }
+    }
+
+    let stdout = child.stdout.take();
+    let stderr = child.stderr.take();
+
+    let sender_stdout = sender.clone();
+    let thread_stdout = std::thread::spawn(move || {
+        if let Some(out) = stdout {
+            let reader = BufReader::new(out);
+            for line in reader.lines() {
+                if let Ok(l) = line {
+                    let _ = sender_stdout.send(l);
+                }
+            }
+        }
+    });
+
+    let sender_stderr = sender;
+    let thread_stderr = std::thread::spawn(move || {
+        if let Some(err) = stderr {
+            let reader = BufReader::new(err);
+            for line in reader.lines() {
+                if let Ok(l) = line {
+                    let _ = sender_stderr.send(l);
+                }
+            }
+        }
+    });
+
+    let _ = thread_stdout.join();
+    let _ = thread_stderr.join();
+    let status = child.wait().map_err(|e| e.to_string())?;
+
+    if status.success() {
+        Ok(())
+    } else {
+        Err(format!("Process exited with status: {}", status))
+    }
+}
+
+/// Triggers system update streaming output via sender channel.
+pub fn stream_update_system(password: Option<&str>, sender: std::sync::mpsc::Sender<String>) -> Result<(), String> {
+    execute_cmd_with_log_stream(&["pacman", "-Syu", "--noconfirm"], password, sender)
+}

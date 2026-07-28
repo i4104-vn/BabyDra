@@ -127,8 +127,22 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> AppsWidget {
         let apps_list_copy = apps_list_box.clone();
         uninstall_btn.connect_clicked(move |_| {
             let pkg_name = app_name.to_lowercase().replace(' ', "-");
-            let _ = babydra_common::services::apps::pacman::uninstall_package(&pkg_name);
-            apps_list_copy.remove(&row_copy);
+            let row_copy_c = row_copy.clone();
+            let apps_list_copy_c = apps_list_copy.clone();
+
+            let (tx, rx) = std::sync::mpsc::channel::<String>();
+            std::thread::spawn(move || {
+                let _ = babydra_common::services::apps::pacman::stream_uninstall_package(&pkg_name, None, tx);
+            });
+
+            glib::timeout_add_local(std::time::Duration::from_millis(100), move || {
+                if rx.try_recv().is_ok() {
+                    apps_list_copy_c.remove(&row_copy_c);
+                    glib::ControlFlow::Break
+                } else {
+                    glib::ControlFlow::Continue
+                }
+            });
         });
 
         row_box.append(&uninstall_btn);
@@ -205,8 +219,23 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> AppsWidget {
         let row_copy = row_box.clone();
         let pkgs_list_copy = pkgs_list_box.clone();
         uninstall_btn.connect_clicked(move |_| {
-            let _ = babydra_common::services::apps::pacman::uninstall_package(&pkg_name);
-            pkgs_list_copy.remove(&row_copy);
+            let pkg_name_c = pkg_name.clone();
+            let row_copy_c = row_copy.clone();
+            let pkgs_list_copy_c = pkgs_list_copy.clone();
+
+            let (tx, rx) = std::sync::mpsc::channel::<String>();
+            std::thread::spawn(move || {
+                let _ = babydra_common::services::apps::pacman::stream_uninstall_package(&pkg_name_c, None, tx);
+            });
+
+            glib::timeout_add_local(std::time::Duration::from_millis(100), move || {
+                if rx.try_recv().is_ok() {
+                    pkgs_list_copy_c.remove(&row_copy_c);
+                    glib::ControlFlow::Break
+                } else {
+                    glib::ControlFlow::Continue
+                }
+            });
         });
 
         row_box.append(&uninstall_btn);

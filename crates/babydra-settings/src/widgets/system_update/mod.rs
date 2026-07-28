@@ -77,12 +77,93 @@ pub fn create_system_update_widget() -> Widget {
         glib::ControlFlow::Break
     });
 
+    let trigger_check_btn = trigger_check.clone();
     widget.refresh_btn.connect_clicked(move |_| {
-        trigger_check();
+        trigger_check_btn();
     });
 
+    // Handle Update All -> Show password bar
+    let auth_box_toggle = widget.auth_box.clone();
     widget.update_all_btn.connect_clicked(move |_| {
-        let _ = babydra_common::services::system::updates::update_system();
+        let is_vis = auth_box_toggle.is_visible();
+        auth_box_toggle.set_visible(!is_vis);
+    });
+
+    // Handle Confirm & Start -> Run update with console stream
+    let auth_box = widget.auth_box.clone();
+    let password_entry = widget.password_entry.clone();
+    let glass_card = widget.glass_card.clone();
+    let console_card = widget.console_card.clone();
+    let text_buffer = widget.text_buffer.clone();
+    let console_scroll = widget.console_scroll.clone();
+    let trigger_check_after = trigger_check.clone();
+    let update_all_btn = widget.update_all_btn.clone();
+
+    let start_streaming_update = move || {
+        let pwd_text = password_entry.text().to_string();
+        let password = if pwd_text.trim().is_empty() {
+            None
+        } else {
+            Some(pwd_text)
+        };
+
+        auth_box.set_visible(false);
+        glass_card.set_visible(false);
+        console_card.set_visible(true);
+        update_all_btn.set_sensitive(false);
+
+        text_buffer.set_text(">>> Initializing system update...\n");
+
+        let (tx, rx) = std::sync::mpsc::channel::<String>();
+        let pwd_clone = password.clone();
+
+        std::thread::spawn(move || {
+            let res = babydra_common::services::system::updates::stream_update_system(pwd_clone.as_deref(), tx.clone());
+            if let Err(e) = res {
+                let _ = tx.send(format!("\nError: {}", e));
+            } else {
+                let _ = tx.send("\n>>> System update completed successfully.".to_string());
+            }
+        });
+
+        let text_buffer_c = text_buffer.clone();
+        let console_scroll_c = console_scroll.clone();
+        let trigger_check_c = trigger_check_after.clone();
+        let update_all_btn_c = update_all_btn.clone();
+
+        glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
+            let mut received = false;
+            while let Ok(line) = rx.try_recv() {
+                received = true;
+                let mut iter = text_buffer_c.end_iter();
+                text_buffer_c.insert(&mut iter, &format!("{}\n", line));
+
+                let adj = console_scroll_c.vadjustment();
+                adj.set_value(adj.upper() - adj.page_size());
+
+                if line.contains("System update completed successfully") || line.starts_with("Error:") {
+                    update_all_btn_c.set_sensitive(true);
+                    trigger_check_c();
+                    return glib::ControlFlow::Break;
+                }
+            }
+
+            if !received {
+                // Keep polling
+            }
+
+            glib::ControlFlow::Continue
+        });
+    };
+
+    let start_up_1 = start_streaming_update.clone();
+    widget.run_auth_btn.connect_clicked(move |_| {
+        start_up_1();
+    });
+
+    let start_up_2 = start_streaming_update.clone();
+    widget.password_entry.connect_activate(move |_| {
+        start_up_2();
     });
 
     widget.container.into()

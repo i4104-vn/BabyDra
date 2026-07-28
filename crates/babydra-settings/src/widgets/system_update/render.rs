@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Label, ListBox, Orientation, ScrolledWindow, Spinner};
+use gtk4::{Box, Button, Label, ListBox, Orientation, PasswordEntry, ScrolledWindow, Spinner, TextBuffer, TextView};
 use babydra_common::models::system_update::PackageUpdate;
 
 pub struct SystemUpdateWidget {
@@ -8,7 +8,15 @@ pub struct SystemUpdateWidget {
     pub spinner: Spinner,
     pub update_all_btn: Button,
     pub refresh_btn: Button,
+    pub glass_card: Box,
     pub list_box: ListBox,
+    pub auth_box: Box,
+    pub password_entry: PasswordEntry,
+    pub run_auth_btn: Button,
+    pub console_card: Box,
+    pub text_view: TextView,
+    pub text_buffer: TextBuffer,
+    pub console_scroll: ScrolledWindow,
 }
 
 pub fn create_update_row(pkg: &PackageUpdate) -> Box {
@@ -81,7 +89,7 @@ pub fn create_empty_up_to_date_row() -> Box {
 }
 
 pub fn build(updates: &[PackageUpdate]) -> SystemUpdateWidget {
-    let container = Box::new(Orientation::Vertical, 16);
+    let container = Box::new(Orientation::Vertical, 12);
     container.set_vexpand(true);
     container.set_valign(gtk4::Align::Fill);
 
@@ -121,6 +129,28 @@ pub fn build(updates: &[PackageUpdate]) -> SystemUpdateWidget {
     header_box.append(&update_all_btn);
     container.append(&header_box);
 
+    // Auth password input bar
+    let auth_box = Box::new(Orientation::Horizontal, 12);
+    auth_box.add_css_class("settings-card-row");
+    auth_box.set_margin_bottom(4);
+    auth_box.set_visible(false);
+
+    let auth_lbl = Label::new(Some("Password:"));
+    auth_lbl.add_css_class("settings-row-title");
+
+    let password_entry = PasswordEntry::new();
+    password_entry.set_hexpand(true);
+    password_entry.add_css_class("sidebar-search-entry");
+    password_entry.set_placeholder_text(Some("Enter sudo password (leave blank for polkit)..."));
+
+    let run_auth_btn = Button::with_label("Confirm & Start");
+    run_auth_btn.add_css_class("connect-pill-btn");
+
+    auth_box.append(&auth_lbl);
+    auth_box.append(&password_entry);
+    auth_box.append(&run_auth_btn);
+    container.append(&auth_box);
+
     // Package List Glass Card
     let glass_card = Box::new(Orientation::Vertical, 0);
     glass_card.add_css_class("glass-panel");
@@ -147,12 +177,47 @@ pub fn build(updates: &[PackageUpdate]) -> SystemUpdateWidget {
     glass_card.append(&scroll);
     container.append(&glass_card);
 
+    // Embedded Console Log Glass Card (hidden by default)
+    let console_card = Box::new(Orientation::Vertical, 8);
+    console_card.add_css_class("glass-panel");
+    console_card.set_vexpand(true);
+    console_card.set_valign(gtk4::Align::Fill);
+    console_card.set_visible(false);
+
+    let text_view = TextView::new();
+    text_view.set_editable(false);
+    text_view.set_cursor_visible(false);
+    text_view.set_monospace(true);
+    text_view.set_margin_top(8);
+    text_view.set_margin_bottom(8);
+    text_view.set_margin_start(12);
+    text_view.set_margin_end(12);
+
+    let text_buffer = text_view.buffer();
+
+    let console_scroll = ScrolledWindow::new();
+    console_scroll.set_policy(gtk4::PolicyType::Automatic, gtk4::PolicyType::Automatic);
+    console_scroll.set_vexpand(true);
+    console_scroll.set_valign(gtk4::Align::Fill);
+    console_scroll.set_child(Some(&text_view));
+
+    console_card.append(&console_scroll);
+    container.append(&console_card);
+
     SystemUpdateWidget {
         container,
         count_badge,
         spinner,
         update_all_btn,
         refresh_btn,
+        glass_card,
         list_box,
+        auth_box,
+        password_entry,
+        run_auth_btn,
+        console_card,
+        text_view,
+        text_buffer,
+        console_scroll,
     }
 }

@@ -121,3 +121,7 @@ pub fn uninstall_app_by_path(full_path: &str) -> Result<(), String> {
     }
 }
 
+pub fn stream_uninstall_package(pkg_name: &str, password: Option<&str>, sender: std::sync::mpsc::Sender<String>) -> Result<(), String> {
+    crate::services::system::updates::execute_cmd_with_log_stream(&["pacman", "-R", "--noconfirm", pkg_name], password, sender)
+}
+
