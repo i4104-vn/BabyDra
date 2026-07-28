@@ -104,7 +104,7 @@ pub fn build(updates: &[PackageUpdate]) -> (SystemUpdateWidget, PasswordDialog) 
     refresh_btn.set_cursor_from_name(Some("pointer"));
 
     let update_all_btn = Button::with_label(&babydra_common::i18n::t("settings.update_all"));
-    update_all_btn.add_css_class("connect-pill-btn");
+    update_all_btn.add_css_class("suggested-action");
     update_all_btn.set_cursor_from_name(Some("pointer"));
 
     header_box.append(&title_label);

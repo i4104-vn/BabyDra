@@ -1,13 +1,13 @@
 button.suggested-action {
-    background-color: #0066cc;
+    background-color: #3b82f6;
 }
 
 button.suggested-action:hover {
-    background-color: #0052a3;
+    background-color: #2563eb;
 }
 
 button.suggested-action:active {
-    background-color: #003d7a;
+    background-color: #1d4ed8;
 }
 
 .explore-dialog {

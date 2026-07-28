@@ -26,7 +26,7 @@ pub fn build(commands: &[StartupCommand]) -> StartupWidget {
     add_btn.add_css_class("connect-pill-btn");
 
     let save_btn = Button::with_label(&babydra_common::i18n::t("settings.save_changes"));
-    save_btn.add_css_class("connect-pill-btn");
+    save_btn.add_css_class("suggested-action");
 
     header_box.append(&title_label);
     header_box.append(&add_btn);

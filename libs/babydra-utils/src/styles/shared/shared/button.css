@@ -22,41 +22,53 @@ button.icon-btn-circle:hover {
     box-shadow: none;
 }
 
-button.btn-primary {
+button.btn-primary,
+button.suggested-action {
     border-radius: 9999px;
     background-color: #3b82f6;
     background-image: none;
     border: none;
     color: #ffffff;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    padding: 8px 20px;
+    padding: 8px 18px;
     box-shadow: none;
-    transition: all 200ms ease;
+    transition: background-color 200ms ease;
 }
 
-button.btn-primary:hover {
+button.btn-primary:hover,
+button.suggested-action:hover {
     background-color: #2563eb;
     background-image: none;
     box-shadow: none;
 }
 
-button.btn-primary:disabled,
-button.btn-primary.disabled {
+button.btn-primary:active,
+button.suggested-action:active {
+    background-color: #1d4ed8;
+    background-image: none;
     box-shadow: none;
 }
 
-button.btn-share-pill {
+button.btn-primary:disabled,
+button.btn-primary.disabled,
+button.suggested-action:disabled {
+    box-shadow: none;
+}
+
+button.btn-share-pill,
+button.connect-pill-btn {
     border-radius: 9999px;
     background-image: none;
     font-size: 13px;
     font-weight: 500;
-    padding: 6px 14px;
+    padding: 8px 18px;
     box-shadow: none;
-    transition: all 200ms ease;
+    transition: background-color 200ms ease, border-color 200ms ease;
 }
 
-button.btn-share-pill:hover {
+button.btn-share-pill:hover,
+button.connect-pill-btn:hover {
     box-shadow: none;
 }
 

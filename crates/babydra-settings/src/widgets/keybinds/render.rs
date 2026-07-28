@@ -31,7 +31,7 @@ pub fn build(keybinds: &[Keybind]) -> KeybindsWidget {
     add_btn.add_css_class("connect-pill-btn");
 
     let save_btn = Button::with_label("Save Changes");
-    save_btn.add_css_class("connect-pill-btn");
+    save_btn.add_css_class("suggested-action");
 
     header_box.append(&title_label);
     header_box.append(&refresh_btn);

@@ -1,11 +1,11 @@
 button.suggested-action {
     background-image: none;
     border: none;
-    border-radius: 8px;
+    border-radius: 9999px;
     color: #ffffff;
-    padding: 6px 16px;
+    padding: 8px 18px;
     font-weight: 600;
-    font-size: 12px;
+    font-size: 13px;
     box-shadow: none;
     transition: background-color 150ms ease;
 }

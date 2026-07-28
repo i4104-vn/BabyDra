@@ -32,6 +32,12 @@ Tài liệu này mô tả phong cách và hướng làm thiết kế giao diện
 | [spacing.md](./spacing.md) | Không gian và khoảng cách — nguyên tắc và cách áp dụng |
 | [theming.md](./theming.md) | Dark/Light theming — cách tiếp cận dual-theme |
 
+## Components Giao diện
+
+| Tài liệu | Nội dung |
+| :--- | :--- |
+| [components/buttons.md](./components/buttons.md) | Quy chuẩn nút bấm: Primary Action, Secondary Pill, Icon Button, CSS Classes |
+
 ## Tham chiếu
 
 | Tài liệu | Nội dung |

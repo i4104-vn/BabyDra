@@ -111,7 +111,7 @@ pub fn render_vpn_list(list_box: &gtk4::ListBox, vpns: &[VpnConn]) {
         } else {
             let connect_btn = gtk4::Button::with_label(&babydra_common::i18n::t("settings.connect"));
             connect_btn.set_valign(gtk4::Align::Center);
-            connect_btn.add_css_class("connect-pill-btn");
+            connect_btn.add_css_class("suggested-action");
             let name_clone = vpn.name.clone();
             connect_btn.connect_clicked(move |_| {
                 let _ = connect_vpn(&name_clone);
