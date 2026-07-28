@@ -47,9 +47,6 @@ pub fn build(commands: &[StartupCommand]) -> StartupWidget {
         let row = Box::new(Orientation::Horizontal, 12);
         row.add_css_class("settings-card-row");
 
-        let badge = Label::new(Some(&babydra_common::i18n::t("settings.startup_exec_badge")));
-        badge.add_css_class("connected-pill");
-
         let entry = Entry::new();
         entry.set_text(&cmd.command);
         entry.set_hexpand(true);
@@ -64,7 +61,6 @@ pub fn build(commands: &[StartupCommand]) -> StartupWidget {
             list_card_copy.remove(&row_copy);
         });
 
-        row.append(&badge);
         row.append(&entry);
         row.append(&delete_btn);
         list_card.append(&row);

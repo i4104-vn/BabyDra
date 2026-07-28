@@ -1,5 +1,6 @@
 //! Pacman explicitly installed package resolution and dependency heuristics.
 
+use crate::models::app_info::InstalledPackage;
 use std::path::Path;
 
 pub fn get_explicitly_installed_packages() -> std::collections::HashSet<String> {
@@ -12,6 +13,24 @@ pub fn get_explicitly_installed_packages() -> std::collections::HashSet<String> 
         }
     }
     set
+}
+
+pub fn get_installed_packages_list() -> Vec<InstalledPackage> {
+    let mut pkgs = Vec::new();
+    if let Ok(output) = std::process::Command::new("pacman").args(&["-Qe"]).output() {
+        if output.status.success() {
+            for line in String::from_utf8_lossy(&output.stdout).lines() {
+                let parts: Vec<&str> = line.split_whitespace().collect();
+                if parts.len() >= 2 {
+                    pkgs.push(InstalledPackage {
+                        name: parts[0].to_string(),
+                        version: parts[1].to_string(),
+                    });
+                }
+            }
+        }
+    }
+    pkgs
 }
 
 pub fn get_package_owner(path: &Path) -> Option<String> {

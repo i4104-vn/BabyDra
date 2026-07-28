@@ -122,6 +122,15 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> AppsWidget {
         x_icon.set_pixel_size(14);
         uninstall_btn.set_child(Some(&x_icon));
 
+        let app_name = app.name.clone();
+        let row_copy = row_box.clone();
+        let apps_list_copy = apps_list_box.clone();
+        uninstall_btn.connect_clicked(move |_| {
+            let pkg_name = app_name.to_lowercase().replace(' ', "-");
+            let _ = babydra_common::services::apps::pacman::uninstall_package(&pkg_name);
+            apps_list_copy.remove(&row_copy);
+        });
+
         row_box.append(&uninstall_btn);
         apps_list_box.append(&row_box);
     }
@@ -143,7 +152,7 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> AppsWidget {
     let pkgs_list_box = ListBox::new();
     pkgs_list_box.set_selection_mode(gtk4::SelectionMode::None);
 
-    for pkg in pkgs.iter().take(100) {
+    for pkg in pkgs.iter().take(200) {
         let row_box = Box::new(Orientation::Horizontal, 14);
         row_box.add_css_class("settings-card-row");
         row_box.set_margin_top(8);
@@ -163,10 +172,19 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> AppsWidget {
         uninstall_btn.add_css_class("icon-btn");
         uninstall_btn.add_css_class("delete-btn");
         uninstall_btn.set_valign(gtk4::Align::Center);
+        uninstall_btn.set_cursor_from_name(Some("pointer"));
 
         let x_icon = babydra_utils::ui::icon::get_icon("close", 14);
         x_icon.set_pixel_size(14);
         uninstall_btn.set_child(Some(&x_icon));
+
+        let pkg_name = pkg.name.clone();
+        let row_copy = row_box.clone();
+        let pkgs_list_copy = pkgs_list_box.clone();
+        uninstall_btn.connect_clicked(move |_| {
+            let _ = babydra_common::services::apps::pacman::uninstall_package(&pkg_name);
+            pkgs_list_copy.remove(&row_copy);
+        });
 
         row_box.append(&name_lbl);
         row_box.append(&ver_lbl);

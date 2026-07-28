@@ -1,7 +1,7 @@
 pub mod render;
 
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Entry, Label, Orientation, Widget};
+use gtk4::{Box, Button, Entry, Orientation, Widget};
 use babydra_common::models::startup_command::StartupCommand;
 
 pub fn create_startup_widget() -> Widget {
@@ -12,9 +12,6 @@ pub fn create_startup_widget() -> Widget {
     widget.add_btn.connect_clicked(move |_| {
         let row = Box::new(Orientation::Horizontal, 12);
         row.add_css_class("settings-card-row");
-
-        let badge = Label::new(Some(&babydra_common::i18n::t("settings.startup_exec_badge")));
-        badge.add_css_class("connected-pill");
 
         let entry = Entry::new();
         entry.set_placeholder_text(Some(&babydra_common::i18n::t("settings.startup_command_placeholder")));
@@ -30,7 +27,6 @@ pub fn create_startup_widget() -> Widget {
             list_card_copy.remove(&row_copy);
         });
 
-        row.append(&badge);
         row.append(&entry);
         row.append(&delete_btn);
         list_card.append(&row);
