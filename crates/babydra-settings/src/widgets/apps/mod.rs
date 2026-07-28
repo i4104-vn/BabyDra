@@ -77,10 +77,16 @@ pub fn create_apps_widget() -> Widget {
             } else if let Some(row_box) = c.downcast_ref::<gtk4::Box>() {
                 let mut label_child = row_box.first_child();
                 while let Some(lc) = label_child {
-                    if let Some(l) = lc.downcast_ref::<gtk4::Label>() {
-                        if l.text().to_lowercase().contains(&query) {
-                            visible = true;
-                            break;
+                    if let Some(tb) = lc.downcast_ref::<gtk4::Box>() {
+                        let mut sub = tb.first_child();
+                        while let Some(lbl) = sub {
+                            if let Some(l) = lbl.downcast_ref::<gtk4::Label>() {
+                                if l.text().to_lowercase().contains(&query) {
+                                    visible = true;
+                                    break;
+                                }
+                            }
+                            sub = lbl.next_sibling();
                         }
                     }
                     label_child = lc.next_sibling();

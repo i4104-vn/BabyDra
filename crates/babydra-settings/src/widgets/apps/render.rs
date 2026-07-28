@@ -155,18 +155,41 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> AppsWidget {
     for pkg in pkgs.iter().take(200) {
         let row_box = Box::new(Orientation::Horizontal, 14);
         row_box.add_css_class("settings-card-row");
-        row_box.set_margin_top(8);
-        row_box.set_margin_bottom(8);
+        row_box.set_margin_top(10);
+        row_box.set_margin_bottom(10);
         row_box.set_margin_start(16);
         row_box.set_margin_end(16);
 
+        // Package Icon Box Container
+        let icon_box = Box::new(Orientation::Vertical, 0);
+        icon_box.add_css_class("blue-icon-badge-sm");
+        icon_box.set_valign(gtk4::Align::Center);
+        icon_box.set_halign(gtk4::Align::Start);
+
+        let icon_img = babydra_utils::ui::icon::get_icon("archive", 18);
+        icon_img.set_pixel_size(18);
+        icon_img.set_valign(gtk4::Align::Center);
+        icon_img.set_halign(gtk4::Align::Center);
+        icon_img.set_vexpand(true);
+        icon_box.append(&icon_img);
+        row_box.append(&icon_box);
+
+        // Package Info Column (Name + Version)
+        let text_box = Box::new(Orientation::Vertical, 2);
+        text_box.set_hexpand(true);
+        text_box.set_valign(gtk4::Align::Center);
+
         let name_lbl = Label::new(Some(&pkg.name));
         name_lbl.add_css_class("settings-row-title");
-        name_lbl.set_hexpand(true);
         name_lbl.set_halign(gtk4::Align::Start);
+        text_box.append(&name_lbl);
 
         let ver_lbl = Label::new(Some(&pkg.version));
         ver_lbl.add_css_class("settings-row-desc");
+        ver_lbl.set_halign(gtk4::Align::Start);
+        text_box.append(&ver_lbl);
+
+        row_box.append(&text_box);
 
         let uninstall_btn = Button::new();
         uninstall_btn.add_css_class("icon-btn");
@@ -186,10 +209,7 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> AppsWidget {
             pkgs_list_copy.remove(&row_copy);
         });
 
-        row_box.append(&name_lbl);
-        row_box.append(&ver_lbl);
         row_box.append(&uninstall_btn);
-
         pkgs_list_box.append(&row_box);
     }
     pkgs_scrolled.set_child(Some(&pkgs_list_box));
