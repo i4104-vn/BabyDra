@@ -1,11 +1,11 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Label, ListBox, Orientation, ScrolledWindow};
+use gtk4::{Box, Button, Label, ListBox, Orientation, ScrolledWindow, Spinner};
 use babydra_common::models::system_update::PackageUpdate;
 
 pub struct SystemUpdateWidget {
     pub container: Box,
-    pub count_label: Label,
-    pub sub_label: Label,
+    pub count_badge: Label,
+    pub spinner: Spinner,
     pub update_all_btn: Button,
     pub refresh_btn: Button,
     pub list_box: ListBox,
@@ -14,8 +14,8 @@ pub struct SystemUpdateWidget {
 pub fn create_update_row(pkg: &PackageUpdate) -> Box {
     let row_box = Box::new(Orientation::Horizontal, 14);
     row_box.add_css_class("settings-card-row");
-    row_box.set_margin_top(10);
-    row_box.set_margin_bottom(10);
+    row_box.set_margin_top(8);
+    row_box.set_margin_bottom(8);
     row_box.set_margin_start(16);
     row_box.set_margin_end(16);
 
@@ -85,46 +85,41 @@ pub fn build(updates: &[PackageUpdate]) -> SystemUpdateWidget {
     container.set_vexpand(true);
     container.set_valign(gtk4::Align::Fill);
 
-    // Header
+    // Clean Header Row with Title, Badge, Spinner and Action Buttons
     let header_box = Box::new(Orientation::Horizontal, 12);
+    header_box.set_margin_bottom(4);
+
     let title_label = Label::new(Some(&babydra_common::i18n::t("settings.update_title")));
     title_label.add_css_class("settings-page-title");
-    title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);
+
+    let count_text = if updates.is_empty() {
+        babydra_common::i18n::t("settings.up_to_date")
+    } else {
+        format!("{} {}", updates.len(), babydra_common::i18n::t("settings.updates_available"))
+    };
+    let count_badge = Label::new(Some(&count_text));
+    count_badge.add_css_class("connected-pill");
+    count_badge.set_hexpand(true);
+    count_badge.set_halign(gtk4::Align::Start);
+
+    let spinner = Spinner::new();
+    spinner.set_visible(false);
 
     let refresh_btn = Button::with_label(&babydra_common::i18n::t("settings.update_check"));
     refresh_btn.add_css_class("connect-pill-btn");
     refresh_btn.set_cursor_from_name(Some("pointer"));
 
-    header_box.append(&title_label);
-    header_box.append(&refresh_btn);
-    container.append(&header_box);
-
-    // Hero Summary Card
-    let hero_card = Box::new(Orientation::Horizontal, 16);
-    hero_card.add_css_class("glass-panel");
-    hero_card.set_margin_bottom(4);
-    hero_card.set_margin_top(4);
-
-    let count_box = Box::new(Orientation::Vertical, 4);
-    count_box.set_hexpand(true);
-    let count_label = Label::new(Some(&format!("{}", updates.len())));
-    count_label.add_css_class("hero-hostname");
-    let sub_label = Label::new(Some(&babydra_common::i18n::t("settings.updates_available")));
-    sub_label.add_css_class("settings-row-desc");
-    sub_label.set_halign(gtk4::Align::Start);
-
-    count_box.append(&count_label);
-    count_box.append(&sub_label);
-
     let update_all_btn = Button::with_label(&babydra_common::i18n::t("settings.update_all"));
     update_all_btn.add_css_class("connect-pill-btn");
-    update_all_btn.set_valign(gtk4::Align::Center);
     update_all_btn.set_cursor_from_name(Some("pointer"));
 
-    hero_card.append(&count_box);
-    hero_card.append(&update_all_btn);
-    container.append(&hero_card);
+    header_box.append(&title_label);
+    header_box.append(&count_badge);
+    header_box.append(&spinner);
+    header_box.append(&refresh_btn);
+    header_box.append(&update_all_btn);
+    container.append(&header_box);
 
     // Package List Glass Card
     let glass_card = Box::new(Orientation::Vertical, 0);
@@ -154,8 +149,8 @@ pub fn build(updates: &[PackageUpdate]) -> SystemUpdateWidget {
 
     SystemUpdateWidget {
         container,
-        count_label,
-        sub_label,
+        count_badge,
+        spinner,
         update_all_btn,
         refresh_btn,
         list_box,
