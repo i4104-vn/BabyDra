@@ -58,17 +58,6 @@ pub fn get_startup_commands() -> Vec<StartupCommand> {
         }
     }
 
-    if commands.is_empty() {
-        commands.push(StartupCommand { id: 1, command: "export PATH=\"$HOME/.local/bin:$PATH\"".to_string() });
-        commands.push(StartupCommand { id: 2, command: "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=labwc || true".to_string() });
-        commands.push(StartupCommand { id: 3, command: "babydra-switcher --daemon &".to_string() });
-        commands.push(StartupCommand { id: 4, command: "awww-daemon &".to_string() });
-        commands.push(StartupCommand { id: 5, command: "fcitx5 -d &".to_string() });
-        commands.push(StartupCommand { id: 6, command: "sleep 0.5".to_string() });
-        commands.push(StartupCommand { id: 7, command: "mkdir -p \"$HOME/.cache/babydra\"".to_string() });
-        commands.push(StartupCommand { id: 8, command: "~/.local/bin/babydra-panel &".to_string() });
-        commands.push(StartupCommand { id: 9, command: "$HOME/.config/labwc/switcher.sh &".to_string() });
-    }
 
     commands
 }
@@ -95,16 +84,6 @@ pub fn save_startup_commands(commands: &[StartupCommand]) -> Result<(), String> 
     #[cfg(unix)]
     {
         let _ = fs::set_permissions(&user_config, fs::Permissions::from_mode(0o755));
-    }
-
-    // Also sync to workspace configs/labwc/autostart if present
-    let local_config = Path::new("configs/labwc/autostart");
-    if local_config.exists() && local_config != user_config {
-        let _ = fs::write(local_config, &content);
-        #[cfg(unix)]
-        {
-            let _ = fs::set_permissions(local_config, fs::Permissions::from_mode(0o755));
-        }
     }
 
     Ok(())

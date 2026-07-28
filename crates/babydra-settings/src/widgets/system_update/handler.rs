@@ -107,8 +107,6 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
         console_card.set_visible(true);
         update_all_btn.set_sensitive(false);
 
-        text_buffer.set_text(">>> Initializing system update...\n");
-
         let (tx, rx) = std::sync::mpsc::channel::<String>();
         let pwd_clone = password.clone();
 
@@ -117,7 +115,7 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
             if let Err(e) = res {
                 let _ = tx.send(format!("\nError: {}", e));
             } else {
-                let _ = tx.send("\n>>> System update completed successfully.".to_string());
+                let _ = tx.send("\nSystem update completed successfully.".to_string());
             }
         });
 

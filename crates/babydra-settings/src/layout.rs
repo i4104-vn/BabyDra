@@ -178,6 +178,7 @@ pub fn build_main_window(app: &gtk4::Application) {
     content_stack.add_named(&startup_widget, Some("startup"));
     content_stack.add_named(&update_widget, Some("system_update"));
     content_stack.add_named(&sys_widget, Some("system"));
+    content_stack.set_visible_child_name("system");
 
     let right_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     right_box.set_hexpand(true);

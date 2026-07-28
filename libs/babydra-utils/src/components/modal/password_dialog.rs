@@ -39,7 +39,7 @@ impl PasswordDialog {
 
         let password_entry = PasswordEntry::new();
         password_entry.add_css_class("sidebar-search-entry");
-        password_entry.set_placeholder_text(Some("Password (leave empty for Polkit)..."));
+        password_entry.set_placeholder_text(Some("Password..."));
         container.append(&password_entry);
 
         let actions_box = Box::new(Orientation::Horizontal, 8);
