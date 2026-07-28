@@ -36,25 +36,23 @@ pub fn create_startup_widget() -> Widget {
     widget.save_btn.connect_clicked(move |_| {
         let mut cmds = Vec::new();
         let mut id = 1;
-        let mut child = list_card_save.first_child();
-        while let Some(c) = child {
+        let mut row_child = list_card_save.first_child();
+        while let Some(c) = row_child {
             if let Some(row_box) = c.downcast_ref::<Box>() {
-                if let Some(first_child) = row_box.first_child() {
-                    let mut next = first_child.next_sibling();
-                    while let Some(n) = next {
-                        if let Some(entry) = n.downcast_ref::<Entry>() {
-                            let text = entry.text().to_string();
-                            if !text.trim().is_empty() {
-                                cmds.push(StartupCommand { id, command: text });
-                                id += 1;
-                            }
-                            break;
+                let mut item = row_box.first_child();
+                while let Some(it) = item {
+                    if let Some(entry) = it.downcast_ref::<Entry>() {
+                        let text = entry.text().to_string();
+                        if !text.trim().is_empty() {
+                            cmds.push(StartupCommand { id, command: text });
+                            id += 1;
                         }
-                        next = n.next_sibling();
+                        break;
                     }
+                    item = it.next_sibling();
                 }
             }
-            child = c.next_sibling();
+            row_child = c.next_sibling();
         }
         let _ = babydra_common::services::system::startup::save_startup_commands(&cmds);
     });

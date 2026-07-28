@@ -59,14 +59,15 @@ pub fn get_startup_commands() -> Vec<StartupCommand> {
     }
 
     if commands.is_empty() {
-        commands.push(StartupCommand {
-            id: 1,
-            command: "babydra-switcher --daemon &".to_string(),
-        });
-        commands.push(StartupCommand {
-            id: 2,
-            command: "~/.local/bin/babydra-panel &".to_string(),
-        });
+        commands.push(StartupCommand { id: 1, command: "export PATH=\"$HOME/.local/bin:$PATH\"".to_string() });
+        commands.push(StartupCommand { id: 2, command: "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=labwc || true".to_string() });
+        commands.push(StartupCommand { id: 3, command: "babydra-switcher --daemon &".to_string() });
+        commands.push(StartupCommand { id: 4, command: "awww-daemon &".to_string() });
+        commands.push(StartupCommand { id: 5, command: "fcitx5 -d &".to_string() });
+        commands.push(StartupCommand { id: 6, command: "sleep 0.5".to_string() });
+        commands.push(StartupCommand { id: 7, command: "mkdir -p \"$HOME/.cache/babydra\"".to_string() });
+        commands.push(StartupCommand { id: 8, command: "~/.local/bin/babydra-panel &".to_string() });
+        commands.push(StartupCommand { id: 9, command: "$HOME/.config/labwc/switcher.sh &".to_string() });
     }
 
     commands
