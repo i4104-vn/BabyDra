@@ -2,17 +2,7 @@
 
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Entry, Label, ListBox, Orientation, ScrolledWindow, Stack};
-use babydra_common::models::app_info::{InstalledApp, InstalledPackage};
-
-pub struct AppsWidget {
-    pub container: Box,
-    pub search_entry: Entry,
-    pub tab_apps_btn: Button,
-    pub tab_packages_btn: Button,
-    pub stack: Stack,
-    pub apps_list_box: ListBox,
-    pub pkgs_list_box: ListBox,
-}
+use babydra_common::models::app_info::{AppsWidget, InstalledApp, InstalledPackage};
 
 pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> AppsWidget {
     let container = Box::new(Orientation::Vertical, 16);

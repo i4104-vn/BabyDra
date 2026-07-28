@@ -1,23 +1,6 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Label, ListBox, Orientation, PasswordEntry, ScrolledWindow, Spinner, TextBuffer, TextView};
-use babydra_common::models::system_update::PackageUpdate;
-
-pub struct SystemUpdateWidget {
-    pub container: Box,
-    pub count_badge: Label,
-    pub spinner: Spinner,
-    pub update_all_btn: Button,
-    pub refresh_btn: Button,
-    pub glass_card: Box,
-    pub list_box: ListBox,
-    pub auth_box: Box,
-    pub password_entry: PasswordEntry,
-    pub run_auth_btn: Button,
-    pub console_card: Box,
-    pub text_view: TextView,
-    pub text_buffer: TextBuffer,
-    pub console_scroll: ScrolledWindow,
-}
+use gtk4::{Box, Button, Label, ListBox, Orientation, Overlay, PasswordEntry, ScrolledWindow, Spinner, TextView};
+use babydra_common::models::system_update::{PackageUpdate, SystemUpdateWidget};
 
 pub fn create_update_row(pkg: &PackageUpdate) -> Box {
     let row_box = Box::new(Orientation::Horizontal, 14);
@@ -89,13 +72,14 @@ pub fn create_empty_up_to_date_row() -> Box {
 }
 
 pub fn build(updates: &[PackageUpdate]) -> SystemUpdateWidget {
-    let container = Box::new(Orientation::Vertical, 12);
+    let root = Overlay::new();
+
+    let container = Box::new(Orientation::Vertical, 16);
     container.set_vexpand(true);
     container.set_valign(gtk4::Align::Fill);
 
-    // Clean Header Row with Title, Badge, Spinner and Action Buttons
+    // Header Row with Title, Count Badge, Spinner & Actions
     let header_box = Box::new(Orientation::Horizontal, 12);
-    header_box.set_margin_bottom(4);
 
     let title_label = Label::new(Some(&babydra_common::i18n::t("settings.update_title")));
     title_label.add_css_class("settings-page-title");
@@ -107,7 +91,7 @@ pub fn build(updates: &[PackageUpdate]) -> SystemUpdateWidget {
         format!("{} {}", updates.len(), babydra_common::i18n::t("settings.updates_available"))
     };
     let count_badge = Label::new(Some(&count_text));
-    count_badge.add_css_class("connected-pill");
+    count_badge.add_css_class("update-count-badge");
     count_badge.set_hexpand(true);
     count_badge.set_halign(gtk4::Align::Start);
 
@@ -128,28 +112,6 @@ pub fn build(updates: &[PackageUpdate]) -> SystemUpdateWidget {
     header_box.append(&refresh_btn);
     header_box.append(&update_all_btn);
     container.append(&header_box);
-
-    // Auth password input bar
-    let auth_box = Box::new(Orientation::Horizontal, 12);
-    auth_box.add_css_class("settings-card-row");
-    auth_box.set_margin_bottom(4);
-    auth_box.set_visible(false);
-
-    let auth_lbl = Label::new(Some("Password:"));
-    auth_lbl.add_css_class("settings-row-title");
-
-    let password_entry = PasswordEntry::new();
-    password_entry.set_hexpand(true);
-    password_entry.add_css_class("sidebar-search-entry");
-    password_entry.set_placeholder_text(Some("Enter sudo password (leave blank for polkit)..."));
-
-    let run_auth_btn = Button::with_label("Confirm & Start");
-    run_auth_btn.add_css_class("connect-pill-btn");
-
-    auth_box.append(&auth_lbl);
-    auth_box.append(&password_entry);
-    auth_box.append(&run_auth_btn);
-    container.append(&auth_box);
 
     // Package List Glass Card
     let glass_card = Box::new(Orientation::Vertical, 0);
@@ -177,21 +139,42 @@ pub fn build(updates: &[PackageUpdate]) -> SystemUpdateWidget {
     glass_card.append(&scroll);
     container.append(&glass_card);
 
-    // Embedded Console Log Glass Card (hidden by default)
-    let console_card = Box::new(Orientation::Vertical, 8);
+    // Console Log Panel (with header bar and close button)
+    let console_card = Box::new(Orientation::Vertical, 0);
     console_card.add_css_class("glass-panel");
+    console_card.add_css_class("console-log-panel");
     console_card.set_vexpand(true);
     console_card.set_valign(gtk4::Align::Fill);
     console_card.set_visible(false);
+
+    let console_header = Box::new(Orientation::Horizontal, 10);
+    console_header.add_css_class("console-header");
+
+    let console_icon = babydra_utils::ui::icon::get_icon("terminal", 16);
+    console_icon.set_pixel_size(16);
+    console_header.append(&console_icon);
+
+    let console_title_lbl = Label::new(Some("System Update Console Output"));
+    console_title_lbl.add_css_class("settings-row-title");
+    console_title_lbl.set_hexpand(true);
+    console_title_lbl.set_halign(gtk4::Align::Start);
+    console_header.append(&console_title_lbl);
+
+    let console_close_btn = Button::new();
+    console_close_btn.add_css_class("icon-btn");
+    console_close_btn.set_cursor_from_name(Some("pointer"));
+    let close_icon = babydra_utils::ui::icon::get_icon("close", 14);
+    close_icon.set_pixel_size(14);
+    console_close_btn.set_child(Some(&close_icon));
+    console_header.append(&console_close_btn);
+
+    console_card.append(&console_header);
 
     let text_view = TextView::new();
     text_view.set_editable(false);
     text_view.set_cursor_visible(false);
     text_view.set_monospace(true);
-    text_view.set_margin_top(8);
-    text_view.set_margin_bottom(8);
-    text_view.set_margin_start(12);
-    text_view.set_margin_end(12);
+    text_view.add_css_class("console-log-text");
 
     let text_buffer = text_view.buffer();
 
@@ -204,7 +187,58 @@ pub fn build(updates: &[PackageUpdate]) -> SystemUpdateWidget {
     console_card.append(&console_scroll);
     container.append(&console_card);
 
+    root.set_child(Some(&container));
+
+    // Password Dialog Overlay (Modal Popup)
+    let auth_overlay = Box::new(Orientation::Vertical, 16);
+    auth_overlay.add_css_class("auth-dialog-card");
+    auth_overlay.set_halign(gtk4::Align::Center);
+    auth_overlay.set_valign(gtk4::Align::Center);
+    auth_overlay.set_visible(false);
+
+    let auth_header_box = Box::new(Orientation::Horizontal, 12);
+    let lock_icon = babydra_utils::ui::icon::get_icon("lock", 24);
+    lock_icon.set_pixel_size(24);
+    auth_header_box.append(&lock_icon);
+
+    let auth_title_box = Box::new(Orientation::Vertical, 2);
+    let auth_title_lbl = Label::new(Some("Authentication Required"));
+    auth_title_lbl.add_css_class("settings-row-title");
+    auth_title_lbl.set_halign(gtk4::Align::Start);
+
+    let auth_sub_lbl = Label::new(Some("Enter sudo password to apply system updates:"));
+    auth_sub_lbl.add_css_class("settings-row-desc");
+    auth_sub_lbl.set_halign(gtk4::Align::Start);
+
+    auth_title_box.append(&auth_title_lbl);
+    auth_title_box.append(&auth_sub_lbl);
+    auth_header_box.append(&auth_title_box);
+    auth_overlay.append(&auth_header_box);
+
+    let password_entry = PasswordEntry::new();
+    password_entry.add_css_class("sidebar-search-entry");
+    password_entry.set_placeholder_text(Some("Password (leave empty for Polkit)..."));
+    auth_overlay.append(&password_entry);
+
+    let auth_actions_box = Box::new(Orientation::Horizontal, 8);
+    auth_actions_box.set_halign(gtk4::Align::End);
+
+    let auth_cancel_btn = Button::with_label("Cancel");
+    auth_cancel_btn.add_css_class("connect-pill-btn");
+    auth_cancel_btn.set_cursor_from_name(Some("pointer"));
+
+    let auth_confirm_btn = Button::with_label("Confirm");
+    auth_confirm_btn.add_css_class("suggested-action");
+    auth_confirm_btn.set_cursor_from_name(Some("pointer"));
+
+    auth_actions_box.append(&auth_cancel_btn);
+    auth_actions_box.append(&auth_confirm_btn);
+    auth_overlay.append(&auth_actions_box);
+
+    root.add_overlay(&auth_overlay);
+
     SystemUpdateWidget {
+        root,
         container,
         count_badge,
         spinner,
@@ -212,10 +246,13 @@ pub fn build(updates: &[PackageUpdate]) -> SystemUpdateWidget {
         refresh_btn,
         glass_card,
         list_box,
-        auth_box,
+        auth_overlay,
         password_entry,
-        run_auth_btn,
+        auth_confirm_btn,
+        auth_cancel_btn,
         console_card,
+        console_title_lbl,
+        console_close_btn,
         text_view,
         text_buffer,
         console_scroll,

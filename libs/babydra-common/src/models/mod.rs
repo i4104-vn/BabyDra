@@ -32,8 +32,8 @@ pub use network::{NetStats, NetSpeed};
 pub use battery::BatteryInfo;
 pub use power::PerformanceProfile;
 pub use display::MonitorConfig;
-pub use app_info::{InstalledApp, InstalledPackage};
-pub use system_update::PackageUpdate;
+pub use app_info::{InstalledApp, InstalledPackage, AppsWidget};
+pub use system_update::{PackageUpdate, SystemUpdateWidget};
 pub use startup_command::StartupCommand;
 pub use wifi::WifiNetwork;
 

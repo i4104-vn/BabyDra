@@ -396,6 +396,37 @@ dropdown > popover > contents listview > row:selected {
     font-weight: 600;
 }
 
+/* Dark Theme Console Log Panel */
+.console-log-panel {
+    background-color: rgba(8, 8, 14, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+.console-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.console-log-text {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Dark Theme Auth Dialog Overlay */
+.auth-dialog-card {
+    background-color: rgba(18, 18, 28, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
+}
+
+.update-count-badge {
+    background-color: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.30);
+    color: #60a5fa;
+}
+
 
 
 

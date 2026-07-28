@@ -213,3 +213,35 @@ progressbar.disk-progress progress {
     font-family: monospace;
     font-size: 13px;
 }
+
+/* Console Log Panel */
+.console-log-panel {
+    border-radius: 16px;
+    padding: 0;
+}
+
+.console-header {
+    padding: 12px 16px;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.console-log-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    padding: 12px 16px;
+}
+
+/* Auth Dialog Overlay */
+.auth-dialog-card {
+    border-radius: 20px;
+    padding: 24px;
+    min-width: 380px;
+}
+
+.update-count-badge {
+    border-radius: 9999px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
