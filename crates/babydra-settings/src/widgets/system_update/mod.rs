@@ -5,61 +5,80 @@ use gtk4::Widget;
 use babydra_common::models::system_update::PackageUpdate;
 
 pub fn create_system_update_widget() -> Widget {
-    let updates = babydra_common::services::system::updates::check_updates().unwrap_or_default();
-    let widget = render::build(&updates);
+    // Build initial UI instantly with empty list to prevent startup lag
+    let widget = render::build(&[]);
 
     let list_box = widget.list_box.clone();
     let count_badge = widget.count_badge.clone();
     let spinner = widget.spinner.clone();
     let refresh_btn = widget.refresh_btn.clone();
 
-    widget.refresh_btn.connect_clicked(move |_| {
-        spinner.set_visible(true);
-        spinner.start();
-        refresh_btn.set_sensitive(false);
-
+    // Helper closure to trigger async update check
+    let trigger_check = {
         let list_box = list_box.clone();
         let count_badge = count_badge.clone();
         let spinner = spinner.clone();
         let refresh_btn = refresh_btn.clone();
 
-        let (tx, rx) = std::sync::mpsc::channel::<Vec<PackageUpdate>>();
+        move || {
+            spinner.set_visible(true);
+            spinner.start();
+            refresh_btn.set_sensitive(false);
 
-        std::thread::spawn(move || {
-            let updates = babydra_common::services::system::updates::check_updates().unwrap_or_default();
-            let _ = tx.send(updates);
-        });
+            let list_box = list_box.clone();
+            let count_badge = count_badge.clone();
+            let spinner = spinner.clone();
+            let refresh_btn = refresh_btn.clone();
 
-        glib::timeout_add_local(std::time::Duration::from_millis(100), move || {
-            if let Ok(updates) = rx.try_recv() {
-                let count_text = if updates.is_empty() {
-                    babydra_common::i18n::t("settings.up_to_date")
-                } else {
-                    format!("{} {}", updates.len(), babydra_common::i18n::t("settings.updates_available"))
-                };
-                count_badge.set_text(&count_text);
+            let (tx, rx) = std::sync::mpsc::channel::<Vec<PackageUpdate>>();
 
-                while let Some(child) = list_box.first_child() {
-                    list_box.remove(&child);
-                }
+            std::thread::spawn(move || {
+                let updates = babydra_common::services::system::updates::check_updates().unwrap_or_default();
+                let _ = tx.send(updates);
+            });
 
-                if updates.is_empty() {
-                    list_box.append(&render::create_empty_up_to_date_row());
-                } else {
-                    for pkg in &updates {
-                        list_box.append(&render::create_update_row(pkg));
+            glib::timeout_add_local(std::time::Duration::from_millis(100), move || {
+                if let Ok(updates) = rx.try_recv() {
+                    let count_text = if updates.is_empty() {
+                        babydra_common::i18n::t("settings.up_to_date")
+                    } else {
+                        format!("{} {}", updates.len(), babydra_common::i18n::t("settings.updates_available"))
+                    };
+                    count_badge.set_text(&count_text);
+
+                    while let Some(child) = list_box.first_child() {
+                        list_box.remove(&child);
                     }
+
+                    if updates.is_empty() {
+                        list_box.append(&render::create_empty_up_to_date_row());
+                    } else {
+                        for pkg in &updates {
+                            list_box.append(&render::create_update_row(pkg));
+                        }
+                    }
+
+                    spinner.stop();
+                    spinner.set_visible(false);
+                    refresh_btn.set_sensitive(true);
+
+                    glib::ControlFlow::Break
+                } else {
+                    glib::ControlFlow::Continue
                 }
+            });
+        }
+    };
 
-                spinner.stop();
-                spinner.set_visible(false);
-                refresh_btn.set_sensitive(true);
+    // Auto-trigger check in background after window is presented (non-blocking)
+    let auto_check = trigger_check.clone();
+    glib::timeout_add_local(std::time::Duration::from_millis(300), move || {
+        auto_check();
+        glib::ControlFlow::Break
+    });
 
-                glib::ControlFlow::Break
-            } else {
-                glib::ControlFlow::Continue
-            }
-        });
+    widget.refresh_btn.connect_clicked(move |_| {
+        trigger_check();
     });
 
     widget.update_all_btn.connect_clicked(move |_| {
