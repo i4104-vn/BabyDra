@@ -2,7 +2,18 @@
 
 use gtk4::prelude::*;
 
-pub fn build_wifi_ui() -> (gtk4::Box, gtk4::Switch, gtk4::ListBox) {
+use babydra_utils::components::modal::{WifiConfigDialog, WifiInfoDialog, WifiPasswordDialog};
+
+pub fn build_wifi_ui() -> (
+    gtk4::Overlay,
+    gtk4::Switch,
+    gtk4::ListBox,
+    WifiInfoDialog,
+    WifiPasswordDialog,
+    WifiConfigDialog,
+) {
+    let overlay = gtk4::Overlay::new();
+
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
     main_box.set_vexpand(true);
     main_box.set_valign(gtk4::Align::Fill);
@@ -50,6 +61,24 @@ pub fn build_wifi_ui() -> (gtk4::Box, gtk4::Switch, gtk4::ListBox) {
     glass_card.append(&scroll);
     main_box.append(&glass_card);
 
-    (main_box, wifi_switch, list_box)
+    overlay.set_child(Some(&main_box));
+
+    // Modals
+    let info_dialog = WifiInfoDialog::new();
+    let password_dialog = WifiPasswordDialog::new();
+    let config_dialog = WifiConfigDialog::new();
+
+    overlay.add_overlay(&info_dialog.container);
+    overlay.add_overlay(&password_dialog.container);
+    overlay.add_overlay(&config_dialog.container);
+
+    (
+        overlay,
+        wifi_switch,
+        list_box,
+        info_dialog,
+        password_dialog,
+        config_dialog,
+    )
 }
 

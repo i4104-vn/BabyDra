@@ -110,6 +110,7 @@ pub fn scan_networks() -> Vec<WifiNetwork> {
             security,
             strength: signal.to_string(),
             is_connected,
+            signal,
         });
     }
 

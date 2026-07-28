@@ -125,3 +125,8 @@ pub fn val_to_str(val: &Value<'_>) -> Option<String> {
     }
     None
 }
+
+pub fn owned_val_to_str(val: &OwnedValue) -> Option<String> {
+    use std::ops::Deref;
+    val_to_str(val.deref())
+}

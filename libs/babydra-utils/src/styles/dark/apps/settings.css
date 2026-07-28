@@ -424,6 +424,45 @@ dropdown > popover > contents listview > row:selected {
     color: #60a5fa;
 }
 
+.wifi-info-section-title {
+    color: #60a5fa;
+}
+
+.wifi-info-label {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.wifi-info-value {
+    color: #ffffff;
+}
+
+.wifi-status-badge {
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.wifi-status-text {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.segmented-control {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.seg-btn {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.seg-btn:hover {
+    color: #ffffff;
+}
+
+.seg-btn-active {
+    background-color: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
 
 
 

@@ -2,8 +2,16 @@
 
 use gtk4::prelude::*;
 use super::WifiState;
+use babydra_utils::components::modal::{WifiConfigDialog, WifiInfoDialog, WifiPasswordDialog};
+use std::rc::Rc;
 
-pub fn render_network_list(list_box: &gtk4::ListBox, st: &WifiState) {
+pub fn render_network_list(
+    list_box: &gtk4::ListBox,
+    st: &WifiState,
+    info_dialog: &Rc<WifiInfoDialog>,
+    password_dialog: &Rc<WifiPasswordDialog>,
+    _config_dialog: &Rc<WifiConfigDialog>,
+) {
     while let Some(child) = list_box.first_child() {
         list_box.remove(&child);
     }
@@ -120,6 +128,47 @@ pub fn render_network_list(list_box: &gtk4::ListBox, st: &WifiState) {
         info_icon.set_pixel_size(16);
         info_btn.set_child(Some(&info_icon));
         hbox.append(&info_btn);
+
+        // Connect info button
+        let net_info = net.clone();
+        let info_dlg_c = info_dialog.clone();
+        info_btn.connect_clicked(move |_| {
+            let ssid = net_info.ssid.clone();
+            let net_clone = net_info.clone();
+            let info_dlg_inner = info_dlg_c.clone();
+            let (tx, rx) = std::sync::mpsc::channel();
+            std::thread::spawn(move || {
+                let config = babydra_common::services::system::wifi::get_wifi_config(&ssid);
+                let _ = tx.send(config);
+            });
+            glib::timeout_add_local(std::time::Duration::from_millis(30), move || {
+                if let Ok(config) = rx.try_recv() {
+                    info_dlg_inner.show_for(&net_clone, Some(&config));
+                    glib::ControlFlow::Break
+                } else {
+                    glib::ControlFlow::Continue
+                }
+            });
+        });
+
+        // Wire row click for connection
+        let net_conn = net.clone();
+        let pwd_dlg_c = password_dialog.clone();
+        let gesture = gtk4::GestureClick::new();
+        gesture.connect_pressed(move |_, _, _, _| {
+            if net_conn.is_connected {
+                return;
+            }
+            if net_conn.security != "open" {
+                pwd_dlg_c.show_for(&net_conn.ssid, &net_conn.security);
+            } else {
+                let ssid = net_conn.ssid.clone();
+                std::thread::spawn(move || {
+                    babydra_common::services::system::wifi::connect_wifi(&ssid, None, None);
+                });
+            }
+        });
+        hbox.add_controller(gesture);
 
         row.set_child(Some(&hbox));
         list_box.append(&row);
