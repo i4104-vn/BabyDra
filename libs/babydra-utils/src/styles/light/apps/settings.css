@@ -174,7 +174,6 @@ button.theme-card-option.active-dark image {
 
 .wallpaper-preview-overlay {
     border-radius: 14px;
-    overflow: hidden;
     border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
@@ -182,7 +181,6 @@ picture.wallpaper-preview-picture,
 .wallpaper-preview-picture picture,
 .wallpaper-preview-picture {
     border-radius: 14px;
-    overflow: hidden;
 }
 
 /* Wallpaper Thumbnail Card */
@@ -200,7 +198,6 @@ button.wallpaper-thumb-card picture {
     border-radius: 10px;
     border: 1px solid rgba(0, 0, 0, 0.12);
     transition: all 200ms ease;
-    overflow: hidden;
 }
 
 button.wallpaper-thumb-card:hover picture {

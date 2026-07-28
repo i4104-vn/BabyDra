@@ -42,7 +42,6 @@ popover.taskbar-popover {
 popover.taskbar-popover>contents {
     padding: 8px;
     min-width: 200px;
-    max-width: 200px;
 }
 
 .taskbar-previews-header-label {
