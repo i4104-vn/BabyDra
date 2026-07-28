@@ -17,8 +17,8 @@ pub fn create_apps_widget() -> Widget {
 
     let pkgs = babydra_common::services::apps::pacman::get_installed_packages_list();
 
-    let widget = render::build(&apps_data, &pkgs);
-    handler::wire_events(&widget);
+    let (widget, auth_dialog, uninstall_items) = render::build(&apps_data, &pkgs);
+    handler::wire_events(&widget, auth_dialog, uninstall_items);
 
-    widget.container.into()
+    widget.root.into()
 }

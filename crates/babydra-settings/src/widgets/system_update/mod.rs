@@ -4,11 +4,11 @@ pub mod render;
 use gtk4::Widget;
 
 pub fn create_system_update_widget() -> Widget {
-    // Build initial UI layout
-    let widget = render::build(&[]);
+    // Build initial UI layout and PasswordDialog overlay
+    let (widget, auth_dialog) = render::build(&[]);
 
-    // Wire events, async update checks, and streaming console
-    handler::wire_events(&widget);
+    // Wire events using reusable PasswordDialog
+    handler::wire_events(&widget, auth_dialog);
 
     widget.root.into()
 }

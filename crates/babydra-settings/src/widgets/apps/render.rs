@@ -1,10 +1,20 @@
 //! Application Manager UI layout generator matching reference design Image 5.
 
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Entry, Label, ListBox, Orientation, ScrolledWindow, Stack};
+use gtk4::{Box, Button, Entry, Label, ListBox, Orientation, Overlay, ScrolledWindow, Stack};
 use babydra_common::models::app_info::{AppsWidget, InstalledApp, InstalledPackage};
+use babydra_utils::components::modal::PasswordDialog;
 
-pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> AppsWidget {
+pub struct UninstallRowItem {
+    pub button: Button,
+    pub pkg_name: String,
+    pub row_box: Box,
+    pub parent_list: ListBox,
+}
+
+pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, PasswordDialog, Vec<UninstallRowItem>) {
+    let root = Overlay::new();
+
     let container = Box::new(Orientation::Vertical, 16);
     container.set_vexpand(true);
     container.set_valign(gtk4::Align::Fill);
@@ -47,6 +57,8 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> AppsWidget {
     stack.set_transition_type(gtk4::StackTransitionType::Crossfade);
     stack.set_vexpand(true);
     stack.set_valign(gtk4::Align::Fill);
+
+    let mut uninstall_items = Vec::new();
 
     // 1. Apps List (Glass Panel List Box)
     let apps_glass_card = Box::new(Orientation::Vertical, 0);
@@ -112,27 +124,12 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> AppsWidget {
         x_icon.set_pixel_size(14);
         uninstall_btn.set_child(Some(&x_icon));
 
-        let app_name = app.name.clone();
-        let row_copy = row_box.clone();
-        let apps_list_copy = apps_list_box.clone();
-        uninstall_btn.connect_clicked(move |_| {
-            let pkg_name = app_name.to_lowercase().replace(' ', "-");
-            let row_copy_c = row_copy.clone();
-            let apps_list_copy_c = apps_list_copy.clone();
-
-            let (tx, rx) = std::sync::mpsc::channel::<String>();
-            std::thread::spawn(move || {
-                let _ = babydra_common::services::apps::pacman::stream_uninstall_package(&pkg_name, None, tx);
-            });
-
-            glib::timeout_add_local(std::time::Duration::from_millis(100), move || {
-                if rx.try_recv().is_ok() {
-                    apps_list_copy_c.remove(&row_copy_c);
-                    glib::ControlFlow::Break
-                } else {
-                    glib::ControlFlow::Continue
-                }
-            });
+        let pkg_name = app.name.to_lowercase().replace(' ', "-");
+        uninstall_items.push(UninstallRowItem {
+            button: uninstall_btn.clone(),
+            pkg_name,
+            row_box: row_box.clone(),
+            parent_list: apps_list_box.clone(),
         });
 
         row_box.append(&uninstall_btn);
@@ -205,27 +202,11 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> AppsWidget {
         x_icon.set_pixel_size(14);
         uninstall_btn.set_child(Some(&x_icon));
 
-        let pkg_name = pkg.name.clone();
-        let row_copy = row_box.clone();
-        let pkgs_list_copy = pkgs_list_box.clone();
-        uninstall_btn.connect_clicked(move |_| {
-            let pkg_name_c = pkg_name.clone();
-            let row_copy_c = row_copy.clone();
-            let pkgs_list_copy_c = pkgs_list_copy.clone();
-
-            let (tx, rx) = std::sync::mpsc::channel::<String>();
-            std::thread::spawn(move || {
-                let _ = babydra_common::services::apps::pacman::stream_uninstall_package(&pkg_name_c, None, tx);
-            });
-
-            glib::timeout_add_local(std::time::Duration::from_millis(100), move || {
-                if rx.try_recv().is_ok() {
-                    pkgs_list_copy_c.remove(&row_copy_c);
-                    glib::ControlFlow::Break
-                } else {
-                    glib::ControlFlow::Continue
-                }
-            });
+        uninstall_items.push(UninstallRowItem {
+            button: uninstall_btn.clone(),
+            pkg_name: pkg.name.clone(),
+            row_box: row_box.clone(),
+            parent_list: pkgs_list_box.clone(),
         });
 
         row_box.append(&uninstall_btn);
@@ -237,7 +218,14 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> AppsWidget {
 
     container.append(&stack);
 
-    AppsWidget {
+    root.set_child(Some(&container));
+
+    // Reusable Password Dialog Overlay
+    let auth_dialog = PasswordDialog::new("Uninstall Authentication", "Enter sudo password to confirm package removal:");
+    root.add_overlay(&auth_dialog.container);
+
+    let widget = AppsWidget {
+        root,
         container,
         search_entry,
         tab_apps_btn,
@@ -245,6 +233,7 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> AppsWidget {
         stack,
         apps_list_box,
         pkgs_list_box,
-    }
-}
+    };
 
+    (widget, auth_dialog, uninstall_items)
+}

@@ -1,4 +1,4 @@
-use gtk4::{Box, Button, Entry, ListBox, Stack};
+use gtk4::{Box, Button, Entry, ListBox, Overlay, Stack};
 
 #[derive(Debug, Clone)]
 pub struct InstalledApp {
@@ -15,6 +15,7 @@ pub struct InstalledPackage {
 }
 
 pub struct AppsWidget {
+    pub root: Overlay,
     pub container: Box,
     pub search_entry: Entry,
     pub tab_apps_btn: Button,

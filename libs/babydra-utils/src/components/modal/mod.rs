@@ -1,5 +1,8 @@
 use gtk4::prelude::*;
 
+pub mod password_dialog;
+pub use password_dialog::PasswordDialog;
+
 /// Creates a standardized dialog overlay box container.
 pub fn create_dialog_box(title: &str, content: &impl IsA<gtk4::Widget>) -> gtk4::Box {
     let dialog_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);

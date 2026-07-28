@@ -1,8 +1,10 @@
 use gtk4::prelude::*;
-use babydra_common::models::system_update::{PackageUpdate, SystemUpdateWidget};
+use babydra_common::models::system_update::PackageUpdate;
+use babydra_common::models::system_update::SystemUpdateWidget;
+use babydra_utils::components::modal::PasswordDialog;
 use super::render;
 
-pub fn wire_events(widget: &SystemUpdateWidget) {
+pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
     let list_box = widget.list_box.clone();
     let count_badge = widget.count_badge.clone();
     let spinner = widget.spinner.clone();
@@ -77,16 +79,11 @@ pub fn wire_events(widget: &SystemUpdateWidget) {
         trigger_check_btn();
     });
 
-    // Handle Update All -> Show password modal overlay
-    let auth_overlay_show = widget.auth_overlay.clone();
+    // Handle Update All -> Show reusable PasswordDialog
+    let auth_dialog_rc = std::rc::Rc::new(auth_dialog);
+    let auth_dialog_show = auth_dialog_rc.clone();
     widget.update_all_btn.connect_clicked(move |_| {
-        auth_overlay_show.set_visible(true);
-    });
-
-    // Handle Cancel Auth Modal
-    let auth_overlay_hide = widget.auth_overlay.clone();
-    widget.auth_cancel_btn.connect_clicked(move |_| {
-        auth_overlay_hide.set_visible(false);
+        auth_dialog_show.show_for("Authentication Required", "Enter sudo password to apply system updates:");
     });
 
     // Handle Console Close Button
@@ -98,8 +95,6 @@ pub fn wire_events(widget: &SystemUpdateWidget) {
     });
 
     // Handle Confirm & Start -> Run update with streaming console output
-    let auth_overlay = widget.auth_overlay.clone();
-    let password_entry = widget.password_entry.clone();
     let glass_card = widget.glass_card.clone();
     let console_card = widget.console_card.clone();
     let text_buffer = widget.text_buffer.clone();
@@ -107,16 +102,7 @@ pub fn wire_events(widget: &SystemUpdateWidget) {
     let trigger_check_after = trigger_check.clone();
     let update_all_btn = widget.update_all_btn.clone();
 
-    let start_streaming_update = move || {
-        let pwd_text = password_entry.text().to_string();
-        let password = if pwd_text.trim().is_empty() {
-            None
-        } else {
-            Some(pwd_text)
-        };
-
-        password_entry.set_text("");
-        auth_overlay.set_visible(false);
+    auth_dialog_rc.connect_submit(move |password| {
         glass_card.set_visible(false);
         console_card.set_visible(true);
         update_all_btn.set_sensitive(false);
@@ -163,15 +149,5 @@ pub fn wire_events(widget: &SystemUpdateWidget) {
 
             glib::ControlFlow::Continue
         });
-    };
-
-    let start_up_1 = start_streaming_update.clone();
-    widget.auth_confirm_btn.connect_clicked(move |_| {
-        start_up_1();
-    });
-
-    let start_up_2 = start_streaming_update.clone();
-    widget.password_entry.connect_activate(move |_| {
-        start_up_2();
     });
 }

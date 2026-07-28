@@ -1,6 +1,7 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Label, ListBox, Orientation, Overlay, PasswordEntry, ScrolledWindow, Spinner, TextView};
+use gtk4::{Box, Button, Label, ListBox, Orientation, Overlay, ScrolledWindow, Spinner, TextView};
 use babydra_common::models::system_update::{PackageUpdate, SystemUpdateWidget};
+use babydra_utils::components::modal::PasswordDialog;
 
 pub fn create_update_row(pkg: &PackageUpdate) -> Box {
     let row_box = Box::new(Orientation::Horizontal, 14);
@@ -71,7 +72,7 @@ pub fn create_empty_up_to_date_row() -> Box {
     row_box
 }
 
-pub fn build(updates: &[PackageUpdate]) -> SystemUpdateWidget {
+pub fn build(updates: &[PackageUpdate]) -> (SystemUpdateWidget, PasswordDialog) {
     let root = Overlay::new();
 
     let container = Box::new(Orientation::Vertical, 16);
@@ -189,55 +190,11 @@ pub fn build(updates: &[PackageUpdate]) -> SystemUpdateWidget {
 
     root.set_child(Some(&container));
 
-    // Password Dialog Overlay (Modal Popup)
-    let auth_overlay = Box::new(Orientation::Vertical, 16);
-    auth_overlay.add_css_class("auth-dialog-card");
-    auth_overlay.set_halign(gtk4::Align::Center);
-    auth_overlay.set_valign(gtk4::Align::Center);
-    auth_overlay.set_visible(false);
+    // Reusable Password Dialog Overlay
+    let auth_dialog = PasswordDialog::new("Authentication Required", "Enter sudo password to apply system updates:");
+    root.add_overlay(&auth_dialog.container);
 
-    let auth_header_box = Box::new(Orientation::Horizontal, 12);
-    let lock_icon = babydra_utils::ui::icon::get_icon("lock", 24);
-    lock_icon.set_pixel_size(24);
-    auth_header_box.append(&lock_icon);
-
-    let auth_title_box = Box::new(Orientation::Vertical, 2);
-    let auth_title_lbl = Label::new(Some("Authentication Required"));
-    auth_title_lbl.add_css_class("settings-row-title");
-    auth_title_lbl.set_halign(gtk4::Align::Start);
-
-    let auth_sub_lbl = Label::new(Some("Enter sudo password to apply system updates:"));
-    auth_sub_lbl.add_css_class("settings-row-desc");
-    auth_sub_lbl.set_halign(gtk4::Align::Start);
-
-    auth_title_box.append(&auth_title_lbl);
-    auth_title_box.append(&auth_sub_lbl);
-    auth_header_box.append(&auth_title_box);
-    auth_overlay.append(&auth_header_box);
-
-    let password_entry = PasswordEntry::new();
-    password_entry.add_css_class("sidebar-search-entry");
-    password_entry.set_placeholder_text(Some("Password (leave empty for Polkit)..."));
-    auth_overlay.append(&password_entry);
-
-    let auth_actions_box = Box::new(Orientation::Horizontal, 8);
-    auth_actions_box.set_halign(gtk4::Align::End);
-
-    let auth_cancel_btn = Button::with_label("Cancel");
-    auth_cancel_btn.add_css_class("connect-pill-btn");
-    auth_cancel_btn.set_cursor_from_name(Some("pointer"));
-
-    let auth_confirm_btn = Button::with_label("Confirm");
-    auth_confirm_btn.add_css_class("suggested-action");
-    auth_confirm_btn.set_cursor_from_name(Some("pointer"));
-
-    auth_actions_box.append(&auth_cancel_btn);
-    auth_actions_box.append(&auth_confirm_btn);
-    auth_overlay.append(&auth_actions_box);
-
-    root.add_overlay(&auth_overlay);
-
-    SystemUpdateWidget {
+    let widget = SystemUpdateWidget {
         root,
         container,
         count_badge,
@@ -246,15 +203,17 @@ pub fn build(updates: &[PackageUpdate]) -> SystemUpdateWidget {
         refresh_btn,
         glass_card,
         list_box,
-        auth_overlay,
-        password_entry,
-        auth_confirm_btn,
-        auth_cancel_btn,
+        auth_overlay: auth_dialog.container.clone(),
+        password_entry: auth_dialog.password_entry.clone(),
+        auth_confirm_btn: auth_dialog.confirm_btn.clone(),
+        auth_cancel_btn: auth_dialog.cancel_btn.clone(),
         console_card,
         console_title_lbl,
         console_close_btn,
         text_view,
         text_buffer,
         console_scroll,
-    }
+    };
+
+    (widget, auth_dialog)
 }
