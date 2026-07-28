@@ -64,16 +64,17 @@ osd.label.text.color: #e8e8f0
 
 # ── Menu ────────────────────────────────────────────────
 menu.items.bg: Solid
-menu.items.bg.color: #12121e
-menu.items.text.color: #c8c8d8
+menu.items.bg.color: #141416
+menu.items.text.color: #e8e8e8
 menu.items.active.bg: Solid
-menu.items.active.bg.color: #2a2a44
+menu.items.active.bg.color: #28282a
 menu.items.active.text.color: #ffffff
+menu.items.padding.x: 12
+menu.items.padding.y: 6
 menu.title.bg: Solid
-menu.title.bg.color: #12121e
-menu.title.text.color: #e8e8f0
+menu.title.bg.color: #141416
+menu.title.text.color: #e8e8e8
 menu.title.text.justify: center
 menu.border.width: 1
-menu.border.color: #3d3d5c
-menu.border.corner-radius: 10
-menu.separator.color: #2a2a3e
+menu.border.color: #28282a
+menu.separator.color: #28282a
