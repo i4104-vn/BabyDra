@@ -46,12 +46,14 @@ pub fn build_system_ui(
     hero_card.append(&avatar_box);
 
     // Right Side Information
-    let info_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
+    let info_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
     info_box.set_hexpand(true);
     info_box.set_valign(gtk4::Align::Center);
 
-    // Top Row: Hostname + Uptime Pill Badge
-    let title_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+    // Left Column: Hostname + Subtitle
+    let text_column = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
+    text_column.set_hexpand(true);
+    text_column.set_valign(gtk4::Align::Center);
 
     let display_host = if !hostname.is_empty() && hostname != "localhost" {
         hostname
@@ -62,8 +64,21 @@ pub fn build_system_ui(
     let os_label = gtk4::Label::new(Some(display_host));
     os_label.add_css_class("hero-hostname");
     os_label.set_halign(gtk4::Align::Start);
-    os_label.set_hexpand(true);
-    title_row.append(&os_label);
+    text_column.append(&os_label);
+
+    // Subtitle Row: OS Name (Architecture) • Kernel Version
+    let sub_title = format!("{} ({}) • Kernel {}", os_name, cpu_arch, kernel_version);
+    let sub_label = gtk4::Label::new(Some(&sub_title));
+    sub_label.add_css_class("hero-subtitle");
+    sub_label.set_halign(gtk4::Align::Start);
+    text_column.append(&sub_label);
+
+    info_box.append(&text_column);
+
+    // Right Column: Uptime Badge (Top) + EN/VN Button (Bottom, below uptime!)
+    let badge_column = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
+    badge_column.set_valign(gtk4::Align::Center);
+    badge_column.set_halign(gtk4::Align::End);
 
     // Sleek Uptime Badge (e.g. "Up 2h 15m")
     let uptime_badge = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
@@ -81,15 +96,54 @@ pub fn build_system_ui(
     uptime_lbl.set_valign(gtk4::Align::Center);
     uptime_badge.append(&uptime_lbl);
 
-    title_row.append(&uptime_badge);
-    info_box.append(&title_row);
+    badge_column.append(&uptime_badge);
 
-    // Subtitle Row: OS Name (Architecture) • Kernel Version
-    let sub_title = format!("{} ({}) • Kernel {}", os_name, cpu_arch, kernel_version);
-    let sub_label = gtk4::Label::new(Some(&sub_title));
-    sub_label.add_css_class("hero-subtitle");
-    sub_label.set_halign(gtk4::Align::Start);
-    info_box.append(&sub_label);
+    // Language Segmented Control Pill (EN / VN) below uptime
+    let lang_segmented_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 2);
+    lang_segmented_box.add_css_class("lang-segmented-control");
+    lang_segmented_box.set_halign(gtk4::Align::End);
+
+    let btn_en = gtk4::Button::with_label("EN");
+    btn_en.set_cursor_from_name(Some("pointer"));
+
+    let btn_vn = gtk4::Button::with_label("VN");
+    btn_vn.set_cursor_from_name(Some("pointer"));
+
+    let current_locale = babydra_common::i18n::get_locale();
+    if current_locale == "vi" {
+        btn_vn.add_css_class("lang-seg-active");
+        btn_en.add_css_class("lang-seg-inactive");
+    } else {
+        btn_en.add_css_class("lang-seg-active");
+        btn_vn.add_css_class("lang-seg-inactive");
+    }
+
+    let btn_en_c = btn_en.clone();
+    let btn_vn_c = btn_vn.clone();
+    btn_en.connect_clicked(move |_| {
+        babydra_common::i18n::set_locale("en");
+        std::env::set_var("LANG", "en_US.UTF-8");
+        btn_en_c.remove_css_class("lang-seg-inactive");
+        btn_en_c.add_css_class("lang-seg-active");
+        btn_vn_c.remove_css_class("lang-seg-active");
+        btn_vn_c.add_css_class("lang-seg-inactive");
+    });
+
+    let btn_en_c2 = btn_en.clone();
+    let btn_vn_c2 = btn_vn.clone();
+    btn_vn.connect_clicked(move |_| {
+        babydra_common::i18n::set_locale("vi");
+        std::env::set_var("LANG", "vi_VN.UTF-8");
+        btn_vn_c2.remove_css_class("lang-seg-inactive");
+        btn_vn_c2.add_css_class("lang-seg-active");
+        btn_en_c2.remove_css_class("lang-seg-active");
+        btn_en_c2.add_css_class("lang-seg-inactive");
+    });
+
+    lang_segmented_box.append(&btn_en);
+    lang_segmented_box.append(&btn_vn);
+    badge_column.append(&lang_segmented_box);
+    info_box.append(&badge_column);
 
     hero_card.append(&info_box);
     content_box.append(&hero_card);

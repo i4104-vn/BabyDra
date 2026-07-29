@@ -172,6 +172,29 @@ button.sidebar-item.active-nav:hover image {
     color: #60a5fa;
 }
 
+.lang-segmented-control {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 9999px;
+    padding: 2px;
+}
+
+button.lang-seg-active {
+    background-color: #3b82f6;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+}
+
+button.lang-seg-inactive {
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+button.lang-seg-inactive:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
 /* Theme Option Cards */
 button.theme-card-option {
     background-color: rgba(255, 255, 255, 0.035);
@@ -388,8 +411,33 @@ dropdown > popover > contents listview > row:selected {
     background-color: rgba(255, 255, 255, 0.02);
 }
 
-.console-log-text {
+.console-log-panel scrolledwindow {
+    background-color: transparent;
+}
+
+textview.console-log-text,
+textview.console-log-text text {
+    background-color: transparent;
     color: rgba(255, 255, 255, 0.85);
+}
+
+progressbar.console-progress {
+    min-height: 4px;
+    margin: 4px 0;
+    padding: 0;
+}
+
+progressbar.console-progress trough {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: none;
+    border-radius: 4px;
+    min-height: 4px;
+}
+
+progressbar.console-progress progress {
+    background-color: #3b82f6;
+    border-radius: 4px;
+    min-height: 4px;
 }
 
 /* Dark Theme Auth Dialog Overlay */

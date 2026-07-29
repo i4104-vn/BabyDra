@@ -42,6 +42,8 @@ pub fn build_appearance_ui(
     // Dashboard Main Glass Panel
     let dashboard_panel = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
     dashboard_panel.add_css_class("glass-panel");
+    dashboard_panel.set_vexpand(true);
+    dashboard_panel.set_valign(gtk4::Align::Fill);
 
     // Top 2-Column Configuration Grid
     let top_grid = gtk4::Grid::new();
@@ -52,10 +54,10 @@ pub fn build_appearance_ui(
     // Column 0 (Left): Narrowed Wallpaper Preview Overlay with Floating Controls
     let preview_overlay = gtk4::Overlay::new();
     preview_overlay.add_css_class("wallpaper-preview-overlay");
-    preview_overlay.set_size_request(-1, 180);
+    preview_overlay.set_size_request(-1, 160);
 
     let preview_pic = gtk4::Picture::new();
-    preview_pic.set_size_request(-1, 180);
+    preview_pic.set_size_request(-1, 160);
     preview_pic.set_content_fit(gtk4::ContentFit::Cover);
     preview_pic.add_css_class("wallpaper-preview-picture");
 
@@ -184,15 +186,15 @@ pub fn build_appearance_ui(
     let quick_select_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     quick_select_box.set_margin_top(4);
     quick_select_box.set_margin_end(4);
-    dashboard_panel.append(&quick_select_box);
 
     let scroll = gtk4::ScrolledWindow::new();
     scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
     scroll.set_vexpand(true);
     scroll.set_valign(gtk4::Align::Fill);
-    scroll.set_child(Some(&dashboard_panel));
+    scroll.set_child(Some(&quick_select_box));
+    dashboard_panel.append(&scroll);
 
-    main_box.append(&scroll);
+    main_box.append(&dashboard_panel);
 
     (
         main_box,

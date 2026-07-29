@@ -294,6 +294,9 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
 
             map.insert("settings.apps_title", "Application Manager");
             map.insert("settings.apps_search_placeholder", "Search installed applications or packages...");
+            map.insert("settings.apps_uninstall_log_title", "Uninstall Log");
+            map.insert("settings.apps_uninstall_success", "Package '{}' uninstalled successfully.");
+            map.insert("settings.apps_uninstall_failed", "Failed to uninstall '{}'.");
 
             map.insert("settings.startup_title", "Startup Applications");
             map.insert("settings.startup_add", "Add App");
@@ -656,6 +659,9 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
 
             map.insert("settings.apps_title", "Quản lý ứng dụng");
             map.insert("settings.apps_search_placeholder", "Tìm kiếm ứng dụng hoặc gói đã cài...");
+            map.insert("settings.apps_uninstall_log_title", "Nhật ký gỡ cài đặt");
+            map.insert("settings.apps_uninstall_success", "Gỡ cài đặt gói '{}' thành công.");
+            map.insert("settings.apps_uninstall_failed", "Gỡ cài đặt gói '{}' thất bại.");
 
             map.insert("settings.startup_title", "Ứng dụng tự chạy");
             map.insert("settings.startup_add", "Thêm ứng dụng");

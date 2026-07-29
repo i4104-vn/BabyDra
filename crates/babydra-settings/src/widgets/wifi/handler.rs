@@ -82,6 +82,7 @@ pub fn render_network_list(
         icon_badge.add_css_class("blue-icon-badge-sm");
         icon_badge.set_valign(gtk4::Align::Center);
         icon_badge.set_halign(gtk4::Align::Start);
+        icon_badge.set_hexpand(false);
 
         let wifi_icon = babydra_utils::ui::icon::get_icon("wifi", 18);
         wifi_icon.set_pixel_size(18);
@@ -89,7 +90,6 @@ pub fn render_network_list(
         wifi_icon.set_halign(gtk4::Align::Center);
         wifi_icon.set_vexpand(true);
         icon_badge.append(&wifi_icon);
-        hbox.append(&icon_badge);
 
         let name_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
         name_box.set_valign(gtk4::Align::Center);
@@ -110,7 +110,12 @@ pub fn render_network_list(
             name_box.append(&lock_icon);
         }
 
-        hbox.append(&name_box);
+        let click_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 14);
+        click_box.set_hexpand(true);
+        click_box.set_cursor_from_name(Some("pointer"));
+        click_box.append(&icon_badge);
+        click_box.append(&name_box);
+        hbox.append(&click_box);
 
         if net.is_connected {
             let check_icon = babydra_utils::ui::icon::get_icon("check", 18);
@@ -168,7 +173,7 @@ pub fn render_network_list(
                 });
             }
         });
-        hbox.add_controller(gesture);
+        click_box.add_controller(gesture);
 
         row.set_child(Some(&hbox));
         list_box.append(&row);

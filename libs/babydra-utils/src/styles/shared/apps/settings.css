@@ -178,6 +178,33 @@ dropdown > button {
     padding: 12px 14px;
 }
 
+.lang-segmented-control {
+    border-radius: 9999px;
+    padding: 2px;
+    margin-top: 2px;
+}
+
+button.lang-seg-active,
+button.lang-seg-inactive {
+    border-radius: 9999px;
+    padding: 3px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    border: none;
+    box-shadow: none;
+    background-image: none;
+    transition: all 200ms ease;
+}
+
+button.lang-seg-active {
+    background-color: #3b82f6;
+    color: #ffffff;
+}
+
+button.lang-seg-inactive {
+    background-color: transparent;
+}
+
 .hero-hostname {
     font-size: 19px;
     font-weight: 700;
@@ -218,6 +245,7 @@ progressbar.disk-progress progress {
 .console-log-panel {
     border-radius: 16px;
     padding: 0;
+    overflow: hidden;
 }
 
 .console-header {
@@ -226,10 +254,35 @@ progressbar.disk-progress progress {
     font-size: 13px;
 }
 
-.console-log-text {
+.console-log-panel scrolledwindow {
+    background-color: transparent;
+}
+
+textview.console-log-text,
+textview.console-log-text text {
+    background-color: transparent;
     font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
     padding: 12px 16px;
+}
+
+progressbar.console-progress {
+    min-height: 4px;
+    margin: 4px 0;
+    padding: 0;
+}
+
+progressbar.console-progress trough {
+    border-radius: 4px;
+    min-height: 4px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: none;
+}
+
+progressbar.console-progress progress {
+    border-radius: 4px;
+    min-height: 4px;
+    background-color: #3b82f6;
 }
 
 /* Auth Dialog Overlay */

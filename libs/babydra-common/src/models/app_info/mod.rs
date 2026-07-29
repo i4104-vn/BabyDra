@@ -1,4 +1,4 @@
-use gtk4::{Box, Button, Entry, ListBox, Overlay, Stack};
+use gtk4::{Box, Button, Entry, Label, ListBox, Overlay, ProgressBar, ScrolledWindow, Stack, TextBuffer, TextView};
 
 #[derive(Debug, Clone)]
 pub struct InstalledApp {
@@ -23,4 +23,11 @@ pub struct AppsWidget {
     pub stack: Stack,
     pub apps_list_box: ListBox,
     pub pkgs_list_box: ListBox,
+    pub console_card: Box,
+    pub console_title_lbl: Label,
+    pub console_close_btn: Button,
+    pub progress_bar: ProgressBar,
+    pub text_view: TextView,
+    pub text_buffer: TextBuffer,
+    pub console_scroll: ScrolledWindow,
 }

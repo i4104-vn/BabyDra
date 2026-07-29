@@ -89,9 +89,11 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
     // Handle Console Close Button
     let console_card_close = widget.console_card.clone();
     let glass_card_show = widget.glass_card.clone();
+    let update_all_btn_close = widget.update_all_btn.clone();
     widget.console_close_btn.connect_clicked(move |_| {
         console_card_close.set_visible(false);
         glass_card_show.set_visible(true);
+        update_all_btn_close.set_sensitive(true);
     });
 
     // Handle Confirm & Start -> Run update with streaming console output
@@ -125,27 +127,31 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
         let update_all_btn_c = update_all_btn.clone();
 
         glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
-            let mut received = false;
-            while let Ok(line) = rx.try_recv() {
-                received = true;
-                let mut iter = text_buffer_c.end_iter();
-                text_buffer_c.insert(&mut iter, &format!("{}\n", line));
+            loop {
+                match rx.try_recv() {
+                    Ok(line) => {
+                        let mut iter = text_buffer_c.end_iter();
+                        text_buffer_c.insert(&mut iter, &format!("{}\n", line));
 
-                let adj = console_scroll_c.vadjustment();
-                adj.set_value(adj.upper() - adj.page_size());
+                        let adj = console_scroll_c.vadjustment();
+                        adj.set_value(adj.upper() - adj.page_size());
 
-                if line.contains("System update completed successfully") || line.starts_with("Error:") {
-                    update_all_btn_c.set_sensitive(true);
-                    trigger_check_c();
-                    return glib::ControlFlow::Break;
+                        if line.contains("System update completed successfully") || line.contains("Error:") {
+                            update_all_btn_c.set_sensitive(true);
+                            trigger_check_c();
+                            return glib::ControlFlow::Break;
+                        }
+                    }
+                    Err(std::sync::mpsc::TryRecvError::Empty) => {
+                        return glib::ControlFlow::Continue;
+                    }
+                    Err(std::sync::mpsc::TryRecvError::Disconnected) => {
+                        update_all_btn_c.set_sensitive(true);
+                        trigger_check_c();
+                        return glib::ControlFlow::Break;
+                    }
                 }
             }
-
-            if !received {
-                // Keep polling
-            }
-
-            glib::ControlFlow::Continue
         });
     });
 }

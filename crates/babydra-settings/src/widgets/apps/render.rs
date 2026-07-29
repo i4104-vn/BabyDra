@@ -1,7 +1,7 @@
 //! Application Manager UI layout generator matching reference design Image 5.
 
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Entry, Label, ListBox, Orientation, Overlay, ScrolledWindow, Stack};
+use gtk4::{Box, Button, Entry, Label, ListBox, Orientation, Overlay, ProgressBar, ScrolledWindow, Stack, TextView};
 use babydra_common::models::app_info::{AppsWidget, InstalledApp, InstalledPackage};
 use babydra_utils::components::modal::PasswordDialog;
 
@@ -218,11 +218,67 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
 
     container.append(&stack);
 
+    // Console Log Modal Dialog Overlay (auth-dialog-card style)
+    let console_card = Box::new(Orientation::Vertical, 14);
+    console_card.add_css_class("auth-dialog-card");
+    console_card.set_halign(gtk4::Align::Center);
+    console_card.set_valign(gtk4::Align::Center);
+    console_card.set_width_request(480);
+    console_card.set_visible(false);
+
+    let console_header = Box::new(Orientation::Horizontal, 10);
+    console_header.set_hexpand(true);
+
+    let console_icon = babydra_utils::ui::icon::get_icon("terminal", 18);
+    console_icon.set_pixel_size(18);
+    console_header.append(&console_icon);
+
+    let console_title_lbl = Label::new(Some(&babydra_common::i18n::t("settings.apps_uninstall_log_title")));
+    console_title_lbl.add_css_class("settings-row-title");
+    console_title_lbl.set_hexpand(true);
+    console_title_lbl.set_halign(gtk4::Align::Start);
+    console_header.append(&console_title_lbl);
+
+    console_card.append(&console_header);
+
+    let progress_bar = ProgressBar::new();
+    progress_bar.add_css_class("console-progress");
+    progress_bar.set_fraction(0.0);
+
+    console_card.append(&progress_bar);
+
+    let text_view = TextView::new();
+    text_view.set_editable(false);
+    text_view.set_cursor_visible(false);
+    text_view.set_monospace(true);
+    text_view.add_css_class("console-log-text");
+
+    let text_buffer = text_view.buffer();
+
+    let console_scroll = ScrolledWindow::new();
+    console_scroll.set_policy(gtk4::PolicyType::Automatic, gtk4::PolicyType::Automatic);
+    console_scroll.set_height_request(240);
+    console_scroll.set_child(Some(&text_view));
+
+    console_card.append(&console_scroll);
+
+    // Footer Actions Row
+    let actions_box = Box::new(Orientation::Horizontal, 8);
+    actions_box.set_halign(gtk4::Align::End);
+
+    let console_close_btn = Button::with_label(&babydra_common::i18n::t("explore.settings_close"));
+    console_close_btn.add_css_class("connect-pill-btn");
+    console_close_btn.set_cursor_from_name(Some("pointer"));
+    actions_box.append(&console_close_btn);
+
+    console_card.append(&actions_box);
+
     root.set_child(Some(&container));
 
-    // Reusable Password Dialog Overlay
+    // Reusable Password Dialog & Console Log Dialog Overlays
     let auth_dialog = PasswordDialog::new("Uninstall Authentication", "Enter sudo password to confirm package removal:");
     root.add_overlay(&auth_dialog.container);
+    root.add_overlay(&console_card);
 
     let widget = AppsWidget {
         root,
@@ -233,6 +289,13 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
         stack,
         apps_list_box,
         pkgs_list_box,
+        console_card,
+        console_title_lbl,
+        console_close_btn,
+        progress_bar,
+        text_view,
+        text_buffer,
+        console_scroll,
     };
 
     (widget, auth_dialog, uninstall_items)

@@ -146,7 +146,25 @@ pub fn execute_cmd_with_log_stream(args: &[&str], password: Option<&str>, sender
     }
 }
 
+fn is_pacman_running() -> bool {
+    if let Ok(out) = Command::new("pgrep").arg("-x").arg("pacman").output() {
+        out.status.success() && !out.stdout.is_empty()
+    } else {
+        false
+    }
+}
+
 /// Triggers system update streaming output via sender channel.
 pub fn stream_update_system(password: Option<&str>, sender: std::sync::mpsc::Sender<String>) -> Result<(), String> {
+    if std::path::Path::new("/var/lib/pacman/db.lck").exists() {
+        if !is_pacman_running() {
+            let _ = sender.send(":: Detected stale pacman lock file (/var/lib/pacman/db.lck). Cleaning lock file...".to_string());
+            if let Some(pwd) = password {
+                let _ = execute_cmd_with_log_stream(&["rm", "-f", "/var/lib/pacman/db.lck"], Some(pwd), sender.clone());
+            } else {
+                let _ = std::fs::remove_file("/var/lib/pacman/db.lck");
+            }
+        }
+    }
     execute_cmd_with_log_stream(&["pacman", "-Syu", "--noconfirm"], password, sender)
 }
