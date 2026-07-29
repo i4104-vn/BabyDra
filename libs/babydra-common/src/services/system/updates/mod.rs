@@ -185,5 +185,5 @@ pub fn stream_update_system(password: Option<&str>, sender: std::sync::mpsc::Sen
             }
         }
     }
-    execute_cmd_with_log_stream(&["pacman", "-Syu", "--noconfirm"], password, sender)
+    execute_cmd_with_log_stream(&["sh", "-c", "yes | pacman -Syu --noconfirm --needed"], password, sender)
 }
