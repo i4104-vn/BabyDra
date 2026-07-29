@@ -135,9 +135,6 @@ pub fn is_pacman_running() -> bool {
     }
 }
 
-pub fn is_update_in_progress() -> bool {
-    is_pacman_running()
-}
 
 pub fn read_update_log() -> String {
     let path = get_update_log_path();
