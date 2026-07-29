@@ -42,40 +42,17 @@ pub fn check_updates() -> Result<Vec<PackageUpdate>, String> {
     Ok(updates)
 }
 
-/// Triggers system update in a terminal emulator.
 pub fn update_system() -> Result<(), String> {
-    let terminals = ["foot", "kitty", "alacritty", "wezterm", "gnome-terminal", "konsole", "xfce4-terminal"];
-    let update_cmd = "sudo pacman -Syu";
+    let output = Command::new("pkexec")
+        .args(["pacman", "-Syu", "--noconfirm"])
+        .output()
+        .map_err(|e| e.to_string())?;
 
-    for term in terminals {
-        let mut cmd = Command::new(term);
-
-        match term {
-            "foot" => {
-                cmd.args(&["--title", "update-system", "sh", "-c", &format!("{}; echo; read -p 'Press Enter to close...' -n 1", update_cmd)]);
-            }
-            "gnome-terminal" | "xfce4-terminal" => {
-                cmd.args(&["--title", "update-system", "--", "bash", "-c", &format!("{}; echo; read -p 'Press Enter to close...' -n 1", update_cmd)]);
-            }
-            "konsole" => {
-                cmd.args(&["-p", "tabtitle=update-system", "-e", "bash", "-c", &format!("{}; echo; read -p 'Press Enter to close...' -n 1", update_cmd)]);
-            }
-            "kitty" | "alacritty" => {
-                cmd.args(&["--title", "update-system", "-e", "sh", "-c", &format!("{}; echo; read -p 'Press Enter to close...' -n 1", update_cmd)]);
-            }
-            "wezterm" => {
-                cmd.args(&["-e", "sh", "-c", &format!("{}; echo; read -p 'Press Enter to close...' -n 1", update_cmd)]);
-            }
-            _ => continue,
-        }
-
-        if let Ok(mut child) = cmd.spawn() {
-            let _ = child.wait();
-            return Ok(());
-        }
+    if output.status.success() {
+        Ok(())
+    } else {
+        Err(String::from_utf8_lossy(&output.stderr).to_string())
     }
-
-    Err("No supported terminal emulator found".to_string())
 }
 
 /// Executes a privileged command and streams stdout/stderr lines via channel.

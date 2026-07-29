@@ -82,34 +82,16 @@ pub fn is_dependency_heuristic(filename: &str, _name: &str, exec: &str) -> bool 
 }
 
 pub fn uninstall_package(name: &str) -> Result<(), String> {
-    let terminals = ["kitty", "alacritty", "wezterm", "gnome-terminal", "konsole", "xfce4-terminal"];
-    let uninstall_cmd = format!("sudo pacman -R {}", name);
+    let output = std::process::Command::new("pkexec")
+        .args(["pacman", "-R", "--noconfirm", name])
+        .output()
+        .map_err(|e| e.to_string())?;
 
-    for term in terminals {
-        let mut cmd = std::process::Command::new(term);
-        match term {
-            "gnome-terminal" | "xfce4-terminal" => {
-                cmd.args(&["--title", "uninstall-app", "--", "bash", "-c", &format!("{}; echo; read -p 'Press Enter to close...' -n 1", uninstall_cmd)]);
-            }
-            "konsole" => {
-                cmd.args(&["-p", "tabtitle=uninstall-app", "-e", "bash", "-c", &format!("{}; echo; read -p 'Press Enter to close...' -n 1", uninstall_cmd)]);
-            }
-            "kitty" | "alacritty" => {
-                cmd.args(&["--title", "uninstall-app", "-e", "sh", "-c", &format!("{}; echo; read -p 'Press Enter to close...' -n 1", uninstall_cmd)]);
-            }
-            "wezterm" => {
-                cmd.args(&["-e", "sh", "-c", &format!("{}; echo; read -p 'Press Enter to close...' -n 1", uninstall_cmd)]);
-            }
-            _ => continue,
-        }
-
-        if let Ok(mut child) = cmd.spawn() {
-            let _ = child.wait();
-            return Ok(());
-        }
+    if output.status.success() {
+        Ok(())
+    } else {
+        Err(String::from_utf8_lossy(&output.stderr).to_string())
     }
-
-    Err("No supported terminal emulator found".to_string())
 }
 
 pub fn uninstall_app_by_path(full_path: &str) -> Result<(), String> {
