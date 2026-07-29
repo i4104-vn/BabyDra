@@ -1,15 +1,19 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Label, ListBox, Orientation, Overlay, ScrolledWindow, Spinner, TextView};
+use gtk4::{Box, Button, Label, ListBox, ListBoxRow, Orientation, Overlay, ScrolledWindow, Spinner, TextView};
 use babydra_common::models::system_update::{PackageUpdate, SystemUpdateWidget};
 use babydra_utils::components::modal::PasswordDialog;
 
-pub fn create_update_row(pkg: &PackageUpdate) -> Box {
+pub fn create_update_row(pkg: &PackageUpdate) -> ListBoxRow {
+    let row = ListBoxRow::new();
+    row.set_selectable(false);
+    row.set_activatable(false);
+
     let row_box = Box::new(Orientation::Horizontal, 14);
     row_box.add_css_class("settings-card-row");
-    row_box.set_margin_top(8);
-    row_box.set_margin_bottom(8);
-    row_box.set_margin_start(16);
-    row_box.set_margin_end(16);
+    row_box.set_margin_top(6);
+    row_box.set_margin_bottom(6);
+    row_box.set_margin_start(12);
+    row_box.set_margin_end(12);
 
     let icon_box = Box::new(Orientation::Vertical, 0);
     icon_box.add_css_class("blue-icon-badge-sm");
@@ -39,10 +43,17 @@ pub fn create_update_row(pkg: &PackageUpdate) -> Box {
     text_box.append(&ver_lbl);
 
     row_box.append(&text_box);
-    row_box
+    row.set_child(Some(&row_box));
+    row
 }
 
-pub fn create_empty_up_to_date_row() -> Box {
+pub fn create_empty_up_to_date_row() -> ListBoxRow {
+    let row = ListBoxRow::new();
+    row.set_selectable(false);
+    row.set_activatable(false);
+    row.set_vexpand(true);
+    row.set_valign(gtk4::Align::Fill);
+
     let row_box = Box::new(Orientation::Vertical, 14);
     row_box.add_css_class("settings-card-row");
     row_box.set_valign(gtk4::Align::Center);
@@ -70,7 +81,8 @@ pub fn create_empty_up_to_date_row() -> Box {
     text_lbl.set_halign(gtk4::Align::Center);
 
     row_box.append(&text_lbl);
-    row_box
+    row.set_child(Some(&row_box));
+    row
 }
 
 pub fn build(updates: &[PackageUpdate]) -> (SystemUpdateWidget, PasswordDialog) {

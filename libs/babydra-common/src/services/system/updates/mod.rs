@@ -136,27 +136,7 @@ pub fn is_pacman_running() -> bool {
 }
 
 pub fn is_update_in_progress() -> bool {
-    if is_pacman_running() {
-        return true;
-    }
-    let path = get_update_log_path();
-    if path.exists() {
-        if let Ok(content) = std::fs::read_to_string(&path) {
-            if !content.is_empty()
-                && !content.contains("System update completed successfully.")
-                && !content.contains("Error:")
-            {
-                if let Ok(meta) = std::fs::metadata(&path) {
-                    if let Ok(modified) = meta.modified() {
-                        if let Ok(elapsed) = modified.elapsed() {
-                            return elapsed.as_secs() < 30;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    false
+    is_pacman_running()
 }
 
 pub fn read_update_log() -> String {
