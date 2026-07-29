@@ -4,8 +4,7 @@ use gtk4::prelude::*;
 use gtk4::Widget;
 use std::cell::RefCell;
 use std::rc::Rc;
-use render::DisplayCardRow;
-use babydra_common::models::display::MonitorConfig;
+use babydra_common::models::display::{DisplayCardRow, MonitorConfig};
 
 /// Reads selected UI values from card rows and persists updated monitor configurations
 fn save_display_configs(monitors: &[MonitorConfig], card_rows: &[DisplayCardRow]) {

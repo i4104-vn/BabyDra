@@ -1,20 +1,6 @@
 use gtk4::prelude::*;
 use gtk4::{Box, Button, DropDown, Label, Orientation, StringList};
-use babydra_common::models::display::MonitorConfig;
-
-pub struct DisplayCardRow {
-    pub container: Box,
-    pub resolution_dropdown: DropDown,
-    pub rate_dropdown: DropDown,
-    pub orientation_dropdown: DropDown,
-}
-
-pub struct DisplaysWidget {
-    pub container: Box,
-    pub save_btn: Button,
-    pub refresh_btn: Button,
-    pub card_rows: Vec<DisplayCardRow>,
-}
+use babydra_common::models::display::{DisplayCardRow, DisplaysWidget, MonitorConfig};
 
 /// Builds the header row containing title and action buttons (Refresh, Save)
 fn build_header() -> (Box, Button, Button) {
