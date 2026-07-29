@@ -43,30 +43,31 @@ pub fn create_update_row(pkg: &PackageUpdate) -> Box {
 }
 
 pub fn create_empty_up_to_date_row() -> Box {
-    let row_box = Box::new(Orientation::Horizontal, 14);
+    let row_box = Box::new(Orientation::Vertical, 14);
     row_box.add_css_class("settings-card-row");
-    row_box.set_margin_top(16);
-    row_box.set_margin_bottom(16);
-    row_box.set_margin_start(16);
-    row_box.set_margin_end(16);
+    row_box.set_valign(gtk4::Align::Center);
+    row_box.set_halign(gtk4::Align::Center);
+    row_box.set_vexpand(true);
+    row_box.set_hexpand(true);
+    row_box.set_margin_top(48);
+    row_box.set_margin_bottom(48);
 
-    let icon_box = Box::new(Orientation::Vertical, 0);
-    icon_box.add_css_class("blue-icon-badge-sm");
-    icon_box.set_valign(gtk4::Align::Center);
+    let icon_badge = Box::new(Orientation::Vertical, 0);
+    icon_badge.add_css_class("blue-icon-badge");
+    icon_badge.set_valign(gtk4::Align::Center);
+    icon_badge.set_halign(gtk4::Align::Center);
 
-    let icon_img = babydra_utils::ui::icon::get_icon("check", 18);
-    icon_img.set_pixel_size(18);
+    let icon_img = babydra_utils::ui::icon::get_icon("check", 24);
+    icon_img.set_pixel_size(24);
     icon_img.set_valign(gtk4::Align::Center);
     icon_img.set_halign(gtk4::Align::Center);
     icon_img.set_vexpand(true);
-    icon_box.append(&icon_img);
-    row_box.append(&icon_box);
+    icon_badge.append(&icon_img);
+    row_box.append(&icon_badge);
 
     let text_lbl = Label::new(Some(&babydra_common::i18n::t("settings.up_to_date")));
     text_lbl.add_css_class("settings-row-title");
-    text_lbl.set_halign(gtk4::Align::Start);
-    text_lbl.set_valign(gtk4::Align::Center);
-    text_lbl.set_hexpand(true);
+    text_lbl.set_halign(gtk4::Align::Center);
 
     row_box.append(&text_lbl);
     row_box
@@ -140,7 +141,7 @@ pub fn build(updates: &[PackageUpdate]) -> (SystemUpdateWidget, PasswordDialog) 
     glass_card.append(&scroll);
     container.append(&glass_card);
 
-    // Console Log Panel (with header bar and close button)
+    // Console Log Panel (no header bar, no close button)
     let console_card = Box::new(Orientation::Vertical, 0);
     console_card.add_css_class("glass-panel");
     console_card.add_css_class("console-log-panel");
@@ -148,28 +149,8 @@ pub fn build(updates: &[PackageUpdate]) -> (SystemUpdateWidget, PasswordDialog) 
     console_card.set_valign(gtk4::Align::Fill);
     console_card.set_visible(false);
 
-    let console_header = Box::new(Orientation::Horizontal, 10);
-    console_header.add_css_class("console-header");
-
-    let console_icon = babydra_utils::ui::icon::get_icon("terminal", 16);
-    console_icon.set_pixel_size(16);
-    console_header.append(&console_icon);
-
     let console_title_lbl = Label::new(Some("System Update Console Output"));
-    console_title_lbl.add_css_class("settings-row-title");
-    console_title_lbl.set_hexpand(true);
-    console_title_lbl.set_halign(gtk4::Align::Start);
-    console_header.append(&console_title_lbl);
-
     let console_close_btn = Button::new();
-    console_close_btn.add_css_class("icon-btn");
-    console_close_btn.set_cursor_from_name(Some("pointer"));
-    let close_icon = babydra_utils::ui::icon::get_icon("close", 14);
-    close_icon.set_pixel_size(14);
-    console_close_btn.set_child(Some(&close_icon));
-    console_header.append(&console_close_btn);
-
-    console_card.append(&console_header);
 
     let text_view = TextView::new();
     text_view.set_editable(false);

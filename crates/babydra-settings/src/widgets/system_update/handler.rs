@@ -3,6 +3,9 @@ use babydra_common::models::system_update::PackageUpdate;
 use babydra_common::models::system_update::SystemUpdateWidget;
 use babydra_utils::components::modal::PasswordDialog;
 use super::render;
+use babydra_common::services::system::updates::{
+    is_update_in_progress, read_update_log, start_background_update,
+};
 
 pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
     let list_box = widget.list_box.clone();
@@ -67,12 +70,53 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
         }
     };
 
-    // Auto-trigger check in background after window presentation
-    let auto_check = trigger_check.clone();
-    glib::timeout_add_local(std::time::Duration::from_millis(300), move || {
-        auto_check();
-        glib::ControlFlow::Break
-    });
+    // Helper to start watching background log stream in UI
+    let text_buffer = widget.text_buffer.clone();
+    let console_scroll = widget.console_scroll.clone();
+    let update_all_btn = widget.update_all_btn.clone();
+    let trigger_check_finish = trigger_check.clone();
+
+    let start_log_stream_watcher = move || {
+        let text_buffer_c = text_buffer.clone();
+        let console_scroll_c = console_scroll.clone();
+        let update_all_btn_c = update_all_btn.clone();
+        let trigger_check_c = trigger_check_finish.clone();
+
+        glib::timeout_add_local(std::time::Duration::from_millis(150), move || {
+            let log_text = read_update_log();
+            text_buffer_c.set_text(&log_text);
+
+            let adj = console_scroll_c.vadjustment();
+            adj.set_value(adj.upper() - adj.page_size());
+
+            let in_progress = is_update_in_progress();
+            if !in_progress {
+                update_all_btn_c.set_sensitive(true);
+                trigger_check_c();
+                glib::ControlFlow::Break
+            } else {
+                update_all_btn_c.set_sensitive(false);
+                glib::ControlFlow::Continue
+            }
+        });
+    };
+
+    // Check if an update is already running in background (e.g. from previous run / app restart)
+    if is_update_in_progress() {
+        widget.glass_card.set_visible(false);
+        widget.console_card.set_visible(true);
+        widget.update_all_btn.set_sensitive(false);
+        let log_text = read_update_log();
+        widget.text_buffer.set_text(&log_text);
+        start_log_stream_watcher();
+    } else {
+        // Auto-trigger check in background after window presentation
+        let auto_check = trigger_check.clone();
+        glib::timeout_add_local(std::time::Duration::from_millis(300), move || {
+            auto_check();
+            glib::ControlFlow::Break
+        });
+    }
 
     let trigger_check_btn = trigger_check.clone();
     widget.refresh_btn.connect_clicked(move |_| {
@@ -86,72 +130,19 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
         auth_dialog_show.show_for("Authentication Required", "Enter sudo password to apply system updates:");
     });
 
-    // Handle Console Close Button
-    let console_card_close = widget.console_card.clone();
-    let glass_card_show = widget.glass_card.clone();
-    let update_all_btn_close = widget.update_all_btn.clone();
-    widget.console_close_btn.connect_clicked(move |_| {
-        console_card_close.set_visible(false);
-        glass_card_show.set_visible(true);
-        update_all_btn_close.set_sensitive(true);
-    });
-
-    // Handle Confirm & Start -> Run update with streaming console output
+    // Handle Confirm & Start -> Run update in background with persistent log
     let glass_card = widget.glass_card.clone();
     let console_card = widget.console_card.clone();
     let text_buffer = widget.text_buffer.clone();
-    let console_scroll = widget.console_scroll.clone();
-    let trigger_check_after = trigger_check.clone();
     let update_all_btn = widget.update_all_btn.clone();
 
     auth_dialog_rc.connect_submit(move |password| {
         glass_card.set_visible(false);
         console_card.set_visible(true);
         update_all_btn.set_sensitive(false);
+        text_buffer.set_text("");
 
-        let (tx, rx) = std::sync::mpsc::channel::<String>();
-        let pwd_clone = password.clone();
-
-        std::thread::spawn(move || {
-            let res = babydra_common::services::system::updates::stream_update_system(pwd_clone.as_deref(), tx.clone());
-            if let Err(e) = res {
-                let _ = tx.send(format!("\nError: {}", e));
-            } else {
-                let _ = tx.send("\nSystem update completed successfully.".to_string());
-            }
-        });
-
-        let text_buffer_c = text_buffer.clone();
-        let console_scroll_c = console_scroll.clone();
-        let trigger_check_c = trigger_check_after.clone();
-        let update_all_btn_c = update_all_btn.clone();
-
-        glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
-            loop {
-                match rx.try_recv() {
-                    Ok(line) => {
-                        let mut iter = text_buffer_c.end_iter();
-                        text_buffer_c.insert(&mut iter, &format!("{}\n", line));
-
-                        let adj = console_scroll_c.vadjustment();
-                        adj.set_value(adj.upper() - adj.page_size());
-
-                        if line.contains("System update completed successfully") || line.contains("Error:") {
-                            update_all_btn_c.set_sensitive(true);
-                            trigger_check_c();
-                            return glib::ControlFlow::Break;
-                        }
-                    }
-                    Err(std::sync::mpsc::TryRecvError::Empty) => {
-                        return glib::ControlFlow::Continue;
-                    }
-                    Err(std::sync::mpsc::TryRecvError::Disconnected) => {
-                        update_all_btn_c.set_sensitive(true);
-                        trigger_check_c();
-                        return glib::ControlFlow::Break;
-                    }
-                }
-            }
-        });
+        start_background_update(password);
+        start_log_stream_watcher();
     });
 }

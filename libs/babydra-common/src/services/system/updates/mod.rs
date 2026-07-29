@@ -146,12 +146,77 @@ pub fn execute_cmd_with_log_stream(args: &[&str], password: Option<&str>, sender
     }
 }
 
-fn is_pacman_running() -> bool {
+pub fn get_update_log_path() -> std::path::PathBuf {
+    std::env::temp_dir().join("babydra-update.log")
+}
+
+pub fn is_pacman_running() -> bool {
     if let Ok(out) = Command::new("pgrep").arg("-x").arg("pacman").output() {
         out.status.success() && !out.stdout.is_empty()
     } else {
         false
     }
+}
+
+pub fn is_update_in_progress() -> bool {
+    if is_pacman_running() {
+        return true;
+    }
+    let path = get_update_log_path();
+    if path.exists() {
+        if let Ok(content) = std::fs::read_to_string(&path) {
+            if !content.is_empty()
+                && !content.contains("System update completed successfully.")
+                && !content.contains("Error:")
+            {
+                if let Ok(meta) = std::fs::metadata(&path) {
+                    if let Ok(modified) = meta.modified() {
+                        if let Ok(elapsed) = modified.elapsed() {
+                            return elapsed.as_secs() < 30;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    false
+}
+
+pub fn read_update_log() -> String {
+    let path = get_update_log_path();
+    std::fs::read_to_string(path).unwrap_or_default()
+}
+
+pub fn start_background_update(password: Option<String>) {
+    use std::fs::OpenOptions;
+    use std::io::Write;
+
+    let path = get_update_log_path();
+    let _ = std::fs::write(&path, "");
+
+    std::thread::spawn(move || {
+        let (tx, rx) = std::sync::mpsc::channel::<String>();
+        let pwd_val = password;
+
+        let log_path = get_update_log_path();
+        let tx_clone = tx.clone();
+
+        std::thread::spawn(move || {
+            let res = stream_update_system(pwd_val.as_deref(), tx_clone.clone());
+            if let Err(e) = res {
+                let _ = tx_clone.send(format!("\nError: {}", e));
+            } else {
+                let _ = tx_clone.send("\nSystem update completed successfully.".to_string());
+            }
+        });
+
+        while let Ok(line) = rx.recv() {
+            if let Ok(mut file) = OpenOptions::new().create(true).append(true).open(&log_path) {
+                let _ = writeln!(file, "{}", line);
+                let _ = file.flush();
+            }
+        }
+    });
 }
 
 /// Triggers system update streaming output via sender channel.
