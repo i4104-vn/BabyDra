@@ -112,13 +112,19 @@ pub fn build(monitors: &[MonitorConfig]) -> DisplaysWidget {
         card.append(&orientation_dropdown);
 
         // 5. Enable Switch
-        let switch_box = Box::new(Orientation::Horizontal, 0);
+        let switch_box = Box::new(Orientation::Horizontal, 8);
         switch_box.set_valign(gtk4::Align::Center);
+
+        let switch_lbl = Label::new(Some(&babydra_common::i18n::t("settings.on")));
+        switch_lbl.add_css_class("settings-page-subtitle");
+        switch_lbl.set_valign(gtk4::Align::Center);
 
         let enable_switch = Switch::new();
         enable_switch.set_active(mon.enabled);
         enable_switch.set_valign(gtk4::Align::Center);
         enable_switch.set_cursor_from_name(Some("pointer"));
+
+        switch_box.append(&switch_lbl);
         switch_box.append(&enable_switch);
 
         card.append(&switch_box);
