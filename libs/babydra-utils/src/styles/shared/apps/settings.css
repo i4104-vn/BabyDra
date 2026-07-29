@@ -197,8 +197,7 @@ button.lang-seg-inactive {
 }
 
 button.lang-seg-active {
-    background-color: #3b82f6;
-    color: #ffffff;
+    font-weight: 700;
 }
 
 button.lang-seg-inactive {

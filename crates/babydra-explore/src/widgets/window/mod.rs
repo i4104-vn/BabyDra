@@ -408,6 +408,32 @@ pub fn create_explore_window(
     // D-Bus service loop
     handlers::setup_dbus_receiver(navigate_pane_no_watch_ref.clone(), active_pane.clone());
 
+    let session_sidebar = session.clone();
+    let nav_sidebar = nav_callback_rc.clone();
+    let main_paned_c = ui.main_paned.clone();
+    let status_bar_c = status_bar_widgets_cell.clone();
+
+    babydra_common::i18n::watch_locale_change(move |_| {
+        // Rebuild sidebar
+        let new_sidebar = crate::widgets::sidebar::create_sidebar(session_sidebar.clone(), {
+            let nav = nav_sidebar.clone();
+            move |p| nav(p)
+        });
+        if let Some(child) = main_paned_c.first_child() {
+            main_paned_c.remove(&child);
+        }
+        main_paned_c.prepend(&new_sidebar);
+
+        // Rebuild status bar tooltips
+        if let Some(ref sw) = *status_bar_c.borrow() {
+            sw.dropdown_sort.set_tooltip_text(Some(&babydra_common::i18n::t("explore.sort_by")));
+            sw.btn_view_icons.set_tooltip_text(Some(&babydra_common::i18n::t("explore.view_grid")));
+            sw.btn_view_list.set_tooltip_text(Some(&babydra_common::i18n::t("explore.view_list")));
+            sw.btn_toggle_preview.set_tooltip_text(Some(&babydra_common::i18n::t("explore.toggle_preview")));
+            sw.btn_settings.set_tooltip_text(Some(&babydra_common::i18n::t("explore.settings")));
+        }
+    });
+
     // Start initial navigation
     let path = session.borrow().active_tab().current_path.clone();
     if let Some(ref f) = *navigate_pane_ref.borrow() {

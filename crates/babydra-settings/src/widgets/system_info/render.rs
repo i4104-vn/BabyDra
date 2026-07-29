@@ -120,24 +120,26 @@ pub fn build_system_ui(
 
     let btn_en_c = btn_en.clone();
     let btn_vn_c = btn_vn.clone();
-    btn_en.connect_clicked(move |_| {
+    btn_en.connect_clicked(move |b| {
         babydra_common::i18n::set_locale("en");
-        std::env::set_var("LANG", "en_US.UTF-8");
+        babydra_common::i18n::persist_locale("en");
         btn_en_c.remove_css_class("lang-seg-inactive");
         btn_en_c.add_css_class("lang-seg-active");
         btn_vn_c.remove_css_class("lang-seg-active");
         btn_vn_c.add_css_class("lang-seg-inactive");
+        let _ = b.activate_action("win.rebuild-ui", None);
     });
 
     let btn_en_c2 = btn_en.clone();
     let btn_vn_c2 = btn_vn.clone();
-    btn_vn.connect_clicked(move |_| {
+    btn_vn.connect_clicked(move |b| {
         babydra_common::i18n::set_locale("vi");
-        std::env::set_var("LANG", "vi_VN.UTF-8");
+        babydra_common::i18n::persist_locale("vi");
         btn_vn_c2.remove_css_class("lang-seg-inactive");
         btn_vn_c2.add_css_class("lang-seg-active");
         btn_en_c2.remove_css_class("lang-seg-active");
         btn_en_c2.add_css_class("lang-seg-inactive");
+        let _ = b.activate_action("win.rebuild-ui", None);
     });
 
     lang_segmented_box.append(&btn_en);

@@ -335,6 +335,27 @@ dropdown > popover > contents listview > row:selected {
     color: #2563eb;
 }
 
+.lang-segmented-control {
+    background-color: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.10);
+}
+
+button.lang-seg-active {
+    background-color: #2563eb;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+}
+
+button.lang-seg-inactive {
+    background-color: transparent;
+    color: rgba(0, 0, 0, 0.60);
+}
+
+button.lang-seg-inactive:hover {
+    color: #1c1c1e;
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
 .cheatsheet-overlay {
     background-color: #ffffff;
     border: 1px solid rgba(0, 0, 0, 0.08);

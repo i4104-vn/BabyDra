@@ -1,8 +1,56 @@
 //! Settings window layout builder.
 
 use gtk4::prelude::*;
+use gtk4::gio;
 
 use crate::widgets;
+
+/// Sidebar navigation i18n keys (ordered to match button creation order).
+const SIDEBAR_I18N_KEYS: &[&str] = &[
+    "settings.nav_wifi",
+    "settings.nav_vpn",
+    "settings.nav_bluetooth",
+    "settings.nav_wallpaper_themes",
+    "settings.nav_displays",
+    "settings.nav_installed_apps",
+    "settings.nav_startup_apps",
+    "settings.nav_system_update",
+    "settings.nav_about_system",
+];
+
+/// Populate a content stack with all Settings widget pages.
+fn populate_content_stack(stack: &gtk4::Stack) {
+    // Remove existing children first
+    while let Some(child) = stack.first_child() {
+        stack.remove(&child);
+    }
+
+    stack.add_named(&widgets::wifi::create_wifi_widget(), Some("wifi"));
+    stack.add_named(&widgets::vpn::create_vpn_widget(), Some("vpn"));
+    stack.add_named(&widgets::bluetooth::create_bluetooth_widget(), Some("bluetooth"));
+    stack.add_named(&widgets::appearance::create_appearance_widget(), Some("appearance"));
+    stack.add_named(&widgets::displays::create_displays_widget(), Some("displays"));
+    stack.add_named(&widgets::apps::create_apps_widget(), Some("apps"));
+    stack.add_named(&widgets::startup::create_startup_widget(), Some("startup"));
+    stack.add_named(&widgets::system_update::create_system_update_widget(), Some("system_update"));
+    stack.add_named(&widgets::system_info::create_system_widget(), Some("system"));
+}
+
+/// Find and update the Label text inside a sidebar Button (Button > Box > Label).
+fn update_sidebar_label(btn: &gtk4::Button, new_text: &str) {
+    if let Some(child) = btn.child() {
+        if let Ok(hbox) = child.downcast::<gtk4::Box>() {
+            let mut widget = hbox.first_child();
+            while let Some(w) = widget {
+                if let Ok(label) = w.clone().downcast::<gtk4::Label>() {
+                    label.set_text(new_text);
+                    return;
+                }
+                widget = w.next_sibling();
+            }
+        }
+    }
+}
 
 const SHORTCUTS_HELP: &str = r#"
 Bảng Phím tắt Hệ thống (Shortcuts)
@@ -159,25 +207,7 @@ pub fn build_main_window(app: &gtk4::Application) {
     content_stack.set_vexpand(true);
     content_stack.add_css_class("settings-content");
 
-    let wifi_widget = widgets::wifi::create_wifi_widget();
-    let vpn_widget = widgets::vpn::create_vpn_widget();
-    let bt_widget = widgets::bluetooth::create_bluetooth_widget();
-    let app_widget = widgets::appearance::create_appearance_widget();
-    let displays_widget = widgets::displays::create_displays_widget();
-    let apps_widget = widgets::apps::create_apps_widget();
-    let startup_widget = widgets::startup::create_startup_widget();
-    let update_widget = widgets::system_update::create_system_update_widget();
-    let sys_widget = widgets::system_info::create_system_widget();
-
-    content_stack.add_named(&wifi_widget, Some("wifi"));
-    content_stack.add_named(&vpn_widget, Some("vpn"));
-    content_stack.add_named(&bt_widget, Some("bluetooth"));
-    content_stack.add_named(&app_widget, Some("appearance"));
-    content_stack.add_named(&displays_widget, Some("displays"));
-    content_stack.add_named(&apps_widget, Some("apps"));
-    content_stack.add_named(&startup_widget, Some("startup"));
-    content_stack.add_named(&update_widget, Some("system_update"));
-    content_stack.add_named(&sys_widget, Some("system"));
+    populate_content_stack(&content_stack);
     content_stack.set_visible_child_name("system");
 
     let right_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
@@ -241,6 +271,53 @@ pub fn build_main_window(app: &gtk4::Application) {
             stack_c.set_visible_child_name(&name_str);
         });
     }
+
+    // --- Rebuild UI Action (triggered by language toggle) ---
+    let rebuild_action = gio::SimpleAction::new("rebuild-ui", None);
+    {
+        let content_stack_c = content_stack.clone();
+        let app_title_lbl_c = app_title_lbl.clone();
+        let app_sub_lbl_c = app_sub_lbl.clone();
+        let search_entry_c = search_entry.clone();
+        let cheatsheet_title_c = cheatsheet_title.clone();
+        let close_btn_c = close_btn.clone();
+        let all_btns_c = all_btns.clone();
+
+        rebuild_action.connect_activate(move |_, _| {
+            let stack = content_stack_c.clone();
+            let title = app_title_lbl_c.clone();
+            let sub = app_sub_lbl_c.clone();
+            let search = search_entry_c.clone();
+            let cs_title = cheatsheet_title_c.clone();
+            let cs_close = close_btn_c.clone();
+            let btns = all_btns_c.clone();
+
+            // Use idle_add_local_once to avoid blocking the click handler
+            gtk4::glib::idle_add_local_once(move || {
+                // 1. Update sidebar labels
+                for (i, (_, btn)) in btns.iter().enumerate() {
+                    if let Some(key) = SIDEBAR_I18N_KEYS.get(i) {
+                        update_sidebar_label(btn, &babydra_common::i18n::t(key));
+                    }
+                }
+
+                // 2. Update header labels
+                title.set_text(&babydra_common::i18n::t("settings.title"));
+                sub.set_text(&babydra_common::i18n::t("settings.subtitle"));
+                search.set_placeholder_text(Some(&babydra_common::i18n::t("settings.search_placeholder")));
+                cs_title.set_text(&babydra_common::i18n::t("settings.shortcuts_title"));
+                cs_close.set_label(&babydra_common::i18n::t("settings.shortcuts_close"));
+
+                // 3. Rebuild content stack pages (preserving current page)
+                let current_page = stack.visible_child_name().map(|s| s.to_string());
+                populate_content_stack(&stack);
+                if let Some(page) = current_page {
+                    stack.set_visible_child_name(&page);
+                }
+            });
+        });
+    }
+    window.add_action(&rebuild_action);
 
     // --- Shortcuts Keyboard Controls ---
     let key_controller = gtk4::EventControllerKey::new();

@@ -22,7 +22,7 @@ pub fn build(monitors: &[MonitorConfig]) -> DisplaysWidget {
     container.set_vexpand(true);
     container.set_valign(gtk4::Align::Fill);
 
-    // Title and Actions
+    // Title and Actions Header
     let header_box = Box::new(Orientation::Horizontal, 12);
     let title_label = Label::new(Some(&babydra_common::i18n::t("settings.displays_title")));
     title_label.add_css_class("settings-page-title");
@@ -40,73 +40,57 @@ pub fn build(monitors: &[MonitorConfig]) -> DisplaysWidget {
     header_box.append(&save_btn);
     container.append(&header_box);
 
-    let cards_box = Box::new(Orientation::Vertical, 16);
+    let cards_box = Box::new(Orientation::Vertical, 12);
     cards_box.set_vexpand(true);
     cards_box.set_valign(gtk4::Align::Fill);
 
     let mut card_rows = Vec::new();
 
     for mon in monitors {
-        let card = Box::new(Orientation::Vertical, 0);
+        // Single Horizontal Card Row for all monitor settings
+        let card = Box::new(Orientation::Horizontal, 12);
         card.add_css_class("glass-panel");
+        card.add_css_class("settings-card-row");
+        card.set_valign(gtk4::Align::Center);
 
-        // Monitor Name and Enable Switch
-        let header = Box::new(Orientation::Horizontal, 12);
-        header.add_css_class("settings-card-row");
-
-        let name_lbl = Label::new(Some(&mon.name));
+        // 1. Monitor Name / Model Title
+        let display_title = if !mon.description.is_empty() && mon.description != mon.name {
+            format!("{} ({})", mon.name, mon.description)
+        } else {
+            mon.name.clone()
+        };
+        let name_lbl = Label::new(Some(&display_title));
         name_lbl.add_css_class("settings-row-title");
         name_lbl.set_hexpand(true);
         name_lbl.set_halign(gtk4::Align::Start);
+        name_lbl.set_valign(gtk4::Align::Center);
+        card.append(&name_lbl);
 
-        let enable_switch = Switch::new();
-        enable_switch.set_active(mon.enabled);
-
-        header.append(&name_lbl);
-        header.append(&enable_switch);
-        card.append(&header);
-
-        // Resolution Row
-        let res_row = Box::new(Orientation::Horizontal, 12);
-        res_row.add_css_class("settings-card-row");
-        let res_lbl = Label::new(Some(&babydra_common::i18n::t("settings.display_resolution")));
-        res_lbl.add_css_class("settings-row-title");
-        res_lbl.set_hexpand(true);
-        res_lbl.set_halign(gtk4::Align::Start);
-
+        // 2. Resolution Dropdown
         let res_strs: Vec<&str> = mon.available_resolutions.iter().map(|s| s.as_str()).collect();
         let res_model = StringList::new(&res_strs);
         let resolution_dropdown = DropDown::new(Some(res_model), Option::<gtk4::Expression>::None);
+        resolution_dropdown.set_valign(gtk4::Align::Center);
 
-        res_row.append(&res_lbl);
-        res_row.append(&resolution_dropdown);
-        card.append(&res_row);
+        let cur_res_str = format!("{}x{}", mon.resolution_width, mon.resolution_height);
+        if let Some(idx) = mon.available_resolutions.iter().position(|r| r == &cur_res_str) {
+            resolution_dropdown.set_selected(idx as u32);
+        }
+        card.append(&resolution_dropdown);
 
-        // Refresh Rate Row
-        let rate_row = Box::new(Orientation::Horizontal, 12);
-        rate_row.add_css_class("settings-card-row");
-        let rate_lbl = Label::new(Some(&babydra_common::i18n::t("settings.display_refresh_rate")));
-        rate_lbl.add_css_class("settings-row-title");
-        rate_lbl.set_hexpand(true);
-        rate_lbl.set_halign(gtk4::Align::Start);
-
+        // 3. Refresh Rate Dropdown
         let rate_strs: Vec<String> = mon.available_rates.iter().map(|r| format!("{:.1} Hz", r)).collect();
         let rate_items: Vec<&str> = rate_strs.iter().map(|s| s.as_str()).collect();
         let rate_model = StringList::new(&rate_items);
         let rate_dropdown = DropDown::new(Some(rate_model), Option::<gtk4::Expression>::None);
+        rate_dropdown.set_valign(gtk4::Align::Center);
 
-        rate_row.append(&rate_lbl);
-        rate_row.append(&rate_dropdown);
-        card.append(&rate_row);
+        if let Some(idx) = mon.available_rates.iter().position(|r| (r - mon.refresh_rate).abs() < 0.5) {
+            rate_dropdown.set_selected(idx as u32);
+        }
+        card.append(&rate_dropdown);
 
-        // Orientation Row
-        let orient_row = Box::new(Orientation::Horizontal, 12);
-        orient_row.add_css_class("settings-card-row");
-        let orient_lbl = Label::new(Some(&babydra_common::i18n::t("settings.display_orientation")));
-        orient_lbl.add_css_class("settings-row-title");
-        orient_lbl.set_hexpand(true);
-        orient_lbl.set_halign(gtk4::Align::Start);
-
+        // 4. Orientation Dropdown
         let orient_items_owned = vec![
             babydra_common::i18n::t("settings.orientation_normal"),
             babydra_common::i18n::t("settings.orientation_left"),
@@ -116,10 +100,28 @@ pub fn build(monitors: &[MonitorConfig]) -> DisplaysWidget {
         let orient_items: Vec<&str> = orient_items_owned.iter().map(|s| s.as_str()).collect();
         let orient_model = StringList::new(&orient_items);
         let orientation_dropdown = DropDown::new(Some(orient_model), Option::<gtk4::Expression>::None);
+        orientation_dropdown.set_valign(gtk4::Align::Center);
 
-        orient_row.append(&orient_lbl);
-        orient_row.append(&orientation_dropdown);
-        card.append(&orient_row);
+        let orient_idx = match mon.orientation.as_str() {
+            "left" | "90" => 1,
+            "inverted" | "180" => 2,
+            "right" | "270" => 3,
+            _ => 0,
+        };
+        orientation_dropdown.set_selected(orient_idx);
+        card.append(&orientation_dropdown);
+
+        // 5. Enable Switch
+        let switch_box = Box::new(Orientation::Horizontal, 0);
+        switch_box.set_valign(gtk4::Align::Center);
+
+        let enable_switch = Switch::new();
+        enable_switch.set_active(mon.enabled);
+        enable_switch.set_valign(gtk4::Align::Center);
+        enable_switch.set_cursor_from_name(Some("pointer"));
+        switch_box.append(&enable_switch);
+
+        card.append(&switch_box);
 
         cards_box.append(&card);
 
