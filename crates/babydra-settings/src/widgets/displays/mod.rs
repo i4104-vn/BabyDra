@@ -17,7 +17,6 @@ pub fn create_displays_widget() -> Widget {
         let mut current_monitors = monitors_c.borrow().clone();
         for (i, row) in card_rows_rc.iter().enumerate() {
             if let Some(mon) = current_monitors.get_mut(i) {
-                mon.enabled = row.enable_switch.is_active();
 
                 // Resolution
                 let res_idx = row.resolution_dropdown.selected() as usize;

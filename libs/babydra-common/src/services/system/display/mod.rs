@@ -118,7 +118,7 @@ pub fn get_displays() -> Vec<MonitorConfig> {
     monitors
 }
 
-/// Saves monitor configurations and applies changes via wlr-randr or hyprctl.
+/// Saves monitor configurations and applies changes via wlr-randr.
 pub fn save_displays(monitors: &[MonitorConfig]) -> Result<(), String> {
     let home = std::env::var("HOME").unwrap_or_else(|_| "/home/i4104".to_string());
     let path = std::path::PathBuf::from(&home).join(".config/babydra/monitors.conf");
@@ -126,6 +126,14 @@ pub fn save_displays(monitors: &[MonitorConfig]) -> Result<(), String> {
     if let Some(parent) = path.parent() {
         let _ = std::fs::create_dir_all(parent);
     }
+
+    // Try to get exact mode refresh rates from wlr-randr --json
+    let wlr_json_val: Option<serde_json::Value> = Command::new("wlr-randr")
+        .arg("--json")
+        .output()
+        .ok()
+        .filter(|o| o.status.success())
+        .and_then(|o| serde_json::from_slice(&o.stdout).ok());
 
     let mut lines = Vec::new();
     for m in monitors {
@@ -148,16 +156,48 @@ pub fn save_displays(monitors: &[MonitorConfig]) -> Result<(), String> {
                 _ => "normal",
             };
 
-            let mode_res_only = format!("{}x{}", m.resolution_width, m.resolution_height);
-            let mode_with_rate = format!("{}x{}@{:.6}", m.resolution_width, m.resolution_height, m.refresh_rate);
             let pos_str = format!("{},{}", m.position_x, m.position_y);
+            let mode_res_only = format!("{}x{}", m.resolution_width, m.resolution_height);
 
-            // Try applying with mode containing rate first
+            // Find exact mode string matching resolution and target refresh rate
+            let mut exact_mode_str: Option<String> = None;
+
+            if let Some(ref val) = wlr_json_val {
+                if let Some(arr) = val.as_array() {
+                    for mon_val in arr {
+                        let name = mon_val.get("name").and_then(|v| v.as_str()).unwrap_or("");
+                        if name == m.name {
+                            if let Some(modes) = mon_val.get("modes").and_then(|v| v.as_array()) {
+                                let mut best_match: Option<(f64, f64)> = None; // (difference, refresh)
+                                for mode in modes {
+                                    let w = mode.get("width").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
+                                    let h = mode.get("height").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
+                                    let refresh = mode.get("refresh").and_then(|v| v.as_f64()).unwrap_or(0.0);
+                                    if w == m.resolution_width && h == m.resolution_height && refresh > 0.0 {
+                                        let diff = (refresh - m.refresh_rate).abs();
+                                        if diff < 1.0 {
+                                            if best_match.map_or(true, |(best_diff, _)| diff < best_diff) {
+                                                best_match = Some((diff, refresh));
+                                            }
+                                        }
+                                    }
+                                }
+                                if let Some((_, exact_refresh)) = best_match {
+                                    exact_mode_str = Some(format!("{}x{}@{}", m.resolution_width, m.resolution_height, exact_refresh));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            let mode_arg = exact_mode_str.unwrap_or_else(|| format!("{}x{}@{:.1}", m.resolution_width, m.resolution_height, m.refresh_rate));
+
             let output = Command::new("wlr-randr")
                 .args([
                     "--output", &m.name,
                     "--on",
-                    "--mode", &mode_with_rate,
+                    "--mode", &mode_arg,
                     "--pos", &pos_str,
                     "--transform", transform_arg,
                 ])
@@ -166,16 +206,31 @@ pub fn save_displays(monitors: &[MonitorConfig]) -> Result<(), String> {
             let success = output.as_ref().map(|o| o.status.success() && !String::from_utf8_lossy(&o.stderr).contains("unknown mode")).unwrap_or(false);
 
             if !success {
-                // Fallback to mode without rate (wlr-randr will automatically choose best rate for that resolution)
-                let _ = Command::new("wlr-randr")
+                let fallback_mode_str = format!("{}x{}@{:.1}", m.resolution_width, m.resolution_height, m.refresh_rate);
+                let output2 = Command::new("wlr-randr")
                     .args([
                         "--output", &m.name,
                         "--on",
-                        "--mode", &mode_res_only,
+                        "--mode", &fallback_mode_str,
                         "--pos", &pos_str,
                         "--transform", transform_arg,
                     ])
-                    .status();
+                    .output();
+
+                let success2 = output2.as_ref().map(|o| o.status.success() && !String::from_utf8_lossy(&o.stderr).contains("unknown mode")).unwrap_or(false);
+
+                if !success2 {
+                    // Final fallback to mode without rate
+                    let _ = Command::new("wlr-randr")
+                        .args([
+                            "--output", &m.name,
+                            "--on",
+                            "--mode", &mode_res_only,
+                            "--pos", &pos_str,
+                            "--transform", transform_arg,
+                        ])
+                        .status();
+                }
             }
         }
     }

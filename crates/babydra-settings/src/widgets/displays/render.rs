@@ -1,10 +1,9 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Button, DropDown, Label, Orientation, StringList, Switch};
+use gtk4::{Box, Button, DropDown, Label, Orientation, StringList};
 use babydra_common::models::display::MonitorConfig;
 
 pub struct DisplayCardRow {
     pub container: Box,
-    pub enable_switch: Switch,
     pub resolution_dropdown: DropDown,
     pub rate_dropdown: DropDown,
     pub orientation_dropdown: DropDown,
@@ -111,29 +110,10 @@ pub fn build(monitors: &[MonitorConfig]) -> DisplaysWidget {
         orientation_dropdown.set_selected(orient_idx);
         card.append(&orientation_dropdown);
 
-        // 5. Enable Switch
-        let switch_box = Box::new(Orientation::Horizontal, 8);
-        switch_box.set_valign(gtk4::Align::Center);
-
-        let switch_lbl = Label::new(Some(&babydra_common::i18n::t("settings.on")));
-        switch_lbl.add_css_class("settings-page-subtitle");
-        switch_lbl.set_valign(gtk4::Align::Center);
-
-        let enable_switch = Switch::new();
-        enable_switch.set_active(mon.enabled);
-        enable_switch.set_valign(gtk4::Align::Center);
-        enable_switch.set_cursor_from_name(Some("pointer"));
-
-        switch_box.append(&switch_lbl);
-        switch_box.append(&enable_switch);
-
-        card.append(&switch_box);
-
         cards_box.append(&card);
 
         card_rows.push(DisplayCardRow {
             container: card,
-            enable_switch,
             resolution_dropdown,
             rate_dropdown,
             orientation_dropdown,
