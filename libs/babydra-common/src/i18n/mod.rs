@@ -319,6 +319,7 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
 
             // Settings App
             map.insert("settings.nav_wifi", "Wi-Fi");
+            map.insert("settings.nav_hosts", "Hosts");
             map.insert("settings.nav_vpn", "VPN");
             map.insert("settings.nav_bluetooth", "Bluetooth");
             map.insert("settings.nav_wallpaper_themes", "Wallpaper & Themes");
@@ -326,7 +327,6 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("settings.nav_installed_apps", "Installed Apps");
             map.insert("settings.nav_startup_apps", "Startup Apps");
             map.insert("settings.nav_system_update", "System Update");
-            map.insert("settings.nav_hosts", "Hosts Editor");
             map.insert("settings.nav_about_system", "About System");
             map.insert("settings.shortcuts_title", "Settings Shortcuts Cheatsheet");
             map.insert("settings.shortcuts_close", "Got it!");
@@ -693,7 +693,7 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("settings.nav_installed_apps", "Ứng dụng đã cài");
             map.insert("settings.nav_startup_apps", "Ứng dụng tự chạy");
             map.insert("settings.nav_system_update", "Cập nhật hệ thống");
-            map.insert("settings.nav_hosts", "Tập tin Hosts");
+            map.insert("settings.nav_hosts", "Hosts");
             map.insert("settings.nav_about_system", "Thông tin hệ thống");
             map.insert("settings.shortcuts_title", "Bảng phím tắt cài đặt");
             map.insert("settings.shortcuts_close", "Tôi đã rõ!");

@@ -8,6 +8,7 @@ use crate::widgets;
 /// Sidebar navigation i18n keys (ordered to match button creation order).
 const SIDEBAR_I18N_KEYS: &[&str] = &[
     "settings.nav_wifi",
+    "settings.nav_hosts",
     "settings.nav_vpn",
     "settings.nav_bluetooth",
     "settings.nav_wallpaper_themes",
@@ -15,7 +16,6 @@ const SIDEBAR_I18N_KEYS: &[&str] = &[
     "settings.nav_installed_apps",
     "settings.nav_startup_apps",
     "settings.nav_system_update",
-    "settings.nav_hosts",
     "settings.nav_about_system",
 ];
 
@@ -133,6 +133,9 @@ pub fn build_main_window(app: &gtk4::Application) {
     let btn_wifi = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_wifi"), "wifi", "sidebar-item", || {});
     btn_wifi.set_cursor_from_name(Some("pointer"));
 
+    let btn_update = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_system_update"), "history", "sidebar-item", || {});
+    btn_update.set_cursor_from_name(Some("pointer"));
+
     let btn_vpn = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_vpn"), "lock", "sidebar-item", || {});
     btn_vpn.set_cursor_from_name(Some("pointer"));
 
@@ -151,9 +154,6 @@ pub fn build_main_window(app: &gtk4::Application) {
     let btn_startup = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_startup_apps"), "cog", "sidebar-item", || {});
     btn_startup.set_cursor_from_name(Some("pointer"));
 
-    let btn_update = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_system_update"), "history", "sidebar-item", || {});
-    btn_update.set_cursor_from_name(Some("pointer"));
-
     let btn_hosts = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_hosts"), "file-text", "sidebar-item", || {});
     btn_hosts.set_cursor_from_name(Some("pointer"));
 
@@ -162,6 +162,7 @@ pub fn build_main_window(app: &gtk4::Application) {
     btn_sys.set_cursor_from_name(Some("pointer"));
 
     nav_container.append(&btn_wifi);
+    nav_container.append(&btn_hosts);
     nav_container.append(&btn_vpn);
     nav_container.append(&btn_bt);
     nav_container.append(&btn_app);
@@ -169,7 +170,6 @@ pub fn build_main_window(app: &gtk4::Application) {
     nav_container.append(&btn_apps);
     nav_container.append(&btn_startup);
     nav_container.append(&btn_update);
-    nav_container.append(&btn_hosts);
 
     // Divider before pinned footer About System item
     let footer_sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
@@ -213,6 +213,7 @@ pub fn build_main_window(app: &gtk4::Application) {
     // --- Navigation Active Handling ---
     let all_btns = vec![
         ("wifi", btn_wifi.clone()),
+        ("hosts", btn_hosts.clone()),
         ("vpn", btn_vpn.clone()),
         ("bluetooth", btn_bt.clone()),
         ("appearance", btn_app.clone()),
@@ -220,7 +221,6 @@ pub fn build_main_window(app: &gtk4::Application) {
         ("apps", btn_apps.clone()),
         ("startup", btn_startup.clone()),
         ("system_update", btn_update.clone()),
-        ("hosts", btn_hosts.clone()),
         ("system", btn_sys.clone()),
     ];
 

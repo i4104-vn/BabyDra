@@ -20,8 +20,9 @@ fn load_hosts_file(buffer: &gtk4::TextBuffer, status_badge: &gtk4::Label) {
 fn save_hosts_file(content: &str, password: &str) -> Result<(), String> {
     let mut child = Command::new("sudo")
         .arg("-S")
-        .arg("tee")
-        .arg("/etc/hosts")
+        .arg("sh")
+        .arg("-c")
+        .arg("cat > /etc/hosts")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -29,8 +30,9 @@ fn save_hosts_file(content: &str, password: &str) -> Result<(), String> {
         .map_err(|e| format!("Failed to execute sudo: {}", e))?;
 
     if let Some(mut stdin) = child.stdin.take() {
-        let payload = format!("{}\n{}", password, content);
-        let _ = stdin.write_all(payload.as_bytes());
+        let _ = writeln!(stdin, "{}", password);
+        let _ = stdin.write_all(content.as_bytes());
+        let _ = stdin.flush();
     }
 
     let output = child.wait_with_output().map_err(|e| format!("Failed to wait for process: {}", e))?;
