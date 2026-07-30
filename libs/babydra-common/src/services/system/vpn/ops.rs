@@ -196,7 +196,13 @@ pub fn connect_vpn(name: &str) -> bool {
 
     let conn_path = match target_path {
         Some(p) => p,
-        None => return false,
+        None => {
+            return std::process::Command::new("nmcli")
+                .args(&["connection", "up", name])
+                .status()
+                .map(|s| s.success())
+                .unwrap_or(false);
+        }
     };
 
     let nm_proxy = match Proxy::new(
@@ -206,18 +212,38 @@ pub fn connect_vpn(name: &str) -> bool {
         "org.freedesktop.NetworkManager",
     ) {
         Ok(p) => p,
-        Err(_) => return false,
+        Err(_) => {
+            return std::process::Command::new("nmcli")
+                .args(&["connection", "up", name])
+                .status()
+                .map(|s| s.success())
+                .unwrap_or(false);
+        }
     };
 
     let null_path = ObjectPath::try_from("/").unwrap();
-    let res: Result<OwnedObjectPath, _> = nm_proxy.call("ActivateConnection", &(conn_path, &null_path, &null_path));
-    res.is_ok()
+    let res: Result<OwnedObjectPath, _> = nm_proxy.call("ActivateConnection", &(conn_path.as_ref(), &null_path, &null_path));
+    if res.is_ok() {
+        true
+    } else {
+        std::process::Command::new("nmcli")
+            .args(&["connection", "up", name])
+            .status()
+            .map(|s| s.success())
+            .unwrap_or(false)
+    }
 }
 
 pub fn disconnect_vpn(name: &str) -> bool {
     let bus = match get_dbus() {
         Ok(b) => b,
-        Err(_) => return false,
+        Err(_) => {
+            return std::process::Command::new("nmcli")
+                .args(&["connection", "down", name])
+                .status()
+                .map(|s| s.success())
+                .unwrap_or(false);
+        }
     };
 
     let nm_proxy = match Proxy::new(
@@ -227,12 +253,24 @@ pub fn disconnect_vpn(name: &str) -> bool {
         "org.freedesktop.NetworkManager",
     ) {
         Ok(p) => p,
-        Err(_) => return false,
+        Err(_) => {
+            return std::process::Command::new("nmcli")
+                .args(&["connection", "down", name])
+                .status()
+                .map(|s| s.success())
+                .unwrap_or(false);
+        }
     };
 
     let active_paths: Vec<OwnedObjectPath> = match nm_proxy.get_property("ActiveConnections") {
         Ok(paths) => paths,
-        Err(_) => return false,
+        Err(_) => {
+            return std::process::Command::new("nmcli")
+                .args(&["connection", "down", name])
+                .status()
+                .map(|s| s.success())
+                .unwrap_or(false);
+        }
     };
 
     for ap in active_paths {
@@ -249,19 +287,31 @@ pub fn disconnect_vpn(name: &str) -> bool {
         if let Ok(id) = active_proxy.get_property::<String>("Id") {
             if id == name {
                 let ap_clone = ap.clone();
-                let res: Result<(), _> = nm_proxy.call("DeactivateConnection", &(ap_clone,));
-                return res.is_ok();
+                let res: Result<(), _> = nm_proxy.call("DeactivateConnection", &(ap_clone.as_ref(),));
+                if res.is_ok() {
+                    return true;
+                }
             }
         }
     }
 
-    false
+    std::process::Command::new("nmcli")
+        .args(&["connection", "down", name])
+        .status()
+        .map(|s| s.success())
+        .unwrap_or(false)
 }
 
 pub fn delete_vpn_connection(name: &str) -> bool {
     let bus = match get_dbus() {
         Ok(b) => b,
-        Err(_) => return false,
+        Err(_) => {
+            return std::process::Command::new("nmcli")
+                .args(&["connection", "delete", name])
+                .status()
+                .map(|s| s.success())
+                .unwrap_or(false);
+        }
     };
 
     let settings_proxy = match Proxy::new(
@@ -271,12 +321,24 @@ pub fn delete_vpn_connection(name: &str) -> bool {
         "org.freedesktop.NetworkManager.Settings",
     ) {
         Ok(p) => p,
-        Err(_) => return false,
+        Err(_) => {
+            return std::process::Command::new("nmcli")
+                .args(&["connection", "delete", name])
+                .status()
+                .map(|s| s.success())
+                .unwrap_or(false);
+        }
     };
 
     let conn_paths: Vec<OwnedObjectPath> = match settings_proxy.call("ListConnections", &()) {
         Ok(paths) => paths,
-        Err(_) => return false,
+        Err(_) => {
+            return std::process::Command::new("nmcli")
+                .args(&["connection", "delete", name])
+                .status()
+                .map(|s| s.success())
+                .unwrap_or(false);
+        }
     };
 
     for path in conn_paths {
@@ -296,13 +358,19 @@ pub fn delete_vpn_connection(name: &str) -> bool {
 
                 if id == name {
                     let res: Result<(), _> = conn_proxy.call("Delete", &());
-                    return res.is_ok();
+                    if res.is_ok() {
+                        return true;
+                    }
                 }
             }
         }
     }
 
-    false
+    std::process::Command::new("nmcli")
+        .args(&["connection", "delete", name])
+        .status()
+        .map(|s| s.success())
+        .unwrap_or(false)
 }
 
 pub fn copy_vpn_config_to_babydra_dir(src_path: &str) -> Result<String, String> {
