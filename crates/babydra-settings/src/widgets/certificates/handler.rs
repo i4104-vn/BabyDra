@@ -57,9 +57,14 @@ pub fn reload_cert_list(
         let icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
         icon_badge.add_css_class("blue-icon-badge-sm");
         icon_badge.set_valign(gtk4::Align::Center);
+        icon_badge.set_halign(gtk4::Align::Center);
 
         let shield_icon = babydra_utils::ui::icon::get_icon("shield", 18);
         shield_icon.set_pixel_size(18);
+        shield_icon.set_valign(gtk4::Align::Center);
+        shield_icon.set_halign(gtk4::Align::Center);
+        shield_icon.set_vexpand(true);
+        shield_icon.set_hexpand(true);
         icon_badge.append(&shield_icon);
         hbox.append(&icon_badge);
 
@@ -167,7 +172,6 @@ pub fn wire_events(widget: &CertificatesWidget, auth_dialog: PasswordDialog) {
 
     // Wire PasswordDialog submit
     let list_box_sub = widget.list_box.clone();
-    let badge_sub = widget.status_badge.clone();
     let auth_dialog_sub = auth_dialog_rc.clone();
     let pending_file_sub = pending_file.clone();
 
@@ -182,8 +186,6 @@ pub fn wire_events(widget: &CertificatesWidget, auth_dialog: PasswordDialog) {
             Some(p) => p,
             None => return,
         };
-
-        badge_sub.set_text("Updating CA certificates trust store...");
 
         let (tx, rx) = mpsc::channel::<Result<(), String>>();
 
@@ -203,20 +205,11 @@ pub fn wire_events(widget: &CertificatesWidget, auth_dialog: PasswordDialog) {
         });
 
         let lb_ref = list_box_sub.clone();
-        let badge_ref = badge_sub.clone();
         let auth_ref = auth_dialog_sub.clone();
         let pending_ref = pending_file_sub.clone();
 
         gtk4::glib::timeout_add_local(std::time::Duration::from_millis(100), move || {
-            if let Ok(res) = rx.try_recv() {
-                match res {
-                    Ok(_) => {
-                        badge_ref.set_text("/etc/ca-certificates/trust-source/anchors/");
-                    }
-                    Err(err) => {
-                        badge_ref.set_text(&format!("Error: {}", err));
-                    }
-                }
+            if let Ok(_res) = rx.try_recv() {
                 reload_cert_list(&lb_ref, &auth_ref, &pending_ref);
                 gtk4::glib::ControlFlow::Break
             } else {

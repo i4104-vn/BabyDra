@@ -7,7 +7,6 @@ pub struct CertificatesWidget {
     pub container: gtk4::Box,
     pub add_btn: gtk4::Button,
     pub list_box: gtk4::ListBox,
-    pub status_badge: gtk4::Label,
 }
 
 pub fn build_certificates_ui() -> (CertificatesWidget, PasswordDialog) {
@@ -45,25 +44,6 @@ pub fn build_certificates_ui() -> (CertificatesWidget, PasswordDialog) {
 
     container.append(&header_box);
 
-    // ── Status Banner Row ───────────────────────────────────────
-    let status_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
-    status_box.add_css_class("settings-card-row");
-    status_box.set_margin_bottom(4);
-
-    let key_icon = babydra_utils::ui::icon::get_icon("key", 16);
-    key_icon.set_pixel_size(16);
-    key_icon.set_valign(gtk4::Align::Center);
-    status_box.append(&key_icon);
-
-    let status_badge = gtk4::Label::new(Some("/etc/ca-certificates/trust-source/anchors/"));
-    status_badge.add_css_class("settings-row-desc");
-    status_badge.set_halign(gtk4::Align::Start);
-    status_badge.set_valign(gtk4::Align::Center);
-    status_badge.set_hexpand(true);
-    status_box.append(&status_badge);
-
-    container.append(&status_box);
-
     // ── Scrolled Glass Panel List ───────────────────────────────
     let scrolled_win = gtk4::ScrolledWindow::new();
     scrolled_win.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
@@ -90,7 +70,6 @@ pub fn build_certificates_ui() -> (CertificatesWidget, PasswordDialog) {
         container,
         add_btn,
         list_box,
-        status_badge,
     };
 
     (widget, auth_dialog)
