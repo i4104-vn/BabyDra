@@ -15,6 +15,7 @@ const SIDEBAR_I18N_KEYS: &[&str] = &[
     "settings.nav_installed_apps",
     "settings.nav_startup_apps",
     "settings.nav_system_update",
+    "settings.nav_hosts",
     "settings.nav_about_system",
 ];
 
@@ -33,6 +34,7 @@ fn populate_content_stack(stack: &gtk4::Stack) {
     stack.add_named(&widgets::apps::create_apps_widget(), Some("apps"));
     stack.add_named(&widgets::startup::create_startup_widget(), Some("startup"));
     stack.add_named(&widgets::system_update::create_system_update_widget(), Some("system_update"));
+    stack.add_named(&widgets::hosts::create_hosts_widget(), Some("hosts"));
     stack.add_named(&widgets::system_info::create_system_widget(), Some("system"));
 }
 
@@ -170,6 +172,9 @@ pub fn build_main_window(app: &gtk4::Application) {
     let btn_update = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_system_update"), "history", "sidebar-item", || {});
     btn_update.set_cursor_from_name(Some("pointer"));
 
+    let btn_hosts = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_hosts"), "file-text", "sidebar-item", || {});
+    btn_hosts.set_cursor_from_name(Some("pointer"));
+
     let btn_sys = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_about_system"), "info", "sidebar-item", || {});
     btn_sys.add_css_class("active-nav");
     btn_sys.set_cursor_from_name(Some("pointer"));
@@ -182,6 +187,7 @@ pub fn build_main_window(app: &gtk4::Application) {
     nav_container.append(&btn_apps);
     nav_container.append(&btn_startup);
     nav_container.append(&btn_update);
+    nav_container.append(&btn_hosts);
 
     // Divider before pinned footer About System item
     let footer_sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
@@ -255,6 +261,7 @@ pub fn build_main_window(app: &gtk4::Application) {
         ("apps", btn_apps.clone()),
         ("startup", btn_startup.clone()),
         ("system_update", btn_update.clone()),
+        ("hosts", btn_hosts.clone()),
         ("system", btn_sys.clone()),
     ];
 
@@ -331,6 +338,7 @@ pub fn build_main_window(app: &gtk4::Application) {
     let btn_apps_k = btn_apps.clone();
     let btn_startup_k = btn_startup.clone();
     let btn_update_k = btn_update.clone();
+    let btn_hosts_k = btn_hosts.clone();
     let btn_sys_k = btn_sys.clone();
 
     key_controller.connect_key_pressed(move |_, keyval, _, state| {
@@ -343,6 +351,8 @@ pub fn build_main_window(app: &gtk4::Application) {
             Some("5") if is_alt => { btn_displays_k.emit_clicked(); }
             Some("6") if is_alt => { btn_apps_k.emit_clicked(); }
             Some("7") if is_alt => { btn_startup_k.emit_clicked(); }
+            Some("8") if is_alt => { btn_update_k.emit_clicked(); }
+            Some("9") if is_alt => { btn_hosts_k.emit_clicked(); }
             Some("minus") if is_alt => { btn_update_k.emit_clicked(); }
             Some("equal") if is_alt => { btn_sys_k.emit_clicked(); }
             Some("h") if is_alt => { cheatsheet_box_key.set_visible(!cheatsheet_box_key.is_visible()); }

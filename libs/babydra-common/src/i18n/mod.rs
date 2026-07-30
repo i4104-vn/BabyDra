@@ -326,6 +326,7 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("settings.nav_installed_apps", "Installed Apps");
             map.insert("settings.nav_startup_apps", "Startup Apps");
             map.insert("settings.nav_system_update", "System Update");
+            map.insert("settings.nav_hosts", "Hosts Editor");
             map.insert("settings.nav_about_system", "About System");
             map.insert("settings.shortcuts_title", "Settings Shortcuts Cheatsheet");
             map.insert("settings.shortcuts_close", "Got it!");
@@ -370,6 +371,7 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("settings.startup_add", "Add App");
 
             map.insert("settings.update_title", "System Update");
+            map.insert("settings.hosts_title", "Hosts File");
             map.insert("settings.updates_available", "Updates Available");
             map.insert("settings.update_all", "Update All");
             map.insert("settings.up_to_date", "Your system is up to date!");
@@ -691,6 +693,7 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("settings.nav_installed_apps", "Ứng dụng đã cài");
             map.insert("settings.nav_startup_apps", "Ứng dụng tự chạy");
             map.insert("settings.nav_system_update", "Cập nhật hệ thống");
+            map.insert("settings.nav_hosts", "Tập tin Hosts");
             map.insert("settings.nav_about_system", "Thông tin hệ thống");
             map.insert("settings.shortcuts_title", "Bảng phím tắt cài đặt");
             map.insert("settings.shortcuts_close", "Tôi đã rõ!");
@@ -735,6 +738,7 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("settings.startup_add", "Thêm ứng dụng");
 
             map.insert("settings.update_title", "Cập nhật hệ thống");
+            map.insert("settings.hosts_title", "Tập tin Hosts");
             map.insert("settings.updates_available", "Có bản cập nhật");
             map.insert("settings.update_all", "Cập nhật tất cả");
             map.insert("settings.up_to_date", "Hệ thống của bạn đã ở bản mới nhất!");

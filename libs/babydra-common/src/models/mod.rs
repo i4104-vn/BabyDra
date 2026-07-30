@@ -18,6 +18,7 @@ pub mod app_info;
 pub mod system_update;
 pub mod startup_command;
 pub mod wifi;
+pub mod hosts;
 
 pub use theme_config::ThemeConfig;
 pub use shell_config::ShellConfig;
@@ -36,5 +37,6 @@ pub use app_info::{InstalledApp, InstalledPackage, AppsWidget};
 pub use system_update::{PackageUpdate, SystemUpdateWidget};
 pub use startup_command::StartupCommand;
 pub use wifi::WifiNetwork;
+pub use hosts::HostsWidget;
 
 
