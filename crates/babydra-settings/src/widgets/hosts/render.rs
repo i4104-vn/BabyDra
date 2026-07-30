@@ -39,6 +39,7 @@ pub fn build() -> (HostsWidget, PasswordDialog) {
     // Text Editor Glass Card
     let glass_card = Box::new(Orientation::Vertical, 0);
     glass_card.add_css_class("glass-panel");
+    glass_card.add_css_class("console-log-panel");
     glass_card.set_vexpand(true);
     glass_card.set_valign(gtk4::Align::Fill);
 
@@ -47,10 +48,6 @@ pub fn build() -> (HostsWidget, PasswordDialog) {
     text_view.set_cursor_visible(true);
     text_view.set_monospace(true);
     text_view.add_css_class("console-log-text");
-    text_view.set_margin_top(8);
-    text_view.set_margin_bottom(8);
-    text_view.set_margin_start(12);
-    text_view.set_margin_end(12);
 
     let text_buffer = text_view.buffer();
 
