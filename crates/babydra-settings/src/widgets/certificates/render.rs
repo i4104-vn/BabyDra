@@ -36,7 +36,7 @@ pub fn build_certificates_ui() -> (CertificatesWidget, PasswordDialog) {
     title_box.set_hexpand(true);
     header_box.append(&title_box);
 
-    // Add Certificate Button (Matching connect-pill-btn style used in Settings)
+    // Add Certificate Button
     let add_btn = gtk4::Button::with_label(&babydra_common::i18n::t("settings.cert_add_btn"));
     add_btn.add_css_class("connect-pill-btn");
     add_btn.set_valign(gtk4::Align::Center);

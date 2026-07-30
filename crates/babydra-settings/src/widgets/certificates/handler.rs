@@ -1,14 +1,10 @@
 use gtk4::prelude::*;
-use std::fs;
-use std::process::{Command, Stdio};
-use std::io::Write;
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::sync::mpsc;
 use babydra_utils::components::modal::PasswordDialog;
+use babydra_common::services::system::certificates;
 use super::render::CertificatesWidget;
-
-const ANCHORS_DIR: &str = "/etc/ca-certificates/trust-source/anchors";
 
 type PendingFileCell = Rc<RefCell<Option<(String, String)>>>;
 
@@ -22,24 +18,9 @@ pub fn reload_cert_list(
         list_box.remove(&child);
     }
 
-    let entries = match fs::read_dir(ANCHORS_DIR) {
-        Ok(dir) => {
-            let mut files = Vec::new();
-            for entry in dir.filter_map(|e| e.ok()) {
-                let path = entry.path();
-                if path.is_file() {
-                    if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
-                        files.push(name.to_string());
-                    }
-                }
-            }
-            files.sort();
-            files
-        }
-        Err(_) => Vec::new(),
-    };
+    let certs = certificates::list_ca_certificates();
 
-    if entries.is_empty() {
+    if certs.is_empty() {
         let row = gtk4::ListBoxRow::new();
         row.add_css_class("settings-card-row");
         row.set_selectable(false);
@@ -63,7 +44,7 @@ pub fn reload_cert_list(
         return;
     }
 
-    for fname in entries {
+    for cert in certs {
         let row = gtk4::ListBoxRow::new();
         row.add_css_class("settings-card-row");
 
@@ -86,13 +67,12 @@ pub fn reload_cert_list(
         text_box.set_valign(gtk4::Align::Center);
         text_box.set_hexpand(true);
 
-        let name_lbl = gtk4::Label::new(Some(&fname));
+        let name_lbl = gtk4::Label::new(Some(&cert.filename));
         name_lbl.add_css_class("settings-row-title");
         name_lbl.set_halign(gtk4::Align::Start);
         text_box.append(&name_lbl);
 
-        let full_path = format!("{}/{}", ANCHORS_DIR, fname);
-        let path_lbl = gtk4::Label::new(Some(&full_path));
+        let path_lbl = gtk4::Label::new(Some(&cert.path));
         path_lbl.add_css_class("settings-row-desc");
         path_lbl.set_halign(gtk4::Align::Start);
         text_box.append(&path_lbl);
@@ -111,7 +91,7 @@ pub fn reload_cert_list(
         del_btn.set_child(Some(&del_icon));
         del_btn.set_tooltip_text(Some(&babydra_common::i18n::t("settings.cert_delete")));
 
-        let fname_del = fname.clone();
+        let fname_del = cert.filename.clone();
         let auth_dialog_c = auth_dialog.clone();
         let pending_file_c = pending_file.clone();
 
@@ -137,7 +117,6 @@ pub fn wire_events(widget: &CertificatesWidget, auth_dialog: PasswordDialog) {
     // Load initial certificate list
     reload_cert_list(&widget.list_box, &auth_dialog_rc, &pending_file);
 
-    let list_box_add = widget.list_box.clone();
     let auth_dialog_add = auth_dialog_rc.clone();
     let pending_file_add = pending_file.clone();
     let container_c = widget.container.clone();
@@ -204,71 +183,23 @@ pub fn wire_events(widget: &CertificatesWidget, auth_dialog: PasswordDialog) {
             None => return,
         };
 
-        let cmd_str = if action_type == "add" {
-            let parts: Vec<&str> = payload.split(":::").collect();
-            if parts.len() == 2 {
-                format!(
-                    "mkdir -p /etc/ca-certificates/trust-source/anchors && cp '{}' '/etc/ca-certificates/trust-source/anchors/{}' && update-ca-trust",
-                    parts[0], parts[1]
-                )
-            } else {
-                String::new()
-            }
-        } else {
-            format!(
-                "rm -f '/etc/ca-certificates/trust-source/anchors/{}' && update-ca-trust",
-                payload
-            )
-        };
-
-        if cmd_str.is_empty() {
-            return;
-        }
-
         badge_sub.set_text("Updating CA certificates trust store...");
 
         let (tx, rx) = mpsc::channel::<Result<(), String>>();
 
         std::thread::spawn(move || {
-        let child = Command::new("sudo")
-                .arg("-S")
-                .arg("sh")
-                .arg("-c")
-                .arg(&cmd_str)
-                .stdin(Stdio::piped())
-                .stdout(Stdio::piped())
-                .stderr(Stdio::piped())
-                .spawn();
+            let res = if action_type == "add" {
+                let parts: Vec<&str> = payload.split(":::").collect();
+                if parts.len() == 2 {
+                    certificates::add_ca_certificate(parts[0], parts[1], &password)
+                } else {
+                    Err("Invalid certificate path".to_string())
+                }
+            } else {
+                certificates::delete_ca_certificate(&payload, &password)
+            };
 
-            match child {
-                Ok(mut c) => {
-                    if let Some(mut stdin) = c.stdin.take() {
-                        let _ = writeln!(stdin, "{}", password);
-                        let _ = stdin.flush();
-                    }
-                    match c.wait_with_output() {
-                        Ok(out) => {
-                            if out.status.success() {
-                                let _ = tx.send(Ok(()));
-                            } else {
-                                let err_msg = String::from_utf8_lossy(&out.stderr);
-                                let err_str = if err_msg.trim().is_empty() {
-                                    "Permission denied or incorrect password".to_string()
-                                } else {
-                                    err_msg.trim().to_string()
-                                };
-                                let _ = tx.send(Err(err_str));
-                            }
-                        }
-                        Err(e) => {
-                            let _ = tx.send(Err(format!("Process error: {}", e)));
-                        }
-                    }
-                }
-                Err(e) => {
-                    let _ = tx.send(Err(format!("Failed to execute sudo: {}", e)));
-                }
-            }
+            let _ = tx.send(res);
         });
 
         let lb_ref = list_box_sub.clone();
