@@ -55,10 +55,10 @@ pub fn render_vpn_list(list_box: &gtk4::ListBox, vpns: &[VpnConn]) {
         row.add_css_class("settings-card-row");
 
         let hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 14);
-        hbox.set_margin_top(12);
-        hbox.set_margin_bottom(12);
-        hbox.set_margin_start(16);
-        hbox.set_margin_end(16);
+        hbox.set_margin_top(4);
+        hbox.set_margin_bottom(4);
+        hbox.set_margin_start(8);
+        hbox.set_margin_end(8);
 
         let icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
         icon_badge.add_css_class("blue-icon-badge-sm");
