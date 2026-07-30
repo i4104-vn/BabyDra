@@ -49,22 +49,22 @@ pub fn reload_cert_list(
         row.add_css_class("settings-card-row");
 
         let hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 14);
-        hbox.set_margin_top(6);
-        hbox.set_margin_bottom(6);
+        hbox.set_margin_top(4);
+        hbox.set_margin_bottom(4);
         hbox.set_margin_start(8);
         hbox.set_margin_end(8);
 
         let icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
         icon_badge.add_css_class("blue-icon-badge-sm");
         icon_badge.set_valign(gtk4::Align::Center);
-        icon_badge.set_halign(gtk4::Align::Center);
+        icon_badge.set_halign(gtk4::Align::Start);
+        icon_badge.set_hexpand(false);
 
         let shield_icon = babydra_utils::ui::icon::get_icon("shield", 18);
         shield_icon.set_pixel_size(18);
         shield_icon.set_valign(gtk4::Align::Center);
         shield_icon.set_halign(gtk4::Align::Center);
         shield_icon.set_vexpand(true);
-        shield_icon.set_hexpand(true);
         icon_badge.append(&shield_icon);
         hbox.append(&icon_badge);
 
@@ -84,10 +84,9 @@ pub fn reload_cert_list(
 
         hbox.append(&text_box);
 
-        // Delete Button
+        // Delete Button matching Wi-Fi row icon-btn-circle style
         let del_btn = gtk4::Button::new();
-        del_btn.add_css_class("connect-pill-btn");
-        del_btn.add_css_class("delete-btn");
+        del_btn.add_css_class("icon-btn-circle");
         del_btn.set_valign(gtk4::Align::Center);
         del_btn.set_cursor_from_name(Some("pointer"));
 
