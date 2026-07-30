@@ -1,9 +1,12 @@
 //! VPN list renderer and event handlers.
 
 use gtk4::prelude::*;
-use babydra_common::services::system::vpn::{connect_vpn, disconnect_vpn, VpnConn};
+use babydra_common::services::system::vpn::{
+    connect_vpn, disconnect_vpn, get_vpn_details, VpnConn,
+};
+use babydra_utils::components::modal::VpnConfigDialog;
 
-pub fn render_vpn_list(list_box: &gtk4::ListBox, vpns: &[VpnConn]) {
+pub fn render_vpn_list(list_box: &gtk4::ListBox, vpns: &[VpnConn], config_dialog: &VpnConfigDialog) {
     while let Some(child) = list_box.first_child() {
         list_box.remove(&child);
     }
@@ -89,6 +92,24 @@ pub fn render_vpn_list(list_box: &gtk4::ListBox, vpns: &[VpnConn]) {
         text_box.append(&desc_lbl);
 
         hbox.append(&text_box);
+
+        // Edit / Customize Button
+        let edit_btn = gtk4::Button::new();
+        edit_btn.add_css_class("icon-btn");
+        edit_btn.set_valign(gtk4::Align::Center);
+        edit_btn.set_cursor_from_name(Some("pointer"));
+
+        let cog_icon = babydra_utils::ui::icon::get_icon("cog", 14);
+        cog_icon.set_pixel_size(14);
+        edit_btn.set_child(Some(&cog_icon));
+
+        let name_edit = vpn.name.clone();
+        let config_dialog_edit = config_dialog.clone();
+        edit_btn.connect_clicked(move |_| {
+            let details = get_vpn_details(&name_edit);
+            config_dialog_edit.show_for_edit(&details);
+        });
+        hbox.append(&edit_btn);
 
         if vpn.active {
             let check_badge = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);

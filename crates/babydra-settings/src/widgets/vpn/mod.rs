@@ -4,22 +4,26 @@ use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use babydra_common::services::system::vpn::{get_vpn_connections, import_vpn_profile};
+use babydra_common::services::system::vpn::{
+    delete_vpn_connection, get_vpn_connections, import_vpn_profile, save_vpn_connection,
+};
 
 mod handler;
 mod render;
 
 pub fn create_vpn_widget() -> gtk4::Box {
-    let (main_box, _vpn_switch, import_btn, list_box) = render::build_vpn_ui();
+    let (main_box, _vpn_switch, import_btn, add_custom_btn, list_box, config_dialog) = render::build_vpn_ui();
 
     let state = Rc::new(RefCell::new(get_vpn_connections()));
 
+    let config_dialog_clone = config_dialog.clone();
     let render_vpns = {
         let list_box_clone = list_box.clone();
         let state_clone = state.clone();
+        let dialog_c = config_dialog_clone.clone();
         move || {
             let vpns = state_clone.borrow();
-            handler::render_vpn_list(&list_box_clone, &vpns);
+            handler::render_vpn_list(&list_box_clone, &vpns, &dialog_c);
         }
     };
 
@@ -44,6 +48,26 @@ pub fn create_vpn_widget() -> gtk4::Box {
     glib::timeout_add_local(std::time::Duration::from_secs(4), move || {
         refresh_periodic();
         glib::ControlFlow::Continue
+    });
+
+    // Handle Add Custom VPN button
+    let config_dialog_new = config_dialog.clone();
+    add_custom_btn.connect_clicked(move |_| {
+        config_dialog_new.show_for_new();
+    });
+
+    // Handle Config Dialog Save
+    let refresh_on_save = refresh_vpns.clone();
+    config_dialog.connect_save(move |details| {
+        let _ = save_vpn_connection(&details);
+        refresh_on_save();
+    });
+
+    // Handle Config Dialog Delete
+    let refresh_on_delete = refresh_vpns.clone();
+    config_dialog.connect_delete(move |name| {
+        let _ = delete_vpn_connection(&name);
+        refresh_on_delete();
     });
 
     // Handle config file import
