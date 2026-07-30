@@ -59,7 +59,7 @@ fn update_sidebar_label(btn: &gtk4::Button, new_text: &str) {
 pub fn build_main_window(app: &gtk4::Application) {
     let window = gtk4::ApplicationWindow::new(app);
     window.set_title(Some("Settings"));
-    window.set_default_size(960, 640);
+    window.set_default_size(1000, 750);
     window.add_css_class("settings-window");
 
     let overlay = gtk4::Overlay::new();

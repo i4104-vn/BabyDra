@@ -66,3 +66,47 @@ button.panel-logo-btn:hover {
     font-size: 11px;
     margin: 0 2px;
 }
+
+popover.status-popover > contents {
+    border-radius: 14px;
+    padding: 10px 14px;
+}
+
+.status-popover-card {
+    min-width: 220px;
+}
+
+.status-popover-header {
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.status-popover-sep {
+    opacity: 0.15;
+    margin-bottom: 6px;
+}
+
+.status-popover-key {
+    font-size: 12px;
+}
+
+.status-popover-val {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-popover-val.speed-low {
+    color: #ef4444;
+    font-weight: 700;
+}
+
+.status-popover-val.speed-medium {
+    color: #f59e0b;
+    font-weight: 700;
+}
+
+.status-popover-val.speed-high {
+    color: #22c55e;
+    font-weight: 700;
+}

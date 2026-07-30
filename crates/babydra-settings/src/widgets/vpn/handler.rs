@@ -126,7 +126,13 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
         text_box.set_halign(gtk4::Align::Start);
         text_box.set_hexpand(true);
 
-        let name_lbl = gtk4::Label::new(Some(&vpn.name));
+        let display_name = if vpn.name.chars().count() > 30 {
+            let truncated: String = vpn.name.chars().take(30).collect();
+            format!("{}...", truncated)
+        } else {
+            vpn.name.clone()
+        };
+        let name_lbl = gtk4::Label::new(Some(&display_name));
         name_lbl.add_css_class("settings-row-title");
         name_lbl.set_halign(gtk4::Align::Start);
         text_box.append(&name_lbl);
@@ -135,14 +141,6 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
             let mut info_parts = vec![format!("{}: {}", babydra_common::i18n::t("settings.vpn_type"), vpn.conn_type.to_uppercase())];
             if !vpn.ip_address.is_empty() {
                 info_parts.push(format!("IP: {}", vpn.ip_address));
-            }
-            if !vpn.remote_server.is_empty() {
-                info_parts.push(format!("Server: {}", vpn.remote_server));
-            } else if !vpn.gateway.is_empty() {
-                info_parts.push(format!("Gateway: {}", vpn.gateway));
-            }
-            if !vpn.dev_iface.is_empty() {
-                info_parts.push(format!("Interface: {}", vpn.dev_iface));
             }
             info_parts.join(" • ")
         } else {
