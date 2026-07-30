@@ -10,10 +10,10 @@ pub fn create_update_row(pkg: &PackageUpdate) -> ListBoxRow {
 
     let row_box = Box::new(Orientation::Horizontal, 14);
     row_box.add_css_class("settings-card-row");
-    row_box.set_margin_top(6);
-    row_box.set_margin_bottom(6);
-    row_box.set_margin_start(12);
-    row_box.set_margin_end(12);
+    row_box.set_margin_top(4);
+    row_box.set_margin_bottom(4);
+    row_box.set_margin_start(8);
+    row_box.set_margin_end(8);
 
     let icon_box = Box::new(Orientation::Vertical, 0);
     icon_box.add_css_class("blue-icon-badge-sm");

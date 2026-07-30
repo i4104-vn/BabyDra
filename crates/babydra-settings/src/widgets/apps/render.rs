@@ -77,10 +77,10 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
     for app in apps {
         let row_box = Box::new(Orientation::Horizontal, 14);
         row_box.add_css_class("settings-card-row");
-        row_box.set_margin_top(10);
-        row_box.set_margin_bottom(10);
-        row_box.set_margin_start(16);
-        row_box.set_margin_end(16);
+        row_box.set_margin_top(4);
+        row_box.set_margin_bottom(4);
+        row_box.set_margin_start(8);
+        row_box.set_margin_end(8);
 
         // App Icon Box Container
         let icon_box = Box::new(Orientation::Vertical, 0);
@@ -156,10 +156,10 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
     for pkg in pkgs.iter().take(200) {
         let row_box = Box::new(Orientation::Horizontal, 14);
         row_box.add_css_class("settings-card-row");
-        row_box.set_margin_top(10);
-        row_box.set_margin_bottom(10);
-        row_box.set_margin_start(16);
-        row_box.set_margin_end(16);
+        row_box.set_margin_top(4);
+        row_box.set_margin_bottom(4);
+        row_box.set_margin_start(8);
+        row_box.set_margin_end(8);
 
         // Package Icon Box Container
         let icon_box = Box::new(Orientation::Vertical, 0);
