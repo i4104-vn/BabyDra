@@ -106,7 +106,7 @@ pub fn build_status_indicators_ui() -> (gtk4::Box, gtk4::Button, gtk4::Label, gt
 
     let inner_layout = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
 
-    let vpn_icon = babydra_utils::ui::icon::get_icon("lock", 14);
+    let vpn_icon = babydra_utils::ui::icon::get_icon("shield", 14);
     vpn_icon.add_css_class("status-icon");
     vpn_icon.set_visible(false);
 

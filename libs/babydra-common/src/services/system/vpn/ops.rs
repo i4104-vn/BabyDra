@@ -1,62 +1,77 @@
-use std::collections::HashMap;
-use zbus::blocking::Proxy;
-use zbus::zvariant::{ObjectPath, OwnedObjectPath};
-
-use super::dbus::*;
+use std::collections::HashSet;
+use std::process::Command;
 use crate::models::vpn::*;
+
+fn run_nmcli(args: &[&str]) -> Option<String> {
+    Command::new("nmcli")
+        .args(args)
+        .output()
+        .ok()
+        .filter(|out| out.status.success())
+        .map(|out| String::from_utf8_lossy(&out.stdout).to_string())
+}
+
+pub fn is_vpn_type(t: &str) -> bool {
+    let lower = t.to_lowercase();
+    lower == "vpn"
+        || lower == "wireguard"
+        || lower.contains("vpn")
+        || lower.contains("wireguard")
+        || lower.contains("openconnect")
+        || lower.contains("pptp")
+        || lower.contains("l2tp")
+        || lower.contains("strongswan")
+}
 
 pub fn get_vpn_connections() -> Vec<VpnConn> {
     let mut connections = Vec::new();
-    let bus = match get_dbus() {
-        Ok(b) => b,
-        Err(_) => return connections,
-    };
+    let active_names: HashSet<String> = run_nmcli(&["-t", "-f", "NAME,TYPE", "connection", "show", "--active"])
+        .unwrap_or_default()
+        .lines()
+        .filter_map(|line| {
+            let parts: Vec<&str> = line.split(':').collect();
+            if parts.len() >= 2 && is_vpn_type(parts[1]) {
+                Some(parts[0].to_string())
+            } else {
+                None
+            }
+        })
+        .collect();
 
-    let active_paths = get_active_connection_paths(&bus);
-
-    let settings_proxy = match Proxy::new(
-        &bus,
-        "org.freedesktop.NetworkManager",
-        "/org/freedesktop/NetworkManager/Settings",
-        "org.freedesktop.NetworkManager.Settings",
-    ) {
-        Ok(p) => p,
-        Err(_) => return connections,
-    };
-
-    let conn_paths: Vec<OwnedObjectPath> = match settings_proxy.call("ListConnections", &()) {
-        Ok(paths) => paths,
-        Err(_) => return connections,
-    };
-
-    for path in conn_paths {
-        let path_str = path.as_str();
-        let conn_proxy = match Proxy::new(
-            &bus,
-            "org.freedesktop.NetworkManager",
-            path_str,
-            "org.freedesktop.NetworkManager.Settings.Connection",
-        ) {
-            Ok(p) => p,
-            Err(_) => continue,
-        };
-
-        if let Ok(settings) = fetch_settings(&conn_proxy) {
-            if let Some(conn_setting) = settings.get("connection") {
-                let name = conn_setting.get("id").and_then(owned_val_to_string).unwrap_or_default();
-                let conn_type = conn_setting.get("type").and_then(owned_val_to_string).unwrap_or_default();
-
-                if is_vpn_type(&conn_type) {
-                    let active = active_paths.contains(&path_str.to_string());
-                    connections.push(VpnConn {
-                        name,
-                        conn_type,
-                        active,
-                        gateway: String::new(),
-                        username: String::new(),
-                        path: path_str.to_string(),
-                    });
+    if let Some(stdout) = run_nmcli(&["-t", "-f", "NAME,TYPE,UUID", "connection", "show"]) {
+        for line in stdout.lines() {
+            let parts: Vec<&str> = line.split(':').collect();
+            if parts.len() >= 2 && is_vpn_type(parts[1]) {
+                let name = parts[0].to_string();
+                let conn_type = parts[1].to_string();
+                let active = active_names.contains(&name);
+                
+                let mut gateway = String::new();
+                let mut username = String::new();
+                if let Some(details_str) = run_nmcli(&["-t", "-f", "vpn.data,vpn.user-name", "connection", "show", &name]) {
+                    for dline in details_str.lines() {
+                        if dline.starts_with("vpn.user-name:") {
+                            username = dline.trim_start_matches("vpn.user-name:").to_string();
+                        } else if dline.starts_with("vpn.data:") {
+                            let data_str = dline.trim_start_matches("vpn.data:");
+                            for item in data_str.split(',') {
+                                let kv: Vec<&str> = item.split('=').map(|s| s.trim()).collect();
+                                if kv.len() == 2 && (kv[0] == "remote" || kv[0] == "gateway") {
+                                    gateway = kv[1].to_string();
+                                }
+                            }
+                        }
+                    }
                 }
+
+                connections.push(VpnConn {
+                    name,
+                    conn_type,
+                    active,
+                    gateway,
+                    username,
+                    path: String::new(),
+                });
             }
         }
     }
@@ -76,71 +91,49 @@ pub fn get_vpn_details(name: &str) -> VpnConnDetails {
         config_file: None,
     };
 
-    let bus = match get_dbus() {
-        Ok(b) => b,
-        Err(_) => return details,
-    };
-
-    let settings_proxy = match Proxy::new(
-        &bus,
-        "org.freedesktop.NetworkManager",
-        "/org/freedesktop/NetworkManager/Settings",
-        "org.freedesktop.NetworkManager.Settings",
-    ) {
-        Ok(p) => p,
-        Err(_) => return details,
-    };
-
-    let conn_paths: Vec<OwnedObjectPath> = match settings_proxy.call("ListConnections", &()) {
-        Ok(paths) => paths,
-        Err(_) => return details,
-    };
-
-    for path in conn_paths {
-        let conn_proxy = match Proxy::new(
-            &bus,
-            "org.freedesktop.NetworkManager",
-            path.as_str(),
-            "org.freedesktop.NetworkManager.Settings.Connection",
-        ) {
-            Ok(p) => p,
-            Err(_) => continue,
-        };
-
-        if let Ok(settings) = fetch_settings(&conn_proxy) {
-            if let Some(conn_setting) = settings.get("connection") {
-                let id = conn_setting.get("id").and_then(owned_val_to_string).unwrap_or_default();
-
-                if id == name {
-                    if let Some(t) = conn_setting.get("type").and_then(owned_val_to_string) {
-                        details.vpn_type = t;
+    if let Some(stdout) = run_nmcli(&["--show-secrets", "-t", "connection", "show", name]) {
+        for line in stdout.lines() {
+            if let Some((key, val)) = line.split_once(':') {
+                match key {
+                    "connection.type" => {
+                        if val != "vpn" && !val.is_empty() {
+                            details.vpn_type = val.to_string();
+                        }
                     }
-
-                    if let Some(vpn_setting) = settings.get("vpn") {
-                        if let Some(st) = vpn_setting.get("service-type").and_then(owned_val_to_string) {
-                            if let Some(last) = st.split('.').last() {
-                                details.vpn_type = last.to_string();
+                    "vpn.service-type" => {
+                        if let Some(last) = val.split('.').last() {
+                            details.vpn_type = last.to_string();
+                        }
+                    }
+                    "vpn.user-name" => {
+                        if !val.is_empty() {
+                            details.username = val.to_string();
+                        }
+                    }
+                    "vpn.secrets" => {
+                        if let Some((s_key, s_val)) = val.split_once('=') {
+                            if s_key.trim() == "password" {
+                                details.password = s_val.trim().to_string();
                             }
                         }
-                        if let Some(un) = vpn_setting.get("user-name").and_then(owned_val_to_string) {
-                            details.username = un;
-                        }
-                        if let Some(data) = vpn_setting.get("data") {
-                            if let Ok(dict) = data.downcast_ref::<zbus::zvariant::Dict>() {
-                                for (k, v) in dict.iter() {
-                                    if let (Ok(ks), Ok(vs)) = (<&str>::try_from(k), <&str>::try_from(v)) {
-                                        match ks {
-                                            "remote" | "gateway" => details.gateway = vs.to_string(),
-                                            "username" | "user" => details.username = vs.to_string(),
-                                            "ca" => details.ca_cert = vs.to_string(),
-                                            _ => {}
+                    }
+                    "vpn.data" => {
+                        for item in val.split(',') {
+                            if let Some((d_key, d_val)) = item.split_once('=') {
+                                match d_key.trim() {
+                                    "remote" | "gateway" => details.gateway = d_val.trim().to_string(),
+                                    "username" | "user" => {
+                                        if details.username.is_empty() {
+                                            details.username = d_val.trim().to_string();
                                         }
                                     }
+                                    "ca" => details.ca_cert = d_val.trim().to_string(),
+                                    _ => {}
                                 }
                             }
                         }
                     }
-                    break;
+                    _ => {}
                 }
             }
         }
@@ -150,152 +143,15 @@ pub fn get_vpn_details(name: &str) -> VpnConnDetails {
 }
 
 pub fn connect_vpn(name: &str) -> bool {
-    let bus = match get_dbus() {
-        Ok(b) => b,
-        Err(_) => return false,
-    };
-
-    let settings_proxy = match Proxy::new(
-        &bus,
-        "org.freedesktop.NetworkManager",
-        "/org/freedesktop/NetworkManager/Settings",
-        "org.freedesktop.NetworkManager.Settings",
-    ) {
-        Ok(p) => p,
-        Err(_) => return false,
-    };
-
-    let conn_paths: Vec<OwnedObjectPath> = match settings_proxy.call("ListConnections", &()) {
-        Ok(paths) => paths,
-        Err(_) => return false,
-    };
-
-    let mut target_path = None;
-    for path in conn_paths {
-        let conn_proxy = match Proxy::new(
-            &bus,
-            "org.freedesktop.NetworkManager",
-            path.as_str(),
-            "org.freedesktop.NetworkManager.Settings.Connection",
-        ) {
-            Ok(p) => p,
-            Err(_) => continue,
-        };
-
-        if let Ok(settings) = fetch_settings(&conn_proxy) {
-            if let Some(conn_setting) = settings.get("connection") {
-                let id = conn_setting.get("id").and_then(owned_val_to_string).unwrap_or_default();
-
-                if id == name {
-                    target_path = Some(path.clone());
-                    break;
-                }
-            }
-        }
-    }
-
-    let conn_path = match target_path {
-        Some(p) => p,
-        None => {
-            return std::process::Command::new("nmcli")
-                .args(&["connection", "up", name])
-                .status()
-                .map(|s| s.success())
-                .unwrap_or(false);
-        }
-    };
-
-    let nm_proxy = match Proxy::new(
-        &bus,
-        "org.freedesktop.NetworkManager",
-        "/org/freedesktop/NetworkManager",
-        "org.freedesktop.NetworkManager",
-    ) {
-        Ok(p) => p,
-        Err(_) => {
-            return std::process::Command::new("nmcli")
-                .args(&["connection", "up", name])
-                .status()
-                .map(|s| s.success())
-                .unwrap_or(false);
-        }
-    };
-
-    let null_path = ObjectPath::try_from("/").unwrap();
-    let res: Result<OwnedObjectPath, _> = nm_proxy.call("ActivateConnection", &(conn_path.as_ref(), &null_path, &null_path));
-    if res.is_ok() {
-        true
-    } else {
-        std::process::Command::new("nmcli")
-            .args(&["connection", "up", name])
-            .status()
-            .map(|s| s.success())
-            .unwrap_or(false)
-    }
+    Command::new("nmcli")
+        .args(&["connection", "up", name])
+        .status()
+        .map(|s| s.success())
+        .unwrap_or(false)
 }
 
 pub fn disconnect_vpn(name: &str) -> bool {
-    let bus = match get_dbus() {
-        Ok(b) => b,
-        Err(_) => {
-            return std::process::Command::new("nmcli")
-                .args(&["connection", "down", name])
-                .status()
-                .map(|s| s.success())
-                .unwrap_or(false);
-        }
-    };
-
-    let nm_proxy = match Proxy::new(
-        &bus,
-        "org.freedesktop.NetworkManager",
-        "/org/freedesktop/NetworkManager",
-        "org.freedesktop.NetworkManager",
-    ) {
-        Ok(p) => p,
-        Err(_) => {
-            return std::process::Command::new("nmcli")
-                .args(&["connection", "down", name])
-                .status()
-                .map(|s| s.success())
-                .unwrap_or(false);
-        }
-    };
-
-    let active_paths: Vec<OwnedObjectPath> = match nm_proxy.get_property("ActiveConnections") {
-        Ok(paths) => paths,
-        Err(_) => {
-            return std::process::Command::new("nmcli")
-                .args(&["connection", "down", name])
-                .status()
-                .map(|s| s.success())
-                .unwrap_or(false);
-        }
-    };
-
-    for ap in active_paths {
-        let active_proxy = match Proxy::new(
-            &bus,
-            "org.freedesktop.NetworkManager",
-            ap.as_str(),
-            "org.freedesktop.NetworkManager.Connection.Active",
-        ) {
-            Ok(p) => p,
-            Err(_) => continue,
-        };
-
-        if let Ok(id) = active_proxy.get_property::<String>("Id") {
-            if id == name {
-                let ap_clone = ap.clone();
-                let res: Result<(), _> = nm_proxy.call("DeactivateConnection", &(ap_clone.as_ref(),));
-                if res.is_ok() {
-                    return true;
-                }
-            }
-        }
-    }
-
-    std::process::Command::new("nmcli")
+    Command::new("nmcli")
         .args(&["connection", "down", name])
         .status()
         .map(|s| s.success())
@@ -303,70 +159,7 @@ pub fn disconnect_vpn(name: &str) -> bool {
 }
 
 pub fn delete_vpn_connection(name: &str) -> bool {
-    let bus = match get_dbus() {
-        Ok(b) => b,
-        Err(_) => {
-            return std::process::Command::new("nmcli")
-                .args(&["connection", "delete", name])
-                .status()
-                .map(|s| s.success())
-                .unwrap_or(false);
-        }
-    };
-
-    let settings_proxy = match Proxy::new(
-        &bus,
-        "org.freedesktop.NetworkManager",
-        "/org/freedesktop/NetworkManager/Settings",
-        "org.freedesktop.NetworkManager.Settings",
-    ) {
-        Ok(p) => p,
-        Err(_) => {
-            return std::process::Command::new("nmcli")
-                .args(&["connection", "delete", name])
-                .status()
-                .map(|s| s.success())
-                .unwrap_or(false);
-        }
-    };
-
-    let conn_paths: Vec<OwnedObjectPath> = match settings_proxy.call("ListConnections", &()) {
-        Ok(paths) => paths,
-        Err(_) => {
-            return std::process::Command::new("nmcli")
-                .args(&["connection", "delete", name])
-                .status()
-                .map(|s| s.success())
-                .unwrap_or(false);
-        }
-    };
-
-    for path in conn_paths {
-        let conn_proxy = match Proxy::new(
-            &bus,
-            "org.freedesktop.NetworkManager",
-            path.as_str(),
-            "org.freedesktop.NetworkManager.Settings.Connection",
-        ) {
-            Ok(p) => p,
-            Err(_) => continue,
-        };
-
-        if let Ok(settings) = fetch_settings(&conn_proxy) {
-            if let Some(conn_setting) = settings.get("connection") {
-                let id = conn_setting.get("id").and_then(owned_val_to_string).unwrap_or_default();
-
-                if id == name {
-                    let res: Result<(), _> = conn_proxy.call("Delete", &());
-                    if res.is_ok() {
-                        return true;
-                    }
-                }
-            }
-        }
-    }
-
-    std::process::Command::new("nmcli")
+    Command::new("nmcli")
         .args(&["connection", "delete", name])
         .status()
         .map(|s| s.success())
@@ -454,101 +247,156 @@ pub fn save_vpn_connection(details: &VpnConnDetails) -> Result<(), String> {
         }
     }
 
-    let bus = get_dbus()?;
-
-    let settings_proxy = Proxy::new(
-        &bus,
-        "org.freedesktop.NetworkManager",
-        "/org/freedesktop/NetworkManager/Settings",
-        "org.freedesktop.NetworkManager.Settings",
-    )
-    .map_err(|e| e.to_string())?;
-
-    let vpn_type = if details.vpn_type.is_empty() { "openvpn" } else { &details.vpn_type };
     let conn_name = if details.name.is_empty() { "VPN Connection" } else { &details.name };
+    let orig_name = details.original_name.as_deref().unwrap_or(conn_name);
 
-    let mut settings: HashMap<String, HashMap<String, zbus::zvariant::Value>> = HashMap::new();
+    let name_str = conn_name.to_string();
+    let orig_str = orig_name.to_string();
+    let un_str = details.username.clone();
+    let pw_str = details.password.clone();
+    let gw_str = details.gateway.clone();
+    let ca_str = details.ca_cert.clone();
+    let vpn_type = if details.vpn_type.is_empty() { "openvpn" } else { &details.vpn_type };
 
-    let mut connection_map: HashMap<String, zbus::zvariant::Value> = HashMap::new();
-    connection_map.insert("id".to_string(), zbus::zvariant::Value::from(conn_name.to_string()));
-    connection_map.insert("uuid".to_string(), zbus::zvariant::Value::from(uuid::Uuid::new_v4().to_string()));
+    let exists = run_nmcli(&["connection", "show", &orig_str]).is_some();
 
-    if vpn_type == "wireguard" {
-        connection_map.insert("type".to_string(), zbus::zvariant::Value::from("wireguard"));
+    if exists {
+        if orig_str != name_str {
+            let _ = Command::new("nmcli")
+                .args(&["connection", "modify", &orig_str, "connection.id", &name_str])
+                .output();
+        }
+        if !un_str.is_empty() {
+            let _ = Command::new("nmcli")
+                .args(&["connection", "modify", &name_str, "vpn.user-name", &un_str])
+                .output();
+        }
+        if !pw_str.is_empty() {
+            let _ = Command::new("nmcli")
+                .args(&["connection", "modify", &name_str, "vpn.secrets", &format!("password={}", pw_str)])
+                .output();
+            let _ = Command::new("nmcli")
+                .args(&["connection", "modify", &name_str, "+vpn.data", "password-flags=0"])
+                .output();
+        }
+        if !gw_str.is_empty() {
+            let _ = Command::new("nmcli")
+                .args(&["connection", "modify", &name_str, "+vpn.data", &format!("remote={}", gw_str)])
+                .output();
+        }
+        if !ca_str.is_empty() {
+            let _ = Command::new("nmcli")
+                .args(&["connection", "modify", &name_str, "+vpn.data", &format!("ca={}", ca_str)])
+                .output();
+        }
+        return Ok(());
+    }
+
+    // New connection creation via nmcli
+    let service_type = format!("org.freedesktop.NetworkManager.{}", vpn_type);
+    let mut add_args = vec![
+        "connection".to_string(),
+        "add".to_string(),
+        "type".to_string(),
+        "vpn".to_string(),
+        "con-name".to_string(),
+        name_str.clone(),
+        "vpn-type".to_string(),
+        vpn_type.to_string(),
+        "vpn.service-type".to_string(),
+        service_type,
+    ];
+
+    if !un_str.is_empty() {
+        add_args.push("vpn.user-name".to_string());
+        add_args.push(un_str.clone());
+    }
+
+    let mut vpn_data_items = vec!["password-flags=0".to_string()];
+    if !gw_str.is_empty() {
+        vpn_data_items.push(format!("remote={}", gw_str));
+    }
+    if !ca_str.is_empty() {
+        vpn_data_items.push(format!("ca={}", ca_str));
+    }
+    let conn_type = if !ca_str.is_empty() && !un_str.is_empty() {
+        "password-tls"
+    } else if !ca_str.is_empty() {
+        "tls"
     } else {
-        connection_map.insert("type".to_string(), zbus::zvariant::Value::from("vpn"));
+        "password"
+    };
+    vpn_data_items.push(format!("connection-type={}", conn_type));
 
-        let service_type = format!("org.freedesktop.NetworkManager.{}", vpn_type);
-        let mut vpn_map: HashMap<String, zbus::zvariant::Value> = HashMap::new();
-        vpn_map.insert("service-type".to_string(), zbus::zvariant::Value::from(service_type));
-        if !details.username.is_empty() {
-            vpn_map.insert("user-name".to_string(), zbus::zvariant::Value::from(details.username.clone()));
-        }
+    let vpn_data_str = vpn_data_items.join(",");
+    add_args.push("vpn.data".to_string());
+    add_args.push(vpn_data_str);
 
-        let mut data_map: HashMap<String, String> = HashMap::new();
-        if !details.gateway.is_empty() {
-            data_map.insert("remote".to_string(), details.gateway.clone());
-        }
-        if !details.ca_cert.is_empty() {
-            data_map.insert("ca".to_string(), details.ca_cert.clone());
-        }
-        vpn_map.insert("data".to_string(), zbus::zvariant::Value::from(data_map));
-
-        if !details.password.is_empty() {
-            let mut secrets_map: HashMap<String, String> = HashMap::new();
-            secrets_map.insert("password".to_string(), details.password.clone());
-            vpn_map.insert("secrets".to_string(), zbus::zvariant::Value::from(secrets_map));
-        }
-
-        settings.insert("vpn".to_string(), vpn_map);
+    if !pw_str.is_empty() {
+        add_args.push("vpn.secrets".to_string());
+        add_args.push(format!("password={}", pw_str));
     }
 
-    settings.insert("connection".to_string(), connection_map);
+    let status = Command::new("nmcli")
+        .args(&add_args)
+        .status()
+        .map(|s| s.success())
+        .unwrap_or(false);
 
-    // If updating existing connection:
-    if let Some(ref orig) = details.original_name {
-        if !orig.is_empty() {
-            let conn_paths: Vec<OwnedObjectPath> = settings_proxy.call("ListConnections", &()).map_err(|e| e.to_string())?;
-            for path in conn_paths {
-                let conn_proxy = match Proxy::new(
-                    &bus,
-                    "org.freedesktop.NetworkManager",
-                    path.as_str(),
-                    "org.freedesktop.NetworkManager.Settings.Connection",
-                ) {
-                    Ok(p) => p,
-                    Err(_) => continue,
-                };
-
-                if let Ok(existing_settings) = fetch_settings(&conn_proxy) {
-                    if let Some(conn_setting) = existing_settings.get("connection") {
-                        let id = conn_setting.get("id").and_then(owned_val_to_string).unwrap_or_default();
-
-                        if id == *orig {
-                            let res: Result<(), _> = conn_proxy.call("Update", &(settings,));
-                            return res.map_err(|e| format!("Failed to update connection: {}", e));
-                        }
-                    }
-                }
-            }
+    if status {
+        if !pw_str.is_empty() {
+            let _ = Command::new("nmcli")
+                .args(&["connection", "modify", &name_str, "vpn.secrets", &format!("password={}", pw_str)])
+                .output();
+            let _ = Command::new("nmcli")
+                .args(&["connection", "modify", &name_str, "+vpn.data", "password-flags=0"])
+                .output();
         }
-    }
-
-    // Add new connection via D-Bus
-    let res: Result<OwnedObjectPath, _> = settings_proxy.call("AddConnection", &(settings,));
-    match res {
-        Ok(_) => Ok(()),
-        Err(e) => Err(format!("Failed to add D-Bus connection: {}", e)),
+        Ok(())
+    } else {
+        Err("Failed to create VPN connection via nmcli".to_string())
     }
 }
 
 pub fn import_vpn_profile(path: &str) -> bool {
+    let vpn_type = if path.ends_with(".ovpn") {
+        "openvpn"
+    } else if path.ends_with(".conf") {
+        "wireguard"
+    } else {
+        "openvpn"
+    };
+
+    let imported = if let Ok(out) = Command::new("nmcli")
+        .args(&["connection", "import", "type", vpn_type, "file", path])
+        .output()
+    {
+        out.status.success()
+    } else if let Ok(out) = Command::new("nmcli")
+        .args(&["connection", "import", "file", path])
+        .output()
+    {
+        out.status.success()
+    } else {
+        false
+    };
+
+    if imported && vpn_type == "openvpn" {
+        if let Some(filename) = std::path::Path::new(path).file_stem().and_then(|s| s.to_str()) {
+            let _ = Command::new("nmcli")
+                .args(&["connection", "modify", filename, "+vpn.data", "password-flags=0"])
+                .output();
+        }
+    }
+
+    if imported {
+        return true;
+    }
+
     let filename = std::path::Path::new(path)
         .file_stem()
         .and_then(|s| s.to_str())
         .unwrap_or("Imported VPN");
-
-    let vpn_type = if path.ends_with(".ovpn") { "openvpn" } else { "wireguard" };
 
     let details = VpnConnDetails {
         name: filename.to_string(),
@@ -564,34 +412,21 @@ pub fn import_vpn_profile(path: &str) -> bool {
 }
 
 pub fn get_active_vpn_fast() -> Option<VpnConn> {
-    let has_vpn_iface = std::fs::read_dir("/sys/class/net")
-        .map(|entries| {
-            entries.filter_map(|e| e.ok()).any(|e| {
-                let name = e.file_name().to_string_lossy().to_string();
-                name.starts_with("tun")
-                    || name.starts_with("tap")
-                    || name.starts_with("wg")
-                    || name.starts_with("ppp")
-                    || name.starts_with("wireguard")
-                    || name.starts_with("pvpn")
-            })
-        })
-        .unwrap_or(false);
-
-    if !has_vpn_iface {
-        return None;
-    }
-
     get_vpn_connections().into_iter().find(|v| v.active)
 }
 
-pub fn get_vpn_logs(name: &str) -> String {
-    if let Ok(output) = std::process::Command::new("journalctl")
-        .args(["-u", "NetworkManager", "-n", "100", "--no-pager"])
-        .output()
-    {
+pub fn get_vpn_logs(name: &str, since: Option<&str>) -> String {
+    let mut args = vec!["-u", "NetworkManager", "-n", "100", "--no-pager"];
+    if let Some(since_ts) = since {
+        if !since_ts.is_empty() {
+            args.push("--since");
+            args.push(since_ts);
+        }
+    }
+
+    if let Ok(output) = Command::new("journalctl").args(&args).output() {
         let stdout = String::from_utf8_lossy(&output.stdout);
-        let mut filtered: Vec<&str> = stdout
+        let mut formatted: Vec<String> = stdout
             .lines()
             .filter(|line| {
                 line.contains(name)
@@ -600,25 +435,63 @@ pub fn get_vpn_logs(name: &str) -> String {
                     || line.contains("WireGuard")
                     || line.contains("VPN")
             })
+            .filter_map(clean_vpn_log_line)
             .collect();
 
-        if !filtered.is_empty() {
-            if filtered.len() > 60 {
-                filtered = filtered.split_off(filtered.len() - 60);
+        if !formatted.is_empty() {
+            if formatted.len() > 60 {
+                formatted = formatted.split_off(formatted.len() - 60);
             }
-            return filtered.join("\n");
-        }
-    }
-
-    if let Ok(output) = std::process::Command::new("journalctl")
-        .args(["-u", "NetworkManager", "-n", "50", "--no-pager"])
-        .output()
-    {
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        if !stdout.is_empty() {
-            return stdout.to_string();
+            return formatted.join("\n");
         }
     }
 
     "No connection logs found for NetworkManager.".to_string()
+}
+
+fn clean_vpn_log_line(line: &str) -> Option<String> {
+    let line_str = line.trim();
+    if line_str.is_empty() {
+        return None;
+    }
+
+    let time_str = if line_str.len() >= 15 && line_str.as_bytes()[6] == b':' {
+        &line_str[7..15]
+    } else {
+        ""
+    };
+
+    let level = if line_str.contains("<warn>") || line_str.contains("warn") || line_str.contains("failed") {
+        "[WARN] "
+    } else if line_str.contains("<error>") || line_str.contains("error") || line_str.contains("Error") {
+        "[ERROR]"
+    } else if line_str.contains("<info>") {
+        "[INFO] "
+    } else {
+        "[LOG]  "
+    };
+
+    let msg = if let Some(idx) = line_str.rfind("]: ") {
+        &line_str[idx + 3..]
+    } else if let Some(idx) = line_str.find("NetworkManager[") {
+        if let Some(rel_idx) = line_str[idx..].find(": ") {
+            &line_str[idx + rel_idx + 2..]
+        } else {
+            line_str
+        }
+    } else {
+        line_str
+    };
+
+    let clean_msg = if let Some(idx) = msg.find("]: ") {
+        &msg[idx + 3..]
+    } else {
+        msg
+    };
+
+    if time_str.is_empty() {
+        Some(format!("{} {}", level, clean_msg))
+    } else {
+        Some(format!("{}  {} {}", time_str, level, clean_msg))
+    }
 }

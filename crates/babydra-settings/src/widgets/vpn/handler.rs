@@ -1,6 +1,11 @@
 //! VPN list renderer and event handlers.
 
 use gtk4::prelude::*;
+use std::cell::RefCell;
+use std::collections::HashSet;
+use std::rc::Rc;
+use std::sync::mpsc::Sender;
+
 use babydra_common::services::system::vpn::{
     connect_vpn, disconnect_vpn, get_vpn_details, VpnConn,
 };
@@ -9,9 +14,11 @@ use babydra_utils::components::modal::{VpnConfigDialog, VpnLogDialog};
 pub fn render_vpn_list<F: Fn() + Send + Sync + Clone + 'static>(
     list_box: &gtk4::ListBox,
     vpns: &[VpnConn],
+    connecting_vpns: &Rc<RefCell<HashSet<String>>>,
+    tx_action: &Sender<(String, bool)>,
     config_dialog: &VpnConfigDialog,
     log_dialog: &VpnLogDialog,
-    trigger_refresh: F,
+    _trigger_refresh: F,
 ) {
     while let Some(child) = list_box.first_child() {
         list_box.remove(&child);
@@ -135,12 +142,15 @@ pub fn render_vpn_list<F: Fn() + Send + Sync + Clone + 'static>(
         });
         hbox.append(&edit_btn);
 
-        let spinner = gtk4::Spinner::new();
-        spinner.set_valign(gtk4::Align::Center);
-        spinner.set_visible(false);
-        hbox.append(&spinner);
+        let is_busy = connecting_vpns.borrow().contains(&vpn.name);
 
-        if vpn.active {
+        if is_busy {
+            let spinner = gtk4::Spinner::new();
+            spinner.set_valign(gtk4::Align::Center);
+            spinner.set_visible(true);
+            spinner.start();
+            hbox.append(&spinner);
+        } else if vpn.active {
             let check_badge = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
             check_badge.add_css_class("active-check-badge");
             check_badge.set_valign(gtk4::Align::Center);
@@ -155,20 +165,15 @@ pub fn render_vpn_list<F: Fn() + Send + Sync + Clone + 'static>(
             disconnect_btn.add_css_class("connect-pill-btn");
 
             let name_clone = vpn.name.clone();
-            let disconnect_btn_c = disconnect_btn.clone();
-            let spinner_c = spinner.clone();
-            let refresh_cb = trigger_refresh.clone();
+            let tx_action_c = tx_action.clone();
 
             disconnect_btn.connect_clicked(move |_| {
-                disconnect_btn_c.set_visible(false);
-                spinner_c.set_visible(true);
-                spinner_c.start();
-
+                let _ = tx_action_c.send((name_clone.clone(), true));
                 let name = name_clone.clone();
-                let cb = refresh_cb.clone();
+                let tx = tx_action_c.clone();
                 std::thread::spawn(move || {
                     let _ = disconnect_vpn(&name);
-                    cb();
+                    let _ = tx.send((name, false));
                 });
             });
             hbox.append(&disconnect_btn);
@@ -178,20 +183,23 @@ pub fn render_vpn_list<F: Fn() + Send + Sync + Clone + 'static>(
             connect_btn.add_css_class("suggested-action");
 
             let name_clone = vpn.name.clone();
-            let connect_btn_c = connect_btn.clone();
-            let spinner_c = spinner.clone();
-            let refresh_cb = trigger_refresh.clone();
+            let tx_action_c = tx_action.clone();
+            let config_dialog_c = config_dialog.clone();
 
             connect_btn.connect_clicked(move |_| {
-                connect_btn_c.set_visible(false);
-                spinner_c.set_visible(true);
-                spinner_c.start();
-
                 let name = name_clone.clone();
-                let cb = refresh_cb.clone();
+                let details = get_vpn_details(&name);
+
+                if details.username.is_empty() || details.password.is_empty() {
+                    config_dialog_c.show_for_edit(&details);
+                    return;
+                }
+
+                let _ = tx_action_c.send((name.clone(), true));
+                let tx = tx_action_c.clone();
                 std::thread::spawn(move || {
                     let _ = connect_vpn(&name);
-                    cb();
+                    let _ = tx.send((name, false));
                 });
             });
             hbox.append(&connect_btn);

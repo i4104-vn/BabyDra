@@ -11,6 +11,7 @@ pub struct VpnLogDialog {
     pub close_btn: Button,
     pub refresh_btn: Button,
     current_vpn: Rc<RefCell<String>>,
+    cleared_at: Rc<RefCell<Option<String>>>,
 }
 
 impl VpnLogDialog {
@@ -34,7 +35,7 @@ impl VpnLogDialog {
 
         container.append(&header_box);
 
-        // Body: Monospace Scrolled TextView for Logs (styled like system update log)
+        // Body: Monospace Scrolled TextView for Logs
         let scroll = ScrolledWindow::new();
         scroll.set_policy(gtk4::PolicyType::Automatic, gtk4::PolicyType::Automatic);
         scroll.set_min_content_height(280);
@@ -51,9 +52,13 @@ impl VpnLogDialog {
         scroll.set_child(Some(&log_view));
         container.append(&scroll);
 
-        // Footer Actions: Refresh + Close
+        // Footer Actions: Clear + Refresh + Close
         let actions_box = Box::new(Orientation::Horizontal, 8);
         actions_box.set_halign(gtk4::Align::End);
+
+        let clear_btn = Button::with_label("Clear");
+        clear_btn.add_css_class("connect-pill-btn");
+        clear_btn.set_cursor_from_name(Some("pointer"));
 
         let refresh_btn = Button::with_label("Refresh");
         refresh_btn.add_css_class("connect-pill-btn");
@@ -63,11 +68,24 @@ impl VpnLogDialog {
         close_btn.add_css_class("suggested-action");
         close_btn.set_cursor_from_name(Some("pointer"));
 
+        let current_vpn = Rc::new(RefCell::new(String::new()));
+        let cleared_at = Rc::new(RefCell::new(None));
+
+        let log_view_clear = log_view.clone();
+        let cleared_at_clear = cleared_at.clone();
+        clear_btn.connect_clicked(move |_| {
+            if let Ok(now) = glib::DateTime::now_local() {
+                if let Ok(ts) = now.format("%Y-%m-%d %H:%M:%S") {
+                    *cleared_at_clear.borrow_mut() = Some(ts.to_string());
+                }
+            }
+            log_view_clear.buffer().set_text("");
+        });
+
+        actions_box.append(&clear_btn);
         actions_box.append(&refresh_btn);
         actions_box.append(&close_btn);
         container.append(&actions_box);
-
-        let current_vpn = Rc::new(RefCell::new(String::new()));
 
         let dialog = Self {
             container,
@@ -76,6 +94,7 @@ impl VpnLogDialog {
             close_btn,
             refresh_btn,
             current_vpn,
+            cleared_at,
         };
 
         let container_c = dialog.container.clone();
@@ -84,11 +103,13 @@ impl VpnLogDialog {
         });
 
         let current_vpn_c = dialog.current_vpn.clone();
+        let cleared_at_c = dialog.cleared_at.clone();
         let log_view_c = dialog.log_view.clone();
         dialog.refresh_btn.connect_clicked(move |_| {
             let vpn_name = current_vpn_c.borrow().clone();
+            let since = cleared_at_c.borrow().clone();
             if !vpn_name.is_empty() {
-                Self::fetch_and_set_logs(&log_view_c, &vpn_name);
+                Self::fetch_and_set_logs(&log_view_c, &vpn_name, since.as_deref());
             }
         });
 
@@ -96,20 +117,26 @@ impl VpnLogDialog {
     }
 
     pub fn show_for_vpn(&self, vpn_name: &str) {
+        if *self.current_vpn.borrow() != vpn_name {
+            *self.cleared_at.borrow_mut() = None;
+        }
         *self.current_vpn.borrow_mut() = vpn_name.to_string();
         self.title_lbl.set_text(&format!("Logs: {}", vpn_name));
-        Self::fetch_and_set_logs(&self.log_view, vpn_name);
+        let since = self.cleared_at.borrow().clone();
+        Self::fetch_and_set_logs(&self.log_view, vpn_name, since.as_deref());
         self.container.set_visible(true);
     }
 
-    fn fetch_and_set_logs(log_view: &TextView, vpn_name: &str) {
+    fn fetch_and_set_logs(log_view: &TextView, vpn_name: &str, since: Option<&str>) {
         let buffer = log_view.buffer();
         buffer.set_text("Fetching connection logs...");
 
         let (tx, rx) = std::sync::mpsc::channel::<String>();
         let vpn = vpn_name.to_string();
+        let since_owned = since.map(|s| s.to_string());
+
         std::thread::spawn(move || {
-            let logs = babydra_common::services::system::vpn::get_vpn_logs(&vpn);
+            let logs = babydra_common::services::system::vpn::get_vpn_logs(&vpn, since_owned.as_deref());
             let _ = tx.send(logs);
         });
 

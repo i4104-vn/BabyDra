@@ -27,11 +27,20 @@ pub fn create_status_indicators(
         let vpn_icon_c = vpn_icon.clone();
         Rc::new(move || {
             if let Some(active_vpn) = babydra_common::services::system::vpn::get_active_vpn_fast() {
-                let vpn_tooltip = format!(
-                    "VPN: Active\nName: {}\nType: {}",
-                    active_vpn.name,
-                    active_vpn.conn_type.to_uppercase()
-                );
+                let vpn_tooltip = if !active_vpn.gateway.is_empty() {
+                    format!(
+                        "VPN: Active\nName: {}\nType: {}\nGateway: {}",
+                        active_vpn.name,
+                        active_vpn.conn_type.to_uppercase(),
+                        active_vpn.gateway
+                    )
+                } else {
+                    format!(
+                        "VPN: Active\nName: {}\nType: {}",
+                        active_vpn.name,
+                        active_vpn.conn_type.to_uppercase()
+                    )
+                };
                 vpn_icon_c.set_tooltip_text(Some(&vpn_tooltip));
                 vpn_icon_c.set_visible(true);
             } else {

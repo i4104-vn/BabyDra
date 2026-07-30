@@ -1,6 +1,5 @@
-//! VPN and WireGuard connection management via NetworkManager D-Bus API (zbus).
+//! VPN and WireGuard connection management via NetworkManager CLI (nmcli).
 
-pub mod dbus;
 pub mod ops;
 
 pub use crate::models::vpn::*;

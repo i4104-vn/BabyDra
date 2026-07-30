@@ -2,6 +2,7 @@
 
 use gtk4::prelude::*;
 use std::cell::RefCell;
+use std::collections::HashSet;
 use std::rc::Rc;
 use std::sync::mpsc::channel;
 
@@ -16,7 +17,9 @@ pub fn create_vpn_widget() -> gtk4::Box {
     let (main_box, _vpn_switch, import_btn, add_custom_btn, list_box, config_dialog, log_dialog) = render::build_vpn_ui();
 
     let state = Rc::new(RefCell::new(Vec::<VpnConn>::new()));
+    let connecting_vpns = Rc::new(RefCell::new(HashSet::<String>::new()));
     let (tx, rx) = channel::<Vec<VpnConn>>();
+    let (tx_action, rx_action) = channel::<(String, bool)>();
 
     let trigger_refresh = {
         let tx_c = tx.clone();
@@ -31,19 +34,37 @@ pub fn create_vpn_widget() -> gtk4::Box {
 
     // Receive data from background thread and render on GTK main thread
     let state_c = state.clone();
+    let connecting_vpns_c = connecting_vpns.clone();
     let list_box_c = list_box.clone();
     let config_dialog_c = config_dialog.clone();
     let log_dialog_c = log_dialog.clone();
     let trigger_ref_c = trigger_refresh.clone();
+    let tx_action_c = tx_action.clone();
 
     glib::timeout_add_local(std::time::Duration::from_millis(150), move || {
         let mut updated = false;
+        while let Ok((name, is_connecting)) = rx_action.try_recv() {
+            if is_connecting {
+                connecting_vpns_c.borrow_mut().insert(name);
+            } else {
+                connecting_vpns_c.borrow_mut().remove(&name);
+            }
+            updated = true;
+        }
         while let Ok(vpns) = rx.try_recv() {
             *state_c.borrow_mut() = vpns;
             updated = true;
         }
         if updated {
-            handler::render_vpn_list(&list_box_c, &state_c.borrow(), &config_dialog_c, &log_dialog_c, trigger_ref_c.clone());
+            handler::render_vpn_list(
+                &list_box_c,
+                &state_c.borrow(),
+                &connecting_vpns_c,
+                &tx_action_c,
+                &config_dialog_c,
+                &log_dialog_c,
+                trigger_ref_c.clone(),
+            );
         }
         glib::ControlFlow::Continue
     });
