@@ -97,7 +97,7 @@ pub fn create_battery_widget() -> Option<gtk4::DrawingArea> {
     Some(drawing_area)
 }
 
-pub fn build_status_indicators_ui() -> (gtk4::Box, gtk4::Button, gtk4::Label, gtk4::Image, gtk4::Image, Option<gtk4::DrawingArea>) {
+pub fn build_status_indicators_ui() -> (gtk4::Box, gtk4::Button, gtk4::Label, gtk4::Image, gtk4::Image, gtk4::Image, Option<gtk4::DrawingArea>) {
     let status_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 4);
     status_box.add_css_class("status-indicators-box");
 
@@ -105,6 +105,11 @@ pub fn build_status_indicators_ui() -> (gtk4::Box, gtk4::Button, gtk4::Label, gt
     status_button.add_css_class("panel-status-btn");
 
     let inner_layout = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+
+    let vpn_icon = babydra_utils::ui::icon::get_icon("lock", 14);
+    vpn_icon.add_css_class("status-icon");
+    vpn_icon.set_visible(false);
+
     let net_icon = babydra_utils::ui::icon::get_icon("wifi", 14);
     net_icon.add_css_class("status-icon");
     
@@ -115,6 +120,7 @@ pub fn build_status_indicators_ui() -> (gtk4::Box, gtk4::Button, gtk4::Label, gt
     };
     vol_icon.add_css_class("status-icon");
     
+    inner_layout.append(&vpn_icon);
     inner_layout.append(&net_icon);
     inner_layout.append(&vol_icon);
 
@@ -133,5 +139,5 @@ pub fn build_status_indicators_ui() -> (gtk4::Box, gtk4::Button, gtk4::Label, gt
     let separator = gtk4::Label::new(Some("│"));
     separator.add_css_class("capsule-separator");
 
-    (status_box, status_button, separator, vol_icon, net_icon, bat_widget)
+    (status_box, status_button, separator, vol_icon, net_icon, vpn_icon, bat_widget)
 }

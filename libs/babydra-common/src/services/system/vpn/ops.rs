@@ -560,6 +560,65 @@ pub fn import_vpn_profile(path: &str) -> bool {
         ca_cert: String::new(),
         config_file: Some(path.to_string()),
     };
-
     save_vpn_connection(&details).is_ok()
+}
+
+pub fn get_active_vpn_fast() -> Option<VpnConn> {
+    let has_vpn_iface = std::fs::read_dir("/sys/class/net")
+        .map(|entries| {
+            entries.filter_map(|e| e.ok()).any(|e| {
+                let name = e.file_name().to_string_lossy().to_string();
+                name.starts_with("tun")
+                    || name.starts_with("tap")
+                    || name.starts_with("wg")
+                    || name.starts_with("ppp")
+                    || name.starts_with("wireguard")
+                    || name.starts_with("pvpn")
+            })
+        })
+        .unwrap_or(false);
+
+    if !has_vpn_iface {
+        return None;
+    }
+
+    get_vpn_connections().into_iter().find(|v| v.active)
+}
+
+pub fn get_vpn_logs(name: &str) -> String {
+    if let Ok(output) = std::process::Command::new("journalctl")
+        .args(["-u", "NetworkManager", "-n", "100", "--no-pager"])
+        .output()
+    {
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let mut filtered: Vec<&str> = stdout
+            .lines()
+            .filter(|line| {
+                line.contains(name)
+                    || line.contains("vpn")
+                    || line.contains("nm-openvpn")
+                    || line.contains("WireGuard")
+                    || line.contains("VPN")
+            })
+            .collect();
+
+        if !filtered.is_empty() {
+            if filtered.len() > 60 {
+                filtered = filtered.split_off(filtered.len() - 60);
+            }
+            return filtered.join("\n");
+        }
+    }
+
+    if let Ok(output) = std::process::Command::new("journalctl")
+        .args(["-u", "NetworkManager", "-n", "50", "--no-pager"])
+        .output()
+    {
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        if !stdout.is_empty() {
+            return stdout.to_string();
+        }
+    }
+
+    "No connection logs found for NetworkManager.".to_string()
 }

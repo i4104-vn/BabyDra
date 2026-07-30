@@ -16,13 +16,30 @@ pub struct BluetoothState {
 pub fn create_bluetooth_widget() -> gtk4::Box {
     let (main_box, bt_switch, list_box) = render::build_bluetooth_ui();
 
-    let bt_status = is_bluetooth_enabled();
     let state = Rc::new(RefCell::new(BluetoothState {
-        enabled: bt_status,
+        enabled: false,
         devices: Vec::new(),
     }));
 
-    bt_switch.set_active(bt_status);
+    let bt_switch_c = bt_switch.clone();
+    let state_c_init = state.clone();
+    let (tx_status, rx_status) = std::sync::mpsc::channel::<bool>();
+    std::thread::spawn(move || {
+        let status = is_bluetooth_enabled();
+        let _ = tx_status.send(status);
+    });
+
+    glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
+        match rx_status.try_recv() {
+            Ok(status) => {
+                bt_switch_c.set_active(status);
+                state_c_init.borrow_mut().enabled = status;
+                glib::ControlFlow::Break
+            }
+            Err(std::sync::mpsc::TryRecvError::Empty) => glib::ControlFlow::Continue,
+            Err(std::sync::mpsc::TryRecvError::Disconnected) => glib::ControlFlow::Break,
+        }
+    });
 
     let render_devices = {
         let list_box_clone = list_box.clone();

@@ -1,9 +1,9 @@
 //! VPN UI layout generator synchronized with Wi-Fi layout & FAB button.
 
 use gtk4::prelude::*;
-use babydra_utils::components::modal::VpnConfigDialog;
+use babydra_utils::components::modal::{VpnConfigDialog, VpnLogDialog};
 
-pub fn build_vpn_ui() -> (gtk4::Box, gtk4::Switch, gtk4::Button, gtk4::Button, gtk4::ListBox, VpnConfigDialog) {
+pub fn build_vpn_ui() -> (gtk4::Box, gtk4::Switch, gtk4::Button, gtk4::Button, gtk4::ListBox, VpnConfigDialog, VpnLogDialog) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 20);
 
     // Header Row (VPN Title, Add Custom Button, On Switcher)
@@ -72,11 +72,14 @@ pub fn build_vpn_ui() -> (gtk4::Box, gtk4::Switch, gtk4::Button, gtk4::Button, g
 
     overlay.add_overlay(&import_btn);
 
-    // VpnConfigDialog Modal Overlay
+    // VpnConfigDialog & VpnLogDialog Modal Overlays
     let config_dialog = VpnConfigDialog::new();
     overlay.add_overlay(&config_dialog.container);
 
+    let log_dialog = VpnLogDialog::new();
+    overlay.add_overlay(&log_dialog.container);
+
     main_box.append(&overlay);
 
-    (main_box, vpn_switch, import_btn, add_custom_btn, list_box, config_dialog)
+    (main_box, vpn_switch, import_btn, add_custom_btn, list_box, config_dialog, log_dialog)
 }

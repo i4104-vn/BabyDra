@@ -18,10 +18,27 @@ pub fn create_status_indicators(
     calendar_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
     launcher_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
 ) -> gtk4::Box {
-    let (status_box, status_button, separator, vol_icon, net_icon, bat_widget) = render::build_status_indicators_ui();
+    let (status_box, status_button, separator, vol_icon, net_icon, vpn_icon, bat_widget) = render::build_status_indicators_ui();
 
     // Initial update of volume & network tooltips on load
     items::volume::update_topbar_volume_icon(&vol_icon);
+
+    let update_vpn_tooltip = {
+        let vpn_icon_c = vpn_icon.clone();
+        Rc::new(move || {
+            if let Some(active_vpn) = babydra_common::services::system::vpn::get_active_vpn_fast() {
+                let vpn_tooltip = format!(
+                    "VPN: Active\nName: {}\nType: {}",
+                    active_vpn.name,
+                    active_vpn.conn_type.to_uppercase()
+                );
+                vpn_icon_c.set_tooltip_text(Some(&vpn_tooltip));
+                vpn_icon_c.set_visible(true);
+            } else {
+                vpn_icon_c.set_visible(false);
+            }
+        })
+    };
 
     let update_network_tooltip = {
         let net_icon_c = net_icon.clone();
@@ -45,6 +62,7 @@ pub fn create_status_indicators(
         })
     };
 
+    update_vpn_tooltip();
     update_network_tooltip();
 
     let scroll_controller = gtk4::EventControllerScroll::new(
@@ -73,19 +91,23 @@ pub fn create_status_indicators(
 
     let motion_controller = gtk4::EventControllerMotion::new();
     let update_net_enter = update_network_tooltip.clone();
+    let update_vpn_enter = update_vpn_tooltip.clone();
     let vol_icon_enter = vol_icon.clone();
     motion_controller.connect_enter(move |_, _, _| {
         items::volume::update_topbar_volume_icon(&vol_icon_enter);
         update_net_enter();
+        update_vpn_enter();
     });
     status_button.add_controller(motion_controller);
 
     let vol_icon_timer = vol_icon.clone();
     let update_net_timer = update_network_tooltip.clone();
+    let update_vpn_timer = update_vpn_tooltip.clone();
     let bat_widget_timer = bat_widget.clone();
     gtk4::glib::timeout_add_local(std::time::Duration::from_millis(1500), move || {
         items::volume::update_topbar_volume_icon(&vol_icon_timer);
         update_net_timer();
+        update_vpn_timer();
         if let Some(ref bat_area) = bat_widget_timer {
             if let Some(info) = render::get_battery_info() {
                 let status_str = if info.is_charging { "Charging" } else { "Discharging" };

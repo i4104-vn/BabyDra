@@ -3,50 +3,58 @@
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::sync::mpsc::channel;
 
 use babydra_common::services::system::vpn::{
-    delete_vpn_connection, get_vpn_connections, import_vpn_profile, save_vpn_connection,
+    delete_vpn_connection, get_vpn_connections, import_vpn_profile, save_vpn_connection, VpnConn,
 };
 
 mod handler;
 mod render;
 
 pub fn create_vpn_widget() -> gtk4::Box {
-    let (main_box, _vpn_switch, import_btn, add_custom_btn, list_box, config_dialog) = render::build_vpn_ui();
+    let (main_box, _vpn_switch, import_btn, add_custom_btn, list_box, config_dialog, log_dialog) = render::build_vpn_ui();
 
-    let state = Rc::new(RefCell::new(get_vpn_connections()));
+    let state = Rc::new(RefCell::new(Vec::<VpnConn>::new()));
+    let (tx, rx) = channel::<Vec<VpnConn>>();
 
-    let config_dialog_clone = config_dialog.clone();
-    let render_vpns = {
-        let list_box_clone = list_box.clone();
-        let state_clone = state.clone();
-        let dialog_c = config_dialog_clone.clone();
+    let trigger_refresh = {
+        let tx_c = tx.clone();
         move || {
-            let vpns = state_clone.borrow();
-            handler::render_vpn_list(&list_box_clone, &vpns, &dialog_c);
+            let tx_sub = tx_c.clone();
+            std::thread::spawn(move || {
+                let vpns = get_vpn_connections();
+                let _ = tx_sub.send(vpns);
+            });
         }
     };
 
-    let refresh_vpns = {
-        let state_clone = state.clone();
-        let render_clone = render_vpns.clone();
-        move || {
-            *state_clone.borrow_mut() = get_vpn_connections();
-            render_clone();
-        }
-    };
+    // Receive data from background thread and render on GTK main thread
+    let state_c = state.clone();
+    let list_box_c = list_box.clone();
+    let config_dialog_c = config_dialog.clone();
+    let log_dialog_c = log_dialog.clone();
+    let trigger_ref_c = trigger_refresh.clone();
 
-    // Load initial
-    let refresh_init = refresh_vpns.clone();
-    glib::timeout_add_local(std::time::Duration::from_millis(200), move || {
-        refresh_init();
-        glib::ControlFlow::Break
+    glib::timeout_add_local(std::time::Duration::from_millis(150), move || {
+        let mut updated = false;
+        while let Ok(vpns) = rx.try_recv() {
+            *state_c.borrow_mut() = vpns;
+            updated = true;
+        }
+        if updated {
+            handler::render_vpn_list(&list_box_c, &state_c.borrow(), &config_dialog_c, &log_dialog_c, trigger_ref_c.clone());
+        }
+        glib::ControlFlow::Continue
     });
 
-    // Refresh periodic
-    let refresh_periodic = refresh_vpns.clone();
+    // Initial fetch
+    trigger_refresh();
+
+    // Periodic refresh (every 4s)
+    let trigger_periodic = trigger_refresh.clone();
     glib::timeout_add_local(std::time::Duration::from_secs(4), move || {
-        refresh_periodic();
+        trigger_periodic();
         glib::ControlFlow::Continue
     });
 
@@ -57,22 +65,28 @@ pub fn create_vpn_widget() -> gtk4::Box {
     });
 
     // Handle Config Dialog Save
-    let refresh_on_save = refresh_vpns.clone();
+    let trigger_on_save = trigger_refresh.clone();
     config_dialog.connect_save(move |details| {
-        let _ = save_vpn_connection(&details);
-        refresh_on_save();
+        let trigger_cb = trigger_on_save.clone();
+        std::thread::spawn(move || {
+            let _ = save_vpn_connection(&details);
+            trigger_cb();
+        });
     });
 
     // Handle Config Dialog Delete
-    let refresh_on_delete = refresh_vpns.clone();
+    let trigger_on_delete = trigger_refresh.clone();
     config_dialog.connect_delete(move |name| {
-        let _ = delete_vpn_connection(&name);
-        refresh_on_delete();
+        let trigger_cb = trigger_on_delete.clone();
+        std::thread::spawn(move || {
+            let _ = delete_vpn_connection(&name);
+            trigger_cb();
+        });
     });
 
     // Handle config file import
     let list_box_parent = list_box.clone();
-    let refresh_on_import = refresh_vpns.clone();
+    let trigger_on_import = trigger_refresh.clone();
     import_btn.connect_clicked(move |_| {
         if let Some(win) = list_box_parent.root().and_then(|r| r.downcast::<gtk4::Window>().ok()) {
             let file_dialog = gtk4::FileDialog::new();
@@ -84,13 +98,16 @@ pub fn create_vpn_widget() -> gtk4::Box {
             filter.add_pattern("*.conf");
             file_dialog.set_default_filter(Some(&filter));
 
-            let refresh_cb = refresh_on_import.clone();
+            let trigger_cb = trigger_on_import.clone();
             file_dialog.open(Some(&win), None::<&gio::Cancellable>, move |res| {
                 if let Ok(file) = res {
                     if let Some(path) = file.path() {
                         let path_str = path.to_string_lossy().to_string();
-                        let _ = import_vpn_profile(&path_str);
-                        refresh_cb();
+                        let trigger_cb2 = trigger_cb.clone();
+                        std::thread::spawn(move || {
+                            let _ = import_vpn_profile(&path_str);
+                            trigger_cb2();
+                        });
                     }
                 }
             });

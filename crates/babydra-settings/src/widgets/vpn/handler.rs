@@ -4,9 +4,15 @@ use gtk4::prelude::*;
 use babydra_common::services::system::vpn::{
     connect_vpn, disconnect_vpn, get_vpn_details, VpnConn,
 };
-use babydra_utils::components::modal::VpnConfigDialog;
+use babydra_utils::components::modal::{VpnConfigDialog, VpnLogDialog};
 
-pub fn render_vpn_list(list_box: &gtk4::ListBox, vpns: &[VpnConn], config_dialog: &VpnConfigDialog) {
+pub fn render_vpn_list<F: Fn() + Send + Sync + Clone + 'static>(
+    list_box: &gtk4::ListBox,
+    vpns: &[VpnConn],
+    config_dialog: &VpnConfigDialog,
+    log_dialog: &VpnLogDialog,
+    trigger_refresh: F,
+) {
     while let Some(child) = list_box.first_child() {
         list_box.remove(&child);
     }
@@ -93,6 +99,24 @@ pub fn render_vpn_list(list_box: &gtk4::ListBox, vpns: &[VpnConn], config_dialog
 
         hbox.append(&text_box);
 
+        // View Logs Button
+        let log_btn = gtk4::Button::new();
+        log_btn.add_css_class("icon-btn");
+        log_btn.set_valign(gtk4::Align::Center);
+        log_btn.set_cursor_from_name(Some("pointer"));
+        log_btn.set_tooltip_text(Some(&babydra_common::i18n::t("settings.vpn_view_logs")));
+
+        let log_icon = babydra_utils::ui::icon::get_icon("history", 14);
+        log_icon.set_pixel_size(14);
+        log_btn.set_child(Some(&log_icon));
+
+        let name_log = vpn.name.clone();
+        let log_dialog_c = log_dialog.clone();
+        log_btn.connect_clicked(move |_| {
+            log_dialog_c.show_for_vpn(&name_log);
+        });
+        hbox.append(&log_btn);
+
         // Edit / Customize Button
         let edit_btn = gtk4::Button::new();
         edit_btn.add_css_class("icon-btn");
@@ -111,6 +135,11 @@ pub fn render_vpn_list(list_box: &gtk4::ListBox, vpns: &[VpnConn], config_dialog
         });
         hbox.append(&edit_btn);
 
+        let spinner = gtk4::Spinner::new();
+        spinner.set_valign(gtk4::Align::Center);
+        spinner.set_visible(false);
+        hbox.append(&spinner);
+
         if vpn.active {
             let check_badge = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
             check_badge.add_css_class("active-check-badge");
@@ -124,18 +153,46 @@ pub fn render_vpn_list(list_box: &gtk4::ListBox, vpns: &[VpnConn], config_dialog
             let disconnect_btn = gtk4::Button::with_label(&babydra_common::i18n::t("settings.disconnect"));
             disconnect_btn.set_valign(gtk4::Align::Center);
             disconnect_btn.add_css_class("connect-pill-btn");
+
             let name_clone = vpn.name.clone();
+            let disconnect_btn_c = disconnect_btn.clone();
+            let spinner_c = spinner.clone();
+            let refresh_cb = trigger_refresh.clone();
+
             disconnect_btn.connect_clicked(move |_| {
-                let _ = disconnect_vpn(&name_clone);
+                disconnect_btn_c.set_visible(false);
+                spinner_c.set_visible(true);
+                spinner_c.start();
+
+                let name = name_clone.clone();
+                let cb = refresh_cb.clone();
+                std::thread::spawn(move || {
+                    let _ = disconnect_vpn(&name);
+                    cb();
+                });
             });
             hbox.append(&disconnect_btn);
         } else {
             let connect_btn = gtk4::Button::with_label(&babydra_common::i18n::t("settings.connect"));
             connect_btn.set_valign(gtk4::Align::Center);
             connect_btn.add_css_class("suggested-action");
+
             let name_clone = vpn.name.clone();
+            let connect_btn_c = connect_btn.clone();
+            let spinner_c = spinner.clone();
+            let refresh_cb = trigger_refresh.clone();
+
             connect_btn.connect_clicked(move |_| {
-                let _ = connect_vpn(&name_clone);
+                connect_btn_c.set_visible(false);
+                spinner_c.set_visible(true);
+                spinner_c.start();
+
+                let name = name_clone.clone();
+                let cb = refresh_cb.clone();
+                std::thread::spawn(move || {
+                    let _ = connect_vpn(&name);
+                    cb();
+                });
             });
             hbox.append(&connect_btn);
         }

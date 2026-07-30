@@ -19,13 +19,31 @@ pub fn create_wifi_widget() -> gtk4::Overlay {
     let password_dialog = Rc::new(password_dialog);
     let config_dialog = Rc::new(config_dialog);
 
-    let wifi_status = babydra_common::services::system::wifi::get_wifi_state().0;
     let state = Rc::new(RefCell::new(WifiState {
-        enabled: wifi_status,
+        enabled: false,
         networks: Vec::new(),
     }));
 
-    wifi_switch.set_active(wifi_status);
+    // Async fetch initial Wi-Fi switch status off main thread
+    let (tx_status, rx_status) = std::sync::mpsc::channel::<bool>();
+    std::thread::spawn(move || {
+        let status = babydra_common::services::system::wifi::get_wifi_state().0;
+        let _ = tx_status.send(status);
+    });
+
+    let wifi_switch_c = wifi_switch.clone();
+    let state_c_init = state.clone();
+    glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
+        match rx_status.try_recv() {
+            Ok(status) => {
+                wifi_switch_c.set_active(status);
+                state_c_init.borrow_mut().enabled = status;
+                glib::ControlFlow::Break
+            }
+            Err(std::sync::mpsc::TryRecvError::Empty) => glib::ControlFlow::Continue,
+            Err(std::sync::mpsc::TryRecvError::Disconnected) => glib::ControlFlow::Break,
+        }
+    });
 
     let render_networks = {
         let list_box_clone = list_box.clone();
@@ -87,48 +105,65 @@ pub fn create_wifi_widget() -> gtk4::Overlay {
         });
     });
 
-    let refresh_networks = {
-        let state_clone = state.clone();
-        let render_clone = render_networks.clone();
+    // Background thread scanning channel
+    let (tx_scan, rx_scan) = std::sync::mpsc::channel::<Vec<WifiNetwork>>();
+    let trigger_wifi_scan = {
+        let tx_c = tx_scan.clone();
+        let state_c = state.clone();
         move || {
-            {
-                let mut st = state_clone.borrow_mut();
-                if st.enabled {
-                    st.networks = babydra_common::services::system::wifi::scan_networks();
-                } else {
-                    st.networks.clear();
-                }
+            if state_c.borrow().enabled {
+                let tx_sub = tx_c.clone();
+                std::thread::spawn(move || {
+                    let nets = babydra_common::services::system::wifi::scan_networks();
+                    let _ = tx_sub.send(nets);
+                });
             }
-            render_clone();
         }
     };
 
-    // Initialize list
-    let refresh_init = refresh_networks.clone();
-    glib::timeout_add_local(std::time::Duration::from_millis(100), move || {
-        refresh_init();
-        glib::ControlFlow::Break
-    });
-
-    // Trigger scan on state change or periodically
-    let refresh_periodic = refresh_networks.clone();
-    glib::timeout_add_local(std::time::Duration::from_secs(6), move || {
-        refresh_periodic();
+    let state_scan_render = state.clone();
+    let render_nets = render_networks.clone();
+    glib::timeout_add_local(std::time::Duration::from_millis(150), move || {
+        let mut updated = false;
+        while let Ok(nets) = rx_scan.try_recv() {
+            state_scan_render.borrow_mut().networks = nets;
+            updated = true;
+        }
+        if updated {
+            render_nets();
+        }
         glib::ControlFlow::Continue
     });
 
+    // Trigger initial scan
+    let trigger_init = trigger_wifi_scan.clone();
+    glib::timeout_add_local(std::time::Duration::from_millis(200), move || {
+        trigger_init();
+        glib::ControlFlow::Break
+    });
+
+    // Trigger periodic scan (every 6s)
+    let trigger_periodic = trigger_wifi_scan.clone();
+    glib::timeout_add_local(std::time::Duration::from_secs(6), move || {
+        trigger_periodic();
+        glib::ControlFlow::Continue
+    });
+
+    let trigger_switch = trigger_wifi_scan.clone();
+    let state_switch = state.clone();
+    let render_switch = render_networks.clone();
     wifi_switch.connect_state_set(move |_, is_active| {
-        let _ = babydra_common::services::system::wifi::set_wifi_enabled(is_active);
-        let mut st = state.borrow_mut();
-        st.enabled = is_active;
-        if !is_active {
-            st.networks.clear();
-        }
-        let render_now = render_networks.clone();
-        glib::timeout_add_local(std::time::Duration::from_millis(300), move || {
-            render_now();
-            glib::ControlFlow::Break
+        let is_active_bool = is_active;
+        state_switch.borrow_mut().enabled = is_active_bool;
+        std::thread::spawn(move || {
+            babydra_common::services::system::wifi::set_wifi_enabled(is_active_bool);
         });
+        if is_active_bool {
+            trigger_switch();
+        } else {
+            state_switch.borrow_mut().networks.clear();
+            render_switch();
+        }
         glib::Propagation::Proceed
     });
 
