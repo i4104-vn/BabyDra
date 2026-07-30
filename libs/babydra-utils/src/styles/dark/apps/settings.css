@@ -416,7 +416,9 @@ dropdown>popover>contents listview>row:selected {
 }
 
 textview.console-log-text,
-textview.console-log-text text {
+textview.console-log-text text,
+textview.hosts-editor-text,
+textview.hosts-editor-text text {
     background-color: transparent;
     color: rgba(255, 255, 255, 0.85);
 }

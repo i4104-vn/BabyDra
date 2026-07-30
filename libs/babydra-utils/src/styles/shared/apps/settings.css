@@ -258,11 +258,13 @@ progressbar.disk-progress progress {
 }
 
 textview.console-log-text,
-textview.console-log-text text {
+textview.console-log-text text,
+textview.hosts-editor-text,
+textview.hosts-editor-text text {
     background-color: transparent;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    padding: 12px 16px;
+    font-size: 13px;
+    padding: 12px;
 }
 
 progressbar.console-progress {
