@@ -100,6 +100,7 @@ button.sidebar-item.active-nav:hover image {
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 16px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    padding: 12px;
 }
 
 .settings-card row,
