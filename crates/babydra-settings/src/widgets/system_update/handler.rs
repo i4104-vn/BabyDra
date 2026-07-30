@@ -54,6 +54,7 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
     let count_badge = widget.count_badge.clone();
     let spinner = widget.spinner.clone();
     let refresh_btn = widget.refresh_btn.clone();
+    let update_all_btn = widget.update_all_btn.clone();
     let btn_provider = gtk4::CssProvider::new();
 
     // Helper closure to trigger async update check
@@ -62,6 +63,7 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
         let count_badge = count_badge.clone();
         let spinner = spinner.clone();
         let refresh_btn = refresh_btn.clone();
+        let update_all_btn = update_all_btn.clone();
 
         move || {
             spinner.set_visible(true);
@@ -72,6 +74,7 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
             let count_badge = count_badge.clone();
             let spinner = spinner.clone();
             let refresh_btn = refresh_btn.clone();
+            let update_all_btn = update_all_btn.clone();
 
             let (tx, rx) = std::sync::mpsc::channel::<Vec<PackageUpdate>>();
 
@@ -95,10 +98,14 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
 
                     if updates.is_empty() {
                         list_box.append(&render::create_empty_up_to_date_row());
+                        update_all_btn.set_visible(false);
+                        refresh_btn.set_visible(true);
                     } else {
                         for pkg in &updates {
                             list_box.append(&render::create_update_row(pkg));
                         }
+                        update_all_btn.set_visible(true);
+                        refresh_btn.set_visible(false);
                     }
 
                     spinner.stop();
@@ -116,14 +123,14 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
     // Helper to start watching background log stream in UI and updating button progress
     let text_buffer = widget.text_buffer.clone();
     let console_scroll = widget.console_scroll.clone();
-    let update_all_btn = widget.update_all_btn.clone();
+    let update_all_btn_stream = widget.update_all_btn.clone();
     let trigger_check_finish = trigger_check.clone();
     let btn_provider_watcher = btn_provider.clone();
 
     let start_log_stream_watcher = move || {
         let text_buffer_c = text_buffer.clone();
         let console_scroll_c = console_scroll.clone();
-        let update_all_btn_c = update_all_btn.clone();
+        let update_all_btn_c = update_all_btn_stream.clone();
         let trigger_check_c = trigger_check_finish.clone();
         let btn_provider_c = btn_provider_watcher.clone();
 
@@ -154,6 +161,8 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
 
     // Check if an update is already running in background (e.g. from previous run / app restart)
     if is_pacman_running() {
+        widget.update_all_btn.set_visible(true);
+        widget.refresh_btn.set_visible(false);
         widget.glass_card.set_visible(false);
         widget.console_card.set_visible(true);
         let log_text = read_update_log();

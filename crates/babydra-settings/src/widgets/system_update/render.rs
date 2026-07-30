@@ -120,6 +120,14 @@ pub fn build(updates: &[PackageUpdate]) -> (SystemUpdateWidget, PasswordDialog) 
     update_all_btn.add_css_class("suggested-action");
     update_all_btn.set_cursor_from_name(Some("pointer"));
 
+    if updates.is_empty() {
+        update_all_btn.set_visible(false);
+        refresh_btn.set_visible(true);
+    } else {
+        update_all_btn.set_visible(true);
+        refresh_btn.set_visible(false);
+    }
+
     header_box.append(&title_label);
     header_box.append(&count_badge);
     header_box.append(&spinner);
