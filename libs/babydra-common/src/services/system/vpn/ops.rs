@@ -3,7 +3,7 @@ use zbus::blocking::Proxy;
 use zbus::zvariant::{ObjectPath, OwnedObjectPath};
 
 use super::dbus::*;
-use super::types::*;
+use crate::models::vpn::*;
 
 pub fn get_vpn_connections() -> Vec<VpnConn> {
     let mut connections = Vec::new();

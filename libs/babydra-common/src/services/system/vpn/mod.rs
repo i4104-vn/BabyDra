@@ -2,7 +2,6 @@
 
 pub mod dbus;
 pub mod ops;
-pub mod types;
 
+pub use crate::models::vpn::*;
 pub use ops::*;
-pub use types::*;

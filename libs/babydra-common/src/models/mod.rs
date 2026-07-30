@@ -19,6 +19,7 @@ pub mod system_update;
 pub mod startup_command;
 pub mod wifi;
 pub mod hosts;
+pub mod vpn;
 
 pub use theme_config::ThemeConfig;
 pub use shell_config::ShellConfig;
@@ -38,5 +39,6 @@ pub use system_update::{PackageUpdate, SystemUpdateWidget};
 pub use startup_command::StartupCommand;
 pub use wifi::WifiNetwork;
 pub use hosts::HostsWidget;
+pub use vpn::{VpnConn, VpnConnDetails};
 
 
