@@ -5,6 +5,21 @@ pub use babydra_common::helper::volume::{
     is_muted, get_current_volume, set_volume, get_audio_devices,
 };
 
+pub fn get_active_output_device_name() -> Option<String> {
+    if let Ok(out) = std::process::Command::new("wpctl").args(["inspect", "@DEFAULT_AUDIO_SINK@"]).output() {
+        let stdout = String::from_utf8_lossy(&out.stdout);
+        for line in stdout.lines() {
+            let line = line.trim();
+            if line.contains("node.description =") {
+                if let Some(val) = line.split('=').nth(1) {
+                    return Some(val.trim().trim_matches('"').to_string());
+                }
+            }
+        }
+    }
+    None
+}
+
 pub fn update_topbar_volume_icon(vol_icon: &gtk4::Image) {
     let is_m = is_muted();
     let vol_pct = get_current_volume();
@@ -34,10 +49,14 @@ pub fn update_topbar_volume_icon(vol_icon: &gtk4::Image) {
         vol_icon.set_paintable(Some(&paintable));
     }
 
+    let dev_name = get_active_output_device_name();
+    let dev_suffix = dev_name.as_deref().map(|d| format!(" • {}", d)).unwrap_or_default();
+
     let tooltip = if is_m {
-        format!("Volume: Muted ({:.0}%)", vol_pct)
+        format!("Volume: Muted ({:.0}%){}", vol_pct, dev_suffix)
     } else {
-        format!("Volume: {:.0}%", vol_pct)
+        format!("Volume: {:.0}%{}", vol_pct, dev_suffix)
     };
     vol_icon.set_tooltip_text(Some(&tooltip));
 }
+

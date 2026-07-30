@@ -45,22 +45,53 @@ fn save_display_configs(monitors: &[MonitorConfig], card_rows: &[DisplayCardRow]
 
 /// Creates the display settings widget with event bindings
 pub fn create_displays_widget() -> Widget {
-    let monitors = babydra_common::services::system::display::get_displays();
-    let widget = render::build(&monitors);
+    // Initial 0ms layout build
+    let widget = render::build(&[]);
+    let container_box = widget.container.clone();
+    let ret_box = widget.container.clone();
 
-    let monitors_rc = Rc::new(RefCell::new(monitors));
-    let card_rows_rc = Rc::new(widget.card_rows);
-
-    let monitors_c = monitors_rc.clone();
-    let card_rows_c = card_rows_rc.clone();
-    widget.save_btn.connect_clicked(move |_| {
-        let monitors = monitors_c.borrow();
-        save_display_configs(&monitors, &card_rows_c);
+    let (tx, rx) = std::sync::mpsc::channel::<Vec<MonitorConfig>>();
+    std::thread::spawn(move || {
+        let monitors = babydra_common::services::system::display::get_displays();
+        let _ = tx.send(monitors);
     });
 
-    widget.refresh_btn.connect_clicked(move |b| {
+    let refresh_btn_c = widget.refresh_btn.clone();
+    refresh_btn_c.connect_clicked(move |b| {
         let _ = b.activate_action("win.rebuild-ui", None);
     });
 
-    widget.container.into()
+    gtk4::glib::timeout_add_local(std::time::Duration::from_millis(100), move || {
+        if let Ok(monitors) = rx.try_recv() {
+            let new_widget = render::build(&monitors);
+            let monitors_rc = Rc::new(RefCell::new(monitors));
+            let card_rows_rc = Rc::new(new_widget.card_rows);
+
+            let monitors_c = monitors_rc.clone();
+            let card_rows_c = card_rows_rc.clone();
+            new_widget.save_btn.connect_clicked(move |_| {
+                let monitors = monitors_c.borrow();
+                save_display_configs(&monitors, &card_rows_c);
+            });
+
+            new_widget.refresh_btn.connect_clicked(move |b| {
+                let _ = b.activate_action("win.rebuild-ui", None);
+            });
+
+            // Replace container children with newly built header and scrollable monitor cards
+            while let Some(c) = container_box.first_child() {
+                container_box.remove(&c);
+            }
+            while let Some(c) = new_widget.container.first_child() {
+                new_widget.container.remove(&c);
+                container_box.append(&c);
+            }
+
+            gtk4::glib::ControlFlow::Break
+        } else {
+            gtk4::glib::ControlFlow::Continue
+        }
+    });
+
+    ret_box.into()
 }

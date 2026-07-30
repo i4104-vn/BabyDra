@@ -51,6 +51,37 @@ pub fn render_device_list(list_box: &gtk4::ListBox, st: &BluetoothState) {
         return;
     }
 
+    if st.enabled && st.is_loading && st.devices.is_empty() {
+        let row = gtk4::ListBoxRow::new();
+        row.add_css_class("settings-card-row");
+        row.set_selectable(false);
+        row.set_activatable(false);
+        row.set_vexpand(true);
+        row.set_valign(gtk4::Align::Fill);
+
+        let placeholder_box = gtk4::Box::new(gtk4::Orientation::Vertical, 14);
+        placeholder_box.set_valign(gtk4::Align::Center);
+        placeholder_box.set_halign(gtk4::Align::Center);
+        placeholder_box.set_vexpand(true);
+        placeholder_box.set_hexpand(true);
+        placeholder_box.set_margin_top(48);
+        placeholder_box.set_margin_bottom(48);
+
+        let spinner = gtk4::Spinner::new();
+        spinner.set_size_request(32, 32);
+        spinner.set_halign(gtk4::Align::Center);
+        spinner.start();
+        placeholder_box.append(&spinner);
+
+        let lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.loading")));
+        lbl.add_css_class("settings-row-title");
+        placeholder_box.append(&lbl);
+
+        row.set_child(Some(&placeholder_box));
+        list_box.append(&row);
+        return;
+    }
+
     if st.devices.is_empty() {
         let row = gtk4::ListBoxRow::new();
         row.add_css_class("settings-card-row");

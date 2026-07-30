@@ -14,6 +14,7 @@ pub struct InstalledPackage {
     pub version: String,
 }
 
+#[derive(Clone)]
 pub struct AppsWidget {
     pub root: Overlay,
     pub container: Box,

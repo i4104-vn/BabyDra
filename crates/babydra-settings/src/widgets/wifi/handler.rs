@@ -44,6 +44,31 @@ pub fn render_network_list(
         return;
     }
 
+    if st.enabled && st.is_loading && st.networks.is_empty() {
+        let row = gtk4::ListBoxRow::new();
+        row.add_css_class("settings-card-row");
+
+        let placeholder_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
+        placeholder_box.set_valign(gtk4::Align::Center);
+        placeholder_box.set_halign(gtk4::Align::Center);
+        placeholder_box.set_margin_top(30);
+        placeholder_box.set_margin_bottom(30);
+
+        let spinner = gtk4::Spinner::new();
+        spinner.set_size_request(32, 32);
+        spinner.set_halign(gtk4::Align::Center);
+        spinner.start();
+        placeholder_box.append(&spinner);
+
+        let lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.loading")));
+        lbl.add_css_class("settings-row-title");
+        placeholder_box.append(&lbl);
+
+        row.set_child(Some(&placeholder_box));
+        list_box.append(&row);
+        return;
+    }
+
     if st.networks.is_empty() {
         let row = gtk4::ListBoxRow::new();
         row.add_css_class("settings-card-row");

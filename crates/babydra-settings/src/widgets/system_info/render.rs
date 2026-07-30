@@ -2,6 +2,17 @@
 
 use gtk4::prelude::*;
 
+#[derive(Clone)]
+pub struct SystemInfoLabels {
+    pub os_label: gtk4::Label,
+    pub sub_label: gtk4::Label,
+    pub uptime_lbl: gtk4::Label,
+    pub kernel_lbl: gtk4::Label,
+    pub cpu_lbl: gtk4::Label,
+    pub mem_lbl: gtk4::Label,
+    pub gpu_lbl: gtk4::Label,
+}
+
 pub fn build_system_ui(
     hostname: &str,
     os_name: &str,
@@ -11,7 +22,7 @@ pub fn build_system_ui(
     memory_text: &str,
     uptime_text: &str,
     cpu_arch: &str,
-) -> gtk4::Box {
+) -> (gtk4::Box, SystemInfoLabels) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
     main_box.set_vexpand(true);
     main_box.set_valign(gtk4::Align::Fill);
@@ -156,14 +167,19 @@ pub fn build_system_ui(
     grid.set_row_spacing(20);
     grid.set_column_homogeneous(true);
 
-    let specs: Vec<(&str, String, String)> = vec![
-        ("cog", babydra_common::i18n::t("settings.spec_kernel"), kernel_version.to_string()),
-        ("sliders", babydra_common::i18n::t("settings.spec_processor"), cpu_model.to_string()),
-        ("history", babydra_common::i18n::t("settings.spec_memory"), memory_text.to_string()),
-        ("palette", babydra_common::i18n::t("settings.spec_graphics"), gpu_info.to_string()),
+    let kernel_lbl = gtk4::Label::new(Some(kernel_version));
+    let cpu_lbl = gtk4::Label::new(Some(cpu_model));
+    let mem_lbl = gtk4::Label::new(Some(memory_text));
+    let gpu_lbl = gtk4::Label::new(Some(gpu_info));
+
+    let specs: Vec<(&str, String, &gtk4::Label)> = vec![
+        ("cog", babydra_common::i18n::t("settings.spec_kernel"), &kernel_lbl),
+        ("sliders", babydra_common::i18n::t("settings.spec_processor"), &cpu_lbl),
+        ("history", babydra_common::i18n::t("settings.spec_memory"), &mem_lbl),
+        ("palette", babydra_common::i18n::t("settings.spec_graphics"), &gpu_lbl),
     ];
 
-    for (idx, (icon_name, label, value)) in specs.iter().enumerate() {
+    for (idx, (icon_name, label, value_widget)) in specs.into_iter().enumerate() {
         let card = gtk4::Box::new(gtk4::Orientation::Vertical, 12);
         card.add_css_class("spec-card");
         card.set_halign(gtk4::Align::Fill);
@@ -176,7 +192,7 @@ pub fn build_system_ui(
         icon_badge.set_valign(gtk4::Align::Center);
         icon_badge.set_size_request(44, 44);
 
-        let icon_img = babydra_utils::ui::icon::get_icon(*icon_name, 22);
+        let icon_img = babydra_utils::ui::icon::get_icon(icon_name, 22);
         icon_img.set_pixel_size(22);
         icon_img.set_vexpand(true);
         icon_img.set_hexpand(true);
@@ -185,19 +201,18 @@ pub fn build_system_ui(
         icon_badge.append(&icon_img);
         card.append(&icon_badge);
 
-        // Label (e.g. KERNEL, PROCESSOR, MEMORY, GRAPHICS)
+        // Label
         let label_widget = gtk4::Label::new(Some(label.as_str()));
         label_widget.add_css_class("spec-label");
         label_widget.set_halign(gtk4::Align::Center);
         card.append(&label_widget);
 
-        // Value (e.g. Linux 7.1.3-arch1-1, Intel Core i5...)
-        let value_widget = gtk4::Label::new(Some(value.as_str()));
+        // Value
         value_widget.add_css_class("spec-value");
         value_widget.set_halign(gtk4::Align::Center);
         value_widget.set_justify(gtk4::Justification::Center);
         value_widget.set_wrap(true);
-        card.append(&value_widget);
+        card.append(value_widget);
 
         let col = (idx % 2) as i32;
         let row = (idx / 2) as i32;
@@ -213,6 +228,16 @@ pub fn build_system_ui(
     scroll.set_child(Some(&content_box));
 
     main_box.append(&scroll);
-    main_box
-}
 
+    let labels = SystemInfoLabels {
+        os_label,
+        sub_label,
+        uptime_lbl,
+        kernel_lbl,
+        cpu_lbl,
+        mem_lbl,
+        gpu_lbl,
+    };
+
+    (main_box, labels)
+}

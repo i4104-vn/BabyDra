@@ -3,10 +3,10 @@
 use gtk4::prelude::*;
 use babydra_utils::components::modal::{VpnConfigDialog, VpnLogDialog};
 
-pub fn build_vpn_ui() -> (gtk4::Box, gtk4::Switch, gtk4::Button, gtk4::Button, gtk4::ListBox, VpnConfigDialog, VpnLogDialog) {
+pub fn build_vpn_ui() -> (gtk4::Box, gtk4::Button, gtk4::Button, gtk4::ListBox, VpnConfigDialog, VpnLogDialog) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 20);
 
-    // Header Row (VPN Title, Add Custom Button, On Switcher)
+    // Header Row (VPN Title, Add Custom Button)
     let header_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
     header_row.set_margin_bottom(4);
 
@@ -24,23 +24,6 @@ pub fn build_vpn_ui() -> (gtk4::Box, gtk4::Switch, gtk4::Button, gtk4::Button, g
     add_custom_btn.set_cursor_from_name(Some("pointer"));
     add_custom_btn.set_valign(gtk4::Align::Center);
     header_row.append(&add_custom_btn);
-
-    // Toggle Switch (On)
-    let switch_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
-    switch_box.set_valign(gtk4::Align::Center);
-    switch_box.set_margin_start(8);
-
-    let switch_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.on")));
-    switch_lbl.add_css_class("settings-page-subtitle");
-    switch_lbl.set_valign(gtk4::Align::Center);
-
-    let vpn_switch = gtk4::Switch::new();
-    vpn_switch.set_active(true);
-    vpn_switch.set_valign(gtk4::Align::Center);
-
-    switch_box.append(&switch_lbl);
-    switch_box.append(&vpn_switch);
-    header_row.append(&switch_box);
 
     main_box.append(&header_row);
 
@@ -81,5 +64,5 @@ pub fn build_vpn_ui() -> (gtk4::Box, gtk4::Switch, gtk4::Button, gtk4::Button, g
 
     main_box.append(&overlay);
 
-    (main_box, vpn_switch, import_btn, add_custom_btn, list_box, config_dialog, log_dialog)
+    (main_box, import_btn, add_custom_btn, list_box, config_dialog, log_dialog)
 }

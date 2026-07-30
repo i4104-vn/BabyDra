@@ -1,4 +1,3 @@
-use std::collections::HashSet;
 use std::process::Command;
 use crate::models::vpn::*;
 
@@ -25,18 +24,15 @@ pub fn is_vpn_type(t: &str) -> bool {
 
 pub fn get_vpn_connections() -> Vec<VpnConn> {
     let mut connections = Vec::new();
-    let active_names: HashSet<String> = run_nmcli(&["-t", "-f", "NAME,TYPE", "connection", "show", "--active"])
-        .unwrap_or_default()
-        .lines()
-        .filter_map(|line| {
+    let mut active_info = std::collections::HashMap::<String, String>::new();
+    if let Some(act_out) = run_nmcli(&["-t", "-f", "NAME,TYPE,DEVICE", "connection", "show", "--active"]) {
+        for line in act_out.lines() {
             let parts: Vec<&str> = line.split(':').collect();
-            if parts.len() >= 2 && is_vpn_type(parts[1]) {
-                Some(parts[0].to_string())
-            } else {
-                None
+            if parts.len() >= 3 && is_vpn_type(parts[1]) {
+                active_info.insert(parts[0].to_string(), parts[2].to_string());
             }
-        })
-        .collect();
+        }
+    }
 
     if let Some(stdout) = run_nmcli(&["-t", "-f", "NAME,TYPE,UUID", "connection", "show"]) {
         for line in stdout.lines() {
@@ -44,20 +40,41 @@ pub fn get_vpn_connections() -> Vec<VpnConn> {
             if parts.len() >= 2 && is_vpn_type(parts[1]) {
                 let name = parts[0].to_string();
                 let conn_type = parts[1].to_string();
-                let active = active_names.contains(&name);
-                
+                let active_iface = active_info.get(&name).cloned();
+                let active = active_iface.is_some();
+                let dev_iface = active_iface.unwrap_or_default();
+
                 let mut gateway = String::new();
                 let mut username = String::new();
-                if let Some(details_str) = run_nmcli(&["-t", "-f", "vpn.data,vpn.user-name", "connection", "show", &name]) {
+                let mut ip_address = String::new();
+                let mut remote_server = String::new();
+                let mut cipher = String::new();
+
+                if let Some(details_str) = run_nmcli(&["-t", "-f", "IP4.ADDRESS,IP4.GATEWAY,vpn.user-name,vpn.data", "connection", "show", &name]) {
                     for dline in details_str.lines() {
                         if dline.starts_with("vpn.user-name:") {
                             username = dline.trim_start_matches("vpn.user-name:").to_string();
+                        } else if dline.starts_with("IP4.ADDRESS") {
+                            if let Some((_, val)) = dline.split_once(':') {
+                                ip_address = val.to_string();
+                            }
+                        } else if dline.starts_with("IP4.GATEWAY:") {
+                            gateway = dline.trim_start_matches("IP4.GATEWAY:").to_string();
                         } else if dline.starts_with("vpn.data:") {
                             let data_str = dline.trim_start_matches("vpn.data:");
                             for item in data_str.split(',') {
                                 let kv: Vec<&str> = item.split('=').map(|s| s.trim()).collect();
-                                if kv.len() == 2 && (kv[0] == "remote" || kv[0] == "gateway") {
-                                    gateway = kv[1].to_string();
+                                if kv.len() == 2 {
+                                    match kv[0] {
+                                        "remote" => remote_server = kv[1].to_string(),
+                                        "gateway" => {
+                                            if gateway.is_empty() {
+                                                gateway = kv[1].to_string();
+                                            }
+                                        }
+                                        "cipher" => cipher = kv[1].to_string(),
+                                        _ => {}
+                                    }
                                 }
                             }
                         }
@@ -71,6 +88,10 @@ pub fn get_vpn_connections() -> Vec<VpnConn> {
                     gateway,
                     username,
                     path: String::new(),
+                    ip_address,
+                    remote_server,
+                    dev_iface,
+                    cipher,
                 });
             }
         }

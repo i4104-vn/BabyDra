@@ -144,12 +144,59 @@ impl VpnLogDialog {
         glib::timeout_add_local(std::time::Duration::from_millis(100), move || {
             match rx.try_recv() {
                 Ok(logs) => {
-                    log_view_c.buffer().set_text(&logs);
+                    Self::render_colored_logs(&log_view_c, &logs);
                     glib::ControlFlow::Break
                 }
                 Err(std::sync::mpsc::TryRecvError::Empty) => glib::ControlFlow::Continue,
                 Err(std::sync::mpsc::TryRecvError::Disconnected) => glib::ControlFlow::Break,
             }
         });
+    }
+
+    fn render_colored_logs(log_view: &TextView, logs: &str) {
+        let buffer = log_view.buffer();
+        let tag_table = buffer.tag_table();
+
+        if tag_table.lookup("log_time").is_none() {
+            buffer.create_tag(Some("log_time"), &[("foreground", &"#9ca3af")]);
+            buffer.create_tag(Some("log_warn"), &[("foreground", &"#f59e0b"), ("weight", &700)]);
+            buffer.create_tag(Some("log_error"), &[("foreground", &"#ef4444"), ("weight", &700)]);
+            buffer.create_tag(Some("log_info"), &[("foreground", &"#60a5fa"), ("weight", &700)]);
+            buffer.create_tag(Some("log_normal"), &[("foreground", &"#34d399")]);
+        }
+
+        buffer.set_text("");
+        let mut iter = buffer.end_iter();
+
+        for line in logs.lines() {
+            if line.len() >= 10 && line.contains(" [") {
+                if let Some(idx) = line.find(" [") {
+                    let time_part = &line[..idx];
+                    let rest = &line[idx..];
+                    buffer.insert_with_tags_by_name(&mut iter, time_part, &["log_time"]);
+
+                    if rest.starts_with(" [WARN]") {
+                        buffer.insert_with_tags_by_name(&mut iter, " [WARN]", &["log_warn"]);
+                        buffer.insert(&mut iter, &rest[7..]);
+                    } else if rest.starts_with(" [ERROR]") {
+                        buffer.insert_with_tags_by_name(&mut iter, " [ERROR]", &["log_error"]);
+                        buffer.insert_with_tags_by_name(&mut iter, &rest[8..], &["log_error"]);
+                    } else if rest.starts_with(" [INFO]") {
+                        buffer.insert_with_tags_by_name(&mut iter, " [INFO]", &["log_info"]);
+                        buffer.insert(&mut iter, &rest[7..]);
+                    } else if rest.starts_with(" [LOG]") {
+                        buffer.insert_with_tags_by_name(&mut iter, " [LOG]", &["log_normal"]);
+                        buffer.insert(&mut iter, &rest[6..]);
+                    } else {
+                        buffer.insert(&mut iter, rest);
+                    }
+                } else {
+                    buffer.insert(&mut iter, line);
+                }
+            } else {
+                buffer.insert(&mut iter, line);
+            }
+            buffer.insert(&mut iter, "\n");
+        }
     }
 }

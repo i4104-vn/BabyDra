@@ -14,10 +14,11 @@ mod handler;
 mod render;
 
 pub fn create_vpn_widget() -> gtk4::Box {
-    let (main_box, _vpn_switch, import_btn, add_custom_btn, list_box, config_dialog, log_dialog) = render::build_vpn_ui();
+    let (main_box, import_btn, add_custom_btn, list_box, config_dialog, log_dialog) = render::build_vpn_ui();
 
     let state = Rc::new(RefCell::new(Vec::<VpnConn>::new()));
     let connecting_vpns = Rc::new(RefCell::new(HashSet::<String>::new()));
+    let is_loading = Rc::new(RefCell::new(true));
     let (tx, rx) = channel::<Vec<VpnConn>>();
     let (tx_action, rx_action) = channel::<(String, bool)>();
 
@@ -35,6 +36,7 @@ pub fn create_vpn_widget() -> gtk4::Box {
     // Receive data from background thread and render on GTK main thread
     let state_c = state.clone();
     let connecting_vpns_c = connecting_vpns.clone();
+    let is_loading_c = is_loading.clone();
     let list_box_c = list_box.clone();
     let config_dialog_c = config_dialog.clone();
     let log_dialog_c = log_dialog.clone();
@@ -53,12 +55,14 @@ pub fn create_vpn_widget() -> gtk4::Box {
         }
         while let Ok(vpns) = rx.try_recv() {
             *state_c.borrow_mut() = vpns;
+            *is_loading_c.borrow_mut() = false;
             updated = true;
         }
         if updated {
             handler::render_vpn_list(
                 &list_box_c,
                 &state_c.borrow(),
+                *is_loading_c.borrow(),
                 &connecting_vpns_c,
                 &tx_action_c,
                 &config_dialog_c,
@@ -69,13 +73,29 @@ pub fn create_vpn_widget() -> gtk4::Box {
         glib::ControlFlow::Continue
     });
 
-    // Initial fetch
-    trigger_refresh();
+    // Trigger fetch instantly when tab becomes active/mapped
+    let trigger_map = trigger_refresh.clone();
+    list_box.connect_map(move |_| {
+        trigger_map();
+    });
 
-    // Periodic refresh (every 4s)
+    // Initial fetch ONLY if mapped
+    let list_box_init = list_box.clone();
+    let trigger_init = trigger_refresh.clone();
+    glib::timeout_add_local(std::time::Duration::from_millis(200), move || {
+        if list_box_init.is_mapped() {
+            trigger_init();
+        }
+        glib::ControlFlow::Break
+    });
+
+    // Periodic refresh (every 4s) ONLY when tab is mapped
+    let list_box_periodic = list_box.clone();
     let trigger_periodic = trigger_refresh.clone();
     glib::timeout_add_local(std::time::Duration::from_secs(4), move || {
-        trigger_periodic();
+        if list_box_periodic.is_mapped() {
+            trigger_periodic();
+        }
         glib::ControlFlow::Continue
     });
 

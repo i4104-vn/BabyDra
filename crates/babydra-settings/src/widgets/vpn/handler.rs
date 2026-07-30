@@ -11,9 +11,10 @@ use babydra_common::services::system::vpn::{
 };
 use babydra_utils::components::modal::{VpnConfigDialog, VpnLogDialog};
 
-pub fn render_vpn_list<F: Fn() + Send + Sync + Clone + 'static>(
+pub fn render_vpn_list<F: Fn() + Clone + 'static>(
     list_box: &gtk4::ListBox,
     vpns: &[VpnConn],
+    is_loading: bool,
     connecting_vpns: &Rc<RefCell<HashSet<String>>>,
     tx_action: &Sender<(String, bool)>,
     config_dialog: &VpnConfigDialog,
@@ -22,6 +23,37 @@ pub fn render_vpn_list<F: Fn() + Send + Sync + Clone + 'static>(
 ) {
     while let Some(child) = list_box.first_child() {
         list_box.remove(&child);
+    }
+
+    if is_loading && vpns.is_empty() {
+        let row = gtk4::ListBoxRow::new();
+        row.add_css_class("settings-card-row");
+        row.set_selectable(false);
+        row.set_activatable(false);
+        row.set_vexpand(true);
+        row.set_valign(gtk4::Align::Fill);
+
+        let placeholder_box = gtk4::Box::new(gtk4::Orientation::Vertical, 14);
+        placeholder_box.set_valign(gtk4::Align::Center);
+        placeholder_box.set_halign(gtk4::Align::Center);
+        placeholder_box.set_vexpand(true);
+        placeholder_box.set_hexpand(true);
+        placeholder_box.set_margin_top(48);
+        placeholder_box.set_margin_bottom(48);
+
+        let spinner = gtk4::Spinner::new();
+        spinner.set_size_request(32, 32);
+        spinner.set_halign(gtk4::Align::Center);
+        spinner.start();
+        placeholder_box.append(&spinner);
+
+        let lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.loading")));
+        lbl.add_css_class("settings-row-title");
+        placeholder_box.append(&lbl);
+
+        row.set_child(Some(&placeholder_box));
+        list_box.append(&row);
+        return;
     }
 
     if vpns.is_empty() {
@@ -99,7 +131,25 @@ pub fn render_vpn_list<F: Fn() + Send + Sync + Clone + 'static>(
         name_lbl.set_halign(gtk4::Align::Start);
         text_box.append(&name_lbl);
 
-        let desc_lbl = gtk4::Label::new(Some(&format!("{}: {}", babydra_common::i18n::t("settings.vpn_type"), vpn.conn_type.to_uppercase())));
+        let sub_text = if vpn.active {
+            let mut info_parts = vec![format!("{}: {}", babydra_common::i18n::t("settings.vpn_type"), vpn.conn_type.to_uppercase())];
+            if !vpn.ip_address.is_empty() {
+                info_parts.push(format!("IP: {}", vpn.ip_address));
+            }
+            if !vpn.remote_server.is_empty() {
+                info_parts.push(format!("Server: {}", vpn.remote_server));
+            } else if !vpn.gateway.is_empty() {
+                info_parts.push(format!("Gateway: {}", vpn.gateway));
+            }
+            if !vpn.dev_iface.is_empty() {
+                info_parts.push(format!("Interface: {}", vpn.dev_iface));
+            }
+            info_parts.join(" • ")
+        } else {
+            format!("{}: {}", babydra_common::i18n::t("settings.vpn_type"), vpn.conn_type.to_uppercase())
+        };
+
+        let desc_lbl = gtk4::Label::new(Some(&sub_text));
         desc_lbl.add_css_class("settings-row-desc");
         desc_lbl.set_halign(gtk4::Align::Start);
         text_box.append(&desc_lbl);
@@ -113,7 +163,7 @@ pub fn render_vpn_list<F: Fn() + Send + Sync + Clone + 'static>(
         log_btn.set_cursor_from_name(Some("pointer"));
         log_btn.set_tooltip_text(Some(&babydra_common::i18n::t("settings.vpn_view_logs")));
 
-        let log_icon = babydra_utils::ui::icon::get_icon("history", 14);
+        let log_icon = babydra_utils::ui::icon::get_icon("terminal", 14);
         log_icon.set_pixel_size(14);
         log_btn.set_child(Some(&log_icon));
 
@@ -151,18 +201,10 @@ pub fn render_vpn_list<F: Fn() + Send + Sync + Clone + 'static>(
             spinner.start();
             hbox.append(&spinner);
         } else if vpn.active {
-            let check_badge = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-            check_badge.add_css_class("active-check-badge");
-            check_badge.set_valign(gtk4::Align::Center);
-
-            let check_icon = babydra_utils::ui::icon::get_icon("check", 14);
-            check_icon.set_pixel_size(14);
-            check_badge.append(&check_icon);
-            hbox.append(&check_badge);
-
             let disconnect_btn = gtk4::Button::with_label(&babydra_common::i18n::t("settings.disconnect"));
             disconnect_btn.set_valign(gtk4::Align::Center);
             disconnect_btn.add_css_class("connect-pill-btn");
+            disconnect_btn.add_css_class("delete-btn");
 
             let name_clone = vpn.name.clone();
             let tx_action_c = tx_action.clone();

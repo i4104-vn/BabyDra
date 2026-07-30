@@ -68,3 +68,19 @@ pub fn format_speed(bytes_per_sec: f64) -> String {
         format!("{:.1} MB/s", bytes_per_sec / (1024.0 * 1024.0))
     }
 }
+
+/// Retrieves local IPv4 address of the active default network route interface.
+pub fn get_local_ip() -> String {
+    if let Ok(output) = std::process::Command::new("sh")
+        .arg("-c")
+        .arg("ip route get 1.1.1.1 2>/dev/null | grep -oP 'src \\K[0-9.]+' | head -n 1")
+        .output()
+    {
+        let ip = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        if !ip.is_empty() {
+            return ip;
+        }
+    }
+    "127.0.0.1".to_string()
+}
+

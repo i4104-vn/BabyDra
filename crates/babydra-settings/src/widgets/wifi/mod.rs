@@ -3,6 +3,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 use babydra_common::models::wifi::WifiNetwork;
+use gtk4::prelude::*;
 
 mod handler;
 mod render;
@@ -10,6 +11,7 @@ mod render;
 pub struct WifiState {
     pub enabled: bool,
     pub networks: Vec<WifiNetwork>,
+    pub is_loading: bool,
 }
 
 pub fn create_wifi_widget() -> gtk4::Overlay {
@@ -22,6 +24,7 @@ pub fn create_wifi_widget() -> gtk4::Overlay {
     let state = Rc::new(RefCell::new(WifiState {
         enabled: false,
         networks: Vec::new(),
+        is_loading: true,
     }));
 
     // Async fetch initial Wi-Fi switch status off main thread
@@ -107,11 +110,29 @@ pub fn create_wifi_widget() -> gtk4::Overlay {
 
     // Background thread scanning channel
     let (tx_scan, rx_scan) = std::sync::mpsc::channel::<Vec<WifiNetwork>>();
+    let list_box_mapped_check = list_box.clone();
+    let render_nets_loading = render_networks.clone();
     let trigger_wifi_scan = {
         let tx_c = tx_scan.clone();
         let state_c = state.clone();
+        let list_box_c = list_box_mapped_check.clone();
+        let render_c = render_nets_loading.clone();
         move || {
-            if state_c.borrow().enabled {
+            // ONLY fetch when tab is active/mapped!
+            if !list_box_c.is_mapped() {
+                return;
+            }
+
+            let (enabled, is_empty) = {
+                let st = state_c.borrow();
+                (st.enabled, st.networks.is_empty())
+            };
+
+            if enabled {
+                if is_empty {
+                    state_c.borrow_mut().is_loading = true;
+                    render_c();
+                }
                 let tx_sub = tx_c.clone();
                 std::thread::spawn(move || {
                     let nets = babydra_common::services::system::wifi::scan_networks();
@@ -126,13 +147,21 @@ pub fn create_wifi_widget() -> gtk4::Overlay {
     glib::timeout_add_local(std::time::Duration::from_millis(150), move || {
         let mut updated = false;
         while let Ok(nets) = rx_scan.try_recv() {
-            state_scan_render.borrow_mut().networks = nets;
+            let mut st = state_scan_render.borrow_mut();
+            st.networks = nets;
+            st.is_loading = false;
             updated = true;
         }
         if updated {
             render_nets();
         }
         glib::ControlFlow::Continue
+    });
+
+    // Trigger scan instantly when tab becomes active/mapped
+    let trigger_map = trigger_wifi_scan.clone();
+    list_box.connect_map(move |_| {
+        trigger_map();
     });
 
     // Trigger initial scan
@@ -142,7 +171,7 @@ pub fn create_wifi_widget() -> gtk4::Overlay {
         glib::ControlFlow::Break
     });
 
-    // Trigger periodic scan (every 6s)
+    // Trigger periodic scan (every 6s) ONLY when tab is mapped
     let trigger_periodic = trigger_wifi_scan.clone();
     glib::timeout_add_local(std::time::Duration::from_secs(6), move || {
         trigger_periodic();
@@ -154,14 +183,20 @@ pub fn create_wifi_widget() -> gtk4::Overlay {
     let render_switch = render_networks.clone();
     wifi_switch.connect_state_set(move |_, is_active| {
         let is_active_bool = is_active;
-        state_switch.borrow_mut().enabled = is_active_bool;
+        {
+            let mut st = state_switch.borrow_mut();
+            st.enabled = is_active_bool;
+            if !is_active_bool {
+                st.networks.clear();
+                st.is_loading = false;
+            }
+        }
         std::thread::spawn(move || {
             babydra_common::services::system::wifi::set_wifi_enabled(is_active_bool);
         });
         if is_active_bool {
             trigger_switch();
         } else {
-            state_switch.borrow_mut().networks.clear();
             render_switch();
         }
         glib::Propagation::Proceed

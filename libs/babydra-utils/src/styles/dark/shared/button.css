@@ -34,6 +34,21 @@ button.connect-pill-btn:hover,
     border-color: rgba(255, 255, 255, 0.20);
 }
 
+button.connect-pill-btn.delete-btn,
+.connect-pill-btn.delete-btn {
+    background-color: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    border-top: 1px solid rgba(239, 68, 68, 0.45);
+    color: #f87171;
+}
+
+button.connect-pill-btn.delete-btn:hover,
+.connect-pill-btn.delete-btn:hover {
+    background-color: rgba(239, 68, 68, 0.25);
+    border-color: rgba(239, 68, 68, 0.50);
+    color: #fca5a5;
+}
+
 button.btn-upgrade-secondary {
     border: 1px solid rgba(255, 255, 255, 0.14);
 }

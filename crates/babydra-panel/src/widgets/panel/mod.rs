@@ -27,21 +27,36 @@ pub fn create_status_indicators(
         let vpn_icon_c = vpn_icon.clone();
         Rc::new(move || {
             if let Some(active_vpn) = babydra_common::services::system::vpn::get_active_vpn_fast() {
-                let vpn_tooltip = if !active_vpn.gateway.is_empty() {
-                    format!(
-                        "VPN: Active\nName: {}\nType: {}\nGateway: {}",
-                        active_vpn.name,
-                        active_vpn.conn_type.to_uppercase(),
-                        active_vpn.gateway
-                    )
+                let mut lines = vec![
+                    "VPN Status: Active".to_string(),
+                    format!("Name: {}", active_vpn.name),
+                ];
+                let proto_str = if !active_vpn.cipher.is_empty() {
+                    format!("{} ({})", active_vpn.conn_type.to_uppercase(), active_vpn.cipher)
                 } else {
-                    format!(
-                        "VPN: Active\nName: {}\nType: {}",
-                        active_vpn.name,
-                        active_vpn.conn_type.to_uppercase()
-                    )
+                    active_vpn.conn_type.to_uppercase()
                 };
-                vpn_icon_c.set_tooltip_text(Some(&vpn_tooltip));
+                lines.push(format!("Type: {}", proto_str));
+
+                if !active_vpn.remote_server.is_empty() {
+                    lines.push(format!("Server: {}", active_vpn.remote_server));
+                } else if !active_vpn.gateway.is_empty() {
+                    lines.push(format!("Gateway: {}", active_vpn.gateway));
+                }
+
+                if !active_vpn.ip_address.is_empty() {
+                    lines.push(format!("VPN IP: {}", active_vpn.ip_address));
+                }
+
+                if !active_vpn.username.is_empty() {
+                    lines.push(format!("User: {}", active_vpn.username));
+                }
+
+                if !active_vpn.dev_iface.is_empty() {
+                    lines.push(format!("Interface: {}", active_vpn.dev_iface));
+                }
+
+                vpn_icon_c.set_tooltip_text(Some(&lines.join("\n")));
                 vpn_icon_c.set_visible(true);
             } else {
                 vpn_icon_c.set_visible(false);
@@ -54,6 +69,7 @@ pub fn create_status_indicators(
         Rc::new(move || {
             let (enabled, ssid) = babydra_common::helper::wifi::get_wifi_state();
             let speed = babydra_common::helper::network::get_network_speed();
+            let local_ip = babydra_common::helper::network::get_local_ip();
 
             let net_tooltip = if !enabled {
                 "Network: Disabled".to_string()
@@ -61,8 +77,9 @@ pub fn create_status_indicators(
                 "Network: Disconnected".to_string()
             } else {
                 format!(
-                    "Network: {}\n↓ {}   ↑ {}",
+                    "Network: {}\nIP: {}\n↓ {}   ↑ {}",
                     ssid,
+                    local_ip,
                     babydra_common::helper::network::format_speed(speed.rx_speed),
                     babydra_common::helper::network::format_speed(speed.tx_speed)
                 )
@@ -71,13 +88,33 @@ pub fn create_status_indicators(
         })
     };
 
-    update_vpn_tooltip();
-    update_network_tooltip();
+    let update_all_tooltips = {
+        let update_net = update_network_tooltip.clone();
+        let update_vpn = update_vpn_tooltip.clone();
+        let vol_icon_c = vol_icon.clone();
+        let bat_widget_c = bat_widget.clone();
+
+        Rc::new(move || {
+            update_net();
+            update_vpn();
+            items::volume::update_topbar_volume_icon(&vol_icon_c);
+
+            if let Some(ref bat_area) = bat_widget_c {
+                if let Some(info) = render::get_battery_info() {
+                    let status_str = if info.is_charging { "Charging" } else { "Discharging" };
+                    bat_area.set_tooltip_text(Some(&format!("Battery: {}% ({})", info.percentage, status_str)));
+                }
+            }
+        })
+    };
+
+    update_all_tooltips();
 
     let scroll_controller = gtk4::EventControllerScroll::new(
         gtk4::EventControllerScrollFlags::VERTICAL
     );
     let vol_icon_scroll = vol_icon.clone();
+    let update_scroll = update_all_tooltips.clone();
     scroll_controller.connect_scroll(move |_, _dx, dy| {
         let current_vol = items::volume::get_current_volume();
         let step = 5.0;
@@ -92,37 +129,25 @@ pub fn create_status_indicators(
         if (new_vol - current_vol).abs() > 0.1 {
             items::volume::set_volume(new_vol);
             items::volume::update_topbar_volume_icon(&vol_icon_scroll);
+            update_scroll();
         }
         gtk4::glib::Propagation::Stop
     });
     status_button.add_controller(scroll_controller);
 
-
     let motion_controller = gtk4::EventControllerMotion::new();
-    let update_net_enter = update_network_tooltip.clone();
-    let update_vpn_enter = update_vpn_tooltip.clone();
-    let vol_icon_enter = vol_icon.clone();
+    let update_enter = update_all_tooltips.clone();
     motion_controller.connect_enter(move |_, _, _| {
-        items::volume::update_topbar_volume_icon(&vol_icon_enter);
-        update_net_enter();
-        update_vpn_enter();
+        update_enter();
     });
     status_button.add_controller(motion_controller);
 
-    let vol_icon_timer = vol_icon.clone();
-    let update_net_timer = update_network_tooltip.clone();
-    let update_vpn_timer = update_vpn_tooltip.clone();
+    let update_timer = update_all_tooltips.clone();
     let bat_widget_timer = bat_widget.clone();
     gtk4::glib::timeout_add_local(std::time::Duration::from_millis(1500), move || {
-        items::volume::update_topbar_volume_icon(&vol_icon_timer);
-        update_net_timer();
-        update_vpn_timer();
+        update_timer();
         if let Some(ref bat_area) = bat_widget_timer {
-            if let Some(info) = render::get_battery_info() {
-                let status_str = if info.is_charging { "Charging" } else { "Discharging" };
-                bat_area.set_tooltip_text(Some(&format!("Battery: {}% ({})", info.percentage, status_str)));
-                bat_area.queue_draw();
-            }
+            bat_area.queue_draw();
         }
         gtk4::glib::ControlFlow::Continue
     });

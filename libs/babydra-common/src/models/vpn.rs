@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct VpnConn {
     pub name: String,
     pub conn_type: String,
@@ -8,6 +8,10 @@ pub struct VpnConn {
     pub gateway: String,
     pub username: String,
     pub path: String,
+    pub ip_address: String,
+    pub remote_server: String,
+    pub dev_iface: String,
+    pub cipher: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
