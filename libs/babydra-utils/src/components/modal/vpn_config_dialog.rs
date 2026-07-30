@@ -1,6 +1,6 @@
 use gtk4::prelude::*;
 use gtk4::{Box, Button, DropDown, Entry, Label, Orientation, PasswordEntry, StringList};
-use babydra_common::services::system::vpn::VpnConnDetails;
+use babydra_common::services::system::vpn::{parse_vpn_config_file, VpnConnDetails};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -8,6 +8,8 @@ use std::rc::Rc;
 pub struct VpnConfigDialog {
     pub container: Box,
     pub title_lbl: Label,
+    pub config_file_entry: Entry,
+    pub browse_config_btn: Button,
     pub name_entry: Entry,
     pub type_dropdown: DropDown,
     pub gateway_entry: Entry,
@@ -19,6 +21,7 @@ pub struct VpnConfigDialog {
     pub delete_btn: Button,
     pub save_btn: Button,
     pub original_name: Rc<RefCell<Option<String>>>,
+    pub selected_config_path: Rc<RefCell<Option<String>>>,
 }
 
 impl VpnConfigDialog {
@@ -48,6 +51,28 @@ impl VpnConfigDialog {
         title_box.append(&sub_lbl);
         header_box.append(&title_box);
         container.append(&header_box);
+
+        // Import Config File Row (Auto-fill fields)
+        let cfg_grp = Box::new(Orientation::Vertical, 4);
+        let cfg_lbl = Label::new(Some("Config File (.ovpn / .conf)"));
+        cfg_lbl.add_css_class("wifi-info-label");
+        cfg_lbl.set_halign(gtk4::Align::Start);
+
+        let cfg_box = Box::new(Orientation::Horizontal, 8);
+        let config_file_entry = Entry::new();
+        config_file_entry.add_css_class("sidebar-search-entry");
+        config_file_entry.set_hexpand(true);
+        config_file_entry.set_placeholder_text(Some("Select VPN profile file..."));
+
+        let browse_config_btn = Button::with_label("Browse Config");
+        browse_config_btn.add_css_class("connect-pill-btn");
+        browse_config_btn.set_cursor_from_name(Some("pointer"));
+
+        cfg_box.append(&config_file_entry);
+        cfg_box.append(&browse_config_btn);
+        cfg_grp.append(&cfg_lbl);
+        cfg_grp.append(&cfg_box);
+        container.append(&cfg_grp);
 
         // Connection Name Row
         let name_grp = Box::new(Orientation::Vertical, 4);
@@ -175,10 +200,13 @@ impl VpnConfigDialog {
         container.append(&actions_box);
 
         let original_name = Rc::new(RefCell::new(None));
+        let selected_config_path = Rc::new(RefCell::new(None));
 
         let dialog = Self {
             container,
             title_lbl,
+            config_file_entry,
+            browse_config_btn,
             name_entry,
             type_dropdown,
             gateway_entry,
@@ -190,6 +218,7 @@ impl VpnConfigDialog {
             delete_btn,
             save_btn,
             original_name,
+            selected_config_path,
         };
 
         let box_c = dialog.container.clone();
@@ -197,11 +226,37 @@ impl VpnConfigDialog {
             box_c.set_visible(false);
         });
 
+        // Auto-fetch config file properties when config file is selected
+        let dialog_c = dialog.clone();
+        let dialog_box_c = dialog.container.clone();
+        dialog.browse_config_btn.connect_clicked(move |_| {
+            if let Some(win) = dialog_box_c.root().and_then(|r| r.downcast::<gtk4::Window>().ok()) {
+                let file_dialog = gtk4::FileDialog::new();
+                file_dialog.set_title("Select VPN Config File");
+
+                let filter = gtk4::FileFilter::new();
+                filter.set_name(Some("VPN Config Files (*.ovpn, *.conf)"));
+                filter.add_pattern("*.ovpn");
+                filter.add_pattern("*.conf");
+                file_dialog.set_default_filter(Some(&filter));
+
+                let d_ref = dialog_c.clone();
+                file_dialog.open(Some(&win), None::<&gio::Cancellable>, move |res| {
+                    if let Ok(file) = res {
+                        if let Some(path) = file.path() {
+                            let path_str = path.to_string_lossy().to_string();
+                            d_ref.apply_config_file(&path_str);
+                        }
+                    }
+                });
+            }
+        });
+
         // Browse CA file handler
         let ca_entry_c = dialog.ca_entry.clone();
-        let dialog_box_c = dialog.container.clone();
+        let dialog_box_ca = dialog.container.clone();
         dialog.browse_ca_btn.connect_clicked(move |_| {
-            if let Some(win) = dialog_box_c.root().and_then(|r| r.downcast::<gtk4::Window>().ok()) {
+            if let Some(win) = dialog_box_ca.root().and_then(|r| r.downcast::<gtk4::Window>().ok()) {
                 let file_dialog = gtk4::FileDialog::new();
                 file_dialog.set_title("Select CA Certificate");
 
@@ -219,9 +274,40 @@ impl VpnConfigDialog {
         dialog
     }
 
+    pub fn apply_config_file(&self, path: &str) {
+        *self.selected_config_path.borrow_mut() = Some(path.to_string());
+        self.config_file_entry.set_text(path);
+
+        let parsed = parse_vpn_config_file(path);
+        if !parsed.name.is_empty() {
+            self.name_entry.set_text(&parsed.name);
+        }
+        if !parsed.gateway.is_empty() {
+            self.gateway_entry.set_text(&parsed.gateway);
+        }
+        if !parsed.ca_cert.is_empty() {
+            self.ca_entry.set_text(&parsed.ca_cert);
+        }
+
+        let vpn_types = vec![
+            "openvpn",
+            "wireguard",
+            "l2tp",
+            "pptp",
+            "openconnect",
+            "fortisslvpn",
+            "strongswan",
+        ];
+        if let Some(idx) = vpn_types.iter().position(|&t| parsed.vpn_type.to_lowercase().contains(t)) {
+            self.type_dropdown.set_selected(idx as u32);
+        }
+    }
+
     pub fn show_for_new(&self) {
         *self.original_name.borrow_mut() = None;
+        *self.selected_config_path.borrow_mut() = None;
         self.title_lbl.set_text("Add Custom VPN Connection");
+        self.config_file_entry.set_text("");
         self.name_entry.set_text("");
         self.type_dropdown.set_selected(0);
         self.gateway_entry.set_text("");
@@ -235,7 +321,10 @@ impl VpnConfigDialog {
 
     pub fn show_for_edit(&self, details: &VpnConnDetails) {
         *self.original_name.borrow_mut() = Some(details.name.clone());
+        *self.selected_config_path.borrow_mut() = details.config_file.clone();
+
         self.title_lbl.set_text(&format!("Configure {}", details.name));
+        self.config_file_entry.set_text(details.config_file.as_deref().unwrap_or(""));
         self.name_entry.set_text(&details.name);
         self.gateway_entry.set_text(&details.gateway);
         self.user_entry.set_text(&details.username);
@@ -268,6 +357,7 @@ impl VpnConfigDialog {
 
     pub fn connect_save<F: Fn(VpnConnDetails) + 'static>(&self, callback: F) {
         let original_name = self.original_name.clone();
+        let selected_config_path = self.selected_config_path.clone();
         let name_entry = self.name_entry.clone();
         let type_dropdown = self.type_dropdown.clone();
         let gateway_entry = self.gateway_entry.clone();
@@ -278,6 +368,7 @@ impl VpnConfigDialog {
 
         self.save_btn.connect_clicked(move |_| {
             let orig = original_name.borrow().clone();
+            let cfg_file = selected_config_path.borrow().clone();
             let vpn_types = vec![
                 "openvpn",
                 "wireguard",
@@ -298,6 +389,7 @@ impl VpnConfigDialog {
                 username: user_entry.text().to_string(),
                 password: password_entry.text().to_string(),
                 ca_cert: ca_entry.text().to_string(),
+                config_file: cfg_file,
             };
 
             container.set_visible(false);

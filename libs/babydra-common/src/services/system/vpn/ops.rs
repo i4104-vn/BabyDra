@@ -73,6 +73,7 @@ pub fn get_vpn_details(name: &str) -> VpnConnDetails {
         username: String::new(),
         password: String::new(),
         ca_cert: String::new(),
+        config_file: None,
     };
 
     let bus = match get_dbus() {
@@ -304,7 +305,87 @@ pub fn delete_vpn_connection(name: &str) -> bool {
     false
 }
 
+pub fn copy_vpn_config_to_babydra_dir(src_path: &str) -> Result<String, String> {
+    let vpn_dir = crate::config::get_babydra_config_dir().join("vpn");
+    std::fs::create_dir_all(&vpn_dir).map_err(|e| format!("Failed to create config dir: {}", e))?;
+
+    let filename = std::path::Path::new(src_path)
+        .file_name()
+        .and_then(|s| s.to_str())
+        .unwrap_or("vpn_profile.conf");
+
+    let dest_path = vpn_dir.join(filename);
+    std::fs::copy(src_path, &dest_path).map_err(|e| format!("Failed to copy config file: {}", e))?;
+
+    Ok(dest_path.to_string_lossy().to_string())
+}
+
+pub fn parse_vpn_config_file(path: &str) -> VpnConnDetails {
+    let mut details = VpnConnDetails::default();
+    details.config_file = Some(path.to_string());
+
+    let path_obj = std::path::Path::new(path);
+    if let Some(stem) = path_obj.file_stem().and_then(|s| s.to_str()) {
+        details.name = stem.to_string();
+    }
+
+    if path.ends_with(".ovpn") {
+        details.vpn_type = "openvpn".to_string();
+    } else if path.ends_with(".conf") || path.contains("wireguard") {
+        details.vpn_type = "wireguard".to_string();
+    } else {
+        details.vpn_type = "openvpn".to_string();
+    }
+
+    let content = match std::fs::read_to_string(path) {
+        Ok(c) => c,
+        Err(_) => return details,
+    };
+
+    for line in content.lines() {
+        let trimmed = line.trim();
+        if trimmed.starts_with('#') || trimmed.starts_with(';') || trimmed.is_empty() {
+            continue;
+        }
+
+        if details.vpn_type == "openvpn" {
+            if trimmed.starts_with("remote ") {
+                let parts: Vec<&str> = trimmed.split_whitespace().collect();
+                if parts.len() >= 2 {
+                    if parts.len() >= 3 {
+                        details.gateway = format!("{}:{}", parts[1], parts[2]);
+                    } else {
+                        details.gateway = parts[1].to_string();
+                    }
+                }
+            } else if trimmed.starts_with("ca ") {
+                let parts: Vec<&str> = trimmed.split_whitespace().collect();
+                if parts.len() >= 2 {
+                    details.ca_cert = parts[1].to_string();
+                }
+            }
+        }
+
+        if details.vpn_type == "wireguard" {
+            if trimmed.to_lowercase().starts_with("endpoint") {
+                let parts: Vec<&str> = trimmed.split('=').map(|s| s.trim()).collect();
+                if parts.len() >= 2 {
+                    details.gateway = parts[1].to_string();
+                }
+            }
+        }
+    }
+
+    details
+}
+
 pub fn save_vpn_connection(details: &VpnConnDetails) -> Result<(), String> {
+    if let Some(ref src_path) = details.config_file {
+        if !src_path.is_empty() {
+            let _ = copy_vpn_config_to_babydra_dir(src_path);
+        }
+    }
+
     let bus = get_dbus()?;
 
     let settings_proxy = Proxy::new(
@@ -409,6 +490,7 @@ pub fn import_vpn_profile(path: &str) -> bool {
         username: String::new(),
         password: String::new(),
         ca_cert: String::new(),
+        config_file: Some(path.to_string()),
     };
 
     save_vpn_connection(&details).is_ok()

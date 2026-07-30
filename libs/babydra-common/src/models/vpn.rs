@@ -19,4 +19,5 @@ pub struct VpnConnDetails {
     pub username: String,
     pub password: String,
     pub ca_cert: String,
+    pub config_file: Option<String>,
 }
