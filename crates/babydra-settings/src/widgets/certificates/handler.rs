@@ -101,7 +101,8 @@ pub fn reload_cert_list(
 
         // Delete Button
         let del_btn = gtk4::Button::new();
-        del_btn.add_css_class("danger-btn");
+        del_btn.add_css_class("connect-pill-btn");
+        del_btn.add_css_class("delete-btn");
         del_btn.set_valign(gtk4::Align::Center);
         del_btn.set_cursor_from_name(Some("pointer"));
 
