@@ -54,25 +54,7 @@ fn update_sidebar_label(btn: &gtk4::Button, new_text: &str) {
     }
 }
 
-const SHORTCUTS_HELP: &str = r#"
-Bảng Phím tắt Hệ thống (Shortcuts)
 
-Di chuyển nhanh (Alt + Phím):
-  Alt + 1 : Wi-Fi
-  Alt + 2 : VPN
-  Alt + 3 : Bluetooth
-  Alt + 4 : Wallpaper
-  Alt + 5 : Themes
-  Alt + 6 : Displays
-  Alt + 7 : Installed Apps
-  Alt + 8 : Startup Apps
-  Alt + - : System Update
-  Alt + = : About System
-
-Trợ giúp:
-  ? / Alt + H : Xem bảng phím tắt này
-  Esc         : Đóng bảng phím tắt
-"#;
 
 pub fn build_main_window(app: &gtk4::Application) {
     let window = gtk4::ApplicationWindow::new(app);
@@ -228,29 +210,6 @@ pub fn build_main_window(app: &gtk4::Application) {
     main_layout.append(&right_box);
     overlay.set_child(Some(&main_layout));
 
-    // --- Cheatsheet Dialog Overlay ---
-    let cheatsheet_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
-    cheatsheet_box.add_css_class("cheatsheet-overlay");
-    cheatsheet_box.set_halign(gtk4::Align::Center);
-    cheatsheet_box.set_valign(gtk4::Align::Center);
-    cheatsheet_box.set_visible(false);
-
-    let cheatsheet_title = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.shortcuts_title")));
-    cheatsheet_title.add_css_class("cheatsheet-title");
-    cheatsheet_box.append(&cheatsheet_title);
-
-    let cheatsheet_lbl = gtk4::Label::new(Some(SHORTCUTS_HELP));
-    cheatsheet_lbl.add_css_class("cheatsheet-value");
-    cheatsheet_lbl.set_justify(gtk4::Justification::Left);
-    cheatsheet_box.append(&cheatsheet_lbl);
-
-    let close_btn = gtk4::Button::with_label(&babydra_common::i18n::t("settings.shortcuts_close"));
-    close_btn.set_halign(gtk4::Align::Center);
-    close_btn.add_css_class("suggested-action");
-    cheatsheet_box.append(&close_btn);
-
-    overlay.add_overlay(&cheatsheet_box);
-
     // --- Navigation Active Handling ---
     let all_btns = vec![
         ("wifi", btn_wifi.clone()),
@@ -286,8 +245,6 @@ pub fn build_main_window(app: &gtk4::Application) {
         let app_title_lbl_c = app_title_lbl.clone();
         let app_sub_lbl_c = app_sub_lbl.clone();
         let search_entry_c = search_entry.clone();
-        let cheatsheet_title_c = cheatsheet_title.clone();
-        let close_btn_c = close_btn.clone();
         let all_btns_c = all_btns.clone();
 
         rebuild_action.connect_activate(move |_, _| {
@@ -295,8 +252,6 @@ pub fn build_main_window(app: &gtk4::Application) {
             let title = app_title_lbl_c.clone();
             let sub = app_sub_lbl_c.clone();
             let search = search_entry_c.clone();
-            let cs_title = cheatsheet_title_c.clone();
-            let cs_close = close_btn_c.clone();
             let btns = all_btns_c.clone();
 
             // Use idle_add_local_once to avoid blocking the click handler
@@ -312,8 +267,6 @@ pub fn build_main_window(app: &gtk4::Application) {
                 title.set_text(&babydra_common::i18n::t("settings.title"));
                 sub.set_text(&babydra_common::i18n::t("settings.subtitle"));
                 search.set_placeholder_text(Some(&babydra_common::i18n::t("settings.search_placeholder")));
-                cs_title.set_text(&babydra_common::i18n::t("settings.shortcuts_title"));
-                cs_close.set_label(&babydra_common::i18n::t("settings.shortcuts_close"));
 
                 // 3. Rebuild content stack pages (preserving current page)
                 let current_page = stack.visible_child_name().map(|s| s.to_string());
@@ -325,50 +278,6 @@ pub fn build_main_window(app: &gtk4::Application) {
         });
     }
     window.add_action(&rebuild_action);
-
-    // --- Shortcuts Keyboard Controls ---
-    let key_controller = gtk4::EventControllerKey::new();
-    let cheatsheet_box_key = cheatsheet_box.clone();
-
-    let btn_wifi_k = btn_wifi.clone();
-    let btn_vpn_k = btn_vpn.clone();
-    let btn_bt_k = btn_bt.clone();
-    let btn_app_k = btn_app.clone();
-    let btn_displays_k = btn_displays.clone();
-    let btn_apps_k = btn_apps.clone();
-    let btn_startup_k = btn_startup.clone();
-    let btn_update_k = btn_update.clone();
-    let btn_hosts_k = btn_hosts.clone();
-    let btn_sys_k = btn_sys.clone();
-
-    key_controller.connect_key_pressed(move |_, keyval, _, state| {
-        let is_alt = state.contains(gtk4::gdk::ModifierType::ALT_MASK);
-        match keyval.name().as_deref() {
-            Some("1") if is_alt => { btn_wifi_k.emit_clicked(); }
-            Some("2") if is_alt => { btn_vpn_k.emit_clicked(); }
-            Some("3") if is_alt => { btn_bt_k.emit_clicked(); }
-            Some("4") if is_alt => { btn_app_k.emit_clicked(); }
-            Some("5") if is_alt => { btn_displays_k.emit_clicked(); }
-            Some("6") if is_alt => { btn_apps_k.emit_clicked(); }
-            Some("7") if is_alt => { btn_startup_k.emit_clicked(); }
-            Some("8") if is_alt => { btn_update_k.emit_clicked(); }
-            Some("9") if is_alt => { btn_hosts_k.emit_clicked(); }
-            Some("minus") if is_alt => { btn_update_k.emit_clicked(); }
-            Some("equal") if is_alt => { btn_sys_k.emit_clicked(); }
-            Some("h") if is_alt => { cheatsheet_box_key.set_visible(!cheatsheet_box_key.is_visible()); }
-            Some("question") => { cheatsheet_box_key.set_visible(!cheatsheet_box_key.is_visible()); }
-            Some("Escape") => { cheatsheet_box_key.set_visible(false); }
-            _ => {}
-        }
-        gtk4::glib::Propagation::Proceed
-    });
-
-    window.add_controller(key_controller);
-
-    let cheatsheet_close = cheatsheet_box.clone();
-    close_btn.connect_clicked(move |_| {
-        cheatsheet_close.set_visible(false);
-    });
 
     window.set_child(Some(&overlay));
     window.present();
