@@ -8,3 +8,4 @@ pub mod startup;
 pub mod system_update;
 pub mod hosts;
 pub mod system_info;
+pub mod certificates;

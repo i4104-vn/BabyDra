@@ -318,6 +318,10 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.placeholder_ext_desc", "File extension");
 
             // Settings App
+            map.insert("settings.cat_network", "Network & Internet");
+            map.insert("settings.cat_hardware", "Hardware & Devices");
+            map.insert("settings.cat_apps", "Personalization & Apps");
+            map.insert("settings.cat_system", "System & Security");
             map.insert("settings.nav_wifi", "Wi-Fi");
             map.insert("settings.nav_hosts", "Hosts");
             map.insert("settings.nav_vpn", "VPN");
@@ -326,8 +330,14 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("settings.nav_displays", "Displays");
             map.insert("settings.nav_installed_apps", "Installed Apps");
             map.insert("settings.nav_startup_apps", "Startup Apps");
+            map.insert("settings.nav_certificates", "CA Certificates");
             map.insert("settings.nav_system_update", "System Update");
             map.insert("settings.nav_about_system", "About System");
+            map.insert("settings.cert_title", "CA Certificates");
+            map.insert("settings.cert_subtitle", "Manage trusted CA certificates in /etc/ca-certificates/trust-source/anchors/");
+            map.insert("settings.cert_add_btn", "Add Certificate");
+            map.insert("settings.cert_no_items", "No custom CA certificates installed");
+            map.insert("settings.cert_delete", "Delete");
             map.insert("settings.shortcuts_title", "Settings Shortcuts Cheatsheet");
             map.insert("settings.shortcuts_close", "Got it!");
 
@@ -685,6 +695,10 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("explore.placeholder_ext_desc", "Phần mở rộng của tệp");
 
             // Settings App
+            map.insert("settings.cat_network", "Mạng & Kết nối");
+            map.insert("settings.cat_hardware", "Phần cứng & Thiết bị");
+            map.insert("settings.cat_apps", "Giao diện & Ứng dụng");
+            map.insert("settings.cat_system", "Hệ thống & Bảo mật");
             map.insert("settings.nav_wifi", "Wi-Fi");
             map.insert("settings.nav_vpn", "VPN");
             map.insert("settings.nav_bluetooth", "Bluetooth");
@@ -692,9 +706,15 @@ fn get_translations(locale: &str) -> HashMap<&'static str, &'static str> {
             map.insert("settings.nav_displays", "Màn hình");
             map.insert("settings.nav_installed_apps", "Ứng dụng đã cài");
             map.insert("settings.nav_startup_apps", "Ứng dụng tự chạy");
+            map.insert("settings.nav_certificates", "Chứng chỉ CA");
             map.insert("settings.nav_system_update", "Cập nhật hệ thống");
             map.insert("settings.nav_hosts", "Hosts");
             map.insert("settings.nav_about_system", "Thông tin hệ thống");
+            map.insert("settings.cert_title", "Chứng chỉ CA");
+            map.insert("settings.cert_subtitle", "Quản lý các chứng chỉ CA tin cậy trong /etc/ca-certificates/trust-source/anchors/");
+            map.insert("settings.cert_add_btn", "Thêm chứng chỉ");
+            map.insert("settings.cert_no_items", "Chưa có chứng chỉ CA tùy chỉnh nào");
+            map.insert("settings.cert_delete", "Xóa");
             map.insert("settings.shortcuts_title", "Bảng phím tắt cài đặt");
             map.insert("settings.shortcuts_close", "Tôi đã rõ!");
 
