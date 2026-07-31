@@ -4,7 +4,7 @@ use std::cell::RefCell;
 use std::sync::mpsc;
 use babydra_utils::components::modal::PasswordDialog;
 use babydra_common::services::system::certificates;
-use super::render::CertificatesWidget;
+use babydra_common::models::certificates::CertificatesWidget;
 
 type PendingFileCell = Rc<RefCell<Option<(String, String)>>>;
 
@@ -13,34 +13,18 @@ pub fn reload_cert_list(
     auth_dialog: &Rc<PasswordDialog>,
     pending_file: &PendingFileCell,
 ) {
-    // Clear list_box
-    while let Some(child) = list_box.first_child() {
-        list_box.remove(&child);
-    }
+    crate::widgets::helpers::clear_list_box(list_box);
 
     let certs = certificates::list_ca_certificates();
 
     if certs.is_empty() {
-        let row = gtk4::ListBoxRow::new();
-        row.add_css_class("settings-card-row");
-        row.set_selectable(false);
-
-        let placeholder_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
-        placeholder_box.set_valign(gtk4::Align::Center);
-        placeholder_box.set_halign(gtk4::Align::Center);
-        placeholder_box.set_margin_top(40);
-        placeholder_box.set_margin_bottom(40);
-
-        let icon = babydra_utils::ui::icon::get_icon("key", 24);
-        icon.set_pixel_size(24);
-        placeholder_box.append(&icon);
-
-        let lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.cert_no_items")));
-        lbl.add_css_class("settings-row-title");
-        placeholder_box.append(&lbl);
-
-        row.set_child(Some(&placeholder_box));
-        list_box.append(&row);
+        list_box.append(&crate::widgets::helpers::create_placeholder_row(
+            crate::widgets::helpers::PlaceholderState::Empty {
+                title_key: "settings.cert_no_items",
+                desc_key: None,
+                icon_name: "key",
+            },
+        ));
         return;
     }
 

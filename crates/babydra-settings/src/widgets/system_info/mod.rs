@@ -6,7 +6,7 @@ use babydra_common::models::SystemInfoData;
 
 mod render;
 
-pub fn create_system_widget() -> gtk4::Box {
+pub fn create_system_widget() -> gtk4::Widget {
     // Render UI instantly with initial placeholder values (0ms blocking!)
     let (main_box, labels) = render::build_system_ui(
         "BabyDra Linux",
@@ -88,5 +88,5 @@ pub fn create_system_widget() -> gtk4::Box {
         }
     });
 
-    main_box
+    main_box.into()
 }

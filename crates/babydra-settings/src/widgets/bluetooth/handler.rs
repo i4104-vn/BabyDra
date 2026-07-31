@@ -5,122 +5,34 @@ use babydra_common::services::system::bluetooth::{connect_device, disconnect_dev
 use super::BluetoothState;
 
 pub fn render_device_list(list_box: &gtk4::ListBox, st: &BluetoothState) {
-    while let Some(child) = list_box.first_child() {
-        list_box.remove(&child);
-    }
+    crate::widgets::helpers::clear_list_box(list_box);
 
     if !st.enabled {
-        let row = gtk4::ListBoxRow::new();
-        row.add_css_class("settings-card-row");
-        row.set_selectable(false);
-        row.set_activatable(false);
-        row.set_vexpand(true);
-        row.set_valign(gtk4::Align::Fill);
-
-        let placeholder_box = gtk4::Box::new(gtk4::Orientation::Vertical, 14);
-        placeholder_box.set_valign(gtk4::Align::Center);
-        placeholder_box.set_halign(gtk4::Align::Center);
-        placeholder_box.set_vexpand(true);
-        placeholder_box.set_hexpand(true);
-        placeholder_box.set_margin_top(48);
-        placeholder_box.set_margin_bottom(48);
-
-        let icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
-        icon_badge.add_css_class("blue-icon-badge");
-        icon_badge.set_valign(gtk4::Align::Center);
-        icon_badge.set_halign(gtk4::Align::Center);
-
-        let bt_icon = babydra_utils::ui::icon::get_icon("bluetooth", 24);
-        bt_icon.set_pixel_size(24);
-        bt_icon.set_valign(gtk4::Align::Center);
-        bt_icon.set_halign(gtk4::Align::Center);
-        bt_icon.set_vexpand(true);
-        icon_badge.append(&bt_icon);
-        placeholder_box.append(&icon_badge);
-
-        let lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.bt_off")));
-        lbl.add_css_class("settings-row-title");
-        placeholder_box.append(&lbl);
-
-        let desc = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.bt_off_sub")));
-        desc.add_css_class("settings-row-desc");
-        placeholder_box.append(&desc);
-
-        row.set_child(Some(&placeholder_box));
-        list_box.append(&row);
+        list_box.append(&crate::widgets::helpers::create_placeholder_row(
+            crate::widgets::helpers::PlaceholderState::Disabled {
+                title_key: "settings.bt_off",
+                desc_key: "settings.bt_off_sub",
+                icon_name: "bluetooth",
+            },
+        ));
         return;
     }
 
     if st.enabled && st.is_loading && st.devices.is_empty() {
-        let row = gtk4::ListBoxRow::new();
-        row.add_css_class("settings-card-row");
-        row.set_selectable(false);
-        row.set_activatable(false);
-        row.set_vexpand(true);
-        row.set_valign(gtk4::Align::Fill);
-
-        let placeholder_box = gtk4::Box::new(gtk4::Orientation::Vertical, 14);
-        placeholder_box.set_valign(gtk4::Align::Center);
-        placeholder_box.set_halign(gtk4::Align::Center);
-        placeholder_box.set_vexpand(true);
-        placeholder_box.set_hexpand(true);
-        placeholder_box.set_margin_top(48);
-        placeholder_box.set_margin_bottom(48);
-
-        let spinner = gtk4::Spinner::new();
-        spinner.set_size_request(32, 32);
-        spinner.set_halign(gtk4::Align::Center);
-        spinner.start();
-        placeholder_box.append(&spinner);
-
-        let lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.loading")));
-        lbl.add_css_class("settings-row-title");
-        placeholder_box.append(&lbl);
-
-        row.set_child(Some(&placeholder_box));
-        list_box.append(&row);
+        list_box.append(&crate::widgets::helpers::create_placeholder_row(
+            crate::widgets::helpers::PlaceholderState::Loading,
+        ));
         return;
     }
 
     if st.devices.is_empty() {
-        let row = gtk4::ListBoxRow::new();
-        row.add_css_class("settings-card-row");
-        row.set_selectable(false);
-        row.set_activatable(false);
-        row.set_vexpand(true);
-        row.set_valign(gtk4::Align::Fill);
-
-        let placeholder_box = gtk4::Box::new(gtk4::Orientation::Vertical, 14);
-        placeholder_box.set_valign(gtk4::Align::Center);
-        placeholder_box.set_halign(gtk4::Align::Center);
-        placeholder_box.set_vexpand(true);
-        placeholder_box.set_hexpand(true);
-        placeholder_box.set_margin_top(48);
-        placeholder_box.set_margin_bottom(48);
-
-        let icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
-        icon_badge.add_css_class("blue-icon-badge");
-        icon_badge.set_valign(gtk4::Align::Center);
-        icon_badge.set_halign(gtk4::Align::Center);
-
-        let bt_icon = babydra_utils::ui::icon::get_icon("bluetooth", 24);
-        bt_icon.set_pixel_size(24);
-        bt_icon.set_valign(gtk4::Align::Center);
-        bt_icon.set_halign(gtk4::Align::Center);
-        bt_icon.set_vexpand(true);
-        icon_badge.append(&bt_icon);
-        placeholder_box.append(&icon_badge);
-
-        let lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.bt_no_devices")));
-        lbl.add_css_class("settings-row-title");
-        placeholder_box.append(&lbl);
-
-        let desc = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.bt_no_devices_sub")));
-        desc.add_css_class("settings-row-desc");
-        placeholder_box.append(&desc);
-
-        row.set_child(Some(&placeholder_box));
-        list_box.append(&row);
+        list_box.append(&crate::widgets::helpers::create_placeholder_row(
+            crate::widgets::helpers::PlaceholderState::Empty {
+                title_key: "settings.bt_no_devices",
+                desc_key: Some("settings.bt_no_devices_sub"),
+                icon_name: "bluetooth",
+            },
+        ));
         return;
     }
 
@@ -134,17 +46,7 @@ pub fn render_device_list(list_box: &gtk4::ListBox, st: &BluetoothState) {
         hbox.set_margin_start(8);
         hbox.set_margin_end(8);
 
-        let icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
-        icon_badge.add_css_class("blue-icon-badge-sm");
-        icon_badge.set_valign(gtk4::Align::Center);
-        icon_badge.set_halign(gtk4::Align::Start);
-
-        let icon = babydra_utils::ui::icon::get_icon("bluetooth", 18);
-        icon.set_pixel_size(18);
-        icon.set_valign(gtk4::Align::Center);
-        icon.set_halign(gtk4::Align::Center);
-        icon.set_vexpand(true);
-        icon_badge.append(&icon);
+        let icon_badge = crate::widgets::helpers::create_icon_badge("bluetooth", 18, true);
         hbox.append(&icon_badge);
 
         let text_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
@@ -179,7 +81,10 @@ pub fn render_device_list(list_box: &gtk4::ListBox, st: &BluetoothState) {
             disconnect_btn.add_css_class("connect-pill-btn");
             let mac_clone = dev.mac.clone();
             disconnect_btn.connect_clicked(move |_| {
-                let _ = disconnect_device(&mac_clone);
+                let mac = mac_clone.clone();
+                std::thread::spawn(move || {
+                    let _ = disconnect_device(&mac);
+                });
             });
             hbox.append(&disconnect_btn);
         } else {
@@ -188,7 +93,10 @@ pub fn render_device_list(list_box: &gtk4::ListBox, st: &BluetoothState) {
             connect_btn.add_css_class("suggested-action");
             let mac_clone = dev.mac.clone();
             connect_btn.connect_clicked(move |_| {
-                let _ = connect_device(&mac_clone);
+                let mac = mac_clone.clone();
+                std::thread::spawn(move || {
+                    let _ = connect_device(&mac);
+                });
             });
             hbox.append(&connect_btn);
         }

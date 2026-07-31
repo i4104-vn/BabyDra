@@ -1,46 +1,92 @@
-//! Settings window layout builder.
+//! Settings window layout builder with lazy page loading and dynamic navigation.
 
-use gtk4::prelude::*;
 use gtk4::gio;
+use gtk4::prelude::*;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 use crate::widgets;
 
-/// Sidebar navigation i18n keys (ordered to match button creation order).
-const SIDEBAR_I18N_KEYS: &[&str] = &[
-    "settings.nav_wifi",
-    "settings.nav_vpn",
-    "settings.nav_hosts",
-    "settings.nav_bluetooth",
-    "settings.nav_displays",
-    "settings.nav_wallpaper_themes",
-    "settings.nav_installed_apps",
-    "settings.nav_startup_apps",
-    "settings.nav_certificates",
-    "settings.nav_system_update",
-    "settings.nav_about_system",
-];
-
-/// Populate a content stack with all Settings widget pages.
-fn populate_content_stack(stack: &gtk4::Stack) {
-    // Remove existing children first
-    while let Some(child) = stack.first_child() {
-        stack.remove(&child);
-    }
-
-    stack.add_named(&widgets::wifi::create_wifi_widget(), Some("wifi"));
-    stack.add_named(&widgets::vpn::create_vpn_widget(), Some("vpn"));
-    stack.add_named(&widgets::bluetooth::create_bluetooth_widget(), Some("bluetooth"));
-    stack.add_named(&widgets::appearance::create_appearance_widget(), Some("appearance"));
-    stack.add_named(&widgets::displays::create_displays_widget(), Some("displays"));
-    stack.add_named(&widgets::apps::create_apps_widget(), Some("apps"));
-    stack.add_named(&widgets::startup::create_startup_widget(), Some("startup"));
-    stack.add_named(&widgets::certificates::create_certificates_widget(), Some("certificates"));
-    stack.add_named(&widgets::system_update::create_system_update_widget(), Some("system_update"));
-    stack.add_named(&widgets::hosts::create_hosts_widget(), Some("hosts"));
-    stack.add_named(&widgets::system_info::create_system_widget(), Some("system"));
+struct NavItem {
+    id: &'static str,
+    icon: &'static str,
+    i18n_key: &'static str,
 }
 
-/// Find and update the Label text inside a sidebar Button (Button > Box > Label).
+struct NavCategory {
+    title_key: &'static str,
+    items: &'static [NavItem],
+}
+
+const NAV_CATEGORIES: &[NavCategory] = &[
+    NavCategory {
+        title_key: "settings.cat_network",
+        items: &[
+            NavItem { id: "wifi", icon: "wifi", i18n_key: "settings.nav_wifi" },
+            NavItem { id: "bluetooth", icon: "bluetooth", i18n_key: "settings.nav_bluetooth" },
+            NavItem { id: "vpn", icon: "lock", i18n_key: "settings.nav_vpn" },
+            NavItem { id: "hosts", icon: "file-text", i18n_key: "settings.nav_hosts" },
+        ],
+    },
+    NavCategory {
+        title_key: "settings.cat_hardware",
+        items: &[
+            NavItem { id: "displays", icon: "desktop", i18n_key: "settings.nav_displays" },
+            NavItem { id: "keybinds", icon: "cog", i18n_key: "settings.nav_keybinds" },
+        ],
+    },
+    NavCategory {
+        title_key: "settings.cat_apps",
+        items: &[
+            NavItem { id: "appearance", icon: "palette", i18n_key: "settings.nav_wallpaper_themes" },
+            NavItem { id: "apps", icon: "th-large", i18n_key: "settings.nav_installed_apps" },
+            NavItem { id: "startup", icon: "cog", i18n_key: "settings.nav_startup_apps" },
+        ],
+    },
+    NavCategory {
+        title_key: "settings.cat_system",
+        items: &[
+            NavItem { id: "env", icon: "sliders", i18n_key: "settings.nav_env" },
+            NavItem { id: "certificates", icon: "key", i18n_key: "settings.nav_certificates" },
+            NavItem { id: "system_update", icon: "history", i18n_key: "settings.nav_system_update" },
+        ],
+    },
+];
+
+const FOOTER_ITEM: NavItem = NavItem {
+    id: "system",
+    icon: "info",
+    i18n_key: "settings.nav_about_system",
+};
+
+/// Instantiates a settings page widget by name on demand.
+fn create_widget_page(name: &str) -> gtk4::Widget {
+    match name {
+        "wifi" => widgets::wifi::create_wifi_widget(),
+        "vpn" => widgets::vpn::create_vpn_widget(),
+        "hosts" => widgets::hosts::create_hosts_widget(),
+        "env" => widgets::env::create_env_widget(),
+        "bluetooth" => widgets::bluetooth::create_bluetooth_widget(),
+        "displays" => widgets::displays::create_displays_widget(),
+        "keybinds" => widgets::keybinds::create_keybinds_widget(),
+        "appearance" => widgets::appearance::create_appearance_widget(),
+        "apps" => widgets::apps::create_apps_widget(),
+        "startup" => widgets::startup::create_startup_widget(),
+        "certificates" => widgets::certificates::create_certificates_widget(),
+        "system_update" => widgets::system_update::create_system_update_widget(),
+        "system" => widgets::system_info::create_system_widget(),
+        _ => gtk4::Box::new(gtk4::Orientation::Vertical, 0).upcast(),
+    }
+}
+
+/// Ensures that a widget page is constructed and added to the content stack.
+fn ensure_page_loaded(stack: &gtk4::Stack, name: &str) {
+    if stack.child_by_name(name).is_none() {
+        stack.add_named(&create_widget_page(name), Some(name));
+    }
+}
+
+/// Finds and updates the Label text inside a sidebar Button (Button > Box > Label).
 fn update_sidebar_label(btn: &gtk4::Button, new_text: &str) {
     if let Some(child) = btn.child() {
         if let Ok(hbox) = child.downcast::<gtk4::Box>() {
@@ -72,11 +118,9 @@ pub fn build_main_window(app: &gtk4::Application) {
     window.add_css_class("settings-window");
 
     let overlay = gtk4::Overlay::new();
-
-    // Main layout split box
     let main_layout = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
 
-    // ── Left: Windows 11 / Acrylic Sidebar Navigation ───────────
+    // ── Left: Sidebar Navigation Container ─────────────────────
     let sidebar_box = gtk4::Box::new(gtk4::Orientation::Vertical, 10);
     sidebar_box.add_css_class("sidebar");
     sidebar_box.set_width_request(240);
@@ -86,10 +130,10 @@ pub fn build_main_window(app: &gtk4::Application) {
     sidebar_box.set_margin_bottom(8);
     sidebar_box.set_margin_start(8);
 
-    // 1. App Title Header Box
+    // App Header Box
     let profile_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
     profile_box.set_margin_top(12);
-    profile_box.set_margin_bottom(4);
+    profile_box.set_margin_bottom(8);
     profile_box.set_margin_start(12);
     profile_box.set_margin_end(12);
 
@@ -114,96 +158,49 @@ pub fn build_main_window(app: &gtk4::Application) {
     profile_box.append(&title_info_box);
     sidebar_box.append(&profile_box);
 
-    // Search Input Box
-    let search_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    search_box.set_margin_start(12);
-    search_box.set_margin_end(12);
-    search_box.set_margin_top(4);
-    search_box.set_margin_bottom(8);
-
-    let search_entry = gtk4::Entry::new();
-    search_entry.set_placeholder_text(Some(&babydra_common::i18n::t("settings.search_placeholder")));
-    search_entry.add_css_class("sidebar-search-entry");
-    search_entry.set_hexpand(true);
-    search_box.append(&search_entry);
-    sidebar_box.append(&search_box);
-
     let profile_sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
     profile_sep.add_css_class("profile-separator");
     sidebar_box.append(&profile_sep);
 
-    // 2. Navigation Scrolled List
+    // Navigation Scrolled List
     let sidebar_scroll = gtk4::ScrolledWindow::new();
     sidebar_scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
     sidebar_scroll.set_vexpand(true);
 
     let nav_container = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
 
-    // Category 1: Network & Internet
-    let cat_net_hdr = create_sidebar_category_header("settings.cat_network");
-    let btn_wifi = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_wifi"), "wifi", "sidebar-item", || {});
-    btn_wifi.set_cursor_from_name(Some("pointer"));
+    let category_labels: Rc<RefCell<Vec<(gtk4::Label, &'static str)>>> = Rc::new(RefCell::new(Vec::new()));
+    let nav_buttons: Rc<RefCell<Vec<(&'static str, gtk4::Button, &'static str)>>> = Rc::new(RefCell::new(Vec::new()));
 
-    let btn_vpn = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_vpn"), "lock", "sidebar-item", || {});
-    btn_vpn.set_cursor_from_name(Some("pointer"));
+    for cat in NAV_CATEGORIES {
+        let hdr = create_sidebar_category_header(cat.title_key);
+        nav_container.append(&hdr);
+        category_labels.borrow_mut().push((hdr, cat.title_key));
 
-    let btn_hosts = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_hosts"), "file-text", "sidebar-item", || {});
-    btn_hosts.set_cursor_from_name(Some("pointer"));
+        for item in cat.items {
+            let btn = babydra_utils::components::create_sidebar_item_button(
+                &babydra_common::i18n::t(item.i18n_key),
+                item.icon,
+                "sidebar-item",
+                || {},
+            );
+            btn.set_cursor_from_name(Some("pointer"));
+            nav_container.append(&btn);
+            nav_buttons.borrow_mut().push((item.id, btn, item.i18n_key));
+        }
+    }
 
-    // Category 2: Hardware & Devices
-    let cat_hw_hdr = create_sidebar_category_header("settings.cat_hardware");
-    let btn_bt = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_bluetooth"), "bluetooth", "sidebar-item", || {});
-    btn_bt.set_cursor_from_name(Some("pointer"));
-
-    let btn_displays = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_displays"), "desktop", "sidebar-item", || {});
-    btn_displays.set_cursor_from_name(Some("pointer"));
-
-    // Category 3: Personalization & Apps
-    let cat_apps_hdr = create_sidebar_category_header("settings.cat_apps");
-    let btn_app = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_wallpaper_themes"), "palette", "sidebar-item", || {});
-    btn_app.set_cursor_from_name(Some("pointer"));
-
-    let btn_apps = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_installed_apps"), "th-large", "sidebar-item", || {});
-    btn_apps.set_cursor_from_name(Some("pointer"));
-
-    let btn_startup = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_startup_apps"), "cog", "sidebar-item", || {});
-    btn_startup.set_cursor_from_name(Some("pointer"));
-
-    // Category 4: System & Security
-    let cat_sys_hdr = create_sidebar_category_header("settings.cat_system");
-    let btn_certs = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_certificates"), "key", "sidebar-item", || {});
-    btn_certs.set_cursor_from_name(Some("pointer"));
-
-    let btn_update = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_system_update"), "history", "sidebar-item", || {});
-    btn_update.set_cursor_from_name(Some("pointer"));
-
-    let btn_sys = babydra_utils::components::create_sidebar_item_button(&babydra_common::i18n::t("settings.nav_about_system"), "info", "sidebar-item", || {});
+    // Pinned Footer Item (About System)
+    let btn_sys = babydra_utils::components::create_sidebar_item_button(
+        &babydra_common::i18n::t(FOOTER_ITEM.i18n_key),
+        FOOTER_ITEM.icon,
+        "sidebar-item",
+        || {},
+    );
     btn_sys.add_css_class("active-nav");
     btn_sys.set_cursor_from_name(Some("pointer"));
+    nav_buttons.borrow_mut().push((FOOTER_ITEM.id, btn_sys.clone(), FOOTER_ITEM.i18n_key));
 
-    // Append Category 1
-    nav_container.append(&cat_net_hdr);
-    nav_container.append(&btn_wifi);
-    nav_container.append(&btn_vpn);
-    nav_container.append(&btn_hosts);
-
-    // Append Category 2
-    nav_container.append(&cat_hw_hdr);
-    nav_container.append(&btn_bt);
-    nav_container.append(&btn_displays);
-
-    // Append Category 3
-    nav_container.append(&cat_apps_hdr);
-    nav_container.append(&btn_app);
-    nav_container.append(&btn_apps);
-    nav_container.append(&btn_startup);
-
-    // Append Category 4
-    nav_container.append(&cat_sys_hdr);
-    nav_container.append(&btn_certs);
-    nav_container.append(&btn_update);
-
-    // Divider before pinned footer About System item
     let footer_sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
     footer_sep.add_css_class("profile-separator");
 
@@ -227,7 +224,8 @@ pub fn build_main_window(app: &gtk4::Application) {
     content_stack.set_vexpand(true);
     content_stack.add_css_class("settings-content");
 
-    populate_content_stack(&content_stack);
+    // Eagerly load initial default page only ("system")
+    ensure_page_loaded(&content_stack, "system");
     content_stack.set_visible_child_name("system");
 
     let right_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
@@ -242,86 +240,62 @@ pub fn build_main_window(app: &gtk4::Application) {
     main_layout.append(&right_box);
     overlay.set_child(Some(&main_layout));
 
-    // --- Navigation Active Handling ---
-    let all_btns = vec![
-        ("wifi", btn_wifi.clone()),
-        ("vpn", btn_vpn.clone()),
-        ("hosts", btn_hosts.clone()),
-        ("bluetooth", btn_bt.clone()),
-        ("displays", btn_displays.clone()),
-        ("appearance", btn_app.clone()),
-        ("apps", btn_apps.clone()),
-        ("startup", btn_startup.clone()),
-        ("certificates", btn_certs.clone()),
-        ("system_update", btn_update.clone()),
-        ("system", btn_sys.clone()),
-    ];
-
-    for (name, button) in all_btns.iter() {
-        let name_str = name.to_string();
+    // Wire navigation button clicks
+    for (id, button, _) in nav_buttons.borrow().iter() {
+        let name_str = id.to_string();
         let stack_c = content_stack.clone();
-        let all_btns_c = all_btns.clone();
+        let nav_buttons_c = nav_buttons.clone();
         let button_c = button.clone();
+
         button.connect_clicked(move |_| {
-            for (_, b) in all_btns_c.iter() {
+            for (_, b, _) in nav_buttons_c.borrow().iter() {
                 b.remove_css_class("active-nav");
             }
             button_c.add_css_class("active-nav");
+
+            ensure_page_loaded(&stack_c, &name_str);
             stack_c.set_visible_child_name(&name_str);
         });
     }
 
-    // --- Rebuild UI Action (triggered by language toggle) ---
+    // ── Rebuild UI Action (Language Toggle Handler) ─────────────
     let rebuild_action = gio::SimpleAction::new("rebuild-ui", None);
     {
         let content_stack_c = content_stack.clone();
         let app_title_lbl_c = app_title_lbl.clone();
         let app_sub_lbl_c = app_sub_lbl.clone();
-        let search_entry_c = search_entry.clone();
-        let all_btns_c = all_btns.clone();
-
-        let cat_net_hdr_c = cat_net_hdr.clone();
-        let cat_hw_hdr_c = cat_hw_hdr.clone();
-        let cat_apps_hdr_c = cat_apps_hdr.clone();
-        let cat_sys_hdr_c = cat_sys_hdr.clone();
+        let category_labels_c = category_labels.clone();
+        let nav_buttons_c = nav_buttons.clone();
 
         rebuild_action.connect_activate(move |_, _| {
             let stack = content_stack_c.clone();
             let title = app_title_lbl_c.clone();
             let sub = app_sub_lbl_c.clone();
-            let search = search_entry_c.clone();
-            let btns = all_btns_c.clone();
+            let cat_labels = category_labels_c.clone();
+            let buttons = nav_buttons_c.clone();
 
-            let h_net = cat_net_hdr_c.clone();
-            let h_hw = cat_hw_hdr_c.clone();
-            let h_apps = cat_apps_hdr_c.clone();
-            let h_sys = cat_sys_hdr_c.clone();
-
-            // Use idle_add_local_once to avoid blocking the click handler
             gtk4::glib::idle_add_local_once(move || {
                 // 1. Update category header labels
-                h_net.set_text(&babydra_common::i18n::t("settings.cat_network"));
-                h_hw.set_text(&babydra_common::i18n::t("settings.cat_hardware"));
-                h_apps.set_text(&babydra_common::i18n::t("settings.cat_apps"));
-                h_sys.set_text(&babydra_common::i18n::t("settings.cat_system"));
-
-                // 2. Update sidebar item labels
-                for (i, (_, btn)) in btns.iter().enumerate() {
-                    if let Some(key) = SIDEBAR_I18N_KEYS.get(i) {
-                        update_sidebar_label(btn, &babydra_common::i18n::t(key));
-                    }
+                for (lbl, key) in cat_labels.borrow().iter() {
+                    lbl.set_text(&babydra_common::i18n::t(key));
                 }
 
-                // 3. Update header labels
+                // 2. Update sidebar item labels
+                for (_, btn, key) in buttons.borrow().iter() {
+                    update_sidebar_label(btn, &babydra_common::i18n::t(key));
+                }
+
+                // 3. Update main header labels
                 title.set_text(&babydra_common::i18n::t("settings.title"));
                 sub.set_text(&babydra_common::i18n::t("settings.subtitle"));
-                search.set_placeholder_text(Some(&babydra_common::i18n::t("settings.search_placeholder")));
 
-                // 4. Rebuild content stack pages (preserving current page)
-                let current_page = stack.visible_child_name().map(|s| s.to_string());
-                populate_content_stack(&stack);
-                if let Some(page) = current_page {
-                    stack.set_visible_child_name(&page);
+                // 4. Clear unvisited cached pages and rebuild current active page
+                if let Some(current_name) = stack.visible_child_name().map(|s| s.to_string()) {
+                    while let Some(child) = stack.first_child() {
+                        stack.remove(&child);
+                    }
+                    stack.add_named(&create_widget_page(&current_name), Some(&current_name));
+                    stack.set_visible_child_name(&current_name);
                 }
             });
         });

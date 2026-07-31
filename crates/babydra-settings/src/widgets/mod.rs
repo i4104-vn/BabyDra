@@ -1,3 +1,4 @@
+pub mod helpers;
 pub mod wifi;
 pub mod bluetooth;
 pub mod vpn;
@@ -9,3 +10,5 @@ pub mod system_update;
 pub mod hosts;
 pub mod system_info;
 pub mod certificates;
+pub mod env;
+pub mod keybinds;

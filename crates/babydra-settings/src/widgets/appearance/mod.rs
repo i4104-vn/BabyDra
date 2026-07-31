@@ -5,7 +5,7 @@ use babydra_common::services::wallpaper::{get_wallpaper_dir, get_local_wallpaper
 
 mod render;
 
-pub fn create_appearance_widget() -> gtk4::Box {
+pub fn create_appearance_widget() -> gtk4::Widget {
     let gtk_themes = babydra_common::services::system::theme::get_gtk_themes();
     let icon_themes = babydra_common::services::system::theme::get_icon_themes();
     let cursor_themes = babydra_common::services::system::theme::get_cursor_themes();
@@ -199,5 +199,5 @@ pub fn create_appearance_widget() -> gtk4::Box {
         }
     });
 
-    main_box
+    main_box.into()
 }

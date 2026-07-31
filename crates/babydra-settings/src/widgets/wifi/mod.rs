@@ -14,7 +14,7 @@ pub struct WifiState {
     pub is_loading: bool,
 }
 
-pub fn create_wifi_widget() -> gtk4::Overlay {
+pub fn create_wifi_widget() -> gtk4::Widget {
     let (overlay, wifi_switch, list_box, info_dialog, password_dialog, config_dialog) = render::build_wifi_ui();
 
     let info_dialog = Rc::new(info_dialog);
@@ -202,5 +202,5 @@ pub fn create_wifi_widget() -> gtk4::Overlay {
         glib::Propagation::Proceed
     });
 
-    overlay
+    overlay.into()
 }

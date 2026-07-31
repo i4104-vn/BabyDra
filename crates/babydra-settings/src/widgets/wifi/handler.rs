@@ -12,84 +12,34 @@ pub fn render_network_list(
     password_dialog: &Rc<WifiPasswordDialog>,
     _config_dialog: &Rc<WifiConfigDialog>,
 ) {
-    while let Some(child) = list_box.first_child() {
-        list_box.remove(&child);
-    }
+    crate::widgets::helpers::clear_list_box(list_box);
 
     if !st.enabled {
-        let row = gtk4::ListBoxRow::new();
-        row.add_css_class("settings-card-row");
-
-        let placeholder_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
-        placeholder_box.set_valign(gtk4::Align::Center);
-        placeholder_box.set_halign(gtk4::Align::Center);
-        placeholder_box.set_margin_top(30);
-        placeholder_box.set_margin_bottom(30);
-
-        let wifi_icon = babydra_utils::ui::icon::get_icon("wifi", 24);
-        wifi_icon.set_pixel_size(24);
-        wifi_icon.add_css_class("settings-row-icon");
-        placeholder_box.append(&wifi_icon);
-
-        let lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.wifi_disabled")));
-        lbl.add_css_class("settings-row-title");
-        placeholder_box.append(&lbl);
-
-        let desc = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.wifi_disabled_sub")));
-        desc.add_css_class("settings-row-desc");
-        placeholder_box.append(&desc);
-
-        row.set_child(Some(&placeholder_box));
-        list_box.append(&row);
+        list_box.append(&crate::widgets::helpers::create_placeholder_row(
+            crate::widgets::helpers::PlaceholderState::Disabled {
+                title_key: "settings.wifi_disabled",
+                desc_key: "settings.wifi_disabled_sub",
+                icon_name: "wifi",
+            },
+        ));
         return;
     }
 
     if st.enabled && st.is_loading && st.networks.is_empty() {
-        let row = gtk4::ListBoxRow::new();
-        row.add_css_class("settings-card-row");
-
-        let placeholder_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
-        placeholder_box.set_valign(gtk4::Align::Center);
-        placeholder_box.set_halign(gtk4::Align::Center);
-        placeholder_box.set_margin_top(30);
-        placeholder_box.set_margin_bottom(30);
-
-        let spinner = gtk4::Spinner::new();
-        spinner.set_size_request(32, 32);
-        spinner.set_halign(gtk4::Align::Center);
-        spinner.start();
-        placeholder_box.append(&spinner);
-
-        let lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.loading")));
-        lbl.add_css_class("settings-row-title");
-        placeholder_box.append(&lbl);
-
-        row.set_child(Some(&placeholder_box));
-        list_box.append(&row);
+        list_box.append(&crate::widgets::helpers::create_placeholder_row(
+            crate::widgets::helpers::PlaceholderState::Loading,
+        ));
         return;
     }
 
     if st.networks.is_empty() {
-        let row = gtk4::ListBoxRow::new();
-        row.add_css_class("settings-card-row");
-
-        let placeholder_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
-        placeholder_box.set_valign(gtk4::Align::Center);
-        placeholder_box.set_halign(gtk4::Align::Center);
-        placeholder_box.set_margin_top(30);
-        placeholder_box.set_margin_bottom(30);
-
-        let wifi_icon = babydra_utils::ui::icon::get_icon("wifi", 24);
-        wifi_icon.set_pixel_size(24);
-        wifi_icon.add_css_class("settings-row-icon");
-        placeholder_box.append(&wifi_icon);
-
-        let lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.wifi_no_networks")));
-        lbl.add_css_class("settings-row-title");
-        placeholder_box.append(&lbl);
-
-        row.set_child(Some(&placeholder_box));
-        list_box.append(&row);
+        list_box.append(&crate::widgets::helpers::create_placeholder_row(
+            crate::widgets::helpers::PlaceholderState::Empty {
+                title_key: "settings.wifi_no_networks",
+                desc_key: None,
+                icon_name: "wifi",
+            },
+        ));
         return;
     }
 

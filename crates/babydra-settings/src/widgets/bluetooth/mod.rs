@@ -16,7 +16,7 @@ pub struct BluetoothState {
     pub is_loading: bool,
 }
 
-pub fn create_bluetooth_widget() -> gtk4::Box {
+pub fn create_bluetooth_widget() -> gtk4::Widget {
     let (main_box, bt_switch, list_box) = render::build_bluetooth_ui();
 
     let state = Rc::new(RefCell::new(BluetoothState {
@@ -144,5 +144,5 @@ pub fn create_bluetooth_widget() -> gtk4::Box {
         glib::Propagation::Proceed
     });
 
-    main_box
+    main_box.into()
 }

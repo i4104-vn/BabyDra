@@ -1,13 +1,6 @@
 use gtk4::prelude::*;
+use babydra_common::models::certificates::CertificatesWidget;
 use babydra_utils::components::modal::PasswordDialog;
-
-#[derive(Clone)]
-pub struct CertificatesWidget {
-    pub root: gtk4::Overlay,
-    pub container: gtk4::Box,
-    pub add_btn: gtk4::Button,
-    pub list_box: gtk4::ListBox,
-}
 
 pub fn build_certificates_ui() -> (CertificatesWidget, PasswordDialog) {
     let root = gtk4::Overlay::new();

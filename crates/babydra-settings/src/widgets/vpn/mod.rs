@@ -13,7 +13,7 @@ use babydra_common::services::system::vpn::{
 mod handler;
 mod render;
 
-pub fn create_vpn_widget() -> gtk4::Box {
+pub fn create_vpn_widget() -> gtk4::Widget {
     let (main_box, import_btn, add_custom_btn, list_box, config_dialog, log_dialog) = render::build_vpn_ui();
 
     let state = Rc::new(RefCell::new(Vec::<VpnConn>::new()));
@@ -155,5 +155,5 @@ pub fn create_vpn_widget() -> gtk4::Box {
         }
     });
 
-    main_box
+    main_box.into()
 }
