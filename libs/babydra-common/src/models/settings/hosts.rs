@@ -1,5 +1,6 @@
 use gtk4::{Box, Button, Label, Overlay, TextBuffer, TextView};
 
+#[derive(Clone)]
 pub struct HostsWidget {
     pub root: Overlay,
     pub container: Box,
@@ -10,5 +11,4 @@ pub struct HostsWidget {
     pub glass_card: Box,
     pub text_view: TextView,
     pub text_buffer: TextBuffer,
-    pub auth_overlay: Box,
 }

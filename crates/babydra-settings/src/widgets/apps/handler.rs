@@ -1,8 +1,8 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 use gtk4::prelude::*;
-use babydra_common::models::app_info::AppsWidget;
 use babydra_utils::components::modal::PasswordDialog;
+use babydra_common::models::app_info::AppsWidget;
 use super::render::UninstallRowItem;
 
 pub fn wire_events(widget: &AppsWidget, auth_dialog: PasswordDialog, uninstall_items: Vec<UninstallRowItem>) {

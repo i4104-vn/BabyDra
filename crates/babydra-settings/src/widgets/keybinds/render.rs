@@ -1,36 +1,26 @@
 use gtk4::prelude::*;
 use gtk4::{Box, Button, DropDown, Entry, Label, Orientation, StringList};
-use babydra_common::models::keybind::Keybind;
-
-pub struct KeybindsWidget {
-    pub container: Box,
-    pub table_box: Box,
-    pub add_btn: Button,
-    pub refresh_btn: Button,
-    pub save_btn: Button,
-}
+use babydra_common::models::keybind::{Keybind, KeybindsWidget};
 
 pub fn build(keybinds: &[Keybind]) -> KeybindsWidget {
     let container = Box::new(Orientation::Vertical, 16);
-    container.set_margin_top(16);
-    container.set_margin_bottom(16);
-    container.set_margin_start(16);
-    container.set_margin_end(16);
+    container.set_vexpand(true);
+    container.set_valign(gtk4::Align::Fill);
 
     // Header
     let header_box = Box::new(Orientation::Horizontal, 12);
-    let title_label = Label::new(Some("Keybinds"));
-    title_label.add_css_class("settings-title-label");
+    let title_label = Label::new(Some(&babydra_common::i18n::t("settings.keybinds_title_page")));
+    title_label.add_css_class("settings-page-title");
     title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);
 
-    let refresh_btn = Button::with_label("Refresh");
+    let refresh_btn = Button::with_label(&babydra_common::i18n::t("settings.refresh"));
     refresh_btn.add_css_class("connect-pill-btn");
 
-    let add_btn = Button::with_label("+ Add New");
+    let add_btn = Button::with_label(&babydra_common::i18n::t("settings.startup_add_new"));
     add_btn.add_css_class("connect-pill-btn");
 
-    let save_btn = Button::with_label("Save Changes");
+    let save_btn = Button::with_label(&babydra_common::i18n::t("settings.save_changes"));
     save_btn.add_css_class("suggested-action");
 
     header_box.append(&title_label);
@@ -39,9 +29,13 @@ pub fn build(keybinds: &[Keybind]) -> KeybindsWidget {
     header_box.append(&save_btn);
     container.append(&header_box);
 
+    let glass_card = Box::new(Orientation::Vertical, 0);
+    glass_card.add_css_class("glass-panel");
+    glass_card.set_vexpand(true);
+    glass_card.set_valign(gtk4::Align::Fill);
+
     // Table Container Card
     let table_card = Box::new(Orientation::Vertical, 4);
-    table_card.add_css_class("settings-card");
 
     // Table Header Row
     let th_row = Box::new(Orientation::Horizontal, 12);
@@ -87,7 +81,14 @@ pub fn build(keybinds: &[Keybind]) -> KeybindsWidget {
         table_card.append(&row);
     }
 
-    container.append(&table_card);
+    let scroll = gtk4::ScrolledWindow::new();
+    scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
+    scroll.set_vexpand(true);
+    scroll.set_valign(gtk4::Align::Fill);
+    scroll.set_child(Some(&table_card));
+
+    glass_card.append(&scroll);
+    container.append(&glass_card);
 
     KeybindsWidget {
         container,

@@ -1,4 +1,4 @@
-use gtk4::{Box, Button, Label, ListBox, Overlay, PasswordEntry, ScrolledWindow, Spinner, TextBuffer, TextView};
+use gtk4::{Box, Button, Label, ListBox, Overlay, ScrolledWindow, Spinner, TextBuffer, TextView};
 
 #[derive(Debug, Clone)]
 pub struct PackageUpdate {
@@ -7,6 +7,7 @@ pub struct PackageUpdate {
     pub new_version: String,
 }
 
+#[derive(Clone)]
 pub struct SystemUpdateWidget {
     pub root: Overlay,
     pub container: Box,
@@ -16,14 +17,6 @@ pub struct SystemUpdateWidget {
     pub refresh_btn: Button,
     pub glass_card: Box,
     pub list_box: ListBox,
-    
-    // Auth Dialog Overlay
-    pub auth_overlay: Box,
-    pub password_entry: PasswordEntry,
-    pub auth_confirm_btn: Button,
-    pub auth_cancel_btn: Button,
-    
-    // Console Log Glass Panel
     pub console_card: Box,
     pub console_title_lbl: Label,
     pub console_close_btn: Button,

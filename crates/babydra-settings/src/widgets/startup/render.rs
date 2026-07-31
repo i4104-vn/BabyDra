@@ -1,14 +1,6 @@
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Entry, Label, Orientation};
-use babydra_common::models::startup_command::StartupCommand;
-
-pub struct StartupWidget {
-    pub container: Box,
-    pub list_box: Box,
-    pub add_btn: Button,
-    pub save_btn: Button,
-    pub entries: Vec<Entry>,
-}
+use babydra_common::models::startup_command::{StartupCommand, StartupWidget};
 
 pub fn build(commands: &[StartupCommand]) -> StartupWidget {
     let container = Box::new(Orientation::Vertical, 16);

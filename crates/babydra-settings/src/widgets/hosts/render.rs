@@ -75,7 +75,6 @@ pub fn build() -> (HostsWidget, PasswordDialog) {
         glass_card,
         text_view,
         text_buffer,
-        auth_overlay: auth_dialog.container.clone(),
     };
 
     (widget, auth_dialog)

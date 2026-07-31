@@ -5,7 +5,33 @@ use gtk4::Widget;
 use babydra_common::models::keybind::Keybind;
 
 pub fn create_keybinds_widget() -> Widget {
-    let keybinds = babydra_common::services::system::keybinds::get_keybinds();
+    let keybinds = vec![
+        Keybind {
+            id: 1,
+            bind_type: "bind".to_string(),
+            modifiers: "SUPER".to_string(),
+            key: "Q".to_string(),
+            dispatcher: "exec".to_string(),
+            args: "kitty".to_string(),
+        },
+        Keybind {
+            id: 2,
+            bind_type: "bind".to_string(),
+            modifiers: "SUPER".to_string(),
+            key: "C".to_string(),
+            dispatcher: "killactive".to_string(),
+            args: "".to_string(),
+        },
+        Keybind {
+            id: 3,
+            bind_type: "bind".to_string(),
+            modifiers: "SUPER".to_string(),
+            key: "E".to_string(),
+            dispatcher: "exec".to_string(),
+            args: "babydra-explore".to_string(),
+        },
+    ];
+
     let widget = render::build(&keybinds);
 
     let parent_card = widget.table_box.clone();
@@ -22,10 +48,6 @@ pub fn create_keybinds_widget() -> Widget {
         };
         let row = render::create_keybind_row(&empty_kb, &types, &mods, parent_card.clone());
         parent_card.append(&row);
-    });
-
-    widget.save_btn.connect_clicked(move |_| {
-        // Save logic
     });
 
     widget.container.into()

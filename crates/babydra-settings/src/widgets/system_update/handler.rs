@@ -1,6 +1,5 @@
 use gtk4::prelude::*;
-use babydra_common::models::system_update::PackageUpdate;
-use babydra_common::models::system_update::SystemUpdateWidget;
+use babydra_common::models::system_update::{PackageUpdate, SystemUpdateWidget};
 use babydra_utils::components::modal::PasswordDialog;
 use super::render;
 use babydra_common::services::system::updates::{
