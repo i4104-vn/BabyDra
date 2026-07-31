@@ -1,0 +1,13 @@
+{
+  "launcher.search_placeholder": "Tìm kiếm ứng dụng hoặc tệp...",
+  "launcher.welcome": "Nhập từ khóa để tìm ứng dụng và tệp...",
+  "launcher.apps": "Ứng dụng",
+  "launcher.other_apps": "Ứng dụng khác",
+  "launcher.files": "Tệp tin",
+  "launcher.no_results": "Không tìm thấy kết quả phù hợp",
+  "launcher.google_search": "Tìm kiếm Google cho \"{}\"",
+  "launcher.shutdown": "Tắt máy",
+  "launcher.restart": "Khởi động lại",
+  "launcher.suspend": "Tạm dừng",
+  "launcher.logout": "Đăng xuất"
+}
