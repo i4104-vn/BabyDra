@@ -310,3 +310,13 @@ button.properties-btn-cancel:hover {
     background-color: rgba(0, 0, 0, 0.09);
     color: #111827;
 }
+
+
+.dialog-error-text {
+    color: #dc2626;
+}
+
+.explore-dialog entry.error-entry {
+    border-color: #ef4444;
+}
+

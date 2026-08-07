@@ -224,49 +224,36 @@ button.wallpaper-action-btn:hover {
 
 /* App Manager Tabs */
 button.app-tab-btn {
-    background: transparent;
-    border: none;
     color: rgba(28, 28, 30, 0.55);
-    font-size: 14px;
-    font-weight: 500;
-    padding: 4px 12px;
 }
 
 button.app-tab-btn.active {
     color: #3b82f6;
-    font-weight: 700;
     border-bottom: 2px solid #3b82f6;
 }
 
 /* Dropdown Select Controls (Matching Search Input Style) */
 dropdown {
-    background: transparent;
-    border: none;
-    box-shadow: none;
 }
 
-dropdown > button {
+dropdown>button {
     background-color: rgba(0, 0, 0, 0.03);
     border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 10px;
-    padding: 8px 14px;
     color: #1c1c1e;
-    transition: all 200ms ease;
-    box-shadow: none;
 }
 
-dropdown > button:hover {
+dropdown>button:hover {
     background-color: rgba(0, 0, 0, 0.06);
     border-color: rgba(0, 0, 0, 0.14);
 }
 
-dropdown:focus-within > button,
-dropdown > button:focus {
+dropdown:focus-within>button,
+dropdown>button:focus {
     border-color: #3b82f6;
     background-color: rgba(59, 130, 246, 0.04);
 }
 
-dropdown > popover,
+dropdown>popover,
 popover.menu {
     background: transparent;
     border: none;
@@ -274,8 +261,8 @@ popover.menu {
     padding: 0;
 }
 
-dropdown > popover > contents,
-popover.menu > contents {
+dropdown>popover>contents,
+popover.menu>contents {
     background-color: #ffffff;
     border: 1px solid rgba(0, 0, 0, 0.10);
     border-radius: 12px;
@@ -283,14 +270,14 @@ popover.menu > contents {
     padding: 6px;
 }
 
-dropdown > popover > contents listview,
-dropdown > popover > contents list {
+dropdown>popover>contents listview,
+dropdown>popover>contents list {
     background: transparent;
     background-color: transparent;
 }
 
-dropdown > popover > contents row,
-dropdown > popover > contents listview > row {
+dropdown>popover>contents row,
+dropdown>popover>contents listview>row {
     background-color: transparent;
     border-radius: 8px;
     padding: 8px 12px;
@@ -298,22 +285,20 @@ dropdown > popover > contents listview > row {
     transition: background-color 150ms ease;
 }
 
-dropdown > popover > contents row:hover,
-dropdown > popover > contents listview > row:hover {
+dropdown>popover>contents row:hover,
+dropdown>popover>contents listview>row:hover {
     background-color: rgba(0, 0, 0, 0.05);
     color: #1c1c1e;
 }
 
-dropdown > popover > contents row:selected,
-dropdown > popover > contents listview > row:selected {
+dropdown>popover>contents row:selected,
+dropdown>popover>contents listview>row:selected {
     background-color: rgba(59, 130, 246, 0.12);
     color: #3b82f6;
     font-weight: 600;
 }
 
 .hero-hostname {
-    font-size: 22px;
-    font-weight: 700;
     color: #1c1c1e;
 }
 
@@ -348,7 +333,6 @@ button.lang-seg-active {
 }
 
 button.lang-seg-inactive {
-    background-color: transparent;
     color: rgba(0, 0, 0, 0.60);
 }
 
@@ -369,5 +353,221 @@ button.lang-seg-inactive:hover {
 }
 
 .cheatsheet-value {
+    color: #1c1c1e;
+}
+
+
+/* --- Synced from dark theme --- */
+.blue-icon-badge {
+    background-color: #2563eb;
+    color: #ffffff;
+    border-radius: 10px;
+    min-width: 44px;
+    min-height: 44px;
+}
+
+.blue-icon-badge-sm {
+    background-color: #2563eb;
+    color: #ffffff;
+    border-radius: 8px;
+    min-width: 32px;
+    min-height: 32px;
+}
+
+.spec-card {
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    padding: 24px 20px;
+    transition: transform 200ms ease, background-color 200ms ease;
+}
+
+.spec-card:hover {
+    background-color: #f4f4f5;
+    border-color: rgba(0, 0, 0, 0.14);
+}
+
+.spec-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    color: rgba(28, 28, 30, 0.55);
+    text-transform: uppercase;
+}
+
+.spec-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1c1c1e;
+}
+
+.hero-avatar-box {
+    background-color: transparent;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+}
+
+.warning-alert-card {
+    background-color: rgba(239, 68, 68, 0.05);
+    border: 1px dashed rgba(239, 68, 68, 0.25);
+    border-radius: 12px;
+    padding: 24px;
+    color: #ef4444;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.seg-btn:hover {
+    color: #1c1c1e;
+}
+
+.console-log-panel {
+    background-color: rgba(248, 248, 250, 0.98);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.console-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.console-log-panel scrolledwindow {
+    background-color: transparent;
+}
+
+textview.console-log-text,
+textview.console-log-text text,
+textview.hosts-editor-text,
+textview.hosts-editor-text text {
+    background-color: transparent;
+    color: rgba(28, 28, 30, 0.85);
+}
+
+progressbar.console-progress {
+    min-height: 4px;
+    margin: 4px 0;
+    padding: 0;
+}
+
+progressbar.console-progress trough {
+    background-color: rgba(0, 0, 0, 0.06);
+    border: none;
+    border-radius: 4px;
+    min-height: 4px;
+}
+
+progressbar.console-progress progress {
+    background-color: #3b82f6;
+    border-radius: 4px;
+    min-height: 4px;
+}
+
+.auth-dialog-card {
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.update-count-badge {
+    background-color: rgba(59, 130, 246, 0.10);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    color: #2563eb;
+}
+
+.wifi-info-section-title {
+    color: #2563eb;
+}
+
+.wifi-info-label {
+    color: rgba(28, 28, 30, 0.6);
+}
+
+.wifi-info-value {
+    color: #1c1c1e;
+}
+
+.wifi-status-badge {
+    background-color: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.wifi-status-text {
+    color: rgba(28, 28, 30, 0.8);
+}
+
+.segmented-control {
+    background-color: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.seg-btn {
+    color: rgba(28, 28, 30, 0.6);
+}
+
+.seg-btn-active {
+    background-color: rgba(0, 0, 0, 0.08);
+    color: #1c1c1e;
+}
+
+dropdown>button:focus,
+dropdown:focus-within>button {
+    border-color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.04);
+}
+
+dropdown>button:hover {
+    background-color: rgba(0, 0, 0, 0.06);
+    border-color: rgba(0, 0, 0, 0.14);
+}
+
+dropdown>popover>contents listview,
+dropdown>popover>contents list {
+    background: transparent;
+    background-color: transparent;
+}
+
+dropdown>popover>contents row,
+dropdown>popover>contents listview>row {
+    background-color: transparent;
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: #1c1c1e;
+    transition: background-color 150ms ease;
+}
+
+dropdown>popover>contents row:hover,
+dropdown>popover>contents listview>row:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #1c1c1e;
+}
+
+dropdown>popover>contents row:selected,
+dropdown>popover>contents listview>row:selected {
+    background-color: rgba(59, 130, 246, 0.12);
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+popover.menu>contents {
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
+    padding: 6px;
+}
+
+entry.sidebar-search-entry:focus-within {
+    background-color: rgba(59, 130, 246, 0.04);
+    border-color: #3b82f6;
+}
+
+entry.sidebar-search-entry>text {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
     color: #1c1c1e;
 }

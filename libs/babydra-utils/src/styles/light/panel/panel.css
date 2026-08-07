@@ -20,7 +20,7 @@ button.panel-logo-btn:hover {
     color: rgba(28, 28, 30, 0.14);
 }
 
-popover.status-popover > contents {
+popover.status-popover>contents {
     background-color: rgba(255, 255, 255, 0.96);
     border: 1px solid rgba(0, 0, 0, 0.10);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);

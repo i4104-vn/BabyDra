@@ -6,10 +6,6 @@ window.settings-window {
 }
 
 /* Sidebar navigation */
-.sidebar {
-    background-color: rgba(12, 12, 20, 0.72);
-}
-
 .profile-avatar {
     background-color: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.14);
@@ -27,7 +23,6 @@ entry.sidebar-search-entry {
     background-color: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.12);
     color: #ffffff;
-    border-radius: 10px;
     box-shadow: none;
 }
 
@@ -67,19 +62,11 @@ button.sidebar-item.active-nav:hover image {
 }
 
 /* Content Area */
-.settings-content {
-    background-color: transparent;
-    padding: 24px 32px;
-}
-
 .settings-page-title {
-    font-size: 24px;
-    font-weight: 700;
     color: #ffffff;
 }
 
 .settings-page-subtitle {
-    font-size: 13px;
     color: rgba(255, 255, 255, 0.55);
 }
 
@@ -148,8 +135,6 @@ button.sidebar-item.active-nav:hover image {
 }
 
 .hero-hostname {
-    font-size: 22px;
-    font-weight: 700;
     color: #ffffff;
 }
 
@@ -175,8 +160,6 @@ button.sidebar-item.active-nav:hover image {
 .lang-segmented-control {
     background-color: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 9999px;
-    padding: 2px;
 }
 
 button.lang-seg-active {
@@ -186,7 +169,6 @@ button.lang-seg-active {
 }
 
 button.lang-seg-inactive {
-    background-color: transparent;
     color: rgba(255, 255, 255, 0.55);
 }
 
@@ -278,17 +260,11 @@ button.wallpaper-action-btn:hover {
 
 /* App Manager Tabs */
 button.app-tab-btn {
-    background: transparent;
-    border: none;
     color: rgba(255, 255, 255, 0.55);
-    font-size: 14px;
-    font-weight: 500;
-    padding: 4px 12px;
 }
 
 button.app-tab-btn.active {
     color: #3b82f6;
-    font-weight: 700;
     border-bottom: 2px solid #3b82f6;
 }
 
@@ -327,9 +303,6 @@ button.wallpaper-thumb-card:hover picture {
 
 /* Dropdown Select Controls (Matching Search Input Style) */
 dropdown {
-    background: transparent;
-    border: none;
-    box-shadow: none;
 }
 
 dropdown>button {
@@ -424,22 +397,12 @@ textview.hosts-editor-text text {
 }
 
 progressbar.console-progress {
-    min-height: 4px;
-    margin: 4px 0;
-    padding: 0;
 }
 
 progressbar.console-progress trough {
-    background-color: rgba(255, 255, 255, 0.08);
-    border: none;
-    border-radius: 4px;
-    min-height: 4px;
 }
 
 progressbar.console-progress progress {
-    background-color: #3b82f6;
-    border-radius: 4px;
-    min-height: 4px;
 }
 
 /* Dark Theme Auth Dialog Overlay */

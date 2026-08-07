@@ -378,3 +378,24 @@ progressbar.console-progress progress {
     font-weight: 600;
     border: none;
 }
+
+.settings-page-title {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.settings-page-subtitle {
+    font-size: 13px;
+}
+
+button.app-tab-btn {
+    background: transparent;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 4px 12px;
+}
+
+button.app-tab-btn.active {
+    font-weight: 700;
+}
