@@ -5,7 +5,9 @@ button,
 }
 
 button.circle-btn,
-button.icon-btn-circle {
+button.icon-btn-circle,
+button.circular,
+.circular {
     background-image: none;
     border-radius: 50%;
     min-width: 32px;
@@ -18,7 +20,9 @@ button.icon-btn-circle {
 }
 
 button.circle-btn:hover,
-button.icon-btn-circle:hover {
+button.icon-btn-circle:hover,
+button.circular:hover,
+.circular:hover {
     box-shadow: none;
 }
 

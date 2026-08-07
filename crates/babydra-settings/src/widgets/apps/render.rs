@@ -116,12 +116,13 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
         // X Uninstall Action Button
         let uninstall_btn = Button::new();
         uninstall_btn.add_css_class("icon-btn");
+        uninstall_btn.add_css_class("circular");
         uninstall_btn.add_css_class("delete-btn");
         uninstall_btn.set_valign(gtk4::Align::Center);
         uninstall_btn.set_cursor_from_name(Some("pointer"));
 
-        let x_icon = babydra_utils::ui::icon::get_icon("close", 14);
-        x_icon.set_pixel_size(14);
+        let x_icon = babydra_utils::ui::icon::get_icon("edit-delete", 16);
+        x_icon.set_pixel_size(16);
         uninstall_btn.set_child(Some(&x_icon));
 
         let pkg_name = app.name.to_lowercase().replace(' ', "-");
@@ -194,12 +195,13 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
 
         let uninstall_btn = Button::new();
         uninstall_btn.add_css_class("icon-btn");
+        uninstall_btn.add_css_class("circular");
         uninstall_btn.add_css_class("delete-btn");
         uninstall_btn.set_valign(gtk4::Align::Center);
         uninstall_btn.set_cursor_from_name(Some("pointer"));
 
-        let x_icon = babydra_utils::ui::icon::get_icon("close", 14);
-        x_icon.set_pixel_size(14);
+        let x_icon = babydra_utils::ui::icon::get_icon("edit-delete", 16);
+        x_icon.set_pixel_size(16);
         uninstall_btn.set_child(Some(&x_icon));
 
         uninstall_items.push(UninstallRowItem {

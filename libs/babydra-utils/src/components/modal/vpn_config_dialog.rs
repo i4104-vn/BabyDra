@@ -175,10 +175,16 @@ impl VpnConfigDialog {
         // Footer Action Buttons
         let actions_box = Box::new(Orientation::Horizontal, 8);
 
-        let delete_btn = Button::with_label("Delete");
-        delete_btn.add_css_class("connect-pill-btn");
+        let delete_btn = Button::new();
+        delete_btn.add_css_class("icon-btn");
+        delete_btn.add_css_class("circular");
         delete_btn.add_css_class("delete-btn");
+        delete_btn.set_valign(gtk4::Align::Center);
         delete_btn.set_cursor_from_name(Some("pointer"));
+
+        let del_icon = crate::ui::icon::get_icon("edit-delete", 16);
+        del_icon.set_pixel_size(16);
+        delete_btn.set_child(Some(&del_icon));
 
         let actions_right = Box::new(Orientation::Horizontal, 8);
         actions_right.set_hexpand(true);

@@ -18,8 +18,14 @@ pub fn create_startup_widget() -> Widget {
         entry.set_hexpand(true);
         entry.add_css_class("sidebar-search-entry");
 
-        let delete_btn = Button::with_label(&babydra_common::i18n::t("settings.startup_remove"));
-        delete_btn.add_css_class("connect-pill-btn");
+        let delete_btn = Button::new();
+        delete_btn.add_css_class("icon-btn");
+        delete_btn.add_css_class("circular");
+        delete_btn.add_css_class("delete-btn");
+        delete_btn.set_valign(gtk4::Align::Center);
+        let del_icon = babydra_utils::ui::icon::get_icon("edit-delete", 16);
+        del_icon.set_pixel_size(16);
+        delete_btn.set_child(Some(&del_icon));
 
         let row_copy = row.clone();
         let list_card_copy = list_card.clone();

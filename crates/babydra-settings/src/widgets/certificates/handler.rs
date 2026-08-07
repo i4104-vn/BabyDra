@@ -70,12 +70,14 @@ pub fn reload_cert_list(
 
         // Delete Button matching Wi-Fi row icon-btn-circle style
         let del_btn = gtk4::Button::new();
-        del_btn.add_css_class("icon-btn-circle");
+        del_btn.add_css_class("icon-btn");
+        del_btn.add_css_class("circular");
+        del_btn.add_css_class("delete-btn");
         del_btn.set_valign(gtk4::Align::Center);
         del_btn.set_cursor_from_name(Some("pointer"));
 
-        let del_icon = babydra_utils::ui::icon::get_icon("trash", 14);
-        del_icon.set_pixel_size(14);
+        let del_icon = babydra_utils::ui::icon::get_icon("edit-delete", 16);
+        del_icon.set_pixel_size(16);
         del_btn.set_child(Some(&del_icon));
         del_btn.set_tooltip_text(Some(&babydra_common::i18n::t("settings.cert_delete")));
 
