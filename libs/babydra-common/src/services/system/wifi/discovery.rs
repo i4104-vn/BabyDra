@@ -33,7 +33,12 @@ pub fn known_networks() -> Vec<String> {
             let parts = parse_nmcli_escaped(line);
             if parts.len() >= 2 && (parts[1] == "802-11-wireless" || parts[1] == "wifi") {
                 if !parts[0].is_empty() {
-                    ssids.push(parts[0].clone());
+                    if let Ok(ssid_out) = Command::new("nmcli").args(&["-g", "802-11-wireless.ssid", "connection", "show", &parts[0]]).output() {
+                        let ssid = String::from_utf8_lossy(&ssid_out.stdout).trim().to_string();
+                        if !ssid.is_empty() && !ssids.contains(&ssid) {
+                            ssids.push(ssid);
+                        }
+                    }
                 }
             }
         }
