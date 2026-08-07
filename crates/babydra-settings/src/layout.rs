@@ -240,6 +240,38 @@ pub fn build_main_window(app: &gtk4::Application) {
     main_layout.append(&right_box);
     overlay.set_child(Some(&main_layout));
 
+    // ── Global Loading Overlay ───────────────────────────────
+    let loading_box = gtk4::Box::new(gtk4::Orientation::Vertical, 10);
+    loading_box.set_valign(gtk4::Align::Center);
+    loading_box.set_halign(gtk4::Align::Center);
+    loading_box.set_vexpand(true);
+    loading_box.set_hexpand(true);
+    
+    let spinner = gtk4::Spinner::new();
+    spinner.set_size_request(48, 48);
+    
+    let loading_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.loading")));
+    loading_lbl.add_css_class("settings-row-title");
+    
+    loading_box.append(&spinner);
+    loading_box.append(&loading_lbl);
+    
+    let overlay_blocker = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    overlay_blocker.set_vexpand(true);
+    overlay_blocker.set_hexpand(true);
+    overlay_blocker.add_css_class("global-loading-blocker");
+    overlay_blocker.append(&loading_box);
+    overlay_blocker.set_visible(false); // Hidden by default
+
+    // Consume all clicks so nothing underneath can be clicked
+    let click_interceptor = gtk4::GestureClick::new();
+    click_interceptor.connect_pressed(|_, _, _, _| {
+        // Do nothing, just intercept
+    });
+    overlay_blocker.add_controller(click_interceptor);
+    
+    overlay.add_overlay(&overlay_blocker);
+
     // Wire navigation button clicks
     for (id, button, _) in nav_buttons.borrow().iter() {
         let name_str = id.to_string();
@@ -301,6 +333,27 @@ pub fn build_main_window(app: &gtk4::Application) {
         });
     }
     window.add_action(&rebuild_action);
+
+    // ── Loading Action ─────────────
+    let show_loading_action = gio::SimpleAction::new_stateful(
+        "show-loading",
+        Some(gtk4::glib::VariantTy::BOOLEAN),
+        &false.to_variant(),
+    );
+    let blocker_c = overlay_blocker.clone();
+    let spinner_c = spinner.clone();
+    show_loading_action.connect_activate(move |action, param| {
+        if let Some(val) = param.and_then(|v| v.get::<bool>()) {
+            blocker_c.set_visible(val);
+            if val {
+                spinner_c.start();
+            } else {
+                spinner_c.stop();
+            }
+            action.set_state(&val.to_variant());
+        }
+    });
+    window.add_action(&show_loading_action);
 
     window.set_child(Some(&overlay));
     window.present();

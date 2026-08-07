@@ -1,5 +1,7 @@
 //! Appearance and themes personalization panel.
 
+use std::cell::Cell;
+use std::rc::Rc;
 use gtk4::prelude::*;
 use babydra_common::services::wallpaper::{get_wallpaper_dir, get_local_wallpapers};
 
@@ -46,8 +48,27 @@ pub fn create_appearance_widget() -> gtk4::Widget {
     let cursor_d = cursor_dropdown.clone();
     let size_d = size_dropdown.clone();
 
+    // Get current appearance to set initial dropdown selections
+    let current_app = babydra_common::services::system::theme::get_current_appearance();
+
+    if let Some(idx) = gtk_themes.iter().position(|t| t == &current_app.gtk_theme) {
+        gtk_d.set_selected(idx as u32);
+    }
+    if let Some(idx) = icon_themes.iter().position(|t| t == &current_app.icon_theme) {
+        icon_d.set_selected(idx as u32);
+    }
+    if let Some(idx) = cursor_themes.iter().position(|t| t == &current_app.cursor_theme) {
+        cursor_d.set_selected(idx as u32);
+    }
+    if let Some(idx) = cursor_sizes.iter().position(|s| s == &current_app.cursor_size) {
+        size_d.set_selected(idx as u32);
+    }
+
+    let initializing = Rc::new(Cell::new(true));
+
+    let gtk_d_c = gtk_d.clone();
     let apply_theme_settings = move || {
-        let gtk_idx = gtk_d.selected() as usize;
+        let gtk_idx = gtk_d_c.selected() as usize;
         let icon_idx = icon_d.selected() as usize;
         let cursor_idx = cursor_d.selected() as usize;
         let size_idx = size_d.selected() as usize;
@@ -57,25 +78,66 @@ pub fn create_appearance_widget() -> gtk4::Widget {
         let selected_cursor = cursor_themes_c.get(cursor_idx).cloned().unwrap_or_else(|| "Adwaita".to_string());
         let selected_size = cursor_sizes_c.get(size_idx).cloned().unwrap_or(24);
 
-        let _ = babydra_common::services::system::theme::apply_appearance(
-            &selected_gtk,
-            &selected_icon,
-            &selected_cursor,
-            selected_size,
-        );
+        if let Some(root) = gtk_d_c.root() {
+            let _ = root.activate_action("win.show-loading", Some(&true.to_variant()));
+            
+            let (tx, rx) = std::sync::mpsc::channel();
+            
+            std::thread::spawn(move || {
+                let _ = babydra_common::services::system::theme::apply_appearance(
+                    &selected_gtk,
+                    &selected_icon,
+                    &selected_cursor,
+                    selected_size,
+                );
+                let _ = tx.send(());
+            });
+
+            gtk4::glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
+                if rx.try_recv().is_ok() {
+                    let _ = root.activate_action("win.show-loading", Some(&false.to_variant()));
+                    gtk4::glib::ControlFlow::Break
+                } else {
+                    gtk4::glib::ControlFlow::Continue
+                }
+            });
+        } else {
+            // Fallback if root not found
+            let _ = babydra_common::services::system::theme::apply_appearance(
+                &selected_gtk,
+                &selected_icon,
+                &selected_cursor,
+                selected_size,
+            );
+        }
     };
 
     let apply_cb1 = apply_theme_settings.clone();
-    gtk_dropdown.connect_selected_notify(move |_| apply_cb1());
+    let init_flag1 = initializing.clone();
+    gtk_dropdown.connect_selected_notify(move |_| {
+        if !init_flag1.get() { apply_cb1(); }
+    });
 
     let apply_cb2 = apply_theme_settings.clone();
-    icon_dropdown.connect_selected_notify(move |_| apply_cb2());
+    let init_flag2 = initializing.clone();
+    icon_dropdown.connect_selected_notify(move |_| {
+        if !init_flag2.get() { apply_cb2(); }
+    });
 
     let apply_cb3 = apply_theme_settings.clone();
-    cursor_dropdown.connect_selected_notify(move |_| apply_cb3());
+    let init_flag3 = initializing.clone();
+    cursor_dropdown.connect_selected_notify(move |_| {
+        if !init_flag3.get() { apply_cb3(); }
+    });
 
     let apply_cb4 = apply_theme_settings.clone();
-    size_dropdown.connect_selected_notify(move |_| apply_cb4());
+    let init_flag4 = initializing.clone();
+    size_dropdown.connect_selected_notify(move |_| {
+        if !init_flag4.get() { apply_cb4(); }
+    });
+
+    initializing.set(false);
+
 
     // Theme Toggle Icon Button Click Handler
     let theme_btn_clone = theme_toggle_btn.clone();

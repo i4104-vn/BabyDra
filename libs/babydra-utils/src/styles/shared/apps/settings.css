@@ -399,3 +399,8 @@ button.app-tab-btn {
 button.app-tab-btn.active {
     font-weight: 700;
 }
+
+.global-loading-blocker {
+    background: rgba(0, 0, 0, 0.5);
+}
+
