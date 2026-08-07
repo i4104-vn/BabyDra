@@ -31,7 +31,7 @@ fn parse_latest_progress(log_text: &str) -> Option<(u32, u32)> {
 fn update_btn_progress(btn: &gtk4::Button, provider: &gtk4::CssProvider, label_text: &str, pct: f64) {
     btn.set_label(label_text);
     let css = format!(
-        ".suggested-action {{ background-image: linear-gradient(to right, #3b82f6 0%, #3b82f6 {:.1}%, rgba(255, 255, 255, 0.12) {:.1}%); border: 1px solid #3b82f6; color: #ffffff; font-weight: 700; border-radius: 9999px; }}",
+        ".suggested-action, .suggested-action:disabled {{ background-image: linear-gradient(to right, #3b82f6 0%, #3b82f6 {:.1}%, rgba(255, 255, 255, 0.12) {:.1}%); border: 1px solid #3b82f6; color: #ffffff; font-weight: 700; border-radius: 9999px; opacity: 1.0; }}",
         pct, pct
     );
     provider.load_from_data(&css);
@@ -43,6 +43,7 @@ fn update_btn_progress(btn: &gtk4::Button, provider: &gtk4::CssProvider, label_t
 /// Resets button style back to default suggested action
 fn reset_btn_progress(btn: &gtk4::Button, provider: &gtk4::CssProvider) {
     btn.set_label(&babydra_common::i18n::t("settings.update_all"));
+    btn.set_sensitive(true);
     if let Some(display) = gtk4::gdk::Display::default() {
         gtk4::style_context_remove_provider_for_display(&display, provider);
     }
@@ -158,8 +159,8 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
         });
     };
 
-    // Check if an update is already running in background (e.g. from previous run / app restart)
     if is_pacman_running() {
+        widget.update_all_btn.set_sensitive(false);
         widget.update_all_btn.set_visible(true);
         widget.refresh_btn.set_visible(false);
         widget.glass_card.set_visible(false);
@@ -202,6 +203,7 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
         glass_card.set_visible(false);
         console_card.set_visible(true);
         text_buffer.set_text("");
+        update_all_btn.set_sensitive(false);
         update_btn_progress(&update_all_btn, &btn_provider_start, &babydra_common::i18n::t("settings.update_all"), 0.0);
 
         start_background_update(password);
