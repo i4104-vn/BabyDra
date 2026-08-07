@@ -90,24 +90,52 @@ pub fn execute_cmd_with_log_stream(args: &[&str], password: Option<&str>, sender
 
     let sender_stdout = sender.clone();
     let thread_stdout = std::thread::spawn(move || {
-        if let Some(out) = stdout {
-            let reader = BufReader::new(out);
-            for line in reader.lines() {
-                if let Ok(l) = line {
-                    let _ = sender_stdout.send(l);
+        if let Some(mut out) = stdout {
+            use std::io::Read;
+            let mut buf = [0u8; 1024];
+            let mut current_line = String::new();
+            while let Ok(n) = out.read(&mut buf) {
+                if n == 0 { break; }
+                let chunk = String::from_utf8_lossy(&buf[..n]);
+                for c in chunk.chars() {
+                    if c == '\n' || c == '\r' {
+                        if !current_line.is_empty() {
+                            let _ = sender_stdout.send(current_line.clone());
+                            current_line.clear();
+                        }
+                    } else {
+                        current_line.push(c);
+                    }
                 }
+            }
+            if !current_line.is_empty() {
+                let _ = sender_stdout.send(current_line);
             }
         }
     });
 
     let sender_stderr = sender;
     let thread_stderr = std::thread::spawn(move || {
-        if let Some(err) = stderr {
-            let reader = BufReader::new(err);
-            for line in reader.lines() {
-                if let Ok(l) = line {
-                    let _ = sender_stderr.send(l);
+        if let Some(mut err) = stderr {
+            use std::io::Read;
+            let mut buf = [0u8; 1024];
+            let mut current_line = String::new();
+            while let Ok(n) = err.read(&mut buf) {
+                if n == 0 { break; }
+                let chunk = String::from_utf8_lossy(&buf[..n]);
+                for c in chunk.chars() {
+                    if c == '\n' || c == '\r' {
+                        if !current_line.is_empty() {
+                            let _ = sender_stderr.send(current_line.clone());
+                            current_line.clear();
+                        }
+                    } else {
+                        current_line.push(c);
+                    }
                 }
+            }
+            if !current_line.is_empty() {
+                let _ = sender_stderr.send(current_line);
             }
         }
     });
