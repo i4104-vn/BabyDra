@@ -1,5 +1,3 @@
-//! Wi-Fi network list renderer.
-
 use gtk4::prelude::*;
 use super::WifiState;
 use babydra_utils::components::modal::{WifiConfigDialog, WifiInfoDialog, WifiPasswordDialog};
@@ -43,7 +41,41 @@ pub fn render_network_list(
         return;
     }
 
+    let mut current_section = 0;
+
     for net in &st.networks {
+        let section = if net.is_connected {
+            1
+        } else if net.is_saved {
+            2
+        } else {
+            3
+        };
+
+        if section != current_section {
+            current_section = section;
+            let header_row = gtk4::ListBoxRow::new();
+            header_row.set_selectable(false);
+            header_row.set_activatable(false);
+            
+            let title_key = match section {
+                1 => "settings.wifi_connected",
+                2 => "settings.wifi_saved",
+                3 => "settings.wifi_available",
+                _ => "",
+            };
+            
+            let header_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t(title_key)));
+            header_lbl.add_css_class("settings-row-desc");
+            header_lbl.set_halign(gtk4::Align::Start);
+            header_lbl.set_margin_start(12);
+            header_lbl.set_margin_top(12);
+            header_lbl.set_margin_bottom(4);
+            
+            header_row.set_child(Some(&header_lbl));
+            list_box.append(&header_row);
+        }
+
         let row = gtk4::ListBoxRow::new();
         row.add_css_class("settings-card-row");
 
@@ -139,7 +171,7 @@ pub fn render_network_list(
             if net_conn.is_connected {
                 return;
             }
-            if net_conn.security != "open" {
+            if net_conn.security != "open" && !net_conn.is_saved {
                 pwd_dlg_c.show_for(&net_conn.ssid, &net_conn.security);
             } else {
                 let ssid = net_conn.ssid.clone();

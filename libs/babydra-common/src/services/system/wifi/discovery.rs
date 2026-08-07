@@ -1,38 +1,39 @@
-//! WiFi access point scanning and discovery.
+//! WiFi access point scanning and discovery using nmcli.
 
 use std::collections::HashMap;
-use zbus::blocking::Connection;
+use std::process::Command;
 use crate::models::wifi::WifiNetwork;
-use super::client::{
-    get_wifi_device, AccessPointProxyBlocking, DeviceWifiProxyBlocking, SettingsProxyBlocking,
-    ConnectionSettingsProxyBlocking, val_to_str,
-};
+
+fn parse_nmcli_escaped(line: &str) -> Vec<String> {
+    let mut parts = Vec::new();
+    let mut current = String::new();
+    let mut escape = false;
+    for c in line.chars() {
+        if escape {
+            current.push(c);
+            escape = false;
+        } else if c == '\\' {
+            escape = true;
+        } else if c == ':' {
+            parts.push(current.clone());
+            current.clear();
+        } else {
+            current.push(c);
+        }
+    }
+    parts.push(current);
+    parts
+}
 
 pub fn known_networks() -> Vec<String> {
     let mut ssids = Vec::new();
-    let conn = match Connection::system() {
-        Ok(c) => c,
-        Err(_) => return ssids,
-    };
-
-    let settings = match SettingsProxyBlocking::new(&conn) {
-        Ok(s) => s,
-        Err(_) => return ssids,
-    };
-
-    if let Ok(conns) = settings.list_connections() {
-        for conn_path in conns {
-            if let Some(c_settings) = ConnectionSettingsProxyBlocking::builder(&conn).path(conn_path).ok().and_then(|b| b.build().ok()) {
-                if let Ok(details) = c_settings.get_settings() {
-                    if details.contains_key("802-11-wireless") {
-                        if let Some(conn_sec) = details.get("connection") {
-                            if let Some(id_val) = conn_sec.get("id") {
-                                if let Some(id_str) = val_to_str(id_val) {
-                                    ssids.push(id_str);
-                                }
-                            }
-                        }
-                    }
+    if let Ok(output) = Command::new("nmcli").args(&["-t", "-f", "NAME,TYPE", "connection", "show"]).output() {
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        for line in stdout.lines() {
+            let parts = parse_nmcli_escaped(line);
+            if parts.len() >= 2 && (parts[1] == "802-11-wireless" || parts[1] == "wifi") {
+                if !parts[0].is_empty() {
+                    ssids.push(parts[0].clone());
                 }
             }
         }
@@ -41,87 +42,77 @@ pub fn known_networks() -> Vec<String> {
 }
 
 pub fn scan_networks() -> Vec<WifiNetwork> {
-    let mut networks = Vec::new();
-    let conn = match Connection::system() {
-        Ok(c) => c,
-        Err(_) => return networks,
-    };
+    let known = known_networks();
+    let mut ap_map: HashMap<String, WifiNetwork> = HashMap::new();
 
-    let dev_path = match get_wifi_device(&conn) {
-        Some(p) => p,
-        None => return networks,
-    };
+    // Request rescan
+    let _ = Command::new("nmcli").args(&["device", "wifi", "rescan"]).output();
+    
+    if let Ok(output) = Command::new("nmcli").args(&["-t", "-f", "SSID,SECURITY,SIGNAL,ACTIVE", "device", "wifi", "list"]).output() {
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        for line in stdout.lines() {
+            let parts = parse_nmcli_escaped(line);
+            if parts.len() >= 4 {
+                let ssid = parts[0].trim().to_string();
+                if ssid.is_empty() { continue; }
+                
+                let security = parts[1].trim().to_lowercase();
+                let signal = parts[2].trim().parse::<u32>().unwrap_or(0);
+                let is_connected = parts[3].trim() == "yes";
+                
+                let sec_str = if security.is_empty() {
+                    "open".to_string()
+                } else if security.contains("802.1x") {
+                    "8021x".to_string()
+                } else {
+                    "psk".to_string()
+                };
 
-    let wifi_dev = match DeviceWifiProxyBlocking::builder(&conn).path(dev_path).ok().and_then(|b| b.build().ok()) {
-        Some(d) => d,
-        None => return networks,
-    };
+                let is_saved = known.contains(&ssid);
 
-    // Request async scan
-    let scan_opts = HashMap::new();
-    let _ = wifi_dev.request_scan(scan_opts);
-    std::thread::sleep(std::time::Duration::from_millis(300));
-
-    let active_ap_path = wifi_dev.active_access_point().ok();
-    let aps = wifi_dev.get_access_points().unwrap_or_default();
-
-    // Map SSID -> (Security, Signal Strength, IsConnected)
-    let mut ap_map: std::collections::HashMap<String, (String, u32, bool)> = std::collections::HashMap::new();
-
-    for ap_path in aps {
-        if let Some(ap) = AccessPointProxyBlocking::builder(&conn).path(ap_path.clone()).ok().and_then(|b| b.build().ok()) {
-            let ssid_bytes = ap.ssid().unwrap_or_default();
-            let ssid = String::from_utf8_lossy(&ssid_bytes).to_string();
-            if ssid.is_empty() {
-                continue;
+                ap_map.entry(ssid.clone())
+                    .and_modify(|net| {
+                        if is_connected { net.is_connected = true; }
+                        if signal > net.signal {
+                            net.signal = signal;
+                            net.strength = signal.to_string();
+                            net.security = sec_str.clone();
+                        }
+                    })
+                    .or_insert(WifiNetwork {
+                        ssid,
+                        security: sec_str,
+                        strength: signal.to_string(),
+                        is_connected,
+                        is_saved,
+                        signal,
+                    });
             }
-
-            let signal = ap.strength().unwrap_or(0) as u32;
-            let wpa = ap.wpa_flags().unwrap_or(0);
-            let rsn = ap.rsn_flags().unwrap_or(0);
-
-            let security = if wpa == 0 && rsn == 0 {
-                "open".to_string()
-            } else if (wpa & 0x200) != 0 || (rsn & 0x200) != 0 {
-                "8021x".to_string()
-            } else {
-                "psk".to_string()
-            };
-
-            let is_connected = active_ap_path.as_ref().map(|path| path == &ap_path).unwrap_or(false);
-
-            ap_map.entry(ssid.clone())
-                .and_modify(|(sec, sig, conn_flag)| {
-                    if is_connected {
-                        *conn_flag = true;
-                    }
-                    if signal > *sig {
-                        *sig = signal;
-                        *sec = security.clone();
-                    }
-                })
-                .or_insert((security, signal, is_connected));
+        }
+    }
+    
+    for saved_ssid in &known {
+        if !ap_map.contains_key(saved_ssid) {
+            ap_map.insert(saved_ssid.clone(), WifiNetwork {
+                ssid: saved_ssid.clone(),
+                security: "psk".to_string(), // Assume secure, actual security isn't available if not in range
+                strength: "0".to_string(),
+                is_connected: false,
+                is_saved: true,
+                signal: 0,
+            });
         }
     }
 
-    for (ssid, (security, signal, is_connected)) in ap_map {
-        networks.push(WifiNetwork {
-            ssid,
-            security,
-            strength: signal.to_string(),
-            is_connected,
-            signal,
-        });
-    }
+    let mut networks: Vec<WifiNetwork> = ap_map.into_values().collect();
 
-    // Sort: Connected Wi-Fi at top (index 0), then descending signal strength
     networks.sort_by(|a, b| {
         if a.is_connected != b.is_connected {
             b.is_connected.cmp(&a.is_connected)
+        } else if a.is_saved != b.is_saved {
+            b.is_saved.cmp(&a.is_saved)
         } else {
-            let sig_a: u32 = a.strength.parse().unwrap_or(0);
-            let sig_b: u32 = b.strength.parse().unwrap_or(0);
-            sig_b.cmp(&sig_a)
+            b.signal.cmp(&a.signal)
         }
     });
 

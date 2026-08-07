@@ -8,6 +8,7 @@ pub struct WifiNetwork {
     pub security: String,
     pub strength: String,
     pub is_connected: bool,
+    pub is_saved: bool,
     pub signal: u32,
 }
 
