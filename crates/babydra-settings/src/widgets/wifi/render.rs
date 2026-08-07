@@ -7,7 +7,7 @@ use babydra_utils::components::modal::{WifiConfigDialog, WifiInfoDialog, WifiPas
 pub fn build_wifi_ui() -> (
     gtk4::Overlay,
     gtk4::Switch,
-    gtk4::ListBox,
+    gtk4::Box,
     WifiInfoDialog,
     WifiPasswordDialog,
     WifiConfigDialog,
@@ -49,8 +49,9 @@ pub fn build_wifi_ui() -> (
     glass_card.set_vexpand(true);
     glass_card.set_valign(gtk4::Align::Fill);
 
-    let list_box = gtk4::ListBox::new();
-    list_box.set_selection_mode(gtk4::SelectionMode::None);
+    let list_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
+    list_box.set_valign(gtk4::Align::Start);
+    list_box.set_hexpand(true);
 
     let scroll = gtk4::ScrolledWindow::new();
     scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);

@@ -4,44 +4,53 @@ use babydra_utils::components::modal::{WifiConfigDialog, WifiInfoDialog, WifiPas
 use std::rc::Rc;
 
 pub fn render_network_list(
-    list_box: &gtk4::ListBox,
+    container: &gtk4::Box,
     st: &WifiState,
     info_dialog: &Rc<WifiInfoDialog>,
     password_dialog: &Rc<WifiPasswordDialog>,
     _config_dialog: &Rc<WifiConfigDialog>,
 ) {
-    crate::widgets::helpers::clear_list_box(list_box);
+    crate::widgets::helpers::clear_box(container);
+
+    let create_placeholder = |row| {
+        let lb = gtk4::ListBox::new();
+        lb.set_selection_mode(gtk4::SelectionMode::None);
+        lb.add_css_class("settings-card");
+        lb.append(&row);
+        lb
+    };
 
     if !st.enabled {
-        list_box.append(&crate::widgets::helpers::create_placeholder_row(
+        container.append(&create_placeholder(crate::widgets::helpers::create_placeholder_row(
             crate::widgets::helpers::PlaceholderState::Disabled {
                 title_key: "settings.wifi_disabled",
                 desc_key: "settings.wifi_disabled_sub",
                 icon_name: "wifi",
             },
-        ));
+        )));
         return;
     }
 
     if st.enabled && st.is_loading && st.networks.is_empty() {
-        list_box.append(&crate::widgets::helpers::create_placeholder_row(
+        container.append(&create_placeholder(crate::widgets::helpers::create_placeholder_row(
             crate::widgets::helpers::PlaceholderState::Loading,
-        ));
+        )));
         return;
     }
 
     if st.networks.is_empty() {
-        list_box.append(&crate::widgets::helpers::create_placeholder_row(
+        container.append(&create_placeholder(crate::widgets::helpers::create_placeholder_row(
             crate::widgets::helpers::PlaceholderState::Empty {
                 title_key: "settings.wifi_no_networks",
                 desc_key: None,
                 icon_name: "wifi",
             },
-        ));
+        )));
         return;
     }
 
     let mut current_section = 0;
+    let mut current_lb: Option<gtk4::ListBox> = None;
 
     for net in &st.networks {
         let section = if net.is_connected {
@@ -54,26 +63,26 @@ pub fn render_network_list(
 
         if section != current_section {
             current_section = section;
-            let header_row = gtk4::ListBoxRow::new();
-            header_row.set_selectable(false);
-            header_row.set_activatable(false);
-            
             let title_key = match section {
                 1 => "settings.wifi_connected",
                 2 => "settings.wifi_saved",
                 3 => "settings.wifi_available",
                 _ => "",
             };
-            
+
             let header_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t(title_key)));
             header_lbl.add_css_class("settings-row-desc");
             header_lbl.set_halign(gtk4::Align::Start);
             header_lbl.set_margin_start(12);
             header_lbl.set_margin_top(12);
             header_lbl.set_margin_bottom(4);
-            
-            header_row.set_child(Some(&header_lbl));
-            list_box.append(&header_row);
+            container.append(&header_lbl);
+
+            let lb = gtk4::ListBox::new();
+            lb.set_selection_mode(gtk4::SelectionMode::None);
+            lb.add_css_class("settings-card");
+            container.append(&lb);
+            current_lb = Some(lb);
         }
 
         let row = gtk4::ListBoxRow::new();
@@ -217,6 +226,8 @@ pub fn render_network_list(
         click_box.add_controller(gesture);
 
         row.set_child(Some(&hbox));
-        list_box.append(&row);
+        if let Some(lb) = &current_lb {
+            lb.append(&row);
+        }
     }
 }
