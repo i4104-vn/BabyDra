@@ -5,13 +5,9 @@ button,
 }
 
 button.circle-btn,
-<<<<<<< HEAD
 button.icon-btn-circle,
 button.circular,
 .circular {
-=======
-button.icon-btn-circle {
->>>>>>> hard-develop
     background-image: none;
     border-radius: 50%;
     min-width: 32px;
@@ -24,7 +20,6 @@ button.icon-btn-circle {
 }
 
 button.circle-btn:hover,
-<<<<<<< HEAD
 button.icon-btn-circle:hover,
 button.circular:hover,
 .circular:hover {
@@ -33,19 +28,11 @@ button.circular:hover,
 
 button.btn-primary,
 button.suggested-action {
-=======
-button.icon-btn-circle:hover {
-    box-shadow: none;
-}
-
-button.btn-primary {
->>>>>>> hard-develop
     border-radius: 9999px;
     background-color: #3b82f6;
     background-image: none;
     border: none;
     color: #ffffff;
-<<<<<<< HEAD
     font-size: 13px;
     font-weight: 600;
     padding: 8px 18px;
@@ -55,22 +42,11 @@ button.btn-primary {
 
 button.btn-primary:hover,
 button.suggested-action:hover {
-=======
-    font-size: 14px;
-    font-weight: 600;
-    padding: 8px 20px;
-    box-shadow: none;
-    transition: all 200ms ease;
-}
-
-button.btn-primary:hover {
->>>>>>> hard-develop
     background-color: #2563eb;
     background-image: none;
     box-shadow: none;
 }
 
-<<<<<<< HEAD
 button.btn-primary:active,
 button.suggested-action:active {
     background-color: #1d4ed8;
@@ -86,19 +62,10 @@ button.suggested-action:disabled {
 
 button.btn-share-pill,
 button.connect-pill-btn {
-=======
-button.btn-primary:disabled,
-button.btn-primary.disabled {
-    box-shadow: none;
-}
-
-button.btn-share-pill {
->>>>>>> hard-develop
     border-radius: 9999px;
     background-image: none;
     font-size: 13px;
     font-weight: 500;
-<<<<<<< HEAD
     padding: 8px 18px;
     box-shadow: none;
     transition: background-color 200ms ease, border-color 200ms ease;
@@ -106,14 +73,6 @@ button.btn-share-pill {
 
 button.btn-share-pill:hover,
 button.connect-pill-btn:hover {
-=======
-    padding: 6px 14px;
-    box-shadow: none;
-    transition: all 200ms ease;
-}
-
-button.btn-share-pill:hover {
->>>>>>> hard-develop
     box-shadow: none;
 }
 
@@ -135,7 +94,6 @@ button.btn-upgrade-secondary:hover {
 
 .floating-icon-badge {
     border-radius: 50%;
-<<<<<<< HEAD
     min-width: 24px;
     min-height: 24px;
     background-color: #ffffff;
@@ -159,16 +117,4 @@ button.baby-fab image,
 button.baby-fab.circular image {
     color: #ffffff;
     -gtk-icon-size: 24px;
-=======
-    width: 24px;
-    height: 24px;
-    background-color: #ffffff;
-    color: #1c1c1e;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    bottom: 8px;
-    left: 8px;
->>>>>>> hard-develop
 }

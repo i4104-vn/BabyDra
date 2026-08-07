@@ -289,11 +289,7 @@ button.quick-tile.active .tile-subtitle {
     color: #1c1c1e !important;
 }
 
-<<<<<<< HEAD
 popover>arrow {
-=======
-popover > arrow {
->>>>>>> hard-develop
     background-color: transparent;
     border: none;
 }

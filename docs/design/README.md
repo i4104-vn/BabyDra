@@ -32,7 +32,6 @@ Tài liệu này mô tả phong cách và hướng làm thiết kế giao diện
 | [spacing.md](./spacing.md) | Không gian và khoảng cách — nguyên tắc và cách áp dụng |
 | [theming.md](./theming.md) | Dark/Light theming — cách tiếp cận dual-theme |
 
-<<<<<<< HEAD
 ## Components Giao diện
 
 | Tài liệu | Nội dung |
@@ -43,10 +42,4 @@ Tài liệu này mô tả phong cách và hướng làm thiết kế giao diện
 
 | Tài liệu | Nội dung |
 | :--- | :--- |
-=======
-## Tham chiếu
-
-| Tài liệu | Nội dung |
-| :--- | :--- |
->>>>>>> hard-develop
 | [tokens.md](./tokens.md) | Bảng tra cứu giá trị — màu, font-size, radius, spacing, shadow |

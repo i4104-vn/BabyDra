@@ -1,9 +1,5 @@
 //! System specifications overview and update tab.
 
-<<<<<<< HEAD
-=======
-use std::process::Command;
->>>>>>> hard-develop
 use sysinfo::System;
 use babydra_common::services::system::gpu::get_gpu_info;
 use babydra_common::models::SystemInfoData;
@@ -29,15 +25,10 @@ pub fn create_system_widget() -> gtk4::Widget {
         let mut sys = System::new_all();
         sys.refresh_all();
 
-<<<<<<< HEAD
         let hostname = System::host_name().unwrap_or_else(|| "localhost".to_string());
         let os_name = System::name().unwrap_or_else(|| "Arch Linux".to_string());
         let kernel_version = System::kernel_version().unwrap_or_else(|| "Unknown".to_string());
         let cpu_model = sys.cpus().first().map(|cpu| cpu.brand()).unwrap_or("Intel/AMD CPU").trim().to_string();
-=======
-    let total_mem_gb = sys.total_memory() as f64 / (1024.0 * 1024.0 * 1024.0);
-    let memory_text = format!("{:.1} GB", total_mem_gb);
->>>>>>> hard-develop
 
         let total_mem_gb = sys.total_memory() as f64 / (1024.0 * 1024.0 * 1024.0);
         let memory_text = format!("{:.1} GB", total_mem_gb);

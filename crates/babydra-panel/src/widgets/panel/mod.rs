@@ -144,7 +144,6 @@ pub fn create_status_indicators(
     calendar_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
     launcher_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
 ) -> gtk4::Box {
-<<<<<<< HEAD
     let (status_box, status_button, separator, vol_icon, net_icon, vpn_icon, bat_widget) = render::build_status_indicators_ui();
 
     // Initial update of volume icon on load
@@ -300,46 +299,13 @@ pub fn create_status_indicators(
             attach_hover_popover(bat_area, bat_pop, update_battery_popover.clone());
         }
     }
-=======
-    let (status_box, status_button, separator, vol_icon, net_icon, bat_widget) = render::build_status_indicators_ui();
-
-    // Initial update of volume & network tooltips on load
-    items::volume::update_topbar_volume_icon(&vol_icon);
-
-    let update_network_tooltip = {
-        let net_icon_c = net_icon.clone();
-        Rc::new(move || {
-            let (enabled, ssid) = babydra_common::helper::wifi::get_wifi_state();
-            let speed = babydra_common::helper::network::get_network_speed();
-
-            let net_tooltip = if !enabled {
-                "Network: Disabled".to_string()
-            } else if ssid == "Disconnected" || ssid == "Off" {
-                "Network: Disconnected".to_string()
-            } else {
-                format!(
-                    "Network: {}\n↓ {}   ↑ {}",
-                    ssid,
-                    babydra_common::helper::network::format_speed(speed.rx_speed),
-                    babydra_common::helper::network::format_speed(speed.tx_speed)
-                )
-            };
-            net_icon_c.set_tooltip_text(Some(&net_tooltip));
-        })
-    };
-
-    update_network_tooltip();
->>>>>>> hard-develop
 
     let scroll_controller = gtk4::EventControllerScroll::new(
         gtk4::EventControllerScrollFlags::VERTICAL
     );
     let vol_icon_scroll = vol_icon.clone();
-<<<<<<< HEAD
     let update_vol_scroll = update_volume_popover.clone();
     let pop_vol_scroll = vol_popover.clone();
-=======
->>>>>>> hard-develop
     scroll_controller.connect_scroll(move |_, _dx, dy| {
         let current_vol = items::volume::get_current_volume();
         let step = 5.0;
@@ -354,18 +320,14 @@ pub fn create_status_indicators(
         if (new_vol - current_vol).abs() > 0.1 {
             items::volume::set_volume(new_vol);
             items::volume::update_topbar_volume_icon(&vol_icon_scroll);
-<<<<<<< HEAD
             if pop_vol_scroll.is_visible() {
                 update_vol_scroll();
             }
-=======
->>>>>>> hard-develop
         }
         gtk4::glib::Propagation::Stop
     });
     status_button.add_controller(scroll_controller);
 
-<<<<<<< HEAD
     let vpn_pop_t = vpn_popover.clone();
     let net_pop_t = net_popover.clone();
     let vol_pop_t = vol_popover.clone();
@@ -404,30 +366,6 @@ pub fn create_status_indicators(
 
         if let Some(ref bat_area) = bat_widget_timer {
             bat_area.queue_draw();
-=======
-
-    let motion_controller = gtk4::EventControllerMotion::new();
-    let update_net_enter = update_network_tooltip.clone();
-    let vol_icon_enter = vol_icon.clone();
-    motion_controller.connect_enter(move |_, _, _| {
-        items::volume::update_topbar_volume_icon(&vol_icon_enter);
-        update_net_enter();
-    });
-    status_button.add_controller(motion_controller);
-
-    let vol_icon_timer = vol_icon.clone();
-    let update_net_timer = update_network_tooltip.clone();
-    let bat_widget_timer = bat_widget.clone();
-    gtk4::glib::timeout_add_local(std::time::Duration::from_millis(1500), move || {
-        items::volume::update_topbar_volume_icon(&vol_icon_timer);
-        update_net_timer();
-        if let Some(ref bat_area) = bat_widget_timer {
-            if let Some(info) = render::get_battery_info() {
-                let status_str = if info.is_charging { "Charging" } else { "Discharging" };
-                bat_area.set_tooltip_text(Some(&format!("Battery: {}% ({})", info.percentage, status_str)));
-                bat_area.queue_draw();
-            }
->>>>>>> hard-develop
         }
         gtk4::glib::ControlFlow::Continue
     });

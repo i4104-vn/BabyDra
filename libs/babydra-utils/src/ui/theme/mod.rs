@@ -48,10 +48,6 @@ const DARK_CSS: &str = concat!(
     include_str!("../../styles/dark/launcher/launcher.css"), "\n",
     include_str!("../../styles/dark/calendar/calendar.css"), "\n",
     include_str!("../../styles/dark/shared/button.css"), "\n",
-<<<<<<< HEAD
-=======
-    include_str!("../../styles/dark/shared/switch.css"), "\n",
->>>>>>> hard-develop
     include_str!("../../styles/dark/shared/sidebar.css"), "\n",
     include_str!("../../styles/dark/apps/screenshot.css"), "\n",
     include_str!("../../styles/dark/apps/lock.css"), "\n",
@@ -83,10 +79,6 @@ const LIGHT_CSS: &str = concat!(
     include_str!("../../styles/light/launcher/launcher.css"), "\n",
     include_str!("../../styles/light/calendar/calendar.css"), "\n",
     include_str!("../../styles/light/shared/button.css"), "\n",
-<<<<<<< HEAD
-=======
-    include_str!("../../styles/light/shared/switch.css"), "\n",
->>>>>>> hard-develop
     include_str!("../../styles/light/shared/sidebar.css"), "\n",
     include_str!("../../styles/light/apps/screenshot.css"), "\n",
     include_str!("../../styles/light/apps/lock.css"), "\n",

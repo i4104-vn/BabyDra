@@ -21,7 +21,6 @@ window.settings-window>overlay>box {
     margin: 4px 8px 8px 8px;
 }
 
-<<<<<<< HEAD
 entry.sidebar-search-entry {
     border-radius: 10px;
     font-size: 12px;
@@ -35,18 +34,6 @@ entry.sidebar-search-entry > text {
     box-shadow: none;
     padding: 6px 12px;
     border-radius: 10px;
-=======
-.sidebar-search-entry,
-.sidebar-search-entry>text {
-    border-radius: 8px;
-    font-size: 12px;
-    padding: 8px 12px;
-}
-
-.sidebar-search-entry:focus,
-.sidebar-search-entry>text:focus {
-    border-color: #3b82f6;
->>>>>>> hard-develop
 }
 
 .settings-content {
@@ -99,11 +86,7 @@ entry.sidebar-search-entry > text {
 
 .settings-card {
     border-radius: 14px;
-<<<<<<< HEAD
     padding: 12px;
-=======
-    padding: 20px 24px;
->>>>>>> hard-develop
 }
 
 .settings-card list {
@@ -174,7 +157,6 @@ button.theme-option-card.active {
     border: 1px solid #3b82f6;
 }
 
-<<<<<<< HEAD
 dropdown {
     background: transparent;
     border: none;
@@ -182,10 +164,6 @@ dropdown {
 }
 
 dropdown > button {
-=======
-dropdown,
-dropdown button {
->>>>>>> hard-develop
     background-image: none;
     border-radius: 10px;
     padding: 6px 14px;
@@ -200,7 +178,6 @@ dropdown button {
     padding: 12px 14px;
 }
 
-<<<<<<< HEAD
 .lang-segmented-control {
     border-radius: 9999px;
     padding: 2px;
@@ -227,14 +204,11 @@ button.lang-seg-inactive {
     background-color: transparent;
 }
 
-=======
->>>>>>> hard-develop
 .hero-hostname {
     font-size: 19px;
     font-weight: 700;
 }
 
-<<<<<<< HEAD
 progressbar.disk-progress {
     min-height: 12px;
 }
@@ -247,16 +221,6 @@ progressbar.disk-progress trough {
 progressbar.disk-progress progress {
     border-radius: 6px;
     min-height: 12px;
-=======
-progressbar.disk-progress trough {
-    border-radius: 6px;
-    min-height: 6px;
-}
-
-progressbar.disk-progress progress {
-    background-color: #3b82f6;
-    border-radius: 6px;
->>>>>>> hard-develop
 }
 
 .cheatsheet-overlay {
@@ -275,7 +239,6 @@ progressbar.disk-progress progress {
     font-family: monospace;
     font-size: 13px;
 }
-<<<<<<< HEAD
 
 /* Console Log Panel */
 .console-log-panel {
@@ -441,5 +404,3 @@ button.app-tab-btn.active {
     background: rgba(0, 0, 0, 0.5);
 }
 
-=======
->>>>>>> hard-develop

@@ -50,12 +50,7 @@ button.panel-logo-btn {
     background-color: transparent;
     background-image: none;
     border: none;
-<<<<<<< HEAD
     margin: 2px 6px;
-=======
-    padding: 2px 6px;
-    margin: 0;
->>>>>>> hard-develop
     border-radius: 6px;
     box-shadow: none;
     min-height: 20px;
@@ -63,18 +58,13 @@ button.panel-logo-btn {
 }
 
 button.panel-logo-btn:hover {
-<<<<<<< HEAD
     border: none;
-=======
-    border: 1px solid rgba(255, 255, 255, 0.08);
->>>>>>> hard-develop
 }
 
 .capsule-separator {
     font-size: 11px;
     margin: 0 2px;
 }
-<<<<<<< HEAD
 
 popover.status-popover>contents {
     border-radius: 14px;
@@ -119,5 +109,3 @@ popover.status-popover>contents {
     color: #22c55e;
     font-weight: 700;
 }
-=======
->>>>>>> hard-develop

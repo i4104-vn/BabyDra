@@ -49,7 +49,6 @@ pub fn update_topbar_volume_icon(vol_icon: &gtk4::Image) {
         vol_icon.set_paintable(Some(&paintable));
     }
 
-<<<<<<< HEAD
     let dev_name = get_active_output_device_name();
     let dev_suffix = dev_name.as_deref().map(|d| format!(" • {}", d)).unwrap_or_default();
 
@@ -57,12 +56,6 @@ pub fn update_topbar_volume_icon(vol_icon: &gtk4::Image) {
         format!("Volume: Muted ({:.0}%){}", vol_pct, dev_suffix)
     } else {
         format!("Volume: {:.0}%{}", vol_pct, dev_suffix)
-=======
-    let tooltip = if is_m {
-        format!("Volume: Muted ({:.0}%)", vol_pct)
-    } else {
-        format!("Volume: {:.0}%", vol_pct)
->>>>>>> hard-develop
     };
     vol_icon.set_tooltip_text(Some(&tooltip));
 }

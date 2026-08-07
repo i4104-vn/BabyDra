@@ -49,13 +49,7 @@
 
 .explore-window flowboxchild {
     min-width: 114px;
-<<<<<<< HEAD
     min-height: 114px;
-=======
-    max-width: 114px;
-    min-height: 114px;
-    max-height: 114px;
->>>>>>> hard-develop
     padding: 0;
     margin: 4px;
     border-radius: 12px;
@@ -63,18 +57,9 @@
 
 .explore-window .file-item {
     min-width: 114px;
-<<<<<<< HEAD
     min-height: 114px;
     border-radius: 12px;
     padding: 6px;
-=======
-    max-width: 114px;
-    min-height: 114px;
-    max-height: 114px;
-    border-radius: 12px;
-    padding: 6px;
-    cursor: pointer;
->>>>>>> hard-develop
     transition: background-color 0.15s ease;
 }
 
@@ -98,10 +83,6 @@
     padding: 6px 12px;
     margin: 1px 6px;
     font-size: 13px;
-<<<<<<< HEAD
-=======
-    cursor: pointer;
->>>>>>> hard-develop
     transition: background 0.1s ease;
 }
 

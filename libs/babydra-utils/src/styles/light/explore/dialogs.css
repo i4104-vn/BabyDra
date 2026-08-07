@@ -1,17 +1,9 @@
 button.suggested-action {
-<<<<<<< HEAD
     background-color: #3b82f6;
 }
 
 button.suggested-action:hover {
     background-color: #2563eb;
-=======
-    background-color: #0066cc;
-}
-
-button.suggested-action:hover {
-    background-color: #0052a3;
->>>>>>> hard-develop
 }
 
 button.suggested-action:active {
@@ -258,27 +250,6 @@ button.row-action-btn.delete-btn:hover {
     background-color: rgba(220, 38, 38, 0.08);
 }
 
-<<<<<<< HEAD
-=======
-.explore-dialog button.baby-fab,
-.explore-dialog button.baby-fab.circular {
-    background-color: #0066cc;
-    box-shadow: 0 4px 16px rgba(0, 102, 204, 0.35);
-}
-
-.explore-dialog button.baby-fab:hover,
-.explore-dialog button.baby-fab.circular:hover {
-    background-color: #0052a3;
-    box-shadow: 0 6px 22px rgba(0, 102, 204, 0.48);
-}
-
-.explore-dialog button.baby-fab:active,
-.explore-dialog button.baby-fab.circular:active {
-    background-color: #003d7a;
-    box-shadow: 0 2px 8px rgba(0, 102, 204, 0.22);
-}
-
->>>>>>> hard-develop
 .explore-dialog.properties-dialog {
     background-color: rgba(255, 255, 255, 0.98);
     border: 1px solid rgba(0, 0, 0, 0.08);
@@ -339,7 +310,6 @@ button.properties-btn-cancel:hover {
     background-color: rgba(0, 0, 0, 0.09);
     color: #111827;
 }
-<<<<<<< HEAD
 
 
 .dialog-error-text {
@@ -350,5 +320,3 @@ button.properties-btn-cancel:hover {
     border-color: #ef4444;
 }
 
-=======
->>>>>>> hard-develop
