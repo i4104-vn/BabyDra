@@ -63,6 +63,8 @@ pub fn execute_cmd_with_log_stream(args: &[&str], password: Option<&str>, sender
     let mut command = if password.is_some() {
         let mut c = Command::new("sudo");
         c.arg("-S");
+        c.arg("-p");
+        c.arg("");
         c.args(args);
         c
     } else {
@@ -82,6 +84,7 @@ pub fn execute_cmd_with_log_stream(args: &[&str], password: Option<&str>, sender
     if let Some(pwd) = password {
         if let Some(mut stdin) = child.stdin.take() {
             let _ = writeln!(stdin, "{}", pwd);
+            let _ = stdin.flush();
         }
     }
 
@@ -170,6 +173,10 @@ pub fn read_update_log() -> String {
 }
 
 pub fn start_background_update(password: Option<String>) {
+    start_background_update_with_sender(password, None);
+}
+
+pub fn start_background_update_with_sender(password: Option<String>, external_tx: Option<std::sync::mpsc::Sender<String>>) {
     use std::fs::OpenOptions;
     use std::io::Write;
 
@@ -193,6 +200,9 @@ pub fn start_background_update(password: Option<String>) {
         });
 
         while let Ok(line) = rx.recv() {
+            if let Some(ref ext_tx) = external_tx {
+                let _ = ext_tx.send(line.clone());
+            }
             if let Ok(mut file) = OpenOptions::new().create(true).append(true).open(&log_path) {
                 let _ = writeln!(file, "{}", line);
                 let _ = file.flush();
@@ -201,17 +211,17 @@ pub fn start_background_update(password: Option<String>) {
     });
 }
 
-/// Triggers system update streaming output via sender channel.
-pub fn stream_update_system(password: Option<&str>, sender: std::sync::mpsc::Sender<String>) -> Result<(), String> {
+pub fn clean_pacman_lock(password: Option<&str>, sender: std::sync::mpsc::Sender<String>) {
     if std::path::Path::new("/var/lib/pacman/db.lck").exists() {
         if !is_pacman_running() {
             let _ = sender.send(":: Detected stale pacman lock file (/var/lib/pacman/db.lck). Cleaning lock file...".to_string());
-            if let Some(pwd) = password {
-                let _ = execute_cmd_with_log_stream(&["rm", "-f", "/var/lib/pacman/db.lck"], Some(pwd), sender.clone());
-            } else {
-                let _ = std::fs::remove_file("/var/lib/pacman/db.lck");
-            }
+            let _ = execute_cmd_with_log_stream(&["rm", "-f", "/var/lib/pacman/db.lck"], password, sender);
         }
     }
+}
+
+/// Triggers system update streaming output via sender channel.
+pub fn stream_update_system(password: Option<&str>, sender: std::sync::mpsc::Sender<String>) -> Result<(), String> {
+    clean_pacman_lock(password, sender.clone());
     execute_cmd_with_log_stream(&["sh", "-c", "yes | pacman -Syu --noconfirm --needed"], password, sender)
 }

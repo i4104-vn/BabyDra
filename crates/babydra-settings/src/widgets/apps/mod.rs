@@ -13,13 +13,14 @@ pub struct AppsData {
 pub fn create_apps_widget() -> Widget {
     // Build initial UI instantly (0ms main thread blocking!)
     let (widget, auth_dialog, _uninstall_items) = render::build(&[], &[]);
+    let auth_dialog_rc = std::rc::Rc::new(auth_dialog);
+    let pending_uninstall = std::rc::Rc::new(std::cell::RefCell::new(None::<(String, gtk4::Box, gtk4::ListBox)>));
 
     // Wire main event handlers (tabs switching, search, console close) on the visible widget
-    handler::wire_events(&widget, auth_dialog, Vec::new());
+    handler::wire_main_events(&widget, &auth_dialog_rc, pending_uninstall.clone());
 
     let apps_list_box = widget.apps_list_box.clone();
     let pkgs_list_box = widget.pkgs_list_box.clone();
-    let widget_c = widget.clone();
 
     // Offload desktop app scanning & pacman query to background thread
     let (tx, rx) = std::sync::mpsc::channel::<AppsData>();
@@ -51,8 +52,8 @@ pub fn create_apps_widget() -> Widget {
             }
 
             // Build populated rows & wire uninstall action buttons
-            let (new_w, new_auth_dlg, uninstall_items) = render::build(&data.apps_data, &data.pkgs);
-            handler::wire_events(&widget_c, new_auth_dlg, uninstall_items);
+            let (new_w, _new_auth_dlg, uninstall_items) = render::build(&data.apps_data, &data.pkgs);
+            handler::wire_uninstall_items(&auth_dialog_rc, pending_uninstall.clone(), uninstall_items);
 
             // Move populated rows into the visible apps_list_box & pkgs_list_box
             while let Some(child) = new_w.apps_list_box.first_child() {

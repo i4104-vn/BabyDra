@@ -357,21 +357,25 @@ button.lang-seg-inactive:hover {
 }
 
 
-/* --- Synced from dark theme --- */
+/* Glassmorphism Circular Icon Badge (Matching circle button style) */
 .blue-icon-badge {
-    background-color: #2563eb;
-    color: #ffffff;
-    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    border-top: 1px solid rgba(0, 0, 0, 0.15);
+    color: #1c1c1e;
+    border-radius: 9999px;
     min-width: 44px;
     min-height: 44px;
 }
 
 .blue-icon-badge-sm {
-    background-color: #2563eb;
-    color: #ffffff;
-    border-radius: 8px;
-    min-width: 32px;
-    min-height: 32px;
+    background-color: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    border-top: 1px solid rgba(0, 0, 0, 0.15);
+    color: #1c1c1e;
+    border-radius: 9999px;
+    min-width: 34px;
+    min-height: 34px;
 }
 
 .spec-card {

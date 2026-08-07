@@ -19,6 +19,7 @@ pub struct AppsWidget {
     pub root: Overlay,
     pub container: Box,
     pub search_entry: Entry,
+    pub refresh_btn: Button,
     pub tab_apps_btn: Button,
     pub tab_packages_btn: Button,
     pub stack: Stack,

@@ -5,7 +5,42 @@ use babydra_utils::components::modal::PasswordDialog;
 use babydra_common::models::app_info::AppsWidget;
 use super::render::UninstallRowItem;
 
-pub fn wire_events(widget: &AppsWidget, auth_dialog: PasswordDialog, uninstall_items: Vec<UninstallRowItem>) {
+fn filter_list_box(list_box: &gtk4::ListBox, query: &str) {
+    let query_lower = query.to_lowercase();
+    let mut child = list_box.first_child();
+    while let Some(c) = child {
+        let mut visible = false;
+        if query_lower.is_empty() {
+            visible = true;
+        } else if let Some(row) = c.downcast_ref::<gtk4::ListBoxRow>() {
+            if let Some(row_box) = row.child().and_then(|w| w.downcast::<gtk4::Box>().ok()) {
+                let mut text_child = row_box.first_child();
+                while let Some(tc) = text_child {
+                    if let Some(text_box) = tc.downcast_ref::<gtk4::Box>() {
+                        let mut lbl_child = text_box.first_child();
+                        while let Some(lbl) = lbl_child {
+                            if let Some(l) = lbl.downcast_ref::<gtk4::Label>() {
+                                if l.text().to_lowercase().contains(&query_lower) {
+                                    visible = true;
+                                    break;
+                                }
+                            }
+                            lbl_child = lbl.next_sibling();
+                        }
+                    }
+                    if visible {
+                        break;
+                    }
+                    text_child = tc.next_sibling();
+                }
+            }
+        }
+        c.set_visible(visible);
+        child = c.next_sibling();
+    }
+}
+
+pub fn wire_main_events(widget: &AppsWidget, auth_dialog_rc: &Rc<PasswordDialog>, pending_uninstall: Rc<RefCell<Option<(String, gtk4::Box, gtk4::ListBox)>>>) {
     let tab_apps_btn_copy = widget.tab_apps_btn.clone();
     let tab_packages_btn_copy = widget.tab_packages_btn.clone();
     let stack1 = widget.stack.clone();
@@ -27,61 +62,77 @@ pub fn wire_events(widget: &AppsWidget, auth_dialog: PasswordDialog, uninstall_i
     let apps_list = widget.apps_list_box.clone();
     let pkgs_list = widget.pkgs_list_box.clone();
     widget.search_entry.connect_changed(move |entry| {
-        let query = entry.text().to_lowercase();
-        
-        let mut app_child = apps_list.first_child();
-        while let Some(c) = app_child {
-            let mut visible = false;
-            if query.is_empty() {
-                visible = true;
-            } else if let Some(row_box) = c.downcast_ref::<gtk4::Box>() {
-                let mut label_child = row_box.first_child();
-                while let Some(lc) = label_child {
-                    if let Some(tb) = lc.downcast_ref::<gtk4::Box>() {
-                        let mut sub = tb.first_child();
-                        while let Some(lbl) = sub {
-                            if let Some(l) = lbl.downcast_ref::<gtk4::Label>() {
-                                if l.text().to_lowercase().contains(&query) {
-                                    visible = true;
-                                    break;
-                                }
-                            }
-                            sub = lbl.next_sibling();
-                        }
-                    }
-                    label_child = lc.next_sibling();
-                }
-            }
-            c.set_visible(visible);
-            app_child = c.next_sibling();
-        }
+        let query = entry.text();
+        filter_list_box(&apps_list, &query);
+        filter_list_box(&pkgs_list, &query);
+    });
 
-        let mut pkg_child = pkgs_list.first_child();
-        while let Some(c) = pkg_child {
-            let mut visible = false;
-            if query.is_empty() {
-                visible = true;
-            } else if let Some(row_box) = c.downcast_ref::<gtk4::Box>() {
-                let mut label_child = row_box.first_child();
-                while let Some(lc) = label_child {
-                    if let Some(tb) = lc.downcast_ref::<gtk4::Box>() {
-                        let mut sub = tb.first_child();
-                        while let Some(lbl) = sub {
-                            if let Some(l) = lbl.downcast_ref::<gtk4::Label>() {
-                                if l.text().to_lowercase().contains(&query) {
-                                    visible = true;
-                                    break;
-                                }
-                            }
-                            sub = lbl.next_sibling();
-                        }
-                    }
-                    label_child = lc.next_sibling();
+    let refresh_btn = widget.refresh_btn.clone();
+    let apps_list_box = widget.apps_list_box.clone();
+    let pkgs_list_box = widget.pkgs_list_box.clone();
+    let search_entry = widget.search_entry.clone();
+    let auth_dialog_rc_ref = auth_dialog_rc.clone();
+    let pending_uninstall_ref = pending_uninstall.clone();
+
+    widget.refresh_btn.connect_clicked(move |_| {
+        refresh_btn.set_sensitive(false);
+
+        let (tx, rx) = std::sync::mpsc::channel::<super::AppsData>();
+        std::thread::spawn(move || {
+            let installed_apps = babydra_common::services::apps::discovery::scan_desktop_apps_from_filesystem();
+            let apps_data: Vec<babydra_common::models::app_info::InstalledApp> = installed_apps
+                .into_iter()
+                .map(|app| babydra_common::models::app_info::InstalledApp {
+                    name: app.name,
+                    description: app.exec,
+                    desktop_file: "".to_string(),
+                    icon: app.icon,
+                })
+                .collect();
+
+            let pkgs = babydra_common::services::apps::pacman::get_installed_packages_list();
+
+            let _ = tx.send(super::AppsData { apps_data, pkgs });
+        });
+
+        let apps_list_box = apps_list_box.clone();
+        let pkgs_list_box = pkgs_list_box.clone();
+        let search_entry = search_entry.clone();
+        let refresh_btn = refresh_btn.clone();
+        let auth_dialog_rc = auth_dialog_rc_ref.clone();
+        let pending_uninstall = pending_uninstall_ref.clone();
+
+        gtk4::glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
+            if let Ok(data) = rx.try_recv() {
+                while let Some(child) = apps_list_box.first_child() {
+                    apps_list_box.remove(&child);
                 }
+                while let Some(child) = pkgs_list_box.first_child() {
+                    pkgs_list_box.remove(&child);
+                }
+
+                let (new_w, _new_auth_dlg, uninstall_items) = super::render::build(&data.apps_data, &data.pkgs);
+                wire_uninstall_items(&auth_dialog_rc, pending_uninstall.clone(), uninstall_items);
+
+                while let Some(child) = new_w.apps_list_box.first_child() {
+                    new_w.apps_list_box.remove(&child);
+                    apps_list_box.append(&child);
+                }
+                while let Some(child) = new_w.pkgs_list_box.first_child() {
+                    new_w.pkgs_list_box.remove(&child);
+                    pkgs_list_box.append(&child);
+                }
+
+                let query = search_entry.text();
+                filter_list_box(&apps_list_box, &query);
+                filter_list_box(&pkgs_list_box, &query);
+
+                refresh_btn.set_sensitive(true);
+                gtk4::glib::ControlFlow::Break
+            } else {
+                gtk4::glib::ControlFlow::Continue
             }
-            c.set_visible(visible);
-            pkg_child = c.next_sibling();
-        }
+        });
     });
 
     // Handle Console Close Button
@@ -90,27 +141,7 @@ pub fn wire_events(widget: &AppsWidget, auth_dialog: PasswordDialog, uninstall_i
         console_card_close.set_visible(false);
     });
 
-    // Wire Uninstall buttons with reusable PasswordDialog
-    let pending_uninstall = Rc::new(RefCell::new(None::<(String, gtk4::Box, gtk4::ListBox)>));
-    let auth_dialog_rc = Rc::new(auth_dialog);
-
-    for item in uninstall_items {
-        let auth_dialog_c = auth_dialog_rc.clone();
-        let pending_c = pending_uninstall.clone();
-        let pkg_name = item.pkg_name;
-        let row_box = item.row_box;
-        let parent_list = item.parent_list;
-
-        item.button.connect_clicked(move |_| {
-            *pending_c.borrow_mut() = Some((pkg_name.clone(), row_box.clone(), parent_list.clone()));
-            auth_dialog_c.show_for(
-                "Uninstall Authentication",
-                &format!("Enter sudo password to uninstall '{}':", pkg_name),
-            );
-        });
-    }
-
-    let pending_submit = pending_uninstall;
+    let pending_submit = pending_uninstall.clone();
     let console_card = widget.console_card.clone();
     let console_title_lbl = widget.console_title_lbl.clone();
     let text_buffer = widget.text_buffer.clone();
@@ -118,6 +149,11 @@ pub fn wire_events(widget: &AppsWidget, auth_dialog: PasswordDialog, uninstall_i
     let progress_bar = widget.progress_bar.clone();
 
     auth_dialog_rc.connect_submit(move |password| {
+        let pwd = match password {
+            Some(p) if !p.trim().is_empty() => p,
+            _ => return,
+        };
+
         if let Some((pkg_name, row_box, parent_list)) = pending_submit.borrow_mut().take() {
             console_card.set_visible(true);
             text_buffer.set_text("");
@@ -130,7 +166,7 @@ pub fn wire_events(widget: &AppsWidget, auth_dialog: PasswordDialog, uninstall_i
 
             let (tx, rx) = std::sync::mpsc::channel::<String>();
             let pkg_name_clone = pkg_name.clone();
-            let pwd_clone = password.clone();
+            let pwd_clone = Some(pwd);
 
             std::thread::spawn(move || {
                 let res = babydra_common::services::apps::pacman::stream_uninstall_package(
@@ -146,7 +182,6 @@ pub fn wire_events(widget: &AppsWidget, auth_dialog: PasswordDialog, uninstall_i
                     let _ = tx.send(format!("\n{}", success_msg));
                 }
             });
-
             let text_buffer_c = text_buffer.clone();
             let console_scroll_c = console_scroll.clone();
             let progress_bar_c = progress_bar.clone();
@@ -197,4 +232,26 @@ pub fn wire_events(widget: &AppsWidget, auth_dialog: PasswordDialog, uninstall_i
             });
         }
     });
+}
+
+pub fn wire_uninstall_items(
+    auth_dialog_rc: &Rc<PasswordDialog>,
+    pending_uninstall: Rc<RefCell<Option<(String, gtk4::Box, gtk4::ListBox)>>>,
+    uninstall_items: Vec<UninstallRowItem>,
+) {
+    for item in uninstall_items {
+        let auth_dialog_c = auth_dialog_rc.clone();
+        let pending_c = pending_uninstall.clone();
+        let pkg_name = item.pkg_name;
+        let row_box = item.row_box;
+        let parent_list = item.parent_list;
+
+        item.button.connect_clicked(move |_| {
+            *pending_c.borrow_mut() = Some((pkg_name.clone(), row_box.clone(), parent_list.clone()));
+            auth_dialog_c.show_for(
+                "Uninstall Authentication",
+                &format!("Enter sudo password to uninstall '{}':", pkg_name),
+            );
+        });
+    }
 }

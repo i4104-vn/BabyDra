@@ -33,8 +33,18 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
     search_entry.add_css_class("sidebar-search-entry");
     search_entry.set_width_request(220);
 
+    let refresh_btn = Button::new();
+    refresh_btn.add_css_class("icon-btn");
+    refresh_btn.add_css_class("circular");
+    refresh_btn.set_cursor_from_name(Some("pointer"));
+    let refresh_icon = babydra_utils::ui::icon::get_icon("refresh", 16);
+    refresh_icon.set_pixel_size(16);
+    refresh_btn.set_child(Some(&refresh_icon));
+    refresh_btn.set_tooltip_text(Some("Refresh application list"));
+
     header_box.append(&title_label);
     header_box.append(&search_entry);
+    header_box.append(&refresh_btn);
     container.append(&header_box);
 
     // Tabs Bar Row
@@ -88,7 +98,8 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
         icon_box.set_valign(gtk4::Align::Center);
         icon_box.set_halign(gtk4::Align::Start);
 
-        let icon_img = babydra_utils::ui::icon::get_icon("th-large", 18);
+        let icon_name = app.icon.as_deref().filter(|s| !s.is_empty()).unwrap_or("application-x-executable");
+        let icon_img = babydra_utils::ui::icon::get_system_or_file_icon(icon_name, "application-x-executable");
         icon_img.set_pixel_size(18);
         icon_img.set_valign(gtk4::Align::Center);
         icon_img.set_halign(gtk4::Align::Center);
@@ -168,7 +179,7 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
         icon_box.set_valign(gtk4::Align::Center);
         icon_box.set_halign(gtk4::Align::Start);
 
-        let icon_img = babydra_utils::ui::icon::get_icon("archive", 18);
+        let icon_img = babydra_utils::ui::icon::get_system_or_file_icon(&pkg.name, "application-x-executable");
         icon_img.set_pixel_size(18);
         icon_img.set_valign(gtk4::Align::Center);
         icon_img.set_halign(gtk4::Align::Center);
@@ -286,6 +297,7 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
         root,
         container,
         search_entry,
+        refresh_btn,
         tab_apps_btn,
         tab_packages_btn,
         stack,

@@ -81,21 +81,25 @@ button.sidebar-item.active-nav:hover image {
     padding: 12px;
 }
 
-/* Blue Icon Square Badge (Matching Reference Images) */
+/* Glassmorphism Circular Icon Badge (Matching circle button style) */
 .blue-icon-badge {
-    background-color: #1d58d8;
-    color: #ffffff;
-    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.22);
+    color: rgba(255, 255, 255, 0.9);
+    border-radius: 9999px;
     min-width: 44px;
     min-height: 44px;
 }
 
 .blue-icon-badge-sm {
-    background-color: #1d58d8;
-    color: #ffffff;
-    border-radius: 8px;
-    min-width: 32px;
-    min-height: 32px;
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.22);
+    color: rgba(255, 255, 255, 0.9);
+    border-radius: 9999px;
+    min-width: 34px;
+    min-height: 34px;
 }
 
 /* Spec Card Grid (2x2) */
