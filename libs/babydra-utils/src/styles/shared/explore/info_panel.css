@@ -3,6 +3,10 @@
     margin: 8px 8px 8px 4px;
     padding: 16px;
     min-width: 250px;
+<<<<<<< HEAD
+=======
+    max-width: 250px;
+>>>>>>> hard-develop
     box-shadow: none;
 }
 

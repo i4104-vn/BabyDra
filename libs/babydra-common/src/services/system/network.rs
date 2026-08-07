@@ -68,6 +68,7 @@ pub fn format_speed(bytes_per_sec: f64) -> String {
         format!("{:.1} MB/s", bytes_per_sec / (1024.0 * 1024.0))
     }
 }
+<<<<<<< HEAD
 
 /// Retrieves local IPv4 address of the active default network route interface.
 pub fn get_local_ip() -> String {
@@ -84,3 +85,5 @@ pub fn get_local_ip() -> String {
     "127.0.0.1".to_string()
 }
 
+=======
+>>>>>>> hard-develop

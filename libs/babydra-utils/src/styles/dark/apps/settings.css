@@ -1,4 +1,5 @@
 window.settings-window {
+<<<<<<< HEAD
     background-color: rgba(12, 12, 20, 0.96);
     color: rgba(255, 255, 255, 0.95);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
@@ -6,6 +7,14 @@ window.settings-window {
 }
 
 /* Sidebar navigation */
+=======
+    background-color: rgba(14, 14, 18, 0.96);
+    color: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+>>>>>>> hard-develop
 .profile-avatar {
     background-color: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.14);
@@ -19,6 +28,7 @@ window.settings-window {
     border-bottom: 1px solid rgba(255, 255, 255, 0.10);
 }
 
+<<<<<<< HEAD
 entry.sidebar-search-entry {
     background-color: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -136,12 +146,136 @@ button.sidebar-item.active-nav:hover image {
     border-radius: 0;
     padding: 0;
     box-shadow: none;
+=======
+.sidebar-search-entry,
+.sidebar-search-entry>text {
+    background-color: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+}
+
+.sidebar-search-entry:focus,
+.sidebar-search-entry>text:focus {
+    background-color: rgba(59, 130, 246, 0.06);
+}
+
+.settings-breadcrumb-parent {
+    color: rgba(255, 255, 255, 0.50);
+}
+
+.settings-breadcrumb-arrow {
+    color: rgba(255, 255, 255, 0.30);
+}
+
+.settings-breadcrumb-current {
+    color: #ffffff;
+}
+
+.settings-group-header-title {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.settings-title-label {
+    color: #ffffff;
+}
+
+.settings-section-title {
+    color: rgba(255, 255, 255, 0.50);
+}
+
+.settings-row-title {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.settings-row-desc {
+    color: rgba(255, 255, 255, 0.50);
+}
+
+.settings-row-icon {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.settings-card {
+    background-color: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.settings-card row,
+.settings-card-row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.settings-card row:hover,
+.settings-card-row:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.connect-pill-btn {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+}
+
+.connect-pill-btn:hover {
+    background-color: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.20);
+}
+
+.connected-pill {
+    background-color: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.30);
+}
+
+.connected-text {
+    color: #34d399;
+}
+
+.wallpaper-preview-frame {
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background-color: rgba(255, 255, 255, 0.035);
+}
+
+button.theme-option-card {
+    background-color: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.70);
+}
+
+button.theme-option-card:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.20);
+    color: #ffffff;
+}
+
+button.theme-option-card.active {
+    background-color: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+}
+
+button.theme-option-card.active label,
+button.theme-option-card.active image {
+    color: #60a5fa;
+}
+
+dropdown,
+dropdown button {
+    background-color: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+}
+
+dropdown:hover,
+dropdown button:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.20);
+>>>>>>> hard-develop
 }
 
 .hero-hostname {
     color: #ffffff;
 }
 
+<<<<<<< HEAD
 .hero-subtitle {
     font-size: 13px;
     font-weight: 500;
@@ -461,3 +595,23 @@ progressbar.console-progress progress {
     background-color: rgba(255, 255, 255, 0.12);
     color: #ffffff;
 }
+=======
+progressbar.disk-progress trough {
+    background-color: rgba(255, 255, 255, 0.10);
+}
+
+.cheatsheet-overlay {
+    background-color: rgba(14, 14, 18, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.cheatsheet-title {
+    color: #ffffff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.cheatsheet-value {
+    color: rgba(255, 255, 255, 0.90);
+}
+>>>>>>> hard-develop

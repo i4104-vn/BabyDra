@@ -1,5 +1,6 @@
 window.settings-window {
     background-color: rgba(255, 255, 255, 0.98);
+<<<<<<< HEAD
     color: #1c1c1e;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     border: 1px solid rgba(0, 0, 0, 0.08);
@@ -575,3 +576,167 @@ entry.sidebar-search-entry>text {
     box-shadow: none;
     color: #1c1c1e;
 }
+=======
+    color: #1c1c1e;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.profile-avatar {
+    background-color: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.profile-user-name {
+    color: #1c1c1e;
+}
+
+.profile-separator {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.sidebar-search-entry,
+.sidebar-search-entry>text {
+    background-color: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: #1c1c1e;
+}
+
+.sidebar-search-entry:focus,
+.sidebar-search-entry>text:focus {
+    background-color: rgba(59, 130, 246, 0.04);
+}
+
+.settings-breadcrumb-parent {
+    color: rgba(28, 28, 30, 0.50);
+}
+
+.settings-breadcrumb-arrow {
+    color: rgba(28, 28, 30, 0.30);
+}
+
+.settings-breadcrumb-current {
+    color: #1c1c1e;
+}
+
+.settings-group-header-title {
+    color: #1c1c1e;
+}
+
+.settings-title-label {
+    color: #1c1c1e;
+}
+
+.settings-section-title {
+    color: rgba(28, 28, 30, 0.50);
+}
+
+.settings-row-title {
+    color: #1c1c1e;
+}
+
+.settings-row-desc {
+    color: rgba(28, 28, 30, 0.50);
+}
+
+.settings-row-icon {
+    color: rgba(28, 28, 30, 0.65);
+}
+
+.settings-card {
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.settings-card row,
+.settings-card-row {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.settings-card row:hover,
+.settings-card-row:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.connect-pill-btn {
+    background-color: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: #1c1c1e;
+}
+
+.connect-pill-btn:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.14);
+}
+
+.connected-pill {
+    background-color: rgba(16, 185, 129, 0.10);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.connected-text {
+    color: #059669;
+}
+
+.wallpaper-preview-frame {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+button.theme-option-card {
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: #1c1c1e;
+}
+
+button.theme-option-card:hover {
+    background-color: #f4f4f5;
+    border-color: rgba(0, 0, 0, 0.14);
+}
+
+button.theme-option-card.active {
+    background-color: rgba(59, 130, 246, 0.10);
+    color: #2563eb;
+}
+
+button.theme-option-card.active label,
+button.theme-option-card.active image {
+    color: #2563eb;
+}
+
+dropdown,
+dropdown button {
+    background-color: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: #1c1c1e;
+}
+
+dropdown:hover,
+dropdown button:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.14);
+}
+
+.hero-hostname {
+    color: #1c1c1e;
+}
+
+progressbar.disk-progress trough {
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+.cheatsheet-overlay {
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.cheatsheet-title {
+    color: #1c1c1e;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.cheatsheet-value {
+    color: #1c1c1e;
+}
+>>>>>>> hard-develop

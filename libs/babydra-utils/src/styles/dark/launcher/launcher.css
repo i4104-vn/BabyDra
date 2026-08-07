@@ -70,6 +70,11 @@ entry.launcher-search>text>placeholder {
 }
 
 .launcher-power-btn {
+<<<<<<< HEAD
+=======
+    background-color: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+>>>>>>> hard-develop
 }
 
 .launcher-power-btn:hover {

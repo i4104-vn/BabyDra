@@ -53,6 +53,12 @@ calendar.calendar-widget cell {
 }
 
 calendar.calendar-widget header {
+<<<<<<< HEAD
+=======
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+>>>>>>> hard-develop
     background-color: transparent;
     border: none;
     padding-bottom: 10px;

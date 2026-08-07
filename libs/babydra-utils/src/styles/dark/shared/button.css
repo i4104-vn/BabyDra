@@ -22,9 +22,13 @@ button.btn-primary.disabled {
     color: rgba(255, 255, 255, 0.40);
 }
 
+<<<<<<< HEAD
 button.btn-share-pill,
 button.connect-pill-btn,
 .connect-pill-btn {
+=======
+button.btn-share-pill {
+>>>>>>> hard-develop
     background-color: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-top: 1px solid rgba(255, 255, 255, 0.28);
@@ -35,6 +39,7 @@ button.btn-share-pill:hover,
 button.connect-pill-btn:hover,
 .connect-pill-btn:hover {
     background-color: rgba(255, 255, 255, 0.15);
+<<<<<<< HEAD
     border-color: rgba(255, 255, 255, 0.20);
 }
 
@@ -53,6 +58,8 @@ button.circular.delete-btn:hover,
     background-color: rgba(239, 68, 68, 0.25);
     border-color: rgba(239, 68, 68, 0.50);
     color: #fca5a5;
+=======
+>>>>>>> hard-develop
 }
 
 button.btn-upgrade-secondary {

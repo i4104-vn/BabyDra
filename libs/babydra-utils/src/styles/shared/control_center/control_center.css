@@ -366,6 +366,10 @@ button.audio-menu-item-btn.active label {
     border-radius: 12px;
     margin: 2px 0;
     transition: all 150ms ease;
+<<<<<<< HEAD
+=======
+    display: flex;
+>>>>>>> hard-develop
 }
 
 button.control-tile-left-btn {
@@ -413,6 +417,10 @@ button.control-tile-right-btn:active {
 .wifi-popover-box {
     padding: 10px;
     min-width: 250px;
+<<<<<<< HEAD
+=======
+    max-width: 320px;
+>>>>>>> hard-develop
 }
 
 .wifi-popover-title {

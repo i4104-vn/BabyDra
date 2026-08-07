@@ -97,7 +97,11 @@ pub fn create_battery_widget() -> Option<gtk4::DrawingArea> {
     Some(drawing_area)
 }
 
+<<<<<<< HEAD
 pub fn build_status_indicators_ui() -> (gtk4::Box, gtk4::Button, gtk4::Label, gtk4::Image, gtk4::Image, gtk4::Image, Option<gtk4::DrawingArea>) {
+=======
+pub fn build_status_indicators_ui() -> (gtk4::Box, gtk4::Button, gtk4::Label, gtk4::Image, gtk4::Image, Option<gtk4::DrawingArea>) {
+>>>>>>> hard-develop
     let status_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 4);
     status_box.add_css_class("status-indicators-box");
 
@@ -139,5 +143,9 @@ pub fn build_status_indicators_ui() -> (gtk4::Box, gtk4::Button, gtk4::Label, gt
     let separator = gtk4::Label::new(Some("│"));
     separator.add_css_class("capsule-separator");
 
+<<<<<<< HEAD
     (status_box, status_button, separator, vol_icon, net_icon, vpn_icon, bat_widget)
+=======
+    (status_box, status_button, separator, vol_icon, net_icon, bat_widget)
+>>>>>>> hard-develop
 }

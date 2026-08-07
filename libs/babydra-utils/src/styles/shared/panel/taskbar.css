@@ -23,6 +23,7 @@ button.taskbar-app-btn {
     box-shadow: none;
 }
 
+<<<<<<< HEAD
 button.taskbar-app-btn,
 button.taskbar-app-btn:hover,
 button.taskbar-app-btn image,
@@ -31,6 +32,8 @@ button.taskbar-app-btn:hover image {
     scale: 1;
 }
 
+=======
+>>>>>>> hard-develop
 button.taskbar-app-btn:hover {
     border-bottom: 2px solid #3b82f6;
 }
@@ -50,6 +53,10 @@ popover.taskbar-popover {
 popover.taskbar-popover>contents {
     padding: 8px;
     min-width: 200px;
+<<<<<<< HEAD
+=======
+    max-width: 200px;
+>>>>>>> hard-develop
 }
 
 .taskbar-previews-header-label {

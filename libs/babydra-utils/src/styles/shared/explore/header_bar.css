@@ -12,7 +12,13 @@
     padding: 6px 10px 6px 14px;
     font-size: 12px;
     min-width: 100px;
+<<<<<<< HEAD
     margin-top: 4px;
+=======
+    max-width: 160px;
+    margin-top: 4px;
+    cursor: pointer;
+>>>>>>> hard-develop
     transition: background 0.12s ease;
 }
 
@@ -57,6 +63,11 @@
     padding: 0;
     min-width: 24px;
     min-height: 24px;
+<<<<<<< HEAD
+=======
+    max-width: 24px;
+    max-height: 24px;
+>>>>>>> hard-develop
     margin: auto 4px;
 }
 
@@ -110,6 +121,10 @@
     padding: 3px 8px;
     font-size: 12px;
     min-width: 80px;
+<<<<<<< HEAD
+=======
+    max-width: 150px;
+>>>>>>> hard-develop
     transition: border-color 0.15s ease;
 }
 

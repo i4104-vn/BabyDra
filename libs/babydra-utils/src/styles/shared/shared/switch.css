@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Unified System-Wide GTK Switch Component Style */
 switch {
     min-width: 42px;
@@ -21,11 +22,28 @@ switch > slider {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
     margin: 2px;
     transition: all 200ms ease;
+=======
+switch {
+    min-width: 28px;
+    min-height: 16px;
+    border-radius: 20px;
+    transition: all 150ms ease;
+}
+
+switch slider {
+    min-width: 12px;
+    min-height: 12px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    margin: 1px;
+    transition: all 150ms ease;
+>>>>>>> hard-develop
 }
 
 switch:checked {
     background-color: #3b82f6;
     border-color: #3b82f6;
+<<<<<<< HEAD
     background-image: none;
 }
 
@@ -33,4 +51,6 @@ switch:checked slider,
 switch:checked > slider {
     background-color: #ffffff;
     background-image: none;
+=======
+>>>>>>> hard-develop
 }

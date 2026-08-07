@@ -1,11 +1,19 @@
 button.suggested-action {
     background-image: none;
     border: none;
+<<<<<<< HEAD
     border-radius: 9999px;
     color: #ffffff;
     padding: 8px 18px;
     font-weight: 600;
     font-size: 13px;
+=======
+    border-radius: 8px;
+    color: #ffffff;
+    padding: 6px 16px;
+    font-weight: 600;
+    font-size: 12px;
+>>>>>>> hard-develop
     box-shadow: none;
     transition: background-color 150ms ease;
 }
@@ -297,6 +305,27 @@ button.row-action-btn:hover {
     opacity: 1.0;
 }
 
+<<<<<<< HEAD
+=======
+.explore-dialog button.baby-fab,
+.explore-dialog button.baby-fab.circular {
+    background-image: none;
+    border: none;
+    border-radius: 50%;
+    min-width: 48px;
+    min-height: 48px;
+    padding: 0;
+    color: #ffffff;
+    transition: background-color 200ms ease, box-shadow 200ms ease;
+}
+
+.explore-dialog button.baby-fab image,
+.explore-dialog button.baby-fab.circular image {
+    color: #ffffff;
+    -gtk-icon-size: 20px;
+}
+
+>>>>>>> hard-develop
 .explore-dialog.properties-dialog {
     border-top: none;
     border-radius: 0 0 16px 16px;

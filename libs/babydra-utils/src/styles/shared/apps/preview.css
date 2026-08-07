@@ -18,13 +18,27 @@
 .main-preview-card {
     background-image: none;
     border-radius: 24px;
+<<<<<<< HEAD
 }
 
 .variation-column {
+=======
+    overflow: hidden;
+}
+
+.variation-column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+>>>>>>> hard-develop
 }
 
 .variation-card {
     border-radius: 16px;
+<<<<<<< HEAD
+=======
+    overflow: hidden;
+>>>>>>> hard-develop
     transition: all 200ms ease;
 }
 
@@ -33,14 +47,33 @@
 }
 
 .prompt-panel {
+<<<<<<< HEAD
+=======
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+>>>>>>> hard-develop
 }
 
 .reference-image-card {
     border-radius: 16px;
+<<<<<<< HEAD
+=======
+    aspect-ratio: 16 / 9;
+    position: relative;
+    overflow: hidden;
+>>>>>>> hard-develop
     transition: all 200ms ease;
 }
 
 .keyword-chips-wrapper {
+<<<<<<< HEAD
+=======
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+>>>>>>> hard-develop
 }
 
 .keyword-chip,
@@ -70,8 +103,20 @@
 }
 
 .input-floating-shell {
+<<<<<<< HEAD
     border-radius: 24px;
     padding: 12px 16px;
+=======
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 24px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+>>>>>>> hard-develop
 }
 
 .parameter-toolbar-chip {
@@ -86,6 +131,12 @@
     padding: 2px 8px;
     font-size: 11px;
     font-weight: 800;
+<<<<<<< HEAD
+=======
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+>>>>>>> hard-develop
 }
 
 .badge-pink {
@@ -107,15 +158,29 @@
     background: conic-gradient(#3b82f6, #f472b6, #fbbf24, #3b82f6);
     border-radius: 50%;
     padding: 2px;
+<<<<<<< HEAD
+=======
+    display: inline-block;
+>>>>>>> hard-develop
 }
 
 .rainbow-ring-avatar {
     border-radius: 50%;
+<<<<<<< HEAD
+=======
+    overflow: hidden;
+>>>>>>> hard-develop
 }
 
 .credit-meter {
     border-radius: 9999px;
     padding: 4px 12px;
+<<<<<<< HEAD
+=======
+    display: flex;
+    align-items: center;
+    gap: 8px;
+>>>>>>> hard-develop
     transition: all 200ms ease;
 }
 
