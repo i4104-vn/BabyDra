@@ -114,8 +114,41 @@ pub fn render_network_list(
             lock_icon.set_pixel_size(12);
             lock_icon.add_css_class("settings-row-desc");
             lock_icon.set_valign(gtk4::Align::Center);
+            lock_icon.set_tooltip_text(Some(&net.security.to_uppercase()));
             name_box.append(&lock_icon);
         }
+
+        let popover = gtk4::Popover::new();
+        popover.set_position(gtk4::PositionType::Top);
+        popover.set_autohide(false);
+        let pop_vbox = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
+        pop_vbox.set_margin_top(8);
+        pop_vbox.set_margin_bottom(8);
+        pop_vbox.set_margin_start(12);
+        pop_vbox.set_margin_end(12);
+        
+        let sig_lbl = gtk4::Label::new(Some(&format!("Signal: {}%", net.signal)));
+        sig_lbl.set_halign(gtk4::Align::Start);
+        sig_lbl.add_css_class("settings-row-desc");
+        let sec_lbl = gtk4::Label::new(Some(&format!("Security: {}", net.security.to_uppercase())));
+        sec_lbl.set_halign(gtk4::Align::Start);
+        sec_lbl.add_css_class("settings-row-desc");
+        
+        pop_vbox.append(&sig_lbl);
+        pop_vbox.append(&sec_lbl);
+        popover.set_child(Some(&pop_vbox));
+        popover.set_parent(&name_box);
+
+        let motion = gtk4::EventControllerMotion::new();
+        let pop_c1 = popover.clone();
+        motion.connect_enter(move |_, _, _| {
+            pop_c1.popup();
+        });
+        let pop_c2 = popover.clone();
+        motion.connect_leave(move |_| {
+            pop_c2.popdown();
+        });
+        name_box.add_controller(motion);
 
         let click_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 14);
         click_box.set_hexpand(true);
@@ -129,6 +162,7 @@ pub fn render_network_list(
             check_icon.set_pixel_size(18);
             check_icon.set_valign(gtk4::Align::Center);
             check_icon.add_css_class("connected-text");
+            check_icon.set_tooltip_text(Some(&babydra_common::i18n::t("settings.wifi_connected")));
             hbox.append(&check_icon);
         }
 
