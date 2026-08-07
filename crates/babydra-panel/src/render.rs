@@ -25,6 +25,7 @@ pub fn rebuild_panel_window(
     // 3. Logo Button
     let logo_btn = gtk4::Button::new();
     logo_btn.add_css_class("panel-logo-btn");
+    logo_btn.set_cursor_from_name(Some("pointer"));
     let logo_icon = babydra_utils::ui::icon::get_icon("logo", 16);
     logo_btn.set_child(Some(&logo_icon));
     
