@@ -91,6 +91,13 @@ pub fn spawn_switcher_tracker() {
 
                 // Reset for the new active window
                 current_focused_window = active_window;
+                if let Some((ref app, ref title)) = current_focused_window {
+                    let is_switcher = app == "babydra-switcher" || app == "org.babydra.switcher";
+                    if !is_switcher {
+                        let key = if title.is_empty() { app.clone() } else { title.clone() };
+                        super::mru::save_history(&key);
+                    }
+                }
                 focus_start = Instant::now();
                 last_screenshot_time = Instant::now();
                 screenshot_taken = false;
