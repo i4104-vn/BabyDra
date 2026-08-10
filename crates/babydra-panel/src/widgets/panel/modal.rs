@@ -6,7 +6,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use super::items;
-use super::items::power::render::create_header_row;
+use super::items::header::render::create_header_row;
 use super::toggle_grid::create_control_center_grid;
 
 pub fn build_control_center_window_ui(
@@ -85,7 +85,7 @@ pub fn create_control_center_window(
     let popover_active = Rc::new(std::cell::Cell::new(false));
     let popover_active_clone = popover_active.clone();
     let q_win_weak = q_win.downgrade();
-    
+
     let motion_controller = gtk4::EventControllerMotion::new();
     main_box.add_controller(motion_controller.clone());
     let motion_c = motion_controller.clone();
@@ -113,7 +113,7 @@ pub fn create_control_center_window(
         });
     }
 
-    // Dismiss when clicking outside the control center box area
+    // Dismiss when clicking outside main box
     babydra_utils::ui::window::setup_click_outside_dismiss(&q_win, &main_box);
 
     let popover_active_for_notify = popover_active.clone();

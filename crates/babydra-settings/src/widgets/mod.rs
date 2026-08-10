@@ -4,6 +4,7 @@ pub mod bluetooth;
 pub mod vpn;
 pub mod appearance;
 pub mod displays;
+pub mod power;
 pub mod apps;
 pub mod startup;
 pub mod system_update;

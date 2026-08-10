@@ -32,6 +32,7 @@ const NAV_CATEGORIES: &[NavCategory] = &[
         title_key: "settings.cat_hardware",
         items: &[
             NavItem { id: "displays", icon: "desktop", i18n_key: "settings.nav_displays" },
+            NavItem { id: "power", icon: "battery", i18n_key: "settings.nav_power" },
             NavItem { id: "keybinds", icon: "cog", i18n_key: "settings.nav_keybinds" },
         ],
     },
@@ -68,6 +69,7 @@ fn create_widget_page(name: &str) -> gtk4::Widget {
         "env" => widgets::env::create_env_widget(),
         "bluetooth" => widgets::bluetooth::create_bluetooth_widget(),
         "displays" => widgets::displays::create_displays_widget(),
+        "power" => widgets::power::create_power_widget(),
         "keybinds" => widgets::keybinds::create_keybinds_widget(),
         "appearance" => widgets::appearance::create_appearance_widget(),
         "apps" => widgets::apps::create_apps_widget(),

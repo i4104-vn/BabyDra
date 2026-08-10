@@ -271,11 +271,13 @@ pub fn create_status_indicators(
     let update_battery_popover = Rc::new(move || {
         if let Some(ref bat_pop) = bat_popover_c {
             if let Some(info) = render::get_battery_info() {
-                let status_str = if info.is_charging { "Charging" } else { "Discharging" };
-                let rows = vec![
+                let mut rows = vec![
                     PopoverRow::new("Level", &format!("{}%", info.percentage), None),
-                    PopoverRow::new("State", status_str, None),
+                    PopoverRow::new("State", &info.status_text, None),
                 ];
+                if let Some(ref rem) = info.time_remaining {
+                    rows.push(PopoverRow::new("Remaining", rem, None));
+                }
                 let card = build_popover_card("Power & Battery", rows);
                 bat_pop.set_child(Some(&card));
             }

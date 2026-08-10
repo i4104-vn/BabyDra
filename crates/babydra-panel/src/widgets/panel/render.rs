@@ -128,8 +128,7 @@ pub fn build_status_indicators_ui() -> (gtk4::Box, gtk4::Button, gtk4::Label, gt
     if let Some(ref bat_area) = bat_widget {
         bat_area.add_css_class("status-icon");
         if let Some(info) = get_battery_info() {
-            let status_str = if info.is_charging { "Charging" } else { "Discharging" };
-            bat_area.set_tooltip_text(Some(&format!("Battery: {}% ({})", info.percentage, status_str)));
+            bat_area.set_tooltip_text(Some(&format!("Battery: {}% ({})", info.percentage, info.status_text)));
         }
         inner_layout.append(bat_area);
     }
