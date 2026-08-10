@@ -29,7 +29,7 @@ fn get_icon_svg_pair(name: &str) -> Option<(&'static str, &'static str)> {
     match name {
         "activity" => Some((DARK_ACTIVITY_SVG, LIGHT_ACTIVITY_SVG)),
         "airplane" => Some((DARK_AIRPLANE_SVG, LIGHT_AIRPLANE_SVG)),
-        "battery" => Some((DARK_BATTERY_SVG, LIGHT_BATTERY_SVG)),
+        "battery" | "battery-charging" | "battery-full" | "battery-low" => Some((DARK_BATTERY_SVG, LIGHT_BATTERY_SVG)),
         "bell" => Some((DARK_BELL_SVG, LIGHT_BELL_SVG)),
         "bell-off" => Some((DARK_BELL_OFF_SVG, LIGHT_BELL_OFF_SVG)),
         "bluetooth" | "bluetooth-active-symbolic" => Some((DARK_BLUETOOTH_SVG, LIGHT_BLUETOOTH_SVG)),

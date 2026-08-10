@@ -115,6 +115,15 @@ entry.sidebar-search-entry > text {
     border-radius: 10px;
 }
 
+button.perf-profile-row-btn {
+    border-radius: 12px;
+    padding: 8px 12px;
+    background-image: none;
+    box-shadow: none;
+    border: 1px solid transparent;
+    transition: background-color 200ms ease, border-color 200ms ease;
+}
+
 .connect-pill-btn {
     border-radius: 9999px;
     padding: 8px 18px;
@@ -284,6 +293,32 @@ progressbar.console-progress progress {
     border-radius: 4px;
     min-height: 4px;
     background-color: #3b82f6;
+}
+
+progressbar.battery-level-bar {
+    min-height: 8px;
+    margin: 8px 0 4px 0;
+    padding: 0;
+}
+
+progressbar.battery-level-bar trough {
+    border-radius: 9999px;
+    min-height: 8px;
+    border: none;
+}
+
+progressbar.battery-level-bar progress {
+    border-radius: 9999px;
+    min-height: 8px;
+    background-color: #2ec27e;
+}
+
+.perf-profile-row-btn {
+    border-radius: 16px;
+    padding: 16px 12px;
+    margin: 0;
+    min-height: 125px;
+    transition: all 0.15s ease;
 }
 
 /* Auth Dialog Overlay */

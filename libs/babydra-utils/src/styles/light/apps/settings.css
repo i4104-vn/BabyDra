@@ -113,6 +113,21 @@ button.sidebar-item.active-nav:hover image {
     background-color: rgba(0, 0, 0, 0.04);
 }
 
+button.perf-profile-row-btn {
+    background-color: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+button.perf-profile-row-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.12);
+}
+
+button.perf-profile-row-btn.active {
+    background-color: rgba(59, 130, 246, 0.10);
+    border-color: #3b82f6;
+}
+
 
 
 .connected-pill {
