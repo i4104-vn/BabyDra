@@ -17,21 +17,30 @@ pub fn create_control_center_grid(on_popover_toggled: Option<Rc<dyn Fn(bool) + '
     right_grid.set_vexpand(true);
     right_grid.set_valign(gtk4::Align::Fill);
 
-    let dnd_btn = create_dnd_tile();
-    right_grid.attach(&dnd_btn, 0, 0, 2, 1);
+    let top_small_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
+    top_small_box.set_hexpand(true);
+    top_small_box.set_homogeneous(true);
+    top_small_box.set_vexpand(true);
+    top_small_box.set_valign(gtk4::Align::Fill);
 
-    let small_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
-    small_box.set_hexpand(true);
-    small_box.set_homogeneous(true);
-    small_box.set_vexpand(true);
-    small_box.set_valign(gtk4::Align::Fill);
+    let dnd_btn = create_dnd_tile();
+    let vpn_btn = items::vpn::render::create_vpn_tile(on_popover_toggled.clone());
+    top_small_box.append(&dnd_btn);
+    top_small_box.append(&vpn_btn);
+    right_grid.attach(&top_small_box, 0, 0, 2, 1);
+
+    let bottom_small_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
+    bottom_small_box.set_hexpand(true);
+    bottom_small_box.set_homogeneous(true);
+    bottom_small_box.set_vexpand(true);
+    bottom_small_box.set_valign(gtk4::Align::Fill);
 
     let night_btn = create_night_light_tile();
     let clean_btn = items::clean::render::create_clean_tile(on_popover_toggled);
 
-    small_box.append(&clean_btn);
-    small_box.append(&night_btn);
-    right_grid.attach(&small_box, 0, 1, 2, 1);
+    bottom_small_box.append(&clean_btn);
+    bottom_small_box.append(&night_btn);
+    right_grid.attach(&bottom_small_box, 0, 1, 2, 1);
 
     main_layout.append(&left_box);
     main_layout.append(&right_grid);
@@ -58,17 +67,14 @@ fn is_dnd_active() -> bool {
 
 pub fn create_dnd_tile() -> gtk4::Button {
     let active = is_dnd_active();
-    let (btn, _) = babydra_utils::components::create_toggle_tile(
+    babydra_utils::components::create_square_toggle_tile(
         "bell-off",
-        "DND",
         "",
-        "control-dnd-tile",
         active,
         |new_active| {
             babydra_island::widgets::notification::set_dnd_active(new_active);
         }
-    );
-    btn
+    )
 }
 
 fn is_night_light_active() -> bool {
