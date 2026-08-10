@@ -5,7 +5,9 @@ button,
 }
 
 button.circle-btn,
-button.icon-btn-circle {
+button.icon-btn-circle,
+button.circular,
+.circular {
     background-image: none;
     border-radius: 50%;
     min-width: 32px;
@@ -18,45 +20,59 @@ button.icon-btn-circle {
 }
 
 button.circle-btn:hover,
-button.icon-btn-circle:hover {
+button.icon-btn-circle:hover,
+button.circular:hover,
+.circular:hover {
     box-shadow: none;
 }
 
-button.btn-primary {
+button.btn-primary,
+button.suggested-action {
     border-radius: 9999px;
     background-color: #3b82f6;
     background-image: none;
     border: none;
     color: #ffffff;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    padding: 8px 20px;
+    padding: 8px 18px;
     box-shadow: none;
-    transition: all 200ms ease;
+    transition: background-color 200ms ease;
 }
 
-button.btn-primary:hover {
+button.btn-primary:hover,
+button.suggested-action:hover {
     background-color: #2563eb;
     background-image: none;
     box-shadow: none;
 }
 
-button.btn-primary:disabled,
-button.btn-primary.disabled {
+button.btn-primary:active,
+button.suggested-action:active {
+    background-color: #1d4ed8;
+    background-image: none;
     box-shadow: none;
 }
 
-button.btn-share-pill {
+button.btn-primary:disabled,
+button.btn-primary.disabled,
+button.suggested-action:disabled {
+    box-shadow: none;
+}
+
+button.btn-share-pill,
+button.connect-pill-btn {
     border-radius: 9999px;
     background-image: none;
     font-size: 13px;
     font-weight: 500;
-    padding: 6px 14px;
+    padding: 8px 18px;
     box-shadow: none;
-    transition: all 200ms ease;
+    transition: background-color 200ms ease, border-color 200ms ease;
 }
 
-button.btn-share-pill:hover {
+button.btn-share-pill:hover,
+button.connect-pill-btn:hover {
     box-shadow: none;
 }
 
@@ -78,14 +94,27 @@ button.btn-upgrade-secondary:hover {
 
 .floating-icon-badge {
     border-radius: 50%;
-    width: 24px;
-    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
     background-color: #ffffff;
     color: #1c1c1e;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    bottom: 8px;
-    left: 8px;
+}
+
+/* Floating Action Button (FAB) Component */
+button.baby-fab,
+button.baby-fab.circular {
+    background-image: none;
+    border: none;
+    border-radius: 50%;
+    min-width: 48px;
+    min-height: 48px;
+    padding: 0;
+    color: #ffffff;
+    transition: background-color 200ms ease, transform 200ms ease, box-shadow 200ms ease;
+}
+
+button.baby-fab image,
+button.baby-fab.circular image {
+    color: #ffffff;
+    -gtk-icon-size: 24px;
 }

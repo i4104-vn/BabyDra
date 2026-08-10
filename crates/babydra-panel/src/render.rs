@@ -25,6 +25,7 @@ pub fn rebuild_panel_window(
     // 3. Logo Button
     let logo_btn = gtk4::Button::new();
     logo_btn.add_css_class("panel-logo-btn");
+    logo_btn.set_cursor_from_name(Some("pointer"));
     let logo_icon = babydra_utils::ui::icon::get_icon("logo", 16);
     logo_btn.set_child(Some(&logo_icon));
     
@@ -154,17 +155,17 @@ pub fn build_panel_ui(
     window.set_layer(Layer::Top);
 
     // Set exclusive zone so other maximized windows don't overlap it
-    window.set_exclusive_zone(44);
+    window.set_exclusive_zone(38);
 
     // Anchor it to the top, left, and right edges of the screen
     window.set_anchor(Edge::Top, true);
     window.set_anchor(Edge::Left, true);
     window.set_anchor(Edge::Right, true);
 
-    // Float the bar 6px from the top edge
-    window.set_margin(Edge::Top, 6);
-    window.set_margin(Edge::Left, 8);
-    window.set_margin(Edge::Right, 8);
+    // Float topbar flush against top edge
+    window.set_margin(Edge::Top, 8);
+    window.set_margin(Edge::Left, 1);
+    window.set_margin(Edge::Right, 1);
 
     // Set default height of the panel
     window.set_default_size(0, 36);
@@ -197,6 +198,21 @@ pub fn build_panel_ui(
             );
         });
     }
+
+    let window_c2 = window.clone();
+    let app_c2 = app.clone();
+    let ccw_c2 = control_center_window.clone();
+    let cw_c2 = calendar_window.clone();
+    let lw_c2 = launcher_window.clone();
+    babydra_common::i18n::watch_locale_change(move |_| {
+        rebuild_panel_window(
+            &window_c2, 
+            &app_c2, 
+            ccw_c2.clone(), 
+            cw_c2.clone(), 
+            lw_c2.clone()
+        );
+    });
 
     window
 }

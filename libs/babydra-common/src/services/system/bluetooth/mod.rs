@@ -11,7 +11,7 @@ pub struct BtDevice {
 }
 
 pub fn is_bluetooth_enabled() -> bool {
-    if let Ok(output) = Command::new("bluetoothctl").arg("show").output() {
+    if let Ok(output) = Command::new("bluetoothctl").args(["--timeout", "2", "show"]).output() {
         let stdout = String::from_utf8_lossy(&output.stdout);
         stdout.contains("Powered: yes")
     } else {
@@ -21,13 +21,13 @@ pub fn is_bluetooth_enabled() -> bool {
 
 pub fn set_bluetooth_enabled(enabled: bool) {
     let arg = if enabled { "power on" } else { "power off" };
-    let _ = Command::new("sh").arg("-c").arg(&format!("bluetoothctl {}", arg)).output();
+    let _ = Command::new("sh").arg("-c").arg(&format!("bluetoothctl --timeout 2 {}", arg)).output();
 }
 
 pub fn get_bluetooth_devices() -> Vec<BtDevice> {
     let mut devices = Vec::new();
     
-    let output = match Command::new("bluetoothctl").arg("devices").output() {
+    let output = match Command::new("bluetoothctl").args(["--timeout", "2", "devices"]).output() {
         Ok(out) => out,
         Err(_) => return devices,
     };
@@ -41,7 +41,7 @@ pub fn get_bluetooth_devices() -> Vec<BtDevice> {
                 let name = parts[2].to_string();
                 
                 let mut connected = false;
-                if let Ok(info_out) = Command::new("bluetoothctl").arg("info").arg(&mac).output() {
+                if let Ok(info_out) = Command::new("bluetoothctl").args(["--timeout", "2", "info", &mac]).output() {
                     let info_str = String::from_utf8_lossy(&info_out.stdout);
                     connected = info_str.contains("Connected: yes");
                 }
@@ -53,3 +53,20 @@ pub fn get_bluetooth_devices() -> Vec<BtDevice> {
     
     devices
 }
+
+pub fn connect_device(mac: &str) -> bool {
+    Command::new("bluetoothctl")
+        .args(["--timeout", "5", "connect", mac])
+        .status()
+        .map(|s| s.success())
+        .unwrap_or(false)
+}
+
+pub fn disconnect_device(mac: &str) -> bool {
+    Command::new("bluetoothctl")
+        .args(["--timeout", "5", "disconnect", mac])
+        .status()
+        .map(|s| s.success())
+        .unwrap_or(false)
+}
+

@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <labwc_config>
+  <core>
+    <!-- Gap between windows -->
+    <gap>16</gap>
+  </core>
+
+  <!-- Outer margins reserved on screen edges so windows have an equal 16px gap on all 4 sides (top=58px to account for 42px panel + 16px gap) -->
+  <margin top="0" bottom="5" left="5" right="5" />
+
+  <!-- Default placement policy for newly spawned windows -->
+  <placement>
+    <policy>center</policy>
+  </placement>
+
   <keyboard>
     <default />
     <!-- Override Alt-Tab with custom babydra-switcher -->
@@ -21,6 +34,7 @@
       <action name="Execute" command="~/.local/bin/babydra-lock" />
     </keybind>
   </keyboard>
+
   <mouse>
     <default />
     <!-- Custom context menu for desktop right-click -->
@@ -34,33 +48,42 @@
   <theme>
     <name>BabyDra</name>
     <cornerRadius>12</cornerRadius>
+
+    <dropShadows>yes</dropShadows>
     <titlebar>
       <layout>iconify,max,close</layout>
       <showTitle>yes</showTitle>
     </titlebar>
     <font place="ActiveWindow">
-      <name>Inter</name>
-      <size>10</size>
+      <name>Ubuntu</name>
+      <size>12</size>
       <weight>bold</weight>
     </font>
     <font place="InactiveWindow">
-      <name>Inter</name>
-      <size>10</size>
+      <name>Ubuntu</name>
+      <size>12</size>
       <weight>normal</weight>
     </font>
     <font place="MenuItem">
-      <name>Inter</name>
-      <size>10</size>
+      <name>Ubuntu</name>
+      <size>12</size>
+      <weight>normal</weight>
     </font>
     <font place="OnScreenDisplay">
-      <name>Inter</name>
-      <size>10</size>
+      <name>Ubuntu</name>
+      <size>12</size>
     </font>
   </theme>
 
   <!-- Window snapping behavior -->
   <snapping>
-    <range>12</range>
+    <range>16</range>
     <topMaximize>yes</topMaximize>
   </snapping>
+
+  <!-- Window edge resistance -->
+  <resistance>
+    <screenEdgeStrength>20</screenEdgeStrength>
+    <windowEdgeStrength>10</windowEdgeStrength>
+  </resistance>
 </labwc_config>

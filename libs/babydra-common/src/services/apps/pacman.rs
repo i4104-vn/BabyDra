@@ -1,5 +1,6 @@
 //! Pacman explicitly installed package resolution and dependency heuristics.
 
+use crate::models::app_info::InstalledPackage;
 use std::path::Path;
 
 pub fn get_explicitly_installed_packages() -> std::collections::HashSet<String> {
@@ -12,6 +13,24 @@ pub fn get_explicitly_installed_packages() -> std::collections::HashSet<String> 
         }
     }
     set
+}
+
+pub fn get_installed_packages_list() -> Vec<InstalledPackage> {
+    let mut pkgs = Vec::new();
+    if let Ok(output) = std::process::Command::new("pacman").args(&["-Qe"]).output() {
+        if output.status.success() {
+            for line in String::from_utf8_lossy(&output.stdout).lines() {
+                let parts: Vec<&str> = line.split_whitespace().collect();
+                if parts.len() >= 2 {
+                    pkgs.push(InstalledPackage {
+                        name: parts[0].to_string(),
+                        version: parts[1].to_string(),
+                    });
+                }
+            }
+        }
+    }
+    pkgs
 }
 
 pub fn get_package_owner(path: &Path) -> Option<String> {
@@ -61,3 +80,32 @@ pub fn is_dependency_heuristic(filename: &str, _name: &str, exec: &str) -> bool 
 
     false
 }
+
+pub fn uninstall_package(name: &str) -> Result<(), String> {
+    let output = std::process::Command::new("pkexec")
+        .args(["pacman", "-R", "--noconfirm", name])
+        .output()
+        .map_err(|e| e.to_string())?;
+
+    if output.status.success() {
+        Ok(())
+    } else {
+        Err(String::from_utf8_lossy(&output.stderr).to_string())
+    }
+}
+
+pub fn uninstall_app_by_path(full_path: &str) -> Result<(), String> {
+    let path = Path::new(full_path);
+    if let Some(pkg) = get_package_owner(path) {
+        uninstall_package(&pkg)
+    } else {
+        Err("Could not find package owner for app".to_string())
+    }
+}
+
+pub fn stream_uninstall_package(pkg_name: &str, password: Option<&str>, sender: std::sync::mpsc::Sender<String>) -> Result<(), String> {
+    crate::services::system::updates::clean_pacman_lock(password, sender.clone());
+    let cmd = format!("yes | pacman -Rns --noconfirm {}", pkg_name.trim());
+    crate::services::system::updates::execute_cmd_with_log_stream(&["sh", "-c", &cmd], password, sender)
+}
+

@@ -51,8 +51,6 @@ box.color-dot-indicator {
     border-radius: 9999px;
     min-width: 14px;
     min-height: 14px;
-    max-width: 14px;
-    max-height: 14px;
     box-shadow: none;
 }
 
@@ -64,8 +62,6 @@ button.color-dot-btn {
     border-radius: 9999px;
     min-width: 16px;
     min-height: 16px;
-    max-width: 16px;
-    max-height: 16px;
     margin: 3px;
     padding: 0;
     background-image: none;

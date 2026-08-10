@@ -10,7 +10,7 @@ use crate::widgets;
 
 /// Creates the main Dynamic Island box container, initializing Notch and notification badge layout hierarchies.
 pub fn create_system_island() -> gtk4::Box {
-    let container_vbox = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
+    let container_vbox = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     container_vbox.set_valign(gtk4::Align::Start);
     container_vbox.set_halign(gtk4::Align::Center);
 

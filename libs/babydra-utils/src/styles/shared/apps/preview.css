@@ -18,18 +18,13 @@
 .main-preview-card {
     background-image: none;
     border-radius: 24px;
-    overflow: hidden;
 }
 
 .variation-column {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
 }
 
 .variation-card {
     border-radius: 16px;
-    overflow: hidden;
     transition: all 200ms ease;
 }
 
@@ -38,24 +33,14 @@
 }
 
 .prompt-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
 }
 
 .reference-image-card {
     border-radius: 16px;
-    aspect-ratio: 16 / 9;
-    position: relative;
-    overflow: hidden;
     transition: all 200ms ease;
 }
 
 .keyword-chips-wrapper {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
 }
 
 .keyword-chip,
@@ -85,15 +70,8 @@
 }
 
 .input-floating-shell {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
     border-radius: 24px;
     padding: 12px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
 }
 
 .parameter-toolbar-chip {
@@ -108,9 +86,6 @@
     padding: 2px 8px;
     font-size: 11px;
     font-weight: 800;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
 }
 
 .badge-pink {
@@ -132,20 +107,15 @@
     background: conic-gradient(#3b82f6, #f472b6, #fbbf24, #3b82f6);
     border-radius: 50%;
     padding: 2px;
-    display: inline-block;
 }
 
 .rainbow-ring-avatar {
     border-radius: 50%;
-    overflow: hidden;
 }
 
 .credit-meter {
     border-radius: 9999px;
     padding: 4px 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
     transition: all 200ms ease;
 }
 

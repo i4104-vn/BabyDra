@@ -7,7 +7,7 @@ echo "============================================="
 
 # 1. Install all dependencies, the Rust toolchain, and system fonts via pacman
 echo "Installing Arch Linux packages..."
-sudo pacman -Syu --needed --noconfirm base-devel git pkgconf gtk4 gtk4-layer-shell rust labwc meson ninja playerctl grim wl-clipboard libnotify gammastep wlsunset wireplumber pipewire-pulse pipewire-alsa ddcutil zip unzip
+sudo pacman -Syu --needed --noconfirm base-devel git pkgconf gtk4 gtk4-layer-shell rust labwc meson ninja playerctl grim slurp wl-clipboard libnotify gammastep wlsunset wireplumber pipewire-pulse pipewire-alsa ddcutil zip unzip p7zip unrar pacman-contrib xdg-utils polkit networkmanager networkmanager-openvpn networkmanager-vpnc networkmanager-pptp networkmanager-l2tp networkmanager-openconnect networkmanager-strongswan wireguard-tools openvpn bluez bluez-utils
 
 # Ensure i2c-dev kernel module is loaded and configured to load on boot
 echo "Configuring i2c-dev kernel module..."
@@ -171,7 +171,7 @@ cat << EOF > "$HOME/.local/share/applications/babydra-preview.desktop"
 Type=Application
 Name=BabyDra Preview
 Comment=Viewer for images
-Exec=/home/i4104/.local/bin/babydra-preview %f
+Exec=$HOME/.local/bin/babydra-preview %f
 Icon=/usr/share/babydra/babydra-preview.png
 Terminal=false
 Categories=Graphics;Viewer;GTK;
@@ -190,7 +190,7 @@ cat << EOF > "$HOME/.local/share/applications/babydra-settings.desktop"
 Type=Application
 Name=BabyDra Settings
 Comment=Configure system settings
-Exec=/home/i4104/.local/bin/babydra-settings
+Exec=$HOME/.local/bin/babydra-settings
 Icon=/usr/share/babydra/babydra-settings.png
 Terminal=false
 Categories=Settings;HardwareSettings;GTK;
@@ -206,7 +206,7 @@ cat << EOF > "$HOME/.local/share/applications/babydra-explore.desktop"
 Type=Application
 Name=BabyDra Explore
 Comment=Explore files and folders
-Exec=/home/i4104/.local/bin/babydra-explore %u
+Exec=$HOME/.local/bin/babydra-explore %u
 Icon=system-file-manager
 Terminal=false
 Categories=System;FileTools;FileManager;GTK;

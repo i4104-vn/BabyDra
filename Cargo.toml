@@ -13,6 +13,11 @@ members = [
     "crates/babydra-settings",
     "crates/babydra-explore",
 ]
+exclude = [
+    ".old_project",
+    ".old_project/*",
+    ".old_project/I4ArchSettings/src-tauri",
+]
 
 [workspace.package]
 version = "1.0.0"

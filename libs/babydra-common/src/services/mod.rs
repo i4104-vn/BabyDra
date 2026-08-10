@@ -11,3 +11,4 @@ pub mod actions;
 pub mod window;
 pub mod icon;
 pub mod tray;
+pub mod utils;

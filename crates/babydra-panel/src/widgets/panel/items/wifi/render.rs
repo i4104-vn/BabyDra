@@ -1,7 +1,7 @@
 use gtk4::prelude::*;
 use std::rc::Rc;
 use tokio::sync::mpsc;
-use super::{get_wifi_state, scan_networks, known_networks, connect_wifi_async};
+use super::{get_wifi_state, scan_networks, connect_wifi_async};
 
 pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) -> gtk4::Box {
     let container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
@@ -152,20 +152,20 @@ fn refresh_wifi_popover_list(
     let icon_widget_clone = icon_widget.clone();
     let popover_clone = popover.clone();
 
-    let (tx, mut rx) = mpsc::unbounded_channel::<Option<(Vec<(String, String, String, bool)>, Vec<String>)>>();
+    let (tx, mut rx) = mpsc::unbounded_channel::<Option<Vec<babydra_common::models::wifi::WifiNetwork>>>();
 
     std::thread::spawn(move || {
         let nets = scan_networks();
-        let known = known_networks();
-        let _ = tx.send(Some((nets, known)));
+        
+        let _ = tx.send(Some(nets));
     });
 
     glib::spawn_future_local(async move {
-        if let Some(Some((nets, known))) = rx.recv().await {
+        if let Some(Some(nets)) = rx.recv().await {
             build_wifi_list_ui(
                 &main_box_clone,
                 nets,
-                known,
+                
                 sub_label_clone.clone(),
                 left_btn_clone.clone(),
                 circle_clone.clone(),
@@ -178,8 +178,8 @@ fn refresh_wifi_popover_list(
 
 fn build_wifi_list_ui(
     main_box: &gtk4::Box,
-    networks: Vec<(String, String, String, bool)>,
-    known: Vec<String>,
+    networks: Vec<babydra_common::models::wifi::WifiNetwork>,
+    
     sub_label: gtk4::Label,
     left_btn: gtk4::Button,
     circle: gtk4::Box,
@@ -201,7 +201,10 @@ fn build_wifi_list_ui(
     let list_box = gtk4::ListBox::new();
     list_box.set_selection_mode(gtk4::SelectionMode::None);
 
-    for (ssid, security, _signal, is_connected) in networks {
+    for net in networks {
+        let ssid = net.ssid;
+        let security = net.security;
+        let is_connected = net.is_connected;
         let row_btn = gtk4::Button::new();
         row_btn.add_css_class("audio-menu-item-btn");
         if is_connected {
@@ -240,7 +243,7 @@ fn build_wifi_list_ui(
 
         let ssid_clone = ssid.clone();
         let security_clone = security.clone();
-        let is_saved = known.contains(&ssid);
+        let is_saved = net.is_saved;
         
         let main_box_c = main_box.clone();
         let sub_label_c = sub_label.clone();

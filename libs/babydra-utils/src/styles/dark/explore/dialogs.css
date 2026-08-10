@@ -262,24 +262,6 @@ button.row-action-btn.delete-btn:hover {
     background-color: rgba(239, 68, 68, 0.12);
 }
 
-.explore-dialog button.baby-fab,
-.explore-dialog button.baby-fab.circular {
-    background-color: #3b82f6;
-    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.35);
-}
-
-.explore-dialog button.baby-fab:hover,
-.explore-dialog button.baby-fab.circular:hover {
-    background-color: #2563eb;
-    box-shadow: 0 6px 22px rgba(59, 130, 246, 0.50);
-}
-
-.explore-dialog button.baby-fab:active,
-.explore-dialog button.baby-fab.circular:active {
-    background-color: #1d4ed8;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
-}
-
 .explore-dialog.properties-dialog {
     background-color: rgba(20, 22, 28, 0.98);
     border: 1px solid rgba(255, 255, 255, 0.08);

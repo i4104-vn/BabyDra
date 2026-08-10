@@ -1,20 +1,20 @@
 # BabyDra Window Titlebar Theme Override (Light)
 
 # ── General ──────────────────────────────────────────────
-border.width: 0
-border.color: #d0d0da
+border.width: 1
+border.color: #c0c0d0
 
 # ── Corner Radius ────────────────────────────────────────
 window.active.border.corner-radius: 12
 window.inactive.border.corner-radius: 12
 
-# ── Padding ─────────────────────────────────────────────
-window.titlebar.padding.width: 14
-window.titlebar.padding.height: 8
+# ── Titlebar Padding ─────────────────────────────────────
+window.titlebar.padding.width: 12
+window.titlebar.padding.height: 6
 
 # ── Window Border Colors ────────────────────────────────
-window.active.border.color: #c0c0cc
-window.inactive.border.color: #d8d8e0
+window.active.border.color: #b0b0c2
+window.inactive.border.color: #d8d8e5
 
 # ── Titlebar Background ────────────────────────────────
 window.active.title.bg: Solid
@@ -28,9 +28,9 @@ window.inactive.label.text.color: #70707e
 window.label.text.justify: center
 
 # ── Window Button Sizes ─────────────────────────────────
-window.button.width: 16
-window.button.height: 16
-window.button.spacing: 10
+window.button.width: 14
+window.button.height: 14
+window.button.spacing: 8
 
 # ── Window Button Hover Overlay ──────────────────────────
 window.button.hover.bg: Solid
@@ -64,16 +64,17 @@ osd.label.text.color: #1a1a28
 
 # ── Menu ────────────────────────────────────────────────
 menu.items.bg: Solid
-menu.items.bg.color: #f2f2f8
-menu.items.text.color: #2a2a38
+menu.items.bg.color: #ffffff
+menu.items.text.color: #1a1a1a
 menu.items.active.bg: Solid
-menu.items.active.bg.color: #dcdce8
-menu.items.active.text.color: #1a1a28
+menu.items.active.bg.color: #f5f5f5
+menu.items.active.text.color: #000000
+menu.items.padding.x: 12
+menu.items.padding.y: 6
 menu.title.bg: Solid
-menu.title.bg.color: #f2f2f8
-menu.title.text.color: #1a1a28
+menu.title.bg.color: #ffffff
+menu.title.text.color: #1a1a1a
 menu.title.text.justify: center
 menu.border.width: 1
-menu.border.color: #c0c0cc
-menu.border.corner-radius: 10
-menu.separator.color: #d0d0da
+menu.border.color: #e6e6e6
+menu.separator.color: #eaeaea

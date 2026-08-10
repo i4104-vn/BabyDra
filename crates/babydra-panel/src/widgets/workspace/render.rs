@@ -26,6 +26,7 @@ pub fn build_popover_container(parent: &gtk4::Button) -> gtk4::Popover {
 pub fn build_taskbar_item_button(app: &DesktopApp, is_active: bool) -> gtk4::Button {
     let btn = gtk4::Button::new();
     btn.add_css_class("taskbar-app-btn");
+    btn.set_cursor_from_name(Some("pointer"));
     btn.set_widget_name(&app.app_id.clone().unwrap_or_else(|| app.name.clone()));
     btn.set_tooltip_text(Some(&app.name));
 

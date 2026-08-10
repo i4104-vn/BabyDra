@@ -41,3 +41,10 @@ button.color-dot-btn.color-active {
 button.color-dot-btn.color-dot-white {
     background-color: #ffffff;
 }
+
+
+button.screenshot-toolbar-btn.selected,
+button.screenshot-toolbar-btn.selected image {
+    color: #60a5fa;
+}
+

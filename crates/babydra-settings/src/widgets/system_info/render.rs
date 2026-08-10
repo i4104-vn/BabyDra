@@ -1,6 +1,17 @@
-//! System specifications UI layout generator matching Windows 11 / About page layout.
+//! System specifications UI layout generator matching reference design Image 1.
 
 use gtk4::prelude::*;
+
+#[derive(Clone)]
+pub struct SystemInfoLabels {
+    pub os_label: gtk4::Label,
+    pub sub_label: gtk4::Label,
+    pub uptime_lbl: gtk4::Label,
+    pub kernel_lbl: gtk4::Label,
+    pub cpu_lbl: gtk4::Label,
+    pub mem_lbl: gtk4::Label,
+    pub gpu_lbl: gtk4::Label,
+}
 
 pub fn build_system_ui(
     hostname: &str,
@@ -9,122 +20,224 @@ pub fn build_system_ui(
     cpu_model: &str,
     gpu_info: &str,
     memory_text: &str,
-    disk_text: &str,
-    _disk_percent: f64,
-) -> gtk4::Box {
-    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 24);
+    uptime_text: &str,
+    cpu_arch: &str,
+) -> (gtk4::Box, SystemInfoLabels) {
+    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
+    main_box.set_vexpand(true);
+    main_box.set_valign(gtk4::Align::Fill);
 
-    // Breadcrumb Header (System > About)
-    let breadcrumb_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
-    breadcrumb_box.set_margin_bottom(4);
+    // Page Title
+    let page_title = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.about_title")));
+    page_title.add_css_class("settings-page-title");
+    page_title.set_halign(gtk4::Align::Start);
+    main_box.append(&page_title);
 
-    let bc_parent = gtk4::Label::new(Some("System"));
-    bc_parent.add_css_class("settings-breadcrumb-parent");
-    let bc_arrow = gtk4::Label::new(Some("›"));
-    bc_arrow.add_css_class("settings-breadcrumb-arrow");
-    let bc_current = gtk4::Label::new(Some("About"));
-    bc_current.add_css_class("settings-breadcrumb-current");
+    let content_box = gtk4::Box::new(gtk4::Orientation::Vertical, 20);
 
-    breadcrumb_box.append(&bc_parent);
-    breadcrumb_box.append(&bc_arrow);
-    breadcrumb_box.append(&bc_current);
-    breadcrumb_box.set_halign(gtk4::Align::Start);
-    main_box.append(&breadcrumb_box);
+    // ── Card 1: Top Hero Card (Avatar, OS Title, Uptime Badge) ──
+    let hero_card = gtk4::Box::new(gtk4::Orientation::Horizontal, 20);
+    hero_card.add_css_class("glass-panel");
+    hero_card.set_margin_top(4);
+    hero_card.set_margin_bottom(4);
+    hero_card.set_margin_start(4);
+    hero_card.set_margin_end(4);
 
-    // ── Card 1: Top Host Header Card ───────────────────────────
-    let host_card = babydra_utils::components::create_card(gtk4::Orientation::Horizontal, 20);
-    host_card.add_css_class("settings-card");
+    // Mascot / Avatar Container
+    let avatar_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    avatar_box.add_css_class("hero-avatar-box");
+    avatar_box.set_size_request(80, 80);
+    avatar_box.set_valign(gtk4::Align::Center);
 
-    let logo_container = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
-    logo_container.add_css_class("os-logo");
-    logo_container.set_valign(gtk4::Align::Center);
-    logo_container.set_margin_start(4);
+    let avatar_img = babydra_utils::ui::icon::get_icon("logo", 80);
+    avatar_img.set_pixel_size(80);
+    avatar_img.set_valign(gtk4::Align::Center);
+    avatar_img.set_halign(gtk4::Align::Center);
+    avatar_box.append(&avatar_img);
+    hero_card.append(&avatar_box);
 
-    let logo_img = babydra_utils::ui::icon::get_icon("logo", 48);
-    logo_img.set_pixel_size(48);
-    logo_img.set_valign(gtk4::Align::Center);
-    logo_img.set_halign(gtk4::Align::Center);
-    logo_container.append(&logo_img);
-    host_card.append(&logo_container);
+    // Right Side Information
+    let info_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+    info_box.set_hexpand(true);
+    info_box.set_valign(gtk4::Align::Center);
 
-    let host_info_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
-    host_info_box.set_hexpand(true);
-    host_info_box.set_valign(gtk4::Align::Center);
+    // Left Column: Hostname + Subtitle
+    let text_column = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
+    text_column.set_hexpand(true);
+    text_column.set_valign(gtk4::Align::Center);
 
-    let hostname_lbl = gtk4::Label::new(Some(hostname));
-    hostname_lbl.add_css_class("hero-hostname");
-    hostname_lbl.set_halign(gtk4::Align::Start);
-    host_info_box.append(&hostname_lbl);
+    let display_host = if !hostname.is_empty() && hostname != "localhost" {
+        hostname
+    } else {
+        "BabyDra Linux"
+    };
 
-    let os_sub_lbl = gtk4::Label::new(Some(&format!("{} • {}", os_name, kernel_version)));
-    os_sub_lbl.add_css_class("settings-row-desc");
-    os_sub_lbl.set_halign(gtk4::Align::Start);
-    host_info_box.append(&os_sub_lbl);
-    host_card.append(&host_info_box);
+    let os_label = gtk4::Label::new(Some(display_host));
+    os_label.add_css_class("hero-hostname");
+    os_label.set_halign(gtk4::Align::Start);
+    text_column.append(&os_label);
 
-    main_box.append(&host_card);
+    // Subtitle Row: OS Name (Architecture) • Kernel Version
+    let sub_title = format!("{} ({}) • Kernel {}", os_name, cpu_arch, kernel_version);
+    let sub_label = gtk4::Label::new(Some(&sub_title));
+    sub_label.add_css_class("hero-subtitle");
+    sub_label.set_halign(gtk4::Align::Start);
+    text_column.append(&sub_label);
 
-    // ── Card 2: Device Specifications Group Card ───────────────
-    let dev_group_card = babydra_utils::components::create_card(gtk4::Orientation::Vertical, 0);
-    dev_group_card.add_css_class("settings-card");
+    info_box.append(&text_column);
 
-    let dev_header_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    dev_header_row.set_margin_top(16);
-    dev_header_row.set_margin_bottom(16);
-    dev_header_row.set_margin_start(16);
+    // Right Column: Uptime Badge (Top) + EN/VN Button (Bottom, below uptime!)
+    let badge_column = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
+    badge_column.set_valign(gtk4::Align::Center);
+    badge_column.set_halign(gtk4::Align::End);
 
-    let dev_icon = babydra_utils::ui::icon::get_icon("info", 20);
-    dev_icon.set_valign(gtk4::Align::Center);
-    dev_icon.add_css_class("settings-row-icon");
-    dev_header_row.append(&dev_icon);
+    // Sleek Uptime Badge (e.g. "Up 2h 15m")
+    let uptime_badge = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
+    uptime_badge.add_css_class("hero-uptime-badge");
+    uptime_badge.set_valign(gtk4::Align::Center);
 
-    let dev_header_title = gtk4::Label::new(Some("Device specifications"));
-    dev_header_title.add_css_class("settings-group-header-title");
-    dev_header_title.set_halign(gtk4::Align::Start);
-    dev_header_title.set_valign(gtk4::Align::Start);
-    dev_header_row.append(&dev_header_title);
+    let clock_icon = babydra_utils::ui::icon::get_icon("history", 14);
+    clock_icon.set_pixel_size(14);
+    clock_icon.set_valign(gtk4::Align::Center);
+    uptime_badge.append(&clock_icon);
 
-    dev_group_card.append(&dev_header_row);
+    let formatted_uptime = babydra_common::i18n::t("settings.up_time").replace("{}", uptime_text);
+    let uptime_lbl = gtk4::Label::new(Some(&formatted_uptime));
+    uptime_lbl.add_css_class("hero-uptime-label");
+    uptime_lbl.set_valign(gtk4::Align::Center);
+    uptime_badge.append(&uptime_lbl);
 
-    // Device Specs Grid (Key-Value aligned without RAM wrapping)
-    let dev_specs_grid = gtk4::Grid::new();
-    dev_specs_grid.set_column_spacing(32);
-    dev_specs_grid.set_row_spacing(16);
-    dev_specs_grid.set_margin_start(24);
-    dev_specs_grid.set_margin_bottom(24);
+    badge_column.append(&uptime_badge);
 
-    let dev_rows = [
-        ("Edition", os_name.to_string()),
-        ("RAM", memory_text.to_string()),
-        ("Storage", disk_text.to_string()),
-        ("Processor", cpu_model.to_string()),
-        ("Graphics", gpu_info.to_string()),
-    ];
+    // Language Segmented Control Pill (EN / VN) below uptime
+    let lang_segmented_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 2);
+    lang_segmented_box.add_css_class("lang-segmented-control");
+    lang_segmented_box.set_halign(gtk4::Align::End);
 
-    for (idx, (key, val)) in dev_rows.iter().enumerate() {
-        let key_lbl = gtk4::Label::new(Some(*key));
-        key_lbl.add_css_class("settings-row-desc");
-        key_lbl.set_halign(gtk4::Align::Start);
-        key_lbl.set_valign(gtk4::Align::Start);
-        key_lbl.set_width_request(80);
+    let btn_en = gtk4::Button::with_label("EN");
+    btn_en.set_cursor_from_name(Some("pointer"));
 
-        let val_lbl = gtk4::Label::new(Some(val));
-        val_lbl.add_css_class("settings-row-title");
-        val_lbl.set_halign(gtk4::Align::Start);
-        val_lbl.set_valign(gtk4::Align::Start);
-        val_lbl.set_selectable(false);
-        if *key == "Processor" || *key == "Graphics" {
-            val_lbl.set_wrap(true);
-        } else {
-            val_lbl.set_wrap(false);
-        }
+    let btn_vn = gtk4::Button::with_label("VN");
+    btn_vn.set_cursor_from_name(Some("pointer"));
 
-        dev_specs_grid.attach(&key_lbl, 0, idx as i32, 1, 1);
-        dev_specs_grid.attach(&val_lbl, 1, idx as i32, 1, 1);
+    let current_locale = babydra_common::i18n::get_locale();
+    if current_locale == "vi" {
+        btn_vn.add_css_class("lang-seg-active");
+        btn_en.add_css_class("lang-seg-inactive");
+    } else {
+        btn_en.add_css_class("lang-seg-active");
+        btn_vn.add_css_class("lang-seg-inactive");
     }
 
-    dev_group_card.append(&dev_specs_grid);
-    main_box.append(&dev_group_card);
+    let btn_en_c = btn_en.clone();
+    let btn_vn_c = btn_vn.clone();
+    btn_en.connect_clicked(move |b| {
+        babydra_common::i18n::set_locale("en");
+        babydra_common::i18n::persist_locale("en");
+        btn_en_c.remove_css_class("lang-seg-inactive");
+        btn_en_c.add_css_class("lang-seg-active");
+        btn_vn_c.remove_css_class("lang-seg-active");
+        btn_vn_c.add_css_class("lang-seg-inactive");
+        let _ = b.activate_action("win.rebuild-ui", None);
+    });
 
-    main_box
+    let btn_en_c2 = btn_en.clone();
+    let btn_vn_c2 = btn_vn.clone();
+    btn_vn.connect_clicked(move |b| {
+        babydra_common::i18n::set_locale("vi");
+        babydra_common::i18n::persist_locale("vi");
+        btn_vn_c2.remove_css_class("lang-seg-inactive");
+        btn_vn_c2.add_css_class("lang-seg-active");
+        btn_en_c2.remove_css_class("lang-seg-active");
+        btn_en_c2.add_css_class("lang-seg-inactive");
+        let _ = b.activate_action("win.rebuild-ui", None);
+    });
+
+    lang_segmented_box.append(&btn_en);
+    lang_segmented_box.append(&btn_vn);
+    badge_column.append(&lang_segmented_box);
+    info_box.append(&badge_column);
+
+    hero_card.append(&info_box);
+    content_box.append(&hero_card);
+
+    // ── 2x2 Grid of Hardware Spec Cards ─────────────────────────
+    let grid = gtk4::Grid::new();
+    grid.set_column_spacing(20);
+    grid.set_row_spacing(20);
+    grid.set_column_homogeneous(true);
+
+    let kernel_lbl = gtk4::Label::new(Some(kernel_version));
+    let cpu_lbl = gtk4::Label::new(Some(cpu_model));
+    let mem_lbl = gtk4::Label::new(Some(memory_text));
+    let gpu_lbl = gtk4::Label::new(Some(gpu_info));
+
+    let specs: Vec<(&str, String, &gtk4::Label)> = vec![
+        ("cog", babydra_common::i18n::t("settings.spec_kernel"), &kernel_lbl),
+        ("sliders", babydra_common::i18n::t("settings.spec_processor"), &cpu_lbl),
+        ("history", babydra_common::i18n::t("settings.spec_memory"), &mem_lbl),
+        ("palette", babydra_common::i18n::t("settings.spec_graphics"), &gpu_lbl),
+    ];
+
+    for (idx, (icon_name, label, value_widget)) in specs.into_iter().enumerate() {
+        let card = gtk4::Box::new(gtk4::Orientation::Vertical, 12);
+        card.add_css_class("spec-card");
+        card.set_halign(gtk4::Align::Fill);
+        card.set_valign(gtk4::Align::Fill);
+
+        // Centered Blue Icon Badge
+        let icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+        icon_badge.add_css_class("blue-icon-badge");
+        icon_badge.set_halign(gtk4::Align::Center);
+        icon_badge.set_valign(gtk4::Align::Center);
+        icon_badge.set_size_request(44, 44);
+
+        let icon_img = babydra_utils::ui::icon::get_icon(icon_name, 22);
+        icon_img.set_pixel_size(22);
+        icon_img.set_vexpand(true);
+        icon_img.set_hexpand(true);
+        icon_img.set_valign(gtk4::Align::Center);
+        icon_img.set_halign(gtk4::Align::Center);
+        icon_badge.append(&icon_img);
+        card.append(&icon_badge);
+
+        // Label
+        let label_widget = gtk4::Label::new(Some(label.as_str()));
+        label_widget.add_css_class("spec-label");
+        label_widget.set_halign(gtk4::Align::Center);
+        card.append(&label_widget);
+
+        // Value
+        value_widget.add_css_class("spec-value");
+        value_widget.set_halign(gtk4::Align::Center);
+        value_widget.set_justify(gtk4::Justification::Center);
+        value_widget.set_wrap(true);
+        card.append(value_widget);
+
+        let col = (idx % 2) as i32;
+        let row = (idx / 2) as i32;
+        grid.attach(&card, col, row, 1, 1);
+    }
+
+    content_box.append(&grid);
+
+    let scroll = gtk4::ScrolledWindow::new();
+    scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
+    scroll.set_vexpand(true);
+    scroll.set_valign(gtk4::Align::Fill);
+    scroll.set_child(Some(&content_box));
+
+    main_box.append(&scroll);
+
+    let labels = SystemInfoLabels {
+        os_label,
+        sub_label,
+        uptime_lbl,
+        kernel_lbl,
+        cpu_lbl,
+        mem_lbl,
+        gpu_lbl,
+    };
+
+    (main_box, labels)
 }

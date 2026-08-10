@@ -71,8 +71,6 @@ entry.launcher-search>text>placeholder {
 }
 
 .launcher-power-btn {
-    background-color: rgba(239, 68, 68, 0.12);
-    border: 1px solid rgba(239, 68, 68, 0.25);
     color: #dc2626;
 }
 

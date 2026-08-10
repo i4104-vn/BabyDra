@@ -11,5 +11,11 @@ pub mod vpn;
 pub mod network;
 pub mod gsettings;
 pub mod battery;
+pub mod display;
+pub mod theme;
+pub mod startup;
+pub mod updates;
+pub mod gpu;
+pub mod certificates;
 
 pub use gsettings::set_gsettings_color_scheme;
