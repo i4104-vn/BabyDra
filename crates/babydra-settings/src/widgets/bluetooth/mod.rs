@@ -127,7 +127,9 @@ pub fn create_bluetooth_widget() -> gtk4::Widget {
     let state_switch = state.clone();
     let render_switch = render_devices.clone();
     bt_switch.connect_state_set(move |_, is_active| {
-        set_bluetooth_enabled(is_active);
+        std::thread::spawn(move || {
+            set_bluetooth_enabled(is_active);
+        });
         {
             let mut st = state_switch.borrow_mut();
             st.enabled = is_active;

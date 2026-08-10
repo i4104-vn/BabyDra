@@ -9,6 +9,7 @@ pub fn render_network_list(
     info_dialog: &Rc<WifiInfoDialog>,
     password_dialog: &Rc<WifiPasswordDialog>,
     _config_dialog: &Rc<WifiConfigDialog>,
+    tx_connect_req: std::sync::mpsc::Sender<(String, Option<String>, Option<String>)>,
 ) {
     crate::widgets::helpers::clear_box(container);
 
@@ -49,11 +50,24 @@ pub fn render_network_list(
         return;
     }
 
+    let mut display_networks = st.networks.clone();
+    display_networks.sort_by(|a, b| {
+        let a_conn = a.is_connected || st.connecting_ssid.as_ref() == Some(&a.ssid);
+        let b_conn = b.is_connected || st.connecting_ssid.as_ref() == Some(&b.ssid);
+        if a_conn != b_conn {
+            return b_conn.cmp(&a_conn);
+        }
+        if a.is_saved != b.is_saved {
+            return b.is_saved.cmp(&a.is_saved);
+        }
+        b.signal.cmp(&a.signal)
+    });
+
     let mut current_section = 0;
     let mut current_lb: Option<gtk4::ListBox> = None;
 
-    for net in &st.networks {
-        let section = if net.is_connected {
+    for net in &display_networks {
+        let section = if net.is_connected || st.connecting_ssid.as_ref() == Some(&net.ssid) {
             1
         } else if net.is_saved {
             2
@@ -166,7 +180,21 @@ pub fn render_network_list(
         click_box.append(&name_box);
         hbox.append(&click_box);
 
-        if net.is_connected {
+        let is_connecting_this = st.connecting_ssid.as_ref() == Some(&net.ssid);
+        let is_connecting_other = st.connecting_ssid.is_some() && !is_connecting_this;
+
+        if is_connecting_this {
+            let conn_lbl = gtk4::Label::new(Some("Connecting..."));
+            conn_lbl.add_css_class("settings-row-desc");
+            conn_lbl.set_valign(gtk4::Align::Center);
+            conn_lbl.set_margin_end(8);
+            hbox.append(&conn_lbl);
+            
+            let spinner = gtk4::Spinner::new();
+            spinner.start();
+            spinner.set_valign(gtk4::Align::Center);
+            hbox.append(&spinner);
+        } else if net.is_connected {
             let check_icon = babydra_utils::ui::icon::get_icon("check", 18);
             check_icon.set_pixel_size(18);
             check_icon.set_valign(gtk4::Align::Center);
@@ -209,21 +237,25 @@ pub fn render_network_list(
         // Wire row click for connection
         let net_conn = net.clone();
         let pwd_dlg_c = password_dialog.clone();
-        let gesture = gtk4::GestureClick::new();
-        gesture.connect_pressed(move |_, _, _, _| {
-            if net_conn.is_connected {
-                return;
-            }
-            if net_conn.security != "open" && !net_conn.is_saved {
-                pwd_dlg_c.show_for(&net_conn.ssid, &net_conn.security);
-            } else {
-                let ssid = net_conn.ssid.clone();
-                std::thread::spawn(move || {
-                    babydra_common::services::system::wifi::connect_wifi(&ssid, None, None);
-                });
-            }
-        });
-        click_box.add_controller(gesture);
+        let tx_req = tx_connect_req.clone();
+        
+        if !st.connecting_ssid.is_some() {
+            let gesture = gtk4::GestureClick::new();
+            gesture.connect_pressed(move |_, _, _, _| {
+                if net_conn.is_connected {
+                    return;
+                }
+                if net_conn.security != "open" && !net_conn.is_saved {
+                    pwd_dlg_c.show_for(&net_conn.ssid, &net_conn.security);
+                } else {
+                    let _ = tx_req.send((net_conn.ssid.clone(), None, None));
+                }
+            });
+            click_box.add_controller(gesture);
+        } else if is_connecting_other {
+            row.set_sensitive(false);
+            info_btn.set_sensitive(false);
+        }
 
         row.set_child(Some(&hbox));
         if let Some(lb) = &current_lb {

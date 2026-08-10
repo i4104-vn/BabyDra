@@ -12,6 +12,7 @@ pub struct WifiState {
     pub enabled: bool,
     pub networks: Vec<WifiNetwork>,
     pub is_loading: bool,
+    pub connecting_ssid: Option<String>,
 }
 
 pub fn create_wifi_widget() -> gtk4::Widget {
@@ -25,6 +26,7 @@ pub fn create_wifi_widget() -> gtk4::Widget {
         enabled: false,
         networks: Vec::new(),
         is_loading: true,
+        connecting_ssid: None,
     }));
 
     // Async fetch initial Wi-Fi switch status off main thread
@@ -48,12 +50,16 @@ pub fn create_wifi_widget() -> gtk4::Widget {
         }
     });
 
-    let render_networks = {
+    let (tx_connect_req, rx_connect_req) = std::sync::mpsc::channel::<(String, Option<String>, Option<String>)>();
+    let (tx_connect, rx_connect) = std::sync::mpsc::channel::<()>();
+
+    let render_networks: Rc<dyn Fn()> = Rc::new({
         let list_box_clone = list_box.clone();
         let state_clone = state.clone();
         let info_dlg_c = info_dialog.clone();
         let pwd_dlg_c = password_dialog.clone();
         let cfg_dlg_c = config_dialog.clone();
+        let tx_req_c = tx_connect_req.clone();
         move || {
             let st = state_clone.borrow();
             handler::render_network_list(
@@ -62,21 +68,40 @@ pub fn create_wifi_widget() -> gtk4::Widget {
                 &info_dlg_c,
                 &pwd_dlg_c,
                 &cfg_dlg_c,
+                tx_req_c.clone(),
             );
         }
-    };
+    });
+
+    let state_req = state.clone();
+    let render_req = render_networks.clone();
+    let tx_done_c = tx_connect.clone();
+    glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
+        while let Ok((ssid, user, pwd)) = rx_connect_req.try_recv() {
+            if state_req.borrow().connecting_ssid.is_some() {
+                continue; // Ignore redundant requests if already connecting
+            }
+            state_req.borrow_mut().connecting_ssid = Some(ssid.clone());
+            render_req();
+            
+            let tx_done = tx_done_c.clone();
+            std::thread::spawn(move || {
+                let _ = babydra_common::services::system::wifi::connect_wifi(&ssid, user.as_deref(), pwd.as_deref());
+                let _ = tx_done.send(());
+            });
+        }
+        glib::ControlFlow::Continue
+    });
 
     // Wire Password Dialog submit
     let pwd_dlg_inner = password_dialog.clone();
+    let tx_req_pwd = tx_connect_req.clone();
     password_dialog.connect_submit(move |pwd, username| {
         let ssid = pwd_dlg_inner.ssid_lbl.text().to_string();
         let ssid_clean = ssid.trim_start_matches("Connect to ").to_string();
         pwd_dlg_inner.hide();
-        std::thread::spawn(move || {
-            let user_ref = username.as_deref();
-            let pwd_ref = if pwd.is_empty() { None } else { Some(pwd.as_str()) };
-            let _ = babydra_common::services::system::wifi::connect_wifi(&ssid_clean, user_ref, pwd_ref);
-        });
+        let pwd_opt = if pwd.is_empty() { None } else { Some(pwd) };
+        let _ = tx_req_pwd.send((ssid_clean, username, pwd_opt));
     });
 
     // Wire Info Dialog configure button click
@@ -141,6 +166,33 @@ pub fn create_wifi_widget() -> gtk4::Widget {
             }
         }
     };
+
+    // Wire Info Dialog forget button click
+    let info_dlg_forget = info_dialog.clone();
+    let trigger_forget = trigger_wifi_scan.clone();
+    info_dialog.connect_forget(move || {
+        let ssid = info_dlg_forget.ssid_lbl.text().to_string();
+        let trigger_scan_c = trigger_forget.clone();
+        std::thread::spawn(move || {
+            babydra_common::services::system::wifi::forget_wifi(&ssid);
+        });
+        glib::timeout_add_local(std::time::Duration::from_millis(300), move || {
+            trigger_scan_c();
+            glib::ControlFlow::Break
+        });
+    });
+
+    let state_done = state.clone();
+    let trigger_done = trigger_wifi_scan.clone();
+    let render_done = render_networks.clone();
+    glib::timeout_add_local(std::time::Duration::from_millis(150), move || {
+        while let Ok(_) = rx_connect.try_recv() {
+            state_done.borrow_mut().connecting_ssid = None;
+            render_done();
+            trigger_done();
+        }
+        glib::ControlFlow::Continue
+    });
 
     let state_scan_render = state.clone();
     let render_nets = render_networks.clone();

@@ -112,6 +112,7 @@ pub fn create_placeholder_row(state: PlaceholderState) -> gtk4::ListBoxRow {
 }
 
 /// Creates a standard glass panel container enclosing a ScrolledWindow and ListBox.
+#[allow(dead_code)]
 pub fn create_scrollable_glass_list() -> (gtk4::Box, gtk4::ListBox, gtk4::ScrolledWindow) {
     let glass_card = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     glass_card.add_css_class("glass-panel");
