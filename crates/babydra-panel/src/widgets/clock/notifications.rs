@@ -47,18 +47,7 @@ pub fn setup_notifications_list(
                 empty_label.set_vexpand(true);
                 notif_stack.append(&empty_label);
             } else {
-                let mut grouped = std::collections::HashMap::<String, Vec<babydra_island::models::ActiveNotification>>::new();
-                let mut app_order = Vec::new();
-
-                for notif in notifications.iter() {
-                    let app_key = if notif.icon.is_empty() { "system".to_string() } else { notif.icon.to_lowercase() };
-                    if !grouped.contains_key(&app_key) {
-                        app_order.push(app_key.clone());
-                    }
-                    grouped.entry(app_key).or_default().push(notif.clone());
-                }
-
-                app_order.reverse();
+                let (grouped, app_order) = super::notification_group::group_notifications_by_app(&notifications);
 
                 for app_key in app_order {
                     let list = &grouped[&app_key];
@@ -366,16 +355,4 @@ fn render_collapsed_group(
     group_container
 }
 
-/// Formats elapsed time since notification trigger into a user-friendly localized text.
-fn format_elapsed_time(instant: std::time::Instant) -> String {
-    let secs = instant.elapsed().as_secs();
-    if secs < 60 {
-        babydra_common::i18n::t("panel.just_now")
-    } else if secs < 3600 {
-        babydra_common::i18n::t("panel.minutes_ago").replace("{}", &(secs / 60).to_string())
-    } else if secs < 86400 {
-        babydra_common::i18n::t("panel.hours_ago").replace("{}", &(secs / 3600).to_string())
-    } else {
-        babydra_common::i18n::t("panel.days_ago").replace("{}", &(secs / 86400).to_string())
-    }
-}
+use super::notification_group::format_elapsed_time;
