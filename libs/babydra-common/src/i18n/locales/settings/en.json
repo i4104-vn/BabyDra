@@ -130,5 +130,14 @@
   "settings.orientation_normal": "Normal",
   "settings.orientation_left": "Left (90°)",
   "settings.orientation_inverted": "Inverted (180°)",
-  "settings.orientation_right": "Right (270°)"
+  "settings.orientation_right": "Right (270°)",
+  "settings.notif_theme_title": "System Theme",
+  "settings.notif_theme_msg": "Applied GTK: {gtk}, Icon: {icon}",
+  "settings.notif_display_mode_title": "Display Mode",
+  "settings.notif_dark_mode_enabled": "Switched to Dark Mode",
+  "settings.notif_light_mode_enabled": "Switched to Light Mode",
+  "settings.notif_wallpaper_title": "System Wallpaper",
+  "settings.notif_wallpaper_msg": "Updated system wallpaper",
+  "settings.notif_power_title": "Power Profile",
+  "settings.notif_power_msg": "Switched to profile: {profile}"
 }

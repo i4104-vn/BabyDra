@@ -115,6 +115,9 @@ pub fn wire_events(widget: &PowerWidget, auth_dialog: PasswordDialog) {
                 if res.is_ok() {
                     update_profile_selection(&balanced_inner, &normal_inner, &high_inner, prof);
                     refresh_battery(&card_inner);
+                    let notif_title = babydra_common::i18n::t("settings.notif_power_title");
+                    let notif_msg = babydra_common::i18n::t("settings.notif_power_msg").replace("{profile}", prof.label());
+                    babydra_common::send_notification_with_icon(&notif_title, &notif_msg, "battery");
                 }
                 glib::ControlFlow::Break
             } else {
@@ -154,6 +157,9 @@ pub fn wire_events(widget: &PowerWidget, auth_dialog: PasswordDialog) {
                         Ok(()) => {
                             update_profile_selection(&balanced_inner, &normal_inner, &high_inner, prof);
                             refresh_battery(&card_inner);
+                            let notif_title = babydra_common::i18n::t("settings.notif_power_title");
+                            let notif_msg = babydra_common::i18n::t("settings.notif_power_msg").replace("{profile}", prof.label());
+                            babydra_common::send_notification_with_icon(&notif_title, &notif_msg, "battery");
                         }
                         Err(_) => {
                             // Prompt PasswordDialog for root elevation

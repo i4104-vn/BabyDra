@@ -195,7 +195,12 @@ trait Notifications {
 
 /// Sends a desktop notification using the default theme/common logo.
 pub fn send_notification(title: &str, body: &str) {
-    let logo_str = "babydra-settings";
+    send_notification_with_icon(title, body, "babydra-settings");
+}
+
+/// Sends a desktop notification specifying an explicit icon name.
+pub fn send_notification_with_icon(title: &str, body: &str, icon_name: &str) {
+    let logo_str = if icon_name.is_empty() { "babydra-settings" } else { icon_name };
     if let Ok(conn) = zbus::blocking::Connection::session() {
         if let Ok(proxy) = NotificationsProxyBlocking::new(&conn) {
             let _ = proxy.notify(

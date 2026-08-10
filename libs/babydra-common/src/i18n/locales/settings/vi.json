@@ -130,5 +130,14 @@
   "settings.orientation_normal": "Bình thường",
   "settings.orientation_left": "Xoay trái (90°)",
   "settings.orientation_inverted": "Lật ngược (180°)",
-  "settings.orientation_right": "Xoay phải (270°)"
+  "settings.orientation_right": "Phải (270°)",
+  "settings.notif_theme_title": "Giao diện hệ thống",
+  "settings.notif_theme_msg": "Đã áp dụng GTK: {gtk}, Icon: {icon}",
+  "settings.notif_display_mode_title": "Chế độ hiển thị",
+  "settings.notif_dark_mode_enabled": "Đã chuyển sang Chế độ Tối (Dark Mode)",
+  "settings.notif_light_mode_enabled": "Đã chuyển sang Chế độ Sáng (Light Mode)",
+  "settings.notif_wallpaper_title": "Hình nền hệ thống",
+  "settings.notif_wallpaper_msg": "Đã cập nhật hình nền mới",
+  "settings.notif_power_title": "Chế độ hiệu năng",
+  "settings.notif_power_msg": "Đã chuyển sang chế độ: {profile}"
 }
