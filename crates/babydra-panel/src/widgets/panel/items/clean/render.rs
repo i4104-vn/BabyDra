@@ -2,7 +2,10 @@ use gtk4::prelude::*;
 use std::rc::Rc;
 use std::cell::RefCell;
 use tokio::sync::mpsc;
-use super::{clean_all_native, format_bytes, cache, logs, temp};
+use babydra_common::helper::clean::{
+    clean_all_native, format_bytes, get_user_cache_size, get_pacman_cache_size,
+    get_journal_logs_size, get_trash_size,
+};
 
 #[derive(Clone)]
 enum CleanProgress {
@@ -341,25 +344,25 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
 
                 let _ = tx.send(CleanProgress::Log("Analyzing user cache...".to_string()));
                 std::thread::sleep(std::time::Duration::from_millis(300));
-                let u_sz = cache::get_user_cache_size();
+                let u_sz = get_user_cache_size();
                 total += u_sz;
                 let _ = tx.send(CleanProgress::ScanStep { step: 0, size: u_sz });
 
                 let _ = tx.send(CleanProgress::Log("Checking package cache...".to_string()));
                 std::thread::sleep(std::time::Duration::from_millis(300));
-                let p_sz = cache::get_pacman_cache_size();
+                let p_sz = get_pacman_cache_size();
                 total += p_sz;
                 let _ = tx.send(CleanProgress::ScanStep { step: 1, size: p_sz });
 
                 let _ = tx.send(CleanProgress::Log("Reading system log size...".to_string()));
                 std::thread::sleep(std::time::Duration::from_millis(300));
-                let j_sz = logs::get_journal_logs_size();
+                let j_sz = get_journal_logs_size();
                 total += j_sz;
                 let _ = tx.send(CleanProgress::ScanStep { step: 2, size: j_sz });
 
                 let _ = tx.send(CleanProgress::Log("Checking trash bin...".to_string()));
                 std::thread::sleep(std::time::Duration::from_millis(300));
-                let t_sz = temp::get_trash_size();
+                let t_sz = get_trash_size();
                 total += t_sz;
                 let _ = tx.send(CleanProgress::ScanStep { step: 3, size: t_sz });
 

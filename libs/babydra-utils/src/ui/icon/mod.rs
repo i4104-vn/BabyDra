@@ -9,14 +9,7 @@ pub use assets::*;
 
 /// Whether dark mode is currently active.
 pub fn is_dark_mode() -> bool {
-    if let Some(settings) = gtk4::Settings::default() {
-        if !settings.is_gtk_application_prefer_dark_theme() {
-            return false;
-        }
-    }
-    let gsettings = gio::Settings::new("org.gnome.desktop.interface");
-    let val = gsettings.string("color-scheme");
-    val != "prefer-light"
+    crate::ui::theme::is_dark_mode()
 }
 
 /// Helper function to retrieve an SVG icon widget by name. Relies on the active theme.
