@@ -26,3 +26,6 @@ pub fn create_popover_with_content(
     popover.set_child(Some(content));
     popover
 }
+
+pub mod hover;
+pub use hover::{HoverPopoverRow, build_hover_popover_card, attach_hover_popover};
