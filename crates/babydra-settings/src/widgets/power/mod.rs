@@ -1,3 +1,4 @@
+pub mod battery_card;
 pub mod handler;
 pub mod render;
 
