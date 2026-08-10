@@ -2,22 +2,32 @@ use gtk4::prelude::*;
 use std::rc::Rc;
 use tokio::sync::mpsc;
 use babydra_common::services::system::vpn::{
-    connect_vpn, disconnect_vpn, get_active_vpn_fast, get_vpn_connections, VpnConn,
+    connect_vpn, disconnect_vpn, is_vpn_active_fast, get_vpn_connections, VpnConn,
 };
 
-pub fn update_vpn_tile_icon_state(btn: &gtk4::Button) {
-    let is_connected = get_active_vpn_fast().is_some();
-    if is_connected {
-        if !btn.has_css_class("active") {
-            btn.add_css_class("active");
+pub fn update_vpn_tile_icon_state_async(btn: &gtk4::Button) {
+    let (tx, mut rx) = mpsc::unbounded_channel::<bool>();
+    std::thread::spawn(move || {
+        let is_connected = is_vpn_active_fast();
+        let _ = tx.send(is_connected);
+    });
+
+    let btn_clone = btn.clone();
+    glib::spawn_future_local(async move {
+        if let Some(is_connected) = rx.recv().await {
+            if is_connected {
+                if !btn_clone.has_css_class("active") {
+                    btn_clone.add_css_class("active");
+                }
+                let active_icon = babydra_utils::ui::icon::get_icon_colored("shield", 18, "#ffffff");
+                btn_clone.set_child(Some(&active_icon));
+            } else if !btn_clone.has_css_class("popover-open") {
+                btn_clone.remove_css_class("active");
+                let inactive_icon = babydra_utils::ui::icon::get_icon_colored("shield", 18, "rgba(255, 255, 255, 0.8)");
+                btn_clone.set_child(Some(&inactive_icon));
+            }
         }
-        let active_icon = babydra_utils::ui::icon::get_icon_colored("shield", 18, "#ffffff");
-        btn.set_child(Some(&active_icon));
-    } else if !btn.has_css_class("popover-open") {
-        btn.remove_css_class("active");
-        let inactive_icon = babydra_utils::ui::icon::get_icon_colored("shield", 18, "rgba(255, 255, 255, 0.8)");
-        btn.set_child(Some(&inactive_icon));
-    }
+    });
 }
 
 pub fn create_vpn_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) -> gtk4::Button {
@@ -35,7 +45,7 @@ pub fn create_vpn_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) -
     btn.set_hexpand(false);
     btn.set_vexpand(false);
 
-    update_vpn_tile_icon_state(&btn);
+    update_vpn_tile_icon_state_async(&btn);
 
     let popover = babydra_utils::components::create_popover(&btn, gtk4::PositionType::Bottom, "media-popover");
     popover.set_has_arrow(false);
@@ -74,17 +84,19 @@ pub fn create_vpn_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) -
     let btn_c2 = btn.clone();
     popover.connect_closed(move |_| {
         btn_c2.remove_css_class("popover-open");
-        update_vpn_tile_icon_state(&btn_c2);
+        update_vpn_tile_icon_state_async(&btn_c2);
 
         if let Some(ref cb) = on_popover_toggled_c {
             cb(false);
         }
     });
 
-    // Periodic sync (every 2 seconds) to keep button active state in sync with system VPN state
+    // Periodic sync (every 5 seconds) when mapped
     let btn_periodic = btn.clone();
-    gtk4::glib::timeout_add_local(std::time::Duration::from_secs(2), move || {
-        update_vpn_tile_icon_state(&btn_periodic);
+    gtk4::glib::timeout_add_local(std::time::Duration::from_secs(5), move || {
+        if btn_periodic.is_mapped() {
+            update_vpn_tile_icon_state_async(&btn_periodic);
+        }
         gtk4::glib::ControlFlow::Continue
     });
 
@@ -150,7 +162,7 @@ fn refresh_vpn_popover_list(main_box: &gtk4::Box, tile_btn: Option<gtk4::Button>
 
 fn build_vpn_list_ui(main_box: &gtk4::Box, vpns: Vec<VpnConn>, tile_btn: Option<gtk4::Button>) {
     if let Some(ref btn) = tile_btn {
-        update_vpn_tile_icon_state(btn);
+        update_vpn_tile_icon_state_async(btn);
     }
     while let Some(child) = main_box.first_child() {
         main_box.remove(&child);

@@ -78,6 +78,35 @@ pub fn create_toggle_tile(
     (btn, sub_label)
 }
 
+/// Updates a toggle tile's active state, icon circle styling, and icon color.
+pub fn update_toggle_tile_state(btn: &gtk4::Button, is_active: bool, icon_name: &str) {
+    if is_active {
+        btn.add_css_class("active");
+    } else {
+        btn.remove_css_class("active");
+    }
+
+    let circle = btn.child()
+        .and_then(|w| w.downcast::<gtk4::Box>().ok())
+        .and_then(|main_box| main_box.first_child())
+        .and_then(|c| c.downcast::<gtk4::Box>().ok());
+
+    if let Some(circle) = circle {
+        if is_active {
+            circle.add_css_class("active");
+        } else {
+            circle.remove_css_class("active");
+        }
+
+        while let Some(old) = circle.first_child() {
+            circle.remove(&old);
+        }
+        let color = if is_active { "#ffffff" } else { "rgba(255, 255, 255, 0.7)" };
+        let new_img = crate::ui::icon::get_icon_colored(icon_name, 14, color);
+        circle.append(&new_img);
+    }
+}
+
 /// Creates a square panel toggle tile with active/inactive state.
 pub fn create_square_toggle_tile(
     icon_name: &str,
