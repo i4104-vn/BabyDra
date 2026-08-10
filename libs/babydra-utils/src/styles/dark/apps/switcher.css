@@ -3,8 +3,7 @@
 }
 
 .stage-manager-panel {
-    background-color: rgba(15, 15, 20, 0.75);
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    background-image: linear-gradient(to right, rgba(10, 10, 15, 0.92), rgba(10, 10, 15, 0.6) 75%, rgba(10, 10, 15, 0) 100%);
 }
 
 .stage-manager-item-btn {

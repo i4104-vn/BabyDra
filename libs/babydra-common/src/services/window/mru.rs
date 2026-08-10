@@ -125,11 +125,19 @@ pub fn get_running_apps() -> Vec<DesktopApp> {
 
     let history = get_history();
     running.sort_by(|a, b| {
-        let key_a = a.window_title.as_deref().unwrap_or(&a.name);
-        let key_b = b.window_title.as_deref().unwrap_or(&b.name);
-        let idx_a = history.iter().position(|x| x == key_a).unwrap_or(usize::MAX);
-        let idx_b = history.iter().position(|x| x == key_b).unwrap_or(usize::MAX);
-        idx_a.cmp(&idx_b)
+        let get_pos = |app: &DesktopApp| {
+            let title_key = app.window_title.as_deref().unwrap_or(&app.name);
+            if let Some(pos) = history.iter().position(|x| x == title_key) {
+                return pos;
+            }
+            if let Some(ref id) = app.app_id {
+                if let Some(pos) = history.iter().position(|x| x == id || x.contains(id)) {
+                    return pos;
+                }
+            }
+            usize::MAX
+        };
+        get_pos(a).cmp(&get_pos(b))
     });
 
     running
