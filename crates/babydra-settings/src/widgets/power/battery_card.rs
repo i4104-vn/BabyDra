@@ -2,6 +2,35 @@ use gtk4::prelude::*;
 use gtk4::{Box, Grid, Label, Orientation, ProgressBar};
 use babydra_common::BatteryInfo;
 
+fn get_cpu_frequency() -> Option<String> {
+    let mut max_freq = 0.0;
+    if let Ok(entries) = std::fs::read_dir("/sys/devices/system/cpu") {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
+                if name.starts_with("cpu") && name[3..].chars().all(char::is_numeric) {
+                    let freq_path = path.join("cpufreq/scaling_cur_freq");
+                    if freq_path.exists() {
+                        if let Ok(content) = std::fs::read_to_string(&freq_path) {
+                            if let Ok(khz) = content.trim().parse::<f64>() {
+                                let ghz = khz / 1_000_000.0;
+                                if ghz > max_freq {
+                                    max_freq = ghz;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if max_freq > 0.0 {
+        Some(format!("{:.2} GHz", max_freq))
+    } else {
+        None
+    }
+}
+
 pub fn update_battery_card_ui(card: &Box, info_opt: Option<BatteryInfo>) {
     while let Some(child) = card.first_child() {
         card.remove(&child);
@@ -174,7 +203,7 @@ pub fn update_battery_card_ui(card: &Box, info_opt: Option<BatteryInfo>) {
     specs_grid.set_row_spacing(4);
     specs_grid.set_halign(gtk4::Align::End);
 
-    let specs: Vec<(String, Option<String>)> = if info.is_ac_only {
+    let mut specs: Vec<(String, Option<String>)> = if info.is_ac_only {
         vec![
             (babydra_common::i18n::t("settings.power_active_profile"), info.active_profile),
             (babydra_common::i18n::t("settings.power_power_source"), info.power_source),
@@ -197,6 +226,8 @@ pub fn update_battery_card_ui(card: &Box, info_opt: Option<BatteryInfo>) {
         ]
     };
 
+    specs.insert(1, (babydra_common::i18n::t("settings.power_cpu_freq"), get_cpu_frequency()));
+
     let mut spec_row = 0;
     for (label_text, val_opt) in specs {
         if let Some(val) = val_opt {
@@ -207,6 +238,19 @@ pub fn update_battery_card_ui(card: &Box, info_opt: Option<BatteryInfo>) {
             let val_lbl = Label::new(Some(&val));
             val_lbl.add_css_class("settings-row-title");
             val_lbl.set_halign(gtk4::Align::End);
+
+            if label_text == babydra_common::i18n::t("settings.power_cpu_freq") {
+                let val_lbl_clone = val_lbl.clone();
+                gtk4::glib::timeout_add_local(std::time::Duration::from_secs(5), move || {
+                    if val_lbl_clone.parent().is_none() {
+                        return gtk4::glib::ControlFlow::Break;
+                    }
+                    if let Some(freq) = get_cpu_frequency() {
+                        val_lbl_clone.set_text(&freq);
+                    }
+                    gtk4::glib::ControlFlow::Continue
+                });
+            }
 
             specs_grid.attach(&lbl, 0, spec_row, 1, 1);
             specs_grid.attach(&val_lbl, 1, spec_row, 1, 1);

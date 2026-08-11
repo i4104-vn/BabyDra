@@ -17,6 +17,7 @@
   "settings.power_battery_details": "DETAILS",
   "settings.power_battery_health": "HEALTH",
   "settings.power_battery_tech": "TECHNOLOGY",
+  "settings.power_cpu_freq": "CPU FREQUENCY",
   "settings.power_power_source": "POWER SOURCE",
   "settings.power_cycle_count": "CYCLE COUNT",
   "settings.power_voltage": "VOLTAGE",
