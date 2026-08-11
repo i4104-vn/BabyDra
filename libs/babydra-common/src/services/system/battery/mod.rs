@@ -177,7 +177,7 @@ pub fn get_battery_info() -> Option<BatteryInfo> {
                             }
                         }
 
-                        return Some(BatteryInfo {
+                        let info = BatteryInfo {
                             percentage: capacity,
                             is_charging,
                             is_ac_only: false,
@@ -196,7 +196,9 @@ pub fn get_battery_info() -> Option<BatteryInfo> {
                             serial_number,
                             temperature,
                             active_profile,
-                        });
+                        };
+                        check_and_apply_auto_battery_saver(&info);
+                        return Some(info);
                     }
                 }
             }
@@ -227,8 +229,7 @@ pub fn get_battery_info() -> Option<BatteryInfo> {
             }
         }
     }
-
-    Some(BatteryInfo {
+    let bat = BatteryInfo {
         percentage: 100,
         is_charging: true,
         is_ac_only: true,
@@ -247,5 +248,104 @@ pub fn get_battery_info() -> Option<BatteryInfo> {
         serial_number: None,
         temperature: None,
         active_profile,
-    })
+    };
+    check_and_apply_auto_battery_saver(&bat);
+    Some(bat)
 }
+
+pub fn check_and_apply_auto_battery_saver(battery_info: &BatteryInfo) {
+    if battery_info.is_ac_only || battery_info.is_charging {
+        return;
+    }
+    let conf = crate::config::load_babydra_config();
+    if !conf.power.auto_saver_enabled {
+        return;
+    }
+    if battery_info.percentage <= conf.power.saver_threshold {
+        let cur_profile = crate::services::system::power::profile::get_current_profile();
+        if cur_profile != crate::PerformanceProfile::Normal {
+            if crate::services::system::power::profile::set_performance_profile(crate::PerformanceProfile::Normal).is_ok() {
+                let title = crate::i18n::t("settings.notif_auto_saver_title");
+                let msg = crate::i18n::t("settings.notif_auto_saver_msg").replace("{level}", &battery_info.percentage.to_string());
+                crate::send_notification(&title, &msg);
+
+                // Reduce screen brightness by 50% when auto saver mode activates
+                let cur_b = crate::services::system::backlight::get_current_brightness();
+                let target_b = (cur_b * 0.5).max(10.0);
+                crate::services::system::backlight::set_brightness(target_b);
+            }
+        }
+    }
+}
+
+pub fn has_charge_limit_support() -> bool {
+    charge_limit_path().is_some()
+}
+
+pub fn charge_limit_path() -> Option<std::path::PathBuf> {
+    let sysfs_paths = [
+        "/sys/class/power_supply/BAT0/charge_control_end_threshold",
+        "/sys/class/power_supply/BAT1/charge_control_end_threshold",
+        "/sys/class/power_supply/BATT/charge_control_end_threshold",
+        "/sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode",
+    ];
+
+    for path_str in &sysfs_paths {
+        let p = std::path::Path::new(path_str);
+        if p.exists() {
+            return Some(p.to_path_buf());
+        }
+    }
+    None
+}
+
+pub fn set_charge_limit(limit: u32) -> Result<(), String> {
+    let limit = limit.clamp(80, 100);
+    let path = match charge_limit_path() {
+        Some(p) => p,
+        None => return Err("unsupported".to_string()),
+    };
+
+    let path_str = path.to_string_lossy();
+    let val = if path_str.contains("conservation_mode") {
+        if limit < 100 { "1" } else { "0" }
+    } else {
+        &limit.to_string()
+    };
+
+    if std::fs::write(&path, val).is_ok() {
+        Ok(())
+    } else {
+        Err("permission_denied".to_string())
+    }
+}
+
+pub fn set_charge_limit_auth(limit: u32, pwd: &str) -> Result<(), String> {
+    let limit = limit.clamp(80, 100);
+    let path = match charge_limit_path() {
+        Some(p) => p,
+        None => return Err("unsupported".to_string()),
+    };
+
+    let path_str = path.to_string_lossy();
+    let val = if path_str.contains("conservation_mode") {
+        if limit < 100 { "1" } else { "0" }
+    } else {
+        &limit.to_string()
+    };
+
+    let safe_pwd = pwd.replace('\'', "'\\''");
+    let cmd = format!(
+        "echo '{}' | sudo -S sh -c 'chmod 666 \"{}\" 2>/dev/null || true; echo \"ACTION==\\\"add|change\\\", SUBSYSTEM==\\\"power_supply\\\", ATTR{{charge_control_end_threshold}}=\\\"\\*\\\", MODE=\\\"0666\\\"\" > /etc/udev/rules.d/99-babydra-battery.rules 2>/dev/null || true; echo {} > \"{}\"'",
+        safe_pwd, path_str, val, path_str
+    );
+
+    if let Ok(status) = std::process::Command::new("sh").args(["-c", &cmd]).status() {
+        if status.success() {
+            return Ok(());
+        }
+    }
+
+    Err("Authentication failed. Incorrect password.".to_string())
+}
+

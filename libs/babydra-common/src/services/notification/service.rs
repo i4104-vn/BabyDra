@@ -14,27 +14,17 @@ thread_local! {
     pub static HISTORICAL_NOTIFICATIONS: RefCell<Vec<ActiveNotification>> = RefCell::new(Vec::new());
 }
 
-fn get_dnd_file_path() -> std::path::PathBuf {
-    let home = std::env::var("HOME").unwrap_or_else(|_| "/home/i4104".to_string());
-    std::path::Path::new(&home).join(".config/babydra/dnd")
-}
-
 /// Checks if DND mode is active.
 pub fn is_dnd_active() -> bool {
-    get_dnd_file_path().exists()
+    let conf = crate::config::load_babydra_config();
+    conf.notification.dnd
 }
 
 /// Sets DND mode state.
 pub fn set_dnd_active(active: bool) {
-    let path = get_dnd_file_path();
-    if active {
-        if let Some(parent) = path.parent() {
-            let _ = std::fs::create_dir_all(parent);
-        }
-        let _ = std::fs::File::create(&path);
-    } else {
-        let _ = std::fs::remove_file(&path);
-    }
+    let mut conf = crate::config::load_babydra_config();
+    conf.notification.dnd = active;
+    crate::config::save_babydra_config(&conf);
 }
 
 /// DBus Notifications interface server object.
@@ -195,12 +185,22 @@ trait Notifications {
 
 /// Sends a desktop notification using the default theme/common logo.
 pub fn send_notification(title: &str, body: &str) {
-    send_notification_with_icon(title, body, "babydra-settings");
+    send_notification_with_icon(title, body, "babydra");
 }
 
 /// Sends a desktop notification specifying an explicit icon name.
 pub fn send_notification_with_icon(title: &str, body: &str, icon_name: &str) {
-    let logo_str = if icon_name.is_empty() { "babydra-settings" } else { icon_name };
+    let logo_path = "/usr/share/babydra/logo.png";
+    let logo_str = if icon_name.is_empty() {
+        if std::path::Path::new(logo_path).exists() {
+            logo_path
+        } else {
+            "babydra"
+        }
+    } else {
+        icon_name
+    };
+
     if let Ok(conn) = zbus::blocking::Connection::session() {
         if let Ok(proxy) = NotificationsProxyBlocking::new(&conn) {
             let _ = proxy.notify(

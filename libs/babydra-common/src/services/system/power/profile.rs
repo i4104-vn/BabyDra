@@ -1,38 +1,22 @@
 //! Performance profile service with fallback elevation support.
 
 use crate::models::shell::power::PerformanceProfile;
-use std::path::Path;
 use std::process::Command;
+use crate::config::{load_babydra_config, save_babydra_config, get_babydra_conf_path};
 
 pub fn get_current_profile() -> PerformanceProfile {
-    let config_path = get_profile_config_path();
-    if let Ok(content) = std::fs::read_to_string(config_path) {
-        return PerformanceProfile::from_key(content.trim());
-    }
+    let conf = load_babydra_config();
+    PerformanceProfile::from_key(&conf.power.profile)
+}
 
-    // Fallback: query sysfs directly if config file doesn't exist
-    if let Ok(gov) = std::fs::read_to_string("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor") {
-        let gov_trim = gov.trim();
-        if gov_trim == "performance" {
-            return PerformanceProfile::HighPerformance;
-        }
-        if let Ok(epp) = std::fs::read_to_string("/sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference") {
-            let epp_trim = epp.trim();
-            if epp_trim == "power" {
-                return PerformanceProfile::Normal;
-            }
-        }
-    }
-
-    PerformanceProfile::Balanced
+fn save_profile_to_config(profile: PerformanceProfile) {
+    let mut conf = load_babydra_config();
+    conf.power.profile = profile.key().to_string();
+    save_babydra_config(&conf);
 }
 
 pub fn set_performance_profile(profile: PerformanceProfile) -> Result<(), String> {
-    let config_path = get_profile_config_path();
-    if let Some(parent) = config_path.parent() {
-        let _ = std::fs::create_dir_all(parent);
-    }
-    let _ = std::fs::write(&config_path, profile.key());
+    save_profile_to_config(profile);
 
     let (governor, epp) = match profile {
         PerformanceProfile::Normal => ("powersave", "power"),
@@ -118,11 +102,7 @@ pub fn set_performance_profile_with_password(profile: PerformanceProfile, passwo
 
     if let Ok(status) = Command::new("sh").args(["-c", &cmd]).status() {
         if status.success() {
-            let config_path = get_profile_config_path();
-            if let Some(parent) = config_path.parent() {
-                let _ = std::fs::create_dir_all(parent);
-            }
-            let _ = std::fs::write(&config_path, profile.key());
+            save_profile_to_config(profile);
             return Ok(());
         }
     }
@@ -136,6 +116,5 @@ pub fn apply_saved_profile() {
 }
 
 pub fn get_profile_config_path() -> std::path::PathBuf {
-    let home = std::env::var("HOME").unwrap_or_else(|_| "/home/i4104".to_string());
-    Path::new(&home).join(".config/babydra/perf_profile")
+    get_babydra_conf_path()
 }

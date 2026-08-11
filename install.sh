@@ -125,8 +125,9 @@ cp "$SCRIPT_DIR/configs/labwc/rc.xml" "$HOME/.config/labwc/rc.xml"
 cp "$SCRIPT_DIR/configs/labwc/themerc-override" "$HOME/.config/labwc/themerc-override"
 mkdir -p "$HOME/.config/labwc/themes"
 cp -r "$SCRIPT_DIR/configs/labwc/themes/"* "$HOME/.config/labwc/themes/"
-cp "$SCRIPT_DIR/configs/labwc/switcher.sh" "$HOME/.config/labwc/switcher.sh"
-chmod +x "$HOME/.config/labwc/switcher.sh"
+mkdir -p "$HOME/.config/labwc/scripts"
+cp -r "$SCRIPT_DIR/configs/labwc/scripts/"* "$HOME/.config/labwc/scripts/"
+chmod +x "$HOME/.config/labwc/scripts/"*
 
 mkdir -p "$HOME/.local/share/themes"
 cp -r "$SCRIPT_DIR/configs/themes/BabyDra" "$HOME/.local/share/themes/"
