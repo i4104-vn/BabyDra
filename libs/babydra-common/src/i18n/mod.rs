@@ -95,7 +95,6 @@ pub fn watch_locale_change<F: Fn(&str) + 'static>(on_change: F) {
         }
         let file = gio::File::for_path(&path);
         if let Ok(monitor) = file.monitor_file(gio::FileMonitorFlags::NONE, gio::Cancellable::NONE) {
-            use gio::prelude::*;
             let last_locale = std::rc::Rc::new(std::cell::RefCell::new(get_locale()));
             
             monitor.connect_changed(move |_, _, _, _| {

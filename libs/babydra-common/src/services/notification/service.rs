@@ -4,6 +4,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::thread;
 use zbus::interface;
+use zbus::fdo::RequestNameFlags;
 
 pub use crate::models::{ActiveNotification, NotificationMsg};
 
@@ -119,7 +120,6 @@ pub fn spawn_dbus_listener(tx: tokio::sync::mpsc::UnboundedSender<NotificationMs
 
             match conn_result {
                 Ok(conn) => {
-                    use zbus::fdo::RequestNameFlags;
                     let _ = conn.request_name_with_flags(
                         "org.freedesktop.Notifications",
                         RequestNameFlags::ReplaceExisting | RequestNameFlags::DoNotQueue,

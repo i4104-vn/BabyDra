@@ -1,6 +1,7 @@
 //! Battery subsystem service for reading /sys/class/power_supply.
 
 use crate::models::shell::battery::BatteryInfo;
+use std::io::Write;
 use std::path::Path;
 
 fn format_duration(total_minutes: u32, is_charging: bool) -> String {
@@ -350,7 +351,6 @@ pub fn set_charge_limit_auth(limit: u32, pwd: &str) -> Result<(), String> {
         path_str, val, path_str
     );
 
-    use std::io::Write;
     let mut child = match std::process::Command::new("sudo")
         .args(["-S", "sh", "-c", &cmd])
         .stdin(std::process::Stdio::piped())

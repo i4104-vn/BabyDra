@@ -1,7 +1,9 @@
 //! System update service.
 
 use crate::models::system_update::PackageUpdate;
-use std::process::Command;
+use std::fs::OpenOptions;
+use std::io::{Read, Write};
+use std::process::{Command, Stdio};
 
 /// Checks for pending system updates using checkupdates with pacman -Qu fallback.
 pub fn check_updates() -> Result<Vec<PackageUpdate>, String> {
@@ -57,9 +59,6 @@ pub fn update_system() -> Result<(), String> {
 
 /// Executes a privileged command and streams stdout/stderr lines via channel.
 pub fn execute_cmd_with_log_stream(args: &[&str], password: Option<&str>, sender: std::sync::mpsc::Sender<String>) -> Result<(), String> {
-    use std::io::Write;
-    use std::process::Stdio;
-
     let mut command = if password.is_some() {
         let mut c = Command::new("sudo");
         c.arg("-S");
@@ -94,7 +93,6 @@ pub fn execute_cmd_with_log_stream(args: &[&str], password: Option<&str>, sender
     let sender_stdout = sender.clone();
     let thread_stdout = std::thread::spawn(move || {
         if let Some(mut out) = stdout {
-            use std::io::Read;
             let mut buf = [0u8; 1024];
             let mut current_line = String::new();
             while let Ok(n) = out.read(&mut buf) {
@@ -120,7 +118,6 @@ pub fn execute_cmd_with_log_stream(args: &[&str], password: Option<&str>, sender
     let sender_stderr = sender;
     let thread_stderr = std::thread::spawn(move || {
         if let Some(mut err) = stderr {
-            use std::io::Read;
             let mut buf = [0u8; 1024];
             let mut current_line = String::new();
             while let Ok(n) = err.read(&mut buf) {
@@ -177,9 +174,6 @@ pub fn start_background_update(password: Option<String>) {
 }
 
 pub fn start_background_update_with_sender(password: Option<String>, external_tx: Option<std::sync::mpsc::Sender<String>>) {
-    use std::fs::OpenOptions;
-    use std::io::Write;
-
     let path = get_update_log_path();
     let _ = std::fs::write(&path, "");
 

@@ -5,6 +5,7 @@ pub mod discovery;
 
 use serde::{Deserialize, Serialize};
 use std::fs::File;
+use std::hash::{Hash, Hasher};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, OnceLock};
 
@@ -133,7 +134,6 @@ pub fn find_desktop_apps() -> Vec<DesktopApp> {
 
 /// Generates a unique hash string representing a specific Wayland window based on its app_id and title.
 pub fn get_window_hash(app_id: &str, title: &str) -> String {
-    use std::hash::{Hash, Hasher};
     let mut hasher = std::collections::hash_map::DefaultHasher::new();
     app_id.hash(&mut hasher);
     title.hash(&mut hasher);

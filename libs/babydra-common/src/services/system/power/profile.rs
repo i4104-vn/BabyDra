@@ -1,6 +1,7 @@
 //! Performance profile service with fallback elevation support.
 
 use crate::models::shell::power::PerformanceProfile;
+use std::io::Write;
 use std::process::Command;
 use crate::config::{load_babydra_config, save_babydra_config};
 
@@ -99,7 +100,6 @@ pub fn set_performance_profile_with_password(profile: PerformanceProfile, passwo
         governor, epp
     );
 
-    use std::io::Write;
     let mut child = match Command::new("sudo")
         .args(["-S", "sh", "-c", &cmd])
         .stdin(std::process::Stdio::piped())
