@@ -2,7 +2,7 @@
 
 use crate::models::shell::power::PerformanceProfile;
 use std::process::Command;
-use crate::config::{load_babydra_config, save_babydra_config, get_babydra_conf_path};
+use crate::config::{load_babydra_config, save_babydra_config};
 
 pub fn get_current_profile() -> PerformanceProfile {
     let conf = load_babydra_config();
@@ -94,13 +94,28 @@ pub fn set_performance_profile_with_password(profile: PerformanceProfile, passwo
         PerformanceProfile::HighPerformance => ("performance", "performance"),
     };
 
-    let safe_pwd = password.replace('\'', "'\\''");
     let cmd = format!(
-        "echo '{}' | sudo -S sh -c 'chmod 666 /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference 2>/dev/null || true; for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo {} > \"$f\" 2>/dev/null; done; for f in /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference; do echo {} > \"$f\" 2>/dev/null; done'",
-        safe_pwd, governor, epp
+        "chmod 666 /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference 2>/dev/null || true; for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo {} > \"$f\" 2>/dev/null; done; for f in /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference; do echo {} > \"$f\" 2>/dev/null; done",
+        governor, epp
     );
 
-    if let Ok(status) = Command::new("sh").args(["-c", &cmd]).status() {
+    use std::io::Write;
+    let mut child = match Command::new("sudo")
+        .args(["-S", "sh", "-c", &cmd])
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .spawn()
+    {
+        Ok(c) => c,
+        Err(_) => return Err("Failed to execute sudo".to_string()),
+    };
+
+    if let Some(mut stdin) = child.stdin.take() {
+        let _ = stdin.write_all(format!("{}\n", password).as_bytes());
+    }
+
+    if let Ok(status) = child.wait() {
         if status.success() {
             save_profile_to_config(profile);
             return Ok(());
@@ -115,6 +130,3 @@ pub fn apply_saved_profile() {
     let _ = set_performance_profile(profile);
 }
 
-pub fn get_profile_config_path() -> std::path::PathBuf {
-    get_babydra_conf_path()
-}

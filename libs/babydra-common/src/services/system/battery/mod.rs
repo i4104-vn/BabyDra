@@ -253,7 +253,18 @@ pub fn get_battery_info() -> Option<BatteryInfo> {
     Some(bat)
 }
 
+static LAST_SAVER_CHECK: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
 pub fn check_and_apply_auto_battery_saver(battery_info: &BatteryInfo) {
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default().as_secs();
+    let last = LAST_SAVER_CHECK.load(std::sync::atomic::Ordering::Relaxed);
+    if now - last < 60 {
+        return;
+    }
+    LAST_SAVER_CHECK.store(now, std::sync::atomic::Ordering::Relaxed);
+
     if battery_info.is_ac_only || battery_info.is_charging {
         return;
     }
@@ -334,13 +345,28 @@ pub fn set_charge_limit_auth(limit: u32, pwd: &str) -> Result<(), String> {
         &limit.to_string()
     };
 
-    let safe_pwd = pwd.replace('\'', "'\\''");
     let cmd = format!(
-        "echo '{}' | sudo -S sh -c 'chmod 666 \"{}\" 2>/dev/null || true; echo \"ACTION==\\\"add|change\\\", SUBSYSTEM==\\\"power_supply\\\", ATTR{{charge_control_end_threshold}}=\\\"\\*\\\", MODE=\\\"0666\\\"\" > /etc/udev/rules.d/99-babydra-battery.rules 2>/dev/null || true; echo {} > \"{}\"'",
-        safe_pwd, path_str, val, path_str
+        "chmod 666 \"{}\" 2>/dev/null || true; echo \"ACTION==\\\"add|change\\\", SUBSYSTEM==\\\"power_supply\\\", ATTR{{charge_control_end_threshold}}=\\\"\\*\\\", MODE=\\\"0666\\\"\" > /etc/udev/rules.d/99-babydra-battery.rules 2>/dev/null || true; echo {} > \"{}\"",
+        path_str, val, path_str
     );
 
-    if let Ok(status) = std::process::Command::new("sh").args(["-c", &cmd]).status() {
+    use std::io::Write;
+    let mut child = match std::process::Command::new("sudo")
+        .args(["-S", "sh", "-c", &cmd])
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .spawn()
+    {
+        Ok(c) => c,
+        Err(_) => return Err("Failed to execute sudo".to_string()),
+    };
+
+    if let Some(mut stdin) = child.stdin.take() {
+        let _ = stdin.write_all(format!("{}\n", pwd).as_bytes());
+    }
+
+    if let Ok(status) = child.wait() {
         if status.success() {
             return Ok(());
         }
