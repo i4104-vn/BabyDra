@@ -70,6 +70,14 @@ button.sidebar-item.active-nav:hover image {
     color: rgba(255, 255, 255, 0.55);
 }
 
+.toggle-status-on {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.toggle-status-off {
+    color: rgba(255, 255, 255, 0.4);
+}
+
 /* Glass Panels & Cards */
 .settings-card,
 .glass-panel {
@@ -78,7 +86,7 @@ button.sidebar-item.active-nav:hover image {
     border-top: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 16px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
-    padding: 12px;
+    padding: 16px 20px;
 }
 
 /* Glassmorphism Circular Icon Badge (Matching circle button style) */
@@ -459,6 +467,15 @@ progressbar.console-progress progress {
     color: rgba(255, 255, 255, 0.8);
 }
 
+.wifi-status-on {
+    color: rgba(255, 255, 255, 0.90);
+}
+
+.wifi-status-off {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+
 .segmented-control {
     background-color: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -514,4 +531,51 @@ progressbar.battery-level-bar trough {
 .perf-profile-row-btn.active {
     background-color: rgba(59, 130, 246, 0.16);
     border: 1px solid rgba(59, 130, 246, 0.45);
+}
+
+/* Settings Scale Slider Colors (Dark) */
+scale.settings-scale trough,
+scale.settings-scale > trough,
+scale.settings-scale contents > trough {
+    background-color: rgba(255, 255, 255, 0.20);
+}
+
+scale.settings-scale trough highlight,
+scale.settings-scale > trough > highlight,
+scale.settings-scale contents > trough > highlight {
+    background-color: #3b82f6;
+}
+
+scale.settings-scale slider,
+scale.settings-scale > slider,
+scale.settings-scale contents > slider {
+    background-color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+scale.settings-scale mark label {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+scale.settings-scale:disabled trough,
+scale.settings-scale:disabled > trough,
+scale.settings-scale:disabled contents > trough {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+scale.settings-scale:disabled trough highlight,
+scale.settings-scale:disabled > trough > highlight,
+scale.settings-scale:disabled contents > trough > highlight {
+    background-color: rgba(255, 255, 255, 0.25);
+}
+
+scale.settings-scale:disabled slider,
+scale.settings-scale:disabled > slider,
+scale.settings-scale:disabled contents > slider {
+    background-color: rgba(255, 255, 255, 0.45);
+    box-shadow: none;
+}
+
+scale.settings-scale:disabled mark label {
+    color: rgba(255, 255, 255, 0.25);
 }

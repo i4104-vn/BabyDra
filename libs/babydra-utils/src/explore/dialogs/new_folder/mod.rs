@@ -13,7 +13,7 @@ pub fn show_new_folder_dialog(
 ) {
     let widgets = render::build_new_folder_dialog_ui(parent);
     let window = widgets.window;
-    let vbox = widgets.vbox;
+    let _vbox = widgets.vbox;
     let entry = widgets.entry;
     let lbl_error = widgets.lbl_error;
     let btn_create = widgets.btn_create;

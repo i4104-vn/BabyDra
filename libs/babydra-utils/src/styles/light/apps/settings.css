@@ -90,6 +90,14 @@ button.sidebar-item.active-nav:hover image {
     color: rgba(28, 28, 30, 0.50);
 }
 
+.toggle-status-on {
+    color: rgba(28, 28, 30, 0.9);
+}
+
+.toggle-status-off {
+    color: rgba(28, 28, 30, 0.4);
+}
+
 .settings-row-icon {
     color: rgba(28, 28, 30, 0.65);
 }
@@ -100,7 +108,7 @@ button.sidebar-item.active-nav:hover image {
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 16px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-    padding: 12px;
+    padding: 16px 20px;
 }
 
 .settings-card row,
@@ -518,6 +526,15 @@ progressbar.console-progress progress {
     color: rgba(28, 28, 30, 0.8);
 }
 
+.wifi-status-on {
+    color: rgba(28, 28, 30, 0.90);
+}
+
+.wifi-status-off {
+    color: rgba(28, 28, 30, 0.45);
+}
+
+
 .segmented-control {
     background-color: rgba(0, 0, 0, 0.04);
     border: 1px solid rgba(0, 0, 0, 0.08);
@@ -589,4 +606,52 @@ entry.sidebar-search-entry>text {
     border: none;
     box-shadow: none;
     color: #1c1c1e;
+}
+
+/* Settings Scale Slider Colors (Light) */
+scale.settings-scale trough,
+scale.settings-scale > trough,
+scale.settings-scale contents > trough {
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+scale.settings-scale trough highlight,
+scale.settings-scale > trough > highlight,
+scale.settings-scale contents > trough > highlight {
+    background-color: #2563eb;
+}
+
+scale.settings-scale slider,
+scale.settings-scale > slider,
+scale.settings-scale contents > slider {
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.20);
+}
+
+scale.settings-scale mark label {
+    color: rgba(0, 0, 0, 0.50);
+}
+
+scale.settings-scale:disabled trough,
+scale.settings-scale:disabled > trough,
+scale.settings-scale:disabled contents > trough {
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+scale.settings-scale:disabled trough highlight,
+scale.settings-scale:disabled > trough > highlight,
+scale.settings-scale:disabled contents > trough > highlight {
+    background-color: rgba(0, 0, 0, 0.18);
+}
+
+scale.settings-scale:disabled slider,
+scale.settings-scale:disabled > slider,
+scale.settings-scale:disabled contents > slider {
+    background-color: rgba(0, 0, 0, 0.25);
+    box-shadow: none;
+}
+
+scale.settings-scale:disabled mark label {
+    color: rgba(0, 0, 0, 0.25);
 }

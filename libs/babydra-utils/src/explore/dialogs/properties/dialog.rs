@@ -1,4 +1,3 @@
-use std::rc::Rc;
 use gtk4::prelude::*;
 use gtk4::{Box, Orientation, Button, Align, Window};
 use std::path::PathBuf;

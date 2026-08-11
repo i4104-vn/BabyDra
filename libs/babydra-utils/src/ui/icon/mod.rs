@@ -1,4 +1,3 @@
-use gio::prelude::*;
 use glib::object::ObjectExt;
 
 pub mod assets;

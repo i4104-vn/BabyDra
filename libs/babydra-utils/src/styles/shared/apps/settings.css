@@ -366,6 +366,13 @@ progressbar.battery-level-bar progress {
     font-weight: 600;
 }
 
+.wifi-status-on,
+.wifi-status-off {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+
 .wifi-connected-dot {
     background-color: #22c55e;
     border-radius: 9999px;
@@ -437,5 +444,56 @@ button.app-tab-btn.active {
 
 .global-loading-blocker {
     background: rgba(0, 0, 0, 0.5);
+}
+
+/* Settings Scale Slider Styling (Common Layout & Sizing) */
+scale.settings-scale {
+    min-height: 28px;
+    margin: 4px 0;
+    padding: 0;
+}
+
+scale.settings-scale trough,
+scale.settings-scale > trough,
+scale.settings-scale contents > trough {
+    min-height: 8px;
+    border-radius: 9999px;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+}
+
+scale.settings-scale trough highlight,
+scale.settings-scale > trough > highlight,
+scale.settings-scale contents > trough > highlight {
+    min-height: 8px;
+    border-radius: 9999px;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+}
+
+scale.settings-scale slider,
+scale.settings-scale > slider,
+scale.settings-scale contents > slider {
+    min-width: 18px;
+    min-height: 18px;
+    border-radius: 9999px;
+    background-image: none;
+    border: none;
+    margin: -5px 0;
+    transition: transform 150ms ease;
+}
+
+scale.settings-scale slider:hover,
+scale.settings-scale > slider:hover,
+scale.settings-scale contents > slider:hover {
+    transform: scale(1.15);
+}
+
+scale.settings-scale mark label {
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 6px;
 }
 

@@ -11,6 +11,7 @@ pub mod placeholder;
 pub mod progress;
 pub mod spinners;
 pub mod switch;
+pub mod slider;
 pub mod tooltips;
 
 // Re-export all builders under components namespace to maintain compatibility
@@ -27,4 +28,5 @@ pub use progress::{create_progress_bar, create_disk_progress};
 pub use spinners::{create_spinner, create_loading_box};
 pub use tooltips::set_tooltip;
 pub use list_group::{create_list_row, clear_list_box, clear_box};
-pub use switch::create_switch;
+pub use switch::{create_switch, ToggleRow, CustomSwitch};
+pub use slider::CustomSlider;
