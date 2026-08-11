@@ -225,9 +225,6 @@ pub fn update_battery_card_ui(card: &Box, info_opt: Option<BatteryInfo>) {
             (babydra_common::i18n::t("settings.power_battery_tech"), info.technology),
         ]
     };
-
-    specs.insert(1, (babydra_common::i18n::t("settings.power_cpu_freq"), Some(String::new())));
-
     let mut spec_row = 0;
     for (label_text, val_opt) in specs {
         if let Some(val) = val_opt {
@@ -239,60 +236,8 @@ pub fn update_battery_card_ui(card: &Box, info_opt: Option<BatteryInfo>) {
             val_lbl.set_halign(gtk4::Align::End);
             val_lbl.set_valign(gtk4::Align::Center);
 
-            if label_text == babydra_common::i18n::t("settings.power_cpu_freq") {
-                val_lbl.add_css_class("cpu-badge");
-                
-                let provider = gtk4::CssProvider::new();
-                val_lbl.style_context().add_provider(&provider, gtk4::STYLE_PROVIDER_PRIORITY_APPLICATION);
-                
-                let update_color = |ghz: f64, prov: &gtk4::CssProvider| {
-                    let (r, g, b) = if ghz < 2.0 {
-                        (46, 194, 126) // Green
-                    } else if ghz < 3.5 {
-                        (255, 152, 0) // Orange
-                    } else {
-                        (244, 67, 54) // Red
-                    };
-                    let css = format!(
-                        ".cpu-badge {{ background-color: rgba({}, {}, {}, 0.18); border: 1px solid rgba({}, {}, {}, 0.35); color: rgb({}, {}, {}); border-radius: 9999px; padding: 2px 10px; font-size: 11px; font-weight: 600; margin: 2px 0px; }}",
-                        r, g, b, r, g, b, r, g, b
-                    );
-                    prov.load_from_data(&css);
-                };
-                
-                if let Some((ghz, freq)) = get_cpu_frequency() {
-                    val_lbl.set_text(&freq);
-                    update_color(ghz, &provider);
-                }
-                
-                let val_lbl_clone = val_lbl.clone();
-                let provider_clone = provider.clone();
-                gtk4::glib::timeout_add_local(std::time::Duration::from_secs(5), move || {
-                    if val_lbl_clone.parent().is_none() {
-                        return gtk4::glib::ControlFlow::Break;
-                    }
-                    if let Some((new_ghz, new_freq)) = get_cpu_frequency() {
-                        val_lbl_clone.set_text(&new_freq);
-                        
-                        let (r, g, b) = if new_ghz < 2.0 {
-                            (46, 194, 126)
-                        } else if new_ghz < 3.5 {
-                            (255, 152, 0)
-                        } else {
-                            (244, 67, 54)
-                        };
-                        let css = format!(
-                            ".cpu-badge {{ background-color: rgba({}, {}, {}, 0.18); border: 1px solid rgba({}, {}, {}, 0.35); color: rgb({}, {}, {}); border-radius: 9999px; padding: 2px 10px; font-size: 11px; font-weight: 600; margin: 2px 0px; }}",
-                            r, g, b, r, g, b, r, g, b
-                        );
-                        provider_clone.load_from_data(&css);
-                    }
-                    gtk4::glib::ControlFlow::Continue
-                });
-            } else {
-                val_lbl.add_css_class("settings-row-title");
-                val_lbl.set_text(&val);
-            }
+            val_lbl.add_css_class("settings-row-title");
+            val_lbl.set_text(&val);
 
             specs_grid.attach(&lbl, 0, spec_row, 1, 1);
             specs_grid.attach(&val_lbl, 1, spec_row, 1, 1);
