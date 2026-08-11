@@ -22,6 +22,27 @@ thread_local! {
     pub static IS_NOTIF_HOVERED: Cell<bool> = Cell::new(false);
 }
 
+fn set_art_fallback_icon(widgets: &IslandWidgets, icon_name: &str) {
+    if let Some(child) = widgets.art_container.first_child() {
+        widgets.art_container.remove(&child);
+    }
+    let music_icon_s = babydra_utils::ui::icon::get_icon_colored(icon_name, 14, "#3b82f6");
+    music_icon_s.add_css_class("notch-album-art");
+    widgets.art_container.append(&music_icon_s);
+
+    if let Some(child) = widgets.popover_art_container.first_child() {
+        widgets.popover_art_container.remove(&child);
+    }
+    let music_icon_l = babydra_utils::ui::icon::get_icon_colored(icon_name, 120, "#3b82f6");
+    music_icon_l.add_css_class("media-popover-art");
+    music_icon_l.set_size_request(240, 240);
+    music_icon_l.set_hexpand(true);
+    music_icon_l.set_vexpand(true);
+    music_icon_l.set_halign(gtk4::Align::Fill);
+    music_icon_l.set_valign(gtk4::Align::Fill);
+    widgets.popover_art_container.append(&music_icon_l);
+}
+
 /// Starts a background timer loop that polls active D-Bus notifications and playerctl
 /// state every second. It orchestrates the Dynamic Island layout updates (compact logo,
 /// active notification, or media player) and updates their corresponding widgets.
@@ -32,7 +53,6 @@ pub fn start_player_polling_loop(
     let last_art_url = Rc::new(RefCell::new(String::new()));
     let last_attempted_url = Rc::new(RefCell::new(String::new()));
     let fail_count = Rc::new(Cell::new(0u32));
-    let _was_custom_active = Rc::new(Cell::new(false));
     let poll_counter = Rc::new(Cell::new(0u32));
     let last_title = Rc::new(RefCell::new(String::new()));
     let art_loaded_for_current_song = Rc::new(Cell::new(false));
@@ -101,24 +121,7 @@ pub fn start_player_polling_loop(
                             *last_art_url_clone.borrow_mut() = url;
                             art_loaded_clone.set(true);
 
-                            if let Some(child) = widgets_clone.art_container.first_child() {
-                                widgets_clone.art_container.remove(&child);
-                            }
-                            let music_icon_s = babydra_utils::ui::icon::get_icon_colored(&app_icon_name, 14, "#3b82f6");
-                            music_icon_s.add_css_class("notch-album-art");
-                            widgets_clone.art_container.append(&music_icon_s);
-
-                            if let Some(child) = widgets_clone.popover_art_container.first_child() {
-                                widgets_clone.popover_art_container.remove(&child);
-                            }
-                            let music_icon_l = babydra_utils::ui::icon::get_icon_colored(&app_icon_name, 120, "#3b82f6");
-                            music_icon_l.add_css_class("media-popover-art");
-                            music_icon_l.set_size_request(240, 240);
-                            music_icon_l.set_hexpand(true);
-                            music_icon_l.set_vexpand(true);
-                            music_icon_l.set_halign(gtk4::Align::Fill);
-                            music_icon_l.set_valign(gtk4::Align::Fill);
-                            widgets_clone.popover_art_container.append(&music_icon_l);
+                            set_art_fallback_icon(&widgets_clone, &app_icon_name);
                         } else {
                             *last_attempted_url_clone.borrow_mut() = String::new();
                         }
@@ -130,24 +133,7 @@ pub fn start_player_polling_loop(
                         *last_art_url_clone.borrow_mut() = url;
                         art_loaded_clone.set(true);
 
-                        if let Some(child) = widgets_clone.art_container.first_child() {
-                            widgets_clone.art_container.remove(&child);
-                        }
-                        let music_icon_s = babydra_utils::ui::icon::get_icon_colored(&app_icon_name, 14, "#3b82f6");
-                        music_icon_s.add_css_class("notch-album-art");
-                        widgets_clone.art_container.append(&music_icon_s);
-
-                        if let Some(child) = widgets_clone.popover_art_container.first_child() {
-                            widgets_clone.popover_art_container.remove(&child);
-                        }
-                        let music_icon_l = babydra_utils::ui::icon::get_icon_colored(&app_icon_name, 120, "#3b82f6");
-                        music_icon_l.add_css_class("media-popover-art");
-                        music_icon_l.set_size_request(240, 240);
-                        music_icon_l.set_hexpand(true);
-                        music_icon_l.set_vexpand(true);
-                        music_icon_l.set_halign(gtk4::Align::Fill);
-                        music_icon_l.set_valign(gtk4::Align::Fill);
-                        widgets_clone.popover_art_container.append(&music_icon_l);
+                        set_art_fallback_icon(&widgets_clone, &app_icon_name);
                     } else {
                         *last_attempted_url_clone.borrow_mut() = String::new();
                     }
@@ -159,7 +145,10 @@ pub fn start_player_polling_loop(
     let island_state = Rc::new(Cell::new(IslandState::Hidden));
 
     // Main thread loop to check notifications and update player view from the cached metadata
-    glib::timeout_add_local(std::time::Duration::from_millis(100), move || {
+    glib::timeout_add_local(std::time::Duration::from_millis(200), move || {
+        let current_state = island_state.get();
+        let metadata_opt = latest_metadata.borrow().clone();
+
         let is_hovering = IS_NOTIF_HOVERED.with(|h| h.get());
         let mut active_notif = None;
         crate::widgets::notification::SHARED_NOTIFICATION.with(|sn| {
@@ -176,7 +165,11 @@ pub fn start_player_polling_loop(
             }
         });
 
-        let metadata = latest_metadata.borrow().clone();
+        if matches!(current_state, IslandState::Hidden) && active_notif.is_none() && metadata_opt.is_none() {
+            return glib::ControlFlow::Continue;
+        }
+
+        let metadata = metadata_opt;
         let mut player_active = false;
         let mut player_playing = false;
         let mut player_title = String::new();
@@ -198,8 +191,6 @@ pub fn start_player_polling_loop(
                 }
             }
         }
-
-        let current_state = island_state.get();
 
         if let Some(notif) = active_notif {
             let mut should_show_notif = false;
@@ -584,24 +575,7 @@ fn update_player_view(
             *last_url = art_url.to_string();
             art_loaded_for_current_song.set(true);
 
-            if let Some(child) = widgets.art_container.first_child() {
-                widgets.art_container.remove(&child);
-            }
-            let music_icon_s = babydra_utils::ui::icon::get_icon_colored(&app_icon_name, 14, "#3b82f6");
-            music_icon_s.add_css_class("notch-album-art");
-            widgets.art_container.append(&music_icon_s);
-
-            if let Some(child) = widgets.popover_art_container.first_child() {
-                widgets.popover_art_container.remove(&child);
-            }
-            let music_icon_l = babydra_utils::ui::icon::get_icon_colored(&app_icon_name, 120, "#3b82f6");
-            music_icon_l.add_css_class("media-popover-art");
-            music_icon_l.set_size_request(240, 240);
-            music_icon_l.set_hexpand(true);
-            music_icon_l.set_vexpand(true);
-            music_icon_l.set_halign(gtk4::Align::Fill);
-            music_icon_l.set_valign(gtk4::Align::Fill);
-            widgets.popover_art_container.append(&music_icon_l);
+            set_art_fallback_icon(widgets, &app_icon_name);
         } else {
             if art_url != *last_attempted_url.borrow() {
                 *last_attempted_url.borrow_mut() = art_url.to_string();
