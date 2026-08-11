@@ -23,7 +23,7 @@ pub use services::icon::get_logo_path;
 pub use services::notification::island::{IslandState, update_island_state, clear_island_state, get_island_state_path};
 pub use services::system::volume::AudioDevice;
 pub use services::system::storage::DiskInfo;
-pub use services::notification::service::{ActiveNotification, NotificationMsg, send_notification, send_notification_with_icon};
+pub use services::notification::service::{ActiveNotification, NotificationMsg, send_notification, send_notification_with_icon, send_settings_notification, send_app_notification};
 pub use services::apps::{find_desktop_apps, refresh_desktop_apps_cache, DesktopApp};
 pub use models::shell::battery::BatteryInfo;
 pub use models::shell::power::PerformanceProfile;

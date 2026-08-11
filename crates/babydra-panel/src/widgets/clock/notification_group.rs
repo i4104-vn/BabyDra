@@ -23,10 +23,14 @@ pub fn group_notifications_by_app(
     let mut app_order = Vec::new();
 
     for notif in notifications.iter() {
-        let app_key = if notif.icon.is_empty() {
-            "system".to_string()
+        let app_key = if notif.app_name.is_empty() {
+            if notif.icon.is_empty() {
+                "babydra".to_string()
+            } else {
+                notif.icon.clone()
+            }
         } else {
-            notif.icon.to_lowercase()
+            notif.app_name.clone()
         };
         if !grouped.contains_key(&app_key) {
             app_order.push(app_key.clone());

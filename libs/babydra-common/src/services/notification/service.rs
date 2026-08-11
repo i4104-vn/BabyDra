@@ -187,15 +187,26 @@ trait Notifications {
 
 /// Sends a desktop notification using the default theme/common logo.
 pub fn send_notification(title: &str, body: &str) {
-    send_notification_with_icon(title, body, "babydra");
+    send_app_notification("BabyDra", title, body, "babydra");
+}
+
+/// Sends a desktop notification for Settings using the logo as icon.
+pub fn send_settings_notification(title: &str, body: &str) {
+    send_app_notification("Settings", title, body, "");
 }
 
 /// Sends a desktop notification specifying an explicit icon name.
 pub fn send_notification_with_icon(title: &str, body: &str, icon_name: &str) {
-    let logo_path = "/usr/share/babydra/logo.png";
+    send_app_notification("BabyDra", title, body, icon_name);
+}
+
+/// Sends a desktop notification with a custom app name and icon.
+pub fn send_app_notification(app_name: &str, title: &str, body: &str, icon_name: &str) {
+    let system_logo = "/usr/share/babydra/logo.png";
+    
     let logo_str = if icon_name.is_empty() {
-        if std::path::Path::new(logo_path).exists() {
-            logo_path
+        if std::path::Path::new(system_logo).exists() {
+            system_logo
         } else {
             "babydra"
         }
@@ -206,7 +217,7 @@ pub fn send_notification_with_icon(title: &str, body: &str, icon_name: &str) {
     if let Ok(conn) = zbus::blocking::Connection::session() {
         if let Ok(proxy) = NotificationsProxyBlocking::new(&conn) {
             let _ = proxy.notify(
-                "BabyDra",
+                app_name,
                 0,
                 logo_str,
                 title,
@@ -219,6 +230,6 @@ pub fn send_notification_with_icon(title: &str, body: &str, icon_name: &str) {
         }
     }
     let _ = std::process::Command::new("notify-send")
-        .args(&["-i", logo_str, title, body])
+        .args(&["-a", app_name, "-i", logo_str, title, body])
         .spawn();
 }

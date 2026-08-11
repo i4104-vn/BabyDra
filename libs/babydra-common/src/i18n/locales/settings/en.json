@@ -50,7 +50,7 @@
   "settings.power_auto_saver_status": "Status:",
   "settings.notif_auto_saver_title": "Battery Saver Mode",
   "settings.notif_auto_saver_msg": "Automatically switched to battery saver mode ({level}% battery)",
-  "settings.notif_saver_threshold_title": "Battery Saver Threshold Updated",
+  "settings.notif_saver_threshold_title": "Battery Saver",
   "settings.notif_saver_threshold_msg": "Battery saver will automatically activate at {threshold}% battery level",
   "settings.power_charge_limit_title": "Charge Limit Management",
   "settings.power_charge_limit_desc": "Automatically stop charging when battery reaches target percentage to extend battery lifespan",

@@ -30,7 +30,7 @@ fn handle_cli_args() -> bool {
                         let bat_pct = get_battery_info().map(|b| b.percentage).unwrap_or(conf.power.saver_threshold);
                         let title = babydra_common::i18n::t("settings.notif_auto_saver_title");
                         let msg = babydra_common::i18n::t("settings.notif_auto_saver_msg").replace("{level}", &bat_pct.to_string());
-                        babydra_common::send_notification(&title, &msg);
+                        babydra_common::send_settings_notification(&title, &msg);
                     }
                 }
             }
@@ -52,7 +52,7 @@ fn handle_cli_args() -> bool {
 
                     let title = babydra_common::i18n::t("settings.notif_power_title");
                     let msg = babydra_common::i18n::t("settings.notif_power_msg").replace("{profile}", prof.label());
-                    babydra_common::send_notification(&title, &msg);
+                    babydra_common::send_settings_notification(&title, &msg);
                 }
             } else {
                 println!("Usage: babydra-settings --set-power-profile <normal|balanced|performance>");

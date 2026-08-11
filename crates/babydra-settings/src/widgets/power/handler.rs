@@ -53,7 +53,7 @@ pub fn wire_events(widget: &PowerWidget, auth_dialog: PasswordDialog) {
                 let title = babydra_common::i18n::t("settings.notif_saver_threshold_title");
                 let msg = babydra_common::i18n::t("settings.notif_saver_threshold_msg")
                     .replace("{threshold}", &threshold.to_string());
-                babydra_common::send_notification(&title, &msg);
+                babydra_common::send_settings_notification(&title, &msg);
 
                 // Check and apply auto battery saver
                 let (tx, rx) = std::sync::mpsc::channel();
@@ -119,7 +119,7 @@ pub fn wire_events(widget: &PowerWidget, auth_dialog: PasswordDialog) {
                         let title = babydra_common::i18n::t("settings.notif_charge_limit_title");
                         let msg = babydra_common::i18n::t("settings.notif_charge_limit_msg")
                             .replace("{limit}", &limit.to_string());
-                        babydra_common::send_notification(&title, &msg);
+                        babydra_common::send_settings_notification(&title, &msg);
                     }
                     Err(err) if err == "permission_denied" => {
                         *pending_charge_inner.borrow_mut() = Some(limit);
@@ -136,7 +136,7 @@ pub fn wire_events(widget: &PowerWidget, auth_dialog: PasswordDialog) {
                         let title = babydra_common::i18n::t("settings.notif_charge_limit_title");
                         let msg = babydra_common::i18n::t("settings.notif_charge_limit_msg")
                             .replace("{limit}", &limit.to_string());
-                        babydra_common::send_notification(&title, &msg);
+                        babydra_common::send_settings_notification(&title, &msg);
                     }
                 }
 
@@ -201,7 +201,7 @@ pub fn wire_events(widget: &PowerWidget, auth_dialog: PasswordDialog) {
 
                     let title = babydra_common::i18n::t("settings.notif_power_title");
                     let msg = babydra_common::i18n::t("settings.notif_power_msg").replace("{profile}", target_profile.label());
-                    babydra_common::send_notification(&title, &msg);
+                    babydra_common::send_settings_notification(&title, &msg);
                 }
                 Err(_) => {
                     *pending_c.borrow_mut() = Some(target_profile);
@@ -241,7 +241,7 @@ pub fn wire_events(widget: &PowerWidget, auth_dialog: PasswordDialog) {
 
                 let title = babydra_common::i18n::t("settings.notif_power_title");
                 let msg = babydra_common::i18n::t("settings.notif_power_msg").replace("{profile}", target_prof.label());
-                babydra_common::send_notification(&title, &msg);
+                babydra_common::send_settings_notification(&title, &msg);
 
                 *pending_auth.borrow_mut() = None;
             }
@@ -256,7 +256,7 @@ pub fn wire_events(widget: &PowerWidget, auth_dialog: PasswordDialog) {
                 let title = babydra_common::i18n::t("settings.notif_charge_limit_title");
                 let msg = babydra_common::i18n::t("settings.notif_charge_limit_msg")
                     .replace("{limit}", &limit.to_string());
-                babydra_common::send_notification(&title, &msg);
+                babydra_common::send_settings_notification(&title, &msg);
 
                 *pending_charge_auth.borrow_mut() = None;
             }
