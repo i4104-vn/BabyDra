@@ -123,7 +123,9 @@ pub struct BabyDraConfig {
     pub notification: NotificationConfig,
 }
 
-pub fn load_babydra_config() -> BabyDraConfig {
+static CONFIG_CACHE: std::sync::OnceLock<std::sync::RwLock<BabyDraConfig>> = std::sync::OnceLock::new();
+
+fn load_from_disk() -> BabyDraConfig {
     let path = get_babydra_conf_path();
     if path.exists() {
         if let Ok(content) = std::fs::read_to_string(&path) {
@@ -166,17 +168,45 @@ pub fn load_babydra_config() -> BabyDraConfig {
         }
     }
 
-    save_babydra_config(&config);
+    // Don't call save_babydra_config here to avoid deadlock, just write to disk
+    let path = get_babydra_conf_path();
+    if let Some(parent) = path.parent() {
+        let _ = std::fs::create_dir_all(parent);
+    }
+    if let Ok(content) = toml::to_string_pretty(&config) {
+        let _ = std::fs::write(&path, content);
+    }
     config
 }
 
+pub fn load_babydra_config() -> BabyDraConfig {
+    let cache = CONFIG_CACHE.get_or_init(|| {
+        std::sync::RwLock::new(load_from_disk())
+    });
+    cache.read().unwrap().clone()
+}
+
 pub fn save_babydra_config(config: &BabyDraConfig) {
+    if let Some(cache) = CONFIG_CACHE.get() {
+        if let Ok(mut guard) = cache.write() {
+            *guard = config.clone();
+        }
+    }
+    
     let path = get_babydra_conf_path();
     if let Some(parent) = path.parent() {
         let _ = std::fs::create_dir_all(parent);
     }
     if let Ok(content) = toml::to_string_pretty(config) {
         let _ = std::fs::write(&path, content);
+    }
+}
+
+pub fn invalidate_config_cache() {
+    if let Some(cache) = CONFIG_CACHE.get() {
+        if let Ok(mut guard) = cache.write() {
+            *guard = load_from_disk();
+        }
     }
 }
 
