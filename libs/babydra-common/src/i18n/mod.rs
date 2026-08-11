@@ -41,6 +41,10 @@ static CURRENT_LOCALE: OnceLock<RwLock<String>> = OnceLock::new();
 static EN_MAP: OnceLock<HashMap<String, String>> = OnceLock::new();
 static VI_MAP: OnceLock<HashMap<String, String>> = OnceLock::new();
 
+thread_local! {
+    static LOCALE_MONITOR: std::cell::RefCell<Option<gio::FileMonitor>> = std::cell::RefCell::new(None);
+}
+
 /// Retrieves the current active system locale ("vi" or "en").
 pub fn get_locale() -> String {
     let lock = CURRENT_LOCALE.get_or_init(|| {
@@ -102,7 +106,7 @@ pub fn watch_locale_change<F: Fn(&str) + 'static>(on_change: F) {
                     on_change(&new_loc);
                 }
             });
-            Box::leak(Box::new(monitor));
+            LOCALE_MONITOR.with(|m| *m.borrow_mut() = Some(monitor));
         }
     }
 }
