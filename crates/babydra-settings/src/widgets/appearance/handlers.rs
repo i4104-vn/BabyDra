@@ -123,24 +123,34 @@ pub fn setup_appearance_handlers(
     theme_toggle_btn.connect_clicked(move |_| {
         let currently_dark = babydra_utils::ui::theme::is_dark_mode();
         let new_dark = !currently_dark;
+        
+        let spinner = gtk4::Spinner::builder().spinning(true).halign(gtk4::Align::Center).valign(gtk4::Align::Center).build();
+        theme_btn_clone.set_child(Some(&spinner));
+        
         babydra_utils::ui::theme::set_dark_mode(new_dark);
-        babydra_utils::ui::theme::init_theme();
-
-        let notif_title = babydra_common::i18n::t("settings.notif_display_mode_title");
-        let notif_msg = if new_dark {
-            babydra_common::i18n::t("settings.notif_dark_mode_enabled")
-        } else {
-            babydra_common::i18n::t("settings.notif_light_mode_enabled")
-        };
-        babydra_common::send_notification(&notif_title, &notif_msg);
-
-        let new_icon_name = if new_dark { "brightness" } else { "dark-mode" };
-        let new_icon = babydra_utils::ui::icon::get_icon(new_icon_name, 18);
-        new_icon.set_pixel_size(18);
-        new_icon.set_valign(gtk4::Align::Center);
-        new_icon.set_halign(gtk4::Align::Center);
-        theme_btn_clone.set_child(Some(&new_icon));
     });
+
+    if let Some(settings) = gtk4::Settings::default() {
+        let theme_btn_clone_notify = theme_toggle_btn.clone();
+        settings.connect_gtk_application_prefer_dark_theme_notify(move |_| {
+            let new_dark = babydra_utils::ui::theme::is_dark_mode();
+            
+            let notif_title = babydra_common::i18n::t("settings.notif_display_mode_title");
+            let notif_msg = if new_dark {
+                babydra_common::i18n::t("settings.notif_dark_mode_enabled")
+            } else {
+                babydra_common::i18n::t("settings.notif_light_mode_enabled")
+            };
+            babydra_common::send_notification(&notif_title, &notif_msg);
+
+            let new_icon_name = if new_dark { "brightness" } else { "dark-mode" };
+            let new_icon = babydra_utils::ui::icon::get_icon(new_icon_name, 18);
+            new_icon.set_pixel_size(18);
+            new_icon.set_valign(gtk4::Align::Center);
+            new_icon.set_halign(gtk4::Align::Center);
+            theme_btn_clone_notify.set_child(Some(&new_icon));
+        });
+    }
 
     let render_wallpapers_grid = {
         let quick_select_box_clone = quick_select_box.clone();

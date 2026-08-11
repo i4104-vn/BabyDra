@@ -47,10 +47,14 @@ pub fn create_header_row(
         icon_color,
         &["circle-btn"],
         Some(&theme_tooltip),
-        || {
-            babydra_utils::ui::theme::set_dark_mode(!babydra_utils::ui::theme::is_dark_mode());
-        },
+        || {},
     );
+    let theme_btn_clone_click = theme_btn.clone();
+    theme_btn.connect_clicked(move |_| {
+        let spinner = gtk4::Spinner::builder().spinning(true).halign(gtk4::Align::Center).valign(gtk4::Align::Center).build();
+        theme_btn_clone_click.set_child(Some(&spinner));
+        babydra_utils::ui::theme::set_dark_mode(!babydra_utils::ui::theme::is_dark_mode());
+    });
 
     // Auto-update icon when theme changes
     if let Some(settings) = gtk4::Settings::default() {
