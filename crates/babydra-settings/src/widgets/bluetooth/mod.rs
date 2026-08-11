@@ -17,7 +17,7 @@ pub struct BluetoothState {
 }
 
 pub fn create_bluetooth_widget() -> gtk4::Widget {
-    let (main_box, bt_switch, list_box) = render::build_bluetooth_ui();
+    let (main_box, toggle_row, list_box) = render::build_bluetooth_ui();
 
     let state = Rc::new(RefCell::new(BluetoothState {
         enabled: false,
@@ -25,7 +25,7 @@ pub fn create_bluetooth_widget() -> gtk4::Widget {
         is_loading: true,
     }));
 
-    let bt_switch_c = bt_switch.clone();
+    let toggle_row_c = toggle_row.clone();
     let state_c_init = state.clone();
     let (tx_status, rx_status) = channel::<bool>();
     std::thread::spawn(move || {
@@ -36,7 +36,8 @@ pub fn create_bluetooth_widget() -> gtk4::Widget {
     glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
         match rx_status.try_recv() {
             Ok(status) => {
-                bt_switch_c.set_active(status);
+                toggle_row_c.switch.set_active(status);
+                toggle_row_c.set_active(status);
                 state_c_init.borrow_mut().enabled = status;
                 glib::ControlFlow::Break
             }
@@ -126,7 +127,9 @@ pub fn create_bluetooth_widget() -> gtk4::Widget {
     let trigger_switch = trigger_refresh.clone();
     let state_switch = state.clone();
     let render_switch = render_devices.clone();
-    bt_switch.connect_state_set(move |_, is_active| {
+    let toggle_row_switch = toggle_row.clone();
+    toggle_row.switch.connect_state_set(move |is_active| {
+        toggle_row_switch.set_active(is_active);
         std::thread::spawn(move || {
             set_bluetooth_enabled(is_active);
         });
@@ -143,7 +146,6 @@ pub fn create_bluetooth_widget() -> gtk4::Widget {
         } else {
             trigger_switch();
         }
-        glib::Propagation::Proceed
     });
 
     main_box.into()

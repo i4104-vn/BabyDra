@@ -68,10 +68,9 @@ pub fn setup_appearance_handlers(
                 let notif_msg = babydra_common::i18n::t("settings.notif_theme_msg")
                     .replace("{gtk}", &selected_gtk)
                     .replace("{icon}", &selected_icon);
-                babydra_common::send_notification_with_icon(
+                babydra_common::send_notification(
                     &notif_title,
                     &notif_msg,
-                    "preferences-desktop-theme",
                 );
                 let _ = tx.send(());
             });
@@ -133,7 +132,7 @@ pub fn setup_appearance_handlers(
         } else {
             babydra_common::i18n::t("settings.notif_light_mode_enabled")
         };
-        babydra_common::send_notification_with_icon(&notif_title, &notif_msg, "preferences-desktop-theme");
+        babydra_common::send_notification(&notif_title, &notif_msg);
 
         let new_icon_name = if new_dark { "brightness" } else { "dark-mode" };
         let new_icon = babydra_utils::ui::icon::get_icon(new_icon_name, 18);
@@ -198,10 +197,9 @@ pub fn setup_appearance_handlers(
                     btn.connect_clicked(move |_| {
                         let _ = babydra_common::set_wallpaper(&wp_clone);
                         preview_cb.set_filename(Some(&wp_clone));
-                        babydra_common::send_notification_with_icon(
+                        babydra_common::send_notification(
                             &babydra_common::i18n::t("settings.notif_wallpaper_title"),
                             &babydra_common::i18n::t("settings.notif_wallpaper_msg"),
-                            "preferences-desktop-wallpaper",
                         );
                     });
 

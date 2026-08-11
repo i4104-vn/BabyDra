@@ -57,7 +57,7 @@ pub fn update_system() -> Result<(), String> {
 
 /// Executes a privileged command and streams stdout/stderr lines via channel.
 pub fn execute_cmd_with_log_stream(args: &[&str], password: Option<&str>, sender: std::sync::mpsc::Sender<String>) -> Result<(), String> {
-    use std::io::{BufRead, BufReader, Write};
+    use std::io::Write;
     use std::process::Stdio;
 
     let mut command = if password.is_some() {

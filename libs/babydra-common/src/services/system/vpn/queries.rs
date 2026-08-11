@@ -1,6 +1,5 @@
 use crate::models::vpn::*;
 use crate::services::utils::run_cmd;
-use std::process::Command;
 
 pub fn is_vpn_type(t: &str) -> bool {
     let lower = t.to_lowercase();

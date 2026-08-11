@@ -16,7 +16,7 @@ pub struct WifiState {
 }
 
 pub fn create_wifi_widget() -> gtk4::Widget {
-    let (overlay, wifi_switch, list_box, info_dialog, password_dialog, config_dialog) = render::build_wifi_ui();
+    let (overlay, toggle_row, list_box, info_dialog, password_dialog, config_dialog) = render::build_wifi_ui();
 
     let info_dialog = Rc::new(info_dialog);
     let password_dialog = Rc::new(password_dialog);
@@ -36,12 +36,13 @@ pub fn create_wifi_widget() -> gtk4::Widget {
         let _ = tx_status.send(status);
     });
 
-    let wifi_switch_c = wifi_switch.clone();
+    let toggle_row_c = toggle_row.clone();
     let state_c_init = state.clone();
     glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
         match rx_status.try_recv() {
             Ok(status) => {
-                wifi_switch_c.set_active(status);
+                toggle_row_c.switch.set_active(status);
+                toggle_row_c.set_active(status);
                 state_c_init.borrow_mut().enabled = status;
                 glib::ControlFlow::Break
             }
@@ -233,8 +234,10 @@ pub fn create_wifi_widget() -> gtk4::Widget {
     let trigger_switch = trigger_wifi_scan.clone();
     let state_switch = state.clone();
     let render_switch = render_networks.clone();
-    wifi_switch.connect_state_set(move |_, is_active| {
+    let toggle_row_switch = toggle_row.clone();
+    toggle_row.switch.connect_state_set(move |is_active| {
         let is_active_bool = is_active;
+        toggle_row_switch.set_active(is_active_bool);
         {
             let mut st = state_switch.borrow_mut();
             st.enabled = is_active_bool;
@@ -251,7 +254,6 @@ pub fn create_wifi_widget() -> gtk4::Widget {
         } else {
             render_switch();
         }
-        glib::Propagation::Proceed
     });
 
     overlay.into()
