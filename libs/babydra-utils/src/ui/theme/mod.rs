@@ -190,7 +190,9 @@ pub fn init_theme() {
 }
 
 /// Helper stub for backward compatibility.
-pub fn apply_theme_class(_window: &gtk4::ApplicationWindow) { }
+pub fn apply_theme_class(_window: &gtk4::ApplicationWindow) {
+    // stub — theme is applied globally via init_theme()
+}
 
 /// Checks if dark mode is preferred in GSettings.
 pub fn is_dark_mode() -> bool {
@@ -210,6 +212,7 @@ pub fn set_dark_mode(dark: bool) {
     init_theme();
 }
 
+#[deprecated(note = "use init_theme() directly")]
 pub fn apply_explore_theme() {
     init_theme();
 }

@@ -11,7 +11,7 @@ thread_local! {
     /// Holds reference to the active single dynamic popup notification.
     pub static SHARED_NOTIFICATION: RefCell<Option<ActiveNotification>> = RefCell::new(None);
     /// Holds rolling history of past system notifications.
-    pub static HISTORICAL_NOTIFICATIONS: RefCell<Vec<ActiveNotification>> = RefCell::new(Vec::new());
+    pub static HISTORICAL_NOTIFICATIONS: RefCell<std::collections::VecDeque<ActiveNotification>> = RefCell::new(std::collections::VecDeque::new());
 }
 
 /// Checks if DND mode is active.
@@ -59,6 +59,7 @@ impl NotificationService {
         
         let mut icon = app_icon.to_string();
         if icon.is_empty() {
+            // Hot path: only query desktop apps cache when icon is missing
             let lower_name = app_name.to_lowercase();
             let apps = crate::services::apps::find_desktop_apps();
             for app in apps {
@@ -135,7 +136,8 @@ pub fn spawn_dbus_listener(tx: tokio::sync::mpsc::UnboundedSender<NotificationMs
 
 /// Dismisses popup display window.
 pub fn close_notification_popup() {
-    // Managed inside notch capsules, no-op
+    // Managed inside notch capsules, no-op.
+    // The player_loop handles the state machine for visibility.
 }
 
 /// Registers the incoming desktop notification, caching it to the rolling historical notifications log.
@@ -156,9 +158,9 @@ pub fn show_notification_popup(summary: &str, body: &str, icon_name: &str, app_n
 
     HISTORICAL_NOTIFICATIONS.with(|list| {
         let mut list_borrow = list.borrow_mut();
-        list_borrow.push(notif);
+        list_borrow.push_back(notif);
         if list_borrow.len() > 50 {
-            list_borrow.remove(0);
+            list_borrow.pop_front();
         }
     });
 }

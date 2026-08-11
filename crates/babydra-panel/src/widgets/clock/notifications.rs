@@ -35,8 +35,8 @@ pub fn setup_notifications_list(
                 notif_stack.remove(&child);
             }
 
-            let notifications = babydra_island::widgets::notification::HISTORICAL_NOTIFICATIONS.with(|list| {
-                list.borrow().clone()
+            let notifications: Vec<_> = babydra_island::widgets::notification::HISTORICAL_NOTIFICATIONS.with(|list| {
+                list.borrow().iter().cloned().collect()
             });
 
             if notifications.is_empty() {
