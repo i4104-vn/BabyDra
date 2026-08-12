@@ -5,14 +5,22 @@ use gtk4::{Box, Button, Entry, Label, ListBox, Orientation, Overlay, ProgressBar
 use babydra_common::models::app_info::{AppsWidget, InstalledApp, InstalledPackage};
 use babydra_utils::components::modal::PasswordDialog;
 
-pub struct UninstallRowItem {
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum AppActionType {
+    Uninstall,
+    Downgrade,
+}
+
+#[derive(Clone)]
+pub struct AppRowActionItem {
     pub button: Button,
     pub pkg_name: String,
+    pub action_type: AppActionType,
     pub row_box: Box,
     pub parent_list: ListBox,
 }
 
-pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, PasswordDialog, Vec<UninstallRowItem>) {
+pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, PasswordDialog, Vec<AppRowActionItem>) {
     let root = Overlay::new();
 
     let container = Box::new(Orientation::Vertical, 16);
@@ -68,7 +76,7 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
     stack.set_vexpand(true);
     stack.set_valign(gtk4::Align::Fill);
 
-    let mut uninstall_items = Vec::new();
+    let mut action_items = Vec::new();
 
     // 1. Apps List (Glass Panel List Box)
     let apps_glass_card = Box::new(Orientation::Vertical, 0);
@@ -124,6 +132,32 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
 
         row_box.append(&text_box);
 
+        let pkg_name = app.name.to_lowercase().replace(' ', "-");
+
+        if babydra_common::services::apps::pacman::find_cached_older_package(&pkg_name).is_some() {
+            let downgrade_btn = Button::new();
+            downgrade_btn.add_css_class("icon-btn");
+            downgrade_btn.add_css_class("circular");
+            downgrade_btn.add_css_class("downgrade-btn");
+            downgrade_btn.set_valign(gtk4::Align::Center);
+            downgrade_btn.set_cursor_from_name(Some("pointer"));
+            downgrade_btn.set_tooltip_text(Some("Downgrade package version"));
+
+            let dl_icon = babydra_utils::ui::icon::get_icon("folder-download", 16);
+            dl_icon.set_pixel_size(16);
+            downgrade_btn.set_child(Some(&dl_icon));
+
+            action_items.push(AppRowActionItem {
+                button: downgrade_btn.clone(),
+                pkg_name: pkg_name.clone(),
+                action_type: AppActionType::Downgrade,
+                row_box: row_box.clone(),
+                parent_list: apps_list_box.clone(),
+            });
+
+            row_box.append(&downgrade_btn);
+        }
+
         // X Uninstall Action Button
         let uninstall_btn = Button::new();
         uninstall_btn.add_css_class("icon-btn");
@@ -131,15 +165,16 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
         uninstall_btn.add_css_class("delete-btn");
         uninstall_btn.set_valign(gtk4::Align::Center);
         uninstall_btn.set_cursor_from_name(Some("pointer"));
+        uninstall_btn.set_tooltip_text(Some("Uninstall package"));
 
         let x_icon = babydra_utils::ui::icon::get_icon("edit-delete", 16);
         x_icon.set_pixel_size(16);
         uninstall_btn.set_child(Some(&x_icon));
 
-        let pkg_name = app.name.to_lowercase().replace(' ', "-");
-        uninstall_items.push(UninstallRowItem {
+        action_items.push(AppRowActionItem {
             button: uninstall_btn.clone(),
             pkg_name,
+            action_type: AppActionType::Uninstall,
             row_box: row_box.clone(),
             parent_list: apps_list_box.clone(),
         });
@@ -204,20 +239,47 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
 
         row_box.append(&text_box);
 
+        if babydra_common::services::apps::pacman::find_cached_older_package(&pkg.name).is_some() {
+            let downgrade_btn = Button::new();
+            downgrade_btn.add_css_class("icon-btn");
+            downgrade_btn.add_css_class("circular");
+            downgrade_btn.add_css_class("downgrade-btn");
+            downgrade_btn.set_valign(gtk4::Align::Center);
+            downgrade_btn.set_cursor_from_name(Some("pointer"));
+            downgrade_btn.set_tooltip_text(Some("Downgrade package version"));
+
+            let dl_icon = babydra_utils::ui::icon::get_icon("folder-download", 16);
+            dl_icon.set_pixel_size(16);
+            downgrade_btn.set_child(Some(&dl_icon));
+
+            action_items.push(AppRowActionItem {
+                button: downgrade_btn.clone(),
+                pkg_name: pkg.name.clone(),
+                action_type: AppActionType::Downgrade,
+                row_box: row_box.clone(),
+                parent_list: pkgs_list_box.clone(),
+            });
+
+            row_box.append(&downgrade_btn);
+        }
+
+        // X Uninstall Action Button
         let uninstall_btn = Button::new();
         uninstall_btn.add_css_class("icon-btn");
         uninstall_btn.add_css_class("circular");
         uninstall_btn.add_css_class("delete-btn");
         uninstall_btn.set_valign(gtk4::Align::Center);
         uninstall_btn.set_cursor_from_name(Some("pointer"));
+        uninstall_btn.set_tooltip_text(Some("Uninstall package"));
 
         let x_icon = babydra_utils::ui::icon::get_icon("edit-delete", 16);
         x_icon.set_pixel_size(16);
         uninstall_btn.set_child(Some(&x_icon));
 
-        uninstall_items.push(UninstallRowItem {
+        action_items.push(AppRowActionItem {
             button: uninstall_btn.clone(),
             pkg_name: pkg.name.clone(),
+            action_type: AppActionType::Uninstall,
             row_box: row_box.clone(),
             parent_list: pkgs_list_box.clone(),
         });
@@ -312,5 +374,5 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
         console_scroll,
     };
 
-    (widget, auth_dialog, uninstall_items)
+    (widget, auth_dialog, action_items)
 }
