@@ -505,9 +505,45 @@ progressbar.console-progress progress {
 }
 
 .update-count-badge {
-    background-color: rgba(59, 130, 246, 0.10);
-    border: 1px solid rgba(59, 130, 246, 0.25);
+    background-color: rgba(37, 99, 235, 0.10);
+    border: 1px solid rgba(37, 99, 235, 0.25);
     color: #2563eb;
+}
+
+.update-progress-bar trough {
+    min-height: 8px;
+    border-radius: 9999px;
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+.update-progress-bar progress {
+    min-height: 8px;
+    border-radius: 9999px;
+    background-color: #2563eb;
+}
+
+.green-icon-badge-sm {
+    background-color: rgba(16, 185, 129, 0.12);
+    border-radius: 8px;
+    padding: 6px;
+}
+
+.red-icon-badge-sm {
+    background-color: rgba(239, 68, 68, 0.12);
+    border-radius: 8px;
+    padding: 6px;
+}
+
+.status-success-badge {
+    color: #059669;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.status-error-badge {
+    color: #dc2626;
+    font-weight: 600;
+    font-size: 13px;
 }
 
 .wifi-info-section-title {

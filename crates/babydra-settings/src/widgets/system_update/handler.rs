@@ -1,52 +1,21 @@
 use gtk4::prelude::*;
-use std::cell::Cell;
+use std::cell::RefCell;
+use std::io::Write;
+use std::process::{Command, Stdio};
 use std::rc::Rc;
-use babydra_common::models::system_update::{PackageUpdate, SystemUpdateWidget};
+use babydra_common::models::system_update::{PackageUpdate, SystemUpdateWidget, UpdateStatus};
+use babydra_common::services::system::updates::{
+    check_updates, clear_update_state, is_pacman_running, load_update_state, save_update_state,
+};
 use babydra_utils::components::modal::PasswordDialog;
 use super::render;
-use babydra_common::services::system::updates::{
-    is_pacman_running, read_update_log, start_background_update_with_sender,
-};
 
-/// Parses current and total steps from log output lines (e.g. "(15/104)")
-fn parse_line_progress(line: &str) -> Option<(u32, u32)> {
-    let line_trimmed = line.trim();
-    if let Some(start) = line_trimmed.find('(') {
-        if let Some(end) = line_trimmed[start..].find(')') {
-            let inner = &line_trimmed[start + 1..start + end];
-            let parts: Vec<&str> = inner.split('/').collect();
-            if parts.len() == 2 {
-                if let (Ok(curr), Ok(total)) = (parts[0].trim().parse::<u32>(), parts[1].trim().parse::<u32>()) {
-                    if total > 0 && curr <= total {
-                        return Some((curr, total));
-                    }
-                }
-            }
-        }
-    }
-    None
-}
-
-/// Applies linear-gradient outline progress style and updates button label
-fn update_btn_progress(btn: &gtk4::Button, provider: &gtk4::CssProvider, label_text: &str, pct: f64) {
-    btn.set_label(label_text);
-    btn.set_sensitive(false);
-    let css = format!(
-        ".suggested-action, .suggested-action:disabled {{ background-image: linear-gradient(to right, #3b82f6 0%, #3b82f6 {:.1}%, rgba(255, 255, 255, 0.12) {:.1}%); border: 1px solid #3b82f6; color: #ffffff; font-weight: 700; border-radius: 9999px; opacity: 1.0; }}",
-        pct, pct
-    );
-    provider.load_from_data(&css);
-    if let Some(display) = gtk4::gdk::Display::default() {
-        gtk4::style_context_add_provider_for_display(&display, provider, gtk4::STYLE_PROVIDER_PRIORITY_APPLICATION);
-    }
-}
-
-/// Resets button style back to default suggested action
-fn reset_btn_progress(btn: &gtk4::Button, provider: &gtk4::CssProvider) {
-    btn.set_label(&babydra_common::i18n::t("settings.update_all"));
-    btn.set_sensitive(true);
-    if let Some(display) = gtk4::gdk::Display::default() {
-        gtk4::style_context_remove_provider_for_display(&display, provider);
+fn status_rank(status: &UpdateStatus) -> u8 {
+    match status {
+        UpdateStatus::Done => 0,
+        UpdateStatus::Updating => 1,
+        UpdateStatus::Failed => 2,
+        UpdateStatus::Pending => 3,
     }
 }
 
@@ -56,32 +25,152 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
     let spinner = widget.spinner.clone();
     let refresh_btn = widget.refresh_btn.clone();
     let update_all_btn = widget.update_all_btn.clone();
-    let btn_provider = gtk4::CssProvider::new();
-    let is_updating = Rc::new(Cell::new(false));
+    let progress_bar = widget.progress_bar.clone();
+    let status_label = widget.status_label.clone();
+    let progress_box = progress_bar.parent().and_then(|p| p.downcast::<gtk4::Box>().ok());
 
-    // Helper closure to trigger async update check
-    let trigger_check = {
+    let current_updates: Rc<RefCell<Vec<PackageUpdate>>> = Rc::new(RefCell::new(Vec::new()));
+    let is_updating = Rc::new(RefCell::new(false));
+
+    // Helper closure to render current package updates into ListBox (Done packages on top)
+    let render_packages = {
         let list_box = list_box.clone();
+        let current_updates = current_updates.clone();
+        move || {
+            while let Some(child) = list_box.first_child() {
+                list_box.remove(&child);
+            }
+
+            let mut pkgs = current_updates.borrow().clone();
+            if pkgs.is_empty() {
+                list_box.append(&render::create_empty_up_to_date_row());
+            } else {
+                pkgs.sort_by_key(|p| status_rank(&p.status));
+                for pkg in pkgs.iter() {
+                    list_box.append(&render::create_update_row(pkg));
+                }
+            }
+        }
+    };
+
+    // Helper closure to start live polling of update_state file
+    let start_state_poller = {
+        let current_updates = current_updates.clone();
+        let render_packages = render_packages.clone();
+        let progress_bar = progress_bar.clone();
+        let status_label = status_label.clone();
         let count_badge = count_badge.clone();
-        let spinner = spinner.clone();
-        let refresh_btn = refresh_btn.clone();
         let update_all_btn = update_all_btn.clone();
+        let refresh_btn = refresh_btn.clone();
+        let is_updating = is_updating.clone();
 
         move || {
-            spinner.set_visible(true);
-            spinner.start();
-            refresh_btn.set_sensitive(false);
+            let current_updates_poller = current_updates.clone();
+            let render_packages_poller = render_packages.clone();
+            let progress_bar_poller = progress_bar.clone();
+            let status_label_poller = status_label.clone();
+            let count_badge_poller = count_badge.clone();
+            let update_all_btn_poller = update_all_btn.clone();
+            let refresh_btn_poller = refresh_btn.clone();
+            let is_updating_poller = is_updating.clone();
 
-            let list_box = list_box.clone();
-            let count_badge = count_badge.clone();
-            let spinner = spinner.clone();
-            let refresh_btn = refresh_btn.clone();
-            let update_all_btn = update_all_btn.clone();
+            glib::timeout_add_local(std::time::Duration::from_millis(200), move || {
+                if let Some(state) = load_update_state() {
+                    let packages_changed = {
+                        let current = current_updates_poller.borrow();
+                        if current.len() != state.packages.len() {
+                            true
+                        } else {
+                            current.iter().zip(state.packages.iter()).any(|(a, b)| a.status != b.status)
+                        }
+                    };
+
+                    if packages_changed {
+                        *current_updates_poller.borrow_mut() = state.packages.clone();
+                        render_packages_poller();
+                    }
+
+                    let total = state.packages.len();
+                    let completed = state.packages.iter().filter(|p| p.status == UpdateStatus::Done || p.status == UpdateStatus::Failed).count();
+
+                    let fraction = if total > 0 { completed as f64 / total as f64 } else { 1.0 };
+                    progress_bar_poller.set_fraction(fraction);
+
+                    if state.is_updating && completed < total {
+                        if state.is_syncing && completed == 0 {
+                            status_label_poller.set_text(&babydra_common::i18n::t("settings.update_syncing"));
+                            progress_bar_poller.set_fraction(0.0);
+                        } else {
+                            let prog_text = babydra_common::i18n::t("settings.update_progress")
+                                .replace("{current}", &completed.to_string())
+                                .replace("{total}", &total.to_string());
+                            status_label_poller.set_text(&prog_text);
+                        }
+                        update_all_btn_poller.set_sensitive(false);
+                        update_all_btn_poller.add_css_class("disabled");
+                        refresh_btn_poller.set_sensitive(false);
+                        refresh_btn_poller.add_css_class("disabled");
+                        glib::ControlFlow::Continue
+                    } else {
+                        let failed_count = state.packages.iter().filter(|p| p.status == UpdateStatus::Failed).count();
+                        if failed_count == 0 {
+                            status_label_poller.set_text(&babydra_common::i18n::t("settings.update_complete"));
+                            count_badge_poller.set_text(&babydra_common::i18n::t("settings.up_to_date"));
+                            update_all_btn_poller.set_visible(false);
+                            refresh_btn_poller.set_visible(true);
+                        } else {
+                            let fail_text = babydra_common::i18n::t("settings.update_failed")
+                                .replace("{count}", &failed_count.to_string());
+                            status_label_poller.set_text(&fail_text);
+                            update_all_btn_poller.set_visible(true);
+                            refresh_btn_poller.set_visible(false);
+                        }
+                        progress_bar_poller.set_fraction(1.0);
+                        *is_updating_poller.borrow_mut() = false;
+                        update_all_btn_poller.set_sensitive(true);
+                        update_all_btn_poller.remove_css_class("disabled");
+                        refresh_btn_poller.set_sensitive(true);
+                        refresh_btn_poller.remove_css_class("disabled");
+                        glib::ControlFlow::Break
+                    }
+                } else {
+                    glib::ControlFlow::Continue
+                }
+            });
+        }
+    };
+
+    // Helper closure to trigger async update check (clears saved state)
+    let trigger_check = {
+        let list_box_c = list_box.clone();
+        let count_badge_c = count_badge.clone();
+        let spinner_c = spinner.clone();
+        let refresh_btn_c = refresh_btn.clone();
+        let update_all_btn_c = update_all_btn.clone();
+        let current_updates_c = current_updates.clone();
+        let progress_box_c = progress_box.clone();
+
+        move || {
+            clear_update_state();
+            spinner_c.set_visible(true);
+            spinner_c.start();
+            refresh_btn_c.set_sensitive(false);
+
+            if let Some(ref pbox) = progress_box_c {
+                pbox.set_visible(false);
+            }
+
+            let list_box_sub = list_box_c.clone();
+            let count_badge_sub = count_badge_c.clone();
+            let spinner_sub = spinner_c.clone();
+            let refresh_btn_sub = refresh_btn_c.clone();
+            let update_all_btn_sub = update_all_btn_c.clone();
+            let current_updates_sub = current_updates_c.clone();
 
             let (tx, rx) = std::sync::mpsc::channel::<Vec<PackageUpdate>>();
 
             std::thread::spawn(move || {
-                let updates = babydra_common::services::system::updates::check_updates().unwrap_or_default();
+                let updates = check_updates().unwrap_or_default();
                 let _ = tx.send(updates);
             });
 
@@ -92,27 +181,28 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
                     } else {
                         format!("{} {}", updates.len(), babydra_common::i18n::t("settings.updates_available"))
                     };
-                    count_badge.set_text(&count_text);
+                    count_badge_sub.set_text(&count_text);
+                    *current_updates_sub.borrow_mut() = updates.clone();
 
-                    while let Some(child) = list_box.first_child() {
-                        list_box.remove(&child);
+                    while let Some(child) = list_box_sub.first_child() {
+                        list_box_sub.remove(&child);
                     }
 
                     if updates.is_empty() {
-                        list_box.append(&render::create_empty_up_to_date_row());
-                        update_all_btn.set_visible(false);
-                        refresh_btn.set_visible(true);
+                        list_box_sub.append(&render::create_empty_up_to_date_row());
+                        update_all_btn_sub.set_visible(false);
+                        refresh_btn_sub.set_visible(true);
                     } else {
                         for pkg in &updates {
-                            list_box.append(&render::create_update_row(pkg));
+                            list_box_sub.append(&render::create_update_row(pkg));
                         }
-                        update_all_btn.set_visible(true);
-                        refresh_btn.set_visible(false);
+                        update_all_btn_sub.set_visible(true);
+                        refresh_btn_sub.set_visible(false);
                     }
 
-                    spinner.stop();
-                    spinner.set_visible(false);
-                    refresh_btn.set_sensitive(true);
+                    spinner_sub.stop();
+                    spinner_sub.set_visible(false);
+                    refresh_btn_sub.set_sensitive(true);
 
                     glib::ControlFlow::Break
                 } else {
@@ -122,163 +212,160 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
         }
     };
 
-    let text_buffer = widget.text_buffer.clone();
-    let console_scroll = widget.console_scroll.clone();
-    let update_all_btn_stream = widget.update_all_btn.clone();
-    let trigger_check_finish = trigger_check.clone();
-    let btn_provider_watcher = btn_provider.clone();
-    let is_updating_watcher = is_updating.clone();
+    // Auto check or restore saved state on presentation
+    let count_badge_init = count_badge.clone();
+    let update_all_btn_init = update_all_btn.clone();
+    let refresh_btn_init = refresh_btn.clone();
+    let progress_bar_init = progress_bar.clone();
+    let status_label_init = status_label.clone();
+    let progress_box_init = progress_box.clone();
+    let current_updates_init = current_updates.clone();
+    let is_updating_init = is_updating.clone();
+    let render_packages_init = render_packages.clone();
+    let auto_check = trigger_check.clone();
+    let start_poller_init = start_state_poller.clone();
 
-    // Polling watcher for cases where update was started elsewhere or on app launch
-    let start_log_file_watcher = move || {
-        let text_buffer_c = text_buffer.clone();
-        let console_scroll_c = console_scroll.clone();
-        let update_all_btn_c = update_all_btn_stream.clone();
-        let trigger_check_c = trigger_check_finish.clone();
-        let btn_provider_c = btn_provider_watcher.clone();
-        let is_updating_c = is_updating_watcher.clone();
-        let ticks = Rc::new(Cell::new(0u32));
+    glib::timeout_add_local(std::time::Duration::from_millis(200), move || {
+        if let Some(saved_state) = load_update_state() {
+            if !saved_state.packages.is_empty() {
+                *current_updates_init.borrow_mut() = saved_state.packages.clone();
+                render_packages_init();
 
-        glib::timeout_add_local(std::time::Duration::from_millis(150), move || {
-            ticks.set(ticks.get() + 1);
+                let total = saved_state.packages.len();
+                let completed = saved_state.packages.iter().filter(|p| p.status == UpdateStatus::Done || p.status == UpdateStatus::Failed).count();
 
-            let log_text = read_update_log();
-            text_buffer_c.set_text(&log_text);
+                let count_text = format!("{} {}", total, babydra_common::i18n::t("settings.updates_available"));
+                count_badge_init.set_text(&count_text);
+                update_all_btn_init.set_visible(true);
+                refresh_btn_init.set_visible(false);
 
-            let adj = console_scroll_c.vadjustment();
-            adj.set_value(adj.upper() - adj.page_size());
-
-            // Parse progress from full text
-            let mut last_progress = None;
-            for line in log_text.lines().rev() {
-                if let Some(prog) = parse_line_progress(line) {
-                    last_progress = Some(prog);
-                    break;
+                if let Some(ref pbox) = progress_box_init {
+                    pbox.set_visible(true);
                 }
-            }
+                let fraction = if total > 0 { completed as f64 / total as f64 } else { 1.0 };
+                progress_bar_init.set_fraction(fraction);
 
-            if let Some((curr, total)) = last_progress {
-                let pct = (curr as f64 / total as f64 * 100.0).clamp(0.0, 100.0);
-                update_btn_progress(&update_all_btn_c, &btn_provider_c, &format!("{}/{}", curr, total), pct);
-            } else {
-                update_btn_progress(&update_all_btn_c, &btn_provider_c, &babydra_common::i18n::t("settings.update_all"), 0.0);
-            }
+                if saved_state.is_updating && completed < total {
+                    *is_updating_init.borrow_mut() = true;
+                    update_all_btn_init.set_sensitive(false);
+                    update_all_btn_init.add_css_class("disabled");
+                    refresh_btn_init.set_sensitive(false);
+                    refresh_btn_init.add_css_class("disabled");
 
-            // Require at least 10 ticks (1.5s) before checking if pacman has ended to prevent premature re-enable
-            let in_progress = is_pacman_running();
-            if ticks.get() > 10 && !in_progress {
-                is_updating_c.set(false);
-                reset_btn_progress(&update_all_btn_c, &btn_provider_c);
-                trigger_check_c();
-                glib::ControlFlow::Break
-            } else {
-                glib::ControlFlow::Continue
-            }
-        });
-    };
+                    if saved_state.is_syncing && completed == 0 {
+                        status_label_init.set_text(&babydra_common::i18n::t("settings.update_syncing"));
+                        progress_bar_init.set_fraction(0.0);
+                    } else {
+                        let prog_text = babydra_common::i18n::t("settings.update_progress")
+                            .replace("{current}", &completed.to_string())
+                            .replace("{total}", &total.to_string());
+                        status_label_init.set_text(&prog_text);
+                    }
 
-    if is_pacman_running() {
-        is_updating.set(true);
-        widget.update_all_btn.set_sensitive(false);
-        widget.update_all_btn.set_visible(true);
-        widget.refresh_btn.set_visible(false);
-        widget.glass_card.set_visible(false);
-        widget.console_card.set_visible(true);
-        let log_text = read_update_log();
-        widget.text_buffer.set_text(&log_text);
-        start_log_file_watcher();
-    } else {
-        // Auto-trigger check in background after window presentation
-        let auto_check = trigger_check.clone();
-        glib::timeout_add_local(std::time::Duration::from_millis(300), move || {
-            auto_check();
-            glib::ControlFlow::Break
-        });
-    }
+                    // Start live polling background process state
+                    start_poller_init();
+                } else {
+                    let failed_count = saved_state.packages.iter().filter(|p| p.status == UpdateStatus::Failed).count();
+                    if failed_count == 0 {
+                        status_label_init.set_text(&babydra_common::i18n::t("settings.update_complete"));
+                        count_badge_init.set_text(&babydra_common::i18n::t("settings.up_to_date"));
+                        update_all_btn_init.set_visible(false);
+                        refresh_btn_init.set_visible(true);
+                    } else {
+                        let fail_text = babydra_common::i18n::t("settings.update_failed")
+                            .replace("{count}", &failed_count.to_string());
+                        status_label_init.set_text(&fail_text);
+                        update_all_btn_init.set_visible(true);
+                        refresh_btn_init.set_visible(false);
+                    }
+                    update_all_btn_init.set_sensitive(true);
+                    update_all_btn_init.remove_css_class("disabled");
+                    refresh_btn_init.set_sensitive(true);
+                    refresh_btn_init.remove_css_class("disabled");
+                }
+                return glib::ControlFlow::Break;
+            }
+        }
+
+        auto_check();
+        glib::ControlFlow::Break
+    });
 
     let trigger_check_btn = trigger_check.clone();
     widget.refresh_btn.connect_clicked(move |_| {
         trigger_check_btn();
     });
 
-    // Handle Update All -> Show reusable PasswordDialog
-    let auth_dialog_rc = std::rc::Rc::new(auth_dialog);
+    // Handle Update All click -> Show PasswordDialog
+    let auth_dialog_rc = Rc::new(auth_dialog);
     let auth_dialog_show = auth_dialog_rc.clone();
     let is_updating_click = is_updating.clone();
     widget.update_all_btn.connect_clicked(move |_| {
-        if is_updating_click.get() || is_pacman_running() {
+        if *is_updating_click.borrow() || is_pacman_running() {
             return;
         }
         auth_dialog_show.show_for("Authentication Required", "Enter sudo password to apply system updates:");
     });
 
-    // Handle Confirm & Start -> Run update in background with realtime log & outline progress
-    let glass_card = widget.glass_card.clone();
-    let console_card = widget.console_card.clone();
-    let text_buffer = widget.text_buffer.clone();
-    let console_scroll = widget.console_scroll.clone();
-    let update_all_btn = widget.update_all_btn.clone();
-    let btn_provider_start = btn_provider.clone();
+    // Handle Password Submit -> Launch detached background update process
+    let current_updates_start = current_updates.clone();
+    let update_all_btn_start = widget.update_all_btn.clone();
+    let refresh_btn_start = widget.refresh_btn.clone();
+    let progress_bar_start = widget.progress_bar.clone();
+    let status_label_start = widget.status_label.clone();
+    let progress_box_start = progress_box.clone();
     let is_updating_start = is_updating.clone();
-    let trigger_check_start = trigger_check.clone();
+    let render_packages_start = render_packages.clone();
+    let start_poller_start = start_state_poller.clone();
 
     auth_dialog_rc.connect_submit(move |password| {
         let pwd = match password {
             Some(p) if !p.trim().is_empty() => p,
-            _ => return, // User cancelled or empty password
+            _ => return,
         };
 
-        is_updating_start.set(true);
-        glass_card.set_visible(false);
-        console_card.set_visible(true);
-        text_buffer.set_text("");
-        update_all_btn.set_sensitive(false);
-        update_btn_progress(&update_all_btn, &btn_provider_start, &babydra_common::i18n::t("settings.update_all"), 0.0);
+        let pkgs_to_update = current_updates_start.borrow().clone();
+        if pkgs_to_update.is_empty() {
+            return;
+        }
 
-        let (tx, rx) = std::sync::mpsc::channel::<String>();
+        *is_updating_start.borrow_mut() = true;
+        update_all_btn_start.set_sensitive(false);
+        update_all_btn_start.add_css_class("disabled");
+        refresh_btn_start.set_sensitive(false);
+        refresh_btn_start.add_css_class("disabled");
 
-        let text_buffer_c = text_buffer.clone();
-        let console_scroll_c = console_scroll.clone();
-        let update_all_btn_c = update_all_btn.clone();
-        let btn_provider_c = btn_provider_start.clone();
-        let is_updating_c = is_updating_start.clone();
-        let trigger_check_c = trigger_check_start.clone();
+        if let Some(ref pbox) = progress_box_start {
+            pbox.set_visible(true);
+        }
+        progress_bar_start.set_fraction(0.0);
 
-        glib::timeout_add_local(std::time::Duration::from_millis(30), move || {
-            loop {
-                match rx.try_recv() {
-                    Ok(line) => {
-                        let mut iter = text_buffer_c.end_iter();
-                        text_buffer_c.insert(&mut iter, &format!("{}\n", line));
+        let initial_status_text = babydra_common::i18n::t("settings.update_syncing");
+        status_label_start.set_text(&initial_status_text);
 
-                        let adj = console_scroll_c.vadjustment();
-                        adj.set_value(adj.upper() - adj.page_size());
+        // Mark all as Pending initially and save state with is_syncing = true
+        for pkg in current_updates_start.borrow_mut().iter_mut() {
+            pkg.status = UpdateStatus::Pending;
+        }
+        save_update_state(true, true, &current_updates_start.borrow());
+        render_packages_start();
 
-                        if let Some((curr, total)) = parse_line_progress(&line) {
-                            let pct = (curr as f64 / total as f64 * 100.0).clamp(0.0, 100.0);
-                            update_btn_progress(&update_all_btn_c, &btn_provider_c, &format!("{}/{}", curr, total), pct);
-                        }
-
-                        if line.contains("completed successfully") || line.contains("Error:") {
-                            is_updating_c.set(false);
-                            reset_btn_progress(&update_all_btn_c, &btn_provider_c);
-                            trigger_check_c();
-                            return glib::ControlFlow::Break;
-                        }
-                    }
-                    Err(std::sync::mpsc::TryRecvError::Empty) => {
-                        return glib::ControlFlow::Continue;
-                    }
-                    Err(std::sync::mpsc::TryRecvError::Disconnected) => {
-                        is_updating_c.set(false);
-                        reset_btn_progress(&update_all_btn_c, &btn_provider_c);
-                        trigger_check_c();
-                        return glib::ControlFlow::Break;
-                    }
-                }
+        // Spawn independent detached process running babydra-settings --run-background-update
+        let exe = std::env::current_exe().unwrap_or_else(|_| std::path::PathBuf::from("babydra-settings"));
+        if let Ok(mut child) = Command::new(exe)
+            .arg("--run-background-update")
+            .stdin(Stdio::piped())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+        {
+            if let Some(mut stdin) = child.stdin.take() {
+                let _ = writeln!(stdin, "{}", pwd);
+                let _ = stdin.flush();
             }
-        });
+        }
 
-        start_background_update_with_sender(Some(pwd), Some(tx));
+        // Start live polling of update state file
+        start_poller_start();
     });
 }

@@ -59,11 +59,23 @@ fn handle_cli_args() -> bool {
             }
             true
         }
+        "--run-background-update" => {
+            use std::io::BufRead;
+            let mut pwd = String::new();
+            let stdin = std::io::stdin();
+            let _ = stdin.lock().read_line(&mut pwd);
+            let pwd_trimmed = pwd.trim();
+            let pwd_opt = if pwd_trimmed.is_empty() { None } else { Some(pwd_trimmed) };
+
+            babydra_common::services::system::updates::run_background_update_loop(pwd_opt);
+            true
+        }
         "--help" | "-h" => {
             println!("BabyDra Settings CLI Options:");
             println!("  --apply-battery-saver         Switch to battery saver profile if auto saver is enabled");
             println!("  --check-battery-saver         Check system battery and apply saver if below threshold");
             println!("  --set-power-profile <profile> Set CPU performance profile (normal, balanced, performance)");
+            println!("  --run-background-update       Run sequential updates in detached background process");
             true
         }
         _ => false,
