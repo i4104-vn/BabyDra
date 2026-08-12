@@ -186,6 +186,10 @@ pub fn create_system_island() -> gtk4::Box {
         popover_art_container,
         popover_app_name,
         play_btn_icon,
+        popover_progress_container,
+        popover_progress_bar,
+        popover_position_lbl,
+        popover_length_lbl,
     ) = widgets::popover::create_media_popover(&notch_capsule, &notification_view);
 
     let is_playing_state = Rc::new(Cell::new(false));
@@ -227,6 +231,10 @@ pub fn create_system_island() -> gtk4::Box {
         notif_art_container,
         notif_title_lbl,
         notif_body_lbl,
+        popover_progress_container,
+        popover_progress_bar,
+        popover_position_lbl,
+        popover_length_lbl,
     };
     start_player_polling_loop(
         is_playing_state.clone(),

@@ -22,6 +22,22 @@ thread_local! {
     pub static IS_NOTIF_HOVERED: Cell<bool> = Cell::new(false);
 }
 
+fn format_time(secs: f64) -> String {
+    if secs <= 0.0 || secs.is_nan() || secs.is_infinite() {
+        return "0:00".to_string();
+    }
+    let total_seconds = secs as u64;
+    let hours = total_seconds / 3600;
+    let minutes = (total_seconds % 3600) / 60;
+    let seconds = total_seconds % 60;
+
+    if hours > 0 {
+        format!("{}:{:02}:{:02}", hours, minutes, seconds)
+    } else {
+        format!("{}:{:02}", minutes, seconds)
+    }
+}
+
 fn set_art_fallback_icon(widgets: &IslandWidgets, icon_name: &str) {
     if let Some(child) = widgets.art_container.first_child() {
         widgets.art_container.remove(&child);
@@ -33,14 +49,22 @@ fn set_art_fallback_icon(widgets: &IslandWidgets, icon_name: &str) {
     if let Some(child) = widgets.popover_art_container.first_child() {
         widgets.popover_art_container.remove(&child);
     }
-    let music_icon_l = babydra_utils::ui::icon::get_icon_colored(icon_name, 120, "#3b82f6");
-    music_icon_l.add_css_class("media-popover-art");
-    music_icon_l.set_size_request(240, 240);
+
+    let fallback_card = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    fallback_card.add_css_class("fallback-art-box");
+    fallback_card.set_size_request(200, 130);
+    fallback_card.set_hexpand(true);
+    fallback_card.set_halign(gtk4::Align::Center);
+    fallback_card.set_valign(gtk4::Align::Center);
+
+    let music_icon_l = babydra_utils::ui::icon::get_icon_colored(icon_name, 48, "#3b82f6");
+    music_icon_l.set_halign(gtk4::Align::Center);
+    music_icon_l.set_valign(gtk4::Align::Center);
     music_icon_l.set_hexpand(true);
     music_icon_l.set_vexpand(true);
-    music_icon_l.set_halign(gtk4::Align::Fill);
-    music_icon_l.set_valign(gtk4::Align::Fill);
-    widgets.popover_art_container.append(&music_icon_l);
+
+    fallback_card.append(&music_icon_l);
+    widgets.popover_art_container.append(&fallback_card);
 }
 
 /// Starts a background timer loop that polls active D-Bus notifications and playerctl
@@ -63,7 +87,7 @@ pub fn start_player_polling_loop(
     // Spawn background thread to poll playerctl metadata every second
     std::thread::spawn(move || {
         loop {
-            let metadata = run_playerctl(&["metadata", "--format", "{{ status }}|//|{{ title }}|//|{{ artist }}|//|{{ playerName }}|//|{{ mpris:artUrl }}"]);
+            let metadata = run_playerctl(&["metadata", "--format", "{{ status }}|//|{{ title }}|//|{{ artist }}|//|{{ playerName }}|//|{{ mpris:artUrl }}|//|{{ position }}|//|{{ mpris:length }}"]);
             if sender.send(metadata).is_err() {
                 break; // Exit thread if receiver has been dropped
             }
@@ -176,6 +200,8 @@ pub fn start_player_polling_loop(
         let mut player_artist = String::new();
         let mut player_name_raw = String::new();
         let mut player_art_url = String::new();
+        let mut player_pos_secs = 0.0f64;
+        let mut player_len_secs = 0.0f64;
 
         if let Some(ref line) = metadata {
             let parts: Vec<&str> = line.split("|//|").collect();
@@ -185,6 +211,12 @@ pub fn start_player_polling_loop(
                 player_artist = parts[2].trim().to_string();
                 player_name_raw = parts[3].trim().to_string();
                 player_art_url = parts[4].trim().to_string();
+                if parts.len() >= 7 {
+                    let pos_us = parts[5].trim().parse::<f64>().unwrap_or(0.0);
+                    let len_us = parts[6].trim().parse::<f64>().unwrap_or(0.0);
+                    player_pos_secs = pos_us / 1_000_000.0;
+                    player_len_secs = len_us / 1_000_000.0;
+                }
                 player_playing = status_str == "Playing";
                 if status_str == "Playing" || status_str == "Paused" {
                     player_active = true;
@@ -339,6 +371,8 @@ pub fn start_player_polling_loop(
                             &player_artist,
                             &player_name_raw,
                             &player_art_url,
+                            player_pos_secs,
+                            player_len_secs,
                             &art_sender,
                         );
                     } else {
@@ -395,6 +429,8 @@ pub fn start_player_polling_loop(
                             &player_artist,
                             &player_name_raw,
                             &player_art_url,
+                            player_pos_secs,
+                            player_len_secs,
                             &art_sender,
                         );
                     }
@@ -506,7 +542,7 @@ fn update_player_view(
     poll_counter: &Cell<u32>,
     last_title: &RefCell<String>,
     art_loaded_for_current_song: &Cell<bool>,
-    last_art_url: &RefCell<String>,
+    _last_art_url: &RefCell<String>,
     last_attempted_url: &RefCell<String>,
     fail_count: &Cell<u32>,
     playing: bool,
@@ -514,15 +550,33 @@ fn update_player_view(
     artist: &str,
     player_name_raw: &str,
     art_url: &str,
+    pos_secs: f64,
+    len_secs: f64,
     art_sender: &tokio::sync::mpsc::UnboundedSender<(String, String, Result<Vec<u8>, ()>)>,
 ) {
     widgets.notch_capsule.remove_css_class("notification-mode");
     is_playing_state.set(playing);
 
+    let count = poll_counter.get();
+    poll_counter.set(count + 1);
+
+    // Update Progress Bar
+    if len_secs > 0.0 {
+        let fraction = (pos_secs / len_secs).clamp(0.0, 1.0);
+        widgets.popover_progress_bar.set_fraction(fraction);
+        widgets.popover_position_lbl.set_text(&format_time(pos_secs));
+        widgets.popover_length_lbl.set_text(&format_time(len_secs));
+        widgets.popover_progress_container.set_visible(true);
+    } else {
+        widgets.popover_progress_container.set_visible(false);
+    }
+
+    // Track metadata change (title, artist, or art_url)
+    let meta_key = format!("{}|{}|{}|{}", title, artist, player_name_raw, art_url);
     let song_changed = {
         let mut last_title_borrow = last_title.borrow_mut();
-        if title != *last_title_borrow {
-            *last_title_borrow = title.to_string();
+        if meta_key != *last_title_borrow {
+            *last_title_borrow = meta_key;
             true
         } else {
             false
@@ -531,14 +585,19 @@ fn update_player_view(
 
     if song_changed {
         art_loaded_for_current_song.set(false);
-        poll_counter.set(0);
+        fail_count.set(0);
+        *last_attempted_url.borrow_mut() = String::new();
     }
 
-    let count = poll_counter.get();
-    poll_counter.set(count + 1);
-
-    if song_changed || count % 5 == 0 {
-        let label_text = if artist.is_empty() {
+    // Always update labels when song/metadata changes or on periodic tick
+    if song_changed || count % 2 == 0 {
+        let label_text = if title.is_empty() {
+            if !player_name_raw.is_empty() {
+                player_name_raw.to_string()
+            } else {
+                "Media Player".to_string()
+            }
+        } else if artist.is_empty() {
             title.to_string()
         } else {
             format!("{} - {}", artist, title)
@@ -552,8 +611,19 @@ fn update_player_view(
         };
         widgets.track_label.set_text(&display_text);
 
-        widgets.popover_title.set_text(title);
-        widgets.popover_artist.set_text(artist);
+        let pop_title = if title.is_empty() {
+            if !player_name_raw.is_empty() {
+                player_name_raw
+            } else {
+                "Media Player"
+            }
+        } else {
+            title
+        };
+        let pop_artist = if artist.is_empty() { "Playing Media" } else { artist };
+
+        widgets.popover_title.set_text(pop_title);
+        widgets.popover_artist.set_text(pop_artist);
 
         let player_name = if !player_name_raw.is_empty() {
             let mut chars = player_name_raw.chars();
@@ -567,42 +637,47 @@ fn update_player_view(
         widgets.popover_app_name.set_text(&player_name);
     }
 
+    // Artwork loading & retry logic
     if !art_loaded_for_current_song.get() {
         let app_icon_name = get_player_icon_name(player_name_raw);
-        let mut last_url = last_art_url.borrow_mut();
 
         if art_url.is_empty() {
-            *last_url = art_url.to_string();
-            art_loaded_for_current_song.set(true);
-
+            // Display fallback icon for now, but keep retrying for 5 ticks in case browser delays artUrl
             set_art_fallback_icon(widgets, &app_icon_name);
+            if count > 5 {
+                art_loaded_for_current_song.set(true);
+            }
         } else {
-            if art_url != *last_attempted_url.borrow() {
+            let last_attempt = last_attempted_url.borrow().clone();
+            let retries = fail_count.get();
+
+            // Refetch if URL changed, or if previous attempt failed but retries < 3
+            if art_url != last_attempt || retries < 3 {
                 *last_attempted_url.borrow_mut() = art_url.to_string();
-                fail_count.set(0);
 
                 let art_url_clone = art_url.to_string();
                 let app_icon_name_clone = app_icon_name.clone();
                 let art_sender_clone = art_sender.clone();
 
                 std::thread::spawn(move || {
-                    let local_path = if let Some(path_str) = art_url_clone.strip_prefix("file://") {
-                        decode_uri(&path_str)
+                    let result = if let Some(path_str) = art_url_clone.strip_prefix("file://") {
+                        let local_path = decode_uri(&path_str);
+                        std::fs::read(&local_path).map_err(|_| ())
                     } else if art_url_clone.starts_with('/') {
-                        art_url_clone.to_string()
+                        std::fs::read(&art_url_clone).map_err(|_| ())
+                    } else if art_url_clone.starts_with("http://") || art_url_clone.starts_with("https://") {
+                        std::process::Command::new("curl")
+                            .args(["-s", "-L", "--max-time", "5", &art_url_clone])
+                            .output()
+                            .ok()
+                            .filter(|o| o.status.success() && !o.stdout.is_empty())
+                            .map(|o| o.stdout)
+                            .ok_or(())
                     } else {
-                        let _ = art_sender_clone.send((art_url_clone, app_icon_name_clone, Err(())));
-                        return;
+                        Err(())
                     };
 
-                    match std::fs::read(&local_path) {
-                        Ok(bytes) => {
-                            let _ = art_sender_clone.send((art_url_clone, app_icon_name_clone, Ok(bytes)));
-                        }
-                        Err(_) => {
-                            let _ = art_sender_clone.send((art_url_clone, app_icon_name_clone, Err(())));
-                        }
-                    }
+                    let _ = art_sender_clone.send((art_url_clone, app_icon_name_clone, result));
                 });
             }
         }

@@ -13,6 +13,10 @@ pub fn create_media_popover(
     gtk4::Box,
     gtk4::Label,
     gtk4::Image,
+    gtk4::Box,
+    gtk4::ProgressBar,
+    gtk4::Label,
+    gtk4::Label,
 ) {
     let popover = babydra_utils::components::create_popover(notch_capsule, gtk4::PositionType::Bottom, "media-popover");
     popover.set_has_arrow(false);
@@ -52,6 +56,40 @@ pub fn create_media_popover(
 
     popover_box.append(&popover_title);
     popover_box.append(&popover_artist);
+
+    // Progress Bar Container
+    let progress_container = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
+    progress_container.add_css_class("media-popover-progress-container");
+    progress_container.set_margin_start(16);
+    progress_container.set_margin_end(16);
+    progress_container.set_margin_top(10);
+    progress_container.set_margin_bottom(6);
+
+    let progress_bar = gtk4::ProgressBar::new();
+    progress_bar.add_css_class("media-popover-progress-bar");
+    progress_bar.set_fraction(0.0);
+
+    let time_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    time_box.add_css_class("media-popover-time-box");
+
+    let pos_label = gtk4::Label::new(Some("0:00"));
+    pos_label.add_css_class("media-popover-time-label");
+    pos_label.set_halign(gtk4::Align::Start);
+
+    let time_spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    time_spacer.set_hexpand(true);
+
+    let len_label = gtk4::Label::new(Some("0:00"));
+    len_label.add_css_class("media-popover-time-label");
+    len_label.set_halign(gtk4::Align::End);
+
+    time_box.append(&pos_label);
+    time_box.append(&time_spacer);
+    time_box.append(&len_label);
+
+    progress_container.append(&progress_bar);
+    progress_container.append(&time_box);
+    popover_box.append(&progress_container);
 
     let controls_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 18);
     controls_box.add_css_class("media-popover-controls");
@@ -166,6 +204,10 @@ pub fn create_media_popover(
         popover_art_container,
         popover_app_name,
         play_btn_icon,
+        progress_container,
+        progress_bar,
+        pos_label,
+        len_label,
     )
 }
 
