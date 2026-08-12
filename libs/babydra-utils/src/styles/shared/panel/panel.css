@@ -51,6 +51,8 @@ button.panel-logo-btn {
     background-image: none;
     border: none;
     border-radius: 6px;
+    padding: 2px 4px;
+    margin: 0;
     box-shadow: none;
     min-height: 20px;
     min-width: 20px;

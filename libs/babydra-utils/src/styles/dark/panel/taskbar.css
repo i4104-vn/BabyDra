@@ -5,20 +5,20 @@
 }
 
 button.taskbar-app-btn {
-    background-color: rgba(14, 14, 18, 0.96);
+    background-color: transparent;
 }
 
 button.taskbar-app-btn:hover {
-    background-color: rgba(36, 35, 35, 0.85);
+    background-color: rgba(255, 255, 255, 0.10);
 }
 
 button.taskbar-app-btn.active {
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: rgba(255, 255, 255, 0.16);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 button.taskbar-app-btn.active:hover {
-    background-color: rgba(255, 255, 255, 0.22);
-    border-bottom: 2px solid #60a5fa;
+    background-color: rgba(255, 255, 255, 0.24);
 }
 
 .taskbar-previews-header-label {
@@ -26,7 +26,7 @@ button.taskbar-app-btn.active:hover {
 }
 
 button.taskbar-preview-list-btn:hover {
-    background-color: rgba(36, 35, 35, 0.85);
+    background-color: rgba(255, 255, 255, 0.10);
 }
 
 .taskbar-preview-title {

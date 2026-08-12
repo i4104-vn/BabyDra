@@ -77,8 +77,9 @@ fn rebuild_taskbar(
             });
         }
 
+        let window_count = windows.len();
         // Delegate button layout rendering
-        let btn = render::build_taskbar_item_button(first_app, is_active);
+        let btn = render::build_taskbar_item_button(first_app, is_active, window_count);
 
         // Create Popover for window previews
         let popover = render::build_popover_container(&btn);

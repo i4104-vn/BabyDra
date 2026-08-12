@@ -57,7 +57,7 @@ fn set_art_fallback_icon(widgets: &IslandWidgets, icon_name: &str) {
     fallback_card.set_halign(gtk4::Align::Center);
     fallback_card.set_valign(gtk4::Align::Center);
 
-    let music_icon_l = babydra_utils::ui::icon::get_icon_colored(icon_name, 48, "#3b82f6");
+    let music_icon_l = babydra_utils::ui::icon::get_icon_colored(icon_name, 56, "#3b82f6");
     music_icon_l.set_halign(gtk4::Align::Center);
     music_icon_l.set_valign(gtk4::Align::Center);
     music_icon_l.set_hexpand(true);
@@ -225,62 +225,12 @@ pub fn start_player_polling_loop(
         }
 
         if let Some(notif) = active_notif {
-            let mut should_show_notif = false;
-            match current_state {
-                IslandState::Hidden => {
-                    island_state.set(IslandState::NotificationActive { timestamp: notif.timestamp });
-                    should_show_notif = true;
-                    widgets.visualizer_box.set_visible(false);
-                    widgets.notch_capsule.add_css_class("active-music");
-                    widgets.notch_capsule.add_css_class("notification-mode");
-                    babydra_utils::ui::animation::island_zoom_in(
-                        widgets.notch_capsule.clone().upcast_ref(),
-                        300,
-                        70,
-                        500,
-                    );
-                }
-                IslandState::PlayerActive => {
-                    island_state.set(IslandState::NotificationActive { timestamp: notif.timestamp });
-                    should_show_notif = true;
-                    widgets.visualizer_box.set_visible(false);
-                    widgets.notch_capsule.add_css_class("notification-mode");
-                    babydra_utils::ui::animation::island_animate_size(
-                        widgets.notch_capsule.clone().upcast_ref(),
-                        200,
-                        300,
-                        30,
-                        70,
-                        400,
-                        || {},
-                    );
-                }
-                IslandState::NotificationActive { timestamp } => {
-                    if timestamp != notif.timestamp {
-                        island_state.set(IslandState::NotificationActive { timestamp: notif.timestamp });
-                        should_show_notif = true;
-                    }
-                }
-                IslandState::ShrinkingToPlayer { .. } | IslandState::ZoomingOut => {
-                    island_state.set(IslandState::NotificationActive { timestamp: notif.timestamp });
-                    should_show_notif = true;
-                    widgets.visualizer_box.set_visible(false);
-                    widgets.notch_capsule.set_visible(true);
-                    widgets.notch_capsule.add_css_class("active-music");
-                    widgets.notch_capsule.add_css_class("notification-mode");
-                    babydra_utils::ui::animation::island_animate_size(
-                        widgets.notch_capsule.clone().upcast_ref(),
-                        200,
-                        300,
-                        30,
-                        70,
-                        400,
-                        || {},
-                    );
-                }
-            }
+            let is_new_notif = match current_state {
+                IslandState::NotificationActive { timestamp } => timestamp != notif.timestamp,
+                _ => true,
+            };
 
-            if should_show_notif {
+            if is_new_notif {
                 is_playing_state.set(false);
                 update_notification_view(
                     &widgets,
@@ -288,6 +238,69 @@ pub fn start_player_polling_loop(
                     &last_art_url,
                     &last_attempted_url,
                 );
+            }
+
+            let target_width = 280;
+            let (_, nat_height, _, _) = widgets.notification_view.measure(gtk4::Orientation::Vertical, target_width - 32);
+            let target_height = (nat_height + 16).max(48); // 16px for top+bottom padding, at least 48px
+
+            match current_state {
+                IslandState::Hidden => {
+                    island_state.set(IslandState::NotificationActive { timestamp: notif.timestamp });
+                    widgets.visualizer_box.set_visible(false);
+                    widgets.notch_capsule.add_css_class("active-music");
+                    widgets.notch_capsule.add_css_class("notification-mode");
+                    babydra_utils::ui::animation::island_zoom_in(
+                        widgets.notch_capsule.clone().upcast_ref(),
+                        target_width,
+                        target_height,
+                        350,
+                    );
+                }
+                IslandState::PlayerActive => {
+                    island_state.set(IslandState::NotificationActive { timestamp: notif.timestamp });
+                    widgets.visualizer_box.set_visible(false);
+                    widgets.notch_capsule.add_css_class("notification-mode");
+                    babydra_utils::ui::animation::island_animate_size(
+                        widgets.notch_capsule.clone().upcast_ref(),
+                        200,
+                        target_width,
+                        26,
+                        target_height,
+                        350,
+                        || {},
+                    );
+                }
+                IslandState::NotificationActive { timestamp } => {
+                    if timestamp != notif.timestamp {
+                        island_state.set(IslandState::NotificationActive { timestamp: notif.timestamp });
+                        babydra_utils::ui::animation::island_animate_size(
+                            widgets.notch_capsule.clone().upcast_ref(),
+                            widgets.notch_capsule.width(),
+                            target_width,
+                            widgets.notch_capsule.height(),
+                            target_height,
+                            250,
+                            || {},
+                        );
+                    }
+                }
+                IslandState::ShrinkingToPlayer { .. } | IslandState::ZoomingOut => {
+                    island_state.set(IslandState::NotificationActive { timestamp: notif.timestamp });
+                    widgets.visualizer_box.set_visible(false);
+                    widgets.notch_capsule.set_visible(true);
+                    widgets.notch_capsule.add_css_class("active-music");
+                    widgets.notch_capsule.add_css_class("notification-mode");
+                    babydra_utils::ui::animation::island_animate_size(
+                        widgets.notch_capsule.clone().upcast_ref(),
+                        200,
+                        target_width,
+                        26,
+                        target_height,
+                        350,
+                        || {},
+                    );
+                }
             }
         } else {
             match current_state {
@@ -301,13 +314,13 @@ pub fn start_player_polling_loop(
                     let is_playing_clone = is_playing_state.clone();
                     let latest_metadata_clone = latest_metadata.clone();
                     
-                    let cur_w = widgets.notch_capsule.width().max(300);
-                    let cur_h = widgets.notch_capsule.height().max(70);
+                    let cur_w = widgets.notch_capsule.width().max(200);
+                    let cur_h = widgets.notch_capsule.height().max(26);
 
                     widgets.notification_view.set_opacity(0.0);
 
                     let target_w = if player_active { 200 } else { 0 };
-                    let target_h = if player_active { 30 } else { 0 };
+                    let target_h = if player_active { 26 } else { 0 };
 
                     babydra_utils::ui::animation::island_animate_size(
                         widgets.notch_capsule.clone().upcast_ref(),
