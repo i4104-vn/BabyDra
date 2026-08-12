@@ -50,7 +50,9 @@ pub use services::system::backlight;
 pub use services::system::bluetooth;
 pub use services::system::vpn;
 pub use services::wallpaper;
-pub use services::wallpaper::{set_wallpaper, get_current_wallpaper};
+pub use services::wallpaper::{set_wallpaper, get_current_wallpaper, apply_saved_wallpaper};
+pub use services::system::display::{save_displays, get_displays, apply_saved_displays};
+
 pub use services::search;
 pub use services::search::search_files;
 pub use services::mpris;
@@ -80,4 +82,21 @@ pub mod helper {
     pub use crate::services::system::storage;
     pub use crate::services::system::clean;
     pub use crate::services::system::network;
+}
+
+/// Applies all saved user settings from unified babydra.conf (CPU performance profile, Display monitors resolution/refresh rates, Wallpaper, Auto Battery Saver).
+pub fn apply_all_saved_settings() {
+    // 1. CPU Performance Profile
+    services::system::power::apply_saved_profile();
+
+    // 2. Display Monitor resolution, refresh rate, position, scale
+    services::system::display::apply_saved_displays();
+
+    // 3. System Wallpaper
+    services::wallpaper::apply_saved_wallpaper();
+
+    // 4. Auto Battery Saver check
+    if let Some(info) = get_battery_info() {
+        battery::check_and_apply_auto_battery_saver(&info);
+    }
 }

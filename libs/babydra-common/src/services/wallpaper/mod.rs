@@ -46,7 +46,15 @@ pub fn set_wallpaper(path: &Path) -> Result<(), String> {
     crate::config::save_babydra_config(&conf);
 
     if has_binary("awww") {
-        let _ = Command::new("awww-daemon").spawn();
+        let daemon_running = Command::new("pgrep")
+            .arg("-x")
+            .arg("awww-daemon")
+            .output()
+            .map(|o| o.status.success())
+            .unwrap_or(false);
+        if !daemon_running {
+            let _ = Command::new("awww-daemon").spawn();
+        }
         let status = Command::new("awww")
             .args(["img", path_str])
             .status()
@@ -57,6 +65,13 @@ pub fn set_wallpaper(path: &Path) -> Result<(), String> {
     } 
 
     Err("No compatible wallpaper backend - awww was found in PATH".to_string())
+}
+
+/// Applies the currently saved wallpaper from babydra.conf.
+pub fn apply_saved_wallpaper() {
+    if let Some(path) = get_current_wallpaper() {
+        let _ = set_wallpaper(&path);
+    }
 }
 
 /// Retrieves the path to the currently active wallpaper from user configuration or daemon query.

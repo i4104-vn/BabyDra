@@ -111,6 +111,57 @@ impl Default for ExploreSettings {
     }
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct DisplayMonitorSetting {
+    #[serde(default)]
+    pub name: String,
+    #[serde(default = "default_width")]
+    pub resolution_width: u32,
+    #[serde(default = "default_height")]
+    pub resolution_height: u32,
+    #[serde(default = "default_refresh_rate")]
+    pub refresh_rate: f64,
+    #[serde(default)]
+    pub position_x: i32,
+    #[serde(default)]
+    pub position_y: i32,
+    #[serde(default = "default_orientation")]
+    pub orientation: String,
+    #[serde(default = "default_enabled")]
+    pub enabled: bool,
+    #[serde(default = "default_scale")]
+    pub scale: f64,
+}
+
+fn default_width() -> u32 { 1920 }
+fn default_height() -> u32 { 1080 }
+fn default_refresh_rate() -> f64 { 60.0 }
+fn default_orientation() -> String { "normal".to_string() }
+fn default_enabled() -> bool { true }
+fn default_scale() -> f64 { 1.0 }
+
+impl Default for DisplayMonitorSetting {
+    fn default() -> Self {
+        Self {
+            name: String::new(),
+            resolution_width: default_width(),
+            resolution_height: default_height(),
+            refresh_rate: default_refresh_rate(),
+            position_x: 0,
+            position_y: 0,
+            orientation: default_orientation(),
+            enabled: default_enabled(),
+            scale: default_scale(),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+pub struct DisplayConfig {
+    #[serde(default)]
+    pub monitors: Vec<DisplayMonitorSetting>,
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct BabyDraConfig {
     #[serde(default)]
@@ -121,6 +172,8 @@ pub struct BabyDraConfig {
     pub wallpaper: WallpaperConfig,
     #[serde(default)]
     pub notification: NotificationConfig,
+    #[serde(default)]
+    pub display: DisplayConfig,
 }
 
 static CONFIG_CACHE: std::sync::OnceLock<std::sync::RwLock<BabyDraConfig>> = std::sync::OnceLock::new();

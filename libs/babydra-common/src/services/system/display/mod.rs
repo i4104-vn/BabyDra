@@ -118,16 +118,27 @@ pub fn get_displays() -> Vec<MonitorConfig> {
     monitors
 }
 
-/// Saves monitor configurations and applies changes via wlr-randr.
+/// Saves monitor configurations into babydra.conf and applies changes via wlr-randr.
 pub fn save_displays(monitors: &[MonitorConfig]) -> Result<(), String> {
-    let home = std::env::var("HOME").unwrap_or_else(|_| "/home/i4104".to_string());
-    let path = std::path::PathBuf::from(&home).join(".config/babydra/monitors.conf");
+    // 1. Save monitor settings into unified babydra.conf
+    let mut conf = crate::config::load_babydra_config();
+    conf.display.monitors = monitors
+        .iter()
+        .map(|m| crate::config::settings::DisplayMonitorSetting {
+            name: m.name.clone(),
+            resolution_width: m.resolution_width,
+            resolution_height: m.resolution_height,
+            refresh_rate: m.refresh_rate,
+            position_x: m.position_x,
+            position_y: m.position_y,
+            orientation: m.orientation.clone(),
+            enabled: m.enabled,
+            scale: 1.0,
+        })
+        .collect();
+    crate::config::save_babydra_config(&conf);
 
-    if let Some(parent) = path.parent() {
-        let _ = std::fs::create_dir_all(parent);
-    }
-
-    // Try to get exact mode refresh rates from wlr-randr --json
+    // 2. Apply via wlr-randr immediately
     let wlr_json_val: Option<serde_json::Value> = Command::new("wlr-randr")
         .arg("--json")
         .output()
@@ -135,20 +146,12 @@ pub fn save_displays(monitors: &[MonitorConfig]) -> Result<(), String> {
         .filter(|o| o.status.success())
         .and_then(|o| serde_json::from_slice(&o.stdout).ok());
 
-    let mut lines = Vec::new();
     for m in monitors {
         if !m.enabled {
-            lines.push(format!("monitor={},disable", m.name));
-            // Apply via wlr-randr
             let _ = Command::new("wlr-randr")
                 .args(["--output", &m.name, "--off"])
                 .status();
         } else {
-            lines.push(format!(
-                "monitor={},{}x{}@{:.1},{}x{},1",
-                m.name, m.resolution_width, m.resolution_height, m.refresh_rate, m.position_x, m.position_y
-            ));
-
             let transform_arg = match m.orientation.as_str() {
                 "left" | "90" => "90",
                 "inverted" | "180" => "180",
@@ -159,16 +162,14 @@ pub fn save_displays(monitors: &[MonitorConfig]) -> Result<(), String> {
             let pos_str = format!("{},{}", m.position_x, m.position_y);
             let mode_res_only = format!("{}x{}", m.resolution_width, m.resolution_height);
 
-            // Find exact mode string matching resolution and target refresh rate
             let mut exact_mode_str: Option<String> = None;
-
             if let Some(ref val) = wlr_json_val {
                 if let Some(arr) = val.as_array() {
                     for mon_val in arr {
                         let name = mon_val.get("name").and_then(|v| v.as_str()).unwrap_or("");
                         if name == m.name {
                             if let Some(modes) = mon_val.get("modes").and_then(|v| v.as_array()) {
-                                let mut best_match: Option<(f64, f64)> = None; // (difference, refresh)
+                                let mut best_match: Option<(f64, f64)> = None;
                                 for mode in modes {
                                     let w = mode.get("width").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
                                     let h = mode.get("height").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
@@ -220,7 +221,6 @@ pub fn save_displays(monitors: &[MonitorConfig]) -> Result<(), String> {
                 let success2 = output2.as_ref().map(|o| o.status.success() && !String::from_utf8_lossy(&o.stderr).contains("unknown mode")).unwrap_or(false);
 
                 if !success2 {
-                    // Final fallback to mode without rate
                     let _ = Command::new("wlr-randr")
                         .args([
                             "--output", &m.name,
@@ -234,7 +234,35 @@ pub fn save_displays(monitors: &[MonitorConfig]) -> Result<(), String> {
             }
         }
     }
+    Ok(())
+}
 
-    let content = lines.join("\n");
-    std::fs::write(&path, content).map_err(|e| e.to_string())
+/// Reads saved monitor configurations from babydra.conf and applies them via wlr-randr.
+pub fn apply_saved_displays() {
+    let conf = crate::config::load_babydra_config();
+    if conf.display.monitors.is_empty() {
+        return;
+    }
+
+    let monitors: Vec<MonitorConfig> = conf.display.monitors
+        .into_iter()
+        .map(|m| MonitorConfig {
+            id: m.name.clone(),
+            name: m.name,
+            description: "Display".to_string(),
+            resolution_width: m.resolution_width,
+            resolution_height: m.resolution_height,
+            refresh_rate: m.refresh_rate,
+            position_x: m.position_x,
+            position_y: m.position_y,
+            orientation: m.orientation,
+            mode: "extend".to_string(),
+            mirror_of: None,
+            enabled: m.enabled,
+            available_resolutions: Vec::new(),
+            available_rates: Vec::new(),
+        })
+        .collect();
+
+    let _ = save_displays(&monitors);
 }

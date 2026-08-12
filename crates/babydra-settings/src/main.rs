@@ -59,6 +59,12 @@ fn handle_cli_args() -> bool {
             }
             true
         }
+        "--apply-all-settings" => {
+            println!("Applying all saved BabyDra system settings (CPU Profile, Displays, Wallpaper, Battery)...");
+            babydra_common::apply_all_saved_settings();
+            println!("All saved settings applied successfully.");
+            true
+        }
         "--run-background-update" => {
             use std::io::BufRead;
             let mut pwd = String::new();
@@ -72,6 +78,7 @@ fn handle_cli_args() -> bool {
         }
         "--help" | "-h" => {
             println!("BabyDra Settings CLI Options:");
+            println!("  --apply-all-settings          Apply all saved system settings (CPU, Displays, Wallpaper, Battery)");
             println!("  --apply-battery-saver         Switch to battery saver profile if auto saver is enabled");
             println!("  --check-battery-saver         Check system battery and apply saver if below threshold");
             println!("  --set-power-profile <profile> Set CPU performance profile (normal, balanced, performance)");
@@ -89,7 +96,7 @@ fn main() {
 
     let app = gtk4::Application::new(
         Some("com.babydra.settings"),
-        Default::default(),
+        gtk4::gio::ApplicationFlags::NON_UNIQUE,
     );
 
     app.connect_activate(move |app| {

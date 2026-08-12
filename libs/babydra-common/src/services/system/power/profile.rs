@@ -25,7 +25,7 @@ pub fn set_performance_profile(profile: PerformanceProfile) -> Result<(), String
         PerformanceProfile::HighPerformance => ("performance", "performance"),
     };
 
-    // 1. Try direct write to sysfs scaling_governor and energy_performance_preference
+    // Try direct write to sysfs scaling_governor and energy_performance_preference
     let mut direct_success = false;
     if let Ok(entries) = std::fs::read_dir("/sys/devices/system/cpu") {
         let mut writen_count = 0;
@@ -49,43 +49,10 @@ pub fn set_performance_profile(profile: PerformanceProfile) -> Result<(), String
     }
 
     if direct_success {
-        return Ok(());
+        Ok(())
+    } else {
+        Err("Permission denied. Sudo password required to update CPU governor.".to_string())
     }
-
-    // 2. Fallback: use pkexec to chmod sysfs files or write directly
-    let cmd_chmod = "chmod 666 /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference 2>/dev/null || true";
-    if let Ok(status) = Command::new("pkexec").args(["sh", "-c", cmd_chmod]).status() {
-        if status.success() {
-            // Retry direct write after chmod
-            if let Ok(entries) = std::fs::read_dir("/sys/devices/system/cpu") {
-                for entry in entries.flatten() {
-                    let path = entry.path();
-                    let gov_path = path.join("cpufreq/scaling_governor");
-                    if gov_path.exists() {
-                        let _ = std::fs::write(&gov_path, governor);
-                    }
-                    let epp_path = path.join("cpufreq/energy_performance_preference");
-                    if epp_path.exists() {
-                        let _ = std::fs::write(&epp_path, epp);
-                    }
-                }
-            }
-            return Ok(());
-        }
-    }
-
-    // 3. Direct pkexec write fallback
-    let cmd_write = format!(
-        "for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo {} > \"$f\" 2>/dev/null; done; for f in /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference; do echo {} > \"$f\" 2>/dev/null; done",
-        governor, epp
-    );
-    if let Ok(status) = Command::new("pkexec").args(["sh", "-c", &cmd_write]).status() {
-        if status.success() {
-            return Ok(());
-        }
-    }
-
-    Err("Permission denied. Could not update CPU governor.".to_string())
 }
 
 pub fn set_performance_profile_with_password(profile: PerformanceProfile, password: &str) -> Result<(), String> {
