@@ -37,9 +37,9 @@ pub fn create_volume_row(
                 icon_container.remove(&old);
             }
             let icon_widget = if is_muted_val {
-                babydra_utils::ui::icon::get_icon("volume-mute", 16)
+                babydra_utils::ui::icon::get_icon_colored("volume-mute", 16, "#ffffff")
             } else {
-                babydra_utils::ui::icon::get_icon("volume", 16)
+                babydra_utils::ui::icon::get_icon_colored("volume", 16, "#ffffff")
             };
             icon_widget.add_css_class("slider-icon");
             icon_container.append(&icon_widget);

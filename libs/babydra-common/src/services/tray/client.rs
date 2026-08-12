@@ -5,38 +5,35 @@ use super::watcher::StatusNotifierItemProxy;
 /// Sends an Activate or ContextMenu signal to the item's D-Bus service, letting the application open its menu or window.
 pub fn activate_item(service: &str, x: i32, y: i32, is_right_click: bool) {
     let service_str = service.to_string();
-    std::thread::spawn(move || {
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        rt.block_on(async {
-            if let Ok(conn) = zbus::Connection::session().await {
-                let bus_name = match zbus::names::BusName::try_from(service_str.clone()) {
-                    Ok(name) => name,
-                    Err(_) => return,
-                };
+    gtk4::glib::spawn_future_local(async move {
+        if let Ok(conn) = zbus::Connection::session().await {
+            let bus_name = match zbus::names::BusName::try_from(service_str.clone()) {
+                Ok(name) => name,
+                Err(_) => return,
+            };
 
-                let proxy = match StatusNotifierItemProxy::builder(&conn)
-                    .destination(bus_name)
-                    .unwrap()
-                    .path("/StatusNotifierItem")
-                    .unwrap()
-                    .build()
-                    .await
-                {
-                    Ok(p) => p,
-                    Err(_) => return,
-                };
+            let proxy = match StatusNotifierItemProxy::builder(&conn)
+                .destination(bus_name)
+                .unwrap()
+                .path("/StatusNotifierItem")
+                .unwrap()
+                .build()
+                .await
+            {
+                Ok(p) => p,
+                Err(_) => return,
+            };
 
-                if is_right_click {
-                    if proxy.context_menu(x, y).await.is_err() {
-                        if proxy.secondary_activate(x, y).await.is_err() {
-                            let _ = proxy.activate(x, y).await;
-                        }
+            if is_right_click {
+                if proxy.context_menu(x, y).await.is_err() {
+                    if proxy.secondary_activate(x, y).await.is_err() {
+                        let _ = proxy.activate(x, y).await;
                     }
-                } else {
-                    let _ = proxy.activate(x, y).await;
                 }
+            } else {
+                let _ = proxy.activate(x, y).await;
             }
-        });
+        }
     });
 }
 
@@ -89,28 +86,25 @@ pub fn get_dbus_menu(service: &str) -> Option<Vec<crate::models::MenuItem>> {
 
 pub fn activate_menu_item(service: &str, item_id: i32) {
     let service_str = service.to_string();
-    std::thread::spawn(move || {
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        rt.block_on(async {
-            let menu_path = fetch_menu_path(&service_str).await.unwrap_or_default();
-            if menu_path.is_empty() { return; }
+    gtk4::glib::spawn_future_local(async move {
+        let menu_path = fetch_menu_path(&service_str).await.unwrap_or_default();
+        if menu_path.is_empty() { return; }
 
-            if let Ok(conn) = zbus::Connection::session().await {
-                if let Ok(bus_name) = zbus::names::BusName::try_from(service_str) {
-                    if let Ok(proxy) = super::dbusmenu::DbusMenuProxy::builder(&conn)
-                        .destination(bus_name)
-                        .unwrap()
-                        .path(menu_path)
-                        .unwrap()
-                        .build()
-                        .await
-                    {
-                        let empty_str = zbus::zvariant::Value::from("");
-                        let _ = proxy.event(item_id, "clicked", &empty_str, 0).await;
-                    }
+        if let Ok(conn) = zbus::Connection::session().await {
+            if let Ok(bus_name) = zbus::names::BusName::try_from(service_str) {
+                if let Ok(proxy) = super::dbusmenu::DbusMenuProxy::builder(&conn)
+                    .destination(bus_name)
+                    .unwrap()
+                    .path(menu_path)
+                    .unwrap()
+                    .build()
+                    .await
+                {
+                    let empty_str = zbus::zvariant::Value::from("");
+                    let _ = proxy.event(item_id, "clicked", &empty_str, 0).await;
                 }
             }
-        });
+        }
     });
 }
 
