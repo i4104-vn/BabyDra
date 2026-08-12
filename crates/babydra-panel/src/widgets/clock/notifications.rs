@@ -6,6 +6,7 @@ use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::collections::HashSet;
+use super::notification_group::format_elapsed_time;
 
 /// Configures and manages the interactive historical notifications list stack.
 /// Sets up periodic timers to update clock time, date, and detects when new notifications arrive.
@@ -35,8 +36,8 @@ pub fn setup_notifications_list(
                 notif_stack.remove(&child);
             }
 
-            let notifications = babydra_island::widgets::notification::HISTORICAL_NOTIFICATIONS.with(|list| {
-                list.borrow().clone()
+            let notifications: Vec<_> = babydra_island::widgets::notification::HISTORICAL_NOTIFICATIONS.with(|list| {
+                list.borrow().iter().cloned().collect()
             });
 
             if notifications.is_empty() {
@@ -47,18 +48,7 @@ pub fn setup_notifications_list(
                 empty_label.set_vexpand(true);
                 notif_stack.append(&empty_label);
             } else {
-                let mut grouped = std::collections::HashMap::<String, Vec<babydra_island::models::ActiveNotification>>::new();
-                let mut app_order = Vec::new();
-
-                for notif in notifications.iter() {
-                    let app_key = if notif.icon.is_empty() { "system".to_string() } else { notif.icon.to_lowercase() };
-                    if !grouped.contains_key(&app_key) {
-                        app_order.push(app_key.clone());
-                    }
-                    grouped.entry(app_key).or_default().push(notif.clone());
-                }
-
-                app_order.reverse();
+                let (grouped, app_order) = super::notification_group::group_notifications_by_app(&notifications);
 
                 for app_key in app_order {
                     let list = &grouped[&app_key];
@@ -165,8 +155,8 @@ fn render_expanded_group(
     let group_header = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
     group_header.add_css_class("notif-group-header");
 
-    let name = if app_key == "system" { "preferences-system" } else { app_key };
-    let icon_widget = babydra_utils::ui::icon::get_system_or_file_icon(name, "preferences-system");
+    let latest_notif = list.last().unwrap();
+    let icon_widget = make_notif_icon(&latest_notif.icon);
     icon_widget.set_pixel_size(18);
     icon_widget.set_valign(gtk4::Align::Center);
     icon_widget.set_halign(gtk4::Align::Center);
@@ -194,7 +184,7 @@ fn render_expanded_group(
         let item_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
         item_box.add_css_class("notif-stack-item");
 
-        let icon_widget = babydra_utils::ui::icon::get_system_or_file_icon(name, "preferences-system");
+        let icon_widget = make_notif_icon(&notif.icon);
         icon_widget.set_pixel_size(18);
         icon_widget.set_valign(gtk4::Align::Center);
         icon_widget.set_halign(gtk4::Align::Center);
@@ -291,8 +281,7 @@ fn render_collapsed_group(
     let main_item = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
     main_item.add_css_class("notif-stack-item");
 
-    let name = if app_key == "system" { "preferences-system" } else { app_key };
-    let icon_widget = babydra_utils::ui::icon::get_system_or_file_icon(name, "preferences-system");
+    let icon_widget = make_notif_icon(&latest_notif.icon);
     icon_widget.set_pixel_size(18);
     icon_widget.set_valign(gtk4::Align::Center);
     icon_widget.set_halign(gtk4::Align::Center);
@@ -366,16 +355,30 @@ fn render_collapsed_group(
     group_container
 }
 
-/// Formats elapsed time since notification trigger into a user-friendly localized text.
-fn format_elapsed_time(instant: std::time::Instant) -> String {
-    let secs = instant.elapsed().as_secs();
-    if secs < 60 {
-        babydra_common::i18n::t("panel.just_now")
-    } else if secs < 3600 {
-        babydra_common::i18n::t("panel.minutes_ago").replace("{}", &(secs / 60).to_string())
-    } else if secs < 86400 {
-        babydra_common::i18n::t("panel.hours_ago").replace("{}", &(secs / 3600).to_string())
-    } else {
-        babydra_common::i18n::t("panel.days_ago").replace("{}", &(secs / 86400).to_string())
+
+fn make_notif_icon(icon: &str) -> gtk4::Image {
+    let size = 18;
+    // Absolute path – use directly if file exists
+    if icon.starts_with('/') && std::path::Path::new(icon).exists() {
+        let img = gtk4::Image::new();
+        img.set_from_file(Some(icon));
+        img.set_pixel_size(size);
+        return img;
     }
+    // Named icon – check if it exists in the current icon theme
+    if !icon.is_empty() && icon != "babydra" {
+        if let Some(display) = gdk4::Display::default() {
+            let theme = gtk4::IconTheme::for_display(&display);
+            // Strip extension if present
+            let clean = icon.trim_end_matches(|c| c == '.')
+                .rsplitn(2, '.').last().unwrap_or(icon);
+            if theme.has_icon(clean) {
+                let img = gtk4::Image::from_icon_name(clean);
+                img.set_pixel_size(size);
+                return img;
+            }
+        }
+    }
+    // Fallback: embedded logo
+    babydra_utils::ui::icon::get_logo_png(size)
 }

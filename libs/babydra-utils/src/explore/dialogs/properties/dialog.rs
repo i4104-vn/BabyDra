@@ -1,6 +1,6 @@
-use std::rc::Rc;
 use gtk4::prelude::*;
 use gtk4::{Box, Orientation, Button, Align, Window};
+use std::os::unix::fs::MetadataExt;
 use std::path::PathBuf;
 
 use babydra_common::i18n::t;
@@ -47,7 +47,6 @@ pub fn show_properties_dialog(
     if target_paths.len() == 1 {
         let path = &target_paths[0];
         if let Ok(meta) = std::fs::metadata(path) {
-            use std::os::unix::fs::MetadataExt;
             let mode = meta.mode();
             checkboxes = Some(build_permission_matrix(&vbox, mode));
         }

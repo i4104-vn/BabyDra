@@ -10,8 +10,8 @@ button.circular,
 .circular {
     background-image: none;
     border-radius: 50%;
-    min-width: 32px;
-    min-height: 32px;
+    min-width: 36px;
+    min-height: 36px;
     padding: 0;
     font-size: 14px;
     font-weight: 500;
@@ -56,7 +56,12 @@ button.suggested-action:active {
 
 button.btn-primary:disabled,
 button.btn-primary.disabled,
-button.suggested-action:disabled {
+button.suggested-action:disabled,
+button.suggested-action.disabled {
+    background-color: rgba(59, 130, 246, 0.30) !important;
+    color: rgba(255, 255, 255, 0.40) !important;
+    opacity: 0.5 !important;
+    cursor: not-allowed;
     box-shadow: none;
 }
 

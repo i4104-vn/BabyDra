@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, ListBox, ListBoxRow, Label, Switch, Align};
+use gtk4::{Box, Orientation, ListBox, ListBoxRow, Label, Align};
 
 /// Helper to render a settings row with a switch toggle.
 pub fn add_switch_row(
@@ -45,19 +45,12 @@ pub fn add_switch_row(
     vbox_lbl.append(&lbl_desc);
     hbox.append(&vbox_lbl);
 
-    let sw = Switch::builder()
-        .active(active)
-        .halign(Align::End)
-        .valign(Align::Center)
-        .build();
-    sw.set_cursor_from_name(Some("pointer"));
-    
-    sw.connect_active_notify(move |switch| {
-        let state = switch.is_active();
+    let sw = babydra_utils::components::CustomSwitch::new(active);
+    sw.connect_state_set(move |state| {
         on_toggle(state);
     });
 
-    hbox.append(&sw);
+    hbox.append(&sw.container);
     row.set_child(Some(&hbox));
     listbox.append(&row);
 }

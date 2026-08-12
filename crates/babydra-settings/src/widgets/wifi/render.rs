@@ -3,10 +3,11 @@
 use gtk4::prelude::*;
 
 use babydra_utils::components::modal::{WifiConfigDialog, WifiInfoDialog, WifiPasswordDialog};
+use babydra_utils::components::ToggleRow;
 
 pub fn build_wifi_ui() -> (
     gtk4::Overlay,
-    gtk4::Switch,
+    ToggleRow,
     gtk4::Box,
     WifiInfoDialog,
     WifiPasswordDialog,
@@ -28,19 +29,8 @@ pub fn build_wifi_ui() -> (
     page_title.set_hexpand(true);
     header_box.append(&page_title);
 
-    let switch_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
-    switch_box.set_valign(gtk4::Align::Center);
-
-    let status_label = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.on")));
-    status_label.add_css_class("wifi-status-on");
-    switch_box.append(&status_label);
-
-    let wifi_switch = gtk4::Switch::new();
-    wifi_switch.set_valign(gtk4::Align::Center);
-    wifi_switch.set_cursor_from_name(Some("pointer"));
-    switch_box.append(&wifi_switch);
-
-    header_box.append(&switch_box);
+    let toggle_row = ToggleRow::new(false);
+    header_box.append(&toggle_row.container);
     main_box.append(&header_box);
 
     // Glass Panel Container (Fixed height extending to bottom line)
@@ -75,7 +65,7 @@ pub fn build_wifi_ui() -> (
 
     (
         overlay,
-        wifi_switch,
+        toggle_row,
         list_box,
         info_dialog,
         password_dialog,

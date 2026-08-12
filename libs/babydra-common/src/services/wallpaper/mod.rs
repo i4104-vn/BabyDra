@@ -40,13 +40,21 @@ pub fn set_wallpaper(path: &Path) -> Result<(), String> {
 
     let path_str = target_path.to_str().ok_or("Invalid path encoding")?;
 
-    // Save active wallpaper path to config file for persistence
-    let config_dir = PathBuf::from(&home).join(".config").join("babydra");
-    let _ = std::fs::create_dir_all(&config_dir);
-    let _ = std::fs::write(config_dir.join("current_wallpaper"), path_str);
+    // Save active wallpaper path to unified babydra.conf
+    let mut conf = crate::config::load_babydra_config();
+    conf.wallpaper.current = path_str.to_string();
+    crate::config::save_babydra_config(&conf);
 
     if has_binary("awww") {
-        let _ = Command::new("awww-daemon").spawn();
+        let daemon_running = Command::new("pgrep")
+            .arg("-x")
+            .arg("awww-daemon")
+            .output()
+            .map(|o| o.status.success())
+            .unwrap_or(false);
+        if !daemon_running {
+            let _ = Command::new("awww-daemon").spawn();
+        }
         let status = Command::new("awww")
             .args(["img", path_str])
             .status()
@@ -57,6 +65,13 @@ pub fn set_wallpaper(path: &Path) -> Result<(), String> {
     } 
 
     Err("No compatible wallpaper backend - awww was found in PATH".to_string())
+}
+
+/// Applies the currently saved wallpaper from babydra.conf.
+pub fn apply_saved_wallpaper() {
+    if let Some(path) = get_current_wallpaper() {
+        let _ = set_wallpaper(&path);
+    }
 }
 
 /// Retrieves the path to the currently active wallpaper from user configuration or daemon query.
@@ -74,15 +89,15 @@ pub fn get_current_wallpaper() -> Option<PathBuf> {
         }
     }
 
-    if let Ok(home) = std::env::var("HOME") {
-        let saved_file = PathBuf::from(&home).join(".config/babydra/current_wallpaper");
-        if let Ok(content) = std::fs::read_to_string(&saved_file) {
-            let path = PathBuf::from(content.trim());
-            if path.exists() {
-                return Some(path);
-            }
+    let conf = crate::config::load_babydra_config();
+    if !conf.wallpaper.current.is_empty() {
+        let path = PathBuf::from(&conf.wallpaper.current);
+        if path.exists() {
+            return Some(path);
         }
+    }
 
+    if let Ok(home) = std::env::var("HOME") {
         let wp_dir = PathBuf::from(&home).join(".babydra/wallpaper");
         if let Ok(entries) = std::fs::read_dir(wp_dir) {
             let mut files: Vec<PathBuf> = entries

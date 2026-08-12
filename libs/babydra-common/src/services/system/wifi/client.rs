@@ -1,6 +1,7 @@
 //! D-Bus proxy clients for NetworkManager interfaces.
 
 use std::collections::HashMap;
+use std::ops::Deref;
 use zbus::blocking::Connection;
 use zbus::zvariant::{ObjectPath, Value, OwnedObjectPath, OwnedValue};
 
@@ -127,6 +128,5 @@ pub fn val_to_str(val: &Value<'_>) -> Option<String> {
 }
 
 pub fn owned_val_to_str(val: &OwnedValue) -> Option<String> {
-    use std::ops::Deref;
     val_to_str(val.deref())
 }

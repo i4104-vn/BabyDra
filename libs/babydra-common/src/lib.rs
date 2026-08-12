@@ -14,17 +14,21 @@ pub use models::explore::{
 };
 
 // Flat re-exports at root for convenience and backward compatibility
-pub use config::{ThemeConfig, ShellConfig, get_babydra_config_dir, ExploreSettings, load_explore_settings, save_explore_settings};
+pub use config::{
+    ThemeConfig, ShellConfig, get_babydra_config_dir, get_babydra_conf_path,
+    ExploreSettings, PowerConfig, WallpaperConfig, NotificationConfig, BabyDraConfig,
+    load_explore_settings, save_explore_settings, load_babydra_config, save_babydra_config,
+};
 pub use services::icon::get_logo_path;
 pub use services::notification::island::{IslandState, update_island_state, clear_island_state, get_island_state_path};
 pub use services::system::volume::AudioDevice;
 pub use services::system::storage::DiskInfo;
-pub use services::notification::service::{ActiveNotification, NotificationMsg};
+pub use services::notification::service::{ActiveNotification, NotificationMsg, send_notification, send_notification_with_icon, send_settings_notification, send_app_notification};
 pub use services::apps::{find_desktop_apps, refresh_desktop_apps_cache, DesktopApp};
-pub use models::battery::BatteryInfo;
-pub use models::power::PerformanceProfile;
+pub use models::shell::battery::BatteryInfo;
+pub use models::shell::power::PerformanceProfile;
 pub use services::system::battery::get_battery_info;
-pub use services::system::power::{poweroff, reboot, suspend, get_current_profile, set_performance_profile};
+pub use services::system::power::{poweroff, reboot, suspend, get_current_profile, set_performance_profile, set_performance_profile_with_password, apply_saved_profile};
 pub use services::system::auth::verify_password;
 pub use services::window::{close_window, focus_window};
 pub use services::screenshot::{capture_screen_to_temp, get_screenshot_save_path, trigger_save, trigger_copy, handle_fullscreen_capture};
@@ -46,7 +50,9 @@ pub use services::system::backlight;
 pub use services::system::bluetooth;
 pub use services::system::vpn;
 pub use services::wallpaper;
-pub use services::wallpaper::{set_wallpaper, get_current_wallpaper};
+pub use services::wallpaper::{set_wallpaper, get_current_wallpaper, apply_saved_wallpaper};
+pub use services::system::display::{save_displays, get_displays, apply_saved_displays};
+
 pub use services::search;
 pub use services::search::search_files;
 pub use services::mpris;
@@ -76,4 +82,21 @@ pub mod helper {
     pub use crate::services::system::storage;
     pub use crate::services::system::clean;
     pub use crate::services::system::network;
+}
+
+/// Applies all saved user settings from unified babydra.conf (CPU performance profile, Display monitors resolution/refresh rates, Wallpaper, Auto Battery Saver).
+pub fn apply_all_saved_settings() {
+    // 1. CPU Performance Profile
+    services::system::power::apply_saved_profile();
+
+    // 2. Display Monitor resolution, refresh rate, position, scale
+    services::system::display::apply_saved_displays();
+
+    // 3. System Wallpaper
+    services::wallpaper::apply_saved_wallpaper();
+
+    // 4. Auto Battery Saver check
+    if let Some(info) = get_battery_info() {
+        battery::check_and_apply_auto_battery_saver(&info);
+    }
 }

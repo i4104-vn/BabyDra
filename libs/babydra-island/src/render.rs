@@ -16,7 +16,7 @@ pub fn create_system_island() -> gtk4::Box {
 
     let notch_capsule = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     notch_capsule.add_css_class("panel-notch");
-    notch_capsule.set_valign(gtk4::Align::Center);
+    notch_capsule.set_valign(gtk4::Align::Start);
     notch_capsule.set_halign(gtk4::Align::Center);
     notch_capsule.set_visible(false);
 
@@ -140,8 +140,9 @@ pub fn create_system_island() -> gtk4::Box {
     notif_body_lbl.add_css_class("badge-desc");
     notif_body_lbl.set_halign(gtk4::Align::Start);
     notif_body_lbl.set_wrap(true);
+    notif_body_lbl.set_wrap_mode(gtk4::pango::WrapMode::WordChar);
     notif_body_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
-    notif_body_lbl.set_lines(2);
+    notif_body_lbl.set_lines(3);
 
     notif_text_box.append(&notif_title_lbl);
     notif_text_box.append(&notif_body_lbl);
@@ -186,6 +187,10 @@ pub fn create_system_island() -> gtk4::Box {
         popover_art_container,
         popover_app_name,
         play_btn_icon,
+        popover_progress_container,
+        popover_progress_bar,
+        popover_position_lbl,
+        popover_length_lbl,
     ) = widgets::popover::create_media_popover(&notch_capsule, &notification_view);
 
     let is_playing_state = Rc::new(Cell::new(false));
@@ -227,6 +232,10 @@ pub fn create_system_island() -> gtk4::Box {
         notif_art_container,
         notif_title_lbl,
         notif_body_lbl,
+        popover_progress_container,
+        popover_progress_bar,
+        popover_position_lbl,
+        popover_length_lbl,
     };
     start_player_polling_loop(
         is_playing_state.clone(),

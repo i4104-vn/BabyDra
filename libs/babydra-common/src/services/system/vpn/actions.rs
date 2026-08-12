@@ -1,6 +1,5 @@
 use crate::models::vpn::*;
 use crate::services::utils::{run_cmd_bool, run_cmd};
-use std::process::Command;
 
 pub fn connect_vpn(name: &str) -> bool {
     run_cmd_bool(&["nmcli", "connection", "up", name])

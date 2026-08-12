@@ -14,7 +14,7 @@ pub fn show_rename_dialog(
 ) {
     let widgets = render::build_rename_dialog_ui(path, parent);
     let window = widgets.window;
-    let vbox = widgets.vbox;
+    let _vbox = widgets.vbox;
     let entry = widgets.entry;
     let lbl_error = widgets.lbl_error;
     let btn_rename = widgets.btn_rename;

@@ -27,6 +27,9 @@ pub trait StatusNotifierItem {
 
     #[zbus(property)]
     fn title(&self) -> zbus::Result<String>;
+    
+    #[zbus(property)]
+    fn menu(&self) -> zbus::Result<zbus::zvariant::ObjectPath<'_>>;
 }
 
 /// DBus watcher object for org.kde.StatusNotifierWatcher.

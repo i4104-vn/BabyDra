@@ -1,6 +1,6 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Label, ListBox, ListBoxRow, Orientation, Overlay, ScrolledWindow, Spinner, TextView};
-use babydra_common::models::system_update::{PackageUpdate, SystemUpdateWidget};
+use gtk4::{Box, Button, Label, ListBox, ListBoxRow, Orientation, Overlay, ProgressBar, ScrolledWindow, Spinner};
+use babydra_common::models::system_update::{PackageUpdate, SystemUpdateWidget, UpdateStatus};
 use babydra_utils::components::modal::PasswordDialog;
 
 pub fn create_update_row(pkg: &PackageUpdate) -> ListBoxRow {
@@ -15,17 +15,48 @@ pub fn create_update_row(pkg: &PackageUpdate) -> ListBoxRow {
     row_box.set_margin_start(8);
     row_box.set_margin_end(8);
 
+    // Left status icon badge
     let icon_box = Box::new(Orientation::Vertical, 0);
-    icon_box.add_css_class("blue-icon-badge-sm");
     icon_box.set_valign(gtk4::Align::Center);
     icon_box.set_halign(gtk4::Align::Start);
 
-    let icon_img = babydra_utils::ui::icon::get_icon("download", 18);
-    icon_img.set_pixel_size(18);
-    icon_img.set_valign(gtk4::Align::Center);
-    icon_img.set_halign(gtk4::Align::Center);
-    icon_img.set_vexpand(true);
-    icon_box.append(&icon_img);
+    match pkg.status {
+        UpdateStatus::Pending => {
+            icon_box.add_css_class("blue-icon-badge-sm");
+            let icon_img = babydra_utils::ui::icon::get_icon("download", 18);
+            icon_img.set_pixel_size(18);
+            icon_img.set_valign(gtk4::Align::Center);
+            icon_img.set_halign(gtk4::Align::Center);
+            icon_img.set_vexpand(true);
+            icon_box.append(&icon_img);
+        }
+        UpdateStatus::Updating => {
+            let row_spinner = Spinner::new();
+            row_spinner.set_size_request(20, 20);
+            row_spinner.set_valign(gtk4::Align::Center);
+            row_spinner.set_halign(gtk4::Align::Center);
+            row_spinner.start();
+            icon_box.append(&row_spinner);
+        }
+        UpdateStatus::Done => {
+            icon_box.add_css_class("green-icon-badge-sm");
+            let icon_img = babydra_utils::ui::icon::get_icon("check", 18);
+            icon_img.set_pixel_size(18);
+            icon_img.set_valign(gtk4::Align::Center);
+            icon_img.set_halign(gtk4::Align::Center);
+            icon_img.set_vexpand(true);
+            icon_box.append(&icon_img);
+        }
+        UpdateStatus::Failed => {
+            icon_box.add_css_class("red-icon-badge-sm");
+            let icon_img = babydra_utils::ui::icon::get_icon("close", 18);
+            icon_img.set_pixel_size(18);
+            icon_img.set_valign(gtk4::Align::Center);
+            icon_img.set_halign(gtk4::Align::Center);
+            icon_img.set_vexpand(true);
+            icon_box.append(&icon_img);
+        }
+    }
     row_box.append(&icon_box);
 
     let text_box = Box::new(Orientation::Vertical, 2);
@@ -43,6 +74,39 @@ pub fn create_update_row(pkg: &PackageUpdate) -> ListBoxRow {
     text_box.append(&ver_lbl);
 
     row_box.append(&text_box);
+
+    // Right status indicator badge
+    let status_badge_lbl = match pkg.status {
+        UpdateStatus::Pending => {
+            let lbl = Label::new(Some(&babydra_common::i18n::t("settings.status_waiting")));
+            lbl.add_css_class("settings-row-desc");
+            lbl.set_valign(gtk4::Align::Center);
+            Some(lbl)
+        }
+        UpdateStatus::Updating => {
+            let lbl = Label::new(Some(&babydra_common::i18n::t("settings.status_pending")));
+            lbl.add_css_class("settings-row-desc");
+            lbl.set_valign(gtk4::Align::Center);
+            Some(lbl)
+        }
+        UpdateStatus::Done => {
+            let lbl = Label::new(Some(&babydra_common::i18n::t("settings.status_done")));
+            lbl.add_css_class("status-success-badge");
+            lbl.set_valign(gtk4::Align::Center);
+            Some(lbl)
+        }
+        UpdateStatus::Failed => {
+            let lbl = Label::new(Some(&babydra_common::i18n::t("settings.status_failed")));
+            lbl.add_css_class("status-error-badge");
+            lbl.set_valign(gtk4::Align::Center);
+            Some(lbl)
+        }
+    };
+
+    if let Some(badge) = status_badge_lbl {
+        row_box.append(&badge);
+    }
+
     row.set_child(Some(&row_box));
     row
 }
@@ -135,6 +199,22 @@ pub fn build(updates: &[PackageUpdate]) -> (SystemUpdateWidget, PasswordDialog) 
     header_box.append(&update_all_btn);
     container.append(&header_box);
 
+    // Overall Progress Bar and Status Label Panel
+    let progress_box = Box::new(Orientation::Vertical, 6);
+    progress_box.set_visible(false);
+
+    let status_label = Label::new(None);
+    status_label.add_css_class("settings-row-desc");
+    status_label.set_halign(gtk4::Align::Start);
+
+    let progress_bar = ProgressBar::new();
+    progress_bar.set_fraction(0.0);
+    progress_bar.add_css_class("update-progress-bar");
+
+    progress_box.append(&status_label);
+    progress_box.append(&progress_bar);
+    container.append(&progress_box);
+
     // Package List Glass Card
     let glass_card = Box::new(Orientation::Vertical, 0);
     glass_card.add_css_class("glass-panel");
@@ -161,34 +241,6 @@ pub fn build(updates: &[PackageUpdate]) -> (SystemUpdateWidget, PasswordDialog) 
     glass_card.append(&scroll);
     container.append(&glass_card);
 
-    // Console Log Panel (no header bar, no close button)
-    let console_card = Box::new(Orientation::Vertical, 0);
-    console_card.add_css_class("glass-panel");
-    console_card.add_css_class("console-log-panel");
-    console_card.set_vexpand(true);
-    console_card.set_valign(gtk4::Align::Fill);
-    console_card.set_visible(false);
-
-    let console_title_lbl = Label::new(Some("System Update Console Output"));
-    let console_close_btn = Button::new();
-
-    let text_view = TextView::new();
-    text_view.set_editable(false);
-    text_view.set_cursor_visible(false);
-    text_view.set_monospace(true);
-    text_view.add_css_class("console-log-text");
-
-    let text_buffer = text_view.buffer();
-
-    let console_scroll = ScrolledWindow::new();
-    console_scroll.set_policy(gtk4::PolicyType::Automatic, gtk4::PolicyType::Automatic);
-    console_scroll.set_vexpand(true);
-    console_scroll.set_valign(gtk4::Align::Fill);
-    console_scroll.set_child(Some(&text_view));
-
-    console_card.append(&console_scroll);
-    container.append(&console_card);
-
     root.set_child(Some(&container));
 
     // Reusable Password Dialog Overlay
@@ -202,14 +254,10 @@ pub fn build(updates: &[PackageUpdate]) -> (SystemUpdateWidget, PasswordDialog) 
         spinner,
         update_all_btn,
         refresh_btn,
+        progress_bar,
+        status_label,
         glass_card,
         list_box,
-        console_card,
-        console_title_lbl,
-        console_close_btn,
-        text_view,
-        text_buffer,
-        console_scroll,
     };
 
     (widget, auth_dialog)

@@ -13,7 +13,7 @@ pub fn show_conflict_dialog(
 ) {
     let widgets = render::build_conflict_dialog_ui(item_name, parent);
     let window = widgets.window;
-    let vbox = widgets.vbox;
+    let _vbox = widgets.vbox;
 
     let win_cancel_btn = window.clone();
     widgets.btn_cancel.connect_clicked(move |_| {

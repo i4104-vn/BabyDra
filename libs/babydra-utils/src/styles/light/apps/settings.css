@@ -41,8 +41,7 @@ button.sidebar-item.active-nav {
     font-weight: 600;
 }
 
-button.sidebar-item.active-nav label,
-button.sidebar-item.active-nav image {
+button.sidebar-item.active-nav label {
     color: #3b82f6;
 }
 
@@ -51,10 +50,16 @@ button.sidebar-item.active-nav:hover {
     color: #2563eb;
 }
 
-button.sidebar-item.active-nav:hover label,
-button.sidebar-item.active-nav:hover image {
+button.sidebar-item.active-nav:hover label {
     color: #2563eb;
 }
+
+.sidebar-wallpaper-thumb {
+    border-radius: 9999px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
 
 .settings-breadcrumb-parent {
     color: rgba(28, 28, 30, 0.50);
@@ -90,6 +95,14 @@ button.sidebar-item.active-nav:hover image {
     color: rgba(28, 28, 30, 0.50);
 }
 
+.toggle-status-on {
+    color: rgba(28, 28, 30, 0.9);
+}
+
+.toggle-status-off {
+    color: rgba(28, 28, 30, 0.4);
+}
+
 .settings-row-icon {
     color: rgba(28, 28, 30, 0.65);
 }
@@ -100,7 +113,7 @@ button.sidebar-item.active-nav:hover image {
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 16px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-    padding: 12px;
+    padding: 16px 20px;
 }
 
 .settings-card row,
@@ -111,6 +124,21 @@ button.sidebar-item.active-nav:hover image {
 .settings-card row:hover,
 .settings-card-row:hover {
     background-color: rgba(0, 0, 0, 0.04);
+}
+
+button.perf-profile-row-btn {
+    background-color: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+button.perf-profile-row-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.12);
+}
+
+button.perf-profile-row-btn.active {
+    background-color: rgba(59, 130, 246, 0.10);
+    border-color: #3b82f6;
 }
 
 
@@ -477,9 +505,45 @@ progressbar.console-progress progress {
 }
 
 .update-count-badge {
-    background-color: rgba(59, 130, 246, 0.10);
-    border: 1px solid rgba(59, 130, 246, 0.25);
+    background-color: rgba(37, 99, 235, 0.10);
+    border: 1px solid rgba(37, 99, 235, 0.25);
     color: #2563eb;
+}
+
+.update-progress-bar trough {
+    min-height: 8px;
+    border-radius: 9999px;
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+.update-progress-bar progress {
+    min-height: 8px;
+    border-radius: 9999px;
+    background-color: #2563eb;
+}
+
+.green-icon-badge-sm {
+    background-color: rgba(16, 185, 129, 0.12);
+    border-radius: 8px;
+    padding: 6px;
+}
+
+.red-icon-badge-sm {
+    background-color: rgba(239, 68, 68, 0.12);
+    border-radius: 8px;
+    padding: 6px;
+}
+
+.status-success-badge {
+    color: #059669;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.status-error-badge {
+    color: #dc2626;
+    font-weight: 600;
+    font-size: 13px;
 }
 
 .wifi-info-section-title {
@@ -502,6 +566,15 @@ progressbar.console-progress progress {
 .wifi-status-text {
     color: rgba(28, 28, 30, 0.8);
 }
+
+.wifi-status-on {
+    color: rgba(28, 28, 30, 0.90);
+}
+
+.wifi-status-off {
+    color: rgba(28, 28, 30, 0.45);
+}
+
 
 .segmented-control {
     background-color: rgba(0, 0, 0, 0.04);
@@ -574,4 +647,52 @@ entry.sidebar-search-entry>text {
     border: none;
     box-shadow: none;
     color: #1c1c1e;
+}
+
+/* Settings Scale Slider Colors (Light) */
+scale.settings-scale trough,
+scale.settings-scale > trough,
+scale.settings-scale contents > trough {
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+scale.settings-scale trough highlight,
+scale.settings-scale > trough > highlight,
+scale.settings-scale contents > trough > highlight {
+    background-color: #2563eb;
+}
+
+scale.settings-scale slider,
+scale.settings-scale > slider,
+scale.settings-scale contents > slider {
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.20);
+}
+
+scale.settings-scale mark label {
+    color: rgba(0, 0, 0, 0.50);
+}
+
+scale.settings-scale:disabled trough,
+scale.settings-scale:disabled > trough,
+scale.settings-scale:disabled contents > trough {
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+scale.settings-scale:disabled trough highlight,
+scale.settings-scale:disabled > trough > highlight,
+scale.settings-scale:disabled contents > trough > highlight {
+    background-color: rgba(0, 0, 0, 0.18);
+}
+
+scale.settings-scale:disabled slider,
+scale.settings-scale:disabled > slider,
+scale.settings-scale:disabled contents > slider {
+    background-color: rgba(0, 0, 0, 0.25);
+    box-shadow: none;
+}
+
+scale.settings-scale:disabled mark label {
+    color: rgba(0, 0, 0, 0.25);
 }

@@ -41,5 +41,13 @@ pub struct IslandWidgets {
     pub notif_title_lbl: gtk4::Label,
     /// Message body label in the notification overlay.
     pub notif_body_lbl: gtk4::Label,
+    /// Container for popover media playback progress bar.
+    pub popover_progress_container: gtk4::Box,
+    /// Media progress bar widget.
+    pub popover_progress_bar: gtk4::ProgressBar,
+    /// Current position time label (e.g. 1:23).
+    pub popover_position_lbl: gtk4::Label,
+    /// Total track length time label (e.g. 3:45).
+    pub popover_length_lbl: gtk4::Label,
 }
 

@@ -46,7 +46,8 @@ pub fn create_tray_widget(window: &gtk4::ApplicationWindow) -> gtk4::Box {
 
                 let gesture = gtk4::GestureClick::new();
                 gesture.set_button(0);
-                gesture.set_propagation_phase(gtk4::PropagationPhase::Capture);
+                gesture.set_propagation_phase(gtk4::PropagationPhase::Bubble);
+                gesture.set_exclusive(true);
 
                 gesture.connect_pressed(move |g, _, click_x, click_y| {
                     let button_num = g.current_button();
@@ -58,7 +59,34 @@ pub fn create_tray_widget(window: &gtk4::ApplicationWindow) -> gtk4::Box {
                     let abs_x = (8.0 + root_x + click_x) as i32;
                     let abs_y = (6.0 + root_y + click_y) as i32;
 
-                    babydra_common::tray::activate_item(&service_name, abs_x, abs_y, is_right_click);
+                    if is_right_click {
+                        let (tx, rx) = std::sync::mpsc::channel();
+                        let s_name_clone = service_name.clone();
+                        std::thread::spawn(move || {
+                            let menu_opt = babydra_common::tray::get_dbus_menu(&s_name_clone);
+                            let _ = tx.send(menu_opt);
+                        });
+
+                        let btn_clone = btn_c.clone();
+                        let s_name_main = service_name.clone();
+                        
+                        gtk4::glib::timeout_add_local(std::time::Duration::from_millis(10), move || {
+                            match rx.try_recv() {
+                                Ok(menu_opt) => {
+                                    if let Some(menu) = menu_opt {
+                                        render::show_context_menu(&btn_clone, &s_name_main, &menu);
+                                    } else {
+                                        babydra_common::tray::activate_item(&s_name_main, abs_x, abs_y, true);
+                                    }
+                                    gtk4::glib::ControlFlow::Break
+                                },
+                                Err(std::sync::mpsc::TryRecvError::Empty) => gtk4::glib::ControlFlow::Continue,
+                                Err(std::sync::mpsc::TryRecvError::Disconnected) => gtk4::glib::ControlFlow::Break,
+                            }
+                        });
+                    } else {
+                        babydra_common::tray::activate_item(&service_name, abs_x, abs_y, false);
+                    }
                 });
 
                 btn.add_controller(gesture);

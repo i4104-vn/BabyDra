@@ -3,6 +3,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 mod calendar_window;
+mod notification_group;
 mod notifications;
 mod render;
 

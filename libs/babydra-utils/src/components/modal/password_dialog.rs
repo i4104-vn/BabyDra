@@ -1,6 +1,7 @@
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Label, Orientation, PasswordEntry};
 
+#[derive(Clone)]
 pub struct PasswordDialog {
     pub container: Box,
     pub password_entry: PasswordEntry,

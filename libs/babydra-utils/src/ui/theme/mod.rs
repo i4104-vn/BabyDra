@@ -190,7 +190,9 @@ pub fn init_theme() {
 }
 
 /// Helper stub for backward compatibility.
-pub fn apply_theme_class(_window: &gtk4::ApplicationWindow) { }
+pub fn apply_theme_class(_window: &gtk4::ApplicationWindow) {
+    // stub — theme is applied globally via init_theme()
+}
 
 /// Checks if dark mode is preferred in GSettings.
 pub fn is_dark_mode() -> bool {
@@ -201,15 +203,19 @@ pub fn is_dark_mode() -> bool {
 
 /// Sets the color scheme preference in GSettings.
 pub fn set_dark_mode(dark: bool) {
-    let _ = babydra_common::services::system::set_gsettings_color_scheme(dark);
+    std::thread::spawn(move || {
+        let _ = babydra_common::services::system::set_gsettings_color_scheme(dark);
 
-    if let Some(settings) = gtk4::Settings::default() {
-        settings.set_gtk_application_prefer_dark_theme(dark);
-    }
-
-    init_theme();
+        gtk4::glib::idle_add_local_once(move || {
+            if let Some(settings) = gtk4::Settings::default() {
+                settings.set_gtk_application_prefer_dark_theme(dark);
+            }
+            init_theme();
+        });
+    });
 }
 
+#[deprecated(note = "use init_theme() directly")]
 pub fn apply_explore_theme() {
     init_theme();
 }

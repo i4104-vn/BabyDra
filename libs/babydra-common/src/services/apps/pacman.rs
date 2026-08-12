@@ -109,3 +109,69 @@ pub fn stream_uninstall_package(pkg_name: &str, password: Option<&str>, sender: 
     crate::services::system::updates::execute_cmd_with_log_stream(&["sh", "-c", &cmd], password, sender)
 }
 
+pub fn find_cached_older_package(pkg_name: &str) -> Option<std::path::PathBuf> {
+    let cache_dir = Path::new("/var/cache/pacman/pkg");
+    if !cache_dir.exists() {
+        return None;
+    }
+
+    let current_ver = std::process::Command::new("pacman")
+        .args(&["-Q", pkg_name])
+        .output()
+        .ok()
+        .and_then(|o| {
+            if o.status.success() {
+                let out = String::from_utf8_lossy(&o.stdout);
+                let parts: Vec<&str> = out.split_whitespace().collect();
+                if parts.len() >= 2 {
+                    Some(parts[1].to_string())
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        });
+
+    let mut matches = Vec::new();
+    if let Ok(entries) = std::fs::read_dir(cache_dir) {
+        let prefix = format!("{}-", pkg_name);
+        for entry in entries.flatten() {
+            let filename = entry.file_name().to_string_lossy().to_string();
+            if filename.starts_with(&prefix) && filename.ends_with(".pkg.tar.zst") {
+                matches.push((entry.path(), filename));
+            }
+        }
+    }
+
+    if matches.is_empty() {
+        return None;
+    }
+
+    matches.sort_by_key(|(path, _)| {
+        std::fs::metadata(path).and_then(|m| m.modified()).ok()
+    });
+    matches.reverse();
+
+    if let Some(ref cur) = current_ver {
+        for (path, filename) in &matches {
+            if !filename.contains(cur) {
+                return Some(path.clone());
+            }
+        }
+    }
+
+    matches.first().map(|(p, _)| p.clone())
+}
+
+pub fn stream_downgrade_package(pkg_name: &str, password: Option<&str>, sender: std::sync::mpsc::Sender<String>) -> Result<(), String> {
+    crate::services::system::updates::clean_pacman_lock(password, sender.clone());
+    if let Some(cached_file) = find_cached_older_package(pkg_name) {
+        let path_str = cached_file.to_string_lossy().to_string();
+        let cmd = format!("pacman -U --noconfirm {}", path_str);
+        crate::services::system::updates::execute_cmd_with_log_stream(&["sh", "-c", &cmd], password, sender)
+    } else {
+        Err(format!("No cached older version found for '{}' in /var/cache/pacman/pkg/", pkg_name))
+    }
+}
+

@@ -1,7 +1,7 @@
 pub mod render;
 
 pub use babydra_common::helper::wifi::{
-    get_wifi_state, known_networks, scan_networks, connect_wifi,
+    get_wifi_state, scan_networks, connect_wifi,
 };
 
 use gtk4::prelude::*;
