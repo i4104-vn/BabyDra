@@ -114,8 +114,7 @@ pub fn render_network_list(
         icon_badge.set_halign(gtk4::Align::Start);
         icon_badge.set_hexpand(false);
 
-        let wifi_icon = babydra_utils::ui::icon::get_icon("wifi", 18);
-        wifi_icon.set_pixel_size(18);
+        let wifi_icon = babydra_utils::components::create_wifi_signal_icon_for_network(net.signal as u32, net.is_connected, 18, Some("#3B82F6"));
         wifi_icon.set_valign(gtk4::Align::Center);
         wifi_icon.set_halign(gtk4::Align::Center);
         wifi_icon.set_vexpand(true);

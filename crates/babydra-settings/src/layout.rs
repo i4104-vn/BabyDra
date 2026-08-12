@@ -24,31 +24,26 @@ const NAV_CATEGORIES: &[NavCategory] = &[
         items: &[
             NavItem { id: "wifi", icon: "wifi", i18n_key: "settings.nav_wifi" },
             NavItem { id: "bluetooth", icon: "bluetooth", i18n_key: "settings.nav_bluetooth" },
-            NavItem { id: "vpn", icon: "lock", i18n_key: "settings.nav_vpn" },
+            NavItem { id: "vpn", icon: "shield", i18n_key: "settings.nav_vpn" },
+            NavItem { id: "certificates", icon: "key", i18n_key: "settings.nav_certificates" },
             NavItem { id: "hosts", icon: "file-text", i18n_key: "settings.nav_hosts" },
-        ],
-    },
-    NavCategory {
-        title_key: "settings.cat_hardware",
-        items: &[
-            NavItem { id: "displays", icon: "desktop", i18n_key: "settings.nav_displays" },
-            NavItem { id: "power", icon: "battery", i18n_key: "settings.nav_power" },
-            NavItem { id: "keybinds", icon: "cog", i18n_key: "settings.nav_keybinds" },
         ],
     },
     NavCategory {
         title_key: "settings.cat_apps",
         items: &[
+            NavItem { id: "displays", icon: "desktop", i18n_key: "settings.nav_displays" },
             NavItem { id: "appearance", icon: "palette", i18n_key: "settings.nav_wallpaper_themes" },
-            NavItem { id: "apps", icon: "th-large", i18n_key: "settings.nav_installed_apps" },
-            NavItem { id: "startup", icon: "cog", i18n_key: "settings.nav_startup_apps" },
+            NavItem { id: "power", icon: "battery", i18n_key: "settings.nav_power" },
         ],
     },
     NavCategory {
         title_key: "settings.cat_system",
         items: &[
+            NavItem { id: "startup", icon: "cog", i18n_key: "settings.nav_startup_apps" },
+            NavItem { id: "apps", icon: "th-large", i18n_key: "settings.nav_installed_apps" },
             NavItem { id: "env", icon: "sliders", i18n_key: "settings.nav_env" },
-            NavItem { id: "certificates", icon: "key", i18n_key: "settings.nav_certificates" },
+            NavItem { id: "keybinds", icon: "cog", i18n_key: "settings.nav_keybinds" },
             NavItem { id: "system_update", icon: "history", i18n_key: "settings.nav_system_update" },
         ],
     },
@@ -88,19 +83,57 @@ fn ensure_page_loaded(stack: &gtk4::Stack, name: &str) {
     }
 }
 
-/// Finds and updates the Label text inside a sidebar Button (Button > Box > Label).
-fn update_sidebar_label(btn: &gtk4::Button, new_text: &str) {
+fn create_sidebar_icon_for_item(id: &str, default_icon: &str) -> gtk4::Widget {
+    match id {
+        "wifi" => babydra_utils::components::create_wifi_signal_icon(18),
+        "appearance" => babydra_utils::components::create_wallpaper_thumbnail_icon(18),
+        "power" => babydra_utils::components::create_battery_percentage_icon(18),
+        "vpn" => babydra_utils::components::create_vpn_shield_icon(18),
+        "bluetooth" => babydra_utils::components::create_colored_icon_widget("bluetooth", 18, "#2563EB"),
+        "hosts" => babydra_utils::components::create_colored_icon_widget("hosts", 18, "#10B981"),
+        "displays" => babydra_utils::components::create_colored_icon_widget("displays", 18, "#0EA5E9"),
+        "keybinds" => babydra_utils::components::create_colored_icon_widget("cog", 18, "#F97316"),
+        "apps" => babydra_utils::components::create_colored_icon_widget("apps", 18, "#A855F7"),
+        "startup" => babydra_utils::components::create_colored_icon_widget("cog", 18, "#6366F1"),
+        "env" => babydra_utils::components::create_colored_icon_widget("env", 18, "#06B6D4"),
+        "certificates" => babydra_utils::components::create_colored_icon_widget("certificates", 18, "#EAB308"),
+        "system_update" => babydra_utils::components::create_colored_icon_widget("system_update", 18, "#10B981"),
+        "system" => babydra_utils::components::create_colored_icon_widget("system", 18, "#3B82F6"),
+        _ => babydra_utils::components::create_colored_icon_widget(default_icon, 18, "#3B82F6"),
+    }
+}
+
+pub type NavButtonEntry = (&'static str, gtk4::Button, &'static str, &'static str);
+
+/// Finds and updates the icon and label text inside a sidebar Button.
+fn update_sidebar_icon_and_label(id: &str, btn: &gtk4::Button, new_text: &str, default_icon: &str) {
     if let Some(child) = btn.child() {
         if let Ok(hbox) = child.downcast::<gtk4::Box>() {
             let mut widget = hbox.first_child();
+            let mut is_first = true;
             while let Some(w) = widget {
-                if let Ok(label) = w.clone().downcast::<gtk4::Label>() {
+                let next = w.next_sibling();
+                if is_first {
+                    hbox.remove(&w);
+                    let new_icon = create_sidebar_icon_for_item(id, default_icon);
+                    new_icon.set_valign(gtk4::Align::Center);
+                    new_icon.set_halign(gtk4::Align::Center);
+                    hbox.prepend(&new_icon);
+                    is_first = false;
+                } else if let Ok(label) = w.clone().downcast::<gtk4::Label>() {
                     label.set_text(new_text);
                     return;
                 }
-                widget = w.next_sibling();
+                widget = next;
             }
         }
+    }
+}
+
+/// Public function to refresh icons and labels for all items in the sidebar.
+pub fn refresh_sidebar(nav_buttons: &Rc<RefCell<Vec<NavButtonEntry>>>) {
+    for (id, btn, key, icon) in nav_buttons.borrow().iter() {
+        update_sidebar_icon_and_label(id, btn, &babydra_common::i18n::t(key), icon);
     }
 }
 
@@ -172,7 +205,7 @@ pub fn build_main_window(app: &gtk4::Application) {
     let nav_container = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
 
     let category_labels: Rc<RefCell<Vec<(gtk4::Label, &'static str)>>> = Rc::new(RefCell::new(Vec::new()));
-    let nav_buttons: Rc<RefCell<Vec<(&'static str, gtk4::Button, &'static str)>>> = Rc::new(RefCell::new(Vec::new()));
+    let nav_buttons: Rc<RefCell<Vec<(&'static str, gtk4::Button, &'static str, &'static str)>>> = Rc::new(RefCell::new(Vec::new()));
 
     for cat in NAV_CATEGORIES {
         let hdr = create_sidebar_category_header(cat.title_key);
@@ -180,28 +213,31 @@ pub fn build_main_window(app: &gtk4::Application) {
         category_labels.borrow_mut().push((hdr, cat.title_key));
 
         for item in cat.items {
-            let btn = babydra_utils::components::create_sidebar_item_button(
+            let icon_w = create_sidebar_icon_for_item(item.id, item.icon);
+            let btn = babydra_utils::components::create_sidebar_item_button_with_widget(
                 &babydra_common::i18n::t(item.i18n_key),
-                item.icon,
+                &icon_w,
                 "sidebar-item",
                 || {},
             );
             btn.set_cursor_from_name(Some("pointer"));
             nav_container.append(&btn);
-            nav_buttons.borrow_mut().push((item.id, btn, item.i18n_key));
+            nav_buttons.borrow_mut().push((item.id, btn, item.i18n_key, item.icon));
         }
     }
 
     // Pinned Footer Item (About System)
-    let btn_sys = babydra_utils::components::create_sidebar_item_button(
+    let sys_icon_w = create_sidebar_icon_for_item(FOOTER_ITEM.id, FOOTER_ITEM.icon);
+    let btn_sys = babydra_utils::components::create_sidebar_item_button_with_widget(
         &babydra_common::i18n::t(FOOTER_ITEM.i18n_key),
-        FOOTER_ITEM.icon,
+        &sys_icon_w,
         "sidebar-item",
         || {},
     );
     btn_sys.add_css_class("active-nav");
     btn_sys.set_cursor_from_name(Some("pointer"));
-    nav_buttons.borrow_mut().push((FOOTER_ITEM.id, btn_sys.clone(), FOOTER_ITEM.i18n_key));
+    nav_buttons.borrow_mut().push((FOOTER_ITEM.id, btn_sys.clone(), FOOTER_ITEM.i18n_key, FOOTER_ITEM.icon));
+
 
     let footer_sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
     footer_sep.add_css_class("profile-separator");
@@ -275,22 +311,38 @@ pub fn build_main_window(app: &gtk4::Application) {
     overlay.add_overlay(&overlay_blocker);
 
     // Wire navigation button clicks
-    for (id, button, _) in nav_buttons.borrow().iter() {
+    for (id, button, _, _) in nav_buttons.borrow().iter() {
         let name_str = id.to_string();
         let stack_c = content_stack.clone();
         let nav_buttons_c = nav_buttons.clone();
         let button_c = button.clone();
 
         button.connect_clicked(move |_| {
-            for (_, b, _) in nav_buttons_c.borrow().iter() {
+            for (_, b, _, _) in nav_buttons_c.borrow().iter() {
                 b.remove_css_class("active-nav");
             }
             button_c.add_css_class("active-nav");
 
             ensure_page_loaded(&stack_c, &name_str);
             stack_c.set_visible_child_name(&name_str);
+
+            // Refresh dynamic icons and state when switching navigation tabs
+            refresh_sidebar(&nav_buttons_c);
         });
     }
+
+    // ── Refresh Sidebar Action ──────────────────────────────────
+    let refresh_sidebar_action = gio::SimpleAction::new("refresh-sidebar", None);
+    {
+        let nav_buttons_c = nav_buttons.clone();
+        refresh_sidebar_action.connect_activate(move |_, _| {
+            let buttons = nav_buttons_c.clone();
+            gtk4::glib::idle_add_local_once(move || {
+                refresh_sidebar(&buttons);
+            });
+        });
+    }
+    window.add_action(&refresh_sidebar_action);
 
     // ── Rebuild UI Action (Language Toggle Handler) ─────────────
     let rebuild_action = gio::SimpleAction::new("rebuild-ui", None);
@@ -314,10 +366,8 @@ pub fn build_main_window(app: &gtk4::Application) {
                     lbl.set_text(&babydra_common::i18n::t(key));
                 }
 
-                // 2. Update sidebar item labels
-                for (_, btn, key) in buttons.borrow().iter() {
-                    update_sidebar_label(btn, &babydra_common::i18n::t(key));
-                }
+                // 2. Update sidebar item icons and labels
+                refresh_sidebar(&buttons);
 
                 // 3. Update main header labels
                 title.set_text(&babydra_common::i18n::t("settings.title"));

@@ -11,9 +11,19 @@ pub fn is_dark_mode() -> bool {
     crate::ui::theme::is_dark_mode()
 }
 
-/// Helper function to retrieve an SVG icon widget by name. Relies on the active theme.
-pub fn get_icon_colored(name: &str, size: i32, _color_hex: &str) -> gtk4::Image {
-    get_icon(name, size)
+/// Helper function to retrieve an SVG icon widget by name with custom color hex.
+pub fn get_icon_colored(name: &str, size: i32, color_hex: &str) -> gtk4::Image {
+    if let Some((dark_svg, light_svg)) = get_icon_svg_pair(name) {
+        let is_dark = is_dark_mode();
+        let base_svg = if is_dark { dark_svg } else { light_svg };
+        let colored_svg = base_svg
+            .replace("#ffffff", color_hex)
+            .replace("#FFFFFF", color_hex)
+            .replace("#1c1c1e", color_hex)
+            .replace("#1C1C1E", color_hex);
+        return get_icon_from_svg(&colored_svg, size);
+    }
+    get_system_or_file_icon(name, "image-missing")
 }
 
 /// Maps an icon name alias to its corresponding (Dark SVG, Light SVG) tuple.
@@ -35,15 +45,15 @@ fn get_icon_svg_pair(name: &str) -> Option<(&'static str, &'static str)> {
         "sliders" | "theme" | "themes" => Some((DARK_SETTINGS_SVG, LIGHT_SETTINGS_SVG)),
         "th-large" | "apps" | "installed-apps" => Some((DARK_VIEW_GRID_SVG, LIGHT_VIEW_GRID_SVG)),
         "cog" | "startup" => Some((DARK_SETTINGS_SVG, LIGHT_SETTINGS_SVG)),
-        "history" | "system-update" => Some((DARK_REFRESH_SVG, LIGHT_REFRESH_SVG)),
-        "keybinds" | "key" => Some((DARK_SETTINGS_SVG, LIGHT_SETTINGS_SVG)),
+        "history" | "system-update" | "system_update" => Some((DARK_REFRESH_SVG, LIGHT_REFRESH_SVG)),
+        "keybinds" | "key" | "certificates" => Some((DARK_SETTINGS_SVG, LIGHT_SETTINGS_SVG)),
         "env" | "environment" => Some((DARK_SETTINGS_SVG, LIGHT_SETTINGS_SVG)),
         "download" | "document-save-symbolic" => Some((DARK_DOWNLOAD_SVG, LIGHT_DOWNLOAD_SVG)),
         "ethernet" => Some((DARK_ETHERNET_SVG, LIGHT_ETHERNET_SVG)),
         "external-link" | "external-link-symbolic" | "window-new-symbolic" => Some((DARK_EXTERNAL_LINK_SVG, LIGHT_EXTERNAL_LINK_SVG)),
         "folder" => Some((DARK_FOLDER_SVG, LIGHT_FOLDER_SVG)),
         "gsconnect" => Some((DARK_GSCONNECT_SVG, LIGHT_GSCONNECT_SVG)),
-        "info" | "preferences-system-symbolic" => Some((DARK_INFO_SVG, LIGHT_INFO_SVG)),
+        "info" | "preferences-system-symbolic" | "system" | "about" => Some((DARK_INFO_SVG, LIGHT_INFO_SVG)),
         "lock" => Some((DARK_LOCK_SVG, LIGHT_LOCK_SVG)),
         "logo" => Some((DARK_LOGO_SVG, LIGHT_LOGO_SVG)),
         "logout" => Some((DARK_LOGOUT_SVG, LIGHT_LOGOUT_SVG)),

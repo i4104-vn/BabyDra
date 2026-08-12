@@ -13,11 +13,21 @@ pub mod spinners;
 pub mod switch;
 pub mod slider;
 pub mod tooltips;
+pub mod wifi;
 
 // Re-export all builders under components namespace to maintain compatibility
 pub use alerts::create_placeholder_message;
 pub use badge::{create_status_badge, create_icon_badge};
-pub use buttons::{create_button, create_accent_button, create_fab, create_icon_button, create_colored_icon_button, create_icon_label_button, create_toggle_tile, update_toggle_tile_state, create_square_toggle_tile, create_sidebar_item_button};
+pub use wifi::{
+    render_wifi_signal_svg, create_wifi_signal_icon_from_strength,
+    create_wifi_signal_icon_for_network, create_system_wifi_signal_icon,
+};
+pub use buttons::{
+    create_button, create_accent_button, create_fab, create_icon_button, create_colored_icon_button,
+    create_icon_label_button, create_toggle_tile, update_toggle_tile_state, create_square_toggle_tile,
+    create_sidebar_item_button, create_sidebar_item_button_with_widget, create_wifi_signal_icon,
+    create_battery_percentage_icon, create_vpn_shield_icon, create_wallpaper_thumbnail_icon, create_colored_icon_widget,
+};
 pub use card::{create_card, create_card_with_class, create_title, create_subtitle, create_item_row, create_switch_card, create_scrollable_list, create_grid_file_item};
 pub use close_button::{create_close_button, create_close_button_with_label};
 pub use modal::create_dialog_box;

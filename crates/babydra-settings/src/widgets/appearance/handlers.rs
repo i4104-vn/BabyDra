@@ -207,6 +207,9 @@ pub fn setup_appearance_handlers(
                     btn.connect_clicked(move |_| {
                         let _ = babydra_common::set_wallpaper(&wp_clone);
                         preview_cb.set_filename(Some(&wp_clone));
+                        if let Some(root) = preview_cb.root() {
+                            let _ = root.activate_action("win.refresh-sidebar", None);
+                        }
                         babydra_common::send_settings_notification(
                             &babydra_common::i18n::t("settings.notif_wallpaper_title"),
                             &babydra_common::i18n::t("settings.notif_wallpaper_msg"),
@@ -252,6 +255,9 @@ pub fn setup_appearance_handlers(
                             let _ = babydra_common::set_wallpaper(&dest_path);
                             preview_cb.set_filename(Some(&dest_path));
                             render_grid_after_pick();
+                            if let Some(root) = preview_cb.root() {
+                                let _ = root.activate_action("win.refresh-sidebar", None);
+                            }
                         }
                     }
                 }

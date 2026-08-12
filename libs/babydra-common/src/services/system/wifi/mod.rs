@@ -5,6 +5,6 @@ pub mod connection;
 pub mod discovery;
 pub mod state;
 
-pub use state::{get_wifi_state, set_wifi_enabled};
+pub use state::{get_wifi_state, set_wifi_enabled, get_wifi_signal_strength};
 pub use discovery::{known_networks, scan_networks};
 pub use connection::{connect_wifi, forget_wifi, get_wifi_config, set_wifi_config, strip_ansi_escapes};

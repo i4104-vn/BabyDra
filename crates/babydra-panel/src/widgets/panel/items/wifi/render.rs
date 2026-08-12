@@ -229,7 +229,7 @@ fn build_wifi_list_ui(
         item_box.set_valign(gtk4::Align::Center);
 
         let icon_color = if is_connected { "#ffffff" } else { "rgba(255, 255, 255, 0.5)" };
-        let wifi_icon = babydra_utils::ui::icon::get_icon_colored("wifi", 14, icon_color);
+        let wifi_icon = babydra_utils::components::create_wifi_signal_icon_for_network(net.signal, is_connected, 14, Some(icon_color));
         item_box.append(&wifi_icon);
 
         let name_label = gtk4::Label::new(Some(&ssid));

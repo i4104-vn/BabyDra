@@ -41,8 +41,7 @@ button.sidebar-item.active-nav {
     font-weight: 600;
 }
 
-button.sidebar-item.active-nav label,
-button.sidebar-item.active-nav image {
+button.sidebar-item.active-nav label {
     color: #3b82f6;
 }
 
@@ -51,10 +50,16 @@ button.sidebar-item.active-nav:hover {
     color: #2563eb;
 }
 
-button.sidebar-item.active-nav:hover label,
-button.sidebar-item.active-nav:hover image {
+button.sidebar-item.active-nav:hover label {
     color: #2563eb;
 }
+
+.sidebar-wallpaper-thumb {
+    border-radius: 9999px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
 
 .settings-breadcrumb-parent {
     color: rgba(28, 28, 30, 0.50);
