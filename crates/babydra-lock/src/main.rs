@@ -30,10 +30,10 @@ fn main() {
         if std::path::Path::new(path).exists() {
             path.clone()
         } else {
-            format!("{}/.config/babydra/wallpaper.png", home)
+            format!("{}/.babydra/wallpaper.png", home)
         }
     } else {
-        format!("{}/.config/babydra/wallpaper.png", home)
+        format!("{}/.babydra/wallpaper.png", home)
     };
 
     let application = gtk4::Application::new(

@@ -15,4 +15,3 @@ gio = "0.20"
 
 # Systems dependencies
 libc = "0.2"
-chrono = "0.4"

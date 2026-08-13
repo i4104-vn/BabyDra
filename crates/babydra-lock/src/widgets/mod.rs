@@ -64,20 +64,7 @@ pub fn create_lock_window(
             let clock_label = clock_label.clone();
             let date_label = date_label.clone();
             move || {
-                let now = chrono::Local::now();
-                clock_label.set_text(&now.format("%H:%M").to_string());
-                
-                let weekday_key = format!("weekday.{}", now.format("%a").to_string().to_lowercase());
-                let weekday = babydra_common::i18n::t(&weekday_key);
-                let month_key = format!("month.{}", now.format("%m").to_string());
-                let month_str = babydra_common::i18n::t(&month_key);
-                
-                let date_str = babydra_common::i18n::t("lock.date_format")
-                    .replace("{weekday}", &weekday)
-                    .replace("{day}", &now.format("%d").to_string())
-                    .replace("{month}", &month_str)
-                    .replace("{year}", &now.format("%Y").to_string());
-                date_label.set_text(&date_str);
+                babydra_common::update_clock(&clock_label, &date_label, "lock.date_format");
                 glib::ControlFlow::Continue
             }
         };
@@ -160,20 +147,7 @@ pub fn create_lock_window(
             let clock_label = clock_label.clone();
             let date_label = date_label.clone();
             move || {
-                let now = chrono::Local::now();
-                clock_label.set_text(&now.format("%H:%M").to_string());
-                
-                let weekday_key = format!("weekday.{}", now.format("%a").to_string().to_lowercase());
-                let weekday = babydra_common::i18n::t(&weekday_key);
-                let month_key = format!("month.{}", now.format("%m").to_string());
-                let month_str = babydra_common::i18n::t(&month_key);
-                
-                let date_str = babydra_common::i18n::t("lock.date_format")
-                    .replace("{weekday}", &weekday)
-                    .replace("{day}", &now.format("%d").to_string())
-                    .replace("{month}", &month_str)
-                    .replace("{year}", &now.format("%Y").to_string());
-                date_label.set_text(&date_str);
+                babydra_common::update_clock(&clock_label, &date_label, "lock.date_format");
                 glib::ControlFlow::Continue
             }
         };
