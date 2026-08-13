@@ -1,12 +1,11 @@
 use serde::{Serialize, Deserialize};
 use std::path::PathBuf;
 
-/// Gets path to `~/.config/babydra/babydra.conf`
+/// Gets path to `~/.babydra/babydra.conf`
 pub fn get_babydra_conf_path() -> PathBuf {
     dirs::home_dir()
         .unwrap_or_else(|| PathBuf::from("."))
-        .join(".config")
-        .join("babydra")
+        .join(".babydra")
         .join("babydra.conf")
 }
 
@@ -163,6 +162,12 @@ pub struct DisplayConfig {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
+pub struct GreeterConfig {
+    #[serde(default)]
+    pub background: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct BabyDraConfig {
     #[serde(default)]
     pub power: PowerConfig,
@@ -174,6 +179,8 @@ pub struct BabyDraConfig {
     pub notification: NotificationConfig,
     #[serde(default)]
     pub display: DisplayConfig,
+    #[serde(default)]
+    pub greeter: GreeterConfig,
 }
 
 static CONFIG_CACHE: std::sync::OnceLock<std::sync::RwLock<BabyDraConfig>> = std::sync::OnceLock::new();
@@ -201,21 +208,21 @@ fn load_from_disk() -> BabyDraConfig {
             }
         }
 
-        let legacy_perf = home.join(".config/babydra/perf_profile");
+        let legacy_perf = home.join(".babydra/perf_profile");
         if legacy_perf.exists() {
             if let Ok(prof) = std::fs::read_to_string(&legacy_perf) {
                 config.power.profile = prof.trim().to_string();
             }
         }
 
-        let legacy_wp = home.join(".config/babydra/current_wallpaper");
+        let legacy_wp = home.join(".babydra/current_wallpaper");
         if legacy_wp.exists() {
             if let Ok(wp) = std::fs::read_to_string(&legacy_wp) {
                 config.wallpaper.current = wp.trim().to_string();
             }
         }
 
-        let legacy_dnd = home.join(".config/babydra/dnd");
+        let legacy_dnd = home.join(".babydra/dnd");
         if legacy_dnd.exists() {
             config.notification.dnd = true;
         }

@@ -1,6 +1,7 @@
 //! Wallpaper management utilities.
 //! Supported backends: swww, swaybg, feh.
 
+use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -149,4 +150,156 @@ pub fn get_local_wallpapers() -> Vec<PathBuf> {
     files.sort();
     files
 }
+
+/// Helper to scan all user homes for saved greeter background in babydra.conf
+fn find_user_conf_wallpaper() -> Option<PathBuf> {
+    if let Ok(entries) = std::fs::read_dir("/home") {
+        for entry in entries.filter_map(Result::ok) {
+            let user_home = entry.path();
+            let conf_path = user_home.join(".babydra").join("babydra.conf");
+            if conf_path.exists() {
+                if let Ok(content) = std::fs::read_to_string(&conf_path) {
+                    if let Ok(conf) = toml::from_str::<crate::config::BabyDraConfig>(&content) {
+                        if !conf.greeter.background.is_empty() {
+                            let p = PathBuf::from(&conf.greeter.background);
+                            if p.exists() {
+                                return Some(p);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    None
+}
+
+/// Mirrors the chosen greeter wallpaper to the world-readable system location
+/// (`/var/lib/babydra/greeter_wallpaper.png`) so the greetd-hosted greeter process
+/// (which runs as the unprivileged `greeter` user and cannot read a locked-down
+/// user home) can always display it.
+fn sync_greeter_wallpaper_to_system(source: &Path) {
+    let sync_dir = PathBuf::from("/var/lib/babydra");
+    if std::fs::create_dir_all(&sync_dir).is_err() {
+        return;
+    }
+    // Keep the sync directory writable by regular users (install.sh also does this)
+    let _ = std::fs::set_permissions(&sync_dir, std::fs::Permissions::from_mode(0o777));
+    let sync_file = sync_dir.join("greeter_wallpaper.png");
+    if std::fs::copy(source, &sync_file).is_err() {
+        return;
+    }
+    // Force world-readable permissions regardless of the source file's mode
+    let _ = std::fs::set_permissions(&sync_file, std::fs::Permissions::from_mode(0o644));
+}
+
+/// Sets the greeter background image path in babydra.conf and mirrors it to the
+/// world-readable system path consumed by the greetd greeter process.
+pub fn set_greeter_wallpaper(path: &Path) -> Result<(), String> {
+    if !path.exists() {
+        return Err(format!("Greeter background file does not exist at: {:?}", path));
+    }
+    let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".to_string());
+    let target_dir = PathBuf::from(&home).join(".babydra").join("wallpaper");
+    let _ = std::fs::create_dir_all(&target_dir);
+
+    let target_path = if path.parent() != Some(&target_dir) {
+        if let Some(file_name) = path.file_name() {
+            let dest = target_dir.join(file_name);
+            if path != dest {
+                let _ = std::fs::copy(path, &dest);
+            }
+            dest
+        } else {
+            path.to_path_buf()
+        }
+    } else {
+        path.to_path_buf()
+    };
+
+    let path_str = target_path.to_str().ok_or("Invalid path encoding")?;
+
+    // Mirror to the system location so the greeter process can always read it
+    sync_greeter_wallpaper_to_system(&target_path);
+
+    let mut conf = crate::config::load_babydra_config();
+    conf.greeter.background = path_str.to_string();
+    crate::config::save_babydra_config(&conf);
+    Ok(())
+}
+
+/// Reads the saved greeter wallpaper from the current user's config and mirrors it
+/// to the world-readable system path used by the greetd greeter process.
+pub fn apply_saved_greeter_wallpaper() {
+    let conf = crate::config::load_babydra_config();
+    if !conf.greeter.background.is_empty() {
+        let path = PathBuf::from(&conf.greeter.background);
+        if path.exists() {
+            sync_greeter_wallpaper_to_system(&path);
+        }
+    }
+}
+
+/// Retrieves the active greeter background path.
+///
+/// The greetd-hosted greeter runs as the unprivileged `greeter` user whose home is
+/// not the real user's home, so it cannot read `~/.babydra` when the home directory
+/// is locked down (e.g. `drwx------`). For that reason the world-readable system
+/// copy (`/var/lib/babydra/greeter_wallpaper.png`) is preferred first. Whenever a
+/// user-level path can be resolved by a process that has access to it, the system
+/// copy is refreshed so the next boot stays in sync.
+pub fn get_greeter_wallpaper() -> Option<PathBuf> {
+    // 1. Current user config (only reachable when this process can read it — i.e.
+    //    the real user, e.g. Settings preview or a terminal run). Refreshes the
+    //    system copy so the next boot stays in sync.
+    let conf = crate::config::load_babydra_config();
+    if !conf.greeter.background.is_empty() {
+        let path = PathBuf::from(&conf.greeter.background);
+        if path.exists() {
+            sync_greeter_wallpaper_to_system(&path);
+            return Some(path);
+        }
+    }
+
+    // 2. World-readable system copy (always accessible to the greeter process at
+    //    boot, which runs as the unprivileged `greeter` user)
+    let system_sync = PathBuf::from("/var/lib/babydra/greeter_wallpaper.png");
+    if system_sync.exists() {
+        return Some(system_sync);
+    }
+
+    // 3. Scan user homes for saved greeter background in babydra.conf
+    if let Some(user_wp) = find_user_conf_wallpaper() {
+        sync_greeter_wallpaper_to_system(&user_wp);
+        return Some(user_wp);
+    }
+
+    // 4. Shared greeter system wallpaper paths
+    let system_candidates = ["/usr/share/babydra/wallpaper.png"];
+    for c in &system_candidates {
+        let p = PathBuf::from(c);
+        if p.exists() {
+            return Some(p);
+        }
+    }
+
+    // 5. User home default wallpaper
+    if let Ok(home) = std::env::var("HOME") {
+        let p = PathBuf::from(home).join(".babydra/wallpaper.png");
+        if p.exists() {
+            return Some(p);
+        }
+    }
+
+    // 6. Source repository fallback wallpaper
+    let src_wp = PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../../wallpaper.png"));
+    if src_wp.exists() {
+        return Some(src_wp);
+    }
+
+    None
+}
+
+
+
 

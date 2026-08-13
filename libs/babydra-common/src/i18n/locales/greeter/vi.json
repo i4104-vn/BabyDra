@@ -1,0 +1,11 @@
+{
+  "greeter.suspend": "Tạm ngừng",
+  "greeter.reboot": "Khởi động lại",
+  "greeter.power_off": "Tắt máy",
+  "greeter.username": "Tên người dùng",
+  "greeter.password": "Mật khẩu",
+  "greeter.user": "Người dùng",
+  "greeter.os_name": "BabyDra OS",
+  "greeter.initializing": "Đang khởi động môi trường Desktop...",
+  "greeter.date_format": "{weekday}, {day} {month}, {year}"
+}

@@ -122,6 +122,7 @@ fn load_en_map() -> HashMap<String, String> {
     parse_locale_map(include_str!("locales/launcher/en.json"), &mut map);
     parse_locale_map(include_str!("locales/settings/en.json"), &mut map);
     parse_locale_map(include_str!("locales/explore/en.json"), &mut map);
+    parse_locale_map(include_str!("locales/greeter/en.json"), &mut map);
     map
 }
 
@@ -131,6 +132,7 @@ fn load_vi_map() -> HashMap<String, String> {
     parse_locale_map(include_str!("locales/launcher/vi.json"), &mut map);
     parse_locale_map(include_str!("locales/settings/vi.json"), &mut map);
     parse_locale_map(include_str!("locales/explore/vi.json"), &mut map);
+    parse_locale_map(include_str!("locales/greeter/vi.json"), &mut map);
     map
 }
 
