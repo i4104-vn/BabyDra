@@ -12,3 +12,5 @@ pub mod window;
 pub mod icon;
 pub mod tray;
 pub mod utils;
+pub mod logger;
+pub mod clock;

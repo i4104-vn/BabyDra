@@ -5,6 +5,8 @@ pub mod config;
 pub mod services;
 pub mod models;
 pub mod i18n;
+pub use services::logger;
+pub use services::logger::{init_logger, get_log_dir, get_log_path};
 
 // Re-export models for convenient flat access
 pub use models::explore::{
@@ -50,9 +52,11 @@ pub use services::system::backlight;
 pub use services::system::bluetooth;
 pub use services::system::vpn;
 pub use services::wallpaper;
-pub use services::wallpaper::{set_wallpaper, get_current_wallpaper, apply_saved_wallpaper};
+pub use services::wallpaper::{set_wallpaper, get_current_wallpaper, apply_saved_wallpaper, set_greeter_wallpaper, get_greeter_wallpaper, apply_saved_greeter_wallpaper};
 pub use services::system::display::{save_displays, get_displays, apply_saved_displays};
 
+pub use services::clock;
+pub use services::clock::update_clock;
 pub use services::search;
 pub use services::search::search_files;
 pub use services::mpris;
@@ -94,6 +98,9 @@ pub fn apply_all_saved_settings() {
 
     // 3. System Wallpaper
     services::wallpaper::apply_saved_wallpaper();
+
+    // 3b. Greeter (lock screen login) wallpaper synced to world-readable system path
+    services::wallpaper::apply_saved_greeter_wallpaper();
 
     // 4. Auto Battery Saver check
     if let Some(info) = get_battery_info() {
