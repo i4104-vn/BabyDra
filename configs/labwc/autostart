@@ -9,6 +9,7 @@ awww-daemon &
 fcitx5 -d &
 mkdir -p "$HOME/.cache/babydra"
 ~/.local/bin/babydra-panel &
+~/.local/bin/babydra-settings --sync-greeter-wallpaper &
 $HOME/.config/labwc/scripts/switcher.sh &
 $HOME/.config/labwc/scripts/bat_saver.sh &
 

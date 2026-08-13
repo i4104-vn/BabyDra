@@ -2,7 +2,7 @@
 # Automatic Battery Saver Checker Daemon for BabyDra
 # Checks system battery and triggers babydra-settings CLI when saver threshold is reached.
 
-CONF_FILE="$HOME/.config/babydra/babydra.conf"
+CONF_FILE="$HOME/.babydra/babydra.conf"
 
 parse_conf() {
     [[ ! -f "$CONF_FILE" ]] && { ENABLED="true"; THRESHOLD=20; return; }

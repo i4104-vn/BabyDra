@@ -20,8 +20,8 @@ killall fnott || true
 killall xfce4-notifyd || true 
 
 # Copy wallpaper to standard config dir
-mkdir -p "$HOME/.config/babydra"
-cp wallpaper.png "$HOME/.config/babydra/wallpaper.png"
+mkdir -p "$HOME/.babydra"
+cp wallpaper.png "$HOME/.babydra/wallpaper.png"
 
 # Setup default autostart and rc.xml by copying them from configs/labwc/
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

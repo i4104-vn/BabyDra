@@ -33,8 +33,9 @@ killall babydra-image-preview || true
 killall babydra-preview || true
 killall babydra-settings || true
 killall babydra-explore || true
+killall babydra-greeter || true
 
-# 5. Overwrite binaries in ~/.local/bin
+# 5. Overwrite binaries in ~/.local/bin and /usr/bin
 echo "Installing new binaries..."
 cp target/release/babydra-panel "$LOCAL_BIN/babydra-panel"
 cp target/release/babydra-switcher "$LOCAL_BIN/babydra-switcher"
@@ -43,6 +44,7 @@ cp target/release/babydra-lock "$LOCAL_BIN/babydra-lock"
 cp target/release/babydra-preview "$LOCAL_BIN/babydra-preview"
 cp target/release/babydra-settings "$LOCAL_BIN/babydra-settings"
 cp target/release/babydra-explore "$LOCAL_BIN/babydra-explore"
+sudo cp target/release/babydra-greeter /usr/bin/babydra-greeter
 
 # Register default image handler in ~/.local/share/applications
 echo "Registering default image handler..."

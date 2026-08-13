@@ -7,7 +7,7 @@ echo "============================================="
 
 # 1. Install all dependencies, the Rust toolchain, and system fonts via pacman
 echo "Installing Arch Linux packages..."
-sudo pacman -Syu --needed --noconfirm base-devel git pkgconf gtk4 gtk4-layer-shell rust labwc meson ninja playerctl grim slurp wl-clipboard libnotify gammastep wlsunset wireplumber pipewire-pulse pipewire-alsa ddcutil zip unzip p7zip unrar pacman-contrib xdg-utils polkit networkmanager networkmanager-openvpn networkmanager-vpnc networkmanager-pptp networkmanager-l2tp networkmanager-openconnect networkmanager-strongswan wireguard-tools openvpn bluez bluez-utils
+sudo pacman -Syu --needed --noconfirm base-devel git pkgconf gtk4 gtk4-layer-shell rust labwc meson ninja playerctl grim slurp wl-clipboard libnotify gammastep wlsunset wireplumber pipewire-pulse pipewire-alsa ddcutil zip unzip p7zip unrar pacman-contrib xdg-utils polkit networkmanager networkmanager-openvpn networkmanager-vpnc networkmanager-pptp networkmanager-l2tp networkmanager-openconnect networkmanager-strongswan wireguard-tools openvpn bluez bluez-utils greetd cage
 
 # Ensure i2c-dev kernel module is loaded and configured to load on boot
 echo "Configuring i2c-dev kernel module..."
@@ -92,6 +92,7 @@ killall babydra-image-preview || true
 killall babydra-preview || true
 killall babydra-settings || true
 killall babydra-explore || true
+killall babydra-greeter || true
 
 # 6. Install the binaries
 echo "Installing binaries to $LOCAL_BIN..."
@@ -103,16 +104,25 @@ cp target/release/babydra-launcher "$LOCAL_BIN/babydra-launcher"
 cp target/release/babydra-preview "$LOCAL_BIN/babydra-preview"
 cp target/release/babydra-settings "$LOCAL_BIN/babydra-settings"
 cp target/release/babydra-explore "$LOCAL_BIN/babydra-explore"
+sudo cp target/release/babydra-greeter /usr/bin/babydra-greeter
 
-# Copy wallpaper to standard config dir
-mkdir -p "$HOME/.config/babydra"
-cp wallpaper.png "$HOME/.config/babydra/wallpaper.png"
 
-# Copy custom transparent logos to babydra resource dir
+# Copy wallpaper and logos to standard config & system resource dirs
+mkdir -p "$HOME/.babydra"
+cp wallpaper.png "$HOME/.babydra/wallpaper.png"
+cp libs/babydra-common/src/services/logo.png "$HOME/.babydra/logo.png"
+
 sudo mkdir -p /usr/share/babydra
-sudo cp crates/babydra-preview/logo.png /usr/share/babydra/babydra-preview.png
-sudo cp crates/babydra-settings/logo.png /usr/share/babydra/babydra-settings.png
-sudo cp crates/babydra-settings/logo.png /usr/share/babydra/logo.png
+sudo mkdir -p /var/lib/babydra
+sudo chmod 777 /var/lib/babydra
+
+sudo cp libs/babydra-common/src/services/logo.png /usr/share/babydra/babydra-preview.png
+sudo cp libs/babydra-common/src/services/logo.png /usr/share/babydra/babydra-settings.png
+sudo cp libs/babydra-common/src/services/logo.png /usr/share/babydra/logo.png
+sudo cp libs/babydra-common/src/services/logo.png /var/lib/babydra/logo.png
+
+sudo cp wallpaper.png /usr/share/babydra/wallpaper.png
+sudo cp wallpaper.png /var/lib/babydra/greeter_wallpaper.png
 
 # 7. Copy labwc configuration files from configs/labwc/
 echo "Configuring labwc compositor integrations..."
@@ -163,6 +173,20 @@ cp "$SCRIPT_DIR/configs/fastfetch/logo.png" "$HOME/.config/fastfetch/logo.png"
 # Rebuild font cache
 echo "Rebuilding font cache..."
 fc-cache -fv || true
+
+# Configure greetd
+echo "Configuring greetd display manager..."
+sudo mkdir -p /etc/greetd
+cat << EOF | sudo tee /etc/greetd/config.toml > /dev/null
+[terminal]
+vt = 1
+
+[default_session]
+command = "cage -s -- /usr/bin/babydra-greeter"
+user = "greeter"
+EOF
+sudo systemctl enable greetd.service || true
+
 
 # 11. Configure default applications for image previews
 echo "Registering default image handler..."
