@@ -253,6 +253,24 @@ button.wallpaper-action-btn {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
+dropdown.wallpaper-target-dropdown {
+    background-color: rgba(0, 0, 0, 0.60);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 9999px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+dropdown.wallpaper-target-dropdown button {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+}
+
 button.wallpaper-pick-overlay-vertical-btn:hover,
 button.wallpaper-pick-overlay-inside-btn:hover,
 button.wallpaper-action-btn:hover {

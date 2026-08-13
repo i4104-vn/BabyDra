@@ -1,6 +1,5 @@
 //! Appearance and themes personalization panel.
 
-
 mod handlers;
 mod render;
 
@@ -11,6 +10,9 @@ pub fn create_appearance_widget() -> gtk4::Widget {
     let cursor_sizes = vec![16, 24, 32, 48, 64];
 
     let wp_path = babydra_common::get_current_wallpaper()
+        .map(|p| p.to_string_lossy().to_string())
+        .unwrap_or_default();
+    let greeter_wp_path = babydra_common::get_greeter_wallpaper()
         .map(|p| p.to_string_lossy().to_string())
         .unwrap_or_default();
     let is_dark = babydra_utils::ui::theme::is_dark_mode();
@@ -24,9 +26,11 @@ pub fn create_appearance_widget() -> gtk4::Widget {
         icon_dropdown,
         cursor_dropdown,
         size_dropdown,
+        target_dropdown,
         quick_select_box,
     ) = render::build_appearance_ui(
         &wp_path,
+        &greeter_wp_path,
         is_dark,
         &gtk_themes,
         &icon_themes,
@@ -43,6 +47,7 @@ pub fn create_appearance_widget() -> gtk4::Widget {
         &icon_dropdown,
         &cursor_dropdown,
         &size_dropdown,
+        &target_dropdown,
         &quick_select_box,
         gtk_themes,
         icon_themes,

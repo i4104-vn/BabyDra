@@ -65,6 +65,11 @@ fn handle_cli_args() -> bool {
             println!("All saved settings applied successfully.");
             true
         }
+        "--sync-greeter-wallpaper" => {
+            println!("Syncing greeter wallpaper to world-readable system path...");
+            babydra_common::apply_saved_greeter_wallpaper();
+            true
+        }
         "--run-background-update" => {
             use std::io::BufRead;
             let mut pwd = String::new();
@@ -79,6 +84,7 @@ fn handle_cli_args() -> bool {
         "--help" | "-h" => {
             println!("BabyDra Settings CLI Options:");
             println!("  --apply-all-settings          Apply all saved system settings (CPU, Displays, Wallpaper, Battery)");
+            println!("  --sync-greeter-wallpaper      Sync saved lock screen wallpaper to the world-readable system path");
             println!("  --apply-battery-saver         Switch to battery saver profile if auto saver is enabled");
             println!("  --check-battery-saver         Check system battery and apply saver if below threshold");
             println!("  --set-power-profile <profile> Set CPU performance profile (normal, balanced, performance)");
