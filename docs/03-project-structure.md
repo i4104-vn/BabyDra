@@ -1,8 +1,8 @@
 # Chương 03: Cấu trúc Dự án và Quy chuẩn Viết mã
 
-**Phiên bản:** 1.0.0
-**Cập nhật lần cuối:** 2026-07-23
-**Phạm vi:** Quy chuẩn đặt tên thư mục, triết lý phân tách file, quy tắc viết mã nguồn mới
+**Phiên bản:** 1.2.0
+**Cập nhật lần cuối:** 2026-08-14
+**Phạm vi:** Quy chuẩn đặt tên thư mục, triết lý phân tách file, trách nhiệm từng module, quy tắc viết mã nguồn mới
 
 ---
 
@@ -11,35 +11,67 @@
 - [1. Tổng quan cấu trúc thư mục](#1-tổng-quan-cấu-trúc-thư-mục)
 - [2. Quy chuẩn đặt tên thư mục](#2-quy-chuẩn-đặt-tên-thư-mục)
 - [3. Triết lý phân tách file mã nguồn](#3-triết-lý-phân-tách-file-mã-nguồn)
-- [4. Quy tắc tổ chức thư viện babydra-common](#4-quy-tắc-tổ-chức-thư-viện-babydra-common)
-- [5. Sơ đồ cấu trúc tham chiếu](#5-sơ-đồ-cấu-trúc-tham-chiếu)
-- [6. Quy tắc chung khi viết mã nguồn mới](#6-quy-tắc-chung-khi-viết-mã-nguồn-mới)
+- [4. Bộ cài đặt TUI (`install/`)](#4-bộ-cài-đặt-tui-install)
+- [5. Nhóm ứng dụng đồ họa (`crates/`)](#5-nhóm-ứng-dụng-đồ-họa-crates)
+- [6. Nhóm thư viện dùng chung (`libs/`)](#6-nhóm-thư-viện-dùng-chung-libs)
+- [7. Cấu hình hệ thống và Script (`configs/`, `start.sh`, `update.sh`)](#7-cấu-hình-hệ-thống-và-script-configs-startsh-updatesh)
+- [8. Tài liệu (`docs/`)](#8-tài-liệu-docs)
+- [9. Quy tắc chung khi viết mã nguồn mới](#9-quy-tắc-chung-khi-viết-mã-nguồn-mới)
 
 ---
 
 ## 1. Tổng quan cấu trúc thư mục
 
+> [!IMPORTANT]
+> Kho mã nguồn được phân tách theo mô hình 3 nhánh (xem [WORKFLOW.md](../WORKFLOW.md)):
+> - **Nhánh `main`** — chỉ chứa `install/`, `install.sh`, tài liệu.
+> - **Nhánh `release`/`develop`** — chứa thêm `crates/`, `libs/`, `configs/`, `start.sh`, `update.sh`, `wallpaper.png`.
+
+### 1.1. Nhánh `main` (Kênh phân phối)
+
 ```
-BabyDra/                          <- Thư mục gốc workspace Rust
-    Cargo.toml                    <- Định nghĩa workspace, liệt kê tất cả members
-    Cargo.lock                    <- Khóa phiên bản dependency (không chỉnh tay)
-    docs/                         <- Toàn bộ tài liệu dự án
-    libs/                         <- Các thư viện dùng chung (không thể chạy độc lập)
-        babydra-common/           <- Thư viện lõi: logic nghiệp vụ, OS interaction
-        babydra-utils/            <- Thư viện tiện ích: CSS, widget, theme
-        babydra-island/           <- Widget Dynamic Island
-        babydra-launcher/         <- Logic tìm kiếm ứng dụng
-    crates/                       <- Các ứng dụng có thể thực thi
-        babydra-panel/            <- Thanh taskbar chính
-        babydra-switcher/         <- Alt-Tab Switcher
-        babydra-screenshot/       <- Công cụ chụp màn hình
-        babydra-lock/             <- Màn hình khóa
-        babydra-preview/          <- Xem trước tệp
-        babydra-settings/         <- Cài đặt hệ thống
-        babydra-explore/          <- Trình quản lý tệp
-    configs/                      <- File cấu hình mặc định
-    install.sh                    <- Script cài đặt toàn bộ DE
-    start.sh                      <- Script khởi động tất cả daemon
+BabyDra/                          <- Thư mục gốc repository (nhánh main)
+├── Cargo.toml                    <- Workspace manifest — members: ["install"]
+├── Cargo.lock                    <- Khóa phiên bản dependency (không chỉnh tay)
+├── install.sh                    <- Script khởi chạy bộ cài đặt TUI
+├── README.md                     <- Hướng dẫn tổng quan người dùng cuối
+├── WORKFLOW.md                   <- Quy chuẩn phân nhánh và phát triển
+├── docs/                         <- Toàn bộ tài liệu dự án (xem mục 8)
+└── install/                      <- Bộ cài đặt TUI (babydra-installer)
+```
+
+### 1.2. Nhánh `release` (Mã nguồn chính thức)
+
+```
+BabyDra/                          <- Thư mục gốc repository (nhánh release)
+├── Cargo.toml                    <- Workspace manifest — liệt kê toàn bộ crates/libs/install
+├── Cargo.lock
+├── install.sh                    <- Script cài đặt toàn bộ DE từ source (dependencies + build + deploy)
+├── start.sh                      <- Script khởi động: config labwc + .desktop entries + chạy labwc
+├── update.sh                     <- Script hot-update: rebuild + copy binary + sync config + restart panel
+├── wallpaper.png                 <- Hình nền mặc định của hệ thống
+├── README.md
+├── docs/                         <- Tài liệu (đồng bộ với nhánh main)
+├── configs/                      <- Cấu hình mẫu hệ thống
+├── crates/                       <- Các ứng dụng đồ họa thực thi độc lập
+├── libs/                         <- Các thư viện dùng chung (không thể chạy độc lập)
+└── install/                      <- Bộ cài đặt TUI (dùng chung với nhánh main)
+```
+
+**Workspace `release` (`Cargo.toml`):**
+
+```toml
+[workspace]
+resolver = "2"
+members = [
+    "libs/babydra-common",    "libs/babydra-island",
+    "libs/babydra-launcher",  "libs/babydra-utils",
+    "crates/babydra-panel",   "crates/babydra-switcher",
+    "crates/babydra-screenshot", "crates/babydra-lock",
+    "crates/babydra-preview", "crates/babydra-settings",
+    "crates/babydra-explore", "crates/babydra-greeter",
+    "install",
+]
 ```
 
 ---
@@ -72,279 +104,422 @@ Tất cả thư mục con và file mã nguồn bên trong thư mục `src/` củ
 
 | Đúng | Sai | Lý do |
 | :--- | :--- | :--- |
+| `src/widgets/` | `src/Widgets/` | PascalCase không được phép |
 | `src/system_tray/` | `src/systemTray/` | camelCase không được phép |
-| `src/control_center/` | `src/ControlCenter/` | PascalCase không được phép |
-| `src/volume_slider/` | `src/volume-slider/` | kebab-case chỉ dùng ở tầng crate |
+| `src/control_center/` | `src/control-center/` | kebab-case chỉ dùng ở tầng crate |
+| `src/main.rs` | `src/Main.rs` | Chỉ `main.rs`/`lib.rs` được đặc cách |
 
 Ví dụ đúng:
-- `libs/babydra-common/src/services/system/volume/`
+- `crates/babydra-panel/src/widgets/panel/items/volume/`
 - `libs/babydra-common/src/services/system/backlight/`
-- `crates/babydra-panel/src/widgets/panel/items/darkmode/`
 
-### 2.3. Tên file Rust
+### 2.3. File CSS: snake_case
 
-File Rust (`*.rs`) cũng dùng snake_case:
+Các file CSS trong `libs/babydra-utils/src/styles/` dùng snake_case, nhóm theo đối tượng:
 
-- `mod.rs` — file entry point của mỗi module (bắt buộc phải có tên này)
-- `render.rs` — file dựng giao diện
-- `helper.rs` — các hàm tiện ích
+- `panel/panel.css`, `panel/taskbar.css`, `panel/clock.css`
+- `explore/content_view.css`, `explore/context_menu.css`
+- `apps/settings.css`, `apps/switcher.css`
+- `shared/button.css`, `shared/switch.css`
 
 ---
 
 ## 3. Triết lý phân tách file mã nguồn
 
-Nguyên tắc cốt lõi là **Separation of Concerns (SoC)** — phân tách trách nhiệm. Mỗi file chỉ làm một việc cụ thể, không làm nhiều việc cùng lúc.
+Mỗi module đồ họa trong `crates/` và `libs/` phải tuân thủ cấu trúc phân tách logic và giao diện:
 
-### 3.1. Cặp file chuẩn: mod.rs và render.rs
-
-Mỗi module giao diện điển hình được tách thành tối thiểu hai file:
-
-**`mod.rs` — Controller (Bộ điều phối)**
-
-- Vai trò: File entry point của module. Đóng vai trò như một "bộ điều phối" kết nối dữ liệu và giao diện.
-- Làm gì: Đăng ký các module con, ánh xạ dữ liệu nghiệp vụ từ `babydra-common`, gắn các callback xử lý sự kiện khi người dùng tương tác.
-- Không làm gì: Không dựng widget GTK (không gọi `GtkBox::new()`, `GtkButton::new()`, v.v.).
-
-```rust
-// Ví dụ: crates/babydra-panel/src/widgets/panel/items/volume/mod.rs
-pub mod render;
-
-use babydra_common::services::system::volume;
-use std::rc::Rc;
-use std::cell::RefCell;
-
-pub fn setup(state: Rc<RefCell<PanelState>>) -> gtk4::Widget {
-    let widget = render::build();           // Gọi render.rs để dựng widget
-    
-    // Gắn callback: khi thanh trượt thay đổi, cập nhật hardware
-    widget.scale.connect_value_changed(clone!(@strong state => move |s| {
-        volume::set_volume(s.value() as u8);
-        state.borrow_mut().volume = s.value() as u8;
-    }));
-    
-    widget.container.into()
-}
-```
-
-**`render.rs` — View (Bộ dựng giao diện)**
-
-- Vai trò: Tập trung hoàn toàn vào việc dựng layout GTK (GtkBox, GtkButton, GtkScale), gán thuộc tính hiển thị và thêm CSS class cho widget.
-- Làm gì: Tạo widget, xếp layout, đặt CSS class, set text placeholder.
-- Không làm gì: Không đọc/ghi hệ thống, không gắn callback sự kiện nghiệp vụ (chỉ được gắn callback thuần giao diện như animation).
-
-```rust
-// Ví dụ: crates/babydra-panel/src/widgets/panel/items/volume/render.rs
-use gtk4::prelude::*;
-use gtk4::{Box, Scale, Image, Orientation};
-
-pub struct VolumeWidget {
-    pub container: Box,
-    pub scale: Scale,
-    pub icon: Image,
-}
-
-pub fn build() -> VolumeWidget {
-    let container = Box::new(Orientation::Horizontal, 8);
-    container.add_css_class("volume-slider-row");
-    
-    let icon = Image::from_icon_name("audio-volume-high-symbolic");
-    icon.add_css_class("volume-icon");
-    
-    let scale = Scale::with_range(Orientation::Horizontal, 0.0, 100.0, 1.0);
-    scale.add_css_class("volume-scale");
-    scale.set_hexpand(true);
-    
-    container.append(&icon);
-    container.append(&scale);
-    
-    VolumeWidget { container, scale, icon }
-}
-```
-
-### 3.2. Khi nào cần tách thêm file?
-
-Nếu `mod.rs` vượt quá **150 dòng**, bắt buộc phải tách logic vào file con chuyên biệt:
-
-| File con | Dùng khi |
+| File | Trách nhiệm |
 | :--- | :--- |
-| `helper.rs` | Các hàm tính toán nhỏ, chuyển đổi đơn vị, format string |
-| `state.rs` | Định nghĩa State struct nếu phức tạp |
-| `handler.rs` | Các callback sự kiện dài và phức tạp |
+| `mod.rs` | Khai báo module, định nghĩa kiểu dữ liệu, State struct và cấu trúc điều khiển |
+| `render.rs` | Xây dựng cây phân cấp widget giao diện bằng GTK4 (thuần khai báo UI) |
+| `handlers.rs` | Xử lý các sự kiện tương tác từ người dùng (click, phím bấm, thay đổi trạng thái) |
+| `actions.rs` | Các hành động nghiệp vụ cụ thể của widget (copy, delete, create...) |
+
+> [!IMPORTANT]
+> **Quy tắc chống trộn lẫn:** `render.rs` **không được** chứa `std::process::Command`, `std::fs::read` hay logic nghiệp vụ — mọi thao tác hệ thống phải gọi qua `babydra-common`.
 
 ---
 
-## 4. Quy tắc tổ chức thư viện babydra-common
-
-Thư viện lõi `babydra-common` được tổ chức theo hai tầng hoàn toàn tách biệt:
-
-### 4.1. Tầng dữ liệu: `src/models/`
-
-- **Chứa gì:** Chỉ định nghĩa `struct` và `enum` thuần túy để vận chuyển và lưu trữ trạng thái. Không chứa thuật toán xử lý.
-- **Không chứa:** Logic tính toán, gọi hệ thống, async code.
-
-```rust
-// Ví dụ: libs/babydra-common/src/models/audio.rs
-#[derive(Debug, Clone)]
-pub struct AudioState {
-    pub volume: u8,          // 0-100
-    pub is_muted: bool,
-    pub device_name: String,
-}
-```
-
-### 4.2. Tầng xử lý: `src/services/`
-
-- **Chứa gì:** Mã lệnh giao tiếp trực tiếp với hệ điều hành (lệnh shell, đọc ghi file hệ thống `/sys/class`, socket IPC, D-Bus).
-- **Không chứa:** GTK code, dữ liệu UI, struct model.
+## 4. Bộ cài đặt TUI (`install/`)
 
 ```
-libs/babydra-common/src/services/
-    system/
-        volume/      <- Điều khiển âm lượng PipeWire/ALSA
-        backlight/   <- Điều khiển độ sáng màn hình
-        wifi/        <- Quản lý WiFi qua NetworkManager D-Bus
-        bluetooth/   <- Quản lý Bluetooth qua BlueZ D-Bus
-        battery/     <- Đọc thông tin pin từ /sys/class/power_supply/
-    apps/            <- Quét ứng dụng .desktop, xếp hạng theo tần suất dùng
-    window/          <- Lắng nghe sự kiện cửa sổ qua Wayland protocol
-    notification/    <- D-Bus notification server
-    screenshot/      <- Chụp màn hình qua XDG portal
+install/
+├── Cargo.toml                    <- Dependencies: ratatui 0.29, crossterm 0.28, chrono, dirs, anyhow, libc
+├── README.md                     <- Hướng dẫn sử dụng nhanh
+├── run.sh                        <- Script thực thi nhanh (chỉ có trên nhánh release)
+└── src/
+    ├── main.rs                   <- Entry point: parse CLI args, raw mode, event loop 50ms tick
+    │                                (trên main, entry point là install.sh ở thư mục gốc)
+    ├── app/
+    │   ├── mod.rs                <- Struct App: toàn bộ trạng thái wizard, channel, profiles, logs
+    │   └── handlers.rs           <- Xử lý toàn bộ phím bấm theo từng step/modal
+    ├── models/
+    │   ├── mod.rs
+    │   ├── step.rs               <- enum WizardStep (8 bước) + ALL/next/prev
+    │   ├── options.rs            <- InstallChannel (Release/Develop/LocalSource), PresetProfile,
+    │   │                             BranchMetadata, GenericOptionItem
+    │   ├── binary.rs             <- BinaryItem, BinaryLocation (UserLocalBin/SystemBin)
+    │   └── log.rs                <- LogLevel, LogMessage
+    ├── system/
+    │   ├── mod.rs                <- Helper: find_workspace_root, default_binary_source_dir, is_root,
+    │   │                             safe_copy_binary, stop_process, format_size...
+    │   ├── initializers.rs       <- Danh sách 9 binaries, 3 package options, 4 varlib options,
+    │   │                             7 configs/themes options, 3 display manager options
+    │   ├── git_ops.rs            <- fetch_branch_metadata: git log -1 để lấy commit hash/author/date
+    │   ├── fs_ops.rs             <- Thao tác file: copy, chmod, tar extraction
+    │   └── process.rs            <- Dừng tiến trình cũ (killall), spawn worker
+    ├── tasks/
+    │   ├── mod.rs                <- InstallPlan, InstallEvent, spawn_installation_worker
+    │   ├── packages.rs           <- Cài pacman deps / AUR (yay) / kernel permissions
+    │   ├── binaries.rs           <- Copy binary vào ~/.local/bin hoặc /usr/bin (sudo fallback)
+    │   ├── varlib.rs             <- Stage binaries/wallpapers/logos vào /var/lib/babydra, chmod 777
+    │   ├── configs.rs            <- Sync labwc, .desktop entries, dotfiles, themes, gsettings
+    │   └── display_manager.rs    <- Cấu hình greetd (cage + babydra-greeter), mask gettys
+    └── ui/
+        ├── mod.rs
+        ├── layout.rs             <- Header, sidebar (8 steps + plan summary), footer (key hints)
+        ├── modals/
+        │   ├── help.rs           <- Bảng phím tắt
+        │   ├── confirm.rs        <- Dialog xác nhận bắt đầu cài đặt
+        │   └── edit_path.rs      <- Nhập đường dẫn thư mục binary tùy chỉnh
+        └── steps/
+            ├── welcome.rs        <- Step 1: chọn kênh (c) + preset profile (j/k)
+            ├── packages.rs       <- Step 2: hệ thống packages & dependencies
+            ├── binaries.rs       <- Step 3: chọn 9 binary component
+            ├── varlib.rs         <- Step 4: /var/lib staging bundle
+            ├── configs.rs        <- Step 5: configs, themes & icons
+            ├── display_manager.rs<- Step 6: greetd display manager
+            ├── progress.rs       <- Step 7: execute + real-time log stream + progress gauge
+            └── summary.rs        <- Step 8: kết quả cài đặt
 ```
 
-### 4.3. Re-export để tạo API phẳng
+### 4.1. 8 bước Wizard
 
-Sử dụng `pub use` tại `lib.rs` hoặc `mod.rs` cấp cha để rút ngắn đường dẫn gọi API:
+| Bước | Tên | Mô tả |
+| :--- | :--- | :--- |
+| 1 | Welcome & Overview | Chọn kênh (Release/Develop/LocalSource), chọn preset profile |
+| 2 | System Packages & Deps | Pacman deps, AUR (yay), kernel/i2c permissions |
+| 3 | BabyDra Binaries | Chọn binary để cài vào `~/.local/bin` / `/usr/bin` |
+| 4 | /var/lib Staging Bundle | Stage binaries, wallpapers, logos vào `/var/lib/babydra` |
+| 5 | Configs, Themes & Icons | labwc configs, .desktop entries, dotfiles, themes/icons/cursors |
+| 6 | Greetd Display Manager | Cấu hình greetd + mask VTs + enable service |
+| 7 | Execute Installation | Chạy worker, theo dõi log realtime |
+| 8 | Summary & Launch | Kết quả và thoát |
 
-```rust
-// libs/babydra-common/src/lib.rs
-pub use services::system::auth::verify_password;
-pub use services::system::volume::{get_volume, set_volume};
-pub use models::audio::AudioState;
+### 4.2. 3 kênh cài đặt (Install Channel)
+
+- **Release Channel** — kéo nhánh `release` (git fetch) + build `cargo build --release --workspace` nếu binary chưa có, rồi copy.
+- **Develop Channel** — tương tự với nhánh `develop`.
+- **Local Source** — copy trực tiếp binary có sẵn trong thư mục nguồn (mặc định `target/release/`, có thể chỉnh bằng `s`).
+
+### 4.3. 3 Preset Profile
+
+- **Full Desktop (Recommended)** — cài tất cả: binaries + varlib + configs/themes + display manager.
+- **Binaries & /var/lib Staging Only** — chỉ binary + staging, bỏ qua dotfiles và display manager.
+- **Custom Selection** — người dùng tự chọn từng mục.
+
+### 4.4. Phím tắt chính
+
+| Phím | Hành động |
+| :--- | :--- |
+| `1`–`8` | Nhảy thẳng tới bước tương ứng |
+| `Tab` / `n`, `BackTab` / `p` | Bước kế tiếp / trước đó |
+| `↑`/`↓`/`j`/`k`, `Space`, `a`/`A` | Di chuyển, toggle, chọn/bỏ chọn tất cả |
+| `c` | Bước 1: đổi kênh cài đặt — Bước 7: xóa log buffer |
+| `s` | Đổi thư mục nguồn binary |
+| `r` | Quét lại thư mục nguồn |
+| `i` / `Enter` | Bắt đầu cài đặt (mở dialog xác nhận) |
+| `?` | Mở help modal |
+| `q` / `Ctrl+C` | Thoát |
+
+---
+
+## 5. Nhóm ứng dụng đồ họa (`crates/`)
+
+> [!NOTE]
+> Thư mục này chỉ tồn tại trên nhánh `release`/`develop`.
+
+### 5.1. `babydra-panel` — Thanh taskbar chính
+
+```
+crates/babydra-panel/src/
+├── main.rs                       <- Khởi động tray watcher, DDC detection, switcher tracker, GTK app
+├── render.rs                     <- build_panel_ui: panel + control center + calendar + launcher windows
+└── widgets/
+    ├── mod.rs
+    ├── panel/
+    │   ├── mod.rs, render.rs, modal.rs, toggle_grid.rs
+    │   ├── items/                <- header, wifi, bluetooth, volume, vpn, backlight, storage, clean
+    │   └── popover/              <- network, volume, vpn, battery
+    ├── clock/                    <- Đồng hồ + calendar_window + notifications (notification_group)
+    ├── sys_monitor/              <- CPU/RAM monitor
+    ├── tray/                     <- Khay hệ thống (StatusNotifier)
+    └── workspace/                <- Workspace + preview
 ```
 
-Nhờ đó, tầng View chỉ cần gọi ngắn gọn:
+### 5.2. `babydra-switcher` — Alt-Tab Switcher
 
-```rust
-// Trong crates/babydra-panel/
-use babydra_common::verify_password;   // Thay vì:
-// use babydra_common::services::system::auth::verify_password;
+```
+crates/babydra-switcher/src/
+├── main.rs                       <- Hai chế độ: --daemon (giữ overlay trong bộ nhớ) / one-shot client
+├── daemon.rs                     <- Lắng nghe Unix socket /tmp/babydra-switcher.socket
+├── render.rs
+└── widgets/                      <- Overlay danh sách cửa sổ + preview
+```
+
+### 5.3. `babydra-screenshot` — Chụp màn hình
+
+```
+crates/babydra-screenshot/src/
+├── main.rs                       <- --full: chụp toàn màn hình; mặc định: chụp vùng (slurp/grim)
+└── widgets/
+    ├── editor.rs                 <- Editor sau khi chụp
+    ├── canvas.rs                 <- Canvas vẽ/vùng chọn
+    └── color_popover.rs          <- Chọn màu
+```
+
+### 5.4. `babydra-lock` — Màn hình khóa
+
+```
+crates/babydra-lock/src/
+├── main.rs                       <- Parse --image, tạo GTK app, map window tới mọi màn hình
+├── render.rs                     <- build_lock_ui
+└── widgets/                      <- Locker UI (xác thực PAM qua babydra_common::verify_password)
+```
+
+### 5.5. `babydra-greeter` — Màn hình đăng nhập (greetd)
+
+```
+crates/babydra-greeter/src/
+├── main.rs                       <- init_logger, đọc GREETD_SOCK/WAYLAND_DISPLAY, GTK app
+├── auth.rs                       <- Xác thực qua greetd protocol
+├── handlers.rs                   <- setup_handlers
+├── render.rs                     <- build_greeter_ui
+├── theme.rs
+└── widgets/                      <- login, splash, top_bar
+```
+
+### 5.6. `babydra-settings` — Trung tâm cấu hình
+
+```
+crates/babydra-settings/src/
+├── main.rs                       <- CLI helpers: --apply-battery-saver, --check-battery-saver,
+│                                    --set-power-profile, --sync-greeter-wallpaper
+├── layout.rs
+└── widgets/
+    ├── appearance/               <- Giao diện: theme, wallpaper, avatar
+    ├── apps/                     <- Quản lý ứng dụng (launch, update, uninstall)
+    ├── bluetooth/
+    ├── certificates/             <- CA certificates
+    ├── displays/                 <- Màn hình (save/apply qua babydra_common::system::display)
+    ├── env/                      <- Biến môi trường
+    ├── hosts/                    <- File /etc/hosts
+    ├── keybinds/                 <- Phím tắt
+    ├── power/                    <- Power profile + battery_card (battery saver tự động)
+    ├── startup/                  <- Ứng dụng khởi động cùng hệ thống
+    ├── system_info/              <- Thông tin hệ thống
+    └── system_update/            <- Cập nhật hệ thống (pacman) với log realtime
+```
+
+### 5.7. `babydra-preview` — Xem nhanh hình ảnh
+
+```
+crates/babydra-preview/src/
+├── main.rs                       <- Nhận đường dẫn ảnh từ argv, fallback FileDialog
+├── exif_reader.rs                <- Đọc metadata EXIF
+└── widgets/
+    └── viewer.rs                 <- Viewer zoom/pan
+```
+
+### 5.8. `babydra-explore` — Trình quản lý tập tin
+
+```
+crates/babydra-explore/src/
+├── main.rs                       <- tokio runtime + SessionState + create_explore_window
+└── widgets/
+    ├── window/                   <- layout (split/preview), handlers (events/navigation), widgets (tabs)
+    ├── content_view/             <- rendering (grid_renderer/list_renderer), gestures (background,
+    │                                clipboard, flowbox, listbox), items (grid_item)
+    ├── header_bar/               <- Thanh địa chỉ + điều hướng
+    ├── sidebar/                  <- Cây thư mục + bookmarks
+    ├── preview_panel/            <- Xem trước nhanh (actions, create)
+    ├── info_panel/               <- Thông tin file/folder
+    ├── status_bar/               <- Thanh trạng thái đáy
+    ├── tab_bar/                  <- Tab phiên làm việc
+    └── settings_dialog/          <- context_menu, general, keybinds
 ```
 
 ---
 
-## 5. Sơ đồ cấu trúc tham chiếu
+## 6. Nhóm thư viện dùng chung (`libs/`)
 
-Dưới đây là sơ đồ cấu trúc thực tế của một crate ứng dụng để làm mẫu khi phát triển module mới:
-
-```
-crates/babydra-panel/
-    Cargo.toml
-    src/
-        main.rs              <- Điểm vào: khởi tạo GTK Application, gọi init_theme()
-        render.rs            <- Cấu hình Layer Shell, ghép layout chính cửa sổ
-        widgets/
-            mod.rs           <- Khai báo và xuất bản danh sách tất cả widgets
-            panel/
-                mod.rs       <- Quản lý trạng thái Control Center
-                items/
-                    mod.rs   <- Xuất bản các toggle con
-                    volume/
-                        mod.rs    <- Bắt sự kiện âm lượng thay đổi, cập nhật hardware
-                        render.rs <- Tạo icon loa, thanh trượt âm lượng GtkScale
-                    backlight/
-                        mod.rs    <- Bắt sự kiện độ sáng thay đổi, cập nhật hardware
-                        render.rs <- Tạo icon độ sáng, thanh trượt GtkScale
-                    wifi/
-                        mod.rs
-                        render.rs
-                    darkmode/
-                        mod.rs
-                        render.rs
-```
+### 6.1. `babydra-common` — Logic lõi
 
 ```
-libs/babydra-common/
-    Cargo.toml
-    src/
-        lib.rs               <- Re-export API phẳng cho toàn bộ services và models
-        models/
-            mod.rs
-            audio.rs         <- AudioState struct
-            network.rs       <- NetworkState struct
-            battery.rs       <- BatteryState struct
-        services/
-            mod.rs
-            system/
-                mod.rs
-                volume/
-                    mod.rs   <- get_volume(), set_volume(), toggle_mute()
-                backlight/
-                    mod.rs   <- get_brightness(), set_brightness()
-                wifi/
-                    mod.rs   <- get_networks(), connect(), disconnect()
+libs/babydra-common/src/
+├── lib.rs                        <- Re-export phẳng toàn bộ API tiện dụng
+├── config/
+│   ├── mod.rs
+│   └── settings.rs               <- BabyDraConfig, ThemeConfig, ShellConfig, PowerConfig,
+│                                    WallpaperConfig, NotificationConfig, ExploreSettings
+│                                    (file cấu hình ~/.babydra/babydra.conf)
+├── i18n/
+│   ├── mod.rs                    <- Hàm t("namespace.key")
+│   └── locales/<app>/{en,vi}.json
+├── models/
+│   ├── mod.rs
+│   ├── explore/                  <- directory, file_entry, grouping, session, tab, widgets
+│   ├── settings/                 <- app_info, certificates, display, env_var, hosts, keybind,
+│   │                                startup_command, system_info, system_update, vpn, wifi
+│   ├── shell/                    <- battery, dbusmenu, island_state, network, notification,
+│   │                                power, shell_config, storage, theme_config, tray_item, volume
+│   ├── network.rs
+│   └── screenshot/
+└── services/                     <- Xem chi tiết Chương 02, mục 7
 ```
 
+### 6.2. `babydra-utils` — Giao diện dùng chung
+
 ```
-libs/babydra-utils/
-    Cargo.toml
-    src/
-        lib.rs
-        ui/
-            theme/
-                mod.rs       <- init_theme(): nạp CSS vào GDK Display
-        styles/
-            dark/            <- CSS chế độ tối
-                shared/
-                    button.css
-                    switch.css
-                    scrollbar.css
-                    sidebar.css
-                panel/
-                    control_center.css
-                    ...
-            light/           <- CSS chế độ sáng (cùng tên file, giá trị khác)
-                shared/
-                    button.css
-                    ...
-        components/          <- Widget GTK tái sử dụng
+libs/babydra-utils/src/
+├── lib.rs                        <- pub mod components; pub mod explore; pub mod ui;
+├── components/                   <- alerts, badge, buttons (icon/standard/tile), card (standard/
+│                                    scrollable/switch_card), close_button, list_group, modal
+│                                    (password/vpn_config/vpn_log/wifi_config/wifi_info/wifi_password
+│                                    dialog), navbar, placeholder, popovers, progress, slider,
+│                                    spinners, switch, tooltips, wifi
+├── explore/                      <- context_menu (clipboard, custom_items, dimming, file_actions,
+│                                    widgets), dialogs (alert, archive, confirm, conflict)
+├── ui/
+│   ├── theme/mod.rs              <- init_theme(): gộp CSS shared + dark/light, nạp provider toàn cục
+│   ├── icon/                     <- resolver, assets
+│   ├── animation/                <- easing, genie, island, slide
+│   ├── battery.rs, window.rs
+└── styles/                       <- CSS: shared/ + dark/ + light/
+```
+
+### 6.3. `babydra-island` — Dynamic Island
+
+```
+libs/babydra-island/src/
+├── lib.rs                        <- create_system_island
+├── models/                       <- Trạng thái island (widgets.rs)
+├── player/                       <- playerctl, player_loop (media player overlay)
+├── widgets/                      <- popover, visualizer
+└── render.rs
+```
+
+### 6.4. `babydra-launcher` — Launcher ứng dụng
+
+```
+libs/babydra-launcher/src/
+├── lib.rs                        <- build_launcher_ui
+├── main.rs                       <- GTK app org.babydra.launcher
+├── render.rs
+└── widgets/
+    ├── app_row/                  <- Dòng ứng dụng trong kết quả
+    ├── file_search/              <- Tìm kiếm file
+    ├── search/                   <- Fuzzy search ứng dụng
+    └── footer/                   <- Gợi ý phím tắt
 ```
 
 ---
 
-## 6. Quy tắc chung khi viết mã nguồn mới
+## 7. Cấu hình hệ thống và Script (`configs/`, `start.sh`, `update.sh`)
 
-### Quy tắc 1: Không lạm dụng mod.rs
+### 7.1. `configs/`
 
-Hạn chế viết logic tính toán hoặc giao diện dài quá 150 dòng trong `mod.rs`. Khi vượt ngưỡng, tạo file con chuyên biệt và gọi từ `mod.rs`.
+```
+configs/
+├── labwc/
+│   ├── autostart                 <- Khởi chạy switcher daemon, fcitx5, panel, settings, scripts
+│   ├── rc.xml                    <- Window rules, phím tắt (A-Tab, W-q, W-l, W-F12, Print...), theme
+│   ├── fonts.conf                <- Fontconfig (Segoe UI, Cascadia Code)
+│   ├── settings.ini              <- GTK settings (nhân bản sang gtk-3.0/4.0)
+│   ├── themerc-override          <- Override titlebar theme (corner radius, màu viền)
+│   ├── themes/{dark,light}       <- Theme titlebar dark/light
+│   └── scripts/
+│       ├── bat_saver.sh          <- Tự động bật battery saver khi pin thấp
+│       └── switcher.sh           <- Hỗ trợ Alt-Tab
+├── kitty/                        <- Cấu hình terminal
+├── nvim/                         <- init.lua + lazy + custom (keymap_viewer, sidebar)
+├── fastfetch/                    <- config.jsonc + logo
+└── themes/
+    ├── BabyDra/                  <- GTK theme (labwc window buttons SVG)
+    ├── cursor/                   <- Twilight cursors (.tar)
+    └── icons/                    <- We10X icons (.tar)
+```
 
-| Đúng | Sai |
+### 7.2. `start.sh` — Khởi động DE
+
+Công việc chính:
+1. Dừng các tiến trình cũ (`killall babydra-panel babydra-launcher babydra-preview ...`).
+2. Sao chép `wallpaper.png` vào `~/.babydra/`.
+3. Đồng bộ `configs/labwc/*` vào `~/.config/labwc/` (autostart, rc.xml, themerc-override, themes, scripts).
+4. Đăng ký `.desktop` entries cho Preview & Settings, bind MIME cho hình ảnh.
+5. Kiểm tra `ddcutil` và ddcutil-service.
+6. `exec labwc` — khởi chạy compositor.
+
+### 7.3. `update.sh` — Hot-update & Reload
+
+1. `cargo build --release` — build lại toàn bộ workspace.
+2. Dừng mọi tiến trình BabyDra.
+3. Copy binary mới vào `~/.local/bin/` (+ `sudo cp babydra-greeter /usr/bin/`).
+4. Stage logos/wallpapers vào `/var/lib/babydra/` và `/usr/share/babydra/`.
+5. Đồng bộ toàn bộ `configs/` (labwc, gtk, fontconfig, kitty, nvim, fastfetch, themes/icons/cursors).
+6. Áp dụng GSettings (font Segoe UI, icon We10X, cursor Twilight) + `fc-cache -f`.
+7. `labwc --reconfigure` nếu đang chạy, khởi động lại `babydra-panel`.
+
+### 7.4. `install.sh` (nhánh `release`) — Cài đặt toàn bộ từ source
+
+1. Cài dependencies qua `sudo pacman -Syu` (gtk4, gtk4-layer-shell, labwc, pipewire, ddcutil, greetd, cage, bluetooth, networkmanager...).
+2. Cấu hình `i2c-dev` và CPU performance permissions.
+3. Cài `yay` (AUR helper) nếu chưa có, cài AUR packages (kitty, neovim, fastfetch...).
+4. Build workspace và deploy binary + configs + themes.
+
+> [!NOTE]
+> Trên nhánh `main`, `install.sh` khác: chỉ build binary `babydra-installer` (nếu chưa có) rồi `exec` bộ cài đặt TUI với các tham số truyền vào.
+
+---
+
+## 8. Tài liệu (`docs/`)
+
+```
+docs/
+├── README.md                     <- Mục lục tài liệu
+├── 01-overview.md                <- Tổng quan dự án
+├── 02-architecture.md            <- Kiến trúc mã nguồn
+├── 03-project-structure.md       <- Cấu trúc dự án (chính là file này)
+├── 04-setup-and-build.md         <- Cài đặt & build
+└── design/                       <- Tài liệu thiết kế giao diện
+    ├── README.md
+    ├── visual-language.md        <- Ngôn ngữ thị giác Glassmorphism
+    ├── surfaces.md               <- Bề mặt UI
+    ├── color.md                  <- Màu sắc
+    ├── typography.md             <- Typography
+    ├── states.md                 <- Trạng thái tương tác
+    ├── motion.md                 <- Chuyển động
+    ├── spacing.md                <- Khoảng cách
+    ├── theming.md                <- Dark/Light theming
+    ├── tokens.md                 <- Bảng design tokens
+    └── components/               <- 16 tài liệu component (buttons, badge, card, switch,
+                                     slider, modal, popovers, navbar, list_group, placeholder,
+                                     progress, spinners, tooltips, close_button, alerts, wifi)
+```
+
+---
+
+## 9. Quy tắc chung khi viết mã nguồn mới
+
+| Quy tắc | Chi tiết |
 | :--- | :--- |
-| `mod.rs` chỉ gọi `render::build()` và gắn callback | `mod.rs` chứa cả code dựng widget lẫn logic tính toán |
-| Tách logic dài vào `helper.rs` | Để 300 dòng trong một `mod.rs` |
-
-### Quy tắc 2: Re-export trực quan
-
-Dùng `pub use` tại `mod.rs` hoặc `lib.rs` cấp cha để tạo API phẳng.
-
-### Quy tắc 3: Cách ly CSS hoàn toàn
-
-Toàn bộ CSS của toàn bộ dự án phải đặt trong `libs/babydra-utils/src/styles/`. Không viết CSS inline trong Rust code.
-
-| Đúng | Sai |
-| :--- | :--- |
-| `widget.add_css_class("volume-icon")` | `widget.set_css_classes(&["color: red; font-size: 14px"])` |
-| Định nghĩa `.volume-icon { ... }` trong `styles/dark/panel/volume.css` | Gọi `GtkCssProvider::load_from_data()` trong file Rust riêng |
-
-### Quy tắc 4: Không import GTK trong babydra-common
-
-`babydra-common` phải là thư viện thuần Rust logic, không phụ thuộc vào GTK. Điều này đảm bảo logic nghiệp vụ có thể được test bằng `cargo test` bình thường mà không cần môi trường đồ họa.
-
-### Quy tắc 5: Đặt tên CSS class theo BEM-like convention
-
-CSS class đặt theo dạng `component-element` hoặc `component-element--modifier`:
-
-- `volume-slider-row` — container chính của volume slider
-- `volume-slider-row--muted` — trạng thái khi tắt tiếng
-- `volume-icon` — icon loa
-- `panel-toggle-btn` — nút toggle trong panel
-- `panel-toggle-btn--active` — trạng thái đang bật
+| DO | Thư mục crate dùng kebab-case; file/thư mục trong `src/` dùng snake_case |
+| DO | Tách `mod.rs` (logic) / `render.rs` (UI) / `handlers.rs` (sự kiện) cho mọi widget phức tạp |
+| DO | Mọi logic hệ thống phải nằm trong `babydra-common/src/services/` và gọi qua API |
+| DO | Mọi CSS phải nằm trong `libs/babydra-utils/src/styles/` và nạp qua `init_theme()` |
+| DO | Chuỗi hiển thị phải đi qua `i18n::t()` với file JSON en/vi tương ứng |
+| DO | State dùng chung qua `Rc<RefCell<T>>` — không lưu business data trong widget |
+| DO NOT | Không import `gtk4` trong `babydra-common` |
+| DO NOT | Không hardcode chuỗi UI tiếng Việt/Anh trong widget |
+| DO NOT | Không tự tạo `GtkCssProvider` riêng trong ứng dụng |
+| DO NOT | Không viết CSS inline trong mã Rust |
