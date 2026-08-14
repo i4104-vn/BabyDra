@@ -114,8 +114,8 @@ cp "$CONFIG_SOURCE/settings.ini" "$HOME/.config/gtk-4.0/settings.ini"
 cp "$CONFIG_SOURCE/fonts.conf" "$HOME/.config/fontconfig/fonts.conf"
 
 # Apply font to GNOME/GTK desktop interface via gsettings
-gsettings set org.gnome.desktop.interface font-name 'Noto Sans 13' 2>/dev/null || true
-gsettings set org.gnome.desktop.interface document-font-name 'Noto Sans 13' 2>/dev/null || true
+gsettings set org.gnome.desktop.interface font-name 'Segoe UI Variable Static Text 13' 2>/dev/null || true
+gsettings set org.gnome.desktop.interface document-font-name 'Segoe UI Variable Static Text 13' 2>/dev/null || true
 
 # Refresh font cache
 fc-cache -f 2>/dev/null || true

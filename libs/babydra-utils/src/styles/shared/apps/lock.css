@@ -42,6 +42,7 @@
 
 .lock-window {
     opacity: 1;
+    font-family: 'Segoe UI Variable Static Text', 'Segoe UI', 'Inter', system-ui, sans-serif;
 }
 
 .lock-tint {
@@ -55,6 +56,7 @@
     padding: 28px 40px;
     min-width: 360px;
     box-shadow: none;
+    font-family: 'Segoe UI Variable Static Text', 'Segoe UI', 'Inter', system-ui, sans-serif;
 }
 
 .lock-clock {

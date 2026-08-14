@@ -55,22 +55,22 @@
       <showTitle>yes</showTitle>
     </titlebar>
     <font place="ActiveWindow">
-      <name>Noto Sans</name>
+      <name>Segoe UI Variable Static Display</name>
       <size>13</size>
       <weight>bold</weight>
     </font>
     <font place="InactiveWindow">
-      <name>Noto Sans</name>
+      <name>Segoe UI Variable Static Display</name>
       <size>13</size>
       <weight>normal</weight>
     </font>
     <font place="MenuItem">
-      <name>Noto Sans</name>
+      <name>Segoe UI Variable Static Text</name>
       <size>13</size>
       <weight>normal</weight>
     </font>
     <font place="OnScreenDisplay">
-      <name>Noto Sans</name>
+      <name>Segoe UI Variable Static Display</name>
       <size>13</size>
     </font>
   </theme>
