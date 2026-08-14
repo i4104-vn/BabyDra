@@ -14,17 +14,20 @@ BabyDra tiếp cận khác: **Dark mode và Light mode có cùng ngôn ngữ th�
 
 ## Cách hệ thống quản lý hai theme
 
-CSS được tổ chức thành hai thư mục riêng biệt:
+CSS được tổ chức thành ba tầng:
 
 ```
 libs/babydra-utils/src/styles/
-    dark/     <- CSS cho dark mode
-    light/    <- CSS cho light mode
+    shared/   <- CSS cấu trúc & layout (không phụ thuộc theme)
+    dark/     <- CSS màu sắc cho dark mode
+    light/    <- CSS màu sắc cho light mode
 ```
 
-Khi ứng dụng khởi động, `init_theme()` trong `babydra-utils` đọc GSettings để biết theme hiện tại và nạp đúng thư mục. Khi người dùng chuyển theme trong lúc chạy, hệ thống reload CSS và áp dụng ngay.
+Cấu trúc thư mục con giống nhau giữa ba tầng: `panel/`, `control_center/`, `island/`, `launcher/`, `calendar/`, `apps/`, `explore/`, `shared/` (button, switch, sidebar, scrollbar).
 
-Điều quan trọng: **mọi thay đổi CSS phải được thực hiện ở cả hai thư mục**. Thêm style mới vào `dark/` mà quên `light/` là lỗi phổ biến nhất trong dự án.
+Khi ứng dụng khởi động, `init_theme()` trong `babydra-utils` gộp toàn bộ CSS `shared/` với CSS `dark/` hoặc `light/` (tùy GSettings) rồi nạp vào provider toàn cục. Khi người dùng chuyển theme trong lúc chạy, hệ thống reload CSS và áp dụng ngay.
+
+Điều quan trọng: **mọi thay đổi CSS phải được thực hiện ở đúng tầng của nó**. Style màu sắc phải được cập nhật ở cả `dark/` lẫn `light/`; style cấu trúc (layout, kích thước) chỉ cần đặt ở `shared/`. Thêm style mới vào `dark/` mà quên `light/` là lỗi phổ biến nhất trong dự án.
 
 ---
 

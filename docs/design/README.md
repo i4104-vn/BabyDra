@@ -1,7 +1,7 @@
 # Hướng dẫn Thiết kế BabyDra
 
-**Phiên bản:** 1.0.0
-**Cập nhật lần cuối:** 2026-07-23
+**Phiên bản:** 1.2.0
+**Cập nhật lần cuối:** 2026-08-14
 
 ---
 
@@ -34,9 +34,26 @@ Tài liệu này mô tả phong cách và hướng làm thiết kế giao diện
 
 ## Components Giao diện
 
+Mỗi component trong `libs/babydra-utils/src/components/` có một tài liệu riêng quy định API, CSS classes và quy tắc sử dụng:
+
 | Tài liệu | Nội dung |
 | :--- | :--- |
-| [components/buttons.md](./components/buttons.md) | Quy chuẩn nút bấm: Primary Action, Secondary Pill, Icon Button, CSS Classes |
+| [components/buttons.md](./components/buttons.md) | Nút bấm: Primary Action, Secondary Pill, Icon Button, Tile |
+| [components/badge.md](./components/badge.md) | Badge trạng thái & icon badge tròn kính mờ |
+| [components/card.md](./components/card.md) | Card kính mờ, switch card, danh sách cuộn |
+| [components/switch.md](./components/switch.md) | CustomSwitch (Cairo, 160ms) & ToggleRow On/Off |
+| [components/slider.md](./components/slider.md) | CustomSlider: range, step, tick marks, nhãn phần trăm |
+| [components/modal.md](./components/modal.md) | Dialog: password, wifi (info/password/config), vpn (config/log) |
+| [components/popovers.md](./components/popovers.md) | Popover chuẩn & Hover Popover (status card) |
+| [components/navbar.md](./components/navbar.md) | Navigation row cho Sidebar (icon badge + label) |
+| [components/list_group.md](./components/list_group.md) | List row chuẩn & helper dọn danh sách |
+| [components/placeholder.md](./components/placeholder.md) | Placeholder state: Disabled / Loading / Empty |
+| [components/progress.md](./components/progress.md) | Progress bar & disk progress |
+| [components/spinners.md](./components/spinners.md) | Spinner & loading box |
+| [components/tooltips.md](./components/tooltips.md) | Helper tooltip thống nhất |
+| [components/close_button.md](./components/close_button.md) | Nút đóng icon / icon + nhãn |
+| [components/alerts.md](./components/alerts.md) | Thông báo chiếm chỗ (placeholder message) |
+| [components/wifi.md](./components/wifi.md) | Icon cường độ tín hiệu Wi-Fi (SVG 0–4 vạch) |
 
 ## Tham chiếu
 
