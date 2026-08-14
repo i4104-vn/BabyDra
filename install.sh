@@ -33,9 +33,9 @@ if ! command -v yay &> /dev/null; then
 fi
 
 # Install AUR packages using yay
-yay -S --noconfirm github-desktop fastfetch neovim awww ddcutil-service
-# Core UI fonts
-yay -S --noconfirm inter-font ttf-ubuntu-font-family ttf-jetbrains-mono-nerd
+yay -S --noconfirm github-desktop fastfetch neovim awww ddcutil-service kitty
+# Core UI and Coding fonts (Windows 11 Segoe UI Variable, VS Code Cascadia Code, JetBrains Mono, Inter)
+yay -S --noconfirm ttf-segoe-ui-variable ttf-cascadia-code-nerd inter-font ttf-ubuntu-font-family ttf-jetbrains-mono-nerd
 
 # Nerd Font symbols (icons in terminal and panel)
 yay -S --noconfirm ttf-nerd-fonts-symbols ttf-nerd-fonts-symbols-mono
@@ -156,13 +156,20 @@ labwc --reconfigure || true
 mkdir -p "$HOME/.cache/babydra"
 ~/.local/bin/babydra-panel > "$HOME/.cache/babydra/panel.log" 2>&1 &
 
-# 9. Configure system-wide default fonts (Inter & JetBrains Mono)
-echo "Configuring system-wide default fonts for GTK and Fontconfig..."
-mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0" "$HOME/.config/fontconfig"
+# 9. Configure system-wide default fonts (Segoe UI Variable & Cascadia Code)
+echo "Configuring system-wide default fonts for GTK, Kitty, Neovim, and Fontconfig..."
+mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0" "$HOME/.config/fontconfig" "$HOME/.config/kitty" "$HOME/.config/nvim"
 
 cp "$SCRIPT_DIR/configs/labwc/settings.ini" "$HOME/.config/gtk-3.0/settings.ini"
 cp "$SCRIPT_DIR/configs/labwc/settings.ini" "$HOME/.config/gtk-4.0/settings.ini"
 cp "$SCRIPT_DIR/configs/labwc/fonts.conf" "$HOME/.config/fontconfig/fonts.conf"
+cp -r "$SCRIPT_DIR/configs/kitty/"* "$HOME/.config/kitty/" 2>/dev/null || true
+cp -r "$SCRIPT_DIR/configs/nvim/"* "$HOME/.config/nvim/" 2>/dev/null || true
+
+# Apply font to GNOME/GTK desktop interface via gsettings
+gsettings set org.gnome.desktop.interface font-name 'Segoe UI Variable Static Text 13' 2>/dev/null || true
+gsettings set org.gnome.desktop.interface document-font-name 'Segoe UI Variable Static Text 13' 2>/dev/null || true
+gsettings set org.gnome.desktop.interface monospace-font-name 'CaskaydiaCove Nerd Font 11' 2>/dev/null || true
 
 # 10. Configure fastfetch
 echo "Configuring fastfetch..."
