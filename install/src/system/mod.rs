@@ -1,10 +1,12 @@
 pub mod fs_ops;
+pub mod git_ops;
 pub mod initializers;
 pub mod process;
 
 use std::path::{Path, PathBuf};
 
 pub use fs_ops::{copy_recursive, format_size, safe_copy_binary};
+pub use git_ops::fetch_branch_metadata;
 pub use initializers::{
     initial_binaries_list, initial_configs_themes_options, initial_display_manager_options,
     initial_package_options, initial_varlib_options, update_binaries_status,
@@ -19,7 +21,7 @@ pub fn find_workspace_root() -> PathBuf {
     ];
 
     for dir in &candidates {
-        if dir.join("Cargo.toml").exists() && dir.join("crates").is_dir() {
+        if dir.join("Cargo.toml").exists() && (dir.join("crates").is_dir() || dir.join("install").is_dir()) {
             return dir.clone();
         }
     }

@@ -5,5 +5,5 @@ pub mod step;
 
 pub use binary::{BinaryItem, BinaryLocation};
 pub use log::{InstallState, LogLevel, LogMessage};
-pub use options::{GenericOptionItem, InstallChannel, PresetProfile};
+pub use options::{BranchMetadata, GenericOptionItem, InstallChannel, PresetProfile};
 pub use step::WizardStep;

@@ -14,17 +14,49 @@ impl InstallChannel {
         }
     }
 
+    pub fn git_branch(&self) -> &'static str {
+        match self {
+            InstallChannel::Release => "release",
+            InstallChannel::Develop => "develop",
+            InstallChannel::LocalSource => "local",
+        }
+    }
+
+    #[allow(dead_code)]
     pub fn description(&self) -> &'static str {
         match self {
             InstallChannel::Release => {
-                "Installs official stable binaries and configurations maintained by author from 'release' branch."
+                "Cài đặt phiên bản chính thức ổn định được kiểm thử và phát hành bởi tác giả từ nhánh 'release'."
             }
             InstallChannel::Develop => {
-                "Installs cutting-edge development features and community variants from 'develop' branch."
+                "Cài đặt phiên bản phát triển cộng đồng chứa các tính năng mới nhất từ nhánh 'develop'."
             }
             InstallChannel::LocalSource => {
-                "Installs from locally pre-compiled target/release directory on the filesystem."
+                "Cài đặt trực tiếp từ thư mục nhị phân target/release có sẵn trên hệ thống cục bộ."
             }
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct BranchMetadata {
+    pub channel: InstallChannel,
+    pub branch_name: String,
+    pub commit_hash: String,
+    pub author_name: String,
+    pub update_date: String,
+    pub commit_msg: String,
+}
+
+impl Default for BranchMetadata {
+    fn default() -> Self {
+        Self {
+            channel: InstallChannel::Release,
+            branch_name: "release".into(),
+            commit_hash: "N/A".into(),
+            author_name: "N/A".into(),
+            update_date: "N/A".into(),
+            commit_msg: "Không có dữ liệu commit".into(),
         }
     }
 }
@@ -39,22 +71,22 @@ pub enum PresetProfile {
 impl PresetProfile {
     pub fn name(&self) -> &'static str {
         match self {
-            PresetProfile::FullDesktop => "Full Desktop (Recommended)",
-            PresetProfile::BinariesAndBundle => "Binaries & /var/lib Only",
-            PresetProfile::Custom => "Custom Selection",
+            PresetProfile::FullDesktop => "Full Desktop (Khuyến nghị)",
+            PresetProfile::BinariesAndBundle => "Chỉ cài đặt Tệp nhị phân & /var/lib",
+            PresetProfile::Custom => "Tùy chỉnh từng thành phần",
         }
     }
 
     pub fn description(&self) -> &'static str {
         match self {
             PresetProfile::FullDesktop => {
-                "Installs all binaries, /var/lib staging, labwc configs, themes, icons, and greetd display manager."
+                "Cài đặt toàn bộ tệp nhị phân, staging /var/lib, cấu hình labwc, themes, We10X icons và greetd."
             }
             PresetProfile::BinariesAndBundle => {
-                "Copies all compiled binaries to ~/.local/bin and stages /var/lib/babydra bundle. Skips dotfiles and greetd."
+                "Sao chép các tệp nhị phân vào ~/.local/bin và /var/lib/babydra. Bỏ qua dotfiles và greetd."
             }
             PresetProfile::Custom => {
-                "Manually customize each step, package, binary, and system configuration."
+                "Tùy chỉnh chọn lọc từng gói phần mềm, tệp nhị phân và cấu hình hệ thống."
             }
         }
     }

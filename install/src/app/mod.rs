@@ -5,10 +5,10 @@ use std::sync::mpsc::{channel, Receiver, Sender};
 use crossterm::event::KeyEvent;
 
 use crate::models::{
-    BinaryItem, GenericOptionItem, InstallChannel, InstallState, LogLevel, LogMessage, PresetProfile, WizardStep,
+    BinaryItem, BranchMetadata, GenericOptionItem, InstallChannel, InstallState, LogLevel, LogMessage, PresetProfile, WizardStep,
 };
 use crate::system::{
-    default_binary_source_dir, find_workspace_root, initial_binaries_list,
+    default_binary_source_dir, fetch_branch_metadata, find_workspace_root, initial_binaries_list,
     initial_configs_themes_options, initial_display_manager_options, initial_package_options,
     initial_varlib_options, update_binaries_status,
 };
@@ -18,6 +18,7 @@ pub struct App {
     pub current_step: WizardStep,
     pub current_profile: PresetProfile,
     pub install_channel: InstallChannel,
+    pub channel_metadata: Vec<BranchMetadata>,
 
     // Step Data & Cursors
     pub package_options: Vec<GenericOptionItem>,
@@ -67,10 +68,17 @@ impl App {
         let source_binary_dir = default_binary_source_dir(&workspace_root);
         let binaries = initial_binaries_list(&source_binary_dir);
 
+        let channel_metadata = vec![
+            fetch_branch_metadata(&workspace_root, InstallChannel::Release),
+            fetch_branch_metadata(&workspace_root, InstallChannel::Develop),
+            fetch_branch_metadata(&workspace_root, InstallChannel::LocalSource),
+        ];
+
         let mut app = Self {
             current_step: WizardStep::Welcome,
             current_profile: PresetProfile::FullDesktop,
             install_channel: InstallChannel::Release,
+            channel_metadata,
 
             package_options: initial_package_options(),
             package_cursor: 0,
@@ -101,17 +109,17 @@ impl App {
 
             install_state: InstallState::Idle,
             progress_percent: 0,
-            current_step_desc: "Ready to install BabyDra packages.".to_string(),
+            current_step_desc: "Sẵn sàng cài đặt gói giao diện BabyDra.".to_string(),
 
             tx,
             rx,
             should_quit: false,
         };
 
-        app.add_log(LogLevel::Info, "BabyDra Step-by-Step TUI Installer initialized.");
+        app.add_log(LogLevel::Info, "Khởi tạo công cụ cài đặt BabyDra TUI Installer.");
         app.add_log(
             LogLevel::Info,
-            format!("Channel: {} | Source: {:?}", app.install_channel.name(), app.source_binary_dir),
+            format!("Kênh: {} | Nguồn: {:?}", app.install_channel.name(), app.source_binary_dir),
         );
         app
     }
@@ -129,7 +137,11 @@ impl App {
             InstallChannel::Develop => InstallChannel::LocalSource,
             InstallChannel::LocalSource => InstallChannel::Release,
         };
-        self.add_log(LogLevel::Config, format!("Switched channel to: {}", self.install_channel.name()));
+        self.add_log(LogLevel::Config, format!("Đã chuyển sang kênh: {}", self.install_channel.name()));
+    }
+
+    pub fn get_current_channel_meta(&self) -> Option<&BranchMetadata> {
+        self.channel_metadata.iter().find(|m| m.channel == self.install_channel)
     }
 
     pub fn rescan_binaries(&mut self) {
@@ -138,7 +150,7 @@ impl App {
         self.add_log(
             LogLevel::Info,
             format!(
-                "Scanned source directory. Found {}/{} pre-built binaries.",
+                "Đã quét thư mục nhị phân. Tìm thấy {}/{} tệp thực thi.",
                 found_count,
                 self.binaries.len()
             ),
@@ -161,7 +173,7 @@ impl App {
                 for opt in &mut self.display_manager_options {
                     opt.selected = true;
                 }
-                self.add_log(LogLevel::Config, "Applied 'Full Desktop' preset profile.");
+                self.add_log(LogLevel::Config, "Đã áp dụng hồ sơ 'Full Desktop'.");
             }
             PresetProfile::BinariesAndBundle => {
                 for b in &mut self.binaries {
@@ -176,10 +188,10 @@ impl App {
                 for opt in &mut self.display_manager_options {
                     opt.selected = false;
                 }
-                self.add_log(LogLevel::Config, "Applied 'Binaries & /var/lib Only' preset profile.");
+                self.add_log(LogLevel::Config, "Đã áp dụng hồ sơ 'Chỉ tệp nhị phân & /var/lib'.");
             }
             PresetProfile::Custom => {
-                self.add_log(LogLevel::Config, "Switched to 'Custom' profile.");
+                self.add_log(LogLevel::Config, "Đã chuyển sang chế độ tùy chỉnh thủ công.");
             }
         }
     }
@@ -212,9 +224,9 @@ impl App {
                 } => {
                     self.progress_percent = 100;
                     self.current_step_desc = if success {
-                        format!("Installation completed successfully in {:.2}s!", duration_secs)
+                        format!("Quá trình cài đặt hoàn tất thành công trong {:.2}s!", duration_secs)
                     } else {
-                        format!("Completed in {:.2}s with {} warnings/errors.", duration_secs, total_errors)
+                        format!("Hoàn tất trong {:.2}s với {} cảnh báo/lỗi.", duration_secs, total_errors)
                     };
                     self.install_state = InstallState::Completed {
                         success,
