@@ -1,4 +1,35 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum InstallChannel {
+    Release,
+    Develop,
+    LocalSource,
+}
+
+impl InstallChannel {
+    pub fn name(&self) -> &'static str {
+        match self {
+            InstallChannel::Release => "Release Channel (Official Stable)",
+            InstallChannel::Develop => "Develop Channel (Community & Feature Builds)",
+            InstallChannel::LocalSource => "Local Directory (Pre-built Binaries)",
+        }
+    }
+
+    pub fn description(&self) -> &'static str {
+        match self {
+            InstallChannel::Release => {
+                "Installs official stable binaries and configurations maintained by author from 'release' branch."
+            }
+            InstallChannel::Develop => {
+                "Installs cutting-edge development features and community variants from 'develop' branch."
+            }
+            InstallChannel::LocalSource => {
+                "Installs from locally pre-compiled target/release directory on the filesystem."
+            }
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PresetProfile {
     FullDesktop,
     BinariesAndBundle,

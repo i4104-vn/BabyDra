@@ -1,8 +1,7 @@
 # Chương 01: Tổng quan Dự án BabyDra
 
-**Phiên bản:** 1.0.0
-**Cập nhật lần cuối:** 2026-07-23
-**Phạm vi:** Giới thiệu dự án, các thành phần hệ thống, mục tiêu thiết kế
+**Phiên bản:** 1.1.0  
+**Phạm vi:** Giới thiệu dự án, các thành phần hệ thống, mục tiêu thiết kế và mô hình phân phối
 
 ---
 
@@ -11,132 +10,101 @@
 - [1. BabyDra là gì?](#1-babydra-là-gì)
 - [2. Mục tiêu thiết kế](#2-mục-tiêu-thiết-kế)
 - [3. Các thành phần của hệ thống](#3-các-thành-phần-của-hệ-thống)
-- [4. Sơ đồ tổng thể](#4-sơ-đồ-tổng-thể)
-- [5. Cheat-sheet nhanh cho Developer](#5-cheat-sheet-nhanh-cho-developer)
+- [4. Mô hình phân phối và phân nhánh](#4-mô-hình-phân-phối-và-phân-nhánh)
+- [5. Sơ đồ kiến trúc tổng thể](#5-sơ-đồ-kiến-trúc-tổng-thể)
+- [6. Bảng tra cứu cho lập trình viên](#6-bảng-tra-cứu-cho-lập-trình-viên)
 
 ---
 
 ## 1. BabyDra là gì?
 
-BabyDra là một **môi trường desktop Linux nhẹ** (lightweight Linux Desktop Environment) được viết bằng ngôn ngữ lập trình **Rust**, sử dụng bộ công cụ giao diện **GTK4** để dựng giao diện đồ họa và chạy trên **Wayland** (giao thức hiển thị đồ họa hiện đại trên Linux).
+BabyDra là môi trường desktop (Desktop Environment) xây dựng trên nền tảng giao thức Wayland dành cho hệ điều hành Arch Linux, được phát triển bằng ngôn ngữ lập trình Rust kết hợp với bộ công cụ đồ họa GTK4 và GTK4 Layer Shell.
 
-Dự án được thiết kế để phù hợp với các máy tính có cấu hình trung bình, ưu tiên tốc độ phản hồi tức thì và giao diện thẩm mỹ cao mà không tiêu tốn nhiều tài nguyên hệ thống.
-
-**Giải thích thuật ngữ:**
-
-- **Desktop Environment (DE):** Bộ phần mềm cung cấp giao diện đồ họa cho hệ điều hành Linux. Bao gồm thanh taskbar, trình quản lý cửa sổ, trình khởi chạy ứng dụng, và các thành phần khác mà người dùng tương tác hàng ngày.
-- **GTK4:** Thư viện giao diện đồ họa (GUI toolkit) phổ biến trên Linux, cung cấp sẵn các widget như nút bấm, ô nhập liệu, cửa sổ.
-- **Wayland:** Giao thức hiển thị thế hệ mới trên Linux, thay thế cho X11. Có hiệu năng tốt hơn và bảo mật cao hơn.
+Hệ thống được tối ưu hóa nhằm đáp ứng hai tiêu chí: tốc độ phản hồi tức thì và khả năng phân tách module rõ ràng, cho phép tùy biến và mở rộng linh hoạt.
 
 ---
 
 ## 2. Mục tiêu thiết kế
 
-BabyDra được xây dựng xung quanh 3 mục tiêu cốt lõi:
+### 2.1. Phản hồi tức thì (Deterministic Low Latency)
+Thời gian từ khi kích hoạt sự kiện đầu vào đến khi hiển thị giao diện được kiểm soát dưới 10 mili-giây. Hệ thống áp dụng mô hình Daemon-Client: các cửa sổ đồ họa được nạp sẵn vào bộ nhớ và chỉ thay đổi trạng thái hiển thị thay vì khởi tạo lại tiến trình.
 
-### 2.1. Phản hồi tức thì (Instant Response)
+### 2.2. Tính thẩm mỹ và ngôn ngữ thiết kế nhất quán
+Giao diện áp dụng ngôn ngữ thiết kế Glassmorphism với nền bán trong suốt, bo tròn góc và hỗ trợ đồng bộ hai chế độ màu sáng (Light) và tối (Dark).
 
-Mọi thao tác của người dùng (nhấn phím tắt, click chuột, mở panel) phải cho kết quả hiển thị trong vòng dưới 10 mili-giây. Để đạt được điều này, dự án dùng mô hình **Daemon-Client**: giao diện được giữ sẵn trong bộ nhớ, chỉ bật/tắt hiển thị thay vì khởi động lại từ đầu mỗi lần gọi. Chi tiết xem [02-architecture.md](./02-architecture.md).
-
-### 2.2. Thẩm mỹ cao (High-quality Aesthetics)
-
-Giao diện sử dụng ngôn ngữ thiết kế **Glassmorphism** (kính mờ): nền bán trong suốt, hiệu ứng làm mờ phía sau, góc bo tròn mềm mại. Hỗ trợ cả chế độ sáng (Light) và tối (Dark). Chi tiết xem [design/01-design-philosophy.md](./design/01-design-philosophy.md).
-
-### 2.3. Dễ bảo trì và mở rộng (Maintainable & Extensible)
-
-Mã nguồn được tổ chức theo nguyên tắc phân tách rõ ràng giữa giao diện và logic nghiệp vụ. Mỗi thành phần là một module độc lập, dễ thêm mới hoặc sửa đổi mà không ảnh hưởng đến phần còn lại. Chi tiết xem [03-project-structure.md](./03-project-structure.md).
+### 2.3. Cấu trúc module hóa và khả năng độc lập
+Mã nguồn được phân rã thành các crate và thư viện độc lập. Các module giao tiếp với nhau qua D-Bus, Unix Domain Socket hoặc cơ chế gọi hàm nội bộ qua thư viện dùng chung.
 
 ---
 
 ## 3. Các thành phần của hệ thống
 
-Dự án BabyDra bao gồm hai loại crate Rust:
+### 3.1. Thư viện dùng chung (`libs/`)
 
-### 3.1. Thư viện dùng chung (Libraries) — thư mục `libs/`
+| Tên thư viện | Đường dẫn | Vai trò |
+|---|---|---|
+| `babydra-common` | `libs/babydra-common/` | Dịch vụ hệ điều hành, D-Bus, sysfs, mô hình dữ liệu và đa ngôn ngữ |
+| `babydra-utils` | `libs/babydra-utils/` | CSS toàn cục, bộ widget dùng chung, bộ phân giải icon và quản lý theme |
+| `babydra-island` | `libs/babydra-island/` | Widget Dynamic Island hiển thị thông báo và điều khiển phát nhạc |
+| `babydra-launcher` | `libs/babydra-launcher/` | Thuật toán tìm kiếm, phân loại và thực thi ứng dụng desktop |
 
-Các thư viện này không thể chạy độc lập. Chúng cung cấp API, widget, và tài nguyên cho các ứng dụng trong `crates/`.
+### 3.2. Ứng dụng thực thi (`crates/` và `install/`)
 
-| Tên thư viện | Thư mục | Vai trò |
-| :--- | :--- | :--- |
-| `babydra-common` | `libs/babydra-common/` | Thư viện lõi: tương tác hệ điều hành, D-Bus, tệp `/sys/class`, models dữ liệu |
-| `babydra-utils` | `libs/babydra-utils/` | Thư viện tiện ích: CSS toàn cục, widget dùng chung, khởi tạo theme |
-| `babydra-island` | `libs/babydra-island/` | Widget Dynamic Island (hiệu ứng chỉ báo trên màn hình) |
-| `babydra-launcher` | `libs/babydra-launcher/` | Logic tìm kiếm và khởi chạy ứng dụng |
-
-### 3.2. Ứng dụng có thể thực thi (Executables) — thư mục `crates/`
-
-Mỗi crate là một tiến trình độc lập, đảm nhận một chức năng cụ thể của desktop.
-
-| Tên ứng dụng | Thư mục | Chức năng |
-| :--- | :--- | :--- |
-| `babydra-panel` | `crates/babydra-panel/` | Thanh taskbar chính: dock, system tray, clock, các toggle điều khiển nhanh |
-| `babydra-switcher` | `crates/babydra-switcher/` | Bộ chuyển đổi ứng dụng (Alt+Tab Switcher) |
-| `babydra-screenshot` | `crates/babydra-screenshot/` | Công cụ chụp màn hình |
-| `babydra-lock` | `crates/babydra-lock/` | Màn hình khóa (Lock Screen) |
-| `babydra-preview` | `crates/babydra-preview/` | Xem trước tệp (File Preview) |
-| `babydra-settings` | `crates/babydra-settings/` | Cài đặt hệ thống |
-| `babydra-explore` | `crates/babydra-explore/` | Trình quản lý tệp (File Explorer) |
+| Tên ứng dụng | Đường dẫn | Chức năng |
+|---|---|---|
+| `babydra-panel` | `crates/babydra-panel/` | Thanh taskbar chính, khay hệ thống, đồng hồ và trung tâm điều khiển |
+| `babydra-switcher` | `crates/babydra-switcher/` | Bộ chuyển đổi cửa sổ ứng dụng (Alt+Tab Switcher) |
+| `babydra-screenshot` | `crates/babydra-screenshot/` | Công cụ chụp màn hình đồ họa |
+| `babydra-lock` | `crates/babydra-lock/` | Màn hình khóa và xác thực người dùng |
+| `babydra-greeter` | `crates/babydra-greeter/` | Màn hình đăng nhập hệ thống tương thích Greetd |
+| `babydra-settings` | `crates/babydra-settings/` | Trung tâm cấu hình hệ thống, giao diện và phần cứng |
+| `babydra-preview` | `crates/babydra-preview/` | Ứng dụng xem nhanh hình ảnh |
+| `babydra-explore` | `crates/babydra-explore/` | Trình duyệt và quản lý tập tin đồ họa |
+| `babydra-installer` | `install/` | Bộ cài đặt TUI đa bước quản lý pull, build và phân phối binary |
 
 ---
 
-## 4. Sơ đồ tổng thể
+## 4. Mô hình phân phối và phân nhánh
 
-Sơ đồ dưới đây mô tả cách các thành phần giao tiếp với nhau:
+Kho mã nguồn BabyDra áp dụng mô hình phân tách 3 nhánh:
 
-```
-Người dùng
-     |
-     | (nhấn phím, click chuột)
-     v
-+------------------+     Unix Socket / D-Bus     +-------------------+
-| Client nhẹ       | --------------------------> | Daemon (crates/)  |
-| (phím tắt)       |                             | Cửa sổ ẩn sẵn     |
-+------------------+                             | trong bộ nhớ      |
-                                                 +-------------------+
-                                                          |
-                                                          | gọi API
-                                                          v
-                                                 +-------------------+
-                                                 | babydra-common    |
-                                                 | (libs/)           |
-                                                 | - Services        |
-                                                 | - Models          |
-                                                 +-------------------+
-                                                          |
-                                                          | đọc/ghi
-                                                          v
-                                                 +-------------------+
-                                                 | Hệ điều hành Linux|
-                                                 | - /sys/class/     |
-                                                 | - D-Bus           |
-                                                 | - sysfs           |
-                                                 +-------------------+
-```
+1. **`main`**: Nhánh phân phối tinh gọn, chỉ chứa công cụ cài đặt `babydra-installer`, script thực thi và tài liệu hướng dẫn.
+2. **`release`**: Nhánh mã nguồn chính thức và ổn định do tác giả duy trì.
+3. **`develop`**: Nhánh phát triển chung được checkout từ `release`, phục vụ việc đóng góp tính năng mới từ cộng đồng.
+
+---
+
+## 5. Sơ đồ kiến trúc tổng thể
 
 ```
-babydra-utils (libs/)
-      |
-      +-- CSS toàn cục (dark/ và light/)
-      +-- Widget dùng chung (components/)
-      +-- Khởi tạo theme (ui/theme/)
-      |
-      v
-   Được nạp vào GDK Display Context
-   khi bất kỳ crate nào khởi động
+[ Người dùng / Phím tắt ]
+           |
+           v
++------------------------+      Unix Socket / D-Bus      +------------------------+
+| Client gửi tín hiệu    | ----------------------------> | Daemon (crates/)       |
++------------------------+                               | Cửa sổ nạp sẵn bộ nhớ  |
+                                                         +------------------------+
+                                                                     |
+                                                                     v
+                                                         +------------------------+
+                                                         | babydra-common (libs/) |
+                                                         +------------------------+
+                                                                     |
+                                                                     v
+                                                         +------------------------+
+                                                         | Hệ thống Arch Linux    |
+                                                         | /sys, /proc, systemd   |
+                                                         +------------------------+
 ```
 
 ---
 
-## 5. Cheat-sheet nhanh cho Developer
+## 6. Bảng tra cứu cho lập trình viên
 
-Bảng tra cứu nhanh khi bắt đầu làm việc với dự án:
-
-| Câu hỏi | Trả lời ngắn | Xem chi tiết tại |
-| :--- | :--- | :--- |
-| CSS nằm ở đâu? | `libs/babydra-utils/src/styles/` | [03-project-structure.md](./03-project-structure.md) |
-| Thêm logic đọc hardware mới? | Thêm vào `libs/babydra-common/src/services/` | [02-architecture.md](./02-architecture.md) |
-| Thêm widget mới? | Tách thành `mod.rs` + `render.rs` | [03-project-structure.md](./03-project-structure.md) |
-| Màu accent là gì? | `#3b82f6` (Xanh dương Neon) | [design/02-design-tokens.md](./design/02-design-tokens.md) |
-| Hover dùng transform không? | Không bao giờ. Chỉ đổi màu. | [design/01-design-philosophy.md](./design/01-design-philosophy.md) |
-| Build dự án như thế nào? | `cargo build` tại thư mục gốc | [04-setup-and-build.md](./04-setup-and-build.md) |
-| CSS inline trong Rust được không? | Không. CSS phải đặt trong `styles/` | [03-project-structure.md](./03-project-structure.md) |
+| Yêu cầu | Vị trí mã nguồn | Tài liệu tham chiếu |
+|---|---|---|
+| CSS và giao diện | `libs/babydra-utils/src/styles/` | [03-project-structure.md](./03-project-structure.md) |
+| Dịch vụ phần cứng và OS | `libs/babydra-common/src/services/` | [02-architecture.md](./02-architecture.md) |
+| Cấu trúc widget giao diện | Tách biệt `mod.rs` và `render.rs` | [03-project-structure.md](./03-project-structure.md) |
+| Hướng dẫn biên dịch | `cargo build --workspace` | [04-setup-and-build.md](./04-setup-and-build.md) |
+| Quy trình phân nhánh và merge | Git workflow | [../WORKFLOW.md](../WORKFLOW.md) |

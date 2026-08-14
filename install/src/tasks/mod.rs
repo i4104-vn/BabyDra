@@ -5,11 +5,12 @@ pub mod packages;
 pub mod varlib;
 
 use std::path::PathBuf;
+use std::process::Command;
 use std::sync::mpsc::Sender;
 use std::thread;
 use std::time::Instant;
 
-use crate::models::{BinaryItem, GenericOptionItem, LogLevel, LogMessage};
+use crate::models::{BinaryItem, GenericOptionItem, InstallChannel, LogLevel, LogMessage};
 use crate::system::stop_process;
 
 pub enum InstallEvent {
@@ -30,6 +31,7 @@ pub enum InstallEvent {
 pub struct InstallPlan {
     pub workspace_root: PathBuf,
     pub source_binary_dir: PathBuf,
+    pub install_channel: InstallChannel,
     pub selected_binaries: Vec<BinaryItem>,
     pub selected_packages: Vec<GenericOptionItem>,
     pub selected_varlib: Vec<GenericOptionItem>,
@@ -48,24 +50,75 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             + plan.selected_varlib.len()
             + plan.selected_configs_themes.len()
             + plan.selected_display_manager.len()
-            + 1;
+            + 2;
         let mut current_step = 0;
 
         let send_log = |lvl: LogLevel, msg: String| {
             let _ = tx.send(InstallEvent::Log(LogMessage::new(lvl, msg)));
         };
 
-        send_log(LogLevel::Info, "Starting BabyDra Installation Worker...".into());
-        send_log(LogLevel::Info, format!("Binary Source: {:?}", plan.source_binary_dir));
+        send_log(LogLevel::Info, "Khởi chạy tiến trình cài đặt BabyDra...".into());
+        send_log(LogLevel::Info, format!("Kênh cài đặt: {}", plan.install_channel.name()));
+        send_log(LogLevel::Info, format!("Thư mục nhị phân nguồn: {:?}", plan.source_binary_dir));
 
-        // 0. Terminate old processes if requested
+        // 0. Pull & Build code if needed for selected channel
+        match plan.install_channel {
+            InstallChannel::Release | InstallChannel::Develop => {
+                let target_branch = match plan.install_channel {
+                    InstallChannel::Release => "release",
+                    InstallChannel::Develop => "develop",
+                    _ => "release",
+                };
+
+                let missing_any = plan.selected_binaries.iter().any(|b| !plan.source_binary_dir.join(&b.name).exists());
+                if missing_any {
+                    current_step += 1;
+                    let _ = tx.send(InstallEvent::Progress {
+                        current: current_step,
+                        total: total_steps,
+                        current_step_name: format!("Đồng bộ mã nguồn nhánh {}", target_branch),
+                    });
+
+                    send_log(LogLevel::Info, format!("Đang kéo mã nguồn từ origin/{}...", target_branch));
+                    let fetch_st = Command::new("git")
+                        .args(["fetch", "origin", target_branch])
+                        .current_dir(&plan.workspace_root)
+                        .status();
+
+                    if let Ok(st) = fetch_st {
+                        if st.success() {
+                            send_log(LogLevel::Success, format!("Đã đồng bộ nhánh {}.", target_branch));
+                        }
+                    }
+
+                    send_log(LogLevel::Info, "Tiến hành biên dịch các gói nhị phân (cargo build --release)...".into());
+                    let build_st = Command::new("cargo")
+                        .args(["build", "--release", "--workspace"])
+                        .current_dir(&plan.workspace_root)
+                        .status();
+
+                    if let Ok(st) = build_st {
+                        if st.success() {
+                            send_log(LogLevel::Success, "Biên dịch thành công các gói nhị phân.".into());
+                        } else {
+                            send_log(LogLevel::Warn, "Quá trình biên dịch hoàn tất với cảnh báo.".into());
+                        }
+                    }
+                }
+            }
+            InstallChannel::LocalSource => {
+                send_log(LogLevel::Info, "Sử dụng trực tiếp các tệp nhị phân có sẵn từ thư mục cục bộ.".into());
+            }
+        }
+
+        // 1. Terminate old processes if requested
         let terminate_enabled = plan
             .selected_configs_themes
             .iter()
             .any(|o| o.id == "terminate_processes" && o.selected);
 
         if terminate_enabled {
-            send_log(LogLevel::Warn, "Terminating active processes before overwrite...".into());
+            send_log(LogLevel::Warn, "Dừng các tiến trình đang hoạt động trước khi ghi đè...".into());
             let procs = [
                 "babydra-panel", "babydra-switcher", "babydra-screenshot",
                 "babydra-lock", "babydra-launcher", "babydra-preview",
@@ -78,7 +131,7 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             thread::sleep(std::time::Duration::from_millis(250));
         }
 
-        // 1. Packages
+        // 2. Packages
         for opt in &plan.selected_packages {
             if !opt.selected {
                 continue;
@@ -94,20 +147,20 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             total_errors += e;
         }
 
-        // 2. Prebuilt Binaries
+        // 3. Prebuilt Binaries
         for bin in &plan.selected_binaries {
             current_step += 1;
             let _ = tx.send(InstallEvent::Progress {
                 current: current_step,
                 total: total_steps,
-                current_step_name: format!("Installing binary: {}", bin.name),
+                current_step_name: format!("Cài đặt tệp nhị phân: {}", bin.name),
             });
             let (c, e) = binaries::execute_binary_copy_task(bin, &plan.source_binary_dir, &send_log);
             total_copied += c;
             total_errors += e;
         }
 
-        // 3. /var/lib Staging
+        // 4. /var/lib Staging
         for opt in &plan.selected_varlib {
             if !opt.selected {
                 continue;
@@ -123,7 +176,7 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             total_errors += e;
         }
 
-        // 4. Configs & Themes
+        // 5. Configs & Themes
         for opt in &plan.selected_configs_themes {
             if !opt.selected || opt.id == "terminate_processes" {
                 continue;
@@ -139,7 +192,7 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             total_errors += e;
         }
 
-        // 5. Display Manager
+        // 6. Display Manager
         for opt in &plan.selected_display_manager {
             if !opt.selected {
                 continue;
@@ -160,7 +213,7 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
 
         send_log(
             if success { LogLevel::Success } else { LogLevel::Warn },
-            format!("Installation finished in {:.2}s. Tasks: {}, Errors: {}", duration, total_copied, total_errors),
+            format!("Hoàn tất quá trình cài đặt trong {:.2}s. Tác vụ thành công: {}, Lỗi: {}", duration, total_copied, total_errors),
         );
 
         let _ = tx.send(InstallEvent::Completed {

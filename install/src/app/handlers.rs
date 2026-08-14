@@ -100,6 +100,9 @@ pub fn handle_key_event(app: &mut App, key: KeyEvent) {
 fn handle_step_interaction(app: &mut App, key: KeyEvent) {
     match app.current_step {
         WizardStep::Welcome => match key.code {
+            KeyCode::Char('c') | KeyCode::Char('C') => {
+                app.toggle_channel();
+            }
             KeyCode::Up | KeyCode::Char('k') => {
                 app.current_profile = match app.current_profile {
                     PresetProfile::FullDesktop => PresetProfile::Custom,

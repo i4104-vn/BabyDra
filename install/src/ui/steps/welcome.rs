@@ -7,24 +7,24 @@ use ratatui::{
 };
 
 use crate::app::App;
-use crate::models::PresetProfile;
+use crate::models::{InstallChannel, PresetProfile};
 
 pub fn draw_welcome_step(f: &mut Frame, app: &App, area: Rect) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
             Constraint::Length(8),
-            Constraint::Length(8),
+            Constraint::Length(9),
             Constraint::Min(6),
         ])
         .split(area);
 
     let banner_text = vec![
-        Line::from(Span::styled("Welcome to BabyDra Desktop Shell Installer", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))),
+        Line::from(Span::styled("BabyDra Desktop Shell Installer", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))),
         Line::from(""),
-        Line::from("This TUI wizard will guide you through setting up BabyDra Wayland shell on Arch Linux."),
-        Line::from(Span::styled("Key feature: It installs pre-built binaries directly without requiring cargo build from source.", Style::default().fg(Color::Green))),
-        Line::from("All binary executables are copied to ~/.local/bin and staged in /var/lib/babydra for system-wide access."),
+        Line::from("Official step-by-step TUI installer for the BabyDra Wayland desktop environment on Arch Linux."),
+        Line::from(Span::styled("Direct deployment: Copies pre-built binaries into ~/.local/bin and /var/lib/babydra.", Style::default().fg(Color::Green))),
+        Line::from(Span::styled("Press 'c' to switch between Release and Develop channels.", Style::default().fg(Color::Yellow))),
     ];
 
     let banner = Paragraph::new(banner_text)
@@ -40,10 +40,21 @@ pub fn draw_welcome_step(f: &mut Frame, app: &App, area: Rect) {
     f.render_widget(banner, chunks[0]);
 
     let found_bins = app.binaries.iter().filter(|b| b.exists_in_source).count();
+    let channel_color = match app.install_channel {
+        InstallChannel::Release => Color::Green,
+        InstallChannel::Develop => Color::Magenta,
+        InstallChannel::LocalSource => Color::Cyan,
+    };
+
     let sys_info = vec![
         Line::from(vec![
-            Span::styled("Workspace Root:     ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-            Span::styled(app.workspace_root.to_string_lossy().to_string(), Style::default().fg(Color::White)),
+            Span::styled("Active Channel:     ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+            Span::styled(app.install_channel.name(), Style::default().fg(channel_color).add_modifier(Modifier::BOLD)),
+            Span::styled(" [Press 'c' to switch channel]", Style::default().fg(Color::DarkGray)),
+        ]),
+        Line::from(vec![
+            Span::styled("Channel Info:       ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+            Span::styled(app.install_channel.description(), Style::default().fg(Color::White)),
         ]),
         Line::from(vec![
             Span::styled("Binary Source Dir:  ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
@@ -53,19 +64,15 @@ pub fn draw_welcome_step(f: &mut Frame, app: &App, area: Rect) {
         Line::from(vec![
             Span::styled("Pre-built Status:   ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
             Span::styled(
-                format!("{found_bins}/{} binaries ready for installation", app.binaries.len()),
+                format!("{found_bins}/{} binaries detected and ready", app.binaries.len()),
                 Style::default().fg(if found_bins == app.binaries.len() { Color::Green } else { Color::Yellow }),
             ),
-        ]),
-        Line::from(vec![
-            Span::styled("Target Bin Folder:  ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-            Span::styled("~/.local/bin (and /var/lib/babydra/bin)", Style::default().fg(Color::White)),
         ]),
     ];
 
     let sys_box = Paragraph::new(sys_info).block(
         Block::default()
-            .title(" Pre-flight Environment Inspection ")
+            .title(" Environment & Channel Configuration ")
             .title_style(Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
@@ -107,7 +114,7 @@ pub fn draw_welcome_step(f: &mut Frame, app: &App, area: Rect) {
 
     let profile_list = List::new(profile_items).block(
         Block::default()
-            .title(" Choose Installation Profile [Use ↑/↓ to switch, Enter/n to Next Step] ")
+            .title(" Choose Installation Profile [↑/↓: Switch profile | c: Switch channel | Enter/n: Next] ")
             .title_style(Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD))
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)

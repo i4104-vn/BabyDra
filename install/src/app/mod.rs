@@ -5,7 +5,7 @@ use std::sync::mpsc::{channel, Receiver, Sender};
 use crossterm::event::KeyEvent;
 
 use crate::models::{
-    BinaryItem, GenericOptionItem, InstallState, LogLevel, LogMessage, PresetProfile, WizardStep,
+    BinaryItem, GenericOptionItem, InstallChannel, InstallState, LogLevel, LogMessage, PresetProfile, WizardStep,
 };
 use crate::system::{
     default_binary_source_dir, find_workspace_root, initial_binaries_list,
@@ -17,6 +17,7 @@ use crate::tasks::{spawn_installation_worker, InstallEvent, InstallPlan};
 pub struct App {
     pub current_step: WizardStep,
     pub current_profile: PresetProfile,
+    pub install_channel: InstallChannel,
 
     // Step Data & Cursors
     pub package_options: Vec<GenericOptionItem>,
@@ -69,6 +70,7 @@ impl App {
         let mut app = Self {
             current_step: WizardStep::Welcome,
             current_profile: PresetProfile::FullDesktop,
+            install_channel: InstallChannel::Release,
 
             package_options: initial_package_options(),
             package_cursor: 0,
@@ -109,7 +111,7 @@ impl App {
         app.add_log(LogLevel::Info, "BabyDra Step-by-Step TUI Installer initialized.");
         app.add_log(
             LogLevel::Info,
-            format!("Detected source binary path: {:?}", app.source_binary_dir),
+            format!("Channel: {} | Source: {:?}", app.install_channel.name(), app.source_binary_dir),
         );
         app
     }
@@ -119,6 +121,15 @@ impl App {
         if self.auto_scroll_logs && self.logs.len() > 10 {
             self.log_scroll = self.logs.len().saturating_sub(10);
         }
+    }
+
+    pub fn toggle_channel(&mut self) {
+        self.install_channel = match self.install_channel {
+            InstallChannel::Release => InstallChannel::Develop,
+            InstallChannel::Develop => InstallChannel::LocalSource,
+            InstallChannel::LocalSource => InstallChannel::Release,
+        };
+        self.add_log(LogLevel::Config, format!("Switched channel to: {}", self.install_channel.name()));
     }
 
     pub fn rescan_binaries(&mut self) {
@@ -248,6 +259,7 @@ impl App {
         let plan = InstallPlan {
             workspace_root: self.workspace_root.clone(),
             source_binary_dir: self.source_binary_dir.clone(),
+            install_channel: self.install_channel,
             selected_binaries,
             selected_packages: self.package_options.clone(),
             selected_varlib: self.varlib_options.clone(),

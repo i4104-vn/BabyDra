@@ -1,29 +1,11 @@
 [workspace]
-resolver = "2"
 members = [
-    "libs/babydra-common",
-    "libs/babydra-island",
-    "libs/babydra-launcher",
-    "libs/babydra-utils",
-    "crates/babydra-panel",
-    "crates/babydra-switcher",
-    "crates/babydra-screenshot",
-    "crates/babydra-lock",
-    "crates/babydra-preview",
-    "crates/babydra-settings",
-    "crates/babydra-explore", "crates/babydra-greeter", "install",
+    "install",
 ]
-exclude = [
-    ".old_project",
-    ".old_project/*",
-    ".old_project/I4ArchSettings/src-tauri",
-]
+resolver = "2"
 
 [workspace.package]
 version = "1.0.0"
-
-[workspace.dependencies]
-babydra-common = { path = "libs/babydra-common" }
-babydra-launcher = { path = "libs/babydra-launcher" }
-babydra-island = { path = "libs/babydra-island" }
-babydra-utils = { path = "libs/babydra-utils" }
+edition = "2021"
+authors = ["tdkhoa <i4104.vn@gmail.com>"]
+license = "MIT"
