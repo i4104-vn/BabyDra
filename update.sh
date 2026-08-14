@@ -108,10 +108,12 @@ mkdir -p "$DEST_DIR"
 cp -r "$CONFIG_SOURCE"/* "$DEST_DIR"/
 
 # Sync system GTK and fontconfig configurations
-mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0" "$HOME/.config/fontconfig"
+mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0" "$HOME/.config/fontconfig" "$HOME/.config/kitty" "$HOME/.config/nvim"
 cp "$CONFIG_SOURCE/settings.ini" "$HOME/.config/gtk-3.0/settings.ini"
 cp "$CONFIG_SOURCE/settings.ini" "$HOME/.config/gtk-4.0/settings.ini"
 cp "$CONFIG_SOURCE/fonts.conf" "$HOME/.config/fontconfig/fonts.conf"
+cp -r "$SCRIPT_DIR/configs/kitty/"* "$HOME/.config/kitty/" 2>/dev/null || true
+cp -r "$SCRIPT_DIR/configs/nvim/"* "$HOME/.config/nvim/" 2>/dev/null || true
 
 # Apply font to GNOME/GTK desktop interface via gsettings
 gsettings set org.gnome.desktop.interface font-name 'Segoe UI Variable Static Text 13' 2>/dev/null || true
