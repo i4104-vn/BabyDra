@@ -7,5 +7,6 @@
   "greeter.user": "Người dùng",
   "greeter.os_name": "BabyDra OS",
   "greeter.initializing": "Đang khởi động môi trường Desktop...",
+  "greeter.starting_desktop": "Đang tải giao diện BabyDra...",
   "greeter.date_format": "{weekday}, {day} {month}, {year}"
 }

@@ -46,7 +46,6 @@ fn setup_splash_transition(g: &GreeterWidgets) {
 
     let splash_container = g.splash.container.clone();
     let login_container = g.login.container.clone();
-    let user_entry = g.login.user_entry.clone();
     let pass_entry = g.login.pass_entry.clone();
 
     // After 2 seconds, fade out splash screen and reveal floating login panel
@@ -58,11 +57,7 @@ fn setup_splash_transition(g: &GreeterWidgets) {
         login_container.set_visible(true);
         login_container.set_opacity(1.0);
 
-        if user_entry.text().is_empty() {
-            user_entry.grab_focus();
-        } else {
-            pass_entry.grab_focus();
-        }
+        pass_entry.grab_focus();
         glib::ControlFlow::Break
     });
 }
@@ -91,7 +86,8 @@ fn setup_power_buttons(top_bar: &TopBarWidget) {
 // ---------------------------------------------------------------------------
 
 fn setup_login_flow(g: &GreeterWidgets) {
-    let user_entry = g.login.user_entry.clone();
+    let user_dropdown = g.login.user_dropdown.clone();
+    let users = g.login.users.clone();
     let pass_entry = g.login.pass_entry.clone();
     let login_btn = g.login.login_btn.clone();
     let btn_spinner = g.login.btn_spinner.clone();
@@ -107,7 +103,8 @@ fn setup_login_flow(g: &GreeterWidgets) {
             return;
         }
 
-        let user = user_entry.text().to_string();
+        let selected_idx = user_dropdown.selected() as usize;
+        let user = users.get(selected_idx).cloned().unwrap_or_default();
         let pass = pass_entry.text().to_string();
         if user.is_empty() || pass.is_empty() {
             tracing::warn!(target: "babydra-greeter", "Login submit ignored: username or password is empty");
@@ -117,7 +114,7 @@ fn setup_login_flow(g: &GreeterWidgets) {
         tracing::info!(target: "babydra-greeter", "Login action triggered for user: {:?}", user);
 
         // Disable controls and show spinner in submit button
-        user_entry.set_sensitive(false);
+        user_dropdown.set_sensitive(false);
         pass_entry.set_sensitive(false);
         login_btn.set_sensitive(false);
         power_btn.set_sensitive(false);
@@ -140,7 +137,7 @@ fn setup_login_flow(g: &GreeterWidgets) {
             let _ = tx.send(result);
         });
 
-        let user_entry_c = user_entry.clone();
+        let user_dropdown_c = user_dropdown.clone();
         let pass_entry_c = pass_entry.clone();
         let login_btn_c = login_btn.clone();
         let btn_spinner_c = btn_spinner.clone();
@@ -165,7 +162,7 @@ fn setup_login_flow(g: &GreeterWidgets) {
                         login_btn_c.set_child(Option::<&gtk4::Widget>::None);
                         login_btn_c.set_label("➔");
 
-                        user_entry_c.set_sensitive(true);
+                        user_dropdown_c.set_sensitive(true);
                         pass_entry_c.set_sensitive(true);
                         login_btn_c.set_sensitive(true);
                         power_btn_c.set_sensitive(true);
@@ -193,11 +190,6 @@ fn setup_login_flow(g: &GreeterWidgets) {
     let do_login_action_btn = do_login_action.clone();
     g.login.login_btn.connect_clicked(move |_| {
         do_login_action_btn();
-    });
-
-    let pass_entry_focus = g.login.pass_entry.clone();
-    g.login.user_entry.connect_activate(move |_| {
-        pass_entry_focus.grab_focus();
     });
 
     g.login.pass_entry.connect_activate(move |_| {

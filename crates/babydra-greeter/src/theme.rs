@@ -209,6 +209,106 @@ pub fn load_css() {
             outline-style: none;
         }
 
+        .login-dropdown, dropdown {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 500;
+            min-height: 38px;
+        }
+
+        dropdown > button {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 500;
+            padding: 0 4px;
+            min-height: 38px;
+        }
+
+        dropdown > button:hover, dropdown > button:active, dropdown > button:checked {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            color: #ffffff;
+        }
+
+        dropdown > button image {
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        popover.menu, dropdown popover {
+            background: transparent;
+            padding: 0px;
+            margin-top: 6px;
+        }
+
+        dropdown popover contents {
+            background: rgba(20, 23, 36, 0.96);
+            -gtk-background-blur: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 16px;
+            padding: 6px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
+        }
+
+        dropdown popover scrolledwindow {
+            min-height: 0px;
+            max-height: 240px;
+        }
+
+        dropdown listview {
+            background: transparent;
+            color: #ffffff;
+            padding: 2px;
+        }
+
+        dropdown listview row {
+            padding: 8px 14px;
+            margin: 2px 0px;
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            font-weight: 500;
+            min-height: 36px;
+            transition: all 150ms ease;
+        }
+
+        dropdown listview row cell {
+            padding: 4px 8px;
+        }
+
+        dropdown listview row box {
+            spacing: 12px;
+        }
+
+        dropdown listview row label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        dropdown listview row image,
+        dropdown listview row image.mark {
+            margin-left: 16px;
+            opacity: 0.9;
+        }
+
+        dropdown listview row:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+        }
+
+        dropdown listview row:selected {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+        }
+
         .input-icon {
             color: rgba(255, 255, 255, 0.85);
             margin-right: 6px;

@@ -7,5 +7,6 @@
   "greeter.user": "User",
   "greeter.os_name": "BabyDra OS",
   "greeter.initializing": "Initializing Desktop Shell...",
+  "greeter.starting_desktop": "Loading BabyDra Desktop...",
   "greeter.date_format": "{weekday}, {day} {month} {year}"
 }
