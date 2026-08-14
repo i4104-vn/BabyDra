@@ -14,6 +14,8 @@ pub fn setup_appearance_handlers(
     size_dropdown: &gtk4::DropDown,
     target_dropdown: &gtk4::DropDown,
     quick_select_box: &gtk4::Box,
+    avatar_pic: &gtk4::Picture,
+    avatar_btn: &gtk4::Button,
     gtk_themes: Vec<String>,
     icon_themes: Vec<String>,
     cursor_themes: Vec<String>,
@@ -155,7 +157,7 @@ pub fn setup_appearance_handlers(
 
     // Dynamic Target Selection & Wallpaper State Management
     let desktop_wp_path = Rc::new(RefCell::new(babydra_common::get_current_wallpaper()));
-    let greeter_wp_path = Rc::new(RefCell::new(babydra_common::get_greeter_wallpaper()));
+    let greeter_wp_path: Rc<RefCell<Option<std::path::PathBuf>>> = Rc::new(RefCell::new(None));
     let target_mode = Rc::new(Cell::new(0u32)); // 0 = Desktop, 1 = Lock screen
 
     let preview_pic_target = preview_pic.clone();
@@ -175,6 +177,11 @@ pub fn setup_appearance_handlers(
         } else {
             if let Some(ref p) = *greeter_wp_ref.borrow() {
                 preview_pic_target.set_filename(Some(p));
+            } else if let Some(bytes) = babydra_common::get_greeter_wallpaper_bytes() {
+                let stream = gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(&bytes));
+                if let Ok(pixbuf) = gtk4::gdk_pixbuf::Pixbuf::from_stream_at_scale(&stream, 800, 600, true, gtk4::gio::Cancellable::NONE) {
+                    preview_pic_target.set_pixbuf(Some(&pixbuf));
+                }
             } else {
                 preview_pic_target.set_filename(None::<&str>);
             }
@@ -337,6 +344,42 @@ pub fn setup_appearance_handlers(
                                     &babydra_common::i18n::t("settings.notif_wallpaper_msg"),
                                 );
                             }
+                        }
+                    }
+                }
+            });
+        }
+    });
+
+    let avatar_preview_cb = avatar_pic.clone();
+    let parent_box_av = main_box.clone();
+    avatar_btn.connect_clicked(move |_| {
+        if let Some(win) = parent_box_av.root().and_then(|r| r.downcast::<gtk4::Window>().ok()) {
+            let file_dialog = gtk4::FileDialog::new();
+            file_dialog.set_title(&babydra_common::i18n::t("settings.pick_avatar"));
+
+            let filter = gtk4::FileFilter::new();
+            filter.set_name(Some(&babydra_common::i18n::t("settings.image_filter")));
+            filter.add_mime_type("image/png");
+            filter.add_mime_type("image/jpeg");
+            filter.add_mime_type("image/webp");
+            file_dialog.set_default_filter(Some(&filter));
+
+            let preview_cb = avatar_preview_cb.clone();
+
+            file_dialog.open(Some(&win), None::<&gtk4::gio::Cancellable>, move |res| {
+                if let Ok(file) = res {
+                    if let Some(path) = file.path() {
+                        if babydra_common::set_avatar(&path).is_ok() {
+                            if let Ok(bytes) = std::fs::read(&path) {
+                                if let Some(pixbuf) = babydra_common::crop_to_circle_pixbuf(&bytes, 42) {
+                                    preview_cb.set_pixbuf(Some(&pixbuf));
+                                }
+                            }
+                            babydra_common::send_settings_notification(
+                                &babydra_common::i18n::t("settings.notif_avatar_title"),
+                                &babydra_common::i18n::t("settings.notif_avatar_msg"),
+                            );
                         }
                     }
                 }

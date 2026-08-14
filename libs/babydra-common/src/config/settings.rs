@@ -162,9 +162,11 @@ pub struct DisplayConfig {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
-pub struct GreeterConfig {
+pub struct LockscreenConfig {
     #[serde(default)]
     pub background: String,
+    #[serde(default)]
+    pub avatar: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
@@ -180,7 +182,7 @@ pub struct BabyDraConfig {
     #[serde(default)]
     pub display: DisplayConfig,
     #[serde(default)]
-    pub greeter: GreeterConfig,
+    pub lockscreen: LockscreenConfig,
 }
 
 static CONFIG_CACHE: std::sync::OnceLock<std::sync::RwLock<BabyDraConfig>> = std::sync::OnceLock::new();

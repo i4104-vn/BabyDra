@@ -1,7 +1,6 @@
 //! Wallpaper management utilities.
 //! Supported backends: swww, swaybg, feh.
 
-use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -151,155 +150,216 @@ pub fn get_local_wallpapers() -> Vec<PathBuf> {
     files
 }
 
-/// Helper to scan all user homes for saved greeter background in babydra.conf
-fn find_user_conf_wallpaper() -> Option<PathBuf> {
-    if let Ok(entries) = std::fs::read_dir("/home") {
-        for entry in entries.filter_map(Result::ok) {
-            let user_home = entry.path();
-            let conf_path = user_home.join(".babydra").join("babydra.conf");
-            if conf_path.exists() {
-                if let Ok(content) = std::fs::read_to_string(&conf_path) {
-                    if let Ok(conf) = toml::from_str::<crate::config::BabyDraConfig>(&content) {
-                        if !conf.greeter.background.is_empty() {
-                            let p = PathBuf::from(&conf.greeter.background);
-                            if p.exists() {
-                                return Some(p);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    None
-}
-
-/// Mirrors the chosen greeter wallpaper to the world-readable system location
-/// (`/var/lib/babydra/greeter_wallpaper.png`) so the greetd-hosted greeter process
-/// (which runs as the unprivileged `greeter` user and cannot read a locked-down
-/// user home) can always display it.
-fn sync_greeter_wallpaper_to_system(source: &Path) {
-    let sync_dir = PathBuf::from("/var/lib/babydra");
-    if std::fs::create_dir_all(&sync_dir).is_err() {
-        return;
-    }
-    // Keep the sync directory writable by regular users (install.sh also does this)
-    let _ = std::fs::set_permissions(&sync_dir, std::fs::Permissions::from_mode(0o777));
-    let sync_file = sync_dir.join("greeter_wallpaper.png");
-    if std::fs::copy(source, &sync_file).is_err() {
-        return;
-    }
-    // Force world-readable permissions regardless of the source file's mode
-    let _ = std::fs::set_permissions(&sync_file, std::fs::Permissions::from_mode(0o644));
-}
-
-/// Sets the greeter background image path in babydra.conf and mirrors it to the
-/// world-readable system path consumed by the greetd greeter process.
+/// Sets the greeter background image path in babydra.conf as a base64 string.
 pub fn set_greeter_wallpaper(path: &Path) -> Result<(), String> {
     if !path.exists() {
         return Err(format!("Greeter background file does not exist at: {:?}", path));
     }
-    let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".to_string());
-    let target_dir = PathBuf::from(&home).join(".babydra").join("wallpaper");
-    let _ = std::fs::create_dir_all(&target_dir);
-
-    let target_path = if path.parent() != Some(&target_dir) {
-        if let Some(file_name) = path.file_name() {
-            let dest = target_dir.join(file_name);
-            if path != dest {
-                let _ = std::fs::copy(path, &dest);
-            }
-            dest
-        } else {
-            path.to_path_buf()
-        }
-    } else {
-        path.to_path_buf()
-    };
-
-    let path_str = target_path.to_str().ok_or("Invalid path encoding")?;
-
-    // Mirror to the system location so the greeter process can always read it
-    sync_greeter_wallpaper_to_system(&target_path);
+    
+    let bytes = std::fs::read(path).map_err(|e| e.to_string())?;
+    use base64::{Engine as _, engine::general_purpose::STANDARD};
+    let b64 = STANDARD.encode(&bytes);
 
     let mut conf = crate::config::load_babydra_config();
-    conf.greeter.background = path_str.to_string();
+    conf.lockscreen.background = b64;
     crate::config::save_babydra_config(&conf);
     Ok(())
 }
 
-/// Reads the saved greeter wallpaper from the current user's config and mirrors it
-/// to the world-readable system path used by the greetd greeter process.
+/// No longer mirrors to system path, just a no-op placeholder for compatibility
 pub fn apply_saved_greeter_wallpaper() {
-    let conf = crate::config::load_babydra_config();
-    if !conf.greeter.background.is_empty() {
-        let path = PathBuf::from(&conf.greeter.background);
-        if path.exists() {
-            sync_greeter_wallpaper_to_system(&path);
-        }
-    }
+    // No-op
 }
 
-/// Retrieves the active greeter background path.
-///
-/// The greetd-hosted greeter runs as the unprivileged `greeter` user whose home is
-/// not the real user's home, so it cannot read `~/.babydra` when the home directory
-/// is locked down (e.g. `drwx------`). For that reason the world-readable system
-/// copy (`/var/lib/babydra/greeter_wallpaper.png`) is preferred first. Whenever a
-/// user-level path can be resolved by a process that has access to it, the system
-/// copy is refreshed so the next boot stays in sync.
-pub fn get_greeter_wallpaper() -> Option<PathBuf> {
-    // 1. Current user config (only reachable when this process can read it — i.e.
-    //    the real user, e.g. Settings preview or a terminal run). Refreshes the
-    //    system copy so the next boot stays in sync.
+/// Retrieves the active greeter background as raw bytes.
+pub fn get_greeter_wallpaper_bytes() -> Option<Vec<u8>> {
     let conf = crate::config::load_babydra_config();
-    if !conf.greeter.background.is_empty() {
-        let path = PathBuf::from(&conf.greeter.background);
-        if path.exists() {
-            sync_greeter_wallpaper_to_system(&path);
-            return Some(path);
+    if !conf.lockscreen.background.is_empty() {
+        use base64::{Engine as _, engine::general_purpose::STANDARD};
+        if let Ok(bytes) = STANDARD.decode(&conf.lockscreen.background) {
+            return Some(bytes);
         }
     }
 
-    // 2. World-readable system copy (always accessible to the greeter process at
-    //    boot, which runs as the unprivileged `greeter` user)
-    let system_sync = PathBuf::from("/var/lib/babydra/greeter_wallpaper.png");
-    if system_sync.exists() {
-        return Some(system_sync);
-    }
-
-    // 3. Scan user homes for saved greeter background in babydra.conf
-    if let Some(user_wp) = find_user_conf_wallpaper() {
-        sync_greeter_wallpaper_to_system(&user_wp);
-        return Some(user_wp);
-    }
-
-    // 4. Shared greeter system wallpaper paths
+    // Default system wallpaper
     let system_candidates = ["/usr/share/babydra/wallpaper.png"];
     for c in &system_candidates {
         let p = PathBuf::from(c);
         if p.exists() {
-            return Some(p);
+            if let Ok(bytes) = std::fs::read(&p) {
+                return Some(bytes);
+            }
         }
-    }
-
-    // 5. User home default wallpaper
-    if let Ok(home) = std::env::var("HOME") {
-        let p = PathBuf::from(home).join(".babydra/wallpaper.png");
-        if p.exists() {
-            return Some(p);
-        }
-    }
-
-    // 6. Source repository fallback wallpaper
-    let src_wp = PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../../wallpaper.png"));
-    if src_wp.exists() {
-        return Some(src_wp);
     }
 
     None
 }
 
+/// Detects the MIME type of an image from its magic bytes.
+fn detect_image_mime(bytes: &[u8]) -> &'static str {
+    if bytes.len() >= 8 && bytes[..8] == [0x89, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A] {
+        "image/png"
+    } else if bytes.len() >= 3 && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF {
+        "image/jpeg"
+    } else if bytes.len() >= 12 && &bytes[..4] == b"RIFF" && &bytes[8..12] == b"WEBP" {
+        "image/webp"
+    } else {
+        "image/png"
+    }
+}
 
+/// Retrieves the active greeter background as a CSS URL string.
+/// The MIME type is sniffed from the bytes so JPEG/WebP images embedded as
+/// base64 data URLs are loaded correctly (previously always labelled image/png).
+pub fn get_greeter_wallpaper_css() -> String {
+    if let Some(bytes) = get_greeter_wallpaper_bytes() {
+        use base64::{Engine as _, engine::general_purpose::STANDARD};
+        let b64 = STANDARD.encode(&bytes);
+        let mime = detect_image_mime(&bytes);
+        format!("url('data:{};base64,{}')", mime, b64)
+    } else {
+        let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".to_string());
+        format!("url('file://{}/.babydra/wallpaper.png')", home)
+    }
+}
 
+/// Sets the avatar image path in babydra.conf as a base64 string.
+pub fn set_avatar(path: &Path) -> Result<(), String> {
+    if !path.exists() {
+        return Err(format!("Avatar file does not exist at: {:?}", path));
+    }
+    let bytes = std::fs::read(path).map_err(|e| e.to_string())?;
+    use base64::{Engine as _, engine::general_purpose::STANDARD};
+    let b64 = STANDARD.encode(&bytes);
 
+    let mut conf = crate::config::load_babydra_config();
+    conf.lockscreen.avatar = b64;
+    crate::config::save_babydra_config(&conf);
+    Ok(())
+}
+
+/// Retrieves the active avatar as raw bytes.
+pub fn get_avatar_bytes() -> Option<Vec<u8>> {
+    let conf = crate::config::load_babydra_config();
+    if !conf.lockscreen.avatar.is_empty() {
+        use base64::{Engine as _, engine::general_purpose::STANDARD};
+        if let Ok(bytes) = STANDARD.decode(&conf.lockscreen.avatar) {
+            return Some(bytes);
+        }
+    }
+    None
+}
+
+/// Helper to convert raw image bytes into a square, scaled Pixbuf
+pub fn crop_to_square_pixbuf(bytes: &[u8], size: i32) -> Option<gtk4::gdk_pixbuf::Pixbuf> {
+    let stream = gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(bytes));
+    if let Ok(pixbuf) = gtk4::gdk_pixbuf::Pixbuf::from_stream(&stream, gtk4::gio::Cancellable::NONE) {
+        let w = pixbuf.width();
+        let h = pixbuf.height();
+        let min_dim = std::cmp::min(w, h);
+        let x = (w - min_dim) / 2;
+        let y = (h - min_dim) / 2;
+        
+        let sub = pixbuf.new_subpixbuf(x, y, min_dim, min_dim);
+        return sub.scale_simple(size, size, gtk4::gdk_pixbuf::InterpType::Bilinear);
+    }
+    None
+}
+
+/// Applies an anti-aliased circular alpha mask to a square pixbuf so the avatar
+/// renders as a circle instead of a square. GTK4 CSS `border-radius` does not
+/// clip widget content, so the mask must be applied to the pixels themselves.
+fn apply_circular_mask(pixbuf: &gtk4::gdk_pixbuf::Pixbuf) -> gtk4::gdk_pixbuf::Pixbuf {
+    let w = pixbuf.width();
+    let h = pixbuf.height();
+    let n_channels = pixbuf.n_channels();
+    let rowstride = pixbuf.rowstride();
+
+    // Owned snapshot of the source pixels (avoids aliasing with the new buffer).
+    let src: Vec<u8> = pixbuf
+        .pixel_bytes()
+        .map(|b| b.as_ref().to_vec())
+        .unwrap_or_default();
+
+    let Some(out) = gtk4::gdk_pixbuf::Pixbuf::new(
+        gtk4::gdk_pixbuf::Colorspace::Rgb,
+        true,
+        8,
+        w,
+        h,
+    ) else {
+        return pixbuf.clone();
+    };
+
+    let center_x = (w - 1) as f64 / 2.0;
+    let center_y = (h - 1) as f64 / 2.0;
+    let radius = (w.min(h) as f64 - 1.0) / 2.0;
+    // Feather band (normalized distance) for a smooth, anti-aliased edge.
+    let feather = 1.5 / radius;
+
+    for y in 0..h {
+        for x in 0..w {
+            let dx = (x as f64 - center_x) / radius;
+            let dy = (y as f64 - center_y) / radius;
+            let dist = (dx * dx + dy * dy).sqrt();
+            let alpha = (((1.0 - dist) / feather).clamp(0.0, 1.0) * 255.0).round() as u8;
+
+            let pos = (y as usize) * (rowstride as usize) + (x as usize) * (n_channels as usize);
+            let (r, g, b) = match src.get(pos..pos + 3) {
+                Some(rgb) => (rgb[0], rgb[1], rgb[2]),
+                None => (0, 0, 0),
+            };
+            out.put_pixel(x as u32, y as u32, r, g, b, alpha);
+        }
+    }
+    out
+}
+
+/// Converts raw image bytes into a square, scaled Pixbuf masked into a circle.
+/// Used for circular avatar displays (greeter, lock screen, settings preview).
+pub fn crop_to_circle_pixbuf(bytes: &[u8], size: i32) -> Option<gtk4::gdk_pixbuf::Pixbuf> {
+    let square = crop_to_square_pixbuf(bytes, size)?;
+    Some(apply_circular_mask(&square))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn read_alpha(pixbuf: &gtk4::gdk_pixbuf::Pixbuf, x: i32, y: i32) -> u8 {
+        let rowstride = pixbuf.rowstride() as usize;
+        let bytes = pixbuf.pixel_bytes().unwrap();
+        bytes.as_ref()[y as usize * rowstride + x as usize * 4 + 3]
+    }
+
+    #[test]
+    fn circular_mask_makes_corners_transparent() {
+        let Some(bytes) = get_avatar_bytes() else {
+            eprintln!("SKIP: no avatar configured");
+            return;
+        };
+        let Some(pixbuf) = crop_to_circle_pixbuf(&bytes, 80) else {
+            panic!("failed to build circular pixbuf");
+        };
+        assert_eq!(pixbuf.width(), 80);
+        assert_eq!(pixbuf.height(), 80);
+        assert!(pixbuf.has_alpha());
+
+        // Corners must be fully transparent (alpha == 0).
+        for (x, y) in [(0, 0), (79, 0), (0, 79), (79, 79)] {
+            assert_eq!(
+                read_alpha(&pixbuf, x, y),
+                0,
+                "corner ({}, {}) should be transparent",
+                x,
+                y
+            );
+        }
+        // Center must be fully opaque.
+        assert_eq!(read_alpha(&pixbuf, 40, 40), 255);
+
+        // Save a copy for visual inspection.
+        let _ = pixbuf.savev("/tmp/avatar_circle_test.png", "png", &[]);
+        eprintln!("saved /tmp/avatar_circle_test.png");
+    }
+}

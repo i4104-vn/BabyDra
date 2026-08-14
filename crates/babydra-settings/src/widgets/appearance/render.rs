@@ -21,6 +21,8 @@ pub fn build_appearance_ui(
     gtk4::DropDown,
     gtk4::DropDown,
     gtk4::Box,
+    gtk4::Picture,
+    gtk4::Button,
 ) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
     main_box.set_vexpand(true);
@@ -122,6 +124,34 @@ pub fn build_appearance_ui(
     actions_box.append(&theme_toggle_btn);
 
     preview_overlay.add_overlay(&actions_box);
+    
+    // Top-Right Overlay Container for Avatar
+    let top_right_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    top_right_box.set_valign(gtk4::Align::Start);
+    top_right_box.set_halign(gtk4::Align::End);
+    top_right_box.set_margin_end(10);
+    top_right_box.set_margin_top(10);
+
+    let avatar_pic = gtk4::Picture::new();
+    avatar_pic.set_size_request(42, 42);
+    avatar_pic.add_css_class("avatar-preview-picture");
+    if let Some(bytes) = babydra_common::get_avatar_bytes() {
+        if let Some(pixbuf) = babydra_common::crop_to_circle_pixbuf(&bytes, 42) {
+            avatar_pic.set_pixbuf(Some(&pixbuf));
+        }
+    }
+    
+    let avatar_btn = gtk4::Button::new();
+    avatar_btn.set_child(Some(&avatar_pic));
+    avatar_btn.set_size_request(42, 42);
+    avatar_btn.set_valign(gtk4::Align::Center);
+    avatar_btn.set_halign(gtk4::Align::Center);
+    avatar_btn.add_css_class("avatar-action-btn");
+    avatar_btn.set_cursor_from_name(Some("pointer"));
+    
+    top_right_box.append(&avatar_btn);
+    preview_overlay.add_overlay(&top_right_box);
+
     top_grid.attach(&preview_overlay, 0, 0, 1, 1);
 
     // Column 1 (Right): System Themes Configuration Dropdowns (2x2 Grid)
@@ -227,5 +257,7 @@ pub fn build_appearance_ui(
         size_dropdown,
         target_dropdown,
         quick_select_box,
+        avatar_pic,
+        avatar_btn,
     )
 }

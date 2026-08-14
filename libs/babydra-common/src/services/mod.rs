@@ -9,7 +9,6 @@ pub mod exif;
 pub mod wallpaper;
 pub mod actions;
 pub mod window;
-pub mod icon;
 pub mod tray;
 pub mod utils;
 pub mod logger;

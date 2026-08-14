@@ -497,3 +497,21 @@ scale.settings-scale mark label {
     margin-top: 6px;
 }
 
+
+.avatar-preview-picture {
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.avatar-action-btn {
+    padding: 0;
+    margin: 0;
+    border: none;
+    background: transparent;
+    border-radius: 50%;
+}
+.avatar-action-btn:hover .avatar-preview-picture {
+    border-color: rgba(255, 255, 255, 1.0);
+    opacity: 0.9;
+}

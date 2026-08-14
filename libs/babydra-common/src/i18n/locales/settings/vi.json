@@ -172,5 +172,9 @@
   "settings.notif_wallpaper_title": "Hình nền hệ thống",
   "settings.notif_wallpaper_msg": "Đã cập nhật hình nền mới",
   "settings.notif_power_title": "Chế độ hiệu năng",
-  "settings.notif_power_msg": "Đã chuyển sang chế độ: {profile}"
+  "settings.notif_power_msg": "Đã chuyển sang chế độ: {profile}",
+  "settings.avatar": "Ảnh đại diện",
+  "settings.pick_avatar": "Chọn ảnh đại diện",
+  "settings.notif_avatar_title": "Ảnh đại diện",
+  "settings.notif_avatar_msg": "Đã cập nhật ảnh đại diện"
 }

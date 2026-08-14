@@ -21,7 +21,7 @@ pub use config::{
     ExploreSettings, PowerConfig, WallpaperConfig, NotificationConfig, BabyDraConfig,
     load_explore_settings, save_explore_settings, load_babydra_config, save_babydra_config,
 };
-pub use services::icon::get_logo_path;
+
 pub use services::notification::island::{IslandState, update_island_state, clear_island_state, get_island_state_path};
 pub use services::system::volume::AudioDevice;
 pub use services::system::storage::DiskInfo;
@@ -52,7 +52,7 @@ pub use services::system::backlight;
 pub use services::system::bluetooth;
 pub use services::system::vpn;
 pub use services::wallpaper;
-pub use services::wallpaper::{set_wallpaper, get_current_wallpaper, apply_saved_wallpaper, set_greeter_wallpaper, get_greeter_wallpaper, apply_saved_greeter_wallpaper};
+pub use services::wallpaper::{set_wallpaper, get_current_wallpaper, apply_saved_wallpaper, set_greeter_wallpaper, get_greeter_wallpaper_bytes, get_greeter_wallpaper_css, apply_saved_greeter_wallpaper, set_avatar, get_avatar_bytes, crop_to_square_pixbuf, crop_to_circle_pixbuf};
 pub use services::system::display::{save_displays, get_displays, apply_saved_displays};
 
 pub use services::clock;

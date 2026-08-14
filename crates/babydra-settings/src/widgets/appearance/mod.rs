@@ -12,9 +12,6 @@ pub fn create_appearance_widget() -> gtk4::Widget {
     let wp_path = babydra_common::get_current_wallpaper()
         .map(|p| p.to_string_lossy().to_string())
         .unwrap_or_default();
-    let greeter_wp_path = babydra_common::get_greeter_wallpaper()
-        .map(|p| p.to_string_lossy().to_string())
-        .unwrap_or_default();
     let is_dark = babydra_utils::ui::theme::is_dark_mode();
 
     let (
@@ -28,9 +25,11 @@ pub fn create_appearance_widget() -> gtk4::Widget {
         size_dropdown,
         target_dropdown,
         quick_select_box,
+        avatar_pic,
+        avatar_btn,
     ) = render::build_appearance_ui(
         &wp_path,
-        &greeter_wp_path,
+        "",
         is_dark,
         &gtk_themes,
         &icon_themes,
@@ -49,6 +48,8 @@ pub fn create_appearance_widget() -> gtk4::Widget {
         &size_dropdown,
         &target_dropdown,
         &quick_select_box,
+        &avatar_pic,
+        &avatar_btn,
         gtk_themes,
         icon_themes,
         cursor_themes,

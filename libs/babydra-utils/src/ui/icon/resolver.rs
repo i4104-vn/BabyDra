@@ -59,10 +59,6 @@ pub fn get_logo_png(size: i32) -> gtk4::Image {
     }
 }
 
-pub fn get_logo_path() -> std::path::PathBuf {
-    std::path::PathBuf::from("/usr/share/babydra/logo.png")
-}
-
 static ICON_PATH_CACHE: OnceLock<HashMap<String, PathBuf>> = OnceLock::new();
 
 fn get_theme_dirs(theme_name: &str) -> Vec<PathBuf> {
