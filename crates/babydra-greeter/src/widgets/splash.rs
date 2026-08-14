@@ -19,7 +19,7 @@ pub fn build() -> SplashWidget {
     logo_wrapper.add_css_class("splash-logo-wrapper");
     logo_wrapper.set_halign(Align::Center);
 
-    let logo_splash = super::create_avatar_picture(110);
+    let logo_splash = babydra_utils::ui::icon::get_logo_png(110);
     logo_wrapper.append(&logo_splash);
 
     let splash_title = Label::new(Some(&babydra_common::i18n::t("greeter.os_name")));

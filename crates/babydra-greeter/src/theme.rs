@@ -91,7 +91,6 @@ pub fn load_css() {
         /* Splash Screen Styling */
         .splash-box {
             background: rgba(13, 15, 23, 0.92);
-            -gtk-background-blur: 40px;
             padding: 50px 60px;
             border-radius: 36px;
             border: 1px solid rgba(255, 255, 255, 0.12);
@@ -140,13 +139,12 @@ pub fn load_css() {
         .avatar-ring {
             border-radius: 9999px;
             padding: 0px;
-            margin-bottom: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            margin-bottom: 4px;
+            box-shadow: none;
         }
 
         .avatar-inner {
             border-radius: 9999px;
-            overflow: hidden;
             border: 2px solid rgba(255, 255, 255, 0.3);
         }
 
@@ -164,7 +162,6 @@ pub fn load_css() {
 
         .input-capsule {
             background: rgba(0, 0, 0, 0.48);
-            -gtk-background-blur: 24px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 9999px;
             padding: 6px 14px;
@@ -249,7 +246,6 @@ pub fn load_css() {
 
         dropdown popover contents {
             background: rgba(20, 23, 36, 0.96);
-            -gtk-background-blur: 30px;
             border: 1px solid rgba(255, 255, 255, 0.18);
             border-radius: 16px;
             padding: 6px;
@@ -258,7 +254,6 @@ pub fn load_css() {
 
         dropdown popover scrolledwindow {
             min-height: 0px;
-            max-height: 240px;
         }
 
         dropdown listview {
@@ -280,10 +275,6 @@ pub fn load_css() {
 
         dropdown listview row cell {
             padding: 4px 8px;
-        }
-
-        dropdown listview row box {
-            spacing: 12px;
         }
 
         dropdown listview row label {

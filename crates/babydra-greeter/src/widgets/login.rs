@@ -68,21 +68,26 @@ pub fn get_system_users() -> Vec<String> {
 pub fn build() -> LoginWidget {
     tracing::info!(target: "babydra-greeter", "Building LoginWidget (avatar, username dropdown/password capsules, submit button)");
     let login_container = GtkBox::new(Orientation::Vertical, 0);
-    login_container.set_valign(Align::Center);
+    login_container.set_valign(Align::End);
     login_container.set_halign(Align::Center);
+    login_container.set_margin_bottom(80);
     login_container.add_css_class("login-box");
 
     let login_panel = GtkBox::new(Orientation::Vertical, 12);
     login_panel.add_css_class("login-panel");
     login_panel.set_halign(Align::Center);
+    login_panel.set_valign(Align::Center);
 
     // 1. Centered Circle Avatar
     let avatar_ring = GtkBox::new(Orientation::Vertical, 0);
     avatar_ring.add_css_class("avatar-ring");
     avatar_ring.set_halign(Align::Center);
+    avatar_ring.set_valign(Align::Center);
 
     let avatar_inner = GtkBox::new(Orientation::Vertical, 0);
     avatar_inner.add_css_class("avatar-inner");
+    avatar_inner.set_halign(Align::Center);
+    avatar_inner.set_valign(Align::Center);
 
     let avatar_img = super::create_avatar_picture(110);
     avatar_img.add_css_class("avatar-img");
