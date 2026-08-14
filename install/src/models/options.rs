@@ -26,13 +26,13 @@ impl InstallChannel {
     pub fn description(&self) -> &'static str {
         match self {
             InstallChannel::Release => {
-                "Cài đặt phiên bản chính thức ổn định được kiểm thử và phát hành bởi tác giả từ nhánh 'release'."
+                "Installs official tested stable binaries and configurations maintained by the author from 'release' branch."
             }
             InstallChannel::Develop => {
-                "Cài đặt phiên bản phát triển cộng đồng chứa các tính năng mới nhất từ nhánh 'develop'."
+                "Installs community development builds containing latest experimental features from 'develop' branch."
             }
             InstallChannel::LocalSource => {
-                "Cài đặt trực tiếp từ thư mục nhị phân target/release có sẵn trên hệ thống cục bộ."
+                "Installs pre-compiled binaries directly from the local target/release filesystem directory."
             }
         }
     }
@@ -56,7 +56,7 @@ impl Default for BranchMetadata {
             commit_hash: "N/A".into(),
             author_name: "N/A".into(),
             update_date: "N/A".into(),
-            commit_msg: "Không có dữ liệu commit".into(),
+            commit_msg: "No commit data available".into(),
         }
     }
 }
@@ -71,22 +71,22 @@ pub enum PresetProfile {
 impl PresetProfile {
     pub fn name(&self) -> &'static str {
         match self {
-            PresetProfile::FullDesktop => "Full Desktop (Khuyến nghị)",
-            PresetProfile::BinariesAndBundle => "Chỉ cài đặt Tệp nhị phân & /var/lib",
-            PresetProfile::Custom => "Tùy chỉnh từng thành phần",
+            PresetProfile::FullDesktop => "Full Desktop (Recommended)",
+            PresetProfile::BinariesAndBundle => "Binaries & /var/lib Staging Only",
+            PresetProfile::Custom => "Custom Selection",
         }
     }
 
     pub fn description(&self) -> &'static str {
         match self {
             PresetProfile::FullDesktop => {
-                "Cài đặt toàn bộ tệp nhị phân, staging /var/lib, cấu hình labwc, themes, We10X icons và greetd."
+                "Installs all binaries, /var/lib staging, labwc configs, themes, We10X icons, and greetd display manager."
             }
             PresetProfile::BinariesAndBundle => {
-                "Sao chép các tệp nhị phân vào ~/.local/bin và /var/lib/babydra. Bỏ qua dotfiles và greetd."
+                "Copies all binaries to ~/.local/bin and /var/lib/babydra. Skips dotfiles and display manager."
             }
             PresetProfile::Custom => {
-                "Tùy chỉnh chọn lọc từng gói phần mềm, tệp nhị phân và cấu hình hệ thống."
+                "Manually configure individual packages, binary components, and system integrations."
             }
         }
     }

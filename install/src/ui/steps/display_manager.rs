@@ -21,7 +21,7 @@ pub fn draw_display_manager_step(f: &mut Frame, app: &App, area: Rect) {
         .map(|(i, opt)| {
             let is_cursor = i == app.display_manager_cursor;
             let check = if opt.selected {
-                Span::styled("[✓] ", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD))
+                Span::styled("[x] ", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD))
             } else {
                 Span::styled("[ ] ", Style::default().fg(Color::DarkGray))
             };

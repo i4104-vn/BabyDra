@@ -12,10 +12,10 @@ use crate::models::InstallState;
 pub fn draw_summary_step(f: &mut Frame, app: &App, area: Rect) {
     let (status_text, status_color) = match app.install_state {
         InstallState::Completed { success: true, .. } => {
-            ("✓ Installation & Configuration Completed Successfully!".to_string(), Color::Green)
+            ("[OK] Installation & Configuration Completed Successfully!".to_string(), Color::Green)
         }
         InstallState::Completed { success: false, total_errors, .. } => {
-            (format!("⚠ Completed with {} warnings/errors", total_errors), Color::Yellow)
+            (format!("[WARN] Completed with {} warnings/errors", total_errors), Color::Yellow)
         }
         _ => ("Installation Ready".to_string(), Color::Cyan),
     };

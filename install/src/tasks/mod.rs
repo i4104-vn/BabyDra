@@ -57,9 +57,9 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             let _ = tx.send(InstallEvent::Log(LogMessage::new(lvl, msg)));
         };
 
-        send_log(LogLevel::Info, "Khởi chạy tiến trình cài đặt BabyDra...".into());
-        send_log(LogLevel::Info, format!("Kênh cài đặt: {}", plan.install_channel.name()));
-        send_log(LogLevel::Info, format!("Thư mục nhị phân nguồn: {:?}", plan.source_binary_dir));
+        send_log(LogLevel::Info, "Starting BabyDra Installation Worker...".into());
+        send_log(LogLevel::Info, format!("Target Channel: {}", plan.install_channel.name()));
+        send_log(LogLevel::Info, format!("Source Directory: {:?}", plan.source_binary_dir));
 
         // 0. Pull & Build code if needed for selected channel
         match plan.install_channel {
@@ -76,10 +76,10 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
                     let _ = tx.send(InstallEvent::Progress {
                         current: current_step,
                         total: total_steps,
-                        current_step_name: format!("Đồng bộ mã nguồn nhánh {}", target_branch),
+                        current_step_name: format!("Syncing source branch {}", target_branch),
                     });
 
-                    send_log(LogLevel::Info, format!("Đang kéo mã nguồn từ origin/{}...", target_branch));
+                    send_log(LogLevel::Info, format!("Fetching source from origin/{}...", target_branch));
                     let fetch_st = Command::new("git")
                         .args(["fetch", "origin", target_branch])
                         .current_dir(&plan.workspace_root)
@@ -87,11 +87,11 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
 
                     if let Ok(st) = fetch_st {
                         if st.success() {
-                            send_log(LogLevel::Success, format!("Đã đồng bộ nhánh {}.", target_branch));
+                            send_log(LogLevel::Success, format!("Successfully fetched branch {}.", target_branch));
                         }
                     }
 
-                    send_log(LogLevel::Info, "Tiến hành biên dịch các gói nhị phân (cargo build --release)...".into());
+                    send_log(LogLevel::Info, "Compiling binary components (cargo build --release)...".into());
                     let build_st = Command::new("cargo")
                         .args(["build", "--release", "--workspace"])
                         .current_dir(&plan.workspace_root)
@@ -99,15 +99,15 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
 
                     if let Ok(st) = build_st {
                         if st.success() {
-                            send_log(LogLevel::Success, "Biên dịch thành công các gói nhị phân.".into());
+                            send_log(LogLevel::Success, "Compiled workspace binary packages successfully.".into());
                         } else {
-                            send_log(LogLevel::Warn, "Quá trình biên dịch hoàn tất với cảnh báo.".into());
+                            send_log(LogLevel::Warn, "Compilation finished with warnings.".into());
                         }
                     }
                 }
             }
             InstallChannel::LocalSource => {
-                send_log(LogLevel::Info, "Sử dụng trực tiếp các tệp nhị phân có sẵn từ thư mục cục bộ.".into());
+                send_log(LogLevel::Info, "Using pre-compiled local binaries from filesystem directory.".into());
             }
         }
 
@@ -118,7 +118,7 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             .any(|o| o.id == "terminate_processes" && o.selected);
 
         if terminate_enabled {
-            send_log(LogLevel::Warn, "Dừng các tiến trình đang hoạt động trước khi ghi đè...".into());
+            send_log(LogLevel::Warn, "Terminating active processes before overwrite...".into());
             let procs = [
                 "babydra-panel", "babydra-switcher", "babydra-screenshot",
                 "babydra-lock", "babydra-launcher", "babydra-preview",
@@ -153,7 +153,7 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             let _ = tx.send(InstallEvent::Progress {
                 current: current_step,
                 total: total_steps,
-                current_step_name: format!("Cài đặt tệp nhị phân: {}", bin.name),
+                current_step_name: format!("Installing binary: {}", bin.name),
             });
             let (c, e) = binaries::execute_binary_copy_task(bin, &plan.source_binary_dir, &send_log);
             total_copied += c;
@@ -213,7 +213,7 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
 
         send_log(
             if success { LogLevel::Success } else { LogLevel::Warn },
-            format!("Hoàn tất quá trình cài đặt trong {:.2}s. Tác vụ thành công: {}, Lỗi: {}", duration, total_copied, total_errors),
+            format!("Installation finished in {:.2}s. Tasks: {}, Errors: {}", duration, total_copied, total_errors),
         );
 
         let _ = tx.send(InstallEvent::Completed {

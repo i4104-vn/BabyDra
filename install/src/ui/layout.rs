@@ -24,7 +24,7 @@ pub fn draw_header(f: &mut Frame, app: &App, area: Rect) {
     };
 
     let title_line = Line::from(vec![
-        Span::styled(" 🐉 BabyDra ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+        Span::styled(" BabyDra ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
         Span::styled("Desktop Shell Installer ", Style::default().fg(Color::White).add_modifier(Modifier::BOLD)),
         Span::styled("v1.0.0", Style::default().fg(Color::DarkGray)),
     ]);

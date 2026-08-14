@@ -109,17 +109,17 @@ impl App {
 
             install_state: InstallState::Idle,
             progress_percent: 0,
-            current_step_desc: "Sẵn sàng cài đặt gói giao diện BabyDra.".to_string(),
+            current_step_desc: "Ready to configure and install BabyDra desktop.".to_string(),
 
             tx,
             rx,
             should_quit: false,
         };
 
-        app.add_log(LogLevel::Info, "Khởi tạo công cụ cài đặt BabyDra TUI Installer.");
+        app.add_log(LogLevel::Info, "BabyDra Step-by-Step TUI Installer initialized.");
         app.add_log(
             LogLevel::Info,
-            format!("Kênh: {} | Nguồn: {:?}", app.install_channel.name(), app.source_binary_dir),
+            format!("Channel: {} | Source: {:?}", app.install_channel.name(), app.source_binary_dir),
         );
         app
     }
@@ -137,7 +137,7 @@ impl App {
             InstallChannel::Develop => InstallChannel::LocalSource,
             InstallChannel::LocalSource => InstallChannel::Release,
         };
-        self.add_log(LogLevel::Config, format!("Đã chuyển sang kênh: {}", self.install_channel.name()));
+        self.add_log(LogLevel::Config, format!("Switched install channel to: {}", self.install_channel.name()));
     }
 
     pub fn get_current_channel_meta(&self) -> Option<&BranchMetadata> {
@@ -150,7 +150,7 @@ impl App {
         self.add_log(
             LogLevel::Info,
             format!(
-                "Đã quét thư mục nhị phân. Tìm thấy {}/{} tệp thực thi.",
+                "Scanned source binary folder. Found {}/{} executables.",
                 found_count,
                 self.binaries.len()
             ),
@@ -173,7 +173,7 @@ impl App {
                 for opt in &mut self.display_manager_options {
                     opt.selected = true;
                 }
-                self.add_log(LogLevel::Config, "Đã áp dụng hồ sơ 'Full Desktop'.");
+                self.add_log(LogLevel::Config, "Applied 'Full Desktop' preset profile.");
             }
             PresetProfile::BinariesAndBundle => {
                 for b in &mut self.binaries {
@@ -188,10 +188,10 @@ impl App {
                 for opt in &mut self.display_manager_options {
                     opt.selected = false;
                 }
-                self.add_log(LogLevel::Config, "Đã áp dụng hồ sơ 'Chỉ tệp nhị phân & /var/lib'.");
+                self.add_log(LogLevel::Config, "Applied 'Binaries & /var/lib Staging Only' preset profile.");
             }
             PresetProfile::Custom => {
-                self.add_log(LogLevel::Config, "Đã chuyển sang chế độ tùy chỉnh thủ công.");
+                self.add_log(LogLevel::Config, "Switched to custom configuration profile.");
             }
         }
     }
@@ -224,9 +224,9 @@ impl App {
                 } => {
                     self.progress_percent = 100;
                     self.current_step_desc = if success {
-                        format!("Quá trình cài đặt hoàn tất thành công trong {:.2}s!", duration_secs)
+                        format!("Installation completed successfully in {:.2}s!", duration_secs)
                     } else {
-                        format!("Hoàn tất trong {:.2}s với {} cảnh báo/lỗi.", duration_secs, total_errors)
+                        format!("Completed in {:.2}s with {} warnings/errors.", duration_secs, total_errors)
                     };
                     self.install_state = InstallState::Completed {
                         success,

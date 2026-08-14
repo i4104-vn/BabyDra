@@ -12,7 +12,7 @@ pub fn fetch_branch_metadata(workspace_root: &Path, channel: InstallChannel) -> 
             commit_hash: "LOCAL-BUILD".into(),
             author_name: std::env::var("USER").unwrap_or_else(|_| "local".into()),
             update_date: chrono::Local::now().format("%Y-%m-%d %H:%M:%S").to_string(),
-            commit_msg: "Các tệp nhị phân cục bộ trên máy tính".into(),
+            commit_msg: "Local filesystem pre-built binaries".into(),
         };
     }
 

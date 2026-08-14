@@ -24,7 +24,7 @@ pub fn draw_binaries_step(f: &mut Frame, app: &App, area: Rect) {
     let rows = app.binaries.iter().enumerate().map(|(i, b)| {
         let is_cursor = i == app.binary_cursor;
         let checkbox = if b.selected {
-            Span::styled("[✓]", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD))
+            Span::styled("[x]", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD))
         } else {
             Span::styled("[ ]", Style::default().fg(Color::DarkGray))
         };

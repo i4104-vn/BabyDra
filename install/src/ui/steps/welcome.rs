@@ -22,16 +22,16 @@ pub fn draw_welcome_step(f: &mut Frame, app: &App, area: Rect) {
     let banner_text = vec![
         Line::from(Span::styled("BabyDra Desktop Shell Installer", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))),
         Line::from(""),
-        Line::from("Công cụ cài đặt TUI chính thức cho môi trường desktop Wayland BabyDra trên Arch Linux."),
-        Line::from(Span::styled("Cơ chế triển khai: Đồng bộ mã nguồn từ nhánh, biên dịch và sao chép tệp nhị phân vào hệ thống.", Style::default().fg(Color::Green))),
-        Line::from(Span::styled("Nhấn phím [c] để chuyển đổi kênh Release và Develop.", Style::default().fg(Color::Yellow))),
+        Line::from("Official step-by-step TUI installer for the BabyDra Wayland desktop environment on Arch Linux."),
+        Line::from(Span::styled("Deployment mechanism: Syncs branch source code, compiles binaries, and deploys system configurations.", Style::default().fg(Color::Green))),
+        Line::from(Span::styled("Press [c] to switch between Release and Develop channels.", Style::default().fg(Color::Yellow))),
     ];
 
     let banner = Paragraph::new(banner_text)
         .wrap(Wrap { trim: true })
         .block(
             Block::default()
-                .title(" 1. Tổng quan & Giới thiệu ")
+                .title(" 1. Welcome & Overview ")
                 .title_style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
                 .borders(Borders::ALL)
                 .border_type(BorderType::Rounded)
@@ -54,30 +54,30 @@ pub fn draw_welcome_step(f: &mut Frame, app: &App, area: Rect) {
 
     let sys_info = vec![
         Line::from(vec![
-            Span::styled("Kênh cài đặt:    ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+            Span::styled("Install Channel:  ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
             Span::styled(app.install_channel.name(), Style::default().fg(channel_color).add_modifier(Modifier::BOLD)),
-            Span::styled("  [Nhấn 'c' để đổi kênh]", Style::default().fg(Color::DarkGray)),
+            Span::styled("  [Press 'c' to switch channel]", Style::default().fg(Color::DarkGray)),
         ]),
         Line::from(vec![
-            Span::styled("Tên nhánh Git:   ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+            Span::styled("Git Branch:       ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
             Span::styled(branch_name, Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
-            Span::styled("    Mã Hash Commit: ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+            Span::styled("    Commit Hash:    ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
             Span::styled(commit_hash, Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)),
         ]),
         Line::from(vec![
-            Span::styled("Người push:      ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+            Span::styled("Author / Pusher:  ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
             Span::styled(author_name, Style::default().fg(Color::White)),
-            Span::styled("    Ngày update:    ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+            Span::styled("    Update Date:    ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
             Span::styled(update_date, Style::default().fg(Color::White)),
         ]),
         Line::from(vec![
-            Span::styled("Nội dung commit: ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+            Span::styled("Latest Commit:    ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
             Span::styled(commit_msg, Style::default().fg(Color::Gray)),
         ]),
         Line::from(vec![
-            Span::styled("Thư mục nhị phân:", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+            Span::styled("Binary Directory: ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
             Span::styled(app.source_binary_dir.to_string_lossy().to_string(), Style::default().fg(Color::White)),
-            Span::styled("  [Nhấn 's' để đổi đường dẫn]", Style::default().fg(Color::DarkGray)),
+            Span::styled("  [Press 's' to change directory]", Style::default().fg(Color::DarkGray)),
         ]),
     ];
 
@@ -85,7 +85,7 @@ pub fn draw_welcome_step(f: &mut Frame, app: &App, area: Rect) {
         .wrap(Wrap { trim: true })
         .block(
             Block::default()
-                .title(" Thông tin Bản cài đặt & Nhánh nguồn Git ")
+                .title(" Installation Channel & Git Branch Metadata ")
                 .title_style(Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))
                 .borders(Borders::ALL)
                 .border_type(BorderType::Rounded)
@@ -127,7 +127,7 @@ pub fn draw_welcome_step(f: &mut Frame, app: &App, area: Rect) {
 
     let profile_list = List::new(profile_items).block(
         Block::default()
-            .title(" Chọn Hồ sơ cài đặt [↑/↓: Chọn hồ sơ | c: Đổi kênh Release/Develop | Enter: Tiếp tục] ")
+            .title(" Choose Installation Profile [↑/↓: Switch profile | c: Switch channel | Enter: Next step] ")
             .title_style(Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD))
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
