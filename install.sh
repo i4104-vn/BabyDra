@@ -177,12 +177,24 @@ fc-cache -fv || true
 # Configure greetd
 echo "Configuring greetd display manager..."
 sudo mkdir -p /etc/greetd
+
+# Disable agetty on the secondary VTs (tty2-6). greetd spawns the user session
+# on the next free VT after the greeter exits; leaving a getty there shows a
+# terminal login prompt for 1-2s until labwc renders over it. Masking them
+# keeps the session VT a clean black screen during the DM -> desktop handover.
+echo "Disabling getty on secondary VTs (tty2-6) to prevent terminal flash during login..."
+for vt in 2 3 4 5 6; do
+    # Stop a running getty (mask alone only affects future starts)
+    sudo systemctl stop "getty@tty${vt}.service" 2>/dev/null || true
+    sudo systemctl mask "getty@tty${vt}.service" 2>/dev/null || true
+done
+
 cat << EOF | sudo tee /etc/greetd/config.toml > /dev/null
 [terminal]
 vt = 1
 
 [default_session]
-command = "cage -s -- /usr/bin/babydra-greeter"
+command = "sh -c 'clear 2>/dev/null; setterm -cursor off 2>/dev/null; exec cage -s -- /usr/bin/babydra-greeter'"
 user = "greeter"
 EOF
 sudo systemctl enable greetd.service || true
