@@ -6,7 +6,7 @@ pub fn load_css() {
     provider.load_from_data(
         r#"
         * {
-            font-family: 'Inter', system-ui, -apple-system, 'SF Pro Display', 'Roboto', 'Ubuntu', sans-serif;
+            font-family: 'Noto Sans', 'Inter', system-ui, -apple-system, 'SF Pro Display', 'Roboto', 'Ubuntu', sans-serif;
             outline: none;
             outline-width: 0px;
             outline-color: transparent;
@@ -23,7 +23,7 @@ pub fn load_css() {
 
         window {
             background-color: transparent;
-            font-family: 'Inter', system-ui, -apple-system, 'SF Pro Display', 'Roboto', 'Ubuntu', sans-serif;
+            font-family: 'Noto Sans', 'Inter', system-ui, -apple-system, 'SF Pro Display', 'Roboto', 'Ubuntu', sans-serif;
         }
 
         .greeter-tint {
