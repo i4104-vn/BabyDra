@@ -106,8 +106,8 @@ pub fn build() -> LoginWidget {
     let user_capsule = GtkBox::new(Orientation::Horizontal, 8);
     user_capsule.add_css_class("input-capsule");
 
-    tracing::info!(target: "babydra-greeter", "Asset loaded: user icon via babydra-utils icon resolver");
-    let user_icon = babydra_utils::ui::icon::get_icon("avatar-default", 18);
+    tracing::info!(target: "babydra-greeter", "Asset loaded: GTK icon 'avatar-default-symbolic'");
+    let user_icon = Image::from_icon_name("avatar-default-symbolic");
     user_icon.set_pixel_size(18);
     user_icon.set_valign(Align::Center);
     user_icon.add_css_class("input-icon");

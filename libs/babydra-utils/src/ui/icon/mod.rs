@@ -95,7 +95,7 @@ fn get_icon_svg_pair(name: &str) -> Option<(&'static str, &'static str)> {
         "trash" => Some((DARK_TRASH_SVG, LIGHT_TRASH_SVG)),
         "broom" => Some((DARK_BROOM_SVG, LIGHT_BROOM_SVG)),
         "unlock" => Some((DARK_UNLOCK_SVG, LIGHT_UNLOCK_SVG)),
-        "user" => Some((DARK_USER_SVG, LIGHT_USER_SVG)),
+        "user" | "avatar-default" => Some((DARK_USER_SVG, LIGHT_USER_SVG)),
         "volume" => Some((DARK_VOLUME_SVG, LIGHT_VOLUME_SVG)),
         "volume-low" => Some((DARK_VOLUME_LOW_SVG, LIGHT_VOLUME_LOW_SVG)),
         "volume-mute" => Some((DARK_VOLUME_MUTE_SVG, LIGHT_VOLUME_MUTE_SVG)),
