@@ -107,6 +107,19 @@ mkdir -p "$DEST_DIR"
 # Copy all files and directories to ~/.config/labwc
 cp -r "$CONFIG_SOURCE"/* "$DEST_DIR"/
 
+# Sync system GTK and fontconfig configurations
+mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0" "$HOME/.config/fontconfig"
+cp "$CONFIG_SOURCE/settings.ini" "$HOME/.config/gtk-3.0/settings.ini"
+cp "$CONFIG_SOURCE/settings.ini" "$HOME/.config/gtk-4.0/settings.ini"
+cp "$CONFIG_SOURCE/fonts.conf" "$HOME/.config/fontconfig/fonts.conf"
+
+# Apply font to GNOME/GTK desktop interface via gsettings
+gsettings set org.gnome.desktop.interface font-name 'Noto Sans 13' 2>/dev/null || true
+gsettings set org.gnome.desktop.interface document-font-name 'Noto Sans 13' 2>/dev/null || true
+
+# Refresh font cache
+fc-cache -f 2>/dev/null || true
+
 # Ensure scripts have execute permission
 chmod +x "$DEST_DIR"/autostart 2>/dev/null || true
 chmod +x "$DEST_DIR"/scripts/* 2>/dev/null || true
@@ -119,7 +132,7 @@ else
   echo "i labwc is not currently running."
 fi
 
-echo "✓ Done! Labwc configuration updated in $DEST_DIR."
+echo "✓ Done! Labwc and GTK configuration updated in $DEST_DIR."
 
 # 7. Start the panel and redirect stdout/stderr to log file
 echo "Starting babydra-panel..."
