@@ -29,7 +29,7 @@ Hệ thống quản lý phiên bản của dự án BabyDra được phân tách
 ## 2. Chi tiết vai trò của các nhánh
 
 ### 2.1. Nhánh `main` (Kênh phân phối & Bộ cài đặt)
-- **Nhiệm vụ**: Chỉ lưu trữ bộ cài đặt TUI (`babydra-installer`), script thực thi (`install.sh`, `install/run.sh`) và tài liệu hướng dẫn (`README.md`, `WORKFLOW.md`, `docs/`).
+- **Nhiệm vụ**: Chỉ lưu trữ bộ cài đặt TUI (`babydra-installer`), script thực thi (`install.sh`) và tài liệu hướng dẫn (`README.md`, `WORKFLOW.md`, `docs/`).
 - **Cơ chế hoạt động**: Khi người dùng kích hoạt cài đặt, công cụ sẽ tự động kéo mã nguồn từ nhánh chỉ định (`release` hoặc `develop`), biên dịch các gói nhị phân và cài đặt vào hệ thống (`~/.local/bin` và `/var/lib/babydra`).
 - **Quy định**: Không chứa mã nguồn phát triển trực tiếp của các ứng dụng đồ họa để tối ưu dung lượng tải về.
 

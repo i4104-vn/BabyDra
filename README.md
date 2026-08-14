@@ -33,9 +33,9 @@ Kho mã nguồn BabyDra được tổ chức theo cấu trúc phân tầng:
 Người dùng có thể khởi chạy bộ cài đặt trực tiếp từ thư mục gốc của nhánh `main`:
 
 ```bash
-# Cấp quyền thực thi và khởi chạy script
-chmod +x ./install/run.sh
-./install/run.sh
+# Cấp quyền thực thi và khởi chạy script cài đặt
+chmod +x ./install.sh
+./install.sh
 ```
 
 Hoặc khởi chạy trực tiếp thông qua Cargo:
