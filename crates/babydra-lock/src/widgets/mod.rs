@@ -4,11 +4,41 @@ use gtk4::prelude::*;
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
 use babydra_common::verify_password;
 
+/// Builds a wallpaper Picture widget from a custom path or saved greeter background.
+pub fn create_wallpaper_picture(custom_path: Option<&str>) -> gtk4::Picture {
+    let bg_picture = gtk4::Picture::new();
+    bg_picture.set_can_shrink(true);
+    bg_picture.set_content_fit(gtk4::ContentFit::Cover);
+    bg_picture.set_hexpand(true);
+    bg_picture.set_vexpand(true);
+
+    if let Some(path) = custom_path {
+        if let Ok(bytes) = std::fs::read(path) {
+            let stream = gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(&bytes));
+            if let Ok(pixbuf) = gtk4::gdk_pixbuf::Pixbuf::from_stream(&stream, gtk4::gio::Cancellable::NONE) {
+                bg_picture.set_pixbuf(Some(&pixbuf));
+                return bg_picture;
+            }
+        }
+    }
+
+    if let Some(bytes) = babydra_common::get_greeter_wallpaper_bytes() {
+        let stream = gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(&bytes));
+        if let Ok(pixbuf) = gtk4::gdk_pixbuf::Pixbuf::from_stream(&stream, gtk4::gio::Cancellable::NONE) {
+            bg_picture.set_pixbuf(Some(&pixbuf));
+            return bg_picture;
+        }
+    }
+
+    bg_picture
+}
+
 /// Spawns a lock window assigned to a specific monitor.
 pub fn create_lock_window(
     app: &gtk4::Application,
     monitor: Option<&gtk4::gdk::Monitor>,
     is_primary: bool,
+    custom_wallpaper: Option<&str>,
 ) {
     let window = gtk4::ApplicationWindow::new(app);
     babydra_utils::ui::theme::apply_theme_class(&window);
@@ -38,10 +68,16 @@ pub fn create_lock_window(
         glib::Propagation::Stop
     });
 
+    let overlay = gtk4::Overlay::new();
+
+    let bg_picture = create_wallpaper_picture(custom_wallpaper);
+    overlay.set_child(Some(&bg_picture));
+
     let tint_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     tint_box.add_css_class("lock-tint");
     tint_box.set_hexpand(true);
     tint_box.set_vexpand(true);
+    overlay.add_overlay(&tint_box);
 
     let center_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     center_box.set_valign(gtk4::Align::Center);
@@ -50,7 +86,7 @@ pub fn create_lock_window(
     center_box.set_vexpand(true);
 
     if is_primary {
-        let card_box = babydra_utils::components::create_card_with_class(gtk4::Orientation::Vertical, 20, "lock-card");
+        let card_box = babydra_utils::components::create_card_with_class(gtk4::Orientation::Vertical, 10, "lock-card");
         card_box.set_valign(gtk4::Align::Center);
         card_box.set_halign(gtk4::Align::Center);
 
@@ -71,9 +107,30 @@ pub fn create_lock_window(
         update_clock();
         glib::timeout_add_local(std::time::Duration::from_secs(1), update_clock);
 
-        let avatar_icon = babydra_utils::ui::icon::get_icon("avatar-default", 80);
-        avatar_icon.add_css_class("lock-avatar");
-        avatar_icon.set_halign(gtk4::Align::Center);
+        let avatar_widget: gtk4::Widget = if let Some(bytes) = babydra_common::get_avatar_bytes() {
+            if let Some(pixbuf) = babydra_common::crop_to_circle_pixbuf(&bytes, 110) {
+                let texture = gtk4::gdk::Texture::for_pixbuf(&pixbuf);
+                let img = gtk4::Image::from_paintable(Some(&texture));
+                img.set_pixel_size(110);
+                img.add_css_class("lock-avatar");
+                img.set_halign(gtk4::Align::Center);
+                img.set_valign(gtk4::Align::Center);
+                img.upcast()
+            } else {
+                let icon = babydra_utils::ui::icon::get_system_or_file_icon("user-info", "user-info");
+                icon.set_pixel_size(110);
+                icon.add_css_class("lock-avatar-fallback");
+                icon.set_halign(gtk4::Align::Center);
+                icon.set_valign(gtk4::Align::Center);
+                icon.upcast()
+            }
+        } else {
+            let avatar_icon = babydra_utils::ui::icon::get_icon("avatar-default", 110);
+            avatar_icon.add_css_class("lock-avatar");
+            avatar_icon.set_halign(gtk4::Align::Center);
+            avatar_icon.set_valign(gtk4::Align::Center);
+            avatar_icon.upcast()
+        };
 
         let username = std::env::var("USER").unwrap_or_else(|_| "i4104".to_string());
         let user_label = gtk4::Label::new(Some(&username));
@@ -92,7 +149,7 @@ pub fn create_lock_window(
 
         card_box.append(&clock_label);
         card_box.append(&date_label);
-        card_box.append(&avatar_icon);
+        card_box.append(&avatar_widget);
         card_box.append(&user_label);
         card_box.append(&entry);
         card_box.append(&status_label);
@@ -117,7 +174,7 @@ pub fn create_lock_window(
 
                 let status_lbl = status_label_clone.clone();
                 let card_box_ref = card_clone.clone();
-                glib::timeout_add_local_once(std::time::Duration::from_millis(1500), move || {
+                glib::timeout_add_local_once(std::time::Duration::from_millis(1600), move || {
                     status_lbl.set_text(&babydra_common::i18n::t("lock.status"));
                     status_lbl.remove_css_class("error");
                     card_box_ref.remove_css_class("shake-error");
@@ -158,8 +215,8 @@ pub fn create_lock_window(
         center_box.append(&date_label);
     }
 
-    tint_box.append(&center_box);
-    window.set_child(Some(&tint_box));
+    overlay.add_overlay(&center_box);
+    window.set_child(Some(&overlay));
     window.present();
 }
 
