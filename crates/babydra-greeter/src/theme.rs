@@ -6,6 +6,7 @@ pub fn load_css() {
     provider.load_from_data(
         r#"
         * {
+            font-family: 'Inter', system-ui, -apple-system, 'SF Pro Display', 'Roboto', 'Ubuntu', sans-serif;
             outline: none;
             outline-width: 0px;
             outline-color: transparent;
@@ -22,6 +23,7 @@ pub fn load_css() {
 
         window {
             background-color: transparent;
+            font-family: 'Inter', system-ui, -apple-system, 'SF Pro Display', 'Roboto', 'Ubuntu', sans-serif;
         }
 
         .greeter-tint {
@@ -33,7 +35,7 @@ pub fn load_css() {
         }
 
         .clock-time {
-            font-size: 64px;
+            font-size: 72px;
             font-weight: 800;
             color: #ffffff;
             letter-spacing: -1.5px;
@@ -41,9 +43,9 @@ pub fn load_css() {
         }
 
         .clock-date {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 600;
-            color: rgba(255, 255, 255, 0.75);
+            color: rgba(255, 255, 255, 0.85);
             letter-spacing: 0.5px;
             margin-top: -2px;
             text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
@@ -53,9 +55,9 @@ pub fn load_css() {
             background: rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 9999px;
-            padding: 6px 16px;
+            padding: 8px 18px;
             color: rgba(255, 255, 255, 0.9);
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
         }
 

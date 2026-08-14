@@ -55,23 +55,23 @@
       <showTitle>yes</showTitle>
     </titlebar>
     <font place="ActiveWindow">
-      <name>Ubuntu</name>
-      <size>12</size>
+      <name>Inter</name>
+      <size>13</size>
       <weight>bold</weight>
     </font>
     <font place="InactiveWindow">
-      <name>Ubuntu</name>
-      <size>12</size>
+      <name>Inter</name>
+      <size>13</size>
       <weight>normal</weight>
     </font>
     <font place="MenuItem">
-      <name>Ubuntu</name>
-      <size>12</size>
+      <name>Inter</name>
+      <size>13</size>
       <weight>normal</weight>
     </font>
     <font place="OnScreenDisplay">
-      <name>Ubuntu</name>
-      <size>12</size>
+      <name>Inter</name>
+      <size>13</size>
     </font>
   </theme>
 
