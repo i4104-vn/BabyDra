@@ -179,6 +179,7 @@ impl VpnConfigDialog {
         delete_btn.add_css_class("icon-btn");
         delete_btn.add_css_class("circular");
         delete_btn.add_css_class("delete-btn");
+        delete_btn.set_size_request(36, 36);
         delete_btn.set_valign(gtk4::Align::Center);
         delete_btn.set_cursor_from_name(Some("pointer"));
 

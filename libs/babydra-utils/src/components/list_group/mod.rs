@@ -42,3 +42,17 @@ pub fn create_list_row(
 
     row
 }
+
+/// Removes all children from a ListBox.
+pub fn clear_list_box(list_box: &gtk4::ListBox) {
+    while let Some(child) = list_box.first_child() {
+        list_box.remove(&child);
+    }
+}
+
+/// Removes all children from a Box container.
+pub fn clear_box(box_container: &gtk4::Box) {
+    while let Some(child) = box_container.first_child() {
+        box_container.remove(&child);
+    }
+}

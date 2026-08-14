@@ -1,5 +1,5 @@
 * {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Segoe UI Variable Static Text', 'Segoe UI', 'Inter', system-ui, sans-serif;
     -gtk-icon-style: symbolic;
 }
 
@@ -51,6 +51,8 @@ button.panel-logo-btn {
     background-image: none;
     border: none;
     border-radius: 6px;
+    padding: 2px 4px;
+    margin: 0;
     box-shadow: none;
     min-height: 20px;
     min-width: 20px;

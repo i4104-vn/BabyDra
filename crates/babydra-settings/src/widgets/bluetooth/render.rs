@@ -1,8 +1,9 @@
 //! Bluetooth UI layout generator synchronized with Wi-Fi layout.
 
+use babydra_utils::components::ToggleRow;
 use gtk4::prelude::*;
 
-pub fn build_bluetooth_ui() -> (gtk4::Box, gtk4::Switch, gtk4::ListBox) {
+pub fn build_bluetooth_ui() -> (gtk4::Box, ToggleRow, gtk4::ListBox) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
     main_box.set_vexpand(true);
     main_box.set_valign(gtk4::Align::Fill);
@@ -21,20 +22,8 @@ pub fn build_bluetooth_ui() -> (gtk4::Box, gtk4::Switch, gtk4::ListBox) {
     header_row.append(&spacer);
 
     // Toggle Switch (On)
-    let switch_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
-    switch_box.set_valign(gtk4::Align::Center);
-
-    let switch_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.on")));
-    switch_lbl.add_css_class("settings-page-subtitle");
-    switch_lbl.set_valign(gtk4::Align::Center);
-
-    let bt_switch = gtk4::Switch::new();
-    bt_switch.set_active(true);
-    bt_switch.set_valign(gtk4::Align::Center);
-
-    switch_box.append(&switch_lbl);
-    switch_box.append(&bt_switch);
-    header_row.append(&switch_box);
+    let toggle_row = ToggleRow::new(true);
+    header_row.append(&toggle_row.container);
 
     main_box.append(&header_row);
 
@@ -56,5 +45,5 @@ pub fn build_bluetooth_ui() -> (gtk4::Box, gtk4::Switch, gtk4::ListBox) {
     glass_card.append(&scroll);
     main_box.append(&glass_card);
 
-    (main_box, bt_switch, list_box)
+    (main_box, toggle_row, list_box)
 }

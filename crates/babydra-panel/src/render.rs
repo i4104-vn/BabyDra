@@ -26,6 +26,8 @@ pub fn rebuild_panel_window(
     let logo_btn = gtk4::Button::new();
     logo_btn.add_css_class("panel-logo-btn");
     logo_btn.set_cursor_from_name(Some("pointer"));
+    logo_btn.set_valign(gtk4::Align::Center);
+    logo_btn.set_halign(gtk4::Align::Center);
     let logo_icon = babydra_utils::ui::icon::get_icon("logo", 16);
     logo_btn.set_child(Some(&logo_icon));
     
@@ -54,6 +56,7 @@ pub fn rebuild_panel_window(
     let workspace_box = create_workspace_switcher();
     let separator = gtk4::Label::new(Some("│"));
     separator.add_css_class("capsule-separator");
+    separator.set_valign(gtk4::Align::Center);
     workspace_box.prepend(&separator);
     workspace_box.prepend(&logo_btn);
 
@@ -77,7 +80,7 @@ pub fn rebuild_panel_window(
 
     let left_wrapper = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     left_wrapper.set_valign(gtk4::Align::Start);
-    left_wrapper.set_size_request(-1, 35);
+    left_wrapper.set_size_request(-1, 36);
     left_wrapper.append(&left_box);
 
     // Center Wrapper
@@ -100,7 +103,7 @@ pub fn rebuild_panel_window(
 
     let right_wrapper = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     right_wrapper.set_valign(gtk4::Align::Start);
-    right_wrapper.set_size_request(-1, 35);
+    right_wrapper.set_size_request(-1, 36);
     right_wrapper.append(&right_box);
 
     // Assemble CenterBox

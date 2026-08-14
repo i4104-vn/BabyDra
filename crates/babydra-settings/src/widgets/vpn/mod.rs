@@ -59,6 +59,9 @@ pub fn create_vpn_widget() -> gtk4::Widget {
             updated = true;
         }
         if updated {
+            if let Some(root) = list_box_c.root() {
+                let _ = root.activate_action("win.refresh-sidebar", None);
+            }
             handler::render_vpn_list(
                 &list_box_c,
                 &state_c.borrow(),

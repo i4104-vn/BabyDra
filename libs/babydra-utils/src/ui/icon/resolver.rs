@@ -3,6 +3,7 @@
 use gdk4::Texture;
 use gdk_pixbuf::Pixbuf;
 use std::collections::HashMap;
+use std::io::{BufRead, BufReader};
 use std::sync::OnceLock;
 use std::path::PathBuf;
 use gio::prelude::*;
@@ -58,10 +59,6 @@ pub fn get_logo_png(size: i32) -> gtk4::Image {
     }
 }
 
-pub fn get_logo_path() -> std::path::PathBuf {
-    std::path::PathBuf::from("/usr/share/babydra/logo.png")
-}
-
 static ICON_PATH_CACHE: OnceLock<HashMap<String, PathBuf>> = OnceLock::new();
 
 fn get_theme_dirs(theme_name: &str) -> Vec<PathBuf> {
@@ -96,7 +93,6 @@ fn get_theme_dirs(theme_name: &str) -> Vec<PathBuf> {
             let index_path = dir.join("index.theme");
             if index_path.exists() {
                 if let Ok(file) = std::fs::File::open(index_path) {
-                    use std::io::{BufRead, BufReader};
                     let reader = BufReader::new(file);
                     for line in reader.lines().flatten() {
                         let line = line.trim();

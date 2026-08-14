@@ -41,6 +41,10 @@ static CURRENT_LOCALE: OnceLock<RwLock<String>> = OnceLock::new();
 static EN_MAP: OnceLock<HashMap<String, String>> = OnceLock::new();
 static VI_MAP: OnceLock<HashMap<String, String>> = OnceLock::new();
 
+thread_local! {
+    static LOCALE_MONITOR: std::cell::RefCell<Option<gio::FileMonitor>> = std::cell::RefCell::new(None);
+}
+
 /// Retrieves the current active system locale ("vi" or "en").
 pub fn get_locale() -> String {
     let lock = CURRENT_LOCALE.get_or_init(|| {
@@ -91,7 +95,6 @@ pub fn watch_locale_change<F: Fn(&str) + 'static>(on_change: F) {
         }
         let file = gio::File::for_path(&path);
         if let Ok(monitor) = file.monitor_file(gio::FileMonitorFlags::NONE, gio::Cancellable::NONE) {
-            use gio::prelude::*;
             let last_locale = std::rc::Rc::new(std::cell::RefCell::new(get_locale()));
             
             monitor.connect_changed(move |_, _, _, _| {
@@ -102,7 +105,7 @@ pub fn watch_locale_change<F: Fn(&str) + 'static>(on_change: F) {
                     on_change(&new_loc);
                 }
             });
-            Box::leak(Box::new(monitor));
+            LOCALE_MONITOR.with(|m| *m.borrow_mut() = Some(monitor));
         }
     }
 }
@@ -119,6 +122,7 @@ fn load_en_map() -> HashMap<String, String> {
     parse_locale_map(include_str!("locales/launcher/en.json"), &mut map);
     parse_locale_map(include_str!("locales/settings/en.json"), &mut map);
     parse_locale_map(include_str!("locales/explore/en.json"), &mut map);
+    parse_locale_map(include_str!("locales/greeter/en.json"), &mut map);
     map
 }
 
@@ -128,6 +132,7 @@ fn load_vi_map() -> HashMap<String, String> {
     parse_locale_map(include_str!("locales/launcher/vi.json"), &mut map);
     parse_locale_map(include_str!("locales/settings/vi.json"), &mut map);
     parse_locale_map(include_str!("locales/explore/vi.json"), &mut map);
+    parse_locale_map(include_str!("locales/greeter/vi.json"), &mut map);
     map
 }
 

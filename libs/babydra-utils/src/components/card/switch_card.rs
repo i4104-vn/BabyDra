@@ -2,7 +2,7 @@ use gtk4::prelude::*;
 use crate::components::card::standard::create_card;
 
 /// Creates a switch card containing a title, subtitle, and an active switch.
-pub fn create_switch_card(title: &str, subtitle: &str) -> (gtk4::Box, gtk4::Switch) {
+pub fn create_switch_card(title: &str, subtitle: &str) -> (gtk4::Box, crate::components::switch::CustomSwitch) {
     let card = create_card(gtk4::Orientation::Horizontal, 12);
     card.set_valign(gtk4::Align::Center);
 
@@ -24,7 +24,7 @@ pub fn create_switch_card(title: &str, subtitle: &str) -> (gtk4::Box, gtk4::Swit
     card.append(&spacer);
 
     let sw = crate::components::switch::create_switch(false, |_| {});
-    card.append(&sw);
+    card.append(&sw.container);
 
     (card, sw)
 }

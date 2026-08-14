@@ -1,6 +1,5 @@
 use crate::models::vpn::*;
 use crate::services::utils::run_cmd;
-use std::process::Command;
 
 pub fn is_vpn_type(t: &str) -> bool {
     let lower = t.to_lowercase();
@@ -153,6 +152,17 @@ pub fn get_vpn_details(name: &str) -> VpnConnDetails {
     }
 
     details
+}
+
+pub fn is_vpn_active_fast() -> bool {
+    if let Some(act_out) = run_cmd(&["nmcli", "-t", "-f", "TYPE", "connection", "show", "--active"]) {
+        for line in act_out.lines() {
+            if is_vpn_type(line.trim()) {
+                return true;
+            }
+        }
+    }
+    false
 }
 
 pub fn get_active_vpn_fast() -> Option<VpnConn> {

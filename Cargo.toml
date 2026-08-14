@@ -11,7 +11,7 @@ members = [
     "crates/babydra-lock",
     "crates/babydra-preview",
     "crates/babydra-settings",
-    "crates/babydra-explore",
+    "crates/babydra-explore", "crates/babydra-greeter", "install",
 ]
 exclude = [
     ".old_project",

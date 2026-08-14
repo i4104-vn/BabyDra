@@ -1,3 +1,4 @@
+use gtk4::prelude::*;
 use std::path::PathBuf;
 use babydra_common::{FileEntry, ContentViewHandle, sort_entries};
 
@@ -85,7 +86,6 @@ pub fn wire_content_view_navigation(
     history: std::rc::Rc<std::cell::RefCell<Vec<PathBuf>>>,
     history_index: std::rc::Rc<std::cell::RefCell<usize>>,
 ) {
-    use gtk4::prelude::*;
 
     // Wire pane navigation button clicks
     {

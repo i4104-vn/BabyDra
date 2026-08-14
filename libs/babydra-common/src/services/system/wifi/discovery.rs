@@ -96,19 +96,6 @@ pub fn scan_networks() -> Vec<WifiNetwork> {
         }
     }
     
-    for saved_ssid in &known {
-        if !ap_map.contains_key(saved_ssid) {
-            ap_map.insert(saved_ssid.clone(), WifiNetwork {
-                ssid: saved_ssid.clone(),
-                security: "psk".to_string(), // Assume secure, actual security isn't available if not in range
-                strength: "0".to_string(),
-                is_connected: false,
-                is_saved: true,
-                signal: 0,
-            });
-        }
-    }
-
     let mut networks: Vec<WifiNetwork> = ap_map.into_values().collect();
 
     networks.sort_by(|a, b| {

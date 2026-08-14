@@ -25,17 +25,6 @@ fn main() {
         }
     }
 
-    let home = std::env::var("HOME").unwrap_or_else(|_| "/home/i4104".to_string());
-    let wallpaper_path = if let Some(ref path) = custom_image {
-        if std::path::Path::new(path).exists() {
-            path.clone()
-        } else {
-            format!("{}/.config/babydra/wallpaper.png", home)
-        }
-    } else {
-        format!("{}/.config/babydra/wallpaper.png", home)
-    };
-
     let application = gtk4::Application::new(
         Some("org.babydra.lock"),
         Default::default(),
@@ -43,7 +32,7 @@ fn main() {
 
     application.connect_activate(move |app| {
         babydra_utils::ui::theme::init_theme();
-        render::build_lock_ui(app, &wallpaper_path);
+        render::build_lock_ui(app, custom_image.as_deref());
     });
 
     application.run_with_args::<&str>(&[]);

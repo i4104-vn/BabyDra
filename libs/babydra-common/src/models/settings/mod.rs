@@ -17,7 +17,7 @@ pub use display::{MonitorConfig, DisplayCardRow, DisplaysWidget};
 pub use hosts::HostsWidget;
 pub use wifi::{WifiNetwork, WifiConfig};
 pub use vpn::{VpnConn, VpnConnDetails};
-pub use system_update::{PackageUpdate, SystemUpdateWidget};
+pub use system_update::{PackageUpdate, SystemUpdateWidget, SystemUpdateState};
 pub use system_info::SystemInfoData;
 pub use startup_command::{StartupCommand, StartupWidget};
 pub use certificates::{CertInfo, CertificatesWidget};

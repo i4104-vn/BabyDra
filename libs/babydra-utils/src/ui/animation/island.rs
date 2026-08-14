@@ -34,7 +34,7 @@ pub fn island_zoom_in(widget: &gtk4::Widget, target_width: i32, target_height: i
         let t = elapsed_us as f64 / dur_us as f64;
         w.set_opacity(1.0);
 
-        let eased_w = easing::ease_out_cubic(t);
+        let eased_w = easing::ease_out_back(t);
         let current_w = target_height + ((target_width - target_height) as f64 * eased_w) as i32;
         w.set_size_request(current_w, target_height);
 
@@ -166,7 +166,7 @@ pub fn island_animate_size<F>(
         }
 
         let t = elapsed_us as f64 / dur_us as f64;
-        let eased = easing::ease_out_cubic(t);
+        let eased = easing::ease_out_back(t);
         let current_w = start_width + ((target_width - start_width) as f64 * eased) as i32;
         let current_h = start_height + ((target_height - start_height) as f64 * eased) as i32;
         w.set_size_request(current_w.max(0), current_h.max(0));

@@ -12,7 +12,7 @@ pub fn show_delete_confirm_dialog(
 ) {
     let widgets = render::build_confirm_dialog_ui(title, message, parent);
     let window = widgets.window;
-    let vbox = widgets.vbox;
+    let _vbox = widgets.vbox;
 
     let win_cancel_btn = window.clone();
     widgets.btn_cancel.connect_clicked(move |_| {

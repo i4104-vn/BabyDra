@@ -4,6 +4,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::thread;
 use zbus::interface;
+use zbus::fdo::RequestNameFlags;
 
 pub use crate::models::{ActiveNotification, NotificationMsg};
 
@@ -11,30 +12,20 @@ thread_local! {
     /// Holds reference to the active single dynamic popup notification.
     pub static SHARED_NOTIFICATION: RefCell<Option<ActiveNotification>> = RefCell::new(None);
     /// Holds rolling history of past system notifications.
-    pub static HISTORICAL_NOTIFICATIONS: RefCell<Vec<ActiveNotification>> = RefCell::new(Vec::new());
-}
-
-fn get_dnd_file_path() -> std::path::PathBuf {
-    let home = std::env::var("HOME").unwrap_or_else(|_| "/home/i4104".to_string());
-    std::path::Path::new(&home).join(".config/babydra/dnd")
+    pub static HISTORICAL_NOTIFICATIONS: RefCell<std::collections::VecDeque<ActiveNotification>> = RefCell::new(std::collections::VecDeque::new());
 }
 
 /// Checks if DND mode is active.
 pub fn is_dnd_active() -> bool {
-    get_dnd_file_path().exists()
+    let conf = crate::config::load_babydra_config();
+    conf.notification.dnd
 }
 
 /// Sets DND mode state.
 pub fn set_dnd_active(active: bool) {
-    let path = get_dnd_file_path();
-    if active {
-        if let Some(parent) = path.parent() {
-            let _ = std::fs::create_dir_all(parent);
-        }
-        let _ = std::fs::File::create(&path);
-    } else {
-        let _ = std::fs::remove_file(&path);
-    }
+    let mut conf = crate::config::load_babydra_config();
+    conf.notification.dnd = active;
+    crate::config::save_babydra_config(&conf);
 }
 
 /// DBus Notifications interface server object.
@@ -69,6 +60,7 @@ impl NotificationService {
         
         let mut icon = app_icon.to_string();
         if icon.is_empty() {
+            // Hot path: only query desktop apps cache when icon is missing
             let lower_name = app_name.to_lowercase();
             let apps = crate::services::apps::find_desktop_apps();
             for app in apps {
@@ -128,7 +120,6 @@ pub fn spawn_dbus_listener(tx: tokio::sync::mpsc::UnboundedSender<NotificationMs
 
             match conn_result {
                 Ok(conn) => {
-                    use zbus::fdo::RequestNameFlags;
                     let _ = conn.request_name_with_flags(
                         "org.freedesktop.Notifications",
                         RequestNameFlags::ReplaceExisting | RequestNameFlags::DoNotQueue,
@@ -145,7 +136,8 @@ pub fn spawn_dbus_listener(tx: tokio::sync::mpsc::UnboundedSender<NotificationMs
 
 /// Dismisses popup display window.
 pub fn close_notification_popup() {
-    // Managed inside notch capsules, no-op
+    // Managed inside notch capsules, no-op.
+    // The player_loop handles the state machine for visibility.
 }
 
 /// Registers the incoming desktop notification, caching it to the rolling historical notifications log.
@@ -166,9 +158,9 @@ pub fn show_notification_popup(summary: &str, body: &str, icon_name: &str, app_n
 
     HISTORICAL_NOTIFICATIONS.with(|list| {
         let mut list_borrow = list.borrow_mut();
-        list_borrow.push(notif);
+        list_borrow.push_back(notif);
         if list_borrow.len() > 50 {
-            list_borrow.remove(0);
+            list_borrow.pop_front();
         }
     });
 }
@@ -195,11 +187,37 @@ trait Notifications {
 
 /// Sends a desktop notification using the default theme/common logo.
 pub fn send_notification(title: &str, body: &str) {
-    let logo_str = "babydra-settings";
+    send_app_notification("BabyDra", title, body, "babydra");
+}
+
+/// Sends a desktop notification for Settings using the logo as icon.
+pub fn send_settings_notification(title: &str, body: &str) {
+    send_app_notification("Settings", title, body, "");
+}
+
+/// Sends a desktop notification specifying an explicit icon name.
+pub fn send_notification_with_icon(title: &str, body: &str, icon_name: &str) {
+    send_app_notification("BabyDra", title, body, icon_name);
+}
+
+/// Sends a desktop notification with a custom app name and icon.
+pub fn send_app_notification(app_name: &str, title: &str, body: &str, icon_name: &str) {
+    let system_logo = "/usr/share/babydra/logo.png";
+    
+    let logo_str = if icon_name.is_empty() {
+        if std::path::Path::new(system_logo).exists() {
+            system_logo
+        } else {
+            "babydra"
+        }
+    } else {
+        icon_name
+    };
+
     if let Ok(conn) = zbus::blocking::Connection::session() {
         if let Ok(proxy) = NotificationsProxyBlocking::new(&conn) {
             let _ = proxy.notify(
-                "BabyDra",
+                app_name,
                 0,
                 logo_str,
                 title,
@@ -212,6 +230,6 @@ pub fn send_notification(title: &str, body: &str) {
         }
     }
     let _ = std::process::Command::new("notify-send")
-        .args(&["-i", logo_str, title, body])
+        .args(&["-a", app_name, "-i", logo_str, title, body])
         .spawn();
 }

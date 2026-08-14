@@ -1,9 +1,10 @@
-//! Appearance UI layout generator with local ~/.babydra/wallpaper grid.
+//! Appearance UI layout generator with local ~/.babydra/wallpaper grid and Greeter settings.
 
 use gtk4::prelude::*;
 
 pub fn build_appearance_ui(
     current_wallpaper_path: &str,
+    _current_greeter_path: &str,
     is_dark: bool,
     gtk_themes: &[String],
     icon_themes: &[String],
@@ -18,7 +19,10 @@ pub fn build_appearance_ui(
     gtk4::DropDown,
     gtk4::DropDown,
     gtk4::DropDown,
+    gtk4::DropDown,
     gtk4::Box,
+    gtk4::Picture,
+    gtk4::Button,
 ) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
     main_box.set_vexpand(true);
@@ -67,14 +71,33 @@ pub fn build_appearance_ui(
     }
     preview_overlay.set_child(Some(&preview_pic));
 
-    // Vertical Overlay Actions Column on the Right Edge (Plus Button + Theme Toggle Button)
+    // Top-Left Dropdown Container inside Preview Overlay
+    let top_left_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    top_left_box.set_valign(gtk4::Align::Start);
+    top_left_box.set_halign(gtk4::Align::Start);
+    top_left_box.set_margin_start(10);
+    top_left_box.set_margin_top(10);
+
+    let target_items = vec![
+        babydra_common::i18n::t("settings.target_desktop"),
+        babydra_common::i18n::t("settings.target_lock"),
+    ];
+    let target_item_strs: Vec<&str> = target_items.iter().map(|s| s.as_str()).collect();
+    let target_model = gtk4::StringList::new(&target_item_strs);
+    let target_dropdown = gtk4::DropDown::new(Some(target_model), Option::<gtk4::Expression>::None);
+    target_dropdown.add_css_class("wallpaper-target-dropdown");
+    target_dropdown.set_cursor_from_name(Some("pointer"));
+
+    top_left_box.append(&target_dropdown);
+    preview_overlay.add_overlay(&top_left_box);
+
+    // Vertical Overlay Actions Column on the Right Edge
     let actions_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
     actions_box.set_valign(gtk4::Align::End);
     actions_box.set_halign(gtk4::Align::End);
     actions_box.set_margin_end(10);
     actions_box.set_margin_bottom(10);
 
-    // 1. Shorter Add Wallpaper Button (Plus icon only)
     let pick_btn = gtk4::Button::new();
     pick_btn.add_css_class("wallpaper-action-btn");
     pick_btn.set_cursor_from_name(Some("pointer"));
@@ -87,7 +110,6 @@ pub fn build_appearance_ui(
     pick_btn.set_child(Some(&plus_icon));
     actions_box.append(&pick_btn);
 
-    // 2. Icon-only Theme Toggle Button (Sun/Moon icon toggles theme & icon)
     let theme_toggle_btn = gtk4::Button::new();
     theme_toggle_btn.add_css_class("wallpaper-action-btn");
     theme_toggle_btn.set_cursor_from_name(Some("pointer"));
@@ -102,6 +124,34 @@ pub fn build_appearance_ui(
     actions_box.append(&theme_toggle_btn);
 
     preview_overlay.add_overlay(&actions_box);
+    
+    // Top-Right Overlay Container for Avatar
+    let top_right_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    top_right_box.set_valign(gtk4::Align::Start);
+    top_right_box.set_halign(gtk4::Align::End);
+    top_right_box.set_margin_end(10);
+    top_right_box.set_margin_top(10);
+
+    let avatar_pic = gtk4::Picture::new();
+    avatar_pic.set_size_request(42, 42);
+    avatar_pic.add_css_class("avatar-preview-picture");
+    if let Some(bytes) = babydra_common::get_avatar_bytes() {
+        if let Some(pixbuf) = babydra_common::crop_to_circle_pixbuf(&bytes, 42) {
+            avatar_pic.set_pixbuf(Some(&pixbuf));
+        }
+    }
+    
+    let avatar_btn = gtk4::Button::new();
+    avatar_btn.set_child(Some(&avatar_pic));
+    avatar_btn.set_size_request(42, 42);
+    avatar_btn.set_valign(gtk4::Align::Center);
+    avatar_btn.set_halign(gtk4::Align::Center);
+    avatar_btn.add_css_class("avatar-action-btn");
+    avatar_btn.set_cursor_from_name(Some("pointer"));
+    
+    top_right_box.append(&avatar_btn);
+    preview_overlay.add_overlay(&top_right_box);
+
     top_grid.attach(&preview_overlay, 0, 0, 1, 1);
 
     // Column 1 (Right): System Themes Configuration Dropdowns (2x2 Grid)
@@ -172,9 +222,9 @@ pub fn build_appearance_ui(
     dashboard_panel.append(&top_grid);
 
     // Separator Line
-    let sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
-    sep.add_css_class("profile-separator");
-    dashboard_panel.append(&sep);
+    let sep1 = gtk4::Separator::new(gtk4::Orientation::Horizontal);
+    sep1.add_css_class("profile-separator");
+    dashboard_panel.append(&sep1);
 
     // Quick Select Section Title
     let quick_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.quick_select")));
@@ -205,6 +255,9 @@ pub fn build_appearance_ui(
         icon_dropdown,
         cursor_dropdown,
         size_dropdown,
+        target_dropdown,
         quick_select_box,
+        avatar_pic,
+        avatar_btn,
     )
 }

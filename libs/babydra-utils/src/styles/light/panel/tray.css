@@ -7,3 +7,20 @@
 button.panel-tray-item-btn:hover {
     background-color: rgba(0, 0, 0, 0.08);
 }
+
+popover.tray-context-menu > contents {
+    background-color: rgba(255, 255, 255, 0.98);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+button.tray-menu-item {
+    color: rgba(0, 0, 0, 0.9);
+}
+
+button.tray-menu-item:hover {
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+separator.tray-menu-separator {
+    background-color: rgba(0, 0, 0, 0.1);
+}

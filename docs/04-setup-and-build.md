@@ -162,7 +162,7 @@ Script `start.sh` ở thư mục gốc khởi động tất cả daemon theo đ�
 Script `install.sh` thực hiện:
 1. Build tất cả crate ở release mode.
 2. Copy binary vào `~/.local/bin/` (hoặc `/usr/local/bin/` nếu chạy với sudo).
-3. Cài đặt file cấu hình mặc định vào `~/.config/babydra/`.
+3. Cài đặt file cấu hình mặc định vào `~/.babydra/`.
 4. Cài đặt file `.desktop` và autostart service.
 
 ```bash

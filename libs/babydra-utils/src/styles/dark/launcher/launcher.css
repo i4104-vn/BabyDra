@@ -54,7 +54,24 @@ entry.launcher-search>text>placeholder {
 }
 
 .launcher-toggle-btn {
-    color: #6c7086;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.28);
+    color: rgba(255, 255, 255, 0.90);
+}
+
+.launcher-toggle-btn:hover,
+.launcher-toggle-btn:focus {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+
+.launcher-toggle-btn.selected {
+    background-color: rgba(59, 130, 246, 0.25);
+    border: 1px solid rgba(59, 130, 246, 0.45);
+    border-top: 1px solid rgba(59, 130, 246, 0.60);
+    color: #60a5fa;
 }
 
 .status-msg {

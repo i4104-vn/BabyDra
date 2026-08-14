@@ -4,7 +4,7 @@
 }
 
 .lock-tint {
-    background-color: #0f0f1c;
+    background: radial-gradient(circle at center, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.75) 100%);
 }
 
 .lock-clock {

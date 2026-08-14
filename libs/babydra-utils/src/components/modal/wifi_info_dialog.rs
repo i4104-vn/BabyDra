@@ -10,6 +10,7 @@ pub struct WifiInfoDialog {
     pub body_box: Box,
     pub close_btn: Button,
     pub configure_btn: Button,
+    pub forget_btn: Button,
 }
 
 impl WifiInfoDialog {
@@ -58,7 +59,24 @@ impl WifiInfoDialog {
 
         // Footer Actions
         let actions_box = Box::new(Orientation::Horizontal, 8);
-        actions_box.set_halign(gtk4::Align::End);
+        actions_box.set_hexpand(true);
+
+        let forget_btn = Button::new();
+        forget_btn.add_css_class("icon-btn");
+        forget_btn.add_css_class("circular");
+        forget_btn.add_css_class("delete-btn");
+        forget_btn.set_size_request(36, 36);
+        forget_btn.set_valign(gtk4::Align::Center);
+        forget_btn.set_cursor_from_name(Some("pointer"));
+        forget_btn.set_tooltip_text(Some("Forget Network"));
+
+        let trash_icon = crate::ui::icon::get_icon("edit-delete", 16);
+        trash_icon.set_pixel_size(16);
+        forget_btn.set_child(Some(&trash_icon));
+
+        let actions_right = Box::new(Orientation::Horizontal, 8);
+        actions_right.set_hexpand(true);
+        actions_right.set_halign(gtk4::Align::End);
 
         let close_btn = Button::with_label("Close");
         close_btn.add_css_class("connect-pill-btn");
@@ -68,8 +86,11 @@ impl WifiInfoDialog {
         configure_btn.add_css_class("suggested-action");
         configure_btn.set_cursor_from_name(Some("pointer"));
 
-        actions_box.append(&close_btn);
-        actions_box.append(&configure_btn);
+        actions_right.append(&close_btn);
+        actions_right.append(&configure_btn);
+
+        actions_box.append(&forget_btn);
+        actions_box.append(&actions_right);
         container.append(&actions_box);
 
         let dialog = Self {
@@ -80,6 +101,7 @@ impl WifiInfoDialog {
             body_box,
             close_btn,
             configure_btn,
+            forget_btn,
         };
 
         let box_c = dialog.container.clone();
@@ -92,6 +114,7 @@ impl WifiInfoDialog {
 
     pub fn show_for(&self, net: &WifiNetwork, config: Option<&WifiConfig>) {
         self.ssid_lbl.set_text(&net.ssid);
+        self.forget_btn.set_visible(net.is_saved || net.is_connected);
 
         if net.is_connected {
             self.status_dot.remove_css_class("wifi-saved-dot");
@@ -206,6 +229,14 @@ impl WifiInfoDialog {
     pub fn connect_configure<F: Fn() + 'static>(&self, callback: F) {
         let container = self.container.clone();
         self.configure_btn.connect_clicked(move |_| {
+            container.set_visible(false);
+            callback();
+        });
+    }
+
+    pub fn connect_forget<F: Fn() + 'static>(&self, callback: F) {
+        let container = self.container.clone();
+        self.forget_btn.connect_clicked(move |_| {
             container.set_visible(false);
             callback();
         });

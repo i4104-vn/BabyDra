@@ -40,13 +40,21 @@ pub fn set_wallpaper(path: &Path) -> Result<(), String> {
 
     let path_str = target_path.to_str().ok_or("Invalid path encoding")?;
 
-    // Save active wallpaper path to config file for persistence
-    let config_dir = PathBuf::from(&home).join(".config").join("babydra");
-    let _ = std::fs::create_dir_all(&config_dir);
-    let _ = std::fs::write(config_dir.join("current_wallpaper"), path_str);
+    // Save active wallpaper path to unified babydra.conf
+    let mut conf = crate::config::load_babydra_config();
+    conf.wallpaper.current = path_str.to_string();
+    crate::config::save_babydra_config(&conf);
 
     if has_binary("awww") {
-        let _ = Command::new("awww-daemon").spawn();
+        let daemon_running = Command::new("pgrep")
+            .arg("-x")
+            .arg("awww-daemon")
+            .output()
+            .map(|o| o.status.success())
+            .unwrap_or(false);
+        if !daemon_running {
+            let _ = Command::new("awww-daemon").spawn();
+        }
         let status = Command::new("awww")
             .args(["img", path_str])
             .status()
@@ -57,6 +65,13 @@ pub fn set_wallpaper(path: &Path) -> Result<(), String> {
     } 
 
     Err("No compatible wallpaper backend - awww was found in PATH".to_string())
+}
+
+/// Applies the currently saved wallpaper from babydra.conf.
+pub fn apply_saved_wallpaper() {
+    if let Some(path) = get_current_wallpaper() {
+        let _ = set_wallpaper(&path);
+    }
 }
 
 /// Retrieves the path to the currently active wallpaper from user configuration or daemon query.
@@ -74,15 +89,15 @@ pub fn get_current_wallpaper() -> Option<PathBuf> {
         }
     }
 
-    if let Ok(home) = std::env::var("HOME") {
-        let saved_file = PathBuf::from(&home).join(".config/babydra/current_wallpaper");
-        if let Ok(content) = std::fs::read_to_string(&saved_file) {
-            let path = PathBuf::from(content.trim());
-            if path.exists() {
-                return Some(path);
-            }
+    let conf = crate::config::load_babydra_config();
+    if !conf.wallpaper.current.is_empty() {
+        let path = PathBuf::from(&conf.wallpaper.current);
+        if path.exists() {
+            return Some(path);
         }
+    }
 
+    if let Ok(home) = std::env::var("HOME") {
         let wp_dir = PathBuf::from(&home).join(".babydra/wallpaper");
         if let Ok(entries) = std::fs::read_dir(wp_dir) {
             let mut files: Vec<PathBuf> = entries
@@ -135,3 +150,216 @@ pub fn get_local_wallpapers() -> Vec<PathBuf> {
     files
 }
 
+/// Sets the greeter background image path in babydra.conf as a base64 string.
+pub fn set_greeter_wallpaper(path: &Path) -> Result<(), String> {
+    if !path.exists() {
+        return Err(format!("Greeter background file does not exist at: {:?}", path));
+    }
+    
+    let bytes = std::fs::read(path).map_err(|e| e.to_string())?;
+    use base64::{Engine as _, engine::general_purpose::STANDARD};
+    let b64 = STANDARD.encode(&bytes);
+
+    let mut conf = crate::config::load_babydra_config();
+    conf.lockscreen.background = b64;
+    crate::config::save_babydra_config(&conf);
+    Ok(())
+}
+
+/// No longer mirrors to system path, just a no-op placeholder for compatibility
+pub fn apply_saved_greeter_wallpaper() {
+    // No-op
+}
+
+/// Retrieves the active greeter background as raw bytes.
+pub fn get_greeter_wallpaper_bytes() -> Option<Vec<u8>> {
+    let conf = crate::config::load_babydra_config();
+    if !conf.lockscreen.background.is_empty() {
+        use base64::{Engine as _, engine::general_purpose::STANDARD};
+        if let Ok(bytes) = STANDARD.decode(&conf.lockscreen.background) {
+            return Some(bytes);
+        }
+    }
+
+    // Default system wallpaper
+    let system_candidates = ["/usr/share/babydra/wallpaper.png"];
+    for c in &system_candidates {
+        let p = PathBuf::from(c);
+        if p.exists() {
+            if let Ok(bytes) = std::fs::read(&p) {
+                return Some(bytes);
+            }
+        }
+    }
+
+    None
+}
+
+/// Detects the MIME type of an image from its magic bytes.
+fn detect_image_mime(bytes: &[u8]) -> &'static str {
+    if bytes.len() >= 8 && bytes[..8] == [0x89, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A] {
+        "image/png"
+    } else if bytes.len() >= 3 && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF {
+        "image/jpeg"
+    } else if bytes.len() >= 12 && &bytes[..4] == b"RIFF" && &bytes[8..12] == b"WEBP" {
+        "image/webp"
+    } else {
+        "image/png"
+    }
+}
+
+/// Retrieves the active greeter background as a CSS URL string.
+/// The MIME type is sniffed from the bytes so JPEG/WebP images embedded as
+/// base64 data URLs are loaded correctly (previously always labelled image/png).
+pub fn get_greeter_wallpaper_css() -> String {
+    if let Some(bytes) = get_greeter_wallpaper_bytes() {
+        use base64::{Engine as _, engine::general_purpose::STANDARD};
+        let b64 = STANDARD.encode(&bytes);
+        let mime = detect_image_mime(&bytes);
+        format!("url('data:{};base64,{}')", mime, b64)
+    } else {
+        let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".to_string());
+        format!("url('file://{}/.babydra/wallpaper.png')", home)
+    }
+}
+
+/// Sets the avatar image path in babydra.conf as a base64 string.
+pub fn set_avatar(path: &Path) -> Result<(), String> {
+    if !path.exists() {
+        return Err(format!("Avatar file does not exist at: {:?}", path));
+    }
+    let bytes = std::fs::read(path).map_err(|e| e.to_string())?;
+    use base64::{Engine as _, engine::general_purpose::STANDARD};
+    let b64 = STANDARD.encode(&bytes);
+
+    let mut conf = crate::config::load_babydra_config();
+    conf.lockscreen.avatar = b64;
+    crate::config::save_babydra_config(&conf);
+    Ok(())
+}
+
+/// Retrieves the active avatar as raw bytes.
+pub fn get_avatar_bytes() -> Option<Vec<u8>> {
+    let conf = crate::config::load_babydra_config();
+    if !conf.lockscreen.avatar.is_empty() {
+        use base64::{Engine as _, engine::general_purpose::STANDARD};
+        if let Ok(bytes) = STANDARD.decode(&conf.lockscreen.avatar) {
+            return Some(bytes);
+        }
+    }
+    None
+}
+
+/// Helper to convert raw image bytes into a square, scaled Pixbuf
+pub fn crop_to_square_pixbuf(bytes: &[u8], size: i32) -> Option<gtk4::gdk_pixbuf::Pixbuf> {
+    let stream = gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(bytes));
+    if let Ok(pixbuf) = gtk4::gdk_pixbuf::Pixbuf::from_stream(&stream, gtk4::gio::Cancellable::NONE) {
+        let w = pixbuf.width();
+        let h = pixbuf.height();
+        let min_dim = std::cmp::min(w, h);
+        let x = (w - min_dim) / 2;
+        let y = (h - min_dim) / 2;
+        
+        let sub = pixbuf.new_subpixbuf(x, y, min_dim, min_dim);
+        return sub.scale_simple(size, size, gtk4::gdk_pixbuf::InterpType::Bilinear);
+    }
+    None
+}
+
+/// Applies an anti-aliased circular alpha mask to a square pixbuf so the avatar
+/// renders as a circle instead of a square. GTK4 CSS `border-radius` does not
+/// clip widget content, so the mask must be applied to the pixels themselves.
+fn apply_circular_mask(pixbuf: &gtk4::gdk_pixbuf::Pixbuf) -> gtk4::gdk_pixbuf::Pixbuf {
+    let w = pixbuf.width();
+    let h = pixbuf.height();
+    let n_channels = pixbuf.n_channels();
+    let rowstride = pixbuf.rowstride();
+
+    // Owned snapshot of the source pixels (avoids aliasing with the new buffer).
+    let src: Vec<u8> = pixbuf
+        .pixel_bytes()
+        .map(|b| b.as_ref().to_vec())
+        .unwrap_or_default();
+
+    let Some(out) = gtk4::gdk_pixbuf::Pixbuf::new(
+        gtk4::gdk_pixbuf::Colorspace::Rgb,
+        true,
+        8,
+        w,
+        h,
+    ) else {
+        return pixbuf.clone();
+    };
+
+    let center_x = (w - 1) as f64 / 2.0;
+    let center_y = (h - 1) as f64 / 2.0;
+    let radius = (w.min(h) as f64 - 1.0) / 2.0;
+    // Feather band (normalized distance) for a smooth, anti-aliased edge.
+    let feather = 1.5 / radius;
+
+    for y in 0..h {
+        for x in 0..w {
+            let dx = (x as f64 - center_x) / radius;
+            let dy = (y as f64 - center_y) / radius;
+            let dist = (dx * dx + dy * dy).sqrt();
+            let alpha = (((1.0 - dist) / feather).clamp(0.0, 1.0) * 255.0).round() as u8;
+
+            let pos = (y as usize) * (rowstride as usize) + (x as usize) * (n_channels as usize);
+            let (r, g, b) = match src.get(pos..pos + 3) {
+                Some(rgb) => (rgb[0], rgb[1], rgb[2]),
+                None => (0, 0, 0),
+            };
+            out.put_pixel(x as u32, y as u32, r, g, b, alpha);
+        }
+    }
+    out
+}
+
+/// Converts raw image bytes into a square, scaled Pixbuf masked into a circle.
+/// Used for circular avatar displays (greeter, lock screen, settings preview).
+pub fn crop_to_circle_pixbuf(bytes: &[u8], size: i32) -> Option<gtk4::gdk_pixbuf::Pixbuf> {
+    let square = crop_to_square_pixbuf(bytes, size)?;
+    Some(apply_circular_mask(&square))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn read_alpha(pixbuf: &gtk4::gdk_pixbuf::Pixbuf, x: i32, y: i32) -> u8 {
+        let rowstride = pixbuf.rowstride() as usize;
+        let bytes = pixbuf.pixel_bytes().unwrap();
+        bytes.as_ref()[y as usize * rowstride + x as usize * 4 + 3]
+    }
+
+    #[test]
+    fn circular_mask_makes_corners_transparent() {
+        let Some(bytes) = get_avatar_bytes() else {
+            eprintln!("SKIP: no avatar configured");
+            return;
+        };
+        let Some(pixbuf) = crop_to_circle_pixbuf(&bytes, 80) else {
+            panic!("failed to build circular pixbuf");
+        };
+        assert_eq!(pixbuf.width(), 80);
+        assert_eq!(pixbuf.height(), 80);
+        assert!(pixbuf.has_alpha());
+
+        // Corners must be fully transparent (alpha == 0).
+        for (x, y) in [(0, 0), (79, 0), (0, 79), (79, 79)] {
+            assert_eq!(
+                read_alpha(&pixbuf, x, y),
+                0,
+                "corner ({}, {}) should be transparent",
+                x,
+                y
+            );
+        }
+        // Center must be fully opaque.
+        assert_eq!(read_alpha(&pixbuf, 40, 40), 255);
+
+        // Save a copy for visual inspection.
+        let _ = pixbuf.savev("/tmp/avatar_circle_test.png", "png", &[]);
+        eprintln!("saved /tmp/avatar_circle_test.png");
+    }
+}

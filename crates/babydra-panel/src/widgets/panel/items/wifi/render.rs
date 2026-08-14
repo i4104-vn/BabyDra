@@ -8,17 +8,31 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
     container.add_css_class("control-tile-container");
     container.set_hexpand(false);
     
-    let (is_active, ssid) = get_wifi_state();
-    
     let (left_btn, sub_label) = babydra_utils::components::create_toggle_tile(
         "wifi",
         &babydra_common::i18n::t("control.network"),
-        &ssid,
+        "...",
         "control-tile-left-btn",
-        is_active,
+        false,
         |_| {}
     );
     left_btn.set_hexpand(false);
+
+    let (tx, mut rx) = mpsc::unbounded_channel::<(bool, String)>();
+    std::thread::spawn(move || {
+        let state = get_wifi_state();
+        let _ = tx.send(state);
+    });
+
+    let left_btn_init = left_btn.clone();
+    let sub_label_init = sub_label.clone();
+    glib::spawn_future_local(async move {
+        if let Some((is_act, ssid_str)) = rx.recv().await {
+            sub_label_init.set_text(&ssid_str);
+            let is_connected = is_act && ssid_str != "Off" && ssid_str != "Disconnected";
+            babydra_utils::components::update_toggle_tile_state(&left_btn_init, is_connected, "wifi");
+        }
+    });
 
     let circle = left_btn.child()
         .and_then(|w| w.downcast::<gtk4::Box>().ok())
@@ -215,7 +229,7 @@ fn build_wifi_list_ui(
         item_box.set_valign(gtk4::Align::Center);
 
         let icon_color = if is_connected { "#ffffff" } else { "rgba(255, 255, 255, 0.5)" };
-        let wifi_icon = babydra_utils::ui::icon::get_icon_colored("wifi", 14, icon_color);
+        let wifi_icon = babydra_utils::components::create_wifi_signal_icon_for_network(net.signal, is_connected, 14, Some(icon_color));
         item_box.append(&wifi_icon);
 
         let name_label = gtk4::Label::new(Some(&ssid));

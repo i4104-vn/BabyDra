@@ -65,7 +65,7 @@ pub fn create_brightness_row() -> (gtk4::Box, gtk4::Scale) {
     icon_container.set_halign(gtk4::Align::Start);
     icon_container.set_margin_start(10);
 
-    let icon_widget = babydra_utils::ui::icon::get_icon("brightness", 16);
+    let icon_widget = babydra_utils::ui::icon::get_icon_colored("brightness", 16, "#ffffff");
     icon_widget.add_css_class("slider-overlay-icon");
     icon_container.append(&icon_widget);
     overlay.add_overlay(&icon_container);
