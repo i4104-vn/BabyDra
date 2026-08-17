@@ -10,6 +10,8 @@ fn temp_root() -> PathBuf {
     std::env::temp_dir().join("babydra_theme_tests")
 }
 
+/// Writes a theme package in the canonical layout:
+/// `tokens.json` + `fonts.json` at the root, CSS layers under `css/`.
 fn write_package(
     id: &str,
     tokens_json: &str,
@@ -19,11 +21,12 @@ fn write_package(
     fonts: &str,
 ) {
     let dir = temp_root().join(id);
-    std::fs::create_dir_all(&dir).expect("create theme dir");
+    let css_dir = dir.join("css");
+    std::fs::create_dir_all(&css_dir).expect("create theme dir");
     std::fs::write(dir.join("tokens.json"), tokens_json).expect("write tokens");
-    std::fs::write(dir.join("dark.css"), dark_css).expect("write dark css");
-    std::fs::write(dir.join("light.css"), light_css).expect("write light css");
-    std::fs::write(dir.join("theme.css"), css).expect("write theme css");
+    std::fs::write(css_dir.join("dark.css"), dark_css).expect("write dark css");
+    std::fs::write(css_dir.join("light.css"), light_css).expect("write light css");
+    std::fs::write(css_dir.join("theme.css"), css).expect("write theme css");
     std::fs::write(dir.join("fonts.json"), fonts).expect("write fonts");
 }
 
@@ -32,7 +35,7 @@ fn point_themes_dir_at_temp() {
 }
 
 #[test]
-fn load_package_reads_all_five_files() {
+fn load_package_reads_all_five_files_from_css_subfolder() {
     write_package(
         "test-default",
         r##"{
@@ -66,7 +69,7 @@ fn load_package_missing_css_files_defaults_empty() {
         r##"{"name": "test-minimal", "dark": {"accent": "#111111"}, "light": {"accent": "#eeeeee"}}"##,
     )
     .expect("write tokens");
-    // No dark.css / light.css / theme.css / fonts.json on purpose.
+    // No css/ folder, no fonts.json on purpose — all layers default empty.
     point_themes_dir_at_temp();
 
     let pkg = load_package("test-minimal").expect("load package");
@@ -74,6 +77,46 @@ fn load_package_missing_css_files_defaults_empty() {
     assert!(pkg.light_css.is_empty());
     assert!(pkg.css.is_empty());
     assert!(pkg.fonts.is_empty());
+}
+
+#[test]
+fn load_package_falls_back_to_legacy_flat_css_layout() {
+    // Packages deployed before the `css/` subfolder put layers at the root.
+    let dir = temp_root().join("test-legacy");
+    std::fs::create_dir_all(&dir).expect("create dir");
+    std::fs::write(
+        dir.join("tokens.json"),
+        r##"{"name": "test-legacy", "dark": {"accent": "#111111"}, "light": {"accent": "#eeeeee"}}"##,
+    )
+    .expect("write tokens");
+    std::fs::write(dir.join("dark.css"), ".legacy-dark {}").expect("write dark css");
+    std::fs::write(dir.join("light.css"), ".legacy-light {}").expect("write light css");
+    std::fs::write(dir.join("theme.css"), ".legacy-override {}").expect("write theme css");
+    point_themes_dir_at_temp();
+
+    let pkg = load_package("test-legacy").expect("load legacy package");
+    assert_eq!(pkg.dark_css, ".legacy-dark {}");
+    assert_eq!(pkg.light_css, ".legacy-light {}");
+    assert_eq!(pkg.css, ".legacy-override {}");
+}
+
+#[test]
+fn css_subfolder_wins_over_legacy_flat_layout() {
+    let dir = temp_root().join("test-both");
+    let css_dir = dir.join("css");
+    std::fs::create_dir_all(&css_dir).expect("create dir");
+    std::fs::write(
+        dir.join("tokens.json"),
+        r##"{"name": "test-both", "dark": {"accent": "#111111"}, "light": {"accent": "#eeeeee"}}"##,
+    )
+    .expect("write tokens");
+    // Both layouts present — the css/ subfolder must win.
+    std::fs::write(css_dir.join("dark.css"), ".nested-dark {}").expect("write nested");
+    std::fs::write(dir.join("dark.css"), ".flat-dark {}").expect("write flat");
+    point_themes_dir_at_temp();
+
+    let pkg = load_package("test-both").expect("load package");
+    assert_eq!(pkg.dark_css, ".nested-dark {}", "css/ subfolder takes precedence");
 }
 
 #[test]

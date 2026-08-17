@@ -1,11 +1,21 @@
 //! Theme package engine for BabyDra.
 //!
-//! A *theme package* is a folder under `themes/<theme-id>/` containing:
-//! - `tokens.json` — design tokens (colors, radius, spacing, font, motion)
-//! - `dark.css`    — dark-mode color layer (loaded on top of the core CSS)
-//! - `light.css`   — light-mode color layer
-//! - `theme.css`   — optional extra color layer (loaded last, e.g. overrides)
-//! - `fonts.json`  — font families used by the theme
+//! A *theme package* is a folder under `themes/<theme-id>/` with a fixed,
+//! uniform structure — JSON config at the root, CSS layers in `css/`:
+//!
+//! ```text
+//! themes/<theme-id>/
+//! ├── tokens.json        (JSON) design tokens (colors, radius, spacing, font)
+//! ├── fonts.json         (JSON) font families used by the theme
+//! └── css/
+//!     ├── dark.css       dark-mode color layer (on top of the core CSS)
+//!     ├── light.css      light-mode color layer
+//!     └── theme.css      optional extra layer, loaded last (overrides)
+//! ```
+//!
+//! Every theme package must use this same structure so themes stay
+//! interchangeable; the legacy flat layout (`<theme-id>/dark.css` etc.) is
+//! still read as a fallback for already-deployed packages.
 //!
 //! This crate is **pure logic** — no GTK, no CSS parsing at runtime. It
 //! reads packages from disk and resolves them into typed `ThemeValue`
@@ -98,9 +108,11 @@ pub fn load_package(id: &str) -> Result<ThemePackage, String> {
     let tokens: ThemeTokens = serde_json::from_str(&tokens_raw)
         .map_err(|e| format!("invalid tokens.json in {}: {}", dir.display(), e))?;
 
-    let dark_css = read_optional(&dir.join("dark.css"));
-    let light_css = read_optional(&dir.join("light.css"));
-    let css = read_optional(&dir.join("theme.css"));
+    // CSS layers live in `css/`; fall back to the legacy flat layout for
+    // theme packages deployed before the `css/` subfolder was introduced.
+    let dark_css = read_css_layer(&dir, "dark");
+    let light_css = read_css_layer(&dir, "light");
+    let css = read_css_layer(&dir, "theme");
 
     let fonts = std::fs::read_to_string(dir.join("fonts.json"))
         .ok()
@@ -118,6 +130,21 @@ pub fn load_package(id: &str) -> Result<ThemePackage, String> {
         fonts,
         path: dir,
     })
+}
+
+/// Reads one CSS layer of a theme package.
+///
+/// New layout: `themes/<id>/css/<name>.css`. Legacy fallback:
+/// `themes/<id>/<name>.css` (flat, before the `css/` subfolder).
+///
+/// Fallback is per-file: a theme that keeps one layer in the flat layout
+/// while the rest live in `css/` still resolves each layer independently.
+fn read_css_layer(dir: &Path, name: &str) -> String {
+    let nested = dir.join("css").join(format!("{name}.css"));
+    if nested.is_file() {
+        return read_optional(&nested);
+    }
+    read_optional(&dir.join(format!("{name}.css")))
 }
 
 fn read_optional(path: &Path) -> String {
