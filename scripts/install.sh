@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+# Resolve the repo root (parent of scripts/) so this script works from any CWD.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$REPO_ROOT"
+
 echo "============================================="
 echo "   BabyDra Desktop Shell Installation Script"
 echo "============================================="
@@ -127,28 +132,27 @@ sudo cp wallpaper.png /var/lib/babydra/greeter_wallpaper.png
 # 7. Copy labwc configuration files from configs/labwc/
 echo "Configuring labwc compositor integrations..."
 mkdir -p "$HOME/.config/labwc"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-cp "$SCRIPT_DIR/configs/labwc/autostart" "$HOME/.config/labwc/autostart"
+cp "$REPO_ROOT/configs/labwc/autostart" "$HOME/.config/labwc/autostart"
 chmod +x "$HOME/.config/labwc/autostart"
-cp "$SCRIPT_DIR/configs/labwc/rc.xml" "$HOME/.config/labwc/rc.xml"
-cp "$SCRIPT_DIR/configs/labwc/themerc-override" "$HOME/.config/labwc/themerc-override"
+cp "$REPO_ROOT/configs/labwc/rc.xml" "$HOME/.config/labwc/rc.xml"
+cp "$REPO_ROOT/configs/labwc/themerc-override" "$HOME/.config/labwc/themerc-override"
 mkdir -p "$HOME/.config/labwc/themes"
-cp -r "$SCRIPT_DIR/configs/labwc/themes/"* "$HOME/.config/labwc/themes/"
+cp -r "$REPO_ROOT/configs/labwc/themes/"* "$HOME/.config/labwc/themes/"
 mkdir -p "$HOME/.config/labwc/scripts"
-cp -r "$SCRIPT_DIR/configs/labwc/scripts/"* "$HOME/.config/labwc/scripts/"
+cp -r "$REPO_ROOT/configs/labwc/scripts/"* "$HOME/.config/labwc/scripts/"
 chmod +x "$HOME/.config/labwc/scripts/"*
 
 mkdir -p "$HOME/.local/share/themes"
-cp -r "$SCRIPT_DIR/configs/themes/BabyDra" "$HOME/.local/share/themes/"
+cp -r "$REPO_ROOT/configs/themes/BabyDra" "$HOME/.local/share/themes/"
 
 mkdir -p "$HOME/.local/share/icons"
-tar -xf "$SCRIPT_DIR/configs/themes/cursor/aosp-cursors.tar" -C "$HOME/.local/share/icons/"
-tar -xf "$SCRIPT_DIR/configs/themes/icons/We10X.tar" -C "$HOME/.local/share/icons/"
-tar -xf "$SCRIPT_DIR/configs/themes/icons/We10X-blue.tar" -C "$HOME/.local/share/icons/"
-tar -xf "$SCRIPT_DIR/configs/themes/icons/We10X-blue-dark.tar" -C "$HOME/.local/share/icons/"
-tar -xf "$SCRIPT_DIR/configs/themes/icons/We10X-dark.tar" -C "$HOME/.local/share/icons/"
-tar -xf "$SCRIPT_DIR/configs/themes/cursor/Twilight-cursors.tar" -C "$HOME/.local/share/icons/"
+tar -xf "$REPO_ROOT/configs/themes/cursor/aosp-cursors.tar" -C "$HOME/.local/share/icons/"
+tar -xf "$REPO_ROOT/configs/themes/icons/We10X.tar" -C "$HOME/.local/share/icons/"
+tar -xf "$REPO_ROOT/configs/themes/icons/We10X-blue.tar" -C "$HOME/.local/share/icons/"
+tar -xf "$REPO_ROOT/configs/themes/icons/We10X-blue-dark.tar" -C "$HOME/.local/share/icons/"
+tar -xf "$REPO_ROOT/configs/themes/icons/We10X-dark.tar" -C "$HOME/.local/share/icons/"
+tar -xf "$REPO_ROOT/configs/themes/cursor/Twilight-cursors.tar" -C "$HOME/.local/share/icons/"
 
 # 8. Reload configuration and restart panel
 echo "Reloading labwc configuration and starting panel..."
@@ -160,11 +164,11 @@ mkdir -p "$HOME/.cache/babydra"
 echo "Configuring system-wide default fonts for GTK, Kitty, Neovim, and Fontconfig..."
 mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0" "$HOME/.config/fontconfig" "$HOME/.config/kitty" "$HOME/.config/nvim"
 
-cp "$SCRIPT_DIR/configs/labwc/settings.ini" "$HOME/.config/gtk-3.0/settings.ini"
-cp "$SCRIPT_DIR/configs/labwc/settings.ini" "$HOME/.config/gtk-4.0/settings.ini"
-cp "$SCRIPT_DIR/configs/labwc/fonts.conf" "$HOME/.config/fontconfig/fonts.conf"
-cp -r "$SCRIPT_DIR/configs/kitty/"* "$HOME/.config/kitty/" 2>/dev/null || true
-cp -r "$SCRIPT_DIR/configs/nvim/"* "$HOME/.config/nvim/" 2>/dev/null || true
+cp "$REPO_ROOT/configs/labwc/settings.ini" "$HOME/.config/gtk-3.0/settings.ini"
+cp "$REPO_ROOT/configs/labwc/settings.ini" "$HOME/.config/gtk-4.0/settings.ini"
+cp "$REPO_ROOT/configs/labwc/fonts.conf" "$HOME/.config/fontconfig/fonts.conf"
+cp -r "$REPO_ROOT/configs/kitty/"* "$HOME/.config/kitty/" 2>/dev/null || true
+cp -r "$REPO_ROOT/configs/nvim/"* "$HOME/.config/nvim/" 2>/dev/null || true
 
 # Apply font to GNOME/GTK desktop interface via gsettings
 gsettings set org.gnome.desktop.interface font-name 'Segoe UI Variable Static Text 13' 2>/dev/null || true
@@ -174,8 +178,8 @@ gsettings set org.gnome.desktop.interface monospace-font-name 'CaskaydiaCove Ner
 # 10. Configure fastfetch
 echo "Configuring fastfetch..."
 mkdir -p "$HOME/.config/fastfetch"
-cp "$SCRIPT_DIR/configs/fastfetch/config.jsonc" "$HOME/.config/fastfetch/config.jsonc"
-cp "$SCRIPT_DIR/configs/fastfetch/logo.png" "$HOME/.config/fastfetch/logo.png"
+cp "$REPO_ROOT/configs/fastfetch/config.jsonc" "$HOME/.config/fastfetch/config.jsonc"
+cp "$REPO_ROOT/configs/fastfetch/logo.png" "$HOME/.config/fastfetch/logo.png"
 
 # Rebuild font cache
 echo "Rebuilding font cache..."
@@ -215,7 +219,7 @@ cat << EOF > "$HOME/.local/share/applications/babydra-preview.desktop"
 Type=Application
 Name=BabyDra Preview
 Comment=Viewer for images
-Exec=$HOME/.local/bin/babydra-preview %f
+Exec=$LOCAL_BIN/babydra-preview %f
 Icon=/usr/share/babydra/babydra-preview.png
 Terminal=false
 Categories=Graphics;Viewer;GTK;
@@ -234,7 +238,7 @@ cat << EOF > "$HOME/.local/share/applications/babydra-settings.desktop"
 Type=Application
 Name=BabyDra Settings
 Comment=Configure system settings
-Exec=$HOME/.local/bin/babydra-settings
+Exec=$LOCAL_BIN/babydra-settings
 Icon=/usr/share/babydra/babydra-settings.png
 Terminal=false
 Categories=Settings;HardwareSettings;GTK;
@@ -250,7 +254,7 @@ cat << EOF > "$HOME/.local/share/applications/babydra-explore.desktop"
 Type=Application
 Name=BabyDra Explore
 Comment=Explore files and folders
-Exec=$HOME/.local/bin/babydra-explore %u
+Exec=$LOCAL_BIN/babydra-explore %u
 Icon=system-file-manager
 Terminal=false
 Categories=System;FileTools;FileManager;GTK;

@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+# Resolve the repo root (parent of scripts/) so this script works from any CWD.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$REPO_DIR"
+
 echo "============================================="
 echo "        BabyDra Hot Update & Reload"
 echo "============================================="
@@ -16,7 +21,6 @@ cargo build --release
 # 3. Create local bin and log directories if needed
 LOCAL_BIN="$HOME/.local/bin"
 LOG_DIR="$HOME/.cache/babydra"
-REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_SOURCE="$REPO_DIR/configs/labwc"
 DEST_DIR="$HOME/.config/labwc"
 
@@ -49,12 +53,12 @@ sudo cp target/release/babydra-greeter /usr/bin/babydra-greeter
 # Register default image handler in ~/.local/share/applications
 echo "Registering default image handler..."
 mkdir -p "$HOME/.local/share/applications"
-cat << 'EOF' > "$HOME/.local/share/applications/babydra-preview.desktop"
+cat << EOF > "$HOME/.local/share/applications/babydra-preview.desktop"
 [Desktop Entry]
 Type=Application
 Name=BabyDra Preview
 Comment=Viewer for images
-Exec=/home/i4104/.local/bin/babydra-preview %f
+Exec=$LOCAL_BIN/babydra-preview %f
 Icon=image-x-generic
 Terminal=false
 Categories=Graphics;Viewer;GTK;
@@ -68,12 +72,12 @@ xdg-mime default babydra-preview.desktop image/png image/jpeg image/gif image/we
 
 # Register Settings application entry
 echo "Registering settings manager entry..."
-cat << 'EOF' > "$HOME/.local/share/applications/babydra-settings.desktop"
+cat << EOF > "$HOME/.local/share/applications/babydra-settings.desktop"
 [Desktop Entry]
 Type=Application
 Name=BabyDra Settings
 Comment=Configure system settings
-Exec=/home/i4104/.local/bin/babydra-settings
+Exec=$LOCAL_BIN/babydra-settings
 Icon=preferences-system
 Terminal=false
 Categories=Settings;HardwareSettings;GTK;
@@ -84,12 +88,12 @@ update-desktop-database "$HOME/.local/share/applications" || true
 
 # Register default folder handler
 echo "Registering default folder handler..."
-cat << 'EOF' > "$HOME/.local/share/applications/babydra-explore.desktop"
+cat << EOF > "$HOME/.local/share/applications/babydra-explore.desktop"
 [Desktop Entry]
 Type=Application
 Name=BabyDra Explore
 Comment=Explore files and folders
-Exec=/home/i4104/.local/bin/babydra-explore %u
+Exec=$LOCAL_BIN/babydra-explore %u
 Icon=system-file-manager
 Terminal=false
 Categories=System;FileTools;FileManager;GTK;
