@@ -110,3 +110,14 @@ pub fn get_user_local_bin() -> PathBuf {
 pub fn get_user_home() -> PathBuf {
     dirs::home_dir().unwrap_or_else(|| PathBuf::from("/home/i4104"))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_find_workspace_root() {
+        let root = find_workspace_root();
+        assert!(root.join(".git").exists(), "Workspace root {:?} must contain .git", root);
+    }
+}

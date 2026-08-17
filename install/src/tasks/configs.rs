@@ -430,3 +430,21 @@ pub fn write_theme_selection(conf_path: &Path, theme_id: &str) -> Result<(), Str
     let out = toml::to_string_pretty(&root).map_err(|e| format!("cannot serialize config: {e}"))?;
     fs::write(conf_path, out).map_err(|e| format!("cannot write {}: {e}", conf_path.display()))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_write_theme_selection() {
+        let temp_dir = std::env::temp_dir().join(format!("babydra_test_{}", std::process::id()));
+        let _ = fs::create_dir_all(&temp_dir);
+        let conf_file = temp_dir.join("babydra.conf");
+
+        assert!(write_theme_selection(&conf_file, "babydra-purple").is_ok());
+        let content = fs::read_to_string(&conf_file).unwrap();
+        assert!(content.contains("babydra-purple"));
+
+        let _ = fs::remove_dir_all(&temp_dir);
+    }
+}
