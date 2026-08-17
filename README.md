@@ -116,7 +116,7 @@ git checkout -b <tên-bạn>/<tên-công-việc>   # nhánh riêng của bạn
 cargo check --workspace
 ```
 
-Trước khi mở Pull Request, chạy bộ kiểm tra an toàn:
+Trước khi gửi thay đổi, chạy bộ kiểm tra an toàn:
 
 ```bash
 ./scripts/check.sh          # cargo check + fmt + clippy -D warnings + test
@@ -130,16 +130,17 @@ Quy trình và quy tắc đóng góp chi tiết: [CONTRIBUTING.md](CONTRIBUTING.
 
 Tài liệu chính thức nằm trong thư mục `docs/` (bắt đầu từ [docs/README.md](docs/README.md)):
 
-| Thư mục | Nội dung |
+| Tài liệu | Nội dung |
 | :--- | :--- |
-| [overview](docs/overview/index.md) | Tổng quan dự án, thành phần hệ thống |
-| [architecture](docs/architecture/index.md) | Kiến trúc, pattern thiết kế, luồng dữ liệu |
-| [structure](docs/structure/index.md) | Cấu trúc thư mục, trách nhiệm module, quy chuẩn code |
-| [setup](docs/setup/index.md) | Cài đặt môi trường phát triển, build từng crate |
-| [apis](docs/apis/index.md) | API reference của từng thư viện (core, ui-kit, explore) |
-| [flows](docs/flows/index.md) | Luồng hoạt động hiện tại của từng crate/lib |
-| [guides](docs/guides/island.md) | Hướng dẫn sử dụng & mở rộng code tái sử dụng (Dynamic Island…) |
-| [themes](docs/themes/index.md) | Tạo theme & variant mới — không cần sửa code |
+| [01 — Tổng quan](docs/01-overview.md) | Giới thiệu, thành phần, mô hình phân nhánh |
+| [02 — Kiến trúc](docs/02-architecture.md) | Pattern thiết kế, daemon-client, sơ đồ hệ thống |
+| [03 — Cài đặt & build](docs/03-setup.md) | Cài đặt qua installer/script, build từ nguồn |
+| [04 — Cấu trúc & quy chuẩn](docs/04-structure.md) | Cây thư mục, trách nhiệm module, quy chuẩn code |
+| [05 — Themes & Variants](docs/05-themes-variants.md) | Tạo theme & variant mới — không cần sửa code |
+| [06 — Luồng hoạt động](docs/06-system-flows.md) | Luồng hoạt động hiện tại của từng crate/lib |
+| [07 — Dynamic Island](docs/07-dynamic-island.md) | Dùng & mở rộng Dynamic Island |
+| [08 — API](docs/08-apis.md) | API reference (core, ui-kit, explore) |
+| [09 — Design](docs/09-design.md) · [10 — Components](docs/10-components.md) | Ngôn ngữ thiết kế & component library |
 
 ---
 

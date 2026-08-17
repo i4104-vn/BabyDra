@@ -2,7 +2,7 @@
 //!
 //! Single source of truth for accent colors used both by custom Cairo
 //! widgets (switch, slider) and generated stylesheets. Keep in sync with
-//! `docs/design/tokens.md` and the theme packages under `themes/`.
+//! `docs/09-design.md` (tokens) and the theme packages under `themes/`.
 
 /// Accent blue (`#3b82f6`) as normalized RGBA for Cairo.
 pub const ACCENT_RGB: (f64, f64, f64) = (0.23, 0.51, 0.96);
