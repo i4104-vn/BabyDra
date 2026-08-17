@@ -15,7 +15,7 @@ pub fn build_footer_layout() -> (
 
     let profile_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
     profile_box.set_valign(gtk4::Align::Center);
-    let user_icon = babydra_utils::ui::icon::get_icon_colored("user", 20, "#ffffff");
+    let user_icon = babydra_ui_kit::ui::icon::get_icon_colored("user", 20, "#ffffff");
     let username = std::env::var("USER").unwrap_or_else(|_| "User".to_string());
     let user_label = gtk4::Label::new(Some(&username));
     user_label.add_css_class("launcher-profile-label");
@@ -25,7 +25,7 @@ pub fn build_footer_layout() -> (
     let power_btn = gtk4::Button::new();
     power_btn.add_css_class("launcher-power-btn");
     power_btn.set_cursor_from_name(Some("pointer"));
-    let power_icon = babydra_utils::ui::icon::get_icon_colored("power", 20, "#ff5555");
+    let power_icon = babydra_ui_kit::ui::icon::get_icon_colored("power", 20, "#ff5555");
     power_btn.set_child(Some(&power_icon));
 
     // Power options buttons
@@ -33,32 +33,32 @@ pub fn build_footer_layout() -> (
     shutdown_btn.add_css_class("launcher-power-option-btn");
     shutdown_btn.add_css_class("shutdown");
     shutdown_btn.set_cursor_from_name(Some("pointer"));
-    shutdown_btn.set_tooltip_text(Some(&babydra_common::i18n::t("launcher.shutdown")));
-    let shutdown_icon = babydra_utils::ui::icon::get_icon_colored("power", 18, "#ff5555");
+    shutdown_btn.set_tooltip_text(Some(&babydra_core::i18n::t("launcher.shutdown")));
+    let shutdown_icon = babydra_ui_kit::ui::icon::get_icon_colored("power", 18, "#ff5555");
     shutdown_btn.set_child(Some(&shutdown_icon));
 
     let reboot_btn = gtk4::Button::new();
     reboot_btn.add_css_class("launcher-power-option-btn");
     reboot_btn.add_css_class("reboot");
     reboot_btn.set_cursor_from_name(Some("pointer"));
-    reboot_btn.set_tooltip_text(Some(&babydra_common::i18n::t("launcher.restart")));
-    let reboot_icon = babydra_utils::ui::icon::get_icon_colored("restart", 18, "#ffb86c");
+    reboot_btn.set_tooltip_text(Some(&babydra_core::i18n::t("launcher.restart")));
+    let reboot_icon = babydra_ui_kit::ui::icon::get_icon_colored("restart", 18, "#ffb86c");
     reboot_btn.set_child(Some(&reboot_icon));
 
     let suspend_btn = gtk4::Button::new();
     suspend_btn.add_css_class("launcher-power-option-btn");
     suspend_btn.add_css_class("suspend");
     suspend_btn.set_cursor_from_name(Some("pointer"));
-    suspend_btn.set_tooltip_text(Some(&babydra_common::i18n::t("launcher.suspend")));
-    let suspend_icon = babydra_utils::ui::icon::get_icon_colored("sleep", 18, "#89b4fa");
+    suspend_btn.set_tooltip_text(Some(&babydra_core::i18n::t("launcher.suspend")));
+    let suspend_icon = babydra_ui_kit::ui::icon::get_icon_colored("sleep", 18, "#89b4fa");
     suspend_btn.set_child(Some(&suspend_icon));
 
     let logout_btn = gtk4::Button::new();
     logout_btn.add_css_class("launcher-power-option-btn");
     logout_btn.add_css_class("logout");
     logout_btn.set_cursor_from_name(Some("pointer"));
-    logout_btn.set_tooltip_text(Some(&babydra_common::i18n::t("launcher.logout")));
-    let logout_icon = babydra_utils::ui::icon::get_icon_colored("logout", 18, "#cba6f7");
+    logout_btn.set_tooltip_text(Some(&babydra_core::i18n::t("launcher.logout")));
+    let logout_icon = babydra_ui_kit::ui::icon::get_icon_colored("logout", 18, "#cba6f7");
     logout_btn.set_child(Some(&logout_icon));
 
     let power_options_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);

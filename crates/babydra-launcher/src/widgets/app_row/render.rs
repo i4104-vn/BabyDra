@@ -1,6 +1,6 @@
 //! UI layout renderer for launcher application rows and grids.
 
-use babydra_common::DesktopApp;
+use babydra_core::DesktopApp;
 use gtk4::prelude::*;
 
 /// Builds a grid item button widget displaying an application icon and truncated label.
@@ -13,7 +13,7 @@ pub fn build_grid_app_ui(app: &DesktopApp) -> (gtk4::Button, gtk4::Box, gtk4::La
     let content_box = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
     content_box.set_halign(gtk4::Align::Center);
 
-    let icon_widget = babydra_utils::ui::icon::get_system_or_file_icon(
+    let icon_widget = babydra_ui_kit::ui::icon::get_system_or_file_icon(
         app.icon.as_deref().unwrap_or(""),
         "application-x-executable",
     );
@@ -50,7 +50,7 @@ pub fn build_list_app_ui(app: &DesktopApp) -> (gtk4::Button, gtk4::Box, gtk4::La
     icon_wrapper.set_halign(gtk4::Align::Center);
     icon_wrapper.set_valign(gtk4::Align::Center);
 
-    let icon_widget = babydra_utils::ui::icon::get_system_or_file_icon(
+    let icon_widget = babydra_ui_kit::ui::icon::get_system_or_file_icon(
         app.icon.as_deref().unwrap_or(""),
         "application-x-executable",
     );
@@ -93,7 +93,14 @@ pub fn build_list_app_ui(app: &DesktopApp) -> (gtk4::Button, gtk4::Box, gtk4::La
     title_row.append(&badge_label);
 
     // Description row
-    let exec_bin = app.exec.split_whitespace().next().unwrap_or("").split('/').last().unwrap_or("");
+    let exec_bin = app
+        .exec
+        .split_whitespace()
+        .next()
+        .unwrap_or("")
+        .split('/')
+        .last()
+        .unwrap_or("");
     let desc_text = if is_flatpak {
         format!("Flatpak App • {}", exec_bin)
     } else {

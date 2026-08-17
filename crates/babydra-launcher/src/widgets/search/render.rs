@@ -18,7 +18,7 @@ pub fn build_browser_search_button(query: &str) -> (gtk4::Button, gtk4::Label) {
     icon_wrapper.set_halign(gtk4::Align::Center);
     icon_wrapper.set_valign(gtk4::Align::Center);
 
-    let web_icon = babydra_utils::ui::icon::get_system_or_file_icon("web-browser", "text-html");
+    let web_icon = babydra_ui_kit::ui::icon::get_system_or_file_icon("web-browser", "text-html");
     web_icon.set_pixel_size(24);
     web_icon.set_halign(gtk4::Align::Center);
     web_icon.set_valign(gtk4::Align::Center);
@@ -44,7 +44,7 @@ pub fn build_browser_search_button(query: &str) -> (gtk4::Button, gtk4::Label) {
     let spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     spacer.set_hexpand(true);
 
-    let badge_label = gtk4::Label::new(Some(&babydra_common::i18n::t("launcher.web")));
+    let badge_label = gtk4::Label::new(Some(&babydra_core::i18n::t("launcher.web")));
     badge_label.add_css_class("item-badge");
     badge_label.add_css_class("web");
 
@@ -53,7 +53,7 @@ pub fn build_browser_search_button(query: &str) -> (gtk4::Button, gtk4::Label) {
     title_row.append(&badge_label);
 
     // Description row
-    let desc_label = gtk4::Label::new(Some(&babydra_common::i18n::t("launcher.web_desc")));
+    let desc_label = gtk4::Label::new(Some(&babydra_core::i18n::t("launcher.web_desc")));
     desc_label.set_halign(gtk4::Align::Start);
     desc_label.set_ellipsize(gtk4::pango::EllipsizeMode::End);
     desc_label.add_css_class("app-desc");

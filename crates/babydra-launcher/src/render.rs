@@ -4,8 +4,8 @@ use crate::widgets::app_row::create_list_app_widget;
 use crate::widgets::file_search::create_file_row;
 use crate::widgets::footer::create_launcher_footer;
 use crate::widgets::search::build_browser_search_button;
-use babydra_common::find_desktop_apps;
-use babydra_common::search_files;
+use babydra_core::find_desktop_apps;
+use babydra_core::search_files;
 use gtk4::prelude::*;
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer};
 use std::cell::RefCell;
@@ -18,9 +18,9 @@ pub fn build_launcher_ui(
     launcher_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
 ) -> gtk4::ApplicationWindow {
     let window = gtk4::ApplicationWindow::new(app);
-    babydra_utils::ui::theme::apply_theme_class(&window);
+    babydra_ui_kit::ui::theme::apply_theme_class(&window);
 
-    babydra_utils::ui::window::init_layer_window(
+    babydra_ui_kit::ui::window::init_layer_window(
         &window,
         Layer::Overlay,
         KeyboardMode::OnDemand,
@@ -55,7 +55,7 @@ pub fn build_launcher_ui(
     let brand_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
     brand_box.set_valign(gtk4::Align::Center);
 
-    let brand_label = gtk4::Label::new(Some(&babydra_common::i18n::t("launcher.apps")));
+    let brand_label = gtk4::Label::new(Some(&babydra_core::i18n::t("launcher.apps")));
     brand_label.add_css_class("brand-text");
     brand_label.set_valign(gtk4::Align::Center);
 
@@ -66,7 +66,7 @@ pub fn build_launcher_ui(
 
     // --- Search Entry ---
     let search_entry = gtk4::Entry::new();
-    search_entry.set_placeholder_text(Some(&babydra_common::i18n::t("launcher.search_hint")));
+    search_entry.set_placeholder_text(Some(&babydra_core::i18n::t("launcher.search_hint")));
     search_entry.add_css_class("launcher-search");
     search_entry.set_margin_start(24);
     search_entry.set_margin_end(24);
@@ -117,7 +117,7 @@ pub fn build_launcher_ui(
     toggle_btn.add_css_class("launcher-toggle-btn");
     toggle_btn.set_cursor_from_name(Some("pointer"));
     let toggle_label_text_collapsed =
-        format!("{}  ▶", babydra_common::i18n::t("launcher.other_apps"));
+        format!("{}  ▶", babydra_core::i18n::t("launcher.other_apps"));
     toggle_btn.set_label(&toggle_label_text_collapsed);
 
     let expanded_clone = expanded.clone();
@@ -133,9 +133,9 @@ pub fn build_launcher_ui(
         *exp = !*exp;
 
         let toggle_label_text = if *exp {
-            format!("{}  ▼", babydra_common::i18n::t("launcher.other_apps"))
+            format!("{}  ▼", babydra_core::i18n::t("launcher.other_apps"))
         } else {
-            format!("{}  ▶", babydra_common::i18n::t("launcher.other_apps"))
+            format!("{}  ▶", babydra_core::i18n::t("launcher.other_apps"))
         };
         toggle_btn_clone.set_label(&toggle_label_text);
 
@@ -222,9 +222,9 @@ pub fn build_launcher_ui(
         }
         let win_cb = win_clone_close.clone();
         let box_layout_cb = box_layout_clone_close.clone();
-        babydra_utils::ui::animation::slide_out_cb(
+        babydra_ui_kit::ui::animation::slide_out_cb(
             box_layout_cb.upcast_ref(),
-            babydra_utils::ui::animation::SlideDirection::Up,
+            babydra_ui_kit::ui::animation::SlideDirection::Up,
             40,
             450,
             false,
@@ -235,7 +235,7 @@ pub fn build_launcher_ui(
         gtk4::glib::Propagation::Stop
     });
 
-    babydra_utils::ui::window::setup_click_outside_dismiss(&window, &box_layout);
+    babydra_ui_kit::ui::window::setup_click_outside_dismiss(&window, &box_layout);
 
     window.connect_is_active_notify(|win| {
         if !win.is_active() {
@@ -351,9 +351,9 @@ pub fn build_launcher_ui(
         });
     });
 
-    babydra_utils::ui::animation::slide_in(
+    babydra_ui_kit::ui::animation::slide_in(
         box_layout.upcast_ref(),
-        babydra_utils::ui::animation::SlideDirection::Down,
+        babydra_ui_kit::ui::animation::SlideDirection::Down,
         40,
         450,
     );
@@ -402,7 +402,7 @@ fn update_highlight(list_box: &gtk4::Box, selected_idx: Option<usize>) {
 fn repopulate_results(
     list_box: &gtk4::Box,
     query: &str,
-    apps: &[babydra_common::DesktopApp],
+    apps: &[babydra_core::DesktopApp],
     window: &gtk4::ApplicationWindow,
     expanded: bool,
     toggle_btn: &gtk4::Button,
@@ -417,7 +417,7 @@ fn repopulate_results(
 
     if q.is_empty() {
         // --- 1. APPLICATIONS GROUP (When empty query) ---
-        let app_title = gtk4::Label::new(Some(&babydra_common::i18n::t("launcher.apps")));
+        let app_title = gtk4::Label::new(Some(&babydra_core::i18n::t("launcher.apps")));
         app_title.add_css_class("launcher-section-title");
         app_title.set_halign(gtk4::Align::Start);
         list_box.append(&app_title);
@@ -455,7 +455,7 @@ fn repopulate_results(
         }
 
         if !matched_apps.is_empty() {
-            let app_title = gtk4::Label::new(Some(&babydra_common::i18n::t("launcher.apps")));
+            let app_title = gtk4::Label::new(Some(&babydra_core::i18n::t("launcher.apps")));
             app_title.add_css_class("launcher-section-title");
             app_title.set_halign(gtk4::Align::Start);
             list_box.append(&app_title);
@@ -467,7 +467,7 @@ fn repopulate_results(
         }
 
         // --- 2. WEB SEARCH GROUP ---
-        let web_title = gtk4::Label::new(Some(&babydra_common::i18n::t("launcher.web_search")));
+        let web_title = gtk4::Label::new(Some(&babydra_core::i18n::t("launcher.web_search")));
         web_title.add_css_class("launcher-section-title");
         web_title.set_halign(gtk4::Align::Start);
         list_box.append(&web_title);
@@ -511,7 +511,7 @@ fn repopulate_results(
                 Ok(matched_files) => {
                     if !matched_files.is_empty() {
                         let files_title =
-                            gtk4::Label::new(Some(&babydra_common::i18n::t("launcher.files_dirs")));
+                            gtk4::Label::new(Some(&babydra_core::i18n::t("launcher.files_dirs")));
                         files_title.add_css_class("launcher-section-title");
                         files_title.set_halign(gtk4::Align::Start);
                         files_container.append(&files_title);
