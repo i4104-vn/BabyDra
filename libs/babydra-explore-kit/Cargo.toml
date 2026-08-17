@@ -4,6 +4,12 @@ version.workspace = true
 edition = "2021"
 description = "Explore feature kit: dialogs, context menus, drag & drop, file item builders."
 
+# Feature toggles mirror babydra-utils so consumers can trim optional parts.
+[features]
+default = ["full"]
+full = []
+minimal = []
+
 [dependencies]
 babydra-common = { workspace = true }
 babydra-utils = { workspace = true }

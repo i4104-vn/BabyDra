@@ -3,6 +3,15 @@ name = "babydra-utils"
 version.workspace = true
 edition = "2021"
 
+# Optional component groups — a minimal build can exclude deprecated or
+# rarely-used modules (planning.md §5.3).
+[features]
+default = ["full"]
+full = ["deprecated-components"]
+minimal = []
+# Deprecated builders kept for backward compatibility (Phase 2).
+deprecated-components = []
+
 [dependencies]
 babydra-common = { workspace = true }
 gtk4 = { version = "0.9", features = ["v4_10"] }

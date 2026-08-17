@@ -1,18 +1,25 @@
 pub mod badge;
 pub mod buttons;
 pub mod card;
-pub mod close_button;
 pub mod list_group;
 pub mod modal;
-pub mod navbar;
 pub mod placeholder;
 pub mod popovers;
-pub mod progress;
 pub mod slider;
-pub mod spinners;
 pub mod switch;
 pub mod tooltips;
 pub mod wifi;
+
+// Deprecated component groups — compiled only with `deprecated-components`
+// (default via `full`). See Cargo.toml features (planning.md §5.3).
+#[cfg(feature = "deprecated-components")]
+pub mod close_button;
+#[cfg(feature = "deprecated-components")]
+pub mod navbar;
+#[cfg(feature = "deprecated-components")]
+pub mod progress;
+#[cfg(feature = "deprecated-components")]
+pub mod spinners;
 
 // Re-export all builders under components namespace to maintain compatibility
 pub use badge::{create_icon_badge, create_status_badge};
@@ -27,17 +34,21 @@ pub use card::{
     create_card, create_card_with_class, create_item_row, create_scrollable_list,
     create_subtitle, create_switch_card, create_title,
 };
+#[cfg(feature = "deprecated-components")]
 pub use close_button::{create_close_button, create_close_button_with_label};
 pub use list_group::{clear_box, clear_list_box, create_list_row};
 pub use modal::create_dialog_box;
+#[cfg(feature = "deprecated-components")]
 pub use navbar::{create_sidebar_row, create_sidebar_row_with_badge};
 pub use placeholder::{create_placeholder_message, create_placeholder_row, PlaceholderState};
 pub use popovers::{
     attach_hover_popover, build_hover_popover_card, create_popover, create_popover_with_content,
     HoverPopoverRow,
 };
+#[cfg(feature = "deprecated-components")]
 pub use progress::{create_disk_progress, create_progress_bar};
 pub use slider::CustomSlider;
+#[cfg(feature = "deprecated-components")]
 pub use spinners::{create_loading_box, create_spinner};
 pub use switch::{create_switch, CustomSwitch, ToggleRow};
 pub use tooltips::set_tooltip;
