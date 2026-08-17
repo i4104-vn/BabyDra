@@ -106,7 +106,9 @@ pub fn create_lock_window(
             let clock_label = clock_label.clone();
             let date_label = date_label.clone();
             move || {
-                babydra_core::update_clock(&clock_label, &date_label, "lock.date_format");
+                let (time, date) = babydra_core::format_clock_date("lock.date_format");
+                clock_label.set_text(&time);
+                date_label.set_text(&date);
                 glib::ControlFlow::Continue
             }
         };
@@ -211,7 +213,9 @@ pub fn create_lock_window(
             let clock_label = clock_label.clone();
             let date_label = date_label.clone();
             move || {
-                babydra_core::update_clock(&clock_label, &date_label, "lock.date_format");
+                let (time, date) = babydra_core::format_clock_date("lock.date_format");
+                clock_label.set_text(&time);
+                date_label.set_text(&date);
                 glib::ControlFlow::Continue
             }
         };

@@ -25,15 +25,15 @@ pub fn setup_handlers(g: &GreeterWidgets) {
 /// Sets up `clock`.
 fn setup_clock(top_bar: &TopBarWidget) {
     tracing::info!(target: "babydra-greeter", "Setting up top bar clock timer (interval: 1 second)");
-    babydra_core::update_clock(
-        &top_bar.clock_label,
-        &top_bar.date_label,
-        "greeter.date_format",
-    );
+    let (time, date) = babydra_core::format_clock_date("greeter.date_format");
+    top_bar.clock_label.set_text(&time);
+    top_bar.date_label.set_text(&date);
     let clock_label = top_bar.clock_label.clone();
     let date_label = top_bar.date_label.clone();
     glib::timeout_add_seconds_local(1, move || {
-        babydra_core::update_clock(&clock_label, &date_label, "greeter.date_format");
+        let (time, date) = babydra_core::format_clock_date("greeter.date_format");
+        clock_label.set_text(&time);
+        date_label.set_text(&date);
         glib::ControlFlow::Continue
     });
 }

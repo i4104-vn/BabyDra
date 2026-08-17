@@ -40,3 +40,19 @@ babydra-ui-kit = { path = "kits/babydra-ui-kit" }
 babydra-explore-kit = { path = "kits/babydra-explore-kit" }
 # crates/
 babydra-launcher = { path = "crates/babydra-launcher" }
+
+# --- External dependencies (single source of truth) ---
+gtk4 = { version = "0.9", features = ["v4_10"] }
+gtk4-layer-shell = "0.4"
+glib = "0.20"
+gio = "0.20"
+gdk4 = "0.9"
+gdk-pixbuf = "0.20"
+cairo-rs = { version = "0.20", features = ["use_glib", "png"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.0", features = ["rt", "rt-multi-thread", "time", "sync", "macros", "process", "fs", "io-util"] }
+chrono = "0.4"
+thiserror = "2.0"
+dirs = "5.0"
+base64 = "0.23.1"
