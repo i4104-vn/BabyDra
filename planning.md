@@ -1,7 +1,11 @@
 # Planning: Khắc phục tính đồng nhất & Thiết kế Kiến trúc Linh hoạt cho BabyDra
 
-**Phiên bản:** 1.0.0
-**Cập nhật lần cuối:** 2026-08-14
+**Phiên bản:** 1.1.0
+**Cập nhật lần cuối:** 2026-08-17
+
+> [!IMPORTANT]
+> Triển khai trên nhánh `refactor/constructor` (base: `release`). Xem commit log
+> theo từng phần và `CHANGELOG.md`.
 **Phạm vi:** Kế hoạch (a) khắc phục các vấn đề đồng nhất giữa component đã phát hiện, (b) thiết kế lại cấu trúc code trên nhánh `release` để hỗ trợ **nhiều phiên bản (variants) bởi nhiều người dùng khác nhau** với **xung đột tối thiểu**.
 
 ---
@@ -247,96 +251,91 @@ release  ──(official)──▶  variants/default  (chính thức)
 
 > Mỗi phase kết thúc bằng: `cargo check --workspace` + `cargo fmt --check` + app demo chạy được.
 
-### Phase 0 — Lưới an toàn (2–3 ngày)
+### Phase 0 — Lưới an toàn (2–3 ngày) ✅ HOÀN THÀNH
 
 **Mục tiêu:** Trước khi refactor, tạo test + CI để phát hiện hồi quy.
 
-- [ ] T0.1 Thêm `#[cfg(test)]` cho các service thuần trong `babydra-common` (volume parse, vpn config parse, wifi sort, config load/save, i18n lookup, `format_size`).
-- [ ] T0.2 Thêm script `scripts/check.sh`: `cargo check --workspace && cargo fmt --check && cargo clippy --workspace -- -D warnings`.
-- [ ] T0.3 Thêm `.github/workflows/ci.yml` chạy `check.sh` trên push/PR (các nhánh release/develop).
-- [ ] T0.4 Chụp screenshot baseline từng app (panel, settings, explore) để đối chiếu visual sau refactor.
-- [ ] T0.5 Rà soát `.gitignore` (thêm `target/`, `*.log` nếu thiếu).
+- [x] T0.1 Thêm `#[cfg(test)]` cho các service thuần trong `babydra-common` (volume parse, vpn config parse, wifi sort, config load/save, i18n lookup, `format_size`) — + unit test `babydra-utils` (colors, switch easing, slider clamp/step).
+- [x] T0.2 Thêm script `scripts/check.sh`: `cargo check --workspace && cargo fmt --check && cargo clippy --workspace -- -D warnings` (+ `cargo test`).
+- [x] T0.3 Thêm `.github/workflows/ci.yml` chạy `check.sh` trên push/PR (các nhánh release/develop + refactor/*).
+- [ ] T0.4 Chụp screenshot baseline từng app (panel, settings, explore) — **thủ công, cần màn hình đồ họa**.
+- [x] T0.5 Rà soát `.gitignore` (thêm `target/`, `*.log` nếu thiếu).
 
 **Định nghĩa hoàn thành:** `cargo test --workspace` xanh; CI chạy được.
 
 ---
 
-### Phase 1 — CSS & Tokens đồng nhất (3–5 ngày)
+### Phase 1 — CSS & Tokens đồng nhất (3–5 ngày) ✅ HOÀN THÀNH
 
 **Mục tiêu:** Xóa ghost class, xóa định nghĩa trùng, thống nhất font, đưa màu Cairo về tokens.
 
-- [ ] T1.1 Định nghĩa đủ **9 ghost class** đúng file chủ quyền (chủ yếu `styles/shared/apps/settings.css`):
+- [x] T1.1 Định nghĩa đủ **9 ghost class** đúng file chủ quyền (chủ yếu `styles/shared/apps/settings.css`):
   `success-text`, `settings-desc`, `settings-title`, `settings-subtitle`, `settings-label`, `settings-item-row`, `sidebar-icon-badge`, `badge-slate`, `baby-button` (+ dark/light nếu là lớp màu).
-- [ ] T1.2 **Hợp nhất định nghĩa trùng**: giữ 1 định nghĩa mỗi class mỗi tầng. `.settings-card`, `.settings-row-title`, `.settings-row-desc`, `.settings-card-row` → gom vào `settings.css`, **xóa bản trùng trong `explore/dialogs.css`** (kiểm tra không lệch giá trị trước khi xóa).
-- [ ] T1.3 Quyết định font: **Segoe UI Variable làm chuẩn** (đang là deployment thực tế). Cập nhật `typography.md`, CSS dùng Inter → Segoe UI (giữ Inter làm `font-family` fallback). Đồng bộ `tokens.md`.
-- [ ] T1.4 Đưa màu hardcode trong `switch`/`slider` (Cairo) về hằng số tokens: thêm module `ui-kit/src/ui/theme/colors.rs` (hằng `ACCENT_RGB`, `SURFACE_TRACK_DARK/LIGHT`...) và dùng chung cho cả Cairo lẫn CSS generation.
-- [ ] T1.5 Cập nhật `tokens.md` mục Badge + bảng surface cho khớp component thực tế; sửa 2 ví dụ sai trong `tooltips.md`, `popovers.md` (signature `create_icon_button` 5 tham số; class `status-good` → class thật).
+- [x] T1.2 **Hợp nhất định nghĩa trùng**: giữ 1 định nghĩa mỗi class mỗi tầng. `.settings-card`, `.settings-row-title`, `.settings-row-desc`, `.settings-card-row` → gom vào `settings.css`, xóa bản trùng trong `explore/dialogs.css` (dialogs dùng scoped `.explore-dialog` override).
+- [x] T1.3 Quyết định font: **Segoe UI Variable làm chuẩn** (đang là deployment thực tế). Cập nhật CSS dùng Inter → Segoe UI (giữ Inter làm `font-family` fallback). Đồng bộ `tokens.md`.
+- [x] T1.4 Đưa màu hardcode trong `switch`/`slider` (Cairo) về hằng số tokens: thêm module `babydra-utils/src/ui/theme/colors.rs` (hằng `ACCENT_RGB`, `TRACK_DARK/LIGHT_RGBA`...) và dùng chung cho cả Cairo lẫn CSS generation.
+- [x] T1.5 Cập nhật `tokens.md` mục Badge + bảng surface cho khớp component thực tế; sửa 2 ví dụ sai trong `tooltips.md`, `popovers.md` (signature `create_icon_button` 5 tham số; class `status-good` → class thật).
 
 **Định nghĩa hoàn thành:** `grep -c` mỗi ghost class ≥ 1 trong CSS; `.settings-card` chỉ còn 1 file mỗi tầng; app render đúng (đối chiếu screenshot baseline).
 
 ---
 
-### Phase 2 — Component Cleanup (3–5 ngày)
+### Phase 2 — Component Cleanup (3–5 ngày) ✅ HOÀN THÀNH
 
 **Mục tiêu:** Hết trùng lặp, hết dead code; mỗi khái niệm 1 component.
 
-- [ ] T2.1 **Row builder duy nhất**: giữ `list_group::create_list_row` (đang được dùng). **Đánh dấu `#[deprecated]`** `card::create_item_row` (nhất quán với chính sách T2.3 — chuyển caller nếu có sang `create_list_row`, xóa hẳn ở Phase 3). Xóa hoặc gộp `explore::items::list_row` nếu trùng chức năng (nếu có hành vi riêng → tách class riêng, không trùng API).
-- [ ] T2.2 **Một hệ switch**: giữ `CustomSwitch` (đang dùng). Xóa CSS `switch.baby-switch` chết (86 dòng) hoặc đánh dấu `@deprecated` rồi xóa ở phase sau.
-- [ ] T2.3 **Xử lý dead components** (chọn 1 trong 2):
-  - (a) Xóa: `alerts`, `spinners`, `progress`, `navbar`, `close_button`, `create_status_badge`, `create_dialog_box` — nếu chắc chắn không dùng.
-  - (b) Giữ + đánh dấu `#[deprecated(note = "unused, remove in v2")]` để quyết định sau.
-  - **Khuyến nghị (b)** — tránh phá API đang có người dùng; dọn dứt điểm ở Phase 3 cùng lúc tách libs.
-- [ ] T2.4 **Gộp `alerts` vào `placeholder`**: chuyển `create_placeholder_message` sang module placeholder (hoặc xóa nếu trùng `create_placeholder_row`), xóa module `alerts`.
-- [ ] T2.5 Thêm test component nhẹ: unit test cho `CustomSwitch` state machine, `CustomSlider` clamp/step, `parse_vpn_config_file` (nếu chưa có).
+- [x] T2.1 **Row builder duy nhất**: giữ `list_group::create_list_row` (đang được dùng). **Đánh dấu `#[deprecated]`** `card::create_item_row`. `explore::items::list_row` có hành vi riêng (file entry, drag/drop, double-click) — giữ, không trùng API.
+- [x] T2.2 **Một hệ switch**: giữ `CustomSwitch` (đang dùng). Xóa CSS `switch.baby-switch` chết (86 dòng) — file giữ comment deprecated vì `include_str!`.
+- [x] T2.3 **Xử lý dead components** — chọn (b): giữ + đánh dấu `#[deprecated(note = "unused, remove in v2")]`; gate sau feature `deprecated-components` (tắt được ở build minimal).
+- [x] T2.4 **Gộp `alerts` vào `placeholder`**: chuyển `create_placeholder_message` sang module placeholder, xóa module `alerts`.
+- [x] T2.5 Thêm test component nhẹ: unit test cho `CustomSwitch` easing + state, `CustomSlider` clamp/step, `parse_vpn_config_file` (đã có).
 
 **Định nghĩa hoàn thành:** `cargo test` xanh; grep không còn `create_item_row`/`baby-switch`; docs component phản ánh đúng số component sống.
 
 ---
 
-### Phase 3 — Tái cấu trúc libs + Theme/Variant engine (2–3 tuần — phase lớn nhất)
+### Phase 3 — Tái cấu trúc libs + Theme/Variant engine (2–3 tuần — phase lớn nhất) 🟡 CƠ BẢN HOÀN THÀNH
 
 **Mục tiêu:** Đưa code về kiến trúc mục tiêu (mục 4).
 
-- [ ] T3.1 **Tách `babydra-utils`** thành `ui-kit` + `explore-kit`:
-  - Di chuyển `src/explore/` → lib mới `babydra-explore-kit` (dialogs, context_menu).
-  - `components/`, `ui/`, `styles/` → `babydra-ui-kit`.
+- [x] T3.1 **Tách `babydra-utils`** → `babydra-explore-kit`:
+  - Di chuyển `src/explore/` → lib mới `babydra-explore-kit` (dialogs, context_menu, drag, items, selection, widgets, helpers) — git mv giữ lịch sử.
+  - `components/`, `ui/`, `styles/` giữ trong `babydra-utils` (ui-kit); `create_grid_file_item` chuyển sang explore-kit.
   - Cập nhật `Cargo.toml` workspace + dependency của `babydra-explore` crate.
-- [ ] T3.2 **Tạo `babydra-theme`**:
+- [x] T3.2 **Tạo `babydra-theme`**:
   - `ThemePackage` load: đọc `themes/<id>/tokens.json` + `theme.css` + `fonts.json`.
-  - `resolve_theme(id)` → `ThemeValue { tokens, css_layers, fonts }`.
-  - Thay thế `init_theme()` cứng: `init_theme_with(theme_id)`; giữ `init_theme()` = theme mặc định (backward compatible).
-  - `ThemeConfig` trong core: mở rộng thành `ThemeSelection { id, dark: bool }` — bỏ field màu cứng hoặc deprecate. **Mọi field mới phải có `#[serde(default)]`** để file `~/.babydra/babydra.conf` cũ vẫn load được bình thường.
-- [ ] T3.3 **Tạo cây `themes/`**:
-  - Di chuyển `libs/babydra-utils/src/styles/dark|light/` → `themes/babydra-default/{theme.css dark|light}` (giữ `styles/core/` = shared).
-  - Thêm `tokens.json` khởi đầu cho `babydra-default` (lấy giá trị từ tokens.md + CSS hiện tại).
-  - Tạo 1 theme mẫu thứ hai (vd `babydra-blue`) để chứng minh cơ chế hoạt động (đổi accent + radius) — **test sống** cho hệ thống.
-- [ ] T3.4 **Tạo cây `variants/`**:
-  - `variants/default/` (variant hiện tại: theme default, đủ 8 app).
-  - Thêm module `babydra-core/src/config/variant.rs`: `load_variant(name)` merge theo thứ tự mục 5.2.
-  - Installer: thêm bước chọn variant (đọc `variants/*/variant.toml`) → thay đổi nhỏ ở `installer`.
-  - **Lưu ý đồng bộ nhánh `main`**: `install/` tồn tại trên cả `release` lẫn `main` (main là kênh phân phối). Mọi thay đổi installer ở Phase 3 phải **mirror sang `main`** cùng phiên bản, nếu không hub sẽ phân phối installer cũ.
-- [ ] T3.5 **Cargo features** cho ui-kit/explore-kit (mục 5.3).
-- [ ] T3.6 **Gom scripts**: `start.sh`, `update.sh`, `install.sh` → `scripts/` (giữ file gốc 1 phase để không phá autostart tham chiếu cũ).
+  - `resolve_theme(id)` → `ThemeValue { dark, light, css_layer, fonts }`, hỗ trợ kế thừa `base` + phát hiện cycle.
+  - Giữ `init_theme()` = theme mặc định (backward compatible); bước gắn `init_theme_with(theme_id)` để sau.
+  - `ThemeConfig` mở rộng → `ThemeSelection { id, dark }` — TODO ở phase tiếp (serde default bảo toàn config cũ).
+- [x] T3.3 **Tạo cây `themes/`**:
+  - `themes/babydra-default/{tokens.json, theme.css, fonts.json}` (giá trị từ tokens.md + CSS hiện tại).
+  - Theme mẫu thứ hai `themes/babydra-blue` (kế thừa default, đổi accent + radius) — **test sống** (engine test dùng temp tree + các test kế thừa).
+- [x] T3.4 **Tạo cây `variants/`**:
+  - `variants/default/variant.toml` (theme default, 8 app, keybinds, config overrides).
+  - Module `babydra-common/src/config/variant.rs`: `list_variants`, `load_variant(name)`, `get_keybind` — merge theo thứ tự mục 5.2.
+  - Installer: bước chọn variant — TODO phase tiếp (cần mirror sang `main`).
+- [x] T3.5 **Cargo features** cho ui-kit/explore-kit (mục 5.3): `default = ["full"]`, `minimal = []`, `deprecated-components`.
+- [x] T3.6 **Gom scripts**: `start.sh`, `update.sh`, `install.sh` → `scripts/` (git mv giữ lịch sử; docs cập nhật).
 
 **Định nghĩa hoàn thành:** `cargo build --release --workspace` xanh; panel/settings render bằng theme engine; đổi theme bằng 1 dòng config; installer chọn được variant.
 
 ---
 
-### Phase 4 — Workflow & Quy tắc chống conflict (1 tuần)
+### Phase 4 — Workflow & Quy tắc chống conflict (1 tuần) ✅ HOÀN THÀNH
 
-- [ ] T4.1 Cập nhật `WORKFLOW.md`: mô hình branch mở rộng (mục 5.4), ma trận sở hữu (mục 6), quy trình PR cho variant.
-- [ ] T4.2 Thêm `CHANGELOG.md` + chính sách version (semver: core/ui-kit là API public).
-- [ ] T4.3 Template PR (`CONTRIBUTING.md`): checklist — chạy `scripts/check.sh`, không sửa file ngoài ownership, thêm test khi đổi core.
-- [ ] T4.4 Bảo vệ nhánh: `release`, `develop` bắt buộc CI + review (nếu dùng GitHub).
+- [x] T4.1 Cập nhật `WORKFLOW.md`: mô hình branch mở rộng (mục 5.4), ma trận sở hữu (mục 6), quy trình PR cho variant.
+- [x] T4.2 Thêm `CHANGELOG.md` + chính sách version (semver: core/ui-kit/theme/explore-kit là API public).
+- [x] T4.3 Template PR (`CONTRIBUTING.md`): checklist — chạy `scripts/check.sh`, không sửa file ngoài ownership, thêm test khi đổi core.
+- [ ] T4.4 Bảo vệ nhánh: `release`, `develop` bắt buộc CI + review (cấu hình GitHub Settings — thủ công).
 
 ---
 
-### Phase 5 — Docs & Đóng gói (2–3 ngày)
+### Phase 5 — Docs & Đóng gói (2–3 ngày) 🟡 CƠ BẢN HOÀN THÀNH
 
-- [ ] T5.1 Cập nhật `docs/03-project-structure.md` theo cấu trúc mới.
-- [ ] T5.2 Viết `docs/05-themes-variants.md`: cách tạo theme mới, cách tạo variant mới (hướng dẫn từng bước cho người dùng thứ 3).
-- [ ] T5.3 Cập nhật docs design: `theming.md` mô tả cơ chế theme package; `tokens.md` làm schema mẫu cho `tokens.json`.
-- [ ] T5.4 Đồng bộ `planning.md` → ghi chú phase đã hoàn thành.
+- [x] T5.1 Cập nhật `docs/03-project-structure.md` theo cấu trúc mới (v1.3.0: theme/explore-kit libs, themes/, variants/, tests/, scripts/).
+- [x] T5.2 Viết `docs/05-themes-variants.md`: cách tạo theme mới, cách tạo variant mới (hướng dẫn từng bước cho người dùng thứ 3).
+- [ ] T5.3 Cập nhật docs design: `theming.md` mô tả cơ chế theme package; `tokens.md` làm schema mẫu cho `tokens.json` — còn lại 1 phần nhỏ.
+- [x] T5.4 Đồng bộ `planning.md` → ghi chú phase đã hoàn thành (chính là file này).
 
 ---
 

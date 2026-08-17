@@ -1,7 +1,7 @@
 # Chương 03: Cấu trúc Dự án và Quy chuẩn Viết mã
 
-**Phiên bản:** 1.2.0
-**Cập nhật lần cuối:** 2026-08-14
+**Phiên bản:** 1.3.0
+**Cập nhật lần cuối:** 2026-08-17
 **Phạm vi:** Quy chuẩn đặt tên thư mục, triết lý phân tách file, trách nhiệm từng module, quy tắc viết mã nguồn mới
 
 ---
@@ -44,17 +44,21 @@ BabyDra/                          <- Thư mục gốc repository (nhánh main)
 
 ```
 BabyDra/                          <- Thư mục gốc repository (nhánh release)
-├── Cargo.toml                    <- Workspace manifest — liệt kê toàn bộ crates/libs/install
+├── Cargo.toml                    <- Workspace manifest — liệt kê toàn bộ crates/libs/install/tests
 ├── Cargo.lock
-├── install.sh                    <- Script cài đặt toàn bộ DE từ source (dependencies + build + deploy)
-├── start.sh                      <- Script khởi động: config labwc + .desktop entries + chạy labwc
-├── update.sh                     <- Script hot-update: rebuild + copy binary + sync config + restart panel
+├── scripts/                      <- Scripts: install.sh, start.sh, update.sh, check.sh (đã gom lại)
 ├── wallpaper.png                 <- Hình nền mặc định của hệ thống
 ├── README.md
+├── WORKFLOW.md                   <- Mô hình branch + ma trận sở hữu (chống conflict)
+├── CONTRIBUTING.md               <- Checklist PR
+├── CHANGELOG.md                  <- Lịch sử phiên bản (SemVer)
 ├── docs/                         <- Tài liệu (đồng bộ với nhánh main)
-├── configs/                      <- Cấu hình mẫu hệ thống
+├── configs/                      <- Cấu hình mẫu hệ thống (seed)
 ├── crates/                       <- Các ứng dụng đồ họa thực thi độc lập
 ├── libs/                         <- Các thư viện dùng chung (không thể chạy độc lập)
+├── themes/                       <- Theme packages (tokens.json + theme.css + fonts.json)
+├── variants/                     <- Variants (mỗi variant 1 thư mục riêng)
+├── tests/                        <- Integration test suite (TDD safety net)
 └── install/                      <- Bộ cài đặt TUI (dùng chung với nhánh main)
 ```
 
@@ -65,12 +69,13 @@ BabyDra/                          <- Thư mục gốc repository (nhánh release
 resolver = "2"
 members = [
     "libs/babydra-common",    "libs/babydra-island",
-    "libs/babydra-launcher",  "libs/babydra-utils",
+    "libs/babydra-launcher",  "libs/babydra-theme",
+    "libs/babydra-utils",     "libs/babydra-explore-kit",
     "crates/babydra-panel",   "crates/babydra-switcher",
     "crates/babydra-screenshot", "crates/babydra-lock",
     "crates/babydra-preview", "crates/babydra-settings",
     "crates/babydra-explore", "crates/babydra-greeter",
-    "install",
+    "install", "tests",
 ]
 ```
 
@@ -378,27 +383,56 @@ libs/babydra-common/src/
 └── services/                     <- Xem chi tiết Chương 02, mục 7
 ```
 
-### 6.2. `babydra-utils` — Giao diện dùng chung
+### 6.2. `babydra-utils` — UI kit (giao diện dùng chung)
 
 ```
 libs/babydra-utils/src/
-├── lib.rs                        <- pub mod components; pub mod explore; pub mod ui;
-├── components/                   <- alerts, badge, buttons (icon/standard/tile), card (standard/
-│                                    scrollable/switch_card), close_button, list_group, modal
+├── lib.rs                        <- pub mod components; pub mod ui;
+├── components/                   <- badge, buttons (icon/standard/tile), card (standard/
+│                                    scrollable/switch_card), list_group, modal
 │                                    (password/vpn_config/vpn_log/wifi_config/wifi_info/wifi_password
-│                                    dialog), navbar, placeholder, popovers, progress, slider,
-│                                    spinners, switch, tooltips, wifi
-├── explore/                      <- context_menu (clipboard, custom_items, dimming, file_actions,
-│                                    widgets), dialogs (alert, archive, confirm, conflict)
+│                                    dialog), placeholder, popovers, slider, switch, tooltips, wifi
+│                                    (close_button, navbar, progress, spinners: deprecated, feature
+│                                    `deprecated-components`)
 ├── ui/
 │   ├── theme/mod.rs              <- init_theme(): gộp CSS shared + dark/light, nạp provider toàn cục
+│   ├── theme/colors.rs           <- Color tokens dùng chung cho Cairo + CSS (T1.4)
 │   ├── icon/                     <- resolver, assets
 │   ├── animation/                <- easing, genie, island, slide
 │   ├── battery.rs, window.rs
 └── styles/                       <- CSS: shared/ + dark/ + light/
 ```
 
-### 6.3. `babydra-island` — Dynamic Island
+### 6.3. `babydra-explore-kit` — Explore feature kit
+
+Tách từ `babydra-utils` (T3.1) — dialogs, context menus, drag & drop, file item builders:
+
+```
+libs/babydra-explore-kit/src/
+├── lib.rs                        <- pub mod explore; pub use explore::*;
+└── explore/
+    ├── context_menu/             <- clipboard, custom_items, dimming, file_actions, widgets
+    ├── dialogs/                  <- alert, archive, confirm, conflict, decompress, new_file,
+    │                                new_folder, properties, rename
+    ├── drag/                     <- source, target
+    ├── helpers/                  <- archive, format, path, trash
+    ├── items/                    <- grid_card, list_row
+    ├── selection/                <- grid, listbox
+    └── widgets/                  <- button
+```
+
+### 6.4. `babydra-theme` — Theme engine
+
+Crate thuần logic (không GTK): đọc theme package từ `themes/<id>/`:
+
+```
+libs/babydra-theme/src/
+├── lib.rs                        <- load_package, resolve_theme (hỗ trợ kế thừa base)
+└── tokens.rs                     <- ThemeTokens, DarkLightTokens, RadiusTokens (serde, merge)
+```
+
+### 6.5. `babydra-island` — Dynamic Island
+
 
 ```
 libs/babydra-island/src/
@@ -409,7 +443,7 @@ libs/babydra-island/src/
 └── render.rs
 ```
 
-### 6.4. `babydra-launcher` — Launcher ứng dụng
+### 6.6. `babydra-launcher` — Launcher ứng dụng
 
 ```
 libs/babydra-launcher/src/
@@ -425,7 +459,7 @@ libs/babydra-launcher/src/
 
 ---
 
-## 7. Cấu hình hệ thống và Script (`configs/`, `start.sh`, `update.sh`)
+## 7. Cấu hình hệ thống, Themes, Variants và Script (`configs/`, `themes/`, `variants/`, `scripts/`)
 
 ### 7.1. `configs/`
 
@@ -450,7 +484,55 @@ configs/
     └── icons/                    <- We10X icons (.tar)
 ```
 
-### 7.2. `start.sh` — Khởi động DE
+### 7.2. `themes/` — Theme packages
+
+Điểm mở rộng chính (T3.3): mỗi giao diện = 1 theme package, người tạo theme mới
+**không cần sửa 1 dòng code**:
+
+```
+themes/
+└── <theme-id>/
+    ├── tokens.json                <- Design tokens (surface, border, accent, font, radius)
+    ├── theme.css                  <- Lớp màu theme (nạp lên core CSS)
+    └── fonts.json                 <- Font families + fallbacks
+```
+
+- `babydra-default/` — theme chính thức.
+- `babydra-blue/` — theme mẫu thứ hai (kế thừa default, override accent + radius) — test sống.
+- Engine: `babydra-theme` (`load_package`, `resolve_theme`, hỗ trợ `base` kế thừa).
+
+### 7.3. `variants/` — Variants
+
+Mỗi phiên bản hoàn chỉnh = 1 thư mục riêng (T3.4):
+
+```
+variants/<name>/
+└── variant.toml                   <- theme ref, app list, keybinds, config overrides
+```
+
+Merge thứ tự (phải sang trái thắng):
+`system defaults < configs/ seed < theme package < variant < ~/.babydra/ (user)`
+
+- API: `babydra_common::config::variant::{list_variants, load_variant, get_keybind}`.
+- `variants/default/` — variant chính thức.
+
+### 7.4. `tests/` — Test suite (TDD safety net)
+
+Integration test chia theo vùng (xem `tests/README.md`); unit test `#[cfg(test)]`
+trong từng crate. Chạy: `cargo test --workspace` / `cargo test -p babydra-tests`.
+
+### 7.5. `scripts/`
+
+Các script đã gom về một nơi (T3.6):
+
+| Script | Vai trò |
+| :--- | :--- |
+| `scripts/install.sh` | Cài đặt toàn bộ DE từ source (dependencies + build + deploy) |
+| `scripts/start.sh` | Khởi động: config labwc + .desktop entries + chạy labwc |
+| `scripts/update.sh` | Hot-update: rebuild + copy binary + sync config + restart panel |
+| `scripts/check.sh` | Safety net: cargo check + fmt + clippy + test |
+
+### 7.6. `start.sh` — Khởi động DE
 
 Công việc chính:
 1. Dừng các tiến trình cũ (`killall babydra-panel babydra-launcher babydra-preview ...`).
@@ -460,7 +542,7 @@ Công việc chính:
 5. Kiểm tra `ddcutil` và ddcutil-service.
 6. `exec labwc` — khởi chạy compositor.
 
-### 7.3. `update.sh` — Hot-update & Reload
+### 7.7. `update.sh` — Hot-update & Reload
 
 1. `cargo build --release` — build lại toàn bộ workspace.
 2. Dừng mọi tiến trình BabyDra.
@@ -470,7 +552,7 @@ Công việc chính:
 6. Áp dụng GSettings (font Segoe UI, icon We10X, cursor Twilight) + `fc-cache -f`.
 7. `labwc --reconfigure` nếu đang chạy, khởi động lại `babydra-panel`.
 
-### 7.4. `install.sh` (nhánh `release`) — Cài đặt toàn bộ từ source
+### 7.8. `install.sh` (nhánh `release`) — Cài đặt toàn bộ từ source
 
 1. Cài dependencies qua `sudo pacman -Syu` (gtk4, gtk4-layer-shell, labwc, pipewire, ddcutil, greetd, cage, bluetooth, networkmanager...).
 2. Cấu hình `i2c-dev` và CPU performance permissions.

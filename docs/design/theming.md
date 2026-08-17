@@ -75,3 +75,22 @@ Khi hoàn thành một phần giao diện, bắt buộc kiểm tra trên cả ha
 - Border quá mờ, mất phân cách giữa các vùng.
 - Shadow quá nhẹ, bề mặt trông phẳng không nổi.
 - Màu accent `#3b82f6` trông khác trên nền sáng so với nền tối (thường vẫn ổn, nhưng cần xác nhận).
+
+---
+
+## Theme packages (Phase 3)
+
+Từ `refactor/constructor` (Phase 3), theme được đóng gói thành **theme package**
+trong `themes/<theme-id>/` và nạp qua engine `babydra-theme` (crate thuần logic,
+không GTK):
+
+```
+themes/<theme-id>/
+├── tokens.json   <- design tokens: surface, border, accent, font, radius (dark + light)
+├── theme.css     <- lớp màu theme, nạp lên core CSS
+└── fonts.json    <- font families + fallbacks
+```
+
+- `resolve_theme(id)` hỗ trợ kế thừa `base` (theme con override từng token).
+- Giá trị dark/light tương ứng với bảng ở đầu tài liệu này.
+- Xem hướng dẫn tạo theme mới: `docs/05-themes-variants.md`.
