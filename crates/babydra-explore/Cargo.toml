@@ -6,7 +6,6 @@ edition = "2021"
 [dependencies]
 babydra-core = { workspace = true }
 babydra-ui-kit = { workspace = true }
-babydra-explore-kit = { workspace = true }
 
 # GUI
 gtk4 = { workspace = true }

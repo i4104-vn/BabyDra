@@ -1,10 +1,12 @@
 //! Integration tests: kits public API / prelude.
 //!
-//! Verifies the one-stop `prelude` re-exports of `babydra-ui-kit` and
-//! `babydra-explore-kit` stay wired up — any rename or removal of a public
-//! item breaks this test, so the documented API surface cannot drift silently.
+//! Verifies the one-stop `prelude` re-exports of `babydra-ui-kit` (widget
+//! prelude + `components::explore::prelude`) stay wired up — any rename or
+//! removal of a
+//! public item breaks this test, so the documented API surface cannot drift
+//! silently.
 
-use babydra_explore_kit::prelude as explore_prelude;
+use babydra_ui_kit::components::explore::prelude as explore_prelude;
 use babydra_ui_kit::prelude as ui_prelude;
 
 /// Asserts the ui-kit prelude exposes the core builders & helpers.
@@ -39,9 +41,9 @@ fn ui_kit_prelude_exposes_components_and_helpers() {
     let _: fn(f64) -> f64 = ui_prelude::ease_out_cubic;
 }
 
-/// Asserts the explore-kit prelude exposes the feature API.
+/// Asserts the `babydra-ui-kit` explore feature prelude exposes the API.
 #[test]
-fn explore_kit_prelude_exposes_features() {
+fn explore_prelude_exposes_features() {
     // Dialogs — `impl IsA<gtk4::Window>` instantiates to ApplicationWindow.
     let _: fn(
         std::path::PathBuf,

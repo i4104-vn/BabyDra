@@ -1,6 +1,6 @@
 use crate::widgets::preview_panel;
 use babydra_core::FileEntry;
-use babydra_explore_kit::explore;
+use babydra_ui_kit::components::explore;
 use gtk4::ScrolledWindow;
 
 pub use crate::widgets::state::InfoPanelWidgets;

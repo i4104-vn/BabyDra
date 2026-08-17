@@ -5,9 +5,7 @@ members = [
     "libs/babydra-core",
     "libs/babydra-island",
     "libs/babydra-theme",
-    # Feature kits — component collections for a domain, extendable via API.
-    "kits/babydra-ui-kit",
-    "kits/babydra-explore-kit",
+    "libs/babydra-ui-kit",  # UI kit — GTK components + explore feature components
     # Applications — each crate ships its own binary.
     "crates/babydra-panel",
     "crates/babydra-switcher",
@@ -35,9 +33,8 @@ version = "1.0.0"
 babydra-core = { path = "libs/babydra-core" }
 babydra-island = { path = "libs/babydra-island" }
 babydra-theme = { path = "libs/babydra-theme" }
-# kits/
-babydra-ui-kit = { path = "kits/babydra-ui-kit" }
-babydra-explore-kit = { path = "kits/babydra-explore-kit" }
+# libs/babydra-ui-kit (components + explore feature components)
+babydra-ui-kit = { path = "libs/babydra-ui-kit" }
 # crates/
 babydra-launcher = { path = "crates/babydra-launcher" }
 
@@ -54,5 +51,6 @@ serde_json = "1.0"
 tokio = { version = "1.0", features = ["rt", "rt-multi-thread", "time", "sync", "macros", "process", "fs", "io-util"] }
 chrono = "0.4"
 thiserror = "2.0"
+trash = "3.0"
 dirs = "5.0"
 base64 = "0.23.1"

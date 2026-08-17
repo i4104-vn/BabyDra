@@ -34,7 +34,7 @@ pub async fn render_list_view(
         let cp = current_path.clone();
         let nav = nav_callback.clone();
         let sel_paths = selected_paths.clone();
-        let list_row = babydra_explore_kit::explore::create_list_row(
+        let list_row = babydra_ui_kit::components::explore::create_list_row(
             idx,
             entry,
             selected_paths.clone(),
@@ -49,7 +49,7 @@ pub async fn render_list_view(
                     .root()
                     .and_then(|r| r.downcast::<gtk4::Window>().ok())
                 {
-                    babydra_explore_kit::explore::context_menu::show_for_file(
+                    babydra_ui_kit::components::explore::context_menu::show_for_file(
                         widget,
                         x,
                         y,

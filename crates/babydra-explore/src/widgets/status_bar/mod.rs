@@ -91,7 +91,7 @@ pub fn create_status_bar() -> StatusBarWidgets {
 
 /// Updates the status bar label content.
 pub fn update_status_bar(lbl_status: &Label, count: usize, total_size: u64) {
-    let size_str = babydra_explore_kit::explore::format_size(total_size);
+    let size_str = babydra_ui_kit::components::explore::format_size(total_size);
     lbl_status.set_text(&format!(
         "{} {} | {}: {}",
         count,

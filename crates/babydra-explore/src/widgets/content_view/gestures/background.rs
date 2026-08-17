@@ -12,7 +12,7 @@ pub fn wire_background_controllers(
 ) {
     // 1. Drag-to-select for Grid overlay
     if let Some(grid_overlay) = widgets.grid_fixed.parent() {
-        babydra_explore_kit::explore::wire_rubberband_grid(
+        babydra_ui_kit::components::explore::wire_rubberband_grid(
             &grid_overlay,
             widgets.grid_container.clone(),
             widgets.grid_fixed.clone(),
@@ -34,7 +34,7 @@ pub fn wire_background_controllers(
                 .root()
                 .and_then(|r| r.downcast::<gtk4::Window>().ok())
             {
-                babydra_explore_kit::explore::context_menu::show_for_empty(
+                babydra_ui_kit::components::explore::context_menu::show_for_empty(
                     container_widget.upcast_ref(),
                     x,
                     y,
@@ -49,8 +49,9 @@ pub fn wire_background_controllers(
 
     // 3. Drop target to background
     {
-        let drop_target =
-            babydra_explore_kit::explore::create_background_drop_target(current_path.clone());
+        let drop_target = babydra_ui_kit::components::explore::create_background_drop_target(
+            current_path.clone(),
+        );
         widgets.container.add_controller(drop_target);
     }
 }

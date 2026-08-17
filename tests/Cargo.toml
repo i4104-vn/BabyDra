@@ -14,7 +14,6 @@ description = "Integration test suite for the BabyDra workspace (TDD safety net)
 babydra-core = { workspace = true }
 babydra-theme = { workspace = true }
 babydra-ui-kit = { workspace = true }
-babydra-explore-kit = { workspace = true }
 babydra-installer = { path = "../install" }
 chrono = "0.4"
 gtk4 = { version = "0.9", features = ["v4_10"] }

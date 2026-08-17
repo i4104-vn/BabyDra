@@ -18,7 +18,7 @@ pub fn create_flow_child(
     let nav = nav_callback.clone();
 
     let sel_paths = selected_paths.clone();
-    let flow_child = babydra_explore_kit::create_grid_file_item(
+    let flow_child = babydra_ui_kit::components::explore::create_grid_file_item(
         idx,
         entry,
         selected_paths,
@@ -32,7 +32,7 @@ pub fn create_flow_child(
                 .root()
                 .and_then(|r| r.downcast::<gtk4::Window>().ok())
             {
-                babydra_explore_kit::explore::context_menu::show_for_file(
+                babydra_ui_kit::components::explore::context_menu::show_for_file(
                     widget,
                     x,
                     y,
@@ -46,7 +46,7 @@ pub fn create_flow_child(
     );
 
     // Dim item if it's currently in the cut clipboard
-    let is_cut = babydra_explore_kit::explore::CLIPBOARD.with(|cb| {
+    let is_cut = babydra_ui_kit::components::explore::CLIPBOARD.with(|cb| {
         cb.borrow()
             .as_ref()
             .map(|(paths, cut)| *cut && paths.contains(&entry.path))

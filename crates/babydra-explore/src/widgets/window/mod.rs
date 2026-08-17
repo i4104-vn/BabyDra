@@ -287,10 +287,11 @@ pub fn create_explore_window(
             };
             if !paths.is_empty() {
                 let current_path = session.borrow().active_tab().current_path.clone();
-                babydra_explore_kit::explore::context_menu::clipboard::set_system_clipboard_files(
+                babydra_ui_kit::components::explore::context_menu::clipboard::set_system_clipboard_files(
                     &paths, true,
                 );
-                babydra_explore_kit::explore::CLIPBOARD.with(|cb| cb.replace(Some((paths, true))));
+                babydra_ui_kit::components::explore::CLIPBOARD
+                    .with(|cb| cb.replace(Some((paths, true))));
                 if let Some(ref f) = *nav.borrow() {
                     f(act.get(), current_path);
                 }
@@ -317,10 +318,11 @@ pub fn create_explore_window(
             };
             if !paths.is_empty() {
                 let current_path = session.borrow().active_tab().current_path.clone();
-                babydra_explore_kit::explore::context_menu::clipboard::set_system_clipboard_files(
+                babydra_ui_kit::components::explore::context_menu::clipboard::set_system_clipboard_files(
                     &paths, false,
                 );
-                babydra_explore_kit::explore::CLIPBOARD.with(|cb| cb.replace(Some((paths, false))));
+                babydra_ui_kit::components::explore::CLIPBOARD
+                    .with(|cb| cb.replace(Some((paths, false))));
                 if let Some(ref f) = *nav.borrow() {
                     f(act.get(), current_path);
                 }
@@ -344,7 +346,7 @@ pub fn create_explore_window(
                     }
                 }) as Rc<dyn Fn(PathBuf)>
             };
-            babydra_explore_kit::explore::context_menu::clipboard::execute_paste_from_system_clipboard(
+            babydra_ui_kit::components::explore::context_menu::clipboard::execute_paste_from_system_clipboard(
                 current_path.clone(),
                 current_path,
                 nav_cb,
@@ -368,7 +370,7 @@ pub fn create_explore_window(
                     }
                 }) as Rc<dyn Fn(PathBuf)>
             };
-            babydra_explore_kit::explore::context_menu::clipboard::execute_undo(
+            babydra_ui_kit::components::explore::context_menu::clipboard::execute_undo(
                 nav_cb,
                 current_path,
             );
