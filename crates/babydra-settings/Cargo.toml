@@ -6,9 +6,9 @@ edition = "2021"
 [dependencies]
 babydra-core = { workspace = true }
 babydra-ui-kit = { workspace = true }
-gtk4 = { version = "0.9", features = ["v4_10"] }
-glib = "0.20"
-gio = "0.20"
-gdk4 = "0.9"
+gtk4 = { workspace = true }
+glib = { workspace = true }
+gio = { workspace = true }
+gdk4 = { workspace = true }
 sysinfo = "0.30"
-chrono = "0.4"
+chrono = { workspace = true }

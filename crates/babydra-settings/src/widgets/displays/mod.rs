@@ -1,6 +1,7 @@
 pub mod render;
 
-use babydra_core::models::display::{DisplayCardRow, MonitorConfig};
+use crate::widgets::state::DisplayCardRow;
+use babydra_core::models::display::MonitorConfig;
 use gtk4::prelude::*;
 use gtk4::Widget;
 use std::cell::RefCell;

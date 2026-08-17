@@ -9,6 +9,7 @@ pub mod hosts;
 pub mod keybinds;
 pub mod power;
 pub mod startup;
+pub mod state;
 pub mod system_info;
 pub mod system_update;
 pub mod vpn;

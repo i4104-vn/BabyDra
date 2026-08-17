@@ -1,4 +1,5 @@
-use babydra_core::models::display::{DisplayCardRow, DisplaysWidget, MonitorConfig};
+use crate::widgets::state::{DisplayCardRow, DisplaysWidget};
+use babydra_core::models::display::MonitorConfig;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, DropDown, Label, Orientation, StringList};
 

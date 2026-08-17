@@ -1,4 +1,4 @@
-use babydra_core::models::certificates::CertificatesWidget;
+use crate::widgets::state::CertificatesWidget;
 use babydra_core::services::system::certificates;
 use babydra_ui_kit::components::modal::PasswordDialog;
 use gtk4::prelude::*;
@@ -176,7 +176,7 @@ pub fn wire_events(widget: &CertificatesWidget, auth_dialog: PasswordDialog) {
             None => return,
         };
 
-        let (tx, rx) = mpsc::channel::<Result<(), String>>();
+        let (tx, rx) = mpsc::channel::<Result<(), babydra_core::CoreError>>();
 
         std::thread::spawn(move || {
             let res = if action_type == "add" {
@@ -184,7 +184,7 @@ pub fn wire_events(widget: &CertificatesWidget, auth_dialog: PasswordDialog) {
                 if parts.len() == 2 {
                     certificates::add_ca_certificate(parts[0], parts[1], &password)
                 } else {
-                    Err("Invalid certificate path".to_string())
+                    Err(babydra_core::CoreError::msg("Invalid certificate path"))
                 }
             } else {
                 certificates::delete_ca_certificate(&payload, &password)

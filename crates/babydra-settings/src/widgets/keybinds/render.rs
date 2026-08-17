@@ -1,4 +1,5 @@
-use babydra_core::models::keybind::{Keybind, KeybindsWidget};
+use crate::widgets::state::KeybindsWidget;
+use babydra_core::models::keybind::Keybind;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, DropDown, Entry, Label, Orientation, StringList};
 

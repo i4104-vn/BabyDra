@@ -1,4 +1,4 @@
-use babydra_core::models::app_info::AppsWidget;
+use crate::widgets::state::AppsWidget;
 use babydra_ui_kit::components::modal::PasswordDialog;
 use gtk4::prelude::*;
 use std::cell::RefCell;

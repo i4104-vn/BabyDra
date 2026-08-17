@@ -1,4 +1,4 @@
-use babydra_core::models::hosts::HostsWidget;
+use crate::widgets::state::HostsWidget;
 use babydra_ui_kit::components::modal::PasswordDialog;
 use gtk4::prelude::*;
 use std::fs;

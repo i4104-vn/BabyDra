@@ -1,4 +1,5 @@
-use babydra_core::models::env_var::{EnvVar, EnvWidget};
+use crate::widgets::state::EnvWidget;
+use babydra_core::models::env_var::EnvVar;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Entry, Label, Orientation};
 

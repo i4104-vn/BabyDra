@@ -1,6 +1,7 @@
 //! Application Manager UI layout generator matching reference design Image 5.
 
-use babydra_core::models::app_info::{AppsWidget, InstalledApp, InstalledPackage};
+use crate::widgets::state::AppsWidget;
+use babydra_core::models::app_info::{InstalledApp, InstalledPackage};
 use babydra_ui_kit::components::modal::PasswordDialog;
 use gtk4::prelude::*;
 use gtk4::{

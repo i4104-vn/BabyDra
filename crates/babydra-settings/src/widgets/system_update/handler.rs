@@ -1,5 +1,6 @@
 use super::render;
-use babydra_core::models::system_update::{PackageUpdate, SystemUpdateWidget, UpdateStatus};
+use crate::widgets::state::SystemUpdateWidget;
+use babydra_core::models::system_update::{PackageUpdate, UpdateStatus};
 use babydra_core::services::system::updates::{
     check_updates, clear_update_state, is_pacman_running, load_update_state, save_update_state,
 };

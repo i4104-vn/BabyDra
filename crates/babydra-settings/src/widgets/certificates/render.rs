@@ -1,4 +1,4 @@
-use babydra_core::models::certificates::CertificatesWidget;
+use crate::widgets::state::CertificatesWidget;
 use babydra_ui_kit::components::modal::PasswordDialog;
 use gtk4::prelude::*;
 

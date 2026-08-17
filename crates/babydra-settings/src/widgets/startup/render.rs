@@ -1,4 +1,5 @@
-use babydra_core::models::startup_command::{StartupCommand, StartupWidget};
+use crate::widgets::state::StartupWidget;
+use babydra_core::models::startup_command::StartupCommand;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Entry, Label, Orientation};
 

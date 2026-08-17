@@ -129,7 +129,9 @@ pub fn wire_events(widget: &PowerWidget, auth_dialog: PasswordDialog) {
                                 .replace("{limit}", &limit.to_string());
                             babydra_core::send_settings_notification(&title, &msg);
                         }
-                        Err(err) if err == "permission_denied" => {
+                        Err(babydra_core::CoreError::Message(ref msg))
+                            if msg == "permission_denied" =>
+                        {
                             *pending_charge_inner.borrow_mut() = Some(limit);
                             auth_dialog_inner.show_for(
                                 "Authentication Required",
