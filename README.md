@@ -56,22 +56,23 @@ Các thành phần chính:
 - Môi trường Wayland: trình quản lý cửa sổ `labwc`.
 - Rust toolchain: phiên bản 1.80.0 trở lên.
 
-### Cách 1 — Bộ cài đặt TUI (babydra-installer)
+### Bộ cài đặt TUI (babydra-installer)
 
-Bộ cài đặt tương tác trong terminal, wizard 10 bước:
-
-```bash
-cargo run --release -p babydra-installer
-```
-
-### Cách 2 — Script tự động
+Nhánh `main` chỉ chứa bộ cài đặt (`install/`) — một crate Rust độc lập, không cần workspace. Chạy wizard 10 bước:
 
 ```bash
-chmod +x ./scripts/install.sh
-./scripts/install.sh
+cd install
+cargo run --release
 ```
 
-Script thực hiện đúng quy trình của `babydra-installer`: cài dependencies, build release, deploy binaries, đồng bộ config labwc/GTK/theme/greetd.
+Hoặc dùng script kèm theo:
+
+```bash
+./install/run.sh
+```
+
+> [!NOTE]
+> Script tự động không tương tác `scripts/install.sh` nằm ở nhánh `release`/`develop` — nơi có mã nguồn để build.
 
 ### Cơ chế hoạt động của bộ cài đặt
 

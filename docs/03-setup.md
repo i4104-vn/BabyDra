@@ -22,8 +22,17 @@
 
 ### Chạy
 
+Tài liệu sống trên nhánh `main` — nơi bộ cài đặt là **crate độc lập** trong `install/` (không có workspace root). Chạy:
+
 ```bash
-cargo run --release -p babydra-installer
+cd install
+cargo run --release
+```
+
+Hoặc dùng script kèm theo:
+
+```bash
+./install/run.sh
 ```
 
 ### Luồng wizard 10 bước
@@ -50,7 +59,9 @@ cargo run --release -p babydra-installer
 
 ---
 
-## 3. Cài đặt qua script tự động
+## 3. Cài đặt qua script tự động (nhánh nguồn)
+
+Script không tương tác `scripts/install.sh` nằm ở **nhánh `release`/`develop`** (nơi có mã nguồn) — nhánh `main` chỉ có bộ cài đặt TUI.
 
 ```bash
 chmod +x ./scripts/install.sh
@@ -61,7 +72,10 @@ Script thực hiện toàn bộ: pacman + yay (deps, fonts, AUR tools) → `carg
 
 ---
 
-## 4. Build từ mã nguồn (nhánh `release`)
+## 4. Build từ mã nguồn (nhánh `release`/`develop`)
+
+> [!IMPORTANT]
+> Mục này yêu cầu **mã nguồn** — clone nhánh `release` (hoặc `develop`). Nhánh `main` không chứa mã nguồn.
 
 ```bash
 # Release (khuyến nghị — binary nhỏ, chạy nhanh)
