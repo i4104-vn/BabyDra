@@ -1,0 +1,16 @@
+[package]
+name = "babydra-screenshot"
+version.workspace = true
+edition = "2021"
+
+[dependencies]
+gtk4 = { workspace = true }
+gtk4-layer-shell = { workspace = true }
+cairo-rs = { workspace = true }
+gdk-pixbuf = { workspace = true }
+glib = { workspace = true }
+gio = { workspace = true }
+dirs = { workspace = true }
+chrono = { workspace = true }
+babydra-core = { workspace = true }
+babydra-ui-kit = { workspace = true }

@@ -1,22 +1,16 @@
-mod app;
-mod models;
-mod system;
-mod tasks;
-mod ui;
-
 use std::io;
 use std::panic;
 use std::time::Duration;
 
 use anyhow::Result;
+use babydra_installer::app::App;
+use babydra_installer::ui;
 use crossterm::{
     event::{self, Event},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use ratatui::{backend::CrosstermBackend, Terminal};
-
-use crate::app::App;
 
 fn setup_panic_hook() {
     let original_hook = panic::take_hook();

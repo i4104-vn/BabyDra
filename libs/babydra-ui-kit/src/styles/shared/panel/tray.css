@@ -1,0 +1,45 @@
+.panel-tray-box {
+    margin-right: 4px;
+    background-image: none;
+    border-radius: 9999px;
+    padding: 2px 6px;
+    min-height: 26px;
+    box-shadow: none;
+}
+
+button.panel-tray-item-btn {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    padding: 2px 4px;
+    margin: 0;
+    border-radius: 6px;
+    box-shadow: none;
+    min-height: 20px;
+    min-width: 20px;
+    transition: all 150ms ease;
+}
+
+popover.tray-context-menu {
+    padding: 6px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+button.tray-menu-item {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    text-align: start;
+    transition: background-color 150ms ease;
+}
+
+separator.tray-menu-separator {
+    margin: 4px 0;
+    opacity: 0.2;
+}
+
+.tray-menu-submenu {
+    padding-left: 12px;
+}

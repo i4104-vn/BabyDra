@@ -1,0 +1,12 @@
+.explore-window {
+    background-image: none;
+    box-shadow: none;
+}
+
+.explore-window-box {
+    border: none;
+    border-radius: 0 0 12px 12px;
+    box-shadow: none;
+    font-family: 'Segoe UI Variable Static Text', 'Segoe UI', 'Inter', system-ui, sans-serif;
+    font-size: 13px;
+}

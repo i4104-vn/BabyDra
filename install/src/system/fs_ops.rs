@@ -1,7 +1,7 @@
+use anyhow::{Context, Result};
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
-use anyhow::{Context, Result};
 
 pub fn format_size(bytes: u64) -> String {
     const KB: u64 = 1024;

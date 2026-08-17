@@ -1,0 +1,18 @@
+{
+  "launcher.search_placeholder": "Search apps or files...",
+  "launcher.welcome": "Type keywords to search apps and files...",
+  "launcher.apps": "Applications",
+  "launcher.other_apps": "Other Applications",
+  "launcher.files": "Files",
+  "launcher.no_results": "No matching results found",
+  "launcher.google_search": "Search Google for \"{}\"",
+  "launcher.shutdown": "Shut Down",
+  "launcher.restart": "Restart",
+  "launcher.suspend": "Suspend",
+  "launcher.logout": "Log Out",
+  "launcher.web_search": "Web Search",
+  "launcher.files_dirs": "Files & Directories",
+  "launcher.web": "Web",
+  "launcher.web_desc": "Open search query in default web browser",
+  "launcher.search_hint": "Type to search apps, files or web..."
+}

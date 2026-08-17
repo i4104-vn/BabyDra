@@ -1,0 +1,24 @@
+[package]
+name = "babydra-explore"
+version.workspace = true
+edition = "2021"
+
+[dependencies]
+babydra-core = { workspace = true }
+babydra-ui-kit = { workspace = true }
+
+# GUI
+gtk4 = { workspace = true }
+gtk4-layer-shell = { workspace = true }
+
+# Async & utilities
+tokio = { workspace = true }
+tracing = "0.1"
+glib = { workspace = true }
+gio = { workspace = true }
+gdk4 = { workspace = true }
+gdk-pixbuf = { workspace = true }
+pulldown-cmark = "0.11"
+rayon = "1.10"
+chrono = { workspace = true }
+

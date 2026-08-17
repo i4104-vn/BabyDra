@@ -19,16 +19,27 @@ pub fn draw_execute_install_step(f: &mut Frame, app: &App, area: Rect) {
         InstallState::Idle => Color::Blue,
         InstallState::Installing => Color::Cyan,
         InstallState::Completed { success, .. } => {
-            if success { Color::Green } else { Color::Yellow }
+            if success {
+                Color::Green
+            } else {
+                Color::Yellow
+            }
         }
     };
 
-    let gauge_title = format!(" Progress: {}% - {}", app.progress_percent, app.current_step_desc);
+    let gauge_title = format!(
+        " Progress: {}% - {}",
+        app.progress_percent, app.current_step_desc
+    );
     let gauge = Gauge::default()
         .block(
             Block::default()
                 .title(gauge_title)
-                .title_style(Style::default().fg(gauge_color).add_modifier(Modifier::BOLD))
+                .title_style(
+                    Style::default()
+                        .fg(gauge_color)
+                        .add_modifier(Modifier::BOLD),
+                )
                 .borders(Borders::ALL)
                 .border_type(BorderType::Rounded)
                 .border_style(Style::default().fg(gauge_color)),
@@ -44,16 +55,47 @@ pub fn draw_execute_install_step(f: &mut Frame, app: &App, area: Rect) {
         .map(|msg| {
             let (badge, style) = match msg.level {
                 LogLevel::Info => ("[INFO  ] ", Style::default().fg(Color::Cyan)),
-                LogLevel::Success => ("[  OK  ] ", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)),
-                LogLevel::Warn => ("[ WARN ] ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-                LogLevel::Error => ("[ FAIL ] ", Style::default().fg(Color::Red).add_modifier(Modifier::BOLD)),
-                LogLevel::Copy => ("[ COPY ] ", Style::default().fg(Color::Blue).add_modifier(Modifier::BOLD)),
-                LogLevel::Bundle => ("[BUNDLE] ", Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD)),
-                LogLevel::Config => ("[ CONFIG] ", Style::default().fg(Color::Rgb(255, 165, 0)).add_modifier(Modifier::BOLD)),
+                LogLevel::Success => (
+                    "[  OK  ] ",
+                    Style::default()
+                        .fg(Color::Green)
+                        .add_modifier(Modifier::BOLD),
+                ),
+                LogLevel::Warn => (
+                    "[ WARN ] ",
+                    Style::default()
+                        .fg(Color::Yellow)
+                        .add_modifier(Modifier::BOLD),
+                ),
+                LogLevel::Error => (
+                    "[ FAIL ] ",
+                    Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
+                ),
+                LogLevel::Copy => (
+                    "[ COPY ] ",
+                    Style::default()
+                        .fg(Color::Blue)
+                        .add_modifier(Modifier::BOLD),
+                ),
+                LogLevel::Bundle => (
+                    "[BUNDLE] ",
+                    Style::default()
+                        .fg(Color::Magenta)
+                        .add_modifier(Modifier::BOLD),
+                ),
+                LogLevel::Config => (
+                    "[ CONFIG] ",
+                    Style::default()
+                        .fg(Color::Rgb(255, 165, 0))
+                        .add_modifier(Modifier::BOLD),
+                ),
             };
 
             Line::from(vec![
-                Span::styled(format!("{} ", msg.timestamp), Style::default().fg(Color::DarkGray)),
+                Span::styled(
+                    format!("{} ", msg.timestamp),
+                    Style::default().fg(Color::DarkGray),
+                ),
                 Span::styled(badge, style),
                 Span::styled(&msg.message, Style::default().fg(Color::White)),
             ])
@@ -61,8 +103,15 @@ pub fn draw_execute_install_step(f: &mut Frame, app: &App, area: Rect) {
         .collect();
 
     let logs_block = Block::default()
-        .title(format!(" 7. Live Installation Logs ({}) [j/k: Scroll | c: Clear | g/G: Top/Bottom] ", app.logs.len()))
-        .title_style(Style::default().fg(Color::White).add_modifier(Modifier::BOLD))
+        .title(format!(
+            " 9. Live Installation Logs ({}) [j/k: Scroll | c: Clear | g/G: Top/Bottom] ",
+            app.logs.len()
+        ))
+        .title_style(
+            Style::default()
+                .fg(Color::White)
+                .add_modifier(Modifier::BOLD),
+        )
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
         .border_style(Style::default().fg(Color::DarkGray));

@@ -1,0 +1,21 @@
+[package]
+name = "babydra-island"
+version.workspace = true
+edition = "2021"
+
+[dependencies]
+babydra-core = { workspace = true }
+babydra-ui-kit = { workspace = true }
+
+# GUI & Layer Shell
+gtk4 = { workspace = true }
+gtk4-layer-shell = { workspace = true }
+
+# Async & utilities
+tokio = { workspace = true }
+tracing = "0.1"
+chrono = { workspace = true }
+glib = { workspace = true }
+gdk-pixbuf = { workspace = true }
+gdk4 = { workspace = true }
+zbus = "4.0"

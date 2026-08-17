@@ -1,0 +1,175 @@
+/* babydra-green — theme override layer (loaded last, on top of inherited layers).
+ *
+ * This theme inherits `babydra-default` (see tokens.json `base`), so it gets
+ * the full dark.css / light.css color layers for free. This file only ships
+ * *overrides*: every rule below replaces the default accent (#3b82f6 blue)
+ * with an emerald accent (#10b981) to demonstrate theme customization without
+ * touching any code — copy this theme, tweak the values, done.
+ */
+
+/* ── Accent palette (override of babydra-default) ─────────────────── */
+/* #3b82f6 → #10b981 ; #2563eb → #059669 ; #1d4ed8 → #047857 ;
+   #60a5fa → #34d399 ; #93c5fd → #6ee7b7 ; rgba(59,130,246,…) → rgba(16,185,129,…) */
+
+/* Floating Action Button */
+button.baby-fab,
+button.baby-fab.circular {
+    background-color: #10b981;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+}
+
+button.baby-fab:hover,
+button.baby-fab.circular:hover {
+    background-image: linear-gradient(135deg, #34d399, #10b981);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.60);
+}
+
+button.baby-fab:active,
+button.baby-fab.circular:active {
+    background-image: linear-gradient(135deg, #047857, #065f46);
+    box-shadow: 0 3px 10px rgba(16, 185, 129, 0.30);
+}
+
+/* Suggested / primary action buttons (dialogs) */
+button.suggested-action {
+    background-color: #10b981;
+}
+button.suggested-action:hover {
+    background-color: #059669;
+}
+button.suggested-action:active {
+    background-color: #047857;
+}
+
+/* Segment control active state */
+button.lang-seg-active {
+    background-color: #10b981;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+}
+
+/* Keyword chips */
+.keyword-chip.active,
+.chip-highlight.active {
+    background-color: #10b981;
+}
+
+/* Update progress bar */
+.update-progress-bar progress {
+    background-color: #10b981;
+}
+
+/* Search entry focus ring */
+entry.sidebar-search-entry:focus-within {
+    background-color: rgba(16, 185, 129, 0.08);
+    border-color: #10b981;
+}
+
+/* Circular downgrade button hover accent */
+button.circular.downgrade-btn:hover,
+.circular.downgrade-btn:hover {
+    background-color: rgba(16, 185, 129, 0.25);
+    border-color: rgba(16, 185, 129, 0.50);
+    color: #6ee7b7;
+}
+
+/* Settings notebook active tab (accent underline) */
+.settings-notebook header tabs tab:checked {
+    color: #10b981;
+    border-bottom-color: #10b981;
+}
+
+/* ── Accent sweep (extended coverage, mirrors base dark/light rules) ── */
+/* WiFi active item */
+.wifi-network-item.active {
+    background-color: rgba(16, 185, 129, 0.6);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* Island badge title */
+.badge-title {
+    color: #34d399;
+}
+
+/* Launcher: box + search borders, selected toggle, footer separator, suspend */
+.launcher-box {
+    border: 1px solid rgba(16, 185, 129, 0.22);
+}
+entry.launcher-search {
+    border: 1px solid rgba(16, 185, 129, 0.12);
+}
+.launcher-toggle-btn.selected {
+    background-color: rgba(16, 185, 129, 0.25);
+    border: 1px solid rgba(16, 185, 129, 0.45);
+    border-top: 1px solid rgba(16, 185, 129, 0.60);
+    color: #34d399;
+}
+.launcher-footer-separator {
+    background-color: rgba(16, 185, 129, 0.15);
+}
+.launcher-power-option-btn.suspend:hover {
+    background-color: rgba(16, 185, 129, 0.35);
+    border-color: rgba(16, 185, 129, 0.7);
+}
+
+/* Sidebar active nav (shared + settings) */
+.sidebar-item.active-nav,
+.sidebar-item.active-pill,
+button.sidebar-item.active-nav {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+}
+.sidebar-item.active-nav:hover,
+.sidebar-item.active-pill:hover,
+button.sidebar-item.active-nav:hover {
+    background-color: rgba(16, 185, 129, 0.22);
+    color: #6ee7b7;
+}
+
+/* Sidebar active-nav label children (still blue in base, keep in accent) */
+button.sidebar-item.active-nav label {
+    color: #34d399;
+}
+button.sidebar-item.active-nav:hover label {
+    color: #6ee7b7;
+}
+
+/* Screenshot selected toolbar */
+button.screenshot-toolbar-btn.selected,
+button.screenshot-toolbar-btn.selected image {
+    color: #34d399;
+}
+
+/* Settings: theme cards, perf profile, app tabs, update badge, wifi info */
+button.theme-card-option.active-dark {
+    background-color: rgba(16, 185, 129, 0.20);
+    color: #34d399;
+    border-color: #10b981;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);
+}
+button.theme-card-option.active-dark label,
+button.theme-card-option.active-dark image {
+    color: #34d399;
+}
+button.perf-profile-row-btn.active {
+    background-color: rgba(16, 185, 129, 0.16);
+    border: 1px solid rgba(16, 185, 129, 0.45);
+}
+button.app-tab-btn.active {
+    color: #10b981;
+    border-bottom: 2px solid #10b981;
+}
+.update-count-badge {
+    background-color: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.30);
+    color: #34d399;
+}
+.wifi-info-section-title {
+    color: #34d399;
+}
+
+/* Dropdown selected row */
+dropdown>popover>contents row:selected,
+dropdown>popover>contents listview>row:selected {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+}

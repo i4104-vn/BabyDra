@@ -1,0 +1,14 @@
+[package]
+name = "babydra-settings"
+version.workspace = true
+edition = "2021"
+
+[dependencies]
+babydra-core = { workspace = true }
+babydra-ui-kit = { workspace = true }
+gtk4 = { workspace = true }
+glib = { workspace = true }
+gio = { workspace = true }
+gdk4 = { workspace = true }
+sysinfo = "0.30"
+chrono = { workspace = true }

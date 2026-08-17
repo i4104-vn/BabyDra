@@ -1,0 +1,27 @@
+.explore-window .info-panel {
+    border-radius: 14px;
+    margin: 8px 8px 8px 4px;
+    padding: 16px;
+    min-width: 250px;
+    box-shadow: none;
+}
+
+.explore-window .info-panel viewport,
+.explore-window .info-panel viewport>box {
+    background-color: transparent;
+}
+
+.explore-window .info-panel frame,
+.explore-window .info-panel frame>border {
+    border: none;
+    box-shadow: none;
+    background-color: transparent;
+}
+
+.explore-window .info-row-key {
+    font-size: 12px;
+}
+
+.explore-window .info-row-val {
+    font-size: 12px;
+}

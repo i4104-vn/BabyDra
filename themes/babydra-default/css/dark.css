@@ -1,0 +1,2611 @@
+/* babydra-default — dark-mode color layer.
+ * Generated from per-component styles (planning.md Phase 3 T3.3).
+ * Theme authors: copy this package and edit this file to restyle dark mode.
+ */
+
+/* === panel/panel.css === */
+popover>contents {
+    background-color: rgba(14, 14, 18, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.panel-box {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+button.panel-logo-btn {
+    color: #ffffff;
+}
+
+button.panel-logo-btn:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+}
+
+.capsule-separator {
+    color: rgba(255, 255, 255, 0.14);
+}
+
+popover.status-popover > contents {
+    background-color: rgba(18, 18, 24, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.status-popover-header,
+.status-popover-val {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.status-popover-key {
+    color: rgba(255, 255, 255, 0.60);
+}
+
+
+/* === panel/workspaces.css === */
+.workspace-box {
+    background-color: rgba(14, 14, 18, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-top: 1px solid rgba(255, 255, 255, 0.20);
+}
+
+button.workspace-dot {
+    background-color: rgba(255, 255, 255, 0.35);
+}
+
+button.workspace-dot:hover {
+    background-color: rgba(255, 255, 255, 0.75);
+}
+
+/* === panel/clock.css === */
+.panel-clock {
+    color: #ffffff;
+}
+
+button.panel-clock-btn {
+    color: #ffffff;
+}
+
+button.panel-clock-btn:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+}
+
+/* === panel/status.css === */
+.status-indicators-box {
+    background-color: rgba(14, 14, 18, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-top: 1px solid rgba(255, 255, 255, 0.20);
+}
+
+.status-text {
+    color: rgba(255, 255, 255, 0.90);
+}
+
+.status-icon {
+    color: rgba(255, 255, 255, 0.90);
+}
+
+button.panel-status-btn {
+    color: #ffffff;
+}
+
+button.panel-status-btn:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+}
+
+/* === panel/sys_monitor.css === */
+.sys-monitor-box {
+    background-color: rgba(14, 14, 18, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-top: 1px solid rgba(255, 255, 255, 0.20);
+}
+
+.sys-monitor-box:hover {
+    background-color: rgb(28, 28, 36);
+    border-color: rgba(255, 255, 255, 0.14);
+}
+
+popover.sys-monitor-popover progressbar trough {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+popover.sys-monitor-popover .sys-chart {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* === panel/tray.css === */
+.panel-tray-box {
+    background-color: rgba(14, 14, 18, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-top: 1px solid rgba(255, 255, 255, 0.20);
+}
+
+button.panel-tray-item-btn:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+}
+
+popover.tray-context-menu > contents {
+    background-color: rgba(14, 14, 18, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+button.tray-menu-item {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+button.tray-menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+}
+
+separator.tray-menu-separator {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* === panel/taskbar.css === */
+.taskbar-parent-box {
+    background-color: rgba(14, 14, 18, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-top: 1px solid rgba(255, 255, 255, 0.20);
+}
+
+button.taskbar-app-btn {
+    background-color: transparent;
+}
+
+button.taskbar-app-btn:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+}
+
+button.taskbar-app-btn.active {
+    background-color: rgba(255, 255, 255, 0.16);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+button.taskbar-app-btn.active:hover {
+    background-color: rgba(255, 255, 255, 0.24);
+}
+
+.taskbar-previews-header-label {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+button.taskbar-preview-list-btn:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+}
+
+.taskbar-preview-title {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.taskbar-popover-header-title {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+button.taskbar-popover-close-btn {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+button.taskbar-preview-list-kill-btn {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.taskbar-preview-separator {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.taskbar-preview-action-label {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+button.taskbar-preview-action-btn:hover .taskbar-preview-action-label {
+    color: #ffffff;
+}
+
+/* === control_center/control_center.css === */
+.control-center-box {
+    background-color: rgba(14, 14, 18, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.28);
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.control-center-title {
+    color: #ffffff;
+}
+
+button.quick-tile {
+    background-color: rgba(255, 255, 255, 0.06);
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.85);
+}
+
+button.quick-tile:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.14);
+}
+
+.tile-icon {
+    color: #ffffff;
+}
+
+.tile-title {
+    color: #ffffff;
+}
+
+.tile-subtitle {
+    color: rgba(255, 255, 255, 0.50);
+}
+
+.tile-chevron {
+    color: rgba(255, 255, 255, 0.30);
+}
+
+button.quick-tile.active {
+    background-color: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-top: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+button.quick-tile.active:hover {
+    background-color: rgba(255, 255, 255, 0.22);
+}
+
+button.quick-tile.active .tile-subtitle {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+button.quick-tile.active .tile-chevron {
+    color: rgba(255, 255, 255, 0.60);
+}
+
+.slider-label {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.slider-icon {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+scale trough {
+    background-color: rgba(255, 255, 255, 0.10);
+}
+
+.control-left-toggles-box {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: none !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+button.control-tile-row {
+    color: #ffffff;
+}
+
+button.control-tile-row:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.control-icon-circle {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.control-icon-circle.active {
+    border-color: rgba(255, 255, 255, 0.20);
+    border-top-color: rgba(255, 255, 255, 0.30);
+}
+
+button.control-dnd-tile {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+    color: #ffffff;
+}
+
+button.control-dnd-tile:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+button.control-dnd-tile.active {
+    border-color: rgba(255, 255, 255, 0.20);
+}
+
+button.control-square-tile {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+    color: #ffffff;
+}
+
+button.control-square-tile:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+button.control-square-tile.active {
+    border-color: rgba(255, 255, 255, 0.20);
+}
+
+.control-square-label {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.control-slider-card {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.control-slider-title {
+    color: rgba(255, 255, 255, 0.50);
+}
+
+.control-disk-card {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.control-disk-name {
+    color: #ffffff;
+}
+
+.control-disk-usage {
+    color: rgba(255, 255, 255, 0.50);
+}
+
+.control-disk-card progressbar trough {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.control-lang-label {
+    color: #ffffff;
+}
+
+button.slider-overlay-mute-btn {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+button.slider-overlay-mute-btn:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+}
+
+.slider-overlay-icon {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+button.slider-popover-btn {
+    background-color: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    color: rgba(255, 255, 255, 0.65);
+}
+
+button.slider-popover-btn:hover {
+    background-color: rgba(255, 255, 255, 0.16);
+    color: rgba(255, 255, 255, 0.90);
+    border-color: rgba(255, 255, 255, 0.18);
+}
+
+.audio-menu-section-title {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+button.audio-menu-item-btn {
+    color: rgba(255, 255, 255, 0.80);
+}
+
+button.audio-menu-item-btn:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+button.audio-menu-item-btn.active {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+}
+
+button.audio-menu-item-btn.active label {
+    color: #ffffff;
+}
+
+button.control-tile-left-btn {
+    color: #ffffff;
+}
+
+button.control-tile-left-btn:hover,
+button.control-tile-left-btn:focus,
+button.control-tile-left-btn:active {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+button.control-tile-right-btn {
+    color: #ffffff;
+}
+
+button.control-tile-right-btn:hover,
+button.control-tile-right-btn:focus,
+button.control-tile-right-btn:active {
+    background-color: rgba(255, 255, 255, 0.10);
+}
+
+.wifi-popover-box {
+    background-color: transparent;
+}
+
+.wifi-popover-title {
+    color: #ffffff;
+}
+
+.wifi-network-item {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.wifi-network-item:hover,
+.wifi-network-item:focus,
+.wifi-network-item:active {
+    background-color: rgba(255, 255, 255, 0.6);
+    color: #ffffff;
+}
+
+.wifi-network-item.active {
+    background-color: rgba(59, 130, 246, 0.6);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: #ffffff;
+}
+
+.wifi-input-field {
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.wifi-btn-secondary {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.wifi-btn-secondary:hover,
+.wifi-btn-secondary:focus,
+.wifi-btn-secondary:active {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+popover>arrow {
+    background-color: transparent;
+    border: none;
+}
+
+.clean-popover-size {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.clean-target-list {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.clean-target-name {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.clean-target-value {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+/* === control_center/power.css === */
+/* Moved to shared/control_center/power.css */
+
+/* === island/system_island.css === */
+.panel-notch.active-music {
+    background-color: rgba(14, 14, 18, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-top: 1px solid rgba(255, 255, 255, 0.20);
+}
+
+.panel-notch.active-music.notification-mode {
+    background-color: rgba(30, 30, 38, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-top: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.notch-player-text {
+    color: rgba(255, 255, 255, 0.90);
+}
+
+.notch-album-art {
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.island-badge {
+    background-color: rgb(14, 14, 18);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.20);
+}
+
+.badge-title {
+    color: #60a5fa;
+}
+
+.badge-desc {
+    color: rgba(255, 255, 255, 0.80);
+}
+
+.panel-notch.active-music:not(.popover-open):hover {
+    background-color: rgba(24, 24, 30, 0.96);
+}
+
+popover.media-popover>contents {
+    background-color: rgba(14, 14, 18, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.media-popover-app-name {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.media-popover-art {
+    border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.media-popover-title {
+    color: #ffffff;
+}
+
+.media-popover-artist {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.media-popover-time-label {
+    color: rgba(255, 255, 255, 0.50);
+}
+
+.media-control-btn {
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+.media-control-btn:hover {
+    background-color: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.18);
+}
+
+scale.media-timeline-scale trough {
+    background-color: rgba(255, 255, 255, 0.10);
+}
+
+scale.media-timeline-scale trough highlight {
+    background-color: #ffffff;
+}
+
+scale.media-timeline-scale slider {
+    background-color: #ffffff;
+}
+
+.media-time-label {
+    color: rgba(255, 255, 255, 0.40);
+}
+
+/* === island/notification.css === */
+window.notification-popup-card {
+    background-color: rgba(14, 14, 18, 0.96);
+}
+
+.notification-popup-box {
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.28);
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.popup-title {
+    color: #ffffff;
+}
+
+.popup-time {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.popup-body {
+    color: rgba(255, 255, 255, 0.80);
+}
+
+.popup-avatar-box {
+    border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+button.popup-action-btn {
+    color: #ffffff;
+}
+
+button.popup-action-btn:hover {
+    background-color: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.14);
+}
+
+/* === launcher/launcher.css === */
+.launcher-box {
+    background-color: rgba(24, 24, 28, 0.95);
+    border: 1px solid rgba(59, 130, 246, 0.22);
+    color: #cdd6f4;
+}
+
+entry.launcher-search {
+    background-color: rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(59, 130, 246, 0.12);
+    color: #cdd6f4;
+}
+
+entry.launcher-search:focus {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+entry.launcher-search placeholder,
+entry.launcher-search>text>placeholder {
+    color: rgba(205, 214, 244, 0.35);
+}
+
+.launcher-section-title {
+    color: #6c7086;
+}
+
+.launcher-list-item {
+    color: #bac2de;
+}
+
+.launcher-list-item:hover,
+.launcher-list-item:focus,
+.launcher-list-item.selected {
+    color: #ffffff;
+}
+
+.app-title {
+    color: #cdd6f4;
+}
+
+.launcher-list-item:hover .app-title,
+.launcher-list-item:focus .app-title,
+.launcher-list-item.selected .app-title {
+    color: #ffffff;
+}
+
+.app-desc {
+    color: #6c7086;
+}
+
+.launcher-list-item:hover .app-desc,
+.launcher-list-item:focus .app-desc,
+.launcher-list-item.selected .app-desc {
+    color: #bac2de;
+}
+
+.launcher-toggle-btn {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.28);
+    color: rgba(255, 255, 255, 0.90);
+}
+
+.launcher-toggle-btn:hover,
+.launcher-toggle-btn:focus {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+
+.launcher-toggle-btn.selected {
+    background-color: rgba(59, 130, 246, 0.25);
+    border: 1px solid rgba(59, 130, 246, 0.45);
+    border-top: 1px solid rgba(59, 130, 246, 0.60);
+    color: #60a5fa;
+}
+
+.status-msg {
+    color: #6c7086;
+}
+
+.launcher-footer-separator {
+    background-color: rgba(59, 130, 246, 0.15);
+}
+
+.launcher-profile-label {
+    color: #bac2de;
+}
+
+.launcher-power-btn {
+}
+
+.launcher-power-btn:hover {
+    background-color: rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #fca5a5;
+}
+
+.launcher-power-option-btn {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.launcher-power-option-btn:hover {
+    background-color: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.launcher-power-option-btn.shutdown:hover {
+    background-color: rgba(239, 68, 68, 0.35);
+    border-color: rgba(239, 68, 68, 0.7);
+}
+
+.launcher-power-option-btn.reboot:hover {
+    background-color: rgba(245, 158, 11, 0.35);
+    border-color: rgba(245, 158, 11, 0.7);
+}
+
+.launcher-power-option-btn.suspend:hover {
+    background-color: rgba(59, 130, 246, 0.35);
+    border-color: rgba(59, 130, 246, 0.7);
+}
+
+.launcher-power-option-btn.logout:hover {
+    background-color: rgba(203, 166, 247, 0.35);
+    border-color: rgba(203, 166, 247, 0.7);
+}
+
+/* === calendar/calendar.css === */
+.calendar-box {
+    background-color: rgba(14, 14, 18, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.28);
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.calendar-top-date {
+    color: #ffffff;
+}
+
+.calendar-close-btn {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.calendar-close-btn:hover {
+    border-color: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+}
+
+calendar.calendar-widget {
+    color: #ffffff;
+}
+
+calendar.calendar-widget header label {
+    color: #ffffff;
+}
+
+calendar.calendar-widget header button {
+    color: rgba(255, 255, 255, 0.40);
+}
+
+calendar.calendar-widget header button:hover {
+    color: #ffffff;
+}
+
+calendar.calendar-widget label.day-name {
+    color: rgba(255, 255, 255, 0.50);
+}
+
+calendar.calendar-widget label.day {
+    color: #ffffff;
+}
+
+calendar.calendar-widget label.day.other-month,
+calendar.calendar-widget .other-month {
+    color: rgba(255, 255, 255, 0.20) !important;
+}
+
+.notif-panel-title {
+    color: #ffffff;
+}
+
+button.clear-all-btn {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.80);
+}
+
+.notif-stack-item {
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.notif-stack-item:hover {
+    border-color: rgba(255, 255, 255, 0.10);
+}
+
+.notif-item-icon {
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.notif-item-title {
+    color: #ffffff;
+}
+
+.notif-item-body {
+    color: rgba(255, 255, 255, 0.60);
+}
+
+.notif-empty-label {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.notif-group-header {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.notif-count-badge {
+    color: #ffffff !important;
+}
+
+.notif-item-sub-time {
+    color: rgba(255, 255, 255, 0.40);
+}
+
+/* === shared/button.css === */
+/* Standard button colors (dark) */
+button.baby-button {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.95);
+}
+
+button.baby-button:hover {
+    background-color: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+button.circle-btn,
+button.icon-btn-circle,
+button.circular,
+.circular {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.28);
+    color: #ffffff;
+}
+
+button.circle-btn:hover,
+button.icon-btn-circle:hover,
+button.circular:hover,
+.circular:hover {
+    background-color: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.20);
+}
+
+button.btn-primary:disabled,
+button.btn-primary.disabled {
+    background-color: rgba(255, 255, 255, 0.20);
+    color: rgba(255, 255, 255, 0.40);
+}
+
+button.btn-share-pill,
+button.connect-pill-btn,
+.connect-pill-btn {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.28);
+    color: rgba(255, 255, 255, 0.95);
+}
+
+button.btn-share-pill:hover,
+button.connect-pill-btn:hover,
+.connect-pill-btn:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.20);
+}
+
+button.connect-pill-btn.delete-btn,
+.connect-pill-btn.delete-btn {
+    background-color: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    border-top: 1px solid rgba(239, 68, 68, 0.45);
+    color: #f87171;
+}
+
+button.connect-pill-btn.delete-btn:hover,
+.connect-pill-btn.delete-btn:hover,
+button.circular.delete-btn:hover,
+.circular.delete-btn:hover {
+    background-color: rgba(239, 68, 68, 0.25);
+    border-color: rgba(239, 68, 68, 0.50);
+    color: #fca5a5;
+}
+
+button.circular.downgrade-btn:hover,
+.circular.downgrade-btn:hover {
+    background-color: rgba(59, 130, 246, 0.25);
+    border-color: rgba(59, 130, 246, 0.50);
+    color: #93c5fd;
+}
+
+button.btn-upgrade-secondary {
+    border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+button.btn-upgrade-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.floating-icon-badge {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* Floating Action Button (FAB) Component */
+button.baby-fab,
+button.baby-fab.circular {
+    background-color: #3b82f6;
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.45);
+}
+
+button.baby-fab:hover,
+button.baby-fab.circular:hover {
+    background-image: linear-gradient(135deg, #60a5fa, #3b82f6);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.60);
+}
+
+button.baby-fab:active,
+button.baby-fab.circular:active {
+    background-image: linear-gradient(135deg, #1d4ed8, #1e40af);
+    transform: translateY(0);
+    box-shadow: 0 3px 10px rgba(59, 130, 246, 0.30);
+}
+
+/* === shared/sidebar.css === */
+.sidebar {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.sidebar-section-label {
+    color: #888;
+}
+
+.sidebar-item {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.sidebar-item:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.sidebar-item.active-nav,
+.sidebar-item.active-pill {
+    background-color: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+}
+
+.sidebar-item.active-nav:hover,
+.sidebar-item.active-pill:hover {
+    background-color: rgba(59, 130, 246, 0.22);
+    color: #93c5fd;
+}
+
+/* === apps/screenshot.css === */
+box.screenshot-toolbar {
+    background-color: rgba(14, 14, 18, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+button.screenshot-toolbar-btn {
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.85);
+}
+
+button.screenshot-toolbar-btn:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.14);
+    border-top-color: rgba(255, 255, 255, 0.20);
+    color: #ffffff;
+}
+
+button.screenshot-toolbar-btn.selected {
+    color: #ffffff;
+}
+
+label.capsule-separator {
+    color: rgba(255, 255, 255, 0.14);
+}
+
+box.color-dot-indicator {
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+button.color-dot-btn {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+button.color-dot-btn.color-active {
+    border: 2px solid #ffffff;
+}
+
+button.color-dot-btn.color-dot-white {
+    background-color: #ffffff;
+}
+
+
+button.screenshot-toolbar-btn.selected,
+button.screenshot-toolbar-btn.selected image {
+    color: #60a5fa;
+}
+
+
+/* === apps/lock.css === */
+.lock-window {
+    background-color: #0f0f1c;
+    color: #ffffff;
+}
+
+.lock-tint {
+    background: radial-gradient(circle at center, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.75) 100%);
+}
+
+.lock-clock {
+    color: #ffffff;
+}
+
+.lock-date {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.lock-avatar {
+    color: #ffffff;
+}
+
+.lock-username {
+    color: #ffffff;
+}
+
+.lock-input {
+    color: #ffffff;
+}
+
+.lock-status {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* === apps/preview.css === */
+.main-preview-card {
+    background-color: rgba(14, 14, 18, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.variation-card {
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+.variation-card:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.variation-card.active {
+    background-color: rgba(59, 130, 246, 0.10);
+}
+
+.reference-image-card {
+    border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.reference-image-card:hover {
+    border-color: rgba(255, 255, 255, 0.28);
+}
+
+.keyword-chip,
+.chip-highlight {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+.keyword-chip:hover,
+.chip-highlight:hover {
+    background-color: rgba(255, 255, 255, 0.14);
+}
+
+.keyword-chip.active,
+.chip-highlight.active {
+    background-color: #3b82f6;
+}
+
+.chip-static {
+    color: rgba(255, 255, 255, 0.50);
+}
+
+.prompt-narrative {
+    color: rgba(255, 255, 255, 0.50);
+}
+
+.input-floating-shell {
+    background-color: rgba(14, 14, 18, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.parameter-toolbar-chip {
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.parameter-toolbar-chip:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.rainbow-ring-avatar {
+    background-color: rgba(14, 14, 18, 0.96);
+}
+
+.credit-meter {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.credit-meter:hover {
+    background-color: rgba(255, 255, 255, 0.14);
+}
+
+.credit-meter-text {
+    color: rgba(255, 255, 255, 0.50);
+}
+
+.skeleton-pulse {
+    background-color: rgba(255, 255, 255, 0.10);
+}
+
+.btn-spinner {
+    border: 2px solid #ffffff;
+}
+
+.tooltip-box {
+    background-color: rgba(14, 14, 18, 0.95);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.info-card {
+    background-color: rgba(14, 14, 18, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+}
+
+/* === apps/settings.css === */
+window.settings-window {
+    background-color: rgba(12, 12, 20, 0.96);
+    color: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Sidebar navigation */
+.profile-avatar {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.profile-user-name {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.profile-separator {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+entry.sidebar-search-entry {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    box-shadow: none;
+}
+
+entry.sidebar-search-entry:focus-within {
+    background-color: rgba(59, 130, 246, 0.08);
+    border-color: #3b82f6;
+}
+
+entry.sidebar-search-entry>text {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    color: #ffffff;
+}
+
+/* Active navigation item */
+button.sidebar-item.active-nav {
+    background-color: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+button.sidebar-item.active-nav label {
+    color: #60a5fa;
+}
+
+button.sidebar-item.active-nav:hover {
+    background-color: rgba(59, 130, 246, 0.22);
+    color: #93c5fd;
+}
+
+button.sidebar-item.active-nav:hover label {
+    color: #93c5fd;
+}
+
+.sidebar-wallpaper-thumb {
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+
+/* Content Area */
+.settings-page-title {
+    color: #ffffff;
+}
+
+.settings-page-subtitle {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.toggle-status-on {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.toggle-status-off {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* Glass Panels & Cards */
+.settings-card,
+.glass-panel {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    padding: 16px 20px;
+}
+
+/* Component token colors (dark) */
+.success-text {
+    color: #4ade80;
+}
+
+.settings-title,
+.settings-label {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.settings-subtitle,
+.settings-desc {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.settings-item-row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-icon-badge {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.24);
+}
+
+.badge-slate {
+    background-color: rgba(100, 116, 139, 0.20);
+    color: #94a3b8;
+}
+
+/* Glassmorphism Circular Icon Badge (Matching circle button style) */
+.blue-icon-badge {
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.22);
+    color: rgba(255, 255, 255, 0.9);
+    border-radius: 9999px;
+    min-width: 44px;
+    min-height: 44px;
+}
+
+.blue-icon-badge-sm {
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.22);
+    color: rgba(255, 255, 255, 0.9);
+    border-radius: 9999px;
+    min-width: 34px;
+    min-height: 34px;
+}
+
+/* Spec Card Grid (2x2) */
+.spec-card {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 16px;
+    padding: 24px 20px;
+    transition: transform 200ms ease, background-color 200ms ease;
+}
+
+.spec-card:hover {
+    background-color: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.18);
+}
+
+.spec-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    color: rgba(255, 255, 255, 0.55);
+    text-transform: uppercase;
+}
+
+.spec-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+/* Hero Section (About System) */
+.hero-avatar-box {
+    background-color: transparent;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+}
+
+.hero-hostname {
+    color: #ffffff;
+}
+
+.hero-subtitle {
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.hero-uptime-badge {
+    background-color: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.30);
+    border-radius: 20px;
+    padding: 4px 12px;
+}
+
+.hero-uptime-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #60a5fa;
+}
+
+.lang-segmented-control {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+button.lang-seg-active {
+    background-color: #3b82f6;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+}
+
+button.lang-seg-inactive {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+button.lang-seg-inactive:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Theme Option Cards */
+button.theme-card-option {
+    background-color: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 14px;
+    color: rgba(255, 255, 255, 0.70);
+    padding: 24px 20px;
+    min-height: 120px;
+    transition: all 200ms ease;
+}
+
+button.theme-card-option label {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+button.theme-card-option:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+button.theme-card-option.active-dark {
+    background-color: rgba(59, 130, 246, 0.20);
+    color: #60a5fa;
+    border-color: #3b82f6;
+    font-weight: 700;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
+}
+
+button.theme-card-option.active-dark label,
+button.theme-card-option.active-dark image {
+    color: #60a5fa;
+}
+
+.wallpaper-preview-overlay {
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+picture.wallpaper-preview-picture,
+.wallpaper-preview-picture picture,
+.wallpaper-preview-picture {
+    border-radius: 14px;
+}
+
+button.wallpaper-pick-overlay-vertical-btn,
+button.wallpaper-pick-overlay-inside-btn,
+button.wallpaper-action-btn {
+    background-color: rgba(0, 0, 0, 0.60);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 9999px;
+    min-width: 38px;
+    min-height: 38px;
+    padding: 0;
+    transition: all 200ms ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+dropdown.wallpaper-target-dropdown {
+    background-color: rgba(0, 0, 0, 0.60);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 9999px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+dropdown.wallpaper-target-dropdown button {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+}
+
+button.wallpaper-pick-overlay-vertical-btn:hover,
+button.wallpaper-pick-overlay-inside-btn:hover,
+button.wallpaper-action-btn:hover {
+    background-color: rgba(59, 130, 246, 0.85);
+    border-color: #3b82f6;
+    color: #ffffff;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.40);
+}
+
+/* Warning alert container */
+.warning-alert-card {
+    background-color: rgba(255, 95, 86, 0.05);
+    border: 1px dashed rgba(255, 95, 86, 0.25);
+    border-radius: 12px;
+    padding: 24px;
+    color: #ff5f56;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+
+
+/* App Manager Tabs */
+button.app-tab-btn {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+button.app-tab-btn.active {
+    color: #3b82f6;
+    border-bottom: 2px solid #3b82f6;
+}
+
+/* Wi-Fi & App Rows */
+.settings-card row,
+.settings-card-row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.settings-card row:hover,
+.settings-card-row:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+button.perf-profile-row-btn {
+    background-color: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+button.perf-profile-row-btn:hover {
+    background-color: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+button.perf-profile-row-btn.active {
+    background-color: rgba(59, 130, 246, 0.15);
+    border-color: #3b82f6;
+}
+
+/* Wallpaper Thumbnail Card */
+button.wallpaper-thumb-card {
+    background-color: transparent;
+    border: none;
+    border-radius: 10px;
+    padding: 0;
+    margin: 0;
+    transition: all 200ms ease;
+    box-shadow: none;
+}
+
+button.wallpaper-thumb-card picture {
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transition: all 200ms ease;
+}
+
+button.wallpaper-thumb-card:hover picture {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+}
+
+/* Dropdown Select Controls (Matching Search Input Style) */
+dropdown {
+}
+
+dropdown>button {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 8px 14px;
+    color: #ffffff;
+    transition: all 200ms ease;
+    box-shadow: none;
+}
+
+dropdown>button:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.20);
+}
+
+dropdown:focus-within>button,
+dropdown>button:focus {
+    border-color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.08);
+}
+
+dropdown>popover,
+popover.menu {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+}
+
+dropdown>popover>contents,
+popover.menu>contents {
+    background-color: rgba(20, 20, 28, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55);
+    padding: 6px;
+}
+
+dropdown>popover>contents listview,
+dropdown>popover>contents list {
+    background: transparent;
+    background-color: transparent;
+}
+
+dropdown>popover>contents row,
+dropdown>popover>contents listview>row {
+    background-color: transparent;
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: rgba(255, 255, 255, 0.90);
+    transition: background-color 150ms ease;
+}
+
+dropdown>popover>contents row:hover,
+dropdown>popover>contents listview>row:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+dropdown>popover>contents row:selected,
+dropdown>popover>contents listview>row:selected {
+    background-color: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    font-weight: 600;
+}
+
+/* Dark Theme Console Log Panel */
+.console-log-panel {
+    background-color: rgba(8, 8, 14, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+.console-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.console-log-panel scrolledwindow {
+    background-color: transparent;
+}
+
+textview.console-log-text,
+textview.console-log-text text,
+textview.hosts-editor-text,
+textview.hosts-editor-text text {
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+progressbar.console-progress {
+}
+
+progressbar.console-progress trough {
+}
+
+progressbar.console-progress progress {
+}
+
+/* Dark Theme Auth Dialog Overlay */
+.auth-dialog-card {
+    background-color: rgba(18, 18, 28, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
+}
+
+.update-count-badge {
+    background-color: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.30);
+    color: #60a5fa;
+}
+
+.update-progress-bar trough {
+    min-height: 8px;
+    border-radius: 9999px;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.update-progress-bar progress {
+    min-height: 8px;
+    border-radius: 9999px;
+    background-color: #3b82f6;
+}
+
+.green-icon-badge-sm {
+    background-color: rgba(16, 185, 129, 0.15);
+    border-radius: 8px;
+    padding: 6px;
+}
+
+.red-icon-badge-sm {
+    background-color: rgba(239, 68, 68, 0.15);
+    border-radius: 8px;
+    padding: 6px;
+}
+
+.status-success-badge {
+    color: #10b981;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.status-error-badge {
+    color: #ef4444;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.wifi-info-section-title {
+    color: #60a5fa;
+}
+
+.wifi-info-label {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.wifi-info-value {
+    color: #ffffff;
+}
+
+.wifi-status-badge {
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.wifi-status-text {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.wifi-status-on {
+    color: rgba(255, 255, 255, 0.90);
+}
+
+.wifi-status-off {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+
+.segmented-control {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.seg-btn {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.seg-btn:hover {
+    color: #ffffff;
+}
+
+.seg-btn-active {
+    background-color: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
+progressbar.battery-level-bar trough {
+    background-color: rgba(255, 255, 255, 0.10);
+}
+
+.battery-badge-charging {
+    background-color: rgba(46, 194, 126, 0.18);
+    border: 1px solid rgba(46, 194, 126, 0.35);
+    color: #2ec27e;
+    border-radius: 9999px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.battery-badge-discharging {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: rgba(255, 255, 255, 0.85);
+    border-radius: 9999px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.perf-profile-row-btn {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.perf-profile-row-btn:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+.perf-profile-row-btn.active {
+    background-color: rgba(59, 130, 246, 0.16);
+    border: 1px solid rgba(59, 130, 246, 0.45);
+}
+
+/* Settings Scale Slider Colors (Dark) */
+scale.settings-scale trough,
+scale.settings-scale > trough,
+scale.settings-scale contents > trough {
+    background-color: rgba(255, 255, 255, 0.20);
+}
+
+scale.settings-scale trough highlight,
+scale.settings-scale > trough > highlight,
+scale.settings-scale contents > trough > highlight {
+    background-color: #3b82f6;
+}
+
+scale.settings-scale slider,
+scale.settings-scale > slider,
+scale.settings-scale contents > slider {
+    background-color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+scale.settings-scale mark label {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+scale.settings-scale:disabled trough,
+scale.settings-scale:disabled > trough,
+scale.settings-scale:disabled contents > trough {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+scale.settings-scale:disabled trough highlight,
+scale.settings-scale:disabled > trough > highlight,
+scale.settings-scale:disabled contents > trough > highlight {
+    background-color: rgba(255, 255, 255, 0.25);
+}
+
+scale.settings-scale:disabled slider,
+scale.settings-scale:disabled > slider,
+scale.settings-scale:disabled contents > slider {
+    background-color: rgba(255, 255, 255, 0.45);
+    box-shadow: none;
+}
+
+scale.settings-scale:disabled mark label {
+    color: rgba(255, 255, 255, 0.25);
+}
+/* === apps/switcher.css === */
+.switcher-window {
+    background-color: rgba(0, 0, 0, 0.35);
+}
+
+.stage-manager-panel {
+    background-image: linear-gradient(to right, rgba(10, 10, 15, 0.92), rgba(10, 10, 15, 0.6) 75%, rgba(10, 10, 15, 0) 100%);
+}
+
+.stage-manager-item-btn {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+}
+
+.stage-manager-item-btn:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.stage-manager-item-btn.selected {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: #60a5fa;
+}
+
+.switcher-item-placeholder {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.switcher-item-title-container {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.switcher-app-title {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.stage-manager-item-btn.selected .switcher-app-title {
+    color: #ffffff;
+}
+
+/* === explore/window.css === */
+.explore-window {
+    background-color: #141416f2;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.explore-window-box {
+    background-color: rgba(20, 20, 22, 0.95);
+    background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.015) 0px, rgba(255, 255, 255, 0.015) 1px, transparent 1px, transparent 2px),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0.12) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    color: #e8e8e8;
+}
+
+/* === explore/header_bar.css === */
+.explore-window .tab-bar {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid #3a3a3a;
+}
+
+.explore-window .tab-item label {
+    color: #999;
+}
+
+.explore-window .tab-item:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.explore-window .tab-item:hover label {
+    color: #e8e8e8;
+}
+
+.explore-window .tab-item.active-tab {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-top: 2px solid #3b82f6;
+}
+
+.explore-window .tab-item.active-tab label {
+    color: #e8e8e8;
+}
+
+.explore-window .tab-close-btn {
+    color: #888;
+}
+
+.explore-window .tab-close-btn:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
+.explore-window button.tab-new-btn {
+    color: #999;
+}
+
+.explore-window button.tab-new-btn:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #e8e8e8;
+}
+
+.explore-window .nav-bar {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid #3a3a3a;
+}
+
+.explore-window .nav-btn {
+    color: #e8e8e8;
+}
+
+.explore-window .nav-btn:hover {
+    background-color: rgba(255, 255, 255, 0.07);
+}
+
+.explore-window .nav-btn:active {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.explore-window .nav-btn:disabled {
+    color: #555;
+}
+
+.explore-window .address-bar-wrap {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid #4a4a4a;
+}
+
+.explore-window .address-bar-wrap:focus-within {
+    border-color: #3b82f6;
+}
+
+.explore-window .breadcrumb-btn {
+    color: #e8e8e8;
+}
+
+.explore-window .breadcrumb-btn:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.explore-window .breadcrumb-sep {
+    color: #666;
+}
+
+.explore-window entry.address-entry {
+    color: #e8e8e8;
+}
+
+.explore-window .search-entry {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid #4a4a4a;
+    color: #e8e8e8;
+}
+
+.explore-window .search-entry:focus {
+    border-color: #3b82f6;
+}
+
+.explore-window .toolbar {
+    background-color: rgba(0, 0, 0, 0.15);
+    border-bottom: 1px solid #3a3a3a;
+}
+
+.explore-window .toolbar-btn {
+    color: #e8e8e8;
+}
+
+.explore-window .toolbar-btn:hover {
+    background-color: rgba(255, 255, 255, 0.07);
+}
+
+.explore-window .toolbar-btn:active {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.explore-window .toolbar-sep {
+    background-color: #3a3a3a;
+}
+
+.explore-window dropdown.toolbar-dropdown>button {
+    color: #e8e8e8;
+}
+
+.explore-window dropdown.toolbar-dropdown>button:hover {
+    background-color: rgba(255, 255, 255, 0.07);
+}
+
+.explore-window dropdown.toolbar-dropdown>button:active {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.explore-window dropdown>popover>contents {
+    background: rgba(30, 30, 30, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.explore-window dropdown>popover>contents row {
+    color: #e8e8e8;
+}
+
+.explore-window dropdown>popover>contents row:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.explore-window dropdown>popover>contents row:selected {
+    background-color: rgba(59, 130, 246, 0.6);
+}
+
+.explore-window .toolbar-btn.new-btn {
+    color: #60a5fa;
+}
+
+.explore-window .toolbar-btn.toolbar-btn-active {
+    background-color: rgba(59, 130, 246, 0.12);
+    color: #60a5fa;
+}
+
+.explore-window .toolbar-btn.toolbar-btn-active:hover {
+    background-color: rgba(59, 130, 246, 0.18);
+}
+
+/* === explore/content_view.css === */
+.explore-window .content-view {
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.explore-window .section-title {
+    color: #e8e8e8;
+}
+
+.explore-window .subsection-tab-btn {
+    color: #999;
+}
+
+.explore-window .subsection-tab-btn:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: #e8e8e8;
+}
+
+.explore-window .subsection-tab-btn.active-subsection {
+    background-color: rgba(96, 205, 255, 0.15);
+    color: #60cdff;
+}
+
+.explore-window .qa-card {
+    background-color: #2b2b2b;
+    border: 1px solid #363636;
+}
+
+.explore-window .qa-card:hover {
+    background-color: #333;
+    border-color: #454545;
+}
+
+.explore-window .qa-card-name {
+    color: #e8e8e8;
+}
+
+.explore-window .qa-card-sub {
+    color: #888;
+}
+
+.explore-window .file-item:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.explore-window .file-item:active {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.explore-window flowboxchild:selected .file-item {
+    background-color: rgba(255, 255, 255, 0.15);
+    outline: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.explore-window row:selected .list-row {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    outline: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.explore-window .file-item-label {
+    color: #e8e8e8;
+}
+
+.explore-window .list-row {
+    color: #ccc;
+}
+
+.explore-window .list-row:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: #e8e8e8;
+}
+
+.explore-window .list-col-meta {
+    color: #888;
+}
+
+.explore-window .info-panel {
+    background-color: rgba(30, 30, 30, 0.85);
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.explore-window .rubberband {
+    background-color: rgba(96, 205, 255, 0.18);
+    border: 1.5px solid rgba(96, 205, 255, 0.6);
+}
+
+.explore-window .loading-label {
+    color: #60cdff;
+}
+
+.explore-window .content-loading-progress progress {
+    background-color: #60cdff;
+}
+
+/* === explore/info_panel.css === */
+.explore-window .info-panel {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.explore-window .info-row-key {
+    color: #888;
+}
+
+.explore-window .info-row-val {
+    color: #ccc;
+}
+
+/* === explore/status_bar.css === */
+.explore-window .status-bar {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid #3a3a3a;
+    color: #888;
+}
+
+.explore-window .status-bar button.status-bar-btn {
+    color: #888888;
+}
+
+.explore-window .status-bar button.status-bar-btn:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+.explore-window .status-bar button.status-bar-btn-active {
+    background-color: rgba(255, 255, 255, 0.12);
+    color: #60a5fa;
+}
+
+.explore-window .status-bar button.status-bar-btn-active:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #60a5fa;
+}
+
+.explore-window dropdown.status-bar-dropdown>button {
+    color: #888888;
+}
+
+.explore-window dropdown.status-bar-dropdown>button:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+.explore-window .status-bar-separator {
+    background-color: #3a3a3a;
+}
+
+/* === explore/context_menu.css === */
+.context-menu-box {
+    background-color: rgb(20, 20, 22);
+    color: #e8e8e8;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+button.context-menu-item {
+    color: #e8e8e8;
+}
+
+button.context-menu-item:focus,
+button.context-menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+button.context-menu-item label {
+    color: #e8e8e8;
+}
+
+button.context-menu-item:focus label,
+button.context-menu-item:hover label {
+    color: #ffffff;
+}
+
+.explore-window .group-header-label {
+    color: #60a5fa;
+}
+
+.context-menu-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+button.context-menu-footer-btn {
+    color: #e8e8e8;
+}
+
+button.context-menu-footer-btn:hover,
+button.context-menu-footer-btn:active {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+button.context-menu-footer-btn:focus {
+    color: #e8e8e8;
+}
+
+/* === explore/dialogs.css === */
+button.suggested-action {
+    background-color: #3b82f6;
+}
+
+button.suggested-action:hover {
+    background-color: #2563eb;
+}
+
+button.suggested-action:active {
+    background-color: #1d4ed8;
+}
+
+.explore-dialog {
+    background-color: rgba(22, 22, 26, 0.97);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45),
+        0 2px 8px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.explore-dialog-box {
+    color: #e8e8e8;
+}
+
+.explore-dialog entry {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    color: #e4e4e7;
+    caret-color: #3b82f6;
+}
+
+.explore-dialog entry:focus {
+    border-color: rgba(59, 130, 246, 0.6);
+    background-color: rgba(59, 130, 246, 0.04);
+}
+
+.explore-dialog entry.error-entry {
+    border-color: rgba(239, 68, 68, 0.7);
+    background-color: rgba(239, 68, 68, 0.06);
+}
+
+.dialog-error-text {
+    color: #f87171;
+    font-size: 11px;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+button.empty-trash-btn {
+    color: #f87171;
+}
+
+button.empty-trash-btn:hover {
+    background-color: rgba(239, 68, 68, 0.12);
+    color: #fca5a5;
+}
+
+.settings-title-label {
+    color: #f4f4f5;
+}
+
+.settings-section-title {
+    color: #a1a1aa;
+}
+
+.settings-section-subtitle {
+    color: #71717a;
+}
+
+.settings-item-name {
+    color: #f4f4f5;
+}
+
+.settings-item-command {
+    color: #71717a;
+}
+
+.settings-row-title {
+    color: #e4e4e7;
+}
+
+.settings-row-desc {
+    color: #71717a;
+}
+
+.settings-row-icon {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.settings-listbox {
+    background-color: #1e1e22;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.settings-listbox row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.settings-listbox row:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.settings-notebook header tabs {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.settings-notebook header tabs tab {
+    color: #71717a;
+}
+
+.settings-notebook header tabs tab:checked {
+    color: #60a5fa;
+    border-bottom: 2px solid #3b82f6;
+}
+
+.settings-notebook header tabs tab:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+    color: #e4e4e7;
+}
+
+.placeholder-btn {
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #71717a;
+}
+
+.placeholder-btn:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+    color: #a1a1aa;
+}
+
+button.placeholder-btn {
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.6);
+}
+
+button.placeholder-btn:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+    color: #ffffff;
+}
+
+.placeholder-btn-small {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #71717a;
+}
+
+.placeholder-btn-small:hover {
+    background-color: rgba(255, 255, 255, 0.09);
+    color: #a1a1aa;
+}
+
+.inline-entry {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    color: #e4e4e7;
+    caret-color: #3b82f6;
+}
+
+.edit-btn {
+    color: #60a5fa;
+}
+
+.edit-btn:hover {
+    background-color: rgba(59, 130, 246, 0.15);
+}
+
+.destructive-action {
+    color: #ef4444;
+}
+
+.destructive-action:hover {
+    background-color: rgba(239, 68, 68, 0.15);
+}
+
+button.destructive-action {
+    background-color: rgba(239, 68, 68, 0.85);
+}
+
+button.destructive-action:hover {
+    background-color: rgba(248, 113, 113, 0.90);
+}
+
+button.destructive-action:active {
+    background-color: #b91c1c;
+}
+
+.settings-capsule-nav-vertical {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+button.settings-pill {
+    color: rgba(255, 255, 255, 0.50);
+}
+
+button.settings-pill:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.85);
+}
+
+button.settings-pill.active-pill {
+    background-color: rgba(59, 130, 246, 0.20);
+    color: #60a5fa;
+    box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.25);
+}
+
+button.settings-pill.active-pill:hover {
+    background-color: rgba(59, 130, 246, 0.28);
+    color: #93c5fd;
+}
+
+/* Dialog-specific card colors (dark); base `.settings-card` lives in
+   `apps/settings.css` — only override what the compact dialog needs. */
+.explore-dialog .settings-card {
+    background-color: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.explore-dialog .settings-card-row,
+.settings-custom-item-row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.explore-dialog .settings-card-row:hover,
+.settings-custom-item-row:hover {
+    background-color: rgba(255, 255, 255, 0.035);
+}
+
+.keybind-pill {
+    background-color: rgba(59, 130, 246, 0.12);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.15);
+}
+
+button.icon-select-btn {
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+button.icon-select-btn:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+button.icon-grid-item:hover {
+    background-color: rgba(255, 255, 255, 0.09);
+}
+
+button.row-action-btn.edit-btn {
+    color: #60a5fa;
+}
+
+button.row-action-btn.edit-btn:hover {
+    background-color: rgba(59, 130, 246, 0.12);
+}
+
+button.row-action-btn.delete-btn {
+    color: #f87171;
+}
+
+button.row-action-btn.delete-btn:hover {
+    background-color: rgba(239, 68, 68, 0.12);
+}
+
+.explore-dialog.properties-dialog {
+    background-color: rgba(20, 22, 28, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.properties-header-card {
+    background-color: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.properties-icon-wrap {
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.properties-title-label {
+    color: #f3f4f6;
+}
+
+.properties-subtitle-badge {
+    color: #9ca3af;
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.properties-card {
+    background-color: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.properties-section-title {
+    color: #6b7280;
+}
+
+.properties-key-label {
+    color: #9ca3af;
+}
+
+.properties-val-label {
+    color: #e5e7eb;
+}
+
+.properties-perm-badge {
+    background-color: rgba(59, 130, 246, 0.12);
+    color: #60a5fa;
+}
+
+.properties-matrix-col-title {
+    color: #9ca3af;
+}
+
+button.properties-btn-cancel {
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #e5e7eb;
+}
+
+button.properties-btn-cancel:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
+/* === shared/scrollbar.css === */
+scrollbar slider {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+scrollbar slider:hover,
+scrollbar slider:hover:active {
+    background-color: rgba(255, 255, 255, 0.35);
+}
+

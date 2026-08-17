@@ -1,0 +1,17 @@
+[package]
+name = "babydra-lock"
+version.workspace = true
+edition = "2021"
+
+[dependencies]
+babydra-core = { workspace = true }
+babydra-ui-kit = { workspace = true }
+
+# GUI & Layer Shell
+gtk4 = { workspace = true }
+gtk4-layer-shell = { workspace = true }
+glib = { workspace = true }
+gio = { workspace = true }
+
+# Systems dependencies
+libc = "0.2"

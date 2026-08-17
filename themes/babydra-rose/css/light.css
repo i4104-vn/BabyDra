@@ -1,0 +1,7 @@
+/* babydra-rose — light-mode color layer.
+ *
+ * This theme inherits `babydra-default` (see tokens.json `base`), so it gets
+ * the full light.css color layer for free and ships no light rules of its own.
+ * Keep this file (even if empty) so every theme package shares the exact
+ * same structure — add light-mode overrides here when needed.
+ */

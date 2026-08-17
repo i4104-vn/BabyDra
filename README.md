@@ -1,91 +1,150 @@
-# BabyDra Desktop Shell
+<p align="center">
+  <img src="logo.png" width="120" height="120" alt="BabyDra logo">
+</p>
 
-## 1. Tổng quan Dự án
+<h3 align="center">BabyDra — Desktop Shell</h3>
 
-BabyDra là môi trường giao diện người dùng (Desktop Shell) xây dựng trên nền tảng giao thức Wayland dành cho hệ điều hành Arch Linux. Dự án sử dụng trình quản lý cửa sổ `labwc` kết hợp cùng bộ công cụ đồ họa `GTK4 Layer Shell` nhằm tối ưu hóa hiệu năng, giảm thiểu độ trễ phản hồi và duy trì tính thẩm mỹ cao.
+<p align="center">
+  <img src="https://img.shields.io/badge/rust-1.80+-a5844f?style=for-the-badge&logo=rust&logoColor=white" alt="Rust">
+  <img src="https://img.shields.io/badge/GTK4-0.9-blue?style=for-the-badge&logo=gtk&logoColor=white" alt="GTK4">
+  <img src="https://img.shields.io/badge/Wayland-labwc-4bc0c0?style=for-the-badge" alt="Wayland">
+  <img src="https://img.shields.io/badge/license-Apache_2.0-blue?style=for-the-badge" alt="License">
+</p>
 
-Nhánh `main` đóng vai trò là kênh phân phối tập trung, lưu trữ công cụ cài đặt độc lập (`babydra-installer`), script khởi tạo hệ thống và hệ thống tài liệu hướng dẫn.
-
----
-
-## 2. Cơ chế phân nhánh hệ thống
-
-Kho mã nguồn BabyDra được tổ chức theo cấu trúc phân tầng:
-
-| Nhánh | Mục đích | Phạm vi truy cập |
-|---|---|---|
-| `main` | Phân phối bộ cài đặt TUI và tài liệu hướng dẫn | Kênh mặc định cho người dùng cuối |
-| `release` | Mã nguồn đầy đủ của phiên bản chính thức ổn định | Do tác giả trực tiếp duy trì và phát hành |
-| `develop` | Nhánh nền tảng phục vụ phát triển và tích hợp cộng đồng | Checkout từ `release`, dành cho lập trình viên |
+<p align="center">Môi trường desktop Wayland nhẹ, hiệu năng cao cho Arch Linux — viết bằng Rust + GTK4 Layer Shell, chạy trên compositor labwc.</p>
 
 ---
 
-## 3. Hướng dẫn cài đặt
+## Mục lục
 
-### 3.1. Yêu cầu hệ thống
-- Hệ điều hành: Arch Linux hoặc các bản phân phối tương thích.
+- [Giới thiệu](#giới-thiệu)
+- [Cài đặt](#cài-đặt)
+- [Mô hình phân nhánh](#mô-hình-phân-nhánh)
+- [Phát triển & đóng góp](#phát-triển--đóng-góp)
+- [Tài liệu](#tài-liệu)
+- [Giấy phép](#giấy-phép)
+
+---
+
+## Giới thiệu
+
+BabyDra là một **môi trường desktop (Desktop Shell) Linux nhẹ** xây dựng trên nền tảng giao thức Wayland dành cho Arch Linux. Dự án kết hợp trình quản lý cửa sổ `labwc` với bộ công cụ đồ họa `GTK4 Layer Shell` nhằm tối ưu hiệu năng, giảm độ trễ phản hồi, tận dụng GPU cho FPS cao và duy trì tính thẩm mỹ (glassmorphism, design tokens đồng nhất).
+
+Các thành phần chính:
+
+| Thành phần | Crate | Vai trò |
+| :--- | :--- | :--- |
+| Dynamic Island & Panel | `babydra-panel` | Island, dock, status bar, notification |
+| Window Switcher | `babydra-switcher` | Alt-Tab với icon & preview cửa sổ |
+| File Explorer | `babydra-explore` | Trình duyệt file GTK4 hiện đại |
+| Settings | `babydra-settings` | Trung tâm cấu hình hệ thống |
+| Launcher | `babydra-launcher` | App grid + tìm kiếm nhanh |
+| Lock & Greeter | `babydra-lock`, `babydra-greeter` | Màn hình khóa & đăng nhập (greetd/cage) |
+| Screenshot & Preview | `babydra-screenshot`, `babydra-preview` | Chụp màn hình, xem ảnh nhanh |
+
+> [!NOTE]
+> Kho mã nguồn phân tách theo mô hình 3 nhánh. Nhánh `main` chỉ chứa bộ cài đặt và tài liệu — chi tiết xem mục [Mô hình phân nhánh](#mô-hình-phân-nhánh).
+
+---
+
+## Cài đặt
+
+### Yêu cầu hệ thống
+
+- Hệ điều hành: Arch Linux hoặc bản phân phối tương thích.
 - Trình quản lý gói: `pacman` và `yay` (hoặc trình trợ giúp AUR tương đương).
-- Môi trường Wayland: Trình quản lý cửa sổ `labwc`.
-- Rust toolchain: Phiên bản 1.80.0 trở lên.
+- Môi trường Wayland: trình quản lý cửa sổ `labwc`.
+- Rust toolchain: phiên bản 1.80.0 trở lên.
 
-### 3.2. Cài đặt thông qua Bộ cài đặt TUI (babydra-installer)
+### Bộ cài đặt TUI (babydra-installer)
 
-Người dùng có thể khởi chạy bộ cài đặt trực tiếp từ thư mục gốc của nhánh `main`:
-
-```bash
-# Cấp quyền thực thi và khởi chạy script cài đặt
-chmod +x ./install.sh
-./install.sh
-```
-
-Hoặc khởi chạy trực tiếp thông qua Cargo:
+Nhánh `main` chỉ chứa bộ cài đặt (`install/`) — một crate Rust độc lập, không cần workspace. Chạy wizard 10 bước:
 
 ```bash
-cargo run --release -p babydra-installer
+cd install
+cargo run --release
 ```
 
-### 3.3. Cơ chế hoạt động của bộ cài đặt
+Hoặc dùng script kèm theo:
 
-Bộ cài đặt `babydra-installer` hỗ trợ hai kênh nguồn chính:
-1. **Release Channel**: Tự động đồng bộ mã nguồn từ nhánh `release`, thực hiện biên dịch tối ưu và triển khai các tệp nhị phân chính thức.
-2. **Develop Channel**: Đồng bộ mã nguồn từ nhánh `develop` để cài đặt các tính năng mới nhất từ cộng đồng.
+```bash
+./install/run.sh
+```
 
-Sau khi hoàn tất biên dịch, các tệp nhị phân được tự động cài đặt vào `~/.local/bin` và đưa vào thư mục lưu trữ hệ thống `/var/lib/babydra`.
+> [!NOTE]
+> Script tự động không tương tác `scripts/install.sh` nằm ở nhánh `release`/`develop` — nơi có mã nguồn để build.
+
+### Cơ chế hoạt động của bộ cài đặt
+
+`babydra-installer` liệt kê **toàn bộ nhánh có thể cài đặt** (trừ `main` — nhánh chỉ chứa bộ cài đặt, không có mã nguồn để build):
+
+1. **Release Channel** — đồng bộ mã nguồn từ nhánh `release` (mặc định), biên dịch tối ưu và triển khai tệp nhị phân chính thức.
+2. **Develop Channel** — đồng bộ mã nguồn từ nhánh `develop` để cài đặt các tính năng mới nhất.
+3. **Nhánh đóng góp viên** — bất kỳ nhánh nào khác được tạo từ `develop` đều có thể chọn để cài đặt thử nghiệm.
+
+Khi chạy, bộ cài đặt:
+
+1. Yêu cầu **mật khẩu sudo trước** (modal che ký tự, xác thực 1 lần trước khi thay đổi bất cứ điều gì — tránh khóa tài khoản).
+2. Checkout nhánh đã chọn → `git pull` → `cargo build --release`.
+3. Sao chép binaries vào `~/.local/bin` (riêng `babydra-greeter` vào `/usr/bin`).
+4. Đưa binaries + wallpapers + logo vào `/var/lib/babydra` và `/usr/share/babydra`.
+5. Đồng bộ config `labwc`, GTK, terminal (kitty/neovim), theme packages (`~/.babydra/themes`), icon, cursor, greetd.
 
 ---
 
-## 4. Hướng dẫn dành cho nhà phát triển
+## Mô hình phân nhánh
 
-Nhà phát triển mong muốn đóng góp mã nguồn hoặc tạo biến thể riêng cần chuyển sang nhánh `develop`:
+Kho mã nguồn BabyDra được tổ chức theo mô hình 3 nhánh chính, tất cả do **tác giả** trực tiếp quản lý:
+
+| Nhánh | Vai trò | Quyền hạn |
+| :--- | :--- | :--- |
+| `main` | Kênh phân phối tinh gọn — **chỉ chứa bộ cài đặt** (`install/`) và tài liệu | Chỉ tác giả |
+| `release` | **Nhánh mặc định** — mã nguồn đầy đủ chính thức do tác giả push lên | Chỉ tác giả |
+| `develop` | Nền tảng phát triển, tách ra từ `release` | Chỉ tác giả |
+
+Không ai ngoài tác giả có thể push trực tiếp vào `main`, `release` hoặc `develop`. Người đóng góp **tạo nhánh riêng từ `develop`** và chỉ làm việc bên trong nhánh của mình; bộ cài đặt liệt kê các nhánh đó để cài đặt thử nghiệm.
+
+---
+
+## Phát triển & đóng góp
+
+Nhà phát triển làm việc trên nhánh `develop`:
 
 ```bash
-# 1. Chuyển sang nhánh phát triển
 git checkout develop
-
-# 2. Đồng bộ dữ liệu mới nhất từ upstream
 git pull origin develop
-
-# 3. Tạo nhánh làm việc theo định danh cá nhân
-git checkout -b feature/<tên-user>
-
-# 4. Kiểm tra biên dịch toàn bộ workspace
+git checkout -b <tên-bạn>/<tên-công-việc>   # nhánh riêng của bạn
 cargo check --workspace
 ```
 
-Quy trình phân nhánh và quy tắc đóng góp chi tiết được quy định tại tập tin [WORKFLOW.md](WORKFLOW.md).
+Trước khi gửi thay đổi, chạy bộ kiểm tra an toàn:
+
+```bash
+./scripts/check.sh          # cargo check + fmt + clippy -D warnings + test
+```
+
+Quy trình và quy tắc đóng góp chi tiết: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
-## 5. Tài liệu kỹ thuật chi tiết
+## Tài liệu
 
-- [Chương 01: Tổng quan dự án](docs/01-overview.md)
-- [Chương 02: Kiến trúc hệ thống](docs/02-architecture.md)
-- [Chương 03: Cấu trúc thư mục và module](docs/03-project-structure.md)
-- [Chương 04: Hướng dẫn thiết lập và biên dịch](docs/04-setup-and-build.md)
-- [Quy chuẩn phân nhánh và phát triển](WORKFLOW.md)
+Tài liệu chính thức nằm trong thư mục `docs/` (bắt đầu từ [docs/README.md](docs/README.md)):
+
+| Tài liệu | Nội dung |
+| :--- | :--- |
+| [01 — Tổng quan](docs/01-overview.md) | Giới thiệu, thành phần, mô hình phân nhánh |
+| [02 — Kiến trúc](docs/02-architecture.md) | Pattern thiết kế, daemon-client, sơ đồ hệ thống |
+| [03 — Cài đặt & build](docs/03-setup.md) | Cài đặt qua installer/script, build từ nguồn |
+| [04 — Cấu trúc & quy chuẩn](docs/04-structure.md) | Cây thư mục, trách nhiệm module, quy chuẩn code |
+| [05 — Themes & Variants](docs/05-themes-variants.md) | Tạo theme & variant mới — không cần sửa code |
+| [06 — Luồng hoạt động](docs/06-system-flows.md) | Luồng hoạt động hiện tại của từng crate/lib |
+| [07 — Dynamic Island](docs/07-dynamic-island.md) | Dùng & mở rộng Dynamic Island |
+| [08 — API](docs/08-apis.md) | API reference (core, ui-kit, explore) |
+| [09 — Design](docs/09-design.md) · [10 — Components](docs/10-components.md) | Ngôn ngữ thiết kế & component library |
 
 ---
 
-## 6. Giấy phép sử dụng
+## Giấy phép
 
-Dự án được phát hành dưới giấy phép MIT License. Chi tiết xem tại tập tin LICENSE.
+Dự án được phát hành dưới giấy phép **Apache License 2.0**. Chi tiết xem tại tập tin [LICENSE](LICENSE).

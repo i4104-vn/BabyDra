@@ -1,0 +1,92 @@
+@keyframes switcher-window-fade {
+    from {
+        background-color: rgba(0, 0, 0, 0);
+    }
+
+    to {
+        background-color: rgba(0, 0, 0, 0.35);
+    }
+}
+
+@keyframes panel-slide-in {
+    from {
+        margin-left: -280px;
+        opacity: 0;
+    }
+
+    to {
+        margin-left: 0px;
+        opacity: 1;
+    }
+}
+
+.switcher-window {
+    animation: switcher-window-fade 200ms ease-out;
+}
+
+.stage-manager-container {
+    background: transparent;
+}
+
+.stage-manager-panel {
+    padding: 16px;
+    min-width: 250px;
+    animation: panel-slide-in 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+button.stage-manager-item-btn {
+    padding: 0px;
+    min-width: 0px;
+    min-height: 0px;
+}
+
+.stage-manager-item-btn {
+    border-radius: 12px;
+    padding: 0px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+    margin-right: 24px;
+    margin-left: 0;
+    opacity: 0.6;
+    transition: margin-left 150ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        margin-right 150ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        opacity 120ms ease-out,
+        border-color 120ms ease-out,
+        background-color 120ms ease-out;
+}
+
+.stage-manager-item-btn:hover {
+    opacity: 0.8;
+}
+
+.stage-manager-item-btn.selected {
+    margin-left: 24px;
+    margin-right: 0;
+    opacity: 1.0;
+}
+
+.switcher-preview-image {
+    border-radius: 10px;
+}
+
+.switcher-item-placeholder {
+    border-radius: 10px;
+}
+
+.switcher-item-icon {
+    opacity: 0.9;
+}
+
+.switcher-item-title-container {
+    border-radius: 0 0 10px 10px;
+    padding: 4px 8px;
+}
+
+.switcher-app-title {
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.stage-manager-item-btn.selected .switcher-app-title {
+    font-weight: bold;
+}

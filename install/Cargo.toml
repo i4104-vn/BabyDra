@@ -1,6 +1,8 @@
 [package]
 name = "babydra-installer"
-version.workspace = true
+# Explicit version — this crate is standalone on the `main` branch
+# (no workspace root there), but still a workspace member here.
+version = "1.0.0"
 edition = "2021"
 
 [dependencies]
@@ -10,5 +12,6 @@ chrono = "0.4"
 dirs = "5.0"
 anyhow = "1.0"
 libc = "0.2"
+toml = "0.8"
 
 

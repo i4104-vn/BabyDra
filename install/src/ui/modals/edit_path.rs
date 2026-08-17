@@ -14,22 +14,42 @@ pub fn draw_edit_path_modal(f: &mut Frame, app: &App, area: Rect) {
     f.render_widget(Clear, popup_area);
 
     let lines = vec![
-        Line::from(Span::styled("Enter path to directory containing pre-built binaries:", Style::default().fg(Color::White))),
+        Line::from(Span::styled(
+            "Enter path to directory containing pre-built binaries:",
+            Style::default().fg(Color::White),
+        )),
         Line::from(""),
         Line::from(vec![
-            Span::styled("Path: ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-            Span::styled(&app.custom_path_input, Style::default().fg(Color::Cyan).add_modifier(Modifier::UNDERLINED)),
+            Span::styled(
+                "Path: ",
+                Style::default()
+                    .fg(Color::Yellow)
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::styled(
+                &app.custom_path_input,
+                Style::default()
+                    .fg(Color::Cyan)
+                    .add_modifier(Modifier::UNDERLINED),
+            ),
             Span::styled("█", Style::default().fg(Color::Green)),
         ]),
         Line::from(""),
-        Line::from(Span::styled("[Enter] Apply & Rescan  |  [Esc] Cancel", Style::default().fg(Color::DarkGray))),
+        Line::from(Span::styled(
+            "[Enter] Apply & Rescan  |  [Esc] Cancel",
+            Style::default().fg(Color::DarkGray),
+        )),
     ];
 
     let block = Paragraph::new(lines)
         .block(
             Block::default()
                 .title(" Change Binary Source Directory ")
-                .title_style(Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))
+                .title_style(
+                    Style::default()
+                        .fg(Color::Yellow)
+                        .add_modifier(Modifier::BOLD),
+                )
                 .borders(Borders::ALL)
                 .border_type(BorderType::Rounded)
                 .border_style(Style::default().fg(Color::Yellow)),
