@@ -159,6 +159,24 @@ where
                 log(LogLevel::Success, "Installed BabyDra GTK theme.".into());
             }
 
+            // Also deploy BabyDra CSS theme packages to ~/.babydra/themes & /usr/share/babydra/themes
+            let theme_pkgs_src = workspace_root.join("themes");
+            let user_themes_dst = home.join(".babydra/themes");
+            if theme_pkgs_src.is_dir() {
+                let _ = copy_recursive(&theme_pkgs_src, &user_themes_dst);
+                let _ = sudo.run_root_quiet(&["mkdir", "-p", "/usr/share/babydra/themes"]);
+                let _ = sudo.run_root_quiet(&[
+                    "cp",
+                    "-r",
+                    &format!("{}/.", theme_pkgs_src.to_str().unwrap_or("")),
+                    "/usr/share/babydra/themes/",
+                ]);
+                log(
+                    LogLevel::Success,
+                    "Installed BabyDra CSS theme packages (default, blue, green, purple, rose).".into(),
+                );
+            }
+
             let cursor_dir = workspace_root.join("configs/themes/cursor");
             if cursor_dir.exists() {
                 if let Ok(entries) = fs::read_dir(&cursor_dir) {
@@ -322,13 +340,13 @@ where
     (copied, 0)
 }
 
-/// Deploys the theme packages tree (`themes/`) to `~/.babydra/themes` and
-/// writes the selected variant's theme id into `~/.babydra/babydra.conf`
+/// Deploys the theme packages tree (`themes/`) to `~/.babydra/themes` and `/usr/share/babydra/themes`
+/// and writes the selected variant's theme id into `~/.babydra/babydra.conf`
 /// (`[theme] selection = { id = "..." }`), which the UI reads at startup.
 ///
-/// This makes the installer's variant step (7/10) actually switch the theme
+/// This makes the installer's variant step actually switch the theme
 /// the running desktop renders with — no code change required.
-pub fn deploy_theme_packages<F>(workspace_root: &Path, theme_id: &str, mut log: F)
+pub fn deploy_theme_packages<F>(workspace_root: &Path, theme_id: &str, sudo: &SudoSession, mut log: F)
 where
     F: FnMut(LogLevel, String),
 {
@@ -338,9 +356,16 @@ where
 
     if themes_src.is_dir() {
         let _ = copy_recursive(&themes_src, &themes_dst);
+        let _ = sudo.run_root_quiet(&["mkdir", "-p", "/usr/share/babydra/themes"]);
+        let _ = sudo.run_root_quiet(&[
+            "cp",
+            "-r",
+            &format!("{}/.", themes_src.to_str().unwrap_or("")),
+            "/usr/share/babydra/themes/",
+        ]);
         log(
             LogLevel::Success,
-            format!("Deployed theme packages to {}", themes_dst.display()),
+            format!("Deployed theme packages to {} and /usr/share/babydra/themes", themes_dst.display()),
         );
     } else {
         log(
@@ -351,7 +376,8 @@ where
 
     // Persist the selected theme id into ~/.babydra/babydra.conf
     let conf_path = home.join(".babydra/babydra.conf");
-    if let Err(e) = write_theme_selection(&conf_path, theme_id) {
+    let selected_id = if theme_id.is_empty() { "babydra-default" } else { theme_id };
+    if let Err(e) = write_theme_selection(&conf_path, selected_id) {
         log(
             LogLevel::Warn,
             format!("Could not write theme selection: {e}"),
@@ -359,7 +385,7 @@ where
     } else {
         log(
             LogLevel::Info,
-            format!("babydra.conf theme.selection.id = {theme_id}"),
+            format!("babydra.conf theme.selection.id = {selected_id}"),
         );
     }
 }

@@ -250,7 +250,19 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             total_errors += e;
         }
 
-        // Phase 6: Configs & Themes.
+        // Phase 6: Theme packages — deploy themes/ to ~/.babydra/themes & /usr/share/babydra/themes + persist variant theme selection
+        {
+            current_step += 1;
+            let _ = tx.send(InstallEvent::Progress {
+                current: current_step,
+                total: total_steps,
+                current_step_name: "Deploy theme packages".to_string(),
+            });
+            configs::deploy_theme_packages(&plan.workspace_root, &plan.variant.theme, &sudo, &send_log);
+            total_copied += 1;
+        }
+
+        // Phase 7: Configs & Desktop Environment Setup (including restarting panel service).
         for opt in &plan.selected_configs_themes {
             if !opt.selected || opt.id == "terminate_processes" {
                 continue;
@@ -266,7 +278,7 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             total_errors += e;
         }
 
-        // Phase 7: Display Manager.
+        // Phase 8: Display Manager.
         for opt in &plan.selected_display_manager {
             if !opt.selected {
                 continue;
@@ -280,18 +292,6 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             let (c, e) = display_manager::execute_display_manager_task(opt, &sudo, &send_log);
             total_copied += c;
             total_errors += e;
-        }
-
-        // Phase 8: Theme packages — deploy themes/ + persist variant theme selection.
-        {
-            current_step += 1;
-            let _ = tx.send(InstallEvent::Progress {
-                current: current_step,
-                total: total_steps,
-                current_step_name: "Deploy theme packages".to_string(),
-            });
-            configs::deploy_theme_packages(&plan.workspace_root, &plan.variant.theme, &send_log);
-            total_copied += 1;
         }
 
         let duration = start_time.elapsed().as_secs_f64();

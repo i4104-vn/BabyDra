@@ -18,22 +18,45 @@ pub use process::{is_root, stop_process};
 pub use sudo::{tail_lines, CmdOutput, SudoSession};
 
 pub fn find_workspace_root() -> PathBuf {
-    let candidates = [
-        std::env::current_dir().unwrap_or_default(),
-        std::env::current_dir()
-            .unwrap_or_default()
-            .parent()
-            .map(|p| p.to_path_buf())
-            .unwrap_or_default(),
-    ];
-
-    for dir in &candidates {
-        if dir.join("Cargo.toml").exists() && dir.join("crates").is_dir() {
-            return dir.clone();
+    // 1. Try git rev-parse --show-toplevel
+    if let Ok(out) = Command::new("git")
+        .args(["rev-parse", "--show-toplevel"])
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::null())
+        .output()
+    {
+        if out.status.success() {
+            let path_str = String::from_utf8_lossy(&out.stdout).trim().to_string();
+            if !path_str.is_empty() {
+                let p = PathBuf::from(path_str);
+                if p.is_dir() {
+                    return p;
+                }
+            }
         }
     }
 
-    std::env::current_dir().unwrap_or_default()
+    // 2. Search upwards from current directory for .git directory or workspace Cargo.toml
+    let mut current = std::env::current_dir().unwrap_or_default();
+    loop {
+        if current.join(".git").exists() {
+            return current;
+        }
+        if !current.pop() {
+            break;
+        }
+    }
+
+    // 3. Check parent if we are inside install/
+    let cur = std::env::current_dir().unwrap_or_default();
+    if cur.file_name().and_then(|s| s.to_str()) == Some("install") {
+        if let Some(parent) = cur.parent() {
+            return parent.to_path_buf();
+        }
+    }
+
+    cur
 }
 
 /// Runs `cargo clean` and `cargo build --release --workspace` in the workspace root, capturing
