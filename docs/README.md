@@ -53,7 +53,7 @@ Toàn bộ tài liệu thiết kế nằm trong thư mục [design/](./design/RE
 | [design/theming.md](./design/theming.md) | Dark/Light theming — cách tiếp cận dual-theme |
 | [design/tokens.md](./design/tokens.md) | Bảng tra cứu giá trị — màu, font-size, radius, spacing, shadow |
 
-**Components Giao diện** (thư mục `design/components/`) — mỗi component trong `libs/babydra-utils/src/components/` có một tài liệu riêng:
+**Components Giao diện** (thư mục `design/components/`) — mỗi component trong `kits/babydra-ui-kit/src/components/` có một tài liệu riêng:
 
 | Tài liệu | Nội dung |
 | :--- | :--- |
@@ -96,10 +96,10 @@ Các tài liệu sử dụng bảng markdown thuần túy và các quy ước sa
 | :--- | :--- | :--- |
 | Bộ cài đặt TUI | `install/` (nhánh `main`) | `babydra-installer`: wizard 8 bước, 3 kênh cài đặt, 3 preset |
 | Ứng dụng đồ họa | `crates/` (nhánh `release`) | 8 ứng dụng: panel, switcher, screenshot, lock, greeter, settings, preview, explore |
-| Logic lõi | `libs/babydra-common/` (nhánh `release`) | Services, models, i18n, D-Bus, sysfs |
-| Widget & CSS dùng chung | `libs/babydra-utils/` (nhánh `release`) | Components, styles (dark/light/shared), theme, icon, animation |
+| Logic lõi | `libs/babydra-core/` (nhánh `release`) | Services, models, i18n, D-Bus, sysfs |
+| Widget & CSS dùng chung | `kits/babydra-ui-kit/` (nhánh `release`) | Components, styles (dark/light/shared), theme, icon, animation |
 | Dynamic Island | `libs/babydra-island/` (nhánh `release`) | Thông báo, overlay âm lượng/độ sáng, media player |
-| Launcher | `libs/babydra-launcher/` (nhánh `release`) | Tìm kiếm mờ (fuzzy), lưới ứng dụng, tìm file |
+| Launcher | `crates/babydra-launcher/` (nhánh `release`) | Tìm kiếm mờ (fuzzy), lưới ứng dụng, tìm file |
 | Cấu hình hệ thống | `configs/` (nhánh `release`) | labwc, kitty, nvim, fastfetch, themes |
 | Script khởi động | `start.sh`, `update.sh` (nhánh `release`) | Khởi động DE, hot-update & reload |
 | Quy trình phân nhánh | [WORKFLOW.md](../WORKFLOW.md) | Quy chuẩn phân nhánh và phát triển |

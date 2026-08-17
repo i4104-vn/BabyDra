@@ -290,8 +290,8 @@ echo $XDG_SESSION_TYPE  # Phải trả về "wayland"
 **Giải pháp:** Thêm dependency vào `Cargo.toml` của crate đang phát triển:
 ```toml
 [dependencies]
-babydra-common = { path = "libs/babydra-common" }
-babydra-utils = { path = "libs/babydra-utils" }
+babydra-core = { path = "libs/babydra-core" }
+babydra-ui-kit = { path = "kits/babydra-ui-kit" }
 ```
 (hoặc `{ workspace = true }` nếu khai báo trong `[workspace.dependencies]` của Cargo.toml gốc)
 

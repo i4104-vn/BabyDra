@@ -14,7 +14,7 @@
 - [4. Pattern 3: Mô hình Daemon-Client](#4-pattern-3-mô-hình-daemon-client)
 - [5. Pattern 4: Module hóa Giao diện](#5-pattern-4-module-hóa-giao-diện)
 - [6. Quy trình khởi tạo cửa sổ chuẩn](#6-quy-trình-khởi-tạo-cửa-sổ-chuẩn)
-- [7. Các dịch vụ nền của babydra-common](#7-các-dịch-vụ-nền-của-babydra-common)
+- [7. Các dịch vụ nền của babydra-core](#7-các-dịch-vụ-nền-của-babydra-core)
 - [8. Câu hỏi thường gặp](#8-câu-hỏi-thường-gặp)
 
 ---
@@ -36,7 +36,7 @@ Vẽ lại giao diện (queue_draw / rebuild widget)
 Tầng View (Crates / GTK Window)
         |
         v
-Tầng Engine (babydra-common)
+Tầng Engine (babydra-core)
         |
         v
 Tương tác Hệ điều hành / D-Bus / sysfs
@@ -60,9 +60,9 @@ BabyDra tách mã nguồn thành hai tầng rõ ràng:
 
 - Vai trò: Lớp hiển thị bên ngoài. Chỉ chịu trách nhiệm bắt sự kiện tương tác của người dùng và hiển thị thông tin lên widget GTK.
 - Không được: Trực tiếp đọc file hệ thống, gọi lệnh terminal, tương tác D-Bus.
-- Được phép: Gọi API từ `babydra-common` để lấy dữ liệu, sau đó hiển thị dữ liệu đó lên widget.
+- Được phép: Gọi API từ `babydra-core` để lấy dữ liệu, sau đó hiển thị dữ liệu đó lên widget.
 
-**Tầng Engine (Core Logic Layer) — nằm trong `libs/babydra-common/`**
+**Tầng Engine (Core Logic Layer) — nằm trong `libs/babydra-core/`**
 
 - Vai trò: Toàn bộ nghiệp vụ tính toán và tương tác với hệ điều hành (đọc ghi file `/sys/class`, điều khiển phần cứng WiFi/Bluetooth, quản lý D-Bus daemon) đều được đóng gói thành các hàm API độc lập.
 - Không biết gì về GTK, widget, hay giao diện.
@@ -76,9 +76,9 @@ Khi người dùng kéo thanh trượt âm lượng:
 Tầng View (crates/babydra-panel/src/widgets/panel/items/volume/)
   Bắt sự kiện kéo thanh trượt
         |
-        | Gọi: babydra_common::services::system::volume::set_volume(value)
+        | Gọi: babydra_core::services::system::volume::set_volume(value)
         v
-Tầng Engine (libs/babydra-common/src/services/system/volume/)
+Tầng Engine (libs/babydra-core/src/services/system/volume/)
   Ghi giá trị mới vào PipeWire / WirePlumber API
 ```
 
@@ -87,9 +87,9 @@ Khi người dùng bật/tắt WiFi trong control center:
 ```
 Tầng View (crates/babydra-panel/src/widgets/panel/popover/network.rs)
         |
-        | Gọi: babydra_common::services::system::wifi::connect(ssid, password)
+        | Gọi: babydra_core::services::system::wifi::connect(ssid, password)
         v
-Tầng Engine (libs/babydra-common/src/services/system/wifi/)
+Tầng Engine (libs/babydra-core/src/services/system/wifi/)
   Gọi NetworkManager qua D-Bus
 ```
 
@@ -97,13 +97,13 @@ Tầng Engine (libs/babydra-common/src/services/system/wifi/)
 
 | Quy tắc | Chi tiết |
 | :--- | :--- |
-| DO | Tầng View chỉ gọi hàm từ `babydra-common` để lấy/set dữ liệu |
+| DO | Tầng View chỉ gọi hàm từ `babydra-core` để lấy/set dữ liệu |
 | DO | Tầng Engine chỉ chứa logic thuần túy, không import GTK |
 | DO NOT | Không viết `std::process::Command` hay `std::fs::read` trong file `render.rs` hoặc `mod.rs` của tầng View |
-| DO NOT | Không import `gtk4` trong `babydra-common` |
+| DO NOT | Không import `gtk4` trong `babydra-core` |
 
 > [!NOTE]
-> Ngoại lệ duy nhất: `libs/babydra-utils` chứa **widget GTK dùng chung** và được phép import GTK4, vì đây là tầng UI infrastructure, không phải nghiệp vụ.
+> Ngoại lệ duy nhất: `kits/babydra-ui-kit` chứa **widget GTK dùng chung** và được phép import GTK4, vì đây là tầng UI infrastructure, không phải nghiệp vụ.
 
 ---
 
@@ -225,10 +225,10 @@ Nếu mỗi crate ứng dụng tự định nghĩa riêng CSS và widget cơ b�
 
 ### 5.2. Giải pháp
 
-Toàn bộ CSS và widget dùng chung được tập trung tại thư viện `babydra-utils`:
+Toàn bộ CSS và widget dùng chung được tập trung tại thư viện `babydra-ui-kit`:
 
 ```
-libs/babydra-utils/
+kits/babydra-ui-kit/
     src/
         styles/
             shared/        <- CSS cấu trúc & layout dùng chung (không phụ thuộc theme)
@@ -254,7 +254,7 @@ libs/babydra-utils/
 
 **Cơ chế nạp CSS:**
 
-Khi bất kỳ ứng dụng nào khởi động, nó gọi hàm `babydra_utils::ui::theme::init_theme()` (không tham số). Hàm này:
+Khi bất kỳ ứng dụng nào khởi động, nó gọi hàm `babydra_ui_kit::ui::theme::init_theme()` (không tham số). Hàm này:
 
 1. Gộp toàn bộ nội dung CSS `shared/` (cấu trúc) với CSS `dark/` hoặc `light/` (màu sắc) tùy theo chế độ hiện tại.
 2. Nạp CSS vào `GtkCssProvider` toàn cục của GDK Display Context.
@@ -266,10 +266,10 @@ Nhờ đó, mọi widget trên mọi ứng dụng đều tự động nhận sty
 
 | Quy tắc | Chi tiết |
 | :--- | :--- |
-| DO | Toàn bộ CSS phải đặt trong `libs/babydra-utils/src/styles/` |
-| DO | Gọi `babydra_utils::ui::theme::init_theme()` trong hàm `main()` hoặc `activate()` của mỗi ứng dụng |
+| DO | Toàn bộ CSS phải đặt trong `kits/babydra-ui-kit/src/styles/` |
+| DO | Gọi `babydra_ui_kit::ui::theme::init_theme()` trong hàm `main()` hoặc `activate()` của mỗi ứng dụng |
 | DO NOT | Không viết CSS inline trong mã Rust (không dùng `css_classes`, `widget.set_css_classes()` với giá trị style cụ thể) |
-| DO NOT | Không tạo `GtkCssProvider` mới trong từng ứng dụng. Chỉ dùng provider toàn cục do `babydra-utils` quản lý |
+| DO NOT | Không tạo `GtkCssProvider` mới trong từng ứng dụng. Chỉ dùng provider toàn cục do `babydra-ui-kit` quản lý |
 
 ---
 
@@ -296,7 +296,7 @@ BabyDra chạy trên Wayland và dùng `gtk4-layer-shell` để định vị c�
 
 ```rust
 // Trong hàm activate() của mỗi ứng dụng
-babydra_utils::ui::theme::init_theme();
+babydra_ui_kit::ui::theme::init_theme();
 ```
 
 Hàm `init_theme()` sẽ:
@@ -309,16 +309,16 @@ Hàm `init_theme()` sẽ:
 
 Tùy theo ứng dụng, đây có thể bao gồm:
 
-- Khởi động D-Bus StatusNotifierWatcher (system tray) — `babydra_common::tray::spawn_watcher_service()`.
-- Khởi động thread theo dõi cửa sổ đang ở tiêu điểm (focus) — `babydra_common::spawn_switcher_tracker()`.
-- Refresh cache danh sách ứng dụng desktop bất đồng bộ — `babydra_common::refresh_desktop_apps_cache()`.
+- Khởi động D-Bus StatusNotifierWatcher (system tray) — `babydra_core::tray::spawn_watcher_service()`.
+- Khởi động thread theo dõi cửa sổ đang ở tiêu điểm (focus) — `babydra_core::spawn_switcher_tracker()`.
+- Refresh cache danh sách ứng dụng desktop bất đồng bộ — `babydra_core::refresh_desktop_apps_cache()`.
 - Phát hiện bus DDC/CI cho màn hình ngoài — `widgets::panel::detect_ddc_bus()`.
 
 ---
 
-## 7. Các dịch vụ nền của babydra-common
+## 7. Các dịch vụ nền của babydra-core
 
-`libs/babydra-common/src/services/` chứa toàn bộ nghiệp vụ hệ thống, được tái export phẳng qua `lib.rs`:
+`libs/babydra-core/src/services/` chứa toàn bộ nghiệp vụ hệ thống, được tái export phẳng qua `lib.rs`:
 
 | Nhóm service | Module | Chức năng |
 | :--- | :--- | :--- |
@@ -330,7 +330,7 @@ Tùy theo ứng dụng, đây có thể bao gồm:
 | Đa phương tiện | `mpris/` | Điều khiển media player qua MPRIS D-Bus |
 | Khác | `actions`, `clock`, `exif`, `explore/` (cmd, dbus, dir_size, filter, fs_ops, preview, sort, watcher), `logger`, `screenshot`, `search`, `wallpaper`, `utils` | — |
 
-Các helper quan trọng tái export tại gốc (`babydra_common::`):
+Các helper quan trọng tái export tại gốc (`babydra_core::`):
 
 - `init_logger(app_name, log_file)` — logger chia sẻ, log vào `~/.cache/babydra/`.
 - `capture_screen_to_temp()`, `handle_fullscreen_capture()`, `trigger_save()`, `trigger_copy()` — chụp màn hình (grim/slurp + wl-clipboard).
@@ -341,8 +341,8 @@ Các helper quan trọng tái export tại gốc (`babydra_common::`):
 
 **Đa ngôn ngữ (i18n):**
 
-- File JSON: `libs/babydra-common/src/i18n/locales/<app>/en.json` và `vi.json` (các app: `common`, `explore`, `greeter`, `launcher`, `settings`).
-- Mọi chuỗi hiển thị trong UI phải đi qua hàm `babydra_common::i18n::t("namespace.key")` thay vì hardcode.
+- File JSON: `libs/babydra-core/src/i18n/locales/<app>/en.json` và `vi.json` (các app: `common`, `explore`, `greeter`, `launcher`, `settings`).
+- Mọi chuỗi hiển thị trong UI phải đi qua hàm `babydra_core::i18n::t("namespace.key")` thay vì hardcode.
 
 ---
 

@@ -1,6 +1,6 @@
 # Chương 05: Themes & Variants — Hướng dẫn mở rộng
 
-**Phiên bản:** 1.0.0
+**Phiên bản:** 1.1.0
 **Cập nhật lần cuối:** 2026-08-17
 **Phạm vi:** Cách tạo theme package mới, cách tạo variant mới — dành cho người
 dùng thứ 3, không cần sửa code core.
@@ -47,14 +47,37 @@ mkdir themes/my-theme
 > [!TIP]
 > Bỏ qua field nào thì field đó **kế thừa từ `base`**. `base = null` = độc lập.
 
-### 2.3. `theme.css` — lớp màu theme
+### 2.3. Lớp màu: `dark.css` + `light.css`
+
+Mỗi theme package sở hữu **lớp màu** của riêng nó (nạp sau CSS cấu trúc
+`styles/shared/`):
 
 ```css
-/* the-my-theme — nạp lên core CSS (styles/shared/) */
-.my-theme-accent { color: #8b5cf6; }
+/* dark.css — màu dark-mode (nếu kế thừa base, có thể bỏ trống) */
+.panel { background: rgba(14, 14, 18, 0.96); }
 ```
 
-### 2.4. `fonts.json`
+```css
+/* light.css — màu light-mode */
+.panel { background: rgba(255, 255, 255, 0.98); }
+```
+
+> [!TIP]
+> Cách nhanh nhất để tạo theme mới: copy `themes/babydra-default/`, sửa màu
+> trong `dark.css`/`light.css` và `tokens.json`, đổi `name`. Không cần động
+> tới code.
+
+### 2.4. `theme.css` — lớp override (tùy chọn, nạp cuối)
+
+```css
+/* theme.css — nạp SAU dark/light, thích hợp để override accent điểm nhấn */
+button.baby-fab { background-color: #8b5cf6; }
+```
+
+Ví dụ thật: `themes/babydra-blue/theme.css` kế thừa `babydra-default` rồi
+override accent `#3b82f6` → `#38bdf8` mà không ship lại toàn bộ dark/light.
+
+### 2.5. `fonts.json`
 
 ```json
 {
@@ -62,12 +85,25 @@ mkdir themes/my-theme
 }
 ```
 
-### 2.5. Kiểm tra theme
+### 2.6. Kiểm tra theme
 
 ```bash
 cargo test -p babydra-theme        # engine hoạt động
 # Hoặc thêm integration test trong tests/theme/ nếu cần
 ```
+
+### 2.7. Áp dụng theme
+
+1. Deploy theme vào `~/.babydra/themes/<id>/` (hoặc `/usr/share/babydra/themes/`).
+2. Đổi config — thêm/sửa trong `~/.babydra/babydra.conf`:
+
+```toml
+[theme]
+selection = { id = "my-theme", dark = false }   # dark = null → theo hệ thống
+```
+
+3. Khởi động lại app (panel, settings, explore...). Installer cũng tự ghi
+   `theme.selection.id` theo variant đã chọn ở bước 6.
 
 ---
 
@@ -97,7 +133,7 @@ apps = ["panel", "explore", "settings"]
 ### 3.3. Kiểm tra
 
 ```bash
-cargo test -p babydra-common variant
+cargo test -p babydra-core variant
 ```
 
 ---
@@ -116,7 +152,7 @@ system defaults < configs/ seed < theme package < variant < ~/.babydra/ (user)
 | :--- | :--- |
 | DO | Mỗi theme/variant = 1 thư mục riêng, không đụng file của người khác |
 | DO | Field mới trong tokens phải có `#[serde(default)]` để file cũ vẫn load |
-| DO | Test `babydra-theme` + `babydra-common variant` xanh trước khi gửi PR |
+| DO | Test `babydra-theme` + `babydra-core variant` xanh trước khi gửi PR |
 | DO NOT | Không hardcode màu/font trong code app — đi qua theme package |
 | DO NOT | Không sửa theme/variant của người khác — mỗi người 1 thư mục |
 

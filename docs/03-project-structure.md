@@ -1,6 +1,6 @@
 # Chương 03: Cấu trúc Dự án và Quy chuẩn Viết mã
 
-**Phiên bản:** 1.3.0
+**Phiên bản:** 1.4.0
 **Cập nhật lần cuối:** 2026-08-17
 **Phạm vi:** Quy chuẩn đặt tên thư mục, triết lý phân tách file, trách nhiệm từng module, quy tắc viết mã nguồn mới
 
@@ -68,9 +68,9 @@ BabyDra/                          <- Thư mục gốc repository (nhánh release
 [workspace]
 resolver = "2"
 members = [
-    "libs/babydra-common",    "libs/babydra-island",
-    "libs/babydra-launcher",  "libs/babydra-theme",
-    "libs/babydra-utils",     "libs/babydra-explore-kit",
+    "libs/babydra-core",      "libs/babydra-island",
+    "crates/babydra-launcher",  "libs/babydra-theme",
+    "kits/babydra-ui-kit",    "kits/babydra-explore-kit",
     "crates/babydra-panel",   "crates/babydra-switcher",
     "crates/babydra-screenshot", "crates/babydra-lock",
     "crates/babydra-preview", "crates/babydra-settings",
@@ -92,12 +92,12 @@ Tất cả crate ứng dụng và thư viện ở tầng gốc (`libs/` và `cra
 | Đúng | Sai | Lý do |
 | :--- | :--- | :--- |
 | `babydra-panel` | `babydraPanel` | camelCase không được phép |
-| `babydra-common` | `babydra_common` | snake_case chỉ dùng bên trong `src/` |
+| `babydra-core` | `babydra_core` | snake_case chỉ dùng bên trong `src/` |
 | `babydra-screenshot` | `BabyDraScreenshot` | PascalCase không được phép |
 
 Ví dụ đúng:
-- `libs/babydra-common/`
-- `libs/babydra-utils/`
+- `libs/babydra-core/`
+- `kits/babydra-ui-kit/`
 - `crates/babydra-panel/`
 - `crates/babydra-explore/`
 
@@ -116,16 +116,13 @@ Tất cả thư mục con và file mã nguồn bên trong thư mục `src/` củ
 
 Ví dụ đúng:
 - `crates/babydra-panel/src/widgets/panel/items/volume/`
-- `libs/babydra-common/src/services/system/backlight/`
+- `libs/babydra-core/src/services/system/backlight/`
 
 ### 2.3. File CSS: snake_case
 
-Các file CSS trong `libs/babydra-utils/src/styles/` dùng snake_case, nhóm theo đối tượng:
-
-- `panel/panel.css`, `panel/taskbar.css`, `panel/clock.css`
-- `explore/content_view.css`, `explore/context_menu.css`
-- `apps/settings.css`, `apps/switcher.css`
-- `shared/button.css`, `shared/switch.css`
+- **CSS cấu trúc** (shared) nằm trong `kits/babydra-ui-kit/src/styles/shared/` — dùng snake_case, nhóm theo đối tượng:
+  `panel/panel.css`, `explore/content_view.css`, `apps/settings.css`, `shared/button.css`...
+- **Lớp màu dark/light** thuộc về theme package (`themes/<id>/dark.css`, `light.css`) — không nằm trong code.
 
 ---
 
@@ -141,7 +138,7 @@ Mỗi module đồ họa trong `crates/` và `libs/` phải tuân thủ cấu tr
 | `actions.rs` | Các hành động nghiệp vụ cụ thể của widget (copy, delete, create...) |
 
 > [!IMPORTANT]
-> **Quy tắc chống trộn lẫn:** `render.rs` **không được** chứa `std::process::Command`, `std::fs::read` hay logic nghiệp vụ — mọi thao tác hệ thống phải gọi qua `babydra-common`.
+> **Quy tắc chống trộn lẫn:** `render.rs` **không được** chứa `std::process::Command`, `std::fs::read` hay logic nghiệp vụ — mọi thao tác hệ thống phải gọi qua `babydra-core`.
 
 ---
 
@@ -153,6 +150,7 @@ install/
 ├── README.md                     <- Hướng dẫn sử dụng nhanh
 ├── run.sh                        <- Script thực thi nhanh (chỉ có trên nhánh release)
 └── src/
+    ├── lib.rs                    <- Library target: re-export models/system/tasks cho integration tests
     ├── main.rs                   <- Entry point: parse CLI args, raw mode, event loop 50ms tick
     │                                (trên main, entry point là install.sh ở thư mục gốc)
     ├── app/
@@ -289,7 +287,7 @@ crates/babydra-screenshot/src/
 crates/babydra-lock/src/
 ├── main.rs                       <- Parse --image, tạo GTK app, map window tới mọi màn hình
 ├── render.rs                     <- build_lock_ui
-└── widgets/                      <- Locker UI (xác thực PAM qua babydra_common::verify_password)
+└── widgets/                      <- Locker UI (xác thực PAM qua babydra_core::verify_password)
 ```
 
 ### 5.5. `babydra-greeter` — Màn hình đăng nhập (greetd)
@@ -316,7 +314,7 @@ crates/babydra-settings/src/
     ├── apps/                     <- Quản lý ứng dụng (launch, update, uninstall)
     ├── bluetooth/
     ├── certificates/             <- CA certificates
-    ├── displays/                 <- Màn hình (save/apply qua babydra_common::system::display)
+    ├── displays/                 <- Màn hình (save/apply qua babydra_core::system::display)
     ├── env/                      <- Biến môi trường
     ├── hosts/                    <- File /etc/hosts
     ├── keybinds/                 <- Phím tắt
@@ -358,16 +356,18 @@ crates/babydra-explore/src/
 
 ## 6. Nhóm thư viện dùng chung (`libs/`)
 
-### 6.1. `babydra-common` — Logic lõi
+### 6.1. `babydra-core` — Logic lõi
+
+> Crate **duy nhất** chứa logic thuần + services; mọi app gọi API qua đây.
 
 ```
-libs/babydra-common/src/
+libs/babydra-core/src/
 ├── lib.rs                        <- Re-export phẳng toàn bộ API tiện dụng
 ├── config/
 │   ├── mod.rs
 │   └── settings.rs               <- BabyDraConfig, ThemeConfig, ShellConfig, PowerConfig,
 │                                    WallpaperConfig, NotificationConfig, ExploreSettings
-│                                    (file cấu hình ~/.babydra/babydra.conf)
+│                                    (file cấu hình ~/.babydra/babydra.conf, gồm [theme] selection)
 ├── i18n/
 │   ├── mod.rs                    <- Hàm t("namespace.key")
 │   └── locales/<app>/{en,vi}.json
@@ -383,10 +383,10 @@ libs/babydra-common/src/
 └── services/                     <- Xem chi tiết Chương 02, mục 7
 ```
 
-### 6.2. `babydra-utils` — UI kit (giao diện dùng chung)
+### 6.2. `babydra-ui-kit` — UI kit (giao diện dùng chung)
 
 ```
-libs/babydra-utils/src/
+kits/babydra-ui-kit/src/
 ├── lib.rs                        <- pub mod components; pub mod ui;
 ├── components/                   <- badge, buttons (icon/standard/tile), card (standard/
 │                                    scrollable/switch_card), list_group, modal
@@ -395,20 +395,21 @@ libs/babydra-utils/src/
 │                                    (close_button, navbar, progress, spinners: deprecated, feature
 │                                    `deprecated-components`)
 ├── ui/
-│   ├── theme/mod.rs              <- init_theme(): gộp CSS shared + dark/light, nạp provider toàn cục
+│   ├── theme/mod.rs              <- init_theme(): đọc ThemeSelection từ config, resolve theme package
+│   │                                qua babydra-theme, nạp CSS shared + dark/light + theme.css
 │   ├── theme/colors.rs           <- Color tokens dùng chung cho Cairo + CSS (T1.4)
 │   ├── icon/                     <- resolver, assets
 │   ├── animation/                <- easing, genie, island, slide
 │   ├── battery.rs, window.rs
-└── styles/                       <- CSS: shared/ + dark/ + light/
+└── styles/shared/                <- CSS cấu trúc (shared) — lớp màu dark/light thuộc themes/
 ```
 
 ### 6.3. `babydra-explore-kit` — Explore feature kit
 
-Tách từ `babydra-utils` (T3.1) — dialogs, context menus, drag & drop, file item builders:
+Tách từ `babydra-ui-kit` (T3.1) — dialogs, context menus, drag & drop, file item builders:
 
 ```
-libs/babydra-explore-kit/src/
+kits/babydra-explore-kit/src/
 ├── lib.rs                        <- pub mod explore; pub use explore::*;
 └── explore/
     ├── context_menu/             <- clipboard, custom_items, dimming, file_actions, widgets
@@ -423,13 +424,19 @@ libs/babydra-explore-kit/src/
 
 ### 6.4. `babydra-theme` — Theme engine
 
-Crate thuần logic (không GTK): đọc theme package từ `themes/<id>/`:
+Crate thuần logic (không GTK): đọc theme package từ `themes/<id>/` và resolve
+các lớp CSS (dark/light) + tokens + fonts:
 
 ```
 libs/babydra-theme/src/
-├── lib.rs                        <- load_package, resolve_theme (hỗ trợ kế thừa base)
+├── lib.rs                        <- load_package, resolve_theme (kế thừa base), themes_root()
+│                                    (BABYDRA_THEMES_DIR → ~/.babydra/themes →
+│                                    /usr/share/babydra/themes → workspace themes/)
 └── tokens.rs                     <- ThemeTokens, DarkLightTokens, RadiusTokens (serde, merge)
 ```
+
+`babydra-ui-kit` gọi `resolve_theme(id)` trong `init_theme()` — đổi theme =
+đổi 1 dòng trong `babydra.conf`: `[theme] selection = { id = "babydra-blue" }`.
 
 ### 6.5. `babydra-island` — Dynamic Island
 
@@ -446,7 +453,7 @@ libs/babydra-island/src/
 ### 6.6. `babydra-launcher` — Launcher ứng dụng
 
 ```
-libs/babydra-launcher/src/
+crates/babydra-launcher/src/
 ├── lib.rs                        <- build_launcher_ui
 ├── main.rs                       <- GTK app org.babydra.launcher
 ├── render.rs
@@ -493,13 +500,21 @@ configs/
 themes/
 └── <theme-id>/
     ├── tokens.json                <- Design tokens (surface, border, accent, font, radius)
-    ├── theme.css                  <- Lớp màu theme (nạp lên core CSS)
+    ├── dark.css                   <- Lớp màu dark-mode (nạp sau CSS shared)
+    ├── light.css                  <- Lớp màu light-mode
+    ├── theme.css                  <- (tùy chọn) override nạp cuối — vd đổi accent
     └── fonts.json                 <- Font families + fallbacks
 ```
 
-- `babydra-default/` — theme chính thức.
-- `babydra-blue/` — theme mẫu thứ hai (kế thừa default, override accent + radius) — test sống.
+- `babydra-default/` — theme chính thức (sở hữu dark.css/light.css đầy đủ).
+- `babydra-blue/` — theme mẫu thứ hai: kế thừa default qua `base`, chỉ ship
+  `theme.css` override accent (#3b82f6 → #38bdf8) — **chứng minh đổi giao diện
+  không cần chạm code**.
 - Engine: `babydra-theme` (`load_package`, `resolve_theme`, hỗ trợ `base` kế thừa).
+- Cách đổi theme: sửa `~/.babydra/babydra.conf` →
+  `[theme]\nselection = { id = "babydra-blue" }` rồi khởi động lại app.
+- Installer (bước 6 chọn variant) tự deploy `themes/` → `~/.babydra/themes` và
+  ghi `theme.selection.id` theo variant đã chọn.
 
 ### 7.3. `variants/` — Variants
 
@@ -513,13 +528,17 @@ variants/<name>/
 Merge thứ tự (phải sang trái thắng):
 `system defaults < configs/ seed < theme package < variant < ~/.babydra/ (user)`
 
-- API: `babydra_common::config::variant::{list_variants, load_variant, get_keybind}`.
+- API: `babydra_core::config::variant::{list_variants, load_variant, get_keybind}`.
 - `variants/default/` — variant chính thức.
 
 ### 7.4. `tests/` — Test suite (TDD safety net)
 
-Integration test chia theo vùng (xem `tests/README.md`); unit test `#[cfg(test)]`
-trong từng crate. Chạy: `cargo test --workspace` / `cargo test -p babydra-tests`.
+Toàn bộ test đã được tách về đây — không còn `#[cfg(test)]` trong workspace crates.
+Integration test chia theo vùng (`common/`, `models/`, `services/`, `theme/`,
+`installer/`), mỗi file là một test binary khai báo trong `tests/Cargo.toml`
+(xem `tests/README.md`). `babydra-installer` có lib target (`src/lib.rs`) để
+test installer pipeline không cần chạy TUI. Chạy: `cargo test --workspace` /
+`cargo test -p babydra-tests`.
 
 ### 7.5. `scripts/`
 
@@ -597,11 +616,11 @@ docs/
 | :--- | :--- |
 | DO | Thư mục crate dùng kebab-case; file/thư mục trong `src/` dùng snake_case |
 | DO | Tách `mod.rs` (logic) / `render.rs` (UI) / `handlers.rs` (sự kiện) cho mọi widget phức tạp |
-| DO | Mọi logic hệ thống phải nằm trong `babydra-common/src/services/` và gọi qua API |
-| DO | Mọi CSS phải nằm trong `libs/babydra-utils/src/styles/` và nạp qua `init_theme()` |
+| DO | Mọi logic hệ thống phải nằm trong `babydra-core/src/services/` và gọi qua API |
+| DO | CSS cấu trúc nằm trong `kits/babydra-ui-kit/src/styles/shared/`; màu dark/light thuộc `themes/` |
 | DO | Chuỗi hiển thị phải đi qua `i18n::t()` với file JSON en/vi tương ứng |
 | DO | State dùng chung qua `Rc<RefCell<T>>` — không lưu business data trong widget |
-| DO NOT | Không import `gtk4` trong `babydra-common` |
+| DO NOT | Không import `gtk4` trong `babydra-core` |
 | DO NOT | Không hardcode chuỗi UI tiếng Việt/Anh trong widget |
 | DO NOT | Không tự tạo `GtkCssProvider` riêng trong ứng dụng |
 | DO NOT | Không viết CSS inline trong mã Rust |
