@@ -1,8 +1,8 @@
 //! WiFi access point scanning and discovery using nmcli.
 
+use crate::models::wifi::WifiNetwork;
 use std::collections::HashMap;
 use std::process::Command;
-use crate::models::wifi::WifiNetwork;
 
 fn parse_nmcli_escaped(line: &str) -> Vec<String> {
     let mut parts = Vec::new();
@@ -27,13 +27,25 @@ fn parse_nmcli_escaped(line: &str) -> Vec<String> {
 
 pub fn known_networks() -> Vec<String> {
     let mut ssids = Vec::new();
-    if let Ok(output) = Command::new("nmcli").args(&["-t", "-f", "NAME,TYPE", "connection", "show"]).output() {
+    if let Ok(output) = Command::new("nmcli")
+        .args(&["-t", "-f", "NAME,TYPE", "connection", "show"])
+        .output()
+    {
         let stdout = String::from_utf8_lossy(&output.stdout);
         for line in stdout.lines() {
             let parts = parse_nmcli_escaped(line);
             if parts.len() >= 2 && (parts[1] == "802-11-wireless" || parts[1] == "wifi") {
                 if !parts[0].is_empty() {
-                    if let Ok(ssid_out) = Command::new("nmcli").args(&["-g", "802-11-wireless.ssid", "connection", "show", &parts[0]]).output() {
+                    if let Ok(ssid_out) = Command::new("nmcli")
+                        .args(&[
+                            "-g",
+                            "802-11-wireless.ssid",
+                            "connection",
+                            "show",
+                            &parts[0],
+                        ])
+                        .output()
+                    {
                         let ssid = String::from_utf8_lossy(&ssid_out.stdout).trim().to_string();
                         if !ssid.is_empty() && !ssids.contains(&ssid) {
                             ssids.push(ssid);
@@ -51,20 +63,34 @@ pub fn scan_networks() -> Vec<WifiNetwork> {
     let mut ap_map: HashMap<String, WifiNetwork> = HashMap::new();
 
     // Request rescan
-    let _ = Command::new("nmcli").args(&["device", "wifi", "rescan"]).output();
-    
-    if let Ok(output) = Command::new("nmcli").args(&["-t", "-f", "SSID,SECURITY,SIGNAL,ACTIVE", "device", "wifi", "list"]).output() {
+    let _ = Command::new("nmcli")
+        .args(&["device", "wifi", "rescan"])
+        .output();
+
+    if let Ok(output) = Command::new("nmcli")
+        .args(&[
+            "-t",
+            "-f",
+            "SSID,SECURITY,SIGNAL,ACTIVE",
+            "device",
+            "wifi",
+            "list",
+        ])
+        .output()
+    {
         let stdout = String::from_utf8_lossy(&output.stdout);
         for line in stdout.lines() {
             let parts = parse_nmcli_escaped(line);
             if parts.len() >= 4 {
                 let ssid = parts[0].trim().to_string();
-                if ssid.is_empty() { continue; }
-                
+                if ssid.is_empty() {
+                    continue;
+                }
+
                 let security = parts[1].trim().to_lowercase();
                 let signal = parts[2].trim().parse::<u32>().unwrap_or(0);
                 let is_connected = parts[3].trim() == "yes";
-                
+
                 let sec_str = if security.is_empty() {
                     "open".to_string()
                 } else if security.contains("802.1x") {
@@ -75,9 +101,12 @@ pub fn scan_networks() -> Vec<WifiNetwork> {
 
                 let is_saved = known.contains(&ssid);
 
-                ap_map.entry(ssid.clone())
+                ap_map
+                    .entry(ssid.clone())
                     .and_modify(|net| {
-                        if is_connected { net.is_connected = true; }
+                        if is_connected {
+                            net.is_connected = true;
+                        }
                         if signal > net.signal {
                             net.signal = signal;
                             net.strength = signal.to_string();
@@ -95,9 +124,14 @@ pub fn scan_networks() -> Vec<WifiNetwork> {
             }
         }
     }
-    
-    let mut networks: Vec<WifiNetwork> = ap_map.into_values().collect();
 
+    let mut networks: Vec<WifiNetwork> = ap_map.into_values().collect();
+    sort_networks(&mut networks);
+    networks
+}
+
+/// Sorts WiFi networks by priority: connected first, then saved, then by signal strength (desc).
+pub fn sort_networks(networks: &mut [WifiNetwork]) {
     networks.sort_by(|a, b| {
         if a.is_connected != b.is_connected {
             b.is_connected.cmp(&a.is_connected)
@@ -107,6 +141,71 @@ pub fn scan_networks() -> Vec<WifiNetwork> {
             b.signal.cmp(&a.signal)
         }
     });
+}
 
-    networks
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::models::wifi::WifiNetwork;
+
+    fn net(ssid: &str, signal: u32, is_connected: bool, is_saved: bool) -> WifiNetwork {
+        WifiNetwork {
+            ssid: ssid.to_string(),
+            security: "psk".to_string(),
+            strength: signal.to_string(),
+            is_connected,
+            is_saved,
+            signal,
+        }
+    }
+
+    #[test]
+    fn parse_nmcli_escaped_splits_on_colons() {
+        assert_eq!(parse_nmcli_escaped("a:b:c"), vec!["a", "b", "c"]);
+    }
+
+    #[test]
+    fn parse_nmcli_escaped_preserves_escaped_colons() {
+        assert_eq!(parse_nmcli_escaped("a\\:b:c"), vec!["a:b", "c"]);
+    }
+
+    #[test]
+    fn parse_nmcli_escaped_single_field() {
+        assert_eq!(parse_nmcli_escaped("only"), vec!["only"]);
+    }
+
+    #[test]
+    fn parse_nmcli_escaped_empty_string() {
+        assert_eq!(parse_nmcli_escaped(""), vec![""]);
+    }
+
+    #[test]
+    fn sort_networks_puts_connected_first() {
+        let mut nets = vec![
+            net("disconnected", 70, false, true),
+            net("connected", 40, true, true),
+        ];
+        sort_networks(&mut nets);
+        assert_eq!(nets[0].ssid, "connected");
+    }
+
+    #[test]
+    fn sort_networks_prefers_saved_over_unknown() {
+        let mut nets = vec![
+            net("unknown", 90, false, false),
+            net("saved", 30, false, true),
+        ];
+        sort_networks(&mut nets);
+        assert_eq!(nets[0].ssid, "saved");
+    }
+
+    #[test]
+    fn sort_networks_orders_by_signal_desc_as_tiebreak() {
+        let mut nets = vec![
+            net("weak", 20, false, false),
+            net("strong", 95, false, false),
+        ];
+        sort_networks(&mut nets);
+        assert_eq!(nets[0].ssid, "strong");
+    }
 }

@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 /// Gets path to `~/.babydra/babydra.conf`
@@ -67,12 +67,12 @@ pub struct CustomContextItem {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ExploreSettings {
-    pub view_mode: String,       // "icons" | "list"
-    pub preview_visible: bool,   // true | false
-    pub show_hidden: bool,       // true | false
+    pub view_mode: String,          // "icons" | "list"
+    pub preview_visible: bool,      // true | false
+    pub show_hidden: bool,          // true | false
     pub double_click_to_open: bool, // true | false
-    pub permanent_delete: bool,   // true | false
-    pub calculate_dir_size: bool, // true | false
+    pub permanent_delete: bool,     // true | false
+    pub calculate_dir_size: bool,   // true | false
     pub custom_context_items: Vec<CustomContextItem>,
     #[serde(default)]
     pub keybinds: std::collections::HashMap<String, String>,
@@ -80,8 +80,10 @@ pub struct ExploreSettings {
 
 impl ExploreSettings {
     pub fn get_keybind(&self, action: &str) -> String {
-        self.keybinds.get(action).cloned().unwrap_or_else(|| {
-            match action {
+        self.keybinds
+            .get(action)
+            .cloned()
+            .unwrap_or_else(|| match action {
                 "toggle_split" => "F3".to_string(),
                 "toggle_preview" => "F4".to_string(),
                 "toggle_hidden" => "Ctrl + H".to_string(),
@@ -90,8 +92,7 @@ impl ExploreSettings {
                 "paste" => "Ctrl + V".to_string(),
                 "undo" => "Ctrl + Z".to_string(),
                 _ => "".to_string(),
-            }
-        })
+            })
     }
 }
 
@@ -132,12 +133,24 @@ pub struct DisplayMonitorSetting {
     pub scale: f64,
 }
 
-fn default_width() -> u32 { 1920 }
-fn default_height() -> u32 { 1080 }
-fn default_refresh_rate() -> f64 { 60.0 }
-fn default_orientation() -> String { "normal".to_string() }
-fn default_enabled() -> bool { true }
-fn default_scale() -> f64 { 1.0 }
+fn default_width() -> u32 {
+    1920
+}
+fn default_height() -> u32 {
+    1080
+}
+fn default_refresh_rate() -> f64 {
+    60.0
+}
+fn default_orientation() -> String {
+    "normal".to_string()
+}
+fn default_enabled() -> bool {
+    true
+}
+fn default_scale() -> f64 {
+    1.0
+}
 
 impl Default for DisplayMonitorSetting {
     fn default() -> Self {
@@ -185,7 +198,8 @@ pub struct BabyDraConfig {
     pub lockscreen: LockscreenConfig,
 }
 
-static CONFIG_CACHE: std::sync::OnceLock<std::sync::RwLock<BabyDraConfig>> = std::sync::OnceLock::new();
+static CONFIG_CACHE: std::sync::OnceLock<std::sync::RwLock<BabyDraConfig>> =
+    std::sync::OnceLock::new();
 
 fn load_from_disk() -> BabyDraConfig {
     let path = get_babydra_conf_path();
@@ -242,9 +256,7 @@ fn load_from_disk() -> BabyDraConfig {
 }
 
 pub fn load_babydra_config() -> BabyDraConfig {
-    let cache = CONFIG_CACHE.get_or_init(|| {
-        std::sync::RwLock::new(load_from_disk())
-    });
+    let cache = CONFIG_CACHE.get_or_init(|| std::sync::RwLock::new(load_from_disk()));
     cache.read().unwrap().clone()
 }
 
@@ -254,7 +266,7 @@ pub fn save_babydra_config(config: &BabyDraConfig) {
             *guard = config.clone();
         }
     }
-    
+
     let path = get_babydra_conf_path();
     if let Some(parent) = path.parent() {
         let _ = std::fs::create_dir_all(parent);
@@ -280,4 +292,75 @@ pub fn save_explore_settings(settings: &ExploreSettings) {
     let mut config = load_babydra_config();
     config.explore = settings.clone();
     save_babydra_config(&config);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_keybind_returns_custom_value_when_set() {
+        let mut settings = ExploreSettings::default();
+        settings
+            .keybinds
+            .insert("toggle_split".to_string(), "F2".to_string());
+        assert_eq!(settings.get_keybind("toggle_split"), "F2");
+    }
+
+    #[test]
+    fn get_keybind_falls_back_to_default() {
+        let settings = ExploreSettings::default();
+        assert_eq!(settings.get_keybind("toggle_split"), "F3");
+        assert_eq!(settings.get_keybind("toggle_preview"), "F4");
+        assert_eq!(settings.get_keybind("toggle_hidden"), "Ctrl + H");
+        assert_eq!(settings.get_keybind("paste"), "Ctrl + V");
+    }
+
+    #[test]
+    fn get_keybind_returns_empty_for_unknown_action() {
+        let settings = ExploreSettings::default();
+        assert_eq!(settings.get_keybind("no_such_action"), "");
+    }
+
+    #[test]
+    fn explore_settings_serde_roundtrip() {
+        let mut original = ExploreSettings::default();
+        original.view_mode = "list".to_string();
+        original.custom_context_items.push(CustomContextItem {
+            name: "Open terminal here".to_string(),
+            command: "kitty".to_string(),
+            icon: Some("terminal".to_string()),
+        });
+
+        let encoded = serde_json::to_string(&original).unwrap();
+        let decoded: ExploreSettings = serde_json::from_str(&encoded).unwrap();
+
+        assert_eq!(decoded.view_mode, "list");
+        assert_eq!(decoded.custom_context_items.len(), 1);
+        assert_eq!(decoded.custom_context_items[0].name, "Open terminal here");
+    }
+
+    #[test]
+    fn babydra_config_toml_roundtrip() {
+        let mut original = BabyDraConfig::default();
+        original.power.profile = "performance".to_string();
+        original.notification.dnd = true;
+
+        let encoded = toml::to_string(&original).unwrap();
+        let decoded: BabyDraConfig = toml::from_str(&encoded).unwrap();
+
+        assert_eq!(decoded.power.profile, "performance");
+        assert!(decoded.notification.dnd);
+    }
+
+    #[test]
+    fn config_uses_defaults_for_missing_fields() {
+        // Simulates an old config file that lacks newer fields.
+        let partial = "[power]\nprofile = \"saver\"\n";
+        let decoded: BabyDraConfig = toml::from_str(partial).unwrap();
+
+        assert_eq!(decoded.power.profile, "saver");
+        assert_eq!(decoded.power.charge_limit, 80);
+        assert!(decoded.explore.preview_visible);
+    }
 }

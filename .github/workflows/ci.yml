@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - release
+      - develop
+      - 'refactor/**'
+  pull_request:
+
+jobs:
+  check:
+    name: Safety-net checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies (GTK4 + layer shell)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgtk-4-dev \
+            libgtk-4-layer-shell-dev \
+            libgdk-pixbuf-2.0-dev \
+            libcairo2-dev \
+            pkg-config
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache cargo registry
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run safety-net checks
+        run: ./scripts/check.sh

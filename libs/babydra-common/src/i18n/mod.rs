@@ -2,9 +2,9 @@
 //! Provides locale management, translations, and string formatting utilities
 //! for English ("en") and Vietnamese ("vi") locales using service-specific JSON configurations.
 
+use gio::prelude::*;
 use std::collections::HashMap;
 use std::sync::{OnceLock, RwLock};
-use gio::prelude::*;
 
 /// Returns the default system locale determined from ~/.config/locale.conf or `LANG` environment variable.
 fn default_locale() -> String {
@@ -47,19 +47,15 @@ thread_local! {
 
 /// Retrieves the current active system locale ("vi" or "en").
 pub fn get_locale() -> String {
-    let lock = CURRENT_LOCALE.get_or_init(|| {
-        RwLock::new(default_locale())
-    });
+    let lock = CURRENT_LOCALE.get_or_init(|| RwLock::new(default_locale()));
     lock.read().unwrap().clone()
 }
 
 /// Sets the current active system locale.
 pub fn set_locale(locale: &str) {
     let normalized = if locale == "en" { "en" } else { "vi" };
-    
-    let lock = CURRENT_LOCALE.get_or_init(|| {
-        RwLock::new(normalized.to_string())
-    });
+
+    let lock = CURRENT_LOCALE.get_or_init(|| RwLock::new(normalized.to_string()));
     if let Ok(mut writer) = lock.write() {
         *writer = normalized.to_string();
     }
@@ -68,13 +64,17 @@ pub fn set_locale(locale: &str) {
 /// Persist locale to ~/.config/locale.conf (user-level) and update env vars.
 pub fn persist_locale(locale: &str) {
     let normalized = if locale == "en" { "en" } else { "vi" };
-    let lang_str = if normalized == "vi" { "vi_VN.UTF-8" } else { "en_US.UTF-8" };
-    
+    let lang_str = if normalized == "vi" {
+        "vi_VN.UTF-8"
+    } else {
+        "en_US.UTF-8"
+    };
+
     // Update process environment and memory
     std::env::set_var("LANG", lang_str);
     std::env::set_var("LANGUAGE", lang_str);
     set_locale(normalized);
-    
+
     // Write to user-level locale config
     if let Some(config_dir) = dirs::config_dir() {
         let _ = std::fs::create_dir_all(&config_dir);
@@ -94,9 +94,10 @@ pub fn watch_locale_change<F: Fn(&str) + 'static>(on_change: F) {
             let _ = std::fs::write(&path, "LANG=en_US.UTF-8\nLANGUAGE=en_US.UTF-8\nLOCALE=en\n");
         }
         let file = gio::File::for_path(&path);
-        if let Ok(monitor) = file.monitor_file(gio::FileMonitorFlags::NONE, gio::Cancellable::NONE) {
+        if let Ok(monitor) = file.monitor_file(gio::FileMonitorFlags::NONE, gio::Cancellable::NONE)
+        {
             let last_locale = std::rc::Rc::new(std::cell::RefCell::new(get_locale()));
-            
+
             monitor.connect_changed(move |_, _, _, _| {
                 let new_loc = default_locale();
                 if *last_locale.borrow() != new_loc {
@@ -144,7 +145,53 @@ pub fn t(key: &str) -> String {
         "en" => EN_MAP.get_or_init(load_en_map),
         _ => VI_MAP.get_or_init(load_vi_map),
     };
-    map.get(key)
-        .cloned()
-        .unwrap_or_else(|| key.to_string())
+    map.get(key).cloned().unwrap_or_else(|| key.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    // Locale functions mutate a process-global locale; serialize tests to avoid races.
+    static LOCALE_TEST_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
+    #[test]
+    fn t_returns_translation_for_known_key_in_en() {
+        let _guard = LOCALE_TEST_LOCK.lock().unwrap();
+        set_locale("en");
+        assert_eq!(t("menu.terminal"), "Terminal");
+        assert_eq!(t("weekday.mon"), "Monday");
+    }
+
+    #[test]
+    fn t_returns_key_when_missing() {
+        let _guard = LOCALE_TEST_LOCK.lock().unwrap();
+        set_locale("en");
+        assert_eq!(t("no.such.key"), "no.such.key");
+    }
+
+    #[test]
+    fn t_returns_vi_translation_after_set_locale() {
+        let _guard = LOCALE_TEST_LOCK.lock().unwrap();
+        set_locale("vi");
+        assert_eq!(t("menu.file_manager"), "Trình quản lý tệp");
+        assert_eq!(t("weekday.mon"), "Thứ Hai");
+    }
+
+    #[test]
+    fn set_locale_normalizes_unknown_to_vi() {
+        let _guard = LOCALE_TEST_LOCK.lock().unwrap();
+        set_locale("fr");
+        assert_eq!(get_locale(), "vi");
+    }
+
+    #[test]
+    fn set_locale_roundtrips_between_en_and_vi() {
+        let _guard = LOCALE_TEST_LOCK.lock().unwrap();
+        set_locale("en");
+        assert_eq!(get_locale(), "en");
+        set_locale("vi");
+        assert_eq!(get_locale(), "vi");
+        set_locale("en");
+        assert_eq!(get_locale(), "en");
+    }
 }

@@ -1,0 +1,40 @@
+[package]
+name = "babydra-tests"
+version.workspace = true
+edition = "2021"
+publish = false
+description = "Integration test suite for the BabyDra workspace (TDD safety net)."
+
+# Integration tests are declared explicitly so each test file in the
+# sub-folders below (common/, utils/, ...) is compiled as its own test
+# binary. This keeps tests small, focused and easy to extend: to add a
+# new test area, drop a file in the matching folder and register a
+# `[[test]]` entry here.
+[dev-dependencies]
+babydra-common = { workspace = true }
+toml = "0.8"
+serde_json = "1.0"
+
+[[test]]
+name = "common_config"
+path = "common/config.rs"
+
+[[test]]
+name = "common_i18n"
+path = "common/i18n.rs"
+
+[[test]]
+name = "common_storage"
+path = "common/storage.rs"
+
+[[test]]
+name = "common_vpn"
+path = "common/vpn.rs"
+
+[[test]]
+name = "common_volume"
+path = "common/volume.rs"
+
+[[test]]
+name = "common_wifi"
+path = "common/wifi.rs"
