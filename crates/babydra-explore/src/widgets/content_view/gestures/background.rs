@@ -1,4 +1,4 @@
-use babydra_core::ContentViewWidgets;
+use crate::widgets::state::ContentViewWidgets;
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::path::PathBuf;

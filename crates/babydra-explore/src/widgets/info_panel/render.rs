@@ -1,5 +1,5 @@
 use crate::widgets::preview_panel::create_preview_panel;
-use babydra_core::InfoPanelWidgets;
+use crate::widgets::state::InfoPanelWidgets;
 use gtk4::prelude::*;
 use gtk4::{Align, Box, Frame, Image, Label, Orientation, ScrolledWindow, Stack};
 

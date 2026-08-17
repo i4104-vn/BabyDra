@@ -1,4 +1,4 @@
-use babydra_core::ContentViewHandle;
+use crate::widgets::state::ContentViewHandle;
 use gtk4::prelude::*;
 
 /// Update content view ui silent.

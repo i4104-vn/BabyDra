@@ -123,8 +123,8 @@ pub fn setup_file_watcher_receiver(
     session: Rc<RefCell<SessionState>>,
     _navigate_pane_no_watch_ref: Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>,
     _active_pane: Rc<Cell<ActivePane>>,
-    left_content_handle: Rc<babydra_core::ContentViewHandle>,
-    right_content_handle: Rc<RefCell<Option<Rc<babydra_core::ContentViewHandle>>>>,
+    left_content_handle: Rc<crate::widgets::state::ContentViewHandle>,
+    right_content_handle: Rc<RefCell<Option<Rc<crate::widgets::state::ContentViewHandle>>>>,
     mut watch_rx: tokio::sync::mpsc::UnboundedReceiver<()>,
 ) {
     let left = left_content_handle;

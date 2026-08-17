@@ -1,5 +1,5 @@
+use crate::widgets::state::ContentViewWidgets;
 use babydra_core::i18n::t;
-use babydra_core::ContentViewWidgets;
 use gtk4::prelude::*;
 use gtk4::{Align, Box, Entry, FlowBox, ListBox, Orientation, ScrolledWindow, Stack};
 

@@ -1,4 +1,4 @@
-use babydra_core::PreviewPanelWidgets;
+use crate::widgets::state::PreviewPanelWidgets;
 use gtk4::prelude::*;
 use gtk4::{Align, Box, Label, Orientation, ScrolledWindow};
 use std::cell::RefCell;

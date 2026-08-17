@@ -1,4 +1,4 @@
-use babydra_core::ContentViewHandle;
+use crate::widgets::state::ContentViewHandle;
 use babydra_core::FileEntry;
 use gtk4::prelude::*;
 use gtk4::{Align, Label};
@@ -8,7 +8,7 @@ use crate::widgets::content_view::items::grid_item::create_flow_child;
 /// Renders entries as a flat icon grid (no grouping headers).
 pub async fn render_flat_grid(
     handle_c: &ContentViewHandle,
-    widgets: &babydra_core::ContentViewWidgets,
+    widgets: &crate::widgets::state::ContentViewWidgets,
     entries: &[FileEntry],
     current_path: &std::path::PathBuf,
     start_path: &std::path::PathBuf,
@@ -61,7 +61,7 @@ pub async fn render_flat_grid(
 /// Renders entries as a grouped icon grid with category headers.
 pub async fn render_grouped_grid(
     handle_c: &ContentViewHandle,
-    widgets: &babydra_core::ContentViewWidgets,
+    widgets: &crate::widgets::state::ContentViewWidgets,
     entries: &[FileEntry],
     current_path: &std::path::PathBuf,
     start_path: &std::path::PathBuf,

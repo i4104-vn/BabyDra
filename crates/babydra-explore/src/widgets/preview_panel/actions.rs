@@ -1,5 +1,5 @@
 use super::render::render_markdown_to_pango;
-use babydra_core::PreviewPanelWidgets;
+use crate::widgets::state::PreviewPanelWidgets;
 use std::fs;
 use std::path::Path;
 

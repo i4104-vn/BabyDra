@@ -1,5 +1,6 @@
+pub use crate::widgets::state::{ContentViewHandle, ContentViewWidgets};
+pub use babydra_core::sort_entries;
 use babydra_core::FileEntry;
-pub use babydra_core::{sort_entries, ContentViewHandle, ContentViewWidgets};
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::path::PathBuf;

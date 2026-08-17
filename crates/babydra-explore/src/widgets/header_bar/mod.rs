@@ -8,8 +8,8 @@ use std::rc::Rc;
 mod address;
 mod render;
 
+pub use crate::widgets::state::HeaderBarWidgets;
 pub use address::update_address_bar;
-pub use babydra_core::HeaderBarWidgets;
 
 /// Creates the header bar, wiring up the navigation button clicks, search events, and layout toggles.
 pub fn create_header_bar(

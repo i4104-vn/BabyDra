@@ -3,7 +3,7 @@ use babydra_core::FileEntry;
 use babydra_explore_kit::explore;
 use gtk4::ScrolledWindow;
 
-pub use babydra_core::InfoPanelWidgets;
+pub use crate::widgets::state::InfoPanelWidgets;
 
 mod render;
 

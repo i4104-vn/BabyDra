@@ -1,5 +1,5 @@
+use crate::widgets::state::HeaderBarWidgets;
 use babydra_core::i18n::t;
-use babydra_core::HeaderBarWidgets;
 use gtk4::prelude::*;
 use gtk4::{Box, Entry, Orientation, Separator, Stack};
 

@@ -1,4 +1,4 @@
-use babydra_core::ContentViewHandle;
+use crate::widgets::state::ContentViewHandle;
 use babydra_core::FileEntry;
 use gtk4::prelude::*;
 use gtk4::{Align, Box, Label, Orientation};
@@ -6,7 +6,7 @@ use gtk4::{Align, Box, Label, Orientation};
 /// Renders entries as list rows in the ListBox.
 pub async fn render_list_view(
     handle_c: &ContentViewHandle,
-    widgets: &babydra_core::ContentViewWidgets,
+    widgets: &crate::widgets::state::ContentViewWidgets,
     entries: &[FileEntry],
     current_path: &std::path::PathBuf,
     start_path: &std::path::PathBuf,

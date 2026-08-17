@@ -1,5 +1,5 @@
+use crate::widgets::state::MainWindowWidgets;
 use babydra_core::i18n::t;
-use babydra_core::MainWindowWidgets;
 use gtk4::prelude::*;
 use gtk4::{ApplicationWindow, Box, Orientation, Paned};
 

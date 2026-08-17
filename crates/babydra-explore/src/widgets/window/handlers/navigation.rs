@@ -1,5 +1,6 @@
+use crate::widgets::state::ContentViewHandle;
 use crate::widgets::status_bar::StatusBarWidgets;
-use babydra_core::{ActivePane, ContentViewHandle, FileWatcher, SessionState};
+use babydra_core::{ActivePane, FileWatcher, SessionState};
 use gtk4::prelude::*;
 use std::cell::{Cell, RefCell};
 use std::path::PathBuf;

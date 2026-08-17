@@ -1,4 +1,5 @@
-use babydra_core::{sort_entries, ContentViewHandle, FileEntry};
+use crate::widgets::state::ContentViewHandle;
+use babydra_core::{sort_entries, FileEntry};
 use gtk4::prelude::*;
 use std::path::PathBuf;
 
@@ -88,7 +89,7 @@ pub fn filter_content_view(handle: &ContentViewHandle, query: &str) {
 
 /// Wires navigation buttons (back, forward, up, refresh) and address bar entry handlers.
 pub fn wire_content_view_navigation(
-    widgets: &babydra_core::ContentViewWidgets,
+    widgets: &crate::widgets::state::ContentViewWidgets,
     nav_cb: std::rc::Rc<dyn Fn(PathBuf)>,
     current_path: std::rc::Rc<std::cell::RefCell<PathBuf>>,
     history: std::rc::Rc<std::cell::RefCell<Vec<PathBuf>>>,
