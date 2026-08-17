@@ -1,6 +1,6 @@
+use babydra_core::i18n::t;
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Label, Align};
-use babydra_common::i18n::t;
+use gtk4::{Align, Box, Label, Orientation};
 
 #[derive(Clone)]
 pub struct StatusBarWidgets {
@@ -37,13 +37,31 @@ pub fn create_status_bar() -> StatusBarWidgets {
     dropdown_sort.set_tooltip_text(Some(&t("explore.sort_by")));
     container.append(&dropdown_sort);
 
-    let btn_view_icons = babydra_utils::components::create_icon_button("view-grid", 16, &["status-bar-btn"], Some(&t("explore.view_grid")), || {});
+    let btn_view_icons = babydra_ui_kit::components::create_icon_button(
+        "view-grid",
+        16,
+        &["status-bar-btn"],
+        Some(&t("explore.view_grid")),
+        || {},
+    );
     container.append(&btn_view_icons);
 
-    let btn_view_list = babydra_utils::components::create_icon_button("view-list", 16, &["status-bar-btn"], Some(&t("explore.view_list")), || {});
+    let btn_view_list = babydra_ui_kit::components::create_icon_button(
+        "view-list",
+        16,
+        &["status-bar-btn"],
+        Some(&t("explore.view_list")),
+        || {},
+    );
     container.append(&btn_view_list);
 
-    let btn_toggle_preview = babydra_utils::components::create_icon_button("sidebar", 16, &["status-bar-btn", "status-bar-btn-active"], Some(&t("explore.toggle_preview")), || {});
+    let btn_toggle_preview = babydra_ui_kit::components::create_icon_button(
+        "sidebar",
+        16,
+        &["status-bar-btn", "status-bar-btn-active"],
+        Some(&t("explore.toggle_preview")),
+        || {},
+    );
     container.append(&btn_toggle_preview);
 
     // Separator before settings
@@ -51,7 +69,13 @@ pub fn create_status_bar() -> StatusBarWidgets {
     sep.set_css_classes(&["status-bar-separator"]);
     container.append(&sep);
 
-    let btn_settings = babydra_utils::components::create_icon_button("settings", 16, &["status-bar-btn"], Some(&t("explore.settings")), || {});
+    let btn_settings = babydra_ui_kit::components::create_icon_button(
+        "settings",
+        16,
+        &["status-bar-btn"],
+        Some(&t("explore.settings")),
+        || {},
+    );
     container.append(&btn_settings);
 
     StatusBarWidgets {
@@ -67,7 +91,7 @@ pub fn create_status_bar() -> StatusBarWidgets {
 
 /// Updates the status bar label content.
 pub fn update_status_bar(lbl_status: &Label, count: usize, total_size: u64) {
-    let size_str = babydra_utils::explore::format_size(total_size);
+    let size_str = babydra_ui_kit::components::explore::format_size(total_size);
     lbl_status.set_text(&format!(
         "{} {} | {}: {}",
         count,

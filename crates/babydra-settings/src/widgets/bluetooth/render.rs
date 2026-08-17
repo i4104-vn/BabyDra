@@ -1,8 +1,9 @@
 //! Bluetooth UI layout generator synchronized with Wi-Fi layout.
 
-use babydra_utils::components::ToggleRow;
+use babydra_ui_kit::components::ToggleRow;
 use gtk4::prelude::*;
 
+/// Builds the `bluetooth ui` UI.
 pub fn build_bluetooth_ui() -> (gtk4::Box, ToggleRow, gtk4::ListBox) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
     main_box.set_vexpand(true);
@@ -12,7 +13,7 @@ pub fn build_bluetooth_ui() -> (gtk4::Box, ToggleRow, gtk4::ListBox) {
     let header_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
     header_row.set_margin_bottom(4);
 
-    let title_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.bt_title")));
+    let title_lbl = gtk4::Label::new(Some(&babydra_core::i18n::t("settings.bt_title")));
     title_lbl.add_css_class("settings-page-title");
     title_lbl.set_halign(gtk4::Align::Start);
     header_row.append(&title_lbl);

@@ -1,9 +1,10 @@
-pub mod window;
-pub mod header_bar;
-pub mod sidebar;
 pub mod content_view;
-pub mod tab_bar;
-pub mod status_bar;
+pub mod header_bar;
 pub mod info_panel;
 pub mod preview_panel;
 pub mod settings_dialog;
+pub mod sidebar;
+pub mod state;
+pub mod status_bar;
+pub mod tab_bar;
+pub mod window;

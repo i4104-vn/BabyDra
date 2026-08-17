@@ -6,15 +6,17 @@ use std::collections::HashSet;
 use std::rc::Rc;
 use std::sync::mpsc::channel;
 
-use babydra_common::services::system::vpn::{
+use babydra_core::services::system::vpn::{
     delete_vpn_connection, get_vpn_connections, import_vpn_profile, save_vpn_connection, VpnConn,
 };
 
 mod handler;
 mod render;
 
+/// Creates a new `VPN widget`.
 pub fn create_vpn_widget() -> gtk4::Widget {
-    let (main_box, import_btn, add_custom_btn, list_box, config_dialog, log_dialog) = render::build_vpn_ui();
+    let (main_box, import_btn, add_custom_btn, list_box, config_dialog, log_dialog) =
+        render::build_vpn_ui();
 
     let state = Rc::new(RefCell::new(Vec::<VpnConn>::new()));
     let connecting_vpns = Rc::new(RefCell::new(HashSet::<String>::new()));
@@ -132,12 +134,15 @@ pub fn create_vpn_widget() -> gtk4::Widget {
     let list_box_parent = list_box.clone();
     let trigger_on_import = trigger_refresh.clone();
     import_btn.connect_clicked(move |_| {
-        if let Some(win) = list_box_parent.root().and_then(|r| r.downcast::<gtk4::Window>().ok()) {
+        if let Some(win) = list_box_parent
+            .root()
+            .and_then(|r| r.downcast::<gtk4::Window>().ok())
+        {
             let file_dialog = gtk4::FileDialog::new();
-            file_dialog.set_title(&babydra_common::i18n::t("settings.open_vpn_profile"));
+            file_dialog.set_title(&babydra_core::i18n::t("settings.open_vpn_profile"));
 
             let filter = gtk4::FileFilter::new();
-            filter.set_name(Some(&babydra_common::i18n::t("settings.vpn_filter")));
+            filter.set_name(Some(&babydra_core::i18n::t("settings.vpn_filter")));
             filter.add_pattern("*.ovpn");
             filter.add_pattern("*.conf");
             file_dialog.set_default_filter(Some(&filter));

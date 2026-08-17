@@ -1,8 +1,9 @@
+use babydra_core::services::wallpaper::{get_local_wallpapers, get_wallpaper_dir};
 use gtk4::prelude::*;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
-use babydra_common::services::wallpaper::{get_wallpaper_dir, get_local_wallpapers};
 
+/// Sets up `appearance handlers`.
 pub fn setup_appearance_handlers(
     main_box: &gtk4::Box,
     preview_pic: &gtk4::Picture,
@@ -26,18 +27,27 @@ pub fn setup_appearance_handlers(
     let cursor_d = cursor_dropdown.clone();
     let size_d = size_dropdown.clone();
 
-    let current_app = babydra_common::services::system::theme::get_current_appearance();
+    let current_app = babydra_core::services::system::theme::get_current_appearance();
 
     if let Some(idx) = gtk_themes.iter().position(|t| t == &current_app.gtk_theme) {
         gtk_d.set_selected(idx as u32);
     }
-    if let Some(idx) = icon_themes.iter().position(|t| t == &current_app.icon_theme) {
+    if let Some(idx) = icon_themes
+        .iter()
+        .position(|t| t == &current_app.icon_theme)
+    {
         icon_d.set_selected(idx as u32);
     }
-    if let Some(idx) = cursor_themes.iter().position(|t| t == &current_app.cursor_theme) {
+    if let Some(idx) = cursor_themes
+        .iter()
+        .position(|t| t == &current_app.cursor_theme)
+    {
         cursor_d.set_selected(idx as u32);
     }
-    if let Some(idx) = cursor_sizes.iter().position(|s| s == &current_app.cursor_size) {
+    if let Some(idx) = cursor_sizes
+        .iter()
+        .position(|s| s == &current_app.cursor_size)
+    {
         size_d.set_selected(idx as u32);
     }
 
@@ -50,9 +60,18 @@ pub fn setup_appearance_handlers(
         let cursor_idx = cursor_d.selected() as usize;
         let size_idx = size_d.selected() as usize;
 
-        let selected_gtk = gtk_themes.get(gtk_idx).cloned().unwrap_or_else(|| "Adwaita".to_string());
-        let selected_icon = icon_themes.get(icon_idx).cloned().unwrap_or_else(|| "Adwaita".to_string());
-        let selected_cursor = cursor_themes.get(cursor_idx).cloned().unwrap_or_else(|| "Adwaita".to_string());
+        let selected_gtk = gtk_themes
+            .get(gtk_idx)
+            .cloned()
+            .unwrap_or_else(|| "Adwaita".to_string());
+        let selected_icon = icon_themes
+            .get(icon_idx)
+            .cloned()
+            .unwrap_or_else(|| "Adwaita".to_string());
+        let selected_cursor = cursor_themes
+            .get(cursor_idx)
+            .cloned()
+            .unwrap_or_else(|| "Adwaita".to_string());
         let selected_size = cursor_sizes.get(size_idx).cloned().unwrap_or(24);
 
         if let Some(root) = gtk_d_c.root() {
@@ -61,20 +80,17 @@ pub fn setup_appearance_handlers(
             let (tx, rx) = std::sync::mpsc::channel();
 
             std::thread::spawn(move || {
-                let _ = babydra_common::services::system::theme::apply_appearance(
+                let _ = babydra_core::services::system::theme::apply_appearance(
                     &selected_gtk,
                     &selected_icon,
                     &selected_cursor,
                     selected_size,
                 );
-                let notif_title = babydra_common::i18n::t("settings.notif_theme_title");
-                let notif_msg = babydra_common::i18n::t("settings.notif_theme_msg")
+                let notif_title = babydra_core::i18n::t("settings.notif_theme_title");
+                let notif_msg = babydra_core::i18n::t("settings.notif_theme_msg")
                     .replace("{gtk}", &selected_gtk)
                     .replace("{icon}", &selected_icon);
-                babydra_common::send_settings_notification(
-                    &notif_title,
-                    &notif_msg,
-                );
+                babydra_core::send_settings_notification(&notif_title, &notif_msg);
                 let _ = tx.send(());
             });
 
@@ -87,7 +103,7 @@ pub fn setup_appearance_handlers(
                 }
             });
         } else {
-            let _ = babydra_common::services::system::theme::apply_appearance(
+            let _ = babydra_core::services::system::theme::apply_appearance(
                 &selected_gtk,
                 &selected_icon,
                 &selected_cursor,
@@ -99,55 +115,67 @@ pub fn setup_appearance_handlers(
     let apply_cb1 = apply_theme_settings.clone();
     let init_flag1 = initializing.clone();
     gtk_dropdown.connect_selected_notify(move |_| {
-        if !init_flag1.get() { apply_cb1(); }
+        if !init_flag1.get() {
+            apply_cb1();
+        }
     });
 
     let apply_cb2 = apply_theme_settings.clone();
     let init_flag2 = initializing.clone();
     icon_dropdown.connect_selected_notify(move |_| {
-        if !init_flag2.get() { apply_cb2(); }
+        if !init_flag2.get() {
+            apply_cb2();
+        }
     });
 
     let apply_cb3 = apply_theme_settings.clone();
     let init_flag3 = initializing.clone();
     cursor_dropdown.connect_selected_notify(move |_| {
-        if !init_flag3.get() { apply_cb3(); }
+        if !init_flag3.get() {
+            apply_cb3();
+        }
     });
 
     let apply_cb4 = apply_theme_settings.clone();
     let init_flag4 = initializing.clone();
     size_dropdown.connect_selected_notify(move |_| {
-        if !init_flag4.get() { apply_cb4(); }
+        if !init_flag4.get() {
+            apply_cb4();
+        }
     });
 
     initializing.set(false);
 
     let theme_btn_clone = theme_toggle_btn.clone();
     theme_toggle_btn.connect_clicked(move |_| {
-        let currently_dark = babydra_utils::ui::theme::is_dark_mode();
+        let currently_dark = babydra_ui_kit::ui::theme::is_dark_mode();
         let new_dark = !currently_dark;
-        
-        let spinner = gtk4::Spinner::builder().spinning(true).halign(gtk4::Align::Center).valign(gtk4::Align::Center).build();
+
+        let spinner = gtk4::Spinner::builder()
+            .spinning(true)
+            .halign(gtk4::Align::Center)
+            .valign(gtk4::Align::Center)
+            .build();
         theme_btn_clone.set_child(Some(&spinner));
-        
-        babydra_utils::ui::theme::set_dark_mode(new_dark);
+
+        babydra_ui_kit::ui::theme::set_dark_mode(new_dark);
     });
 
     if let Some(settings) = gtk4::Settings::default() {
         let theme_btn_clone_notify = theme_toggle_btn.clone();
         settings.connect_gtk_application_prefer_dark_theme_notify(move |_| {
-            let new_dark = babydra_utils::ui::theme::is_dark_mode();
-            
-            let notif_title = babydra_common::i18n::t("settings.notif_display_mode_title");
+            let new_dark = babydra_ui_kit::ui::theme::is_dark_mode();
+
+            let notif_title = babydra_core::i18n::t("settings.notif_display_mode_title");
             let notif_msg = if new_dark {
-                babydra_common::i18n::t("settings.notif_dark_mode_enabled")
+                babydra_core::i18n::t("settings.notif_dark_mode_enabled")
             } else {
-                babydra_common::i18n::t("settings.notif_light_mode_enabled")
+                babydra_core::i18n::t("settings.notif_light_mode_enabled")
             };
-            babydra_common::send_settings_notification(&notif_title, &notif_msg);
+            babydra_core::send_settings_notification(&notif_title, &notif_msg);
 
             let new_icon_name = if new_dark { "brightness" } else { "dark-mode" };
-            let new_icon = babydra_utils::ui::icon::get_icon(new_icon_name, 18);
+            let new_icon = babydra_ui_kit::ui::icon::get_icon(new_icon_name, 18);
             new_icon.set_pixel_size(18);
             new_icon.set_valign(gtk4::Align::Center);
             new_icon.set_halign(gtk4::Align::Center);
@@ -156,7 +184,7 @@ pub fn setup_appearance_handlers(
     }
 
     // Dynamic Target Selection & Wallpaper State Management
-    let desktop_wp_path = Rc::new(RefCell::new(babydra_common::get_current_wallpaper()));
+    let desktop_wp_path = Rc::new(RefCell::new(babydra_core::get_current_wallpaper()));
     let greeter_wp_path: Rc<RefCell<Option<std::path::PathBuf>>> = Rc::new(RefCell::new(None));
     let target_mode = Rc::new(Cell::new(0u32)); // 0 = Desktop, 1 = Lock screen
 
@@ -177,9 +205,16 @@ pub fn setup_appearance_handlers(
         } else {
             if let Some(ref p) = *greeter_wp_ref.borrow() {
                 preview_pic_target.set_filename(Some(p));
-            } else if let Some(bytes) = babydra_common::get_greeter_wallpaper_bytes() {
-                let stream = gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(&bytes));
-                if let Ok(pixbuf) = gtk4::gdk_pixbuf::Pixbuf::from_stream_at_scale(&stream, 800, 600, true, gtk4::gio::Cancellable::NONE) {
+            } else if let Some(bytes) = babydra_core::get_greeter_wallpaper_bytes() {
+                let stream =
+                    gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(&bytes));
+                if let Ok(pixbuf) = gtk4::gdk_pixbuf::Pixbuf::from_stream_at_scale(
+                    &stream,
+                    800,
+                    600,
+                    true,
+                    gtk4::gio::Cancellable::NONE,
+                ) {
                     preview_pic_target.set_pixbuf(Some(&pixbuf));
                 }
             } else {
@@ -208,16 +243,18 @@ pub fn setup_appearance_handlers(
                 empty_box.set_margin_top(24);
                 empty_box.set_margin_bottom(24);
 
-                let icon = babydra_utils::ui::icon::get_icon("display", 28);
+                let icon = babydra_ui_kit::ui::icon::get_icon("display", 28);
                 icon.set_pixel_size(28);
                 icon.set_halign(gtk4::Align::Center);
                 empty_box.append(&icon);
 
-                let title = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.no_wallpapers")));
+                let title =
+                    gtk4::Label::new(Some(&babydra_core::i18n::t("settings.no_wallpapers")));
                 title.add_css_class("settings-row-title");
                 empty_box.append(&title);
 
-                let sub = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.no_wallpapers_sub")));
+                let sub =
+                    gtk4::Label::new(Some(&babydra_core::i18n::t("settings.no_wallpapers_sub")));
                 sub.add_css_class("settings-row-desc");
                 empty_box.append(&sub);
 
@@ -251,23 +288,23 @@ pub fn setup_appearance_handlers(
                     btn.connect_clicked(move |_| {
                         let is_lock = target_mode_cb.get() == 1;
                         if is_lock {
-                            let _ = babydra_common::set_greeter_wallpaper(&wp_clone);
+                            let _ = babydra_core::set_greeter_wallpaper(&wp_clone);
                             *greeter_wp_cb.borrow_mut() = Some(wp_clone.clone());
                             preview_cb.set_filename(Some(&wp_clone));
-                            babydra_common::send_settings_notification(
-                                &babydra_common::i18n::t("settings.notif_greeter_wallpaper_title"),
-                                &babydra_common::i18n::t("settings.notif_greeter_wallpaper_msg"),
+                            babydra_core::send_settings_notification(
+                                &babydra_core::i18n::t("settings.notif_greeter_wallpaper_title"),
+                                &babydra_core::i18n::t("settings.notif_greeter_wallpaper_msg"),
                             );
                         } else {
-                            let _ = babydra_common::set_wallpaper(&wp_clone);
+                            let _ = babydra_core::set_wallpaper(&wp_clone);
                             *desktop_wp_cb.borrow_mut() = Some(wp_clone.clone());
                             preview_cb.set_filename(Some(&wp_clone));
                             if let Some(root) = preview_cb.root() {
                                 let _ = root.activate_action("win.refresh-sidebar", None);
                             }
-                            babydra_common::send_settings_notification(
-                                &babydra_common::i18n::t("settings.notif_wallpaper_title"),
-                                &babydra_common::i18n::t("settings.notif_wallpaper_msg"),
+                            babydra_core::send_settings_notification(
+                                &babydra_core::i18n::t("settings.notif_wallpaper_title"),
+                                &babydra_core::i18n::t("settings.notif_wallpaper_msg"),
                             );
                         }
                     });
@@ -291,18 +328,21 @@ pub fn setup_appearance_handlers(
 
     // Floating '+' Button Picker
     pick_btn.connect_clicked(move |_| {
-        if let Some(win) = parent_box.root().and_then(|r| r.downcast::<gtk4::Window>().ok()) {
+        if let Some(win) = parent_box
+            .root()
+            .and_then(|r| r.downcast::<gtk4::Window>().ok())
+        {
             let file_dialog = gtk4::FileDialog::new();
             let is_lock = target_mode_pick.get() == 1;
             let title = if is_lock {
-                babydra_common::i18n::t("settings.pick_greeter_wallpaper")
+                babydra_core::i18n::t("settings.pick_greeter_wallpaper")
             } else {
-                babydra_common::i18n::t("settings.pick_wallpaper")
+                babydra_core::i18n::t("settings.pick_wallpaper")
             };
             file_dialog.set_title(&title);
 
             let filter = gtk4::FileFilter::new();
-            filter.set_name(Some(&babydra_common::i18n::t("settings.image_filter")));
+            filter.set_name(Some(&babydra_core::i18n::t("settings.image_filter")));
             filter.add_mime_type("image/png");
             filter.add_mime_type("image/jpeg");
             filter.add_mime_type("image/webp");
@@ -323,25 +363,27 @@ pub fn setup_appearance_handlers(
                                 let _ = std::fs::copy(&path, &dest_path);
                             }
                             if is_lock {
-                                let _ = babydra_common::set_greeter_wallpaper(&dest_path);
+                                let _ = babydra_core::set_greeter_wallpaper(&dest_path);
                                 *greeter_wp_file.borrow_mut() = Some(dest_path.clone());
                                 preview_cb.set_filename(Some(&dest_path));
                                 render_grid_after_pick();
-                                babydra_common::send_settings_notification(
-                                    &babydra_common::i18n::t("settings.notif_greeter_wallpaper_title"),
-                                    &babydra_common::i18n::t("settings.notif_greeter_wallpaper_msg"),
+                                babydra_core::send_settings_notification(
+                                    &babydra_core::i18n::t(
+                                        "settings.notif_greeter_wallpaper_title",
+                                    ),
+                                    &babydra_core::i18n::t("settings.notif_greeter_wallpaper_msg"),
                                 );
                             } else {
-                                let _ = babydra_common::set_wallpaper(&dest_path);
+                                let _ = babydra_core::set_wallpaper(&dest_path);
                                 *desktop_wp_file.borrow_mut() = Some(dest_path.clone());
                                 preview_cb.set_filename(Some(&dest_path));
                                 render_grid_after_pick();
                                 if let Some(root) = preview_cb.root() {
                                     let _ = root.activate_action("win.refresh-sidebar", None);
                                 }
-                                babydra_common::send_settings_notification(
-                                    &babydra_common::i18n::t("settings.notif_wallpaper_title"),
-                                    &babydra_common::i18n::t("settings.notif_wallpaper_msg"),
+                                babydra_core::send_settings_notification(
+                                    &babydra_core::i18n::t("settings.notif_wallpaper_title"),
+                                    &babydra_core::i18n::t("settings.notif_wallpaper_msg"),
                                 );
                             }
                         }
@@ -354,12 +396,15 @@ pub fn setup_appearance_handlers(
     let avatar_preview_cb = avatar_pic.clone();
     let parent_box_av = main_box.clone();
     avatar_btn.connect_clicked(move |_| {
-        if let Some(win) = parent_box_av.root().and_then(|r| r.downcast::<gtk4::Window>().ok()) {
+        if let Some(win) = parent_box_av
+            .root()
+            .and_then(|r| r.downcast::<gtk4::Window>().ok())
+        {
             let file_dialog = gtk4::FileDialog::new();
-            file_dialog.set_title(&babydra_common::i18n::t("settings.pick_avatar"));
+            file_dialog.set_title(&babydra_core::i18n::t("settings.pick_avatar"));
 
             let filter = gtk4::FileFilter::new();
-            filter.set_name(Some(&babydra_common::i18n::t("settings.image_filter")));
+            filter.set_name(Some(&babydra_core::i18n::t("settings.image_filter")));
             filter.add_mime_type("image/png");
             filter.add_mime_type("image/jpeg");
             filter.add_mime_type("image/webp");
@@ -370,15 +415,17 @@ pub fn setup_appearance_handlers(
             file_dialog.open(Some(&win), None::<&gtk4::gio::Cancellable>, move |res| {
                 if let Ok(file) = res {
                     if let Some(path) = file.path() {
-                        if babydra_common::set_avatar(&path).is_ok() {
+                        if babydra_core::set_avatar(&path).is_ok() {
                             if let Ok(bytes) = std::fs::read(&path) {
-                                if let Some(pixbuf) = babydra_common::crop_to_circle_pixbuf(&bytes, 42) {
+                                if let Some(pixbuf) =
+                                    babydra_core::crop_to_circle_pixbuf(&bytes, 42)
+                                {
                                     preview_cb.set_pixbuf(Some(&pixbuf));
                                 }
                             }
-                            babydra_common::send_settings_notification(
-                                &babydra_common::i18n::t("settings.notif_avatar_title"),
-                                &babydra_common::i18n::t("settings.notif_avatar_msg"),
+                            babydra_core::send_settings_notification(
+                                &babydra_core::i18n::t("settings.notif_avatar_title"),
+                                &babydra_core::i18n::t("settings.notif_avatar_msg"),
                             );
                         }
                     }

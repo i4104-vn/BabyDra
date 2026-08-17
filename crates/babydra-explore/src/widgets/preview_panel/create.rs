@@ -1,9 +1,10 @@
+use crate::widgets::state::PreviewPanelWidgets;
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Label, ScrolledWindow, Align};
-use std::rc::Rc;
+use gtk4::{Align, Box, Label, Orientation, ScrolledWindow};
 use std::cell::RefCell;
-use babydra_common::PreviewPanelWidgets;
+use std::rc::Rc;
 
+/// Creates a new `preview panel`.
 pub fn create_preview_panel() -> (ScrolledWindow, PreviewPanelWidgets) {
     let container = ScrolledWindow::new();
     container.set_css_classes(&["preview-panel"]);
@@ -15,7 +16,7 @@ pub fn create_preview_panel() -> (ScrolledWindow, PreviewPanelWidgets) {
     vbox.set_vexpand(true);
     container.set_child(Some(&vbox));
 
-    let lbl_status = Label::new(Some(&babydra_common::i18n::t("explore.preview_no_selection")));
+    let lbl_status = Label::new(Some(&babydra_core::i18n::t("explore.preview_no_selection")));
     lbl_status.set_css_classes(&["dim-label"]);
     lbl_status.set_margin_bottom(6);
     vbox.append(&lbl_status);

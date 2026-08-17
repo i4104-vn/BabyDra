@@ -32,7 +32,10 @@ fn get_cpu_raw() -> Option<CpuTime> {
 
             let idle_time = idle + iowait;
             let total_time = user + nice + system + idle_time + irq + softirq + steal;
-            return Some(CpuTime { total: total_time, idle: idle_time });
+            return Some(CpuTime {
+                total: total_time,
+                idle: idle_time,
+            });
         }
     }
     None
@@ -74,18 +77,17 @@ fn get_ram_usage() -> Option<(f64, f64, f64)> {
 pub fn create_sys_monitor_widget() -> gtk4::Box {
     let capsule = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
 
-    let (
-        sys_label,
-        popover,
-        cpu_chart,
-        ram_chart,
-        cpu_label,
-        ram_label,
-        ram_detail,
-    ) = render::build_sys_monitor_ui(&capsule);
+    let (sys_label, popover, cpu_chart, ram_chart, cpu_label, ram_label, ram_detail) =
+        render::build_sys_monitor_ui(&capsule);
 
-    let cpu_history = Rc::new(RefCell::new(std::collections::VecDeque::from(vec![0.0; 30])));
-    let ram_history = Rc::new(RefCell::new(std::collections::VecDeque::from(vec![0.0; 30])));
+    let cpu_history = Rc::new(RefCell::new(std::collections::VecDeque::from(vec![
+        0.0;
+        30
+    ])));
+    let ram_history = Rc::new(RefCell::new(std::collections::VecDeque::from(vec![
+        0.0;
+        30
+    ])));
 
     render::setup_chart_draw(&cpu_chart, cpu_history.clone(), "#3b82f6");
     render::setup_chart_draw(&ram_chart, ram_history.clone(), "#a855f7");
@@ -121,16 +123,27 @@ pub fn create_sys_monitor_widget() -> gtk4::Box {
 
             let ram_info = get_ram_usage().unwrap_or((0.0, 0.0, 0.0));
 
-            sys_label_clone.set_text(&format!(
-                "CPU: {:.0}% | RAM: {:.0}%",
-                cpu_percent, ram_info.2
-            ));
+            let sys_template = babydra_core::i18n::t("sysmon.cpu_ram");
+            sys_label_clone.set_text(
+                &sys_template
+                    .replace("{cpu}", &format!("{:.0}", cpu_percent))
+                    .replace("{ram}", &format!("{:.0}", ram_info.2)),
+            );
 
-            cpu_label_clone.set_text(&format!("{}: {:.1}%", babydra_common::i18n::t("panel.cpu_load"), cpu_percent));
-            ram_label_clone.set_text(&format!("{}: {:.1}%", babydra_common::i18n::t("panel.ram_usage"), ram_info.2));
+            cpu_label_clone.set_text(&format!(
+                "{}: {:.1}%",
+                babydra_core::i18n::t("panel.cpu_load"),
+                cpu_percent
+            ));
+            ram_label_clone.set_text(&format!(
+                "{}: {:.1}%",
+                babydra_core::i18n::t("panel.ram_usage"),
+                ram_info.2
+            ));
             ram_detail_clone.set_text(&format!(
                 "{:.} GB / {:.2} GB",
-                format!("{:.2}", ram_info.0), ram_info.1
+                format!("{:.2}", ram_info.0),
+                ram_info.1
             ));
 
             {
@@ -153,7 +166,7 @@ pub fn create_sys_monitor_widget() -> gtk4::Box {
 
     let motion_controller = gtk4::EventControllerMotion::new();
     let popover_enter = popover.clone();
-    
+
     let last_cpu_hover = last_cpu.clone();
     let cpu_label_hover = cpu_label.clone();
     let ram_label_hover = ram_label.clone();
@@ -180,17 +193,22 @@ pub fn create_sys_monitor_widget() -> gtk4::Box {
                 0.0
             };
             *last_cpu_borrow = Some(current_cpu);
-            cpu_label_hover.set_text(&format!("{}: {:.1}%", babydra_common::i18n::t("panel.cpu_load"), cpu_percent));
+            cpu_label_hover.set_text(&format!(
+                "{}: {:.1}%",
+                babydra_core::i18n::t("panel.cpu_load"),
+                cpu_percent
+            ));
         }
 
         let mut ram_pct = 0.0;
         if let Some(ram_info) = get_ram_usage() {
             ram_pct = ram_info.2;
-            ram_label_hover.set_text(&format!("{}: {:.1}%", babydra_common::i18n::t("panel.ram_usage"), ram_pct));
-            ram_detail_hover.set_text(&format!(
-                "{:.2} GB / {:.2} GB",
-                ram_info.0, ram_info.1
+            ram_label_hover.set_text(&format!(
+                "{}: {:.1}%",
+                babydra_core::i18n::t("panel.ram_usage"),
+                ram_pct
             ));
+            ram_detail_hover.set_text(&format!("{:.2} GB / {:.2} GB", ram_info.0, ram_info.1));
         }
 
         {
@@ -218,4 +236,3 @@ pub fn create_sys_monitor_widget() -> gtk4::Box {
     capsule.add_controller(motion_controller);
     capsule
 }
-

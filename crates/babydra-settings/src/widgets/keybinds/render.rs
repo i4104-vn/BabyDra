@@ -1,7 +1,9 @@
+use crate::widgets::state::KeybindsWidget;
+use babydra_core::models::keybind::Keybind;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, DropDown, Entry, Label, Orientation, StringList};
-use babydra_common::models::keybind::{Keybind, KeybindsWidget};
 
+/// Build.
 pub fn build(keybinds: &[Keybind]) -> KeybindsWidget {
     let container = Box::new(Orientation::Vertical, 16);
     container.set_vexpand(true);
@@ -9,18 +11,18 @@ pub fn build(keybinds: &[Keybind]) -> KeybindsWidget {
 
     // Header
     let header_box = Box::new(Orientation::Horizontal, 12);
-    let title_label = Label::new(Some(&babydra_common::i18n::t("settings.keybinds_title_page")));
+    let title_label = Label::new(Some(&babydra_core::i18n::t("settings.keybinds_title_page")));
     title_label.add_css_class("settings-page-title");
     title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);
 
-    let refresh_btn = Button::with_label(&babydra_common::i18n::t("settings.refresh"));
+    let refresh_btn = Button::with_label(&babydra_core::i18n::t("settings.refresh"));
     refresh_btn.add_css_class("connect-pill-btn");
 
-    let add_btn = Button::with_label(&babydra_common::i18n::t("settings.startup_add_new"));
+    let add_btn = Button::with_label(&babydra_core::i18n::t("settings.startup_add_new"));
     add_btn.add_css_class("connect-pill-btn");
 
-    let save_btn = Button::with_label(&babydra_common::i18n::t("settings.save_changes"));
+    let save_btn = Button::with_label(&babydra_core::i18n::t("settings.save_changes"));
     save_btn.add_css_class("suggested-action");
 
     header_box.append(&title_label);
@@ -42,23 +44,23 @@ pub fn build(keybinds: &[Keybind]) -> KeybindsWidget {
     th_row.add_css_class("settings-card-row");
     th_row.set_margin_bottom(8);
 
-    let col_type = Label::new(Some("TYPE"));
+    let col_type = Label::new(Some(&babydra_core::i18n::t("settings.keybind_type")));
     col_type.set_width_request(100);
     col_type.add_css_class("settings-section-title");
 
-    let col_mod = Label::new(Some("MODIFIER"));
+    let col_mod = Label::new(Some(&babydra_core::i18n::t("settings.keybind_modifier")));
     col_mod.set_width_request(120);
     col_mod.add_css_class("settings-section-title");
 
-    let col_key = Label::new(Some("KEY"));
+    let col_key = Label::new(Some(&babydra_core::i18n::t("settings.keybind_key")));
     col_key.set_width_request(80);
     col_key.add_css_class("settings-section-title");
 
-    let col_disp = Label::new(Some("DISPATCHER"));
+    let col_disp = Label::new(Some(&babydra_core::i18n::t("settings.keybind_dispatch")));
     col_disp.set_hexpand(true);
     col_disp.add_css_class("settings-section-title");
 
-    let col_args = Label::new(Some("ARGS"));
+    let col_args = Label::new(Some(&babydra_core::i18n::t("settings.keybind_args")));
     col_args.set_hexpand(true);
     col_args.add_css_class("settings-section-title");
 
@@ -99,12 +101,8 @@ pub fn build(keybinds: &[Keybind]) -> KeybindsWidget {
     }
 }
 
-pub fn create_keybind_row(
-    kb: &Keybind,
-    types: &[&str],
-    mods: &[&str],
-    parent: Box,
-) -> Box {
+/// Creates a new `keybind row`.
+pub fn create_keybind_row(kb: &Keybind, types: &[&str], mods: &[&str], parent: Box) -> Box {
     let row = Box::new(Orientation::Horizontal, 8);
     row.add_css_class("settings-card-row");
 
@@ -136,7 +134,7 @@ pub fn create_keybind_row(
     delete_btn.add_css_class("circular");
     delete_btn.add_css_class("delete-btn");
     delete_btn.set_valign(gtk4::Align::Center);
-    let del_icon = babydra_utils::ui::icon::get_icon("edit-delete", 16);
+    let del_icon = babydra_ui_kit::ui::icon::get_icon("edit-delete", 16);
     del_icon.set_pixel_size(16);
     delete_btn.set_child(Some(&del_icon));
 

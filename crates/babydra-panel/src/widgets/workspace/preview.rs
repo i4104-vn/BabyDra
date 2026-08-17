@@ -1,17 +1,12 @@
-use gtk4::prelude::*;
-use babydra_common::{DesktopApp, focus_window, close_window};
 use super::render;
+use babydra_core::{close_window, focus_window, DesktopApp};
+use gtk4::prelude::*;
 
 /// Populates a Popover widget containing a vertical list of window titles grouped by app
-pub fn populate_popover_previews(
-    popover: &gtk4::Popover,
-    windows: &[DesktopApp],
-    app_id: &str,
-) {
+pub fn populate_popover_previews(popover: &gtk4::Popover, windows: &[DesktopApp], app_id: &str) {
     let (action_triggers, open_new_info, close_all_btn_opt) =
         render::render_popover_previews(popover, windows, app_id);
 
-    // Set up click handlers for window items
     for (preview_btn, kill_btn, app) in action_triggers {
         let pop_close = popover.clone();
         let app_id_str = app.app_id.clone().unwrap_or_else(|| app_id.to_string());
@@ -33,7 +28,6 @@ pub fn populate_popover_previews(
         });
     }
 
-    // Set up click handler for open new button
     if let Some((open_new_btn, exec_cmd)) = open_new_info {
         let pop_open_new = popover.clone();
         open_new_btn.connect_clicked(move |_| {
@@ -47,7 +41,6 @@ pub fn populate_popover_previews(
         });
     }
 
-    // Set up click handler for close all button
     if let Some(close_all_btn) = close_all_btn_opt {
         let pop_close_all = popover.clone();
         let windows_clone: Vec<(String, String)> = windows
@@ -67,8 +60,8 @@ pub fn populate_popover_previews(
         });
     }
 
-    // Clear child on closed to free resources
     popover.connect_closed(|pop| {
+        // Clear the child on close to free widget resources
         pop.set_child(None::<&gtk4::Widget>);
     });
 }

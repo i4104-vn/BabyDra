@@ -13,6 +13,7 @@ pub struct SystemInfoLabels {
     pub gpu_lbl: gtk4::Label,
 }
 
+/// Builds the `system ui` UI.
 pub fn build_system_ui(
     hostname: &str,
     os_name: &str,
@@ -28,7 +29,7 @@ pub fn build_system_ui(
     main_box.set_valign(gtk4::Align::Fill);
 
     // Page Title
-    let page_title = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.about_title")));
+    let page_title = gtk4::Label::new(Some(&babydra_core::i18n::t("settings.about_title")));
     page_title.add_css_class("settings-page-title");
     page_title.set_halign(gtk4::Align::Start);
     main_box.append(&page_title);
@@ -49,7 +50,7 @@ pub fn build_system_ui(
     avatar_box.set_size_request(80, 80);
     avatar_box.set_valign(gtk4::Align::Center);
 
-    let avatar_img = babydra_utils::ui::icon::get_icon("logo", 80);
+    let avatar_img = babydra_ui_kit::ui::icon::get_icon("logo", 80);
     avatar_img.set_pixel_size(80);
     avatar_img.set_valign(gtk4::Align::Center);
     avatar_img.set_halign(gtk4::Align::Center);
@@ -96,12 +97,12 @@ pub fn build_system_ui(
     uptime_badge.add_css_class("hero-uptime-badge");
     uptime_badge.set_valign(gtk4::Align::Center);
 
-    let clock_icon = babydra_utils::ui::icon::get_icon("history", 14);
+    let clock_icon = babydra_ui_kit::ui::icon::get_icon("history", 14);
     clock_icon.set_pixel_size(14);
     clock_icon.set_valign(gtk4::Align::Center);
     uptime_badge.append(&clock_icon);
 
-    let formatted_uptime = babydra_common::i18n::t("settings.up_time").replace("{}", uptime_text);
+    let formatted_uptime = babydra_core::i18n::t("settings.up_time").replace("{}", uptime_text);
     let uptime_lbl = gtk4::Label::new(Some(&formatted_uptime));
     uptime_lbl.add_css_class("hero-uptime-label");
     uptime_lbl.set_valign(gtk4::Align::Center);
@@ -120,7 +121,7 @@ pub fn build_system_ui(
     let btn_vn = gtk4::Button::with_label("VN");
     btn_vn.set_cursor_from_name(Some("pointer"));
 
-    let current_locale = babydra_common::i18n::get_locale();
+    let current_locale = babydra_core::i18n::get_locale();
     if current_locale == "vi" {
         btn_vn.add_css_class("lang-seg-active");
         btn_en.add_css_class("lang-seg-inactive");
@@ -132,8 +133,8 @@ pub fn build_system_ui(
     let btn_en_c = btn_en.clone();
     let btn_vn_c = btn_vn.clone();
     btn_en.connect_clicked(move |b| {
-        babydra_common::i18n::set_locale("en");
-        babydra_common::i18n::persist_locale("en");
+        babydra_core::i18n::set_locale("en");
+        babydra_core::i18n::persist_locale("en");
         btn_en_c.remove_css_class("lang-seg-inactive");
         btn_en_c.add_css_class("lang-seg-active");
         btn_vn_c.remove_css_class("lang-seg-active");
@@ -144,8 +145,8 @@ pub fn build_system_ui(
     let btn_en_c2 = btn_en.clone();
     let btn_vn_c2 = btn_vn.clone();
     btn_vn.connect_clicked(move |b| {
-        babydra_common::i18n::set_locale("vi");
-        babydra_common::i18n::persist_locale("vi");
+        babydra_core::i18n::set_locale("vi");
+        babydra_core::i18n::persist_locale("vi");
         btn_vn_c2.remove_css_class("lang-seg-inactive");
         btn_vn_c2.add_css_class("lang-seg-active");
         btn_en_c2.remove_css_class("lang-seg-active");
@@ -173,10 +174,26 @@ pub fn build_system_ui(
     let gpu_lbl = gtk4::Label::new(Some(gpu_info));
 
     let specs: Vec<(&str, String, &gtk4::Label)> = vec![
-        ("cog", babydra_common::i18n::t("settings.spec_kernel"), &kernel_lbl),
-        ("sliders", babydra_common::i18n::t("settings.spec_processor"), &cpu_lbl),
-        ("history", babydra_common::i18n::t("settings.spec_memory"), &mem_lbl),
-        ("palette", babydra_common::i18n::t("settings.spec_graphics"), &gpu_lbl),
+        (
+            "cog",
+            babydra_core::i18n::t("settings.spec_kernel"),
+            &kernel_lbl,
+        ),
+        (
+            "sliders",
+            babydra_core::i18n::t("settings.spec_processor"),
+            &cpu_lbl,
+        ),
+        (
+            "history",
+            babydra_core::i18n::t("settings.spec_memory"),
+            &mem_lbl,
+        ),
+        (
+            "palette",
+            babydra_core::i18n::t("settings.spec_graphics"),
+            &gpu_lbl,
+        ),
     ];
 
     for (idx, (icon_name, label, value_widget)) in specs.into_iter().enumerate() {
@@ -192,7 +209,7 @@ pub fn build_system_ui(
         icon_badge.set_valign(gtk4::Align::Center);
         icon_badge.set_size_request(44, 44);
 
-        let icon_img = babydra_utils::ui::icon::get_icon(icon_name, 22);
+        let icon_img = babydra_ui_kit::ui::icon::get_icon(icon_name, 22);
         icon_img.set_pixel_size(22);
         icon_img.set_vexpand(true);
         icon_img.set_hexpand(true);

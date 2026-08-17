@@ -1,8 +1,8 @@
+use babydra_core::{ActivePane, SessionState};
 use gtk4::prelude::*;
-use std::rc::Rc;
 use std::cell::RefCell;
 use std::path::PathBuf;
-use babydra_common::{SessionState, ActivePane};
+use std::rc::Rc;
 
 /// Initializes the tab bar widget, mounts it to the box, and sets up recursive rebuild/navigation callbacks.
 pub fn setup_tab_bar(
@@ -92,11 +92,7 @@ pub fn setup_tab_bar(
                 let on_cre: Rc<dyn Fn()> = Rc::new(on_tab_created);
                 *rebuild_tabs_c.borrow_mut() = Some(Box::new(move || {
                     crate::widgets::tab_bar::rebuild_tab_bar(
-                        &tbb_c,
-                        &sess_c,
-                        &on_act,
-                        &on_cls,
-                        &on_cre,
+                        &tbb_c, &sess_c, &on_act, &on_cls, &on_cre,
                     );
                 }) as Box<dyn Fn()>);
 
@@ -139,7 +135,7 @@ pub fn setup_tab_bar(
                 move || {
                     rebuild();
                 }
-            }
+            },
         );
         vbox.prepend(&tab_bar);
         tab_bar.add_css_class("tab-bar-container");

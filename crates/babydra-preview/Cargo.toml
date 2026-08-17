@@ -4,12 +4,12 @@ version.workspace = true
 edition = "2021"
 
 [dependencies]
-babydra-common = { workspace = true }
-babydra-utils = { workspace = true }
-gtk4 = { version = "0.9", features = ["v4_10"] }
-glib = "0.20"
-gio = "0.20"
-gdk4 = "0.9"
-gdk-pixbuf = "0.20"
+babydra-core = { workspace = true }
+babydra-ui-kit = { workspace = true }
+gtk4 = { workspace = true }
+glib = { workspace = true }
+gio = { workspace = true }
+gdk4 = { workspace = true }
+gdk-pixbuf = { workspace = true }
 cairo-rs = { version = "0.20", features = ["use_glib"] }
-chrono = "0.4"
+chrono = { workspace = true }

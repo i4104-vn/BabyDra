@@ -1,11 +1,12 @@
 //! UI rendering structure for the system monitor popover and draw graphs.
 
+use babydra_core::i18n::t;
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
 /// Builds widgets for system monitoring.
-/// 
+///
 /// Returns labels, popover, drawings areas, and details components.
 pub fn build_sys_monitor_ui(
     capsule: &gtk4::Box,
@@ -21,30 +22,35 @@ pub fn build_sys_monitor_ui(
     capsule.add_css_class("sys-monitor-box");
     capsule.set_valign(gtk4::Align::Center);
 
-    let sys_label = gtk4::Label::new(Some("CPU: 0% | RAM: 0%"));
+    let sys_tpl = t("sysmon.cpu_ram");
+    let sys_label = gtk4::Label::new(Some(&sys_tpl.replace("{cpu}", "0").replace("{ram}", "0")));
     sys_label.add_css_class("status-text");
     capsule.append(&sys_label);
 
-    let popover = babydra_utils::components::create_popover(capsule, gtk4::PositionType::Bottom, "sys-monitor-popover");
+    let popover = babydra_ui_kit::components::create_popover(
+        capsule,
+        gtk4::PositionType::Bottom,
+        "sys-monitor-popover",
+    );
     popover.set_autohide(false);
 
     let popover_box = gtk4::Box::new(gtk4::Orientation::Vertical, 10);
     popover_box.set_size_request(200, -1);
 
-    let popover_title = gtk4::Label::new(Some(&babydra_common::i18n::t("panel.system_resources")));
+    let popover_title = gtk4::Label::new(Some(&babydra_core::i18n::t("panel.system_resources")));
     popover_title.add_css_class("tile-title");
     popover_title.set_xalign(0.0);
     popover_title.set_margin_bottom(4);
 
-    let cpu_label = gtk4::Label::new(Some("CPU Usage: 0%"));
+    let cpu_label = gtk4::Label::new(Some(&t("sysmon.cpu_usage")));
     cpu_label.set_xalign(0.0);
     cpu_label.add_css_class("tile-subtitle");
-    
+
     let cpu_chart = gtk4::DrawingArea::new();
     cpu_chart.set_size_request(200, 60);
     cpu_chart.add_css_class("sys-chart");
 
-    let ram_label = gtk4::Label::new(Some("RAM Usage: 0%"));
+    let ram_label = gtk4::Label::new(Some(&t("sysmon.ram_usage")));
     ram_label.set_xalign(0.0);
     ram_label.add_css_class("tile-subtitle");
 
@@ -67,13 +73,7 @@ pub fn build_sys_monitor_ui(
     popover.set_child(Some(&popover_box));
 
     (
-        sys_label,
-        popover,
-        cpu_chart,
-        ram_chart,
-        cpu_label,
-        ram_label,
-        ram_detail,
+        sys_label, popover, cpu_chart, ram_chart, cpu_label, ram_label, ram_detail,
     )
 }
 
@@ -147,4 +147,3 @@ pub fn setup_chart_draw(
         let _ = cr.stroke();
     });
 }
-

@@ -1,21 +1,21 @@
+use babydra_core::i18n::t;
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Label, Align, ListBox, Entry, Grid, Overlay, Window};
-use babydra_common::i18n::t;
-use std::rc::Rc;
+use gtk4::{Align, Box, Entry, Grid, Label, ListBox, Orientation, Overlay, Window};
 use std::cell::RefCell;
+use std::rc::Rc;
 
 pub mod row;
 
 const AVAILABLE_ICONS: &[&str] = &[
-    "settings", "terminal", "folder", "text", "camera", "music", "user",
-    "activity", "lock", "wifi", "refresh", "power", "search", "logo"
+    "settings", "terminal", "folder", "text", "camera", "music", "user", "activity", "lock",
+    "wifi", "refresh", "power", "search", "logo",
 ];
 
 /// Builds the context menu options page inside the Settings Dialog.
 /// Features a full-height scrolled list of options and a floating action button (FAB)
 /// at the bottom-right corner to open the "Add Option" dialog.
 pub fn build_context_menu_page(parent_window: &Window) -> Overlay {
-    let settings = babydra_common::load_explore_settings();
+    let settings = babydra_core::load_explore_settings();
     let overlay = Overlay::new();
     overlay.set_hexpand(true);
     overlay.set_vexpand(true);
@@ -38,7 +38,7 @@ pub fn build_context_menu_page(parent_window: &Window) -> Overlay {
         row::render_option_row(&context_listbox, item);
     }
 
-    let btn_fab = babydra_utils::components::create_fab("plus");
+    let btn_fab = babydra_ui_kit::components::create_fab("plus");
     btn_fab.add_css_class("circular");
     btn_fab.set_margin_bottom(10);
     btn_fab.set_margin_end(10);
@@ -108,7 +108,13 @@ fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
         .build();
 
     let popover_icon_c = popover_icon.clone();
-    let btn_select_icon = babydra_utils::components::create_icon_button("settings", 16, &["circular", "icon-select-btn"], None, move || popover_icon_c.popup());
+    let btn_select_icon = babydra_ui_kit::components::create_icon_button(
+        "settings",
+        16,
+        &["circular", "icon-select-btn"],
+        None,
+        move || popover_icon_c.popup(),
+    );
     btn_select_icon.set_valign(Align::Center);
     btn_select_icon.set_cursor_from_name(Some("pointer"));
     popover_icon.set_parent(&btn_select_icon);
@@ -131,7 +137,19 @@ fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
         let btn_select_icon_c = btn_select_icon.clone();
         let popover_icon_c = popover_icon.clone();
 
-        let btn_item = babydra_utils::components::create_icon_button(icon_name, 20, &["flat", "icon-grid-item"], Some(*icon_name), move || { selected_icon_c.replace(icon_name_str.clone()); let new_img = babydra_utils::ui::icon::get_icon(&icon_name_str, 16); new_img.set_pixel_size(16); btn_select_icon_c.set_child(Some(&new_img)); popover_icon_c.popdown(); });
+        let btn_item = babydra_ui_kit::components::create_icon_button(
+            icon_name,
+            20,
+            &["flat", "icon-grid-item"],
+            Some(*icon_name),
+            move || {
+                selected_icon_c.replace(icon_name_str.clone());
+                let new_img = babydra_ui_kit::ui::icon::get_icon(&icon_name_str, 16);
+                new_img.set_pixel_size(16);
+                btn_select_icon_c.set_child(Some(&new_img));
+                popover_icon_c.popdown();
+            },
+        );
         btn_item.set_cursor_from_name(Some("pointer"));
 
         icon_grid.attach(&btn_item, c, r, 1, 1);
@@ -161,13 +179,13 @@ fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
     placeholders_box.set_margin_top(2);
     let placeholders = [
         ("{path}", "explore.placeholder_path_desc"),
-        ("{dir}",  "explore.placeholder_dir_desc"),
+        ("{dir}", "explore.placeholder_dir_desc"),
         ("{name}", "explore.placeholder_name_desc"),
         ("{stem}", "explore.placeholder_stem_desc"),
-        ("{ext}",  "explore.placeholder_ext_desc"),
+        ("{ext}", "explore.placeholder_ext_desc"),
     ];
     for (p, desc_key) in placeholders {
-        let btn_p = babydra_utils::components::create_button(p);
+        let btn_p = babydra_ui_kit::components::create_button(p);
         btn_p.remove_css_class("baby-button");
         btn_p.add_css_class("flat");
         btn_p.add_css_class("placeholder-btn");
@@ -192,8 +210,8 @@ fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
     bbox.set_margin_top(8);
     vbox.append(&bbox);
 
-    let btn_cancel = babydra_utils::components::create_button(&t("explore.settings_cancel"));
-    let btn_add = babydra_utils::components::create_accent_button(&t("explore.settings_add"));
+    let btn_cancel = babydra_ui_kit::components::create_button(&t("explore.settings_cancel"));
+    let btn_add = babydra_ui_kit::components::create_accent_button(&t("explore.settings_add"));
     btn_add.set_cursor_from_name(Some("pointer"));
 
     bbox.append(&btn_cancel);
@@ -214,14 +232,14 @@ fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
         }
         is_animating_cancel.set(true);
         let win_cb = win_cancel.clone();
-        babydra_utils::ui::animation::genie_out(
+        babydra_ui_kit::ui::animation::genie_out(
             vbox_cancel.upcast_ref(),
             420,
             280,
             200,
             move || {
                 win_cb.destroy();
-            }
+            },
         );
         glib::Propagation::Stop
     });
@@ -237,15 +255,15 @@ fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
         let cmd_str = entry_cmd_c.text().to_string();
         let icon_str = selected_icon_c.borrow().clone();
         if !name_str.is_empty() && !cmd_str.is_empty() {
-            let item = babydra_common::config::settings::CustomContextItem {
+            let item = babydra_core::config::settings::CustomContextItem {
                 name: name_str,
                 command: cmd_str,
                 icon: Some(icon_str),
             };
 
-            let mut s = babydra_common::load_explore_settings();
+            let mut s = babydra_core::load_explore_settings();
             s.custom_context_items.push(item.clone());
-            babydra_common::save_explore_settings(&s);
+            babydra_core::save_explore_settings(&s);
 
             row::render_option_row(&listbox_c, item);
             win_add.close();
@@ -253,5 +271,5 @@ fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
     });
 
     dialog.present();
-    babydra_utils::ui::animation::genie_in(vbox.upcast_ref(), 420, 280, 200);
+    babydra_ui_kit::ui::animation::genie_in(vbox.upcast_ref(), 420, 280, 200);
 }

@@ -1,10 +1,11 @@
+use crate::widgets::state::ContentViewWidgets;
+use babydra_core::i18n::t;
 use gtk4::prelude::*;
-use gtk4::{ScrolledWindow, FlowBox, ListBox, Stack, Align, Box, Entry, Orientation};
-use babydra_common::ContentViewWidgets;
-use babydra_common::i18n::t;
+use gtk4::{Align, Box, Entry, FlowBox, ListBox, Orientation, ScrolledWindow, Stack};
 
+/// Builds the `content view ui` UI.
 pub fn build_content_view_ui() -> ContentViewWidgets {
-    let settings = babydra_common::load_explore_settings();
+    let settings = babydra_core::load_explore_settings();
     let activate_on_single = !settings.double_click_to_open;
 
     let scroll_win = ScrolledWindow::new();
@@ -63,7 +64,6 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
     list_scroll.set_child(Some(&list_overlay));
     stack.add_named(&list_scroll, Some("list"));
 
-    // Create navigation widgets for this pane
     let pane_nav_row = Box::new(Orientation::Horizontal, 4);
     pane_nav_row.set_css_classes(&["nav-bar"]);
     pane_nav_row.set_margin_start(6);
@@ -71,22 +71,46 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
     pane_nav_row.set_margin_bottom(4);
     pane_nav_row.set_margin_top(4);
 
-    let btn_back = babydra_utils::components::create_icon_button("back", 16, &["nav-btn"], Some(&t("explore.back")), || {});
+    let btn_back = babydra_ui_kit::components::create_icon_button(
+        "back",
+        16,
+        &["nav-btn"],
+        Some(&t("explore.back")),
+        || {},
+    );
     btn_back.set_size_request(28, 28);
     btn_back.set_hexpand(false);
     btn_back.set_vexpand(false);
 
-    let btn_forward = babydra_utils::components::create_icon_button("forward", 16, &["nav-btn"], Some(&t("explore.forward")), || {});
+    let btn_forward = babydra_ui_kit::components::create_icon_button(
+        "forward",
+        16,
+        &["nav-btn"],
+        Some(&t("explore.forward")),
+        || {},
+    );
     btn_forward.set_size_request(28, 28);
     btn_forward.set_hexpand(false);
     btn_forward.set_vexpand(false);
 
-    let btn_up = babydra_utils::components::create_icon_button("up", 16, &["nav-btn"], Some(&t("explore.up")), || {});
+    let btn_up = babydra_ui_kit::components::create_icon_button(
+        "up",
+        16,
+        &["nav-btn"],
+        Some(&t("explore.up")),
+        || {},
+    );
     btn_up.set_size_request(28, 28);
     btn_up.set_hexpand(false);
     btn_up.set_vexpand(false);
 
-    let btn_refresh = babydra_utils::components::create_icon_button("refresh", 16, &["nav-btn"], Some(&t("explore.refresh")), || {});
+    let btn_refresh = babydra_ui_kit::components::create_icon_button(
+        "refresh",
+        16,
+        &["nav-btn"],
+        Some(&t("explore.refresh")),
+        || {},
+    );
     btn_refresh.set_size_request(28, 28);
     btn_refresh.set_hexpand(false);
     btn_refresh.set_vexpand(false);

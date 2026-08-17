@@ -1,15 +1,18 @@
 //! Individual switcher card layout component.
 //! Renders active application thumbnail previews or falls back to system application icons.
 
+use babydra_core::DesktopApp;
 use gtk4::prelude::*;
-use babydra_common::DesktopApp;
 
 /// Creates a card button displaying a window preview screenshot or a placeholder icon.
 pub fn create_app_button(app_item: &DesktopApp) -> gtk4::Button {
     let btn = gtk4::Button::new();
     btn.add_css_class("stage-manager-item-btn");
 
-    let app_icon_str = app_item.icon.as_deref().unwrap_or("application-x-executable");
+    let app_icon_str = app_item
+        .icon
+        .as_deref()
+        .unwrap_or("application-x-executable");
 
     let mut screenshot_path: Option<String> = None;
     if let Some(hash) = app_item.get_screenshot_hash() {
@@ -57,10 +60,8 @@ pub fn create_app_button(app_item: &DesktopApp) -> gtk4::Button {
     icon_container.set_margin_top(8);
     icon_container.set_margin_start(8);
 
-    let icon_widget = babydra_utils::ui::icon::get_system_or_file_icon(
-        app_icon_str,
-        "application-x-executable",
-    );
+    let icon_widget =
+        babydra_ui_kit::ui::icon::get_system_or_file_icon(app_icon_str, "application-x-executable");
     icon_widget.set_pixel_size(20);
     icon_widget.add_css_class("switcher-item-icon");
     icon_container.append(&icon_widget);
@@ -99,10 +100,8 @@ fn create_placeholder_preview(app_icon_str: &str, width: i32, height: i32) -> gt
     placeholder_box.set_halign(gtk4::Align::Fill);
     placeholder_box.set_valign(gtk4::Align::Fill);
 
-    let icon_widget = babydra_utils::ui::icon::get_system_or_file_icon(
-        app_icon_str,
-        "application-x-executable",
-    );
+    let icon_widget =
+        babydra_ui_kit::ui::icon::get_system_or_file_icon(app_icon_str, "application-x-executable");
     icon_widget.set_pixel_size(48);
     icon_widget.add_css_class("switcher-item-icon");
     icon_widget.set_valign(gtk4::Align::Center);

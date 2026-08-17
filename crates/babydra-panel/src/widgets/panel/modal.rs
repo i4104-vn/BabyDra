@@ -9,11 +9,12 @@ use super::items;
 use super::items::header::render::create_header_row;
 use super::toggle_grid::create_control_center_grid;
 
+/// Builds the `control center window ui` UI.
 pub fn build_control_center_window_ui(
     app: &gtk4::Application,
 ) -> (gtk4::ApplicationWindow, gtk4::Box) {
     let q_win = gtk4::ApplicationWindow::new(app);
-    babydra_utils::ui::theme::apply_theme_class(&q_win);
+    babydra_ui_kit::ui::theme::apply_theme_class(&q_win);
     q_win.init_layer_shell();
     q_win.set_layer(Layer::Overlay);
     q_win.set_keyboard_mode(KeyboardMode::OnDemand);
@@ -38,12 +39,12 @@ pub fn build_control_center_window_ui(
     (q_win, main_box)
 }
 
+/// Rebuild control center contents.
 pub fn rebuild_control_center_contents(
     main_box: &gtk4::Box,
     on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>,
     vol_icon: gtk4::Image,
 ) {
-    // Sync the topbar volume icon to current hardware state on load
     items::volume::update_topbar_volume_icon(&vol_icon);
 
     // 1. Remove all existing children
@@ -58,10 +59,8 @@ pub fn rebuild_control_center_contents(
     main_box.append(&create_control_center_grid(on_popover_toggled.clone()));
 
     // 4. Append volume slider
-    let (volume_row, _volume_scale) = items::volume::render::create_volume_row(
-        on_popover_toggled.clone(),
-        vol_icon.clone(),
-    );
+    let (volume_row, _volume_scale) =
+        items::volume::render::create_volume_row(on_popover_toggled.clone(), vol_icon.clone());
     main_box.append(&volume_row);
 
     // 5. Append brightness slider
@@ -109,12 +108,16 @@ pub fn create_control_center_window(
         let on_popover_toggled_c = on_popover_toggled_opt.clone();
         let vol_icon_c = vol_icon.clone();
         settings.connect_gtk_application_prefer_dark_theme_notify(move |_| {
-            rebuild_control_center_contents(&main_box_c, on_popover_toggled_c.clone(), vol_icon_c.clone());
+            rebuild_control_center_contents(
+                &main_box_c,
+                on_popover_toggled_c.clone(),
+                vol_icon_c.clone(),
+            );
         });
     }
 
     // Dismiss when clicking outside main box
-    babydra_utils::ui::window::setup_click_outside_dismiss(&q_win, &main_box);
+    babydra_ui_kit::ui::window::setup_click_outside_dismiss(&q_win, &main_box);
 
     let popover_active_for_notify = popover_active.clone();
     q_win.connect_is_active_notify(move |win| {
@@ -137,20 +140,20 @@ pub fn create_control_center_window(
             *borrow = None;
         }
         let q_win_cb = q_win_clone.clone();
-        babydra_utils::ui::animation::genie_out(
+        babydra_ui_kit::ui::animation::genie_out(
             main_box_clone.upcast_ref(),
             360,
             480,
             450,
             move || {
                 q_win_cb.destroy();
-            }
+            },
         );
         glib::Propagation::Stop
     });
 
     q_win.present();
-    babydra_utils::ui::animation::genie_in(main_box.upcast_ref(), 360, 480, 450);
+    babydra_ui_kit::ui::animation::genie_in(main_box.upcast_ref(), 360, 480, 450);
 
     q_win
 }

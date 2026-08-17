@@ -1,6 +1,7 @@
-//! Graphical widgets rendering Dynamic Island sub-components.
+//! Shared widget re-exports.
+//!
+//! Giữ re-export `notification` để giữ tương thích với `babydra-panel`
+//! (`babydra_island::widgets::notification::*`). Các widget riêng của feature
+//! đã được chuyển vào bên trong thư mục feature tương ứng.
 
-pub mod visualizer;
-pub mod popover;
-pub use ::babydra_common::helper::notification;
-
+pub use ::babydra_core::helper::notification;

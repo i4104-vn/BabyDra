@@ -1,20 +1,21 @@
+use crate::widgets::state::{DisplayCardRow, DisplaysWidget};
+use babydra_core::models::display::MonitorConfig;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, DropDown, Label, Orientation, StringList};
-use babydra_common::models::display::{DisplayCardRow, DisplaysWidget, MonitorConfig};
 
 /// Builds the header row containing title and action buttons (Refresh, Save)
 fn build_header() -> (Box, Button, Button) {
     let header_box = Box::new(Orientation::Horizontal, 12);
 
-    let title_label = Label::new(Some(&babydra_common::i18n::t("settings.displays_title")));
+    let title_label = Label::new(Some(&babydra_core::i18n::t("settings.displays_title")));
     title_label.add_css_class("settings-page-title");
     title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);
 
-    let refresh_btn = Button::with_label(&babydra_common::i18n::t("settings.refresh"));
+    let refresh_btn = Button::with_label(&babydra_core::i18n::t("settings.refresh"));
     refresh_btn.add_css_class("connect-pill-btn");
 
-    let save_btn = Button::with_label(&babydra_common::i18n::t("settings.save"));
+    let save_btn = Button::with_label(&babydra_core::i18n::t("settings.save"));
     save_btn.add_css_class("suggested-action");
 
     header_box.append(&title_label);
@@ -45,36 +46,61 @@ fn build_monitor_card(mon: &MonitorConfig) -> DisplayCardRow {
     card.append(&name_lbl);
 
     // 2. Resolution Dropdown
-    let res_strs: Vec<&str> = mon.available_resolutions.iter().map(|s| s.as_str()).collect();
-    let resolution_dropdown = DropDown::new(Some(StringList::new(&res_strs)), Option::<gtk4::Expression>::None);
+    let res_strs: Vec<&str> = mon
+        .available_resolutions
+        .iter()
+        .map(|s| s.as_str())
+        .collect();
+    let resolution_dropdown = DropDown::new(
+        Some(StringList::new(&res_strs)),
+        Option::<gtk4::Expression>::None,
+    );
     resolution_dropdown.set_valign(gtk4::Align::Center);
 
     let cur_res_str = format!("{}x{}", mon.resolution_width, mon.resolution_height);
-    if let Some(idx) = mon.available_resolutions.iter().position(|r| r == &cur_res_str) {
+    if let Some(idx) = mon
+        .available_resolutions
+        .iter()
+        .position(|r| r == &cur_res_str)
+    {
         resolution_dropdown.set_selected(idx as u32);
     }
     card.append(&resolution_dropdown);
 
     // 3. Refresh Rate Dropdown
-    let rate_strs: Vec<String> = mon.available_rates.iter().map(|r| format!("{:.1} Hz", r)).collect();
+    let rate_strs: Vec<String> = mon
+        .available_rates
+        .iter()
+        .map(|r| format!("{:.1} Hz", r))
+        .collect();
     let rate_items: Vec<&str> = rate_strs.iter().map(|s| s.as_str()).collect();
-    let rate_dropdown = DropDown::new(Some(StringList::new(&rate_items)), Option::<gtk4::Expression>::None);
+    let rate_dropdown = DropDown::new(
+        Some(StringList::new(&rate_items)),
+        Option::<gtk4::Expression>::None,
+    );
     rate_dropdown.set_valign(gtk4::Align::Center);
 
-    if let Some(idx) = mon.available_rates.iter().position(|r| (r - mon.refresh_rate).abs() < 0.5) {
+    if let Some(idx) = mon
+        .available_rates
+        .iter()
+        .position(|r| (r - mon.refresh_rate).abs() < 0.5)
+    {
         rate_dropdown.set_selected(idx as u32);
     }
     card.append(&rate_dropdown);
 
     // 4. Orientation Dropdown
     let orient_items_owned = vec![
-        babydra_common::i18n::t("settings.orientation_normal"),
-        babydra_common::i18n::t("settings.orientation_left"),
-        babydra_common::i18n::t("settings.orientation_inverted"),
-        babydra_common::i18n::t("settings.orientation_right"),
+        babydra_core::i18n::t("settings.orientation_normal"),
+        babydra_core::i18n::t("settings.orientation_left"),
+        babydra_core::i18n::t("settings.orientation_inverted"),
+        babydra_core::i18n::t("settings.orientation_right"),
     ];
     let orient_items: Vec<&str> = orient_items_owned.iter().map(|s| s.as_str()).collect();
-    let orientation_dropdown = DropDown::new(Some(StringList::new(&orient_items)), Option::<gtk4::Expression>::None);
+    let orientation_dropdown = DropDown::new(
+        Some(StringList::new(&orient_items)),
+        Option::<gtk4::Expression>::None,
+    );
     orientation_dropdown.set_valign(gtk4::Align::Center);
 
     let orient_idx = match mon.orientation.as_str() {

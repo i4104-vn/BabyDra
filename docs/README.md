@@ -1,105 +1,102 @@
-# BabyDra — Mục lục Tài liệu
+<p align="center">
+  <img src="../logo.png" width="120" height="120" alt="BabyDra logo">
+</p>
 
-**Phiên bản:** 1.2.0
-**Cập nhật lần cuối:** 2026-08-14
-**Phạm vi:** Toàn bộ tài liệu kỹ thuật và thiết kế của dự án BabyDra
+<h3 align="center">BabyDra — Documentation</h3>
 
----
+<p align="center">
+  <img src="https://img.shields.io/badge/rust-1.80+-a5844f?style=for-the-badge&logo=rust&logoColor=white" alt="Rust">
+  <img src="https://img.shields.io/badge/GTK4-0.9-blue?style=for-the-badge&logo=gtk&logoColor=white" alt="GTK4">
+  <img src="https://img.shields.io/badge/Wayland-labwc-4bc0c0?style=for-the-badge" alt="Wayland">
+  <img src="https://img.shields.io/badge/license-Apache_2.0-blue?style=for-the-badge" alt="License">
+</p>
 
-## Giới thiệu
-
-Đây là trang chủ của hệ thống tài liệu BabyDra. Mỗi tài liệu được tổ chức thành các chương độc lập, mỗi chương tập trung vào một chủ đề cụ thể. Bạn có thể đọc từng chương riêng lẻ mà không cần đọc theo thứ tự, tuy nhiên nếu bạn là developer mới, nên bắt đầu từ Chương 01.
-
-> [!NOTE]
-> Kho mã nguồn BabyDra được phân tách theo mô hình 3 nhánh (xem [WORKFLOW.md](../WORKFLOW.md)):
-> - **`main`** — kênh phân phối: chỉ chứa bộ cài đặt TUI (`install/`), script thực thi và tài liệu.
-> - **`release`** — mã nguồn chính thức: toàn bộ ứng dụng (`crates/`), thư viện (`libs/`) và cấu hình (`configs/`).
-> - **`develop`** — nền tảng phát triển cộng đồng, được checkout từ `release`.
-
-Quy tắc chung khi đọc tài liệu này:
-
-- Các thuật ngữ kỹ thuật giữ nguyên tiếng Anh (ví dụ: `struct`, `trait`, `Rc<RefCell<T>>`, CSS property).
-- Các giải thích, mô tả, quy tắc dùng tiếng Việt.
-- Mỗi khái niệm mới sẽ được định nghĩa trước khi sử dụng.
-- Mỗi section "Quy tắc bắt buộc" chứa các quy tắc mà agent có thể quét và áp dụng trực tiếp.
+<p align="center">Tài liệu kỹ thuật của môi trường desktop BabyDra — viết cho người phát triển, không phải người dùng cuối.</p>
 
 ---
 
 ## Mục lục
 
-### Tài liệu Kỹ thuật Chính
-
-| Số thứ tự | File | Mô tả ngắn |
-| :--- | :--- | :--- |
-| 01 | [01-overview.md](./01-overview.md) | Tổng quan: BabyDra là gì, các thành phần hệ thống, mô hình phân nhánh |
-| 02 | [02-architecture.md](./02-architecture.md) | Kiến trúc mã nguồn: 4 pattern thiết kế, luồng dữ liệu, Daemon-Client |
-| 03 | [03-project-structure.md](./03-project-structure.md) | Cấu trúc dự án: thư mục, trách nhiệm từng module, quy chuẩn viết mã |
-| 04 | [04-setup-and-build.md](./04-setup-and-build.md) | Hướng dẫn cài đặt, build và chạy dự án từ đầu |
-
-### Tài liệu Thiết kế Giao diện
-
-Toàn bộ tài liệu thiết kế nằm trong thư mục [design/](./design/README.md), bao gồm:
-
-| File | Mô tả ngắn |
-| :--- | :--- |
-| [design/README.md](./design/README.md) | Trang chủ hướng dẫn thiết kế — thứ tự đọc đề xuất |
-| [design/visual-language.md](./design/visual-language.md) | Ngôn ngữ thị giác Glassmorphism — cảm giác và tư duy đằng sau |
-| [design/surfaces.md](./design/surfaces.md) | Cách mọi bề mặt UI được xây dựng — cấu trúc và lớp nền |
-| [design/color.md](./design/color.md) | Triết lý màu sắc — tại sao chọn từng màu, cách dùng đúng |
-| [design/typography.md](./design/typography.md) | Phông chữ, phân cấp, và lý do đằng sau |
-| [design/states.md](./design/states.md) | Trạng thái tương tác — hover, active, disabled |
-| [design/motion.md](./design/motion.md) | Triết lý chuyển động — khi nào animate, khi nào không |
-| [design/spacing.md](./design/spacing.md) | Không gian và khoảng cách — nguyên tắc và cách áp dụng |
-| [design/theming.md](./design/theming.md) | Dark/Light theming — cách tiếp cận dual-theme |
-| [design/tokens.md](./design/tokens.md) | Bảng tra cứu giá trị — màu, font-size, radius, spacing, shadow |
-
-**Components Giao diện** (thư mục `design/components/`) — mỗi component trong `libs/babydra-utils/src/components/` có một tài liệu riêng:
-
-| Tài liệu | Nội dung |
-| :--- | :--- |
-| [design/components/buttons.md](./design/components/buttons.md) | Nút bấm: Primary, Secondary Pill, Icon Button, Tile |
-| [design/components/badge.md](./design/components/badge.md) | Badge trạng thái & icon badge tròn kính mờ |
-| [design/components/card.md](./design/components/card.md) | Card kính mờ, switch card, danh sách cuộn |
-| [design/components/switch.md](./design/components/switch.md) | CustomSwitch (Cairo, 160ms) & ToggleRow |
-| [design/components/slider.md](./design/components/slider.md) | CustomSlider: range, step, tick marks |
-| [design/components/modal.md](./design/components/modal.md) | Dialog: password, wifi, vpn (config/log) |
-| [design/components/popovers.md](./design/components/popovers.md) | Popover chuẩn & Hover Popover |
-| [design/components/navbar.md](./design/components/navbar.md) | Navigation row cho Sidebar |
-| [design/components/list_group.md](./design/components/list_group.md) | List row chuẩn & helper danh sách |
-| [design/components/placeholder.md](./design/components/placeholder.md) | Placeholder: Disabled / Loading / Empty |
-| [design/components/progress.md](./design/components/progress.md) | Progress bar & disk progress |
-| [design/components/spinners.md](./design/components/spinners.md) | Spinner & loading box |
-| [design/components/tooltips.md](./design/components/tooltips.md) | Helper tooltip thống nhất |
-| [design/components/close_button.md](./design/components/close_button.md) | Nút đóng icon / icon + nhãn |
-| [design/components/alerts.md](./design/components/alerts.md) | Thông báo chiếm chỗ (placeholder message) |
-| [design/components/wifi.md](./design/components/wifi.md) | Icon cường độ tín hiệu Wi-Fi (SVG 0–4 vạch) |
+- [Giới thiệu](#giới-thiệu)
+- [Bắt đầu từ đâu](#bắt-đầu-từ-đâu)
+- [Bản đồ tài liệu](#bản-đồ-tài-liệu)
+- [Quy ước viết tài liệu](#quy-ước-viết-tài-liệu)
+- [Đóng góp tài liệu](#đóng-góp-tài-liệu)
 
 ---
 
-## Quy ước Ký Hiệu Trong Tài Liệu
+## Giới thiệu
 
-Các tài liệu sử dụng bảng markdown thuần túy và các quy ước sau:
-
-- **NOTE:** Thông tin bổ sung giúp hiểu rõ hơn.
-- **IMPORTANT:** Yêu cầu bắt buộc phải tuân theo.
-- **DO:** Việc cần làm, mẫu tốt.
-- **DO NOT:** Việc cấm làm, mẫu xấu.
+BabyDra là một **môi trường desktop Linux nhẹ** viết bằng Rust + GTK4 trên compositor labwc (Wayland). Tài liệu gồm 10 trang đánh số, mỗi trang một chủ đề lớn — đọc theo thứ tự từ 01 đến 10 là hiểu cả hệ thống.
 
 ---
 
-## Liên kết Nhanh đến Mã nguồn
+## Bắt đầu từ đâu
 
-> [!IMPORTANT]
-> `crates/`, `libs/` và `configs/` **không tồn tại trên nhánh `main`** — chúng nằm trên nhánh `release` (và `develop`). Nhánh `main` chỉ chứa `install/` (bộ cài đặt) và tài liệu.
+```text
+01 Tổng quan ─▶ 02 Kiến trúc ─▶ 03 Cài đặt & build
+      │
+      ▼
+04 Cấu trúc & quy chuẩn ─▶ 06 Luồng hoạt động ─▶ 07 Dynamic Island
+      │
+      ▼
+05 Themes & Variants ─▶ 08 API ─▶ 09 Design ─▶ 10 Components
+```
 
-| Thành phần | Đường dẫn | Mô tả |
+| # | Tài liệu | Bạn cần khi… |
 | :--- | :--- | :--- |
-| Bộ cài đặt TUI | `install/` (nhánh `main`) | `babydra-installer`: wizard 8 bước, 3 kênh cài đặt, 3 preset |
-| Ứng dụng đồ họa | `crates/` (nhánh `release`) | 8 ứng dụng: panel, switcher, screenshot, lock, greeter, settings, preview, explore |
-| Logic lõi | `libs/babydra-common/` (nhánh `release`) | Services, models, i18n, D-Bus, sysfs |
-| Widget & CSS dùng chung | `libs/babydra-utils/` (nhánh `release`) | Components, styles (dark/light/shared), theme, icon, animation |
-| Dynamic Island | `libs/babydra-island/` (nhánh `release`) | Thông báo, overlay âm lượng/độ sáng, media player |
-| Launcher | `libs/babydra-launcher/` (nhánh `release`) | Tìm kiếm mờ (fuzzy), lưới ứng dụng, tìm file |
-| Cấu hình hệ thống | `configs/` (nhánh `release`) | labwc, kitty, nvim, fastfetch, themes |
-| Script khởi động | `start.sh`, `update.sh` (nhánh `release`) | Khởi động DE, hot-update & reload |
-| Quy trình phân nhánh | [WORKFLOW.md](../WORKFLOW.md) | Quy chuẩn phân nhánh và phát triển |
+| 01 | [Tổng quan dự án](./01-overview.md) | Muốn biết BabyDra gồm những gì, mô hình phân nhánh |
+| 02 | [Kiến trúc](./02-architecture.md) | Muốn hiểu pattern thiết kế, daemon-client, sơ đồ tổng thể |
+| 03 | [Cài đặt & build](./03-setup.md) | Muốn cài đặt, build, chạy thử |
+| 04 | [Cấu trúc & quy chuẩn](./04-structure.md) | Muốn biết code nằm ở đâu, viết code mới thế nào |
+| 05 | [Themes & Variants](./05-themes-variants.md) | Muốn tạo theme/variant mới (không cần sửa code) |
+| 06 | [Luồng hoạt động hệ thống](./06-system-flows.md) | Muốn hiểu ai gọi ai, luồng từng crate |
+| 07 | [Dynamic Island](./07-dynamic-island.md) | Muốn dùng/mở rộng island, tạo feature mới |
+| 08 | [API Reference](./08-apis.md) | Muốn tra cứu API core, ui-kit, explore |
+| 09 | [Ngôn ngữ thiết kế](./09-design.md) | Muốn làm UI đúng phong cách (tokens, motion, states…) |
+| 10 | [Component Library](./10-components.md) | Muốn dùng đúng component chuẩn (button, modal, switch…) |
+
+---
+
+## Bản đồ tài liệu
+
+```text
+docs/
+├── README.md            ← Trang này — mục lục & điểm bắt đầu
+├── 01-overview.md       ← Giới thiệu, thành phần, phân nhánh
+├── 02-architecture.md   ← Pattern, daemon-client, sơ đồ hệ thống
+├── 03-setup.md          ← Cài đặt, build, chạy
+├── 04-structure.md      ← Cây thư mục, trách nhiệm module, quy chuẩn code
+├── 05-themes-variants.md← Theme packages & variants
+├── 06-system-flows.md   ← Luồng hoạt động từng crate/lib
+├── 07-dynamic-island.md ← Dynamic Island: dùng + mở rộng
+├── 08-apis.md           ← API core, ui-kit, explore
+├── 09-design.md         ← Ngôn ngữ thiết kế (tokens, motion, states)
+└── 10-components.md     ← Component library (button, modal, switch…)
+```
+
+Nguyên tắc tổ chức: **một chủ đề, một trang** — thông tin định nghĩa một lần, nơi khác chỉ link tới (không copy-paste).
+
+---
+
+## Quy ước viết tài liệu
+
+| Quy ước | Chi tiết |
+| :--- | :--- |
+| Ngôn ngữ | Tiếng Việt; thuật ngữ kỹ thuật giữ tiếng Anh (`struct`, `trait`, `Rc<RefCell<T>>`) |
+| Format | Chỉ `README.md` dùng header trình bày (logo/badges); mọi trang khác là tài liệu thuần |
+| Diagram | Mermaid cho sơ đồ kiến trúc/luồng lớn; ASCII cho luồng terminal (installer, khởi động) |
+| Bảng | Ưu tiên bảng hơn đoạn văn dài — 1 hàng = 1 ý |
+| Callout | `> [!NOTE]`, `> [!IMPORTANT]`, `> [!TIP]`, `> [!WARNING]` |
+| API docs | Bảng tham số (Tên / Kiểu / Mô tả) + ví dụ code |
+| Mỗi file | Bắt đầu bằng metadata: **Phạm vi** / **Phiên bản** / **Cập nhật lần cuối** |
+
+---
+
+## Đóng góp tài liệu
+
+- Sửa tài liệu cùng commit với code — nếu đổi API, đổi luôn docs.
+- Thêm nội dung mới: ưu tiên bổ sung vào trang chủ đề tương ứng; chỉ tạo trang mới khi chủ đề thực sự tách biệt.
+- Kiểm tra liên kết chéo sau khi đổi tên/di chuyển file.
+
+Xem thêm: [CONTRIBUTING.md](../CONTRIBUTING.md) — quy trình đóng góp.

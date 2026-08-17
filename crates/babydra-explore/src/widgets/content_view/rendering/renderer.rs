@@ -1,14 +1,17 @@
+use crate::widgets::state::ContentViewHandle;
 use gtk4::prelude::*;
-use babydra_common::ContentViewHandle;
 
+/// Update content view ui silent.
 pub fn update_content_view_ui_silent(handle: &ContentViewHandle) {
     update_content_view_ui_internal(handle, true);
 }
 
+/// Update content view ui.
 pub fn update_content_view_ui(handle: &ContentViewHandle) {
     update_content_view_ui_internal(handle, false);
 }
 
+/// Update content view ui internal.
 fn update_content_view_ui_internal(handle: &ContentViewHandle, silent: bool) {
     let widgets = handle.widgets.clone();
     let entries = handle.entries.borrow().clone();
@@ -32,12 +35,10 @@ fn update_content_view_ui_internal(handle: &ContentViewHandle, silent: bool) {
         widgets.progress_bar.set_fraction(0.0);
     }
 
-    // Clear grid_container (for icons/grid view)
     while let Some(child) = widgets.grid_container.first_child() {
         widgets.grid_container.remove(&child);
     }
 
-    // Clear listbox
     while let Some(child) = widgets.listbox.first_child() {
         widgets.listbox.remove(&child);
     }
@@ -46,24 +47,49 @@ fn update_content_view_ui_internal(handle: &ContentViewHandle, silent: bool) {
         if current_mode == "icons" {
             if sort_mode == "auto" {
                 super::grid_renderer::render_flat_grid(
-                    &handle_c, &widgets, &entries, &current_path,
-                    &start_path, gen, &nav_callback, selected_paths,
-                ).await;
+                    &handle_c,
+                    &widgets,
+                    &entries,
+                    &current_path,
+                    &start_path,
+                    gen,
+                    &nav_callback,
+                    selected_paths,
+                )
+                .await;
             } else {
                 super::grid_renderer::render_grouped_grid(
-                    &handle_c, &widgets, &entries, &current_path,
-                    &start_path, gen, &sort_mode, &nav_callback, selected_paths,
-                ).await;
+                    &handle_c,
+                    &widgets,
+                    &entries,
+                    &current_path,
+                    &start_path,
+                    gen,
+                    &sort_mode,
+                    &nav_callback,
+                    selected_paths,
+                )
+                .await;
             }
         } else {
             super::list_renderer::render_list_view(
-                &handle_c, &widgets, &entries, &current_path,
-                &start_path, gen, &sort_mode, &nav_callback, selected_paths,
-            ).await;
+                &handle_c,
+                &widgets,
+                &entries,
+                &current_path,
+                &start_path,
+                gen,
+                &sort_mode,
+                &nav_callback,
+                selected_paths,
+            )
+            .await;
         }
 
         // Hide progress bar when layout completes successfully
-        if *handle_c.current_path.borrow() == start_path && *handle_c.render_generation.borrow() == gen {
+        if *handle_c.current_path.borrow() == start_path
+            && *handle_c.render_generation.borrow() == gen
+        {
             handle_c.widgets.progress_bar.set_visible(false);
         }
     });

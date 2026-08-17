@@ -3,16 +3,17 @@
 mod handlers;
 mod render;
 
+/// Creates a new `appearance widget`.
 pub fn create_appearance_widget() -> gtk4::Widget {
-    let gtk_themes = babydra_common::services::system::theme::get_gtk_themes();
-    let icon_themes = babydra_common::services::system::theme::get_icon_themes();
-    let cursor_themes = babydra_common::services::system::theme::get_cursor_themes();
+    let gtk_themes = babydra_core::services::system::theme::get_gtk_themes();
+    let icon_themes = babydra_core::services::system::theme::get_icon_themes();
+    let cursor_themes = babydra_core::services::system::theme::get_cursor_themes();
     let cursor_sizes = vec![16, 24, 32, 48, 64];
 
-    let wp_path = babydra_common::get_current_wallpaper()
+    let wp_path = babydra_core::get_current_wallpaper()
         .map(|p| p.to_string_lossy().to_string())
         .unwrap_or_default();
-    let is_dark = babydra_utils::ui::theme::is_dark_mode();
+    let is_dark = babydra_ui_kit::ui::theme::is_dark_mode();
 
     let (
         main_box,

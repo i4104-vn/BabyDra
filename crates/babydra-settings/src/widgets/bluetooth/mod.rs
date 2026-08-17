@@ -4,7 +4,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::mpsc::channel;
 
-use babydra_common::{is_bluetooth_enabled, set_bluetooth_enabled, get_bluetooth_devices, BtDevice};
+use babydra_core::{get_bluetooth_devices, is_bluetooth_enabled, set_bluetooth_enabled, BtDevice};
 use gtk4::prelude::*;
 
 mod handler;
@@ -16,6 +16,7 @@ pub struct BluetoothState {
     pub is_loading: bool,
 }
 
+/// Creates a new `bluetooth widget`.
 pub fn create_bluetooth_widget() -> gtk4::Widget {
     let (main_box, toggle_row, list_box) = render::build_bluetooth_ui();
 
@@ -33,8 +34,9 @@ pub fn create_bluetooth_widget() -> gtk4::Widget {
         let _ = tx_status.send(status);
     });
 
-    glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
-        match rx_status.try_recv() {
+    glib::timeout_add_local(
+        std::time::Duration::from_millis(50),
+        move || match rx_status.try_recv() {
             Ok(status) => {
                 toggle_row_c.switch.set_active(status);
                 toggle_row_c.set_active(status);
@@ -43,8 +45,8 @@ pub fn create_bluetooth_widget() -> gtk4::Widget {
             }
             Err(std::sync::mpsc::TryRecvError::Empty) => glib::ControlFlow::Continue,
             Err(std::sync::mpsc::TryRecvError::Disconnected) => glib::ControlFlow::Break,
-        }
-    });
+        },
+    );
 
     let render_devices = {
         let list_box_clone = list_box.clone();

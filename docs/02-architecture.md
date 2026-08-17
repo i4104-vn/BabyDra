@@ -1,365 +1,129 @@
-# Chương 02: Kiến trúc Mã nguồn BabyDra
+# 02 — Kiến trúc mã nguồn
 
-**Phiên bản:** 1.2.0
-**Cập nhật lần cuối:** 2026-08-14
-**Phạm vi:** 4 pattern thiết kế cốt lõi, luồng dữ liệu một chiều, mô hình Daemon-Client, quy trình khởi tạo cửa sổ
-
----
-
-## Mục lục
-
-- [1. Tổng quan kiến trúc](#1-tổng-quan-kiến-trúc)
-- [2. Pattern 1: Phân tách Giao diện và Nghiệp vụ](#2-pattern-1-phân-tách-giao-diện-và-nghiệp-vụ)
-- [3. Pattern 2: Hướng trạng thái và Luồng dữ liệu một chiều](#3-pattern-2-hướng-trạng-thái-và-luồng-dữ-liệu-một-chiều)
-- [4. Pattern 3: Mô hình Daemon-Client](#4-pattern-3-mô-hình-daemon-client)
-- [5. Pattern 4: Module hóa Giao diện](#5-pattern-4-module-hóa-giao-diện)
-- [6. Quy trình khởi tạo cửa sổ chuẩn](#6-quy-trình-khởi-tạo-cửa-sổ-chuẩn)
-- [7. Các dịch vụ nền của babydra-common](#7-các-dịch-vụ-nền-của-babydra-common)
-- [8. Câu hỏi thường gặp](#8-câu-hỏi-thường-gặp)
+**Phạm vi:** 4 pattern thiết kế cốt lõi, mô hình daemon-client, luồng khởi tạo chuẩn.
+**Phiên bản:** 2.0.0
+**Cập nhật lần cuối:** 2026-08-17
 
 ---
 
-## 1. Tổng quan kiến trúc
+## 1. Sơ đồ tổng thể
 
-Toàn bộ mã nguồn BabyDra hoạt động theo luồng một chiều: thao tác người dùng kích hoạt cập nhật trạng thái, trạng thái kích hoạt vẽ lại giao diện.
+```mermaid
+flowchart LR
+    subgraph Session["Session người dùng (labwc)"]
+        Panel["babydra-panel (daemon)"]
+        Switcher["babydra-switcher (daemon)"]
+        Island["Dynamic Island (trong panel)"]
+    end
 
+    subgraph System["Hệ thống"]
+        Greetd["greetd → babydra-greeter"]
+        Services["Systemd services / D-Bus"]
+    end
+
+    subgraph Clients["Client nhanh (oneshot)"]
+        Settings
+        Explore
+        Launcher
+        Lock
+        Screenshot
+        Preview
+    end
+
+    Greetd --> Panel
+    Clients -->|"gửi tín hiệu qua socket/D-Bus"| Panel
+    Panel --> Island
+    Panel --> Services
 ```
-Thao tác người dùng
-        |
-        v
-Cập nhật State (Rc<RefCell<T>>)
-        |
-        v
-Vẽ lại giao diện (queue_draw / rebuild widget)
-        |
-        v
-Tầng View (Crates / GTK Window)
-        |
-        v
-Tầng Engine (babydra-common)
-        |
-        v
-Tương tác Hệ điều hành / D-Bus / sysfs
-```
-
-Kiến trúc này được xây dựng trên 4 pattern thiết kế cốt lõi, trình bày chi tiết ở các section bên dưới.
 
 ---
 
-## 2. Pattern 1: Phân tách Giao diện và Nghiệp vụ
+## 2. Bốn pattern cốt lõi
 
-### 2.1. Vấn đề cần giải quyết
+### Pattern 1 — Phân tách Giao diện và Nghiệp vụ
 
-Nếu mã giao diện (GTK widget) và mã nghiệp vụ (đọc file hệ thống, tính toán) được trộn lẫn trong cùng một file, codebase sẽ trở nên khó test, khó tái sử dụng, và dễ tạo ra bug khi sửa đổi.
+Mọi widget đều tách file: **`mod.rs`** (struct, state, logic) và **`render.rs`** (chỉ vẽ UI).
 
-### 2.2. Giải pháp
-
-BabyDra tách mã nguồn thành hai tầng rõ ràng:
-
-**Tầng View (GUI Layer) — nằm trong `crates/` và `libs/` (widget)**
-
-- Vai trò: Lớp hiển thị bên ngoài. Chỉ chịu trách nhiệm bắt sự kiện tương tác của người dùng và hiển thị thông tin lên widget GTK.
-- Không được: Trực tiếp đọc file hệ thống, gọi lệnh terminal, tương tác D-Bus.
-- Được phép: Gọi API từ `babydra-common` để lấy dữ liệu, sau đó hiển thị dữ liệu đó lên widget.
-
-**Tầng Engine (Core Logic Layer) — nằm trong `libs/babydra-common/`**
-
-- Vai trò: Toàn bộ nghiệp vụ tính toán và tương tác với hệ điều hành (đọc ghi file `/sys/class`, điều khiển phần cứng WiFi/Bluetooth, quản lý D-Bus daemon) đều được đóng gói thành các hàm API độc lập.
-- Không biết gì về GTK, widget, hay giao diện.
-- Được phép: Đọc ghi hệ thống, thực thi lệnh shell, lắng nghe D-Bus.
-
-### 2.3. Ví dụ thực tế
-
-Khi người dùng kéo thanh trượt âm lượng:
-
-```
-Tầng View (crates/babydra-panel/src/widgets/panel/items/volume/)
-  Bắt sự kiện kéo thanh trượt
-        |
-        | Gọi: babydra_common::services::system::volume::set_volume(value)
-        v
-Tầng Engine (libs/babydra-common/src/services/system/volume/)
-  Ghi giá trị mới vào PipeWire / WirePlumber API
+```text
+widgets/
+├── mod.rs      ← struct + state + xử lý sự kiện (logic)
+└── render.rs   ← fn render(): dựng GTK widget từ state (giao diện)
 ```
 
-Khi người dùng bật/tắt WiFi trong control center:
+- Logic không biết GTK; render không chứa nghiệp vụ.
+- Đổi giao diện không đụng logic, đổi logic không vỡ UI.
 
+### Pattern 2 — Hướng trạng thái, luồng dữ liệu một chiều
+
+```mermaid
+flowchart LR
+    State["State (một nơi duy nhất)"] -->|"đọc"| Render["Render"]
+    Event["Sự kiện (click, timer, channel)"] -->|"cập nhật"| State
 ```
-Tầng View (crates/babydra-panel/src/widgets/panel/popover/network.rs)
-        |
-        | Gọi: babydra_common::services::system::wifi::connect(ssid, password)
-        v
-Tầng Engine (libs/babydra-common/src/services/system/wifi/)
-  Gọi NetworkManager qua D-Bus
+
+- State là nguồn sự thật duy nhất; render chỉ là phép chiếu của state.
+- Không có widget tự sửa dữ liệu rồi tự vẽ lại — mọi thay đổi đi qua state → render.
+
+### Pattern 3 — Mô hình Daemon-Client
+
+**Daemon** (panel, switcher) chạy nền, giữ cửa sổ nạp sẵn. **Client** (settings, launcher…) chạy nhanh, gửi tín hiệu rồi thoát.
+
+```text
+Client "mở settings" ──socket/D-Bus──▶ Daemon (panel)
+                                        │ đã nạp sẵn cửa sổ
+                                        ▼
+                                     hiện cửa sổ ngay, không lag
 ```
 
-### 2.4. Quy tắc bắt buộc
+### Pattern 4 — Module hóa Giao diện
 
-| Quy tắc | Chi tiết |
-| :--- | :--- |
-| DO | Tầng View chỉ gọi hàm từ `babydra-common` để lấy/set dữ liệu |
-| DO | Tầng Engine chỉ chứa logic thuần túy, không import GTK |
-| DO NOT | Không viết `std::process::Command` hay `std::fs::read` trong file `render.rs` hoặc `mod.rs` của tầng View |
-| DO NOT | Không import `gtk4` trong `babydra-common` |
-
-> [!NOTE]
-> Ngoại lệ duy nhất: `libs/babydra-utils` chứa **widget GTK dùng chung** và được phép import GTK4, vì đây là tầng UI infrastructure, không phải nghiệp vụ.
+UI chia theo widget độc lập, mỗi widget có API riêng (`create_*`), giao tiếp qua callback. Không widget nào import widget khác trực tiếp.
 
 ---
 
-## 3. Pattern 2: Hướng trạng thái và Luồng dữ liệu một chiều
+## 3. Quy trình khởi tạo cửa sổ chuẩn
 
-### 3.1. Vấn đề cần giải quyết
+Mọi ứng dụng GTK đều đi theo cùng một chuỗi:
 
-Giao diện GTK có nhiều widget khác nhau (slider, label, button) cùng hiển thị một thông tin (ví dụ: mức âm lượng). Nếu mỗi widget tự lưu trữ dữ liệu riêng, chúng sẽ dễ mất đồng bộ với nhau.
+```mermaid
+sequenceDiagram
+    participant App as app.activate()
+    participant Theme as init_theme()
+    participant UI as build_ui()
+    participant Win as window
 
-### 3.2. Giải pháp
-
-Mỗi cửa sổ phức tạp liên kết với một **cấu trúc trạng thái** (State struct) duy nhất, được chia sẻ qua con trỏ `Rc<RefCell<T>>`.
-
-**Giải thích `Rc<RefCell<T>>`:**
-
-- `Rc<T>` (Reference Counted): Cho phép nhiều nơi cùng giữ tham chiếu đến một giá trị mà không cần sao chép. Khi tất cả tham chiếu bị hủy, giá trị tự động được giải phóng.
-- `RefCell<T>`: Cho phép thay đổi (mutate) giá trị bên trong ngay cả khi đang được giữ bởi nhiều tham chiếu, bằng cách kiểm tra quy tắc borrow ở runtime thay vì compile time.
-- Kết hợp lại `Rc<RefCell<T>>`: Cho phép nhiều widget cùng đọc và ghi vào một State struct duy nhất một cách an toàn.
-
-Ví dụ thực tế trong codebase:
-
-- `babydra-panel`: `Rc<RefCell<Option<gtk4::ApplicationWindow>>>` cho `control_center_window`, `calendar_window`, `launcher_window` — đảm bảo chỉ một cửa sổ nổi mở tại một thời điểm.
-- `babydra-explore`: `Rc<RefCell<SessionState>>` chứa toàn bộ trạng thái phiên làm việc (tabs, thư mục hiện tại, pane đang active).
-
-### 3.3. Luồng dữ liệu một chiều
-
-Luồng hoạt động cố định theo 2 bước:
-
-**Bước 1: Thao tác kích hoạt cập nhật State**
-
-Người dùng tương tác (nhấp chuột, gõ phím, kéo thanh trượt) → callback được gọi → giá trị bên trong State struct thay đổi.
-
-```rust
-// Ví dụ: khi kéo thanh trượt âm lượng
-scale.connect_value_changed(clone!(@strong state => move |s| {
-    state.borrow_mut().volume = s.value() as u8;
-    // Bước tiếp theo: cập nhật giao diện
-}));
+    App->>Theme: gọi init_theme() (đồng bộ GTK/GtkSettings)
+    Theme->>Theme: resolve theme package → build CSS → GtkCssProvider
+    Theme-->>App: CSS toàn cục đã nạp
+    App->>UI: build UI từ state
+    UI->>Win: present window
 ```
 
-**Bước 2: State thay đổi kích hoạt vẽ lại giao diện**
-
-Sau khi State được cập nhật, phát tín hiệu yêu cầu vẽ lại (`queue_draw`) hoặc tái tạo cây widget (`rebuild`) để đồng bộ giao diện với trạng thái mới.
-
-```rust
-// Sau khi cập nhật state, yêu cầu vẽ lại label hiển thị phần trăm
-volume_label.set_text(&format!("{}%", state.borrow().volume));
-```
-
-### 3.4. Quy tắc bắt buộc
-
-| Quy tắc | Chi tiết |
-| :--- | :--- |
-| DO | Sử dụng `Rc<RefCell<State>>` làm nguồn dữ liệu duy nhất cho mỗi cửa sổ phức tạp |
-| DO | Luồng dữ liệu chỉ chạy một chiều: Người dùng → State → Giao diện |
-| DO NOT | Không lưu dữ liệu kinh doanh (business data) trực tiếp trong widget (ví dụ: không dùng `button.set_data("volume", 50)` thay cho State) |
-| DO NOT | Không để hai widget cùng ghi vào dữ liệu mà không thông qua State |
+> [!IMPORTANT]
+> `init_theme()` là **điểm duy nhất** nạp theme — mọi crate đều gọi nó, không ai tự nạp CSS riêng. Chi tiết luồng theme: [05-themes-variants.md](./05-themes-variants.md) mục 3.
 
 ---
 
-## 4. Pattern 3: Mô hình Daemon-Client
+## 4. Các service nền của babydra-core
 
-### 4.1. Vấn đề cần giải quyết
+`babydra-core` cung cấp các service không phụ thuộc GTK, dùng chung bởi mọi app:
 
-Khởi động lạnh một ứng dụng GTK (cold start) tốn hàng trăm mili-giây (thường 200ms–500ms) do phải nạp thư viện, khởi tạo GDK context, và dựng cây widget từ đầu. Điều này khiến trải nghiệm nhấn phím tắt để mở panel bị giật lag.
-
-### 4.2. Giải pháp
-
-BabyDra áp dụng mô hình **Daemon-Client** để loại bỏ hoàn toàn độ trễ:
-
-```
-+------------------+          +----------------------------+
-| Client (siêu nhẹ)|          | Daemon (chạy ngầm 24/7)   |
-|                  |          |                            |
-| Được gọi khi     | Socket / | Giữ cửa sổ ẩn sẵn trong   |
-| người dùng nhấn  | D-Bus    | bộ nhớ (set_visible false) |
-| phím tắt         |--------> |                            |
-|                  |          | Nhận tín hiệu → gọi        |
-| Chỉ gửi 1 tín    |          | window.set_visible(true)   |
-| hiệu, sau đó     |          | + window.present()         |
-| thoát ngay       |          |                            |
-+------------------+          +----------------------------+
-                                           |
-                               Cửa sổ hiện ra < 10ms
-```
-
-**Ví dụ triển khai thực tế — `babydra-switcher`:**
-
-```bash
-# Daemon chạy từ autostart của labwc (xem configs/labwc/autostart)
-babydra-switcher --daemon &
-```
-
-- Daemon giữ overlay (danh sách cửa sổ + preview) dựng sẵn trong bộ nhớ và lắng nghe Unix socket `/tmp/babydra-switcher.socket`.
-- Khi người dùng nhấn `Alt+Tab` (keybind trong `rc.xml`), labwc gọi binary `babydra-switcher` (chế độ one-shot client). Client chỉ làm một việc: gửi tín hiệu `show`/`next` vào socket rồi thoát ngay.
-- Daemon nhận tín hiệu và hiện overlay ngay lập tức — không có cold start.
-
-**Kết quả:** Tốc độ hiển thị từ nhấn phím đến cửa sổ xuất hiện dưới 10ms.
-
-### 4.3. Quy tắc bắt buộc
-
-| Quy tắc | Chi tiết |
-| :--- | :--- |
-| DO | Mỗi crate ứng dụng phải chạy ở chế độ Daemon: khởi động xong thì ẩn cửa sổ và lắng nghe socket |
-| DO | Client phải cực nhỏ: chỉ gửi tín hiệu socket rồi thoát, không làm gì khác |
-| DO NOT | Không để người dùng nhấn phím tắt mà phải khởi động toàn bộ ứng dụng từ đầu |
-
----
-
-## 5. Pattern 4: Module hóa Giao diện
-
-### 5.1. Vấn đề cần giải quyết
-
-Nếu mỗi crate ứng dụng tự định nghĩa riêng CSS và widget cơ bản, sẽ xuất hiện:
-
-- Không nhất quán về màu sắc, kích thước, font chữ giữa các ứng dụng.
-- Trùng lặp mã CSS: mỗi ứng dụng copy-paste cùng một đoạn CSS.
-- Khó thay đổi theme: cần sửa ở nhiều nơi cùng lúc.
-
-### 5.2. Giải pháp
-
-Toàn bộ CSS và widget dùng chung được tập trung tại thư viện `babydra-utils`:
-
-```
-libs/babydra-utils/
-    src/
-        styles/
-            shared/        <- CSS cấu trúc & layout dùng chung (không phụ thuộc theme)
-                panel/     <- Panel: panel, taskbar, clock, status, sys_monitor, tray, workspaces
-                control_center/
-                island/    <- system_island, notification
-                launcher/
-                calendar/
-                apps/      <- lock, preview, screenshot, settings, switcher
-                explore/   <- window, header_bar, content_view, info_panel, status_bar, context_menu, dialogs
-                shared/    <- button, switch, sidebar, scrollbar
-            dark/          <- Màu sắc chế độ tối (cùng cây thư mục như shared/)
-            light/         <- Màu sắc chế độ sáng (cùng cây thư mục như shared/)
-        components/        <- Widget GTK dùng chung (button, card, modal, switch, navbar, slider...)
-        explore/           <- Context menu & dialogs dùng riêng cho babydra-explore
-        ui/
-            theme/         <- Module khởi tạo và nạp theme
-            icon/          <- Icon resolver & assets
-            animation/     <- easing, genie, island, slide
-            battery.rs     <- Helper đọc pin
-            window.rs      <- Helper cửa sổ
-```
-
-**Cơ chế nạp CSS:**
-
-Khi bất kỳ ứng dụng nào khởi động, nó gọi hàm `babydra_utils::ui::theme::init_theme()` (không tham số). Hàm này:
-
-1. Gộp toàn bộ nội dung CSS `shared/` (cấu trúc) với CSS `dark/` hoặc `light/` (màu sắc) tùy theo chế độ hiện tại.
-2. Nạp CSS vào `GtkCssProvider` toàn cục của GDK Display Context.
-3. Đăng ký lắng nghe sự kiện thay đổi `color-scheme` của GSettings — khi người dùng chuyển Dark ↔ Light, gọi lại `init_theme()` để áp dụng ngay mà không cần khởi động lại ứng dụng.
-
-Nhờ đó, mọi widget trên mọi ứng dụng đều tự động nhận style đúng mà không cần mỗi ứng dụng tự quản lý CSS.
-
-### 5.3. Quy tắc bắt buộc
-
-| Quy tắc | Chi tiết |
-| :--- | :--- |
-| DO | Toàn bộ CSS phải đặt trong `libs/babydra-utils/src/styles/` |
-| DO | Gọi `babydra_utils::ui::theme::init_theme()` trong hàm `main()` hoặc `activate()` của mỗi ứng dụng |
-| DO NOT | Không viết CSS inline trong mã Rust (không dùng `css_classes`, `widget.set_css_classes()` với giá trị style cụ thể) |
-| DO NOT | Không tạo `GtkCssProvider` mới trong từng ứng dụng. Chỉ dùng provider toàn cục do `babydra-utils` quản lý |
-
----
-
-## 6. Quy trình khởi tạo cửa sổ chuẩn
-
-Mỗi cửa sổ GTK trong dự án phải được khởi tạo theo đúng 3 bước sau:
-
-### Bước 1: Cấu hình Layer Shell
-
-BabyDra chạy trên Wayland và dùng `gtk4-layer-shell` để định vị cửa sổ chính xác trên màn hình mà không cần window manager can thiệp.
-
-**Layer (Tầng lớp hiển thị):** Quyết định cửa sổ nằm ở vị trí nào trong không gian Z (độ sâu hiển thị).
-
-| Layer | Dùng cho | Ví dụ |
+| Nhóm | Service | Chức năng |
 | :--- | :--- | :--- |
-| `Layer::Top` | Giao diện hệ thống luôn nổi trên ứng dụng thông thường | Panel, thanh trạng thái |
-| `Layer::Overlay` | Giao diện cần bao phủ toàn màn hình | Alt-Tab Switcher, Lock Screen, Screenshot |
+| Hệ thống | `system::wifi`, `system::vpn`, `system::volume`, `system::brightness`, `system::battery`, `system::cpu` | Đọc/điều khiển phần cứng (NetworkManager, WirePlumber, DDC/CI…) |
+| Ứng dụng | `wallpaper`, `updates` | Đổi wallpaper, kiểm tra cập nhật |
+| Nền | `daemon`, `tray_watcher`, `notification` | Lắng nghe system tray, gửi notification |
+| Cấu hình | `config` | Đọc/ghi `~/.babydra/babydra.conf` (cache `OnceLock<RwLock>`) |
+| Ngôn ngữ | `i18n` | Tra từ điển `locales/*/en.json`, `vi.json` |
 
-**Edge (Neo cạnh màn hình):** Gắn cửa sổ vào một cạnh màn hình cụ thể để cố định vị trí.
-
-**Exclusive Zone (Vùng loại trừ):** Chỉ định khoảng không gian trên màn hình mà các ứng dụng khác không được phóng to đè lên. Ví dụ: Panel cao 48px thì đặt `exclusive_zone = 48` để các ứng dụng khác tự động bắt đầu hiển thị từ pixel 49 trở đi, không bị che khuất.
-
-### Bước 2: Nạp Stylesheet toàn cục
-
-```rust
-// Trong hàm activate() của mỗi ứng dụng
-babydra_utils::ui::theme::init_theme();
-```
-
-Hàm `init_theme()` sẽ:
-
-1. Gộp CSS `shared/` + CSS `dark/` hoặc `light/` theo chế độ màu hiện tại của GSettings (`org.gnome.desktop.interface color-scheme`).
-2. Nạp toàn bộ CSS vào provider toàn cục của GDK Display.
-3. Lắng nghe sự kiện thay đổi theme (khi người dùng chuyển Dark ↔ Light trong lúc chạy) và nạp lại tự động.
-
-### Bước 3: Khởi động các dịch vụ chạy ngầm
-
-Tùy theo ứng dụng, đây có thể bao gồm:
-
-- Khởi động D-Bus StatusNotifierWatcher (system tray) — `babydra_common::tray::spawn_watcher_service()`.
-- Khởi động thread theo dõi cửa sổ đang ở tiêu điểm (focus) — `babydra_common::spawn_switcher_tracker()`.
-- Refresh cache danh sách ứng dụng desktop bất đồng bộ — `babydra_common::refresh_desktop_apps_cache()`.
-- Phát hiện bus DDC/CI cho màn hình ngoài — `widgets::panel::detect_ddc_bus()`.
+**Luồng áp dụng cấu hình:** app khởi động → `load_babydra_config()` → `apply_all_saved_settings()` → các service đọc lại trạng thái đã lưu.
 
 ---
 
-## 7. Các dịch vụ nền của babydra-common
+## 5. Câu hỏi thường gặp
 
-`libs/babydra-common/src/services/` chứa toàn bộ nghiệp vụ hệ thống, được tái export phẳng qua `lib.rs`:
-
-| Nhóm service | Module | Chức năng |
-| :--- | :--- | :--- |
-| Hệ thống | `system/` | battery, backlight (DDC/CI + sysfs), bluetooth, certificates, clean (cache/logs/pacman/trash), display, gpu, monitor, network, power (profile + saver), startup, storage, theme, updates, volume (PipeWire), vpn (NetworkManager), wifi (NetworkManager) |
-| Cửa sổ | `window/` | `tracker` (theo dõi cửa sổ focus cho switcher), `mru` (Most Recently Used — lịch sử cửa sổ) |
-| Thông báo | `notification/` | `service` (gửi thông báo), `island` (trạng thái island) |
-| Tray | `tray/` | `client`, `dbusmenu`, `watcher` (StatusNotifierWatcher) |
-| Ứng dụng | `apps/` | `discovery` (quét .desktop files), `pacman` |
-| Đa phương tiện | `mpris/` | Điều khiển media player qua MPRIS D-Bus |
-| Khác | `actions`, `clock`, `exif`, `explore/` (cmd, dbus, dir_size, filter, fs_ops, preview, sort, watcher), `logger`, `screenshot`, `search`, `wallpaper`, `utils` | — |
-
-Các helper quan trọng tái export tại gốc (`babydra_common::`):
-
-- `init_logger(app_name, log_file)` — logger chia sẻ, log vào `~/.cache/babydra/`.
-- `capture_screen_to_temp()`, `handle_fullscreen_capture()`, `trigger_save()`, `trigger_copy()` — chụp màn hình (grim/slurp + wl-clipboard).
-- `verify_password()`, `poweroff()`, `reboot()`, `suspend()`, `set_performance_profile()` — quyền & nguồn điện (PAM).
-- `send_notification(...)` — gửi thông báo desktop.
-- `set_wallpaper()`, `set_greeter_wallpaper()`, `set_avatar()` — hình nền & avatar.
-- `i18n::t("settings.notif_auto_saver_title")` — dịch chuỗi theo ngôn ngữ hiện tại (en/vi).
-
-**Đa ngôn ngữ (i18n):**
-
-- File JSON: `libs/babydra-common/src/i18n/locales/<app>/en.json` và `vi.json` (các app: `common`, `explore`, `greeter`, `launcher`, `settings`).
-- Mọi chuỗi hiển thị trong UI phải đi qua hàm `babydra_common::i18n::t("namespace.key")` thay vì hardcode.
-
----
-
-## 8. Câu hỏi thường gặp
-
-**Hỏi: Tại sao không dùng async/await thay vì Daemon?**
-
-Trả lời: Async/await giải quyết vấn đề chờ đợi I/O mà không block thread, nhưng không giải quyết được vấn đề thời gian khởi động GTK. Dù dùng async, GTK vẫn phải dựng widget từ đầu, vẫn tốn 200ms+. Daemon giữ widget đã dựng sẵn trong bộ nhớ, đây là cách duy nhất để đạt dưới 10ms.
-
-**Hỏi: `Rc<RefCell<T>>` có an toàn không? Có thể gây panic không?**
-
-Trả lời: `RefCell` kiểm tra borrow rule ở runtime. Nếu code cố gắng mượn (borrow) cùng lúc nhiều lần không hợp lệ (ví dụ: `borrow_mut()` trong khi đang `borrow()`), chương trình sẽ panic. Để tránh: không bao giờ gọi `borrow()` hay `borrow_mut()` bên trong một closure đang giữ borrow khác của cùng RefCell.
-
-**Hỏi: Khi nào cần dùng `queue_draw()` và khi nào cần `rebuild` toàn bộ widget?**
-
-Trả lời: Dùng `queue_draw()` khi chỉ cần vẽ lại nội dung (ví dụ: cập nhật số liệu trên label, thay đổi màu). Dùng `rebuild` (tạo lại cây widget) khi cấu trúc giao diện thay đổi (ví dụ: thêm/xóa một dòng trong danh sách).
-
-**Hỏi: `babydra-explore` dùng tokio — có phá vỡ pattern không?**
-
-Trả lời: Không. `babydra-explore` dùng `tokio::runtime` để thực hiện các thao tác I/O nặng (đọc thư mục lớn, tính kích thước thư mục) không block UI thread. State vẫn là `Rc<RefCell<SessionState>>`, luồng dữ liệu vẫn một chiều — async chỉ là công cụ chạy nền, không thay đổi kiến trúc.
+| Câu hỏi | Trả lời |
+| :--- | :--- |
+| Vì sao panel là daemon mà settings là client? | Cửa sổ panel phải luôn sẵn sàng (không lag khi bấm), còn settings mở theo nhu cầu nên chạy oneshot. |
+| Vì sao tách `mod.rs`/`render.rs`? | Đổi giao diện không đụng logic; dễ test state thuần không cần GTK. |
+| Vì sao một nguồn theme duy nhất? | Đổi theme 1 nơi, áp dụng mọi app; tránh mỗi crate tự định nghĩa màu riêng. |

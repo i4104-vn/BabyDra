@@ -1,13 +1,14 @@
+use crate::models::{GenericOptionItem, LogLevel};
+use crate::system::{copy_recursive, get_user_home, get_user_local_bin, SudoSession};
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::process::Command;
-use crate::models::{GenericOptionItem, LogLevel};
-use crate::system::{copy_recursive, get_user_home, get_user_local_bin};
 
 pub fn execute_configs_task<F>(
     opt: &GenericOptionItem,
     workspace_root: &Path,
+    sudo: &SudoSession,
     mut log: F,
 ) -> (usize, usize)
 where
@@ -45,7 +46,10 @@ where
                         }
                     }
                 }
-                log(LogLevel::Success, "Synced labwc autostart, rc.xml, scripts to ~/.config/labwc".into());
+                log(
+                    LogLevel::Success,
+                    "Synced labwc autostart, rc.xml, scripts to ~/.config/labwc".into(),
+                );
                 copied += 1;
             }
         }
@@ -72,13 +76,33 @@ where
             );
             let _ = fs::write(apps_dir.join("babydra-explore.desktop"), explore_desktop);
 
-            let _ = Command::new("update-desktop-database").arg(apps_dir.to_str().unwrap()).status();
-            let _ = Command::new("xdg-mime")
-                .args(["default", "babydra-preview.desktop", "image/png", "image/jpeg", "image/gif", "image/webp", "image/bmp"])
-                .status();
-            let _ = Command::new("xdg-mime").args(["default", "babydra-explore.desktop", "inode/directory"]).status();
+            // All external commands run through the safe executor: stdout/stderr
+            // are captured, never printed over the raw-mode TUI.
+            let _ = sudo.run(
+                "update-desktop-database",
+                &[apps_dir.to_str().unwrap_or("")],
+            );
+            let _ = sudo.run(
+                "xdg-mime",
+                &[
+                    "default",
+                    "babydra-preview.desktop",
+                    "image/png",
+                    "image/jpeg",
+                    "image/gif",
+                    "image/webp",
+                    "image/bmp",
+                ],
+            );
+            let _ = sudo.run(
+                "xdg-mime",
+                &["default", "babydra-explore.desktop", "inode/directory"],
+            );
 
-            log(LogLevel::Success, "Registered .desktop files & MIME associations.".into());
+            log(
+                LogLevel::Success,
+                "Registered .desktop files & MIME associations.".into(),
+            );
             copied += 1;
         }
 
@@ -116,7 +140,10 @@ where
                 let _ = copy_recursive(&ff_src, &home.join(".config/fastfetch"));
             }
 
-            log(LogLevel::Success, "Synced GTK-3/4, Fontconfig, Kitty, Neovim, and Fastfetch dotfiles.".into());
+            log(
+                LogLevel::Success,
+                "Synced GTK-3/4, Fontconfig, Kitty, Neovim, and Fastfetch dotfiles.".into(),
+            );
             copied += 1;
         }
 
@@ -138,8 +165,22 @@ where
                     for e in entries.flatten() {
                         let path = e.path();
                         if path.extension().and_then(|s| s.to_str()) == Some("tar") {
-                            log(LogLevel::Info, format!("Extracting cursor archive: {:?}", path.file_name().unwrap()));
-                            let _ = Command::new("tar").args(["-xf", path.to_str().unwrap(), "-C", icons_dst.to_str().unwrap()]).status();
+                            log(
+                                LogLevel::Info,
+                                format!(
+                                    "Extracting cursor archive: {:?}",
+                                    path.file_name().unwrap()
+                                ),
+                            );
+                            let _ = sudo.run(
+                                "tar",
+                                &[
+                                    "-xf",
+                                    path.to_str().unwrap_or(""),
+                                    "-C",
+                                    icons_dst.to_str().unwrap_or(""),
+                                ],
+                            );
                         }
                     }
                 }
@@ -151,8 +192,19 @@ where
                     for e in entries.flatten() {
                         let path = e.path();
                         if path.extension().and_then(|s| s.to_str()) == Some("tar") {
-                            log(LogLevel::Info, format!("Extracting icon theme: {:?}", path.file_name().unwrap()));
-                            let _ = Command::new("tar").args(["-xf", path.to_str().unwrap(), "-C", icons_dst.to_str().unwrap()]).status();
+                            log(
+                                LogLevel::Info,
+                                format!("Extracting icon theme: {:?}", path.file_name().unwrap()),
+                            );
+                            let _ = sudo.run(
+                                "tar",
+                                &[
+                                    "-xf",
+                                    path.to_str().unwrap_or(""),
+                                    "-C",
+                                    icons_dst.to_str().unwrap_or(""),
+                                ],
+                            );
                         }
                     }
                 }
@@ -161,43 +213,105 @@ where
         }
 
         "gsettings_fontcache" => {
-            let _ = Command::new("gsettings")
-                .args(["set", "org.gnome.desktop.interface", "font-name", "Segoe UI Variable Static Text 13"])
-                .status();
-            let _ = Command::new("gsettings")
-                .args(["set", "org.gnome.desktop.interface", "document-font-name", "Segoe UI Variable Static Text 13"])
-                .status();
-            let _ = Command::new("gsettings")
-                .args(["set", "org.gnome.desktop.interface", "monospace-font-name", "CaskaydiaCove Nerd Font 11"])
-                .status();
-            let _ = Command::new("gsettings")
-                .args(["set", "org.gnome.desktop.interface", "icon-theme", "We10X"])
-                .status();
-            let _ = Command::new("gsettings")
-                .args(["set", "org.gnome.desktop.interface", "cursor-theme", "Twilight-cursors"])
-                .status();
+            let font_cmds: &[&[&str]] = &[
+                &[
+                    "gsettings",
+                    "set",
+                    "org.gnome.desktop.interface",
+                    "font-name",
+                    "Segoe UI Variable Static Text 13",
+                ],
+                &[
+                    "gsettings",
+                    "set",
+                    "org.gnome.desktop.interface",
+                    "document-font-name",
+                    "Segoe UI Variable Static Text 13",
+                ],
+                &[
+                    "gsettings",
+                    "set",
+                    "org.gnome.desktop.interface",
+                    "monospace-font-name",
+                    "CaskaydiaCove Nerd Font 11",
+                ],
+                &[
+                    "gsettings",
+                    "set",
+                    "org.gnome.desktop.interface",
+                    "icon-theme",
+                    "We10X",
+                ],
+                &[
+                    "gsettings",
+                    "set",
+                    "org.gnome.desktop.interface",
+                    "cursor-theme",
+                    "Twilight-cursors",
+                ],
+            ];
+            for cmd in font_cmds {
+                let _ = sudo.run(cmd[0], &cmd[1..]);
+            }
 
-            log(LogLevel::Info, "Rebuilding font cache (fc-cache -fv)...".into());
-            let _ = Command::new("fc-cache").arg("-fv").status();
+            log(
+                LogLevel::Info,
+                "Rebuilding font cache (fc-cache -fv)...".into(),
+            );
+            let _ = sudo.run("fc-cache", &["-fv"]);
 
-            log(LogLevel::Success, "Applied system GSettings and rebuilt font cache.".into());
+            log(
+                LogLevel::Success,
+                "Applied system GSettings and rebuilt font cache.".into(),
+            );
             copied += 1;
         }
 
         "restart_services" => {
-            let labwc_running = Command::new("pgrep").arg("-x").arg("labwc").status().map(|s| s.success()).unwrap_or(false);
+            let labwc_running = sudo
+                .run("pgrep", &["-x", "labwc"])
+                .map(|o| o.success)
+                .unwrap_or(false);
             if labwc_running {
-                let _ = Command::new("labwc").arg("--reconfigure").status();
-                log(LogLevel::Success, "Reloaded labwc compositor configuration.".into());
+                let _ = sudo.run("labwc", &["--reconfigure"]);
+                log(
+                    LogLevel::Success,
+                    "Reloaded labwc compositor configuration.".into(),
+                );
             }
 
             let panel_bin = user_bin_dir.join("babydra-panel");
             if panel_bin.exists() {
-                log(LogLevel::Info, "Starting babydra-panel background service...".into());
+                log(
+                    LogLevel::Info,
+                    "Starting babydra-panel background service...".into(),
+                );
                 let log_dir = home.join(".cache/babydra");
                 let _ = fs::create_dir_all(&log_dir);
-                let _ = Command::new(&panel_bin).spawn();
-                log(LogLevel::Success, "babydra-panel started.".into());
+                let log_file = log_dir.join("panel.log");
+                // Spawn detached with output redirected to a log file so the
+                // TUI is never written to by the child process.
+                let opened = fs::OpenOptions::new()
+                    .create(true)
+                    .append(true)
+                    .open(&log_file);
+                if let Ok(f) = opened {
+                    let out = f.try_clone().unwrap_or_else(|_| {
+                        fs::OpenOptions::new()
+                            .create(true)
+                            .append(true)
+                            .open(&log_file)
+                            .expect("reopen panel log")
+                    });
+                    let _ = Command::new(&panel_bin)
+                        .stdout(std::process::Stdio::from(out))
+                        .stderr(std::process::Stdio::from(f))
+                        .spawn();
+                }
+                log(
+                    LogLevel::Success,
+                    format!("babydra-panel started (logs: {}).", log_file.display()),
+                );
             }
             copied += 1;
         }
@@ -206,4 +320,87 @@ where
     }
 
     (copied, 0)
+}
+
+/// Deploys the theme packages tree (`themes/`) to `~/.babydra/themes` and
+/// writes the selected variant's theme id into `~/.babydra/babydra.conf`
+/// (`[theme] selection = { id = "..." }`), which the UI reads at startup.
+///
+/// This makes the installer's variant step (7/10) actually switch the theme
+/// the running desktop renders with — no code change required.
+pub fn deploy_theme_packages<F>(workspace_root: &Path, theme_id: &str, mut log: F)
+where
+    F: FnMut(LogLevel, String),
+{
+    let home = get_user_home();
+    let themes_src = workspace_root.join("themes");
+    let themes_dst = home.join(".babydra/themes");
+
+    if themes_src.is_dir() {
+        let _ = copy_recursive(&themes_src, &themes_dst);
+        log(
+            LogLevel::Success,
+            format!("Deployed theme packages to {}", themes_dst.display()),
+        );
+    } else {
+        log(
+            LogLevel::Warn,
+            "themes/ not found in workspace — skipping theme packages deploy.".into(),
+        );
+    }
+
+    // Persist the selected theme id into ~/.babydra/babydra.conf
+    let conf_path = home.join(".babydra/babydra.conf");
+    if let Err(e) = write_theme_selection(&conf_path, theme_id) {
+        log(
+            LogLevel::Warn,
+            format!("Could not write theme selection: {e}"),
+        );
+    } else {
+        log(
+            LogLevel::Info,
+            format!("babydra.conf theme.selection.id = {theme_id}"),
+        );
+    }
+}
+
+/// Sets `[theme] selection.id` inside the TOML config, preserving other keys.
+/// Writes `theme.selection.id = "<theme_id>"` into a `babydra.conf` TOML file.
+///
+/// Preserves all existing keys/sections and replaces any previous
+/// `selection` value under `[theme]`. Returns an error string on I/O or
+/// parse failure.
+pub fn write_theme_selection(conf_path: &Path, theme_id: &str) -> Result<(), String> {
+    let mut root: toml::Table = if conf_path.exists() {
+        let content = fs::read_to_string(conf_path)
+            .map_err(|e| format!("cannot read {}: {e}", conf_path.display()))?;
+        content
+            .parse::<toml::Table>()
+            .map_err(|e| format!("invalid TOML in {}: {e}", conf_path.display()))?
+    } else {
+        toml::Table::new()
+    };
+
+    let theme_table = root
+        .entry("theme".to_string())
+        .or_insert_with(|| toml::Value::Table(toml::Table::new()));
+    let theme_table = theme_table
+        .as_table_mut()
+        .ok_or_else(|| "[theme] is not a table".to_string())?;
+
+    let selection = theme_table
+        .entry("selection".to_string())
+        .or_insert_with(|| toml::Value::Table(toml::Table::new()));
+    let selection = selection
+        .as_table_mut()
+        .ok_or_else(|| "[theme.selection] is not a table".to_string())?;
+
+    selection.insert("id".to_string(), toml::Value::String(theme_id.to_string()));
+
+    if let Some(parent) = conf_path.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|e| format!("cannot create {}: {e}", parent.display()))?;
+    }
+    let out = toml::to_string_pretty(&root).map_err(|e| format!("cannot serialize config: {e}"))?;
+    fs::write(conf_path, out).map_err(|e| format!("cannot write {}: {e}", conf_path.display()))
 }

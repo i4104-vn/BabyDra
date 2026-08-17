@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Box as GtkBox, Label, Button, Orientation, Align};
+use gtk4::{Align, Box as GtkBox, Button, Label, Orientation};
 
 pub struct TopBarWidget {
     pub container: GtkBox,
@@ -10,6 +10,7 @@ pub struct TopBarWidget {
     pub date_label: Label,
 }
 
+/// Build.
 pub fn build() -> TopBarWidget {
     tracing::info!(target: "babydra-greeter", "Building TopBar Widget (clock, date, power buttons)");
     let top_bar = GtkBox::new(Orientation::Horizontal, 0);
@@ -37,24 +38,24 @@ pub fn build() -> TopBarWidget {
     let suspend_btn = Button::new();
     suspend_btn.add_css_class("power-btn");
     suspend_btn.add_css_class("action-btn-suspend");
-    suspend_btn.set_tooltip_text(Some(&babydra_common::i18n::t("greeter.suspend")));
+    suspend_btn.set_tooltip_text(Some(&babydra_core::i18n::t("greeter.suspend")));
     suspend_btn.set_cursor_from_name(Some("pointer"));
-    let suspend_icon = babydra_utils::ui::icon::get_icon_colored("sleep", 18, "#ffffff");
+    let suspend_icon = babydra_ui_kit::ui::icon::get_icon_colored("sleep", 18, "#ffffff");
     suspend_btn.set_child(Some(&suspend_icon));
 
     let reboot_btn = Button::new();
     reboot_btn.add_css_class("power-btn");
     reboot_btn.add_css_class("action-btn-reboot");
-    reboot_btn.set_tooltip_text(Some(&babydra_common::i18n::t("greeter.reboot")));
+    reboot_btn.set_tooltip_text(Some(&babydra_core::i18n::t("greeter.reboot")));
     reboot_btn.set_cursor_from_name(Some("pointer"));
-    let reboot_icon = babydra_utils::ui::icon::get_icon_colored("restart", 18, "#ffffff");
+    let reboot_icon = babydra_ui_kit::ui::icon::get_icon_colored("restart", 18, "#ffffff");
     reboot_btn.set_child(Some(&reboot_icon));
 
     let power_btn = Button::new();
     power_btn.add_css_class("power-btn");
-    power_btn.set_tooltip_text(Some(&babydra_common::i18n::t("greeter.power_off")));
+    power_btn.set_tooltip_text(Some(&babydra_core::i18n::t("greeter.power_off")));
     power_btn.set_cursor_from_name(Some("pointer"));
-    let power_icon = babydra_utils::ui::icon::get_icon_colored("power", 18, "#ffffff");
+    let power_icon = babydra_ui_kit::ui::icon::get_icon_colored("power", 18, "#ffffff");
     power_btn.set_child(Some(&power_icon));
 
     actions_box.append(&suspend_btn);

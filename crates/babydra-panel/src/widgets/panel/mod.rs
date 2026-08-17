@@ -1,8 +1,8 @@
 pub mod items;
 pub mod modal;
-pub mod toggle_grid;
 pub mod popover;
 mod render;
+pub mod toggle_grid;
 
 use gtk4::prelude::*;
 use std::cell::RefCell;
@@ -19,7 +19,8 @@ pub fn create_status_indicators(
     calendar_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
     launcher_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
 ) -> gtk4::Box {
-    let (status_box, status_button, separator, vol_icon, net_icon, vpn_icon, bat_widget) = render::build_status_indicators_ui();
+    let (status_box, status_button, separator, vol_icon, net_icon, vpn_icon, bat_widget) =
+        render::build_status_indicators_ui();
 
     // Initial update of volume icon on load
     items::volume::update_topbar_volume_icon(&vol_icon);
@@ -28,9 +29,8 @@ pub fn create_status_indicators(
     let popovers = popover::setup_status_popovers(&vol_icon, &net_icon, &vpn_icon, &bat_widget);
 
     // Scroll controller for volume on status button
-    let scroll_controller = gtk4::EventControllerScroll::new(
-        gtk4::EventControllerScrollFlags::VERTICAL
-    );
+    let scroll_controller =
+        gtk4::EventControllerScroll::new(gtk4::EventControllerScrollFlags::VERTICAL);
     let vol_icon_scroll = vol_icon.clone();
     let update_vol_scroll = popovers.update_volume_popover.clone();
     let pop_vol_scroll = popovers.vol_popover.clone();
@@ -79,7 +79,11 @@ pub fn create_status_indicators(
         if let Some(existing_window) = existing {
             existing_window.close();
         } else {
-            let q_win = modal::create_control_center_window(&app_clone, ccw_clone.clone(), vol_icon_clone.clone());
+            let q_win = modal::create_control_center_window(
+                &app_clone,
+                ccw_clone.clone(),
+                vol_icon_clone.clone(),
+            );
             if let Ok(mut borrow) = ccw_clone.try_borrow_mut() {
                 *borrow = Some(q_win);
             }

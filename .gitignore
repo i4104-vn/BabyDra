@@ -16,3 +16,7 @@ Cargo.lock
 .old_project/
 .docs/
 .svg-icons/
+
+# Safety-net artifacts
+*.log
+screenshot-baseline/

@@ -1,12 +1,12 @@
+pub mod popover;
 pub mod render;
 
-pub use babydra_common::helper::wifi::{
-    get_wifi_state, scan_networks, connect_wifi,
-};
+pub use babydra_core::helper::wifi::{connect_wifi, get_wifi_state, scan_networks};
 
 use gtk4::prelude::*;
 use tokio::sync::mpsc;
 
+/// Connect wifi async.
 pub fn connect_wifi_async(
     ssid: &str,
     username: Option<String>,
@@ -38,7 +38,7 @@ pub fn connect_wifi_async(
                 sub_label_c.set_text(&ssid_str2);
                 left_btn_c.add_css_class("active");
                 circle_c.add_css_class("active");
-                let new_img = babydra_utils::ui::icon::get_icon_colored("wifi", 14, "#ffffff");
+                let new_img = babydra_ui_kit::ui::icon::get_icon_colored("wifi", 14, "#ffffff");
                 if let Some(paintable) = new_img.paintable() {
                     icon_widget_c.set_paintable(Some(&paintable));
                 }

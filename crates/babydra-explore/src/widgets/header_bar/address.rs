@@ -1,9 +1,9 @@
+use babydra_core::SessionState;
 use gtk4::prelude::*;
 use gtk4::{Box, Label};
+use std::cell::RefCell;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
-use std::cell::RefCell;
-use babydra_common::SessionState;
 
 /// Updates the breadcrumb path components based on the active path.
 pub fn update_address_bar(
@@ -13,7 +13,6 @@ pub fn update_address_bar(
     path: &Path,
     nav_callback: &Rc<dyn Fn(PathBuf)>,
 ) {
-    // Clear existing breadcrumbs
     while let Some(child) = breadcrumb_box.first_child() {
         breadcrumb_box.remove(&child);
     }
@@ -38,7 +37,12 @@ pub fn update_address_bar(
                 let btn_gesture = gtk4::GestureClick::new();
                 btn_gesture.connect_pressed(move |g, _, _, _| {
                     g.set_state(gtk4::EventSequenceState::Claimed);
-                    { session_clone.borrow_mut().active_tab_mut().navigate_to(target.clone()); }
+                    {
+                        session_clone
+                            .borrow_mut()
+                            .active_tab_mut()
+                            .navigate_to(target.clone());
+                    }
                     nav_cb(target.clone());
                 });
                 btn.add_controller(btn_gesture);
@@ -78,7 +82,12 @@ pub fn update_address_bar(
         let nav_cb2 = nav_cb.clone();
         btn_gesture.connect_pressed(move |g, _, _, _| {
             g.set_state(gtk4::EventSequenceState::Claimed);
-            { session_clone2.borrow_mut().active_tab_mut().navigate_to(target_c.clone()); }
+            {
+                session_clone2
+                    .borrow_mut()
+                    .active_tab_mut()
+                    .navigate_to(target_c.clone());
+            }
             nav_cb2(target_c.clone());
         });
         btn.add_controller(btn_gesture);

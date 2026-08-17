@@ -1,11 +1,12 @@
 pub mod render;
 
+use babydra_core::models::startup_command::StartupCommand;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Entry, Orientation, Widget};
-use babydra_common::models::startup_command::StartupCommand;
 
+/// Creates a new `startup widget`.
 pub fn create_startup_widget() -> Widget {
-    let commands = babydra_common::services::system::startup::get_startup_commands();
+    let commands = babydra_core::services::system::startup::get_startup_commands();
     let widget = render::build(&commands);
 
     let list_card = widget.list_box.clone();
@@ -14,7 +15,9 @@ pub fn create_startup_widget() -> Widget {
         row.add_css_class("settings-card-row");
 
         let entry = Entry::new();
-        entry.set_placeholder_text(Some(&babydra_common::i18n::t("settings.startup_command_placeholder")));
+        entry.set_placeholder_text(Some(&babydra_core::i18n::t(
+            "settings.startup_command_placeholder",
+        )));
         entry.set_hexpand(true);
         entry.add_css_class("sidebar-search-entry");
 
@@ -23,7 +26,7 @@ pub fn create_startup_widget() -> Widget {
         delete_btn.add_css_class("circular");
         delete_btn.add_css_class("delete-btn");
         delete_btn.set_valign(gtk4::Align::Center);
-        let del_icon = babydra_utils::ui::icon::get_icon("edit-delete", 16);
+        let del_icon = babydra_ui_kit::ui::icon::get_icon("edit-delete", 16);
         del_icon.set_pixel_size(16);
         delete_btn.set_child(Some(&del_icon));
 
@@ -60,7 +63,7 @@ pub fn create_startup_widget() -> Widget {
             }
             row_child = c.next_sibling();
         }
-        let _ = babydra_common::services::system::startup::save_startup_commands(&cmds);
+        let _ = babydra_core::services::system::startup::save_startup_commands(&cmds);
     });
 
     widget.container.into()

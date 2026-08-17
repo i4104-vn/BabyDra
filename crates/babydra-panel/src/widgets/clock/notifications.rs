@@ -2,11 +2,11 @@
 //! Manages loading, grouped rendering (by app), and expanding/collapsing of notifications,
 //! as well as formatting timestamps and clearing history.
 
+use super::notification_group::format_elapsed_time;
 use gtk4::prelude::*;
 use std::cell::RefCell;
-use std::rc::Rc;
 use std::collections::HashSet;
-use super::notification_group::format_elapsed_time;
+use std::rc::Rc;
 
 /// Configures and manages the interactive historical notifications list stack.
 /// Sets up periodic timers to update clock time, date, and detects when new notifications arrive.
@@ -17,7 +17,8 @@ pub fn setup_notifications_list(
     big_date: &gtk4::Label,
 ) {
     let expanded_apps = Rc::new(RefCell::new(HashSet::<String>::new()));
-    let render_notifications_holder: Rc<RefCell<Option<Rc<dyn Fn()>>>> = Rc::new(RefCell::new(None));
+    let render_notifications_holder: Rc<RefCell<Option<Rc<dyn Fn()>>>> =
+        Rc::new(RefCell::new(None));
 
     let render_notifications = {
         let notif_stack = notif_stack.clone();
@@ -36,24 +37,26 @@ pub fn setup_notifications_list(
                 notif_stack.remove(&child);
             }
 
-            let notifications: Vec<_> = babydra_island::widgets::notification::HISTORICAL_NOTIFICATIONS.with(|list| {
-                list.borrow().iter().cloned().collect()
-            });
+            let notifications: Vec<_> =
+                babydra_island::widgets::notification::HISTORICAL_NOTIFICATIONS
+                    .with(|list| list.borrow().iter().cloned().collect());
 
             if notifications.is_empty() {
-                let empty_label = gtk4::Label::new(Some(&babydra_common::i18n::t("panel.no_notifications")));
+                let empty_label =
+                    gtk4::Label::new(Some(&babydra_core::i18n::t("panel.no_notifications")));
                 empty_label.add_css_class("notif-empty-label");
                 empty_label.set_halign(gtk4::Align::Center);
                 empty_label.set_valign(gtk4::Align::Center);
                 empty_label.set_vexpand(true);
                 notif_stack.append(&empty_label);
             } else {
-                let (grouped, app_order) = super::notification_group::group_notifications_by_app(&notifications);
+                let (grouped, app_order) =
+                    super::notification_group::group_notifications_by_app(&notifications);
 
                 for app_key in app_order {
                     let list = &grouped[&app_key];
                     let display_app_name = if app_key == "system" {
-                        babydra_common::i18n::t("panel.system")
+                        babydra_core::i18n::t("panel.system")
                     } else {
                         let mut chars = app_key.chars();
                         match chars.next() {
@@ -65,9 +68,21 @@ pub fn setup_notifications_list(
                     let is_expanded = expanded_apps.borrow().contains(&app_key);
 
                     let group_container = if is_expanded {
-                        render_expanded_group(&app_key, &display_app_name, list, expanded_apps.clone(), render_notifications_rc.clone())
+                        render_expanded_group(
+                            &app_key,
+                            &display_app_name,
+                            list,
+                            expanded_apps.clone(),
+                            render_notifications_rc.clone(),
+                        )
                     } else {
-                        render_collapsed_group(&app_key, &display_app_name, list, expanded_apps.clone(), render_notifications_rc.clone())
+                        render_collapsed_group(
+                            &app_key,
+                            &display_app_name,
+                            list,
+                            expanded_apps.clone(),
+                            render_notifications_rc.clone(),
+                        )
                     };
 
                     notif_stack.append(&group_container);
@@ -91,20 +106,21 @@ pub fn setup_notifications_list(
         babydra_island::widgets::notification::HISTORICAL_NOTIFICATIONS.with(|list| {
             list.borrow_mut().clear();
         });
-        babydra_utils::ui::animation::slide_out_cb(
+        babydra_ui_kit::ui::animation::slide_out_cb(
             notif_stack_clear_clone.upcast_ref(),
-            babydra_utils::ui::animation::SlideDirection::Up,
+            babydra_ui_kit::ui::animation::SlideDirection::Up,
             20,
             450,
             false,
             move || {
                 cb();
-            }
+            },
         );
     });
 
     let last_notif_count = Rc::new(std::cell::Cell::new(
-        babydra_island::widgets::notification::HISTORICAL_NOTIFICATIONS.with(|list| list.borrow().len())
+        babydra_island::widgets::notification::HISTORICAL_NOTIFICATIONS
+            .with(|list| list.borrow().len()),
     ));
 
     let bt_clone = big_time.clone();
@@ -114,21 +130,23 @@ pub fn setup_notifications_list(
     let update_header = move || {
         let current_now = chrono::Local::now();
         bt_clone.set_text(&current_now.format("%I:%M %p").to_string());
-        
-        let weekday_key = format!("weekday.{}", current_now.format("%a").to_string().to_lowercase());
-        let weekday = babydra_common::i18n::t(&weekday_key);
+
+        let weekday_key = format!(
+            "weekday.{}",
+            current_now.format("%a").to_string().to_lowercase()
+        );
+        let weekday = babydra_core::i18n::t(&weekday_key);
         let month_key = format!("month.{}", current_now.format("%m").to_string());
-        let month_str = babydra_common::i18n::t(&month_key);
-        
-        let date_str = babydra_common::i18n::t("panel.date_format")
+        let month_str = babydra_core::i18n::t(&month_key);
+
+        let date_str = babydra_core::i18n::t("panel.date_format")
             .replace("{weekday}", &weekday)
             .replace("{day}", &current_now.format("%d").to_string())
             .replace("{month}", &month_str);
         bd_clone.set_text(&date_str);
 
-        let current_count = babydra_island::widgets::notification::HISTORICAL_NOTIFICATIONS.with(|list| {
-            list.borrow().len()
-        });
+        let current_count = babydra_island::widgets::notification::HISTORICAL_NOTIFICATIONS
+            .with(|list| list.borrow().len());
         if current_count != last_count_clone.get() {
             last_count_clone.set(current_count);
             render_timer_clone();
@@ -138,7 +156,6 @@ pub fn setup_notifications_list(
     };
     glib::timeout_add_local(std::time::Duration::from_millis(500), update_header);
 }
-
 
 /// Renders the expanded group layout displaying all historical notifications grouped
 /// under the specific application name with slide animation transitions.
@@ -167,7 +184,7 @@ fn render_expanded_group(
     title_lbl.set_halign(gtk4::Align::Start);
     title_lbl.set_hexpand(true);
 
-    let chevron = babydra_utils::ui::icon::get_icon("up", 12);
+    let chevron = babydra_ui_kit::ui::icon::get_icon("up", 12);
     chevron.set_pixel_size(12);
     chevron.set_opacity(0.4);
     chevron.set_valign(gtk4::Align::Center);
@@ -240,23 +257,23 @@ fn render_expanded_group(
         let ea_cb = ea_c.clone();
         let ak_cb = ak_c.clone();
         let render_cb = render_c.clone();
-        babydra_utils::ui::animation::slide_out_cb(
+        babydra_ui_kit::ui::animation::slide_out_cb(
             sub_box_c.upcast_ref(),
-            babydra_utils::ui::animation::SlideDirection::Up,
+            babydra_ui_kit::ui::animation::SlideDirection::Up,
             15,
             400,
             false,
             move || {
                 ea_cb.borrow_mut().remove(&ak_cb);
                 render_cb();
-            }
+            },
         );
     });
     group_header.add_controller(click_gesture);
 
-    babydra_utils::ui::animation::slide_in(
+    babydra_ui_kit::ui::animation::slide_in(
         sub_box.upcast_ref(),
-        babydra_utils::ui::animation::SlideDirection::Down,
+        babydra_ui_kit::ui::animation::SlideDirection::Down,
         15,
         450,
     );
@@ -355,7 +372,7 @@ fn render_collapsed_group(
     group_container
 }
 
-
+/// Make notif icon.
 fn make_notif_icon(icon: &str) -> gtk4::Image {
     let size = 18;
     // Absolute path – use directly if file exists
@@ -370,8 +387,11 @@ fn make_notif_icon(icon: &str) -> gtk4::Image {
         if let Some(display) = gdk4::Display::default() {
             let theme = gtk4::IconTheme::for_display(&display);
             // Strip extension if present
-            let clean = icon.trim_end_matches(|c| c == '.')
-                .rsplitn(2, '.').last().unwrap_or(icon);
+            let clean = icon
+                .trim_end_matches(|c| c == '.')
+                .rsplitn(2, '.')
+                .last()
+                .unwrap_or(icon);
             if theme.has_icon(clean) {
                 let img = gtk4::Image::from_icon_name(clean);
                 img.set_pixel_size(size);
@@ -380,5 +400,5 @@ fn make_notif_icon(icon: &str) -> gtk4::Image {
         }
     }
     // Fallback: embedded logo
-    babydra_utils::ui::icon::get_logo_png(size)
+    babydra_ui_kit::ui::icon::get_logo_png(size)
 }

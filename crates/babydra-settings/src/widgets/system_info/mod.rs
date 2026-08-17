@@ -1,13 +1,13 @@
 //! System specifications overview and update tab.
 
+use babydra_core::models::SystemInfoData;
+use babydra_core::services::system::gpu::get_gpu_info;
 use sysinfo::System;
-use babydra_common::services::system::gpu::get_gpu_info;
-use babydra_common::models::SystemInfoData;
 
 mod render;
 
+/// Creates a new `system widget`.
 pub fn create_system_widget() -> gtk4::Widget {
-    // Render UI instantly with initial placeholder values (0ms blocking!)
     let (main_box, labels) = render::build_system_ui(
         "BabyDra Linux",
         "Linux",
@@ -28,7 +28,13 @@ pub fn create_system_widget() -> gtk4::Widget {
         let hostname = System::host_name().unwrap_or_else(|| "localhost".to_string());
         let os_name = System::name().unwrap_or_else(|| "Arch Linux".to_string());
         let kernel_version = System::kernel_version().unwrap_or_else(|| "Unknown".to_string());
-        let cpu_model = sys.cpus().first().map(|cpu| cpu.brand()).unwrap_or("Intel/AMD CPU").trim().to_string();
+        let cpu_model = sys
+            .cpus()
+            .first()
+            .map(|cpu| cpu.brand())
+            .unwrap_or("Intel/AMD CPU")
+            .trim()
+            .to_string();
 
         let total_mem_gb = sys.total_memory() as f64 / (1024.0 * 1024.0 * 1024.0);
         let memory_text = format!("{:.1} GB", total_mem_gb);
@@ -71,10 +77,14 @@ pub fn create_system_widget() -> gtk4::Widget {
             };
             labels.os_label.set_text(display_host);
 
-            let sub_title = format!("{} ({}) • Kernel {}", data.os_name, data.cpu_arch, data.kernel_version);
+            let sub_title = format!(
+                "{} ({}) • Kernel {}",
+                data.os_name, data.cpu_arch, data.kernel_version
+            );
             labels.sub_label.set_text(&sub_title);
 
-            let formatted_uptime = babydra_common::i18n::t("settings.up_time").replace("{}", &data.uptime_text);
+            let formatted_uptime =
+                babydra_core::i18n::t("settings.up_time").replace("{}", &data.uptime_text);
             labels.uptime_lbl.set_text(&formatted_uptime);
 
             labels.kernel_lbl.set_text(&data.kernel_version);

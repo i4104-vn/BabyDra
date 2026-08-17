@@ -1,0 +1,89 @@
+[package]
+name = "babydra-tests"
+version.workspace = true
+edition = "2021"
+publish = false
+description = "Integration test suite for the BabyDra workspace (TDD safety net)."
+
+# Integration tests are declared explicitly so each test file in the
+# sub-folders below (common/, models/, ...) is compiled as its own test
+# binary. This keeps tests small, focused and easy to extend: to add a
+# new test area, drop a file in the matching folder and register a
+# `[[test]]` entry here.
+[dev-dependencies]
+babydra-core = { workspace = true }
+babydra-theme = { workspace = true }
+babydra-ui-kit = { workspace = true }
+babydra-installer = { path = "../install" }
+chrono = "0.4"
+gtk4 = { version = "0.9", features = ["v4_10"] }
+serde_json = "1.0"
+toml = "0.8"
+
+[[test]]
+name = "common_config"
+path = "common/config.rs"
+
+[[test]]
+name = "common_i18n"
+path = "common/i18n.rs"
+
+[[test]]
+name = "common_storage"
+path = "common/storage.rs"
+
+[[test]]
+name = "common_variant"
+path = "common/variant.rs"
+
+[[test]]
+name = "common_vpn"
+path = "common/vpn.rs"
+
+[[test]]
+name = "common_volume"
+path = "common/volume.rs"
+
+[[test]]
+name = "common_wifi"
+path = "common/wifi.rs"
+
+[[test]]
+name = "models_explore_grouping"
+path = "models/explore_grouping.rs"
+
+[[test]]
+name = "models_shell_theme_config"
+path = "models/shell_theme_config.rs"
+
+[[test]]
+name = "services_wallpaper"
+path = "services/wallpaper.rs"
+
+[[test]]
+name = "services_updates"
+path = "services/updates.rs"
+
+[[test]]
+name = "theme_engine"
+path = "theme/engine.rs"
+
+[[test]]
+name = "theme_tokens"
+path = "theme/tokens.rs"
+
+[[test]]
+name = "theme_shipped"
+path = "theme/shipped.rs"
+
+[[test]]
+name = "kits_prelude"
+path = "kits/prelude.rs"
+
+[[test]]
+name = "installer_variant_options"
+path = "installer/variant_options.rs"
+
+[[test]]
+name = "installer_theme_selection"
+path = "installer/theme_selection.rs"

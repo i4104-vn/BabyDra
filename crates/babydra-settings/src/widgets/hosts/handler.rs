@@ -1,10 +1,11 @@
+use crate::widgets::state::HostsWidget;
+use babydra_ui_kit::components::modal::PasswordDialog;
 use gtk4::prelude::*;
 use std::fs;
 use std::io::Write;
 use std::process::{Command, Stdio};
-use babydra_common::models::hosts::HostsWidget;
-use babydra_utils::components::modal::PasswordDialog;
 
+/// Load hosts file.
 fn load_hosts_file(buffer: &gtk4::TextBuffer, status_badge: &gtk4::Label) {
     match fs::read_to_string("/etc/hosts") {
         Ok(content) => {
@@ -17,6 +18,7 @@ fn load_hosts_file(buffer: &gtk4::TextBuffer, status_badge: &gtk4::Label) {
     }
 }
 
+/// Save hosts file.
 fn save_hosts_file(content: &str, password: &str) -> Result<(), String> {
     let mut child = Command::new("sudo")
         .arg("-S")
@@ -35,7 +37,9 @@ fn save_hosts_file(content: &str, password: &str) -> Result<(), String> {
         let _ = stdin.flush();
     }
 
-    let output = child.wait_with_output().map_err(|e| format!("Failed to wait for process: {}", e))?;
+    let output = child
+        .wait_with_output()
+        .map_err(|e| format!("Failed to wait for process: {}", e))?;
     if output.status.success() {
         Ok(())
     } else {
@@ -48,6 +52,7 @@ fn save_hosts_file(content: &str, password: &str) -> Result<(), String> {
     }
 }
 
+/// Wire events.
 pub fn wire_events(widget: &HostsWidget, auth_dialog: PasswordDialog) {
     // Initial load
     load_hosts_file(&widget.text_buffer, &widget.status_badge);
@@ -63,7 +68,10 @@ pub fn wire_events(widget: &HostsWidget, auth_dialog: PasswordDialog) {
     let auth_dialog_rc = std::rc::Rc::new(auth_dialog);
     let auth_dialog_show = auth_dialog_rc.clone();
     widget.save_btn.connect_clicked(move |_| {
-        auth_dialog_show.show_for("Authentication Required", "Enter sudo password to save /etc/hosts:");
+        auth_dialog_show.show_for(
+            "Authentication Required",
+            "Enter sudo password to save /etc/hosts:",
+        );
     });
 
     // Wire Confirm inside PasswordDialog

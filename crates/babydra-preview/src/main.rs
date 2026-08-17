@@ -1,20 +1,18 @@
 //! Dynamic desktop image preview application.
 //! Base Rust + GTK4 image viewer entry point.
 
+use babydra_core::i18n::t;
 use gtk4::prelude::*;
 use std::path::PathBuf;
 
 mod widgets;
 
+/// Application entry point: `main`.
 fn main() {
-    let app = gtk4::Application::new(
-        Some("com.babydra.preview"),
-        Default::default(),
-    );
+    let app = gtk4::Application::new(Some("com.babydra.preview"), Default::default());
 
     app.connect_activate(|app| {
-        // Load custom styling CSS rules from babydra-common
-        babydra_utils::ui::theme::init_theme();
+        babydra_ui_kit::ui::theme::init_theme();
 
         let arg_path = std::env::args().nth(1);
         if let Some(p) = arg_path {
@@ -27,14 +25,14 @@ fn main() {
 
         // Fallback file selector if no path is given or if the path is invalid
         let fallback_window = gtk4::ApplicationWindow::new(app);
-        fallback_window.set_title(Some("BabyDra Preview"));
+        fallback_window.set_title(Some(&t("common.app_preview_title")));
         fallback_window.set_default_size(400, 200);
 
         let file_dialog = gtk4::FileDialog::new();
-        file_dialog.set_title("Open Image File");
-        
+        file_dialog.set_title(&t("common.open_image_file"));
+
         let filter = gtk4::FileFilter::new();
-        filter.set_name(Some("Images"));
+        filter.set_name(Some(&t("common.images_filter")));
         filter.add_mime_type("image/png");
         filter.add_mime_type("image/jpeg");
         filter.add_mime_type("image/webp");
@@ -42,18 +40,22 @@ fn main() {
 
         let app_clone = app.clone();
         let fallback_win_clone = fallback_window.clone();
-        file_dialog.open(Some(&fallback_window), None::<&gio::Cancellable>, move |res| {
-            if let Ok(file) = res {
-                if let Some(path) = file.path() {
-                    widgets::build_ui(&app_clone, path);
-                    fallback_win_clone.close();
+        file_dialog.open(
+            Some(&fallback_window),
+            None::<&gio::Cancellable>,
+            move |res| {
+                if let Ok(file) = res {
+                    if let Some(path) = file.path() {
+                        widgets::build_ui(&app_clone, path);
+                        fallback_win_clone.close();
+                    } else {
+                        fallback_win_clone.close();
+                    }
                 } else {
                     fallback_win_clone.close();
                 }
-            } else {
-                fallback_win_clone.close();
-            }
-        });
+            },
+        );
 
         fallback_window.present();
     });

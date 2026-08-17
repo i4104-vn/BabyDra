@@ -1,3 +1,4 @@
+/// Renders `markdown to pango`.
 pub fn render_markdown_to_pango(markdown: &str) -> String {
     let options = pulldown_cmark::Options::empty();
     let parser = pulldown_cmark::Parser::new_ext(markdown, options);
@@ -18,9 +19,15 @@ pub fn render_markdown_to_pango(markdown: &str) -> String {
         .replace("</strong>", "</b>")
         .replace("<em>", "<b>")
         .replace("</em>", "</b>")
-        .replace("<pre><code>", "\n<span face=\"monospace\" background=\"#2e2e2e\">")
+        .replace(
+            "<pre><code>",
+            "\n<span face=\"monospace\" background=\"#2e2e2e\">",
+        )
         .replace("</code></pre>", "</span>\n")
-        .replace("<code>", "<span face=\"monospace\" background=\"#2e2e2e\"> ")
+        .replace(
+            "<code>",
+            "<span face=\"monospace\" background=\"#2e2e2e\"> ",
+        )
         .replace("</code>", " </span>")
         .replace("<ul>", "")
         .replace("</ul>", "")

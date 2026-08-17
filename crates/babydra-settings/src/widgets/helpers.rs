@@ -1,9 +1,6 @@
-pub use babydra_utils::components::{
-    clear_list_box, clear_box,
-    create_icon_badge,
-    PlaceholderState, create_placeholder_row,
+pub use babydra_ui_kit::components::{
+    clear_box, clear_list_box, create_icon_badge, create_placeholder_row, PlaceholderState,
 };
-
 
 /// Spawns a background task thread and invokes the `on_done` callback on the main GTK thread upon completion.
 pub fn spawn_async_task<T, F, G>(task: F, on_done: G, poll_ms: u64)

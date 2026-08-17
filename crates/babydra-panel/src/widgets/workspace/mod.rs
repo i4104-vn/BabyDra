@@ -1,12 +1,12 @@
 mod preview;
 mod render;
 
+use babydra_core::DesktopApp;
+use babydra_core::{focus_window, get_running_apps};
 use gtk4::prelude::*;
-use babydra_common::DesktopApp;
-use babydra_common::{get_running_apps, focus_window};
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
-use std::cell::RefCell;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
@@ -15,8 +15,9 @@ pub struct PopoverState {
     popover: gtk4::Popover,
 }
 
+/// Returns the current `active app id`.
 fn get_active_app_id() -> Option<String> {
-    babydra_common::helper::window::get_active_window().map(|(app_id, _)| app_id)
+    babydra_core::helper::window::get_active_window().map(|(app_id, _)| app_id)
 }
 
 /// Helper to generate a signature representing current taskbar state (apps only, not active).
@@ -72,16 +73,19 @@ fn rebuild_taskbar(
         let mut is_active = false;
         if let Some(ref active_id) = active_app_id {
             let active_id_lower = active_id.to_lowercase();
-            is_active = app_id.to_lowercase() == active_id_lower || windows.iter().any(|w| {
-                w.app_id.as_ref().map(|id| id.to_lowercase() == active_id_lower).unwrap_or(false)
-            });
+            is_active = app_id.to_lowercase() == active_id_lower
+                || windows.iter().any(|w| {
+                    w.app_id
+                        .as_ref()
+                        .map(|id| id.to_lowercase() == active_id_lower)
+                        .unwrap_or(false)
+                });
         }
 
         let window_count = windows.len();
         // Delegate button layout rendering
         let btn = render::build_taskbar_item_button(first_app, is_active, window_count);
 
-        // Create Popover for window previews
         let popover = render::build_popover_container(&btn);
 
         // Setup click action
@@ -94,13 +98,14 @@ fn rebuild_taskbar(
             } else {
                 Vec::new()
             };
-            let app_windows: Vec<DesktopApp> = windows_list.into_iter()
+            let app_windows: Vec<DesktopApp> = windows_list
+                .into_iter()
                 .filter(|w| {
                     let w_id = w.app_id.as_deref().unwrap_or(&w.name);
                     w_id == app_id_clone
                 })
                 .collect();
-            
+
             if app_windows.len() > 1 {
                 preview::populate_popover_previews(&pop_clone, &app_windows, &app_id_clone);
                 pop_clone.popup();
@@ -126,9 +131,9 @@ fn update_active_highlight(apps_box: &gtk4::Box, active_app_id: Option<&str>) ->
             // Retrieve the stored app_id from the widget name
             let btn_app_id = btn.widget_name().to_string();
             if !btn_app_id.is_empty() {
-                let should_be_active = active_app_id.map(|a| {
-                    a.to_lowercase() == btn_app_id.to_lowercase()
-                }).unwrap_or(false);
+                let should_be_active = active_app_id
+                    .map(|a| a.to_lowercase() == btn_app_id.to_lowercase())
+                    .unwrap_or(false);
 
                 let is_active = btn.has_css_class("active");
                 if should_be_active && !is_active {
@@ -160,26 +165,22 @@ pub fn create_workspace_switcher() -> gtk4::Box {
 
     // Thread 1: Poll running windows list every 1s (slow — expensive wlrctl call)
     let apps_shared_clone = running_apps_shared.clone();
-    thread::spawn(move || {
-        loop {
-            let apps = get_running_apps();
-            if let Ok(mut lock) = apps_shared_clone.lock() {
-                *lock = apps;
-            }
-            thread::sleep(Duration::from_millis(1000));
+    thread::spawn(move || loop {
+        let apps = get_running_apps();
+        if let Ok(mut lock) = apps_shared_clone.lock() {
+            *lock = apps;
         }
+        thread::sleep(Duration::from_millis(1000));
     });
 
     // Thread 2: Poll active window every 100ms (fast — lightweight wlrctl call)
     let active_shared_clone = active_shared.clone();
-    thread::spawn(move || {
-        loop {
-            let active = get_active_app_id();
-            if let Ok(mut lock) = active_shared_clone.lock() {
-                *lock = active;
-            }
-            thread::sleep(Duration::from_millis(100));
+    thread::spawn(move || loop {
+        let active = get_active_app_id();
+        if let Ok(mut lock) = active_shared_clone.lock() {
+            *lock = active;
         }
+        thread::sleep(Duration::from_millis(100));
     });
 
     let apps_box_clone = apps_box.clone();
@@ -200,8 +201,16 @@ pub fn create_workspace_switcher() -> gtk4::Box {
         let active_shared = active_shared.clone();
         let apps_rebuild = apps_for_rebuild.clone();
         move || {
-            let apps = if let Ok(lock) = apps_shared.lock() { lock.clone() } else { Vec::new() };
-            let active = if let Ok(lock) = active_shared.lock() { lock.clone() } else { None };
+            let apps = if let Ok(lock) = apps_shared.lock() {
+                lock.clone()
+            } else {
+                Vec::new()
+            };
+            let active = if let Ok(lock) = active_shared.lock() {
+                lock.clone()
+            } else {
+                None
+            };
             *sig.borrow_mut() = get_apps_signature(&apps);
             *last_active.borrow_mut() = active.clone();
             rebuild_taskbar(&apps_box, apps, active, &popovers, apps_rebuild);
@@ -210,8 +219,16 @@ pub fn create_workspace_switcher() -> gtk4::Box {
 
     // GTK timer: 100ms — check active window first (cheap CSS update), then check apps list
     glib::timeout_add_local(Duration::from_millis(100), move || {
-        let active = if let Ok(lock) = active_for_timer.lock() { lock.clone() } else { None };
-        let apps = if let Ok(lock) = apps_for_timer.lock() { lock.clone() } else { Vec::new() };
+        let active = if let Ok(lock) = active_for_timer.lock() {
+            lock.clone()
+        } else {
+            None
+        };
+        let apps = if let Ok(lock) = apps_for_timer.lock() {
+            lock.clone()
+        } else {
+            Vec::new()
+        };
 
         let new_apps_sig = get_apps_signature(&apps);
         let active_changed = *last_active_clone.borrow() != active;
@@ -220,7 +237,13 @@ pub fn create_workspace_switcher() -> gtk4::Box {
             // Apps list changed → full rebuild
             *sig_clone.borrow_mut() = new_apps_sig;
             *last_active_clone.borrow_mut() = active.clone();
-            rebuild_taskbar(&apps_box_clone, apps, active, &popovers_clone, apps_for_rebuild.clone());
+            rebuild_taskbar(
+                &apps_box_clone,
+                apps,
+                active,
+                &popovers_clone,
+                apps_for_rebuild.clone(),
+            );
         } else if active_changed {
             // Only active window changed → fast CSS-only update (no rebuild)
             *last_active_clone.borrow_mut() = active.clone();

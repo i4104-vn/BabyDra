@@ -2,6 +2,7 @@
 
 use gtk4::prelude::*;
 
+/// Builds the `appearance ui` UI.
 pub fn build_appearance_ui(
     current_wallpaper_path: &str,
     _current_greeter_path: &str,
@@ -32,7 +33,7 @@ pub fn build_appearance_ui(
     let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
     header_box.set_margin_bottom(4);
 
-    let page_title = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.appearance_title")));
+    let page_title = gtk4::Label::new(Some(&babydra_core::i18n::t("settings.appearance_title")));
     page_title.add_css_class("settings-page-title");
     page_title.set_halign(gtk4::Align::Start);
     header_box.append(&page_title);
@@ -79,8 +80,8 @@ pub fn build_appearance_ui(
     top_left_box.set_margin_top(10);
 
     let target_items = vec![
-        babydra_common::i18n::t("settings.target_desktop"),
-        babydra_common::i18n::t("settings.target_lock"),
+        babydra_core::i18n::t("settings.target_desktop"),
+        babydra_core::i18n::t("settings.target_lock"),
     ];
     let target_item_strs: Vec<&str> = target_items.iter().map(|s| s.as_str()).collect();
     let target_model = gtk4::StringList::new(&target_item_strs);
@@ -103,7 +104,7 @@ pub fn build_appearance_ui(
     pick_btn.set_cursor_from_name(Some("pointer"));
     pick_btn.set_size_request(38, 38);
 
-    let plus_icon = babydra_utils::ui::icon::get_icon("plus", 18);
+    let plus_icon = babydra_ui_kit::ui::icon::get_icon("plus", 18);
     plus_icon.set_pixel_size(18);
     plus_icon.set_valign(gtk4::Align::Center);
     plus_icon.set_halign(gtk4::Align::Center);
@@ -116,7 +117,7 @@ pub fn build_appearance_ui(
     theme_toggle_btn.set_size_request(38, 38);
 
     let initial_theme_icon = if is_dark { "brightness" } else { "dark-mode" };
-    let theme_icon = babydra_utils::ui::icon::get_icon(initial_theme_icon, 18);
+    let theme_icon = babydra_ui_kit::ui::icon::get_icon(initial_theme_icon, 18);
     theme_icon.set_pixel_size(18);
     theme_icon.set_valign(gtk4::Align::Center);
     theme_icon.set_halign(gtk4::Align::Center);
@@ -124,7 +125,7 @@ pub fn build_appearance_ui(
     actions_box.append(&theme_toggle_btn);
 
     preview_overlay.add_overlay(&actions_box);
-    
+
     // Top-Right Overlay Container for Avatar
     let top_right_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     top_right_box.set_valign(gtk4::Align::Start);
@@ -135,12 +136,12 @@ pub fn build_appearance_ui(
     let avatar_pic = gtk4::Picture::new();
     avatar_pic.set_size_request(42, 42);
     avatar_pic.add_css_class("avatar-preview-picture");
-    if let Some(bytes) = babydra_common::get_avatar_bytes() {
-        if let Some(pixbuf) = babydra_common::crop_to_circle_pixbuf(&bytes, 42) {
+    if let Some(bytes) = babydra_core::get_avatar_bytes() {
+        if let Some(pixbuf) = babydra_core::crop_to_circle_pixbuf(&bytes, 42) {
             avatar_pic.set_pixbuf(Some(&pixbuf));
         }
     }
-    
+
     let avatar_btn = gtk4::Button::new();
     avatar_btn.set_child(Some(&avatar_pic));
     avatar_btn.set_size_request(42, 42);
@@ -148,7 +149,7 @@ pub fn build_appearance_ui(
     avatar_btn.set_halign(gtk4::Align::Center);
     avatar_btn.add_css_class("avatar-action-btn");
     avatar_btn.set_cursor_from_name(Some("pointer"));
-    
+
     top_right_box.append(&avatar_btn);
     preview_overlay.add_overlay(&top_right_box);
 
@@ -163,7 +164,7 @@ pub fn build_appearance_ui(
 
     // Field 1: GTK Theme
     let gtk_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
-    let gtk_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.gtk_theme")));
+    let gtk_lbl = gtk4::Label::new(Some(&babydra_core::i18n::t("settings.gtk_theme")));
     gtk_lbl.add_css_class("spec-label");
     gtk_lbl.set_halign(gtk4::Align::Start);
     gtk_box.append(&gtk_lbl);
@@ -177,7 +178,7 @@ pub fn build_appearance_ui(
 
     // Field 2: Icon Theme
     let icon_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
-    let icon_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.icon_theme")));
+    let icon_lbl = gtk4::Label::new(Some(&babydra_core::i18n::t("settings.icon_theme")));
     icon_lbl.add_css_class("spec-label");
     icon_lbl.set_halign(gtk4::Align::Start);
     icon_box.append(&icon_lbl);
@@ -191,7 +192,7 @@ pub fn build_appearance_ui(
 
     // Field 3: Cursor Theme
     let cursor_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
-    let cursor_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.cursor_theme")));
+    let cursor_lbl = gtk4::Label::new(Some(&babydra_core::i18n::t("settings.cursor_theme")));
     cursor_lbl.add_css_class("spec-label");
     cursor_lbl.set_halign(gtk4::Align::Start);
     cursor_box.append(&cursor_lbl);
@@ -205,7 +206,7 @@ pub fn build_appearance_ui(
 
     // Field 4: Cursor Size
     let size_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
-    let size_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.cursor_size")));
+    let size_lbl = gtk4::Label::new(Some(&babydra_core::i18n::t("settings.cursor_size")));
     size_lbl.add_css_class("spec-label");
     size_lbl.set_halign(gtk4::Align::Start);
     size_box.append(&size_lbl);
@@ -227,7 +228,7 @@ pub fn build_appearance_ui(
     dashboard_panel.append(&sep1);
 
     // Quick Select Section Title
-    let quick_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.quick_select")));
+    let quick_lbl = gtk4::Label::new(Some(&babydra_core::i18n::t("settings.quick_select")));
     quick_lbl.add_css_class("settings-row-title");
     quick_lbl.set_halign(gtk4::Align::Start);
     dashboard_panel.append(&quick_lbl);

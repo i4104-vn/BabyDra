@@ -1,9 +1,10 @@
-use std::rc::Rc;
-use std::cell::{RefCell, Cell};
-use std::path::PathBuf;
-use gtk4::prelude::*;
-use babydra_common::{SessionState, ActivePane, ContentViewHandle, FileWatcher};
+use crate::widgets::state::ContentViewHandle;
 use crate::widgets::status_bar::StatusBarWidgets;
+use babydra_core::{ActivePane, FileWatcher, SessionState};
+use gtk4::prelude::*;
+use std::cell::{Cell, RefCell};
+use std::path::PathBuf;
+use std::rc::Rc;
 
 /// Sets up the primary navigation closures (`navigate_pane` and `navigate_pane_no_watch`) and registers the left-pane channel watcher.
 pub fn setup_navigation(
@@ -22,7 +23,10 @@ pub fn setup_navigation(
 ) -> (
     Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>, // navigate_pane_ref
     Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>, // navigate_pane_no_watch_ref
-    (Rc<RefCell<Option<FileWatcher>>>, Rc<RefCell<Option<FileWatcher>>>),
+    (
+        Rc<RefCell<Option<FileWatcher>>>,
+        Rc<RefCell<Option<FileWatcher>>>,
+    ),
 ) {
     let navigate_pane_ref = Rc::new(RefCell::new(None::<Rc<dyn Fn(ActivePane, PathBuf)>>));
     let navigate_pane_no_watch_ref = Rc::new(RefCell::new(None::<Rc<dyn Fn(ActivePane, PathBuf)>>));
@@ -41,101 +45,103 @@ pub fn setup_navigation(
         let navigate_pane_no_watch_ref_c = navigate_pane_no_watch_ref.clone();
         let rebuild_tabs_cell_c = rebuild_tabs_cell.clone();
 
-        *navigate_pane_no_watch_ref.borrow_mut() = Some(Rc::new(move |pane: ActivePane, path: PathBuf| {
-            // Highlight active pane
-            active_pane.set(pane);
-            if pane == ActivePane::Left {
-                if let Some(ref ls) = *left_s.borrow() {
-                    ls.add_css_class("active-pane");
-                }
-                if let Some(ref rs) = *right_s.borrow() {
-                    rs.remove_css_class("active-pane");
-                }
-            } else {
-                if let Some(ref ls) = *left_s.borrow() {
-                    ls.remove_css_class("active-pane");
-                }
-                if let Some(ref rs) = *right_s.borrow() {
-                    rs.add_css_class("active-pane");
-                }
-            }
-
-            let show_hidden = session.borrow().active_tab().show_hidden;
-
-            let content_handle = if pane == ActivePane::Left {
-                Some(left_handle.clone())
-            } else {
-                right_handle.borrow().clone()
-            };
-
-            // Update session path
-            session.borrow_mut().active_tab_mut().current_path = path.clone();
-
-            if let Some(ref handle) = content_handle {
-                handle.widgets.progress_bar.set_visible(true);
-                handle.widgets.progress_bar.set_fraction(0.0);
-
-                // Update pane history stack
-                let mut hist = handle.history.borrow_mut();
-                let mut idx = handle.history_index.borrow_mut();
-                if hist.is_empty() || hist[*idx] != path {
-                    if *idx + 1 < hist.len() {
-                        hist.truncate(*idx + 1);
+        *navigate_pane_no_watch_ref.borrow_mut() =
+            Some(Rc::new(move |pane: ActivePane, path: PathBuf| {
+                // Highlight active pane
+                active_pane.set(pane);
+                if pane == ActivePane::Left {
+                    if let Some(ref ls) = *left_s.borrow() {
+                        ls.add_css_class("active-pane");
                     }
-                    hist.push(path.clone());
-                    *idx = hist.len() - 1;
+                    if let Some(ref rs) = *right_s.borrow() {
+                        rs.remove_css_class("active-pane");
+                    }
+                } else {
+                    if let Some(ref ls) = *left_s.borrow() {
+                        ls.remove_css_class("active-pane");
+                    }
+                    if let Some(ref rs) = *right_s.borrow() {
+                        rs.add_css_class("active-pane");
+                    }
                 }
-            }
 
-            let session_c = session.clone();
-            let nav_no_watch_c = navigate_pane_no_watch_ref_c.clone();
-            let rebuild_tabs_cell_c2 = rebuild_tabs_cell_c.clone();
-            let status_lbl_c = status_bar_lbl.clone();
-            let content_handle_err = content_handle.clone();
+                let show_hidden = session.borrow().active_tab().show_hidden;
 
-            glib::spawn_future_local(async move {
-                match babydra_common::load_directory(path.clone(), show_hidden).await {
-                    Ok(entries) => {
-                        // Update Pane-specific breadcrumbs
-                        if let Some(ref handle) = content_handle {
-                            let nav_cb: Rc<dyn Fn(PathBuf)> = Rc::new(move |p: PathBuf| {
-                                if let Some(ref f) = *nav_no_watch_c.borrow() {
-                                    f(pane, p);
-                                }
-                            });
-                            crate::widgets::header_bar::update_address_bar(
-                                &handle.widgets.breadcrumb_box,
-                                &handle.widgets.address_stack,
-                                &session_c,
-                                &path,
-                                &nav_cb,
+                let content_handle = if pane == ActivePane::Left {
+                    Some(left_handle.clone())
+                } else {
+                    right_handle.borrow().clone()
+                };
+
+                session.borrow_mut().active_tab_mut().current_path = path.clone();
+
+                if let Some(ref handle) = content_handle {
+                    handle.widgets.progress_bar.set_visible(true);
+                    handle.widgets.progress_bar.set_fraction(0.0);
+
+                    let mut hist = handle.history.borrow_mut();
+                    let mut idx = handle.history_index.borrow_mut();
+                    if hist.is_empty() || hist[*idx] != path {
+                        if *idx + 1 < hist.len() {
+                            hist.truncate(*idx + 1);
+                        }
+                        hist.push(path.clone());
+                        *idx = hist.len() - 1;
+                    }
+                }
+
+                let session_c = session.clone();
+                let nav_no_watch_c = navigate_pane_no_watch_ref_c.clone();
+                let rebuild_tabs_cell_c2 = rebuild_tabs_cell_c.clone();
+                let status_lbl_c = status_bar_lbl.clone();
+                let content_handle_err = content_handle.clone();
+
+                glib::spawn_future_local(async move {
+                    match babydra_core::load_directory(path.clone(), show_hidden).await {
+                        Ok(entries) => {
+                            if let Some(ref handle) = content_handle {
+                                let nav_cb: Rc<dyn Fn(PathBuf)> = Rc::new(move |p: PathBuf| {
+                                    if let Some(ref f) = *nav_no_watch_c.borrow() {
+                                        f(pane, p);
+                                    }
+                                });
+                                crate::widgets::header_bar::update_address_bar(
+                                    &handle.widgets.breadcrumb_box,
+                                    &handle.widgets.address_stack,
+                                    &session_c,
+                                    &path,
+                                    &nav_cb,
+                                );
+                            }
+
+                            // Calculate size
+                            let total_size: u64 = entries.iter().map(|e| e.size).sum();
+
+                            if let Some(ref handle) = content_handle {
+                                crate::widgets::content_view::update_content_view(
+                                    handle, &entries, path,
+                                );
+                            }
+
+                            crate::widgets::status_bar::update_status_bar(
+                                &status_lbl_c,
+                                entries.len(),
+                                total_size,
                             );
+
+                            if let Some(ref rebuild) = *rebuild_tabs_cell_c2.borrow() {
+                                rebuild();
+                            }
                         }
-
-                        // Calculate size
-                        let total_size: u64 = entries.iter().map(|e| e.size).sum();
-
-                        // Update Content
-                        if let Some(ref handle) = content_handle {
-                            crate::widgets::content_view::update_content_view(handle, &entries, path);
-                        }
-
-                        // Update Status Bar
-                        crate::widgets::status_bar::update_status_bar(&status_lbl_c, entries.len(), total_size);
-
-                        if let Some(ref rebuild) = *rebuild_tabs_cell_c2.borrow() {
-                            rebuild();
+                        Err(err) => {
+                            eprintln!("Failed to load directory: {}", err);
+                            if let Some(ref handle) = content_handle_err {
+                                handle.widgets.progress_bar.set_visible(false);
+                            }
                         }
                     }
-                    Err(err) => {
-                        eprintln!("Failed to load directory: {}", err);
-                        if let Some(ref handle) = content_handle_err {
-                            handle.widgets.progress_bar.set_visible(false);
-                        }
-                    }
-                }
-            });
-        }));
+                });
+            }));
     }
 
     // Define navigate_pane closure (which handles watcher)
@@ -144,7 +150,7 @@ pub fn setup_navigation(
         let right_w = right_watcher.clone();
         let watch_tx = watch_tx.clone();
         let nav_no_watch_ref = navigate_pane_no_watch_ref.clone();
- 
+
         *navigate_pane_ref.borrow_mut() = Some(Rc::new(move |pane: ActivePane, path: PathBuf| {
             let target_watcher = if pane == ActivePane::Left {
                 left_w.clone()
@@ -157,19 +163,19 @@ pub fn setup_navigation(
                 let _ = w.watch(&path);
             } else {
                 let tx_clone = watch_tx.clone();
-                if let Ok(w) = babydra_common::FileWatcher::new(path.clone(), move |_event| {
+                if let Ok(w) = babydra_core::FileWatcher::new(path.clone(), move |_event| {
                     let _ = tx_clone.send(());
                 }) {
                     *watcher_borrow = Some(w);
                 }
             }
- 
+
             if let Some(ref f) = *nav_no_watch_ref.borrow() {
                 f(pane, path);
             }
         }));
     }
- 
+
     // Wire left pane navigation loop
     {
         let nav = navigate_pane_ref.clone();
@@ -186,6 +192,10 @@ pub fn setup_navigation(
             }
         });
     }
- 
-    (navigate_pane_ref, navigate_pane_no_watch_ref, (left_watcher, right_watcher))
+
+    (
+        navigate_pane_ref,
+        navigate_pane_no_watch_ref,
+        (left_watcher, right_watcher),
+    )
 }

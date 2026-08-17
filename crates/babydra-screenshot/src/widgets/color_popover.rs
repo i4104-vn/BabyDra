@@ -2,7 +2,7 @@ use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use babydra_common::models::EditorState;
+use babydra_core::models::EditorState;
 
 /// Creates a Popover widget containing a color palette grid to select the active pen/shape color.
 pub fn create_color_popover(
@@ -10,7 +10,11 @@ pub fn create_color_popover(
     state: Rc<RefCell<EditorState>>,
     color_dot: &gtk4::DrawingArea,
 ) -> gtk4::Popover {
-    let popover = babydra_utils::components::create_popover(parent, gtk4::PositionType::Top, "screenshot-color-popover");
+    let popover = babydra_ui_kit::components::create_popover(
+        parent,
+        gtk4::PositionType::Top,
+        "screenshot-color-popover",
+    );
 
     let grid = gtk4::Grid::new();
     grid.set_column_spacing(6);
@@ -21,14 +25,46 @@ pub fn create_color_popover(
     grid.set_margin_bottom(4);
 
     let colors = vec![
-        (babydra_common::i18n::t("color.red"), "red", (0.93, 0.15, 0.15)),
-        (babydra_common::i18n::t("color.orange"), "orange", (0.98, 0.45, 0.09)),
-        (babydra_common::i18n::t("color.yellow"), "yellow", (0.92, 0.70, 0.15)),
-        (babydra_common::i18n::t("color.green"), "green", (0.13, 0.77, 0.36)),
-        (babydra_common::i18n::t("color.blue"), "blue", (0.23, 0.51, 0.96)),
-        (babydra_common::i18n::t("color.purple"), "purple", (0.66, 0.33, 0.97)),
-        (babydra_common::i18n::t("color.white"), "white", (1.0, 1.0, 1.0)),
-        (babydra_common::i18n::t("color.black"), "black", (0.0, 0.0, 0.0)),
+        (
+            babydra_core::i18n::t("color.red"),
+            "red",
+            (0.93, 0.15, 0.15),
+        ),
+        (
+            babydra_core::i18n::t("color.orange"),
+            "orange",
+            (0.98, 0.45, 0.09),
+        ),
+        (
+            babydra_core::i18n::t("color.yellow"),
+            "yellow",
+            (0.92, 0.70, 0.15),
+        ),
+        (
+            babydra_core::i18n::t("color.green"),
+            "green",
+            (0.13, 0.77, 0.36),
+        ),
+        (
+            babydra_core::i18n::t("color.blue"),
+            "blue",
+            (0.23, 0.51, 0.96),
+        ),
+        (
+            babydra_core::i18n::t("color.purple"),
+            "purple",
+            (0.66, 0.33, 0.97),
+        ),
+        (
+            babydra_core::i18n::t("color.white"),
+            "white",
+            (1.0, 1.0, 1.0),
+        ),
+        (
+            babydra_core::i18n::t("color.black"),
+            "black",
+            (0.0, 0.0, 0.0),
+        ),
     ];
 
     let mut col = 0;

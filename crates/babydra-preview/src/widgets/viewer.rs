@@ -1,9 +1,10 @@
 //! Core image viewer widget layout, gesture bindings, and zoom/pan math.
 
+use babydra_core::i18n::t;
 use gtk4::prelude::*;
 use std::cell::RefCell;
-use std::rc::Rc;
 use std::path::PathBuf;
+use std::rc::Rc;
 
 struct ImageState {
     pixbuf: gdk_pixbuf::Pixbuf,
@@ -18,6 +19,7 @@ struct ImageState {
     drag_start_y: f64,
 }
 
+/// Calculate gcd.
 fn calculate_gcd(a: u32, b: u32) -> u32 {
     if b == 0 {
         a
@@ -26,6 +28,7 @@ fn calculate_gcd(a: u32, b: u32) -> u32 {
     }
 }
 
+/// Format aspect ratio.
 fn format_aspect_ratio(w: u32, h: u32) -> String {
     let divisor = calculate_gcd(w, h);
     if divisor > 0 {
@@ -35,6 +38,7 @@ fn format_aspect_ratio(w: u32, h: u32) -> String {
     }
 }
 
+/// Format file size.
 fn format_file_size(bytes: u64) -> String {
     if bytes >= 1024 * 1024 {
         format!("{:.2} MB", bytes as f64 / (1024.0 * 1024.0))
@@ -43,6 +47,7 @@ fn format_file_size(bytes: u64) -> String {
     }
 }
 
+/// Clamp position.
 fn clamp_position(st: &mut ImageState, area_w: f64, area_h: f64) {
     let scaled_w = st.img_w * st.scale;
     let scaled_h = st.img_h * st.scale;
@@ -54,10 +59,12 @@ fn clamp_position(st: &mut ImageState, area_w: f64, area_h: f64) {
     st.offset_y = st.offset_y.clamp(-limit_y, limit_y);
 }
 
+/// Update zoom display.
 fn update_zoom_display(st: &ImageState, lbl: &gtk4::Label) {
     lbl.set_text(&format!("{:.0}%", st.scale * 100.0));
 }
 
+/// Fit to screen.
 fn fit_to_screen(st: &mut ImageState, area_w: f64, area_h: f64) {
     let scale_x = area_w / st.img_w;
     let scale_y = area_h / st.img_h;
@@ -67,7 +74,13 @@ fn fit_to_screen(st: &mut ImageState, area_w: f64, area_h: f64) {
     st.offset_y = 0.0;
 }
 
-fn do_zoom(state: &Rc<RefCell<ImageState>>, area: &gtk4::DrawingArea, lbl: &gtk4::Label, delta: f64) {
+/// Do zoom.
+fn do_zoom(
+    state: &Rc<RefCell<ImageState>>,
+    area: &gtk4::DrawingArea,
+    lbl: &gtk4::Label,
+    delta: f64,
+) {
     let mut st = state.borrow_mut();
     let area_w = area.width() as f64;
     let area_h = area.height() as f64;
@@ -86,16 +99,20 @@ fn do_zoom(state: &Rc<RefCell<ImageState>>, area: &gtk4::DrawingArea, lbl: &gtk4
     area.queue_draw();
 }
 
+/// Builds the `ui` UI.
 pub fn build_ui(app: &gtk4::Application, path: PathBuf) {
     let window = gtk4::ApplicationWindow::new(app);
-    window.set_title(Some(&format!("Image Preview - {}", path.file_name().unwrap_or_default().to_string_lossy())));
+    window.set_title(Some(&t("preview.title").replace(
+        "{}",
+        &path.file_name().unwrap_or_default().to_string_lossy(),
+    )));
     window.set_default_size(800, 600);
     window.add_css_class("viewer-window");
 
     let pixbuf = match gdk_pixbuf::Pixbuf::from_file(&path) {
         Ok(pb) => pb,
         Err(_) => {
-            let err_label = gtk4::Label::new(Some("Failed to load image file."));
+            let err_label = gtk4::Label::new(Some(&t("preview.failed_load")));
             err_label.add_css_class("brand-text");
             window.set_child(Some(&err_label));
             window.present();
@@ -127,16 +144,22 @@ pub fn build_ui(app: &gtk4::Application, path: PathBuf) {
     overlay.set_child(Some(&drawing_area));
 
     // Exif Metadata parsing
-    let exif_data = babydra_common::read_exif(&path);
+    let exif_data = babydra_core::read_exif(&path);
 
     // --- Bottom-Right Info Box Overlay ---
-    let info_box = babydra_utils::components::create_card_with_class(gtk4::Orientation::Vertical, 4, "info-card");
+    let info_box = babydra_ui_kit::components::create_card_with_class(
+        gtk4::Orientation::Vertical,
+        4,
+        "info-card",
+    );
     info_box.set_halign(gtk4::Align::End);
     info_box.set_valign(gtk4::Align::End);
     info_box.set_margin_end(20);
     info_box.set_margin_bottom(20);
 
-    let name_lbl = gtk4::Label::new(Some(&path.file_name().unwrap_or_default().to_string_lossy()));
+    let name_lbl = gtk4::Label::new(Some(
+        &path.file_name().unwrap_or_default().to_string_lossy(),
+    ));
     name_lbl.add_css_class("info-item");
     name_lbl.set_halign(gtk4::Align::Start);
     info_box.append(&name_lbl);
@@ -173,21 +196,24 @@ pub fn build_ui(app: &gtk4::Application, path: PathBuf) {
     controls_box.set_margin_bottom(20);
 
     let zoom_out_btn = gtk4::Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("zoom-out-symbolic", 16))
+        .child(&babydra_ui_kit::ui::icon::get_icon("zoom-out-symbolic", 16))
         .build();
     zoom_out_btn.add_css_class("control-btn");
     zoom_out_btn.set_cursor_from_name(Some("pointer"));
     controls_box.append(&zoom_out_btn);
 
     let reset_btn = gtk4::Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("zoom-original-symbolic", 16))
+        .child(&babydra_ui_kit::ui::icon::get_icon(
+            "zoom-original-symbolic",
+            16,
+        ))
         .build();
     reset_btn.add_css_class("control-btn");
     reset_btn.set_cursor_from_name(Some("pointer"));
     controls_box.append(&reset_btn);
 
     let zoom_in_btn = gtk4::Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("zoom-in-symbolic", 16))
+        .child(&babydra_ui_kit::ui::icon::get_icon("zoom-in-symbolic", 16))
         .build();
     zoom_in_btn.add_css_class("control-btn");
     zoom_in_btn.set_cursor_from_name(Some("pointer"));
@@ -202,7 +228,7 @@ pub fn build_ui(app: &gtk4::Application, path: PathBuf) {
     exif_box.set_valign(gtk4::Align::Center);
     exif_box.set_visible(false);
 
-    let exif_title = gtk4::Label::new(Some("Camera Information"));
+    let exif_title = gtk4::Label::new(Some(&t("preview.camera_info")));
     exif_title.add_css_class("exif-title");
     exif_box.append(&exif_title);
 
@@ -248,7 +274,7 @@ pub fn build_ui(app: &gtk4::Application, path: PathBuf) {
             add_exif_row("Date Original", val);
         }
     } else {
-        let no_exif_lbl = gtk4::Label::new(Some("No EXIF data available"));
+        let no_exif_lbl = gtk4::Label::new(Some(&t("preview.no_exif")));
         no_exif_lbl.add_css_class("exif-value");
         grid.attach(&no_exif_lbl, 0, 0, 2, 1);
     }
@@ -311,13 +337,18 @@ pub fn build_ui(app: &gtk4::Application, path: PathBuf) {
     let lbl_reset = scale_lbl.clone();
     reset_btn.connect_clicked(move |_| {
         let mut st = state_reset.borrow_mut();
-        fit_to_screen(&mut st, area_reset.width() as f64, area_reset.height() as f64);
+        fit_to_screen(
+            &mut st,
+            area_reset.width() as f64,
+            area_reset.height() as f64,
+        );
         update_zoom_display(&st, &lbl_reset);
         area_reset.queue_draw();
     });
 
     // Mouse Scroll Wheel Zoom
-    let scroll_controller = gtk4::EventControllerScroll::new(gtk4::EventControllerScrollFlags::VERTICAL);
+    let scroll_controller =
+        gtk4::EventControllerScroll::new(gtk4::EventControllerScrollFlags::VERTICAL);
     let state_scroll = state.clone();
     let area_scroll = drawing_area.clone();
     let lbl_scroll = scale_lbl.clone();

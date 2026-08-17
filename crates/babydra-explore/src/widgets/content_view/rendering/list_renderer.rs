@@ -1,12 +1,12 @@
+use crate::widgets::state::ContentViewHandle;
+use babydra_core::FileEntry;
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Label, Align};
-use babydra_common::FileEntry;
-use babydra_common::ContentViewHandle;
+use gtk4::{Align, Box, Label, Orientation};
 
 /// Renders entries as list rows in the ListBox.
 pub async fn render_list_view(
     handle_c: &ContentViewHandle,
-    widgets: &babydra_common::ContentViewWidgets,
+    widgets: &crate::widgets::state::ContentViewWidgets,
     entries: &[FileEntry],
     current_path: &std::path::PathBuf,
     start_path: &std::path::PathBuf,
@@ -17,18 +17,24 @@ pub async fn render_list_view(
 ) {
     let mut counter = 0;
     for (idx, entry) in entries.iter().enumerate() {
-        if *handle_c.current_path.borrow() != *start_path || *handle_c.render_generation.borrow() != gen {
+        if *handle_c.current_path.borrow() != *start_path
+            || *handle_c.render_generation.borrow() != gen
+        {
             return;
         }
 
-        let fraction = if entries.is_empty() { 1.0 } else { (idx + 1) as f64 / entries.len() as f64 };
+        let fraction = if entries.is_empty() {
+            1.0
+        } else {
+            (idx + 1) as f64 / entries.len() as f64
+        };
         handle_c.widgets.progress_bar.set_fraction(fraction);
 
         let target_entry = entry.clone();
         let cp = current_path.clone();
         let nav = nav_callback.clone();
         let sel_paths = selected_paths.clone();
-        let list_row = babydra_utils::explore::create_list_row(
+        let list_row = babydra_ui_kit::components::explore::create_list_row(
             idx,
             entry,
             selected_paths.clone(),
@@ -39,8 +45,11 @@ pub async fn render_list_view(
                     target_paths = vec![target_entry.path.clone()];
                 }
 
-                if let Some(win) = widget.root().and_then(|r| r.downcast::<gtk4::Window>().ok()) {
-                    babydra_utils::explore::context_menu::show_for_file(
+                if let Some(win) = widget
+                    .root()
+                    .and_then(|r| r.downcast::<gtk4::Window>().ok())
+                {
+                    babydra_ui_kit::components::explore::context_menu::show_for_file(
                         widget,
                         x,
                         y,
@@ -53,7 +62,7 @@ pub async fn render_list_view(
             },
         );
         widgets.listbox.append(&list_row);
-        
+
         counter += 1;
         if counter >= 40 {
             counter = 0;
@@ -61,8 +70,8 @@ pub async fn render_list_view(
         }
     }
 
-    // Set header function for grouping in ListBox
-    if *handle_c.current_path.borrow() == *start_path && *handle_c.render_generation.borrow() == gen {
+    if *handle_c.current_path.borrow() == *start_path && *handle_c.render_generation.borrow() == gen
+    {
         let entries_clone = entries.to_vec();
         let sort_mode_clone = sort_mode.to_string();
         widgets.listbox.set_header_func(move |row, before| {
@@ -75,7 +84,7 @@ pub async fn render_list_view(
                 let path_str = r.widget_name();
                 let path = std::path::Path::new(path_str.as_str());
                 if let Some(entry) = entries_clone.iter().find(|e| e.path == path) {
-                    babydra_common::get_group_name(entry, &sort_mode_clone)
+                    babydra_core::get_group_name(entry, &sort_mode_clone)
                 } else {
                     "".to_string()
                 }

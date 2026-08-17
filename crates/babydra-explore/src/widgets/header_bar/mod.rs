@@ -1,14 +1,14 @@
+use babydra_core::SessionState;
 use gtk4::prelude::*;
 use gtk4::Box;
-use std::rc::Rc;
 use std::cell::RefCell;
 use std::path::PathBuf;
-use babydra_common::SessionState;
+use std::rc::Rc;
 
-mod render;
 mod address;
+mod render;
 
-pub use babydra_common::HeaderBarWidgets;
+pub use crate::widgets::state::HeaderBarWidgets;
 pub use address::update_address_bar;
 
 /// Creates the header bar, wiring up the navigation button clicks, search events, and layout toggles.

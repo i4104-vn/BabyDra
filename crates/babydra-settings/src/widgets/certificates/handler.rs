@@ -1,13 +1,14 @@
+use crate::widgets::state::CertificatesWidget;
+use babydra_core::services::system::certificates;
+use babydra_ui_kit::components::modal::PasswordDialog;
 use gtk4::prelude::*;
-use std::rc::Rc;
 use std::cell::RefCell;
+use std::rc::Rc;
 use std::sync::mpsc;
-use babydra_utils::components::modal::PasswordDialog;
-use babydra_common::services::system::certificates;
-use babydra_common::models::certificates::CertificatesWidget;
 
 type PendingFileCell = Rc<RefCell<Option<(String, String)>>>;
 
+/// Reload cert list.
 pub fn reload_cert_list(
     list_box: &gtk4::ListBox,
     auth_dialog: &Rc<PasswordDialog>,
@@ -44,7 +45,7 @@ pub fn reload_cert_list(
         icon_badge.set_halign(gtk4::Align::Start);
         icon_badge.set_hexpand(false);
 
-        let shield_icon = babydra_utils::ui::icon::get_icon("shield", 18);
+        let shield_icon = babydra_ui_kit::ui::icon::get_icon("shield", 18);
         shield_icon.set_pixel_size(18);
         shield_icon.set_valign(gtk4::Align::Center);
         shield_icon.set_halign(gtk4::Align::Center);
@@ -76,10 +77,10 @@ pub fn reload_cert_list(
         del_btn.set_valign(gtk4::Align::Center);
         del_btn.set_cursor_from_name(Some("pointer"));
 
-        let del_icon = babydra_utils::ui::icon::get_icon("edit-delete", 16);
+        let del_icon = babydra_ui_kit::ui::icon::get_icon("edit-delete", 16);
         del_icon.set_pixel_size(16);
         del_btn.set_child(Some(&del_icon));
-        del_btn.set_tooltip_text(Some(&babydra_common::i18n::t("settings.cert_delete")));
+        del_btn.set_tooltip_text(Some(&babydra_core::i18n::t("settings.cert_delete")));
 
         let fname_del = cert.filename.clone();
         let auth_dialog_c = auth_dialog.clone();
@@ -90,7 +91,10 @@ pub fn reload_cert_list(
             *pending_file_c.borrow_mut() = Some(("delete".to_string(), fn_rem.clone()));
             auth_dialog_c.show_for(
                 "Delete Certificate",
-                &format!("Enter sudo password to remove '{}' and run update-ca-trust:", fn_rem),
+                &format!(
+                    "Enter sudo password to remove '{}' and run update-ca-trust:",
+                    fn_rem
+                ),
             );
         });
 
@@ -100,11 +104,11 @@ pub fn reload_cert_list(
     }
 }
 
+/// Wire events.
 pub fn wire_events(widget: &CertificatesWidget, auth_dialog: PasswordDialog) {
     let auth_dialog_rc = Rc::new(auth_dialog);
     let pending_file = Rc::new(RefCell::new(None::<(String, String)>));
 
-    // Load initial certificate list
     reload_cert_list(&widget.list_box, &auth_dialog_rc, &pending_file);
 
     let auth_dialog_add = auth_dialog_rc.clone();
@@ -172,7 +176,7 @@ pub fn wire_events(widget: &CertificatesWidget, auth_dialog: PasswordDialog) {
             None => return,
         };
 
-        let (tx, rx) = mpsc::channel::<Result<(), String>>();
+        let (tx, rx) = mpsc::channel::<Result<(), babydra_core::CoreError>>();
 
         std::thread::spawn(move || {
             let res = if action_type == "add" {
@@ -180,7 +184,7 @@ pub fn wire_events(widget: &CertificatesWidget, auth_dialog: PasswordDialog) {
                 if parts.len() == 2 {
                     certificates::add_ca_certificate(parts[0], parts[1], &password)
                 } else {
-                    Err("Invalid certificate path".to_string())
+                    Err(babydra_core::CoreError::msg("Invalid certificate path"))
                 }
             } else {
                 certificates::delete_ca_certificate(&payload, &password)

@@ -1,9 +1,10 @@
+use babydra_core::i18n::t;
 use gtk4::prelude::*;
-use gtk4::{Window, Label, Box, Orientation, Align, Button};
-use std::rc::Rc;
+use gtk4::{Align, Box, Button, Label, Orientation, Window};
 use std::cell::RefCell;
-use babydra_common::i18n::t;
+use std::rc::Rc;
 
+/// Shows the `capture dialog`.
 pub fn show_capture_dialog(
     parent: &Window,
     action_desc: &str,
@@ -29,7 +30,7 @@ pub fn show_capture_dialog(
     window.set_child(Some(&vbox));
 
     let lbl_desc = Label::builder()
-        .label(&format!("Press key combination for:\n{}", action_desc))
+        .label(&t("explore.settings_press_for").replace("{}", action_desc))
         .halign(Align::Center)
         .justify(gtk4::Justification::Center)
         .build();
@@ -37,7 +38,7 @@ pub fn show_capture_dialog(
     vbox.append(&lbl_desc);
 
     let lbl_shortcut = Label::builder()
-        .label("Press any keys...")
+        .label(&t("explore.settings_press_any"))
         .halign(Align::Center)
         .build();
     lbl_shortcut.add_css_class("keybind-pill");
@@ -50,15 +51,16 @@ pub fn show_capture_dialog(
     let lbl_shortcut_c = lbl_shortcut.clone();
     let captured_c = captured_shortcut.clone();
     key_controller.connect_key_pressed(move |_, keyval, _, state| {
-        let clean_state = state & (gtk4::gdk::ModifierType::CONTROL_MASK 
-                                 | gtk4::gdk::ModifierType::SHIFT_MASK 
-                                 | gtk4::gdk::ModifierType::ALT_MASK);
+        let clean_state = state
+            & (gtk4::gdk::ModifierType::CONTROL_MASK
+                | gtk4::gdk::ModifierType::SHIFT_MASK
+                | gtk4::gdk::ModifierType::ALT_MASK);
 
-        let is_modifier_only = keyval == gtk4::gdk::Key::Control_L 
+        let is_modifier_only = keyval == gtk4::gdk::Key::Control_L
             || keyval == gtk4::gdk::Key::Control_R
-            || keyval == gtk4::gdk::Key::Shift_L 
+            || keyval == gtk4::gdk::Key::Shift_L
             || keyval == gtk4::gdk::Key::Shift_R
-            || keyval == gtk4::gdk::Key::Alt_L 
+            || keyval == gtk4::gdk::Key::Alt_L
             || keyval == gtk4::gdk::Key::Alt_R;
 
         if !is_modifier_only {
@@ -78,7 +80,9 @@ pub fn show_capture_dialog(
     btn_save.add_css_class("baby-button");
     btn_save.set_cursor_from_name(Some("pointer"));
 
-    let btn_cancel = Button::builder().label(&t("explore.settings_cancel")).build();
+    let btn_cancel = Button::builder()
+        .label(&t("explore.settings_cancel"))
+        .build();
     btn_cancel.add_css_class("baby-button");
     btn_cancel.set_cursor_from_name(Some("pointer"));
 
@@ -102,6 +106,7 @@ pub fn show_capture_dialog(
     window.present();
 }
 
+/// Keyval to string.
 fn keyval_to_string(keyval: &gtk4::gdk::Key, state: gtk4::gdk::ModifierType) -> String {
     let mut parts = Vec::new();
     if state.contains(gtk4::gdk::ModifierType::CONTROL_MASK) {
@@ -131,7 +136,7 @@ fn keyval_to_string(keyval: &gtk4::gdk::Key, state: gtk4::gdk::ModifierType) -> 
     } else {
         "Unknown".to_string()
     };
-    
+
     parts.push(&key_name);
     parts.join(" + ")
 }

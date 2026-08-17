@@ -1,9 +1,10 @@
 //! Bluetooth device list renderer and event handlers.
 
-use gtk4::prelude::*;
-use babydra_common::services::system::bluetooth::{connect_device, disconnect_device};
 use super::BluetoothState;
+use babydra_core::services::system::bluetooth::{connect_device, disconnect_device};
+use gtk4::prelude::*;
 
+/// Renders `device list`.
 pub fn render_device_list(list_box: &gtk4::ListBox, st: &BluetoothState) {
     crate::widgets::helpers::clear_list_box(list_box);
 
@@ -71,12 +72,13 @@ pub fn render_device_list(list_box: &gtk4::ListBox, st: &BluetoothState) {
             check_badge.add_css_class("active-check-badge");
             check_badge.set_valign(gtk4::Align::Center);
 
-            let check_icon = babydra_utils::ui::icon::get_icon("check", 14);
+            let check_icon = babydra_ui_kit::ui::icon::get_icon("check", 14);
             check_icon.set_pixel_size(14);
             check_badge.append(&check_icon);
             hbox.append(&check_badge);
 
-            let disconnect_btn = gtk4::Button::with_label(&babydra_common::i18n::t("settings.disconnect"));
+            let disconnect_btn =
+                gtk4::Button::with_label(&babydra_core::i18n::t("settings.disconnect"));
             disconnect_btn.set_valign(gtk4::Align::Center);
             disconnect_btn.add_css_class("connect-pill-btn");
             let mac_clone = dev.mac.clone();
@@ -88,7 +90,7 @@ pub fn render_device_list(list_box: &gtk4::ListBox, st: &BluetoothState) {
             });
             hbox.append(&disconnect_btn);
         } else {
-            let connect_btn = gtk4::Button::with_label(&babydra_common::i18n::t("settings.connect"));
+            let connect_btn = gtk4::Button::with_label(&babydra_core::i18n::t("settings.connect"));
             connect_btn.set_valign(gtk4::Align::Center);
             connect_btn.add_css_class("suggested-action");
             let mac_clone = dev.mac.clone();

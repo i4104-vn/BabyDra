@@ -1,8 +1,8 @@
+use crate::widgets::state::AppsWidget;
+use babydra_ui_kit::components::modal::PasswordDialog;
+use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
-use gtk4::prelude::*;
-use babydra_utils::components::modal::PasswordDialog;
-use babydra_common::models::app_info::AppsWidget;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum PendingActionType {
@@ -18,6 +18,7 @@ pub struct PendingAction {
     pub parent_list: gtk4::ListBox,
 }
 
+/// Filter list box.
 fn filter_list_box(list_box: &gtk4::ListBox, query: &str) {
     let query_lower = query.to_lowercase();
     let mut child = list_box.first_child();
@@ -53,7 +54,12 @@ fn filter_list_box(list_box: &gtk4::ListBox, query: &str) {
     }
 }
 
-pub fn wire_main_events(widget: &AppsWidget, auth_dialog_rc: &Rc<PasswordDialog>, pending_action: Rc<RefCell<Option<PendingAction>>>) {
+/// Wire main events.
+pub fn wire_main_events(
+    widget: &AppsWidget,
+    auth_dialog_rc: &Rc<PasswordDialog>,
+    pending_action: Rc<RefCell<Option<PendingAction>>>,
+) {
     let tab_apps_btn_copy = widget.tab_apps_btn.clone();
     let tab_packages_btn_copy = widget.tab_packages_btn.clone();
     let stack1 = widget.stack.clone();
@@ -92,10 +98,11 @@ pub fn wire_main_events(widget: &AppsWidget, auth_dialog_rc: &Rc<PasswordDialog>
 
         let (tx, rx) = std::sync::mpsc::channel::<super::AppsData>();
         std::thread::spawn(move || {
-            let installed_apps = babydra_common::services::apps::discovery::scan_desktop_apps_from_filesystem();
-            let apps_data: Vec<babydra_common::models::app_info::InstalledApp> = installed_apps
+            let installed_apps =
+                babydra_core::services::apps::discovery::scan_desktop_apps_from_filesystem();
+            let apps_data: Vec<babydra_core::models::app_info::InstalledApp> = installed_apps
                 .into_iter()
-                .map(|app| babydra_common::models::app_info::InstalledApp {
+                .map(|app| babydra_core::models::app_info::InstalledApp {
                     name: app.name,
                     description: app.exec,
                     desktop_file: "".to_string(),
@@ -103,7 +110,7 @@ pub fn wire_main_events(widget: &AppsWidget, auth_dialog_rc: &Rc<PasswordDialog>
                 })
                 .collect();
 
-            let pkgs = babydra_common::services::apps::pacman::get_installed_packages_list();
+            let pkgs = babydra_core::services::apps::pacman::get_installed_packages_list();
 
             let _ = tx.send(super::AppsData { apps_data, pkgs });
         });
@@ -124,7 +131,8 @@ pub fn wire_main_events(widget: &AppsWidget, auth_dialog_rc: &Rc<PasswordDialog>
                     pkgs_list_box.remove(&child);
                 }
 
-                let (new_w, _new_auth_dlg, action_items) = super::render::build(&data.apps_data, &data.pkgs);
+                let (new_w, _new_auth_dlg, action_items) =
+                    super::render::build(&data.apps_data, &data.pkgs);
                 wire_uninstall_items(&auth_dialog_rc, pending_action.clone(), action_items);
 
                 while let Some(child) = new_w.apps_list_box.first_child() {
@@ -183,7 +191,7 @@ pub fn wire_main_events(widget: &AppsWidget, auth_dialog_rc: &Rc<PasswordDialog>
             };
             console_title_lbl.set_text(&format!(
                 "{} - {}",
-                babydra_common::i18n::t(log_title_key),
+                babydra_core::i18n::t(log_title_key),
                 pkg_name
             ));
 
@@ -195,14 +203,14 @@ pub fn wire_main_events(widget: &AppsWidget, auth_dialog_rc: &Rc<PasswordDialog>
             std::thread::spawn(move || {
                 let res = match act_type_clone {
                     PendingActionType::Uninstall => {
-                        babydra_common::services::apps::pacman::stream_uninstall_package(
+                        babydra_core::services::apps::pacman::stream_uninstall_package(
                             &pkg_name_clone,
                             pwd_clone.as_deref(),
                             tx.clone(),
                         )
                     }
                     PendingActionType::Downgrade => {
-                        babydra_common::services::apps::pacman::stream_downgrade_package(
+                        babydra_core::services::apps::pacman::stream_downgrade_package(
                             &pkg_name_clone,
                             pwd_clone.as_deref(),
                             tx.clone(),
@@ -216,8 +224,8 @@ pub fn wire_main_events(widget: &AppsWidget, auth_dialog_rc: &Rc<PasswordDialog>
                         PendingActionType::Uninstall => "settings.apps_uninstall_success",
                         PendingActionType::Downgrade => "settings.apps_downgrade_success",
                     };
-                    let success_msg = babydra_common::i18n::t(success_key)
-                        .replace("{}", &pkg_name_clone);
+                    let success_msg =
+                        babydra_core::i18n::t(success_key).replace("{}", &pkg_name_clone);
                     let _ = tx.send(format!("\n{}", success_msg));
                 }
             });
@@ -228,48 +236,54 @@ pub fn wire_main_events(widget: &AppsWidget, auth_dialog_rc: &Rc<PasswordDialog>
             let parent_list_c = parent_list.clone();
             let act_type_check = action_type.clone();
 
-            glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
-                loop {
-                    match rx.try_recv() {
-                        Ok(line) => {
-                            let mut iter = text_buffer_c.end_iter();
-                            text_buffer_c.insert(&mut iter, &format!("{}\n", line));
+            glib::timeout_add_local(std::time::Duration::from_millis(50), move || loop {
+                match rx.try_recv() {
+                    Ok(line) => {
+                        let mut iter = text_buffer_c.end_iter();
+                        text_buffer_c.insert(&mut iter, &format!("{}\n", line));
 
-                            let adj = console_scroll_c.vadjustment();
-                            adj.set_value(adj.upper() - adj.page_size());
+                        let adj = console_scroll_c.vadjustment();
+                        adj.set_value(adj.upper() - adj.page_size());
 
-                            if line.contains("checking dependencies") || line.contains("loading packages") {
-                                progress_bar_c.set_fraction(0.25);
-                            } else if line.contains("removing") || line.contains("downgrading") || line.contains("upgrading") {
-                                progress_bar_c.set_fraction(0.50);
-                            } else if line.contains("post-transaction hooks") || line.contains("(1/") {
-                                progress_bar_c.set_fraction(0.75);
-                            } else if line.contains("(2/") {
-                                progress_bar_c.set_fraction(0.90);
-                            } else {
-                                progress_bar_c.pulse();
-                            }
+                        if line.contains("checking dependencies")
+                            || line.contains("loading packages")
+                        {
+                            progress_bar_c.set_fraction(0.25);
+                        } else if line.contains("removing")
+                            || line.contains("downgrading")
+                            || line.contains("upgrading")
+                        {
+                            progress_bar_c.set_fraction(0.50);
+                        } else if line.contains("post-transaction hooks") || line.contains("(1/") {
+                            progress_bar_c.set_fraction(0.75);
+                        } else if line.contains("(2/") {
+                            progress_bar_c.set_fraction(0.90);
+                        } else {
+                            progress_bar_c.pulse();
+                        }
 
-                            if line.contains("Error:") || line.contains("thành công") || line.contains("successfully") {
-                                if !line.contains("Error:") {
-                                    progress_bar_c.set_fraction(1.0);
-                                    if act_type_check == PendingActionType::Uninstall {
-                                        parent_list_c.remove(&row_box_c);
-                                    }
+                        if line.contains("Error:")
+                            || line.contains("thành công")
+                            || line.contains("successfully")
+                        {
+                            if !line.contains("Error:") {
+                                progress_bar_c.set_fraction(1.0);
+                                if act_type_check == PendingActionType::Uninstall {
+                                    parent_list_c.remove(&row_box_c);
                                 }
-                                return glib::ControlFlow::Break;
-                            }
-                        }
-                        Err(std::sync::mpsc::TryRecvError::Empty) => {
-                            return glib::ControlFlow::Continue;
-                        }
-                        Err(std::sync::mpsc::TryRecvError::Disconnected) => {
-                            progress_bar_c.set_fraction(1.0);
-                            if act_type_check == PendingActionType::Uninstall {
-                                parent_list_c.remove(&row_box_c);
                             }
                             return glib::ControlFlow::Break;
                         }
+                    }
+                    Err(std::sync::mpsc::TryRecvError::Empty) => {
+                        return glib::ControlFlow::Continue;
+                    }
+                    Err(std::sync::mpsc::TryRecvError::Disconnected) => {
+                        progress_bar_c.set_fraction(1.0);
+                        if act_type_check == PendingActionType::Uninstall {
+                            parent_list_c.remove(&row_box_c);
+                        }
+                        return glib::ControlFlow::Break;
                     }
                 }
             });
@@ -277,6 +291,7 @@ pub fn wire_main_events(widget: &AppsWidget, auth_dialog_rc: &Rc<PasswordDialog>
     });
 }
 
+/// Wire uninstall items.
 pub fn wire_uninstall_items(
     auth_dialog_rc: &Rc<PasswordDialog>,
     pending_action: Rc<RefCell<Option<PendingAction>>>,
@@ -295,10 +310,13 @@ pub fn wire_uninstall_items(
 
         item.button.connect_clicked(move |_| {
             if action_type == PendingActionType::Downgrade {
-                if babydra_common::services::apps::pacman::find_cached_older_package(&pkg_name).is_none() {
-                    let msg = babydra_common::i18n::t("settings.apps_downgrade_not_found").replace("{}", &pkg_name);
-                    babydra_common::send_settings_notification(
-                        &babydra_common::i18n::t("settings.apps_downgrade_log_title"),
+                if babydra_core::services::apps::pacman::find_cached_older_package(&pkg_name)
+                    .is_none()
+                {
+                    let msg = babydra_core::i18n::t("settings.apps_downgrade_not_found")
+                        .replace("{}", &pkg_name);
+                    babydra_core::send_settings_notification(
+                        &babydra_core::i18n::t("settings.apps_downgrade_log_title"),
                         &msg,
                     );
                     return;
@@ -319,7 +337,10 @@ pub fn wire_uninstall_items(
                 ),
                 PendingActionType::Downgrade => (
                     "Downgrade Authentication",
-                    format!("Enter sudo password to downgrade '{}' to cached version:", pkg_name),
+                    format!(
+                        "Enter sudo password to downgrade '{}' to cached version:",
+                        pkg_name
+                    ),
                 ),
             };
 

@@ -18,14 +18,36 @@ pub fn draw_header(f: &mut Frame, app: &App, area: Rect) {
 
     let user_name = std::env::var("USER").unwrap_or_else(|_| "user".into());
     let root_badge = if is_root() {
-        Span::styled(" [ROOT] ", Style::default().fg(Color::Black).bg(Color::Red).add_modifier(Modifier::BOLD))
+        Span::styled(
+            " [ROOT] ",
+            Style::default()
+                .fg(Color::Black)
+                .bg(Color::Red)
+                .add_modifier(Modifier::BOLD),
+        )
     } else {
-        Span::styled(" [USER] ", Style::default().fg(Color::Black).bg(Color::Green).add_modifier(Modifier::BOLD))
+        Span::styled(
+            " [USER] ",
+            Style::default()
+                .fg(Color::Black)
+                .bg(Color::Green)
+                .add_modifier(Modifier::BOLD),
+        )
     };
 
     let title_line = Line::from(vec![
-        Span::styled(" 🐉 BabyDra ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
-        Span::styled("Desktop Shell Installer ", Style::default().fg(Color::White).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            " 🐉 BabyDra ",
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
+        ),
+        Span::styled(
+            "Desktop Shell Installer ",
+            Style::default()
+                .fg(Color::White)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::styled("v1.0.0", Style::default().fg(Color::DarkGray)),
     ]);
 
@@ -40,9 +62,17 @@ pub fn draw_header(f: &mut Frame, app: &App, area: Rect) {
     let right_line = Line::from(vec![
         root_badge,
         Span::raw(" "),
-        Span::styled(format!("{user_name}@ArchLinux "), Style::default().fg(Color::White)),
+        Span::styled(
+            format!("{user_name}@ArchLinux "),
+            Style::default().fg(Color::White),
+        ),
         Span::styled("│ Step: ", Style::default().fg(Color::DarkGray)),
-        Span::styled(app.current_step.short_name(), Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            app.current_step.short_name(),
+            Style::default()
+                .fg(Color::Yellow)
+                .add_modifier(Modifier::BOLD),
+        ),
     ]);
 
     let right_header = Paragraph::new(right_line)
@@ -99,43 +129,107 @@ pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
 
     let steps_list = List::new(items).block(
         Block::default()
-            .title(" Steps [1-8] ")
-            .title_style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
+            .title(" Steps [1-9, 0] ")
+            .title_style(
+                Style::default()
+                    .fg(Color::Cyan)
+                    .add_modifier(Modifier::BOLD),
+            )
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
             .border_style(Style::default().fg(Color::Cyan)),
     );
     f.render_widget(steps_list, sidebar_chunks[0]);
 
-    let selected_bins = app.binaries.iter().filter(|b| b.selected && b.exists_in_source).count();
+    let build_from_source = app.is_build_from_source();
+    let selected_bins = app
+        .binaries
+        .iter()
+        .filter(|b| b.selected && (b.exists_in_source || build_from_source))
+        .count();
     let total_bins = app.binaries.len();
     let selected_varlib = app.varlib_options.iter().filter(|o| o.selected).count();
-    let selected_cfgs = app.configs_themes_options.iter().filter(|o| o.selected).count();
-    let selected_dm = app.display_manager_options.iter().filter(|o| o.selected).count();
+    let selected_cfgs = app
+        .configs_themes_options
+        .iter()
+        .filter(|o| o.selected)
+        .count();
+    let selected_dm = app
+        .display_manager_options
+        .iter()
+        .filter(|o| o.selected)
+        .count();
+    let selected_variant = app
+        .variant_options
+        .iter()
+        .find(|v| v.selected)
+        .map(|v| v.name.as_str())
+        .unwrap_or("default");
 
     let summary_lines = vec![
         Line::from(vec![
             Span::styled("• Binaries: ", Style::default().fg(Color::DarkGray)),
-            Span::styled(format!("{selected_bins}/{total_bins}"), Style::default().fg(Color::White).add_modifier(Modifier::BOLD)),
+            Span::styled(
+                format!("{selected_bins}/{total_bins}"),
+                Style::default()
+                    .fg(Color::White)
+                    .add_modifier(Modifier::BOLD),
+            ),
         ]),
         Line::from(vec![
             Span::styled("• /var/lib: ", Style::default().fg(Color::DarkGray)),
-            Span::styled(format!("{selected_varlib} staged"), Style::default().fg(Color::Magenta)),
+            Span::styled(
+                format!("{selected_varlib} staged"),
+                Style::default().fg(Color::Magenta),
+            ),
         ]),
         Line::from(vec![
             Span::styled("• Configs:  ", Style::default().fg(Color::DarkGray)),
-            Span::styled(format!("{selected_cfgs} enabled"), Style::default().fg(Color::Green)),
+            Span::styled(
+                format!("{selected_cfgs} enabled"),
+                Style::default().fg(Color::Green),
+            ),
         ]),
         Line::from(vec![
             Span::styled("• Greetd DM:", Style::default().fg(Color::DarkGray)),
-            Span::styled(if selected_dm > 0 { " Enabled" } else { " Skipped" }, Style::default().fg(if selected_dm > 0 { Color::Cyan } else { Color::DarkGray })),
+            Span::styled(
+                if selected_dm > 0 {
+                    " Enabled"
+                } else {
+                    " Skipped"
+                },
+                Style::default().fg(if selected_dm > 0 {
+                    Color::Cyan
+                } else {
+                    Color::DarkGray
+                }),
+            ),
+        ]),
+        Line::from(vec![
+            Span::styled("• Variant:  ", Style::default().fg(Color::DarkGray)),
+            Span::styled(selected_variant, Style::default().fg(Color::Magenta)),
+        ]),
+        Line::from(vec![
+            Span::styled("• Source:   ", Style::default().fg(Color::DarkGray)),
+            Span::styled(
+                if build_from_source {
+                    format!("branch {}", app.selected_branch)
+                } else {
+                    "pre-built".to_string()
+                },
+                Style::default().fg(Color::Cyan),
+            ),
         ]),
     ];
 
     let summary_box = Paragraph::new(summary_lines).block(
         Block::default()
             .title(" Plan Summary ")
-            .title_style(Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))
+            .title_style(
+                Style::default()
+                    .fg(Color::Yellow)
+                    .add_modifier(Modifier::BOLD),
+            )
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
             .border_style(Style::default().fg(Color::DarkGray)),
@@ -145,23 +239,66 @@ pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
 
 pub fn draw_footer(f: &mut Frame, _app: &App, area: Rect) {
     let key_hints = vec![
-        Span::styled(" [Tab/n] ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            " [Tab/n] ",
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::raw("Next  "),
-        Span::styled(" [p] ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            " [p] ",
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::raw("Prev  "),
-        Span::styled(" [↑/↓|j/k] ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            " [↑/↓|j/k] ",
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::raw("Nav  "),
-        Span::styled(" [Space] ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            " [Space] ",
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::raw("Toggle  "),
-        Span::styled(" [a] ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            " [a] ",
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::raw("All  "),
-        Span::styled(" [i/Enter] ", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            " [i/Enter] ",
+            Style::default()
+                .fg(Color::Green)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::styled("Install  ", Style::default().fg(Color::Green)),
-        Span::styled(" [s] ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            " [s] ",
+            Style::default()
+                .fg(Color::Yellow)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::raw("Source  "),
-        Span::styled(" [?] ", Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            " [?] ",
+            Style::default()
+                .fg(Color::Magenta)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::raw("Help  "),
-        Span::styled(" [q] ", Style::default().fg(Color::Red).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            " [q] ",
+            Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
+        ),
         Span::raw("Quit "),
     ];
 

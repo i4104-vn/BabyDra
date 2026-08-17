@@ -2,8 +2,8 @@ use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use babydra_common::models::{EditorState, Tool, Drawing};
-use babydra_common::services::screenshot::draw_pixelated_rect;
+use babydra_core::models::{Drawing, EditorState, Tool};
+use babydra_core::services::screenshot::draw_pixelated_rect;
 
 /// Draws the background image, crop selection window shadow, and annotation marks (strokes, boxes, blur).
 pub fn draw_editor_canvas(cr: &cairo::Context, s: &EditorState, width: f64, height: f64) {
@@ -13,14 +13,14 @@ pub fn draw_editor_canvas(cr: &cairo::Context, s: &EditorState, width: f64, heig
 
     // 2. Draw Dark Overlay
     cr.set_source_rgba(0.0, 0.0, 0.0, 0.45);
-    
+
     let has_clip = s.has_selection && s.crop_w > 5.0 && s.crop_h > 5.0;
     if has_clip {
         let rx = s.crop_x;
         let ry = s.crop_y;
         let rw = s.crop_w;
         let rh = s.crop_h;
-        
+
         // Clip out the selection area so it remains bright
         cr.save().unwrap();
         cr.rectangle(0.0, 0.0, width, height);
@@ -51,8 +51,14 @@ pub fn draw_editor_canvas(cr: &cairo::Context, s: &EditorState, width: f64, heig
             Drawing::Blur { x, y, w, h } => {
                 draw_pixelated_rect(cr, &s.bg_pixbuf, *x, *y, *w, *h);
             }
-            Drawing::Stroke { points, color, width } => {
-                if points.len() < 2 { continue; }
+            Drawing::Stroke {
+                points,
+                color,
+                width,
+            } => {
+                if points.len() < 2 {
+                    continue;
+                }
                 cr.set_source_rgb(color.0, color.1, color.2);
                 cr.set_line_width(*width);
                 cr.set_line_cap(cairo::LineCap::Round);
@@ -63,7 +69,14 @@ pub fn draw_editor_canvas(cr: &cairo::Context, s: &EditorState, width: f64, heig
                 }
                 cr.stroke().unwrap();
             }
-            Drawing::Rect { x, y, w, h, color, width } => {
+            Drawing::Rect {
+                x,
+                y,
+                w,
+                h,
+                color,
+                width,
+            } => {
                 cr.set_source_rgb(color.0, color.1, color.2);
                 cr.set_line_width(*width);
                 cr.rectangle(*x, *y, *w, *h);
@@ -118,15 +131,15 @@ pub fn setup_editor_gestures(
     drag_gesture.connect_drag_begin(move |_, start_x, start_y| {
         let mut s_mut = state_mouse.borrow_mut();
         let s = &mut *s_mut;
-        
+
         if !s.has_selection {
             s.current_tool = Tool::Select;
         }
-        
+
         if s.has_selection && s.current_tool != Tool::Select {
-            let inside_crop = start_x >= s.crop_x 
-                && start_x <= s.crop_x + s.crop_w 
-                && start_y >= s.crop_y 
+            let inside_crop = start_x >= s.crop_x
+                && start_x <= s.crop_x + s.crop_w
+                && start_y >= s.crop_y
                 && start_y <= s.crop_y + s.crop_h;
             if !inside_crop {
                 return;
@@ -135,7 +148,7 @@ pub fn setup_editor_gestures(
 
         s.drag_start_x = start_x;
         s.drag_start_y = start_y;
-        
+
         match s.current_tool {
             Tool::Select => {
                 s.is_selecting = true;
@@ -154,14 +167,15 @@ pub fn setup_editor_gestures(
             }
             Tool::Eraser => {
                 let click_p = (start_x, start_y);
-                s.drawings.retain(|d| {
-                    match d {
-                        Drawing::Stroke { points, .. } => {
-                            !points.iter().any(|p| ((p.0 - click_p.0).powi(2) + (p.1 - click_p.1).powi(2)).sqrt() < 10.0)
-                        }
-                        Drawing::Rect { x, y, w, h, .. } | Drawing::Blur { x, y, w, h } => {
-                            !(click_p.0 >= *x && click_p.0 <= x + w && click_p.1 >= *y && click_p.1 <= y + h)
-                        }
+                s.drawings.retain(|d| match d {
+                    Drawing::Stroke { points, .. } => !points.iter().any(|p| {
+                        ((p.0 - click_p.0).powi(2) + (p.1 - click_p.1).powi(2)).sqrt() < 10.0
+                    }),
+                    Drawing::Rect { x, y, w, h, .. } | Drawing::Blur { x, y, w, h } => {
+                        !(click_p.0 >= *x
+                            && click_p.0 <= x + w
+                            && click_p.1 >= *y
+                            && click_p.1 <= y + h)
                     }
                 });
             }
@@ -267,7 +281,7 @@ pub fn setup_editor_gestures(
             }
             _ => {}
         }
-        
+
         if s.has_selection {
             toolbar_wrapper_end.set_visible(true);
         } else {

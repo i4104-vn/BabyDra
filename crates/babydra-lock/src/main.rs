@@ -2,11 +2,12 @@
 //! Sets up GTK Application, parses command line arguments for a custom wallpaper,
 //! initializes theme context, and maps locker windows to all connected monitors.
 
-mod widgets;
 mod render;
+mod widgets;
 
 use gtk4::prelude::*;
 
+/// Application entry point: `main`.
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let mut custom_image = None;
@@ -25,13 +26,10 @@ fn main() {
         }
     }
 
-    let application = gtk4::Application::new(
-        Some("org.babydra.lock"),
-        Default::default(),
-    );
+    let application = gtk4::Application::new(Some("org.babydra.lock"), Default::default());
 
     application.connect_activate(move |app| {
-        babydra_utils::ui::theme::init_theme();
+        babydra_ui_kit::ui::theme::init_theme();
         render::build_lock_ui(app, custom_image.as_deref());
     });
 

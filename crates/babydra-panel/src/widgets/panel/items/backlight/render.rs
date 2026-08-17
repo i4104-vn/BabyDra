@@ -1,17 +1,19 @@
-use gtk4::prelude::*;
-use std::rc::Rc;
-use std::cell::Cell;
 use super::{
-    has_backlight, get_current_brightness, set_brightness, query_ddcutil_brightness,
-    BRIGHTNESS_STATE, BRIGHTNESS_SYNCED
+    get_current_brightness, has_backlight, query_ddcutil_brightness, set_brightness,
+    BRIGHTNESS_STATE, BRIGHTNESS_SYNCED,
 };
+use babydra_core::i18n::t;
+use gtk4::prelude::*;
+use std::cell::Cell;
+use std::rc::Rc;
 
+/// Creates a new `brightness row`.
 pub fn create_brightness_row() -> (gtk4::Box, gtk4::Scale) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
     main_box.add_css_class("control-slider-card");
 
     let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    let title_label = gtk4::Label::new(Some("Brightness"));
+    let title_label = gtk4::Label::new(Some(&t("common.brightness")));
     title_label.add_css_class("control-slider-title");
     title_label.set_xalign(0.0);
     title_label.set_hexpand(true);
@@ -45,13 +47,11 @@ pub fn create_brightness_row() -> (gtk4::Box, gtk4::Scale) {
         }
 
         let last_source_inner = last_source_clone.clone();
-        let new_id = gtk4::glib::timeout_add_local_once(
-            std::time::Duration::from_millis(80),
-            move || {
+        let new_id =
+            gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(80), move || {
                 last_source_inner.set(None);
                 set_brightness(val);
-            }
-        );
+            });
         last_source_clone.set(Some(new_id));
     });
 
@@ -65,7 +65,7 @@ pub fn create_brightness_row() -> (gtk4::Box, gtk4::Scale) {
     icon_container.set_halign(gtk4::Align::Start);
     icon_container.set_margin_start(10);
 
-    let icon_widget = babydra_utils::ui::icon::get_icon_colored("brightness", 16, "#ffffff");
+    let icon_widget = babydra_ui_kit::ui::icon::get_icon_colored("brightness", 16, "#ffffff");
     icon_widget.add_css_class("slider-overlay-icon");
     icon_container.append(&icon_widget);
     overlay.add_overlay(&icon_container);
@@ -80,6 +80,7 @@ pub fn create_brightness_row() -> (gtk4::Box, gtk4::Scale) {
     (main_box, scale)
 }
 
+/// Sync DDC brightness async.
 fn sync_ddc_brightness_async(brightness_scale: &gtk4::Scale) {
     if !has_backlight() {
         let mut need_sync = false;
@@ -95,7 +96,11 @@ fn sync_ddc_brightness_async(brightness_scale: &gtk4::Scale) {
             let scale_clone = brightness_scale.clone();
             glib::MainContext::default().spawn_local(async move {
                 if let Some(val) = rx.recv().await {
-                    let current_val = if let Ok(guard) = BRIGHTNESS_STATE.lock() { *guard } else { 60.0 };
+                    let current_val = if let Ok(guard) = BRIGHTNESS_STATE.lock() {
+                        *guard
+                    } else {
+                        60.0
+                    };
                     if current_val == 60.0 {
                         scale_clone.set_value(val);
                         if let Ok(mut guard) = BRIGHTNESS_STATE.lock() {

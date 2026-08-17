@@ -1,9 +1,10 @@
 pub mod widgets;
 
+use babydra_core::SessionState;
 use gtk4::prelude::*;
 use gtk4::Application;
-use babydra_common::SessionState;
 
+/// Application entry point: `main`.
 fn main() {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let _guard = rt.enter();
@@ -14,10 +15,10 @@ fn main() {
         .build();
 
     app.connect_activate(|app| {
-        let target_dir = babydra_utils::explore::parse_target_dir();
+        let target_dir = babydra_ui_kit::components::explore::parse_target_dir();
 
         let session = std::rc::Rc::new(std::cell::RefCell::new(SessionState::new(target_dir)));
-        
+
         let main_window = crate::widgets::window::create_explore_window(app, session);
         main_window.present();
     });

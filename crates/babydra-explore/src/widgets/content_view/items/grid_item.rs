@@ -1,9 +1,9 @@
+use babydra_core::FileEntry;
 use gtk4::prelude::*;
 use gtk4::FlowBoxChild;
+use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
-use babydra_common::FileEntry;
-use std::cell::RefCell;
 
 /// Creates an explore-specific flowbox child grid cell representing a single file/folder.
 pub fn create_flow_child(
@@ -18,7 +18,7 @@ pub fn create_flow_child(
     let nav = nav_callback.clone();
 
     let sel_paths = selected_paths.clone();
-    let flow_child = babydra_utils::components::create_grid_file_item(
+    let flow_child = babydra_ui_kit::components::explore::create_grid_file_item(
         idx,
         entry,
         selected_paths,
@@ -28,8 +28,11 @@ pub fn create_flow_child(
                 target_paths = vec![target_entry.path.clone()];
             }
 
-            if let Some(win) = widget.root().and_then(|r| r.downcast::<gtk4::Window>().ok()) {
-                babydra_utils::explore::context_menu::show_for_file(
+            if let Some(win) = widget
+                .root()
+                .and_then(|r| r.downcast::<gtk4::Window>().ok())
+            {
+                babydra_ui_kit::components::explore::context_menu::show_for_file(
                     widget,
                     x,
                     y,
@@ -43,8 +46,11 @@ pub fn create_flow_child(
     );
 
     // Dim item if it's currently in the cut clipboard
-    let is_cut = babydra_utils::explore::CLIPBOARD.with(|cb| {
-        cb.borrow().as_ref().map(|(paths, cut)| *cut && paths.contains(&entry.path)).unwrap_or(false)
+    let is_cut = babydra_ui_kit::components::explore::CLIPBOARD.with(|cb| {
+        cb.borrow()
+            .as_ref()
+            .map(|(paths, cut)| *cut && paths.contains(&entry.path))
+            .unwrap_or(false)
     });
     if is_cut {
         if let Some(child_widget) = flow_child.child() {
@@ -55,10 +61,10 @@ pub fn create_flow_child(
     let double_click_gesture = gtk4::GestureClick::new();
     double_click_gesture.set_button(1);
     let target_path = entry.path.clone();
-    let is_dir = matches!(entry.file_type, babydra_common::FileType::Directory);
+    let is_dir = matches!(entry.file_type, babydra_core::FileType::Directory);
     let nav_c = nav_callback.clone();
     double_click_gesture.connect_pressed(move |_, n_press, _, _| {
-        let settings = babydra_common::load_explore_settings();
+        let settings = babydra_core::load_explore_settings();
         let trigger = if settings.double_click_to_open {
             n_press == 2
         } else {
@@ -69,7 +75,10 @@ pub fn create_flow_child(
                 nav_c(target_path.clone());
             } else {
                 let uri = format!("file://{}", target_path.to_string_lossy());
-                let _ = gtk4::gio::AppInfo::launch_default_for_uri(&uri, gtk4::gio::AppLaunchContext::NONE);
+                let _ = gtk4::gio::AppInfo::launch_default_for_uri(
+                    &uri,
+                    gtk4::gio::AppLaunchContext::NONE,
+                );
             }
         }
     });

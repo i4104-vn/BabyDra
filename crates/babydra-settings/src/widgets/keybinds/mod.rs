@@ -1,9 +1,10 @@
 pub mod render;
 
+use babydra_core::models::keybind::Keybind;
 use gtk4::prelude::*;
 use gtk4::Widget;
-use babydra_common::models::keybind::Keybind;
 
+/// Creates a new `keybinds widget`.
 pub fn create_keybinds_widget() -> Widget {
     let keybinds = vec![
         Keybind {

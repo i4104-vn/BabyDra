@@ -16,7 +16,12 @@ pub fn draw_system_packages_step(f: &mut Frame, app: &App, area: Rect) {
         .map(|(i, opt)| {
             let is_cursor = i == app.package_cursor;
             let check = if opt.selected {
-                Span::styled("[✓] ", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD))
+                Span::styled(
+                    "[✓] ",
+                    Style::default()
+                        .fg(Color::Green)
+                        .add_modifier(Modifier::BOLD),
+                )
             } else {
                 Span::styled("[ ] ", Style::default().fg(Color::DarkGray))
             };
@@ -28,17 +33,31 @@ pub fn draw_system_packages_step(f: &mut Frame, app: &App, area: Rect) {
             };
 
             let title_style = if is_cursor {
-                Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD | Modifier::UNDERLINED)
+                Style::default()
+                    .fg(Color::Cyan)
+                    .add_modifier(Modifier::BOLD | Modifier::UNDERLINED)
             } else {
-                Style::default().fg(Color::White).add_modifier(Modifier::BOLD)
+                Style::default()
+                    .fg(Color::White)
+                    .add_modifier(Modifier::BOLD)
             };
 
-            let row_style = if is_cursor { Style::default().bg(Color::Rgb(25, 30, 48)) } else { Style::default() };
+            let row_style = if is_cursor {
+                Style::default().bg(Color::Rgb(25, 30, 48))
+            } else {
+                Style::default()
+            };
 
             ListItem::new(vec![
                 Line::from(vec![check, Span::styled(&opt.title, title_style), root_tag]),
-                Line::from(Span::styled(format!("    {}", opt.description), Style::default().fg(Color::Gray))),
-                Line::from(Span::styled(format!("    Command: {}", opt.detail), Style::default().fg(Color::DarkGray))),
+                Line::from(Span::styled(
+                    format!("    {}", opt.description),
+                    Style::default().fg(Color::Gray),
+                )),
+                Line::from(Span::styled(
+                    format!("    Command: {}", opt.detail),
+                    Style::default().fg(Color::DarkGray),
+                )),
             ])
             .style(row_style)
         })
@@ -46,7 +65,7 @@ pub fn draw_system_packages_step(f: &mut Frame, app: &App, area: Rect) {
 
     let list = List::new(items).block(
         Block::default()
-            .title(" 2. System Packages & Dependencies [Space: Toggle | a: Select All | Enter/n: Next] ")
+            .title(" 3. System Packages & Dependencies [Space: Toggle | a: Select All | Enter/n: Next] ")
             .title_style(Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)

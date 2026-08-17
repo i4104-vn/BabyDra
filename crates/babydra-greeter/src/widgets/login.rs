@@ -1,5 +1,7 @@
 use gtk4::prelude::*;
-use gtk4::{Box as GtkBox, Label, Button, PasswordEntry, Image, Orientation, Align, Spinner, DropDown};
+use gtk4::{
+    Align, Box as GtkBox, Button, DropDown, Image, Label, Orientation, PasswordEntry, Spinner,
+};
 
 use super::LAST_USER_FILE;
 
@@ -65,6 +67,7 @@ pub fn get_system_users() -> Vec<String> {
     result
 }
 
+/// Build.
 pub fn build() -> LoginWidget {
     tracing::info!(target: "babydra-greeter", "Building LoginWidget (avatar, username dropdown/password capsules, submit button)");
     let login_container = GtkBox::new(Orientation::Vertical, 0);
@@ -95,7 +98,7 @@ pub fn build() -> LoginWidget {
     avatar_ring.append(&avatar_inner);
 
     // 2. User Display Name Label
-    let username_label = Label::new(Some(&babydra_common::i18n::t("greeter.user")));
+    let username_label = Label::new(Some(&babydra_core::i18n::t("greeter.user")));
     username_label.add_css_class("login-username-label");
     username_label.set_halign(Align::Center);
 
@@ -133,7 +136,7 @@ pub fn build() -> LoginWidget {
     pass_icon.add_css_class("input-icon");
 
     let pass_entry = PasswordEntry::new();
-    pass_entry.set_placeholder_text(Some(&babydra_common::i18n::t("greeter.password")));
+    pass_entry.set_placeholder_text(Some(&babydra_core::i18n::t("greeter.password")));
     pass_entry.add_css_class("login-input");
     pass_entry.set_hexpand(true);
     pass_entry.set_valign(Align::Center);
@@ -177,7 +180,9 @@ pub fn build() -> LoginWidget {
     login_container.append(&login_panel);
 
     // Restore last logged in username if available in system user list
-    let last_user_opt = std::fs::read_to_string(LAST_USER_FILE).ok().map(|s| s.trim().to_string());
+    let last_user_opt = std::fs::read_to_string(LAST_USER_FILE)
+        .ok()
+        .map(|s| s.trim().to_string());
     let default_user = std::env::var("USER").unwrap_or_else(|_| "user".to_string());
 
     let target_user = match last_user_opt {

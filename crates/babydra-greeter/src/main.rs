@@ -11,13 +11,15 @@ mod widgets;
 use gtk4::prelude::*;
 use tracing::info;
 
+/// Application entry point: `main`.
 fn main() {
-    // 1. Initialize reusable logging system from babydra-common
-    babydra_common::init_logger("babydra-greeter", "displaymanager.log");
+    // 1. Initialize reusable logging system from babydra-core
+    babydra_core::init_logger("babydra-greeter", "displaymanager.log");
 
     let pid = std::process::id();
     let greetd_sock = std::env::var("GREETD_SOCK").unwrap_or_else(|_| "<NOT SET>".to_string());
-    let wayland_display = std::env::var("WAYLAND_DISPLAY").unwrap_or_else(|_| "<NOT SET>".to_string());
+    let wayland_display =
+        std::env::var("WAYLAND_DISPLAY").unwrap_or_else(|_| "<NOT SET>".to_string());
     let xdg_config = std::env::var("XDG_CONFIG_HOME").unwrap_or_else(|_| "<DEFAULT>".to_string());
 
     info!(

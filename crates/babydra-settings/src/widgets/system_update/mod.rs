@@ -3,8 +3,8 @@ pub mod render;
 
 use gtk4::Widget;
 
+/// Creates a new `system update widget`.
 pub fn create_system_update_widget() -> Widget {
-    // Build initial UI layout and PasswordDialog overlay
     let (widget, auth_dialog) = render::build(&[]);
 
     // Wire events using reusable PasswordDialog
