@@ -24,8 +24,10 @@
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
+pub mod error;
 pub mod tokens;
 
+pub use error::ThemeError;
 pub use tokens::{DarkLightTokens, RadiusTokens, ThemeTokens};
 
 /// Fully resolved theme values for one theme id.
@@ -96,17 +98,22 @@ pub fn themes_root() -> PathBuf {
 }
 
 /// Loads a theme package folder (`themes/<id>/`) from disk.
-pub fn load_package(id: &str) -> Result<ThemePackage, String> {
+pub fn load_package(id: &str) -> Result<ThemePackage, ThemeError> {
     let dir = themes_root().join(id);
     if !dir.is_dir() {
-        return Err(format!("theme package not found: {}", dir.display()));
+        return Err(ThemeError::NotFound(format!(
+            "theme package not found: {}",
+            dir.display()
+        )));
     }
 
     let tokens_path = dir.join("tokens.json");
-    let tokens_raw = std::fs::read_to_string(&tokens_path)
-        .map_err(|e| format!("cannot read {}: {}", tokens_path.display(), e))?;
-    let tokens: ThemeTokens = serde_json::from_str(&tokens_raw)
-        .map_err(|e| format!("invalid tokens.json in {}: {}", dir.display(), e))?;
+    let tokens_raw = std::fs::read_to_string(&tokens_path).map_err(|e| {
+        ThemeError::Invalid(format!("cannot read {}: {}", tokens_path.display(), e))
+    })?;
+    let tokens: ThemeTokens = serde_json::from_str(&tokens_raw).map_err(|e| {
+        ThemeError::Invalid(format!("invalid tokens.json in {}: {}", dir.display(), e))
+    })?;
 
     // CSS layers live in `css/`; fall back to the legacy flat layout for
     // theme packages deployed before the `css/` subfolder was introduced.
@@ -156,7 +163,7 @@ fn read_optional(path: &Path) -> String {
 /// Tokens are merged base-first (base values are defaults, the child theme
 /// overrides them). CSS layers concatenate base-first, so child rules win.
 /// Returns a fully-resolved `ThemeValue`.
-pub fn resolve_theme(id: &str) -> Result<ThemeValue, String> {
+pub fn resolve_theme(id: &str) -> Result<ThemeValue, ThemeError> {
     let mut visited: Vec<String> = Vec::new();
     let merged = resolve_recursive(id, &mut visited)?;
     Ok(ThemeValue {
@@ -170,9 +177,9 @@ pub fn resolve_theme(id: &str) -> Result<ThemeValue, String> {
     })
 }
 
-fn resolve_recursive(id: &str, visited: &mut Vec<String>) -> Result<ThemePackage, String> {
+fn resolve_recursive(id: &str, visited: &mut Vec<String>) -> Result<ThemePackage, ThemeError> {
     if visited.iter().any(|v| v == id) {
-        return Err(format!("theme inheritance cycle detected at '{}'", id));
+        return Err(ThemeError::Cycle(id.to_string()));
     }
     visited.push(id.to_string());
 
