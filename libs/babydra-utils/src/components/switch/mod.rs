@@ -39,22 +39,34 @@ impl CustomSwitch {
 
             // 1. Draw Background Trough Pill
             cr.new_sub_path();
-            cr.arc(width - r, r, r, -std::f64::consts::FRAC_PI_2, std::f64::consts::FRAC_PI_2);
-            cr.arc(r, r, r, std::f64::consts::FRAC_PI_2, 3.0 * std::f64::consts::FRAC_PI_2);
+            cr.arc(
+                width - r,
+                r,
+                r,
+                -std::f64::consts::FRAC_PI_2,
+                std::f64::consts::FRAC_PI_2,
+            );
+            cr.arc(
+                r,
+                r,
+                r,
+                std::f64::consts::FRAC_PI_2,
+                3.0 * std::f64::consts::FRAC_PI_2,
+            );
             cr.close_path();
 
             let is_dark = crate::ui::theme::is_dark_mode();
-
-            // Color lerp: Inactive gray -> Active blue (#3b82f6)
-            let (in_r, in_g, in_b, in_a) = if is_dark {
-                (1.0, 1.0, 1.0, 0.16)
-            } else {
-                (0.0, 0.0, 0.0, 0.14)
+            use crate::ui::theme::colors::{
+                track_border_rgba, track_rgba, ACCENT_RGB, KNOB_FILL_RGBA, KNOB_SHADOW_RGBA,
             };
 
-            let bg_r = in_r + (0.23 - in_r) * prog;
-            let bg_g = in_g + (0.51 - in_g) * prog;
-            let bg_b = in_b + (0.96 - in_b) * prog;
+            // Color lerp: Inactive gray -> Active blue (tokenized from colors.rs)
+            let (in_r, in_g, in_b, in_a) = track_rgba(is_dark);
+            let (acc_r, acc_g, acc_b) = ACCENT_RGB;
+
+            let bg_r = in_r + (acc_r - in_r) * prog;
+            let bg_g = in_g + (acc_g - in_g) * prog;
+            let bg_b = in_b + (acc_b - in_b) * prog;
             let bg_a = in_a + (1.0 - in_a) * prog;
 
             cr.set_source_rgba(bg_r, bg_g, bg_b, bg_a);
@@ -62,8 +74,13 @@ impl CustomSwitch {
 
             // Subtle border for inactive state (fades out as active)
             if prog < 0.99 {
-                let border_color = if is_dark { (1.0, 1.0, 1.0, 0.20) } else { (0.0, 0.0, 0.0, 0.16) };
-                cr.set_source_rgba(border_color.0, border_color.1, border_color.2, border_color.3 * (1.0 - prog));
+                let border_color = track_border_rgba(is_dark);
+                cr.set_source_rgba(
+                    border_color.0,
+                    border_color.1,
+                    border_color.2,
+                    border_color.3 * (1.0 - prog),
+                );
                 cr.set_line_width(1.0);
                 let _ = cr.stroke();
             } else {
@@ -78,12 +95,28 @@ impl CustomSwitch {
             let knob_y = r;
 
             // Drop Shadow under knob
-            cr.set_source_rgba(0.0, 0.0, 0.0, 0.30);
-            cr.arc(knob_x, knob_y + 1.0, knob_r + 1.0, 0.0, std::f64::consts::TAU);
+            cr.set_source_rgba(
+                KNOB_SHADOW_RGBA.0,
+                KNOB_SHADOW_RGBA.1,
+                KNOB_SHADOW_RGBA.2,
+                KNOB_SHADOW_RGBA.3,
+            );
+            cr.arc(
+                knob_x,
+                knob_y + 1.0,
+                knob_r + 1.0,
+                0.0,
+                std::f64::consts::TAU,
+            );
             let _ = cr.fill();
 
             // Knob Circle (White)
-            cr.set_source_rgba(1.0, 1.0, 1.0, 1.0);
+            cr.set_source_rgba(
+                KNOB_FILL_RGBA.0,
+                KNOB_FILL_RGBA.1,
+                KNOB_FILL_RGBA.2,
+                KNOB_FILL_RGBA.3,
+            );
             cr.arc(knob_x, knob_y, knob_r, 0.0, std::f64::consts::TAU);
             let _ = cr.fill();
         });
@@ -100,12 +133,7 @@ impl CustomSwitch {
             let new_state = !active_click.get();
             active_click.set(new_state);
 
-            Self::start_slide_animation(
-                new_state,
-                &area_click,
-                &progress_click,
-                &animating_click,
-            );
+            Self::start_slide_animation(new_state, &area_click, &progress_click, &animating_click);
 
             for cb in listeners_click.borrow().iter() {
                 cb(new_state);
@@ -176,12 +204,7 @@ impl CustomSwitch {
     pub fn set_active(&self, state: bool) {
         if self.active.get() != state {
             self.active.set(state);
-            Self::start_slide_animation(
-                state,
-                &self.container,
-                &self.progress,
-                &self.animating,
-            );
+            Self::start_slide_animation(state, &self.container, &self.progress, &self.animating);
         }
     }
 
@@ -191,10 +214,7 @@ impl CustomSwitch {
 }
 
 /// Creates a standalone CustomSwitch widget.
-pub fn create_switch(
-    initial_active: bool,
-    on_changed: impl Fn(bool) + 'static,
-) -> CustomSwitch {
+pub fn create_switch(initial_active: bool, on_changed: impl Fn(bool) + 'static) -> CustomSwitch {
     let sw = CustomSwitch::new(initial_active);
     sw.connect_state_set(on_changed);
     sw
@@ -256,7 +276,8 @@ impl ToggleRow {
             self.label.remove_css_class("toggle-status-off");
             self.label.add_css_class("toggle-status-on");
         } else {
-            self.label.set_text(&babydra_common::i18n::t("settings.off"));
+            self.label
+                .set_text(&babydra_common::i18n::t("settings.off"));
             self.label.remove_css_class("toggle-status-on");
             self.label.add_css_class("toggle-status-off");
         }

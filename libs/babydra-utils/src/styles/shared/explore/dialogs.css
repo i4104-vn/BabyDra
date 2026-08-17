@@ -90,13 +90,9 @@ button.empty-trash-btn {
     font-family: "JetBrains Mono", "Fira Code", monospace;
 }
 
-.settings-row-title {
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.01em;
-}
-
-.settings-row-desc {
+/* `.settings-row-title` / `.settings-row-desc` are owned by
+   `apps/settings.css`; keep only dialog-specific tweaks here. */
+.explore-dialog .settings-row-desc {
     font-size: 11px;
 }
 
@@ -218,12 +214,24 @@ button.settings-pill.active-pill:hover {
     transform: none;
 }
 
-.settings-card {
-    border-radius: 14px;
+/* `.settings-card` is owned by `apps/settings.css`; dialogs are more
+   compact, so scope the tighter padding/radius under the dialog root. */
+.explore-dialog .settings-card {
     padding: 2px;
 }
 
-.settings-card-row,
+.explore-dialog .settings-card-row {
+    border-radius: 12px 12px 0 0;
+}
+
+.explore-dialog .settings-card-row:last-child {
+    border-radius: 0 0 12px 12px;
+}
+
+.explore-dialog .settings-card-row:only-child {
+    border-radius: 12px;
+}
+
 .settings-custom-item-row {
     background: transparent;
     background-color: transparent;
@@ -231,18 +239,15 @@ button.settings-pill.active-pill:hover {
     transition: background-color 120ms ease;
 }
 
-.settings-card-row:first-child,
 .settings-custom-item-row:first-child {
     border-radius: 12px 12px 0 0;
 }
 
-.settings-card-row:last-child,
 .settings-custom-item-row:last-child {
     border-bottom: none;
     border-radius: 0 0 12px 12px;
 }
 
-.settings-card-row:only-child,
 .settings-custom-item-row:only-child {
     border-radius: 12px;
 }

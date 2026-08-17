@@ -20,13 +20,20 @@ impl CustomSlider {
         Self::new_range(10, 90, 10, initial_value, on_changed)
     }
 
-    pub fn new_range(min: u32, max: u32, step: u32, initial_value: u32, on_changed: impl Fn(u32) + 'static) -> Self {
+    pub fn new_range(
+        min: u32,
+        max: u32,
+        step: u32,
+        initial_value: u32,
+        on_changed: impl Fn(u32) + 'static,
+    ) -> Self {
         let min = min.min(max);
         let max = max.max(min + 1);
         let step = step.max(1);
 
         let value = Rc::new(Cell::new(initial_value.clamp(min, max)));
-        let listeners: Rc<RefCell<Vec<Callback>>> = Rc::new(RefCell::new(vec![Box::new(on_changed)]));
+        let listeners: Rc<RefCell<Vec<Callback>>> =
+            Rc::new(RefCell::new(vec![Box::new(on_changed)]));
 
         let area = DrawingArea::new();
         area.set_content_height(56);
@@ -45,13 +52,15 @@ impl CustomSlider {
             let track_w = (width - 2.0 * margin_x).max(10.0);
 
             let is_dark = crate::ui::theme::is_dark_mode();
+            use crate::ui::theme::colors::{
+                slider_text_rgba, slider_tick_rgba, slider_track_rgba, ACCENT_ALPHA,
+                ACCENT_DIM_ALPHA, ACCENT_RGB, KNOB_FILL_RGBA, SLIDER_KNOB_SHADOW_RGBA,
+            };
+            let (acc_r, acc_g, acc_b) = ACCENT_RGB;
 
             // 1. Draw Background Track (Pill)
-            if is_dark {
-                cr.set_source_rgba(1.0, 1.0, 1.0, 0.15);
-            } else {
-                cr.set_source_rgba(0.0, 0.0, 0.0, 0.12);
-            }
+            let (t_r, t_g, t_b, t_a) = slider_track_rgba(is_dark);
+            cr.set_source_rgba(t_r, t_g, t_b, t_a);
             cr.set_line_width(6.0);
             cr.set_line_cap(cairo::LineCap::Round);
             cr.move_to(margin_x, track_y);
@@ -59,11 +68,12 @@ impl CustomSlider {
             let _ = cr.stroke();
 
             // 2. Draw Filled Active Track
-            let active_frac = (cur_val.saturating_sub(min) as f64 / (max - min) as f64).clamp(0.0, 1.0);
+            let active_frac =
+                (cur_val.saturating_sub(min) as f64 / (max - min) as f64).clamp(0.0, 1.0);
             let active_w = active_frac * track_w;
 
             if active_w > 0.0 {
-                cr.set_source_rgba(0.23, 0.51, 0.96, 1.0); // #3b82f6
+                cr.set_source_rgba(acc_r, acc_g, acc_b, ACCENT_ALPHA);
                 cr.set_line_width(6.0);
                 cr.set_line_cap(cairo::LineCap::Round);
                 cr.move_to(margin_x, track_y);
@@ -81,11 +91,10 @@ impl CustomSlider {
 
                 // Tick Mark Vertical Line
                 if is_passed {
-                    cr.set_source_rgba(0.23, 0.51, 0.96, 0.9);
-                } else if is_dark {
-                    cr.set_source_rgba(1.0, 1.0, 1.0, 0.25);
+                    cr.set_source_rgba(acc_r, acc_g, acc_b, ACCENT_DIM_ALPHA);
                 } else {
-                    cr.set_source_rgba(0.0, 0.0, 0.0, 0.25);
+                    let (k_r, k_g, k_b, k_a) = slider_tick_rgba(is_dark);
+                    cr.set_source_rgba(k_r, k_g, k_b, k_a);
                 }
 
                 cr.set_line_width(2.0);
@@ -114,23 +123,8 @@ impl CustomSlider {
                 let text_x = step_x - (extents.width() / 2.0) - extents.x_bearing();
                 let text_y = track_y + 30.0;
 
-                if is_dark {
-                    if is_selected {
-                        cr.set_source_rgba(1.0, 1.0, 1.0, 1.0);
-                    } else if is_passed {
-                        cr.set_source_rgba(1.0, 1.0, 1.0, 0.75);
-                    } else {
-                        cr.set_source_rgba(1.0, 1.0, 1.0, 0.40);
-                    }
-                } else {
-                    if is_selected {
-                        cr.set_source_rgba(0.12, 0.16, 0.23, 1.0);
-                    } else if is_passed {
-                        cr.set_source_rgba(0.12, 0.16, 0.23, 0.80);
-                    } else {
-                        cr.set_source_rgba(0.12, 0.16, 0.23, 0.45);
-                    }
-                }
+                let (tx_r, tx_g, tx_b, tx_a) = slider_text_rgba(is_dark, is_selected, is_passed);
+                cr.set_source_rgba(tx_r, tx_g, tx_b, tx_a);
 
                 cr.move_to(text_x, text_y);
                 let _ = cr.show_text(&text);
@@ -141,17 +135,33 @@ impl CustomSlider {
             let knob_r = 9.0;
 
             // Outer Shadow
-            cr.set_source_rgba(0.0, 0.0, 0.0, 0.35);
-            cr.arc(knob_x, track_y + 1.0, knob_r + 1.5, 0.0, std::f64::consts::TAU);
+            cr.set_source_rgba(
+                SLIDER_KNOB_SHADOW_RGBA.0,
+                SLIDER_KNOB_SHADOW_RGBA.1,
+                SLIDER_KNOB_SHADOW_RGBA.2,
+                SLIDER_KNOB_SHADOW_RGBA.3,
+            );
+            cr.arc(
+                knob_x,
+                track_y + 1.0,
+                knob_r + 1.5,
+                0.0,
+                std::f64::consts::TAU,
+            );
             let _ = cr.fill();
 
             // Knob Base (White Circle)
-            cr.set_source_rgba(1.0, 1.0, 1.0, 1.0);
+            cr.set_source_rgba(
+                KNOB_FILL_RGBA.0,
+                KNOB_FILL_RGBA.1,
+                KNOB_FILL_RGBA.2,
+                KNOB_FILL_RGBA.3,
+            );
             cr.arc(knob_x, track_y, knob_r, 0.0, std::f64::consts::TAU);
             let _ = cr.fill();
 
             // Knob Ring Border
-            cr.set_source_rgba(0.23, 0.51, 0.96, 1.0);
+            cr.set_source_rgba(acc_r, acc_g, acc_b, ACCENT_ALPHA);
             cr.set_line_width(2.5);
             cr.arc(knob_x, track_y, knob_r, 0.0, std::f64::consts::TAU);
             let _ = cr.stroke();

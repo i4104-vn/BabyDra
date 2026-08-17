@@ -1,7 +1,23 @@
 button,
 .btn {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Segoe UI Variable Static Text', 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
     transition: all 200ms ease;
+}
+
+/* Standard interactive button (.baby-button) */
+button.baby-button {
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    background-image: none;
+    box-shadow: none;
+    border: 1px solid transparent;
+    transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+}
+
+button.baby-button:focus {
+    outline: none;
 }
 
 button.circle-btn,

@@ -198,18 +198,20 @@ button.settings-pill.active-pill:hover {
     color: #0052a3;
 }
 
-.settings-card {
+/* Dialog-specific card colors (light); base `.settings-card` lives in
+   `apps/settings.css` — only override what the compact dialog needs. */
+.explore-dialog .settings-card {
     background-color: #ffffff;
     border: 1px solid #e5e7eb;
     border-top: 1px solid #f3f4f6;
 }
 
-.settings-card-row,
+.explore-dialog .settings-card-row,
 .settings-custom-item-row {
     border-bottom: 1px solid #f3f4f6;
 }
 
-.settings-card-row:hover,
+.explore-dialog .settings-card-row:hover,
 .settings-custom-item-row:hover {
     background-color: rgba(0, 0, 0, 0.015);
 }

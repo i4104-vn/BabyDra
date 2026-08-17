@@ -116,6 +116,35 @@ button.sidebar-item.active-nav:hover label {
     padding: 16px 20px;
 }
 
+/* Component token colors (light) */
+.success-text {
+    color: #16a34a;
+}
+
+.settings-title,
+.settings-label {
+    color: #1c1c1e;
+}
+
+.settings-subtitle,
+.settings-desc {
+    color: rgba(28, 28, 30, 0.55);
+}
+
+.settings-item-row {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.sidebar-icon-badge {
+    background-color: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.badge-slate {
+    background-color: rgba(100, 116, 139, 0.15);
+    color: #475569;
+}
+
 .settings-card row,
 .settings-card-row {
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);

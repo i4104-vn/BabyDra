@@ -94,6 +94,36 @@ button.sidebar-item.active-nav:hover label {
     padding: 16px 20px;
 }
 
+/* Component token colors (dark) */
+.success-text {
+    color: #4ade80;
+}
+
+.settings-title,
+.settings-label {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.settings-subtitle,
+.settings-desc {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.settings-item-row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-icon-badge {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.24);
+}
+
+.badge-slate {
+    background-color: rgba(100, 116, 139, 0.20);
+    color: #94a3b8;
+}
+
 /* Glassmorphism Circular Icon Badge (Matching circle button style) */
 .blue-icon-badge {
     background-color: rgba(255, 255, 255, 0.06);

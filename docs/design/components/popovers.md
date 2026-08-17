@@ -76,8 +76,9 @@ popover > contents {
 
 ```rust
 // Tạo popover hover hiển thị thông tin pin
+// Class tùy chọn cho value dùng token có thật: `success-text` hoặc `settings-desc`.
 let rows = vec![
-    HoverPopoverRow::new("Battery", "78%", Some("status-good")),
+    HoverPopoverRow::new("Battery", "78%", Some("success-text")),
     HoverPopoverRow::new("Charging", "Yes", None),
 ];
 let card = build_hover_popover_card("Power", rows);

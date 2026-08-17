@@ -26,10 +26,16 @@ pub fn set_tooltip(widget: &impl IsA<gtk4::Widget>, text: &str)
 ## 3. Ví dụ sử dụng
 
 ```rust
-use babydra_utils::components::set_tooltip;
+use babydra_utils::components::{create_icon_button, set_tooltip};
 
-let btn = create_icon_button("edit-delete", ...);
-set_tooltip(&btn, "Forget Network");
+let btn = create_icon_button(
+    "edit-delete", // icon_name
+    16,            // size
+    &["flat", "circular"], // css_classes
+    Some("Forget Network"), // tooltip
+    || { /* on_click */ },
+);
+// Lưu ý: `create_icon_button` đã nhận tooltip — chỉ gọi `set_tooltip` khi cần override.
 ```
 
 ---

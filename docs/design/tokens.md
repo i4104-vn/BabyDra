@@ -33,11 +33,15 @@
 
 ## Badge
 
-| Biến thể | background | color |
-| :--- | :--- | :--- |
-| Hồng | `#fce7f3` | `#be185d` |
-| Xanh lá | `#dcfce7` | `#15803d` |
-| Xanh dương | `#dbeafe` | `#1e40af` |
+Badge trong code là **status badge** (`create_status_badge`) — màu được quyết định bởi class token, không phải bảng màu tĩnh:
+
+| Biến thể | Class | Dark | Light | Dùng cho |
+| :--- | :--- | :--- | :--- | :--- |
+| Thành công | `.success-text` | `#4ade80` | `#16a34a` | Trạng thái hoàn thành, đã kết nối |
+| Thông thường | `.settings-desc` | `rgba(255,255,255,0.55)` | `rgba(28,28,30,0.55)` | Mô tả phụ, trạng thái mặc định |
+
+> [!NOTE]
+> Chủ quyền: `styles/dark|light/apps/settings.css`. Icon badge dùng class `blue-icon-badge`/`blue-icon-badge-sm` (44px/34px), màu kính mờ theo layer tương ứng.
 
 ---
 
