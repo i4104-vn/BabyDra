@@ -559,9 +559,15 @@ docs/
 │   ├── core.md                   <-   API babydra-core
 │   ├── ui-kit.md                 <-   API babydra-ui-kit
 │   └── explore-kit.md            <-   API components::explore
+├── flows/                        <- Luồng hoạt động hiện tại từng crate/lib
+│   ├── index.md                  <-   Tổng quan hệ thống + bản đồ luồng
+│   ├── core.md, ui-kit.md, theme.md, island.md
+│   ├── panel.md, switcher.md, screenshot.md, lock.md, greeter.md
+│   └── settings.md, preview.md, explore.md, launcher.md, installer.md
 ├── guides/                       <- Hướng dẫn sử dụng code tái sử dụng
 │   ├── island.md                 <-   Sử dụng & mở rộng Dynamic Island
-│   └── island-features.md        <-   Cấu trúc chuẩn của island feature
+│   ├── island-features.md        <-   Cấu trúc chuẩn của island feature
+│   └── island-internals.md       <-   Kiến trúc runtime & luồng chi tiết island
 └── design/                       <- Tài liệu thiết kế giao diện
     ├── README.md
     ├── visual-language.md, surfaces.md, color.md, typography.md,

@@ -39,7 +39,7 @@ Mọi dialog tuân theo bố cục:
 │  Nhóm nhập liệu (Entry / DropDown)     │
 │  ...                                   │
 │  ─────────────────────────────────────  │
-│  [🗑]               [Cancel] [Confirm] │   ← nút xóa chỉ ở dialog có dữ liệu
+│  [Delete]          [Cancel] [Confirm] │   ← nút xóa chỉ ở dialog có dữ liệu
 └───────────────────────────────────────┘     (WifiInfoDialog, VpnConfigDialog)
 ```
 

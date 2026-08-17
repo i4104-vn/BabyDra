@@ -52,6 +52,12 @@ Muốn **mở rộng** BabyDra? Đọc:
 - [Tạo theme & variant mới](./themes/index.md) — không cần sửa code.
 - [Mở rộng Dynamic Island](./guides/island.md) — đăng ký view/feature mới.
 - [Tạo island feature mới](./guides/island-features.md) — cấu trúc chuẩn.
+- [Island hoạt động như thế nào](./guides/island-internals.md) — kiến trúc runtime & luồng dữ liệu hiện tại.
+
+Muốn hiểu **luồng hoạt động hiện tại** của từng thành phần? Mở:
+
+- [Luồng hoạt động — tổng quan](./flows/index.md) — khởi động DE, daemon-client, bản đồ luồng theo crate/lib.
+- [Luồng từng crate/lib](./flows/index.md) — core, ui-kit, theme, island, panel, switcher, settings, explore...
 
 Cần **tra cứu API**? Mở:
 
@@ -72,7 +78,8 @@ docs/
 ├── setup/                 <- Cài đặt, build, chạy từng crate, xử lý lỗi
 ├── themes/                <- Theme packages & variants — hướng dẫn mở rộng
 ├── apis/                  <- API reference của từng thư viện (core, ui-kit, explore)
-├── guides/                <- Hướng dẫn sử dụng & mở rộng code tái sử dụng (island…)
+├── flows/                 <- Luồng hoạt động hiện tại của từng crate/lib (core, panel, island...)
+├── guides/                <- Hướng dẫn sử dụng & mở rộng code tái sử dụng (island, island-internals…)
 └── design/                <- Ngôn ngữ thiết kế giao diện (glassmorphism, tokens…)
 ```
 
@@ -84,7 +91,8 @@ docs/
 | `setup/` | Yêu cầu hệ thống, dependencies, build, chạy | Developer |
 | `themes/` | Tạo theme/variant mới | Người dùng thứ 3 |
 | `apis/` | API reference từng thư viện | Developer |
-| `guides/` | Hướng dẫn mở rộng code tái sử dụng (island…) | Developer |
+| `flows/` | Luồng hoạt động hiện tại từng crate/lib — ai gọi ai, khi nào | Developer |
+| `guides/` | Hướng dẫn sử dụng + mở rộng (island, island-features, island-internals…) | Developer |
 | `design/` | Thiết kế giao diện, tokens, motion | Designer + Developer |
 
 ---

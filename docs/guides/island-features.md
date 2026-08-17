@@ -42,10 +42,10 @@ features/<feature>/
 
 | File | Bắt buộc | Trách nhiệm | Ví dụ thật |
 | :--- | :--- | :--- | :--- |
-| `mod.rs` | ✅ | Struct feature, `new()`, `impl IslandFeature` (`tick`, `on_click`, `on_show`, `on_hide`, `init`, `attach`) | `media_player/mod.rs`, `notification/mod.rs` |
-| `view.rs` | ✅ | Widget struct + `build()` — chỉ dựng widget, không có logic dữ liệu | `media_player/view.rs` (`PlayerWidgets`) |
-| `render.rs` | ✅ | Hàm/method đẩy dữ liệu → widget; parse dữ liệu thô | `media_player/render.rs` (`update_player_view`) |
-| `service.rs` | ⚠️ Chỉ khi có | Service nền: thread polling, D-Bus listener, channel bridge | `notification/service.rs` |
+| `mod.rs` | Có | Struct feature, `new()`, `impl IslandFeature` (`tick`, `on_click`, `on_show`, `on_hide`, `init`, `attach`) | `media_player/mod.rs`, `notification/mod.rs` |
+| `view.rs` | Có | Widget struct + `build()` — chỉ dựng widget, không có logic dữ liệu | `media_player/view.rs` (`PlayerWidgets`) |
+| `render.rs` | Có | Hàm/method đẩy dữ liệu → widget; parse dữ liệu thô | `media_player/render.rs` (`update_player_view`) |
+| `service.rs` | Tùy chọn | Service nền: thread polling, D-Bus listener, channel bridge | `notification/service.rs` |
 
 ### 2.2. File helper riêng của feature
 

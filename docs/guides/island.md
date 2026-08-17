@@ -10,22 +10,23 @@
 ## Mục lục
 
 - [1. Tổng quan](#1-tổng-quan)
-- [2. Bắt đầu nhanh](#2-bắt-đầu-nhanh)
-- [3. Cách 1 — View descriptor + Handle](#3-cách-1--view-descriptor--handle)
-- [4. Cách 2 — Trait `IslandFeature`](#4-cách-2--trait-islandfeature)
-- [5. Điều khiển hiển thị](#5-điều-khiển-hiển-thị)
-- [6. Arbitration & Priority](#6-arbitration--priority)
-- [7. Ghi đè media player (override)](#7-ghi-đè-media-player-override)
-- [8. Truy cập toàn cục `default_island()`](#8-truy-cập-toàn-cục-default_island)
-- [9. Dựng island tùy chỉnh](#9-dựng-island-tùy-chỉnh)
-- [10. Vòng đời & lưu ý](#10-vòng-đời--lưu-ý)
-- [11. Quy tắc](#11-quy-tắc)
+- [2. Cách hoạt động & luồng](#2-cách-hoạt-động--luồng)
+- [3. Bắt đầu nhanh](#3-bắt-đầu-nhanh)
+- [4. Cách 1 — View descriptor + Handle](#4-cách-1--view-descriptor--handle)
+- [5. Cách 2 — Trait `IslandFeature`](#5-cách-2--trait-islandfeature)
+- [6. Điều khiển hiển thị](#6-điều-khiển-hiển-thị)
+- [7. Arbitration & Priority](#7-arbitration--priority)
+- [8. Ghi đè media player (override)](#8-ghi-đè-media-player-override)
+- [9. Truy cập toàn cục `default_island()`](#9-truy-cập-toàn-cục-default_island)
+- [10. Dựng island tùy chỉnh](#10-dựng-island-tùy-chỉnh)
+- [11. Vòng đời & lưu ý](#11-vòng-đời--lưu-ý)
+- [12. Quy tắc](#12-quy-tắc)
 
 ---
 
 ## 1. Tổng quan
 
-`babydra-island` là widget **Dynamic Island** — notch capsule trên thanh panel. Nó là một **view stack**: tại mỗi thời điểm chỉ có **một view** được hiển thị, chọn bởi controller loop theo **priority** (xem mục 6).
+`babydra-island` là widget **Dynamic Island** — notch capsule trên thanh panel. Nó là một **view stack**: tại mỗi thời điểm chỉ có **một view** được hiển thị, chọn bởi controller loop theo **priority** (xem mục 7).
 
 Hai cách thêm view:
 
@@ -38,11 +39,43 @@ Các feature mặc định đi kèm: `media_player` (playerctl + visualizer + po
 
 > [!NOTE]
 > Hướng dẫn tạo feature mới theo cấu trúc chuẩn (tách sub-folder) xem
-> [island-features.md](./island-features.md).
+> [island-features.md](./island-features.md). Muốn hiểu **luồng vận hành bên trong**
+> (controller loop, arbitration, transition, luồng dữ liệu từng feature) xem
+> [island-internals.md](./island-internals.md).
 
 ---
 
-## 2. Bắt đầu nhanh
+## 2. Cách hoạt động & luồng
+
+Island là một **view stack** điều khiển bởi một **controller loop** chạy mỗi
+`poll_interval_ms` (mặc định 150ms). Mỗi tick gồm 4 bước:
+
+```text
+1. Timer       → hết hạn show_for / override_show_for → rút yêu cầu / nhả override
+2. Feature tick → mọi feature cập nhật trạng thái + gọi handle.show()/hide()
+3. Arbitration → chọn view thắng (override > priority > gần đây nhất > thứ tự đăng ký)
+4. Transition  → nếu đổi view: on_hide(view cũ) → animate expand/collapse → on_show(view mới)
+```
+
+Tóm tắt luồng dữ liệu từng feature built-in:
+
+| Feature | Nguồn dữ liệu | Luồng |
+| :--- | :--- | :--- |
+| `media_player` | Thread poll `playerctl` mỗi 1s | raw line → channel → cache (main thread) → tick đọc cache → `show()/hide()` → render khi đang hiển thị → thread tải artwork → art receiver gán ảnh |
+| `notification` | D-Bus daemon `org.freedesktop.Notifications` | message → channel → main thread → `SHARED_NOTIFICATION` → tick đọc → `show()` 5s (kéo dài khi hover) → `hide()` khi hết hạn |
+| `default` (idle) | — | Hiện logo pill nhỏ khi không view nào thắng và `idle_visible = true` |
+
+> [!IMPORTANT]
+> Player giữ `requested` liên tục khi có player đang chạy → muốn overlay tạm thời
+> chiếm chỗ rồi tự trả lại player phải dùng `override_show_for()` (mục 9),
+> không thể dựa vào priority thường.
+
+Mô tả chi tiết từng bước (thành phần runtime, thuật toán arbitration, transition,
+toàn bộ luồng media player / notification): **[island-internals.md](./island-internals.md)**.
+
+---
+
+## 3. Bắt đầu nhanh
 
 ```toml
 # Cargo.toml
@@ -69,15 +102,15 @@ fn show_volume_overlay(percent: u8) {
 > [!IMPORTANT]
 > `default_island()` chỉ trả về `Some` sau khi `create_system_island()` /
 > `build_default_island()` chạy (panel khởi tạo). Nếu view chưa được đăng ký,
-> hãy đăng ký trước (mục 3) rồi dùng handle.
+> hãy đăng ký trước (mục 4) rồi dùng handle.
 
 ---
 
-## 3. Cách 1 — View descriptor + Handle
+## 4. Cách 1 — View descriptor + Handle
 
 Phù hợp cho overlay đơn giản: bạn dựng widget, mô tả view (priority, kích thước, callback), đăng ký và nhận handle để điều khiển.
 
-### 3.1. Tạo và đăng ký view
+### 4.1. Tạo và đăng ký view
 
 ```rust
 use babydra_island::{default_island, IslandView};
@@ -116,7 +149,7 @@ Các builder method của `IslandView`:
 > [!TIP]
 > `IslandView::with_builder("id", || widget)` trì hoãn việc dựng widget đến lúc đăng ký.
 
-### 3.2. Handle
+### 4.2. Handle
 
 `IslandViewHandle` rẻ để clone và **không khóa manager** — an toàn khi gọi từ callback/tick.
 
@@ -133,7 +166,7 @@ Các builder method của `IslandView`:
 
 ---
 
-## 4. Cách 2 — Trait `IslandFeature`
+## 5. Cách 2 — Trait `IslandFeature`
 
 Dành cho feature có trạng thái, tự quyết định khi nào hiển thị (media player, notification). Đăng ký bằng `island.register_feature(Box::new(my_feature))`.
 
@@ -164,7 +197,7 @@ impl IslandFeature for BatteryFeature {
     /// Chạy mỗi tick (~150ms) cho mọi feature đã đăng ký.
     fn tick(&mut self, ctx: &IslandCtx) {
         if let Some(info) = babydra_core::get_battery_info() {
-            let text = format!("🔋 {}%", info.percent);
+            let text = format!("Battery {}%", info.percent);
             self.label.set_text(&text);
             if let Some(h) = &self.handle {
                 h.show();               // giữ yêu cầu hiển thị khi có pin
@@ -204,7 +237,7 @@ Toàn bộ methods của trait:
 
 ---
 
-## 5. Điều khiển hiển thị
+## 6. Điều khiển hiển thị
 
 ```rust
 let island = default_island().unwrap();
@@ -221,7 +254,7 @@ h.show_for(Duration::from_secs(3));
 
 ---
 
-## 6. Arbitration & Priority
+## 7. Arbitration & Priority
 
 Mỗi poll interval (~150ms), controller loop:
 
@@ -243,7 +276,7 @@ Thứ tự priority mặc định:
 
 ---
 
-## 7. Ghi đè media player (override)
+## 8. Ghi đè media player (override)
 
 Media player gần như **luôn hiển thị** khi có player đang chạy. Để tạm thời thay thế nó
 (volume, brightness, clipboard, timer…) rồi **tự trả lại player**, dùng `override_show_for`:
@@ -274,7 +307,7 @@ Cơ chế:
 
 ---
 
-## 8. Truy cập toàn cục `default_island()`
+## 9. Truy cập toàn cục `default_island()`
 
 ```rust
 use babydra_island::default_island;
@@ -293,7 +326,7 @@ island.register_feature(Box::new(MyFeature::new()));
 
 ---
 
-## 9. Dựng island tùy chỉnh
+## 10. Dựng island tùy chỉnh
 
 ```rust
 use babydra_island::{Island, IslandConfig, IslandFeature};
@@ -347,7 +380,7 @@ API builder:
 
 ---
 
-## 10. Vòng đời & lưu ý
+## 11. Vòng đời & lưu ý
 
 - **Luồng GTK:** controller loop, tick, callback đều chạy trên main thread — handle
   an toàn gọi từ mọi callback.
@@ -360,7 +393,7 @@ API builder:
 
 ---
 
-## 11. Quy tắc
+## 12. Quy tắc
 
 | Quy tắc | Chi tiết |
 | :--- | :--- |
@@ -371,5 +404,6 @@ API builder:
 | DO NOT | Gọi `register_view`/`register_feature` từ trong tick/callback của feature |
 | DO NOT | Tạo nhiều island song song nếu không cần — dùng `default_island()` |
 
-Xem thêm: [island-features.md](./island-features.md) — cấu trúc chuẩn khi tạo feature mới,
+Xem thêm: [island-internals.md](./island-internals.md) — kiến trúc runtime & luồng hoạt động chi tiết,
+[island-features.md](./island-features.md) — cấu trúc chuẩn khi tạo feature mới,
 [structure](../structure/index.md) — cây thư mục đầy đủ của crate.
