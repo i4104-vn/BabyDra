@@ -1,46 +1,47 @@
-# Chương 06: Kits & API — Tổng hợp
+# Chương 06: UI Kit & API — Tổng hợp
 
 **Phiên bản:** 1.0.0
 **Cập nhật lần cuối:** 2026-08-17
-**Phạm vi:** Tổng quan 2 feature kits của BabyDra, cách dùng `prelude`, liên kết tới API reference chi tiết.
+**Phạm vi:** Tổng quan UI kit của BabyDra (`libs/babydra-ui-kit`), cách dùng `prelude`, liên kết tới API reference chi tiết.
 
 ---
 
-## 1. Kits là gì?
+## 1. Kit là gì?
 
 **Kit** (feature kit) là crate **tái sử dụng được** đóng gói một nhóm widget/feature
-theo domain — nằm trong `kits/`. Khác với `libs/` (logic thuần) và `crates/`
-(ứng dụng chạy độc lập), kit có thể được nhiều app dùng chung:
+theo domain — nằm trong `libs/`. Khác với `libs/` logic thuần (`babydra-core`,
+`babydra-theme`) và `crates/` (ứng dụng chạy độc lập), kit chứa **giao diện GTK
+dùng chung** và có thể được nhiều app dùng chung:
 
 | Kit | Domain | Mô tả |
 | :--- | :--- | :--- |
 | [`babydra-ui-kit`](./kit-apis/ui-kit.md) | Giao diện | Widget GTK4 dùng chung + theme/icon/animation/battery/window helpers |
-| [`babydra-explore-kit`](./kit-apis/explore-kit.md) | Explore | Dialog, context menu, drag & drop, file items, selection |
+| `babydra-ui-kit::components::explore` | Explore | Dialog, context menu, drag & drop, file items, selection — nằm trong cùng crate |
 
-Cả 2 kit đều expose 1 module **`prelude`** — import 1 dòng là dùng được toàn bộ API thông dụng.
+UI kit expose 2 module **`prelude`** — import 1 dòng là dùng được toàn bộ API thông dụng:
 
 ```rust
-use babydra_ui_kit::prelude::*;
-use babydra_explore_kit::prelude::*;
+use babydra_ui_kit::prelude::*;          // widget + UI helpers chung
+use babydra_ui_kit::components::explore::prelude::*; // feature API của Explore
 ```
 
 ---
 
-## 2. So sánh nhanh
+## 2. Cấu trúc module
 
-| Tiêu chí | `babydra-ui-kit` | `babydra-explore-kit` |
-| :--- | :--- | :--- |
-| Vị trí | `kits/babydra-ui-kit/` | `kits/babydra-explore-kit/` |
-| Module chính | `components`, `ui`, `prelude` | `explore`, `prelude` |
-| Phụ thuộc | `babydra-core`, `babydra-theme`, `gtk4` | `babydra-core`, `babydra-ui-kit`, `gtk4`, `trash` |
-| Phù hợp | Mọi app cần widget GTK4 BabyDra | App file manager / Explore |
-| Features | `default = ["full"]`, `minimal` | `default = ["full"]`, `minimal` |
+| Module | Nội dung |
+| :--- | :--- |
+| `components` | Widget builders: buttons, card, list_group, modal, placeholder, popovers, slider, switch, tooltips, wifi |
+| `ui` | Theme, icon, animation, battery, window helpers |
+| `components::explore` | Feature components cho file manager: context_menu, dialogs, drag, helpers, items, selection, widgets |
+| `prelude` | Re-export API thông dụng của `components` + `ui` |
+| `components::explore::prelude` | Re-export API feature của `components::explore` (tách riêng để tránh trùng tên như `create_list_row`) |
 
 ---
 
 ## 3. Các API chính (tóm tắt)
 
-### 3.1. `babydra-ui-kit` — nhóm API
+### 3.1. Widget & UI helpers (`prelude`)
 
 | Nhóm | API tiêu biểu |
 | :--- | :--- |
@@ -53,7 +54,7 @@ use babydra_explore_kit::prelude::*;
 | Battery | `get_battery_color_hex`, `draw_cairo_battery` |
 | Window | `init_layer_window`, `setup_click_outside_dismiss` |
 
-### 3.2. `babydra-explore-kit` — nhóm API
+### 3.2. Explore feature (`components::explore::prelude`)
 
 | Nhóm | API tiêu biểu |
 | :--- | :--- |
@@ -66,11 +67,11 @@ use babydra_explore_kit::prelude::*;
 
 ---
 
-## 4. Bắt đầu nhanh (ví dụ kết hợp 2 kit)
+## 4. Bắt đầu nhanh (ví dụ kết hợp 2 prelude)
 
 ```rust
 use babydra_ui_kit::prelude::*;
-use babydra_explore_kit::prelude::*;
+use babydra_ui_kit::components::explore::prelude::*;
 
 fn build_file_window() {
     init_theme();
@@ -78,7 +79,7 @@ fn build_file_window() {
     // Thanh công cụ từ ui-kit
     let fab = create_fab("plus");
 
-    // Click → dialog tạo thư mục từ explore-kit
+    // Click → dialog tạo thư mục từ explore feature
     let current = current_path.clone();
     fab.connect_clicked(move |_| {
         show_new_folder_dialog(current.clone(), nav_cb.clone(), None);
@@ -96,7 +97,7 @@ fn build_file_window() {
 | Tài liệu | Nội dung |
 | :--- | :--- |
 | [API `babydra-ui-kit`](./kit-apis/ui-kit.md) | Từng component, helper, signature, ví dụ |
-| [API `babydra-explore-kit`](./kit-apis/explore-kit.md) | Từng feature, helper, signature, ví dụ |
+| [API `babydra-ui-kit::components::explore`](./kit-apis/explore-kit.md) | Từng feature, helper, signature, ví dụ |
 | [Kiến trúc](./02-architecture.md) | Vai trò của libs/kits/crates trong luồng dữ liệu |
 | [Cấu trúc dự án](./03-project-structure.md) | Vị trí thư mục, quy chuẩn |
 | [Design components](./design/README.md) | Thiết kế giao diện của từng component |

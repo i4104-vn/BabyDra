@@ -1,23 +1,23 @@
-# API Reference — `babydra-explore-kit`
+# API Reference — `babydra_ui_kit::components::explore`
 
-**Crate:** `kits/babydra-explore-kit/`
-**Phạm vi:** Feature kit cho Explore — dialogs, context menu, drag & drop, file items, rubberband selection.
-**Dependency:** `babydra-core`, `babydra-ui-kit`, `gtk4`, `trash`.
+**Crate:** `libs/babydra-ui-kit/` (module `components/explore/`)
+**Phạm vi:** Feature components cho Explore — dialogs, context menu, drag & drop, file items, rubberband selection.
+**Dependency:** `babydra-core`, `gtk4`, `trash` (dùng chung deps của `babydra-ui-kit`).
 
 ---
 
 ## 1. Cách dùng nhanh
 
-Thêm vào `Cargo.toml`:
+`babydra-ui-kit` đã bao gồm module `components::explore` — chỉ cần khai báo 1 dependency:
 
 ```toml
-babydra-explore-kit = { workspace = true }
+babydra-ui-kit = { workspace = true }
 ```
 
-Import toàn bộ API qua `prelude`:
+Import toàn bộ API feature qua `prelude` riêng:
 
 ```rust
-use babydra_explore_kit::prelude::*;
+use babydra_ui_kit::components::explore::prelude::*;
 
 // Hiện menu ngữ cảnh cho file / thư mục / vùng trống
 show_for_file(&widget, x, y, target_paths, current_path, nav_cb, &window);
@@ -37,9 +37,9 @@ let target = create_dir_drop_target(dest_path);
 
 ---
 
-## 2. `prelude` — re-export toàn bộ API feature
+## 2. `components::explore::prelude` — re-export toàn bộ API feature
 
-`babydra_explore_kit::prelude::*` gộp mặt phẳng API của mọi module feature.
+`babydra_ui_kit::components::explore::prelude::*` gộp mặt phẳng API của mọi module feature.
 Các mục chính:
 
 | Nhóm | Mục |
@@ -52,6 +52,10 @@ Các mục chính:
 | **Items** | `create_grid_file_item`, `create_list_row` |
 | **Selection** | `wire_rubberband_grid`, `wire_rubberband_listbox` |
 | **Widgets** | `update_new_folder_button` |
+
+> [!NOTE]
+> `components::explore::prelude` tách riêng khỏi `prelude` gốc vì một số tên trùng (vd
+> `create_list_row`) — mỗi prelude giữ đúng không gian API của mình.
 
 ---
 
@@ -178,10 +182,10 @@ wire_rubberband_listbox(&list_box, ...);
 
 | Quy tắc | Chi tiết |
 | :--- | :--- |
-| DO | Import qua `prelude::*`; dùng module sâu khi cần (vd `dialogs::properties::helpers`) |
+| DO | Import qua `components::explore::prelude::*`; dùng module sâu khi cần (vd `components::explore::dialogs::properties::helpers`) |
 | DO | Dialog async phải chạy trong `glib::spawn_future_local` — xem `perform_decompress_async` |
-| DO | Thao tác file hệ thống đi qua `babydra-core` services; kit chỉ dựng UI + gọi |
-| DO NOT | Gọi trực tiếp `std::fs` xóa/nén trong render code — dùng helper của kit hoặc core |
+| DO | Thao tác file hệ thống đi qua `babydra-core` services; module chỉ dựng UI + gọi |
+| DO NOT | Gọi trực tiếp `std::fs` xóa/nén trong render code — dùng helper của module hoặc core |
 | DO NOT | Hardcode chuỗi UI — qua `babydra_core::i18n::t()` |
 
 Xem thêm: [tổng hợp API kits](../06-kits-api.md), [explore docs](../02-architecture.md).

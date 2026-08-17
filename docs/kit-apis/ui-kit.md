@@ -1,8 +1,8 @@
 # API Reference — `babydra-ui-kit`
 
-**Crate:** `kits/babydra-ui-kit/`
-**Phạm vi:** Widget GTK4 dùng chung + UI helpers (theme, icon, animation, battery, window).
-**Dependency:** `babydra-core`, `babydra-theme`, `gtk4`.
+**Crate:** `libs/babydra-ui-kit/`
+**Phạm vi:** Widget GTK4 dùng chung + UI helpers (theme, icon, animation, battery, window) + feature components `components/explore/`.
+**Dependency:** `babydra-core`, `babydra-theme`, `gtk4`, `trash`.
 
 ---
 
@@ -187,4 +187,5 @@ setup_click_outside_dismiss(&window, &content);
 | DO NOT | Tạo `GtkCssProvider` riêng trong app — màu/CSS đi qua theme package + `init_theme()` |
 | DO NOT | Viết CSS inline trong Rust |
 
-Xem thêm: [tổng hợp API kits](../06-kits-api.md), [components design](../design/README.md), [theming](../design/theming.md).
+Xem thêm: [tổng hợp API kits](../06-kits-api.md), [components design](../design/README.md), [theming](../design/theming.md),
+[API `explore`](./explore-kit.md).

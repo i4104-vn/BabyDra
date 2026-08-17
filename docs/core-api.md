@@ -91,7 +91,9 @@ Các struct: `BabyDraConfig`, `ExploreSettings`, `PowerConfig`, `NotificationCon
 | `set_avatar(&Path) -> CoreResult<()>` | Set avatar (base64) |
 | `get_avatar_bytes() -> Option<Vec<u8>>` | Bytes avatar |
 
-> PIXBUF helpers (`crop_to_circle_pixbuf`…) đã chuyển sang UI layer (Phase 1) — xem kits.
+> PIXBUF helpers (`crop_to_circle_pixbuf`, `crop_to_square_pixbuf`) nằm trong
+> `babydra-core` (dùng `gdk-pixbuf` trực tiếp, không phụ thuộc `gtk4`) — xem
+> [`services::wallpaper`](core-api.md#53-system-services).
 
 ### 5.3. System services
 | Module | API tiêu biểu |
