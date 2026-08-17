@@ -6,9 +6,10 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use babydra_core::models::{EditorState, Tool};
-use babydra_core::services::screenshot::{trigger_copy, trigger_save};
+use babydra_core::services::screenshot::trigger_save;
 
 use super::canvas::{draw_editor_canvas, setup_editor_gestures};
+use super::clipboard::copy_to_clipboard;
 use super::color_popover::create_color_popover;
 
 /// Sets up keyboard event controllers to handle global shortcuts like Escape (cancel),
@@ -25,7 +26,7 @@ fn setup_editor_keys(window: &gtk4::ApplicationWindow, state: Rc<RefCell<EditorS
             gtk4::glib::Propagation::Stop
         }
         gtk4::gdk::Key::Return => {
-            if trigger_copy(&state_key.borrow(), &win_key) {
+            if copy_to_clipboard(&state_key.borrow(), &win_key) {
                 win_key.close();
             }
             gtk4::glib::Propagation::Stop
@@ -219,7 +220,7 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
     let state_copy = state.clone();
     let win_copy = window.clone();
     btn_copy.connect_clicked(move |_| {
-        if trigger_copy(&state_copy.borrow(), &win_copy) {
+        if copy_to_clipboard(&state_copy.borrow(), &win_copy) {
             win_copy.close();
         }
     });

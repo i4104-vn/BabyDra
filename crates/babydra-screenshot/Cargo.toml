@@ -4,13 +4,13 @@ version.workspace = true
 edition = "2021"
 
 [dependencies]
-gtk4 = { version = "0.9", package = "gtk4" }
-gtk4-layer-shell = "0.4"
-cairo-rs = { version = "0.20", features = ["use_glib", "png"] }
-gdk-pixbuf = "0.20"
-glib = "0.20"
-gio = "0.20"
-dirs = "5.0"
-chrono = "0.4"
+gtk4 = { workspace = true }
+gtk4-layer-shell = { workspace = true }
+cairo-rs = { workspace = true }
+gdk-pixbuf = { workspace = true }
+glib = { workspace = true }
+gio = { workspace = true }
+dirs = { workspace = true }
+chrono = { workspace = true }
 babydra-core = { workspace = true }
 babydra-ui-kit = { workspace = true }
