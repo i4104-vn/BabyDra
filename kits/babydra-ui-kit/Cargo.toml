@@ -1,0 +1,28 @@
+[package]
+name = "babydra-ui-kit"
+version.workspace = true
+edition = "2021"
+
+# Optional component groups — a minimal build can exclude rarely-used
+# modules (planning.md §5.3).
+[features]
+default = ["full"]
+full = []
+minimal = []
+
+[dependencies]
+babydra-core = { workspace = true }
+babydra-theme = { workspace = true }
+gtk4 = { version = "0.9", features = ["v4_10"] }
+glib = "0.20"
+gio = "0.20"
+chrono = "0.4"
+tokio = { version = "1.0", features = ["fs", "rt", "process", "io-util"] }
+gtk4-layer-shell = "0.4.0"
+gdk-pixbuf = "0.20"
+gdk4 = "0.9"
+cairo-rs = { version = "0.20", features = ["use_glib", "png"] }
+kamadak-exif = "0.5"
+serde_json = "1.0.151"
+tracing = "0.1"
+
