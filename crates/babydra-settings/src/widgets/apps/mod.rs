@@ -1,17 +1,19 @@
 pub mod handler;
 pub mod render;
 
+use babydra_core::models::app_info::{InstalledApp, InstalledPackage};
 use gtk4::prelude::*;
 use gtk4::Widget;
-use babydra_common::models::app_info::{InstalledApp, InstalledPackage};
 
 pub struct AppsData {
     pub apps_data: Vec<InstalledApp>,
     pub pkgs: Vec<InstalledPackage>,
 }
 
+/// Creates a new `apps widget`.
 pub fn create_apps_widget() -> Widget {
-    // Build initial UI instantly (0ms main thread blocking!)
+    // Build the initial UI instantly (0ms main-thread blocking) so the window
+    // appears before background app scanning finishes.
     let (widget, auth_dialog, _action_items) = render::build(&[], &[]);
     let auth_dialog_rc = std::rc::Rc::new(auth_dialog);
     let pending_action = std::rc::Rc::new(std::cell::RefCell::new(None::<handler::PendingAction>));
@@ -25,7 +27,8 @@ pub fn create_apps_widget() -> Widget {
     // Offload desktop app scanning & pacman query to background thread
     let (tx, rx) = std::sync::mpsc::channel::<AppsData>();
     std::thread::spawn(move || {
-        let installed_apps = babydra_common::services::apps::discovery::scan_desktop_apps_from_filesystem();
+        let installed_apps =
+            babydra_core::services::apps::discovery::scan_desktop_apps_from_filesystem();
         let apps_data: Vec<InstalledApp> = installed_apps
             .into_iter()
             .map(|app| InstalledApp {
@@ -36,14 +39,13 @@ pub fn create_apps_widget() -> Widget {
             })
             .collect();
 
-        let pkgs = babydra_common::services::apps::pacman::get_installed_packages_list();
+        let pkgs = babydra_core::services::apps::pacman::get_installed_packages_list();
 
         let _ = tx.send(AppsData { apps_data, pkgs });
     });
 
     gtk4::glib::timeout_add_local(std::time::Duration::from_millis(100), move || {
         if let Ok(data) = rx.try_recv() {
-            // Clear placeholder lists
             while let Some(child) = apps_list_box.first_child() {
                 apps_list_box.remove(&child);
             }
@@ -51,7 +53,6 @@ pub fn create_apps_widget() -> Widget {
                 pkgs_list_box.remove(&child);
             }
 
-            // Build populated rows & wire action buttons
             let (new_w, _new_auth_dlg, action_items) = render::build(&data.apps_data, &data.pkgs);
             handler::wire_uninstall_items(&auth_dialog_rc, pending_action.clone(), action_items);
 

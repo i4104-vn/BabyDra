@@ -1,12 +1,13 @@
 pub mod render;
 
+use babydra_core::models::env_var::EnvVar;
+use gtk4::prelude::*;
+use gtk4::{Box, Entry, Widget};
 use std::fs;
 use std::io::{BufRead, BufReader, Write};
 use std::path::PathBuf;
-use gtk4::prelude::*;
-use gtk4::{Box, Entry, Widget};
-use babydra_common::models::env_var::EnvVar;
 
+/// Returns the current `labwc env path`.
 fn get_labwc_env_path() -> PathBuf {
     glib::home_dir()
         .join(".config")
@@ -14,6 +15,7 @@ fn get_labwc_env_path() -> PathBuf {
         .join("environment")
 }
 
+/// Load labwc env vars.
 fn load_labwc_env_vars() -> Vec<EnvVar> {
     let path = get_labwc_env_path();
     let mut result = Vec::new();
@@ -39,13 +41,17 @@ fn load_labwc_env_vars() -> Vec<EnvVar> {
     result
 }
 
+/// Save labwc env vars.
 fn save_labwc_env_vars(vars: &[EnvVar]) -> std::io::Result<()> {
     let path = get_labwc_env_path();
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
     }
     let mut file = fs::File::create(&path)?;
-    writeln!(file, "# Labwc Environment Variables managed by babydra-settings")?;
+    writeln!(
+        file,
+        "# Labwc Environment Variables managed by babydra-settings"
+    )?;
     for v in vars {
         let k = v.key.trim();
         if !k.is_empty() {
@@ -55,6 +61,7 @@ fn save_labwc_env_vars(vars: &[EnvVar]) -> std::io::Result<()> {
     Ok(())
 }
 
+/// Creates a new `env widget`.
 pub fn create_env_widget() -> Widget {
     // Read environment variables directly from ~/.config/labwc/environment
     let vars = load_labwc_env_vars();
@@ -63,7 +70,11 @@ pub fn create_env_widget() -> Widget {
 
     let parent_card = widget.list_box.clone();
     widget.add_btn.connect_clicked(move |_| {
-        let empty_var = EnvVar { id: 0, key: "".to_string(), value: "".to_string() };
+        let empty_var = EnvVar {
+            id: 0,
+            key: "".to_string(),
+            value: "".to_string(),
+        };
         let row = render::create_env_row(&empty_var, parent_card.clone());
         parent_card.append(&row);
     });
@@ -91,7 +102,11 @@ pub fn create_env_widget() -> Widget {
                     sub_child = sc.next_sibling();
                 }
                 if !key.trim().is_empty() {
-                    save_list.push(EnvVar { id, key: key.clone(), value: val.clone() });
+                    save_list.push(EnvVar {
+                        id,
+                        key: key.clone(),
+                        value: val.clone(),
+                    });
                     id += 1;
                 }
             }

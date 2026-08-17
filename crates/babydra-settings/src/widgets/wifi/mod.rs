@@ -1,9 +1,9 @@
 //! Wi-Fi configurations control panel.
 
+use babydra_core::models::wifi::WifiNetwork;
+use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
-use babydra_common::models::wifi::WifiNetwork;
-use gtk4::prelude::*;
 
 mod handler;
 mod render;
@@ -15,8 +15,10 @@ pub struct WifiState {
     pub connecting_ssid: Option<String>,
 }
 
+/// Creates a new `wifi widget`.
 pub fn create_wifi_widget() -> gtk4::Widget {
-    let (overlay, toggle_row, list_box, info_dialog, password_dialog, config_dialog) = render::build_wifi_ui();
+    let (overlay, toggle_row, list_box, info_dialog, password_dialog, config_dialog) =
+        render::build_wifi_ui();
 
     let info_dialog = Rc::new(info_dialog);
     let password_dialog = Rc::new(password_dialog);
@@ -32,14 +34,15 @@ pub fn create_wifi_widget() -> gtk4::Widget {
     // Async fetch initial Wi-Fi switch status off main thread
     let (tx_status, rx_status) = std::sync::mpsc::channel::<bool>();
     std::thread::spawn(move || {
-        let status = babydra_common::services::system::wifi::get_wifi_state().0;
+        let status = babydra_core::services::system::wifi::get_wifi_state().0;
         let _ = tx_status.send(status);
     });
 
     let toggle_row_c = toggle_row.clone();
     let state_c_init = state.clone();
-    glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
-        match rx_status.try_recv() {
+    glib::timeout_add_local(
+        std::time::Duration::from_millis(50),
+        move || match rx_status.try_recv() {
             Ok(status) => {
                 toggle_row_c.switch.set_active(status);
                 toggle_row_c.set_active(status);
@@ -48,10 +51,11 @@ pub fn create_wifi_widget() -> gtk4::Widget {
             }
             Err(std::sync::mpsc::TryRecvError::Empty) => glib::ControlFlow::Continue,
             Err(std::sync::mpsc::TryRecvError::Disconnected) => glib::ControlFlow::Break,
-        }
-    });
+        },
+    );
 
-    let (tx_connect_req, rx_connect_req) = std::sync::mpsc::channel::<(String, Option<String>, Option<String>)>();
+    let (tx_connect_req, rx_connect_req) =
+        std::sync::mpsc::channel::<(String, Option<String>, Option<String>)>();
     let (tx_connect, rx_connect) = std::sync::mpsc::channel::<()>();
 
     let render_networks: Rc<dyn Fn()> = Rc::new({
@@ -84,10 +88,14 @@ pub fn create_wifi_widget() -> gtk4::Widget {
             }
             state_req.borrow_mut().connecting_ssid = Some(ssid.clone());
             render_req();
-            
+
             let tx_done = tx_done_c.clone();
             std::thread::spawn(move || {
-                let _ = babydra_common::services::system::wifi::connect_wifi(&ssid, user.as_deref(), pwd.as_deref());
+                let _ = babydra_core::services::system::wifi::connect_wifi(
+                    &ssid,
+                    user.as_deref(),
+                    pwd.as_deref(),
+                );
                 let _ = tx_done.send(());
             });
         }
@@ -114,7 +122,7 @@ pub fn create_wifi_widget() -> gtk4::Widget {
         let (tx, rx) = std::sync::mpsc::channel();
         let ssid_clone = ssid.clone();
         std::thread::spawn(move || {
-            let config = babydra_common::services::system::wifi::get_wifi_config(&ssid_clone);
+            let config = babydra_core::services::system::wifi::get_wifi_config(&ssid_clone);
             let _ = tx.send(config);
         });
         glib::timeout_add_local(std::time::Duration::from_millis(30), move || {
@@ -130,7 +138,7 @@ pub fn create_wifi_widget() -> gtk4::Widget {
     // Wire Config Dialog save button click
     config_dialog.connect_save(move |ssid, config| {
         std::thread::spawn(move || {
-            let _ = babydra_common::services::system::wifi::set_wifi_config(&ssid, &config);
+            let _ = babydra_core::services::system::wifi::set_wifi_config(&ssid, &config);
         });
     });
 
@@ -161,7 +169,7 @@ pub fn create_wifi_widget() -> gtk4::Widget {
                 }
                 let tx_sub = tx_c.clone();
                 std::thread::spawn(move || {
-                    let nets = babydra_common::services::system::wifi::scan_networks();
+                    let nets = babydra_core::services::system::wifi::scan_networks();
                     let _ = tx_sub.send(nets);
                 });
             }
@@ -175,7 +183,7 @@ pub fn create_wifi_widget() -> gtk4::Widget {
         let ssid = info_dlg_forget.ssid_lbl.text().to_string();
         let trigger_scan_c = trigger_forget.clone();
         std::thread::spawn(move || {
-            babydra_common::services::system::wifi::forget_wifi(&ssid);
+            babydra_core::services::system::wifi::forget_wifi(&ssid);
         });
         glib::timeout_add_local(std::time::Duration::from_millis(300), move || {
             trigger_scan_c();
@@ -217,7 +225,6 @@ pub fn create_wifi_widget() -> gtk4::Widget {
         trigger_map();
     });
 
-    // Trigger initial scan
     let trigger_init = trigger_wifi_scan.clone();
     glib::timeout_add_local(std::time::Duration::from_millis(200), move || {
         trigger_init();
@@ -247,7 +254,7 @@ pub fn create_wifi_widget() -> gtk4::Widget {
             }
         }
         std::thread::spawn(move || {
-            babydra_common::services::system::wifi::set_wifi_enabled(is_active_bool);
+            babydra_core::services::system::wifi::set_wifi_enabled(is_active_bool);
         });
         if is_active_bool {
             trigger_switch();

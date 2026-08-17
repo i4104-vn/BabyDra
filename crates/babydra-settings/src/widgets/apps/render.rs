@@ -1,9 +1,12 @@
 //! Application Manager UI layout generator matching reference design Image 5.
 
+use babydra_core::models::app_info::{AppsWidget, InstalledApp, InstalledPackage};
+use babydra_ui_kit::components::modal::PasswordDialog;
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Entry, Label, ListBox, Orientation, Overlay, ProgressBar, ScrolledWindow, Stack, TextView};
-use babydra_common::models::app_info::{AppsWidget, InstalledApp, InstalledPackage};
-use babydra_utils::components::modal::PasswordDialog;
+use gtk4::{
+    Box, Button, Entry, Label, ListBox, Orientation, Overlay, ProgressBar, ScrolledWindow, Stack,
+    TextView,
+};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum AppActionType {
@@ -20,7 +23,11 @@ pub struct AppRowActionItem {
     pub parent_list: ListBox,
 }
 
-pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, PasswordDialog, Vec<AppRowActionItem>) {
+/// Build.
+pub fn build(
+    apps: &[InstalledApp],
+    pkgs: &[InstalledPackage],
+) -> (AppsWidget, PasswordDialog, Vec<AppRowActionItem>) {
     let root = Overlay::new();
 
     let container = Box::new(Orientation::Vertical, 16);
@@ -31,13 +38,15 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
     let header_box = Box::new(Orientation::Horizontal, 12);
     header_box.set_margin_bottom(4);
 
-    let title_label = Label::new(Some(&babydra_common::i18n::t("settings.apps_title")));
+    let title_label = Label::new(Some(&babydra_core::i18n::t("settings.apps_title")));
     title_label.add_css_class("settings-page-title");
     title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);
 
     let search_entry = Entry::new();
-    search_entry.set_placeholder_text(Some(&babydra_common::i18n::t("settings.apps_search_placeholder")));
+    search_entry.set_placeholder_text(Some(&babydra_core::i18n::t(
+        "settings.apps_search_placeholder",
+    )));
     search_entry.add_css_class("sidebar-search-entry");
     search_entry.set_width_request(220);
 
@@ -45,7 +54,7 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
     refresh_btn.add_css_class("icon-btn");
     refresh_btn.add_css_class("circular");
     refresh_btn.set_cursor_from_name(Some("pointer"));
-    let refresh_icon = babydra_utils::ui::icon::get_icon("refresh", 16);
+    let refresh_icon = babydra_ui_kit::ui::icon::get_icon("refresh", 16);
     refresh_icon.set_pixel_size(16);
     refresh_btn.set_child(Some(&refresh_icon));
     refresh_btn.set_tooltip_text(Some("Refresh application list"));
@@ -57,12 +66,12 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
 
     // Tabs Bar Row
     let tabs_box = Box::new(Orientation::Horizontal, 12);
-    let tab_apps_btn = Button::with_label(&babydra_common::i18n::t("settings.apps_tab_apps"));
+    let tab_apps_btn = Button::with_label(&babydra_core::i18n::t("settings.apps_tab_apps"));
     tab_apps_btn.add_css_class("app-tab-btn");
     tab_apps_btn.add_css_class("active");
     tab_apps_btn.set_cursor_from_name(Some("pointer"));
 
-    let tab_packages_btn = Button::with_label(&babydra_common::i18n::t("settings.apps_tab_packages"));
+    let tab_packages_btn = Button::with_label(&babydra_core::i18n::t("settings.apps_tab_packages"));
     tab_packages_btn.add_css_class("app-tab-btn");
     tab_packages_btn.set_cursor_from_name(Some("pointer"));
 
@@ -106,8 +115,15 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
         icon_box.set_valign(gtk4::Align::Center);
         icon_box.set_halign(gtk4::Align::Start);
 
-        let icon_name = app.icon.as_deref().filter(|s| !s.is_empty()).unwrap_or("application-x-executable");
-        let icon_img = babydra_utils::ui::icon::get_system_or_file_icon(icon_name, "application-x-executable");
+        let icon_name = app
+            .icon
+            .as_deref()
+            .filter(|s| !s.is_empty())
+            .unwrap_or("application-x-executable");
+        let icon_img = babydra_ui_kit::ui::icon::get_system_or_file_icon(
+            icon_name,
+            "application-x-executable",
+        );
         icon_img.set_pixel_size(18);
         icon_img.set_valign(gtk4::Align::Center);
         icon_img.set_halign(gtk4::Align::Center);
@@ -134,7 +150,7 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
 
         let pkg_name = app.name.to_lowercase().replace(' ', "-");
 
-        if babydra_common::services::apps::pacman::find_cached_older_package(&pkg_name).is_some() {
+        if babydra_core::services::apps::pacman::find_cached_older_package(&pkg_name).is_some() {
             let downgrade_btn = Button::new();
             downgrade_btn.add_css_class("icon-btn");
             downgrade_btn.add_css_class("circular");
@@ -143,7 +159,7 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
             downgrade_btn.set_cursor_from_name(Some("pointer"));
             downgrade_btn.set_tooltip_text(Some("Downgrade package version"));
 
-            let dl_icon = babydra_utils::ui::icon::get_icon("folder-download", 16);
+            let dl_icon = babydra_ui_kit::ui::icon::get_icon("folder-download", 16);
             dl_icon.set_pixel_size(16);
             downgrade_btn.set_child(Some(&dl_icon));
 
@@ -167,7 +183,7 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
         uninstall_btn.set_cursor_from_name(Some("pointer"));
         uninstall_btn.set_tooltip_text(Some("Uninstall package"));
 
-        let x_icon = babydra_utils::ui::icon::get_icon("edit-delete", 16);
+        let x_icon = babydra_ui_kit::ui::icon::get_icon("edit-delete", 16);
         x_icon.set_pixel_size(16);
         uninstall_btn.set_child(Some(&x_icon));
 
@@ -214,7 +230,10 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
         icon_box.set_valign(gtk4::Align::Center);
         icon_box.set_halign(gtk4::Align::Start);
 
-        let icon_img = babydra_utils::ui::icon::get_system_or_file_icon(&pkg.name, "application-x-executable");
+        let icon_img = babydra_ui_kit::ui::icon::get_system_or_file_icon(
+            &pkg.name,
+            "application-x-executable",
+        );
         icon_img.set_pixel_size(18);
         icon_img.set_valign(gtk4::Align::Center);
         icon_img.set_halign(gtk4::Align::Center);
@@ -239,7 +258,7 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
 
         row_box.append(&text_box);
 
-        if babydra_common::services::apps::pacman::find_cached_older_package(&pkg.name).is_some() {
+        if babydra_core::services::apps::pacman::find_cached_older_package(&pkg.name).is_some() {
             let downgrade_btn = Button::new();
             downgrade_btn.add_css_class("icon-btn");
             downgrade_btn.add_css_class("circular");
@@ -248,7 +267,7 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
             downgrade_btn.set_cursor_from_name(Some("pointer"));
             downgrade_btn.set_tooltip_text(Some("Downgrade package version"));
 
-            let dl_icon = babydra_utils::ui::icon::get_icon("folder-download", 16);
+            let dl_icon = babydra_ui_kit::ui::icon::get_icon("folder-download", 16);
             dl_icon.set_pixel_size(16);
             downgrade_btn.set_child(Some(&dl_icon));
 
@@ -272,7 +291,7 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
         uninstall_btn.set_cursor_from_name(Some("pointer"));
         uninstall_btn.set_tooltip_text(Some("Uninstall package"));
 
-        let x_icon = babydra_utils::ui::icon::get_icon("edit-delete", 16);
+        let x_icon = babydra_ui_kit::ui::icon::get_icon("edit-delete", 16);
         x_icon.set_pixel_size(16);
         uninstall_btn.set_child(Some(&x_icon));
 
@@ -304,11 +323,13 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
     let console_header = Box::new(Orientation::Horizontal, 10);
     console_header.set_hexpand(true);
 
-    let console_icon = babydra_utils::ui::icon::get_icon("terminal", 18);
+    let console_icon = babydra_ui_kit::ui::icon::get_icon("terminal", 18);
     console_icon.set_pixel_size(18);
     console_header.append(&console_icon);
 
-    let console_title_lbl = Label::new(Some(&babydra_common::i18n::t("settings.apps_uninstall_log_title")));
+    let console_title_lbl = Label::new(Some(&babydra_core::i18n::t(
+        "settings.apps_uninstall_log_title",
+    )));
     console_title_lbl.add_css_class("settings-row-title");
     console_title_lbl.set_hexpand(true);
     console_title_lbl.set_halign(gtk4::Align::Start);
@@ -341,7 +362,7 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
     let actions_box = Box::new(Orientation::Horizontal, 8);
     actions_box.set_halign(gtk4::Align::End);
 
-    let console_close_btn = Button::with_label(&babydra_common::i18n::t("explore.settings_close"));
+    let console_close_btn = Button::with_label(&babydra_core::i18n::t("explore.settings_close"));
     console_close_btn.add_css_class("connect-pill-btn");
     console_close_btn.set_cursor_from_name(Some("pointer"));
     actions_box.append(&console_close_btn);
@@ -351,7 +372,10 @@ pub fn build(apps: &[InstalledApp], pkgs: &[InstalledPackage]) -> (AppsWidget, P
     root.set_child(Some(&container));
 
     // Reusable Password Dialog & Console Log Dialog Overlays
-    let auth_dialog = PasswordDialog::new("Uninstall Authentication", "Enter sudo password to confirm package removal:");
+    let auth_dialog = PasswordDialog::new(
+        "Uninstall Authentication",
+        "Enter sudo password to confirm package removal:",
+    );
     root.add_overlay(&auth_dialog.container);
     root.add_overlay(&console_card);
 

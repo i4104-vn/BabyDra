@@ -1,7 +1,8 @@
+use babydra_core::models::certificates::CertificatesWidget;
+use babydra_ui_kit::components::modal::PasswordDialog;
 use gtk4::prelude::*;
-use babydra_common::models::certificates::CertificatesWidget;
-use babydra_utils::components::modal::PasswordDialog;
 
+/// Builds the `certificates ui` UI.
 pub fn build_certificates_ui() -> (CertificatesWidget, PasswordDialog) {
     let root = gtk4::Overlay::new();
     root.set_vexpand(true);
@@ -13,13 +14,13 @@ pub fn build_certificates_ui() -> (CertificatesWidget, PasswordDialog) {
 
     // ── Header Row ──────────────────────────────────────────────
     let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    
+
     let title_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-    let title_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.cert_title")));
+    let title_lbl = gtk4::Label::new(Some(&babydra_core::i18n::t("settings.cert_title")));
     title_lbl.add_css_class("settings-page-title");
     title_lbl.set_halign(gtk4::Align::Start);
 
-    let desc_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.cert_subtitle")));
+    let desc_lbl = gtk4::Label::new(Some(&babydra_core::i18n::t("settings.cert_subtitle")));
     desc_lbl.add_css_class("settings-row-desc");
     desc_lbl.set_halign(gtk4::Align::Start);
 
@@ -28,8 +29,7 @@ pub fn build_certificates_ui() -> (CertificatesWidget, PasswordDialog) {
     title_box.set_hexpand(true);
     header_box.append(&title_box);
 
-    // Add Certificate Button
-    let add_btn = gtk4::Button::with_label(&babydra_common::i18n::t("settings.cert_add_btn"));
+    let add_btn = gtk4::Button::with_label(&babydra_core::i18n::t("settings.cert_add_btn"));
     add_btn.add_css_class("connect-pill-btn");
     add_btn.set_valign(gtk4::Align::Center);
     add_btn.set_cursor_from_name(Some("pointer"));
@@ -55,7 +55,10 @@ pub fn build_certificates_ui() -> (CertificatesWidget, PasswordDialog) {
     root.set_child(Some(&container));
 
     // Password Dialog Modal Overlay
-    let auth_dialog = PasswordDialog::new("Authentication Required", "Enter sudo password for CA certificate management:");
+    let auth_dialog = PasswordDialog::new(
+        "Authentication Required",
+        "Enter sudo password for CA certificate management:",
+    );
     root.add_overlay(&auth_dialog.container);
 
     let widget = CertificatesWidget {

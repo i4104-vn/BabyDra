@@ -1,7 +1,8 @@
+use babydra_core::models::env_var::{EnvVar, EnvWidget};
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Entry, Label, Orientation};
-use babydra_common::models::env_var::{EnvVar, EnvWidget};
 
+/// Build.
 pub fn build(vars: &[EnvVar]) -> EnvWidget {
     let container = Box::new(Orientation::Vertical, 16);
     container.set_vexpand(true);
@@ -13,21 +14,21 @@ pub fn build(vars: &[EnvVar]) -> EnvWidget {
     title_box.set_hexpand(true);
     title_box.set_halign(gtk4::Align::Start);
 
-    let title_label = Label::new(Some(&babydra_common::i18n::t("settings.env_title")));
+    let title_label = Label::new(Some(&babydra_core::i18n::t("settings.env_title")));
     title_label.add_css_class("settings-page-title");
     title_label.set_halign(gtk4::Align::Start);
 
-    let subtitle_label = Label::new(Some(&babydra_common::i18n::t("settings.env_subtitle")));
+    let subtitle_label = Label::new(Some(&babydra_core::i18n::t("settings.env_subtitle")));
     subtitle_label.add_css_class("settings-page-subtitle");
     subtitle_label.set_halign(gtk4::Align::Start);
 
     title_box.append(&title_label);
     title_box.append(&subtitle_label);
 
-    let add_btn = Button::with_label(&babydra_common::i18n::t("settings.startup_add_new"));
+    let add_btn = Button::with_label(&babydra_core::i18n::t("settings.startup_add_new"));
     add_btn.add_css_class("connect-pill-btn");
 
-    let save_btn = Button::with_label(&babydra_common::i18n::t("settings.save_changes"));
+    let save_btn = Button::with_label(&babydra_core::i18n::t("settings.save_changes"));
     save_btn.add_css_class("suggested-action");
 
     header_box.append(&title_box);
@@ -64,6 +65,7 @@ pub fn build(vars: &[EnvVar]) -> EnvWidget {
     }
 }
 
+/// Creates a new `env row`.
 pub fn create_env_row(v: &EnvVar, parent: Box) -> Box {
     let row = Box::new(Orientation::Horizontal, 12);
     row.add_css_class("settings-card-row");
@@ -91,7 +93,7 @@ pub fn create_env_row(v: &EnvVar, parent: Box) -> Box {
     delete_btn.add_css_class("circular");
     delete_btn.add_css_class("delete-btn");
     delete_btn.set_valign(gtk4::Align::Center);
-    let del_icon = babydra_utils::ui::icon::get_icon("edit-delete", 16);
+    let del_icon = babydra_ui_kit::ui::icon::get_icon("edit-delete", 16);
     del_icon.set_pixel_size(16);
     delete_btn.set_child(Some(&del_icon));
 

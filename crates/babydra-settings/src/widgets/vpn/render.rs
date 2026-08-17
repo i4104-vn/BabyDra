@@ -1,16 +1,24 @@
 //! VPN UI layout generator synchronized with Wi-Fi layout & FAB button.
 
+use babydra_ui_kit::components::modal::{VpnConfigDialog, VpnLogDialog};
 use gtk4::prelude::*;
-use babydra_utils::components::modal::{VpnConfigDialog, VpnLogDialog};
 
-pub fn build_vpn_ui() -> (gtk4::Box, gtk4::Button, gtk4::Button, gtk4::ListBox, VpnConfigDialog, VpnLogDialog) {
+/// Builds the `VPN ui` UI.
+pub fn build_vpn_ui() -> (
+    gtk4::Box,
+    gtk4::Button,
+    gtk4::Button,
+    gtk4::ListBox,
+    VpnConfigDialog,
+    VpnLogDialog,
+) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 20);
 
     // Header Row (VPN Title, Add Custom Button)
     let header_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
     header_row.set_margin_bottom(4);
 
-    let title_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.vpn_title")));
+    let title_lbl = gtk4::Label::new(Some(&babydra_core::i18n::t("settings.vpn_title")));
     title_lbl.add_css_class("settings-page-title");
     title_lbl.set_halign(gtk4::Align::Start);
     header_row.append(&title_lbl);
@@ -19,7 +27,8 @@ pub fn build_vpn_ui() -> (gtk4::Box, gtk4::Button, gtk4::Button, gtk4::ListBox, 
     spacer.set_hexpand(true);
     header_row.append(&spacer);
 
-    let add_custom_btn = gtk4::Button::with_label(&babydra_common::i18n::t("settings.vpn_add_profile"));
+    let add_custom_btn =
+        gtk4::Button::with_label(&babydra_core::i18n::t("settings.vpn_add_profile"));
     add_custom_btn.add_css_class("connect-pill-btn");
     add_custom_btn.set_cursor_from_name(Some("pointer"));
     add_custom_btn.set_valign(gtk4::Align::Center);
@@ -48,8 +57,8 @@ pub fn build_vpn_ui() -> (gtk4::Box, gtk4::Button, gtk4::Button, gtk4::ListBox, 
     overlay.set_child(Some(&scroll));
 
     // Floating Action Button Component (import_btn)
-    let import_btn = babydra_utils::components::create_fab("plus");
-    import_btn.set_tooltip_text(Some(&babydra_common::i18n::t("settings.vpn_add_tooltip")));
+    let import_btn = babydra_ui_kit::components::create_fab("plus");
+    import_btn.set_tooltip_text(Some(&babydra_core::i18n::t("settings.vpn_add_tooltip")));
     import_btn.set_margin_end(24);
     import_btn.set_margin_bottom(24);
 
@@ -64,5 +73,12 @@ pub fn build_vpn_ui() -> (gtk4::Box, gtk4::Button, gtk4::Button, gtk4::ListBox, 
 
     main_box.append(&overlay);
 
-    (main_box, import_btn, add_custom_btn, list_box, config_dialog, log_dialog)
+    (
+        main_box,
+        import_btn,
+        add_custom_btn,
+        list_box,
+        config_dialog,
+        log_dialog,
+    )
 }

@@ -1,7 +1,8 @@
+use babydra_core::models::startup_command::{StartupCommand, StartupWidget};
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Entry, Label, Orientation};
-use babydra_common::models::startup_command::{StartupCommand, StartupWidget};
 
+/// Build.
 pub fn build(commands: &[StartupCommand]) -> StartupWidget {
     let container = Box::new(Orientation::Vertical, 16);
     container.set_vexpand(true);
@@ -9,15 +10,15 @@ pub fn build(commands: &[StartupCommand]) -> StartupWidget {
 
     // Header
     let header_box = Box::new(Orientation::Horizontal, 12);
-    let title_label = Label::new(Some(&babydra_common::i18n::t("settings.startup_title")));
+    let title_label = Label::new(Some(&babydra_core::i18n::t("settings.startup_title")));
     title_label.add_css_class("settings-page-title");
     title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);
 
-    let add_btn = Button::with_label(&babydra_common::i18n::t("settings.startup_add_new"));
+    let add_btn = Button::with_label(&babydra_core::i18n::t("settings.startup_add_new"));
     add_btn.add_css_class("connect-pill-btn");
 
-    let save_btn = Button::with_label(&babydra_common::i18n::t("settings.save_changes"));
+    let save_btn = Button::with_label(&babydra_core::i18n::t("settings.save_changes"));
     save_btn.add_css_class("suggested-action");
 
     header_box.append(&title_label);
@@ -49,7 +50,7 @@ pub fn build(commands: &[StartupCommand]) -> StartupWidget {
         delete_btn.add_css_class("circular");
         delete_btn.add_css_class("delete-btn");
         delete_btn.set_valign(gtk4::Align::Center);
-        let del_icon = babydra_utils::ui::icon::get_icon("edit-delete", 16);
+        let del_icon = babydra_ui_kit::ui::icon::get_icon("edit-delete", 16);
         del_icon.set_pixel_size(16);
         delete_btn.set_child(Some(&del_icon));
 

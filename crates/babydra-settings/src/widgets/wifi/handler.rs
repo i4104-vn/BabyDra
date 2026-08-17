@@ -1,9 +1,10 @@
 use super::WifiState;
-use babydra_common::i18n::t;
-use babydra_utils::components::modal::{WifiConfigDialog, WifiInfoDialog, WifiPasswordDialog};
+use babydra_core::i18n::t;
+use babydra_ui_kit::components::modal::{WifiConfigDialog, WifiInfoDialog, WifiPasswordDialog};
 use gtk4::prelude::*;
 use std::rc::Rc;
 
+/// Renders `network list`.
 pub fn render_network_list(
     container: &gtk4::Box,
     st: &WifiState,
@@ -91,7 +92,7 @@ pub fn render_network_list(
                 _ => "",
             };
 
-            let header_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t(title_key)));
+            let header_lbl = gtk4::Label::new(Some(&babydra_core::i18n::t(title_key)));
             header_lbl.add_css_class("settings-row-desc");
             header_lbl.set_halign(gtk4::Align::Start);
             header_lbl.set_margin_start(12);
@@ -121,7 +122,7 @@ pub fn render_network_list(
         icon_badge.set_halign(gtk4::Align::Start);
         icon_badge.set_hexpand(false);
 
-        let wifi_icon = babydra_utils::components::create_wifi_signal_icon_for_network(
+        let wifi_icon = babydra_ui_kit::components::create_wifi_signal_icon_for_network(
             net.signal as u32,
             net.is_connected,
             18,
@@ -144,7 +145,7 @@ pub fn render_network_list(
         name_box.append(&ssid_lbl);
 
         if net.security != "open" {
-            let lock_icon = babydra_utils::ui::icon::get_icon("lock", 12);
+            let lock_icon = babydra_ui_kit::ui::icon::get_icon("lock", 12);
             lock_icon.set_pixel_size(12);
             lock_icon.add_css_class("settings-row-desc");
             lock_icon.set_valign(gtk4::Align::Center);
@@ -206,11 +207,11 @@ pub fn render_network_list(
             spinner.set_valign(gtk4::Align::Center);
             hbox.append(&spinner);
         } else if net.is_connected {
-            let check_icon = babydra_utils::ui::icon::get_icon("check", 18);
+            let check_icon = babydra_ui_kit::ui::icon::get_icon("check", 18);
             check_icon.set_pixel_size(18);
             check_icon.set_valign(gtk4::Align::Center);
             check_icon.add_css_class("connected-text");
-            check_icon.set_tooltip_text(Some(&babydra_common::i18n::t("settings.wifi_connected")));
+            check_icon.set_tooltip_text(Some(&babydra_core::i18n::t("settings.wifi_connected")));
             hbox.append(&check_icon);
         }
 
@@ -218,12 +219,11 @@ pub fn render_network_list(
         info_btn.add_css_class("icon-btn");
         info_btn.set_valign(gtk4::Align::Center);
 
-        let info_icon = babydra_utils::ui::icon::get_icon("info", 16);
+        let info_icon = babydra_ui_kit::ui::icon::get_icon("info", 16);
         info_icon.set_pixel_size(16);
         info_btn.set_child(Some(&info_icon));
         hbox.append(&info_btn);
 
-        // Connect info button
         let net_info = net.clone();
         let info_dlg_c = info_dialog.clone();
         info_btn.connect_clicked(move |_| {
@@ -232,7 +232,7 @@ pub fn render_network_list(
             let info_dlg_inner = info_dlg_c.clone();
             let (tx, rx) = std::sync::mpsc::channel();
             std::thread::spawn(move || {
-                let config = babydra_common::services::system::wifi::get_wifi_config(&ssid);
+                let config = babydra_core::services::system::wifi::get_wifi_config(&ssid);
                 let _ = tx.send(config);
             });
             glib::timeout_add_local(std::time::Duration::from_millis(30), move || {

@@ -1,15 +1,15 @@
 //! Native Arch Linux settings manager built with GTK4 + Rust.
 
-use gtk4::prelude::*;
-use babydra_common::{
-    PerformanceProfile, get_current_profile, set_performance_profile,
-    get_battery_info, load_babydra_config, save_babydra_config,
-    battery::check_and_apply_auto_battery_saver,
+use babydra_core::{
+    battery::check_and_apply_auto_battery_saver, get_battery_info, get_current_profile,
+    load_babydra_config, save_babydra_config, set_performance_profile, PerformanceProfile,
 };
+use gtk4::prelude::*;
 
 mod layout;
 mod widgets;
 
+/// Handle cli args.
 fn handle_cli_args() -> bool {
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 2 {
@@ -27,10 +27,13 @@ fn handle_cli_args() -> bool {
                         updated_conf.power.profile = PerformanceProfile::Normal.key().to_string();
                         save_babydra_config(&updated_conf);
 
-                        let bat_pct = get_battery_info().map(|b| b.percentage).unwrap_or(conf.power.saver_threshold);
-                        let title = babydra_common::i18n::t("settings.notif_auto_saver_title");
-                        let msg = babydra_common::i18n::t("settings.notif_auto_saver_msg").replace("{level}", &bat_pct.to_string());
-                        babydra_common::send_settings_notification(&title, &msg);
+                        let bat_pct = get_battery_info()
+                            .map(|b| b.percentage)
+                            .unwrap_or(conf.power.saver_threshold);
+                        let title = babydra_core::i18n::t("settings.notif_auto_saver_title");
+                        let msg = babydra_core::i18n::t("settings.notif_auto_saver_msg")
+                            .replace("{level}", &bat_pct.to_string());
+                        babydra_core::send_settings_notification(&title, &msg);
                     }
                 }
             }
@@ -50,24 +53,27 @@ fn handle_cli_args() -> bool {
                     updated_conf.power.profile = prof.key().to_string();
                     save_babydra_config(&updated_conf);
 
-                    let title = babydra_common::i18n::t("settings.notif_power_title");
-                    let msg = babydra_common::i18n::t("settings.notif_power_msg").replace("{profile}", prof.label());
-                    babydra_common::send_settings_notification(&title, &msg);
+                    let title = babydra_core::i18n::t("settings.notif_power_title");
+                    let msg = babydra_core::i18n::t("settings.notif_power_msg")
+                        .replace("{profile}", prof.label());
+                    babydra_core::send_settings_notification(&title, &msg);
                 }
             } else {
-                println!("Usage: babydra-settings --set-power-profile <normal|balanced|performance>");
+                println!(
+                    "Usage: babydra-settings --set-power-profile <normal|balanced|performance>"
+                );
             }
             true
         }
         "--apply-all-settings" => {
             println!("Applying all saved BabyDra system settings (CPU Profile, Displays, Wallpaper, Battery)...");
-            babydra_common::apply_all_saved_settings();
+            babydra_core::apply_all_saved_settings();
             println!("All saved settings applied successfully.");
             true
         }
         "--sync-greeter-wallpaper" => {
             println!("Syncing greeter wallpaper to world-readable system path...");
-            babydra_common::apply_saved_greeter_wallpaper();
+            babydra_core::apply_saved_greeter_wallpaper();
             true
         }
         "--run-background-update" => {
@@ -76,9 +82,13 @@ fn handle_cli_args() -> bool {
             let stdin = std::io::stdin();
             let _ = stdin.lock().read_line(&mut pwd);
             let pwd_trimmed = pwd.trim();
-            let pwd_opt = if pwd_trimmed.is_empty() { None } else { Some(pwd_trimmed) };
+            let pwd_opt = if pwd_trimmed.is_empty() {
+                None
+            } else {
+                Some(pwd_trimmed)
+            };
 
-            babydra_common::services::system::updates::run_background_update_loop(pwd_opt);
+            babydra_core::services::system::updates::run_background_update_loop(pwd_opt);
             true
         }
         "--help" | "-h" => {
@@ -95,6 +105,7 @@ fn handle_cli_args() -> bool {
     }
 }
 
+/// Application entry point: `main`.
 fn main() {
     if handle_cli_args() {
         return;
@@ -106,10 +117,8 @@ fn main() {
     );
 
     app.connect_activate(move |app| {
-        // Load custom styles
-        babydra_utils::ui::theme::init_theme();
+        babydra_ui_kit::ui::theme::init_theme();
 
-        // Build and display main settings window
         layout::build_main_window(app);
     });
 

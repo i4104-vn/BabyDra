@@ -1,10 +1,10 @@
 pub mod render;
 
+use babydra_core::models::display::{DisplayCardRow, MonitorConfig};
 use gtk4::prelude::*;
 use gtk4::Widget;
 use std::cell::RefCell;
 use std::rc::Rc;
-use babydra_common::models::display::{DisplayCardRow, MonitorConfig};
 
 /// Reads selected UI values from card rows and persists updated monitor configurations
 fn save_display_configs(monitors: &[MonitorConfig], card_rows: &[DisplayCardRow]) {
@@ -23,7 +23,6 @@ fn save_display_configs(monitors: &[MonitorConfig], card_rows: &[DisplayCardRow]
                 }
             }
 
-            // Refresh Rate
             let rate_idx = row.rate_dropdown.selected() as usize;
             if let Some(&rate) = mon.available_rates.get(rate_idx) {
                 mon.refresh_rate = rate;
@@ -40,7 +39,7 @@ fn save_display_configs(monitors: &[MonitorConfig], card_rows: &[DisplayCardRow]
         }
     }
 
-    let _ = babydra_common::services::system::display::save_displays(&current_monitors);
+    let _ = babydra_core::services::system::display::save_displays(&current_monitors);
 }
 
 /// Creates the display settings widget with event bindings
@@ -52,7 +51,7 @@ pub fn create_displays_widget() -> Widget {
 
     let (tx, rx) = std::sync::mpsc::channel::<Vec<MonitorConfig>>();
     std::thread::spawn(move || {
-        let monitors = babydra_common::services::system::display::get_displays();
+        let monitors = babydra_core::services::system::display::get_displays();
         let _ = tx.send(monitors);
     });
 

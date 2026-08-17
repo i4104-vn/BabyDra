@@ -22,29 +22,81 @@ const NAV_CATEGORIES: &[NavCategory] = &[
     NavCategory {
         title_key: "settings.cat_network",
         items: &[
-            NavItem { id: "wifi", icon: "wifi", i18n_key: "settings.nav_wifi" },
-            NavItem { id: "bluetooth", icon: "bluetooth", i18n_key: "settings.nav_bluetooth" },
-            NavItem { id: "vpn", icon: "shield", i18n_key: "settings.nav_vpn" },
-            NavItem { id: "certificates", icon: "key", i18n_key: "settings.nav_certificates" },
-            NavItem { id: "hosts", icon: "file-text", i18n_key: "settings.nav_hosts" },
+            NavItem {
+                id: "wifi",
+                icon: "wifi",
+                i18n_key: "settings.nav_wifi",
+            },
+            NavItem {
+                id: "bluetooth",
+                icon: "bluetooth",
+                i18n_key: "settings.nav_bluetooth",
+            },
+            NavItem {
+                id: "vpn",
+                icon: "shield",
+                i18n_key: "settings.nav_vpn",
+            },
+            NavItem {
+                id: "certificates",
+                icon: "key",
+                i18n_key: "settings.nav_certificates",
+            },
+            NavItem {
+                id: "hosts",
+                icon: "file-text",
+                i18n_key: "settings.nav_hosts",
+            },
         ],
     },
     NavCategory {
         title_key: "settings.cat_apps",
         items: &[
-            NavItem { id: "displays", icon: "desktop", i18n_key: "settings.nav_displays" },
-            NavItem { id: "appearance", icon: "palette", i18n_key: "settings.nav_wallpaper_themes" },
-            NavItem { id: "power", icon: "battery", i18n_key: "settings.nav_power" },
+            NavItem {
+                id: "displays",
+                icon: "desktop",
+                i18n_key: "settings.nav_displays",
+            },
+            NavItem {
+                id: "appearance",
+                icon: "palette",
+                i18n_key: "settings.nav_wallpaper_themes",
+            },
+            NavItem {
+                id: "power",
+                icon: "battery",
+                i18n_key: "settings.nav_power",
+            },
         ],
     },
     NavCategory {
         title_key: "settings.cat_system",
         items: &[
-            NavItem { id: "startup", icon: "cog", i18n_key: "settings.nav_startup_apps" },
-            NavItem { id: "apps", icon: "th-large", i18n_key: "settings.nav_installed_apps" },
-            NavItem { id: "env", icon: "sliders", i18n_key: "settings.nav_env" },
-            NavItem { id: "keybinds", icon: "cog", i18n_key: "settings.nav_keybinds" },
-            NavItem { id: "system_update", icon: "history", i18n_key: "settings.nav_system_update" },
+            NavItem {
+                id: "startup",
+                icon: "cog",
+                i18n_key: "settings.nav_startup_apps",
+            },
+            NavItem {
+                id: "apps",
+                icon: "th-large",
+                i18n_key: "settings.nav_installed_apps",
+            },
+            NavItem {
+                id: "env",
+                icon: "sliders",
+                i18n_key: "settings.nav_env",
+            },
+            NavItem {
+                id: "keybinds",
+                icon: "cog",
+                i18n_key: "settings.nav_keybinds",
+            },
+            NavItem {
+                id: "system_update",
+                icon: "history",
+                i18n_key: "settings.nav_system_update",
+            },
         ],
     },
 ];
@@ -83,23 +135,32 @@ fn ensure_page_loaded(stack: &gtk4::Stack, name: &str) {
     }
 }
 
+/// Creates a new `sidebar icon for item`.
 fn create_sidebar_icon_for_item(id: &str, default_icon: &str) -> gtk4::Widget {
     match id {
-        "wifi" => babydra_utils::components::create_wifi_signal_icon(18),
-        "appearance" => babydra_utils::components::create_wallpaper_thumbnail_icon(18),
-        "power" => babydra_utils::components::create_battery_percentage_icon(18),
-        "vpn" => babydra_utils::components::create_vpn_shield_icon(18),
-        "bluetooth" => babydra_utils::components::create_colored_icon_widget("bluetooth", 18, "#2563EB"),
-        "hosts" => babydra_utils::components::create_colored_icon_widget("hosts", 18, "#10B981"),
-        "displays" => babydra_utils::components::create_colored_icon_widget("displays", 18, "#0EA5E9"),
-        "keybinds" => babydra_utils::components::create_colored_icon_widget("cog", 18, "#F97316"),
-        "apps" => babydra_utils::components::create_colored_icon_widget("apps", 18, "#A855F7"),
-        "startup" => babydra_utils::components::create_colored_icon_widget("cog", 18, "#6366F1"),
-        "env" => babydra_utils::components::create_colored_icon_widget("env", 18, "#06B6D4"),
-        "certificates" => babydra_utils::components::create_colored_icon_widget("certificates", 18, "#EAB308"),
-        "system_update" => babydra_utils::components::create_colored_icon_widget("system_update", 18, "#10B981"),
-        "system" => babydra_utils::components::create_colored_icon_widget("system", 18, "#3B82F6"),
-        _ => babydra_utils::components::create_colored_icon_widget(default_icon, 18, "#3B82F6"),
+        "wifi" => babydra_ui_kit::components::create_wifi_signal_icon(18),
+        "appearance" => babydra_ui_kit::components::create_wallpaper_thumbnail_icon(18),
+        "power" => babydra_ui_kit::components::create_battery_percentage_icon(18),
+        "vpn" => babydra_ui_kit::components::create_vpn_shield_icon(18),
+        "bluetooth" => {
+            babydra_ui_kit::components::create_colored_icon_widget("bluetooth", 18, "#2563EB")
+        }
+        "hosts" => babydra_ui_kit::components::create_colored_icon_widget("hosts", 18, "#10B981"),
+        "displays" => {
+            babydra_ui_kit::components::create_colored_icon_widget("displays", 18, "#0EA5E9")
+        }
+        "keybinds" => babydra_ui_kit::components::create_colored_icon_widget("cog", 18, "#F97316"),
+        "apps" => babydra_ui_kit::components::create_colored_icon_widget("apps", 18, "#A855F7"),
+        "startup" => babydra_ui_kit::components::create_colored_icon_widget("cog", 18, "#6366F1"),
+        "env" => babydra_ui_kit::components::create_colored_icon_widget("env", 18, "#06B6D4"),
+        "certificates" => {
+            babydra_ui_kit::components::create_colored_icon_widget("certificates", 18, "#EAB308")
+        }
+        "system_update" => {
+            babydra_ui_kit::components::create_colored_icon_widget("system_update", 18, "#10B981")
+        }
+        "system" => babydra_ui_kit::components::create_colored_icon_widget("system", 18, "#3B82F6"),
+        _ => babydra_ui_kit::components::create_colored_icon_widget(default_icon, 18, "#3B82F6"),
     }
 }
 
@@ -133,12 +194,13 @@ fn update_sidebar_icon_and_label(id: &str, btn: &gtk4::Button, new_text: &str, d
 /// Public function to refresh icons and labels for all items in the sidebar.
 pub fn refresh_sidebar(nav_buttons: &Rc<RefCell<Vec<NavButtonEntry>>>) {
     for (id, btn, key, icon) in nav_buttons.borrow().iter() {
-        update_sidebar_icon_and_label(id, btn, &babydra_common::i18n::t(key), icon);
+        update_sidebar_icon_and_label(id, btn, &babydra_core::i18n::t(key), icon);
     }
 }
 
+/// Creates a new `sidebar category header`.
 fn create_sidebar_category_header(key: &str) -> gtk4::Label {
-    let lbl = gtk4::Label::new(Some(&babydra_common::i18n::t(key)));
+    let lbl = gtk4::Label::new(Some(&babydra_core::i18n::t(key)));
     lbl.add_css_class("sidebar-section-label");
     lbl.set_halign(gtk4::Align::Start);
     lbl.set_margin_top(8);
@@ -146,6 +208,7 @@ fn create_sidebar_category_header(key: &str) -> gtk4::Label {
     lbl
 }
 
+/// Builds the `main window` UI.
 pub fn build_main_window(app: &gtk4::Application) {
     let window = gtk4::ApplicationWindow::new(app);
     window.set_title(Some("Settings"));
@@ -172,7 +235,7 @@ pub fn build_main_window(app: &gtk4::Application) {
     profile_box.set_margin_start(12);
     profile_box.set_margin_end(12);
 
-    let logo_img = babydra_utils::ui::icon::get_icon("logo", 28);
+    let logo_img = babydra_ui_kit::ui::icon::get_icon("logo", 28);
     logo_img.set_pixel_size(28);
     logo_img.set_valign(gtk4::Align::Center);
     profile_box.append(&logo_img);
@@ -180,11 +243,11 @@ pub fn build_main_window(app: &gtk4::Application) {
     let title_info_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     title_info_box.set_valign(gtk4::Align::Center);
 
-    let app_title_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.title")));
+    let app_title_lbl = gtk4::Label::new(Some(&babydra_core::i18n::t("settings.title")));
     app_title_lbl.add_css_class("profile-user-name");
     app_title_lbl.set_halign(gtk4::Align::Start);
 
-    let app_sub_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.subtitle")));
+    let app_sub_lbl = gtk4::Label::new(Some(&babydra_core::i18n::t("settings.subtitle")));
     app_sub_lbl.add_css_class("settings-row-desc");
     app_sub_lbl.set_halign(gtk4::Align::Start);
 
@@ -204,8 +267,10 @@ pub fn build_main_window(app: &gtk4::Application) {
 
     let nav_container = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
 
-    let category_labels: Rc<RefCell<Vec<(gtk4::Label, &'static str)>>> = Rc::new(RefCell::new(Vec::new()));
-    let nav_buttons: Rc<RefCell<Vec<(&'static str, gtk4::Button, &'static str, &'static str)>>> = Rc::new(RefCell::new(Vec::new()));
+    let category_labels: Rc<RefCell<Vec<(gtk4::Label, &'static str)>>> =
+        Rc::new(RefCell::new(Vec::new()));
+    let nav_buttons: Rc<RefCell<Vec<(&'static str, gtk4::Button, &'static str, &'static str)>>> =
+        Rc::new(RefCell::new(Vec::new()));
 
     for cat in NAV_CATEGORIES {
         let hdr = create_sidebar_category_header(cat.title_key);
@@ -214,30 +279,36 @@ pub fn build_main_window(app: &gtk4::Application) {
 
         for item in cat.items {
             let icon_w = create_sidebar_icon_for_item(item.id, item.icon);
-            let btn = babydra_utils::components::create_sidebar_item_button_with_widget(
-                &babydra_common::i18n::t(item.i18n_key),
+            let btn = babydra_ui_kit::components::create_sidebar_item_button_with_widget(
+                &babydra_core::i18n::t(item.i18n_key),
                 &icon_w,
                 "sidebar-item",
                 || {},
             );
             btn.set_cursor_from_name(Some("pointer"));
             nav_container.append(&btn);
-            nav_buttons.borrow_mut().push((item.id, btn, item.i18n_key, item.icon));
+            nav_buttons
+                .borrow_mut()
+                .push((item.id, btn, item.i18n_key, item.icon));
         }
     }
 
     // Pinned Footer Item (About System)
     let sys_icon_w = create_sidebar_icon_for_item(FOOTER_ITEM.id, FOOTER_ITEM.icon);
-    let btn_sys = babydra_utils::components::create_sidebar_item_button_with_widget(
-        &babydra_common::i18n::t(FOOTER_ITEM.i18n_key),
+    let btn_sys = babydra_ui_kit::components::create_sidebar_item_button_with_widget(
+        &babydra_core::i18n::t(FOOTER_ITEM.i18n_key),
         &sys_icon_w,
         "sidebar-item",
         || {},
     );
     btn_sys.add_css_class("active-nav");
     btn_sys.set_cursor_from_name(Some("pointer"));
-    nav_buttons.borrow_mut().push((FOOTER_ITEM.id, btn_sys.clone(), FOOTER_ITEM.i18n_key, FOOTER_ITEM.icon));
-
+    nav_buttons.borrow_mut().push((
+        FOOTER_ITEM.id,
+        btn_sys.clone(),
+        FOOTER_ITEM.i18n_key,
+        FOOTER_ITEM.icon,
+    ));
 
     let footer_sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
     footer_sep.add_css_class("profile-separator");
@@ -284,16 +355,16 @@ pub fn build_main_window(app: &gtk4::Application) {
     loading_box.set_halign(gtk4::Align::Center);
     loading_box.set_vexpand(true);
     loading_box.set_hexpand(true);
-    
+
     let spinner = gtk4::Spinner::new();
     spinner.set_size_request(48, 48);
-    
-    let loading_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("settings.loading")));
+
+    let loading_lbl = gtk4::Label::new(Some(&babydra_core::i18n::t("settings.loading")));
     loading_lbl.add_css_class("settings-row-title");
-    
+
     loading_box.append(&spinner);
     loading_box.append(&loading_lbl);
-    
+
     let overlay_blocker = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     overlay_blocker.set_vexpand(true);
     overlay_blocker.set_hexpand(true);
@@ -307,7 +378,7 @@ pub fn build_main_window(app: &gtk4::Application) {
         // Do nothing, just intercept
     });
     overlay_blocker.add_controller(click_interceptor);
-    
+
     overlay.add_overlay(&overlay_blocker);
 
     // Wire navigation button clicks
@@ -363,15 +434,15 @@ pub fn build_main_window(app: &gtk4::Application) {
             gtk4::glib::idle_add_local_once(move || {
                 // 1. Update category header labels
                 for (lbl, key) in cat_labels.borrow().iter() {
-                    lbl.set_text(&babydra_common::i18n::t(key));
+                    lbl.set_text(&babydra_core::i18n::t(key));
                 }
 
                 // 2. Update sidebar item icons and labels
                 refresh_sidebar(&buttons);
 
                 // 3. Update main header labels
-                title.set_text(&babydra_common::i18n::t("settings.title"));
-                sub.set_text(&babydra_common::i18n::t("settings.subtitle"));
+                title.set_text(&babydra_core::i18n::t("settings.title"));
+                sub.set_text(&babydra_core::i18n::t("settings.subtitle"));
 
                 // 4. Clear unvisited cached pages and rebuild current active page
                 if let Some(current_name) = stack.visible_child_name().map(|s| s.to_string()) {

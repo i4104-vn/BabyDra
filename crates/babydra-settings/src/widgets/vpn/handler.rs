@@ -6,10 +6,8 @@ use std::collections::HashSet;
 use std::rc::Rc;
 use std::sync::mpsc::Sender;
 
-use babydra_common::services::system::vpn::{
-    connect_vpn, disconnect_vpn, get_vpn_details, VpnConn,
-};
-use babydra_utils::components::modal::{VpnConfigDialog, VpnLogDialog};
+use babydra_core::services::system::vpn::{connect_vpn, disconnect_vpn, get_vpn_details, VpnConn};
+use babydra_ui_kit::components::modal::{VpnConfigDialog, VpnLogDialog};
 
 pub fn render_vpn_list<F: Fn() + Clone + 'static>(
     list_box: &gtk4::ListBox,
@@ -56,7 +54,7 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
         icon_badge.set_valign(gtk4::Align::Center);
         icon_badge.set_halign(gtk4::Align::Start);
 
-        let shield_icon = babydra_utils::ui::icon::get_icon("shield", 18);
+        let shield_icon = babydra_ui_kit::ui::icon::get_icon("shield", 18);
         shield_icon.set_pixel_size(18);
         shield_icon.set_valign(gtk4::Align::Center);
         shield_icon.set_halign(gtk4::Align::Center);
@@ -81,13 +79,21 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
         text_box.append(&name_lbl);
 
         let sub_text = if vpn.active {
-            let mut info_parts = vec![format!("{}: {}", babydra_common::i18n::t("settings.vpn_type"), vpn.conn_type.to_uppercase())];
+            let mut info_parts = vec![format!(
+                "{}: {}",
+                babydra_core::i18n::t("settings.vpn_type"),
+                vpn.conn_type.to_uppercase()
+            )];
             if !vpn.ip_address.is_empty() {
                 info_parts.push(format!("IP: {}", vpn.ip_address));
             }
             info_parts.join(" • ")
         } else {
-            format!("{}: {}", babydra_common::i18n::t("settings.vpn_type"), vpn.conn_type.to_uppercase())
+            format!(
+                "{}: {}",
+                babydra_core::i18n::t("settings.vpn_type"),
+                vpn.conn_type.to_uppercase()
+            )
         };
 
         let desc_lbl = gtk4::Label::new(Some(&sub_text));
@@ -102,9 +108,9 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
         log_btn.add_css_class("icon-btn");
         log_btn.set_valign(gtk4::Align::Center);
         log_btn.set_cursor_from_name(Some("pointer"));
-        log_btn.set_tooltip_text(Some(&babydra_common::i18n::t("settings.vpn_view_logs")));
+        log_btn.set_tooltip_text(Some(&babydra_core::i18n::t("settings.vpn_view_logs")));
 
-        let log_icon = babydra_utils::ui::icon::get_icon("terminal", 14);
+        let log_icon = babydra_ui_kit::ui::icon::get_icon("terminal", 14);
         log_icon.set_pixel_size(14);
         log_btn.set_child(Some(&log_icon));
 
@@ -121,7 +127,7 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
         edit_btn.set_valign(gtk4::Align::Center);
         edit_btn.set_cursor_from_name(Some("pointer"));
 
-        let cog_icon = babydra_utils::ui::icon::get_icon("cog", 14);
+        let cog_icon = babydra_ui_kit::ui::icon::get_icon("cog", 14);
         cog_icon.set_pixel_size(14);
         edit_btn.set_child(Some(&cog_icon));
 
@@ -149,7 +155,8 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
             spinner.start();
             hbox.append(&spinner);
         } else if vpn.active {
-            let disconnect_btn = gtk4::Button::with_label(&babydra_common::i18n::t("settings.disconnect"));
+            let disconnect_btn =
+                gtk4::Button::with_label(&babydra_core::i18n::t("settings.disconnect"));
             disconnect_btn.set_valign(gtk4::Align::Center);
             disconnect_btn.add_css_class("connect-pill-btn");
             disconnect_btn.add_css_class("delete-btn");
@@ -168,7 +175,7 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
             });
             hbox.append(&disconnect_btn);
         } else {
-            let connect_btn = gtk4::Button::with_label(&babydra_common::i18n::t("settings.connect"));
+            let connect_btn = gtk4::Button::with_label(&babydra_core::i18n::t("settings.connect"));
             connect_btn.set_valign(gtk4::Align::Center);
             connect_btn.add_css_class("suggested-action");
 
