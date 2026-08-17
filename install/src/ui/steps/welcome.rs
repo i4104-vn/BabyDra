@@ -7,20 +7,20 @@ use ratatui::{
 };
 
 use crate::app::App;
-use crate::models::{InstallChannel, PresetProfile};
+use crate::models::PresetProfile;
 
 pub fn draw_welcome_step(f: &mut Frame, app: &App, area: Rect) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Length(7),
-            Constraint::Length(11),
+            Constraint::Length(8),
+            Constraint::Length(8),
             Constraint::Min(6),
         ])
         .split(area);
 
     let banner_text = vec![
-        Line::from(Span::styled("BabyDra Desktop Shell Installer", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))),
+        Line::from(Span::styled("Welcome to BabyDra Desktop Shell Installer", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))),
         Line::from(""),
         Line::from("This TUI wizard will guide you through setting up BabyDra Wayland shell on Arch Linux."),
         Line::from(Span::styled("Two install modes: copy pre-built binaries directly, or pick a git branch and rebuild everything from source.", Style::default().fg(Color::Green))),
@@ -41,19 +41,7 @@ pub fn draw_welcome_step(f: &mut Frame, app: &App, area: Rect) {
     );
     f.render_widget(banner, chunks[0]);
 
-    let channel_color = match app.install_channel {
-        InstallChannel::Release => Color::Green,
-        InstallChannel::Develop => Color::Magenta,
-        InstallChannel::LocalSource => Color::Cyan,
-    };
-
-    let meta = app.get_current_channel_meta();
-    let branch_name = meta.map(|m| m.branch_name.as_str()).unwrap_or("N/A");
-    let commit_hash = meta.map(|m| m.commit_hash.as_str()).unwrap_or("N/A");
-    let author_name = meta.map(|m| m.author_name.as_str()).unwrap_or("N/A");
-    let update_date = meta.map(|m| m.update_date.as_str()).unwrap_or("N/A");
-    let commit_msg = meta.map(|m| m.commit_msg.as_str()).unwrap_or("N/A");
-
+    let found_bins = app.binaries.iter().filter(|b| b.exists_in_source).count();
     let sys_info = vec![
         Line::from(vec![
             Span::styled(

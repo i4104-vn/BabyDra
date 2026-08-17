@@ -28,7 +28,7 @@ pub fn find_workspace_root() -> PathBuf {
     ];
 
     for dir in &candidates {
-        if dir.join("Cargo.toml").exists() && (dir.join("crates").is_dir() || dir.join("install").is_dir()) {
+        if dir.join("Cargo.toml").exists() && dir.join("crates").is_dir() {
             return dir.clone();
         }
     }

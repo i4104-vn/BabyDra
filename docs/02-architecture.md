@@ -102,9 +102,6 @@ sequenceDiagram
 > [!IMPORTANT]
 > `init_theme()` là **điểm duy nhất** nạp theme — mọi crate đều gọi nó, không ai tự nạp CSS riêng. Chi tiết luồng theme: [05-themes-variants.md](./05-themes-variants.md) mục 3.
 
-> [!NOTE]
-> Ngoại lệ duy nhất: `libs/babydra-utils` chứa **widget GTK dùng chung** và được phép import GTK4, vì đây là tầng UI infrastructure, không phải nghiệp vụ.
-
 ---
 
 ## 4. Các service nền của babydra-core

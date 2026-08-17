@@ -5,7 +5,6 @@ pub mod packages;
 pub mod varlib;
 
 use std::path::PathBuf;
-use std::process::Command;
 use std::sync::mpsc::Sender;
 use std::thread;
 use std::time::Instant;
@@ -34,7 +33,6 @@ pub enum InstallEvent {
 pub struct InstallPlan {
     pub workspace_root: PathBuf,
     pub source_binary_dir: PathBuf,
-    pub install_channel: InstallChannel,
     pub selected_binaries: Vec<BinaryItem>,
     pub selected_packages: Vec<GenericOptionItem>,
     pub selected_varlib: Vec<GenericOptionItem>,

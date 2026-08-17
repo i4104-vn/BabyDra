@@ -10,7 +10,7 @@ use crate::models::{
 };
 use crate::system::sudo::MAX_PASSWORD_ATTEMPTS;
 use crate::system::{
-    default_binary_source_dir, fetch_branch_metadata, find_workspace_root, initial_binaries_list,
+    default_binary_source_dir, find_workspace_root, initial_binaries_list,
     initial_configs_themes_options, initial_display_manager_options, initial_package_options,
     initial_variant_options, initial_varlib_options, list_branches, update_binaries_status,
     SudoSession,
@@ -20,8 +20,6 @@ use crate::tasks::{spawn_installation_worker, InstallEvent, InstallPlan};
 pub struct App {
     pub current_step: WizardStep,
     pub current_profile: PresetProfile,
-    pub install_channel: InstallChannel,
-    pub channel_metadata: Vec<BranchMetadata>,
 
     // Step Data & Cursors
     pub package_options: Vec<GenericOptionItem>,
@@ -89,17 +87,9 @@ impl App {
         let binaries = initial_binaries_list(&source_binary_dir);
         let branches = list_branches(&workspace_root);
 
-        let channel_metadata = vec![
-            fetch_branch_metadata(&workspace_root, InstallChannel::Release),
-            fetch_branch_metadata(&workspace_root, InstallChannel::Develop),
-            fetch_branch_metadata(&workspace_root, InstallChannel::LocalSource),
-        ];
-
         let mut app = Self {
             current_step: WizardStep::Welcome,
             current_profile: PresetProfile::FullDesktop,
-            install_channel: InstallChannel::Release,
-            channel_metadata,
 
             package_options: initial_package_options(),
             package_cursor: 0,
@@ -143,7 +133,7 @@ impl App {
 
             install_state: InstallState::Idle,
             progress_percent: 0,
-            current_step_desc: "Ready to configure and install BabyDra desktop.".to_string(),
+            current_step_desc: "Ready to install BabyDra packages.".to_string(),
 
             tx,
             rx,
@@ -156,7 +146,7 @@ impl App {
         );
         app.add_log(
             LogLevel::Info,
-            format!("Channel: {} | Source: {:?}", app.install_channel.name(), app.source_binary_dir),
+            format!("Detected source binary path: {:?}", app.source_binary_dir),
         );
         if app.branches.is_empty() {
             app.add_log(
@@ -185,26 +175,13 @@ impl App {
         }
     }
 
-    pub fn toggle_channel(&mut self) {
-        self.install_channel = match self.install_channel {
-            InstallChannel::Release => InstallChannel::Develop,
-            InstallChannel::Develop => InstallChannel::LocalSource,
-            InstallChannel::LocalSource => InstallChannel::Release,
-        };
-        self.add_log(LogLevel::Config, format!("Switched install channel to: {}", self.install_channel.name()));
-    }
-
-    pub fn get_current_channel_meta(&self) -> Option<&BranchMetadata> {
-        self.channel_metadata.iter().find(|m| m.channel == self.install_channel)
-    }
-
     pub fn rescan_binaries(&mut self) {
         update_binaries_status(&mut self.binaries, &self.source_binary_dir);
         let found_count = self.binaries.iter().filter(|b| b.exists_in_source).count();
         self.add_log(
             LogLevel::Info,
             format!(
-                "Scanned source binary folder. Found {}/{} executables.",
+                "Scanned source directory. Found {}/{} pre-built binaries.",
                 found_count,
                 self.binaries.len()
             ),
@@ -249,7 +226,7 @@ impl App {
                 );
             }
             PresetProfile::Custom => {
-                self.add_log(LogLevel::Config, "Switched to custom configuration profile.");
+                self.add_log(LogLevel::Config, "Switched to 'Custom' profile.");
             }
         }
     }
