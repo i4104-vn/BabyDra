@@ -1,175 +1,175 @@
-/* babydra-blue — theme override layer (loaded last, on top of inherited layers).
+/* babydra-rose — theme override layer (loaded last, on top of inherited layers).
  *
  * This theme inherits `babydra-default` (see tokens.json `base`), so it gets
  * the full dark.css / light.css color layers for free. This file only ships
  * *overrides*: every rule below replaces the default accent (#3b82f6 blue)
- * with a sky-blue accent (#38bdf8) to demonstrate theme customization without
+ * with a rose accent (#f43f5e) to demonstrate theme customization without
  * touching any code — copy this theme, tweak the values, done.
  */
 
 /* ── Accent palette (override of babydra-default) ─────────────────── */
-/* #3b82f6 → #38bdf8 ; #2563eb → #0ea5e9 ; #1d4ed8 → #0284c7 ;
-   #60a5fa → #7dd3fc ; #93c5fd → #bae6fd ; rgba(59,130,246,…) → rgba(56,189,248,…) */
+/* #3b82f6 → #f43f5e ; #2563eb → #e11d48 ; #1d4ed8 → #be123c ;
+   #60a5fa → #fb7185 ; #93c5fd → #fda4af ; rgba(59,130,246,…) → rgba(244,63,94,…) */
 
 /* Floating Action Button */
 button.baby-fab,
 button.baby-fab.circular {
-    background-color: #38bdf8;
-    box-shadow: 0 6px 20px rgba(56, 189, 248, 0.45);
+    background-color: #f43f5e;
+    box-shadow: 0 6px 20px rgba(244, 63, 94, 0.45);
 }
 
 button.baby-fab:hover,
 button.baby-fab.circular:hover {
-    background-image: linear-gradient(135deg, #7dd3fc, #38bdf8);
-    box-shadow: 0 8px 24px rgba(56, 189, 248, 0.60);
+    background-image: linear-gradient(135deg, #fb7185, #f43f5e);
+    box-shadow: 0 8px 24px rgba(244, 63, 94, 0.60);
 }
 
 button.baby-fab:active,
 button.baby-fab.circular:active {
-    background-image: linear-gradient(135deg, #0284c7, #0369a1);
-    box-shadow: 0 3px 10px rgba(56, 189, 248, 0.30);
+    background-image: linear-gradient(135deg, #be123c, #9f1239);
+    box-shadow: 0 3px 10px rgba(244, 63, 94, 0.30);
 }
 
 /* Suggested / primary action buttons (dialogs) */
 button.suggested-action {
-    background-color: #38bdf8;
+    background-color: #f43f5e;
 }
 button.suggested-action:hover {
-    background-color: #0ea5e9;
+    background-color: #e11d48;
 }
 button.suggested-action:active {
-    background-color: #0284c7;
+    background-color: #be123c;
 }
 
 /* Segment control active state */
 button.lang-seg-active {
-    background-color: #38bdf8;
-    box-shadow: 0 2px 8px rgba(56, 189, 248, 0.35);
+    background-color: #f43f5e;
+    box-shadow: 0 2px 8px rgba(244, 63, 94, 0.35);
 }
 
 /* Keyword chips */
 .keyword-chip.active,
 .chip-highlight.active {
-    background-color: #38bdf8;
+    background-color: #f43f5e;
 }
 
 /* Update progress bar */
 .update-progress-bar progress {
-    background-color: #38bdf8;
+    background-color: #f43f5e;
 }
 
 /* Search entry focus ring */
 entry.sidebar-search-entry:focus-within {
-    background-color: rgba(56, 189, 248, 0.08);
-    border-color: #38bdf8;
+    background-color: rgba(244, 63, 94, 0.08);
+    border-color: #f43f5e;
 }
 
 /* Circular downgrade button hover accent */
 button.circular.downgrade-btn:hover,
 .circular.downgrade-btn:hover {
-    background-color: rgba(56, 189, 248, 0.25);
-    border-color: rgba(56, 189, 248, 0.50);
-    color: #bae6fd;
+    background-color: rgba(244, 63, 94, 0.25);
+    border-color: rgba(244, 63, 94, 0.50);
+    color: #fda4af;
 }
 
 /* Settings notebook active tab (accent underline) */
 .settings-notebook header tabs tab:checked {
-    color: #38bdf8;
-    border-bottom-color: #38bdf8;
+    color: #f43f5e;
+    border-bottom-color: #f43f5e;
 }
 
 /* ── Accent sweep (extended coverage, mirrors base dark/light rules) ── */
 /* WiFi active item */
 .wifi-network-item.active {
-    background-color: rgba(56, 189, 248, 0.6);
-    border: 1px solid rgba(56, 189, 248, 0.3);
+    background-color: rgba(244, 63, 94, 0.6);
+    border: 1px solid rgba(244, 63, 94, 0.3);
 }
 
 /* Island badge title */
 .badge-title {
-    color: #7dd3fc;
+    color: #fb7185;
 }
 
 /* Launcher: box + search borders, selected toggle, footer separator, suspend */
 .launcher-box {
-    border: 1px solid rgba(56, 189, 248, 0.22);
+    border: 1px solid rgba(244, 63, 94, 0.22);
 }
 entry.launcher-search {
-    border: 1px solid rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(244, 63, 94, 0.12);
 }
 .launcher-toggle-btn.selected {
-    background-color: rgba(56, 189, 248, 0.25);
-    border: 1px solid rgba(56, 189, 248, 0.45);
-    border-top: 1px solid rgba(56, 189, 248, 0.60);
-    color: #7dd3fc;
+    background-color: rgba(244, 63, 94, 0.25);
+    border: 1px solid rgba(244, 63, 94, 0.45);
+    border-top: 1px solid rgba(244, 63, 94, 0.60);
+    color: #fb7185;
 }
 .launcher-footer-separator {
-    background-color: rgba(56, 189, 248, 0.15);
+    background-color: rgba(244, 63, 94, 0.15);
 }
 .launcher-power-option-btn.suspend:hover {
-    background-color: rgba(56, 189, 248, 0.35);
-    border-color: rgba(56, 189, 248, 0.7);
+    background-color: rgba(244, 63, 94, 0.35);
+    border-color: rgba(244, 63, 94, 0.7);
 }
 
 /* Sidebar active nav (shared + settings) */
 .sidebar-item.active-nav,
 .sidebar-item.active-pill,
 button.sidebar-item.active-nav {
-    background-color: rgba(56, 189, 248, 0.15);
-    color: #7dd3fc;
+    background-color: rgba(244, 63, 94, 0.15);
+    color: #fb7185;
 }
 .sidebar-item.active-nav:hover,
 .sidebar-item.active-pill:hover,
 button.sidebar-item.active-nav:hover {
-    background-color: rgba(56, 189, 248, 0.22);
-    color: #bae6fd;
+    background-color: rgba(244, 63, 94, 0.22);
+    color: #fda4af;
 }
 
 /* Sidebar active-nav label children (still blue in base, keep in accent) */
 button.sidebar-item.active-nav label {
-    color: #7dd3fc;
+    color: #fb7185;
 }
 button.sidebar-item.active-nav:hover label {
-    color: #bae6fd;
+    color: #fda4af;
 }
 
 /* Screenshot selected toolbar */
 button.screenshot-toolbar-btn.selected,
 button.screenshot-toolbar-btn.selected image {
-    color: #7dd3fc;
+    color: #fb7185;
 }
 
 /* Settings: theme cards, perf profile, app tabs, update badge, wifi info */
 button.theme-card-option.active-dark {
-    background-color: rgba(56, 189, 248, 0.20);
-    color: #7dd3fc;
-    border-color: #38bdf8;
-    box-shadow: 0 4px 16px rgba(56, 189, 248, 0.25);
+    background-color: rgba(244, 63, 94, 0.20);
+    color: #fb7185;
+    border-color: #f43f5e;
+    box-shadow: 0 4px 16px rgba(244, 63, 94, 0.25);
 }
 button.theme-card-option.active-dark label,
 button.theme-card-option.active-dark image {
-    color: #7dd3fc;
+    color: #fb7185;
 }
 button.perf-profile-row-btn.active {
-    background-color: rgba(56, 189, 248, 0.16);
-    border: 1px solid rgba(56, 189, 248, 0.45);
+    background-color: rgba(244, 63, 94, 0.16);
+    border: 1px solid rgba(244, 63, 94, 0.45);
 }
 button.app-tab-btn.active {
-    color: #38bdf8;
-    border-bottom: 2px solid #38bdf8;
+    color: #f43f5e;
+    border-bottom: 2px solid #f43f5e;
 }
 .update-count-badge {
-    background-color: rgba(56, 189, 248, 0.15);
-    border: 1px solid rgba(56, 189, 248, 0.30);
-    color: #7dd3fc;
+    background-color: rgba(244, 63, 94, 0.15);
+    border: 1px solid rgba(244, 63, 94, 0.30);
+    color: #fb7185;
 }
 .wifi-info-section-title {
-    color: #7dd3fc;
+    color: #fb7185;
 }
 
 /* Dropdown selected row */
 dropdown>popover>contents row:selected,
 dropdown>popover>contents listview>row:selected {
-    background-color: rgba(56, 189, 248, 0.15);
-    color: #7dd3fc;
+    background-color: rgba(244, 63, 94, 0.15);
+    color: #fb7185;
 }
