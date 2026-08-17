@@ -1,11 +1,11 @@
-pub mod vpn;
+pub mod battery;
 pub mod network;
 pub mod volume;
-pub mod battery;
+pub mod vpn;
 
+use babydra_ui_kit::components::popovers::hover::attach_hover_popover;
 use gtk4::prelude::*;
 use std::rc::Rc;
-use babydra_utils::components::popovers::hover::attach_hover_popover;
 
 #[allow(dead_code)]
 pub struct StatusPopovers {
@@ -16,18 +16,35 @@ pub struct StatusPopovers {
     pub update_volume_popover: Rc<dyn Fn()>,
 }
 
+/// Sets up `status popovers`.
 pub fn setup_status_popovers(
     vol_icon: &gtk4::Image,
     net_icon: &gtk4::Image,
     vpn_icon: &gtk4::Image,
     bat_widget: &Option<gtk4::DrawingArea>,
 ) -> StatusPopovers {
-    let vpn_popover = babydra_utils::components::create_popover(vpn_icon, gtk4::PositionType::Bottom, "status-popover");
-    let net_popover = babydra_utils::components::create_popover(net_icon, gtk4::PositionType::Bottom, "status-popover");
-    let vol_popover = babydra_utils::components::create_popover(vol_icon, gtk4::PositionType::Bottom, "status-popover");
+    let vpn_popover = babydra_ui_kit::components::create_popover(
+        vpn_icon,
+        gtk4::PositionType::Bottom,
+        "status-popover",
+    );
+    let net_popover = babydra_ui_kit::components::create_popover(
+        net_icon,
+        gtk4::PositionType::Bottom,
+        "status-popover",
+    );
+    let vol_popover = babydra_ui_kit::components::create_popover(
+        vol_icon,
+        gtk4::PositionType::Bottom,
+        "status-popover",
+    );
 
     let bat_popover_opt = if let Some(ref bat_area) = bat_widget {
-        let bat_pop = babydra_utils::components::create_popover(bat_area, gtk4::PositionType::Bottom, "status-popover");
+        let bat_pop = babydra_ui_kit::components::create_popover(
+            bat_area,
+            gtk4::PositionType::Bottom,
+            "status-popover",
+        );
         Some(bat_pop)
     } else {
         None
@@ -38,7 +55,7 @@ pub fn setup_status_popovers(
     let update_volume_popover = volume::build_volume_update_fn(vol_icon, &vol_popover);
     let update_battery_popover = battery::build_battery_update_fn(&bat_popover_opt);
 
-    if babydra_common::services::system::vpn::get_active_vpn_fast().is_some() {
+    if babydra_core::services::system::vpn::get_active_vpn_fast().is_some() {
         vpn_icon.set_visible(true);
     } else {
         vpn_icon.set_visible(false);
@@ -84,7 +101,7 @@ pub fn setup_status_popovers(
             }
         }
 
-        let vpn_active = babydra_common::services::system::vpn::get_active_vpn_fast().is_some();
+        let vpn_active = babydra_core::services::system::vpn::get_active_vpn_fast().is_some();
         if vpn_icon_timer.is_visible() != vpn_active {
             vpn_icon_timer.set_visible(vpn_active);
         }

@@ -1,9 +1,10 @@
+use babydra_ui_kit::components::popovers::hover::{
+    build_hover_popover_card as build_popover_card, HoverPopoverRow as PopoverRow,
+};
 use gtk4::prelude::*;
 use std::rc::Rc;
-use babydra_utils::components::popovers::hover::{
-    HoverPopoverRow as PopoverRow, build_hover_popover_card as build_popover_card,
-};
 
+/// Returns the current `speed color class`.
 fn get_speed_color_class(bytes_per_sec: f64) -> &'static str {
     if bytes_per_sec > 1_048_576.0 {
         "speed-high"
@@ -14,15 +15,14 @@ fn get_speed_color_class(bytes_per_sec: f64) -> &'static str {
     }
 }
 
-pub fn build_network_update_fn(
-    net_popover: &gtk4::Popover,
-) -> Rc<dyn Fn()> {
+/// Builds the `network update fn` UI.
+pub fn build_network_update_fn(net_popover: &gtk4::Popover) -> Rc<dyn Fn()> {
     let net_popover_c = net_popover.clone();
 
     Rc::new(move || {
-        let (enabled, ssid) = babydra_common::helper::wifi::get_wifi_state();
-        let speed = babydra_common::helper::network::get_network_speed();
-        let local_ip = babydra_common::helper::network::get_local_ip();
+        let (enabled, ssid) = babydra_core::helper::wifi::get_wifi_state();
+        let speed = babydra_core::helper::network::get_network_speed();
+        let local_ip = babydra_core::helper::network::get_local_ip();
 
         let rx_cls = get_speed_color_class(speed.rx_speed);
         let tx_cls = get_speed_color_class(speed.tx_speed);
@@ -35,8 +35,22 @@ pub fn build_network_update_fn(
             vec![
                 PopoverRow::new("SSID", &ssid, None),
                 PopoverRow::new("IP Address", &local_ip, None),
-                PopoverRow::new("Download", &format!("↓ {}", babydra_common::helper::network::format_speed(speed.rx_speed)), Some(rx_cls)),
-                PopoverRow::new("Upload", &format!("↑ {}", babydra_common::helper::network::format_speed(speed.tx_speed)), Some(tx_cls)),
+                PopoverRow::new(
+                    "Download",
+                    &format!(
+                        "↓ {}",
+                        babydra_core::helper::network::format_speed(speed.rx_speed)
+                    ),
+                    Some(rx_cls),
+                ),
+                PopoverRow::new(
+                    "Upload",
+                    &format!(
+                        "↑ {}",
+                        babydra_core::helper::network::format_speed(speed.tx_speed)
+                    ),
+                    Some(tx_cls),
+                ),
             ]
         };
 

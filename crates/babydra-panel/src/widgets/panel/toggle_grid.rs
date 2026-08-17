@@ -1,8 +1,11 @@
+use super::items;
 use gtk4::prelude::*;
 use std::rc::Rc;
-use super::items;
 
-pub fn create_control_center_grid(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) -> gtk4::Box {
+/// Creates a new `control center grid`.
+pub fn create_control_center_grid(
+    on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>,
+) -> gtk4::Box {
     let main_layout = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
     main_layout.add_css_class("control-center-grid");
     main_layout.set_hexpand(true);
@@ -47,6 +50,7 @@ pub fn create_control_center_grid(on_popover_toggled: Option<Rc<dyn Fn(bool) + '
     main_layout
 }
 
+/// Creates a new `left box toggles`.
 fn create_left_box_toggles(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) -> gtk4::Box {
     let container = gtk4::Box::new(gtk4::Orientation::Vertical, 10);
     container.add_css_class("control-left-toggles-box");
@@ -61,29 +65,35 @@ fn create_left_box_toggles(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>
     container
 }
 
+/// Returns `true` when `dnd active` holds, `false` otherwise.
 fn is_dnd_active() -> bool {
     babydra_island::widgets::notification::is_dnd_active()
 }
 
+/// Creates a new `dnd tile`.
 pub fn create_dnd_tile() -> gtk4::Button {
     let active = is_dnd_active();
-    babydra_utils::components::create_square_toggle_tile(
-        "bell-off",
-        "",
-        active,
-        |new_active| {
-            babydra_island::widgets::notification::set_dnd_active(new_active);
-        }
-    )
+    babydra_ui_kit::components::create_square_toggle_tile("bell-off", "", active, |new_active| {
+        babydra_island::widgets::notification::set_dnd_active(new_active);
+    })
 }
 
+/// Returns `true` when `night light active` holds, `false` otherwise.
 fn is_night_light_active() -> bool {
-    if let Ok(output) = std::process::Command::new("pgrep").arg("-x").arg("gammastep").output() {
+    if let Ok(output) = std::process::Command::new("pgrep")
+        .arg("-x")
+        .arg("gammastep")
+        .output()
+    {
         if output.status.success() {
             return true;
         }
     }
-    if let Ok(output) = std::process::Command::new("pgrep").arg("-x").arg("wl-gammarelay").output() {
+    if let Ok(output) = std::process::Command::new("pgrep")
+        .arg("-x")
+        .arg("wl-gammarelay")
+        .output()
+    {
         if output.status.success() {
             return true;
         }
@@ -91,18 +101,19 @@ fn is_night_light_active() -> bool {
     false
 }
 
+/// Creates a new `night light tile`.
 pub fn create_night_light_tile() -> gtk4::Button {
     let active = is_night_light_active();
-    babydra_utils::components::create_square_toggle_tile(
-        "night-light",
-        "",
-        active,
-        |new_active| {
-            if new_active {
-                let _ = std::process::Command::new("gammastep").args(&["-O", "4500", "-b", "1.0:1.0"]).spawn();
-            } else {
-                let _ = std::process::Command::new("pkill").arg("-x").arg("gammastep").status();
-            }
+    babydra_ui_kit::components::create_square_toggle_tile("night-light", "", active, |new_active| {
+        if new_active {
+            let _ = std::process::Command::new("gammastep")
+                .args(&["-O", "4500", "-b", "1.0:1.0"])
+                .spawn();
+        } else {
+            let _ = std::process::Command::new("pkill")
+                .arg("-x")
+                .arg("gammastep")
+                .status();
         }
-    )
+    })
 }

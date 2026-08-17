@@ -1,8 +1,8 @@
-use babydra_common::helper::clean::{
+use babydra_core::helper::clean::{
     clean_all_native, format_bytes, get_journal_logs_size, get_pacman_cache_size, get_trash_size,
     get_user_cache_size,
 };
-use babydra_common::i18n::t;
+use babydra_core::i18n::t;
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -36,8 +36,9 @@ enum CleanState {
     },
 }
 
+/// Creates a new `clean tile`.
 pub fn create_clean_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) -> gtk4::Button {
-    let btn = babydra_utils::components::create_colored_icon_button(
+    let btn = babydra_ui_kit::components::create_colored_icon_button(
         "broom",
         18,
         "rgba(255, 255, 255, 0.8)",
@@ -51,7 +52,7 @@ pub fn create_clean_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>)
     btn.set_hexpand(false);
     btn.set_vexpand(false);
 
-    let popover = babydra_utils::components::create_popover(
+    let popover = babydra_ui_kit::components::create_popover(
         &btn,
         gtk4::PositionType::Bottom,
         "media-popover",
@@ -71,16 +72,16 @@ pub fn create_clean_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>)
     let on_popover_toggled_c_map = on_popover_toggled.clone();
     popover.connect_map(move |_| {
         btn_c.add_css_class("active");
-        let active_icon = babydra_utils::ui::icon::get_icon_colored("broom", 18, "#ffffff");
+        let active_icon = babydra_ui_kit::ui::icon::get_icon_colored("broom", 18, "#ffffff");
         btn_c.set_child(Some(&active_icon));
 
         if let Some(ref cb) = on_popover_toggled_c_map {
             cb(true);
         }
 
-        babydra_utils::ui::animation::slide_in(
+        babydra_ui_kit::ui::animation::slide_in(
             popover_box_clone.upcast_ref(),
-            babydra_utils::ui::animation::SlideDirection::Down,
+            babydra_ui_kit::ui::animation::SlideDirection::Down,
             15,
             450,
         );
@@ -90,7 +91,7 @@ pub fn create_clean_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>)
     popover.connect_closed(move |_| {
         btn_c2.remove_css_class("active");
         let inactive_icon =
-            babydra_utils::ui::icon::get_icon_colored("broom", 18, "rgba(255, 255, 255, 0.8)");
+            babydra_ui_kit::ui::icon::get_icon_colored("broom", 18, "rgba(255, 255, 255, 0.8)");
         btn_c2.set_child(Some(&inactive_icon));
 
         if let Some(ref cb) = on_popover_toggled_c {
@@ -101,6 +102,7 @@ pub fn create_clean_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>)
     btn
 }
 
+/// Sets up `clean popover`.
 fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
     let popover_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     popover_box.add_css_class("media-popover-box");
@@ -111,9 +113,8 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
     let popover_header = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
     popover_header.add_css_class("media-popover-header");
     popover_header.set_valign(gtk4::Align::Center);
-    let popover_app_icon = babydra_utils::ui::icon::get_icon_colored("broom", 14, "#ef4444");
-    let popover_app_name =
-        gtk4::Label::new(Some(&babydra_common::i18n::t("control.clean_my_linux")));
+    let popover_app_icon = babydra_ui_kit::ui::icon::get_icon_colored("broom", 14, "#ef4444");
+    let popover_app_name = gtk4::Label::new(Some(&babydra_core::i18n::t("control.clean_my_linux")));
     popover_app_name.add_css_class("media-popover-app-name");
     popover_header.append(&popover_app_icon);
     popover_header.append(&popover_app_name);
@@ -193,7 +194,7 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
     btn_container.set_margin_bottom(8);
 
     let action_btn =
-        babydra_utils::components::create_accent_button(&babydra_common::i18n::t("control.scan"));
+        babydra_ui_kit::components::create_accent_button(&babydra_core::i18n::t("control.scan"));
     action_btn.add_css_class("wifi-btn-primary");
     action_btn.set_size_request(120, -1);
     btn_container.append(&action_btn);
@@ -218,8 +219,8 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
     let journal_size = Rc::new(RefCell::new(0u64));
     let trash_size = Rc::new(RefCell::new(0u64));
 
-    // Set custom drawing logic on progress circle drawing area
     let state_draw = state.clone();
+    // Custom drawing logic for the progress circle + glow + particles
     progress_drawing.set_draw_func(move |_, cr, width, height| {
         let current_state = *state_draw.borrow();
         let cx = width as f64 / 2.0;
@@ -330,7 +331,6 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
         }
     });
 
-    // Connect button click handler
     let action_btn_c = action_btn.clone();
     let percent_label_c = percent_label.clone();
     let size_label_c = size_label.clone();
@@ -350,13 +350,12 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
 
     action_btn.connect_clicked(move |btn| {
         let label = btn.label().unwrap_or_default().to_string();
-        let scan_label_str = babydra_common::i18n::t("control.scan");
-        let free_label_str = babydra_common::i18n::t("control.free");
+        let scan_label_str = babydra_core::i18n::t("control.scan");
+        let free_label_str = babydra_core::i18n::t("control.free");
 
         if label == scan_label_str {
-            // Trigger Scan
             btn.set_sensitive(false);
-            btn.set_label(&babydra_common::i18n::t("control.scanning"));
+            btn.set_label(&babydra_core::i18n::t("control.scanning"));
 
             percent_label_c.remove_css_class("cleaning");
             percent_label_c.remove_css_class("finished");
@@ -373,7 +372,6 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
             *state_c.borrow_mut() = CleanState::Scanning { angle: 0.0 };
             progress_drawing_c.queue_draw();
 
-            // Start Scanning Animation Loop
             let state_loop = state_c.clone();
             let drawing_loop = progress_drawing_c.clone();
             gtk4::glib::timeout_add_local(std::time::Duration::from_millis(16), move || {
@@ -389,7 +387,6 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
                 }
             });
 
-            // Trigger Background Scan Thread
             let (tx, mut rx) = mpsc::unbounded_channel::<CleanProgress>();
             std::thread::spawn(move || {
                 let mut total = 0u64;
@@ -492,19 +489,17 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
                                 size_label_inner.set_text(&format_bytes(total_bytes));
 
                                 let size_str = format_bytes(total_bytes);
-                                let desc = babydra_common::i18n::t("control.bytes_can_be_freed")
+                                let desc = babydra_core::i18n::t("control.bytes_can_be_freed")
                                     .replace("{}", &size_str);
                                 log_inner.set_text(&desc);
-                                action_btn_inner
-                                    .set_label(&babydra_common::i18n::t("control.free"));
+                                action_btn_inner.set_label(&babydra_core::i18n::t("control.free"));
                             } else {
                                 *state_inner.borrow_mut() = CleanState::Idle;
                                 percent_label_inner.set_text(&t("common.ready_upper"));
                                 size_label_inner.set_text("0 B");
                                 log_inner
-                                    .set_text(&babydra_common::i18n::t("control.nothing_to_free"));
-                                action_btn_inner
-                                    .set_label(&babydra_common::i18n::t("control.scan"));
+                                    .set_text(&babydra_core::i18n::t("control.nothing_to_free"));
+                                action_btn_inner.set_label(&babydra_core::i18n::t("control.scan"));
                             }
                             progress_drawing_inner.queue_draw();
                         }
@@ -513,7 +508,6 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
                 }
             });
         } else if label == free_label_str {
-            // Trigger Clean
             btn.set_sensitive(false);
             btn.set_label(&t("common.cleaning"));
 
@@ -597,12 +591,12 @@ fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
                         val4_loop.set_text("0 B");
 
                         let size_str = format_bytes(actual_freed);
-                        let success_msg = babydra_common::i18n::t("control.freed_success")
-                            .replace("{}", &size_str);
+                        let success_msg =
+                            babydra_core::i18n::t("control.freed_success").replace("{}", &size_str);
                         log_lbl_loop.set_text(&success_msg);
 
                         action_btn_loop.set_sensitive(true);
-                        action_btn_loop.set_label(&babydra_common::i18n::t("control.scan"));
+                        action_btn_loop.set_label(&babydra_core::i18n::t("control.scan"));
 
                         drawing_loop.queue_draw();
                         gtk4::glib::ControlFlow::Break

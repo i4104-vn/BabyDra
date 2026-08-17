@@ -1,6 +1,6 @@
 //! UI rendering structure for the system monitor popover and draw graphs.
 
-use babydra_common::i18n::t;
+use babydra_core::i18n::t;
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -27,7 +27,7 @@ pub fn build_sys_monitor_ui(
     sys_label.add_css_class("status-text");
     capsule.append(&sys_label);
 
-    let popover = babydra_utils::components::create_popover(
+    let popover = babydra_ui_kit::components::create_popover(
         capsule,
         gtk4::PositionType::Bottom,
         "sys-monitor-popover",
@@ -37,7 +37,7 @@ pub fn build_sys_monitor_ui(
     let popover_box = gtk4::Box::new(gtk4::Orientation::Vertical, 10);
     popover_box.set_size_request(200, -1);
 
-    let popover_title = gtk4::Label::new(Some(&babydra_common::i18n::t("panel.system_resources")));
+    let popover_title = gtk4::Label::new(Some(&babydra_core::i18n::t("panel.system_resources")));
     popover_title.add_css_class("tile-title");
     popover_title.set_xalign(0.0);
     popover_title.set_margin_bottom(4);

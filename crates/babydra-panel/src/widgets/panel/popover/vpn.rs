@@ -1,20 +1,22 @@
+use babydra_ui_kit::components::popovers::hover::{
+    build_hover_popover_card as build_popover_card, HoverPopoverRow as PopoverRow,
+};
 use gtk4::prelude::*;
 use std::rc::Rc;
-use babydra_utils::components::popovers::hover::{
-    HoverPopoverRow as PopoverRow, build_hover_popover_card as build_popover_card,
-};
 
-pub fn build_vpn_update_fn(
-    vpn_icon: &gtk4::Image,
-    vpn_popover: &gtk4::Popover,
-) -> Rc<dyn Fn()> {
+/// Builds the `VPN update fn` UI.
+pub fn build_vpn_update_fn(vpn_icon: &gtk4::Image, vpn_popover: &gtk4::Popover) -> Rc<dyn Fn()> {
     let vpn_icon_c = vpn_icon.clone();
     let vpn_popover_c = vpn_popover.clone();
 
     Rc::new(move || {
-        if let Some(active_vpn) = babydra_common::services::system::vpn::get_active_vpn_fast() {
+        if let Some(active_vpn) = babydra_core::services::system::vpn::get_active_vpn_fast() {
             let proto_str = if !active_vpn.cipher.is_empty() {
-                format!("{} ({})", active_vpn.conn_type.to_uppercase(), active_vpn.cipher)
+                format!(
+                    "{} ({})",
+                    active_vpn.conn_type.to_uppercase(),
+                    active_vpn.cipher
+                )
             } else {
                 active_vpn.conn_type.to_uppercase()
             };

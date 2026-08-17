@@ -1,6 +1,7 @@
 use gtk4::prelude::*;
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
 
+/// Builds the `clock ui` UI.
 pub fn build_clock_ui() -> (gtk4::Button, gtk4::Label, gtk4::Widget) {
     let clock_button = gtk4::Button::new();
     clock_button.add_css_class("panel-clock-btn");
@@ -13,7 +14,7 @@ pub fn build_clock_ui() -> (gtk4::Button, gtk4::Label, gtk4::Widget) {
     overlay.set_valign(gtk4::Align::Center);
     overlay.set_halign(gtk4::Align::Center);
 
-    let bell_icon = babydra_utils::ui::icon::get_icon("bell", 14);
+    let bell_icon = babydra_ui_kit::ui::icon::get_icon("bell", 14);
     bell_icon.add_css_class("clock-bell-icon");
     overlay.set_child(Some(&bell_icon));
 
@@ -34,6 +35,7 @@ pub fn build_clock_ui() -> (gtk4::Button, gtk4::Label, gtk4::Widget) {
     (clock_button, clock_label, red_dot.upcast::<gtk4::Widget>())
 }
 
+/// Builds the `calendar window ui` UI.
 pub fn build_calendar_window_ui(
     app: &gtk4::Application,
 ) -> (
@@ -46,7 +48,7 @@ pub fn build_calendar_window_ui(
     gtk4::Box,
 ) {
     let c_win = gtk4::ApplicationWindow::new(app);
-    babydra_utils::ui::theme::apply_theme_class(&c_win);
+    babydra_ui_kit::ui::theme::apply_theme_class(&c_win);
     c_win.init_layer_shell();
     c_win.set_layer(Layer::Overlay);
     c_win.set_keyboard_mode(KeyboardMode::OnDemand);
@@ -92,12 +94,12 @@ pub fn build_calendar_window_ui(
     let notif_header = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
     notif_header.set_hexpand(true);
 
-    let notif_title = gtk4::Label::new(Some(&babydra_common::i18n::t("panel.notifications")));
+    let notif_title = gtk4::Label::new(Some(&babydra_core::i18n::t("panel.notifications")));
     notif_title.add_css_class("notif-panel-title");
     notif_title.set_halign(gtk4::Align::Start);
     notif_title.set_hexpand(true);
 
-    let clear_btn = gtk4::Button::with_label(&babydra_common::i18n::t("panel.clear_all"));
+    let clear_btn = gtk4::Button::with_label(&babydra_core::i18n::t("panel.clear_all"));
     clear_btn.add_css_class("clear-all-btn");
     clear_btn.set_halign(gtk4::Align::End);
 

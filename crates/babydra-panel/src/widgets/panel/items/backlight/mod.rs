@@ -1,6 +1,6 @@
 pub mod render;
 
-pub use babydra_common::helper::backlight::{
-    BRIGHTNESS_STATE, BRIGHTNESS_SYNCED,
-    detect_ddc_bus, has_backlight, get_current_brightness, set_brightness, query_ddcutil_brightness,
+pub use babydra_core::helper::backlight::{
+    detect_ddc_bus, get_current_brightness, has_backlight, query_ddcutil_brightness,
+    set_brightness, BRIGHTNESS_STATE, BRIGHTNESS_SYNCED,
 };

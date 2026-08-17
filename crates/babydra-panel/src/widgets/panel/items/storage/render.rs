@@ -1,24 +1,25 @@
-use gtk4::prelude::*;
 use super::get_disk_list;
+use gtk4::prelude::*;
 
+/// Creates a new `disk list box`.
 pub fn create_disk_list_box() -> gtk4::Box {
     let card = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
     card.add_css_class("control-disk-card");
 
     let title_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
-    let disk_icon = babydra_utils::ui::icon::get_icon_colored("server", 12, "#10b981");
-    let title_label = gtk4::Label::new(Some(&babydra_common::i18n::t("panel.storage_usage")));
+    let disk_icon = babydra_ui_kit::ui::icon::get_icon_colored("server", 12, "#10b981");
+    let title_label = gtk4::Label::new(Some(&babydra_core::i18n::t("panel.storage_usage")));
     title_label.add_css_class("control-slider-title");
-    
+
     title_row.append(&disk_icon);
     title_row.append(&title_label);
     card.append(&title_row);
 
     let list_container = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
-    
+
     let disks = get_disk_list();
     if disks.is_empty() {
-        let no_disks = gtk4::Label::new(Some(&babydra_common::i18n::t("panel.no_storage")));
+        let no_disks = gtk4::Label::new(Some(&babydra_core::i18n::t("panel.no_storage")));
         no_disks.add_css_class("tile-subtitle");
         list_container.append(&no_disks);
     } else {

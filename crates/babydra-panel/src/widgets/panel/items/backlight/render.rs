@@ -2,11 +2,12 @@ use super::{
     get_current_brightness, has_backlight, query_ddcutil_brightness, set_brightness,
     BRIGHTNESS_STATE, BRIGHTNESS_SYNCED,
 };
-use babydra_common::i18n::t;
+use babydra_core::i18n::t;
 use gtk4::prelude::*;
 use std::cell::Cell;
 use std::rc::Rc;
 
+/// Creates a new `brightness row`.
 pub fn create_brightness_row() -> (gtk4::Box, gtk4::Scale) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
     main_box.add_css_class("control-slider-card");
@@ -64,7 +65,7 @@ pub fn create_brightness_row() -> (gtk4::Box, gtk4::Scale) {
     icon_container.set_halign(gtk4::Align::Start);
     icon_container.set_margin_start(10);
 
-    let icon_widget = babydra_utils::ui::icon::get_icon_colored("brightness", 16, "#ffffff");
+    let icon_widget = babydra_ui_kit::ui::icon::get_icon_colored("brightness", 16, "#ffffff");
     icon_widget.add_css_class("slider-overlay-icon");
     icon_container.append(&icon_widget);
     overlay.add_overlay(&icon_container);
@@ -79,6 +80,7 @@ pub fn create_brightness_row() -> (gtk4::Box, gtk4::Scale) {
     (main_box, scale)
 }
 
+/// Sync DDC brightness async.
 fn sync_ddc_brightness_async(brightness_scale: &gtk4::Scale) {
     if !has_backlight() {
         let mut need_sync = false;

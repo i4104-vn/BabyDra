@@ -29,9 +29,8 @@ pub fn create_clock_widget(
             );
             clock_label.set_text(&time_str);
 
-            let notif_count = babydra_island::widgets::notification::HISTORICAL_NOTIFICATIONS.with(|list| {
-                list.borrow().len()
-            });
+            let notif_count = babydra_island::widgets::notification::HISTORICAL_NOTIFICATIONS
+                .with(|list| list.borrow().len());
             red_dot.set_visible(notif_count > 0);
 
             glib::ControlFlow::Continue

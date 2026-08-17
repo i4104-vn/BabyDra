@@ -1,8 +1,7 @@
+pub use babydra_core::get_battery_info;
 use gtk4::prelude::*;
-pub use babydra_common::get_battery_info;
 
-
-
+/// Creates a new `battery widget`.
 pub fn create_battery_widget() -> Option<gtk4::DrawingArea> {
     if get_battery_info().is_none() {
         return None;
@@ -20,8 +19,8 @@ pub fn create_battery_widget() -> Option<gtk4::DrawingArea> {
             None => return,
         };
 
-        let is_dark = babydra_utils::ui::theme::is_dark_mode();
-        babydra_utils::ui::battery::draw_cairo_battery(
+        let is_dark = babydra_ui_kit::ui::theme::is_dark_mode();
+        babydra_ui_kit::ui::battery::draw_cairo_battery(
             cr,
             width as f64,
             height as f64,
@@ -34,7 +33,16 @@ pub fn create_battery_widget() -> Option<gtk4::DrawingArea> {
     Some(drawing_area)
 }
 
-pub fn build_status_indicators_ui() -> (gtk4::Box, gtk4::Button, gtk4::Label, gtk4::Image, gtk4::Image, gtk4::Image, Option<gtk4::DrawingArea>) {
+/// Builds the `status indicators ui` UI.
+pub fn build_status_indicators_ui() -> (
+    gtk4::Box,
+    gtk4::Button,
+    gtk4::Label,
+    gtk4::Image,
+    gtk4::Image,
+    gtk4::Image,
+    Option<gtk4::DrawingArea>,
+) {
     let status_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 4);
     status_box.add_css_class("status-indicators-box");
 
@@ -43,20 +51,20 @@ pub fn build_status_indicators_ui() -> (gtk4::Box, gtk4::Button, gtk4::Label, gt
 
     let inner_layout = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
 
-    let vpn_icon = babydra_utils::ui::icon::get_icon("shield", 14);
+    let vpn_icon = babydra_ui_kit::ui::icon::get_icon("shield", 14);
     vpn_icon.add_css_class("status-icon");
     vpn_icon.set_visible(false);
 
-    let net_icon = babydra_utils::ui::icon::get_icon("wifi", 14);
+    let net_icon = babydra_ui_kit::ui::icon::get_icon("wifi", 14);
     net_icon.add_css_class("status-icon");
-    
+
     let vol_icon = if super::items::volume::is_muted() {
-        babydra_utils::ui::icon::get_icon("volume-mute", 14)
+        babydra_ui_kit::ui::icon::get_icon("volume-mute", 14)
     } else {
-        babydra_utils::ui::icon::get_icon("volume", 14)
+        babydra_ui_kit::ui::icon::get_icon("volume", 14)
     };
     vol_icon.add_css_class("status-icon");
-    
+
     inner_layout.append(&vpn_icon);
     inner_layout.append(&net_icon);
     inner_layout.append(&vol_icon);
@@ -72,5 +80,13 @@ pub fn build_status_indicators_ui() -> (gtk4::Box, gtk4::Button, gtk4::Label, gt
     let separator = gtk4::Label::new(Some("│"));
     separator.add_css_class("capsule-separator");
 
-    (status_box, status_button, separator, vol_icon, net_icon, vpn_icon, bat_widget)
+    (
+        status_box,
+        status_button,
+        separator,
+        vol_icon,
+        net_icon,
+        vpn_icon,
+        bat_widget,
+    )
 }

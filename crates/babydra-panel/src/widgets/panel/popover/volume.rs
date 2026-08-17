@@ -1,14 +1,12 @@
+use super::super::items;
+use babydra_ui_kit::components::popovers::hover::{
+    build_hover_popover_card as build_popover_card, HoverPopoverRow as PopoverRow,
+};
 use gtk4::prelude::*;
 use std::rc::Rc;
-use babydra_utils::components::popovers::hover::{
-    HoverPopoverRow as PopoverRow, build_hover_popover_card as build_popover_card,
-};
-use super::super::items;
 
-pub fn build_volume_update_fn(
-    vol_icon: &gtk4::Image,
-    vol_popover: &gtk4::Popover,
-) -> Rc<dyn Fn()> {
+/// Builds the `volume update fn` UI.
+pub fn build_volume_update_fn(vol_icon: &gtk4::Image, vol_popover: &gtk4::Popover) -> Rc<dyn Fn()> {
     let vol_icon_c = vol_icon.clone();
     let vol_popover_c = vol_popover.clone();
 
@@ -24,9 +22,7 @@ pub fn build_volume_update_fn(
             format!("{:.0}%", vol_pct)
         };
 
-        let mut rows = vec![
-            PopoverRow::new("Volume", &vol_str, None),
-        ];
+        let mut rows = vec![PopoverRow::new("Volume", &vol_str, None)];
         if let Some(ref dev) = dev_name {
             rows.push(PopoverRow::new("Device", dev, None));
         }

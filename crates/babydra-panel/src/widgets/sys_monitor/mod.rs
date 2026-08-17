@@ -123,7 +123,7 @@ pub fn create_sys_monitor_widget() -> gtk4::Box {
 
             let ram_info = get_ram_usage().unwrap_or((0.0, 0.0, 0.0));
 
-            let sys_template = babydra_common::i18n::t("sysmon.cpu_ram");
+            let sys_template = babydra_core::i18n::t("sysmon.cpu_ram");
             sys_label_clone.set_text(
                 &sys_template
                     .replace("{cpu}", &format!("{:.0}", cpu_percent))
@@ -132,12 +132,12 @@ pub fn create_sys_monitor_widget() -> gtk4::Box {
 
             cpu_label_clone.set_text(&format!(
                 "{}: {:.1}%",
-                babydra_common::i18n::t("panel.cpu_load"),
+                babydra_core::i18n::t("panel.cpu_load"),
                 cpu_percent
             ));
             ram_label_clone.set_text(&format!(
                 "{}: {:.1}%",
-                babydra_common::i18n::t("panel.ram_usage"),
+                babydra_core::i18n::t("panel.ram_usage"),
                 ram_info.2
             ));
             ram_detail_clone.set_text(&format!(
@@ -195,7 +195,7 @@ pub fn create_sys_monitor_widget() -> gtk4::Box {
             *last_cpu_borrow = Some(current_cpu);
             cpu_label_hover.set_text(&format!(
                 "{}: {:.1}%",
-                babydra_common::i18n::t("panel.cpu_load"),
+                babydra_core::i18n::t("panel.cpu_load"),
                 cpu_percent
             ));
         }
@@ -205,7 +205,7 @@ pub fn create_sys_monitor_widget() -> gtk4::Box {
             ram_pct = ram_info.2;
             ram_label_hover.set_text(&format!(
                 "{}: {:.1}%",
-                babydra_common::i18n::t("panel.ram_usage"),
+                babydra_core::i18n::t("panel.ram_usage"),
                 ram_pct
             ));
             ram_detail_hover.set_text(&format!("{:.2} GB / {:.2} GB", ram_info.0, ram_info.1));

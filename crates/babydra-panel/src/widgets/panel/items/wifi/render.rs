@@ -1,17 +1,18 @@
 use super::{connect_wifi_async, get_wifi_state, scan_networks};
-use babydra_common::i18n::t;
+use babydra_core::i18n::t;
 use gtk4::prelude::*;
 use std::rc::Rc;
 use tokio::sync::mpsc;
 
+/// Creates a new `wifi tile`.
 pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) -> gtk4::Box {
     let container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     container.add_css_class("control-tile-container");
     container.set_hexpand(false);
 
-    let (left_btn, sub_label) = babydra_utils::components::create_toggle_tile(
+    let (left_btn, sub_label) = babydra_ui_kit::components::create_toggle_tile(
         "wifi",
-        &babydra_common::i18n::t("control.network"),
+        &babydra_core::i18n::t("control.network"),
         "...",
         "control-tile-left-btn",
         false,
@@ -31,7 +32,7 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
         if let Some((is_act, ssid_str)) = rx.recv().await {
             sub_label_init.set_text(&ssid_str);
             let is_connected = is_act && ssid_str != "Off" && ssid_str != "Disconnected";
-            babydra_utils::components::update_toggle_tile_state(
+            babydra_ui_kit::components::update_toggle_tile_state(
                 &left_btn_init,
                 is_connected,
                 "wifi",
@@ -51,7 +52,7 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
         .and_then(|img| img.downcast::<gtk4::Image>().ok())
         .unwrap();
 
-    let right_btn = babydra_utils::components::create_colored_icon_button(
+    let right_btn = babydra_ui_kit::components::create_colored_icon_button(
         "go-next-symbolic",
         12,
         "rgba(255, 255, 255, 0.7)",
@@ -60,7 +61,7 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
         || {},
     );
 
-    let popover = babydra_utils::components::create_popover(
+    let popover = babydra_ui_kit::components::create_popover(
         &container,
         gtk4::PositionType::Right,
         "taskbar-popover",
@@ -83,7 +84,7 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
         if let Some(ref cb) = on_popover_toggled_c {
             cb(true);
         }
-        let left_icon = babydra_utils::ui::icon::get_icon_colored(
+        let left_icon = babydra_ui_kit::ui::icon::get_icon_colored(
             "go-previous-symbolic",
             12,
             "rgba(255, 255, 255, 0.7)",
@@ -97,7 +98,7 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
         if let Some(ref cb) = on_popover_toggled_c2 {
             cb(false);
         }
-        let right_icon = babydra_utils::ui::icon::get_icon_colored(
+        let right_icon = babydra_ui_kit::ui::icon::get_icon_colored(
             "go-next-symbolic",
             12,
             "rgba(255, 255, 255, 0.7)",
@@ -109,10 +110,10 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
     left_btn.connect_clicked(move |b| {
         let is_now_active = b.has_css_class("active");
         if is_now_active {
-            babydra_common::helper::wifi::set_wifi_enabled(true);
+            babydra_core::helper::wifi::set_wifi_enabled(true);
             sub_label_c.set_text(&t("control.scanning"));
         } else {
-            babydra_common::helper::wifi::set_wifi_enabled(false);
+            babydra_core::helper::wifi::set_wifi_enabled(false);
             sub_label_c.set_text(&t("control.off"));
         }
     });
@@ -122,6 +123,7 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
     container
 }
 
+/// Sets up `wifi popover`.
 fn setup_wifi_popover(
     popover: &gtk4::Popover,
     sub_label: gtk4::Label,
@@ -151,6 +153,7 @@ fn setup_wifi_popover(
     });
 }
 
+/// Refresh wifi popover list.
 fn refresh_wifi_popover_list(
     main_box: &gtk4::Box,
     sub_label: gtk4::Label,
@@ -192,7 +195,7 @@ fn refresh_wifi_popover_list(
     let popover_clone = popover.clone();
 
     let (tx, mut rx) =
-        mpsc::unbounded_channel::<Option<Vec<babydra_common::models::wifi::WifiNetwork>>>();
+        mpsc::unbounded_channel::<Option<Vec<babydra_core::models::wifi::WifiNetwork>>>();
 
     std::thread::spawn(move || {
         let nets = scan_networks();
@@ -215,9 +218,10 @@ fn refresh_wifi_popover_list(
     });
 }
 
+/// Builds the `wifi list ui` UI.
 fn build_wifi_list_ui(
     main_box: &gtk4::Box,
-    networks: Vec<babydra_common::models::wifi::WifiNetwork>,
+    networks: Vec<babydra_core::models::wifi::WifiNetwork>,
 
     sub_label: gtk4::Label,
     left_btn: gtk4::Button,
@@ -258,7 +262,7 @@ fn build_wifi_list_ui(
         } else {
             "rgba(255, 255, 255, 0.5)"
         };
-        let wifi_icon = babydra_utils::components::create_wifi_signal_icon_for_network(
+        let wifi_icon = babydra_ui_kit::components::create_wifi_signal_icon_for_network(
             net.signal,
             is_connected,
             14,
@@ -274,7 +278,7 @@ fn build_wifi_list_ui(
         let is_secured = security != "open";
         if is_secured {
             let lock_icon =
-                babydra_utils::ui::icon::get_icon_colored("lock", 12, "rgba(255, 255, 255, 0.4)");
+                babydra_ui_kit::ui::icon::get_icon_colored("lock", 12, "rgba(255, 255, 255, 0.4)");
             item_box.append(&lock_icon);
         }
 
@@ -344,6 +348,7 @@ fn build_wifi_list_ui(
     main_box.append(&scroll);
 }
 
+/// Shows the `connecting state`.
 fn show_connecting_state(main_box: &gtk4::Box, ssid: &str) {
     while let Some(child) = main_box.first_child() {
         main_box.remove(&child);
@@ -363,6 +368,7 @@ fn show_connecting_state(main_box: &gtk4::Box, ssid: &str) {
     main_box.append(&spinner);
 }
 
+/// Shows the `credentials form`.
 fn show_credentials_form(
     main_box: &gtk4::Box,
     ssid: &str,

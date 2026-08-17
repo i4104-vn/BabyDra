@@ -1,13 +1,14 @@
+use crate::widgets::panel::create_status_indicators;
+use crate::widgets::sys_monitor::create_sys_monitor_widget;
+use crate::widgets::tray::create_tray_widget;
+use crate::widgets::workspace::create_workspace_switcher;
+use babydra_island::create_system_island;
 use gtk4::prelude::*;
 use gtk4_layer_shell::{Edge, Layer, LayerShell};
 use std::cell::RefCell;
 use std::rc::Rc;
-use crate::widgets::panel::create_status_indicators;
-use crate::widgets::workspace::create_workspace_switcher;
-use crate::widgets::sys_monitor::create_sys_monitor_widget;
-use crate::widgets::tray::create_tray_widget;
-use babydra_island::create_system_island;
 
+/// Rebuild panel window.
 pub fn rebuild_panel_window(
     window: &gtk4::ApplicationWindow,
     app: &gtk4::Application,
@@ -28,18 +29,22 @@ pub fn rebuild_panel_window(
     logo_btn.set_cursor_from_name(Some("pointer"));
     logo_btn.set_valign(gtk4::Align::Center);
     logo_btn.set_halign(gtk4::Align::Center);
-    let logo_icon = babydra_utils::ui::icon::get_icon("logo", 16);
+    let logo_icon = babydra_ui_kit::ui::icon::get_icon("logo", 16);
     logo_btn.set_child(Some(&logo_icon));
-    
+
     let lw_clone = launcher_window.clone();
     let ccw_clone = control_center_window.clone();
     let cw_clone = calendar_window.clone();
     let app_clone = app.clone();
     logo_btn.connect_clicked(move |_| {
         let cc_win = { ccw_clone.borrow().clone() };
-        if let Some(win) = cc_win { win.close(); }
+        if let Some(win) = cc_win {
+            win.close();
+        }
         let cal_win = { cw_clone.borrow().clone() };
-        if let Some(win) = cal_win { win.close(); }
+        if let Some(win) = cal_win {
+            win.close();
+        }
         let existing = { lw_clone.borrow().clone() };
         if let Some(win) = existing {
             win.close();
@@ -119,7 +124,7 @@ pub fn rebuild_panel_window(
         if let Some(surface) = win.surface() {
             let win_w = win.width();
             let region = gtk4::cairo::Region::create();
-            
+
             // Top bar panel rect (height 36px)
             let top_rect = gtk4::cairo::RectangleInt::new(0, 0, win_w, 36);
             let _ = region.union_rectangle(&top_rect);
@@ -130,7 +135,8 @@ pub fn rebuild_panel_window(
                     let nw = notch_clone.width();
                     let nh = notch_clone.height();
                     if nh > 36 && nw > 0 {
-                        let notch_rect = gtk4::cairo::RectangleInt::new(nx as i32, ny as i32, nw, nh);
+                        let notch_rect =
+                            gtk4::cairo::RectangleInt::new(nx as i32, ny as i32, nw, nh);
                         let _ = region.union_rectangle(&notch_rect);
                     }
                 }
@@ -142,6 +148,7 @@ pub fn rebuild_panel_window(
     });
 }
 
+/// Builds the `panel ui` UI.
 pub fn build_panel_ui(
     app: &gtk4::Application,
     control_center_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
@@ -149,7 +156,7 @@ pub fn build_panel_ui(
     launcher_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
 ) -> gtk4::ApplicationWindow {
     let window = gtk4::ApplicationWindow::new(app);
-    babydra_utils::ui::theme::apply_theme_class(&window);
+    babydra_ui_kit::ui::theme::apply_theme_class(&window);
 
     // Initialize layer shell properties on the window
     window.init_layer_shell();
@@ -157,7 +164,7 @@ pub fn build_panel_ui(
     // Assign to the Top layer so it renders above normal windows
     window.set_layer(Layer::Top);
 
-    // Set exclusive zone so other maximized windows don't overlap it
+    // Keep the panel in its own exclusive zone so maximized windows don't overlap it
     window.set_exclusive_zone(38);
 
     // Anchor it to the top, left, and right edges of the screen
@@ -170,10 +177,8 @@ pub fn build_panel_ui(
     window.set_margin(Edge::Left, 1);
     window.set_margin(Edge::Right, 1);
 
-    // Set default height of the panel
     window.set_default_size(0, 36);
 
-    // Add styling class
     window.add_css_class("panel-window");
 
     let window_c = window.clone();
@@ -183,22 +188,16 @@ pub fn build_panel_ui(
     let lw_c = launcher_window.clone();
 
     rebuild_panel_window(
-        &window, 
-        app, 
-        control_center_window.clone(), 
-        calendar_window.clone(), 
-        launcher_window.clone()
+        &window,
+        app,
+        control_center_window.clone(),
+        calendar_window.clone(),
+        launcher_window.clone(),
     );
 
     if let Some(settings) = gtk4::Settings::default() {
         settings.connect_gtk_application_prefer_dark_theme_notify(move |_| {
-            rebuild_panel_window(
-                &window_c, 
-                &app_c, 
-                ccw_c.clone(), 
-                cw_c.clone(), 
-                lw_c.clone()
-            );
+            rebuild_panel_window(&window_c, &app_c, ccw_c.clone(), cw_c.clone(), lw_c.clone());
         });
     }
 
@@ -207,13 +206,13 @@ pub fn build_panel_ui(
     let ccw_c2 = control_center_window.clone();
     let cw_c2 = calendar_window.clone();
     let lw_c2 = launcher_window.clone();
-    babydra_common::i18n::watch_locale_change(move |_| {
+    babydra_core::i18n::watch_locale_change(move |_| {
         rebuild_panel_window(
-            &window_c2, 
-            &app_c2, 
-            ccw_c2.clone(), 
-            cw_c2.clone(), 
-            lw_c2.clone()
+            &window_c2,
+            &app_c2,
+            ccw_c2.clone(),
+            cw_c2.clone(),
+            lw_c2.clone(),
         );
     });
 
