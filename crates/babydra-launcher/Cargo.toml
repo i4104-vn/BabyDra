@@ -8,11 +8,11 @@ babydra-core = { workspace = true }
 babydra-ui-kit = { workspace = true }
 
 # GUI & Layer Shell
-gtk4 = { version = "0.9", features = ["v4_10"] }
-gtk4-layer-shell = "0.4.0"
+gtk4 = { workspace = true }
+gtk4-layer-shell = { workspace = true }
 
 # Async & utilities
-tokio = { version = "1.0", features = ["full"] }
+tokio = { workspace = true }
 tracing = "0.1"
-dirs = "5.0"
+dirs = { workspace = true }
 
