@@ -248,15 +248,14 @@ fn handle_step_interaction(app: &mut App, key: KeyEvent) {
                 }
             }
             KeyCode::Char(' ') => {
-                if let Some(item) = app.variant_options.get_mut(app.variant_cursor) {
-                    let name = item.name.clone();
+                if app.variant_cursor < app.variant_options.len() {
                     for v in &mut app.variant_options {
                         v.selected = false;
                     }
                     if let Some(selected) = app.variant_options.get_mut(app.variant_cursor) {
                         selected.selected = true;
+                        app.selected_variant = selected.name.clone();
                     }
-                    app.selected_variant = name;
                     app.current_profile = PresetProfile::Custom;
                 }
             }
