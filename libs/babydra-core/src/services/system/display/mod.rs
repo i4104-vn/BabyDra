@@ -1,5 +1,6 @@
 //! Monitor/Display configuration service.
 
+use crate::error::CoreResult;
 use crate::models::display::MonitorConfig;
 use std::process::Command;
 
@@ -148,7 +149,7 @@ pub fn get_displays() -> Vec<MonitorConfig> {
 }
 
 /// Saves monitor configurations into babydra.conf and applies changes via wlr-randr.
-pub fn save_displays(monitors: &[MonitorConfig]) -> Result<(), String> {
+pub fn save_displays(monitors: &[MonitorConfig]) -> CoreResult<()> {
     // 1. Save monitor settings into unified babydra.conf
     let mut conf = crate::config::load_babydra_config();
     conf.display.monitors = monitors

@@ -1,3 +1,4 @@
+use crate::error::{CoreError, CoreResult};
 use crate::models::explore::file_entry::{FileEntry, FileType};
 use mime_guess::from_path;
 use std::ffi::CStr;
@@ -234,8 +235,10 @@ pub async fn rename_path(path: PathBuf, new_name: String) -> Result<(), std::io:
 }
 
 /// Asynchronously sends a file or directory to XDG Trash.
-pub async fn send_to_trash(path: PathBuf) -> Result<(), String> {
-    tokio::task::spawn_blocking(move || trash::delete(path).map_err(|e| e.to_string()))
-        .await
-        .unwrap()
+pub async fn send_to_trash(path: PathBuf) -> CoreResult<()> {
+    tokio::task::spawn_blocking(move || {
+        trash::delete(path).map_err(|e| CoreError::Message(e.to_string()))
+    })
+    .await
+    .unwrap()
 }

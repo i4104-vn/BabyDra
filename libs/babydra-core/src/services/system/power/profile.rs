@@ -1,6 +1,7 @@
 //! Performance profile service with fallback elevation support.
 
 use crate::config::{load_babydra_config, save_babydra_config};
+use crate::error::CoreResult;
 use crate::models::shell::power::PerformanceProfile;
 use std::io::Write;
 use std::process::Command;
@@ -18,7 +19,7 @@ fn save_profile_to_config(profile: PerformanceProfile) {
 }
 
 /// Sets `performance profile` to the given value.
-pub fn set_performance_profile(profile: PerformanceProfile) -> Result<(), String> {
+pub fn set_performance_profile(profile: PerformanceProfile) -> CoreResult<()> {
     save_profile_to_config(profile);
 
     let (governor, epp) = match profile {
@@ -53,7 +54,7 @@ pub fn set_performance_profile(profile: PerformanceProfile) -> Result<(), String
     if direct_success {
         Ok(())
     } else {
-        Err("Permission denied. Sudo password required to update CPU governor.".to_string())
+        Err("Permission denied. Sudo password required to update CPU governor.".into())
     }
 }
 
@@ -61,7 +62,7 @@ pub fn set_performance_profile(profile: PerformanceProfile) -> Result<(), String
 pub fn set_performance_profile_with_password(
     profile: PerformanceProfile,
     password: &str,
-) -> Result<(), String> {
+) -> CoreResult<()> {
     let (governor, epp) = match profile {
         PerformanceProfile::Normal => ("powersave", "power"),
         PerformanceProfile::Balanced => ("powersave", "balance_performance"),
@@ -81,7 +82,7 @@ pub fn set_performance_profile_with_password(
         .spawn()
     {
         Ok(c) => c,
-        Err(_) => return Err("Failed to execute sudo".to_string()),
+        Err(_) => return Err("Failed to execute sudo".into()),
     };
 
     if let Some(mut stdin) = child.stdin.take() {
@@ -95,7 +96,7 @@ pub fn set_performance_profile_with_password(
         }
     }
 
-    Err("Authentication failed. Incorrect password.".to_string())
+    Err("Authentication failed. Incorrect password.".into())
 }
 
 /// Applies `saved profile`.

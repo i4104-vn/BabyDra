@@ -1,6 +1,6 @@
-use gtk4::{Box, Button, DropDown};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MonitorConfig {
     pub id: String,
     pub name: String,
@@ -16,18 +16,4 @@ pub struct MonitorConfig {
     pub enabled: bool,
     pub available_resolutions: Vec<String>,
     pub available_rates: Vec<f64>,
-}
-
-pub struct DisplayCardRow {
-    pub container: Box,
-    pub resolution_dropdown: DropDown,
-    pub rate_dropdown: DropDown,
-    pub orientation_dropdown: DropDown,
-}
-
-pub struct DisplaysWidget {
-    pub container: Box,
-    pub save_btn: Button,
-    pub refresh_btn: Button,
-    pub card_rows: Vec<DisplayCardRow>,
 }

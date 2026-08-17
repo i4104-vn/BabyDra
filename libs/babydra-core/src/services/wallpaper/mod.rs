@@ -1,6 +1,7 @@
 //! Wallpaper management utilities.
 //! Supported backends: swww, swaybg, feh.
 
+use crate::error::CoreResult;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -14,9 +15,9 @@ fn has_binary(name: &str) -> bool {
 }
 
 /// Sets the desktop wallpaper using the best available backend utility (awww, swww, swaybg, feh).
-pub fn set_wallpaper(path: &Path) -> Result<(), String> {
+pub fn set_wallpaper(path: &Path) -> CoreResult<()> {
     if !path.exists() {
-        return Err(format!("Wallpaper file does not exist at: {:?}", path));
+        return Err(format!("Wallpaper file does not exist at: {:?}", path).into());
     }
 
     let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".to_string());
@@ -63,7 +64,7 @@ pub fn set_wallpaper(path: &Path) -> Result<(), String> {
         }
     }
 
-    Err("No compatible wallpaper backend - awww was found in PATH".to_string())
+    Err("No compatible wallpaper backend - awww was found in PATH".into())
 }
 
 /// Applies the currently saved wallpaper from babydra.conf.
@@ -155,12 +156,9 @@ pub fn get_local_wallpapers() -> Vec<PathBuf> {
 }
 
 /// Sets the greeter background image path in babydra.conf as a base64 string.
-pub fn set_greeter_wallpaper(path: &Path) -> Result<(), String> {
+pub fn set_greeter_wallpaper(path: &Path) -> CoreResult<()> {
     if !path.exists() {
-        return Err(format!(
-            "Greeter background file does not exist at: {:?}",
-            path
-        ));
+        return Err(format!("Greeter background file does not exist at: {:?}", path).into());
     }
 
     let bytes = std::fs::read(path).map_err(|e| e.to_string())?;
@@ -231,9 +229,9 @@ pub fn get_greeter_wallpaper_css() -> String {
 }
 
 /// Sets the avatar image path in babydra.conf as a base64 string.
-pub fn set_avatar(path: &Path) -> Result<(), String> {
+pub fn set_avatar(path: &Path) -> CoreResult<()> {
     if !path.exists() {
-        return Err(format!("Avatar file does not exist at: {:?}", path));
+        return Err(format!("Avatar file does not exist at: {:?}", path).into());
     }
     let bytes = std::fs::read(path).map_err(|e| e.to_string())?;
     use base64::{engine::general_purpose::STANDARD, Engine as _};
@@ -258,10 +256,9 @@ pub fn get_avatar_bytes() -> Option<Vec<u8>> {
 }
 
 /// Helper to convert raw image bytes into a square, scaled Pixbuf
-pub fn crop_to_square_pixbuf(bytes: &[u8], size: i32) -> Option<gtk4::gdk_pixbuf::Pixbuf> {
-    let stream = gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(bytes));
-    if let Ok(pixbuf) = gtk4::gdk_pixbuf::Pixbuf::from_stream(&stream, gtk4::gio::Cancellable::NONE)
-    {
+pub fn crop_to_square_pixbuf(bytes: &[u8], size: i32) -> Option<gdk_pixbuf::Pixbuf> {
+    let stream = gio::MemoryInputStream::from_bytes(&glib::Bytes::from(bytes));
+    if let Ok(pixbuf) = gdk_pixbuf::Pixbuf::from_stream(&stream, gio::Cancellable::NONE) {
         let w = pixbuf.width();
         let h = pixbuf.height();
         let min_dim = std::cmp::min(w, h);
@@ -269,7 +266,7 @@ pub fn crop_to_square_pixbuf(bytes: &[u8], size: i32) -> Option<gtk4::gdk_pixbuf
         let y = (h - min_dim) / 2;
 
         let sub = pixbuf.new_subpixbuf(x, y, min_dim, min_dim);
-        return sub.scale_simple(size, size, gtk4::gdk_pixbuf::InterpType::Bilinear);
+        return sub.scale_simple(size, size, gdk_pixbuf::InterpType::Bilinear);
     }
     None
 }
@@ -277,7 +274,7 @@ pub fn crop_to_square_pixbuf(bytes: &[u8], size: i32) -> Option<gtk4::gdk_pixbuf
 /// Applies an anti-aliased circular alpha mask to a square pixbuf so the avatar
 /// renders as a circle instead of a square. GTK4 CSS `border-radius` does not
 /// clip widget content, so the mask must be applied to the pixels themselves.
-fn apply_circular_mask(pixbuf: &gtk4::gdk_pixbuf::Pixbuf) -> gtk4::gdk_pixbuf::Pixbuf {
+fn apply_circular_mask(pixbuf: &gdk_pixbuf::Pixbuf) -> gdk_pixbuf::Pixbuf {
     let w = pixbuf.width();
     let h = pixbuf.height();
     let n_channels = pixbuf.n_channels();
@@ -289,8 +286,7 @@ fn apply_circular_mask(pixbuf: &gtk4::gdk_pixbuf::Pixbuf) -> gtk4::gdk_pixbuf::P
         .map(|b| b.as_ref().to_vec())
         .unwrap_or_default();
 
-    let Some(out) = gtk4::gdk_pixbuf::Pixbuf::new(gtk4::gdk_pixbuf::Colorspace::Rgb, true, 8, w, h)
-    else {
+    let Some(out) = gdk_pixbuf::Pixbuf::new(gdk_pixbuf::Colorspace::Rgb, true, 8, w, h) else {
         return pixbuf.clone();
     };
 
@@ -320,7 +316,7 @@ fn apply_circular_mask(pixbuf: &gtk4::gdk_pixbuf::Pixbuf) -> gtk4::gdk_pixbuf::P
 
 /// Converts raw image bytes into a square, scaled Pixbuf masked into a circle.
 /// Used for circular avatar displays (greeter, lock screen, settings preview).
-pub fn crop_to_circle_pixbuf(bytes: &[u8], size: i32) -> Option<gtk4::gdk_pixbuf::Pixbuf> {
+pub fn crop_to_circle_pixbuf(bytes: &[u8], size: i32) -> Option<gdk_pixbuf::Pixbuf> {
     let square = crop_to_square_pixbuf(bytes, size)?;
     Some(apply_circular_mask(&square))
 }

@@ -1,6 +1,6 @@
-use gtk4::{Box, Button};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Keybind {
     pub id: usize,
     pub bind_type: String,
@@ -8,13 +8,4 @@ pub struct Keybind {
     pub key: String,
     pub dispatcher: String,
     pub args: String,
-}
-
-#[derive(Clone)]
-pub struct KeybindsWidget {
-    pub container: Box,
-    pub table_box: Box,
-    pub add_btn: Button,
-    pub refresh_btn: Button,
-    pub save_btn: Button,
 }

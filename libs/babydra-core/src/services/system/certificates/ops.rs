@@ -1,3 +1,4 @@
+use crate::error::{CoreError, CoreResult};
 use crate::models::CertInfo;
 use std::fs;
 use std::io::Write;
@@ -26,11 +27,7 @@ pub fn list_ca_certificates() -> Vec<CertInfo> {
 }
 
 /// Add ca certificate.
-pub fn add_ca_certificate(
-    src_path: &str,
-    filename: &str,
-    sudo_password: &str,
-) -> Result<(), String> {
+pub fn add_ca_certificate(src_path: &str, filename: &str, sudo_password: &str) -> CoreResult<()> {
     let cmd_str = format!(
         "mkdir -p /etc/ca-certificates/trust-source/anchors && cp '{}' '/etc/ca-certificates/trust-source/anchors/{}' && update-ca-trust",
         src_path, filename
@@ -39,7 +36,7 @@ pub fn add_ca_certificate(
 }
 
 /// Delete ca certificate.
-pub fn delete_ca_certificate(filename: &str, sudo_password: &str) -> Result<(), String> {
+pub fn delete_ca_certificate(filename: &str, sudo_password: &str) -> CoreResult<()> {
     let cmd_str = format!(
         "rm -f '/etc/ca-certificates/trust-source/anchors/{}' && update-ca-trust",
         filename
@@ -47,7 +44,7 @@ pub fn delete_ca_certificate(filename: &str, sudo_password: &str) -> Result<(), 
     execute_sudo_command(&cmd_str, sudo_password)
 }
 
-fn execute_sudo_command(cmd_str: &str, password: &str) -> Result<(), String> {
+fn execute_sudo_command(cmd_str: &str, password: &str) -> CoreResult<()> {
     let mut child = Command::new("sudo")
         .arg("-S")
         .arg("sh")
@@ -73,9 +70,9 @@ fn execute_sudo_command(cmd_str: &str, password: &str) -> Result<(), String> {
     } else {
         let err_msg = String::from_utf8_lossy(&output.stderr);
         Err(if err_msg.trim().is_empty() {
-            "Permission denied or incorrect password".to_string()
+            CoreError::msg("Permission denied or incorrect password")
         } else {
-            err_msg.trim().to_string()
+            CoreError::msg(err_msg.trim().to_string())
         })
     }
 }

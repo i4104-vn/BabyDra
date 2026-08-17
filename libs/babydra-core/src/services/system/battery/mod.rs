@@ -1,5 +1,6 @@
 //! Battery subsystem service for reading /sys/class/power_supply.
 
+use crate::error::CoreResult;
 use crate::models::shell::battery::BatteryInfo;
 use std::io::Write;
 use std::path::Path;
@@ -340,11 +341,11 @@ pub fn charge_limit_path() -> Option<std::path::PathBuf> {
 }
 
 /// Sets `charge limit` to the given value.
-pub fn set_charge_limit(limit: u32) -> Result<(), String> {
+pub fn set_charge_limit(limit: u32) -> CoreResult<()> {
     let limit = limit.clamp(80, 100);
     let path = match charge_limit_path() {
         Some(p) => p,
-        None => return Err("unsupported".to_string()),
+        None => return Err("unsupported".into()),
     };
 
     let path_str = path.to_string_lossy();
@@ -361,16 +362,16 @@ pub fn set_charge_limit(limit: u32) -> Result<(), String> {
     if std::fs::write(&path, val).is_ok() {
         Ok(())
     } else {
-        Err("permission_denied".to_string())
+        Err("permission_denied".into())
     }
 }
 
 /// Sets `charge limit auth` to the given value.
-pub fn set_charge_limit_auth(limit: u32, pwd: &str) -> Result<(), String> {
+pub fn set_charge_limit_auth(limit: u32, pwd: &str) -> CoreResult<()> {
     let limit = limit.clamp(80, 100);
     let path = match charge_limit_path() {
         Some(p) => p,
-        None => return Err("unsupported".to_string()),
+        None => return Err("unsupported".into()),
     };
 
     let path_str = path.to_string_lossy();
@@ -397,7 +398,7 @@ pub fn set_charge_limit_auth(limit: u32, pwd: &str) -> Result<(), String> {
         .spawn()
     {
         Ok(c) => c,
-        Err(_) => return Err("Failed to execute sudo".to_string()),
+        Err(_) => return Err("Failed to execute sudo".into()),
     };
 
     if let Some(mut stdin) = child.stdin.take() {
@@ -410,5 +411,5 @@ pub fn set_charge_limit_auth(limit: u32, pwd: &str) -> Result<(), String> {
         }
     }
 
-    Err("Authentication failed. Incorrect password.".to_string())
+    Err("Authentication failed. Incorrect password.".into())
 }

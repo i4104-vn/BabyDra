@@ -1,3 +1,4 @@
+use crate::error::CoreResult;
 use crate::models::vpn::*;
 use crate::services::utils::{run_cmd, run_cmd_bool};
 
@@ -17,7 +18,7 @@ pub fn delete_vpn_connection(name: &str) -> bool {
 }
 
 /// Persists `VPN connection`.
-pub fn save_vpn_connection(details: &VpnConnDetails) -> Result<(), String> {
+pub fn save_vpn_connection(details: &VpnConnDetails) -> CoreResult<()> {
     if let Some(ref src_path) = details.config_file {
         if !src_path.is_empty() {
             let _ = crate::services::system::vpn::config::copy_vpn_config_to_babydra_dir(src_path);
@@ -177,6 +178,6 @@ pub fn save_vpn_connection(details: &VpnConnDetails) -> Result<(), String> {
         }
         Ok(())
     } else {
-        Err("Failed to create VPN connection via nmcli".to_string())
+        Err("Failed to create VPN connection via nmcli".into())
     }
 }

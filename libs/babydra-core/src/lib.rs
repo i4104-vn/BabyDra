@@ -2,17 +2,19 @@
 //! Exposes shared config, services, and i18n hooks.
 
 pub mod config;
+pub mod error;
 pub mod i18n;
 pub mod models;
 pub mod services;
+
+pub use error::{CoreError, CoreResult};
 pub use services::logger;
 pub use services::logger::{get_log_dir, get_log_path, init_logger};
 
 // Re-export models for convenient flat access
 pub use models::explore::{
-    get_group_name, ActivePane, ContentViewHandle, ContentViewWidgets, DirectoryModel, FileEntry,
-    FileType, HeaderBarWidgets, InfoPanelWidgets, MainWindowWidgets, PreviewPanelWidgets,
-    SessionState, SortColumn, SortOrder, TabState,
+    get_group_name, ActivePane, DirectoryModel, FileEntry, FileType, SessionState, SortColumn,
+    SortOrder, TabState,
 };
 
 // Flat re-exports at root for convenience and backward compatibility
@@ -33,8 +35,7 @@ pub use services::notification::service::{
     send_settings_notification, ActiveNotification, NotificationMsg,
 };
 pub use services::screenshot::{
-    capture_screen_to_temp, get_screenshot_save_path, handle_fullscreen_capture, trigger_copy,
-    trigger_save,
+    capture_screen_to_temp, get_screenshot_save_path, handle_fullscreen_capture, trigger_save,
 };
 pub use services::system::auth::verify_password;
 pub use services::system::battery::get_battery_info;
@@ -71,7 +72,7 @@ pub use services::wallpaper::{
 pub use services::window;
 
 pub use services::clock;
-pub use services::clock::update_clock;
+pub use services::clock::format_clock_date;
 pub use services::exif;
 pub use services::exif::{read_exif, ExifData};
 pub use services::explore::{

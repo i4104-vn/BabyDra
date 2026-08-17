@@ -1,16 +1,8 @@
-use gtk4::{Box, Button};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EnvVar {
     pub id: usize,
     pub key: String,
     pub value: String,
-}
-
-#[derive(Clone)]
-pub struct EnvWidget {
-    pub container: Box,
-    pub list_box: Box,
-    pub add_btn: Button,
-    pub save_btn: Button,
 }

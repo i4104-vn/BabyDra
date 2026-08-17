@@ -8,6 +8,7 @@
 //! system defaults < configs/ seed < theme package < variant < ~/.babydra/
 //! ```
 
+use crate::error::CoreResult;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -62,7 +63,7 @@ pub fn list_variants() -> Vec<String> {
 }
 
 /// Loads a variant by name from `variants/<name>/variant.toml`.
-pub fn load_variant(name: &str) -> Result<Variant, String> {
+pub fn load_variant(name: &str) -> CoreResult<Variant> {
     let path = variants_root().join(name).join("variant.toml");
     let content = std::fs::read_to_string(&path)
         .map_err(|e| format!("cannot read {}: {}", path.display(), e))?;

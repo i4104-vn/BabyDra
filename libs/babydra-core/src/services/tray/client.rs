@@ -5,7 +5,7 @@ use super::watcher::StatusNotifierItemProxy;
 /// Sends an Activate or ContextMenu signal to the item's D-Bus service, letting the application open its menu or window.
 pub fn activate_item(service: &str, x: i32, y: i32, is_right_click: bool) {
     let service_str = service.to_string();
-    gtk4::glib::spawn_future_local(async move {
+    glib::spawn_future_local(async move {
         if let Ok(conn) = zbus::Connection::session().await {
             let bus_name = match zbus::names::BusName::try_from(service_str.clone()) {
                 Ok(name) => name,
@@ -94,7 +94,7 @@ pub fn get_dbus_menu(service: &str) -> Option<Vec<crate::models::MenuItem>> {
 /// Activate menu item.
 pub fn activate_menu_item(service: &str, item_id: i32) {
     let service_str = service.to_string();
-    gtk4::glib::spawn_future_local(async move {
+    glib::spawn_future_local(async move {
         let menu_path = fetch_menu_path(&service_str).await.unwrap_or_default();
         if menu_path.is_empty() {
             return;

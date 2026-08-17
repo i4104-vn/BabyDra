@@ -1,3 +1,4 @@
+use crate::error::CoreResult;
 use crate::services::utils::{get_home_dir, run_cmd};
 use std::fs;
 use std::path::Path;
@@ -8,7 +9,7 @@ pub fn apply_appearance(
     icon_theme: &str,
     cursor_theme: &str,
     cursor_size: u32,
-) -> Result<(), String> {
+) -> CoreResult<()> {
     let size_str = cursor_size.to_string();
 
     let _ = run_cmd(&[
@@ -96,7 +97,10 @@ pub fn apply_appearance(
                         _ => {
                             env_vars.push((
                                 key.to_string(),
-                                trimmed.split_once('=').unwrap().1.to_string(),
+                                trimmed
+                                    .split_once('=')
+                                    .map(|(_, v)| v.to_string())
+                                    .unwrap_or_default(),
                             ));
                         }
                     }

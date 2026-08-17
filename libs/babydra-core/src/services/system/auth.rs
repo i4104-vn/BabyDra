@@ -95,8 +95,10 @@ pub unsafe extern "C" fn pam_conversation_fn(
 ///
 /// Returns `true` if authentication succeeded, `false` otherwise.
 pub fn verify_password(username: &str, password: &str) -> bool {
-    let username_c = CString::new(username).unwrap();
-    let password_c = CString::new(password).unwrap();
+    // Guard against NUL bytes from user input before touching C APIs.
+    let (Ok(username_c), Ok(password_c)) = (CString::new(username), CString::new(password)) else {
+        return false;
+    };
 
     let conv = pam_conv {
         conv: Some(pam_conversation_fn),
@@ -106,6 +108,7 @@ pub fn verify_password(username: &str, password: &str) -> bool {
     let mut pamh: *mut c_void = std::ptr::null_mut();
 
     unsafe {
+        // "login" is a compile-time constant, safe to unwrap.
         let service_c = CString::new("login").unwrap();
         let start_status = pam_start(service_c.as_ptr(), username_c.as_ptr(), &conv, &mut pamh);
 

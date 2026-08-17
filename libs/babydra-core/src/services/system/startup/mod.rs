@@ -1,5 +1,6 @@
 //! Startup commands service (Labwc autostart).
 
+use crate::error::CoreResult;
 use crate::models::startup_command::StartupCommand;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -62,7 +63,7 @@ pub fn get_startup_commands() -> Vec<StartupCommand> {
 }
 
 /// Saves autostart commands to labwc autostart file.
-pub fn save_startup_commands(commands: &[StartupCommand]) -> Result<(), String> {
+pub fn save_startup_commands(commands: &[StartupCommand]) -> CoreResult<()> {
     let home = get_home_dir();
     let user_config = Path::new(&home).join(".config/labwc/autostart");
 

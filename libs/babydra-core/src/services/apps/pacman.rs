@@ -1,5 +1,6 @@
 //! Pacman explicitly installed package resolution and dependency heuristics.
 
+use crate::error::CoreResult;
 use crate::models::app_info::InstalledPackage;
 use std::path::Path;
 
@@ -104,7 +105,7 @@ pub fn is_dependency_heuristic(filename: &str, _name: &str, exec: &str) -> bool 
 }
 
 /// Uninstalls a package by name.
-pub fn uninstall_package(name: &str) -> Result<(), String> {
+pub fn uninstall_package(name: &str) -> CoreResult<()> {
     let output = std::process::Command::new("pkexec")
         .args(["pacman", "-R", "--noconfirm", name])
         .output()
@@ -113,17 +114,17 @@ pub fn uninstall_package(name: &str) -> Result<(), String> {
     if output.status.success() {
         Ok(())
     } else {
-        Err(String::from_utf8_lossy(&output.stderr).to_string())
+        Err(String::from_utf8_lossy(&output.stderr).to_string().into())
     }
 }
 
 /// Uninstall app by path.
-pub fn uninstall_app_by_path(full_path: &str) -> Result<(), String> {
+pub fn uninstall_app_by_path(full_path: &str) -> CoreResult<()> {
     let path = Path::new(full_path);
     if let Some(pkg) = get_package_owner(path) {
         uninstall_package(&pkg)
     } else {
-        Err("Could not find package owner for app".to_string())
+        Err("Could not find package owner for app".into())
     }
 }
 
@@ -132,7 +133,7 @@ pub fn stream_uninstall_package(
     pkg_name: &str,
     password: Option<&str>,
     sender: std::sync::mpsc::Sender<String>,
-) -> Result<(), String> {
+) -> CoreResult<()> {
     crate::services::system::updates::clean_pacman_lock(password, sender.clone());
     let cmd = format!("yes | pacman -Rns --noconfirm {}", pkg_name.trim());
     crate::services::system::updates::execute_cmd_with_log_stream(
@@ -201,7 +202,7 @@ pub fn stream_downgrade_package(
     pkg_name: &str,
     password: Option<&str>,
     sender: std::sync::mpsc::Sender<String>,
-) -> Result<(), String> {
+) -> CoreResult<()> {
     crate::services::system::updates::clean_pacman_lock(password, sender.clone());
     if let Some(cached_file) = find_cached_older_package(pkg_name) {
         let path_str = cached_file.to_string_lossy().to_string();
@@ -215,6 +216,7 @@ pub fn stream_downgrade_package(
         Err(format!(
             "No cached older version found for '{}' in /var/cache/pacman/pkg/",
             pkg_name
-        ))
+        )
+        .into())
     }
 }

@@ -1,8 +1,9 @@
+use crate::error::CoreResult;
 use crate::models::vpn::*;
 use crate::services::utils::run_cmd_bool;
 
 /// Copy VPN config to babydra dir.
-pub fn copy_vpn_config_to_babydra_dir(src_path: &str) -> Result<String, String> {
+pub fn copy_vpn_config_to_babydra_dir(src_path: &str) -> CoreResult<String> {
     let vpn_dir = crate::config::get_babydra_config_dir().join("vpn");
     std::fs::create_dir_all(&vpn_dir).map_err(|e| format!("Failed to create config dir: {}", e))?;
 
