@@ -42,7 +42,7 @@ pub fn show_for_empty(
     });
 
     // Sub-popover containing create options
-    let sub_popover = crate::components::popovers::create_popover(&btn_create_new, gtk4::PositionType::Right, "explore-popover");
+    let sub_popover = babydra_utils::components::popovers::create_popover(&btn_create_new, gtk4::PositionType::Right, "explore-popover");
     let sub_vbox = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
     sub_vbox.set_css_classes(&["context-menu-box"]);
     sub_vbox.set_width_request(150);

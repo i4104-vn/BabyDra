@@ -35,7 +35,7 @@ pub fn build_grid_card_ui(entry: &FileEntry) -> Box {
         overlay.set_halign(Align::Center);
         overlay.set_valign(Align::Center);
         
-        let temp_icon = crate::ui::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
+        let temp_icon = babydra_utils::ui::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
         temp_icon.set_pixel_size(64);
         temp_icon.set_halign(Align::Center);
         temp_icon.set_valign(Align::Center);
@@ -66,7 +66,7 @@ pub fn build_grid_card_ui(entry: &FileEntry) -> Box {
             }
         });
     } else {
-        let icon = crate::ui::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
+        let icon = babydra_utils::ui::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
         icon.set_pixel_size(68);
         icon.set_halign(Align::Center);
         icon.set_valign(Align::Center);

@@ -115,7 +115,7 @@ pub fn wire_listbox_controllers(
 
     // 5. Drag-to-select with rubberband selection
     if let Some(list_overlay) = widgets.list_fixed.parent() {
-        babydra_utils::explore::wire_rubberband_listbox(
+        babydra_explore_kit::explore::wire_rubberband_listbox(
             &list_overlay,
             widgets.listbox.clone(),
             widgets.list_fixed.clone(),

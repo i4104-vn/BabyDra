@@ -28,7 +28,7 @@ pub fn show_alert_dialog(
         }
         is_animating_cancel.set(true);
         let win_cb = win_cancel.clone();
-        crate::ui::animation::genie_out(
+        babydra_utils::ui::animation::genie_out(
             vbox_cancel.upcast_ref(),
             340,
             130,
@@ -41,5 +41,5 @@ pub fn show_alert_dialog(
     });
 
     window.present();
-    crate::ui::animation::genie_in(vbox.upcast_ref(), 340, 130, 300);
+    babydra_utils::ui::animation::genie_in(vbox.upcast_ref(), 340, 130, 300);
 }

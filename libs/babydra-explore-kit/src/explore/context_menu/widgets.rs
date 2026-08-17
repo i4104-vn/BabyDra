@@ -24,7 +24,7 @@ pub fn create_menu_popover(parent: &gtk4::Widget, x: f64, y: f64) -> (Popover, B
 
 pub fn create_menu_button(label: &str, icon: &str) -> Button {
     let hbox = Box::new(Orientation::Horizontal, 8);
-    let img = crate::ui::icon::get_icon(icon, 16);
+    let img = babydra_utils::ui::icon::get_icon(icon, 16);
     img.set_pixel_size(16);
     let lbl = Label::builder()
         .label(label)
@@ -43,7 +43,7 @@ pub fn create_menu_button(label: &str, icon: &str) -> Button {
 }
 
 pub fn create_footer_icon_button(icon: &str, tooltip: &str) -> Button {
-    let img = crate::ui::icon::get_icon(icon, 14);
+    let img = babydra_utils::ui::icon::get_icon(icon, 14);
     img.set_pixel_size(14);
 
     Button::builder()

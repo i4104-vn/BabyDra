@@ -6,6 +6,7 @@ members = [
     "libs/babydra-launcher",
     "libs/babydra-theme",
     "libs/babydra-utils",
+    "libs/babydra-explore-kit",
     "crates/babydra-panel",
     "crates/babydra-switcher",
     "crates/babydra-screenshot",
@@ -29,3 +30,4 @@ babydra-common = { path = "libs/babydra-common" }
 babydra-launcher = { path = "libs/babydra-launcher" }
 babydra-island = { path = "libs/babydra-island" }
 babydra-utils = { path = "libs/babydra-utils" }
+babydra-explore-kit = { path = "libs/babydra-explore-kit" }

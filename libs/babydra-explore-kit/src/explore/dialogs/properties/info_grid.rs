@@ -23,7 +23,7 @@ pub fn build_info_grid(
 
         let icon_box = Box::new(Orientation::Vertical, 0);
         icon_box.set_css_classes(&["properties-icon-wrap"]);
-        let icon = crate::ui::icon::get_icon(icon_name, 36);
+        let icon = babydra_utils::ui::icon::get_icon(icon_name, 36);
         icon.set_halign(Align::Center);
         icon.set_valign(Align::Center);
         icon_box.append(&icon);
@@ -136,7 +136,7 @@ pub fn build_info_grid(
 
         let icon_box = Box::new(Orientation::Vertical, 0);
         icon_box.set_css_classes(&["properties-icon-wrap"]);
-        let icon = crate::ui::icon::get_icon("info", 36);
+        let icon = babydra_utils::ui::icon::get_icon("info", 36);
         icon.set_halign(Align::Center);
         icon.set_valign(Align::Center);
         icon_box.append(&icon);
@@ -209,7 +209,7 @@ fn create_prop_row(container: &Box, icon_name: &str, key: &str, value: &str) -> 
     let hbox = Box::new(Orientation::Horizontal, 8);
     hbox.set_css_classes(&["properties-row"]);
 
-    let icon = crate::ui::icon::get_icon(icon_name, 15);
+    let icon = babydra_utils::ui::icon::get_icon(icon_name, 15);
     icon.set_halign(Align::Start);
     icon.set_valign(Align::Center);
     hbox.append(&icon);

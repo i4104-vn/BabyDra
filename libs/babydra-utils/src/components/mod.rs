@@ -24,8 +24,8 @@ pub use buttons::{
     create_wallpaper_thumbnail_icon, create_wifi_signal_icon, update_toggle_tile_state,
 };
 pub use card::{
-    create_card, create_card_with_class, create_grid_file_item, create_item_row,
-    create_scrollable_list, create_subtitle, create_switch_card, create_title,
+    create_card, create_card_with_class, create_item_row, create_scrollable_list,
+    create_subtitle, create_switch_card, create_title,
 };
 pub use close_button::{create_close_button, create_close_button_with_label};
 pub use list_group::{clear_box, clear_list_box, create_list_row};

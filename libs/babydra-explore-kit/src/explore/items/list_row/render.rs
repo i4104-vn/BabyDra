@@ -14,7 +14,7 @@ pub fn build_list_row_ui(entry: &FileEntry) -> Box {
     item_box.set_margin_start(6);
     item_box.set_margin_end(6);
 
-    let img = crate::ui::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
+    let img = babydra_utils::ui::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
     img.set_pixel_size(24);
     item_box.append(&img);
 
