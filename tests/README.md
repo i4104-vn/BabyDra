@@ -22,8 +22,6 @@ Current areas:
 | `models/`      | shell theme config, explore grouping | `babydra-core`          |
 | `services/`    | wallpaper avatar cropping            | `babydra-core`, `gtk4`  |
 | `theme/`       | theme package engine + tokens        | `babydra-theme`         |
-| `installer/`   | variant parsing, theme selection     | `babydra-installer`     |
-
 All test binaries are declared explicitly in `tests/Cargo.toml` (`[[test]]`
 entries) so each file compiles as its own small, focused binary.
 

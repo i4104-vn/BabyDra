@@ -16,7 +16,6 @@ members = [
     "crates/babydra-explore",
     "crates/babydra-greeter",
     "crates/babydra-launcher",
-    "install",
     "tests",
 ]
 exclude = [

@@ -14,7 +14,6 @@ description = "Integration test suite for the BabyDra workspace (TDD safety net)
 babydra-core = { workspace = true }
 babydra-theme = { workspace = true }
 babydra-ui-kit = { workspace = true }
-babydra-installer = { path = "../install" }
 chrono = "0.4"
 gtk4 = { version = "0.9", features = ["v4_10"] }
 serde_json = "1.0"
@@ -80,10 +79,3 @@ path = "theme/shipped.rs"
 name = "kits_prelude"
 path = "kits/prelude.rs"
 
-[[test]]
-name = "installer_variant_options"
-path = "installer/variant_options.rs"
-
-[[test]]
-name = "installer_theme_selection"
-path = "installer/theme_selection.rs"
