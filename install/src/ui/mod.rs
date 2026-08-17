@@ -16,13 +16,12 @@ use crate::models::WizardStep;
 pub fn draw(f: &mut Frame, app: &App) {
     let size = f.area();
 
-    // Main layout: Header -> (Sidebar + Content) -> Footer
+    // Main layout: Header -> Body (No footer)
     let main_chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
             Constraint::Length(3),
-            Constraint::Min(12),
-            Constraint::Length(3),
+            Constraint::Min(10),
         ])
         .split(size);
 
@@ -36,32 +35,19 @@ pub fn draw(f: &mut Frame, app: &App) {
 
     if is_full_width_step {
         draw_content(f, app, main_chunks[1]);
-    } else if size.width >= 105 {
-        // Body split: Left Sidebar (33 chars) + Center Content + Right Floating Shortcuts (22 chars)
+    } else {
+        // Layout: Main Content (spacious) + Right Floating Shortcuts Box
         let body_chunks = Layout::default()
             .direction(Direction::Horizontal)
             .constraints([
-                Constraint::Length(33),
                 Constraint::Min(45),
-                Constraint::Length(22),
+                Constraint::Length(25),
             ])
             .split(main_chunks[1]);
 
-        layout::draw_sidebar(f, app, body_chunks[0]);
-        draw_content(f, app, body_chunks[1]);
-        layout::draw_shortcuts_panel(f, app, body_chunks[2]);
-    } else {
-        // Compact layout for narrow terminals: Left Sidebar (32 chars) + Right Content
-        let body_chunks = Layout::default()
-            .direction(Direction::Horizontal)
-            .constraints([Constraint::Length(32), Constraint::Min(40)])
-            .split(main_chunks[1]);
-
-        layout::draw_sidebar(f, app, body_chunks[0]);
-        draw_content(f, app, body_chunks[1]);
+        draw_content(f, app, body_chunks[0]);
+        layout::draw_shortcuts_panel(f, app, body_chunks[1]);
     }
-
-    layout::draw_footer(f, app, main_chunks[2]);
 
     // Modals
     if app.show_branch_switching_modal {

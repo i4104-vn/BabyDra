@@ -93,6 +93,7 @@ pub fn draw_header(f: &mut Frame, app: &App, area: Rect) {
     f.render_widget(right_header, header_chunks[1]);
 }
 
+#[allow(dead_code)]
 pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
     let sidebar_chunks = Layout::default()
         .direction(Direction::Vertical)
@@ -296,6 +297,7 @@ pub fn draw_shortcuts_panel(f: &mut Frame, _app: &App, area: Rect) {
     f.render_widget(list, area);
 }
 
+#[allow(dead_code)]
 pub fn draw_footer(f: &mut Frame, app: &App, area: Rect) {
     let step_info = app.current_step.short_name();
     let footer_text = vec![
