@@ -48,7 +48,11 @@ pub fn create_colored_icon_button(
 }
 
 /// Creates an icon + label button.
-pub fn create_icon_label_button(icon_name: &str, label_text: &str, css_class: &str) -> gtk4::Button {
+pub fn create_icon_label_button(
+    icon_name: &str,
+    label_text: &str,
+    css_class: &str,
+) -> gtk4::Button {
     let btn = gtk4::Button::new();
     if !css_class.is_empty() {
         btn.add_css_class(css_class);
@@ -141,11 +145,12 @@ pub fn create_wifi_signal_icon(size: i32) -> gtk4::Widget {
 
 /// Dynamic battery level % icon widget (matches Cairo battery card style).
 pub fn create_battery_percentage_icon(_size: i32) -> gtk4::Widget {
-    let (pct, is_charging) = if let Some(info) = babydra_common::services::system::battery::get_battery_info() {
-        (info.percentage, info.is_charging)
-    } else {
-        (100, false)
-    };
+    let (pct, is_charging) =
+        if let Some(info) = babydra_common::services::system::battery::get_battery_info() {
+            (info.percentage, info.is_charging)
+        } else {
+            (100, false)
+        };
 
     crate::ui::battery::create_battery_drawing_area(pct, is_charging, 22, 12).upcast()
 }
@@ -200,7 +205,9 @@ pub fn create_wallpaper_thumbnail_icon(size: i32) -> gtk4::Widget {
                 let y = (h - square_size) / 2;
 
                 let cropped = orig.new_subpixbuf(x, y, square_size, square_size);
-                if let Some(scaled) = cropped.scale_simple(size, size, gdk_pixbuf::InterpType::Bilinear) {
+                if let Some(scaled) =
+                    cropped.scale_simple(size, size, gdk_pixbuf::InterpType::Bilinear)
+                {
                     if let Ok(circle_pb) = scaled.add_alpha(false, 0, 0, 0) {
                         let width = circle_pb.width();
                         let height = circle_pb.height();
@@ -217,7 +224,8 @@ pub fn create_wallpaper_thumbnail_icon(size: i32) -> gtk4::Widget {
                                 for px in 0..width {
                                     let dx = px as f64 - center;
                                     if dx * dx + dy * dy > radius_sq {
-                                        let idx = (py as usize) * rowstride + (px as usize) * n_channels;
+                                        let idx =
+                                            (py as usize) * rowstride + (px as usize) * n_channels;
                                         if idx + 3 < pixels.len() {
                                             pixels[idx + 3] = 0;
                                         }
@@ -254,5 +262,3 @@ pub fn create_wallpaper_thumbnail_icon(size: i32) -> gtk4::Widget {
 pub fn create_colored_icon_widget(icon_name: &str, size: i32, color_hex: &str) -> gtk4::Widget {
     crate::ui::icon::get_icon_colored(icon_name, size, color_hex).upcast()
 }
-
-

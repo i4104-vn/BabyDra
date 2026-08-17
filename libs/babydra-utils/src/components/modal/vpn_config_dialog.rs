@@ -1,6 +1,6 @@
+use babydra_common::services::system::vpn::{parse_vpn_config_file, VpnConnDetails};
 use gtk4::prelude::*;
 use gtk4::{Box, Button, DropDown, Entry, Label, Orientation, PasswordEntry, StringList};
-use babydra_common::services::system::vpn::{parse_vpn_config_file, VpnConnDetails};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -237,7 +237,10 @@ impl VpnConfigDialog {
         let dialog_c = dialog.clone();
         let dialog_box_c = dialog.container.clone();
         dialog.browse_config_btn.connect_clicked(move |_| {
-            if let Some(win) = dialog_box_c.root().and_then(|r| r.downcast::<gtk4::Window>().ok()) {
+            if let Some(win) = dialog_box_c
+                .root()
+                .and_then(|r| r.downcast::<gtk4::Window>().ok())
+            {
                 let file_dialog = gtk4::FileDialog::new();
                 file_dialog.set_title("Select VPN Config File");
 
@@ -263,7 +266,10 @@ impl VpnConfigDialog {
         let ca_entry_c = dialog.ca_entry.clone();
         let dialog_box_ca = dialog.container.clone();
         dialog.browse_ca_btn.connect_clicked(move |_| {
-            if let Some(win) = dialog_box_ca.root().and_then(|r| r.downcast::<gtk4::Window>().ok()) {
+            if let Some(win) = dialog_box_ca
+                .root()
+                .and_then(|r| r.downcast::<gtk4::Window>().ok())
+            {
                 let file_dialog = gtk4::FileDialog::new();
                 file_dialog.set_title("Select CA Certificate");
 
@@ -305,7 +311,10 @@ impl VpnConfigDialog {
             "fortisslvpn",
             "strongswan",
         ];
-        if let Some(idx) = vpn_types.iter().position(|&t| parsed.vpn_type.to_lowercase().contains(t)) {
+        if let Some(idx) = vpn_types
+            .iter()
+            .position(|&t| parsed.vpn_type.to_lowercase().contains(t))
+        {
             self.type_dropdown.set_selected(idx as u32);
         }
     }
@@ -330,8 +339,10 @@ impl VpnConfigDialog {
         *self.original_name.borrow_mut() = Some(details.name.clone());
         *self.selected_config_path.borrow_mut() = details.config_file.clone();
 
-        self.title_lbl.set_text(&format!("Configure {}", details.name));
-        self.config_file_entry.set_text(details.config_file.as_deref().unwrap_or(""));
+        self.title_lbl
+            .set_text(&format!("Configure {}", details.name));
+        self.config_file_entry
+            .set_text(details.config_file.as_deref().unwrap_or(""));
         self.name_entry.set_text(&details.name);
         self.gateway_entry.set_text(&details.gateway);
         self.user_entry.set_text(&details.username);
@@ -347,7 +358,10 @@ impl VpnConfigDialog {
             "fortisslvpn",
             "strongswan",
         ];
-        if let Some(idx) = vpn_types.iter().position(|&t| details.vpn_type.to_lowercase().contains(t)) {
+        if let Some(idx) = vpn_types
+            .iter()
+            .position(|&t| details.vpn_type.to_lowercase().contains(t))
+        {
             self.type_dropdown.set_selected(idx as u32);
         } else {
             self.type_dropdown.set_selected(0);
@@ -410,7 +424,10 @@ impl VpnConfigDialog {
         let container = self.container.clone();
 
         self.delete_btn.connect_clicked(move |_| {
-            let name = original_name.borrow().clone().unwrap_or_else(|| name_entry.text().to_string());
+            let name = original_name
+                .borrow()
+                .clone()
+                .unwrap_or_else(|| name_entry.text().to_string());
             if !name.is_empty() {
                 container.set_visible(false);
                 callback(name);

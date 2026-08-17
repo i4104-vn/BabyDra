@@ -4,6 +4,10 @@ Tài liệu quy định cách sử dụng, kiểu dáng, và mã nguồn chuẩn
 
 **Vị trí mã nguồn:** `libs/babydra-utils/src/components/switch/mod.rs`
 
+> [!NOTE]
+> Hệ switch duy nhất là **`CustomSwitch`** (vẽ Cairo, màu lấy từ `ui/theme/colors.rs`).
+> CSS `switch.baby-switch` cũ đã bị xóa (dead CSS, Phase 2 T2.2).
+
 ---
 
 ## 1. Tổng quan

@@ -1,6 +1,6 @@
+use babydra_common::models::wifi::WifiConfig;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Entry, Label, Orientation};
-use babydra_common::models::wifi::WifiConfig;
 use std::cell::RefCell;
 use std::rc::Rc;
 

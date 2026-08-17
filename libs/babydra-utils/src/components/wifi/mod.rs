@@ -73,6 +73,13 @@ pub fn create_wifi_signal_icon_for_network(
 
 /// Creates a dynamic Wi-Fi signal icon widget querying current system Wi-Fi state.
 pub fn create_system_wifi_signal_icon(size: i32, custom_color: Option<&str>) -> gtk4::Widget {
-    let (is_enabled, is_connected, strength_pct) = babydra_common::services::system::wifi::get_wifi_signal_strength();
-    create_wifi_signal_icon_from_strength(strength_pct as u32, is_enabled, is_connected, size, custom_color)
+    let (is_enabled, is_connected, strength_pct) =
+        babydra_common::services::system::wifi::get_wifi_signal_strength();
+    create_wifi_signal_icon_from_strength(
+        strength_pct as u32,
+        is_enabled,
+        is_connected,
+        size,
+        custom_color,
+    )
 }

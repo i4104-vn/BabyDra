@@ -1,6 +1,6 @@
+use babydra_common::models::wifi::{WifiConfig, WifiNetwork};
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Label, Orientation, ScrolledWindow};
-use babydra_common::models::wifi::{WifiNetwork, WifiConfig};
 
 pub struct WifiInfoDialog {
     pub container: Box,
@@ -114,7 +114,8 @@ impl WifiInfoDialog {
 
     pub fn show_for(&self, net: &WifiNetwork, config: Option<&WifiConfig>) {
         self.ssid_lbl.set_text(&net.ssid);
-        self.forget_btn.set_visible(net.is_saved || net.is_connected);
+        self.forget_btn
+            .set_visible(net.is_saved || net.is_connected);
 
         if net.is_connected {
             self.status_dot.remove_css_class("wifi-saved-dot");
@@ -182,10 +183,18 @@ impl WifiInfoDialog {
         grid2.set_row_spacing(8);
 
         if let Some(cfg) = config {
-            let method_str = if cfg.method == "manual" { "Static (Manual)" } else { "DHCP (Automatic)" };
+            let method_str = if cfg.method == "manual" {
+                "Static (Manual)"
+            } else {
+                "DHCP (Automatic)"
+            };
             self.add_grid_row(&grid2, 0, "IP Assignment", method_str);
 
-            let ip_str = if cfg.ip_address.is_empty() { "Not Assigned" } else { &cfg.ip_address };
+            let ip_str = if cfg.ip_address.is_empty() {
+                "Not Assigned"
+            } else {
+                &cfg.ip_address
+            };
             self.add_grid_row(&grid2, 1, "IPv4 Address", ip_str);
 
             let prefix_str = if cfg.ip_address.is_empty() {
@@ -195,10 +204,18 @@ impl WifiInfoDialog {
             };
             self.add_grid_row(&grid2, 2, "Prefix", &prefix_str);
 
-            let gw_str = if cfg.gateway.is_empty() { "Not Available" } else { &cfg.gateway };
+            let gw_str = if cfg.gateway.is_empty() {
+                "Not Available"
+            } else {
+                &cfg.gateway
+            };
             self.add_grid_row(&grid2, 3, "Default Gateway", gw_str);
 
-            let dns_str = if cfg.dns.is_empty() { "Automatic (Router Default)" } else { &cfg.dns };
+            let dns_str = if cfg.dns.is_empty() {
+                "Automatic (Router Default)"
+            } else {
+                &cfg.dns
+            };
             self.add_grid_row(&grid2, 4, "DNS Servers", dns_str);
         } else {
             self.add_grid_row(&grid2, 0, "IP Assignment", "DHCP (Automatic)");

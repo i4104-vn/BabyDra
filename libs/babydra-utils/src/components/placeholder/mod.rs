@@ -1,11 +1,31 @@
-use gtk4::prelude::*;
 use crate::components::badge::create_icon_badge;
+use gtk4::prelude::*;
+
+/// Creates a simple placeholder label (moved here from the removed `alerts` module).
+///
+/// Prefer `create_placeholder_row` for settings ListBox containers.
+#[deprecated(note = "use create_placeholder_row with PlaceholderState instead")]
+pub fn create_placeholder_message(text: &str) -> gtk4::Label {
+    let placeholder = gtk4::Label::new(Some(text));
+    placeholder.add_css_class("settings-desc");
+    placeholder.set_margin_top(20);
+    placeholder.set_margin_bottom(20);
+    placeholder
+}
 
 /// Standard placeholder states for settings ListBox containers.
 pub enum PlaceholderState<'a> {
-    Disabled { title_key: &'a str, desc_key: &'a str, icon_name: &'a str },
+    Disabled {
+        title_key: &'a str,
+        desc_key: &'a str,
+        icon_name: &'a str,
+    },
     Loading,
-    Empty { title_key: &'a str, desc_key: Option<&'a str>, icon_name: &'a str },
+    Empty {
+        title_key: &'a str,
+        desc_key: Option<&'a str>,
+        icon_name: &'a str,
+    },
 }
 
 /// Constructs a unified ListBoxRow placeholder for disabled, loading, or empty states.
@@ -26,7 +46,11 @@ pub fn create_placeholder_row(state: PlaceholderState) -> gtk4::ListBoxRow {
     placeholder_box.set_margin_bottom(40);
 
     match state {
-        PlaceholderState::Disabled { title_key, desc_key, icon_name } => {
+        PlaceholderState::Disabled {
+            title_key,
+            desc_key,
+            icon_name,
+        } => {
             let badge = create_icon_badge(icon_name, 24, false);
             placeholder_box.append(&badge);
 
@@ -52,7 +76,11 @@ pub fn create_placeholder_row(state: PlaceholderState) -> gtk4::ListBoxRow {
             lbl.set_halign(gtk4::Align::Center);
             placeholder_box.append(&lbl);
         }
-        PlaceholderState::Empty { title_key, desc_key, icon_name } => {
+        PlaceholderState::Empty {
+            title_key,
+            desc_key,
+            icon_name,
+        } => {
             let badge = create_icon_badge(icon_name, 24, false);
             placeholder_box.append(&badge);
 

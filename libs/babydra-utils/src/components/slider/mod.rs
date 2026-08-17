@@ -5,6 +5,52 @@ use std::rc::Rc;
 
 type Callback = Box<dyn Fn(u32) + 'static>;
 
+/// Pure helper: snap a raw position value to the nearest step, clamped to [min, max].
+pub(crate) fn snap_to_step(raw: f64, min: u32, max: u32, step: u32) -> u32 {
+    let min_f = min as f64;
+    let max_f = max as f64;
+    let step_f = step.max(1) as f64;
+    let frac = ((raw - min_f) / (max_f - min_f)).clamp(0.0, 1.0);
+    let raw_val = min_f + frac * (max_f - min_f);
+    let steps = ((raw_val - min_f) / step_f).round();
+    let rounded = (min_f + steps * step_f) as u32;
+    rounded.clamp(min, max)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn snap_to_step_clamps_below_min() {
+        assert_eq!(snap_to_step(-50.0, 10, 90, 10), 10);
+    }
+
+    #[test]
+    fn snap_to_step_clamps_above_max() {
+        assert_eq!(snap_to_step(500.0, 10, 90, 10), 90);
+    }
+
+    #[test]
+    fn snap_to_step_rounds_to_nearest_step() {
+        // 45 -> nearest step of 10 from 10..90 is 50
+        assert_eq!(snap_to_step(45.0, 10, 90, 10), 50);
+        // 44 -> nearest is 40
+        assert_eq!(snap_to_step(44.0, 10, 90, 10), 40);
+    }
+
+    #[test]
+    fn snap_to_step_handles_custom_range_and_step() {
+        assert_eq!(snap_to_step(25.0, 0, 100, 25), 25);
+        assert_eq!(snap_to_step(12.0, 0, 100, 25), 0);
+    }
+
+    #[test]
+    fn snap_to_step_returns_initial_when_already_aligned() {
+        assert_eq!(snap_to_step(30.0, 10, 90, 10), 30);
+    }
+}
+
 /// CustomSlider: An interactive custom Cairo slider replacing GTK Scale with customizable range.
 #[derive(Clone)]
 pub struct CustomSlider {
@@ -172,10 +218,7 @@ impl CustomSlider {
             let margin_x = 24.0;
             let track_w = (width - 2.0 * margin_x).max(10.0);
             let frac = ((x - margin_x) / track_w).clamp(0.0, 1.0);
-            let raw = min as f64 + frac * (max - min) as f64;
-            let steps = ((raw - min as f64) / step as f64).round();
-            let rounded = (min as f64 + steps * step as f64) as u32;
-            rounded.clamp(min, max)
+            snap_to_step(min as f64 + frac * (max - min) as f64, min, max, step)
         };
 
         // Click Gesture

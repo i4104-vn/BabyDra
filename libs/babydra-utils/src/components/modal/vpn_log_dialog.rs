@@ -1,7 +1,7 @@
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Label, Orientation, ScrolledWindow, TextView};
-use std::rc::Rc;
 use std::cell::RefCell;
+use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct VpnLogDialog {
@@ -136,7 +136,8 @@ impl VpnLogDialog {
         let since_owned = since.map(|s| s.to_string());
 
         std::thread::spawn(move || {
-            let logs = babydra_common::services::system::vpn::get_vpn_logs(&vpn, since_owned.as_deref());
+            let logs =
+                babydra_common::services::system::vpn::get_vpn_logs(&vpn, since_owned.as_deref());
             let _ = tx.send(logs);
         });
 
@@ -159,9 +160,18 @@ impl VpnLogDialog {
 
         if tag_table.lookup("log_time").is_none() {
             buffer.create_tag(Some("log_time"), &[("foreground", &"#9ca3af")]);
-            buffer.create_tag(Some("log_warn"), &[("foreground", &"#f59e0b"), ("weight", &700)]);
-            buffer.create_tag(Some("log_error"), &[("foreground", &"#ef4444"), ("weight", &700)]);
-            buffer.create_tag(Some("log_info"), &[("foreground", &"#60a5fa"), ("weight", &700)]);
+            buffer.create_tag(
+                Some("log_warn"),
+                &[("foreground", &"#f59e0b"), ("weight", &700)],
+            );
+            buffer.create_tag(
+                Some("log_error"),
+                &[("foreground", &"#ef4444"), ("weight", &700)],
+            );
+            buffer.create_tag(
+                Some("log_info"),
+                &[("foreground", &"#60a5fa"), ("weight", &700)],
+            );
             buffer.create_tag(Some("log_normal"), &[("foreground", &"#34d399")]);
         }
 

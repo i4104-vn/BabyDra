@@ -1,11 +1,13 @@
 use gtk4::prelude::*;
 
 /// Creates a sidebar navigation row box.
+#[deprecated(note = "unused — remove in v2; use explore sidebar widgets")]
 pub fn create_sidebar_row(label: &str, icon_name: &str) -> gtk4::Box {
     create_sidebar_row_with_badge(label, icon_name, "badge-slate")
 }
 
 /// Creates a sidebar navigation row box with custom icon badge class.
+#[deprecated(note = "unused — remove in v2; use explore sidebar widgets")]
 pub fn create_sidebar_row_with_badge(label: &str, icon_name: &str, badge_class: &str) -> gtk4::Box {
     let row_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
     row_box.add_css_class("settings-sidebar-row");
@@ -27,4 +29,3 @@ pub fn create_sidebar_row_with_badge(label: &str, icon_name: &str, badge_class: 
 
     row_box
 }
-

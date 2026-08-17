@@ -1,6 +1,7 @@
 use gtk4::prelude::*;
 
 /// Creates a standardized icon-only close button.
+#[deprecated(note = "unused — remove in v2; use create_icon_button")]
 pub fn create_close_button(css_class: &str) -> gtk4::Button {
     let btn = gtk4::Button::new();
     if !css_class.is_empty() {
@@ -16,6 +17,7 @@ pub fn create_close_button(css_class: &str) -> gtk4::Button {
 }
 
 /// Creates a close button with a label and an icon.
+#[deprecated(note = "unused — remove in v2; use create_icon_button")]
 pub fn create_close_button_with_label(label_text: &str, css_class: &str) -> gtk4::Button {
     let btn = gtk4::Button::new();
     if !css_class.is_empty() {
@@ -24,7 +26,7 @@ pub fn create_close_button_with_label(label_text: &str, css_class: &str) -> gtk4
         btn.add_css_class("close-btn");
     }
     btn.set_cursor_from_name(Some("pointer"));
-    
+
     let close_content = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
     let close_icon = crate::ui::icon::get_system_or_file_icon("window-close", "window-close");
     close_icon.set_pixel_size(12);

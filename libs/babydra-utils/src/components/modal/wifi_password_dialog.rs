@@ -123,11 +123,13 @@ impl WifiPasswordDialog {
         self.error_lbl.set_visible(false);
 
         if security == "8021x" {
-            self.sub_lbl.set_text("This enterprise network requires credentials.");
+            self.sub_lbl
+                .set_text("This enterprise network requires credentials.");
             self.username_box.set_visible(true);
             self.username_entry.grab_focus();
         } else {
-            self.sub_lbl.set_text("This network requires a security password.");
+            self.sub_lbl
+                .set_text("This network requires a security password.");
             self.username_box.set_visible(false);
             self.password_entry.grab_focus();
         }

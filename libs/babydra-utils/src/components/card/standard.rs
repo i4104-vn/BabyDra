@@ -8,7 +8,11 @@ pub fn create_card(orientation: gtk4::Orientation, spacing: i32) -> gtk4::Box {
 }
 
 /// Creates a box container styled as a card with a custom CSS class.
-pub fn create_card_with_class(orientation: gtk4::Orientation, spacing: i32, css_class: &str) -> gtk4::Box {
+pub fn create_card_with_class(
+    orientation: gtk4::Orientation,
+    spacing: i32,
+    css_class: &str,
+) -> gtk4::Box {
     let card = gtk4::Box::new(orientation, spacing);
     if !css_class.is_empty() {
         card.add_css_class(css_class);
@@ -33,6 +37,10 @@ pub fn create_subtitle(text: &str) -> gtk4::Label {
 }
 
 /// Creates a general purpose settings row inside a card list.
+///
+/// This duplicates `list_group::create_list_row` (the single canonical row
+/// builder) — deprecated, migrate callers to `create_list_row`.
+#[deprecated(note = "use list_group::create_list_row instead")]
 pub fn create_item_row(
     title: &str,
     subtitle: &str,

@@ -103,7 +103,11 @@ impl PasswordDialog {
             let pwd = entry1.text().to_string();
             entry1.set_text("");
             container1.set_visible(false);
-            let opt = if pwd.trim().is_empty() { None } else { Some(pwd) };
+            let opt = if pwd.trim().is_empty() {
+                None
+            } else {
+                Some(pwd)
+            };
             cb1(opt);
         });
 
@@ -114,7 +118,11 @@ impl PasswordDialog {
             let pwd = entry2.text().to_string();
             entry2.set_text("");
             container2.set_visible(false);
-            let opt = if pwd.trim().is_empty() { None } else { Some(pwd) };
+            let opt = if pwd.trim().is_empty() {
+                None
+            } else {
+                Some(pwd)
+            };
             cb2(opt);
         });
     }

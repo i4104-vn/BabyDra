@@ -1,6 +1,7 @@
 use gtk4::prelude::*;
 
 /// Creates a status indicator label/badge.
+#[deprecated(note = "unused — remove in v2; use success-text / settings-desc classes directly")]
 pub fn create_status_badge(text: &str, is_success: bool) -> gtk4::Label {
     let lbl = gtk4::Label::new(Some(text));
     if is_success {

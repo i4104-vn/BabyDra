@@ -28,4 +28,4 @@ pub fn create_popover_with_content(
 }
 
 pub mod hover;
-pub use hover::{HoverPopoverRow, build_hover_popover_card, attach_hover_popover};
+pub use hover::{attach_hover_popover, build_hover_popover_card, HoverPopoverRow};

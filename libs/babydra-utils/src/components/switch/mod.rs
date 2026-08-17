@@ -5,6 +5,44 @@ use std::rc::Rc;
 
 type Callback = Box<dyn Fn(bool) + 'static>;
 
+/// Pure ease-out cubic easing function shared by switch animations.
+pub(crate) fn ease_out_cubic(t: f64) -> f64 {
+    1.0 - (1.0 - t).powi(3)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn ease_out_cubic_endpoints() {
+        assert!((ease_out_cubic(0.0) - 0.0).abs() < 1e-9);
+        assert!((ease_out_cubic(1.0) - 1.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn ease_out_cubic_is_monotonic() {
+        let mut prev = ease_out_cubic(0.0);
+        for i in 1..=10 {
+            let t = i as f64 / 10.0;
+            let v = ease_out_cubic(t);
+            assert!(v >= prev, "easing must not decrease");
+            prev = v;
+        }
+    }
+
+    #[test]
+    fn ease_out_cubic_starts_slow_ends_fast() {
+        // Ease-out: first quarter moves less than the last quarter.
+        let early = ease_out_cubic(0.25);
+        let late = ease_out_cubic(0.75);
+        assert!(
+            late - 0.5 > 0.5 - early,
+            "late segment should cover more ground"
+        );
+    }
+}
+
 /// CustomSwitch: A custom Cairo-drawn interactive toggle switch widget with smooth 60fps sliding animation.
 #[derive(Clone)]
 pub struct CustomSwitch {
@@ -187,7 +225,7 @@ impl CustomSwitch {
             }
 
             let t = (elapsed as f64 / duration_us as f64).clamp(0.0, 1.0);
-            let eased = 1.0 - (1.0 - t).powi(3); // ease-out cubic
+            let eased = ease_out_cubic(t); // ease-out cubic
             let cur_p = start_p + (target_p - start_p) * eased;
 
             p_cell.set(cur_p);
