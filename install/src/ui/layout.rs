@@ -2,7 +2,7 @@ use ratatui::{
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Modifier, Style},
     text::{Line, Span},
-    widgets::{Block, BorderType, Borders, List, ListItem, Paragraph},
+    widgets::{Block, BorderType, Borders, Clear, List, ListItem, Paragraph},
     Frame,
 };
 
@@ -93,7 +93,6 @@ pub fn draw_header(f: &mut Frame, app: &App, area: Rect) {
     f.render_widget(right_header, header_chunks[1]);
 }
 
-#[allow(dead_code)]
 pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
     let sidebar_chunks = Layout::default()
         .direction(Direction::Vertical)
@@ -253,15 +252,31 @@ pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
     f.render_widget(summary_box, sidebar_chunks[1]);
 }
 
-pub fn draw_shortcuts_panel(f: &mut Frame, _app: &App, area: Rect) {
+pub fn draw_floating_shortcuts(f: &mut Frame, area: Rect) {
+    let box_width: u16 = 25;
+    let box_height: u16 = 12;
+
+    if area.width < 50 || area.height < 14 {
+        return;
+    }
+
+    let floating_area = Rect {
+        x: area.x + area.width.saturating_sub(box_width),
+        y: area.y + area.height.saturating_sub(box_height),
+        width: box_width.min(area.width),
+        height: box_height.min(area.height),
+    };
+
+    f.render_widget(Clear, floating_area);
+
     let shortcuts = [
         ("Space", "Toggle / Select", THEME.mint),
-        ("Tab / n", "Next Step", THEME.cyan),
-        ("p", "Previous Step", THEME.cyan),
-        ("↑ / ↓", "Navigate Items", THEME.cyan),
+        ("Tab/n", "Next Step", THEME.cyan),
+        ("p", "Prev Step", THEME.cyan),
+        ("↑ / ↓", "Navigate", THEME.cyan),
         ("a", "Select All", THEME.cyan),
-        ("i / ↵", "Start Install", THEME.mint),
-        ("s", "Binary Folder", THEME.amber),
+        ("i / ↵", "Run Install", THEME.mint),
+        ("s", "Binary Path", THEME.amber),
         ("r", "Rescan Source", THEME.purple),
         ("?", "Help Dialog", THEME.purple),
         ("q", "Quit Installer", THEME.rose),
@@ -270,31 +285,31 @@ pub fn draw_shortcuts_panel(f: &mut Frame, _app: &App, area: Rect) {
     let items: Vec<ListItem> = shortcuts
         .iter()
         .map(|(key, desc, col)| {
-            ListItem::new(vec![
-                Line::from(Span::styled(
-                    format!(" {key} "),
+            ListItem::new(Line::from(vec![
+                Span::styled(
+                    format!(" {:<5} ", key),
                     Style::default()
                         .fg(*col)
                         .bg(THEME.bg_badge)
                         .add_modifier(Modifier::BOLD),
-                )),
-                Line::from(Span::styled(
+                ),
+                Span::styled(
                     format!(" {desc}"),
-                    Style::default().fg(THEME.text_dim),
-                )),
-            ])
+                    Style::default().fg(THEME.text_body),
+                ),
+            ]))
         })
         .collect();
 
-    let list = List::new(items).block(
+    let block = List::new(items).block(
         Block::default()
             .title(" 󰌌 Shortcuts ")
             .title_style(THEME.title_cyan())
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
-            .border_style(Style::default().fg(THEME.border_normal)),
+            .border_style(Style::default().fg(THEME.cyan)),
     );
-    f.render_widget(list, area);
+    f.render_widget(block, floating_area);
 }
 
 #[allow(dead_code)]

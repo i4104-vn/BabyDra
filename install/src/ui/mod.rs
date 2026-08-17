@@ -36,17 +36,20 @@ pub fn draw(f: &mut Frame, app: &App) {
     if is_full_width_step {
         draw_content(f, app, main_chunks[1]);
     } else {
-        // Layout: Main Content (spacious) + Right Floating Shortcuts Box
+        // Body: Left Sidebar (Step navigation & Plan summary) + Right Main Content
         let body_chunks = Layout::default()
             .direction(Direction::Horizontal)
             .constraints([
-                Constraint::Min(45),
-                Constraint::Length(25),
+                Constraint::Length(33),
+                Constraint::Min(40),
             ])
             .split(main_chunks[1]);
 
-        draw_content(f, app, body_chunks[0]);
-        layout::draw_shortcuts_panel(f, app, body_chunks[1]);
+        layout::draw_sidebar(f, app, body_chunks[0]);
+        draw_content(f, app, body_chunks[1]);
+
+        // Floating shortcuts docked in the bottom-right corner!
+        layout::draw_floating_shortcuts(f, body_chunks[1]);
     }
 
     // Modals
