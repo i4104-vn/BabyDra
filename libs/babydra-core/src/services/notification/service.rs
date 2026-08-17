@@ -140,8 +140,8 @@ pub fn spawn_dbus_listener(tx: tokio::sync::mpsc::UnboundedSender<NotificationMs
 
 /// Dismisses popup display window.
 pub fn close_notification_popup() {
-    // Managed inside notch capsules, no-op.
-    // The player_loop handles the state machine for visibility.
+    // Managed inside the island notification feature, no-op here.
+    // The island controller handles the state machine for visibility.
 }
 
 /// Registers the incoming desktop notification, caching it to the rolling historical notifications log.
