@@ -23,9 +23,27 @@ Nguyên tắc: **người tạo theme/variant không cần sửa 1 dòng code co
 
 ### 2.1. Tạo thư mục
 
+Mọi theme package **bắt buộc** có chung cấu trúc — file JSON ở gốc, toàn bộ
+CSS trong thư mục `css/`:
+
 ```bash
-mkdir themes/my-theme
+mkdir -p themes/my-theme/css
 ```
+
+```text
+themes/my-theme/
+├── tokens.json        (JSON) design tokens: surface, border, accent, font, radius
+├── fonts.json         (JSON) font families + fallbacks
+└── css/               (CSS) — tách riêng, KHÔNG nằm chung với file JSON
+    ├── dark.css       lớp màu dark-mode
+    ├── light.css      lớp màu light-mode
+    └── theme.css      (tùy chọn) override nạp cuối
+```
+
+> [!IMPORTANT]
+> Cấu trúc này là bắt buộc cho **mọi** theme package — xem
+> `themes/babydra-default/` và `themes/babydra-blue/` (cả hai đều đủ
+> `tokens.json`, `fonts.json`, `css/dark.css`, `css/light.css`, `css/theme.css`).
 
 ### 2.2. `tokens.json`
 
@@ -47,34 +65,34 @@ mkdir themes/my-theme
 > [!TIP]
 > Bỏ qua field nào thì field đó **kế thừa từ `base`**. `base = null` = độc lập.
 
-### 2.3. Lớp màu: `dark.css` + `light.css`
+### 2.3. Lớp màu: `css/dark.css` + `css/light.css`
 
 Mỗi theme package sở hữu **lớp màu** của riêng nó (nạp sau CSS cấu trúc
-`styles/shared/`):
+`styles/shared/`), đặt trong thư mục `css/`:
 
 ```css
-/* dark.css — màu dark-mode (nếu kế thừa base, có thể bỏ trống) */
+/* css/dark.css — màu dark-mode (nếu kế thừa base, có thể bỏ trống) */
 .panel { background: rgba(14, 14, 18, 0.96); }
 ```
 
 ```css
-/* light.css — màu light-mode */
+/* css/light.css — màu light-mode */
 .panel { background: rgba(255, 255, 255, 0.98); }
 ```
 
 > [!TIP]
-> Cách nhanh nhất để tạo theme mới: copy `themes/babydra-default/`, sửa màu
-> trong `dark.css`/`light.css` và `tokens.json`, đổi `name`. Không cần động
-> tới code.
+> Cách nhanh nhất để tạo theme mới: copy toàn bộ `themes/babydra-default/`,
+> sửa màu trong `css/dark.css`/`css/light.css` và `tokens.json`, đổi `name`.
+> Không cần động tới code.
 
-### 2.4. `theme.css` — lớp override (tùy chọn, nạp cuối)
+### 2.4. `css/theme.css` — lớp override (tùy chọn, nạp cuối)
 
 ```css
-/* theme.css — nạp SAU dark/light, thích hợp để override accent điểm nhấn */
+/* css/theme.css — nạp SAU dark/light, thích hợp để override accent điểm nhấn */
 button.baby-fab { background-color: #8b5cf6; }
 ```
 
-Ví dụ thật: `themes/babydra-blue/theme.css` kế thừa `babydra-default` rồi
+Ví dụ thật: `themes/babydra-blue/css/theme.css` kế thừa `babydra-default` rồi
 override accent `#3b82f6` → `#38bdf8` mà không ship lại toàn bộ dark/light.
 
 ### 2.5. `fonts.json`
@@ -92,7 +110,27 @@ cargo test -p babydra-theme        # engine hoạt động
 # Hoặc thêm integration test trong tests/theme/ nếu cần
 ```
 
-### 2.7. Áp dụng theme
+### 2.7. Themes đi kèm (repo)
+
+| Theme | Accent | Cách hoạt động |
+| :--- | :--- | :--- |
+| `babydra-default` | `#3b82f6` (xanh dương) | Base — sở hữu `css/dark.css` + `css/light.css` đầy đủ |
+| `babydra-blue` | `#38bdf8` (xanh trời) | Kế thừa default, override qua `css/theme.css` |
+| `babydra-purple` | `#8b5cf6` (tím) | Kế thừa default, override qua `css/theme.css` |
+| `babydra-green` | `#10b981` (ngọc lục bảo) | Kế thừa default, override qua `css/theme.css` |
+| `babydra-rose` | `#f43f5e` (hồng) | Kế thừa default, override qua `css/theme.css` |
+
+Cả 5 theme dùng chung 1 cấu trúc: `tokens.json` + `fonts.json` + `css/`
+(dark.css, light.css, theme.css) — theme màu chỉ khác accent trong `tokens.json`
+và `css/theme.css`.
+
+> [!NOTE]
+> Các theme màu dùng **1 lớp override chung** cho cả dark + light mode
+> (`css/theme.css`). Nếu tạo theme màu, hãy kiểm tra cả 2 mode — màu text
+> sáng (vd `#a78bfa`) có thể tương phản thấp trên nền light; khi đó thêm rule
+> riêng cho light mode.
+
+### 2.8. Áp dụng theme
 
 1. Deploy theme vào `~/.babydra/themes/<id>/` (hoặc `/usr/share/babydra/themes/`).
 2. Đổi config — thêm/sửa trong `~/.babydra/babydra.conf`:
@@ -130,7 +168,20 @@ apps = ["panel", "explore", "settings"]
 "labwc.rc.margin.gap" = 12
 ```
 
-### 3.3. Kiểm tra
+### 3.3. Variants đi kèm (repo)
+
+Mỗi variant chọn 1 theme (phải tồn tại trong `themes/`) — giữ đồng bộ giữa
+2 bên:
+
+| Variant | Theme |
+| :--- | :--- |
+| `default` | `babydra-default` |
+| `blue` | `babydra-blue` |
+| `purple` | `babydra-purple` |
+| `green` | `babydra-green` |
+| `rose` | `babydra-rose` |
+
+### 3.4. Kiểm tra
 
 ```bash
 cargo test -p babydra-core variant

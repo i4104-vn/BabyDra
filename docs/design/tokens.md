@@ -41,7 +41,7 @@ Badge trong code là **status badge** (`create_status_badge`) — màu được 
 | Thông thường | `.settings-desc` | `rgba(255,255,255,0.55)` | `rgba(28,28,30,0.55)` | Mô tả phụ, trạng thái mặc định |
 
 > [!NOTE]
-> Chủ quyền: `themes/babydra-default/dark.css|light.css`. Icon badge dùng class `blue-icon-badge`/`blue-icon-badge-sm` (44px/34px), màu kính mờ theo layer tương ứng.
+> Chủ quyền: `themes/babydra-default/css/dark.css|light.css`. Icon badge dùng class `blue-icon-badge`/`blue-icon-badge-sm` (44px/34px), màu kính mờ theo layer tương ứng.
 
 ---
 
@@ -132,5 +132,5 @@ override so với `base`.
   hiện cycle kế thừa.
 - **Theme mới**: copy thư mục `themes/babydra-default/` → đổi `name` + giá trị.
   Hướng dẫn từng bước: `docs/05-themes-variants.md`.
-- `theme.css` và `fonts.json` đi kèm là lớp màu nạp lên core CSS và bảng font
+- `css/theme.css` và `fonts.json` đi kèm là lớp màu nạp lên core CSS và bảng font
   families — xem `docs/design/theming.md` mục Theme packages.

@@ -86,9 +86,12 @@ không GTK):
 
 ```
 themes/<theme-id>/
-├── tokens.json   <- design tokens: surface, border, accent, font, radius (dark + light)
-├── theme.css     <- lớp màu theme, nạp lên core CSS
-└── fonts.json    <- font families + fallbacks
+├── tokens.json        <- design tokens: surface, border, accent, font, radius (dark + light)
+├── fonts.json         <- font families + fallbacks
+└── css/               <- CSS tách riêng — KHÔNG nằm chung với file JSON
+    ├── dark.css       <- lớp màu dark-mode
+    ├── light.css      <- lớp màu light-mode
+    └── theme.css      <- lớp override (tùy chọn, nạp cuối)
 ```
 
 - `resolve_theme(id)` hỗ trợ kế thừa `base` (theme con override từng token).

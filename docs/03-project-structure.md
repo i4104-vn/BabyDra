@@ -56,7 +56,7 @@ BabyDra/                          <- Thư mục gốc repository (nhánh release
 ├── configs/                      <- Cấu hình mẫu hệ thống (seed)
 ├── crates/                       <- Các ứng dụng đồ họa thực thi độc lập
 ├── libs/                         <- Các thư viện dùng chung (không thể chạy độc lập)
-├── themes/                       <- Theme packages (tokens.json + theme.css + fonts.json)
+├── themes/                       <- Theme packages (tokens.json + fonts.json + css/)
 ├── variants/                     <- Variants (mỗi variant 1 thư mục riêng)
 ├── tests/                        <- Integration test suite (TDD safety net)
 └── install/                      <- Bộ cài đặt TUI (dùng chung với nhánh main)
@@ -122,7 +122,7 @@ Ví dụ đúng:
 
 - **CSS cấu trúc** (shared) nằm trong `kits/babydra-ui-kit/src/styles/shared/` — dùng snake_case, nhóm theo đối tượng:
   `panel/panel.css`, `explore/content_view.css`, `apps/settings.css`, `shared/button.css`...
-- **Lớp màu dark/light** thuộc về theme package (`themes/<id>/dark.css`, `light.css`) — không nằm trong code.
+- **Lớp màu dark/light** thuộc về theme package (`themes/<id>/css/dark.css`, `css/light.css`) — không nằm trong code.
 
 ---
 
@@ -396,7 +396,7 @@ kits/babydra-ui-kit/src/
 │                                    `deprecated-components`)
 ├── ui/
 │   ├── theme/mod.rs              <- init_theme(): đọc ThemeSelection từ config, resolve theme package
-│   │                                qua babydra-theme, nạp CSS shared + dark/light + theme.css
+│   │                                qua babydra-theme, nạp CSS shared + lớp màu dark/light + lớp override
 │   ├── theme/colors.rs           <- Color tokens dùng chung cho Cairo + CSS (T1.4)
 │   ├── icon/                     <- resolver, assets
 │   ├── animation/                <- easing, genie, island, slide
@@ -496,20 +496,29 @@ configs/
 Điểm mở rộng chính (T3.3): mỗi giao diện = 1 theme package, người tạo theme mới
 **không cần sửa 1 dòng code**:
 
+Mọi theme package **bắt buộc** có chung cấu trúc — JSON ở gốc, CSS tách riêng
+trong `css/`:
+
 ```
 themes/
 └── <theme-id>/
     ├── tokens.json                <- Design tokens (surface, border, accent, font, radius)
-    ├── dark.css                   <- Lớp màu dark-mode (nạp sau CSS shared)
-    ├── light.css                  <- Lớp màu light-mode
-    ├── theme.css                  <- (tùy chọn) override nạp cuối — vd đổi accent
-    └── fonts.json                 <- Font families + fallbacks
+    ├── fonts.json                 <- Font families + fallbacks
+    └── css/                       <- CSS tách riêng, không nằm chung với file JSON
+        ├── dark.css               <- Lớp màu dark-mode (nạp sau CSS shared)
+        ├── light.css              <- Lớp màu light-mode
+        └── theme.css              <- (tùy chọn) override nạp cuối — vd đổi accent
 ```
 
-- `babydra-default/` — theme chính thức (sở hữu dark.css/light.css đầy đủ).
-- `babydra-blue/` — theme mẫu thứ hai: kế thừa default qua `base`, chỉ ship
-  `theme.css` override accent (#3b82f6 → #38bdf8) — **chứng minh đổi giao diện
-  không cần chạm code**.
+Các theme đi kèm (cùng cấu trúc, chỉ khác accent):
+
+| Theme | Accent | Ghi chú |
+| :--- | :--- | :--- |
+| `babydra-default` | `#3b82f6` | Base — sở hữu css/dark.css + css/light.css đầy đủ |
+| `babydra-blue` | `#38bdf8` | Kế thừa default, override css/theme.css |
+| `babydra-purple` | `#8b5cf6` | Kế thừa default, override css/theme.css |
+| `babydra-green` | `#10b981` | Kế thừa default, override css/theme.css |
+| `babydra-rose` | `#f43f5e` | Kế thừa default, override css/theme.css |
 - Engine: `babydra-theme` (`load_package`, `resolve_theme`, hỗ trợ `base` kế thừa).
 - Cách đổi theme: sửa `~/.babydra/babydra.conf` →
   `[theme]\nselection = { id = "babydra-blue" }` rồi khởi động lại app.
@@ -529,7 +538,8 @@ Merge thứ tự (phải sang trái thắng):
 `system defaults < configs/ seed < theme package < variant < ~/.babydra/ (user)`
 
 - API: `babydra_core::config::variant::{list_variants, load_variant, get_keybind}`.
-- `variants/default/` — variant chính thức.
+- Variants đi kèm: `default`, `blue`, `purple`, `green`, `rose` — mỗi variant
+  tương ứng 1 theme trong `themes/` (xem bảng ở mục 7.2).
 
 ### 7.4. `tests/` — Test suite (TDD safety net)
 

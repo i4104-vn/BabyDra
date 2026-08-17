@@ -68,7 +68,7 @@ pub fn create_icon_badge(icon_name: &str, icon_size: i32, is_small: bool) -> gtk
 ```
 
 > [!NOTE]
-> Vị trí CSS: `themes/babydra-default/dark.css` và `themes/babydra-default/light.css` (dark/light tương ứng).
+> Vị trí CSS: `themes/babydra-default/css/dark.css` và `themes/babydra-default/css/light.css` (dark/light tương ứng).
 
 ---
 
