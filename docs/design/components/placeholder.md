@@ -2,7 +2,7 @@
 
 Tài liệu quy định cách sử dụng, kiểu dáng, và mã nguồn chuẩn cho **Placeholder State** trong hệ thống BabyDra.
 
-**Vị trí mã nguồn:** `libs/babydra-utils/src/components/placeholder/mod.rs`
+**Vị trí mã nguồn:** `kits/babydra-ui-kit/src/components/placeholder/mod.rs`
 
 ---
 
@@ -16,7 +16,7 @@ Placeholder là dòng chiếm chỗ thống nhất cho 3 trạng thái của dan
 | `Loading` | Đang tải — spinner 32px + label "Loading" |
 | `Empty` | Không có dữ liệu — icon + title (+ desc tùy chọn) |
 
-Mọi chuỗi hiển thị đều đi qua i18n (`babydra_common::i18n::t`).
+Mọi chuỗi hiển thị đều đi qua i18n (`babydra_core::i18n::t`).
 
 ---
 

@@ -2,7 +2,7 @@
 
 Tài liệu quy định cách sử dụng, kiểu dáng, và mã nguồn chuẩn cho **Badge** trong hệ thống BabyDra.
 
-**Vị trí mã nguồn:** `libs/babydra-utils/src/components/badge/mod.rs`
+**Vị trí mã nguồn:** `kits/babydra-ui-kit/src/components/badge/mod.rs`
 
 ---
 
@@ -68,7 +68,7 @@ pub fn create_icon_badge(icon_name: &str, icon_size: i32, is_small: bool) -> gtk
 ```
 
 > [!NOTE]
-> Vị trí CSS: `styles/dark/apps/settings.css` và `styles/light/apps/settings.css` (dark/light tương ứng).
+> Vị trí CSS: `themes/babydra-default/dark.css` và `themes/babydra-default/light.css` (dark/light tương ứng).
 
 ---
 

@@ -2,7 +2,7 @@
 
 Tài liệu quy định cách sử dụng và mã nguồn chuẩn cho **Message / Placeholder label** trong hệ thống BabyDra.
 
-**Vị trí mã nguồn:** `libs/babydra-utils/src/components/placeholder/mod.rs` (moved from `alerts/` — Phase 2 T2.4)
+**Vị trí mã nguồn:** `kits/babydra-ui-kit/src/components/placeholder/mod.rs` (moved from `alerts/` — Phase 2 T2.4)
 
 ---
 

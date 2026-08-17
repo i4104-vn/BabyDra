@@ -2,7 +2,7 @@
 
 Tài liệu quy định cách sử dụng và mã nguồn chuẩn cho **Tooltip** trong hệ thống BabyDra.
 
-**Vị trí mã nguồn:** `libs/babydra-utils/src/components/tooltips/mod.rs`
+**Vị trí mã nguồn:** `kits/babydra-ui-kit/src/components/tooltips/mod.rs`
 
 ---
 
@@ -26,7 +26,7 @@ pub fn set_tooltip(widget: &impl IsA<gtk4::Widget>, text: &str)
 ## 3. Ví dụ sử dụng
 
 ```rust
-use babydra_utils::components::{create_icon_button, set_tooltip};
+use babydra_ui_kit::components::{create_icon_button, set_tooltip};
 
 let btn = create_icon_button(
     "edit-delete", // icon_name

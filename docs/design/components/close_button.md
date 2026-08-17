@@ -2,7 +2,7 @@
 
 Tài liệu quy định cách sử dụng, kiểu dáng, và mã nguồn chuẩn cho **Close Button** trong hệ thống BabyDra.
 
-**Vị trí mã nguồn:** `libs/babydra-utils/src/components/close_button/mod.rs`
+**Vị trí mã nguồn:** `kits/babydra-ui-kit/src/components/close_button/mod.rs`
 
 ---
 

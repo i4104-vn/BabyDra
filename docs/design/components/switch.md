@@ -2,7 +2,7 @@
 
 Tài liệu quy định cách sử dụng, kiểu dáng, và mã nguồn chuẩn cho **Switch (Toggle)** trong hệ thống BabyDra.
 
-**Vị trí mã nguồn:** `libs/babydra-utils/src/components/switch/mod.rs`
+**Vị trí mã nguồn:** `kits/babydra-ui-kit/src/components/switch/mod.rs`
 
 > [!NOTE]
 > Hệ switch duy nhất là **`CustomSwitch`** (vẽ Cairo, màu lấy từ `ui/theme/colors.rs`).

@@ -50,9 +50,9 @@ Tài liệu quy định cách sử dụng, kiểu dáng, và mã CSS chuẩn cho
 ## 3. Vị trí File Mã Nguồn CSS
 
 Mọi style của nút bấm được tập trung khai báo tại:
-- `libs/babydra-utils/src/styles/shared/shared/button.css` (Cấu trúc & layout dùng chung)
-- `libs/babydra-utils/src/styles/dark/shared/button.css` (Màu sắc chế độ Tối)
-- `libs/babydra-utils/src/styles/light/shared/button.css` (Màu sắc chế độ Sáng)
+- `kits/babydra-ui-kit/src/styles/shared/shared/button.css` (Cấu trúc & layout dùng chung)
+- `themes/babydra-default/dark.css` (Màu sắc chế độ Tối — theme package)
+- `themes/babydra-default/light.css` (Màu sắc chế độ Sáng — theme package)
 
 > [!IMPORTANT]
 > **Quy tắc cho Developer**: Không tự ý ghi đè `border-radius`, `transform`, hay `box-shadow` của `button.suggested-action` hoặc `.connect-pill-btn` trong các file CSS riêng lẻ của ứng dụng (`settings.css`, `dialogs.css`). Mọi widget GTK phải kế thừa trực tiếp từ hệ thống CSS dùng chung này.

@@ -2,7 +2,7 @@
 
 Tài liệu quy định cách sử dụng và mã nguồn chuẩn cho **icon cường độ tín hiệu Wi-Fi** trong hệ thống BabyDra.
 
-**Vị trí mã nguồn:** `libs/babydra-utils/src/components/wifi/mod.rs`
+**Vị trí mã nguồn:** `kits/babydra-ui-kit/src/components/wifi/mod.rs`
 
 ---
 
@@ -42,7 +42,7 @@ pub fn create_system_wifi_signal_icon(size: i32, custom_color: Option<&str>) -> 
 | `render_wifi_signal_svg` | Trả về chuỗi SVG (dùng cho các mục đích không phải widget) |
 | `create_wifi_signal_icon_from_strength` | Icon từ dữ liệu tường minh |
 | `create_wifi_signal_icon_for_network` | Icon cho một mạng cụ thể (luôn bật) |
-| `create_system_wifi_signal_icon` | Icon động — tự query trạng thái Wi-Fi hệ thống qua `babydra_common::services::system::wifi::get_wifi_signal_strength()` |
+| `create_system_wifi_signal_icon` | Icon động — tự query trạng thái Wi-Fi hệ thống qua `babydra_core::services::system::wifi::get_wifi_signal_strength()` |
 
 - `custom_color: Some(...)` → ghi đè màu mặc định.
 

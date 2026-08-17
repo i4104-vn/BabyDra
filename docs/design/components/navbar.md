@@ -2,7 +2,7 @@
 
 Tài liệu quy định cách sử dụng, kiểu dáng, và mã nguồn chuẩn cho **Navigation Row** trong **Sidebar** của hệ thống BabyDra.
 
-**Vị trí mã nguồn:** `libs/babydra-utils/src/components/navbar/mod.rs`
+**Vị trí mã nguồn:** `kits/babydra-ui-kit/src/components/navbar/mod.rs`
 
 ---
 

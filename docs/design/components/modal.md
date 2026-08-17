@@ -2,7 +2,7 @@
 
 Tài liệu quy định cách sử dụng, kiểu dáng, và mã nguồn chuẩn cho **Modal / Dialog** trong hệ thống BabyDra.
 
-**Vị trí mã nguồn:** `libs/babydra-utils/src/components/modal/`
+**Vị trí mã nguồn:** `kits/babydra-ui-kit/src/components/modal/`
 
 ---
 
@@ -140,4 +140,4 @@ pub fn show_for_vpn(&self, vpn_name: &str)
 | DO | Nhãn trường dùng `wifi-info-label`, entry dùng `sidebar-search-entry` |
 | DO | Dialog yêu cầu nhập liệu phải có cả xác nhận lẫn hủy bỏ |
 | DO NOT | Không dùng `gtk4::Dialog`/`gtk4::Window` modal riêng — dùng overlay box |
-| DO | Chuỗi mới nên đi qua i18n (`babydra_common::i18n::t`) — lưu ý một số dialog hiện tại vẫn hardcode tiếng Anh (Cancel, Confirm...), nên khi sửa hãy chuyển dần sang i18n |
+| DO | Chuỗi mới nên đi qua i18n (`babydra_core::i18n::t`) — lưu ý một số dialog hiện tại vẫn hardcode tiếng Anh (Cancel, Confirm...), nên khi sửa hãy chuyển dần sang i18n |

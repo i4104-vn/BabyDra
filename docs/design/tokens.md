@@ -41,7 +41,7 @@ Badge trong code là **status badge** (`create_status_badge`) — màu được 
 | Thông thường | `.settings-desc` | `rgba(255,255,255,0.55)` | `rgba(28,28,30,0.55)` | Mô tả phụ, trạng thái mặc định |
 
 > [!NOTE]
-> Chủ quyền: `styles/dark|light/apps/settings.css`. Icon badge dùng class `blue-icon-badge`/`blue-icon-badge-sm` (44px/34px), màu kính mờ theo layer tương ứng.
+> Chủ quyền: `themes/babydra-default/dark.css|light.css`. Icon badge dùng class `blue-icon-badge`/`blue-icon-badge-sm` (44px/34px), màu kính mờ theo layer tương ứng.
 
 ---
 
