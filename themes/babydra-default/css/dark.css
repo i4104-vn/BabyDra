@@ -272,7 +272,7 @@ scale trough {
 
 .control-left-toggles-box {
     background-color: rgba(255, 255, 255, 0.04);
-    border: none !important;
+    border: none;
     border-top: 1px solid rgba(255, 255, 255, 0.10);
 }
 
@@ -798,7 +798,7 @@ calendar.calendar-widget label.day {
 
 calendar.calendar-widget label.day.other-month,
 calendar.calendar-widget .other-month {
-    color: rgba(255, 255, 255, 0.20) !important;
+    color: rgba(255, 255, 255, 0.20);
 }
 
 .notif-panel-title {
@@ -842,7 +842,7 @@ button.clear-all-btn {
 }
 
 .notif-count-badge {
-    color: #ffffff !important;
+    color: #ffffff;
 }
 
 .notif-item-sub-time {

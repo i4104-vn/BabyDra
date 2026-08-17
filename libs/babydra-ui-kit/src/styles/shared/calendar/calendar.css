@@ -47,8 +47,8 @@ calendar.calendar-widget {
 calendar.calendar-widget grid,
 calendar.calendar-widget grid cell,
 calendar.calendar-widget cell {
-    border: none !important;
-    background: transparent !important;
+    border: none;
+    background: transparent;
     box-shadow: none;
 }
 
@@ -62,8 +62,6 @@ calendar.calendar-widget header {
 calendar.calendar-widget header label {
     font-size: 15px;
     font-weight: 700;
-    order: 1;
-    margin-right: auto;
     padding: 0;
 }
 
@@ -84,18 +82,6 @@ calendar.calendar-widget header button:hover {
     border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-calendar.calendar-widget header button.left,
-calendar.calendar-widget header button.prev,
-calendar.calendar-widget header button.prev-month {
-    order: 2;
-}
-
-calendar.calendar-widget header button.right,
-calendar.calendar-widget header button.next,
-calendar.calendar-widget header button.next-month {
-    order: 3;
-}
-
 calendar.calendar-widget header button.left image,
 calendar.calendar-widget header button.prev image,
 calendar.calendar-widget header button.prev-month image {
@@ -112,7 +98,11 @@ calendar.calendar-widget header button.double-left,
 calendar.calendar-widget header button.double-right,
 calendar.calendar-widget header button.prev-year,
 calendar.calendar-widget header button.next-year {
-    display: none;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+    opacity: 0;
 }
 
 calendar.calendar-widget label.day-name {
@@ -144,18 +134,18 @@ calendar.calendar-widget label.day:hover {
 
 calendar.calendar-widget label.day.other-month,
 calendar.calendar-widget .other-month {
-    opacity: 1.0 !important;
+    opacity: 1.0;
 }
 
 calendar.calendar-widget label.day:selected,
 calendar.calendar-widget :selected {
-    background-color: #f38064 !important;
-    background-image: none !important;
-    color: #121317 !important;
-    border-radius: 9999px !important;
-    font-weight: 700 !important;
+    background-color: #f38064;
+    background-image: none;
+    color: #121317;
+    border-radius: 9999px;
+    font-weight: 700;
     box-shadow: none;
-    border: none !important;
+    border: none;
     text-shadow: none;
 }
 
@@ -201,7 +191,6 @@ scrolledwindow.notif-scroll viewport {
     border-radius: 14px;
     padding: 10px 12px;
     transition: all 200ms ease;
-    width: 100%;
     box-shadow: none;
 }
 
@@ -214,11 +203,8 @@ scrolledwindow.notif-scroll viewport {
     background-color: rgba(255, 255, 255, 0.08);
     border-radius: 8px;
     padding: 6px;
-    width: 18px;
-    height: 18px;
     min-width: 18px;
     min-height: 18px;
-    align-self: center;
 }
 
 .notif-item-title {
@@ -267,16 +253,12 @@ scrolledwindow.notif-scroll viewport {
     font-weight: 800;
     padding: 2px 6px;
     min-width: 14px;
-    text-align: center;
     margin-left: 6px;
-    align-self: center;
     box-shadow: none;
 }
 
 .notif-item-sub-time {
     font-size: 11px;
-    align-self: center;
-    margin-left: auto;
     margin-right: 4px;
 }
 
@@ -285,7 +267,7 @@ scrolledwindow.notif-scroll viewport {
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-top: none;
     border-radius: 0 0 12px 12px;
-    height: 4px;
+    min-height: 4px;
     margin-left: 12px;
     margin-right: 12px;
     box-shadow: none;
@@ -296,7 +278,7 @@ scrolledwindow.notif-scroll viewport {
     border: 1px solid rgba(255, 255, 255, 0.03);
     border-top: none;
     border-radius: 0 0 12px 12px;
-    height: 4px;
+    min-height: 4px;
     margin-left: 6px;
     margin-right: 6px;
     box-shadow: none;

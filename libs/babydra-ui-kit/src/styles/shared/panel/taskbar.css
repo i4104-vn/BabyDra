@@ -28,7 +28,6 @@ button.taskbar-app-btn:hover,
 button.taskbar-app-btn image,
 button.taskbar-app-btn:hover image {
     transform: none;
-    scale: 1;
 }
 
 .taskbar-dots-container {
@@ -83,7 +82,6 @@ button.taskbar-preview-list-btn {
     padding: 6px 10px;
     transition: all 150ms ease;
     box-shadow: none;
-    text-align: left;
 }
 
 .taskbar-preview-title {
@@ -152,7 +150,6 @@ button.taskbar-preview-action-btn {
     padding: 6px 8px;
     transition: all 150ms ease;
     box-shadow: none;
-    text-align: left;
     margin: 2px 0;
 }
 

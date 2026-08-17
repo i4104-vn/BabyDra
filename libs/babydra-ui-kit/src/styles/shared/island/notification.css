@@ -38,7 +38,6 @@ window.notification-popup-card {
     padding: 6px;
     min-width: 20px;
     min-height: 20px;
-    align-self: center;
 }
 
 button.popup-action-btn {

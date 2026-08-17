@@ -57,7 +57,7 @@
     padding: 0;
     min-width: 24px;
     min-height: 24px;
-    margin: auto 4px;
+    margin: 0 4px;
 }
 
 .explore-window button.tab-new-btn:hover {

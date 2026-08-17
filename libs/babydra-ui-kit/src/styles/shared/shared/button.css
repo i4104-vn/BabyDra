@@ -74,10 +74,9 @@ button.btn-primary:disabled,
 button.btn-primary.disabled,
 button.suggested-action:disabled,
 button.suggested-action.disabled {
-    background-color: rgba(59, 130, 246, 0.30) !important;
-    color: rgba(255, 255, 255, 0.40) !important;
-    opacity: 0.5 !important;
-    cursor: not-allowed;
+    background-color: rgba(59, 130, 246, 0.30);
+    color: rgba(255, 255, 255, 0.40);
+    opacity: 0.5;
     box-shadow: none;
 }
 

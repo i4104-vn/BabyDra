@@ -76,6 +76,10 @@ name = "theme_shipped"
 path = "theme/shipped.rs"
 
 [[test]]
+name = "theme_css"
+path = "theme/css.rs"
+
+[[test]]
 name = "kits_prelude"
 path = "kits/prelude.rs"
 

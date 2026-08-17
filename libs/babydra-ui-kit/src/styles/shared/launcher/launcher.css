@@ -193,8 +193,8 @@ entry.launcher-search:focus {
 .launcher-power-option-btn {
     border-radius: 9999px;
     padding: 6px;
-    width: 34px;
-    height: 34px;
+    min-width: 34px;
+    min-height: 34px;
     transition: all 200ms ease;
     box-shadow: none;
 }

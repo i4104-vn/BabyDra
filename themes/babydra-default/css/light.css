@@ -499,7 +499,7 @@ button.control-tile-right-btn:active {
 button.quick-tile.active label,
 button.quick-tile.active .tile-title,
 button.quick-tile.active .tile-subtitle {
-    color: #1c1c1e !important;
+    color: #1c1c1e;
 }
 
 popover>arrow {
@@ -809,7 +809,7 @@ calendar.calendar-widget label.day {
 
 calendar.calendar-widget label.day.other-month,
 calendar.calendar-widget .other-month {
-    color: rgba(28, 28, 30, 0.20) !important;
+    color: rgba(28, 28, 30, 0.20);
 }
 
 .notif-panel-title {
@@ -853,7 +853,7 @@ button.clear-all-btn {
 }
 
 .notif-count-badge {
-    color: #1c1c1e !important;
+    color: #1c1c1e;
 }
 
 .notif-item-sub-time {
@@ -1038,7 +1038,7 @@ button.color-dot-btn.color-dot-white {
 }
 
 button.screenshot-toolbar-btn.selected, button.screenshot-toolbar-btn.selected image {
-    color: #ffffff !important;
+    color: #ffffff;
 }
 
 /* === apps/lock.css === */

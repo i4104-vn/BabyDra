@@ -130,8 +130,8 @@
 }
 
 .btn-spinner {
-    width: 16px;
-    height: 16px;
+    min-width: 16px;
+    min-height: 16px;
     border-top-color: transparent;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;

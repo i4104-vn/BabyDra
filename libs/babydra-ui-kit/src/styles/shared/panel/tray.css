@@ -31,7 +31,6 @@ button.tray-menu-item {
     border-radius: 6px;
     border: none;
     background: transparent;
-    text-align: start;
     transition: background-color 150ms ease;
 }
 

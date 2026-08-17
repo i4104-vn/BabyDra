@@ -158,7 +158,6 @@ button.control-tile-row:hover {
     min-width: 14px;
     min-height: 14px;
     transition: all 150ms ease;
-    align-self: center;
 }
 
 .control-icon-circle.active {
@@ -252,7 +251,6 @@ button.vpn-action-toggle.active:hover {
 .control-square-label {
     font-size: 10px;
     font-weight: 600;
-    text-align: center;
     line-height: 1.2;
 }
 
@@ -314,7 +312,6 @@ button.vpn-action-toggle.active:hover {
 .control-lang-label {
     font-size: 11px;
     font-weight: 800;
-    text-align: center;
 }
 
 button.slider-overlay-mute-btn {
@@ -451,11 +448,11 @@ button.control-tile-right-btn:active {
 .wifi-network-item {
     background-color: transparent;
     background-image: none;
-    border: none !important;
+    border: none;
     border-radius: 8px;
     padding: 6px 10px;
     box-shadow: none;
-    outline: none !important;
+    outline: none;
     transition: all 120ms ease;
     margin-bottom: 2px;
 }
@@ -483,13 +480,13 @@ button.control-tile-right-btn:active {
     font-size: 12px;
     margin-bottom: 8px;
     box-shadow: none;
-    outline: none !important;
+    outline: none;
 }
 
 .wifi-input-field:focus {
     border-color: #3b82f6;
     box-shadow: none;
-    outline: none !important;
+    outline: none;
 }
 
 .wifi-button-row {
@@ -499,14 +496,14 @@ button.control-tile-right-btn:active {
 .wifi-btn-primary {
     background-color: #3b82f6;
     background-image: none;
-    border: none !important;
+    border: none;
     border-radius: 6px;
     padding: 6px 12px;
     color: #ffffff;
     font-size: 12px;
     font-weight: 600;
     box-shadow: none;
-    outline: none !important;
+    outline: none;
 }
 
 .wifi-btn-primary:hover,
@@ -514,28 +511,28 @@ button.control-tile-right-btn:active {
 .wifi-btn-primary:active {
     background-color: #2563eb;
     background-image: none;
-    border: none !important;
+    border: none;
     box-shadow: none;
-    outline: none !important;
+    outline: none;
 }
 
 .wifi-btn-secondary {
     background-image: none;
-    border: none !important;
+    border: none;
     border-radius: 6px;
     padding: 6px 12px;
     font-size: 12px;
     box-shadow: none;
-    outline: none !important;
+    outline: none;
 }
 
 .wifi-btn-secondary:hover,
 .wifi-btn-secondary:focus,
 .wifi-btn-secondary:active {
     background-image: none;
-    border: none !important;
+    border: none;
     box-shadow: none;
-    outline: none !important;
+    outline: none;
 }
 
 scrolledwindow {

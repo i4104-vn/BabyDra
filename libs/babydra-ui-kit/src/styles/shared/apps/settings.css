@@ -289,7 +289,6 @@ progressbar.disk-progress progress {
 .console-log-panel {
     border-radius: 16px;
     padding: 0;
-    overflow: hidden;
 }
 
 .console-header {
