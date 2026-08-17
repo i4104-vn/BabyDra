@@ -1,7 +1,7 @@
 # BabyDra — Mục lục Tài liệu
 
 **Phiên bản:** 1.2.0
-**Cập nhật lần cuối:** 2026-08-14
+**Cập nhật lần cuối:** 2026-08-17
 **Phạm vi:** Toàn bộ tài liệu kỹ thuật và thiết kế của dự án BabyDra
 
 ---
@@ -35,6 +35,15 @@ Quy tắc chung khi đọc tài liệu này:
 | 02 | [02-architecture.md](./02-architecture.md) | Kiến trúc mã nguồn: 4 pattern thiết kế, luồng dữ liệu, Daemon-Client |
 | 03 | [03-project-structure.md](./03-project-structure.md) | Cấu trúc dự án: thư mục, trách nhiệm từng module, quy chuẩn viết mã |
 | 04 | [04-setup-and-build.md](./04-setup-and-build.md) | Hướng dẫn cài đặt, build và chạy dự án từ đầu |
+| 05 | [05-themes-variants.md](./05-themes-variants.md) | Themes & variants — cách tạo theme/variant mới |
+| 06 | [06-kits-api.md](./06-kits-api.md) | Tổng hợp API của các kits (prelude, bắt đầu nhanh) |
+| 07 | [07-codebase-report.md](./07-codebase-report.md) | Báo cáo đánh giá toàn diện mã nguồn — điểm mạnh, điểm yếu, chỉ số kỹ thuật |
+
+### Kế hoạch & Đánh giá
+
+| Tài liệu | Nội dung |
+| :--- | :--- |
+| [planning.md](./planning.md) | Kế hoạch cải thiện chi tiết theo phase (test-first) — bắt nguồn từ báo cáo 07 |
 
 ### Tài liệu Thiết kế Giao diện
 
@@ -52,6 +61,15 @@ Toàn bộ tài liệu thiết kế nằm trong thư mục [design/](./design/RE
 | [design/spacing.md](./design/spacing.md) | Không gian và khoảng cách — nguyên tắc và cách áp dụng |
 | [design/theming.md](./design/theming.md) | Dark/Light theming — cách tiếp cận dual-theme |
 | [design/tokens.md](./design/tokens.md) | Bảng tra cứu giá trị — màu, font-size, radius, spacing, shadow |
+
+### API Reference của Kits
+
+| Tài liệu | Nội dung |
+| :--- | :--- |
+| [kit-apis/ui-kit.md](./kit-apis/ui-kit.md) | API `babydra-ui-kit` — components, theme, icons, animation, battery, window |
+| [kit-apis/explore-kit.md](./kit-apis/explore-kit.md) | API `babydra-explore-kit` — dialogs, context menu, drag & drop, file items |
+| [06-kits-api.md](./06-kits-api.md) | Tổng hợp 2 kits, cách dùng prelude, bắt đầu nhanh |
+| [core-api.md](./core-api.md) | API `babydra-core` — services, models, config, error handling |
 
 **Components Giao diện** (thư mục `design/components/`) — mỗi component trong `kits/babydra-ui-kit/src/components/` có một tài liệu riêng:
 
