@@ -4,6 +4,7 @@ members = [
     "libs/babydra-common",
     "libs/babydra-island",
     "libs/babydra-launcher",
+    "libs/babydra-theme",
     "libs/babydra-utils",
     "crates/babydra-panel",
     "crates/babydra-switcher",

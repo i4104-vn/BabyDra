@@ -1,0 +1,9 @@
+[package]
+name = "babydra-theme"
+version.workspace = true
+edition = "2021"
+description = "Theme package engine: loads tokens.json + theme.css + fonts.json and resolves theme values."
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
