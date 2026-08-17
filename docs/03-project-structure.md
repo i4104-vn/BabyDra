@@ -70,7 +70,7 @@ resolver = "2"
 members = [
     "libs/babydra-core",      "libs/babydra-island",
     "crates/babydra-launcher",  "libs/babydra-theme",
-    "kits/babydra-ui-kit",    "kits/babydra-explore-kit",
+    "libs/babydra-ui-kit",
     "crates/babydra-panel",   "crates/babydra-switcher",
     "crates/babydra-screenshot", "crates/babydra-lock",
     "crates/babydra-preview", "crates/babydra-settings",
@@ -97,7 +97,7 @@ Tất cả crate ứng dụng và thư viện ở tầng gốc (`libs/` và `cra
 
 Ví dụ đúng:
 - `libs/babydra-core/`
-- `kits/babydra-ui-kit/`
+- `libs/babydra-ui-kit/`
 - `crates/babydra-panel/`
 - `crates/babydra-explore/`
 
@@ -120,7 +120,7 @@ Ví dụ đúng:
 
 ### 2.3. File CSS: snake_case
 
-- **CSS cấu trúc** (shared) nằm trong `kits/babydra-ui-kit/src/styles/shared/` — dùng snake_case, nhóm theo đối tượng:
+- **CSS cấu trúc** (shared) nằm trong `libs/babydra-ui-kit/src/styles/shared/` — dùng snake_case, nhóm theo đối tượng:
   `panel/panel.css`, `explore/content_view.css`, `apps/settings.css`, `shared/button.css`...
 - **Lớp màu dark/light** thuộc về theme package (`themes/<id>/css/dark.css`, `css/light.css`) — không nằm trong code.
 
@@ -386,14 +386,25 @@ libs/babydra-core/src/
 ### 6.2. `babydra-ui-kit` — UI kit (giao diện dùng chung)
 
 ```
-kits/babydra-ui-kit/src/
-├── lib.rs                        <- pub mod components; pub mod ui;
+libs/babydra-ui-kit/src/
+├── lib.rs                        <- pub mod components; pub mod explore; pub mod ui;
 ├── components/                   <- badge, buttons (icon/standard/tile), card (standard/
 │                                    scrollable/switch_card), list_group, modal
 │                                    (password/vpn_config/vpn_log/wifi_config/wifi_info/wifi_password
 │                                    dialog), placeholder, popovers, slider, switch, tooltips, wifi
 │                                    (close_button, navbar, progress, spinners: deprecated, feature
 │                                    `deprecated-components`)
+├── components/explore/           <- Explore feature components (trước đây tách thành
+│                                    babydra-explore-kit, nay gộp vào components/ của ui-kit):
+│   ├── context_menu/             <-   clipboard, custom_items, dimming, file_actions, widgets
+│   ├── dialogs/                  <-   alert, archive, confirm, conflict, decompress, new_file,
+│   │                                new_folder, properties, rename
+│   ├── drag/                     <-   source, target
+│   ├── helpers/                  <-   archive, format, path, trash
+│   ├── items/                    <-   grid_card, list_row
+│   ├── selection/                <-   grid, listbox
+│   ├── widgets/                  <-   button
+│   └── prelude.rs                <-   re-export API feature (tránh trùng tên với prelude gốc)
 ├── ui/
 │   ├── theme/mod.rs              <- init_theme(): đọc ThemeSelection từ config, resolve theme package
 │   │                                qua babydra-theme, nạp CSS shared + lớp màu dark/light + lớp override
@@ -404,25 +415,7 @@ kits/babydra-ui-kit/src/
 └── styles/shared/                <- CSS cấu trúc (shared) — lớp màu dark/light thuộc themes/
 ```
 
-### 6.3. `babydra-explore-kit` — Explore feature kit
-
-Tách từ `babydra-ui-kit` (T3.1) — dialogs, context menus, drag & drop, file item builders:
-
-```
-kits/babydra-explore-kit/src/
-├── lib.rs                        <- pub mod explore; pub use explore::*;
-└── explore/
-    ├── context_menu/             <- clipboard, custom_items, dimming, file_actions, widgets
-    ├── dialogs/                  <- alert, archive, confirm, conflict, decompress, new_file,
-    │                                new_folder, properties, rename
-    ├── drag/                     <- source, target
-    ├── helpers/                  <- archive, format, path, trash
-    ├── items/                    <- grid_card, list_row
-    ├── selection/                <- grid, listbox
-    └── widgets/                  <- button
-```
-
-### 6.4. `babydra-theme` — Theme engine
+### 6.3. `babydra-theme` — Theme engine
 
 Crate thuần logic (không GTK): đọc theme package từ `themes/<id>/` và resolve
 các lớp CSS (dark/light) + tokens + fonts:
@@ -627,7 +620,7 @@ docs/
 | DO | Thư mục crate dùng kebab-case; file/thư mục trong `src/` dùng snake_case |
 | DO | Tách `mod.rs` (logic) / `render.rs` (UI) / `handlers.rs` (sự kiện) cho mọi widget phức tạp |
 | DO | Mọi logic hệ thống phải nằm trong `babydra-core/src/services/` và gọi qua API |
-| DO | CSS cấu trúc nằm trong `kits/babydra-ui-kit/src/styles/shared/`; màu dark/light thuộc `themes/` |
+| DO | CSS cấu trúc nằm trong `libs/babydra-ui-kit/src/styles/shared/`; màu dark/light thuộc `themes/` |
 | DO | Chuỗi hiển thị phải đi qua `i18n::t()` với file JSON en/vi tương ứng |
 | DO | State dùng chung qua `Rc<RefCell<T>>` — không lưu business data trong widget |
 | DO NOT | Không import `gtk4` trong `babydra-core` |

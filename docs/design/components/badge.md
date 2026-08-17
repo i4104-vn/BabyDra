@@ -2,7 +2,7 @@
 
 Tài liệu quy định cách sử dụng, kiểu dáng, và mã nguồn chuẩn cho **Badge** trong hệ thống BabyDra.
 
-**Vị trí mã nguồn:** `kits/babydra-ui-kit/src/components/badge/mod.rs`
+**Vị trí mã nguồn:** `libs/babydra-ui-kit/src/components/badge/mod.rs`
 
 ---
 

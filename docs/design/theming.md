@@ -17,7 +17,7 @@ BabyDra tiếp cận khác: **Dark mode và Light mode có cùng ngôn ngữ th�
 CSS được tổ chức thành ba tầng:
 
 ```
-kits/babydra-ui-kit/src/styles/
+libs/babydra-ui-kit/src/styles/
     shared/   <- CSS cấu trúc & layout (không phụ thuộc theme)
     dark/     <- CSS màu sắc cho dark mode
     light/    <- CSS màu sắc cho light mode

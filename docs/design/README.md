@@ -34,7 +34,7 @@ Tài liệu này mô tả phong cách và hướng làm thiết kế giao diện
 
 ## Components Giao diện
 
-Mỗi component trong `kits/babydra-ui-kit/src/components/` có một tài liệu riêng quy định API, CSS classes và quy tắc sử dụng:
+Mỗi component trong `libs/babydra-ui-kit/src/components/` có một tài liệu riêng quy định API, CSS classes và quy tắc sử dụng:
 
 | Tài liệu | Nội dung |
 | :--- | :--- |

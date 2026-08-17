@@ -67,11 +67,11 @@ Toàn bộ tài liệu thiết kế nằm trong thư mục [design/](./design/RE
 | Tài liệu | Nội dung |
 | :--- | :--- |
 | [kit-apis/ui-kit.md](./kit-apis/ui-kit.md) | API `babydra-ui-kit` — components, theme, icons, animation, battery, window |
-| [kit-apis/explore-kit.md](./kit-apis/explore-kit.md) | API `babydra-explore-kit` — dialogs, context menu, drag & drop, file items |
-| [06-kits-api.md](./06-kits-api.md) | Tổng hợp 2 kits, cách dùng prelude, bắt đầu nhanh |
+| [kit-apis/explore-kit.md](./kit-apis/explore-kit.md) | API `babydra-ui-kit::components::explore` — dialogs, context menu, drag & drop, file items |
+| [06-kits-api.md](./06-kits-api.md) | Tổng hợp UI kit, cách dùng prelude, bắt đầu nhanh |
 | [core-api.md](./core-api.md) | API `babydra-core` — services, models, config, error handling |
 
-**Components Giao diện** (thư mục `design/components/`) — mỗi component trong `kits/babydra-ui-kit/src/components/` có một tài liệu riêng:
+**Components Giao diện** (thư mục `design/components/`) — mỗi component trong `libs/babydra-ui-kit/src/components/` có một tài liệu riêng:
 
 | Tài liệu | Nội dung |
 | :--- | :--- |
@@ -115,7 +115,7 @@ Các tài liệu sử dụng bảng markdown thuần túy và các quy ước sa
 | Bộ cài đặt TUI | `install/` (nhánh `main`) | `babydra-installer`: wizard 8 bước, 3 kênh cài đặt, 3 preset |
 | Ứng dụng đồ họa | `crates/` (nhánh `release`) | 8 ứng dụng: panel, switcher, screenshot, lock, greeter, settings, preview, explore |
 | Logic lõi | `libs/babydra-core/` (nhánh `release`) | Services, models, i18n, D-Bus, sysfs |
-| Widget & CSS dùng chung | `kits/babydra-ui-kit/` (nhánh `release`) | Components, styles (dark/light/shared), theme, icon, animation |
+| Widget & CSS dùng chung | `libs/babydra-ui-kit/` (nhánh `release`) | Components, styles (dark/light/shared), theme, icon, animation |
 | Dynamic Island | `libs/babydra-island/` (nhánh `release`) | Thông báo, overlay âm lượng/độ sáng, media player |
 | Launcher | `crates/babydra-launcher/` (nhánh `release`) | Tìm kiếm mờ (fuzzy), lưới ứng dụng, tìm file |
 | Cấu hình hệ thống | `configs/` (nhánh `release`) | labwc, kitty, nvim, fastfetch, themes |

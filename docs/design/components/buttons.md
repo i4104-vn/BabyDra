@@ -50,7 +50,7 @@ Tài liệu quy định cách sử dụng, kiểu dáng, và mã CSS chuẩn cho
 ## 3. Vị trí File Mã Nguồn CSS
 
 Mọi style của nút bấm được tập trung khai báo tại:
-- `kits/babydra-ui-kit/src/styles/shared/shared/button.css` (Cấu trúc & layout dùng chung)
+- `libs/babydra-ui-kit/src/styles/shared/shared/button.css` (Cấu trúc & layout dùng chung)
 - `themes/babydra-default/css/dark.css` (Màu sắc chế độ Tối — theme package)
 - `themes/babydra-default/css/light.css` (Màu sắc chế độ Sáng — theme package)
 

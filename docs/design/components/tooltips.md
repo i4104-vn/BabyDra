@@ -2,7 +2,7 @@
 
 Tài liệu quy định cách sử dụng và mã nguồn chuẩn cho **Tooltip** trong hệ thống BabyDra.
 
-**Vị trí mã nguồn:** `kits/babydra-ui-kit/src/components/tooltips/mod.rs`
+**Vị trí mã nguồn:** `libs/babydra-ui-kit/src/components/tooltips/mod.rs`
 
 ---
 

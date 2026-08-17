@@ -291,7 +291,7 @@ echo $XDG_SESSION_TYPE  # Phải trả về "wayland"
 ```toml
 [dependencies]
 babydra-core = { path = "libs/babydra-core" }
-babydra-ui-kit = { path = "kits/babydra-ui-kit" }
+babydra-ui-kit = { path = "libs/babydra-ui-kit" }
 ```
 (hoặc `{ workspace = true }` nếu khai báo trong `[workspace.dependencies]` của Cargo.toml gốc)
 

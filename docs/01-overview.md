@@ -65,7 +65,7 @@ Mã nguồn được phân rã thành các crate và thư viện độc lập. C
 | Tên thư viện | Đường dẫn | Vai trò |
 |---|---|---|
 | `babydra-core` | `libs/babydra-core/` | Dịch vụ hệ điều hành (battery, wifi, bluetooth, volume, backlight, vpn, power, storage...), D-Bus, sysfs, mô hình dữ liệu, i18n (en/vi), logger |
-| `babydra-ui-kit` | `kits/babydra-ui-kit/` | CSS toàn cục (dark/light/shared), bộ widget dùng chung (button, card, modal, switch...), theme, icon resolver, animation, context menu & dialogs cho Explore |
+| `babydra-ui-kit` | `libs/babydra-ui-kit/` | CSS toàn cục (dark/light/shared), bộ widget dùng chung (button, card, modal, switch...), theme, icon resolver, animation, context menu & dialogs cho Explore |
 | `babydra-island` | `libs/babydra-island/` | Widget Dynamic Island: thông báo, overlay âm lượng/độ sáng, media player (playerctl + visualizer) |
 | `babydra-launcher` | `crates/babydra-launcher/` | Launcher ứng dụng: tìm kiếm mờ (fuzzy search), lưới ứng dụng, tìm kiếm file |
 
@@ -149,7 +149,7 @@ Quy trình phân nhánh chi tiết được quy định tại [WORKFLOW.md](../W
                                                          +------------------------+
 ```
 
-Toàn bộ giao diện được tô màu bởi CSS dùng chung từ `kits/babydra-ui-kit/src/styles/` (nạp qua `babydra_ui_kit::ui::theme::init_theme()`), đồng bộ giữa mọi ứng dụng.
+Toàn bộ giao diện được tô màu bởi CSS dùng chung từ `libs/babydra-ui-kit/src/styles/` (nạp qua `babydra_ui_kit::ui::theme::init_theme()`), đồng bộ giữa mọi ứng dụng.
 
 ---
 
@@ -157,7 +157,7 @@ Toàn bộ giao diện được tô màu bởi CSS dùng chung từ `kits/babydr
 
 | Yêu cầu | Vị trí mã nguồn | Tài liệu tham chiếu |
 |---|---|---|
-| CSS và giao diện | `kits/babydra-ui-kit/src/styles/` (nhánh `release`) | [design/](./design/README.md), [03-project-structure.md](./03-project-structure.md) |
+| CSS và giao diện | `libs/babydra-ui-kit/src/styles/` (nhánh `release`) | [design/](./design/README.md), [03-project-structure.md](./03-project-structure.md) |
 | Dịch vụ phần cứng và OS | `libs/babydra-core/src/services/` (nhánh `release`) | [02-architecture.md](./02-architecture.md) |
 | Cấu trúc widget giao diện | Tách biệt `mod.rs` và `render.rs` | [03-project-structure.md](./03-project-structure.md) |
 | Đa ngôn ngữ (i18n) | `libs/babydra-core/src/i18n/` + `locales/*/en.json`, `vi.json` | [03-project-structure.md](./03-project-structure.md) |

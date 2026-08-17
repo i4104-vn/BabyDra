@@ -103,7 +103,7 @@ Tầng Engine (libs/babydra-core/src/services/system/wifi/)
 | DO NOT | Không import `gtk4` trong `babydra-core` |
 
 > [!NOTE]
-> Ngoại lệ duy nhất: `kits/babydra-ui-kit` chứa **widget GTK dùng chung** và được phép import GTK4, vì đây là tầng UI infrastructure, không phải nghiệp vụ.
+> Ngoại lệ duy nhất: `libs/babydra-ui-kit` chứa **widget GTK dùng chung** và được phép import GTK4, vì đây là tầng UI infrastructure, không phải nghiệp vụ.
 
 ---
 
@@ -228,7 +228,7 @@ Nếu mỗi crate ứng dụng tự định nghĩa riêng CSS và widget cơ b�
 Toàn bộ CSS và widget dùng chung được tập trung tại thư viện `babydra-ui-kit`:
 
 ```
-kits/babydra-ui-kit/
+libs/babydra-ui-kit/
     src/
         styles/
             shared/        <- CSS cấu trúc & layout dùng chung (không phụ thuộc theme)
@@ -266,7 +266,7 @@ Nhờ đó, mọi widget trên mọi ứng dụng đều tự động nhận sty
 
 | Quy tắc | Chi tiết |
 | :--- | :--- |
-| DO | Toàn bộ CSS phải đặt trong `kits/babydra-ui-kit/src/styles/` |
+| DO | Toàn bộ CSS phải đặt trong `libs/babydra-ui-kit/src/styles/` |
 | DO | Gọi `babydra_ui_kit::ui::theme::init_theme()` trong hàm `main()` hoặc `activate()` của mỗi ứng dụng |
 | DO NOT | Không viết CSS inline trong mã Rust (không dùng `css_classes`, `widget.set_css_classes()` với giá trị style cụ thể) |
 | DO NOT | Không tạo `GtkCssProvider` mới trong từng ứng dụng. Chỉ dùng provider toàn cục do `babydra-ui-kit` quản lý |
