@@ -4,20 +4,15 @@ version.workspace = true
 edition = "2021"
 description = "Explore feature kit: dialogs, context menus, drag & drop, file item builders."
 
-# Feature toggles mirror babydra-ui-kit so consumers can trim optional parts.
-[features]
-default = ["full"]
-full = []
-minimal = []
-
 [dependencies]
 babydra-core = { workspace = true }
 babydra-ui-kit = { workspace = true }
-gtk4 = { version = "0.9", features = ["v4_10"] }
-glib = "0.20"
-gio = "0.20"
-gdk4 = "0.9"
-gdk-pixbuf = "0.20"
-chrono = "0.4"
-tokio = { version = "1.0", features = ["fs", "rt", "process", "io-util"] }
+gtk4 = { workspace = true }
+glib = { workspace = true }
+gio = { workspace = true }
+gdk4 = { workspace = true }
+gdk-pixbuf = { workspace = true }
+chrono = { workspace = true }
+tokio = { workspace = true }
+thiserror = { workspace = true }
 trash = "3.0"
