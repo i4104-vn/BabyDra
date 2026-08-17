@@ -107,14 +107,14 @@ echo "============================================="
 # 6.1 Copy wallpapers and brand assets
 mkdir -p "$HOME/.babydra"
 cp "$REPO_DIR/wallpaper.png" "$HOME/.babydra/wallpaper.png" 2>/dev/null || true
-cp "$REPO_DIR/libs/babydra-common/src/services/logo.png" "$HOME/.babydra/logo.png" 2>/dev/null || true
+cp "$REPO_DIR/libs/babydra-core/src/services/logo.png" "$HOME/.babydra/logo.png" 2>/dev/null || true
 
 sudo mkdir -p /usr/share/babydra /var/lib/babydra 2>/dev/null || true
 sudo chmod 777 /var/lib/babydra 2>/dev/null || true
-sudo cp "$REPO_DIR/libs/babydra-common/src/services/logo.png" /usr/share/babydra/babydra-preview.png 2>/dev/null || true
-sudo cp "$REPO_DIR/libs/babydra-common/src/services/logo.png" /usr/share/babydra/babydra-settings.png 2>/dev/null || true
-sudo cp "$REPO_DIR/libs/babydra-common/src/services/logo.png" /usr/share/babydra/logo.png 2>/dev/null || true
-sudo cp "$REPO_DIR/libs/babydra-common/src/services/logo.png" /var/lib/babydra/logo.png 2>/dev/null || true
+sudo cp "$REPO_DIR/libs/babydra-core/src/services/logo.png" /usr/share/babydra/babydra-preview.png 2>/dev/null || true
+sudo cp "$REPO_DIR/libs/babydra-core/src/services/logo.png" /usr/share/babydra/babydra-settings.png 2>/dev/null || true
+sudo cp "$REPO_DIR/libs/babydra-core/src/services/logo.png" /usr/share/babydra/logo.png 2>/dev/null || true
+sudo cp "$REPO_DIR/libs/babydra-core/src/services/logo.png" /var/lib/babydra/logo.png 2>/dev/null || true
 sudo cp "$REPO_DIR/wallpaper.png" /usr/share/babydra/wallpaper.png 2>/dev/null || true
 sudo cp "$REPO_DIR/wallpaper.png" /var/lib/babydra/greeter_wallpaper.png 2>/dev/null || true
 

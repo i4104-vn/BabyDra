@@ -5,7 +5,7 @@
 #
 # Usage:
 #   ./scripts/check.sh                 # full workspace
-#   ./scripts/check.sh -p babydra-common  # pass-through cargo args
+#   ./scripts/check.sh -p babydra-core  # pass-through cargo args
 #
 set -euo pipefail
 

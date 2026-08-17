@@ -110,16 +110,16 @@ sudo cp target/release/babydra-greeter /usr/bin/babydra-greeter
 # Copy wallpaper and logos to standard config & system resource dirs
 mkdir -p "$HOME/.babydra"
 cp wallpaper.png "$HOME/.babydra/wallpaper.png"
-cp libs/babydra-common/src/services/logo.png "$HOME/.babydra/logo.png"
+cp libs/babydra-core/src/services/logo.png "$HOME/.babydra/logo.png"
 
 sudo mkdir -p /usr/share/babydra
 sudo mkdir -p /var/lib/babydra
 sudo chmod 777 /var/lib/babydra
 
-sudo cp libs/babydra-common/src/services/logo.png /usr/share/babydra/babydra-preview.png
-sudo cp libs/babydra-common/src/services/logo.png /usr/share/babydra/babydra-settings.png
-sudo cp libs/babydra-common/src/services/logo.png /usr/share/babydra/logo.png
-sudo cp libs/babydra-common/src/services/logo.png /var/lib/babydra/logo.png
+sudo cp libs/babydra-core/src/services/logo.png /usr/share/babydra/babydra-preview.png
+sudo cp libs/babydra-core/src/services/logo.png /usr/share/babydra/babydra-settings.png
+sudo cp libs/babydra-core/src/services/logo.png /usr/share/babydra/logo.png
+sudo cp libs/babydra-core/src/services/logo.png /var/lib/babydra/logo.png
 
 sudo cp wallpaper.png /usr/share/babydra/wallpaper.png
 sudo cp wallpaper.png /var/lib/babydra/greeter_wallpaper.png
