@@ -13,6 +13,8 @@ description = "Integration test suite for the BabyDra workspace (TDD safety net)
 [dev-dependencies]
 babydra-core = { workspace = true }
 babydra-theme = { workspace = true }
+babydra-ui-kit = { workspace = true }
+babydra-explore-kit = { workspace = true }
 babydra-installer = { path = "../install" }
 chrono = "0.4"
 gtk4 = { version = "0.9", features = ["v4_10"] }
@@ -60,6 +62,10 @@ name = "services_wallpaper"
 path = "services/wallpaper.rs"
 
 [[test]]
+name = "services_updates"
+path = "services/updates.rs"
+
+[[test]]
 name = "theme_engine"
 path = "theme/engine.rs"
 
@@ -70,6 +76,10 @@ path = "theme/tokens.rs"
 [[test]]
 name = "theme_shipped"
 path = "theme/shipped.rs"
+
+[[test]]
+name = "kits_prelude"
+path = "kits/prelude.rs"
 
 [[test]]
 name = "installer_variant_options"

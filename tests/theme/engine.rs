@@ -116,7 +116,10 @@ fn css_subfolder_wins_over_legacy_flat_layout() {
     point_themes_dir_at_temp();
 
     let pkg = load_package("test-both").expect("load package");
-    assert_eq!(pkg.dark_css, ".nested-dark {}", "css/ subfolder takes precedence");
+    assert_eq!(
+        pkg.dark_css, ".nested-dark {}",
+        "css/ subfolder takes precedence"
+    );
 }
 
 #[test]
@@ -268,5 +271,8 @@ fn resolve_theme_detects_inheritance_cycle() {
     point_themes_dir_at_temp();
 
     let err = resolve_theme("cycle-a").expect_err("cycle must fail");
-    assert!(err.contains("cycle"), "error mentions cycle: {err}");
+    assert!(
+        matches!(err, babydra_theme::ThemeError::Cycle(_)),
+        "expected a cycle error, got: {err}"
+    );
 }
