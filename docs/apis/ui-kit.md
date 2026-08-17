@@ -6,9 +6,17 @@
 
 ---
 
-## 1. Cách dùng nhanh
+## Mục lục
 
-Thêm vào `Cargo.toml`:
+- [1. Cách dùng nhanh](#1-cách-dùng-nhanh)
+- [2. `prelude` — re-export API thông dụng](#2-prelude--re-export-api-thông-dụng)
+- [3. Components](#3-components)
+- [4. UI helpers](#4-ui-helpers)
+- [5. Quy tắc](#5-quy-tắc)
+
+---
+
+## 1. Cách dùng nhanh
 
 ```toml
 babydra-ui-kit = { workspace = true }
@@ -37,10 +45,9 @@ use babydra_ui_kit::ui::animation::slide::SlideDirection;
 
 ---
 
-## 2. `prelude` — re-export toàn bộ API thông dụng
+## 2. `prelude` — re-export API thông dụng
 
-`babydra_ui_kit::prelude::*` gộp mọi builder + helper hay dùng nhất về một nơi.
-Các mục chính:
+`babydra_ui_kit::prelude::*` gộp mọi builder + helper hay dùng về một nơi:
 
 | Nhóm | Mục |
 | :--- | :--- |
@@ -61,12 +68,11 @@ Các mục chính:
 | **Window** | `init_layer_window`, `setup_click_outside_dismiss` |
 
 > [!NOTE]
-> `prelude` giữ **module gốc vẫn truy cập được** — chỉ gộp mặt phẳng các tên hay dùng,
-> không thay thế cấu trúc module (`components`, `ui`).
+> `prelude` giữ **module gốc vẫn truy cập được** — chỉ gộp mặt phẳng các tên hay dùng, không thay thế cấu trúc module.
 
 ---
 
-## 3. Components (thành phần giao diện)
+## 3. Components
 
 ### 3.1. Buttons
 
@@ -135,7 +141,7 @@ let svg  = render_wifi_signal_svg(strength, size, color);      // SVG thô
 
 | Hàm | Mô tả |
 | :--- | :--- |
-| `init_theme()` | Gọi 1 lần khi app khởi động — nạp CSS shared + theme package đang chọn (`~/.babydra/babydra.conf` → `theme.selection`) |
+| `init_theme()` | Gọi 1 lần lúc khởi động — nạp CSS shared + theme package đang chọn (`~/.babydra/babydra.conf` → `theme.selection`) |
 | `set_dark_mode(bool)` | Đổi GSettings + reload CSS |
 | `is_dark_mode() -> bool` | Trạng thái dark hiện tại |
 | `apply_theme_class(window)` | Stub tương thích (theme áp dụng toàn cục) |
@@ -183,9 +189,8 @@ setup_click_outside_dismiss(&window, &content);
 | :--- | :--- |
 | DO | Import qua `prelude::*` cho API thông dụng; dùng module sâu khi cần cụ thể |
 | DO | Gọi `init_theme()` đúng 1 lần lúc khởi động trước khi tạo widget |
-| DO | Mọi chuỗi hiển thị phải qua `babydra_core::i18n::t()` — không hardcode tiếng Việt/Anh |
+| DO | Mọi chuỗi hiển thị phải qua `babydra_core::i18n::t()` — không hardcode |
 | DO NOT | Tạo `GtkCssProvider` riêng trong app — màu/CSS đi qua theme package + `init_theme()` |
 | DO NOT | Viết CSS inline trong Rust |
 
-Xem thêm: [tổng hợp API kits](../06-kits-api.md), [components design](../design/README.md), [theming](../design/theming.md),
-[API `explore`](./explore-kit.md).
+Xem thêm: [tổng hợp API kits](./index.md), [components design](../design/README.md), [theming](../design/theming.md), [API explore](./explore-kit.md).

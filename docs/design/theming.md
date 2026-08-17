@@ -14,20 +14,22 @@ BabyDra tiếp cận khác: **Dark mode và Light mode có cùng ngôn ngữ th�
 
 ## Cách hệ thống quản lý hai theme
 
-CSS được tổ chức thành ba tầng:
+CSS được tổ chức thành hai tầng:
 
 ```
 libs/babydra-ui-kit/src/styles/
     shared/   <- CSS cấu trúc & layout (không phụ thuộc theme)
-    dark/     <- CSS màu sắc cho dark mode
-    light/    <- CSS màu sắc cho light mode
+themes/<theme-id>/css/
+    dark.css   <- lớp màu dark-mode (thuộc theme package)
+    light.css  <- lớp màu light-mode
+    theme.css  <- override nạp cuối (tùy chọn)
 ```
 
-Cấu trúc thư mục con giống nhau giữa ba tầng: `panel/`, `control_center/`, `island/`, `launcher/`, `calendar/`, `apps/`, `explore/`, `shared/` (button, switch, sidebar, scrollbar).
+Cấu trúc thư mục con của `shared/` nhóm theo đối tượng: `panel/`, `control_center/`, `island/`, `launcher/`, `calendar/`, `apps/`, `explore/`, `shared/` (button, switch, sidebar, scrollbar). Lớp màu dark/light nằm trong theme package tại `themes/<theme-id>/css/` — mỗi theme sở hữu màu riêng (xem [themes](../themes/index.md)).
 
-Khi ứng dụng khởi động, `init_theme()` trong `babydra-ui-kit` gộp toàn bộ CSS `shared/` với CSS `dark/` hoặc `light/` (tùy GSettings) rồi nạp vào provider toàn cục. Khi người dùng chuyển theme trong lúc chạy, hệ thống reload CSS và áp dụng ngay.
+Khi ứng dụng khởi động, `init_theme()` trong `babydra-ui-kit` đọc theme đang chọn (`~/.babydra/babydra.conf` → `theme.selection`), gộp CSS `shared/` với lớp màu dark/light của theme package rồi nạp vào provider toàn cục. Khi người dùng chuyển theme trong lúc chạy, hệ thống reload CSS và áp dụng ngay.
 
-Điều quan trọng: **mọi thay đổi CSS phải được thực hiện ở đúng tầng của nó**. Style màu sắc phải được cập nhật ở cả `dark/` lẫn `light/`; style cấu trúc (layout, kích thước) chỉ cần đặt ở `shared/`. Thêm style mới vào `dark/` mà quên `light/` là lỗi phổ biến nhất trong dự án.
+Điều quan trọng: **mọi thay đổi CSS phải được thực hiện ở đúng tầng của nó**. Style màu sắc phải được cập nhật ở cả `dark.css` lẫn `light.css` của theme package; style cấu trúc (layout, kích thước) chỉ cần đặt ở `shared/`. Thêm style mới vào `dark.css` mà quên `light.css` là lỗi phổ biến nhất trong dự án.
 
 ---
 
@@ -96,4 +98,4 @@ themes/<theme-id>/
 
 - `resolve_theme(id)` hỗ trợ kế thừa `base` (theme con override từng token).
 - Giá trị dark/light tương ứng với bảng ở đầu tài liệu này.
-- Xem hướng dẫn tạo theme mới: `docs/05-themes-variants.md`.
+- Xem hướng dẫn tạo theme mới: [`themes`](../themes/index.md).

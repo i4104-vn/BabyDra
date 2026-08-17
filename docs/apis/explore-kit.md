@@ -6,15 +6,26 @@
 
 ---
 
+## Mục lục
+
+- [1. Cách dùng nhanh](#1-cách-dùng-nhanh)
+- [2. `prelude` — re-export API feature](#2-prelude--re-export-api-feature)
+- [3. Context Menu](#3-context-menu)
+- [4. Dialogs](#4-dialogs)
+- [5. Drag & Drop](#5-drag--drop)
+- [6. Helpers thuần](#6-helpers-thuần)
+- [7. Items & Selection](#7-items--selection)
+- [8. Quy tắc](#8-quy-tắc)
+
+---
+
 ## 1. Cách dùng nhanh
 
-`babydra-ui-kit` đã bao gồm module `components::explore` — chỉ cần khai báo 1 dependency:
+`babydra-ui-kit` đã bao gồm module `components::explore` — chỉ cần 1 dependency:
 
 ```toml
 babydra-ui-kit = { workspace = true }
 ```
-
-Import toàn bộ API feature qua `prelude` riêng:
 
 ```rust
 use babydra_ui_kit::components::explore::prelude::*;
@@ -37,10 +48,7 @@ let target = create_dir_drop_target(dest_path);
 
 ---
 
-## 2. `components::explore::prelude` — re-export toàn bộ API feature
-
-`babydra_ui_kit::components::explore::prelude::*` gộp mặt phẳng API của mọi module feature.
-Các mục chính:
+## 2. `prelude` — re-export API feature
 
 | Nhóm | Mục |
 | :--- | :--- |
@@ -54,8 +62,7 @@ Các mục chính:
 | **Widgets** | `update_new_folder_button` |
 
 > [!NOTE]
-> `components::explore::prelude` tách riêng khỏi `prelude` gốc vì một số tên trùng (vd
-> `create_list_row`) — mỗi prelude giữ đúng không gian API của mình.
+> `components::explore::prelude` tách riêng khỏi `prelude` gốc vì một số tên trùng (vd `create_list_row`) — mỗi prelude giữ đúng không gian API của mình.
 
 ---
 
@@ -117,15 +124,13 @@ let (footer_box, actions_box) = create_footer_container();
 | `show_rename_dialog(&path, current_path, nav_cb, parent)` | Đổi tên |
 
 > [!NOTE]
-> Tất cả hàm dialog nhận `parent: Option<&impl IsA<gtk4::Window>>` — truyền `None` để
-> tự do, hoặc window cha để modal đúng ngữ cảnh.
+> Tất cả hàm dialog nhận `parent: Option<&impl IsA<gtk4::Window>>` — truyền `None` để tự do, hoặc window cha để modal đúng ngữ cảnh.
 
 ### 4.1. Thuộc tính (Properties)
 
 ```rust
 show_properties_dialog(vec![path], Some(&window));
 
-// Tiện ích phụ
 let perm = get_permissions_string(0o755);              // "rwxr-xr-x"
 let (files, dirs) = count_dir_contents_recursive(&path);
 let checkboxes = build_permission_matrix(&parent_vbox, 0o755);
@@ -158,7 +163,7 @@ let source = create_drag_source(&path, &icon_name, selected_paths);
 | `format_date(mtime: SystemTime)` | `String` | Ngày theo locale hiện tại |
 | `is_archive_file(path)` | `bool` | `.zip/.tar/.gz/...` |
 | `is_in_trash(path)` | `bool` | Đang nằm trong Thùng rác |
-| `restore_from_trash(trash_file_path) -> Result<(), String>` | `async` | Khôi phục file/folder từ Thùng rác về vị trí cũ (đọc `.trashinfo`) |
+| `restore_from_trash(trash_file_path) -> Result<(), String>` | `async` | Khôi phục từ Thùng rác về vị trí cũ (đọc `.trashinfo`) |
 | `parse_target_dir() -> PathBuf` | — | Thư mục đích khi paste (đọc global state) |
 | `sanitize_path(path) -> PathBuf` | — | Vệ sinh tên file trùng |
 
@@ -167,7 +172,6 @@ let source = create_drag_source(&path, &icon_name, selected_paths);
 ## 7. Items & Selection
 
 ```rust
-// Grid card / list row
 let card: gtk4::FlowBoxChild = create_grid_file_item(idx, &entry, selected_paths, on_right_click);
 let row: gtk4::ListBoxRow = create_list_row(idx, &entry, ...);
 
@@ -188,4 +192,4 @@ wire_rubberband_listbox(&list_box, ...);
 | DO NOT | Gọi trực tiếp `std::fs` xóa/nén trong render code — dùng helper của module hoặc core |
 | DO NOT | Hardcode chuỗi UI — qua `babydra_core::i18n::t()` |
 
-Xem thêm: [tổng hợp API kits](../06-kits-api.md), [explore docs](../02-architecture.md).
+Xem thêm: [tổng hợp API kits](./index.md), [kiến trúc](../architecture/index.md).

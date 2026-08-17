@@ -131,6 +131,6 @@ override so với `base`.
   (vd `babydra-blue` kế thừa default, đổi `accent` + `radius`). Engine tự phát
   hiện cycle kế thừa.
 - **Theme mới**: copy thư mục `themes/babydra-default/` → đổi `name` + giá trị.
-  Hướng dẫn từng bước: `docs/05-themes-variants.md`.
+  Hướng dẫn từng bước: [`themes`](../themes/index.md).
 - `css/theme.css` và `fonts.json` đi kèm là lớp màu nạp lên core CSS và bảng font
-  families — xem `docs/design/theming.md` mục Theme packages.
+  families — xem [`theming.md`](./theming.md) mục Theme packages.

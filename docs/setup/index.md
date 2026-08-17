@@ -1,8 +1,8 @@
-# Chương 04: Hướng dẫn Cài đặt và Build Dự án
+# Cài đặt & build dự án
 
-**Phiên bản:** 1.2.0
-**Cập nhật lần cuối:** 2026-08-14
-**Phạm vi:** Yêu cầu hệ thống, cài đặt dependencies, build, chạy từng crate, cài đặt DE và xử lý lỗi
+**Phạm vi:** Yêu cầu hệ thống, cài đặt dependencies, build, chạy từng crate, cài đặt DE và xử lý lỗi.
+**Phiên bản:** 1.3.0
+**Cập nhật lần cuối:** 2026-08-17
 
 ---
 
@@ -14,7 +14,7 @@
 - [4. Cài đặt qua Bộ cài đặt TUI (khuyến nghị)](#4-cài-đặt-qua-bộ-cài-đặt-tui-khuyến-nghị)
 - [5. Build từ mã nguồn (nhánh release)](#5-build-từ-mã-nguồn-nhánh-release)
 - [6. Chạy từng crate ứng dụng](#6-chạy-từng-crate-ứng-dụng)
-- [7. Script hệ thống: start.sh, update.sh, install.sh](#7-script-hệ-thống-startsh-updatesh-installsh)
+- [7. Script hệ thống](#7-script-hệ-thống)
 - [8. Xử lý lỗi thường gặp](#8-xử-lý-lỗi-thường-gặp)
 
 ---
@@ -23,14 +23,13 @@
 
 ### Hệ điều hành
 
-- **Arch Linux** hoặc các bản phân phối tương thích (baby-dra được thiết kế cho Arch, dùng `pacman` và `yay`).
-- **Wayland compositor** đang chạy — mặc định là **labwc**. Không hỗ trợ X11.
+- **Arch Linux** hoặc bản phân phối tương thích (dùng `pacman` và `yay`).
+- **Wayland compositor** đang chạy — mặc định **labwc**. Không hỗ trợ X11.
 - Kiểm tra: `echo $XDG_SESSION_TYPE` phải trả về `wayland`.
 
 ### Phiên bản Rust
 
-- **Rust 1.80.0 trở lên** (stable channel) — theo yêu cầu chính thức trong README.
-- Kiểm tra phiên bản hiện tại: `rustc --version`
+- **Rust 1.80.0 trở lên** (stable channel). Kiểm tra: `rustc --version`.
 
 ### Thư viện hệ thống cần thiết
 
@@ -41,7 +40,7 @@
 | GLib | `glib2` | Nền tảng cho GTK |
 | D-Bus | `dbus` | Giao tiếp liên tiến trình |
 | PipeWire | `pipewire` | Điều khiển âm thanh |
-| pkg-config | `pkgconf` | Công cụ tìm thư viện khi build |
+| pkg-config | `pkgconf` | Tìm thư viện khi build |
 | labwc | `labwc` | Wayland compositor / window manager |
 | greetd + cage | `greetd cage` | Màn hình đăng nhập |
 | playerctl | `playerctl` | Điều khiển media player (island) |
@@ -50,7 +49,7 @@
 | ddcutil | `ddcutil` | Điều khiển độ sáng màn hình ngoài |
 
 > [!NOTE]
-> Nếu dùng **Bộ cài đặt TUI** (xem mục 4), toàn bộ dependencies trên được cài tự động qua bước "System Packages & Deps" — không cần cài tay.
+> Nếu dùng **Bộ cài đặt TUI** (mục 4), toàn bộ dependencies được cài tự động qua bước "System Packages & Deps" — không cần cài tay.
 
 ---
 
@@ -68,7 +67,6 @@ sudo pacman -S --needed base-devel git pkgconf gtk4 gtk4-layer-shell rust \
 ### AUR helper (nếu chưa có)
 
 ```bash
-# Cài yay từ AUR
 git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin
 cd /tmp/yay-bin && makepkg -si
 ```
@@ -84,11 +82,9 @@ yay -S --noconfirm ttf-segoe-ui-variable ttf-cascadia-code-nerd kitty neovim fas
 ## 3. Clone và chuẩn bị dự án
 
 ```bash
-# Clone repository (mặc định nhánh main — kênh phân phối)
 git clone <địa_chỉ_repository> BabyDra
 cd BabyDra
 
-# Kiểm tra Rust toolchain
 rustc --version
 cargo --version
 ```
@@ -101,7 +97,6 @@ Hai cách sử dụng:
 | `release` | Developer: build toàn bộ mã nguồn DE (mục 5) |
 
 ```bash
-# Chuyển sang nhánh mã nguồn đầy đủ (developer)
 git fetch origin release
 git checkout release
 ```
@@ -110,7 +105,7 @@ git checkout release
 
 ## 4. Cài đặt qua Bộ cài đặt TUI (khuyến nghị)
 
-Bộ cài đặt `babydra-installer` nằm trên nhánh `main`. Đây là cách cài đặt khuyến nghị cho người dùng cuối.
+Bộ cài đặt `babydra-installer` nằm trên nhánh `main` — cách cài đặt khuyến nghị cho người dùng cuối.
 
 ### 4.1. Khởi chạy
 
@@ -136,17 +131,17 @@ CLI arguments:
 
 ### 4.2. Quy trình trong TUI
 
-1. **Bước 1 (Welcome):** Nhấn `c` để chọn kênh — **Release** (ổn định) / **Develop** (thử nghiệm) / **Local Source** (binary có sẵn). Trình chọn kênh hiển thị commit hash, tác giả và ngày cập nhật của từng nhánh. Dùng `j`/`k` chọn preset profile: *Full Desktop*, *Binaries & /var/lib Only*, *Custom*.
-2. **Bước 2 (Packages):** Chọn cài pacman deps, AUR packages, kernel/i2c permissions.
-3. **Bước 3 (Binaries):** Chọn 9 binary component (panel, switcher, screenshot, lock, launcher, preview, settings, explore, greeter) — binary nào có trong thư mục nguồn sẽ được đánh dấu sẵn.
-4. **Bước 4 (/var/lib):** Stage binaries, wallpapers, logos vào `/var/lib/babydra` (chmod 777).
-5. **Bước 5 (Configs & Themes):** Sync labwc configs, .desktop entries, dotfiles (GTK/fontconfig/kitty/nvim/fastfetch), themes/icons/cursors, gsettings.
-6. **Bước 6 (Display Manager):** Cấu hình greetd (`cage` + `babydra-greeter`), mask gettys tty2-6, enable greetd.service.
-7. **Bước 7 (Execute):** Theo dõi log realtime và progress gauge.
-8. **Bước 8 (Summary):** Xem kết quả và thoát.
+1. **Bước 1 (Welcome):** nhấn `c` chọn kênh — **Release** (ổn định) / **Develop** (thử nghiệm) / **Local Source**. Trình chọn hiển thị commit hash, tác giả, ngày cập nhật của từng nhánh. Dùng `j`/`k` chọn preset profile.
+2. **Bước 2 (Packages):** chọn pacman deps, AUR packages, kernel/i2c permissions.
+3. **Bước 3 (Binaries):** chọn 9 binary component (panel, switcher, screenshot, lock, launcher, preview, settings, explore, greeter).
+4. **Bước 4 (/var/lib):** stage binaries, wallpapers, logos vào `/var/lib/babydra`.
+5. **Bước 5 (Configs & Themes):** sync labwc configs, .desktop entries, dotfiles, themes/icons/cursors, gsettings.
+6. **Bước 6 (Display Manager):** cấu hình greetd (`cage` + `babydra-greeter`), mask gettys, enable greetd.service.
+7. **Bước 7 (Execute):** theo dõi log realtime và progress gauge.
+8. **Bước 8 (Summary):** xem kết quả và thoát.
 
 > [!IMPORTANT]
-> Nếu chọn kênh **Release/Develop** mà binary chưa có trong thư mục nguồn, bộ cài đặt sẽ tự động `git fetch origin <branch>` và chạy `cargo build --release --workspace` để tạo binary trước khi cài. Kênh **Local Source** copy trực tiếp, không build.
+> Nếu chọn kênh **Release/Develop** mà binary chưa có, bộ cài đặt tự động `git fetch origin <branch>` + `cargo build --release --workspace`. Kênh **Local Source** copy trực tiếp, không build.
 
 ### 4.3. Kết quả sau khi cài
 
@@ -161,12 +156,10 @@ CLI arguments:
 ## 5. Build từ mã nguồn (nhánh release)
 
 > [!NOTE]
-> Bước này cần workspace đầy đủ — chuyển sang nhánh `release` trước (`git checkout release`).
-
-### Build toàn bộ workspace
+> Cần workspace đầy đủ — chuyển sang nhánh `release` trước.
 
 ```bash
-# Release mode (khuyến nghị — binary nhỏ hơn, chạy nhanh hơn)
+# Release mode (khuyến nghị)
 cargo build --release --workspace
 
 # Debug mode
@@ -175,33 +168,28 @@ cargo build --workspace
 
 Artifact nằm tại `target/release/` (hoặc `target/debug/`).
 
-### Build một crate cụ thể
-
 ```bash
+# Build một crate cụ thể
 cargo build --release -p babydra-panel
 cargo build --release -p babydra-explore
-```
 
-### Kiểm tra lỗi compile mà không sinh binary
-
-```bash
+# Kiểm tra compile không sinh binary
 cargo check --workspace
 cargo check -p babydra-panel
-```
 
-### Format chuẩn Rust
-
-```bash
+# Format chuẩn
 cargo fmt --check
+
+# Clippy (lint)
+cargo clippy --workspace -- -D warnings
 ```
 
 ---
 
 ## 6. Chạy từng crate ứng dụng
 
-**Lưu ý quan trọng:** Các ứng dụng chạy trên Wayland. Phải đang trong phiên Wayland (`labwc`, Sway, Hyprland...) mới hoạt động đúng.
-
-### Chạy qua cargo (debug)
+> [!IMPORTANT]
+> Các ứng dụng chạy trên Wayland — phải đang trong phiên Wayland (labwc, Sway, Hyprland...) mới hoạt động đúng.
 
 ```bash
 cargo run -p babydra-panel        # Thanh taskbar chính
@@ -226,23 +214,23 @@ cargo run -p babydra-preview -- /path/to/image.png
 ./start.sh
 ```
 
-Script `start.sh` đồng bộ config labwc, đăng ký .desktop entries rồi `exec labwc` — toàn bộ DE khởi động cùng autostart (panel, switcher daemon, fcitx5...).
+`start.sh` đồng bộ config labwc, đăng ký .desktop entries rồi `exec labwc` — toàn bộ DE khởi động cùng autostart.
 
 ---
 
-## 7. Script hệ thống: start.sh, update.sh, install.sh
+## 7. Script hệ thống
 
 | Script | Nhánh | Mục đích |
 | :--- | :--- | :--- |
 | `install.sh` (main) | `main` | Build & launch bộ cài đặt TUI (mục 4) |
-| `install.sh` (release) | `release` | Cài đặt toàn bộ DE từ source: pacman deps, yay, i2c/CPU perms, build, deploy |
+| `install.sh` (release) | `release` | Cài đặt toàn bộ DE từ source: pacman deps, yay, perms, build, deploy |
 | `start.sh` | `release` | Khởi động DE: sync labwc config, .desktop entries, chạy labwc |
-| `update.sh` | `release` | Hot-update: `cargo build --release`, dừng tiến trình cũ, copy binary mới, sync toàn bộ config, `labwc --reconfigure`, restart panel |
+| `update.sh` | `release` | Hot-update: rebuild, dừng tiến trình cũ, copy binary, sync config, restart panel |
 
 **Cập nhật DE sau khi có code mới (developer):**
 
 ```bash
-git pull origin release   # hoặc rebase từ develop
+git pull origin release
 ./update.sh               # rebuild + deploy + restart
 ```
 
@@ -252,18 +240,16 @@ git pull origin release   # hoặc rebase từ develop
 
 ### Lỗi: `error: failed to run custom build command for gtk4-sys`
 
-**Nguyên nhân:** Thiếu thư viện GTK4 development headers.
+**Nguyên nhân:** thiếu GTK4 development headers.
 
-**Giải pháp:**
 ```bash
 sudo pacman -S gtk4 gtk4-layer-shell
 ```
 
 ### Lỗi: `cannot find -lgtk4-layer-shell`
 
-**Nguyên nhân:** Thiếu thư viện gtk4-layer-shell.
+**Nguyên nhân:** thiếu gtk4-layer-shell.
 
-**Giải pháp:**
 ```bash
 sudo pacman -S gtk4-layer-shell
 # Nếu không có package: build từ source
@@ -275,9 +261,8 @@ ninja && sudo ninja install
 
 ### Lỗi: `WAYLAND_DISPLAY is not set`
 
-**Nguyên nhân:** Đang chạy trong phiên X11 hoặc terminal không có biến môi trường Wayland.
+**Nguyên nhân:** đang chạy trong phiên X11 hoặc terminal thiếu biến môi trường Wayland.
 
-**Giải pháp:** Chắc chắn đang đăng nhập vào phiên Wayland. Kiểm tra:
 ```bash
 echo $WAYLAND_DISPLAY   # Phải trả về tên socket như wayland-1
 echo $XDG_SESSION_TYPE  # Phải trả về "wayland"
@@ -285,31 +270,31 @@ echo $XDG_SESSION_TYPE  # Phải trả về "wayland"
 
 ### Lỗi: `error[E0433]: failed to resolve: use of undeclared crate`
 
-**Nguyên nhân:** Quên thêm dependency vào `Cargo.toml` của crate.
+**Nguyên nhân:** quên thêm dependency vào `Cargo.toml` của crate.
 
-**Giải pháp:** Thêm dependency vào `Cargo.toml` của crate đang phát triển:
 ```toml
 [dependencies]
 babydra-core = { path = "libs/babydra-core" }
 babydra-ui-kit = { path = "libs/babydra-ui-kit" }
 ```
+
 (hoặc `{ workspace = true }` nếu khai báo trong `[workspace.dependencies]` của Cargo.toml gốc)
 
 ### Lỗi: `Text file busy` (ETXTBSY) khi cập nhật binary
 
-**Nguyên nhân:** Tiến trình cũ vẫn đang chạy, ghi đè executable bị chặn.
+**Nguyên nhân:** tiến trình cũ vẫn đang chạy.
 
-**Giải pháp:** Dừng tiến trình trước khi cập nhật:
 ```bash
 killall babydra-panel babydra-switcher babydra-screenshot babydra-lock \
     babydra-launcher babydra-preview babydra-settings babydra-explore || true
 ```
+
 (Bộ cài đặt TUI và `update.sh` đã tự xử lý bước này.)
 
 ### Lỗi: Screenshot không hoạt động
 
-**Giải pháp:** Cài `grim slurp wl-clipboard` và kiểm tra đang chạy trên phiên Wayland.
+Cài `grim slurp wl-clipboard` và kiểm tra đang chạy trên phiên Wayland.
 
 ### Build chậm lần đầu
 
-Build lần đầu tốn nhiều thời gian (5–15 phút tùy máy) vì phải compile tất cả dependencies. Từ lần thứ hai trở đi, Cargo cache lại, chỉ rebuild những gì thay đổi, mất khoảng 5–30 giây.
+Build lần đầu mất 5–15 phút vì compile toàn bộ dependencies. Từ lần thứ hai Cargo cache lại, chỉ rebuild phần thay đổi (5–30 giây).

@@ -1,18 +1,37 @@
 # API Reference — `babydra-core`
 
-**Phiên bản:** 1.0.0
-**Ngày:** 2026-08-17
+**Phạm vi:** API toàn bộ services, models, config, i18n của thư viện lõi.
+**Phiên bản:** 1.1.0
+**Cập nhật lần cuối:** 2026-08-17
+
 **Nguyên tắc:** `babydra-core` là logic thuần — **không phụ thuộc GTK**. Mọi struct dữ liệu đều serde; mọi lỗi đều là typed error (`CoreError`).
+
+---
+
+## Mục lục
+
+- [1. Tổng quan](#1-tổng-quan)
+- [2. Error handling](#2-error-handling)
+- [3. Config](#3-config)
+- [4. Models](#4-models)
+- [5. Services](#5-services)
+- [6. Ví dụ nhanh](#6-ví-dụ-nhanh)
+- [7. Tài liệu liên quan](#7-tài-liệu-liên-quan)
 
 ---
 
 ## 1. Tổng quan
 
-`babydra-core` là thư viện lõi của BabyDra: services hệ thống (wifi, vpn, volume, battery, power, display…), models dữ liệu thuần, config tập trung và i18n. Các crate UI (kits, apps) phụ thuộc vào nó, không ngược lại.
+`babydra-core` là thư viện lõi: services hệ thống (wifi, vpn, volume, battery, power, display…), models dữ liệu thuần, config tập trung và i18n. Các crate UI (kits, apps) phụ thuộc vào nó, không ngược lại.
 
 - **Ngôn ngữ:** Rust (edition 2021)
 - **Public API:** `libs/babydra-core/src/lib.rs` (re-export phẳng)
 - **Error:** `babydra_core::error::{CoreError, CoreResult}` — dùng `thiserror`
+
+```toml
+# Cargo.toml
+babydra-core = { workspace = true }
+```
 
 ---
 
@@ -56,18 +75,22 @@ Các struct: `BabyDraConfig`, `ExploreSettings`, `PowerConfig`, `NotificationCon
 ## 4. Models
 
 ### Explore
+
 `FileEntry`, `FileType`, `DirectoryModel`, `SortColumn`, `SortOrder`, `SessionState`, `ActivePane`, `TabState`, `get_group_name(&FileEntry, &str) -> String`
 
 ### Settings (data thuần — không widget)
+
 `InstalledApp`, `InstalledPackage`, `CertInfo`, `MonitorConfig`, `EnvVar`, `Keybind`, `StartupCommand`, `PackageUpdate`, `SystemUpdateState`, `UpdateStatus`, `SystemInfoData`, `VpnConn`, `VpnConnDetails`, `WifiConfig`, `WifiNetwork`
 
 > [!IMPORTANT]
-> Các struct `*Widget` (GTK) **không còn nằm trong core** — chúng đã chuyển sang `crates/babydra-settings/src/widgets/state.rs` và `crates/babydra-explore/src/widgets/state.rs` (Phase 1).
+> Các struct `*Widget` (GTK) **không còn nằm trong core** — chúng nằm trong `crates/babydra-settings/src/widgets/state.rs` và `crates/babydra-explore/src/widgets/state.rs`.
 
 ### Shell
+
 `BatteryInfo`, `PerformanceProfile`
 
 ### Screenshot
+
 `EditorState`, `Drawing`, `Tool`
 
 ---
@@ -75,6 +98,7 @@ Các struct: `BabyDraConfig`, `ExploreSettings`, `PowerConfig`, `NotificationCon
 ## 5. Services
 
 ### 5.1. i18n
+
 | API | Mô tả |
 | :--- | :--- |
 | `t(key) -> String` | Tra cứu chuỗi theo locale (en/vi) |
@@ -82,6 +106,7 @@ Các struct: `BabyDraConfig`, `ExploreSettings`, `PowerConfig`, `NotificationCon
 | `get_locale() -> String` | Locale hiện tại |
 
 ### 5.2. Wallpaper
+
 | API | Mô tả |
 | :--- | :--- |
 | `set_wallpaper(&Path) -> CoreResult<()>` | Đặt wallpaper qua backend (awww/swaybg/feh) |
@@ -91,11 +116,11 @@ Các struct: `BabyDraConfig`, `ExploreSettings`, `PowerConfig`, `NotificationCon
 | `set_avatar(&Path) -> CoreResult<()>` | Set avatar (base64) |
 | `get_avatar_bytes() -> Option<Vec<u8>>` | Bytes avatar |
 
-> PIXBUF helpers (`crop_to_circle_pixbuf`, `crop_to_square_pixbuf`) nằm trong
-> `babydra-core` (dùng `gdk-pixbuf` trực tiếp, không phụ thuộc `gtk4`) — xem
-> [`services::wallpaper`](core-api.md#53-system-services).
+> [!NOTE]
+> PIXBUF helpers (`crop_to_circle_pixbuf`, `crop_to_square_pixbuf`) nằm trong core (dùng `gdk-pixbuf` trực tiếp, không phụ thuộc `gtk4`).
 
 ### 5.3. System services
+
 | Module | API tiêu biểu |
 | :--- | :--- |
 | `system::wifi` | `scan_networks`, `connect_wifi_async`, `get_wifi_state` |
@@ -113,6 +138,7 @@ Các struct: `BabyDraConfig`, `ExploreSettings`, `PowerConfig`, `NotificationCon
 | `system::backlight` | `get_current_brightness`, `set_brightness` |
 
 ### 5.4. Apps & Explore
+
 | API | Mô tả |
 | :--- | :--- |
 | `find_desktop_apps() -> Vec<DesktopApp>` | Quét .desktop files |
@@ -123,6 +149,7 @@ Các struct: `BabyDraConfig`, `ExploreSettings`, `PowerConfig`, `NotificationCon
 | `parse_desktop_file(&Path) -> Option<DesktopApp>` | Parse .desktop |
 
 ### 5.5. Notification & Window
+
 | API | Mô tả |
 | :--- | :--- |
 | `send_notification(title, msg)` | Gửi thông báo desktop |
@@ -131,6 +158,7 @@ Các struct: `BabyDraConfig`, `ExploreSettings`, `PowerConfig`, `NotificationCon
 | `get_running_apps / get_history / save_history` | Window MRU |
 
 ### 5.6. Tray & Clock
+
 | API | Mô tả |
 | :--- | :--- |
 | `tray::activate_item(service, x, y, is_right_click)` | Kích hoạt StatusNotifierItem |
@@ -164,6 +192,6 @@ fn example() -> Result<(), CoreError> {
 
 ## 7. Tài liệu liên quan
 
-- [planning.md](./planning.md) — Phase 1–2: GTK-free core + typed errors
-- [06-kits-api.md](./06-kits-api.md) — API của UI kits
-- [07-codebase-report.md](./07-codebase-report.md) — báo cáo đánh giá
+- [Kiến trúc & dịch vụ nền](../architecture/index.md) — vị trí từng service trong luồng dữ liệu
+- [UI Kit API](./ui-kit.md) — widget GTK dùng chung
+- [Explore API](./explore-kit.md) — feature components cho file manager
