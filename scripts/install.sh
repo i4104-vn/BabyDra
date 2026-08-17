@@ -143,7 +143,12 @@ mkdir -p "$HOME/.config/labwc/scripts"
 cp -r "$REPO_ROOT/configs/labwc/scripts/"* "$HOME/.config/labwc/scripts/"
 chmod +x "$HOME/.config/labwc/scripts/"*
 
-mkdir -p "$HOME/.local/share/themes"
+mkdir -p "$HOME/.local/share/themes" "$HOME/.babydra/themes"
+if [ -d "$REPO_ROOT/themes" ]; then
+    cp -r "$REPO_ROOT/themes/"* "$HOME/.babydra/themes/"
+    sudo mkdir -p /usr/share/babydra/themes
+    sudo cp -r "$REPO_ROOT/themes/"* /usr/share/babydra/themes/
+fi
 cp -r "$REPO_ROOT/configs/themes/BabyDra" "$HOME/.local/share/themes/"
 
 mkdir -p "$HOME/.local/share/icons"

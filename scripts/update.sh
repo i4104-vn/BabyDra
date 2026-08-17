@@ -153,7 +153,12 @@ if [ -d "$REPO_DIR/configs/fastfetch" ]; then
 fi
 
 # 6.7 Sync Themes, Cursors, and Icons
-mkdir -p "$HOME/.local/share/themes" "$HOME/.local/share/icons"
+mkdir -p "$HOME/.local/share/themes" "$HOME/.local/share/icons" "$HOME/.babydra/themes"
+if [ -d "$REPO_DIR/themes" ]; then
+    cp -r "$REPO_DIR/themes/"* "$HOME/.babydra/themes/" 2>/dev/null || true
+    sudo mkdir -p /usr/share/babydra/themes 2>/dev/null || true
+    sudo cp -r "$REPO_DIR/themes/"* /usr/share/babydra/themes/ 2>/dev/null || true
+fi
 if [ -d "$REPO_DIR/configs/themes/BabyDra" ]; then
     cp -r "$REPO_DIR/configs/themes/BabyDra" "$HOME/.local/share/themes/" 2>/dev/null || true
 fi
