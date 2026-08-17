@@ -1,19 +1,24 @@
 [workspace]
 resolver = "2"
 members = [
-    "libs/babydra-common",
+    # Core libraries — pure/reusable logic, no binaries.
+    "libs/babydra-core",
     "libs/babydra-island",
-    "libs/babydra-launcher",
     "libs/babydra-theme",
-    "libs/babydra-utils",
-    "libs/babydra-explore-kit",
+    # Feature kits — component collections for a domain, extendable via API.
+    "kits/babydra-ui-kit",
+    "kits/babydra-explore-kit",
+    # Applications — each crate ships its own binary.
     "crates/babydra-panel",
     "crates/babydra-switcher",
     "crates/babydra-screenshot",
     "crates/babydra-lock",
     "crates/babydra-preview",
     "crates/babydra-settings",
-    "crates/babydra-explore", "crates/babydra-greeter", "install",
+    "crates/babydra-explore",
+    "crates/babydra-greeter",
+    "crates/babydra-launcher",
+    "install",
     "tests",
 ]
 exclude = [
@@ -26,8 +31,12 @@ exclude = [
 version = "1.0.0"
 
 [workspace.dependencies]
-babydra-common = { path = "libs/babydra-common" }
-babydra-launcher = { path = "libs/babydra-launcher" }
+# libs/
+babydra-core = { path = "libs/babydra-core" }
 babydra-island = { path = "libs/babydra-island" }
-babydra-utils = { path = "libs/babydra-utils" }
-babydra-explore-kit = { path = "libs/babydra-explore-kit" }
+babydra-theme = { path = "libs/babydra-theme" }
+# kits/
+babydra-ui-kit = { path = "kits/babydra-ui-kit" }
+babydra-explore-kit = { path = "kits/babydra-explore-kit" }
+# crates/
+babydra-launcher = { path = "crates/babydra-launcher" }
