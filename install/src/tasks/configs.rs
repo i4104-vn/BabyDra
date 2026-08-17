@@ -288,3 +288,86 @@ where
 
     (copied, 0)
 }
+
+/// Deploys the theme packages tree (`themes/`) to `~/.babydra/themes` and
+/// writes the selected variant's theme id into `~/.babydra/babydra.conf`
+/// (`[theme] selection = { id = "..." }`), which the UI reads at startup.
+///
+/// This makes the installer's variant step (6/9) actually switch the theme
+/// the running desktop renders with — no code change required.
+pub fn deploy_theme_packages<F>(workspace_root: &Path, theme_id: &str, mut log: F)
+where
+    F: FnMut(LogLevel, String),
+{
+    let home = get_user_home();
+    let themes_src = workspace_root.join("themes");
+    let themes_dst = home.join(".babydra/themes");
+
+    if themes_src.is_dir() {
+        let _ = copy_recursive(&themes_src, &themes_dst);
+        log(
+            LogLevel::Success,
+            format!("Deployed theme packages to {}", themes_dst.display()),
+        );
+    } else {
+        log(
+            LogLevel::Warn,
+            "themes/ not found in workspace — skipping theme packages deploy.".into(),
+        );
+    }
+
+    // Persist the selected theme id into ~/.babydra/babydra.conf
+    let conf_path = home.join(".babydra/babydra.conf");
+    if let Err(e) = write_theme_selection(&conf_path, theme_id) {
+        log(
+            LogLevel::Warn,
+            format!("Could not write theme selection: {e}"),
+        );
+    } else {
+        log(
+            LogLevel::Info,
+            format!("babydra.conf theme.selection.id = {theme_id}"),
+        );
+    }
+}
+
+/// Sets `[theme] selection.id` inside the TOML config, preserving other keys.
+/// Writes `theme.selection.id = "<theme_id>"` into a `babydra.conf` TOML file.
+///
+/// Preserves all existing keys/sections and replaces any previous
+/// `selection` value under `[theme]`. Returns an error string on I/O or
+/// parse failure.
+pub fn write_theme_selection(conf_path: &Path, theme_id: &str) -> Result<(), String> {
+    let mut root: toml::Table = if conf_path.exists() {
+        let content = fs::read_to_string(conf_path)
+            .map_err(|e| format!("cannot read {}: {e}", conf_path.display()))?;
+        content
+            .parse::<toml::Table>()
+            .map_err(|e| format!("invalid TOML in {}: {e}", conf_path.display()))?
+    } else {
+        toml::Table::new()
+    };
+
+    let theme_table = root
+        .entry("theme".to_string())
+        .or_insert_with(|| toml::Value::Table(toml::Table::new()));
+    let theme_table = theme_table
+        .as_table_mut()
+        .ok_or_else(|| "[theme] is not a table".to_string())?;
+
+    let selection = theme_table
+        .entry("selection".to_string())
+        .or_insert_with(|| toml::Value::Table(toml::Table::new()));
+    let selection = selection
+        .as_table_mut()
+        .ok_or_else(|| "[theme.selection] is not a table".to_string())?;
+
+    selection.insert("id".to_string(), toml::Value::String(theme_id.to_string()));
+
+    if let Some(parent) = conf_path.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|e| format!("cannot create {}: {e}", parent.display()))?;
+    }
+    let out = toml::to_string_pretty(&root).map_err(|e| format!("cannot serialize config: {e}"))?;
+    fs::write(conf_path, out).map_err(|e| format!("cannot write {}: {e}", conf_path.display()))
+}

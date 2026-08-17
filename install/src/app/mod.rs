@@ -265,7 +265,7 @@ impl App {
             .variant_options
             .iter()
             .find(|v| v.selected)
-            .map(|v| v.clone())
+            .cloned()
             .unwrap_or_else(|| VariantItem {
                 name: "default".to_string(),
                 theme: "babydra-default".to_string(),

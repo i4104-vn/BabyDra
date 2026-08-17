@@ -186,6 +186,18 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             total_errors += e;
         }
 
+        // 6. Theme packages — deploy themes/ + persist variant theme selection.
+        {
+            current_step += 1;
+            let _ = tx.send(InstallEvent::Progress {
+                current: current_step,
+                total: total_steps,
+                current_step_name: "Deploy theme packages".to_string(),
+            });
+            configs::deploy_theme_packages(&plan.workspace_root, &plan.variant.theme, &send_log);
+            total_copied += 1;
+        }
+
         let duration = start_time.elapsed().as_secs_f64();
         let success = total_errors == 0;
 

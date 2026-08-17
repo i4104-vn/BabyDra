@@ -320,10 +320,8 @@ fn handle_step_interaction(app: &mut App, key: KeyEvent) {
                 app.auto_scroll_logs = true;
                 app.log_scroll = app.logs.len().saturating_sub(12);
             }
-            KeyCode::Enter => {
-                if app.install_state != InstallState::Installing {
-                    app.show_confirm_dialog = true;
-                }
+            KeyCode::Enter if app.install_state != InstallState::Installing => {
+                app.show_confirm_dialog = true;
             }
             _ => {}
         },

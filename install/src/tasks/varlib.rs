@@ -118,7 +118,7 @@ where
                 LogLevel::Bundle,
                 "Deploying logos & icons to /var/lib/babydra & /usr/share/babydra...".into(),
             );
-            let logo = workspace_root.join("libs/babydra-common/src/services/logo.png");
+            let logo = workspace_root.join("libs/babydra-core/src/services/logo.png");
             let user_babydra = home.join(".babydra");
             let _ = fs::create_dir_all(&user_babydra);
 
