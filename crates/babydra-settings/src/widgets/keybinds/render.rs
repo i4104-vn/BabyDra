@@ -1,6 +1,6 @@
+use babydra_common::models::keybind::{Keybind, KeybindsWidget};
 use gtk4::prelude::*;
 use gtk4::{Box, Button, DropDown, Entry, Label, Orientation, StringList};
-use babydra_common::models::keybind::{Keybind, KeybindsWidget};
 
 pub fn build(keybinds: &[Keybind]) -> KeybindsWidget {
     let container = Box::new(Orientation::Vertical, 16);
@@ -9,7 +9,9 @@ pub fn build(keybinds: &[Keybind]) -> KeybindsWidget {
 
     // Header
     let header_box = Box::new(Orientation::Horizontal, 12);
-    let title_label = Label::new(Some(&babydra_common::i18n::t("settings.keybinds_title_page")));
+    let title_label = Label::new(Some(&babydra_common::i18n::t(
+        "settings.keybinds_title_page",
+    )));
     title_label.add_css_class("settings-page-title");
     title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);
@@ -42,23 +44,23 @@ pub fn build(keybinds: &[Keybind]) -> KeybindsWidget {
     th_row.add_css_class("settings-card-row");
     th_row.set_margin_bottom(8);
 
-    let col_type = Label::new(Some("TYPE"));
+    let col_type = Label::new(Some(&babydra_common::i18n::t("settings.keybind_type")));
     col_type.set_width_request(100);
     col_type.add_css_class("settings-section-title");
 
-    let col_mod = Label::new(Some("MODIFIER"));
+    let col_mod = Label::new(Some(&babydra_common::i18n::t("settings.keybind_modifier")));
     col_mod.set_width_request(120);
     col_mod.add_css_class("settings-section-title");
 
-    let col_key = Label::new(Some("KEY"));
+    let col_key = Label::new(Some(&babydra_common::i18n::t("settings.keybind_key")));
     col_key.set_width_request(80);
     col_key.add_css_class("settings-section-title");
 
-    let col_disp = Label::new(Some("DISPATCHER"));
+    let col_disp = Label::new(Some(&babydra_common::i18n::t("settings.keybind_dispatch")));
     col_disp.set_hexpand(true);
     col_disp.add_css_class("settings-section-title");
 
-    let col_args = Label::new(Some("ARGS"));
+    let col_args = Label::new(Some(&babydra_common::i18n::t("settings.keybind_args")));
     col_args.set_hexpand(true);
     col_args.add_css_class("settings-section-title");
 
@@ -99,12 +101,7 @@ pub fn build(keybinds: &[Keybind]) -> KeybindsWidget {
     }
 }
 
-pub fn create_keybind_row(
-    kb: &Keybind,
-    types: &[&str],
-    mods: &[&str],
-    parent: Box,
-) -> Box {
+pub fn create_keybind_row(kb: &Keybind, types: &[&str], mods: &[&str], parent: Box) -> Box {
     let row = Box::new(Orientation::Horizontal, 8);
     row.add_css_class("settings-card-row");
 

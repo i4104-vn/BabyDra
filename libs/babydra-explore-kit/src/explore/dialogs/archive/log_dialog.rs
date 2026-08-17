@@ -1,12 +1,14 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Label, Button, Align, Window, Spinner, TextView, ScrolledWindow, ProgressBar};
+use gtk4::{
+    Align, Box, Button, Label, Orientation, ProgressBar, ScrolledWindow, Spinner, TextView, Window,
+};
 use std::path::PathBuf;
 use std::rc::Rc;
 use tokio::io::{AsyncBufReadExt, BufReader};
 
+use crate::explore::dialogs::shared::scroll_to_end;
 use babydra_common::i18n::t;
 use babydra_common::services::explore::spawn_compress_command;
-use crate::explore::dialogs::shared::scroll_to_end;
 
 pub fn show_compress_log_dialog(
     target_paths: Vec<PathBuf>,
@@ -49,9 +51,7 @@ pub fn show_compress_log_dialog(
     status_box.append(&spinner);
     vbox.append(&status_box);
 
-    let progress_bar = ProgressBar::builder()
-        .hexpand(true)
-        .build();
+    let progress_bar = ProgressBar::builder().hexpand(true).build();
     vbox.append(&progress_bar);
 
     let scroll = ScrolledWindow::builder()
@@ -68,11 +68,18 @@ pub fn show_compress_log_dialog(
         .wrap_mode(gtk4::WrapMode::WordChar)
         .build();
     text_view.add_css_class("log-textview");
-    
+
     let buffer = text_view.buffer();
-    let fname = archive_path.file_name().unwrap_or_default().to_string_lossy().to_string();
-    buffer.set_text(&format!("$ Creating archive {}...\n\n", fname));
-    
+    let fname = archive_path
+        .file_name()
+        .unwrap_or_default()
+        .to_string_lossy()
+        .to_string();
+    buffer.set_text(&format!(
+        "$ {}\n\n",
+        t("explore.creating_archive").replace("{}", &fname)
+    ));
+
     scroll.set_child(Some(&text_view));
     vbox.append(&scroll);
 
@@ -90,7 +97,7 @@ pub fn show_compress_log_dialog(
 
     let nav_c = nav_callback.clone();
     let current_path_c = current_path.clone();
-    
+
     let is_running = Rc::new(std::cell::Cell::new(true));
     let is_running_c = is_running.clone();
     let pb_pulse = progress_bar.clone();
@@ -116,26 +123,34 @@ pub fn show_compress_log_dialog(
                 spinner_c.stop();
                 spinner_c.set_visible(false);
                 pb_finish.set_fraction(0.0);
-                lbl_status_c.set_markup(&format!("<b><span foreground='#ef4444'>{}</span></b>", t("explore.compress_failed")));
-                buffer_c.set_text("Invalid parent directory");
+                lbl_status_c.set_markup(&format!(
+                    "<b><span foreground='#ef4444'>{}</span></b>",
+                    t("explore.compress_failed")
+                ));
+                buffer_c.set_text(&t("explore.invalid_parent_dir"));
                 btn_close_c.set_sensitive(true);
                 return;
             }
         };
-        
-        let archive_filename = archive_path.file_name().unwrap_or_default().to_string_lossy().to_string();
-        let files: Vec<String> = target_paths.iter()
+
+        let archive_filename = archive_path
+            .file_name()
+            .unwrap_or_default()
+            .to_string_lossy()
+            .to_string();
+        let files: Vec<String> = target_paths
+            .iter()
             .filter_map(|p| p.file_name().map(|f| f.to_string_lossy().to_string()))
             .collect();
-            
+
         match spawn_compress_command(&parent_dir, &archive_filename, &files, is_zip) {
             Ok(mut child) => {
                 let stdout = child.stdout.take().unwrap();
                 let stderr = child.stderr.take().unwrap();
-                
+
                 let mut stdout_reader = BufReader::new(stdout).lines();
                 let mut stderr_reader = BufReader::new(stderr).lines();
-                
+
                 loop {
                     tokio::select! {
                         res = stdout_reader.next_line() => {
@@ -156,18 +171,18 @@ pub fn show_compress_log_dialog(
                             is_running.set(false);
                             spinner_c.stop();
                             spinner_c.set_visible(false);
-                            
+
                             let success = status.map(|s| s.success()).unwrap_or(false);
                             if success {
                                 pb_finish.set_fraction(1.0);
                                 lbl_status_c.set_markup(&format!("<b><span foreground='#22c55e'>{}</span></b>", t("explore.compress_success")));
                                 let mut end = buffer_c.end_iter();
-                                buffer_c.insert(&mut end, "\n✓ Compression completed successfully.\n");
+                                buffer_c.insert(&mut end, &format!("\n✓ {}\n", t("explore.compress_completed")));
                             } else {
                                 pb_finish.set_fraction(0.0);
                                 lbl_status_c.set_markup(&format!("<b><span foreground='#ef4444'>{}</span></b>", t("explore.compress_failed")));
                                 let mut end = buffer_c.end_iter();
-                                buffer_c.insert(&mut end, "\n✗ Compression failed.\n");
+                                buffer_c.insert(&mut end, &format!("\n✗ {}\n", t("explore.compress_failed_detail")));
                             }
                             scroll_to_end(&text_view_c);
                             break;
@@ -180,13 +195,22 @@ pub fn show_compress_log_dialog(
                 spinner_c.stop();
                 spinner_c.set_visible(false);
                 pb_finish.set_fraction(0.0);
-                lbl_status_c.set_markup(&format!("<b><span foreground='#ef4444'>{}</span></b>", t("explore.compress_failed")));
+                lbl_status_c.set_markup(&format!(
+                    "<b><span foreground='#ef4444'>{}</span></b>",
+                    t("explore.compress_failed")
+                ));
                 let mut end = buffer_c.end_iter();
-                buffer_c.insert(&mut end, &format!("Failed to spawn compress process: {}\n", e));
+                buffer_c.insert(
+                    &mut end,
+                    &format!(
+                        "{}\n",
+                        t("explore.spawn_compress_failed").replace("{}", &e.to_string())
+                    ),
+                );
                 scroll_to_end(&text_view_c);
             }
         }
-        
+
         btn_close_c.set_sensitive(true);
         nav_c(current_path_c);
     });

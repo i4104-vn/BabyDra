@@ -1,3 +1,4 @@
+use babydra_common::i18n::t;
 use babydra_common::models::wifi::{WifiConfig, WifiNetwork};
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Label, Orientation, ScrolledWindow};
@@ -26,7 +27,7 @@ impl WifiInfoDialog {
         let header_box = Box::new(Orientation::Horizontal, 12);
         header_box.set_hexpand(true);
 
-        let ssid_lbl = Label::new(Some("Wi-Fi Details"));
+        let ssid_lbl = Label::new(Some(&t("wifi.details")));
         ssid_lbl.add_css_class("settings-row-title");
         ssid_lbl.set_halign(gtk4::Align::Start);
         ssid_lbl.set_hexpand(true);
@@ -40,7 +41,7 @@ impl WifiInfoDialog {
         status_dot.add_css_class("wifi-saved-dot");
         status_badge.append(&status_dot);
 
-        let status_lbl = Label::new(Some("Saved"));
+        let status_lbl = Label::new(Some(&t("wifi.saved")));
         status_lbl.add_css_class("wifi-status-text");
         status_badge.append(&status_lbl);
 
@@ -68,7 +69,7 @@ impl WifiInfoDialog {
         forget_btn.set_size_request(36, 36);
         forget_btn.set_valign(gtk4::Align::Center);
         forget_btn.set_cursor_from_name(Some("pointer"));
-        forget_btn.set_tooltip_text(Some("Forget Network"));
+        forget_btn.set_tooltip_text(Some(&t("wifi.forget_network")));
 
         let trash_icon = crate::ui::icon::get_icon("edit-delete", 16);
         trash_icon.set_pixel_size(16);
@@ -78,11 +79,11 @@ impl WifiInfoDialog {
         actions_right.set_hexpand(true);
         actions_right.set_halign(gtk4::Align::End);
 
-        let close_btn = Button::with_label("Close");
+        let close_btn = Button::with_label(&t("common.close"));
         close_btn.add_css_class("connect-pill-btn");
         close_btn.set_cursor_from_name(Some("pointer"));
 
-        let configure_btn = Button::with_label("Configure IP");
+        let configure_btn = Button::with_label(&t("wifi.configure_ip"));
         configure_btn.add_css_class("suggested-action");
         configure_btn.set_cursor_from_name(Some("pointer"));
 
@@ -120,11 +121,11 @@ impl WifiInfoDialog {
         if net.is_connected {
             self.status_dot.remove_css_class("wifi-saved-dot");
             self.status_dot.add_css_class("wifi-connected-dot");
-            self.status_lbl.set_text("Connected");
+            self.status_lbl.set_text(&t("control.connected"));
         } else {
             self.status_dot.remove_css_class("wifi-connected-dot");
             self.status_dot.add_css_class("wifi-saved-dot");
-            self.status_lbl.set_text("Saved");
+            self.status_lbl.set_text(&t("wifi.saved"));
         }
 
         // Clear existing body children
@@ -133,7 +134,7 @@ impl WifiInfoDialog {
         }
 
         // Section 1: Wireless Connection
-        let sec1_title = Label::new(Some("Wireless Connection"));
+        let sec1_title = Label::new(Some(&t("wifi.wireless_connection")));
         sec1_title.add_css_class("wifi-info-section-title");
         sec1_title.set_halign(gtk4::Align::Start);
         self.body_box.append(&sec1_title);
@@ -143,37 +144,37 @@ impl WifiInfoDialog {
         grid1.set_row_spacing(8);
 
         let sec_label = if net.security == "open" {
-            "Open (Unsecured)"
+            t("wifi.open_unsecured")
         } else if net.security == "8021x" {
-            "WPA Enterprise (802.1X)"
+            t("wifi.enterprise")
         } else {
-            "WPA/WPA2 Personal"
+            t("wifi.wpa_personal")
         };
-        self.add_grid_row(&grid1, 0, "Security", sec_label);
+        self.add_grid_row(&grid1, 0, &t("wifi.security"), &sec_label);
 
         let signal_label = if net.signal > 80 {
-            format!("Strong ({}%)", net.signal)
+            t("wifi.signal_strong").replace("{}", &net.signal.to_string())
         } else if net.signal > 50 {
-            format!("Medium ({}%)", net.signal)
+            t("wifi.signal_medium").replace("{}", &net.signal.to_string())
         } else if net.signal > 20 {
-            format!("Weak ({}%)", net.signal)
+            t("wifi.signal_weak").replace("{}", &net.signal.to_string())
         } else {
-            format!("Very Weak ({}%)", net.signal)
+            t("wifi.signal_very_weak").replace("{}", &net.signal.to_string())
         };
-        self.add_grid_row(&grid1, 1, "Signal Strength", &signal_label);
+        self.add_grid_row(&grid1, 1, &t("wifi.signal_strength"), &signal_label);
 
         if let Some(cfg) = config {
             if let Some(ref iface) = cfg.interface {
-                self.add_grid_row(&grid1, 2, "Interface", iface);
+                self.add_grid_row(&grid1, 2, &t("wifi.interface"), iface);
             }
             if let Some(ref mac) = cfg.mac_address {
-                self.add_grid_row(&grid1, 3, "MAC Address", mac);
+                self.add_grid_row(&grid1, 3, &t("wifi.mac_address"), mac);
             }
         }
         self.body_box.append(&grid1);
 
         // Section 2: IPv4 Configuration
-        let sec2_title = Label::new(Some("IPv4 Configuration"));
+        let sec2_title = Label::new(Some(&t("wifi.ipv4_config")));
         sec2_title.add_css_class("wifi-info-section-title");
         sec2_title.set_halign(gtk4::Align::Start);
         self.body_box.append(&sec2_title);
@@ -184,42 +185,47 @@ impl WifiInfoDialog {
 
         if let Some(cfg) = config {
             let method_str = if cfg.method == "manual" {
-                "Static (Manual)"
+                t("wifi.static_manual")
             } else {
-                "DHCP (Automatic)"
+                t("wifi.dhcp_automatic")
             };
-            self.add_grid_row(&grid2, 0, "IP Assignment", method_str);
+            self.add_grid_row(&grid2, 0, &t("wifi.ip_assignment"), &method_str);
 
             let ip_str = if cfg.ip_address.is_empty() {
-                "Not Assigned"
+                t("wifi.not_assigned")
             } else {
-                &cfg.ip_address
+                cfg.ip_address.clone()
             };
-            self.add_grid_row(&grid2, 1, "IPv4 Address", ip_str);
+            self.add_grid_row(&grid2, 1, &t("wifi.ipv4_address"), &ip_str);
 
             let prefix_str = if cfg.ip_address.is_empty() {
-                "Not Available".to_string()
+                t("wifi.not_available")
             } else {
                 format!("/{}", cfg.prefix)
             };
-            self.add_grid_row(&grid2, 2, "Prefix", &prefix_str);
+            self.add_grid_row(&grid2, 2, &t("wifi.prefix"), &prefix_str);
 
             let gw_str = if cfg.gateway.is_empty() {
-                "Not Available"
+                t("wifi.not_available")
             } else {
-                &cfg.gateway
+                cfg.gateway.clone()
             };
-            self.add_grid_row(&grid2, 3, "Default Gateway", gw_str);
+            self.add_grid_row(&grid2, 3, &t("wifi.default_gateway"), &gw_str);
 
             let dns_str = if cfg.dns.is_empty() {
-                "Automatic (Router Default)"
+                t("wifi.router_default")
             } else {
-                &cfg.dns
+                cfg.dns.clone()
             };
-            self.add_grid_row(&grid2, 4, "DNS Servers", dns_str);
+            self.add_grid_row(&grid2, 4, &t("wifi.dns_servers"), &dns_str);
         } else {
-            self.add_grid_row(&grid2, 0, "IP Assignment", "DHCP (Automatic)");
-            self.add_grid_row(&grid2, 1, "IPv4 Address", "Not Assigned");
+            self.add_grid_row(
+                &grid2,
+                0,
+                &t("wifi.ip_assignment"),
+                &t("wifi.dhcp_automatic"),
+            );
+            self.add_grid_row(&grid2, 1, &t("wifi.ipv4_address"), &t("wifi.not_assigned"));
         }
         self.body_box.append(&grid2);
 

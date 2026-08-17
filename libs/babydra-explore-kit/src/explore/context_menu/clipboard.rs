@@ -1,9 +1,9 @@
+use crate::explore::context_menu::CLIPBOARD;
+use gtk4::gdk::FileList;
+use gtk4::prelude::*;
+use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
-use std::cell::RefCell;
-use gtk4::prelude::*;
-use gtk4::gdk::FileList;
-use crate::explore::context_menu::CLIPBOARD;
 
 pub struct UndoOperation {
     pub is_cut: bool,
@@ -20,9 +20,8 @@ pub fn set_system_clipboard_files(paths: &[PathBuf], is_cut: bool) {
     let display = gtk4::gdk::Display::default().unwrap();
     let clipboard = display.clipboard();
 
-    let gio_files: Vec<gtk4::gio::File> = paths.iter()
-        .map(|p| gtk4::gio::File::for_path(p))
-        .collect();
+    let gio_files: Vec<gtk4::gio::File> =
+        paths.iter().map(|p| gtk4::gio::File::for_path(p)).collect();
     let file_list = FileList::from_array(&gio_files);
     let file_provider = gtk4::gdk::ContentProvider::for_value(&file_list.to_value());
 
@@ -35,12 +34,10 @@ pub fn set_system_clipboard_files(paths: &[PathBuf], is_cut: bool) {
         gnome_content.push_str(&uri);
     }
     let bytes = glib::Bytes::from(gnome_content.as_bytes());
-    let gnome_provider = gtk4::gdk::ContentProvider::for_bytes("x-special/gnome-copied-files", &bytes);
+    let gnome_provider =
+        gtk4::gdk::ContentProvider::for_bytes("x-special/gnome-copied-files", &bytes);
 
-    let union_provider = gtk4::gdk::ContentProvider::new_union(&[
-        file_provider,
-        gnome_provider,
-    ]);
+    let union_provider = gtk4::gdk::ContentProvider::new_union(&[file_provider, gnome_provider]);
 
     let _ = clipboard.set_content(Some(&union_provider));
 }
@@ -77,23 +74,33 @@ pub fn execute_paste(
     let nav_callback_c = nav_callback.clone();
 
     let do_paste = move || {
-        perform_execute_paste(sources_c, dest_dir_c, is_cut, current_path_c, nav_callback_c);
+        perform_execute_paste(
+            sources_c,
+            dest_dir_c,
+            is_cut,
+            current_path_c,
+            nav_callback_c,
+        );
     };
 
     if !conflicts.is_empty() {
         let conflict_name = if conflicts.len() == 1 {
             conflicts[0].clone()
         } else {
-            format!("{} đối tượng", conflicts.len())
+            t("explore.conflict_items").replace("{}", &conflicts.len().to_string())
         };
-        crate::explore::dialogs::show_conflict_dialog(&conflict_name, do_paste, None::<&gtk4::Window>);
+        crate::explore::dialogs::show_conflict_dialog(
+            &conflict_name,
+            do_paste,
+            None::<&gtk4::Window>,
+        );
     } else {
         do_paste();
     }
 }
 
 use babydra_common::i18n::t;
-use gtk4::{Window, Box, Orientation, Label, ProgressBar, Align};
+use gtk4::{Align, Box, Label, Orientation, ProgressBar, Window};
 
 fn perform_execute_paste(
     sources: Vec<PathBuf>,
@@ -106,7 +113,11 @@ fn perform_execute_paste(
         return;
     }
 
-    let title_str = if is_cut { t("explore.moving_title") } else { t("explore.copying_title") };
+    let title_str = if is_cut {
+        t("explore.moving_title")
+    } else {
+        t("explore.copying_title")
+    };
 
     let dialog = Window::builder()
         .title(&title_str)
@@ -196,7 +207,9 @@ fn perform_execute_paste(
         if is_cut && all_success {
             CLIPBOARD.with(|cb| cb.replace(None));
             let display = gtk4::gdk::Display::default().unwrap();
-            let _ = display.clipboard().set_content(None::<&gtk4::gdk::ContentProvider>);
+            let _ = display
+                .clipboard()
+                .set_content(None::<&gtk4::gdk::ContentProvider>);
             apply_cut_dimming_global(&[]);
         }
 
@@ -238,26 +251,38 @@ pub fn execute_paste_from_system_clipboard(
                     move |res_bytes| {
                         if let Ok(bytes) = res_bytes {
                             let content = String::from_utf8_lossy(&bytes).to_string();
-                            let lines: Vec<&str> = content.lines().filter(|l| !l.trim().is_empty()).collect();
-                            if lines.is_empty() { return; }
+                            let lines: Vec<&str> =
+                                content.lines().filter(|l| !l.trim().is_empty()).collect();
+                            if lines.is_empty() {
+                                return;
+                            }
 
                             let (is_cut, uris) = if mime_type == "x-special/gnome-copied-files" {
                                 let is_cut = lines[0].trim() == "cut";
-                                let uris = lines[1..].iter().map(|s| s.to_string()).collect::<Vec<_>>();
+                                let uris =
+                                    lines[1..].iter().map(|s| s.to_string()).collect::<Vec<_>>();
                                 (is_cut, uris)
                             } else {
                                 // text/uri-list
-                                (false, lines.iter().map(|s| s.to_string()).collect::<Vec<_>>())
+                                (
+                                    false,
+                                    lines.iter().map(|s| s.to_string()).collect::<Vec<_>>(),
+                                )
                             };
 
-                            let paths: Vec<PathBuf> = uris.iter()
-                                .filter_map(|uri| {
-                                    gtk4::gio::File::for_uri(uri).path()
-                                })
+                            let paths: Vec<PathBuf> = uris
+                                .iter()
+                                .filter_map(|uri| gtk4::gio::File::for_uri(uri).path())
                                 .collect();
 
                             if !paths.is_empty() {
-                                execute_paste(paths, dest_dir_inner, is_cut, cur_path_inner, nav_cb_inner);
+                                execute_paste(
+                                    paths,
+                                    dest_dir_inner,
+                                    is_cut,
+                                    cur_path_inner,
+                                    nav_cb_inner,
+                                );
                             }
                         }
                     },

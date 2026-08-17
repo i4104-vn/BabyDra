@@ -9,5 +9,10 @@
   "launcher.shutdown": "Tắt máy",
   "launcher.restart": "Khởi động lại",
   "launcher.suspend": "Tạm dừng",
-  "launcher.logout": "Đăng xuất"
+  "launcher.logout": "Đăng xuất",
+  "launcher.web_search": "Tìm kiếm web",
+  "launcher.files_dirs": "Tệp và Thư mục",
+  "launcher.web": "Web",
+  "launcher.web_desc": "Mở truy vấn tìm kiếm trong trình duyệt web mặc định",
+  "launcher.search_hint": "Gõ để tìm kiếm ứng dụng, tệp hoặc web..."
 }

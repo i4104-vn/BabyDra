@@ -1,3 +1,4 @@
+use babydra_common::i18n::t;
 use babydra_common::models::wifi::WifiConfig;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Entry, Label, Orientation};
@@ -30,11 +31,11 @@ impl WifiConfigDialog {
         container.set_width_request(400);
 
         let header_box = Box::new(Orientation::Vertical, 2);
-        let ssid_lbl = Label::new(Some("Configure Wi-Fi"));
+        let ssid_lbl = Label::new(Some(&t("wifi.configure_title")));
         ssid_lbl.add_css_class("settings-row-title");
         ssid_lbl.set_halign(gtk4::Align::Start);
 
-        let sub_lbl = Label::new(Some("Network Settings"));
+        let sub_lbl = Label::new(Some(&t("wifi.network_settings")));
         sub_lbl.add_css_class("settings-row-desc");
         sub_lbl.set_halign(gtk4::Align::Start);
 
@@ -46,12 +47,12 @@ impl WifiConfigDialog {
         let seg_box = Box::new(Orientation::Horizontal, 0);
         seg_box.add_css_class("segmented-control");
 
-        let dhcp_btn = Button::with_label("Automatic (DHCP)");
+        let dhcp_btn = Button::with_label(&t("wifi.automatic_dhcp"));
         dhcp_btn.add_css_class("seg-btn-active");
         dhcp_btn.set_hexpand(true);
         dhcp_btn.set_cursor_from_name(Some("pointer"));
 
-        let static_btn = Button::with_label("Manual (Static)");
+        let static_btn = Button::with_label(&t("wifi.manual_static"));
         static_btn.add_css_class("seg-btn");
         static_btn.set_hexpand(true);
         static_btn.set_cursor_from_name(Some("pointer"));
@@ -68,7 +69,7 @@ impl WifiConfigDialog {
 
         let ip_grp = Box::new(Orientation::Vertical, 4);
         ip_grp.set_hexpand(true);
-        let ip_lbl = Label::new(Some("IP Address"));
+        let ip_lbl = Label::new(Some(&t("wifi.ip_address")));
         ip_lbl.add_css_class("wifi-info-label");
         ip_lbl.set_halign(gtk4::Align::Start);
         let ip_entry = Entry::new();
@@ -80,7 +81,7 @@ impl WifiConfigDialog {
 
         let prefix_grp = Box::new(Orientation::Vertical, 4);
         prefix_grp.set_width_request(80);
-        let pfx_lbl = Label::new(Some("Prefix"));
+        let pfx_lbl = Label::new(Some(&t("wifi.prefix")));
         pfx_lbl.add_css_class("wifi-info-label");
         pfx_lbl.set_halign(gtk4::Align::Start);
         let prefix_entry = Entry::new();
@@ -93,7 +94,7 @@ impl WifiConfigDialog {
         manual_box.append(&ip_row);
 
         let gw_grp = Box::new(Orientation::Vertical, 4);
-        let gw_lbl = Label::new(Some("Gateway"));
+        let gw_lbl = Label::new(Some(&t("wifi.gateway")));
         gw_lbl.add_css_class("wifi-info-label");
         gw_lbl.set_halign(gtk4::Align::Start);
         let gateway_entry = Entry::new();
@@ -107,13 +108,13 @@ impl WifiConfigDialog {
 
         // DNS Section (Always visible)
         let dns_grp = Box::new(Orientation::Vertical, 4);
-        let dns_lbl = Label::new(Some("DNS Servers"));
+        let dns_lbl = Label::new(Some(&t("wifi.dns_servers")));
         dns_lbl.add_css_class("wifi-info-label");
         dns_lbl.set_halign(gtk4::Align::Start);
         let dns_entry = Entry::new();
         dns_entry.add_css_class("sidebar-search-entry");
         dns_entry.set_placeholder_text(Some("8.8.8.8, 1.1.1.1"));
-        let dns_hint = Label::new(Some("Leave empty to use router default DNS"));
+        let dns_hint = Label::new(Some(&t("wifi.dns_hint")));
         dns_hint.add_css_class("input-hint-lbl");
         dns_hint.set_halign(gtk4::Align::Start);
 
@@ -126,11 +127,11 @@ impl WifiConfigDialog {
         let actions_box = Box::new(Orientation::Horizontal, 8);
         actions_box.set_halign(gtk4::Align::End);
 
-        let cancel_btn = Button::with_label("Cancel");
+        let cancel_btn = Button::with_label(&t("common.cancel"));
         cancel_btn.add_css_class("connect-pill-btn");
         cancel_btn.set_cursor_from_name(Some("pointer"));
 
-        let save_btn = Button::with_label("Apply Changes");
+        let save_btn = Button::with_label(&t("wifi.apply_changes"));
         save_btn.add_css_class("suggested-action");
         save_btn.set_cursor_from_name(Some("pointer"));
 
@@ -194,7 +195,8 @@ impl WifiConfigDialog {
 
     pub fn show_for(&self, ssid: &str, cfg: &WifiConfig) {
         *self.current_ssid.borrow_mut() = ssid.to_string();
-        self.ssid_lbl.set_text(&format!("Configure {}", ssid));
+        self.ssid_lbl
+            .set_text(&t("wifi.configure_ssid").replace("{}", ssid));
 
         if cfg.method == "manual" {
             self.static_btn.emit_clicked();

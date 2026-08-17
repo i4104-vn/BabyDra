@@ -176,5 +176,10 @@
   "settings.avatar": "User Avatar",
   "settings.pick_avatar": "Select Avatar",
   "settings.notif_avatar_title": "Avatar",
-  "settings.notif_avatar_msg": "User avatar updated"
+  "settings.notif_avatar_msg": "User avatar updated",
+  "settings.keybind_type": "TYPE",
+  "settings.keybind_modifier": "MODIFIER",
+  "settings.keybind_key": "KEY",
+  "settings.keybind_dispatch": "DISPATCHER",
+  "settings.keybind_args": "ARGS"
 }

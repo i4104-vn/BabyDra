@@ -1,12 +1,13 @@
 //! UI structure assembly for Dynamic Island overlays and notification sliders.
 
+use crate::models;
+use crate::player::player_loop::start_player_polling_loop;
+use crate::widgets;
+use crate::widgets::visualizer::{create_visualizer, start_visualizer_animation};
+use babydra_common::i18n::t;
 use gtk4::prelude::*;
 use std::cell::Cell;
 use std::rc::Rc;
-use crate::widgets::visualizer::{create_visualizer, start_visualizer_animation};
-use crate::player::player_loop::start_player_polling_loop;
-use crate::models;
-use crate::widgets;
 
 /// Creates the main Dynamic Island box container, initializing Notch and notification badge layout hierarchies.
 pub fn create_system_island() -> gtk4::Box {
@@ -57,7 +58,7 @@ pub fn create_system_island() -> gtk4::Box {
     let art_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     art_container.set_valign(gtk4::Align::Center);
 
-    let track_label = gtk4::Label::new(Some("No media"));
+    let track_label = gtk4::Label::new(Some(&t("island.no_media")));
     track_label.add_css_class("notch-player-text");
     track_label.set_hexpand(true);
     track_label.set_halign(gtk4::Align::Center);
@@ -79,31 +80,32 @@ pub fn create_system_island() -> gtk4::Box {
     let click_gesture = gtk4::GestureClick::new();
     click_gesture.set_button(0);
     click_gesture.connect_pressed(move |_, _, _, _| {
-        let app_to_activate = widgets::notification::SHARED_NOTIFICATION.with(|sn| {
-            sn.borrow().as_ref().map(|n| n.app_name.clone())
-        });
-        
+        let app_to_activate = widgets::notification::SHARED_NOTIFICATION
+            .with(|sn| sn.borrow().as_ref().map(|n| n.app_name.clone()));
+
         if let Some(app_name) = app_to_activate {
             let apps = babydra_common::find_desktop_apps();
             let mut found_app = None;
             let lower_name = app_name.to_lowercase();
-            
+
             for app in &apps {
                 if app.name.to_lowercase() == lower_name {
                     found_app = Some(app.clone());
                     break;
                 }
             }
-            
+
             if found_app.is_none() {
                 for app in &apps {
-                    if app.name.to_lowercase().contains(&lower_name) || lower_name.contains(&app.name.to_lowercase()) {
+                    if app.name.to_lowercase().contains(&lower_name)
+                        || lower_name.contains(&app.name.to_lowercase())
+                    {
                         found_app = Some(app.clone());
                         break;
                     }
                 }
             }
-            
+
             if let Some(app) = found_app {
                 babydra_common::helper::window::focus_app(
                     &app.name,
@@ -112,12 +114,7 @@ pub fn create_system_island() -> gtk4::Box {
                     app.window_title.as_deref(),
                 );
             } else {
-                babydra_common::helper::window::focus_app(
-                    &app_name,
-                    "",
-                    Some(&app_name),
-                    None,
-                );
+                babydra_common::helper::window::focus_app(&app_name, "", Some(&app_name), None);
             }
         }
     });
@@ -166,13 +163,13 @@ pub fn create_system_island() -> gtk4::Box {
     badge_icon_container.append(&badge_icon);
 
     let badge_text_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-    let badge_title = gtk4::Label::new(Some("Notification"));
+    let badge_title = gtk4::Label::new(Some(&t("island.notification")));
     badge_title.add_css_class("badge-title");
     badge_title.set_halign(gtk4::Align::Start);
-    let badge_desc = gtk4::Label::new(Some("New Message"));
+    let badge_desc = gtk4::Label::new(Some(&t("island.new_message")));
     badge_desc.add_css_class("badge-desc");
     badge_desc.set_halign(gtk4::Align::Start);
-    
+
     badge_text_box.append(&badge_title);
     badge_text_box.append(&badge_desc);
 
@@ -201,8 +198,16 @@ pub fn create_system_island() -> gtk4::Box {
     glib::MainContext::default().spawn_local(async move {
         while let Some(msg) = rx.recv().await {
             match msg {
-                models::NotificationMsg::New { summary, body, icon, app_name, timeout } => {
-                    widgets::notification::show_notification_popup(&summary, &body, &icon, &app_name, timeout);
+                models::NotificationMsg::New {
+                    summary,
+                    body,
+                    icon,
+                    app_name,
+                    timeout,
+                } => {
+                    widgets::notification::show_notification_popup(
+                        &summary, &body, &icon, &app_name, timeout,
+                    );
                 }
                 models::NotificationMsg::Close => {
                     widgets::notification::close_notification_popup();
@@ -237,11 +242,7 @@ pub fn create_system_island() -> gtk4::Box {
         popover_position_lbl,
         popover_length_lbl,
     };
-    start_player_polling_loop(
-        is_playing_state.clone(),
-        island_widgets,
-    );
+    start_player_polling_loop(is_playing_state.clone(), island_widgets);
 
     container_vbox
 }
-

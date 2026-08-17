@@ -1,6 +1,7 @@
-use gtk4::prelude::*;
 use super::WifiState;
+use babydra_common::i18n::t;
 use babydra_utils::components::modal::{WifiConfigDialog, WifiInfoDialog, WifiPasswordDialog};
+use gtk4::prelude::*;
 use std::rc::Rc;
 
 pub fn render_network_list(
@@ -22,31 +23,37 @@ pub fn render_network_list(
     };
 
     if !st.enabled {
-        container.append(&create_placeholder(crate::widgets::helpers::create_placeholder_row(
-            crate::widgets::helpers::PlaceholderState::Disabled {
-                title_key: "settings.wifi_disabled",
-                desc_key: "settings.wifi_disabled_sub",
-                icon_name: "wifi",
-            },
-        )));
+        container.append(&create_placeholder(
+            crate::widgets::helpers::create_placeholder_row(
+                crate::widgets::helpers::PlaceholderState::Disabled {
+                    title_key: "settings.wifi_disabled",
+                    desc_key: "settings.wifi_disabled_sub",
+                    icon_name: "wifi",
+                },
+            ),
+        ));
         return;
     }
 
     if st.enabled && st.is_loading && st.networks.is_empty() {
-        container.append(&create_placeholder(crate::widgets::helpers::create_placeholder_row(
-            crate::widgets::helpers::PlaceholderState::Loading,
-        )));
+        container.append(&create_placeholder(
+            crate::widgets::helpers::create_placeholder_row(
+                crate::widgets::helpers::PlaceholderState::Loading,
+            ),
+        ));
         return;
     }
 
     if st.networks.is_empty() {
-        container.append(&create_placeholder(crate::widgets::helpers::create_placeholder_row(
-            crate::widgets::helpers::PlaceholderState::Empty {
-                title_key: "settings.wifi_no_networks",
-                desc_key: None,
-                icon_name: "wifi",
-            },
-        )));
+        container.append(&create_placeholder(
+            crate::widgets::helpers::create_placeholder_row(
+                crate::widgets::helpers::PlaceholderState::Empty {
+                    title_key: "settings.wifi_no_networks",
+                    desc_key: None,
+                    icon_name: "wifi",
+                },
+            ),
+        ));
         return;
     }
 
@@ -114,7 +121,12 @@ pub fn render_network_list(
         icon_badge.set_halign(gtk4::Align::Start);
         icon_badge.set_hexpand(false);
 
-        let wifi_icon = babydra_utils::components::create_wifi_signal_icon_for_network(net.signal as u32, net.is_connected, 18, Some("#3B82F6"));
+        let wifi_icon = babydra_utils::components::create_wifi_signal_icon_for_network(
+            net.signal as u32,
+            net.is_connected,
+            18,
+            Some("#3B82F6"),
+        );
         wifi_icon.set_valign(gtk4::Align::Center);
         wifi_icon.set_halign(gtk4::Align::Center);
         wifi_icon.set_vexpand(true);
@@ -148,14 +160,14 @@ pub fn render_network_list(
         pop_vbox.set_margin_bottom(8);
         pop_vbox.set_margin_start(12);
         pop_vbox.set_margin_end(12);
-        
+
         let sig_lbl = gtk4::Label::new(Some(&format!("Signal: {}%", net.signal)));
         sig_lbl.set_halign(gtk4::Align::Start);
         sig_lbl.add_css_class("settings-row-desc");
         let sec_lbl = gtk4::Label::new(Some(&format!("Security: {}", net.security.to_uppercase())));
         sec_lbl.set_halign(gtk4::Align::Start);
         sec_lbl.add_css_class("settings-row-desc");
-        
+
         pop_vbox.append(&sig_lbl);
         pop_vbox.append(&sec_lbl);
         popover.set_child(Some(&pop_vbox));
@@ -183,12 +195,12 @@ pub fn render_network_list(
         let is_connecting_other = st.connecting_ssid.is_some() && !is_connecting_this;
 
         if is_connecting_this {
-            let conn_lbl = gtk4::Label::new(Some("Connecting..."));
+            let conn_lbl = gtk4::Label::new(Some(&t("wifi.connecting")));
             conn_lbl.add_css_class("settings-row-desc");
             conn_lbl.set_valign(gtk4::Align::Center);
             conn_lbl.set_margin_end(8);
             hbox.append(&conn_lbl);
-            
+
             let spinner = gtk4::Spinner::new();
             spinner.start();
             spinner.set_valign(gtk4::Align::Center);
@@ -237,7 +249,7 @@ pub fn render_network_list(
         let net_conn = net.clone();
         let pwd_dlg_c = password_dialog.clone();
         let tx_req = tx_connect_req.clone();
-        
+
         if !st.connecting_ssid.is_some() {
             let gesture = gtk4::GestureClick::new();
             gesture.connect_pressed(move |_, _, _, _| {

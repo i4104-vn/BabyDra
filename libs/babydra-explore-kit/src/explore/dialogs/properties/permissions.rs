@@ -1,9 +1,10 @@
+use super::helpers::get_permissions_string;
+use babydra_common::i18n::t;
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Grid, Label, Align, CheckButton};
-use std::path::Path;
+use gtk4::{Align, Box, CheckButton, Grid, Label, Orientation};
 use std::os::unix::fs::MetadataExt;
 use std::os::unix::fs::PermissionsExt;
-use super::helpers::get_permissions_string;
+use std::path::Path;
 
 pub struct PermissionCheckboxes {
     pub owner_read: CheckButton,
@@ -17,10 +18,7 @@ pub struct PermissionCheckboxes {
     pub others_exec: CheckButton,
 }
 
-pub fn build_permission_matrix(
-    parent_vbox: &Box,
-    mode: u32,
-) -> PermissionCheckboxes {
+pub fn build_permission_matrix(parent_vbox: &Box, mode: u32) -> PermissionCheckboxes {
     let perm_card = Box::new(Orientation::Vertical, 8);
     perm_card.set_css_classes(&["properties-card"]);
 
@@ -28,7 +26,7 @@ pub fn build_permission_matrix(
     let top_hbox = Box::new(Orientation::Horizontal, 8);
 
     let lbl_title = Label::builder()
-        .label("PERMISSIONS & ACCESS")
+        .label(&t("explore.perm_access"))
         .halign(Align::Start)
         .valign(Align::Center)
         .build();
@@ -59,9 +57,18 @@ pub fn build_permission_matrix(
         .build();
 
     // Column Headers
-    let lbl_owner = Label::builder().label("Owner").halign(Align::Center).build();
-    let lbl_group = Label::builder().label("Group").halign(Align::Center).build();
-    let lbl_others = Label::builder().label("Others").halign(Align::Center).build();
+    let lbl_owner = Label::builder()
+        .label(&t("explore.perm_owner"))
+        .halign(Align::Center)
+        .build();
+    let lbl_group = Label::builder()
+        .label(&t("explore.perm_group"))
+        .halign(Align::Center)
+        .build();
+    let lbl_others = Label::builder()
+        .label(&t("explore.perm_others"))
+        .halign(Align::Center)
+        .build();
     lbl_owner.set_css_classes(&["properties-matrix-col-title"]);
     lbl_group.set_css_classes(&["properties-matrix-col-title"]);
     lbl_others.set_css_classes(&["properties-matrix-col-title"]);
@@ -71,9 +78,18 @@ pub fn build_permission_matrix(
     perm_grid.attach(&lbl_others, 3, 0, 1, 1);
 
     // Row Titles
-    let lbl_read = Label::builder().label("Read").halign(Align::Start).build();
-    let lbl_write = Label::builder().label("Write").halign(Align::Start).build();
-    let lbl_exec = Label::builder().label("Execute").halign(Align::Start).build();
+    let lbl_read = Label::builder()
+        .label(&t("explore.perm_read"))
+        .halign(Align::Start)
+        .build();
+    let lbl_write = Label::builder()
+        .label(&t("explore.perm_write"))
+        .halign(Align::Start)
+        .build();
+    let lbl_exec = Label::builder()
+        .label(&t("explore.perm_execute"))
+        .halign(Align::Start)
+        .build();
     lbl_read.set_css_classes(&["properties-key-label"]);
     lbl_write.set_css_classes(&["properties-key-label"]);
     lbl_exec.set_css_classes(&["properties-key-label"]);
@@ -83,23 +99,50 @@ pub fn build_permission_matrix(
     perm_grid.attach(&lbl_exec, 0, 3, 1, 1);
 
     // Checkboxes
-    let c_or = CheckButton::builder().active(mode & 0o400 != 0).halign(Align::Center).build();
-    let c_ow = CheckButton::builder().active(mode & 0o200 != 0).halign(Align::Center).build();
-    let c_ox = CheckButton::builder().active(mode & 0o100 != 0).halign(Align::Center).build();
+    let c_or = CheckButton::builder()
+        .active(mode & 0o400 != 0)
+        .halign(Align::Center)
+        .build();
+    let c_ow = CheckButton::builder()
+        .active(mode & 0o200 != 0)
+        .halign(Align::Center)
+        .build();
+    let c_ox = CheckButton::builder()
+        .active(mode & 0o100 != 0)
+        .halign(Align::Center)
+        .build();
     perm_grid.attach(&c_or, 1, 1, 1, 1);
     perm_grid.attach(&c_ow, 1, 2, 1, 1);
     perm_grid.attach(&c_ox, 1, 3, 1, 1);
 
-    let c_gr = CheckButton::builder().active(mode & 0o040 != 0).halign(Align::Center).build();
-    let c_gw = CheckButton::builder().active(mode & 0o020 != 0).halign(Align::Center).build();
-    let c_gx = CheckButton::builder().active(mode & 0o010 != 0).halign(Align::Center).build();
+    let c_gr = CheckButton::builder()
+        .active(mode & 0o040 != 0)
+        .halign(Align::Center)
+        .build();
+    let c_gw = CheckButton::builder()
+        .active(mode & 0o020 != 0)
+        .halign(Align::Center)
+        .build();
+    let c_gx = CheckButton::builder()
+        .active(mode & 0o010 != 0)
+        .halign(Align::Center)
+        .build();
     perm_grid.attach(&c_gr, 2, 1, 1, 1);
     perm_grid.attach(&c_gw, 2, 2, 1, 1);
     perm_grid.attach(&c_gx, 2, 3, 1, 1);
 
-    let c_tr = CheckButton::builder().active(mode & 0o004 != 0).halign(Align::Center).build();
-    let c_tw = CheckButton::builder().active(mode & 0o002 != 0).halign(Align::Center).build();
-    let c_tx = CheckButton::builder().active(mode & 0o001 != 0).halign(Align::Center).build();
+    let c_tr = CheckButton::builder()
+        .active(mode & 0o004 != 0)
+        .halign(Align::Center)
+        .build();
+    let c_tw = CheckButton::builder()
+        .active(mode & 0o002 != 0)
+        .halign(Align::Center)
+        .build();
+    let c_tx = CheckButton::builder()
+        .active(mode & 0o001 != 0)
+        .halign(Align::Center)
+        .build();
     perm_grid.attach(&c_tr, 3, 1, 1, 1);
     perm_grid.attach(&c_tw, 3, 2, 1, 1);
     perm_grid.attach(&c_tx, 3, 3, 1, 1);
@@ -122,15 +165,33 @@ pub fn build_permission_matrix(
 
 pub fn apply_permissions(path: &Path, checkboxes: &PermissionCheckboxes) {
     let mut new_mode = 0;
-    if checkboxes.owner_read.is_active() { new_mode |= 0o400; }
-    if checkboxes.owner_write.is_active() { new_mode |= 0o200; }
-    if checkboxes.owner_exec.is_active() { new_mode |= 0o100; }
-    if checkboxes.group_read.is_active() { new_mode |= 0o040; }
-    if checkboxes.group_write.is_active() { new_mode |= 0o020; }
-    if checkboxes.group_exec.is_active() { new_mode |= 0o010; }
-    if checkboxes.others_read.is_active() { new_mode |= 0o004; }
-    if checkboxes.others_write.is_active() { new_mode |= 0o002; }
-    if checkboxes.others_exec.is_active() { new_mode |= 0o001; }
+    if checkboxes.owner_read.is_active() {
+        new_mode |= 0o400;
+    }
+    if checkboxes.owner_write.is_active() {
+        new_mode |= 0o200;
+    }
+    if checkboxes.owner_exec.is_active() {
+        new_mode |= 0o100;
+    }
+    if checkboxes.group_read.is_active() {
+        new_mode |= 0o040;
+    }
+    if checkboxes.group_write.is_active() {
+        new_mode |= 0o020;
+    }
+    if checkboxes.group_exec.is_active() {
+        new_mode |= 0o010;
+    }
+    if checkboxes.others_read.is_active() {
+        new_mode |= 0o004;
+    }
+    if checkboxes.others_write.is_active() {
+        new_mode |= 0o002;
+    }
+    if checkboxes.others_exec.is_active() {
+        new_mode |= 0o001;
+    }
 
     if let Ok(meta) = std::fs::metadata(path) {
         let original_mode = meta.mode();

@@ -44,7 +44,7 @@ pub fn build_browser_search_button(query: &str) -> (gtk4::Button, gtk4::Label) {
     let spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     spacer.set_hexpand(true);
 
-    let badge_label = gtk4::Label::new(Some("Web"));
+    let badge_label = gtk4::Label::new(Some(&babydra_common::i18n::t("launcher.web")));
     badge_label.add_css_class("item-badge");
     badge_label.add_css_class("web");
 
@@ -53,7 +53,7 @@ pub fn build_browser_search_button(query: &str) -> (gtk4::Button, gtk4::Label) {
     title_row.append(&badge_label);
 
     // Description row
-    let desc_label = gtk4::Label::new(Some("Open search query in default web browser"));
+    let desc_label = gtk4::Label::new(Some(&babydra_common::i18n::t("launcher.web_desc")));
     desc_label.set_halign(gtk4::Align::Start);
     desc_label.set_ellipsize(gtk4::pango::EllipsizeMode::End);
     desc_label.add_css_class("app-desc");

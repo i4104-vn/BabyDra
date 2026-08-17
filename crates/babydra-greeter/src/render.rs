@@ -2,6 +2,7 @@
 //! Follows the `render.rs` convention used by babydra-panel / babydra-lock:
 //! builds the window once and returns widget handles for signal wiring.
 
+use babydra_common::i18n::t;
 use gtk4::prelude::*;
 use gtk4::{Align, ApplicationWindow, Box as GtkBox, ContentFit, Orientation, Overlay};
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
@@ -27,7 +28,7 @@ pub fn build_greeter_ui(app: &gtk4::Application) -> GreeterWidgets {
 
     let window = ApplicationWindow::builder()
         .application(app)
-        .title("BabyDra Login")
+        .title(&t("common.app_greeter_title"))
         .decorated(false)
         .build();
 
@@ -57,7 +58,9 @@ pub fn build_greeter_ui(app: &gtk4::Application) -> GreeterWidgets {
     let bg_picture = gtk4::Picture::new();
     if let Some(bytes) = babydra_common::get_greeter_wallpaper_bytes() {
         let stream = gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(&bytes));
-        if let Ok(pixbuf) = gtk4::gdk_pixbuf::Pixbuf::from_stream(&stream, gtk4::gio::Cancellable::NONE) {
+        if let Ok(pixbuf) =
+            gtk4::gdk_pixbuf::Pixbuf::from_stream(&stream, gtk4::gio::Cancellable::NONE)
+        {
             bg_picture.set_pixbuf(Some(&pixbuf));
         }
         info!(target: "babydra-greeter", "Asset loaded: greeter wallpaper base64 rendered");

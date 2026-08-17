@@ -1,9 +1,10 @@
+use babydra_common::i18n::t;
+use babydra_common::services::system::vpn::{
+    connect_vpn, disconnect_vpn, get_vpn_connections, is_vpn_active_fast, VpnConn,
+};
 use gtk4::prelude::*;
 use std::rc::Rc;
 use tokio::sync::mpsc;
-use babydra_common::services::system::vpn::{
-    connect_vpn, disconnect_vpn, is_vpn_active_fast, get_vpn_connections, VpnConn,
-};
 
 pub fn update_vpn_tile_icon_state_async(btn: &gtk4::Button) {
     let (tx, mut rx) = mpsc::unbounded_channel::<bool>();
@@ -19,11 +20,16 @@ pub fn update_vpn_tile_icon_state_async(btn: &gtk4::Button) {
                 if !btn_clone.has_css_class("active") {
                     btn_clone.add_css_class("active");
                 }
-                let active_icon = babydra_utils::ui::icon::get_icon_colored("shield", 18, "#ffffff");
+                let active_icon =
+                    babydra_utils::ui::icon::get_icon_colored("shield", 18, "#ffffff");
                 btn_clone.set_child(Some(&active_icon));
             } else if !btn_clone.has_css_class("popover-open") {
                 btn_clone.remove_css_class("active");
-                let inactive_icon = babydra_utils::ui::icon::get_icon_colored("shield", 18, "rgba(255, 255, 255, 0.8)");
+                let inactive_icon = babydra_utils::ui::icon::get_icon_colored(
+                    "shield",
+                    18,
+                    "rgba(255, 255, 255, 0.8)",
+                );
                 btn_clone.set_child(Some(&inactive_icon));
             }
         }
@@ -47,7 +53,11 @@ pub fn create_vpn_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) -
 
     update_vpn_tile_icon_state_async(&btn);
 
-    let popover = babydra_utils::components::create_popover(&btn, gtk4::PositionType::Bottom, "media-popover");
+    let popover = babydra_utils::components::create_popover(
+        &btn,
+        gtk4::PositionType::Bottom,
+        "media-popover",
+    );
     popover.set_has_arrow(false);
 
     let main_box = setup_vpn_popover(&popover);
@@ -124,7 +134,8 @@ fn refresh_vpn_popover_list(main_box: &gtk4::Box, tile_btn: Option<gtk4::Button>
     popover_header.add_css_class("media-popover-header");
     popover_header.set_valign(gtk4::Align::Center);
     let popover_app_icon = babydra_utils::ui::icon::get_icon_colored("shield", 14, "#3b82f6");
-    let popover_app_name = gtk4::Label::new(Some(&babydra_common::i18n::t("control.vpn_connections")));
+    let popover_app_name =
+        gtk4::Label::new(Some(&babydra_common::i18n::t("control.vpn_connections")));
     popover_app_name.add_css_class("media-popover-app-name");
     popover_header.append(&popover_app_icon);
     popover_header.append(&popover_app_name);
@@ -140,7 +151,7 @@ fn refresh_vpn_popover_list(main_box: &gtk4::Box, tile_btn: Option<gtk4::Button>
     spinner.start();
     loading_box.append(&spinner);
 
-    let scan_label = gtk4::Label::new(Some("Loading VPN..."));
+    let scan_label = gtk4::Label::new(Some(&t("vpn.loading")));
     scan_label.add_css_class("media-time-label");
     loading_box.append(&scan_label);
     main_box.append(&loading_box);
@@ -175,7 +186,8 @@ fn build_vpn_list_ui(main_box: &gtk4::Box, vpns: Vec<VpnConn>, tile_btn: Option<
     popover_header.add_css_class("media-popover-header");
     popover_header.set_valign(gtk4::Align::Center);
     let popover_app_icon = babydra_utils::ui::icon::get_icon_colored("shield", 14, "#3b82f6");
-    let popover_app_name = gtk4::Label::new(Some(&babydra_common::i18n::t("control.vpn_connections")));
+    let popover_app_name =
+        gtk4::Label::new(Some(&babydra_common::i18n::t("control.vpn_connections")));
     popover_app_name.add_css_class("media-popover-app-name");
     popover_header.append(&popover_app_icon);
     popover_header.append(&popover_app_name);
@@ -215,23 +227,29 @@ fn build_vpn_list_ui(main_box: &gtk4::Box, vpns: Vec<VpnConn>, tile_btn: Option<
         empty_box.set_margin_top(12);
         empty_box.set_margin_bottom(12);
 
-        let empty_icon = babydra_utils::ui::icon::get_icon_colored("shield", 24, "rgba(255, 255, 255, 0.4)");
+        let empty_icon =
+            babydra_utils::ui::icon::get_icon_colored("shield", 24, "rgba(255, 255, 255, 0.4)");
         empty_icon.set_halign(gtk4::Align::Center);
         empty_box.append(&empty_icon);
 
-        let empty_lbl = gtk4::Label::new(Some(&babydra_common::i18n::t("control.vpn_no_connections")));
+        let empty_lbl =
+            gtk4::Label::new(Some(&babydra_common::i18n::t("control.vpn_no_connections")));
         empty_lbl.add_css_class("media-time-label");
         empty_lbl.set_halign(gtk4::Align::Center);
         empty_box.append(&empty_lbl);
 
-        let empty_sub = gtk4::Label::new(Some(&babydra_common::i18n::t("control.vpn_no_connections_sub")));
+        let empty_sub = gtk4::Label::new(Some(&babydra_common::i18n::t(
+            "control.vpn_no_connections_sub",
+        )));
         empty_sub.add_css_class("settings-row-desc");
         empty_sub.set_halign(gtk4::Align::Center);
         empty_box.append(&empty_sub);
 
         content_box.append(&empty_box);
     } else if !available_vpns.is_empty() {
-        let avail_title = gtk4::Label::new(Some(&babydra_common::i18n::t("control.vpn_available_section")));
+        let avail_title = gtk4::Label::new(Some(&babydra_common::i18n::t(
+            "control.vpn_available_section",
+        )));
         avail_title.add_css_class("audio-menu-section-title");
         avail_title.set_xalign(0.0);
         avail_title.set_margin_start(4);
@@ -266,7 +284,11 @@ fn create_vpn_item_row(vpn: &VpnConn, is_connected: bool, main_box: &gtk4::Box) 
     row_box.set_margin_top(2);
     row_box.set_margin_bottom(2);
 
-    let icon_color = if is_connected { "#3b82f6" } else { "rgba(255, 255, 255, 0.5)" };
+    let icon_color = if is_connected {
+        "#3b82f6"
+    } else {
+        "rgba(255, 255, 255, 0.5)"
+    };
     let shield_icon = babydra_utils::ui::icon::get_icon_colored("shield", 14, icon_color);
     shield_icon.set_valign(gtk4::Align::Center);
     row_box.append(&shield_icon);
@@ -312,7 +334,8 @@ fn create_vpn_item_row(vpn: &VpnConn, is_connected: bool, main_box: &gtk4::Box) 
         action_btn.set_child(Some(&icon));
         action_btn.set_tooltip_text(Some(&babydra_common::i18n::t("settings.disconnect")));
     } else {
-        let icon = babydra_utils::ui::icon::get_icon_colored("power", 14, "rgba(255, 255, 255, 0.6)");
+        let icon =
+            babydra_utils::ui::icon::get_icon_colored("power", 14, "rgba(255, 255, 255, 0.6)");
         action_btn.set_child(Some(&icon));
         action_btn.set_tooltip_text(Some(&babydra_common::i18n::t("settings.connect")));
     }

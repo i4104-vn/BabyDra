@@ -149,10 +149,10 @@ pub fn t(key: &str) -> String {
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use super::*;
     // Locale functions mutate a process-global locale; serialize tests to avoid races.
-    static LOCALE_TEST_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+    pub(crate) static LOCALE_TEST_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
 
     #[test]
     fn t_returns_translation_for_known_key_in_en() {

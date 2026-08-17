@@ -1,12 +1,13 @@
+use babydra_common::i18n::t;
+use babydra_common::MainWindowWidgets;
 use gtk4::prelude::*;
 use gtk4::{ApplicationWindow, Box, Orientation, Paned};
-use babydra_common::MainWindowWidgets;
 
 /// Builds the MainWindow container and basic layouts grid.
 pub fn build_window_ui(app: &gtk4::Application) -> MainWindowWidgets {
     let window = ApplicationWindow::builder()
         .application(app)
-        .title("BabyDra Explore")
+        .title(&t("common.app_explore_title"))
         .default_width(1000)
         .default_height(700)
         .build();
@@ -41,8 +42,8 @@ pub fn build_window_ui(app: &gtk4::Application) -> MainWindowWidgets {
     layout_paned.set_hexpand(true);
     layout_paned.set_vexpand(true);
     layout_paned.set_position(530); // Allocate space for InfoPanel
-    layout_paned.set_resize_end_child(false);  // Info panel keeps fixed width
-    layout_paned.set_shrink_end_child(false);  // Info panel cannot be shrunk
+    layout_paned.set_resize_end_child(false); // Info panel keeps fixed width
+    layout_paned.set_shrink_end_child(false); // Info panel cannot be shrunk
     content_vbox.append(&layout_paned);
 
     layout_paned.set_start_child(Some(&split_paned));

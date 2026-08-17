@@ -1,7 +1,10 @@
+use super::{
+    get_audio_devices, get_current_volume, is_muted, set_volume, update_topbar_volume_icon,
+};
+use babydra_common::i18n::t;
 use gtk4::prelude::*;
-use std::rc::Rc;
 use std::cell::Cell;
-use super::{is_muted, get_current_volume, set_volume, get_audio_devices, update_topbar_volume_icon};
+use std::rc::Rc;
 
 pub fn create_volume_row(
     on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>,
@@ -11,7 +14,7 @@ pub fn create_volume_row(
     main_box.add_css_class("control-slider-card");
 
     let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    let title_label = gtk4::Label::new(Some("Volume"));
+    let title_label = gtk4::Label::new(Some(&t("volume.title")));
     title_label.add_css_class("control-slider-title");
     title_label.set_xalign(0.0);
     title_label.set_hexpand(true);
@@ -94,10 +97,9 @@ pub fn create_volume_row(
         let vol_icon_inner = vol_icon_c2.clone();
         let update_mute_icon_inner = update_mute_icon_c.clone();
         let muted_state_inner = muted_state_c.clone();
-        
-        let new_id = gtk4::glib::timeout_add_local_once(
-            std::time::Duration::from_millis(80),
-            move || {
+
+        let new_id =
+            gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(80), move || {
                 last_source_inner.set(None);
                 set_volume(val);
                 if val > 0.0 {
@@ -105,8 +107,7 @@ pub fn create_volume_row(
                     update_mute_icon_inner(false);
                 }
                 update_topbar_volume_icon(&vol_icon_inner);
-            }
-        );
+            });
         last_source_clone.set(Some(new_id));
     });
 
@@ -125,14 +126,18 @@ pub fn create_volume_row(
     row_box.append(&overlay);
     row_box.append(&menu_btn);
 
-    let popover = babydra_utils::components::create_popover(&menu_btn, gtk4::PositionType::Bottom, "taskbar-popover");
+    let popover = babydra_utils::components::create_popover(
+        &menu_btn,
+        gtk4::PositionType::Bottom,
+        "taskbar-popover",
+    );
     popover.set_has_arrow(true);
 
     let popover_clone = popover.clone();
     let update_mute_clone = update_mute_icon.clone();
     let on_popover_toggled_c = on_popover_toggled.clone();
     let menu_btn_clone = menu_btn.clone();
-    
+
     menu_btn.connect_clicked(move |_| {
         let update_mute_wrapper = {
             let update_mute_clone = update_mute_clone.clone();
@@ -145,7 +150,7 @@ pub fn create_volume_row(
         if let Some(ref cb) = on_popover_toggled_c {
             cb(true);
         }
-        
+
         let down_icon = babydra_utils::ui::icon::get_icon("go-down-symbolic", 12);
         menu_btn_clone.set_child(Some(&down_icon));
     });
@@ -170,14 +175,14 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
     container.add_css_class("audio-menu-popover");
     container.set_size_request(260, -1);
 
-    let out_label = gtk4::Label::new(Some("Output Devices"));
+    let out_label = gtk4::Label::new(Some(&t("volume.output_devices")));
     out_label.add_css_class("audio-menu-section-title");
     out_label.set_xalign(0.0);
     container.append(&out_label);
 
     let sinks = get_audio_devices(false);
     if sinks.is_empty() {
-        let empty = gtk4::Label::new(Some("No output devices found"));
+        let empty = gtk4::Label::new(Some(&t("volume.no_output")));
         empty.add_css_class("tile-subtitle");
         container.append(&empty);
     } else {
@@ -187,17 +192,22 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
             if sink.is_default {
                 btn.add_css_class("active");
             }
-            
+
             let btn_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
             let icon = babydra_utils::ui::icon::get_icon_colored(
-                "volume", 14, 
-                if sink.is_default { "#ffffff" } else { "rgba(255, 255, 255, 0.5)" }
+                "volume",
+                14,
+                if sink.is_default {
+                    "#ffffff"
+                } else {
+                    "rgba(255, 255, 255, 0.5)"
+                },
             );
             let name_label = gtk4::Label::new(Some(&sink.description));
             name_label.set_ellipsize(gtk4::pango::EllipsizeMode::End);
             name_label.set_hexpand(true);
             name_label.set_halign(gtk4::Align::Start);
-            
+
             btn_box.append(&icon);
             btn_box.append(&name_label);
 
@@ -216,9 +226,12 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
                 babydra_common::volume::select_audio_device(&name);
                 let pop_c = pop_clone.clone();
                 let update_mute_c = update_mute_clone.clone();
-                gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(150), move || {
-                    populate_audio_menu(&pop_c, update_mute_c);
-                });
+                gtk4::glib::timeout_add_local_once(
+                    std::time::Duration::from_millis(150),
+                    move || {
+                        populate_audio_menu(&pop_c, update_mute_c);
+                    },
+                );
             });
             container.append(&btn);
         }
@@ -229,7 +242,7 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
     sep.set_margin_bottom(4);
     container.append(&sep);
 
-    let in_label = gtk4::Label::new(Some("Input Devices"));
+    let in_label = gtk4::Label::new(Some(&t("volume.input_devices")));
     in_label.add_css_class("audio-menu-section-title");
     in_label.set_xalign(0.0);
     container.append(&in_label);
@@ -246,17 +259,22 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
         if source.is_default {
             btn.add_css_class("active");
         }
-        
+
         let btn_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
         let icon = babydra_utils::ui::icon::get_icon_colored(
-            "microphone", 14, 
-            if source.is_default { "#ffffff" } else { "rgba(255, 255, 255, 0.5)" }
+            "microphone",
+            14,
+            if source.is_default {
+                "#ffffff"
+            } else {
+                "rgba(255, 255, 255, 0.5)"
+            },
         );
         let name_label = gtk4::Label::new(Some(&source.description));
         name_label.set_ellipsize(gtk4::pango::EllipsizeMode::End);
         name_label.set_hexpand(true);
         name_label.set_halign(gtk4::Align::Start);
-        
+
         btn_box.append(&icon);
         btn_box.append(&name_label);
 
@@ -283,7 +301,7 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
     }
 
     if !input_added {
-        let empty = gtk4::Label::new(Some("No input devices found"));
+        let empty = gtk4::Label::new(Some(&t("volume.no_input")));
         empty.add_css_class("tile-subtitle");
         container.append(&empty);
     }
