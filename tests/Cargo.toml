@@ -68,6 +68,10 @@ name = "theme_tokens"
 path = "theme/tokens.rs"
 
 [[test]]
+name = "theme_shipped"
+path = "theme/shipped.rs"
+
+[[test]]
 name = "installer_variant_options"
 path = "installer/variant_options.rs"
 
