@@ -3,7 +3,8 @@
 //! These exercise the public config API end-to-end, including TOML
 //! round-trips and backward-compatible defaults for legacy config files.
 
-use babydra_common::config::{BabyDraConfig, ExploreSettings, PowerConfig};
+use babydra_core::config::settings::CustomContextItem;
+use babydra_core::config::{BabyDraConfig, ExploreSettings, PowerConfig};
 
 #[test]
 fn default_config_has_sane_values() {
@@ -53,7 +54,7 @@ fn config_roundtrip_preserves_nested_sections() {
     config
         .explore
         .custom_context_items
-        .push(babydra_common::config::settings::CustomContextItem {
+        .push(babydra_core::config::settings::CustomContextItem {
             name: "Open in terminal".to_string(),
             command: "kitty".to_string(),
             icon: Some("terminal".to_string()),
@@ -69,4 +70,50 @@ fn config_roundtrip_preserves_nested_sections() {
         decoded.explore.custom_context_items[0].name,
         "Open in terminal"
     );
+}
+
+#[test]
+fn get_keybind_returns_custom_value_when_set() {
+    let mut settings = ExploreSettings::default();
+    settings
+        .keybinds
+        .insert("toggle_split".to_string(), "F2".to_string());
+    assert_eq!(settings.get_keybind("toggle_split"), "F2");
+}
+
+#[test]
+fn get_keybind_returns_empty_for_unknown_action() {
+    let settings = ExploreSettings::default();
+    assert_eq!(settings.get_keybind("no_such_action"), "");
+}
+
+#[test]
+fn explore_settings_serde_roundtrip() {
+    let mut original = ExploreSettings::default();
+    original.view_mode = "list".to_string();
+    original.custom_context_items.push(CustomContextItem {
+        name: "Open terminal here".to_string(),
+        command: "kitty".to_string(),
+        icon: Some("terminal".to_string()),
+    });
+
+    let encoded = serde_json::to_string(&original).unwrap();
+    let decoded: ExploreSettings = serde_json::from_str(&encoded).unwrap();
+
+    assert_eq!(decoded.view_mode, "list");
+    assert_eq!(decoded.custom_context_items.len(), 1);
+    assert_eq!(decoded.custom_context_items[0].name, "Open terminal here");
+}
+
+#[test]
+fn babydra_config_toml_roundtrip() {
+    let mut original = BabyDraConfig::default();
+    original.power.profile = "performance".to_string();
+    original.notification.dnd = true;
+
+    let encoded = toml::to_string(&original).unwrap();
+    let decoded: BabyDraConfig = toml::from_str(&encoded).unwrap();
+
+    assert_eq!(decoded.power.profile, "performance");
+    assert!(decoded.notification.dnd);
 }

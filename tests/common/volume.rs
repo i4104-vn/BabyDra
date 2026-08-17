@@ -3,7 +3,7 @@
 //! Verifies WirePlumber profile name parsing (e.g. `output:analog-stereo`)
 //! through the public helper API.
 
-use babydra_common::services::system::volume::helper::parse_profile_parts;
+use babydra_core::services::system::volume::helper::parse_profile_parts;
 
 #[test]
 fn parses_output_and_input_parts() {
@@ -30,4 +30,11 @@ fn ignores_unprefixed_segments() {
     let (outputs, inputs) = parse_profile_parts("off+input:mic");
     assert!(outputs.is_empty());
     assert_eq!(inputs, vec!["mic"]);
+}
+
+#[test]
+fn empty_input_yields_empty_vectors() {
+    let (outputs, inputs) = parse_profile_parts("");
+    assert!(outputs.is_empty());
+    assert!(inputs.is_empty());
 }

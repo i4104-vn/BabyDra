@@ -3,8 +3,8 @@
 //! Verifies nmcli line parsing and network prioritization logic through
 //! the public API.
 
-use babydra_common::models::wifi::WifiNetwork;
-use babydra_common::services::system::wifi::discovery::sort_networks;
+use babydra_core::models::wifi::WifiNetwork;
+use babydra_core::services::system::wifi::discovery::{parse_nmcli_escaped, sort_networks};
 
 fn net(ssid: &str, signal: u32, is_connected: bool, is_saved: bool) -> WifiNetwork {
     WifiNetwork {
@@ -45,4 +45,24 @@ fn sort_orders_by_signal_strength_desc() {
     assert_eq!(networks[0].ssid, "strong");
     assert_eq!(networks[1].ssid, "medium");
     assert_eq!(networks[2].ssid, "weak");
+}
+
+#[test]
+fn parses_plain_colon_separated_fields() {
+    assert_eq!(parse_nmcli_escaped("a:b:c"), vec!["a", "b", "c"]);
+}
+
+#[test]
+fn preserves_escaped_colons() {
+    assert_eq!(parse_nmcli_escaped("a\\:b:c"), vec!["a:b", "c"]);
+}
+
+#[test]
+fn parses_single_field() {
+    assert_eq!(parse_nmcli_escaped("only"), vec!["only"]);
+}
+
+#[test]
+fn parses_empty_string() {
+    assert_eq!(parse_nmcli_escaped(""), vec![""]);
 }

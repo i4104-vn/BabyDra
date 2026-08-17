@@ -3,7 +3,7 @@
 //! Verifies human-readable capacity formatting and partition → parent
 //! drive mapping through the public helper API.
 
-use babydra_common::services::system::storage::helper::{format_size, get_parent_drive};
+use babydra_core::services::system::storage::helper::{format_size, get_parent_drive};
 
 #[test]
 fn format_size_uses_gb_below_1000() {
@@ -35,5 +35,14 @@ fn parent_drive_leaves_other_paths_untouched() {
     assert_eq!(
         get_parent_drive("/dev/mapper/luks-root"),
         "/dev/mapper/luks-root"
+    );
+}
+
+#[test]
+fn format_size_rounds_to_one_decimal() {
+    assert_eq!(format_size((1.5 * 1024.0 * 1024.0) as u64), "1.5 GB");
+    assert_eq!(
+        format_size((2.5 * 1024.0 * 1024.0 * 1024.0) as u64),
+        "2.5 TB"
     );
 }

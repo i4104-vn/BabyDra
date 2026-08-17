@@ -10,17 +10,22 @@ they protect.
 tests/
 ├── Cargo.toml        # workspace package `babydra-tests` (test-only, publish = false)
 ├── README.md
-├── src/lib.rs        # shared test helpers (empty for now)
 └── <area>/           # one folder per crate/area under test
     └── <name>.rs     # one small, focused test binary per concern
 ```
 
 Current areas:
 
-| Folder        | Covers                         | Depends on           |
-|---------------|--------------------------------|----------------------|
-| `common/`     | babydra-common pure logic      | `babydra-common`     |
-| *(future)*    | ui-kit / theme / variants…     | —                    |
+| Folder         | Covers                               | Depends on              |
+|----------------|--------------------------------------|-------------------------|
+| `common/`      | babydra-core pure logic              | `babydra-core`          |
+| `models/`      | shell theme config, explore grouping | `babydra-core`          |
+| `services/`    | wallpaper avatar cropping            | `babydra-core`, `gtk4`  |
+| `theme/`       | theme package engine + tokens        | `babydra-theme`         |
+| `installer/`   | variant parsing, theme selection     | `babydra-installer`     |
+
+All test binaries are declared explicitly in `tests/Cargo.toml` (`[[test]]`
+entries) so each file compiles as its own small, focused binary.
 
 ## How tests are split (TDD model)
 
@@ -30,8 +35,10 @@ Current areas:
 - **Test before refactor**: when a refactor in `planning.md` touches a module,
   write/extend its tests first, run them, then refactor until green.
 - **Public API only**: integration tests call the exported crate API — the
-  same surface that apps use. Pure internals that need testing get
-  `#[cfg(test)]` unit tests inside the crate module itself.
+  same surface that apps use. Inline `#[cfg(test)]` modules have been
+  migrated out of the workspace crates into this suite, so the crates stay
+  free of test code; anything that needs a unit test now goes through a
+  `pub` function here.
 
 ## Running
 

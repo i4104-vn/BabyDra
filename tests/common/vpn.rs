@@ -3,7 +3,7 @@
 //! Verifies that `.ovpn` (OpenVPN) and `.conf` (WireGuard) profile files
 //! are parsed into structured connection details.
 
-use babydra_common::services::system::vpn::config::parse_vpn_config_file;
+use babydra_core::services::system::vpn::config::parse_vpn_config_file;
 use std::io::Write;
 
 fn write_temp_config(name: &str, content: &str) -> std::path::PathBuf {
@@ -89,4 +89,16 @@ fn missing_file_returns_partial_defaults() {
     assert_eq!(details.vpn_type, "openvpn");
     assert!(details.gateway.is_empty());
     assert!(details.ca_cert.is_empty());
+}
+
+#[test]
+fn records_config_file_path() {
+    let path = write_temp_config(
+        "office.ovpn",
+        "client\nremote vpn.company.com 1194\nca ca.crt\n",
+    );
+    let details = parse_vpn_config_file(path.to_str().unwrap());
+    let _ = std::fs::remove_file(&path);
+
+    assert_eq!(details.config_file.as_deref(), Some(path.to_str().unwrap()));
 }
