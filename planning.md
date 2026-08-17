@@ -306,14 +306,14 @@ release  ──(official)──▶  variants/default  (chính thức)
   - `ThemePackage` load: đọc `themes/<id>/tokens.json` + `theme.css` + `fonts.json`.
   - `resolve_theme(id)` → `ThemeValue { dark, light, css_layer, fonts }`, hỗ trợ kế thừa `base` + phát hiện cycle.
   - Giữ `init_theme()` = theme mặc định (backward compatible); bước gắn `init_theme_with(theme_id)` để sau.
-  - `ThemeConfig` mở rộng → `ThemeSelection { id, dark }` — TODO ở phase tiếp (serde default bảo toàn config cũ).
+  - [x] `ThemeConfig` mở rộng → `ThemeSelection { id, dark }` (serde default bảo toàn config cũ + 3 test).
 - [x] T3.3 **Tạo cây `themes/`**:
   - `themes/babydra-default/{tokens.json, theme.css, fonts.json}` (giá trị từ tokens.md + CSS hiện tại).
   - Theme mẫu thứ hai `themes/babydra-blue` (kế thừa default, đổi accent + radius) — **test sống** (engine test dùng temp tree + các test kế thừa).
 - [x] T3.4 **Tạo cây `variants/`**:
   - `variants/default/variant.toml` (theme default, 8 app, keybinds, config overrides).
   - Module `babydra-common/src/config/variant.rs`: `list_variants`, `load_variant(name)`, `get_keybind` — merge theo thứ tự mục 5.2.
-  - Installer: bước chọn variant — TODO phase tiếp (cần mirror sang `main`).
+  - [x] Installer: bước chọn variant (step 6/9: `Variant Selection` + unit tests + plan/summary wiring).
 - [x] T3.5 **Cargo features** cho ui-kit/explore-kit (mục 5.3): `default = ["full"]`, `minimal = []`, `deprecated-components`.
 - [x] T3.6 **Gom scripts**: `start.sh`, `update.sh`, `install.sh` → `scripts/` (git mv giữ lịch sử; docs cập nhật).
 
@@ -334,7 +334,7 @@ release  ──(official)──▶  variants/default  (chính thức)
 
 - [x] T5.1 Cập nhật `docs/03-project-structure.md` theo cấu trúc mới (v1.3.0: theme/explore-kit libs, themes/, variants/, tests/, scripts/).
 - [x] T5.2 Viết `docs/05-themes-variants.md`: cách tạo theme mới, cách tạo variant mới (hướng dẫn từng bước cho người dùng thứ 3).
-- [ ] T5.3 Cập nhật docs design: `theming.md` mô tả cơ chế theme package; `tokens.md` làm schema mẫu cho `tokens.json` — còn lại 1 phần nhỏ.
+- [x] T5.3 Cập nhật docs design: `theming.md` mô tả cơ chế theme package; `tokens.md` làm schema mẫu cho `tokens.json`.
 - [x] T5.4 Đồng bộ `planning.md` → ghi chú phase đã hoàn thành (chính là file này).
 
 ---

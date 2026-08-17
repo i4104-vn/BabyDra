@@ -89,3 +89,48 @@ Badge trong code là **status badge** (`create_status_badge`) — màu được 
 | Genie / Slide | `400ms–450ms` | custom | Cửa sổ đóng/mở |
 | Skeleton pulse | `1.2s` | `ease-in-out infinite` | Loading state |
 | Button spinner | `0.8s` | `linear infinite` | Nút đang xử lý |
+
+---
+
+## Schema `tokens.json` (theme packages)
+
+Từ `refactor/constructor` (Phase 3), mỗi theme package trong `themes/<theme-id>/`
+có một `tokens.json` — schema dưới đây là **hợp đồng** với engine
+`babydra-theme` (`ThemeTokens` → `DarkLightTokens` → `RadiusTokens`).
+Mọi field đều có `#[serde(default)]`, nên theme có thể chỉ khai báo phần muốn
+override so với `base`.
+
+```jsonc
+// themes/<theme-id>/tokens.json
+{
+  "name": "babydra-default",   // bắt buộc: id theme, khớp tên thư mục
+  "base": null,                // kế thừa theme khác; null = không kế thừa
+
+  "dark": {                    // lớp màu dark (bắt buộc cặp dark + light)
+    "surface": "rgba(14, 14, 18, 0.96)",   // nền bề mặt nổi
+    "border":  "rgba(255, 255, 255, 0.14)", // viền bề mặt
+    "accent":  "#3b82f6",                   // điểm nhấn (nút primary, active)
+    "font":    "Segoe UI Variable Static Text",
+    "radius":  { "pill": 9999, "lg": 20, "md": 16, "sm": 10 }
+  },
+
+  "light": {
+    "surface": "rgba(255, 255, 255, 0.98)",
+    "border":  "rgba(0, 0, 0, 0.08)",
+    "accent":  "#3b82f6",
+    "font":    "Segoe UI Variable Static Text",
+    "radius":  { "pill": 9999, "lg": 20, "md": 16, "sm": 10 }
+  }
+}
+```
+
+### Quy tắc
+
+- **Màu** nhận CSS color string (`#hex`, `rgba(...)`); **radius** nhận số `px` (u32).
+- **Kế thừa**: field `base: "<theme-id>"` cho phép theme con chỉ ghi phần khác
+  (vd `babydra-blue` kế thừa default, đổi `accent` + `radius`). Engine tự phát
+  hiện cycle kế thừa.
+- **Theme mới**: copy thư mục `themes/babydra-default/` → đổi `name` + giá trị.
+  Hướng dẫn từng bước: `docs/05-themes-variants.md`.
+- `theme.css` và `fonts.json` đi kèm là lớp màu nạp lên core CSS và bảng font
+  families — xem `docs/design/theming.md` mục Theme packages.
