@@ -1,5 +1,4 @@
-
-
+/// Load css.
 pub fn load_css() {
     tracing::info!(target: "babydra-greeter", "Loading inline CSS stylesheet into CssProvider");
     let provider = gtk4::CssProvider::new();

@@ -2,8 +2,8 @@
 //! Takes care of CSS injection for custom wallpapers and window instantiation
 //! across all detected system monitors.
 
-use gtk4::prelude::*;
 use crate::widgets;
+use gtk4::prelude::*;
 
 /// Instantiates lock screen windows for every connected display monitor.
 pub fn build_lock_ui(app: &gtk4::Application, custom_wallpaper: Option<&str>) {
@@ -15,11 +15,13 @@ pub fn build_lock_ui(app: &gtk4::Application, custom_wallpaper: Option<&str>) {
         widgets::create_lock_window(app, None, true, custom_wallpaper);
     } else {
         for i in 0..num_monitors {
-            if let Some(monitor) = monitors.item(i).and_then(|obj| obj.downcast::<gtk4::gdk::Monitor>().ok()) {
+            if let Some(monitor) = monitors
+                .item(i)
+                .and_then(|obj| obj.downcast::<gtk4::gdk::Monitor>().ok())
+            {
                 let is_primary = i == 0;
                 widgets::create_lock_window(app, Some(&monitor), is_primary, custom_wallpaper);
             }
         }
     }
 }
-

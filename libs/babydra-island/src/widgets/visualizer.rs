@@ -54,4 +54,3 @@ pub fn start_visualizer_animation(bars: Vec<gtk4::Box>, is_playing: Rc<Cell<bool
         glib::ControlFlow::Continue
     });
 }
-

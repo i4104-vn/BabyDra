@@ -1,18 +1,18 @@
 //! Dynamic desktop image preview application.
 //! Base Rust + GTK4 image viewer entry point.
 
-use babydra_common::i18n::t;
+use babydra_core::i18n::t;
 use gtk4::prelude::*;
 use std::path::PathBuf;
 
 mod widgets;
 
+/// Application entry point: `main`.
 fn main() {
     let app = gtk4::Application::new(Some("com.babydra.preview"), Default::default());
 
     app.connect_activate(|app| {
-        // Load custom styling CSS rules from babydra-common
-        babydra_utils::ui::theme::init_theme();
+        babydra_ui_kit::ui::theme::init_theme();
 
         let arg_path = std::env::args().nth(1);
         if let Some(p) = arg_path {

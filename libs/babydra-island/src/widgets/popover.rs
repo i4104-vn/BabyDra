@@ -1,6 +1,6 @@
 //! UI layout renderer for the Dynamic Island media controller popover.
 
-use babydra_common::i18n::t;
+use babydra_core::i18n::t;
 use gtk4::prelude::*;
 
 /// Builds and registers the glassmorphic media control Popover anchored to the notch capsule.
@@ -19,7 +19,7 @@ pub fn create_media_popover(
     gtk4::Label,
     gtk4::Label,
 ) {
-    let popover = babydra_utils::components::create_popover(
+    let popover = babydra_ui_kit::components::create_popover(
         notch_capsule,
         gtk4::PositionType::Bottom,
         "media-popover",
@@ -33,7 +33,7 @@ pub fn create_media_popover(
     let popover_header = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
     popover_header.add_css_class("media-popover-header");
     popover_header.set_valign(gtk4::Align::Center);
-    let popover_app_icon = babydra_utils::ui::icon::get_icon_colored("logo", 14, "#3b82f6");
+    let popover_app_icon = babydra_ui_kit::ui::icon::get_icon_colored("logo", 14, "#3b82f6");
     let popover_app_name = gtk4::Label::new(Some(&t("island.music_player")));
     popover_app_name.add_css_class("media-popover-app-name");
     popover_header.append(&popover_app_icon);
@@ -102,7 +102,7 @@ pub fn create_media_popover(
 
     let prev_btn = gtk4::Button::new();
     prev_btn.add_css_class("media-control-btn");
-    let prev_img = babydra_utils::ui::icon::get_icon("previous", 16);
+    let prev_img = babydra_ui_kit::ui::icon::get_icon("previous", 16);
     prev_btn.set_child(Some(&prev_img));
     prev_btn.connect_clicked(|_| {
         let _ = std::process::Command::new("playerctl")
@@ -112,7 +112,7 @@ pub fn create_media_popover(
 
     let play_btn = gtk4::Button::new();
     play_btn.add_css_class("media-control-btn");
-    let play_btn_icon = babydra_utils::ui::icon::get_icon("play", 22);
+    let play_btn_icon = babydra_ui_kit::ui::icon::get_icon("play", 22);
     play_btn.set_child(Some(&play_btn_icon));
     play_btn.connect_clicked(move |_| {
         let _ = std::process::Command::new("playerctl")
@@ -122,7 +122,7 @@ pub fn create_media_popover(
 
     let next_btn = gtk4::Button::new();
     next_btn.add_css_class("media-control-btn");
-    let next_img = babydra_utils::ui::icon::get_icon("next", 16);
+    let next_img = babydra_ui_kit::ui::icon::get_icon("next", 16);
     next_btn.set_child(Some(&next_img));
     next_btn.connect_clicked(|_| {
         let _ = std::process::Command::new("playerctl").arg("next").spawn();
@@ -171,9 +171,9 @@ pub fn create_media_popover(
             let is_animating_cb = is_animating_clone.clone();
             is_animating_cb.set(true);
 
-            babydra_utils::ui::animation::slide_out_cb(
+            babydra_ui_kit::ui::animation::slide_out_cb(
                 popover_box_clone.upcast_ref(),
-                babydra_utils::ui::animation::SlideDirection::Up,
+                babydra_ui_kit::ui::animation::SlideDirection::Up,
                 15,
                 450,
                 false,
@@ -192,9 +192,9 @@ pub fn create_media_popover(
     let notch_capsule_clone = notch_capsule.clone();
     popover.connect_map(move |_| {
         notch_capsule_clone.add_css_class("popover-open");
-        babydra_utils::ui::animation::slide_in(
+        babydra_ui_kit::ui::animation::slide_in(
             popover_box_clone2.upcast_ref(),
-            babydra_utils::ui::animation::SlideDirection::Down,
+            babydra_ui_kit::ui::animation::SlideDirection::Down,
             15,
             450,
         );

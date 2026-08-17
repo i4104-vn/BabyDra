@@ -2,7 +2,7 @@
 //! Follows the `render.rs` convention used by babydra-panel / babydra-lock:
 //! builds the window once and returns widget handles for signal wiring.
 
-use babydra_common::i18n::t;
+use babydra_core::i18n::t;
 use gtk4::prelude::*;
 use gtk4::{Align, ApplicationWindow, Box as GtkBox, ContentFit, Orientation, Overlay};
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
@@ -23,6 +23,7 @@ pub struct GreeterWidgets {
     pub login: LoginWidget,
 }
 
+/// Builds the `greeter ui` UI.
 pub fn build_greeter_ui(app: &gtk4::Application) -> GreeterWidgets {
     info!(target: "babydra-greeter", "Building GTK Application Window UI");
 
@@ -50,13 +51,12 @@ pub fn build_greeter_ui(app: &gtk4::Application) -> GreeterWidgets {
     info!(target: "babydra-greeter", "Applying fullscreen layout mode");
     window.fullscreen();
 
-    // Load CSS
     info!(target: "babydra-greeter", "Triggering CSS theme loading");
     theme::load_css();
 
-    // Background wallpaper resolved via babydra_common::get_greeter_wallpaper_bytes()
+    // Background wallpaper resolved via babydra_core::get_greeter_wallpaper_bytes()
     let bg_picture = gtk4::Picture::new();
-    if let Some(bytes) = babydra_common::get_greeter_wallpaper_bytes() {
+    if let Some(bytes) = babydra_core::get_greeter_wallpaper_bytes() {
         let stream = gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(&bytes));
         if let Ok(pixbuf) =
             gtk4::gdk_pixbuf::Pixbuf::from_stream(&stream, gtk4::gio::Cancellable::NONE)
@@ -81,7 +81,6 @@ pub fn build_greeter_ui(app: &gtk4::Application) -> GreeterWidgets {
     tint.add_css_class("greeter-tint");
     overlay.add_overlay(&tint);
 
-    // Build widgets
     info!(target: "babydra-greeter", "Building main layout overlay container");
     let top_bar = widgets::top_bar::build();
     let splash = widgets::splash::build();

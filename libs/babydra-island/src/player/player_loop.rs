@@ -6,8 +6,8 @@ use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 use super::playerctl::load_album_art_from_bytes;
-use babydra_common::{run_playerctl, decode_uri};
 use crate::models::IslandWidgets;
+use babydra_core::{decode_uri, run_playerctl};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum IslandState {
@@ -42,7 +42,7 @@ fn set_art_fallback_icon(widgets: &IslandWidgets, icon_name: &str) {
     if let Some(child) = widgets.art_container.first_child() {
         widgets.art_container.remove(&child);
     }
-    let music_icon_s = babydra_utils::ui::icon::get_icon_colored(icon_name, 14, "#3b82f6");
+    let music_icon_s = babydra_ui_kit::ui::icon::get_icon_colored(icon_name, 14, "#3b82f6");
     music_icon_s.add_css_class("notch-album-art");
     widgets.art_container.append(&music_icon_s);
 
@@ -57,7 +57,7 @@ fn set_art_fallback_icon(widgets: &IslandWidgets, icon_name: &str) {
     fallback_card.set_halign(gtk4::Align::Center);
     fallback_card.set_valign(gtk4::Align::Center);
 
-    let music_icon_l = babydra_utils::ui::icon::get_icon_colored(icon_name, 56, "#3b82f6");
+    let music_icon_l = babydra_ui_kit::ui::icon::get_icon_colored(icon_name, 56, "#3b82f6");
     music_icon_l.set_halign(gtk4::Align::Center);
     music_icon_l.set_valign(gtk4::Align::Center);
     music_icon_l.set_hexpand(true);
@@ -70,10 +70,7 @@ fn set_art_fallback_icon(widgets: &IslandWidgets, icon_name: &str) {
 /// Starts a background timer loop that polls active D-Bus notifications and playerctl
 /// state every second. It orchestrates the Dynamic Island layout updates (compact logo,
 /// active notification, or media player) and updates their corresponding widgets.
-pub fn start_player_polling_loop(
-    is_playing_state: Rc<Cell<bool>>,
-    widgets: IslandWidgets,
-) {
+pub fn start_player_polling_loop(is_playing_state: Rc<Cell<bool>>, widgets: IslandWidgets) {
     let last_art_url = Rc::new(RefCell::new(String::new()));
     let last_attempted_url = Rc::new(RefCell::new(String::new()));
     let fail_count = Rc::new(Cell::new(0u32));
@@ -84,7 +81,6 @@ pub fn start_player_polling_loop(
     // Create a tokio channel to send playerctl metadata from the background thread to the main thread
     let (sender, mut receiver) = tokio::sync::mpsc::unbounded_channel::<Option<String>>();
 
-    // Spawn background thread to poll playerctl metadata every second
     std::thread::spawn(move || {
         loop {
             let metadata = run_playerctl(&["metadata", "--format", "{{ status }}|//|{{ title }}|//|{{ artist }}|//|{{ playerName }}|//|{{ mpris:artUrl }}|//|{{ position }}|//|{{ mpris:length }}"]);
@@ -105,7 +101,8 @@ pub fn start_player_polling_loop(
         }
     });
 
-    let (art_sender, mut art_receiver) = tokio::sync::mpsc::unbounded_channel::<(String, String, Result<Vec<u8>, ()>)>();
+    let (art_sender, mut art_receiver) =
+        tokio::sync::mpsc::unbounded_channel::<(String, String, Result<Vec<u8>, ()>)>();
     let widgets_clone = widgets.clone();
     let last_art_url_clone = last_art_url.clone();
     let last_attempted_url_clone = last_attempted_url.clone();
@@ -189,7 +186,10 @@ pub fn start_player_polling_loop(
             }
         });
 
-        if matches!(current_state, IslandState::Hidden) && active_notif.is_none() && metadata_opt.is_none() {
+        if matches!(current_state, IslandState::Hidden)
+            && active_notif.is_none()
+            && metadata_opt.is_none()
+        {
             return glib::ControlFlow::Continue;
         }
 
@@ -232,25 +232,24 @@ pub fn start_player_polling_loop(
 
             if is_new_notif {
                 is_playing_state.set(false);
-                update_notification_view(
-                    &widgets,
-                    &notif,
-                    &last_art_url,
-                    &last_attempted_url,
-                );
+                update_notification_view(&widgets, &notif, &last_art_url, &last_attempted_url);
             }
 
             let target_width = 280;
-            let (_, nat_height, _, _) = widgets.notification_view.measure(gtk4::Orientation::Vertical, target_width - 32);
+            let (_, nat_height, _, _) = widgets
+                .notification_view
+                .measure(gtk4::Orientation::Vertical, target_width - 32);
             let target_height = (nat_height + 16).max(48); // 16px for top+bottom padding, at least 48px
 
             match current_state {
                 IslandState::Hidden => {
-                    island_state.set(IslandState::NotificationActive { timestamp: notif.timestamp });
+                    island_state.set(IslandState::NotificationActive {
+                        timestamp: notif.timestamp,
+                    });
                     widgets.visualizer_box.set_visible(false);
                     widgets.notch_capsule.add_css_class("active-music");
                     widgets.notch_capsule.add_css_class("notification-mode");
-                    babydra_utils::ui::animation::island_zoom_in(
+                    babydra_ui_kit::ui::animation::island_zoom_in(
                         widgets.notch_capsule.clone().upcast_ref(),
                         target_width,
                         target_height,
@@ -258,10 +257,12 @@ pub fn start_player_polling_loop(
                     );
                 }
                 IslandState::PlayerActive => {
-                    island_state.set(IslandState::NotificationActive { timestamp: notif.timestamp });
+                    island_state.set(IslandState::NotificationActive {
+                        timestamp: notif.timestamp,
+                    });
                     widgets.visualizer_box.set_visible(false);
                     widgets.notch_capsule.add_css_class("notification-mode");
-                    babydra_utils::ui::animation::island_animate_size(
+                    babydra_ui_kit::ui::animation::island_animate_size(
                         widgets.notch_capsule.clone().upcast_ref(),
                         200,
                         target_width,
@@ -273,8 +274,10 @@ pub fn start_player_polling_loop(
                 }
                 IslandState::NotificationActive { timestamp } => {
                     if timestamp != notif.timestamp {
-                        island_state.set(IslandState::NotificationActive { timestamp: notif.timestamp });
-                        babydra_utils::ui::animation::island_animate_size(
+                        island_state.set(IslandState::NotificationActive {
+                            timestamp: notif.timestamp,
+                        });
+                        babydra_ui_kit::ui::animation::island_animate_size(
                             widgets.notch_capsule.clone().upcast_ref(),
                             widgets.notch_capsule.width(),
                             target_width,
@@ -286,12 +289,14 @@ pub fn start_player_polling_loop(
                     }
                 }
                 IslandState::ShrinkingToPlayer { .. } | IslandState::ZoomingOut => {
-                    island_state.set(IslandState::NotificationActive { timestamp: notif.timestamp });
+                    island_state.set(IslandState::NotificationActive {
+                        timestamp: notif.timestamp,
+                    });
                     widgets.visualizer_box.set_visible(false);
                     widgets.notch_capsule.set_visible(true);
                     widgets.notch_capsule.add_css_class("active-music");
                     widgets.notch_capsule.add_css_class("notification-mode");
-                    babydra_utils::ui::animation::island_animate_size(
+                    babydra_ui_kit::ui::animation::island_animate_size(
                         widgets.notch_capsule.clone().upcast_ref(),
                         200,
                         target_width,
@@ -305,15 +310,17 @@ pub fn start_player_polling_loop(
         } else {
             match current_state {
                 IslandState::NotificationActive { .. } => {
-                    island_state.set(IslandState::ShrinkingToPlayer { had_player_before: player_active });
-                    
+                    island_state.set(IslandState::ShrinkingToPlayer {
+                        had_player_before: player_active,
+                    });
+
                     let state_clone = island_state.clone();
                     let widgets_clone = widgets.clone();
                     let last_title_clone = last_title.clone();
                     let art_loaded_clone = art_loaded_for_current_song.clone();
                     let is_playing_clone = is_playing_state.clone();
                     let latest_metadata_clone = latest_metadata.clone();
-                    
+
                     let cur_w = widgets.notch_capsule.width().max(200);
                     let cur_h = widgets.notch_capsule.height().max(26);
 
@@ -322,7 +329,7 @@ pub fn start_player_polling_loop(
                     let target_w = if player_active { 200 } else { 0 };
                     let target_h = if player_active { 26 } else { 0 };
 
-                    babydra_utils::ui::animation::island_animate_size(
+                    babydra_ui_kit::ui::animation::island_animate_size(
                         widgets.notch_capsule.clone().upcast_ref(),
                         cur_w,
                         target_w,
@@ -332,7 +339,9 @@ pub fn start_player_polling_loop(
                         move || {
                             widgets_clone.notification_view.set_visible(false);
                             widgets_clone.notification_view.set_opacity(1.0);
-                            widgets_clone.notch_capsule.remove_css_class("notification-mode");
+                            widgets_clone
+                                .notch_capsule
+                                .remove_css_class("notification-mode");
 
                             let metadata_fresh = latest_metadata_clone.borrow().clone();
                             let mut player_active_fresh = false;
@@ -357,15 +366,21 @@ pub fn start_player_polling_loop(
                                 is_playing_clone.set(false);
                                 widgets_clone.notch_capsule.set_visible(false);
                                 widgets_clone.notch_capsule.remove_css_class("active-music");
-                                babydra_utils::ui::icon::set_image_from_icon(&widgets_clone.play_btn_icon, "play", 22);
+                                babydra_ui_kit::ui::icon::set_image_from_icon(
+                                    &widgets_clone.play_btn_icon,
+                                    "play",
+                                    22,
+                                );
                                 if let Some(child) = widgets_clone.art_container.first_child() {
                                     widgets_clone.art_container.remove(&child);
                                 }
-                                if let Some(child) = widgets_clone.popover_art_container.first_child() {
+                                if let Some(child) =
+                                    widgets_clone.popover_art_container.first_child()
+                                {
                                     widgets_clone.popover_art_container.remove(&child);
                                 }
                             }
-                        }
+                        },
                     );
                 }
                 IslandState::PlayerActive => {
@@ -391,7 +406,9 @@ pub fn start_player_polling_loop(
                     } else {
                         island_state.set(IslandState::ZoomingOut);
                         is_playing_state.set(false);
-                        widgets.play_btn_icon.set_icon_name(Some("media-playback-start-symbolic"));
+                        widgets
+                            .play_btn_icon
+                            .set_icon_name(Some("media-playback-start-symbolic"));
                         if let Some(child) = widgets.art_container.first_child() {
                             widgets.art_container.remove(&child);
                         }
@@ -399,20 +416,23 @@ pub fn start_player_polling_loop(
                             widgets.popover_art_container.remove(&child);
                         }
 
-                        babydra_utils::ui::animation::island_zoom_out(
+                        babydra_ui_kit::ui::animation::island_zoom_out(
                             widgets.notch_capsule.clone().upcast_ref(),
                             200,
                             500,
                             true,
                         );
-                        
+
                         let state_final = island_state.clone();
                         let notch_clone = widgets.notch_capsule.clone();
-                        glib::timeout_add_local_once(std::time::Duration::from_millis(500), move || {
-                            state_final.set(IslandState::Hidden);
-                            notch_clone.remove_css_class("active-music");
-                            notch_clone.remove_css_class("notification-mode");
-                        });
+                        glib::timeout_add_local_once(
+                            std::time::Duration::from_millis(500),
+                            move || {
+                                state_final.set(IslandState::Hidden);
+                                notch_clone.remove_css_class("active-music");
+                                notch_clone.remove_css_class("notification-mode");
+                            },
+                        );
                     }
                 }
                 IslandState::Hidden => {
@@ -421,13 +441,13 @@ pub fn start_player_polling_loop(
                         widgets.music_view.set_visible(true);
                         widgets.visualizer_box.set_visible(true);
                         widgets.notch_capsule.add_css_class("active-music");
-                        babydra_utils::ui::animation::island_zoom_in(
+                        babydra_ui_kit::ui::animation::island_zoom_in(
                             widgets.notch_capsule.clone().upcast_ref(),
                             200,
                             30,
                             500,
                         );
-                        
+
                         update_player_view(
                             &widgets,
                             &is_playing_state,
@@ -481,7 +501,7 @@ fn update_notification_view(
     if let Some(child) = widgets.notif_art_container.first_child() {
         widgets.notif_art_container.remove(&child);
     }
-    
+
     // Check if the icon file or system icon name exists, otherwise use logo
     let mut use_logo = notif.icon.is_empty();
     if !use_logo {
@@ -509,9 +529,12 @@ fn update_notification_view(
     }
 
     let notif_icon = if use_logo {
-        babydra_utils::ui::icon::get_icon("logo", 24)
+        babydra_ui_kit::ui::icon::get_icon("logo", 24)
     } else {
-        babydra_utils::ui::icon::get_system_or_file_icon(&notif.icon, "preferences-system-notifications-symbolic")
+        babydra_ui_kit::ui::icon::get_system_or_file_icon(
+            &notif.icon,
+            "preferences-system-notifications-symbolic",
+        )
     };
     notif_icon.set_pixel_size(24);
     notif_icon.add_css_class("notch-album-art");
@@ -532,7 +555,7 @@ fn get_player_icon_name(player_name_raw: &str) -> String {
     }
 
     // Dynamic search across registered desktop application entry files
-    let apps = babydra_common::find_desktop_apps();
+    let apps = babydra_core::find_desktop_apps();
     for app in &apps {
         let app_name = app.name.to_lowercase();
         let app_exec = app.exec.to_lowercase();
@@ -573,11 +596,12 @@ fn update_player_view(
     let count = poll_counter.get();
     poll_counter.set(count + 1);
 
-    // Update Progress Bar
     if len_secs > 0.0 {
         let fraction = (pos_secs / len_secs).clamp(0.0, 1.0);
         widgets.popover_progress_bar.set_fraction(fraction);
-        widgets.popover_position_lbl.set_text(&format_time(pos_secs));
+        widgets
+            .popover_position_lbl
+            .set_text(&format_time(pos_secs));
         widgets.popover_length_lbl.set_text(&format_time(len_secs));
         widgets.popover_progress_container.set_visible(true);
     } else {
@@ -633,7 +657,11 @@ fn update_player_view(
         } else {
             title
         };
-        let pop_artist = if artist.is_empty() { "Playing Media" } else { artist };
+        let pop_artist = if artist.is_empty() {
+            "Playing Media"
+        } else {
+            artist
+        };
 
         widgets.popover_title.set_text(pop_title);
         widgets.popover_artist.set_text(pop_artist);
@@ -678,7 +706,9 @@ fn update_player_view(
                         std::fs::read(&local_path).map_err(|_| ())
                     } else if art_url_clone.starts_with('/') {
                         std::fs::read(&art_url_clone).map_err(|_| ())
-                    } else if art_url_clone.starts_with("http://") || art_url_clone.starts_with("https://") {
+                    } else if art_url_clone.starts_with("http://")
+                        || art_url_clone.starts_with("https://")
+                    {
                         std::process::Command::new("curl")
                             .args(["-s", "-L", "--max-time", "5", &art_url_clone])
                             .output()
@@ -697,16 +727,16 @@ fn update_player_view(
     }
 
     if playing {
-        babydra_utils::ui::icon::set_image_from_icon(&widgets.play_btn_icon, "pause", 22);
+        babydra_ui_kit::ui::icon::set_image_from_icon(&widgets.play_btn_icon, "pause", 22);
     } else {
-        babydra_utils::ui::icon::set_image_from_icon(&widgets.play_btn_icon, "play", 22);
+        babydra_ui_kit::ui::icon::set_image_from_icon(&widgets.play_btn_icon, "play", 22);
     }
 
     widgets.default_view.set_visible(false);
     widgets.music_view.set_visible(true);
     if !widgets.notch_capsule.is_visible() {
         widgets.notch_capsule.add_css_class("active-music");
-        babydra_utils::ui::animation::island_zoom_in(
+        babydra_ui_kit::ui::animation::island_zoom_in(
             widgets.notch_capsule.clone().upcast_ref(),
             200,
             10,
@@ -714,4 +744,3 @@ fn update_player_view(
         );
     }
 }
-

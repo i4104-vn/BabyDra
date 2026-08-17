@@ -1,12 +1,12 @@
 //! UI renderer and event handlers for the switcher overlay window.
 
+use crate::widgets::list::build_apps_list;
+use babydra_core::DesktopApp;
+use babydra_core::{activate_app, save_history};
 use gtk4::prelude::*;
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
 use std::cell::RefCell;
 use std::rc::Rc;
-use babydra_common::DesktopApp;
-use babydra_common::{activate_app, save_history};
-use crate::widgets::list::build_apps_list;
 
 /// Shared state for the daemon window controller.
 pub struct SwitcherController {
@@ -22,10 +22,10 @@ pub struct SwitcherController {
 /// In daemon mode this is called once at startup; the window is simply
 /// hidden/shown on subsequent Alt+Tab presses rather than destroyed/recreated.
 pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
-    babydra_utils::ui::theme::init_theme();
+    babydra_ui_kit::ui::theme::init_theme();
 
     let window = gtk4::ApplicationWindow::new(app);
-    babydra_utils::ui::theme::apply_theme_class(&window);
+    babydra_ui_kit::ui::theme::apply_theme_class(&window);
     window.init_layer_shell();
     window.set_layer(Layer::Overlay);
     window.set_keyboard_mode(KeyboardMode::Exclusive);
@@ -80,7 +80,8 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
     let current_index: Rc<RefCell<usize>> = Rc::new(RefCell::new(0));
     let closed: Rc<RefCell<bool>> = Rc::new(RefCell::new(false));
     let alt_check_enabled: Rc<RefCell<bool>> = Rc::new(RefCell::new(false));
-    let last_cycle_time: Rc<RefCell<std::time::Instant>> = Rc::new(RefCell::new(std::time::Instant::now()));
+    let last_cycle_time: Rc<RefCell<std::time::Instant>> =
+        Rc::new(RefCell::new(std::time::Instant::now()));
 
     // --- update_selection closure ---
     let update_selection = {
@@ -148,14 +149,18 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
             let now = std::time::Instant::now();
             match key {
                 gtk4::gdk::Key::Tab | gtk4::gdk::Key::Down => {
-                    if now.duration_since(*last_cycle_key.borrow()) > std::time::Duration::from_millis(80) {
+                    if now.duration_since(*last_cycle_key.borrow())
+                        > std::time::Duration::from_millis(80)
+                    {
                         *last_cycle_key.borrow_mut() = now;
                         update_sel_key((idx + 1) % apps_len);
                     }
                     gtk4::glib::Propagation::Stop
                 }
                 gtk4::gdk::Key::ISO_Left_Tab | gtk4::gdk::Key::Up => {
-                    if now.duration_since(*last_cycle_key.borrow()) > std::time::Duration::from_millis(80) {
+                    if now.duration_since(*last_cycle_key.borrow())
+                        > std::time::Duration::from_millis(80)
+                    {
                         *last_cycle_key.borrow_mut() = now;
                         let prev = if idx == 0 { apps_len - 1 } else { idx - 1 };
                         update_sel_key(prev);
@@ -247,16 +252,16 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
         Box::new(move || {
             *closed.borrow_mut() = false;
             *alt_check_enabled.borrow_mut() = false;
+            // Show the window immediately for 0-latency feedback
             *last_cycle_show.borrow_mut() = std::time::Instant::now();
 
-            // Show window immediately for 0-latency feedback
             window.set_visible(true);
             window.present();
 
-            // Query compositor for running apps asynchronously
+            // Spawn a background thread to query the compositor for running apps
             let (tx, rx) = std::sync::mpsc::channel();
             std::thread::spawn(move || {
-                let apps = babydra_common::get_running_apps();
+                let apps = babydra_core::get_running_apps();
                 let _ = tx.send(apps);
             });
 
@@ -269,71 +274,68 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
             let closed = closed.clone();
             let alt_check_enabled = alt_check_enabled.clone();
 
-            gtk4::glib::timeout_add_local(
-                std::time::Duration::from_millis(2),
-                move || {
-                    if let Ok(apps) = rx.try_recv() {
-                        if apps.is_empty() {
-                            window.set_visible(false);
-                            return gtk4::glib::ControlFlow::Break;
-                        }
-
-                        // Clear previous widgets
-                        while let Some(child) = list_container.first_child() {
-                            list_container.remove(&child);
-                        }
-
-                        // Build new list
-                        let (icons_column, item_buttons) = build_apps_list(&apps);
-
-                        // Wire up click handlers
-                        for (i, btn) in item_buttons.iter().enumerate() {
-                            let update_sel = update_selection.clone();
-                            let window_close = window.clone();
-                            let apps_click = apps.clone();
-                            let closed_click = closed.clone();
-                            btn.connect_clicked(move |_| {
-                                update_sel(i);
-                                let app_item = apps_click[i].clone();
-                                save_history(app_item.window_title.as_deref().unwrap_or(&app_item.name));
-                                activate_app(&app_item);
-                                *closed_click.borrow_mut() = true;
-                                let win = window_close.clone();
-                                gtk4::glib::timeout_add_local_once(
-                                    std::time::Duration::from_millis(50),
-                                    move || {
-                                        win.set_visible(false);
-                                    },
-                                );
-                            });
-                        }
-
-                        list_container.append(&icons_column);
-
-                        *apps_state.borrow_mut() = apps.clone();
-                        *buttons_state.borrow_mut() = item_buttons;
-
-                        let initial_idx = if apps.len() > 1 { 1 } else { 0 };
-                        *current_index.borrow_mut() = initial_idx;
-
-                        // Apply selection immediately — no frame delay needed
-                        update_selection(initial_idx);
-
-                        // Grace period for GTK layer shell keyboard focus assignment
-                        let alt_check = alt_check_enabled.clone();
-                        gtk4::glib::timeout_add_local_once(
-                            std::time::Duration::from_millis(30),
-                            move || {
-                                *alt_check.borrow_mut() = true;
-                            },
-                        );
-
-                        gtk4::glib::ControlFlow::Break
-                    } else {
-                        gtk4::glib::ControlFlow::Continue
+            gtk4::glib::timeout_add_local(std::time::Duration::from_millis(2), move || {
+                if let Ok(apps) = rx.try_recv() {
+                    if apps.is_empty() {
+                        window.set_visible(false);
+                        return gtk4::glib::ControlFlow::Break;
                     }
-                },
-            );
+
+                    while let Some(child) = list_container.first_child() {
+                        list_container.remove(&child);
+                    }
+
+                    let (icons_column, item_buttons) = build_apps_list(&apps);
+
+                    // Wire up click handlers
+                    for (i, btn) in item_buttons.iter().enumerate() {
+                        let update_sel = update_selection.clone();
+                        let window_close = window.clone();
+                        let apps_click = apps.clone();
+                        let closed_click = closed.clone();
+                        btn.connect_clicked(move |_| {
+                            update_sel(i);
+                            let app_item = apps_click[i].clone();
+                            save_history(
+                                app_item.window_title.as_deref().unwrap_or(&app_item.name),
+                            );
+                            activate_app(&app_item);
+                            *closed_click.borrow_mut() = true;
+                            let win = window_close.clone();
+                            gtk4::glib::timeout_add_local_once(
+                                std::time::Duration::from_millis(50),
+                                move || {
+                                    win.set_visible(false);
+                                },
+                            );
+                        });
+                    }
+
+                    list_container.append(&icons_column);
+
+                    *apps_state.borrow_mut() = apps.clone();
+                    *buttons_state.borrow_mut() = item_buttons;
+
+                    // Apply the selection immediately — no frame delay needed
+                    let initial_idx = if apps.len() > 1 { 1 } else { 0 };
+                    *current_index.borrow_mut() = initial_idx;
+
+                    update_selection(initial_idx);
+
+                    // Grace period for GTK layer shell keyboard focus assignment
+                    let alt_check = alt_check_enabled.clone();
+                    gtk4::glib::timeout_add_local_once(
+                        std::time::Duration::from_millis(30),
+                        move || {
+                            *alt_check.borrow_mut() = true;
+                        },
+                    );
+
+                    gtk4::glib::ControlFlow::Break
+                } else {
+                    gtk4::glib::ControlFlow::Continue
+                }
+            });
         })
     };
 
@@ -353,7 +355,8 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
         let last_cycle_next = last_cycle_time.clone();
         Box::new(move || {
             let now = std::time::Instant::now();
-            if now.duration_since(*last_cycle_next.borrow()) < std::time::Duration::from_millis(80) {
+            if now.duration_since(*last_cycle_next.borrow()) < std::time::Duration::from_millis(80)
+            {
                 return;
             }
             *last_cycle_next.borrow_mut() = now;

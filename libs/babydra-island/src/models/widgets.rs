@@ -50,4 +50,3 @@ pub struct IslandWidgets {
     /// Total track length time label (e.g. 3:45).
     pub popover_length_lbl: gtk4::Label,
 }
-

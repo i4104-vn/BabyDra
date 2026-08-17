@@ -15,9 +15,9 @@ use gtk4::prelude::*;
 use std::io::Write;
 use std::os::unix::net::UnixStream;
 
-mod widgets;
-mod render;
 mod daemon;
+mod render;
+mod widgets;
 
 const SOCKET_PATH: &str = "/tmp/babydra-switcher.socket";
 
@@ -31,6 +31,7 @@ fn try_signal_daemon(msg: &[u8]) -> bool {
     false
 }
 
+/// Application entry point: `main`.
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let is_daemon = args.iter().any(|a| a == "--daemon");
@@ -46,6 +47,7 @@ fn main() {
 // Daemon mode
 // ---------------------------------------------------------------------------
 
+/// Runs `daemon`.
 fn run_daemon() {
     // If another daemon is already running, bail out
     if UnixStream::connect(SOCKET_PATH).is_ok() {
@@ -53,10 +55,7 @@ fn run_daemon() {
         return;
     }
 
-    let application = gtk4::Application::new(
-        Some("org.babydra.switcher"),
-        Default::default(),
-    );
+    let application = gtk4::Application::new(Some("org.babydra.switcher"), Default::default());
 
     application.connect_activate(|app| {
         let controller = render::build_switcher_ui(app);
@@ -105,13 +104,14 @@ fn run_daemon() {
 // One-shot mode (legacy / testing)
 // ---------------------------------------------------------------------------
 
+/// Runs `oneshot`.
 fn run_oneshot() {
     // If a daemon is already running, send "show" and exit
     if try_signal_daemon(b"show") {
         return;
     }
 
-    let apps = babydra_common::get_running_apps();
+    let apps = babydra_core::get_running_apps();
     if apps.is_empty() {
         return;
     }
@@ -119,10 +119,7 @@ fn run_oneshot() {
     // No daemon: fall back to the old spawn-per-keypress behaviour.
     // We reuse the daemon's socket protocol so a running daemon handles
     // subsequent Alt+Tab presses naturally.
-    let application = gtk4::Application::new(
-        Some("org.babydra.switcher"),
-        Default::default(),
-    );
+    let application = gtk4::Application::new(Some("org.babydra.switcher"), Default::default());
 
     application.connect_activate(move |app| {
         let controller = render::build_switcher_ui(app);

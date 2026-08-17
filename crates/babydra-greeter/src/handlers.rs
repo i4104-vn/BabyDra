@@ -22,13 +22,18 @@ pub fn setup_handlers(g: &GreeterWidgets) {
 // Top bar clock
 // ---------------------------------------------------------------------------
 
+/// Sets up `clock`.
 fn setup_clock(top_bar: &TopBarWidget) {
     tracing::info!(target: "babydra-greeter", "Setting up top bar clock timer (interval: 1 second)");
-    babydra_common::update_clock(&top_bar.clock_label, &top_bar.date_label, "greeter.date_format");
+    babydra_core::update_clock(
+        &top_bar.clock_label,
+        &top_bar.date_label,
+        "greeter.date_format",
+    );
     let clock_label = top_bar.clock_label.clone();
     let date_label = top_bar.date_label.clone();
     glib::timeout_add_seconds_local(1, move || {
-        babydra_common::update_clock(&clock_label, &date_label, "greeter.date_format");
+        babydra_core::update_clock(&clock_label, &date_label, "greeter.date_format");
         glib::ControlFlow::Continue
     });
 }
@@ -37,6 +42,7 @@ fn setup_clock(top_bar: &TopBarWidget) {
 // Splash screen transition
 // ---------------------------------------------------------------------------
 
+/// Sets up `splash transition`.
 fn setup_splash_transition(g: &GreeterWidgets) {
     tracing::info!(target: "babydra-greeter", "Initializing splash screen transition (showing splash, hiding login panel)");
     g.login.container.set_opacity(0.0);
@@ -66,18 +72,19 @@ fn setup_splash_transition(g: &GreeterWidgets) {
 // Power buttons (poweroff / reboot / suspend)
 // ---------------------------------------------------------------------------
 
+/// Sets up `power buttons`.
 fn setup_power_buttons(top_bar: &TopBarWidget) {
     top_bar.power_btn.connect_clicked(|_| {
-        tracing::info!(target: "babydra-greeter", "User clicked Power Off button -> babydra_common::power::poweroff()");
-        babydra_common::power::poweroff();
+        tracing::info!(target: "babydra-greeter", "User clicked Power Off button -> babydra_core::power::poweroff()");
+        babydra_core::power::poweroff();
     });
     top_bar.reboot_btn.connect_clicked(|_| {
-        tracing::info!(target: "babydra-greeter", "User clicked Reboot button -> babydra_common::power::reboot()");
-        babydra_common::power::reboot();
+        tracing::info!(target: "babydra-greeter", "User clicked Reboot button -> babydra_core::power::reboot()");
+        babydra_core::power::reboot();
     });
     top_bar.suspend_btn.connect_clicked(|_| {
-        tracing::info!(target: "babydra-greeter", "User clicked Suspend button -> babydra_common::power::suspend()");
-        babydra_common::power::suspend();
+        tracing::info!(target: "babydra-greeter", "User clicked Suspend button -> babydra_core::power::suspend()");
+        babydra_core::power::suspend();
     });
 }
 
@@ -85,6 +92,7 @@ fn setup_power_buttons(top_bar: &TopBarWidget) {
 // Login flow
 // ---------------------------------------------------------------------------
 
+/// Sets up `login flow`.
 fn setup_login_flow(g: &GreeterWidgets) {
     let user_dropdown = g.login.user_dropdown.clone();
     let users = g.login.users.clone();
@@ -113,7 +121,7 @@ fn setup_login_flow(g: &GreeterWidgets) {
 
         tracing::info!(target: "babydra-greeter", "Login action triggered for user: {:?}", user);
 
-        // Disable controls and show spinner in submit button
+        // Disable controls and show the spinner while authentication runs
         user_dropdown.set_sensitive(false);
         pass_entry.set_sensitive(false);
         login_btn.set_sensitive(false);
@@ -174,7 +182,6 @@ fn setup_login_flow(g: &GreeterWidgets) {
                         pass_entry_c.set_text("");
                         pass_entry_c.grab_focus();
 
-                        // Add shake visual feedback
                         login_panel_c.add_css_class("shake-error");
                         let login_panel_cb = login_panel_c.clone();
                         glib::timeout_add_local(std::time::Duration::from_millis(400), move || {

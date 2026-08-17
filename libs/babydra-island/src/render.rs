@@ -4,7 +4,7 @@ use crate::models;
 use crate::player::player_loop::start_player_polling_loop;
 use crate::widgets;
 use crate::widgets::visualizer::{create_visualizer, start_visualizer_animation};
-use babydra_common::i18n::t;
+use babydra_core::i18n::t;
 use gtk4::prelude::*;
 use std::cell::Cell;
 use std::rc::Rc;
@@ -45,7 +45,7 @@ pub fn create_system_island() -> gtk4::Box {
     let default_view = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     default_view.set_valign(gtk4::Align::Center);
     default_view.set_halign(gtk4::Align::Center);
-    let default_icon = babydra_utils::ui::icon::get_icon("logo", 12);
+    let default_icon = babydra_ui_kit::ui::icon::get_icon("logo", 12);
     default_view.append(&default_icon);
     notch_content.append(&default_view);
 
@@ -84,7 +84,7 @@ pub fn create_system_island() -> gtk4::Box {
             .with(|sn| sn.borrow().as_ref().map(|n| n.app_name.clone()));
 
         if let Some(app_name) = app_to_activate {
-            let apps = babydra_common::find_desktop_apps();
+            let apps = babydra_core::find_desktop_apps();
             let mut found_app = None;
             let lower_name = app_name.to_lowercase();
 
@@ -107,14 +107,14 @@ pub fn create_system_island() -> gtk4::Box {
             }
 
             if let Some(app) = found_app {
-                babydra_common::helper::window::focus_app(
+                babydra_core::helper::window::focus_app(
                     &app.name,
                     &app.exec,
                     app.app_id.as_deref(),
                     app.window_title.as_deref(),
                 );
             } else {
-                babydra_common::helper::window::focus_app(&app_name, "", Some(&app_name), None);
+                babydra_core::helper::window::focus_app(&app_name, "", Some(&app_name), None);
             }
         }
     });
@@ -159,7 +159,7 @@ pub fn create_system_island() -> gtk4::Box {
 
     let badge_icon_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     badge_icon_container.set_valign(gtk4::Align::Center);
-    let badge_icon = babydra_utils::ui::icon::get_icon_colored("bell", 14, "#3b82f6");
+    let badge_icon = babydra_ui_kit::ui::icon::get_icon_colored("bell", 14, "#3b82f6");
     badge_icon_container.append(&badge_icon);
 
     let badge_text_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);

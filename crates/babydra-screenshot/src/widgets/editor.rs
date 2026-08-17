@@ -5,47 +5,42 @@ use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use babydra_common::models::{EditorState, Tool};
-use babydra_common::services::screenshot::{trigger_save, trigger_copy};
+use babydra_core::models::{EditorState, Tool};
+use babydra_core::services::screenshot::{trigger_copy, trigger_save};
 
 use super::canvas::{draw_editor_canvas, setup_editor_gestures};
 use super::color_popover::create_color_popover;
 
 /// Sets up keyboard event controllers to handle global shortcuts like Escape (cancel),
 /// Return (copy to clipboard), and Ctrl+S (save to file).
-fn setup_editor_keys(
-    window: &gtk4::ApplicationWindow,
-    state: Rc<RefCell<EditorState>>,
-) {
+fn setup_editor_keys(window: &gtk4::ApplicationWindow, state: Rc<RefCell<EditorState>>) {
     let key_controller = gtk4::EventControllerKey::new();
     key_controller.set_propagation_phase(gtk4::PropagationPhase::Capture);
-    
+
     let state_key = state.clone();
     let win_key = window.clone();
-    key_controller.connect_key_pressed(move |_, key, _, state_flags| {
-        match key {
-            gtk4::gdk::Key::Escape => {
+    key_controller.connect_key_pressed(move |_, key, _, state_flags| match key {
+        gtk4::gdk::Key::Escape => {
+            win_key.close();
+            gtk4::glib::Propagation::Stop
+        }
+        gtk4::gdk::Key::Return => {
+            if trigger_copy(&state_key.borrow(), &win_key) {
                 win_key.close();
-                gtk4::glib::Propagation::Stop
             }
-            gtk4::gdk::Key::Return => {
-                if trigger_copy(&state_key.borrow(), &win_key) {
+            gtk4::glib::Propagation::Stop
+        }
+        gtk4::gdk::Key::s | gtk4::gdk::Key::S => {
+            if state_flags.contains(gtk4::gdk::ModifierType::CONTROL_MASK) {
+                if trigger_save(&state_key.borrow()) {
                     win_key.close();
                 }
                 gtk4::glib::Propagation::Stop
+            } else {
+                gtk4::glib::Propagation::Proceed
             }
-            gtk4::gdk::Key::s | gtk4::gdk::Key::S => {
-                if state_flags.contains(gtk4::gdk::ModifierType::CONTROL_MASK) {
-                    if trigger_save(&state_key.borrow()) {
-                        win_key.close();
-                    }
-                    gtk4::glib::Propagation::Stop
-                } else {
-                    gtk4::glib::Propagation::Proceed
-                }
-            }
-            _ => gtk4::glib::Propagation::Proceed,
         }
+        _ => gtk4::glib::Propagation::Proceed,
     });
 
     window.add_controller(key_controller);
@@ -62,7 +57,7 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
     let state = Rc::new(RefCell::new(EditorState::new(pixbuf)));
 
     let window = gtk4::ApplicationWindow::new(app);
-    babydra_utils::ui::theme::apply_theme_class(&window);
+    babydra_ui_kit::ui::theme::apply_theme_class(&window);
     window.init_layer_shell();
     window.set_layer(Layer::Overlay);
     window.set_keyboard_mode(KeyboardMode::Exclusive);
@@ -106,42 +101,42 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
 
     // Tool buttons
     let btn_reset = gtk4::Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("refresh", 16))
+        .child(&babydra_ui_kit::ui::icon::get_icon("refresh", 16))
         .build();
-    btn_reset.set_tooltip_text(Some(&babydra_common::i18n::t("screenshot.reset_tooltip")));
+    btn_reset.set_tooltip_text(Some(&babydra_core::i18n::t("screenshot.reset_tooltip")));
     btn_reset.add_css_class("flat");
     btn_reset.add_css_class("screenshot-toolbar-btn");
 
     let btn_pen = gtk4::Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("edit", 16))
+        .child(&babydra_ui_kit::ui::icon::get_icon("edit", 16))
         .build();
-    btn_pen.set_tooltip_text(Some(&babydra_common::i18n::t("screenshot.pen_tooltip")));
+    btn_pen.set_tooltip_text(Some(&babydra_core::i18n::t("screenshot.pen_tooltip")));
     btn_pen.add_css_class("flat");
     btn_pen.add_css_class("screenshot-toolbar-btn");
 
     let btn_rect = gtk4::Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("rect", 16))
+        .child(&babydra_ui_kit::ui::icon::get_icon("rect", 16))
         .build();
-    btn_rect.set_tooltip_text(Some(&babydra_common::i18n::t("screenshot.rect_tooltip")));
+    btn_rect.set_tooltip_text(Some(&babydra_core::i18n::t("screenshot.rect_tooltip")));
     btn_rect.add_css_class("flat");
     btn_rect.add_css_class("screenshot-toolbar-btn");
 
     let btn_blur = gtk4::Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("blur", 16))
+        .child(&babydra_ui_kit::ui::icon::get_icon("blur", 16))
         .build();
-    btn_blur.set_tooltip_text(Some(&babydra_common::i18n::t("screenshot.blur_tooltip")));
+    btn_blur.set_tooltip_text(Some(&babydra_core::i18n::t("screenshot.blur_tooltip")));
     btn_blur.add_css_class("flat");
     btn_blur.add_css_class("screenshot-toolbar-btn");
 
     let btn_eraser = gtk4::Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("broom", 16))
+        .child(&babydra_ui_kit::ui::icon::get_icon("broom", 16))
         .build();
-    btn_eraser.set_tooltip_text(Some(&babydra_common::i18n::t("screenshot.eraser_tooltip")));
+    btn_eraser.set_tooltip_text(Some(&babydra_core::i18n::t("screenshot.eraser_tooltip")));
     btn_eraser.add_css_class("flat");
     btn_eraser.add_css_class("screenshot-toolbar-btn");
 
     let color_btn = gtk4::Button::new();
-    color_btn.set_tooltip_text(Some(&babydra_common::i18n::t("screenshot.color_tooltip")));
+    color_btn.set_tooltip_text(Some(&babydra_core::i18n::t("screenshot.color_tooltip")));
     color_btn.add_css_class("flat");
     color_btn.add_css_class("screenshot-toolbar-btn");
 
@@ -155,7 +150,9 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
         let cx = w as f64 / 2.0;
         let cy = h as f64 / 2.0;
         let radius = (w.min(h) as f64 / 2.0) - 1.5;
-        if radius <= 0.0 { return; }
+        if radius <= 0.0 {
+            return;
+        }
         cr.arc(cx, cy, radius, 0.0, 2.0 * std::f64::consts::PI);
         cr.set_source_rgb(r, g, b);
         cr.fill_preserve().unwrap();
@@ -171,7 +168,6 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
         popover_c.popup();
     });
 
-    // Reset button click event
     let state_reset = state.clone();
     let toolbar_wrapper_reset = toolbar_wrapper.clone();
     let canvas_reset = drawing_area.clone();
@@ -214,12 +210,12 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
 
     // Action buttons
     let btn_copy = gtk4::Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("copy", 16))
+        .child(&babydra_ui_kit::ui::icon::get_icon("copy", 16))
         .build();
-    btn_copy.set_tooltip_text(Some(&babydra_common::i18n::t("screenshot.copy_tooltip")));
+    btn_copy.set_tooltip_text(Some(&babydra_core::i18n::t("screenshot.copy_tooltip")));
     btn_copy.add_css_class("flat");
     btn_copy.add_css_class("screenshot-toolbar-btn");
-    
+
     let state_copy = state.clone();
     let win_copy = window.clone();
     btn_copy.connect_clicked(move |_| {
@@ -229,12 +225,12 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
     });
 
     let btn_save = gtk4::Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("download", 16))
+        .child(&babydra_ui_kit::ui::icon::get_icon("download", 16))
         .build();
-    btn_save.set_tooltip_text(Some(&babydra_common::i18n::t("screenshot.save_tooltip")));
+    btn_save.set_tooltip_text(Some(&babydra_core::i18n::t("screenshot.save_tooltip")));
     btn_save.add_css_class("flat");
     btn_save.add_css_class("screenshot-toolbar-btn");
-    
+
     let state_save = state.clone();
     let win_save = window.clone();
     btn_save.connect_clicked(move |_| {
@@ -244,12 +240,12 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
     });
 
     let btn_cancel = gtk4::Button::builder()
-        .child(&babydra_utils::ui::icon::get_icon("close", 16))
+        .child(&babydra_ui_kit::ui::icon::get_icon("close", 16))
         .build();
-    btn_cancel.set_tooltip_text(Some(&babydra_common::i18n::t("screenshot.cancel_tooltip")));
+    btn_cancel.set_tooltip_text(Some(&babydra_core::i18n::t("screenshot.cancel_tooltip")));
     btn_cancel.add_css_class("flat");
     btn_cancel.add_css_class("screenshot-toolbar-btn");
-    
+
     let win_cancel = window.clone();
     btn_cancel.connect_clicked(move |_| {
         win_cancel.close();
@@ -257,16 +253,16 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
 
     // Assemble toolbar
     toolbar.append(&btn_reset);
-    
+
     let sep0 = gtk4::Label::new(Some("│"));
     sep0.add_css_class("capsule-separator");
     toolbar.append(&sep0);
-    
+
     toolbar.append(&btn_pen);
     toolbar.append(&btn_rect);
     toolbar.append(&btn_blur);
     toolbar.append(&btn_eraser);
-    
+
     let sep1 = gtk4::Label::new(Some("│"));
     sep1.add_css_class("capsule-separator");
     toolbar.append(&sep1);

@@ -1,10 +1,11 @@
 use gtk4::prelude::*;
-use gtk4::{Box as GtkBox, Label, Orientation, Align, Spinner};
+use gtk4::{Align, Box as GtkBox, Label, Orientation, Spinner};
 
 pub struct SplashWidget {
     pub container: GtkBox,
 }
 
+/// Build.
 pub fn build() -> SplashWidget {
     tracing::info!(target: "babydra-greeter", "Building SplashWidget container and initial loading spinner");
     let splash_container = GtkBox::new(Orientation::Vertical, 16);
@@ -19,13 +20,13 @@ pub fn build() -> SplashWidget {
     logo_wrapper.add_css_class("splash-logo-wrapper");
     logo_wrapper.set_halign(Align::Center);
 
-    let logo_splash = babydra_utils::ui::icon::get_logo_png(110);
+    let logo_splash = babydra_ui_kit::ui::icon::get_logo_png(110);
     logo_wrapper.append(&logo_splash);
 
-    let splash_title = Label::new(Some(&babydra_common::i18n::t("greeter.os_name")));
+    let splash_title = Label::new(Some(&babydra_core::i18n::t("greeter.os_name")));
     splash_title.add_css_class("splash-title");
 
-    let splash_subtitle = Label::new(Some(&babydra_common::i18n::t("greeter.initializing")));
+    let splash_subtitle = Label::new(Some(&babydra_core::i18n::t("greeter.initializing")));
     splash_subtitle.add_css_class("splash-subtitle");
 
     let spinner = Spinner::new();

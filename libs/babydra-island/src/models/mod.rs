@@ -2,6 +2,5 @@
 
 pub mod widgets;
 
-pub use ::babydra_common::helper::notification::{ActiveNotification, NotificationMsg};
+pub use ::babydra_core::helper::notification::{ActiveNotification, NotificationMsg};
 pub use widgets::IslandWidgets;
-
