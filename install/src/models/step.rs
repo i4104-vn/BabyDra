@@ -5,18 +5,20 @@ pub enum WizardStep {
     Binaries = 2,
     VarLibBundle = 3,
     ConfigsThemes = 4,
-    DisplayManager = 5,
-    ExecuteInstall = 6,
-    Summary = 7,
+    VariantSelection = 5,
+    DisplayManager = 6,
+    ExecuteInstall = 7,
+    Summary = 8,
 }
 
 impl WizardStep {
-    pub const ALL: [WizardStep; 8] = [
+    pub const ALL: [WizardStep; 9] = [
         WizardStep::Welcome,
         WizardStep::SystemPackages,
         WizardStep::Binaries,
         WizardStep::VarLibBundle,
         WizardStep::ConfigsThemes,
+        WizardStep::VariantSelection,
         WizardStep::DisplayManager,
         WizardStep::ExecuteInstall,
         WizardStep::Summary,
@@ -29,9 +31,10 @@ impl WizardStep {
             WizardStep::Binaries => "3. BabyDra Binaries",
             WizardStep::VarLibBundle => "4. /var/lib Staging Bundle",
             WizardStep::ConfigsThemes => "5. Configs, Themes & Icons",
-            WizardStep::DisplayManager => "6. Greetd Display Manager",
-            WizardStep::ExecuteInstall => "7. Execute Installation",
-            WizardStep::Summary => "8. Summary & Launch",
+            WizardStep::VariantSelection => "6. Variant Selection",
+            WizardStep::DisplayManager => "7. Greetd Display Manager",
+            WizardStep::ExecuteInstall => "8. Execute Installation",
+            WizardStep::Summary => "9. Summary & Launch",
         }
     }
 
@@ -42,6 +45,7 @@ impl WizardStep {
             WizardStep::Binaries => "Binaries",
             WizardStep::VarLibBundle => "VarLib Bundle",
             WizardStep::ConfigsThemes => "Configs & Themes",
+            WizardStep::VariantSelection => "Variant",
             WizardStep::DisplayManager => "Display Manager",
             WizardStep::ExecuteInstall => "Install Progress",
             WizardStep::Summary => "Summary",

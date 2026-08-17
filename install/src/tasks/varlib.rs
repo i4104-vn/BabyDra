@@ -1,9 +1,9 @@
+use crate::models::{GenericOptionItem, LogLevel};
+use crate::system::{get_user_home, is_root, safe_copy_binary};
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use crate::models::{GenericOptionItem, LogLevel};
-use crate::system::{get_user_home, is_root, safe_copy_binary};
 
 pub fn execute_varlib_task<F>(
     opt: &GenericOptionItem,
@@ -21,7 +21,10 @@ where
 
     match opt.id.as_str() {
         "stage_binaries" => {
-            log(LogLevel::Bundle, "Staging all built binaries into /var/lib/babydra/bin/...".into());
+            log(
+                LogLevel::Bundle,
+                "Staging all built binaries into /var/lib/babydra/bin/...".into(),
+            );
             if is_root() {
                 let _ = fs::create_dir_all(&var_lib_bin);
             } else {
@@ -31,9 +34,15 @@ where
             }
 
             let all_binary_names = [
-                "babydra-panel", "babydra-switcher", "babydra-screenshot",
-                "babydra-lock", "babydra-launcher", "babydra-preview",
-                "babydra-settings", "babydra-explore", "babydra-greeter",
+                "babydra-panel",
+                "babydra-switcher",
+                "babydra-screenshot",
+                "babydra-lock",
+                "babydra-launcher",
+                "babydra-preview",
+                "babydra-settings",
+                "babydra-explore",
+                "babydra-greeter",
             ];
 
             for bname in all_binary_names {
@@ -50,15 +59,24 @@ where
                             .args(["chmod", "755", dst.to_str().unwrap()])
                             .status();
                     }
-                    log(LogLevel::Bundle, format!("Staged binary -> /var/lib/babydra/bin/{}", bname));
+                    log(
+                        LogLevel::Bundle,
+                        format!("Staged binary -> /var/lib/babydra/bin/{}", bname),
+                    );
                 }
             }
-            log(LogLevel::Success, "Staged binaries to /var/lib/babydra/bin/".into());
+            log(
+                LogLevel::Success,
+                "Staged binaries to /var/lib/babydra/bin/".into(),
+            );
             copied += 1;
         }
 
         "stage_wallpapers" => {
-            log(LogLevel::Bundle, "Staging wallpapers to /var/lib/babydra and /usr/share/babydra...".into());
+            log(
+                LogLevel::Bundle,
+                "Staging wallpapers to /var/lib/babydra and /usr/share/babydra...".into(),
+            );
             let wp = workspace_root.join("wallpaper.png");
             let user_babydra = home.join(".babydra");
             let _ = fs::create_dir_all(&user_babydra);
@@ -72,9 +90,23 @@ where
                     let _ = fs::copy(&wp, var_lib_babydra.join("greeter_wallpaper.png"));
                     let _ = fs::copy(&wp, "/usr/share/babydra/wallpaper.png");
                 } else {
-                    let _ = Command::new("sudo").args(["mkdir", "-p", "/usr/share/babydra", "/var/lib/babydra"]).status();
-                    let _ = Command::new("sudo").args(["cp", wp.to_str().unwrap(), "/var/lib/babydra/greeter_wallpaper.png"]).status();
-                    let _ = Command::new("sudo").args(["cp", wp.to_str().unwrap(), "/usr/share/babydra/wallpaper.png"]).status();
+                    let _ = Command::new("sudo")
+                        .args(["mkdir", "-p", "/usr/share/babydra", "/var/lib/babydra"])
+                        .status();
+                    let _ = Command::new("sudo")
+                        .args([
+                            "cp",
+                            wp.to_str().unwrap(),
+                            "/var/lib/babydra/greeter_wallpaper.png",
+                        ])
+                        .status();
+                    let _ = Command::new("sudo")
+                        .args([
+                            "cp",
+                            wp.to_str().unwrap(),
+                            "/usr/share/babydra/wallpaper.png",
+                        ])
+                        .status();
                 }
                 log(LogLevel::Success, "Deployed system wallpapers.".into());
             }
@@ -82,7 +114,10 @@ where
         }
 
         "stage_logos" => {
-            log(LogLevel::Bundle, "Deploying logos & icons to /var/lib/babydra & /usr/share/babydra...".into());
+            log(
+                LogLevel::Bundle,
+                "Deploying logos & icons to /var/lib/babydra & /usr/share/babydra...".into(),
+            );
             let logo = workspace_root.join("libs/babydra-common/src/services/logo.png");
             let user_babydra = home.join(".babydra");
             let _ = fs::create_dir_all(&user_babydra);
@@ -98,19 +133,43 @@ where
                     let _ = fs::copy(&logo, "/usr/share/babydra/babydra-preview.png");
                     let _ = fs::copy(&logo, "/usr/share/babydra/babydra-settings.png");
                 } else {
-                    let _ = Command::new("sudo").args(["mkdir", "-p", "/usr/share/babydra", "/var/lib/babydra"]).status();
-                    let _ = Command::new("sudo").args(["cp", logo.to_str().unwrap(), "/var/lib/babydra/logo.png"]).status();
-                    let _ = Command::new("sudo").args(["cp", logo.to_str().unwrap(), "/usr/share/babydra/logo.png"]).status();
-                    let _ = Command::new("sudo").args(["cp", logo.to_str().unwrap(), "/usr/share/babydra/babydra-preview.png"]).status();
-                    let _ = Command::new("sudo").args(["cp", logo.to_str().unwrap(), "/usr/share/babydra/babydra-settings.png"]).status();
+                    let _ = Command::new("sudo")
+                        .args(["mkdir", "-p", "/usr/share/babydra", "/var/lib/babydra"])
+                        .status();
+                    let _ = Command::new("sudo")
+                        .args(["cp", logo.to_str().unwrap(), "/var/lib/babydra/logo.png"])
+                        .status();
+                    let _ = Command::new("sudo")
+                        .args(["cp", logo.to_str().unwrap(), "/usr/share/babydra/logo.png"])
+                        .status();
+                    let _ = Command::new("sudo")
+                        .args([
+                            "cp",
+                            logo.to_str().unwrap(),
+                            "/usr/share/babydra/babydra-preview.png",
+                        ])
+                        .status();
+                    let _ = Command::new("sudo")
+                        .args([
+                            "cp",
+                            logo.to_str().unwrap(),
+                            "/usr/share/babydra/babydra-settings.png",
+                        ])
+                        .status();
                 }
-                log(LogLevel::Success, "Deployed brand logos & preview icons.".into());
+                log(
+                    LogLevel::Success,
+                    "Deployed brand logos & preview icons.".into(),
+                );
             }
             copied += 1;
         }
 
         "set_varlib_permissions" => {
-            log(LogLevel::Config, "Setting chmod 777 on /var/lib/babydra for greeter/user access...".into());
+            log(
+                LogLevel::Config,
+                "Setting chmod 777 on /var/lib/babydra for greeter/user access...".into(),
+            );
             if is_root() {
                 let mut perms = fs::metadata(&var_lib_babydra)
                     .map(|m| m.permissions())
@@ -118,9 +177,14 @@ where
                 perms.set_mode(0o777);
                 let _ = fs::set_permissions(&var_lib_babydra, perms);
             } else {
-                let _ = Command::new("sudo").args(["chmod", "777", "/var/lib/babydra"]).status();
+                let _ = Command::new("sudo")
+                    .args(["chmod", "777", "/var/lib/babydra"])
+                    .status();
             }
-            log(LogLevel::Success, "Set /var/lib/babydra permissions to 0777.".into());
+            log(
+                LogLevel::Success,
+                "Set /var/lib/babydra permissions to 0777.".into(),
+            );
             copied += 1;
         }
 

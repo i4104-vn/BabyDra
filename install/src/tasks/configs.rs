@@ -1,9 +1,9 @@
+use crate::models::{GenericOptionItem, LogLevel};
+use crate::system::{copy_recursive, get_user_home, get_user_local_bin};
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::process::Command;
-use crate::models::{GenericOptionItem, LogLevel};
-use crate::system::{copy_recursive, get_user_home, get_user_local_bin};
 
 pub fn execute_configs_task<F>(
     opt: &GenericOptionItem,
@@ -45,7 +45,10 @@ where
                         }
                     }
                 }
-                log(LogLevel::Success, "Synced labwc autostart, rc.xml, scripts to ~/.config/labwc".into());
+                log(
+                    LogLevel::Success,
+                    "Synced labwc autostart, rc.xml, scripts to ~/.config/labwc".into(),
+                );
                 copied += 1;
             }
         }
@@ -72,13 +75,28 @@ where
             );
             let _ = fs::write(apps_dir.join("babydra-explore.desktop"), explore_desktop);
 
-            let _ = Command::new("update-desktop-database").arg(apps_dir.to_str().unwrap()).status();
-            let _ = Command::new("xdg-mime")
-                .args(["default", "babydra-preview.desktop", "image/png", "image/jpeg", "image/gif", "image/webp", "image/bmp"])
+            let _ = Command::new("update-desktop-database")
+                .arg(apps_dir.to_str().unwrap())
                 .status();
-            let _ = Command::new("xdg-mime").args(["default", "babydra-explore.desktop", "inode/directory"]).status();
+            let _ = Command::new("xdg-mime")
+                .args([
+                    "default",
+                    "babydra-preview.desktop",
+                    "image/png",
+                    "image/jpeg",
+                    "image/gif",
+                    "image/webp",
+                    "image/bmp",
+                ])
+                .status();
+            let _ = Command::new("xdg-mime")
+                .args(["default", "babydra-explore.desktop", "inode/directory"])
+                .status();
 
-            log(LogLevel::Success, "Registered .desktop files & MIME associations.".into());
+            log(
+                LogLevel::Success,
+                "Registered .desktop files & MIME associations.".into(),
+            );
             copied += 1;
         }
 
@@ -116,7 +134,10 @@ where
                 let _ = copy_recursive(&ff_src, &home.join(".config/fastfetch"));
             }
 
-            log(LogLevel::Success, "Synced GTK-3/4, Fontconfig, Kitty, Neovim, and Fastfetch dotfiles.".into());
+            log(
+                LogLevel::Success,
+                "Synced GTK-3/4, Fontconfig, Kitty, Neovim, and Fastfetch dotfiles.".into(),
+            );
             copied += 1;
         }
 
@@ -138,8 +159,21 @@ where
                     for e in entries.flatten() {
                         let path = e.path();
                         if path.extension().and_then(|s| s.to_str()) == Some("tar") {
-                            log(LogLevel::Info, format!("Extracting cursor archive: {:?}", path.file_name().unwrap()));
-                            let _ = Command::new("tar").args(["-xf", path.to_str().unwrap(), "-C", icons_dst.to_str().unwrap()]).status();
+                            log(
+                                LogLevel::Info,
+                                format!(
+                                    "Extracting cursor archive: {:?}",
+                                    path.file_name().unwrap()
+                                ),
+                            );
+                            let _ = Command::new("tar")
+                                .args([
+                                    "-xf",
+                                    path.to_str().unwrap(),
+                                    "-C",
+                                    icons_dst.to_str().unwrap(),
+                                ])
+                                .status();
                         }
                     }
                 }
@@ -151,8 +185,18 @@ where
                     for e in entries.flatten() {
                         let path = e.path();
                         if path.extension().and_then(|s| s.to_str()) == Some("tar") {
-                            log(LogLevel::Info, format!("Extracting icon theme: {:?}", path.file_name().unwrap()));
-                            let _ = Command::new("tar").args(["-xf", path.to_str().unwrap(), "-C", icons_dst.to_str().unwrap()]).status();
+                            log(
+                                LogLevel::Info,
+                                format!("Extracting icon theme: {:?}", path.file_name().unwrap()),
+                            );
+                            let _ = Command::new("tar")
+                                .args([
+                                    "-xf",
+                                    path.to_str().unwrap(),
+                                    "-C",
+                                    icons_dst.to_str().unwrap(),
+                                ])
+                                .status();
                         }
                     }
                 }
@@ -162,38 +206,75 @@ where
 
         "gsettings_fontcache" => {
             let _ = Command::new("gsettings")
-                .args(["set", "org.gnome.desktop.interface", "font-name", "Segoe UI Variable Static Text 13"])
+                .args([
+                    "set",
+                    "org.gnome.desktop.interface",
+                    "font-name",
+                    "Segoe UI Variable Static Text 13",
+                ])
                 .status();
             let _ = Command::new("gsettings")
-                .args(["set", "org.gnome.desktop.interface", "document-font-name", "Segoe UI Variable Static Text 13"])
+                .args([
+                    "set",
+                    "org.gnome.desktop.interface",
+                    "document-font-name",
+                    "Segoe UI Variable Static Text 13",
+                ])
                 .status();
             let _ = Command::new("gsettings")
-                .args(["set", "org.gnome.desktop.interface", "monospace-font-name", "CaskaydiaCove Nerd Font 11"])
+                .args([
+                    "set",
+                    "org.gnome.desktop.interface",
+                    "monospace-font-name",
+                    "CaskaydiaCove Nerd Font 11",
+                ])
                 .status();
             let _ = Command::new("gsettings")
                 .args(["set", "org.gnome.desktop.interface", "icon-theme", "We10X"])
                 .status();
             let _ = Command::new("gsettings")
-                .args(["set", "org.gnome.desktop.interface", "cursor-theme", "Twilight-cursors"])
+                .args([
+                    "set",
+                    "org.gnome.desktop.interface",
+                    "cursor-theme",
+                    "Twilight-cursors",
+                ])
                 .status();
 
-            log(LogLevel::Info, "Rebuilding font cache (fc-cache -fv)...".into());
+            log(
+                LogLevel::Info,
+                "Rebuilding font cache (fc-cache -fv)...".into(),
+            );
             let _ = Command::new("fc-cache").arg("-fv").status();
 
-            log(LogLevel::Success, "Applied system GSettings and rebuilt font cache.".into());
+            log(
+                LogLevel::Success,
+                "Applied system GSettings and rebuilt font cache.".into(),
+            );
             copied += 1;
         }
 
         "restart_services" => {
-            let labwc_running = Command::new("pgrep").arg("-x").arg("labwc").status().map(|s| s.success()).unwrap_or(false);
+            let labwc_running = Command::new("pgrep")
+                .arg("-x")
+                .arg("labwc")
+                .status()
+                .map(|s| s.success())
+                .unwrap_or(false);
             if labwc_running {
                 let _ = Command::new("labwc").arg("--reconfigure").status();
-                log(LogLevel::Success, "Reloaded labwc compositor configuration.".into());
+                log(
+                    LogLevel::Success,
+                    "Reloaded labwc compositor configuration.".into(),
+                );
             }
 
             let panel_bin = user_bin_dir.join("babydra-panel");
             if panel_bin.exists() {
-                log(LogLevel::Info, "Starting babydra-panel background service...".into());
+                log(
+                    LogLevel::Info,
+                    "Starting babydra-panel background service...".into(),
+                );
                 let log_dir = home.join(".cache/babydra");
                 let _ = fs::create_dir_all(&log_dir);
                 let _ = Command::new(&panel_bin).spawn();

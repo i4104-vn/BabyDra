@@ -7,14 +7,19 @@ use std::path::{Path, PathBuf};
 pub use fs_ops::{copy_recursive, format_size, safe_copy_binary};
 pub use initializers::{
     initial_binaries_list, initial_configs_themes_options, initial_display_manager_options,
-    initial_package_options, initial_varlib_options, update_binaries_status,
+    initial_package_options, initial_variant_options, initial_varlib_options,
+    update_binaries_status,
 };
 pub use process::{is_root, stop_process};
 
 pub fn find_workspace_root() -> PathBuf {
     let candidates = [
         std::env::current_dir().unwrap_or_default(),
-        std::env::current_dir().unwrap_or_default().parent().map(|p| p.to_path_buf()).unwrap_or_default(),
+        std::env::current_dir()
+            .unwrap_or_default()
+            .parent()
+            .map(|p| p.to_path_buf())
+            .unwrap_or_default(),
         PathBuf::from("/home/i4104/BabyDra"),
     ];
 

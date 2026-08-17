@@ -53,6 +53,7 @@ fn draw_content(f: &mut Frame, app: &App, area: Rect) {
         WizardStep::Binaries => steps::draw_binaries_step(f, app, area),
         WizardStep::VarLibBundle => steps::draw_varlib_bundle_step(f, app, area),
         WizardStep::ConfigsThemes => steps::draw_configs_themes_step(f, app, area),
+        WizardStep::VariantSelection => steps::draw_variant_step(f, app, area),
         WizardStep::DisplayManager => steps::draw_display_manager_step(f, app, area),
         WizardStep::ExecuteInstall => steps::draw_execute_install_step(f, app, area),
         WizardStep::Summary => steps::draw_summary_step(f, app, area),

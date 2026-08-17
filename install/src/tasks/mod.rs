@@ -9,7 +9,7 @@ use std::sync::mpsc::Sender;
 use std::thread;
 use std::time::Instant;
 
-use crate::models::{BinaryItem, GenericOptionItem, LogLevel, LogMessage};
+use crate::models::{BinaryItem, GenericOptionItem, LogLevel, LogMessage, VariantItem};
 use crate::system::stop_process;
 
 pub enum InstallEvent {
@@ -35,6 +35,8 @@ pub struct InstallPlan {
     pub selected_varlib: Vec<GenericOptionItem>,
     pub selected_configs_themes: Vec<GenericOptionItem>,
     pub selected_display_manager: Vec<GenericOptionItem>,
+    /// Variant selected in step 6 (theme + app list + keybinds source).
+    pub variant: VariantItem,
 }
 
 pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
@@ -55,8 +57,21 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             let _ = tx.send(InstallEvent::Log(LogMessage::new(lvl, msg)));
         };
 
-        send_log(LogLevel::Info, "Starting BabyDra Installation Worker...".into());
-        send_log(LogLevel::Info, format!("Binary Source: {:?}", plan.source_binary_dir));
+        send_log(
+            LogLevel::Info,
+            "Starting BabyDra Installation Worker...".into(),
+        );
+        send_log(
+            LogLevel::Info,
+            format!("Binary Source: {:?}", plan.source_binary_dir),
+        );
+        send_log(
+            LogLevel::Info,
+            format!(
+                "Variant: {} (theme: {})",
+                plan.variant.name, plan.variant.theme
+            ),
+        );
 
         // 0. Terminate old processes if requested
         let terminate_enabled = plan
@@ -65,12 +80,22 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             .any(|o| o.id == "terminate_processes" && o.selected);
 
         if terminate_enabled {
-            send_log(LogLevel::Warn, "Terminating active processes before overwrite...".into());
+            send_log(
+                LogLevel::Warn,
+                "Terminating active processes before overwrite...".into(),
+            );
             let procs = [
-                "babydra-panel", "babydra-switcher", "babydra-screenshot",
-                "babydra-lock", "babydra-launcher", "babydra-preview",
-                "babydra-settings", "babydra-explore", "babydra-greeter",
-                "fnott", "xfce4-notifyd",
+                "babydra-panel",
+                "babydra-switcher",
+                "babydra-screenshot",
+                "babydra-lock",
+                "babydra-launcher",
+                "babydra-preview",
+                "babydra-settings",
+                "babydra-explore",
+                "babydra-greeter",
+                "fnott",
+                "xfce4-notifyd",
             ];
             for p in procs {
                 stop_process(p);
@@ -102,7 +127,8 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
                 total: total_steps,
                 current_step_name: format!("Installing binary: {}", bin.name),
             });
-            let (c, e) = binaries::execute_binary_copy_task(bin, &plan.source_binary_dir, &send_log);
+            let (c, e) =
+                binaries::execute_binary_copy_task(bin, &plan.source_binary_dir, &send_log);
             total_copied += c;
             total_errors += e;
         }
@@ -118,7 +144,12 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
                 total: total_steps,
                 current_step_name: opt.title.clone(),
             });
-            let (c, e) = varlib::execute_varlib_task(opt, &plan.workspace_root, &plan.source_binary_dir, &send_log);
+            let (c, e) = varlib::execute_varlib_task(
+                opt,
+                &plan.workspace_root,
+                &plan.source_binary_dir,
+                &send_log,
+            );
             total_copied += c;
             total_errors += e;
         }
@@ -159,8 +190,15 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
         let success = total_errors == 0;
 
         send_log(
-            if success { LogLevel::Success } else { LogLevel::Warn },
-            format!("Installation finished in {:.2}s. Tasks: {}, Errors: {}", duration, total_copied, total_errors),
+            if success {
+                LogLevel::Success
+            } else {
+                LogLevel::Warn
+            },
+            format!(
+                "Installation finished in {:.2}s. Tasks: {}, Errors: {}",
+                duration, total_copied, total_errors
+            ),
         );
 
         let _ = tx.send(InstallEvent::Completed {

@@ -27,46 +27,91 @@ pub fn draw_welcome_step(f: &mut Frame, app: &App, area: Rect) {
         Line::from("All binary executables are copied to ~/.local/bin and staged in /var/lib/babydra for system-wide access."),
     ];
 
-    let banner = Paragraph::new(banner_text)
-        .wrap(Wrap { trim: true })
-        .block(
-            Block::default()
-                .title(" 1. Welcome & Overview ")
-                .title_style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
-                .borders(Borders::ALL)
-                .border_type(BorderType::Rounded)
-                .border_style(Style::default().fg(Color::Cyan)),
-        );
+    let banner = Paragraph::new(banner_text).wrap(Wrap { trim: true }).block(
+        Block::default()
+            .title(" 1. Welcome & Overview ")
+            .title_style(
+                Style::default()
+                    .fg(Color::Cyan)
+                    .add_modifier(Modifier::BOLD),
+            )
+            .borders(Borders::ALL)
+            .border_type(BorderType::Rounded)
+            .border_style(Style::default().fg(Color::Cyan)),
+    );
     f.render_widget(banner, chunks[0]);
 
     let found_bins = app.binaries.iter().filter(|b| b.exists_in_source).count();
     let sys_info = vec![
         Line::from(vec![
-            Span::styled("Workspace Root:     ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-            Span::styled(app.workspace_root.to_string_lossy().to_string(), Style::default().fg(Color::White)),
-        ]),
-        Line::from(vec![
-            Span::styled("Binary Source Dir:  ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-            Span::styled(app.source_binary_dir.to_string_lossy().to_string(), Style::default().fg(Color::White)),
-            Span::styled(" [Press 's' to change]", Style::default().fg(Color::DarkGray)),
-        ]),
-        Line::from(vec![
-            Span::styled("Pre-built Status:   ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
             Span::styled(
-                format!("{found_bins}/{} binaries ready for installation", app.binaries.len()),
-                Style::default().fg(if found_bins == app.binaries.len() { Color::Green } else { Color::Yellow }),
+                "Workspace Root:     ",
+                Style::default()
+                    .fg(Color::Yellow)
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::styled(
+                app.workspace_root.to_string_lossy().to_string(),
+                Style::default().fg(Color::White),
             ),
         ]),
         Line::from(vec![
-            Span::styled("Target Bin Folder:  ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-            Span::styled("~/.local/bin (and /var/lib/babydra/bin)", Style::default().fg(Color::White)),
+            Span::styled(
+                "Binary Source Dir:  ",
+                Style::default()
+                    .fg(Color::Yellow)
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::styled(
+                app.source_binary_dir.to_string_lossy().to_string(),
+                Style::default().fg(Color::White),
+            ),
+            Span::styled(
+                " [Press 's' to change]",
+                Style::default().fg(Color::DarkGray),
+            ),
+        ]),
+        Line::from(vec![
+            Span::styled(
+                "Pre-built Status:   ",
+                Style::default()
+                    .fg(Color::Yellow)
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::styled(
+                format!(
+                    "{found_bins}/{} binaries ready for installation",
+                    app.binaries.len()
+                ),
+                Style::default().fg(if found_bins == app.binaries.len() {
+                    Color::Green
+                } else {
+                    Color::Yellow
+                }),
+            ),
+        ]),
+        Line::from(vec![
+            Span::styled(
+                "Target Bin Folder:  ",
+                Style::default()
+                    .fg(Color::Yellow)
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::styled(
+                "~/.local/bin (and /var/lib/babydra/bin)",
+                Style::default().fg(Color::White),
+            ),
         ]),
     ];
 
     let sys_box = Paragraph::new(sys_info).block(
         Block::default()
             .title(" Pre-flight Environment Inspection ")
-            .title_style(Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))
+            .title_style(
+                Style::default()
+                    .fg(Color::Yellow)
+                    .add_modifier(Modifier::BOLD),
+            )
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
             .border_style(Style::default().fg(Color::DarkGray)),
@@ -84,31 +129,49 @@ pub fn draw_welcome_step(f: &mut Frame, app: &App, area: Rect) {
         .map(|p| {
             let is_selected = *p == app.current_profile;
             let radio = if is_selected {
-                Span::styled("(●) ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
+                Span::styled(
+                    "(●) ",
+                    Style::default()
+                        .fg(Color::Cyan)
+                        .add_modifier(Modifier::BOLD),
+                )
             } else {
                 Span::styled("( ) ", Style::default().fg(Color::DarkGray))
             };
 
             let title_style = if is_selected {
-                Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)
+                Style::default()
+                    .fg(Color::Cyan)
+                    .add_modifier(Modifier::BOLD)
             } else {
                 Style::default().fg(Color::White)
             };
 
-            let desc = Span::styled(format!("    {}", p.description()), Style::default().fg(Color::DarkGray));
+            let desc = Span::styled(
+                format!("    {}", p.description()),
+                Style::default().fg(Color::DarkGray),
+            );
 
             ListItem::new(vec![
                 Line::from(vec![radio, Span::styled(p.name(), title_style)]),
                 Line::from(desc),
             ])
-            .style(if is_selected { Style::default().bg(Color::Rgb(25, 30, 48)) } else { Style::default() })
+            .style(if is_selected {
+                Style::default().bg(Color::Rgb(25, 30, 48))
+            } else {
+                Style::default()
+            })
         })
         .collect();
 
     let profile_list = List::new(profile_items).block(
         Block::default()
             .title(" Choose Installation Profile [Use ↑/↓ to switch, Enter/n to Next Step] ")
-            .title_style(Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD))
+            .title_style(
+                Style::default()
+                    .fg(Color::Magenta)
+                    .add_modifier(Modifier::BOLD),
+            )
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
             .border_style(Style::default().fg(Color::Magenta)),

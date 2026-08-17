@@ -1,16 +1,17 @@
 pub mod handlers;
 
+use crossterm::event::KeyEvent;
 use std::path::PathBuf;
 use std::sync::mpsc::{channel, Receiver, Sender};
-use crossterm::event::KeyEvent;
 
 use crate::models::{
-    BinaryItem, GenericOptionItem, InstallState, LogLevel, LogMessage, PresetProfile, WizardStep,
+    BinaryItem, GenericOptionItem, InstallState, LogLevel, LogMessage, PresetProfile, VariantItem,
+    WizardStep,
 };
 use crate::system::{
     default_binary_source_dir, find_workspace_root, initial_binaries_list,
     initial_configs_themes_options, initial_display_manager_options, initial_package_options,
-    initial_varlib_options, update_binaries_status,
+    initial_variant_options, initial_varlib_options, update_binaries_status,
 };
 use crate::tasks::{spawn_installation_worker, InstallEvent, InstallPlan};
 
@@ -33,6 +34,10 @@ pub struct App {
 
     pub display_manager_options: Vec<GenericOptionItem>,
     pub display_manager_cursor: usize,
+
+    pub variant_options: Vec<VariantItem>,
+    pub variant_cursor: usize,
+    pub selected_variant: String,
 
     // Logs & Progress
     pub logs: Vec<LogMessage>,
@@ -85,6 +90,10 @@ impl App {
             display_manager_options: initial_display_manager_options(),
             display_manager_cursor: 0,
 
+            variant_options: initial_variant_options(&workspace_root),
+            variant_cursor: 0,
+            selected_variant: "default".to_string(),
+
             logs: Vec::new(),
             log_scroll: 0,
             auto_scroll_logs: true,
@@ -106,7 +115,10 @@ impl App {
             should_quit: false,
         };
 
-        app.add_log(LogLevel::Info, "BabyDra Step-by-Step TUI Installer initialized.");
+        app.add_log(
+            LogLevel::Info,
+            "BabyDra Step-by-Step TUI Installer initialized.",
+        );
         app.add_log(
             LogLevel::Info,
             format!("Detected source binary path: {:?}", app.source_binary_dir),
@@ -165,7 +177,10 @@ impl App {
                 for opt in &mut self.display_manager_options {
                     opt.selected = false;
                 }
-                self.add_log(LogLevel::Config, "Applied 'Binaries & /var/lib Only' preset profile.");
+                self.add_log(
+                    LogLevel::Config,
+                    "Applied 'Binaries & /var/lib Only' preset profile.",
+                );
             }
             PresetProfile::Custom => {
                 self.add_log(LogLevel::Config, "Switched to 'Custom' profile.");
@@ -201,9 +216,15 @@ impl App {
                 } => {
                     self.progress_percent = 100;
                     self.current_step_desc = if success {
-                        format!("Installation completed successfully in {:.2}s!", duration_secs)
+                        format!(
+                            "Installation completed successfully in {:.2}s!",
+                            duration_secs
+                        )
                     } else {
-                        format!("Completed in {:.2}s with {} warnings/errors.", duration_secs, total_errors)
+                        format!(
+                            "Completed in {:.2}s with {} warnings/errors.",
+                            duration_secs, total_errors
+                        )
                     };
                     self.install_state = InstallState::Completed {
                         success,
@@ -240,6 +261,26 @@ impl App {
             .cloned()
             .collect();
 
+        let selected_variant = self
+            .variant_options
+            .iter()
+            .find(|v| v.selected)
+            .map(|v| v.clone())
+            .unwrap_or_else(|| VariantItem {
+                name: "default".to_string(),
+                theme: "babydra-default".to_string(),
+                apps: Vec::new(),
+                selected: true,
+            });
+        self.selected_variant = selected_variant.name.clone();
+        self.add_log(
+            LogLevel::Config,
+            format!(
+                "Selected variant '{}' (theme: {})",
+                selected_variant.name, selected_variant.theme
+            ),
+        );
+
         self.install_state = InstallState::Installing;
         self.progress_percent = 0;
         self.current_step = WizardStep::ExecuteInstall;
@@ -253,6 +294,7 @@ impl App {
             selected_varlib: self.varlib_options.clone(),
             selected_configs_themes: self.configs_themes_options.clone(),
             selected_display_manager: self.display_manager_options.clone(),
+            variant: selected_variant,
         };
 
         spawn_installation_worker(plan, self.tx.clone());

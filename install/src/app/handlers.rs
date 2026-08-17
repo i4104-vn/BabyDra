@@ -78,15 +78,16 @@ pub fn handle_key_event(app: &mut App, key: KeyEvent) {
             }
         }
 
-        // Direct Number Jumping (1-8)
+        // Direct Number Jumping (1-9)
         KeyCode::Char('1') => app.current_step = WizardStep::Welcome,
         KeyCode::Char('2') => app.current_step = WizardStep::SystemPackages,
         KeyCode::Char('3') => app.current_step = WizardStep::Binaries,
         KeyCode::Char('4') => app.current_step = WizardStep::VarLibBundle,
         KeyCode::Char('5') => app.current_step = WizardStep::ConfigsThemes,
-        KeyCode::Char('6') => app.current_step = WizardStep::DisplayManager,
-        KeyCode::Char('7') => app.current_step = WizardStep::ExecuteInstall,
-        KeyCode::Char('8') => app.current_step = WizardStep::Summary,
+        KeyCode::Char('6') => app.current_step = WizardStep::VariantSelection,
+        KeyCode::Char('7') => app.current_step = WizardStep::DisplayManager,
+        KeyCode::Char('8') => app.current_step = WizardStep::ExecuteInstall,
+        KeyCode::Char('9') => app.current_step = WizardStep::Summary,
 
         // Step Navigation
         KeyCode::Tab | KeyCode::Char('n') => app.next_step(),
@@ -216,7 +217,10 @@ fn handle_step_interaction(app: &mut App, key: KeyEvent) {
                 }
             }
             KeyCode::Char(' ') => {
-                if let Some(item) = app.configs_themes_options.get_mut(app.configs_themes_cursor) {
+                if let Some(item) = app
+                    .configs_themes_options
+                    .get_mut(app.configs_themes_cursor)
+                {
                     item.selected = !item.selected;
                     app.current_profile = PresetProfile::Custom;
                 }
@@ -227,6 +231,34 @@ fn handle_step_interaction(app: &mut App, key: KeyEvent) {
                     o.selected = !all_sel;
                 }
                 app.current_profile = PresetProfile::Custom;
+            }
+            KeyCode::Enter => app.next_step(),
+            _ => {}
+        },
+
+        WizardStep::VariantSelection => match key.code {
+            KeyCode::Up | KeyCode::Char('k') => {
+                if app.variant_cursor > 0 {
+                    app.variant_cursor -= 1;
+                }
+            }
+            KeyCode::Down | KeyCode::Char('j') => {
+                if app.variant_cursor + 1 < app.variant_options.len() {
+                    app.variant_cursor += 1;
+                }
+            }
+            KeyCode::Char(' ') => {
+                if let Some(item) = app.variant_options.get_mut(app.variant_cursor) {
+                    let name = item.name.clone();
+                    for v in &mut app.variant_options {
+                        v.selected = false;
+                    }
+                    if let Some(selected) = app.variant_options.get_mut(app.variant_cursor) {
+                        selected.selected = true;
+                    }
+                    app.selected_variant = name;
+                    app.current_profile = PresetProfile::Custom;
+                }
             }
             KeyCode::Enter => app.next_step(),
             _ => {}
@@ -244,7 +276,10 @@ fn handle_step_interaction(app: &mut App, key: KeyEvent) {
                 }
             }
             KeyCode::Char(' ') => {
-                if let Some(item) = app.display_manager_options.get_mut(app.display_manager_cursor) {
+                if let Some(item) = app
+                    .display_manager_options
+                    .get_mut(app.display_manager_cursor)
+                {
                     item.selected = !item.selected;
                     app.current_profile = PresetProfile::Custom;
                 }

@@ -8,27 +8,27 @@ use ratatui::{
 
 use crate::app::App;
 
-pub fn draw_display_manager_step(f: &mut Frame, app: &App, area: Rect) {
+pub fn draw_variant_step(f: &mut Frame, app: &App, area: Rect) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([Constraint::Min(8), Constraint::Length(7)])
         .split(area);
 
     let items: Vec<ListItem> = app
-        .display_manager_options
+        .variant_options
         .iter()
         .enumerate()
-        .map(|(i, opt)| {
-            let is_cursor = i == app.display_manager_cursor;
-            let check = if opt.selected {
+        .map(|(i, v)| {
+            let is_cursor = i == app.variant_cursor;
+            let radio = if v.selected {
                 Span::styled(
-                    "[✓] ",
+                    "(●) ",
                     Style::default()
                         .fg(Color::Green)
                         .add_modifier(Modifier::BOLD),
                 )
             } else {
-                Span::styled("[ ] ", Style::default().fg(Color::DarkGray))
+                Span::styled("( ) ", Style::default().fg(Color::DarkGray))
             };
 
             let title_style = if is_cursor {
@@ -48,9 +48,17 @@ pub fn draw_display_manager_step(f: &mut Frame, app: &App, area: Rect) {
             };
 
             ListItem::new(vec![
-                Line::from(vec![check, Span::styled(&opt.title, title_style)]),
+                Line::from(vec![
+                    radio,
+                    Span::styled(&v.name, title_style),
+                    Span::raw("  "),
+                    Span::styled(
+                        format!("(theme: {})", v.theme),
+                        Style::default().fg(Color::Cyan),
+                    ),
+                ]),
                 Line::from(Span::styled(
-                    format!("    {}", opt.description),
+                    format!("    Apps: {}", v.apps_preview()),
                     Style::default().fg(Color::DarkGray),
                 )),
             ])
@@ -60,7 +68,7 @@ pub fn draw_display_manager_step(f: &mut Frame, app: &App, area: Rect) {
 
     let list = List::new(items).block(
         Block::default()
-            .title(" 7. Display Manager & Greetd Login Setup [Space: Toggle | Enter: Confirm Install] ")
+            .title(" 6. Variant Selection (Theme + Apps + Keybinds) [↑/↓: Move | Space: Select | Enter: Next] ")
             .title_style(Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
@@ -68,15 +76,34 @@ pub fn draw_display_manager_step(f: &mut Frame, app: &App, area: Rect) {
     );
     f.render_widget(list, chunks[0]);
 
+    let selected = app
+        .variant_options
+        .iter()
+        .find(|v| v.selected)
+        .map(|v| v.name.as_str())
+        .unwrap_or("default");
+
     let prompt_box = Paragraph::new(vec![
-        Line::from(Span::styled("Ready to Execute Installation?", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD))),
-        Line::from("All configuration steps have been specified. Press [Enter] or [i] to begin direct binary deployment."),
-        Line::from(Span::styled("Or use [p] to review previous configuration steps.", Style::default().fg(Color::DarkGray))),
+        Line::from(Span::styled(
+            format!("Currently selected variant: {selected}"),
+            Style::default()
+                .fg(Color::Green)
+                .add_modifier(Modifier::BOLD),
+        )),
+        Line::from("A variant bundles a theme package, an app list and keybinds in one folder."),
+        Line::from(Span::styled(
+            "Press [Space] to select, [Enter/n] to continue.",
+            Style::default().fg(Color::DarkGray),
+        )),
     ])
     .block(
         Block::default()
-            .title(" Ready ")
-            .title_style(Style::default().fg(Color::Green).add_modifier(Modifier::BOLD))
+            .title(" Variant Info ")
+            .title_style(
+                Style::default()
+                    .fg(Color::Green)
+                    .add_modifier(Modifier::BOLD),
+            )
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
             .border_style(Style::default().fg(Color::Green)),
