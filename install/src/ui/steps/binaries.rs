@@ -1,6 +1,6 @@
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
-    style::{Color, Modifier, Style},
+    style::{Modifier, Style},
     text::{Line, Span},
     widgets::{Block, BorderType, Borders, Paragraph, Row, Table, Wrap},
     Frame,
@@ -9,6 +9,7 @@ use ratatui::{
 use crate::app::App;
 use crate::models::BinaryLocation;
 use crate::system::format_size;
+use crate::ui::THEME;
 
 pub fn draw_binaries_step(f: &mut Frame, app: &App, area: Rect) {
     let chunks = Layout::default()
@@ -18,14 +19,10 @@ pub fn draw_binaries_step(f: &mut Frame, app: &App, area: Rect) {
 
     let build_from_source = app.is_build_from_source();
 
-    let header_cells = ["", "Binary Name", "Status", "Size", "Target Location"]
+    let header_cells = ["", "Binary Executable", "Build Status", "Size", "Destination Target"]
         .into_iter()
         .map(|h| {
-            ratatui::widgets::Cell::from(h).style(
-                Style::default()
-                    .fg(Color::Yellow)
-                    .add_modifier(Modifier::BOLD),
-            )
+            ratatui::widgets::Cell::from(h).style(THEME.title_cyan())
         });
     let header = Row::new(header_cells).height(1).bottom_margin(1);
 
@@ -33,37 +30,39 @@ pub fn draw_binaries_step(f: &mut Frame, app: &App, area: Rect) {
         let is_cursor = i == app.binary_cursor;
         let checkbox = if b.selected {
             Span::styled(
-                "[✓]",
+                "[✔]",
                 Style::default()
-                    .fg(Color::Green)
+                    .fg(THEME.mint)
                     .add_modifier(Modifier::BOLD),
             )
         } else {
-            Span::styled("[ ]", Style::default().fg(Color::DarkGray))
+            Span::styled("[ ]", Style::default().fg(THEME.text_muted))
         };
 
-        // In build-from-source mode every binary will be produced by the
-        // release build, so treat missing files as "will build".
         let available = b.exists_in_source || build_from_source;
 
         let name_style = if is_cursor {
             Style::default()
-                .fg(Color::Cyan)
-                .add_modifier(Modifier::BOLD | Modifier::UNDERLINED)
+                .fg(THEME.cyan)
+                .add_modifier(Modifier::BOLD)
+        } else if b.selected {
+            Style::default()
+                .fg(THEME.text_bright)
+                .add_modifier(Modifier::BOLD)
         } else if available {
-            Style::default().fg(Color::White)
+            Style::default().fg(THEME.text_body)
         } else {
-            Style::default().fg(Color::DarkGray)
+            Style::default().fg(THEME.text_muted)
         };
 
         let status_span = if !available {
-            Span::styled("Missing in src", Style::default().fg(Color::Red))
+            Span::styled("Missing in src", Style::default().fg(THEME.rose))
         } else if build_from_source {
-            Span::styled("Build from source", Style::default().fg(Color::Cyan))
+            Span::styled("▲ Build from source", Style::default().fg(THEME.cyan).add_modifier(Modifier::BOLD))
         } else if b.exists_in_target {
-            Span::styled("Installed (Update)", Style::default().fg(Color::Green))
+            Span::styled("● Installed (Update)", Style::default().fg(THEME.mint))
         } else {
-            Span::styled("Available (New)", Style::default().fg(Color::Blue))
+            Span::styled("✦ Available (New)", Style::default().fg(THEME.blue))
         };
 
         let size_str = b
@@ -71,24 +70,35 @@ pub fn draw_binaries_step(f: &mut Frame, app: &App, area: Rect) {
             .map(format_size)
             .unwrap_or_else(|| "--".into());
         let target_str = match b.default_dest {
-            BinaryLocation::UserLocalBin => "~/.local/bin/",
-            BinaryLocation::SystemBin => "/usr/bin/ (sudo)",
+            BinaryLocation::UserLocalBin => "~/.local/bin/ (user)",
+            BinaryLocation::SystemBin => "/usr/bin/ (system root)",
         };
 
         let row_style = if is_cursor {
-            Style::default().bg(Color::Rgb(25, 30, 48))
+            Style::default().bg(THEME.bg_cursor)
+        } else if b.selected {
+            Style::default().bg(THEME.bg_card)
         } else {
             Style::default()
         };
 
+        let name_line = if is_cursor {
+            Line::from(vec![
+                Span::styled(&b.name, name_style),
+                Span::styled(" [Space: Bật/Tắt]", Style::default().fg(THEME.amber).add_modifier(Modifier::BOLD)),
+            ])
+        } else {
+            Line::from(Span::styled(&b.name, name_style))
+        };
+
         Row::new(vec![
             ratatui::widgets::Cell::from(Line::from(checkbox)),
-            ratatui::widgets::Cell::from(Span::styled(&b.name, name_style)),
+            ratatui::widgets::Cell::from(name_line),
             ratatui::widgets::Cell::from(status_span),
-            ratatui::widgets::Cell::from(Span::styled(size_str, Style::default().fg(Color::Gray))),
+            ratatui::widgets::Cell::from(Span::styled(size_str, Style::default().fg(THEME.text_dim))),
             ratatui::widgets::Cell::from(Span::styled(
                 target_str,
-                Style::default().fg(Color::DarkGray),
+                Style::default().fg(THEME.text_muted),
             )),
         ])
         .style(row_style)
@@ -99,8 +109,8 @@ pub fn draw_binaries_step(f: &mut Frame, app: &App, area: Rect) {
         rows,
         [
             Constraint::Length(4),
-            Constraint::Length(22),
-            Constraint::Length(20),
+            Constraint::Length(32),
+            Constraint::Length(23),
             Constraint::Length(12),
             Constraint::Min(16),
         ],
@@ -108,75 +118,52 @@ pub fn draw_binaries_step(f: &mut Frame, app: &App, area: Rect) {
     .header(header)
     .block(
         Block::default()
-            .title(" 4. BabyDra Binaries [Pre-built Copy or Build-from-Source] ")
-            .title_style(
-                Style::default()
-                    .fg(Color::Cyan)
-                    .add_modifier(Modifier::BOLD),
-            )
+            .title(" 4. BabyDra Binary Executables [Space: Toggle | a: Select All | Enter: Next] ")
+            .title_style(THEME.title_cyan())
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
-            .border_style(Style::default().fg(Color::Cyan)),
+            .border_style(Style::default().fg(THEME.cyan)),
     );
     f.render_widget(table, chunks[0]);
 
     if let Some(selected) = app.binaries.get(app.binary_cursor) {
         let card_lines = vec![
             Line::from(vec![
-                Span::styled(
-                    "Component: ",
-                    Style::default()
-                        .fg(Color::Yellow)
-                        .add_modifier(Modifier::BOLD),
-                ),
+                Span::styled("◆ Component:   ", Style::default().fg(THEME.text_dim)),
                 Span::styled(
                     &selected.name,
                     Style::default()
-                        .fg(Color::White)
+                        .fg(THEME.text_bright)
                         .add_modifier(Modifier::BOLD),
                 ),
                 Span::styled(
                     format!("  ({})", selected.crate_path),
-                    Style::default().fg(Color::DarkGray),
+                    Style::default().fg(THEME.text_muted),
                 ),
             ]),
             Line::from(vec![
-                Span::styled(
-                    "Description: ",
-                    Style::default()
-                        .fg(Color::Yellow)
-                        .add_modifier(Modifier::BOLD),
-                ),
-                Span::styled(&selected.description, Style::default().fg(Color::Cyan)),
+                Span::styled("◆ Description: ", Style::default().fg(THEME.text_dim)),
+                Span::styled(&selected.description, Style::default().fg(THEME.text_body)),
             ]),
             Line::from(vec![
-                Span::styled(
-                    "Deploy: ",
-                    Style::default()
-                        .fg(Color::Yellow)
-                        .add_modifier(Modifier::BOLD),
-                ),
+                Span::styled("◆ Deploy Path: ", Style::default().fg(THEME.text_dim)),
                 Span::styled(
                     format!(
-                        "Direct binary copy (0755) -> ~/.local/bin/{} & /var/lib/babydra/bin/{}",
+                        "Executable permissions (0755) -> ~/.local/bin/{} & /var/lib/babydra/bin/{}",
                         selected.name, selected.name
                     ),
-                    Style::default().fg(Color::Green),
+                    Style::default().fg(THEME.mint),
                 ),
             ]),
         ];
 
         let card = Paragraph::new(card_lines).wrap(Wrap { trim: true }).block(
             Block::default()
-                .title(" Selected Binary Details ")
-                .title_style(
-                    Style::default()
-                        .fg(Color::Yellow)
-                        .add_modifier(Modifier::BOLD),
-                )
+                .title(" Selected Component Inspection ")
+                .title_style(THEME.title_amber())
                 .borders(Borders::ALL)
                 .border_type(BorderType::Rounded)
-                .border_style(Style::default().fg(Color::DarkGray)),
+                .border_style(Style::default().fg(THEME.border_normal)),
         );
         f.render_widget(card, chunks[1]);
     }

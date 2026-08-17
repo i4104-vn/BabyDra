@@ -1,20 +1,15 @@
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
-    style::{Color, Modifier, Style},
+    style::{Modifier, Style},
     text::{Line, Span},
     widgets::{Block, BorderType, Borders, List, ListItem, Paragraph},
     Frame,
 };
 
 use crate::app::App;
+use crate::ui::THEME;
 
 /// Draws step 2: choose the git branch to install from.
-///
-/// Row 0 is always "pre-built binaries only". Rows 1..=N are the actual
-/// branches discovered from the repository (local + remote). Selecting a
-/// branch switches the installer into "build from source" mode: at install
-/// time it will checkout the branch, pull, run `cargo build --release` and
-/// then copy the freshly built binaries.
 pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
@@ -55,27 +50,26 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
 
     let list = List::new(items).block(
         Block::default()
-            .title(" 2. Install Source — Pick a Git Branch [Up/Down: Move | Space: Select | Enter: Next] ")
-            .title_style(Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))
+            .title(" 2. Install Source — Pick a Git Branch [↑/↓: Move | Space: Select | Enter: Switch Branch] ")
+            .title_style(THEME.title_cyan())
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
-            .border_style(Style::default().fg(Color::Yellow)),
+            .border_style(Style::default().fg(THEME.cyan)),
     );
     f.render_widget(list, chunks[0]);
 
     let (mode_color, mode_text) = if build_from_source {
         (
-            Color::Cyan,
+            THEME.amber,
             format!(
-                "Build from source: branch '{}' will be checked out, pulled and rebuilt with cargo.",
+                "★ Target branch: '{}' (Will checkout, pull, and rescan workspace components on Enter).",
                 app.selected_branch
             ),
         )
     } else {
         (
-            Color::Green,
-            "Pre-built mode: binaries are copied directly from the source folder — no rebuild."
-                .to_string(),
+            THEME.mint,
+            "● Target mode: Pre-built binaries only (No git checkout or cargo rebuild).".to_string(),
         )
     };
 
@@ -88,26 +82,22 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
         )),
         Line::from(Span::styled(
             format!(
-                "Detected {} branch(es) in {}",
-                app.branches.len(),
-                app.workspace_root.display()
+                "Repository: {} ({} branches available)",
+                app.workspace_root.display(),
+                app.branches.len()
             ),
-            Style::default().fg(Color::DarkGray),
+            Style::default().fg(THEME.text_dim),
         )),
-        Line::from("Picking a branch runs: git fetch --prune -> git checkout <branch> -> git pull -> cargo build --release."),
+        Line::from("Pressing [Enter] on a branch will display a loading modal, run git checkout & pull, then rescan variants and binaries."),
         Line::from(Span::styled(
-            "Press [Space] to select, [Enter/n] to continue, [p] for previous step.",
-            Style::default().fg(Color::DarkGray),
+            "Controls: [Space] Select Branch | [Enter / n] Confirm & Switch | [p] Previous Step",
+            Style::default().fg(THEME.text_muted),
         )),
     ])
     .block(
         Block::default()
-            .title(" Install Mode Info ")
-            .title_style(
-                Style::default()
-                    .fg(mode_color)
-                    .add_modifier(Modifier::BOLD),
-            )
+            .title(" Target Branch Selection Info ")
+            .title_style(Style::default().fg(mode_color).add_modifier(Modifier::BOLD))
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
             .border_style(Style::default().fg(mode_color)),
@@ -129,42 +119,81 @@ fn branch_row<'a>(
         Span::styled(
             "(●) ",
             Style::default()
-                .fg(Color::Green)
+                .fg(THEME.mint)
                 .add_modifier(Modifier::BOLD),
         )
     } else {
-        Span::styled("( ) ", Style::default().fg(Color::DarkGray))
+        Span::styled("( ) ", Style::default().fg(THEME.text_muted))
     };
 
     let title_style = if is_cursor {
         Style::default()
-            .fg(Color::Yellow)
-            .add_modifier(Modifier::BOLD | Modifier::UNDERLINED)
+            .fg(THEME.cyan)
+            .add_modifier(Modifier::BOLD)
+    } else if is_selected {
+        Style::default()
+            .fg(THEME.text_bright)
+            .add_modifier(Modifier::BOLD)
     } else if row_idx == 0 {
-        Style::default().fg(Color::White)
+        Style::default().fg(THEME.text_bright)
     } else {
-        Style::default().fg(Color::Cyan)
+        Style::default().fg(THEME.text_dim)
     };
 
     let mut spans = vec![radio, Span::styled(name, title_style)];
     for t in tags {
         let tag_style = match *t {
-            "current" => Style::default().fg(Color::Green),
-            _ => Style::default().fg(Color::DarkGray),
+            "current" => Style::default().fg(THEME.mint).bg(THEME.bg_badge).add_modifier(Modifier::BOLD),
+            _ => Style::default().fg(THEME.text_dim).bg(THEME.bg_badge),
         };
-        spans.push(Span::raw("  "));
-        spans.push(Span::styled(format!("[{t}]"), tag_style));
+        spans.push(Span::raw(" "));
+        spans.push(Span::styled(format!(" {t} "), tag_style));
     }
-    if is_selected && build_from_source && row_idx > 0 {
+
+    if is_selected {
+        if row_idx == 0 {
+            spans.push(Span::raw(" "));
+            spans.push(Span::styled(
+                " [SELECTED: PRE-BUILT ONLY] ",
+                Style::default()
+                    .fg(THEME.mint)
+                    .bg(THEME.bg_badge)
+                    .add_modifier(Modifier::BOLD),
+            ));
+        } else {
+            spans.push(Span::raw(" "));
+            spans.push(Span::styled(
+                " [★ TARGET BRANCH] ",
+                Style::default()
+                    .fg(THEME.amber)
+                    .bg(THEME.bg_badge)
+                    .add_modifier(Modifier::BOLD),
+            ));
+            if build_from_source {
+                spans.push(Span::styled(
+                    " (will checkout & rebuild)",
+                    Style::default().fg(THEME.cyan),
+                ));
+            }
+        }
+    } else if is_cursor {
+        spans.push(Span::raw(" "));
         spans.push(Span::styled(
-            "  will rebuild from source",
-            Style::default().fg(Color::Cyan),
+            " [Space: Chọn Target] ",
+            Style::default()
+                .fg(THEME.mint)
+                .bg(THEME.bg_badge)
+                .add_modifier(Modifier::BOLD),
         ));
     }
 
-    ListItem::new(Line::from(spans)).style(if is_cursor {
-        Style::default().bg(Color::Rgb(25, 30, 48))
+    let bg_style = if is_cursor {
+        Style::default().bg(THEME.bg_cursor)
+    } else if is_selected {
+        Style::default().bg(THEME.bg_selected)
     } else {
         Style::default()
-    })
+    };
+
+    ListItem::new(Line::from(spans)).style(bg_style)
 }

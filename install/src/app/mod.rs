@@ -10,12 +10,19 @@ use crate::models::{
 };
 use crate::system::sudo::MAX_PASSWORD_ATTEMPTS;
 use crate::system::{
-    default_binary_source_dir, find_workspace_root, initial_binaries_list,
+    checkout_and_pull, default_binary_source_dir, find_workspace_root, initial_binaries_list,
     initial_configs_themes_options, initial_display_manager_options, initial_package_options,
     initial_variant_options, initial_varlib_options, list_branches, update_binaries_status,
     SudoSession,
 };
 use crate::tasks::{spawn_installation_worker, InstallEvent, InstallPlan};
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum BranchSwitchStatus {
+    Idle,
+    Switching,
+    Done(Result<(), String>),
+}
 
 pub struct App {
     pub current_step: WizardStep,
@@ -62,6 +69,9 @@ pub struct App {
     pub show_help: bool,
     pub show_confirm_dialog: bool,
     pub show_sudo_modal: bool,
+    pub show_branch_switching_modal: bool,
+    pub branch_switch_status: BranchSwitchStatus,
+    pub branch_switch_spinner_tick: usize,
 
     // Sudo
     /// In-memory sudo password (masked in the UI, fed via `sudo -S` stdin).
@@ -126,6 +136,9 @@ impl App {
             show_help: false,
             show_confirm_dialog: false,
             show_sudo_modal: false,
+            show_branch_switching_modal: false,
+            branch_switch_status: BranchSwitchStatus::Idle,
+            branch_switch_spinner_tick: 0,
 
             sudo_password: String::new(),
             sudo_error: None,
@@ -193,6 +206,9 @@ impl App {
         let build_from_source = self.is_build_from_source();
         match profile {
             PresetProfile::FullDesktop => {
+                for opt in &mut self.package_options {
+                    opt.selected = true;
+                }
                 for b in &mut self.binaries {
                     b.selected = b.exists_in_source || build_from_source;
                 }
@@ -208,6 +224,9 @@ impl App {
                 self.add_log(LogLevel::Config, "Applied 'Full Desktop' preset profile.");
             }
             PresetProfile::BinariesAndBundle => {
+                for opt in &mut self.package_options {
+                    opt.selected = false;
+                }
                 for b in &mut self.binaries {
                     b.selected = b.exists_in_source || build_from_source;
                 }
@@ -231,7 +250,52 @@ impl App {
         }
     }
 
+    pub fn start_branch_switch(&mut self) {
+        if self.selected_branch.is_empty() {
+            self.next_step();
+            return;
+        }
+
+        self.show_branch_switching_modal = true;
+        self.branch_switch_status = BranchSwitchStatus::Switching;
+        self.branch_switch_spinner_tick = 0;
+        self.add_log(
+            LogLevel::Info,
+            format!("Switching to branch '{}' in background...", self.selected_branch),
+        );
+
+        let workspace_root = self.workspace_root.clone();
+        let branch = self.selected_branch.clone();
+        let tx = self.tx.clone();
+
+        std::thread::spawn(move || {
+            match checkout_and_pull(&workspace_root, &branch) {
+                Ok(()) => {
+                    let _ = tx.send(InstallEvent::BranchSwitched {
+                        success: true,
+                        error_msg: None,
+                    });
+                }
+                Err(e) => {
+                    let _ = tx.send(InstallEvent::BranchSwitched {
+                        success: false,
+                        error_msg: Some(e.to_string()),
+                    });
+                }
+            }
+        });
+    }
+
+    pub fn rescan_after_branch_switch(&mut self) {
+        self.variant_options = initial_variant_options(&self.workspace_root);
+        self.rescan_binaries();
+    }
+
     pub fn on_tick(&mut self) {
+        if self.show_branch_switching_modal {
+            self.branch_switch_spinner_tick = (self.branch_switch_spinner_tick + 1) % 1000;
+        }
+
         while let Ok(event) = self.rx.try_recv() {
             match event {
                 InstallEvent::Progress {
@@ -249,6 +313,25 @@ impl App {
                     self.logs.push(log_msg);
                     if self.auto_scroll_logs && self.logs.len() > 14 {
                         self.log_scroll = self.logs.len().saturating_sub(14);
+                    }
+                }
+                InstallEvent::BranchSwitched { success, error_msg } => {
+                    if success {
+                        self.branch_switch_status = BranchSwitchStatus::Done(Ok(()));
+                        self.rescan_after_branch_switch();
+                        self.add_log(
+                            LogLevel::Success,
+                            format!("Switched to branch '{}' and loaded variants & components.", self.selected_branch),
+                        );
+                        self.show_branch_switching_modal = false;
+                        self.next_step();
+                    } else {
+                        let msg = error_msg.unwrap_or_else(|| "Unknown git error".into());
+                        self.branch_switch_status = BranchSwitchStatus::Done(Err(msg.clone()));
+                        self.add_log(
+                            LogLevel::Error,
+                            format!("Branch switch failed: {}", msg),
+                        );
                     }
                 }
                 InstallEvent::SudoFailed(msg) => {

@@ -1,6 +1,6 @@
 use ratatui::{
     layout::{Alignment, Constraint, Direction, Layout, Rect},
-    style::{Color, Modifier, Style},
+    style::{Modifier, Style},
     text::{Line, Span},
     widgets::{Block, BorderType, Borders, List, ListItem, Paragraph},
     Frame,
@@ -9,28 +9,29 @@ use ratatui::{
 use crate::app::App;
 use crate::models::WizardStep;
 use crate::system::is_root;
+use crate::ui::THEME;
 
 pub fn draw_header(f: &mut Frame, app: &App, area: Rect) {
     let header_chunks = Layout::default()
         .direction(Direction::Horizontal)
-        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
+        .constraints([Constraint::Percentage(52), Constraint::Percentage(48)])
         .split(area);
 
     let user_name = std::env::var("USER").unwrap_or_else(|_| "user".into());
     let root_badge = if is_root() {
         Span::styled(
-            " [ROOT] ",
+            " ROOT ",
             Style::default()
-                .fg(Color::Black)
-                .bg(Color::Red)
+                .fg(THEME.rose)
+                .bg(THEME.bg_badge)
                 .add_modifier(Modifier::BOLD),
         )
     } else {
         Span::styled(
-            " [USER] ",
+            " USER ",
             Style::default()
-                .fg(Color::Black)
-                .bg(Color::Green)
+                .fg(THEME.mint)
+                .bg(THEME.bg_badge)
                 .add_modifier(Modifier::BOLD),
         )
     };
@@ -39,40 +40,46 @@ pub fn draw_header(f: &mut Frame, app: &App, area: Rect) {
         Span::styled(
             " 🐉 BabyDra ",
             Style::default()
-                .fg(Color::Cyan)
+                .fg(THEME.cyan)
                 .add_modifier(Modifier::BOLD),
         ),
         Span::styled(
             "Desktop Shell Installer ",
             Style::default()
-                .fg(Color::White)
+                .fg(THEME.text_bright)
                 .add_modifier(Modifier::BOLD),
         ),
-        Span::styled("v1.0.0", Style::default().fg(Color::DarkGray)),
+        Span::styled("v1.0.0", Style::default().fg(THEME.text_muted)),
     ]);
 
     let left_header = Paragraph::new(title_line).block(
         Block::default()
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
-            .border_style(Style::default().fg(Color::Cyan)),
+            .border_style(Style::default().fg(THEME.cyan)),
     );
     f.render_widget(left_header, header_chunks[0]);
 
+    let current_step_idx = app.current_step as usize + 1;
     let right_line = Line::from(vec![
         root_badge,
         Span::raw(" "),
         Span::styled(
-            format!("{user_name}@ArchLinux "),
-            Style::default().fg(Color::White),
+            format!("{user_name}@arch "),
+            Style::default().fg(THEME.text_body),
         ),
-        Span::styled("│ Step: ", Style::default().fg(Color::DarkGray)),
+        Span::styled("│ Step ", Style::default().fg(THEME.text_muted)),
+        Span::styled(
+            format!("{current_step_idx}/10: "),
+            Style::default().fg(THEME.amber).add_modifier(Modifier::BOLD),
+        ),
         Span::styled(
             app.current_step.short_name(),
             Style::default()
-                .fg(Color::Yellow)
+                .fg(THEME.text_bright)
                 .add_modifier(Modifier::BOLD),
         ),
+        Span::raw(" "),
     ]);
 
     let right_header = Paragraph::new(right_line)
@@ -81,7 +88,7 @@ pub fn draw_header(f: &mut Frame, app: &App, area: Rect) {
             Block::default()
                 .borders(Borders::ALL)
                 .border_type(BorderType::Rounded)
-                .border_style(Style::default().fg(Color::DarkGray)),
+                .border_style(Style::default().fg(THEME.border_normal)),
         );
     f.render_widget(right_header, header_chunks[1]);
 }
@@ -89,7 +96,7 @@ pub fn draw_header(f: &mut Frame, app: &App, area: Rect) {
 pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
     let sidebar_chunks = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([Constraint::Min(10), Constraint::Length(8)])
+        .constraints([Constraint::Min(10), Constraint::Length(9)])
         .split(area);
 
     let current_step_idx = app.current_step as usize;
@@ -102,26 +109,36 @@ pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
 
             let (icon, style) = if is_current {
                 (
-                    "►▶ ",
+                    "▶ ",
                     Style::default()
-                        .fg(Color::Cyan)
-                        .add_modifier(Modifier::BOLD | Modifier::UNDERLINED),
+                        .fg(THEME.cyan)
+                        .add_modifier(Modifier::BOLD),
                 )
             } else if step_idx < current_step_idx {
-                (" ● ", Style::default().fg(Color::Green))
+                ("✔ ", Style::default().fg(THEME.mint))
             } else {
-                (" ○ ", Style::default().fg(Color::DarkGray))
+                ("○ ", Style::default().fg(THEME.text_muted))
+            };
+
+            let text_style = if is_current {
+                Style::default()
+                    .fg(THEME.text_bright)
+                    .add_modifier(Modifier::BOLD)
+            } else if step_idx < current_step_idx {
+                Style::default().fg(THEME.text_body)
+            } else {
+                Style::default().fg(THEME.text_dim)
             };
 
             let row_style = if is_current {
-                Style::default().bg(Color::Rgb(25, 30, 48))
+                Style::default().bg(THEME.bg_cursor)
             } else {
                 Style::default()
             };
 
             ListItem::new(Line::from(vec![
                 Span::styled(icon, style),
-                Span::styled(step.title(), style),
+                Span::styled(step.title(), text_style),
             ]))
             .style(row_style)
         })
@@ -129,15 +146,11 @@ pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
 
     let steps_list = List::new(items).block(
         Block::default()
-            .title(" Steps [1-9, 0] ")
-            .title_style(
-                Style::default()
-                    .fg(Color::Cyan)
-                    .add_modifier(Modifier::BOLD),
-            )
+            .title(" 󰇊 Navigation [1-9, 0] ")
+            .title_style(THEME.title_cyan())
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
-            .border_style(Style::default().fg(Color::Cyan)),
+            .border_style(Style::default().fg(THEME.cyan)),
     );
     f.render_widget(steps_list, sidebar_chunks[0]);
 
@@ -168,56 +181,62 @@ pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
 
     let summary_lines = vec![
         Line::from(vec![
-            Span::styled("• Binaries: ", Style::default().fg(Color::DarkGray)),
+            Span::styled("◆ Binaries:  ", Style::default().fg(THEME.text_dim)),
             Span::styled(
                 format!("{selected_bins}/{total_bins}"),
                 Style::default()
-                    .fg(Color::White)
+                    .fg(THEME.text_bright)
                     .add_modifier(Modifier::BOLD),
             ),
         ]),
         Line::from(vec![
-            Span::styled("• /var/lib: ", Style::default().fg(Color::DarkGray)),
+            Span::styled("◆ /var/lib:  ", Style::default().fg(THEME.text_dim)),
             Span::styled(
                 format!("{selected_varlib} staged"),
-                Style::default().fg(Color::Magenta),
+                Style::default().fg(THEME.purple).add_modifier(Modifier::BOLD),
             ),
         ]),
         Line::from(vec![
-            Span::styled("• Configs:  ", Style::default().fg(Color::DarkGray)),
+            Span::styled("◆ Configs:   ", Style::default().fg(THEME.text_dim)),
             Span::styled(
                 format!("{selected_cfgs} enabled"),
-                Style::default().fg(Color::Green),
+                Style::default().fg(THEME.mint).add_modifier(Modifier::BOLD),
             ),
         ]),
         Line::from(vec![
-            Span::styled("• Greetd DM:", Style::default().fg(Color::DarkGray)),
+            Span::styled("◆ Greetd DM: ", Style::default().fg(THEME.text_dim)),
             Span::styled(
                 if selected_dm > 0 {
-                    " Enabled"
+                    "Enabled"
                 } else {
-                    " Skipped"
+                    "Skipped"
                 },
                 Style::default().fg(if selected_dm > 0 {
-                    Color::Cyan
+                    THEME.cyan
                 } else {
-                    Color::DarkGray
-                }),
+                    THEME.text_muted
+                }).add_modifier(Modifier::BOLD),
             ),
         ]),
         Line::from(vec![
-            Span::styled("• Variant:  ", Style::default().fg(Color::DarkGray)),
-            Span::styled(selected_variant, Style::default().fg(Color::Magenta)),
+            Span::styled("◆ Variant:   ", Style::default().fg(THEME.text_dim)),
+            Span::styled(selected_variant, Style::default().fg(THEME.pink).add_modifier(Modifier::BOLD)),
         ]),
         Line::from(vec![
-            Span::styled("• Source:   ", Style::default().fg(Color::DarkGray)),
+            Span::styled("◆ Mode:      ", Style::default().fg(THEME.text_dim)),
             Span::styled(
                 if build_from_source {
-                    format!("branch {}", app.selected_branch)
+                    format!("★ branch '{}'", app.selected_branch)
                 } else {
-                    "pre-built".to_string()
+                    "● pre-built only".to_string()
                 },
-                Style::default().fg(Color::Cyan),
+                Style::default()
+                    .fg(if build_from_source {
+                        THEME.amber
+                    } else {
+                        THEME.mint
+                    })
+                    .add_modifier(Modifier::BOLD),
             ),
         ]),
     ];
@@ -225,90 +244,86 @@ pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
     let summary_box = Paragraph::new(summary_lines).block(
         Block::default()
             .title(" Plan Summary ")
-            .title_style(
-                Style::default()
-                    .fg(Color::Yellow)
-                    .add_modifier(Modifier::BOLD),
-            )
+            .title_style(THEME.title_amber())
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
-            .border_style(Style::default().fg(Color::DarkGray)),
+            .border_style(Style::default().fg(THEME.border_normal)),
     );
     f.render_widget(summary_box, sidebar_chunks[1]);
 }
 
-pub fn draw_footer(f: &mut Frame, _app: &App, area: Rect) {
-    let key_hints = vec![
-        Span::styled(
-            " [Tab/n] ",
-            Style::default()
-                .fg(Color::Cyan)
-                .add_modifier(Modifier::BOLD),
-        ),
-        Span::raw("Next  "),
-        Span::styled(
-            " [p] ",
-            Style::default()
-                .fg(Color::Cyan)
-                .add_modifier(Modifier::BOLD),
-        ),
-        Span::raw("Prev  "),
-        Span::styled(
-            " [↑/↓|j/k] ",
-            Style::default()
-                .fg(Color::Cyan)
-                .add_modifier(Modifier::BOLD),
-        ),
-        Span::raw("Nav  "),
-        Span::styled(
-            " [Space] ",
-            Style::default()
-                .fg(Color::Cyan)
-                .add_modifier(Modifier::BOLD),
-        ),
-        Span::raw("Toggle  "),
-        Span::styled(
-            " [a] ",
-            Style::default()
-                .fg(Color::Cyan)
-                .add_modifier(Modifier::BOLD),
-        ),
-        Span::raw("All  "),
-        Span::styled(
-            " [i/Enter] ",
-            Style::default()
-                .fg(Color::Green)
-                .add_modifier(Modifier::BOLD),
-        ),
-        Span::styled("Install  ", Style::default().fg(Color::Green)),
-        Span::styled(
-            " [s] ",
-            Style::default()
-                .fg(Color::Yellow)
-                .add_modifier(Modifier::BOLD),
-        ),
-        Span::raw("Source  "),
-        Span::styled(
-            " [?] ",
-            Style::default()
-                .fg(Color::Magenta)
-                .add_modifier(Modifier::BOLD),
-        ),
-        Span::raw("Help  "),
-        Span::styled(
-            " [q] ",
-            Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
-        ),
-        Span::raw("Quit "),
+pub fn draw_shortcuts_panel(f: &mut Frame, _app: &App, area: Rect) {
+    let shortcuts = [
+        ("Space", "Chọn / Bật tắt", THEME.mint),
+        ("Tab / n", "Bước tiếp theo", THEME.cyan),
+        ("p", "Bước trước đó", THEME.cyan),
+        ("↑ / ↓", "Di chuyển chọn", THEME.cyan),
+        ("a", "Chọn tất cả", THEME.cyan),
+        ("i / ↵", "Cài đặt ngay", THEME.mint),
+        ("s", "Đổi thư mục src", THEME.amber),
+        ("r", "Quét lại file", THEME.purple),
+        ("?", "Trợ giúp", THEME.purple),
+        ("q", "Thoát installer", THEME.rose),
     ];
 
-    let footer = Paragraph::new(Line::from(key_hints))
+    let items: Vec<ListItem> = shortcuts
+        .iter()
+        .map(|(key, desc, col)| {
+            ListItem::new(vec![
+                Line::from(Span::styled(
+                    format!(" {key} "),
+                    Style::default()
+                        .fg(*col)
+                        .bg(THEME.bg_badge)
+                        .add_modifier(Modifier::BOLD),
+                )),
+                Line::from(Span::styled(
+                    format!(" {desc}"),
+                    Style::default().fg(THEME.text_dim),
+                )),
+            ])
+        })
+        .collect();
+
+    let list = List::new(items).block(
+        Block::default()
+            .title(" 󰌌 Phím tắt ")
+            .title_style(THEME.title_cyan())
+            .borders(Borders::ALL)
+            .border_type(BorderType::Rounded)
+            .border_style(Style::default().fg(THEME.border_normal)),
+    );
+    f.render_widget(list, area);
+}
+
+pub fn draw_footer(f: &mut Frame, app: &App, area: Rect) {
+    let step_info = app.current_step.short_name();
+    let footer_text = vec![
+        Span::styled(" 🐉 BabyDra Installer ", THEME.title_cyan()),
+        Span::styled("│ Wayland Compositor ", Style::default().fg(THEME.text_muted)),
+        Span::styled("│ Bước: ", Style::default().fg(THEME.text_dim)),
+        Span::styled(step_info, Style::default().fg(THEME.amber).add_modifier(Modifier::BOLD)),
+        Span::styled(" │ ", Style::default().fg(THEME.text_muted)),
+        Span::styled(" Space ", THEME.key_badge_green()),
+        Span::styled(" Chọn/Đổi ", Style::default().fg(THEME.mint).add_modifier(Modifier::BOLD)),
+        Span::styled("│ ", Style::default().fg(THEME.text_muted)),
+        Span::styled(" Tab/n ", THEME.key_badge()),
+        Span::styled(" Tiếp ", Style::default().fg(THEME.text_body)),
+        Span::styled("│ ", Style::default().fg(THEME.text_muted)),
+        Span::styled(" p ", THEME.key_badge()),
+        Span::styled(" Lùi ", Style::default().fg(THEME.text_body)),
+        Span::styled("│ ", Style::default().fg(THEME.text_muted)),
+        Span::styled(" ? ", Style::default().fg(THEME.purple).bg(THEME.bg_badge).add_modifier(Modifier::BOLD)),
+        Span::styled(" Trợ giúp ", Style::default().fg(THEME.text_body)),
+    ];
+
+    let footer = Paragraph::new(Line::from(footer_text))
         .alignment(Alignment::Center)
         .block(
             Block::default()
                 .borders(Borders::ALL)
                 .border_type(BorderType::Rounded)
-                .border_style(Style::default().fg(Color::DarkGray)),
+                .border_style(Style::default().fg(THEME.border_normal)),
         );
     f.render_widget(footer, area);
 }
@@ -332,3 +347,4 @@ pub fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
         ])
         .split(popup_layout[1])[1]
 }
+

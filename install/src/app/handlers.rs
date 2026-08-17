@@ -5,6 +5,23 @@ use super::App;
 use crate::models::{InstallState, PresetProfile, WizardStep};
 
 pub fn handle_key_event(app: &mut App, key: KeyEvent) {
+    // 0. Branch Switching Modal
+    if app.show_branch_switching_modal {
+        match app.branch_switch_status {
+            crate::app::BranchSwitchStatus::Done(Err(_)) => {
+                if key.code == KeyCode::Esc || key.code == KeyCode::Enter || key.code == KeyCode::Char('q') {
+                    app.show_branch_switching_modal = false;
+                }
+            }
+            _ => {
+                if key.code == KeyCode::Char('c') && key.modifiers.contains(KeyModifiers::CONTROL) {
+                    app.should_quit = true;
+                }
+            }
+        }
+        return;
+    }
+
     // 1. Modal Help Popup
     if app.show_help {
         if key.code == KeyCode::Esc
@@ -112,7 +129,13 @@ pub fn handle_key_event(app: &mut App, key: KeyEvent) {
         KeyCode::Char('0') => app.current_step = WizardStep::Summary,
 
         // Step Navigation
-        KeyCode::Tab | KeyCode::Char('n') => app.next_step(),
+        KeyCode::Tab | KeyCode::Char('n') => {
+            if app.current_step == WizardStep::SourceBranch && app.is_build_from_source() {
+                app.start_branch_switch();
+            } else {
+                app.next_step();
+            }
+        }
         KeyCode::BackTab | KeyCode::Char('p') => app.prev_step(),
 
         // Step-Specific Interaction
@@ -158,7 +181,13 @@ fn handle_step_interaction(app: &mut App, key: KeyEvent) {
                 select_branch_at_cursor(app);
                 app.current_profile = PresetProfile::Custom;
             }
-            KeyCode::Enter => app.next_step(),
+            KeyCode::Enter => {
+                if app.is_build_from_source() {
+                    app.start_branch_switch();
+                } else {
+                    app.next_step();
+                }
+            }
             _ => {}
         },
 

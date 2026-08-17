@@ -22,6 +22,11 @@ pub enum InstallEvent {
     /// Sudo pre-authentication failed. The TUI re-opens the password modal
     /// with the error message instead of aborting the whole install.
     SudoFailed(String),
+    /// Background branch checkout & pull completed.
+    BranchSwitched {
+        success: bool,
+        error_msg: Option<String>,
+    },
     Completed {
         success: bool,
         total_copied: usize,
@@ -179,6 +184,7 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
                 "babydra-screenshot",
                 "babydra-lock",
                 "babydra-launcher",
+                "babydra-image-preview",
                 "babydra-preview",
                 "babydra-settings",
                 "babydra-explore",

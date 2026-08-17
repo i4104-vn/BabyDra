@@ -36,9 +36,17 @@ pub fn find_workspace_root() -> PathBuf {
     std::env::current_dir().unwrap_or_default()
 }
 
-/// Runs `cargo build --release --workspace` in the workspace root, capturing
+/// Runs `cargo clean` and `cargo build --release --workspace` in the workspace root, capturing
 /// output so nothing leaks onto the TUI. Returns `(success, last_lines)`.
 pub fn build_workspace(workspace_root: &Path) -> (bool, Vec<String>) {
+    let _ = Command::new("cargo")
+        .current_dir(workspace_root)
+        .args(["clean"])
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .output();
+
     let output = Command::new("cargo")
         .current_dir(workspace_root)
         .args(["build", "--release", "--workspace"])

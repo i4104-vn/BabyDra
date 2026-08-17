@@ -1,12 +1,13 @@
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
-    style::{Color, Modifier, Style},
+    style::{Modifier, Style},
     text::{Line, Span},
     widgets::{Block, BorderType, Borders, List, ListItem, Paragraph},
     Frame,
 };
 
 use crate::app::App;
+use crate::ui::THEME;
 
 pub fn draw_variant_step(f: &mut Frame, app: &App, area: Rect) {
     let chunks = Layout::default()
@@ -24,27 +25,51 @@ pub fn draw_variant_step(f: &mut Frame, app: &App, area: Rect) {
                 Span::styled(
                     "(●) ",
                     Style::default()
-                        .fg(Color::Green)
+                        .fg(THEME.pink)
                         .add_modifier(Modifier::BOLD),
                 )
             } else {
-                Span::styled("( ) ", Style::default().fg(Color::DarkGray))
+                Span::styled("( ) ", Style::default().fg(THEME.text_muted))
             };
 
             let title_style = if is_cursor {
                 Style::default()
-                    .fg(Color::Yellow)
-                    .add_modifier(Modifier::BOLD | Modifier::UNDERLINED)
-            } else {
-                Style::default()
-                    .fg(Color::White)
+                    .fg(THEME.pink)
                     .add_modifier(Modifier::BOLD)
+            } else if v.selected {
+                Style::default()
+                    .fg(THEME.text_bright)
+                    .add_modifier(Modifier::BOLD)
+            } else {
+                Style::default().fg(THEME.text_dim)
             };
 
             let row_style = if is_cursor {
-                Style::default().bg(Color::Rgb(25, 30, 48))
+                Style::default().bg(THEME.bg_cursor)
+            } else if v.selected {
+                Style::default().bg(THEME.bg_card)
             } else {
                 Style::default()
+            };
+
+            let placeholder_hint = if v.selected {
+                Span::styled(
+                    " [Đang chọn] ",
+                    Style::default()
+                        .fg(THEME.mint)
+                        .bg(THEME.bg_badge)
+                        .add_modifier(Modifier::BOLD),
+                )
+            } else if is_cursor {
+                Span::styled(
+                    " [Space: Chọn Variant] ",
+                    Style::default()
+                        .fg(THEME.amber)
+                        .bg(THEME.bg_badge)
+                        .add_modifier(Modifier::BOLD),
+                )
+            } else {
+                Span::raw("")
             };
 
             ListItem::new(vec![
@@ -53,13 +78,15 @@ pub fn draw_variant_step(f: &mut Frame, app: &App, area: Rect) {
                     Span::styled(&v.name, title_style),
                     Span::raw("  "),
                     Span::styled(
-                        format!("(theme: {})", v.theme),
-                        Style::default().fg(Color::Cyan),
+                        format!("[theme: {}]", v.theme),
+                        Style::default().fg(THEME.cyan),
                     ),
+                    Span::raw(" "),
+                    placeholder_hint,
                 ]),
                 Line::from(Span::styled(
                     format!("    Apps: {}", v.apps_preview()),
-                    Style::default().fg(Color::DarkGray),
+                    Style::default().fg(if is_cursor { THEME.text_body } else { THEME.text_muted }),
                 )),
             ])
             .style(row_style)
@@ -69,10 +96,10 @@ pub fn draw_variant_step(f: &mut Frame, app: &App, area: Rect) {
     let list = List::new(items).block(
         Block::default()
             .title(" 7. Variant Selection (Theme + Apps + Keybinds) [↑/↓: Move | Space: Select | Enter: Next] ")
-            .title_style(Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))
+            .title_style(THEME.title_purple())
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
-            .border_style(Style::default().fg(Color::Yellow)),
+            .border_style(Style::default().fg(THEME.purple)),
     );
     f.render_widget(list, chunks[0]);
 
@@ -84,29 +111,23 @@ pub fn draw_variant_step(f: &mut Frame, app: &App, area: Rect) {
         .unwrap_or("default");
 
     let prompt_box = Paragraph::new(vec![
+        Line::from(vec![
+            Span::styled("◆ Active Selected Variant: ", Style::default().fg(THEME.text_dim)),
+            Span::styled(selected, Style::default().fg(THEME.pink).add_modifier(Modifier::BOLD)),
+        ]),
+        Line::from("A variant bundles a curated theme package, pre-installed app launcher shortcuts, and compositor keybinds."),
         Line::from(Span::styled(
-            format!("Currently selected variant: {selected}"),
-            Style::default()
-                .fg(Color::Green)
-                .add_modifier(Modifier::BOLD),
-        )),
-        Line::from("A variant bundles a theme package, an app list and keybinds in one folder."),
-        Line::from(Span::styled(
-            "Press [Space] to select, [Enter/n] to continue.",
-            Style::default().fg(Color::DarkGray),
+            "Controls: [Space] Select Variant | [Enter / n] Next Step | [p] Previous Step",
+            Style::default().fg(THEME.text_muted),
         )),
     ])
     .block(
         Block::default()
-            .title(" Variant Info ")
-            .title_style(
-                Style::default()
-                    .fg(Color::Green)
-                    .add_modifier(Modifier::BOLD),
-            )
+            .title(" Variant System Description ")
+            .title_style(THEME.title_amber())
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
-            .border_style(Style::default().fg(Color::Green)),
+            .border_style(Style::default().fg(THEME.border_normal)),
     );
     f.render_widget(prompt_box, chunks[1]);
 }

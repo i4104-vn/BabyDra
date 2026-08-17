@@ -1,6 +1,6 @@
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
-    style::{Color, Modifier, Style},
+    style::{Modifier, Style},
     text::{Line, Span},
     widgets::{Block, BorderType, Borders, Gauge, Paragraph, Wrap},
     Frame,
@@ -8,27 +8,28 @@ use ratatui::{
 
 use crate::app::App;
 use crate::models::{InstallState, LogLevel};
+use crate::ui::THEME;
 
 pub fn draw_execute_install_step(f: &mut Frame, app: &App, area: Rect) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([Constraint::Length(4), Constraint::Min(8)])
+        .constraints([Constraint::Length(3), Constraint::Min(0)])
         .split(area);
 
     let gauge_color = match app.install_state {
-        InstallState::Idle => Color::Blue,
-        InstallState::Installing => Color::Cyan,
+        InstallState::Idle => THEME.blue,
+        InstallState::Installing => THEME.cyan,
         InstallState::Completed { success, .. } => {
             if success {
-                Color::Green
+                THEME.mint
             } else {
-                Color::Yellow
+                THEME.amber
             }
         }
     };
 
     let gauge_title = format!(
-        " Progress: {}% - {}",
+        " 󰐥 Progress: {}% ── {} ",
         app.progress_percent, app.current_step_desc
     );
     let gauge = Gauge::default()
@@ -44,49 +45,74 @@ pub fn draw_execute_install_step(f: &mut Frame, app: &App, area: Rect) {
                 .border_type(BorderType::Rounded)
                 .border_style(Style::default().fg(gauge_color)),
         )
-        .gauge_style(Style::default().fg(gauge_color).bg(Color::DarkGray))
+        .gauge_style(
+            Style::default()
+                .fg(gauge_color)
+                .bg(THEME.bg_selected),
+        )
         .percent(app.progress_percent);
     f.render_widget(gauge, chunks[0]);
+
+    // Available inner height for log rows (minus top and bottom border)
+    let inner_height = chunks[1].height.saturating_sub(2) as usize;
+    let total_logs = app.logs.len();
+
+    let display_scroll = if app.auto_scroll_logs && total_logs > inner_height {
+        total_logs.saturating_sub(inner_height)
+    } else {
+        app.log_scroll
+    };
 
     let log_lines: Vec<Line> = app
         .logs
         .iter()
-        .skip(app.log_scroll)
+        .skip(display_scroll)
         .map(|msg| {
             let (badge, style) = match msg.level {
-                LogLevel::Info => ("[INFO  ] ", Style::default().fg(Color::Cyan)),
+                LogLevel::Info => (
+                    " [INFO  ] ",
+                    Style::default().fg(THEME.cyan).bg(THEME.bg_card),
+                ),
                 LogLevel::Success => (
-                    "[  OK  ] ",
+                    " [  OK  ] ",
                     Style::default()
-                        .fg(Color::Green)
+                        .fg(THEME.mint)
+                        .bg(THEME.bg_card)
                         .add_modifier(Modifier::BOLD),
                 ),
                 LogLevel::Warn => (
-                    "[ WARN ] ",
+                    " [ WARN ] ",
                     Style::default()
-                        .fg(Color::Yellow)
+                        .fg(THEME.amber)
+                        .bg(THEME.bg_card)
                         .add_modifier(Modifier::BOLD),
                 ),
                 LogLevel::Error => (
-                    "[ FAIL ] ",
-                    Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
+                    " [ FAIL ] ",
+                    Style::default()
+                        .fg(THEME.rose)
+                        .bg(THEME.bg_card)
+                        .add_modifier(Modifier::BOLD),
                 ),
                 LogLevel::Copy => (
-                    "[ COPY ] ",
+                    " [ COPY ] ",
                     Style::default()
-                        .fg(Color::Blue)
+                        .fg(THEME.blue)
+                        .bg(THEME.bg_card)
                         .add_modifier(Modifier::BOLD),
                 ),
                 LogLevel::Bundle => (
-                    "[BUNDLE] ",
+                    " [BUNDLE] ",
                     Style::default()
-                        .fg(Color::Magenta)
+                        .fg(THEME.purple)
+                        .bg(THEME.bg_card)
                         .add_modifier(Modifier::BOLD),
                 ),
                 LogLevel::Config => (
-                    "[ CONFIG] ",
+                    " [CONFIG] ",
                     Style::default()
-                        .fg(Color::Rgb(255, 165, 0))
+                        .fg(THEME.pink)
+                        .bg(THEME.bg_card)
                         .add_modifier(Modifier::BOLD),
                 ),
             };
@@ -94,27 +120,29 @@ pub fn draw_execute_install_step(f: &mut Frame, app: &App, area: Rect) {
             Line::from(vec![
                 Span::styled(
                     format!("{} ", msg.timestamp),
-                    Style::default().fg(Color::DarkGray),
+                    Style::default().fg(THEME.text_muted),
                 ),
                 Span::styled(badge, style),
-                Span::styled(&msg.message, Style::default().fg(Color::White)),
+                Span::raw(" "),
+                Span::styled(&msg.message, Style::default().fg(THEME.text_bright)),
             ])
         })
         .collect();
 
+    let scroll_status = if app.auto_scroll_logs {
+        "Auto-scroll: ON"
+    } else {
+        "Auto-scroll: OFF"
+    };
+
     let logs_block = Block::default()
         .title(format!(
-            " 9. Live Installation Logs ({}) [j/k: Scroll | c: Clear | g/G: Top/Bottom] ",
-            app.logs.len()
+            " 9. Live Installation Logs ({total_logs} entries | {scroll_status}) [j/k: Scroll | c: Clear | g/G: Top/Bottom] "
         ))
-        .title_style(
-            Style::default()
-                .fg(Color::White)
-                .add_modifier(Modifier::BOLD),
-        )
+        .title_style(THEME.title_cyan())
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
-        .border_style(Style::default().fg(Color::DarkGray));
+        .border_style(Style::default().fg(THEME.cyan));
 
     let logs_widget = Paragraph::new(log_lines)
         .block(logs_block)

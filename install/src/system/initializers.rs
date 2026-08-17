@@ -183,6 +183,15 @@ pub fn initial_variant_options(workspace_root: &Path) -> Vec<VariantItem> {
         }
     }
 
+    if items.is_empty() {
+        items.push(VariantItem {
+            name: "default".to_string(),
+            theme: "babydra-default".to_string(),
+            apps: Vec::new(),
+            selected: true,
+        });
+    }
+
     items.sort_by(|a, b| a.name.cmp(&b.name));
     if let Some(default) = items.iter_mut().find(|v| v.name == "default") {
         default.selected = true;
@@ -197,20 +206,36 @@ pub fn initial_package_options() -> Vec<GenericOptionItem> {
             title: "1. Install Arch Linux Pacman Packages".to_string(),
             description: "Installs GTK4, layer-shell, labwc, pipewire, playerctl, ddcutil, greetd, cage, etc.".to_string(),
             detail: "sudo pacman -Syu --needed base-devel git pkgconf gtk4 gtk4-layer-shell labwc pipewire ddcutil greetd cage ...".to_string(),
-            selected: false,
+            selected: true,
             requires_root: true,
         },
         GenericOptionItem {
+            id: "install_yay".to_string(),
+            title: "2. Install yay AUR Helper (if missing)".to_string(),
+            description: "Clones and builds yay-bin from AUR if yay is not found on the system.".to_string(),
+            detail: "git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin && makepkg -si --noconfirm".to_string(),
+            selected: true,
+            requires_root: false,
+        },
+        GenericOptionItem {
             id: "aur_packages".to_string(),
-            title: "2. Install AUR Packages via yay".to_string(),
+            title: "3. Install AUR Packages via yay".to_string(),
             description: "Installs kitty, neovim, fastfetch, wlrctl, Segoe UI & Cascadia Code fonts.".to_string(),
             detail: "yay -S --noconfirm github-desktop fastfetch neovim awww kitty ttf-segoe-ui-variable wlrctl ...".to_string(),
-            selected: false,
+            selected: true,
+            requires_root: false,
+        },
+        GenericOptionItem {
+            id: "build_wtype".to_string(),
+            title: "4. Build wtype from source (if missing)".to_string(),
+            description: "Compiles wtype with meson + ninja to ~/.local/bin/wtype for Alt-key release handling.".to_string(),
+            detail: "git clone https://github.com/atx/wtype.git /tmp/wtype && meson setup build && ninja -C build".to_string(),
+            selected: true,
             requires_root: false,
         },
         GenericOptionItem {
             id: "kernel_permissions".to_string(),
-            title: "3. Configure i2c-dev & CPU Performance Permissions".to_string(),
+            title: "5. Configure i2c-dev & CPU Performance Permissions".to_string(),
             description: "Loads i2c-dev module for DDC/CI brightness and allows CPU governor switching.".to_string(),
             detail: "Configures /etc/modules-load.d/i2c.conf and /etc/tmpfiles.d/babydra-perf.conf for non-root CPU control.".to_string(),
             selected: true,

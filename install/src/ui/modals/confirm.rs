@@ -1,6 +1,6 @@
 use ratatui::{
     layout::{Alignment, Rect},
-    style::{Color, Modifier, Style},
+    style::{Modifier, Style},
     text::{Line, Span},
     widgets::{Block, BorderType, Borders, Clear, Paragraph},
     Frame,
@@ -8,15 +8,16 @@ use ratatui::{
 
 use crate::app::App;
 use crate::ui::layout::centered_rect;
+use crate::ui::THEME;
 
 pub fn draw_confirm_modal(f: &mut Frame, app: &App, area: Rect) {
-    let popup_area = centered_rect(60, 32, area);
+    let popup_area = centered_rect(62, 34, area);
     f.render_widget(Clear, popup_area);
 
     let selected_bins = app
         .binaries
         .iter()
-        .filter(|b| b.selected && b.exists_in_source)
+        .filter(|b| b.selected && (b.exists_in_source || app.is_build_from_source()))
         .count();
     let selected_varlib = app.varlib_options.iter().filter(|o| o.selected).count();
     let selected_cfgs = app
@@ -24,74 +25,57 @@ pub fn draw_confirm_modal(f: &mut Frame, app: &App, area: Rect) {
         .iter()
         .filter(|o| o.selected)
         .count();
+    let selected_pkgs = app.package_options.iter().filter(|o| o.selected).count();
 
     let lines = vec![
         Line::from(Span::styled(
-            "Confirm BabyDra Installation Plan",
-            Style::default()
-                .fg(Color::White)
-                .add_modifier(Modifier::BOLD),
+            "Ready to Execute BabyDra Installation Plan",
+            THEME.title_cyan(),
         )),
         Line::from(""),
         Line::from(vec![
+            Span::styled("◆ System Packages:  ", Style::default().fg(THEME.text_dim)),
             Span::styled(
-                "Pre-built Binaries: ",
-                Style::default()
-                    .fg(Color::Yellow)
-                    .add_modifier(Modifier::BOLD),
-            ),
-            Span::styled(
-                format!("{selected_bins} selected (Copy to ~/.local/bin)"),
-                Style::default().fg(Color::Cyan),
+                format!("{selected_pkgs} selected (pacman, AUR yay, permissions)"),
+                Style::default().fg(THEME.amber).add_modifier(Modifier::BOLD),
             ),
         ]),
         Line::from(vec![
+            Span::styled("◆ Binary Binaries:  ", Style::default().fg(THEME.text_dim)),
             Span::styled(
-                "/var/lib Staging:   ",
-                Style::default()
-                    .fg(Color::Yellow)
-                    .add_modifier(Modifier::BOLD),
+                format!("{selected_bins} selected (Deploy to ~/.local/bin)"),
+                Style::default().fg(THEME.cyan).add_modifier(Modifier::BOLD),
             ),
+        ]),
+        Line::from(vec![
+            Span::styled("◆ /var/lib Staging: ", Style::default().fg(THEME.text_dim)),
             Span::styled(
                 format!("{selected_varlib} tasks enabled (/var/lib/babydra)"),
-                Style::default().fg(Color::Magenta),
+                Style::default().fg(THEME.purple).add_modifier(Modifier::BOLD),
             ),
         ]),
         Line::from(vec![
-            Span::styled(
-                "Configs & Themes:   ",
-                Style::default()
-                    .fg(Color::Yellow)
-                    .add_modifier(Modifier::BOLD),
-            ),
+            Span::styled("◆ Configs & Themes: ", Style::default().fg(THEME.text_dim)),
             Span::styled(
                 format!("{selected_cfgs} dotfiles & themes enabled"),
-                Style::default().fg(Color::Green),
+                Style::default().fg(THEME.mint).add_modifier(Modifier::BOLD),
             ),
         ]),
         Line::from(""),
         Line::from(Span::styled(
-            "Binaries will be copied directly without source recompilation.",
-            Style::default().fg(Color::DarkGray),
+            if app.is_build_from_source() {
+                format!("Source: Branch '{}' will be compiled with cargo --release.", app.selected_branch)
+            } else {
+                "Source: Pre-built binaries will be copied directly.".to_string()
+            },
+            Style::default().fg(THEME.text_dim),
         )),
         Line::from(""),
         Line::from(vec![
-            Span::styled(
-                " [y / Enter] ",
-                Style::default()
-                    .fg(Color::Black)
-                    .bg(Color::Green)
-                    .add_modifier(Modifier::BOLD),
-            ),
-            Span::raw(" Start Installation    "),
-            Span::styled(
-                " [n / Esc] ",
-                Style::default()
-                    .fg(Color::Black)
-                    .bg(Color::Red)
-                    .add_modifier(Modifier::BOLD),
-            ),
-            Span::raw(" Cancel"),
+            Span::styled(" y / Enter ", THEME.key_badge_green()),
+            Span::styled(" Start Installation   ", Style::default().fg(THEME.mint).add_modifier(Modifier::BOLD)),
+            Span::styled(" n / Esc ", THEME.key_badge_red()),
+            Span::styled(" Cancel", Style::default().fg(THEME.rose)),
         ]),
     ];
 
@@ -99,14 +83,10 @@ pub fn draw_confirm_modal(f: &mut Frame, app: &App, area: Rect) {
         .block(
             Block::default()
                 .title(" Confirmation ")
-                .title_style(
-                    Style::default()
-                        .fg(Color::Green)
-                        .add_modifier(Modifier::BOLD),
-                )
+                .title_style(THEME.title_mint())
                 .borders(Borders::ALL)
                 .border_type(BorderType::Rounded)
-                .border_style(Style::default().fg(Color::Green)),
+                .border_style(Style::default().fg(THEME.mint)),
         )
         .alignment(Alignment::Center);
 

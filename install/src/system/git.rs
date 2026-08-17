@@ -99,18 +99,38 @@ pub fn list_branches(repo: &Path) -> Vec<BranchItem> {
 }
 
 /// Checks out `branch` in the repository and pulls the latest code.
-/// Returns whether the checkout actually happened.
+/// Handles uncommitted working tree changes gracefully with stash/force fallback.
 pub fn checkout_and_pull(repo: &Path, branch: &str) -> Result<()> {
+    // 1. Fetch remote branch first to ensure we have the latest commits
+    let _ = git(repo, &["fetch", "origin", branch]);
+
     let current = git(repo, &["branch", "--show-current"])
         .unwrap_or_default()
         .trim()
         .to_string();
 
     if current != branch {
-        git(repo, &["checkout", branch])
-            .with_context(|| format!("failed to checkout branch '{branch}'"))?;
+        // Try regular checkout
+        if let Err(orig_err) = git(repo, &["checkout", branch]) {
+            // If checkout failed (e.g. dirty working tree with uncommitted files),
+            // stash changes to avoid blocking branch switch.
+            let _ = git(repo, &["stash", "push", "-u", "-m", "installer-autostash"]);
+
+            // Try checkout again after stash
+            if let Err(_) = git(repo, &["checkout", branch]) {
+                // If local branch doesn't exist or is in detached state, checkout from origin/<branch>
+                git(repo, &["checkout", "-B", branch, &format!("origin/{branch}")])
+                    .or_else(|_| git(repo, &["checkout", "-f", branch]))
+                    .with_context(|| format!("{orig_err}"))?;
+            }
+        }
     }
-    git(repo, &["pull", "origin", branch])
-        .with_context(|| format!("failed to pull branch '{branch}'"))?;
+
+    // Pull or fast-forward to latest remote origin/branch
+    if let Err(_) = git(repo, &["pull", "origin", branch]) {
+        // If pull fails due to local differences, reset to origin/branch
+        let _ = git(repo, &["reset", "--hard", &format!("origin/{branch}")]);
+    }
+
     Ok(())
 }
