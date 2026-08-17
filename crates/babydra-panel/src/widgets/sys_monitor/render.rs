@@ -22,7 +22,8 @@ pub fn build_sys_monitor_ui(
     capsule.add_css_class("sys-monitor-box");
     capsule.set_valign(gtk4::Align::Center);
 
-    let sys_label = gtk4::Label::new(Some(&t("sysmon.cpu_ram")));
+    let sys_tpl = t("sysmon.cpu_ram");
+    let sys_label = gtk4::Label::new(Some(&sys_tpl.replace("{cpu}", "0").replace("{ram}", "0")));
     sys_label.add_css_class("status-text");
     capsule.append(&sys_label);
 
