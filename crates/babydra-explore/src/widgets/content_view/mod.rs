@@ -1,18 +1,21 @@
+use babydra_core::FileEntry;
+pub use babydra_core::{sort_entries, ContentViewHandle, ContentViewWidgets};
+use gtk4::prelude::*;
+use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
-use std::cell::RefCell;
-use gtk4::prelude::*;
-use babydra_common::FileEntry;
-pub use babydra_common::{ContentViewWidgets, ContentViewHandle, sort_entries};
 
-mod render;
-pub mod items;
-mod gestures;
-mod rendering;
 mod actions;
+mod gestures;
+pub mod items;
+mod render;
+mod rendering;
 
+pub use actions::{
+    filter_content_view, set_content_view_mode, set_content_view_sort, update_content_view,
+    update_content_view_silent,
+};
 pub use rendering::renderer::{update_content_view_ui, update_content_view_ui_silent};
-pub use actions::{set_content_view_mode, set_content_view_sort, update_content_view, update_content_view_silent, filter_content_view};
 
 /// Creates the content view area widgets and returns the scroll container and ContentViewHandle state handle.
 pub fn create_content_view(
@@ -21,7 +24,7 @@ pub fn create_content_view(
 ) -> (gtk4::Box, ContentViewHandle) {
     let widgets = render::build_content_view_ui();
 
-    let settings = babydra_common::load_explore_settings();
+    let settings = babydra_core::load_explore_settings();
     widgets.stack.set_visible_child_name(&settings.view_mode);
 
     let entries: Rc<RefCell<Vec<FileEntry>>> = Rc::new(RefCell::new(Vec::new()));
@@ -35,7 +38,7 @@ pub fn create_content_view(
     let selected_paths = Rc::new(RefCell::new(Vec::new()));
     let selected_paths_c = selected_paths.clone();
     let sel_cb = Rc::new(selection_callback) as Rc<dyn Fn(Vec<FileEntry>)>;
-    
+
     let sc_fn = Rc::new(move |selected_paths_list: Vec<PathBuf>| {
         let mut list = Vec::new();
         let b = entries_clone.borrow();
@@ -53,7 +56,13 @@ pub fn create_content_view(
     let history_index = Rc::new(RefCell::new(0usize));
 
     // Wire pane navigation & address bar entry
-    actions::wire_content_view_navigation(&widgets, nav_cb.clone(), current_path.clone(), history.clone(), history_index.clone());
+    actions::wire_content_view_navigation(
+        &widgets,
+        nav_cb.clone(),
+        current_path.clone(),
+        history.clone(),
+        history_index.clone(),
+    );
 
     let handle = ContentViewHandle {
         widgets: widgets.clone(),
@@ -79,7 +88,14 @@ pub fn create_content_view(
     }
 
     // Wire all controllers/gestures for ListBox and overlay background
-    gestures::wire_listbox_controllers(&widgets, entries.clone(), nav_cb.clone(), sc_fn.clone(), current_path.clone(), selected_paths.clone());
+    gestures::wire_listbox_controllers(
+        &widgets,
+        entries.clone(),
+        nav_cb.clone(),
+        sc_fn.clone(),
+        current_path.clone(),
+        selected_paths.clone(),
+    );
     gestures::wire_background_controllers(&widgets, current_path.clone(), nav_cb.clone());
 
     (widgets.container.clone(), handle)
@@ -94,7 +110,7 @@ pub fn create_grid_flowbox(
     current_path: Rc<RefCell<PathBuf>>,
     selected_paths: Rc<RefCell<Vec<PathBuf>>>,
 ) -> gtk4::FlowBox {
-    let settings = babydra_common::load_explore_settings();
+    let settings = babydra_core::load_explore_settings();
     let activate_on_single = !settings.double_click_to_open;
 
     let flowbox = gtk4::FlowBox::builder()
@@ -107,7 +123,15 @@ pub fn create_grid_flowbox(
         .column_spacing(10)
         .build();
 
-    gestures::wire_grid_flowbox_controllers(&flowbox, entries, nav_cb, sc_fn, grid_container, current_path, selected_paths);
+    gestures::wire_grid_flowbox_controllers(
+        &flowbox,
+        entries,
+        nav_cb,
+        sc_fn,
+        grid_container,
+        current_path,
+        selected_paths,
+    );
 
     flowbox
 }

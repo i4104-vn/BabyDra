@@ -1,10 +1,10 @@
+use babydra_core::i18n::t;
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Window, Stack};
-use babydra_common::i18n::t;
+use gtk4::{Box, Orientation, Stack, Window};
 use std::rc::Rc;
 
-mod general;
 mod context_menu;
+mod general;
 mod keybinds;
 
 /// Displays the main settings dialog with vertical icon-only pill navigation and card content stack.
@@ -41,16 +41,31 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     main_hbox.append(&sidebar);
 
     // 1. General (Settings Icon)
-    let btn_general = babydra_utils::components::create_sidebar_item_button(&t("explore.settings_general"), "settings", "sidebar-item", || {});
+    let btn_general = babydra_ui_kit::components::create_sidebar_item_button(
+        &t("explore.settings_general"),
+        "settings",
+        "sidebar-item",
+        || {},
+    );
     btn_general.add_css_class("active-nav");
     btn_general.set_cursor_from_name(Some("pointer"));
 
     // 2. Keybinds (Terminal/Command Icon)
-    let btn_keybinds = babydra_utils::components::create_sidebar_item_button(&t("explore.settings_keybinds"), "terminal", "sidebar-item", || {});
+    let btn_keybinds = babydra_ui_kit::components::create_sidebar_item_button(
+        &t("explore.settings_keybinds"),
+        "terminal",
+        "sidebar-item",
+        || {},
+    );
     btn_keybinds.set_cursor_from_name(Some("pointer"));
 
     // 3. Context Menu (Folder/Menu Icon)
-    let btn_context = babydra_utils::components::create_sidebar_item_button(&t("explore.settings_context_menu"), "folder", "sidebar-item", || {});
+    let btn_context = babydra_ui_kit::components::create_sidebar_item_button(
+        &t("explore.settings_context_menu"),
+        "folder",
+        "sidebar-item",
+        || {},
+    );
     btn_context.set_cursor_from_name(Some("pointer"));
 
     nav_container.append(&btn_general);
@@ -123,7 +138,6 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         stack_c3.set_visible_child_name("context_menu");
     });
 
-    // Close Request & Animation Setup
     let win_cancel = window.clone();
     let hbox_cancel = main_hbox.clone();
     let is_animating = Rc::new(std::cell::Cell::new(false));
@@ -134,14 +148,14 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         }
         is_animating_cancel.set(true);
         let win_cb = win_cancel.clone();
-        babydra_utils::ui::animation::genie_out(
+        babydra_ui_kit::ui::animation::genie_out(
             hbox_cancel.upcast_ref(),
             680,
             460,
             300,
             move || {
                 win_cb.destroy();
-            }
+            },
         );
         glib::Propagation::Stop
     });
@@ -152,5 +166,5 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     });
 
     window.present();
-    babydra_utils::ui::animation::genie_in(main_hbox.upcast_ref(), 680, 460, 300);
+    babydra_ui_kit::ui::animation::genie_in(main_hbox.upcast_ref(), 680, 460, 300);
 }

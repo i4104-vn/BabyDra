@@ -4,8 +4,8 @@ version.workspace = true
 edition = "2021"
 
 [dependencies]
-babydra-common = { workspace = true }
-babydra-utils = { workspace = true }
+babydra-core = { workspace = true }
+babydra-ui-kit = { workspace = true }
 babydra-explore-kit = { workspace = true }
 
 # GUI

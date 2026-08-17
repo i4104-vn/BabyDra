@@ -1,9 +1,10 @@
-use babydra_common::i18n::t;
+use babydra_core::i18n::t;
 use gtk4::prelude::*;
 use gtk4::{Align, Box, Button, Label, Orientation, Window};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+/// Shows the `capture dialog`.
 pub fn show_capture_dialog(
     parent: &Window,
     action_desc: &str,
@@ -105,6 +106,7 @@ pub fn show_capture_dialog(
     window.present();
 }
 
+/// Keyval to string.
 fn keyval_to_string(keyval: &gtk4::gdk::Key, state: gtk4::gdk::ModifierType) -> String {
     let mut parts = Vec::new();
     if state.contains(gtk4::gdk::ModifierType::CONTROL_MASK) {

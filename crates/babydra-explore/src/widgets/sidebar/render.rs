@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, ScrolledWindow, Label, Align, Separator};
+use gtk4::{Align, Box, Label, Orientation, ScrolledWindow, Separator};
 
 /// Builds the scroll container and layout box for the sidebar.
 pub fn build_sidebar_ui() -> (ScrolledWindow, Box) {

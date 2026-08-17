@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, ListBox, ListBoxRow, Label, Align};
+use gtk4::{Align, Box, Label, ListBox, ListBoxRow, Orientation};
 
 /// Helper to render a settings row with a switch toggle.
 pub fn add_switch_row(
@@ -20,7 +20,7 @@ pub fn add_switch_row(
     hbox.set_margin_end(16);
 
     // Left Icon
-    let icon = babydra_utils::ui::icon::get_icon(icon_name, 16);
+    let icon = babydra_ui_kit::ui::icon::get_icon(icon_name, 16);
     icon.set_valign(Align::Center);
     icon.add_css_class("settings-row-icon");
     hbox.append(&icon);
@@ -45,7 +45,7 @@ pub fn add_switch_row(
     vbox_lbl.append(&lbl_desc);
     hbox.append(&vbox_lbl);
 
-    let sw = babydra_utils::components::CustomSwitch::new(active);
+    let sw = babydra_ui_kit::components::CustomSwitch::new(active);
     sw.connect_state_set(move |state| {
         on_toggle(state);
     });

@@ -1,8 +1,8 @@
+use babydra_core::ContentViewWidgets;
 use gtk4::prelude::*;
+use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
-use std::cell::RefCell;
-use babydra_common::ContentViewWidgets;
 
 /// Wires background click gestures, context menus, drag select, and drag drop to the view container
 pub fn wire_background_controllers(
@@ -30,7 +30,10 @@ pub fn wire_background_controllers(
         gesture.connect_pressed(move |gesture, _, x, y| {
             gesture.set_state(gtk4::EventSequenceState::Claimed);
             let path = cp.borrow().clone();
-            if let Some(win) = container_widget.root().and_then(|r| r.downcast::<gtk4::Window>().ok()) {
+            if let Some(win) = container_widget
+                .root()
+                .and_then(|r| r.downcast::<gtk4::Window>().ok())
+            {
                 babydra_explore_kit::explore::context_menu::show_for_empty(
                     container_widget.upcast_ref(),
                     x,
@@ -46,7 +49,8 @@ pub fn wire_background_controllers(
 
     // 3. Drop target to background
     {
-        let drop_target = babydra_explore_kit::explore::create_background_drop_target(current_path.clone());
+        let drop_target =
+            babydra_explore_kit::explore::create_background_drop_target(current_path.clone());
         widgets.container.add_controller(drop_target);
     }
 }

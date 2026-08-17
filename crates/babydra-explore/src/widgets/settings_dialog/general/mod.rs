@@ -1,12 +1,12 @@
+use babydra_core::i18n::t;
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, ListBox};
-use babydra_common::i18n::t;
+use gtk4::{Box, ListBox, Orientation};
 
 pub mod row;
 
 /// Builds the general settings page, mounting various toggles for file exploration features.
 pub fn build_general_page() -> Box {
-    let settings = babydra_common::load_explore_settings();
+    let settings = babydra_core::load_explore_settings();
     let tab_general = Box::new(Orientation::Vertical, 10);
     tab_general.set_margin_top(8);
     tab_general.set_margin_bottom(8);
@@ -24,9 +24,9 @@ pub fn build_general_page() -> Box {
         &t("explore.settings_toggle_hidden_desc"),
         settings.show_hidden,
         std::boxed::Box::new(|state| {
-            let mut s = babydra_common::load_explore_settings();
+            let mut s = babydra_core::load_explore_settings();
             s.show_hidden = state;
-            babydra_common::save_explore_settings(&s);
+            babydra_core::save_explore_settings(&s);
         }),
     );
 
@@ -38,9 +38,9 @@ pub fn build_general_page() -> Box {
         &t("explore.settings_toggle_preview_desc"),
         settings.preview_visible,
         std::boxed::Box::new(|state| {
-            let mut s = babydra_common::load_explore_settings();
+            let mut s = babydra_core::load_explore_settings();
             s.preview_visible = state;
-            babydra_common::save_explore_settings(&s);
+            babydra_core::save_explore_settings(&s);
         }),
     );
 
@@ -52,9 +52,9 @@ pub fn build_general_page() -> Box {
         &t("explore.settings_double_click_desc"),
         settings.double_click_to_open,
         std::boxed::Box::new(|state| {
-            let mut s = babydra_common::load_explore_settings();
+            let mut s = babydra_core::load_explore_settings();
             s.double_click_to_open = state;
-            babydra_common::save_explore_settings(&s);
+            babydra_core::save_explore_settings(&s);
         }),
     );
 
@@ -66,9 +66,9 @@ pub fn build_general_page() -> Box {
         &t("explore.settings_permanent_delete_desc"),
         settings.permanent_delete,
         std::boxed::Box::new(|state| {
-            let mut s = babydra_common::load_explore_settings();
+            let mut s = babydra_core::load_explore_settings();
             s.permanent_delete = state;
-            babydra_common::save_explore_settings(&s);
+            babydra_core::save_explore_settings(&s);
         }),
     );
 
@@ -80,9 +80,9 @@ pub fn build_general_page() -> Box {
         &t("explore.settings_calculate_size_desc"),
         settings.calculate_dir_size,
         std::boxed::Box::new(|state| {
-            let mut s = babydra_common::load_explore_settings();
+            let mut s = babydra_core::load_explore_settings();
             s.calculate_dir_size = state;
-            babydra_common::save_explore_settings(&s);
+            babydra_core::save_explore_settings(&s);
         }),
     );
 

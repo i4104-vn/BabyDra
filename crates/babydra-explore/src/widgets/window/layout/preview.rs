@@ -1,7 +1,7 @@
-use std::rc::Rc;
-use std::cell::{RefCell, Cell};
-use gtk4::prelude::*;
 use crate::widgets::status_bar::StatusBarWidgets;
+use gtk4::prelude::*;
+use std::cell::{Cell, RefCell};
+use std::rc::Rc;
 
 /// Sets up the preview panel visibility toggling closure.
 pub fn setup_preview_toggle(
@@ -36,18 +36,18 @@ pub fn setup_preview_toggle(
             });
         }
 
-        // Save updated settings
         {
-            let mut current_settings = babydra_common::load_explore_settings();
+            let mut current_settings = babydra_core::load_explore_settings();
             current_settings.preview_visible = now_visible;
-            babydra_common::save_explore_settings(&current_settings);
+            babydra_core::save_explore_settings(&current_settings);
         }
 
         if let Some(ref sw) = *status_widgets_c.borrow() {
             if now_visible {
                 sw.btn_toggle_preview.add_css_class("status-bar-btn-active");
             } else {
-                sw.btn_toggle_preview.remove_css_class("status-bar-btn-active");
+                sw.btn_toggle_preview
+                    .remove_css_class("status-bar-btn-active");
             }
         }
     };

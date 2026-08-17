@@ -1,9 +1,10 @@
-use std::rc::Rc;
-use std::cell::{RefCell, Cell};
-use std::path::PathBuf;
+use babydra_core::{ActivePane, ContentViewHandle, SessionState};
 use gtk4::prelude::*;
-use babydra_common::{SessionState, ActivePane, ContentViewHandle};
+use std::cell::{Cell, RefCell};
+use std::path::PathBuf;
+use std::rc::Rc;
 
+/// Update pane nav visibility.
 fn update_pane_nav_visibility(handle: &ContentViewHandle, is_split: bool) {
     let widgets = &handle.widgets;
     widgets.btn_back.set_visible(!is_split);
@@ -72,19 +73,16 @@ pub fn setup_split_view(
             let left_scroll_cc = left_scroll_c.clone();
             let right_scroll_cc = right_scroll_c.clone();
 
-            let (right_scroll, right_handle) = crate::widgets::content_view::create_content_view(
-                right_nav_cb,
-                move |sel| {
+            let (right_scroll, right_handle) =
+                crate::widgets::content_view::create_content_view(right_nav_cb, move |sel| {
                     active_c.set(ActivePane::Right);
                     left_scroll_cc.remove_css_class("active-pane");
                     if let Some(ref rs) = *right_scroll_cc.borrow() {
                         rs.add_css_class("active-pane");
                     }
                     crate::widgets::info_panel::update_info_panel(&info_panel_c, &sel);
-                }
-            );
+                });
 
-            // Hide buttons/search on right pane
             update_pane_nav_visibility(&right_handle, true);
 
             split_paned_c.set_end_child(Some(&right_scroll));
@@ -94,7 +92,6 @@ pub fn setup_split_view(
             right_handle_c.replace(Some(Rc::new(right_handle)));
             is_split_c.set(true);
 
-            // Hide buttons/search on left pane
             update_pane_nav_visibility(&left_handle_c, true);
 
             active_pane_c.set(ActivePane::Right);

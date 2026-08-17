@@ -1,14 +1,14 @@
+use babydra_core::ContentViewHandle;
+use babydra_core::FileEntry;
 use gtk4::prelude::*;
-use gtk4::{Label, Align};
-use babydra_common::FileEntry;
-use babydra_common::ContentViewHandle;
+use gtk4::{Align, Label};
 
 use crate::widgets::content_view::items::grid_item::create_flow_child;
 
 /// Renders entries as a flat icon grid (no grouping headers).
 pub async fn render_flat_grid(
     handle_c: &ContentViewHandle,
-    widgets: &babydra_common::ContentViewWidgets,
+    widgets: &babydra_core::ContentViewWidgets,
     entries: &[FileEntry],
     current_path: &std::path::PathBuf,
     start_path: &std::path::PathBuf,
@@ -25,19 +25,31 @@ pub async fn render_flat_grid(
         handle_c.selected_paths.clone(),
     );
     widgets.grid_container.append(&flowbox);
-    
+
     let mut counter = 0;
     for (idx, entry) in entries.iter().enumerate() {
-        if *handle_c.current_path.borrow() != *start_path || *handle_c.render_generation.borrow() != gen {
+        if *handle_c.current_path.borrow() != *start_path
+            || *handle_c.render_generation.borrow() != gen
+        {
             return;
         }
-        
-        let fraction = if entries.is_empty() { 1.0 } else { (idx + 1) as f64 / entries.len() as f64 };
+
+        let fraction = if entries.is_empty() {
+            1.0
+        } else {
+            (idx + 1) as f64 / entries.len() as f64
+        };
         handle_c.widgets.progress_bar.set_fraction(fraction);
-        
-        let flow_child = create_flow_child(idx, entry, current_path, nav_callback, selected_paths.clone());
+
+        let flow_child = create_flow_child(
+            idx,
+            entry,
+            current_path,
+            nav_callback,
+            selected_paths.clone(),
+        );
         flowbox.append(&flow_child);
-        
+
         counter += 1;
         if counter >= 40 {
             counter = 0;
@@ -49,7 +61,7 @@ pub async fn render_flat_grid(
 /// Renders entries as a grouped icon grid with category headers.
 pub async fn render_grouped_grid(
     handle_c: &ContentViewHandle,
-    widgets: &babydra_common::ContentViewWidgets,
+    widgets: &babydra_core::ContentViewWidgets,
     entries: &[FileEntry],
     current_path: &std::path::PathBuf,
     start_path: &std::path::PathBuf,
@@ -58,20 +70,25 @@ pub async fn render_grouped_grid(
     nav_callback: &std::rc::Rc<dyn Fn(std::path::PathBuf)>,
     selected_paths: std::rc::Rc<std::cell::RefCell<Vec<std::path::PathBuf>>>,
 ) {
-    let get_group_name = |entry: &FileEntry| -> String {
-        babydra_common::get_group_name(entry, sort_mode)
-    };
+    let get_group_name =
+        |entry: &FileEntry| -> String { babydra_core::get_group_name(entry, sort_mode) };
 
     let mut current_group_name = String::new();
     let mut current_flowbox: Option<gtk4::FlowBox> = None;
-    
+
     let mut counter = 0;
     for (idx, entry) in entries.iter().enumerate() {
-        if *handle_c.current_path.borrow() != *start_path || *handle_c.render_generation.borrow() != gen {
+        if *handle_c.current_path.borrow() != *start_path
+            || *handle_c.render_generation.borrow() != gen
+        {
             return;
         }
 
-        let fraction = if entries.is_empty() { 1.0 } else { (idx + 1) as f64 / entries.len() as f64 };
+        let fraction = if entries.is_empty() {
+            1.0
+        } else {
+            (idx + 1) as f64 / entries.len() as f64
+        };
         handle_c.widgets.progress_bar.set_fraction(fraction);
 
         let group_name = get_group_name(entry);
@@ -100,10 +117,16 @@ pub async fn render_grouped_grid(
         }
 
         if let Some(ref flowbox) = current_flowbox {
-            let flow_child = create_flow_child(idx, entry, current_path, nav_callback, selected_paths.clone());
+            let flow_child = create_flow_child(
+                idx,
+                entry,
+                current_path,
+                nav_callback,
+                selected_paths.clone(),
+            );
             flowbox.append(&flow_child);
         }
-        
+
         counter += 1;
         if counter >= 40 {
             counter = 0;

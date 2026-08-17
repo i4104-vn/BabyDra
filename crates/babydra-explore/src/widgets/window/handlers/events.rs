@@ -1,9 +1,9 @@
-use std::rc::Rc;
-use std::cell::{RefCell, Cell};
-use std::path::PathBuf;
-use gtk4::prelude::*;
-use babydra_common::{SessionState, ActivePane};
 use crate::widgets::status_bar::StatusBarWidgets;
+use babydra_core::{ActivePane, SessionState};
+use gtk4::prelude::*;
+use std::cell::{Cell, RefCell};
+use std::path::PathBuf;
+use std::rc::Rc;
 
 pub struct KeyShortcut {
     pub keyval: gtk4::gdk::Key,
@@ -11,6 +11,7 @@ pub struct KeyShortcut {
     pub callback: Rc<dyn Fn()>,
 }
 
+/// Parse shortcut.
 pub fn parse_shortcut(shortcut_str: &str) -> Option<(gtk4::gdk::Key, gtk4::gdk::ModifierType)> {
     let parts: Vec<&str> = shortcut_str.split('+').map(|s| s.trim()).collect();
     let mut modifiers = gtk4::gdk::ModifierType::empty();
@@ -47,9 +48,7 @@ pub fn parse_shortcut(shortcut_str: &str) -> Option<(gtk4::gdk::Key, gtk4::gdk::
                     let c = s.chars().next().unwrap();
                     gtk4::gdk::Key::from_name(&c.to_string())
                 }
-                s => {
-                    gtk4::gdk::Key::from_name(s)
-                }
+                s => gtk4::gdk::Key::from_name(s),
             };
             if let Some(keyval) = k {
                 key = Some(keyval);
@@ -67,9 +66,10 @@ pub fn setup_key_shortcuts(
 ) -> gtk4::EventControllerKey {
     let key_controller = gtk4::EventControllerKey::new();
     key_controller.connect_key_pressed(move |_, keyval, _, state| {
-        let clean_state = state & (gtk4::gdk::ModifierType::CONTROL_MASK 
-                                 | gtk4::gdk::ModifierType::SHIFT_MASK 
-                                 | gtk4::gdk::ModifierType::ALT_MASK);
+        let clean_state = state
+            & (gtk4::gdk::ModifierType::CONTROL_MASK
+                | gtk4::gdk::ModifierType::SHIFT_MASK
+                | gtk4::gdk::ModifierType::ALT_MASK);
         for shortcut in &shortcuts {
             if shortcut.keyval == keyval && shortcut.modifiers == clean_state {
                 (shortcut.callback)();
@@ -104,7 +104,8 @@ pub fn setup_window_resize_handler(
                 }
             });
             if let Some(ref sw) = *status_widgets_cell.borrow() {
-                sw.btn_toggle_preview.remove_css_class("status-bar-btn-active");
+                sw.btn_toggle_preview
+                    .remove_css_class("status-bar-btn-active");
             }
         } else if w >= 700 && !preview_visible.get() && user_wants_preview.get() {
             layout_paned.set_end_child(Some(&revealer));
@@ -122,8 +123,8 @@ pub fn setup_file_watcher_receiver(
     session: Rc<RefCell<SessionState>>,
     _navigate_pane_no_watch_ref: Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>,
     _active_pane: Rc<Cell<ActivePane>>,
-    left_content_handle: Rc<babydra_common::ContentViewHandle>,
-    right_content_handle: Rc<RefCell<Option<Rc<babydra_common::ContentViewHandle>>>>,
+    left_content_handle: Rc<babydra_core::ContentViewHandle>,
+    right_content_handle: Rc<RefCell<Option<Rc<babydra_core::ContentViewHandle>>>>,
     mut watch_rx: tokio::sync::mpsc::UnboundedReceiver<()>,
 ) {
     let left = left_content_handle;
@@ -145,18 +146,23 @@ pub fn setup_file_watcher_receiver(
             let session_c = session.clone();
 
             // Schedule quiet background refresh after 350ms of quiet time
-            let source_id = glib::timeout_add_local_once(
-                std::time::Duration::from_millis(350),
-                move || {
+            let source_id =
+                glib::timeout_add_local_once(std::time::Duration::from_millis(350), move || {
                     timer_ref.borrow_mut().take();
                     let show_hidden = session_c.borrow().active_tab().show_hidden;
 
                     let left_path = left_c.current_path.borrow().clone();
                     let left_handle = left_c.clone();
                     glib::spawn_future_local(async move {
-                        if let Ok(entries) = babydra_common::load_directory(left_path.clone(), show_hidden).await {
+                        if let Ok(entries) =
+                            babydra_core::load_directory(left_path.clone(), show_hidden).await
+                        {
                             if *left_handle.current_path.borrow() == left_path {
-                                crate::widgets::content_view::update_content_view_silent(&left_handle, &entries, left_path);
+                                crate::widgets::content_view::update_content_view_silent(
+                                    &left_handle,
+                                    &entries,
+                                    left_path,
+                                );
                             }
                         }
                     });
@@ -165,15 +171,20 @@ pub fn setup_file_watcher_receiver(
                         let right_path = r_handle.current_path.borrow().clone();
                         let r_handle_c = r_handle.clone();
                         glib::spawn_future_local(async move {
-                            if let Ok(entries) = babydra_common::load_directory(right_path.clone(), show_hidden).await {
+                            if let Ok(entries) =
+                                babydra_core::load_directory(right_path.clone(), show_hidden).await
+                            {
                                 if *r_handle_c.current_path.borrow() == right_path {
-                                    crate::widgets::content_view::update_content_view_silent(&r_handle_c, &entries, right_path);
+                                    crate::widgets::content_view::update_content_view_silent(
+                                        &r_handle_c,
+                                        &entries,
+                                        right_path,
+                                    );
                                 }
                             }
                         });
                     }
-                },
-            );
+                });
 
             *pending_timer.borrow_mut() = Some(source_id);
         }
@@ -195,7 +206,7 @@ pub fn setup_dbus_receiver(
     });
 
     tokio::spawn(async move {
-        if let Err(e) = babydra_common::start_dbus_service(dbus_tx).await {
+        if let Err(e) = babydra_core::start_dbus_service(dbus_tx).await {
             eprintln!("Failed to start D-Bus service: {}", e);
         }
     });
@@ -261,8 +272,8 @@ pub fn setup_status_bar_wiring(
             let toggle_p_inner_cb = toggle_p_inner.clone();
 
             crate::widgets::settings_dialog::show_settings_dialog(&parent_win_c, move || {
-                let settings = babydra_common::load_explore_settings();
-                
+                let settings = babydra_core::load_explore_settings();
+
                 {
                     let mut s = session_inner_cb.borrow_mut();
                     let tab = s.active_tab_mut();
@@ -285,8 +296,7 @@ pub fn setup_status_bar_wiring(
             });
         });
 
-        // Sync initial view mode class
-        let settings = babydra_common::load_explore_settings();
+        let settings = babydra_core::load_explore_settings();
         if settings.view_mode == "list" {
             sw.btn_view_list.add_css_class("status-bar-btn-active");
             sw.btn_view_icons.remove_css_class("status-bar-btn-active");
@@ -318,7 +328,7 @@ pub fn setup_window_shortcuts(
             window.remove_controller(old_controller);
         }
 
-        let settings = babydra_common::load_explore_settings();
+        let settings = babydra_core::load_explore_settings();
         let mut shortcuts = Vec::new();
 
         let mut add_shortcut = |action: &str, cb: Rc<dyn Fn()>| {
@@ -329,7 +339,7 @@ pub fn setup_window_shortcuts(
                     modifiers,
                     callback: cb.clone(),
                 });
-                
+
                 if let Some(name) = keyval.name() {
                     if name.len() == 1 {
                         let upper_name = name.to_uppercase();

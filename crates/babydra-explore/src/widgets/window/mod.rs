@@ -1,13 +1,13 @@
+use babydra_core::{ActivePane, SessionState};
 use gtk4::prelude::*;
 use gtk4::ApplicationWindow;
-use std::rc::Rc;
-use std::cell::{RefCell, Cell};
+use std::cell::{Cell, RefCell};
 use std::path::PathBuf;
-use babydra_common::{SessionState, ActivePane};
+use std::rc::Rc;
 
-mod render;
 pub mod handlers;
 pub mod layout;
+mod render;
 pub mod widgets;
 
 /// Creates and configures the main file explorer window, wires all component widgets (header, sidebar, content panes, tabs, info panel, status bar), and launches the navigation loops.
@@ -15,9 +15,8 @@ pub fn create_explore_window(
     app: &gtk4::Application,
     session: Rc<RefCell<SessionState>>,
 ) -> ApplicationWindow {
-    let settings = babydra_common::load_explore_settings();
-    
-    // Apply settings to initial tab
+    let settings = babydra_core::load_explore_settings();
+
     {
         let mut s = session.borrow_mut();
         let tab = s.active_tab_mut();
@@ -36,7 +35,6 @@ pub fn create_explore_window(
     // Channels for file watching/reloading
     let (watch_tx, watch_rx) = tokio::sync::mpsc::unbounded_channel::<()>();
 
-    // Create InfoPanel
     let (info_panel_container, info_widgets) = crate::widgets::info_panel::create_info_panel();
     let revealer = gtk4::Revealer::builder()
         .transition_type(gtk4::RevealerTransitionType::SlideLeft)
@@ -62,10 +60,8 @@ pub fn create_explore_window(
         let _ = left_nav_tx.send(path);
     };
 
-    // Create Left ContentView
-    let (left_content_scroll, left_content_handle) = crate::widgets::content_view::create_content_view(
-        left_nav_cb,
-        {
+    let (left_content_scroll, left_content_handle) =
+        crate::widgets::content_view::create_content_view(left_nav_cb, {
             let info = info_widgets_rc.clone();
             let active = active_pane.clone();
             let left_s = left_scroll_cell.clone();
@@ -80,8 +76,7 @@ pub fn create_explore_window(
                 }
                 crate::widgets::info_panel::update_info_panel(&info, &sel);
             }
-        },
-    );
+        });
 
     *left_scroll_cell.borrow_mut() = Some(left_content_scroll.clone());
     let left_content_handle = Rc::new(left_content_handle);
@@ -89,16 +84,17 @@ pub fn create_explore_window(
     left_content_scroll.add_css_class("active-pane");
 
     // Right pane content variables
-    let right_content_handle = Rc::new(RefCell::new(None::<Rc<crate::widgets::content_view::ContentViewHandle>>));
+    let right_content_handle = Rc::new(RefCell::new(
+        None::<Rc<crate::widgets::content_view::ContentViewHandle>>,
+    ));
 
-    // Create StatusBar cells
-    let status_bar_widgets_cell = Rc::new(RefCell::new(None::<crate::widgets::status_bar::StatusBarWidgets>));
+    let status_bar_widgets_cell = Rc::new(RefCell::new(
+        None::<crate::widgets::status_bar::StatusBarWidgets>,
+    ));
     let rebuild_shortcuts_cell = Rc::new(RefCell::new(None::<Rc<dyn Fn()>>));
 
-    // Create TabBar Container
     let tab_bar_box = Rc::new(RefCell::new(None::<gtk4::Box>));
 
-    // Create StatusBar
     let status_bar_widgets = crate::widgets::status_bar::create_status_bar();
     ui.vbox.append(&status_bar_widgets.container);
     let status_bar_lbl_rc = Rc::new(status_bar_widgets.lbl_status.clone());
@@ -134,14 +130,11 @@ pub fn create_explore_window(
                 tab.show_hidden
             };
 
-            // Save updated settings
             {
-                let mut current_settings = babydra_common::load_explore_settings();
+                let mut current_settings = babydra_core::load_explore_settings();
                 current_settings.show_hidden = show_hidden_now;
-                babydra_common::save_explore_settings(&current_settings);
+                babydra_core::save_explore_settings(&current_settings);
             }
-
-
 
             let path = session_c.borrow().active_tab().current_path.clone();
             if let Some(ref f) = *nav.borrow() {
@@ -160,7 +153,7 @@ pub fn create_explore_window(
         if let Some(ref f) = *nav_ref_for_header.borrow() {
             let active = active_pane_for_header.get();
             f(active, path);
-            
+
             // If split view is open, refresh the other pane too to keep listings in sync
             if let Some(ref right) = *right_handle_for_nav.borrow() {
                 let other_pane = if active == ActivePane::Left {
@@ -190,14 +183,12 @@ pub fn create_explore_window(
                 crate::widgets::content_view::set_content_view_mode(r, &mode);
             }
 
-            // Save updated settings
             {
-                let mut current_settings = babydra_common::load_explore_settings();
+                let mut current_settings = babydra_core::load_explore_settings();
                 current_settings.view_mode = mode.clone();
-                babydra_common::save_explore_settings(&current_settings);
+                babydra_core::save_explore_settings(&current_settings);
             }
 
-            // Update button active classes in status bar
             if let Some(ref sw) = *status_bar_widgets_c.borrow() {
                 if mode == "list" {
                     sw.btn_view_list.add_css_class("status-bar-btn-active");
@@ -248,17 +239,19 @@ pub fn create_explore_window(
         preview_visible.clone(),
     );
 
-
-    let _rebuild_tabs_rc = widgets::setup_tab_bar(&ui.vbox, session.clone(), navigate_pane_ref.clone(), tab_bar_box.clone(), rebuild_tabs_cell.clone());
+    let _rebuild_tabs_rc = widgets::setup_tab_bar(
+        &ui.vbox,
+        session.clone(),
+        navigate_pane_ref.clone(),
+        tab_bar_box.clone(),
+        rebuild_tabs_cell.clone(),
+    );
 
     // Sidebar creation
-    let sidebar = crate::widgets::sidebar::create_sidebar(
-        session.clone(),
-        {
-            let nav = nav_callback_rc.clone();
-            move |p| nav(p)
-        }
-    );
+    let sidebar = crate::widgets::sidebar::create_sidebar(session.clone(), {
+        let nav = nav_callback_rc.clone();
+        move |p| nav(p)
+    });
     ui.main_paned.prepend(&sidebar);
 
     // Active split toggling handler
@@ -286,13 +279,17 @@ pub fn create_explore_window(
             let paths = if act.get() == ActivePane::Left {
                 left.selected_paths.borrow().clone()
             } else {
-                right.borrow().as_ref()
+                right
+                    .borrow()
+                    .as_ref()
                     .map(|r| r.selected_paths.borrow().clone())
                     .unwrap_or_default()
             };
             if !paths.is_empty() {
                 let current_path = session.borrow().active_tab().current_path.clone();
-                babydra_explore_kit::explore::context_menu::clipboard::set_system_clipboard_files(&paths, true);
+                babydra_explore_kit::explore::context_menu::clipboard::set_system_clipboard_files(
+                    &paths, true,
+                );
                 babydra_explore_kit::explore::CLIPBOARD.with(|cb| cb.replace(Some((paths, true))));
                 if let Some(ref f) = *nav.borrow() {
                     f(act.get(), current_path);
@@ -312,13 +309,17 @@ pub fn create_explore_window(
             let paths = if act.get() == ActivePane::Left {
                 left.selected_paths.borrow().clone()
             } else {
-                right.borrow().as_ref()
+                right
+                    .borrow()
+                    .as_ref()
                     .map(|r| r.selected_paths.borrow().clone())
                     .unwrap_or_default()
             };
             if !paths.is_empty() {
                 let current_path = session.borrow().active_tab().current_path.clone();
-                babydra_explore_kit::explore::context_menu::clipboard::set_system_clipboard_files(&paths, false);
+                babydra_explore_kit::explore::context_menu::clipboard::set_system_clipboard_files(
+                    &paths, false,
+                );
                 babydra_explore_kit::explore::CLIPBOARD.with(|cb| cb.replace(Some((paths, false))));
                 if let Some(ref f) = *nav.borrow() {
                     f(act.get(), current_path);
@@ -367,7 +368,10 @@ pub fn create_explore_window(
                     }
                 }) as Rc<dyn Fn(PathBuf)>
             };
-            babydra_explore_kit::explore::context_menu::clipboard::execute_undo(nav_cb, current_path);
+            babydra_explore_kit::explore::context_menu::clipboard::execute_undo(
+                nav_cb,
+                current_path,
+            );
         }
     };
     let undo_cb_rc = Rc::new(undo_cb) as Rc<dyn Fn()>;
@@ -385,7 +389,6 @@ pub fn create_explore_window(
         rebuild_shortcuts_cell.clone(),
     );
 
-    // Set up window resize response logic
     handlers::setup_window_resize_handler(
         &ui.window,
         ui.layout_paned.clone(),
@@ -413,7 +416,7 @@ pub fn create_explore_window(
     let main_paned_c = ui.main_paned.clone();
     let status_bar_c = status_bar_widgets_cell.clone();
 
-    babydra_common::i18n::watch_locale_change(move |_| {
+    babydra_core::i18n::watch_locale_change(move |_| {
         // Rebuild sidebar
         let new_sidebar = crate::widgets::sidebar::create_sidebar(session_sidebar.clone(), {
             let nav = nav_sidebar.clone();
@@ -426,15 +429,19 @@ pub fn create_explore_window(
 
         // Rebuild status bar tooltips
         if let Some(ref sw) = *status_bar_c.borrow() {
-            sw.dropdown_sort.set_tooltip_text(Some(&babydra_common::i18n::t("explore.sort_by")));
-            sw.btn_view_icons.set_tooltip_text(Some(&babydra_common::i18n::t("explore.view_grid")));
-            sw.btn_view_list.set_tooltip_text(Some(&babydra_common::i18n::t("explore.view_list")));
-            sw.btn_toggle_preview.set_tooltip_text(Some(&babydra_common::i18n::t("explore.toggle_preview")));
-            sw.btn_settings.set_tooltip_text(Some(&babydra_common::i18n::t("explore.settings")));
+            sw.dropdown_sort
+                .set_tooltip_text(Some(&babydra_core::i18n::t("explore.sort_by")));
+            sw.btn_view_icons
+                .set_tooltip_text(Some(&babydra_core::i18n::t("explore.view_grid")));
+            sw.btn_view_list
+                .set_tooltip_text(Some(&babydra_core::i18n::t("explore.view_list")));
+            sw.btn_toggle_preview
+                .set_tooltip_text(Some(&babydra_core::i18n::t("explore.toggle_preview")));
+            sw.btn_settings
+                .set_tooltip_text(Some(&babydra_core::i18n::t("explore.settings")));
         }
     });
 
-    // Start initial navigation
     let path = session.borrow().active_tab().current_path.clone();
     if let Some(ref f) = *navigate_pane_ref.borrow() {
         f(ActivePane::Left, path);

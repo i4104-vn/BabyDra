@@ -1,7 +1,7 @@
-use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Label, Align, Image, ScrolledWindow, Frame, Stack};
 use crate::widgets::preview_panel::create_preview_panel;
-use babydra_common::InfoPanelWidgets;
+use babydra_core::InfoPanelWidgets;
+use gtk4::prelude::*;
+use gtk4::{Align, Box, Frame, Image, Label, Orientation, ScrolledWindow, Stack};
 
 /// Builds the InfoPanel UI hierarchy and returns a handle containing all components.
 pub fn build_info_panel_ui() -> InfoPanelWidgets {
@@ -65,15 +65,13 @@ pub fn build_info_panel_ui() -> InfoPanelWidgets {
     }
 }
 
+/// Creates a new `detail row`.
 fn create_detail_row(container: &Box, label: &str) -> Label {
     let hbox = Box::new(Orientation::Horizontal, 6);
-    
-    let lbl_title = Label::builder()
-        .label(label)
-        .halign(Align::Start)
-        .build();
+
+    let lbl_title = Label::builder().label(label).halign(Align::Start).build();
     lbl_title.set_css_classes(&["dim-label"]);
-    
+
     let lbl_val = Label::builder()
         .label("--")
         .halign(Align::End)

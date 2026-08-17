@@ -1,8 +1,8 @@
 mod dialog;
 
+use babydra_core::i18n::t;
 use gtk4::prelude::*;
-use gtk4::{Box, Orientation, Label, Align, ListBox, ListBoxRow};
-use babydra_common::i18n::t;
+use gtk4::{Align, Box, Label, ListBox, ListBoxRow, Orientation};
 use std::rc::Rc;
 
 /// Builds the keyboard shortcuts list page inside the Settings Dialog.
@@ -26,8 +26,8 @@ pub fn build_keybinds_page(
     listbox.add_css_class("settings-card");
     scroll.set_child(Some(&listbox));
 
-    // Load settings to fetch active shortcuts
-    let settings = babydra_common::load_explore_settings();
+    // Load settings to fetch the currently active shortcuts
+    let settings = babydra_core::load_explore_settings();
 
     // Keep track of shortcut labels so we can update them on capture
     let on_changed = Rc::new(on_keybinds_changed);
@@ -43,7 +43,7 @@ pub fn build_keybinds_page(
         hbox.set_margin_start(16);
         hbox.set_margin_end(16);
 
-        let icon = babydra_utils::ui::icon::get_icon(icon_name, 16);
+        let icon = babydra_ui_kit::ui::icon::get_icon(icon_name, 16);
         icon.set_valign(Align::Center);
         icon.add_css_class("settings-row-icon");
         hbox.append(&icon);
@@ -57,7 +57,6 @@ pub fn build_keybinds_page(
         lbl_desc.add_css_class("settings-row-title");
         hbox.append(&lbl_desc);
 
-        // Get keybind value from settings
         let shortcut_val = settings.get_keybind(action_id);
         let lbl_shortcut = Label::builder()
             .label(&shortcut_val)
@@ -83,22 +82,20 @@ pub fn build_keybinds_page(
             let lbl_inner = lbl_shortcut_c.clone();
             let on_changed_inner = on_changed_c.clone();
             dialog::show_capture_dialog(&parent_win_c, &action_desc_c, move |new_shortcut| {
-                // Update settings
-                let mut current_settings = babydra_common::load_explore_settings();
-                current_settings.keybinds.insert(action_id_inner.clone(), new_shortcut.clone());
-                babydra_common::save_explore_settings(&current_settings);
+                let mut current_settings = babydra_core::load_explore_settings();
+                current_settings
+                    .keybinds
+                    .insert(action_id_inner.clone(), new_shortcut.clone());
+                babydra_core::save_explore_settings(&current_settings);
 
-                // Update UI Label
                 lbl_inner.set_text(&new_shortcut);
 
-                // Trigger callback
                 on_changed_inner();
             });
         });
         row.add_controller(click_gesture);
     };
 
-    // Add dynamic keybind rows
     add_keybind_row("display", "toggle_split", &t("explore.shortcut_split"));
     add_keybind_row("sidebar", "toggle_preview", &t("explore.shortcut_preview"));
     add_keybind_row("eye-off", "toggle_hidden", &t("explore.shortcut_hidden"));

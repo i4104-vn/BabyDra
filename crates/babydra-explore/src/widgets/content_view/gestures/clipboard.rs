@@ -6,14 +6,15 @@ pub fn is_in_trash(path: &std::path::Path) -> bool {
     path.to_string_lossy().contains("Trash/files")
 }
 
-
 /// Shared handler for Ctrl+X (cut) operation.
 pub fn handle_cut(paths: Vec<PathBuf>, current_path: PathBuf, _nav_cb: Rc<dyn Fn(PathBuf)>) {
     if !is_in_trash(&current_path) && !paths.is_empty() {
         babydra_explore_kit::explore::CLIPBOARD.with(|cb| {
             cb.replace(Some((paths.clone(), true)));
         });
-        babydra_explore_kit::explore::context_menu::clipboard::set_system_clipboard_files(&paths, true);
+        babydra_explore_kit::explore::context_menu::clipboard::set_system_clipboard_files(
+            &paths, true,
+        );
         babydra_explore_kit::explore::context_menu::clipboard::apply_cut_dimming_global(&paths);
     }
 }
@@ -24,7 +25,9 @@ pub fn handle_copy(paths: Vec<PathBuf>, current_path: PathBuf, _nav_cb: Rc<dyn F
         babydra_explore_kit::explore::CLIPBOARD.with(|cb| {
             cb.replace(Some((paths.clone(), false)));
         });
-        babydra_explore_kit::explore::context_menu::clipboard::set_system_clipboard_files(&paths, false);
+        babydra_explore_kit::explore::context_menu::clipboard::set_system_clipboard_files(
+            &paths, false,
+        );
         babydra_explore_kit::explore::context_menu::clipboard::apply_cut_dimming_global(&[]);
     }
 }

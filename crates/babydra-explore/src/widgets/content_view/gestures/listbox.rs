@@ -1,8 +1,8 @@
+use babydra_core::{ContentViewWidgets, FileEntry};
 use gtk4::prelude::*;
+use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
-use std::cell::RefCell;
-use babydra_common::{FileEntry, ContentViewWidgets};
 
 /// Wires event controllers, drag select, click activation and keys for ListBox
 pub fn wire_listbox_controllers(
@@ -17,7 +17,9 @@ pub fn wire_listbox_controllers(
     {
         let sc = sc_fn.clone();
         widgets.listbox.connect_selected_rows_changed(move |lb| {
-            let sel: Vec<PathBuf> = lb.selected_rows().iter()
+            let sel: Vec<PathBuf> = lb
+                .selected_rows()
+                .iter()
                 .map(|r| PathBuf::from(r.widget_name().to_string()))
                 .filter(|p| p.is_absolute())
                 .collect();
@@ -44,12 +46,21 @@ pub fn wire_listbox_controllers(
         let e_ref = entries.clone();
         let nav = nav_cb.clone();
         widgets.listbox.connect_row_activated(move |lb, row| {
-            let mut selected_indices: Vec<usize> = lb.selected_rows().iter()
-                .map(|r| r.property::<String>("name").parse::<usize>().unwrap_or(usize::MAX))
+            let mut selected_indices: Vec<usize> = lb
+                .selected_rows()
+                .iter()
+                .map(|r| {
+                    r.property::<String>("name")
+                        .parse::<usize>()
+                        .unwrap_or(usize::MAX)
+                })
                 .filter(|&idx| idx != usize::MAX)
                 .collect();
             if selected_indices.is_empty() {
-                let idx = row.property::<String>("name").parse::<usize>().unwrap_or(usize::MAX);
+                let idx = row
+                    .property::<String>("name")
+                    .parse::<usize>()
+                    .unwrap_or(usize::MAX);
                 if idx != usize::MAX {
                     selected_indices.push(idx);
                 }
@@ -58,11 +69,14 @@ pub fn wire_listbox_controllers(
             for idx in selected_indices {
                 if idx < b.len() {
                     let entry = &b[idx];
-                    if matches!(entry.file_type, babydra_common::FileType::Directory) {
+                    if matches!(entry.file_type, babydra_core::FileType::Directory) {
                         nav(entry.path.clone());
                     } else {
                         let uri = format!("file://{}", entry.path.to_string_lossy());
-                        let _ = gtk4::gio::AppInfo::launch_default_for_uri(&uri, gtk4::gio::AppLaunchContext::NONE);
+                        let _ = gtk4::gio::AppInfo::launch_default_for_uri(
+                            &uri,
+                            gtk4::gio::AppLaunchContext::NONE,
+                        );
                     }
                 }
             }
@@ -80,28 +94,45 @@ pub fn wire_listbox_controllers(
         key_controller.connect_key_pressed(move |_, keyval, _, state| {
             let has_ctrl = state.contains(gtk4::gdk::ModifierType::CONTROL_MASK);
             if keyval == gtk4::gdk::Key::Return || keyval == gtk4::gdk::Key::KP_Enter {
-                let selected_indices: Vec<usize> = lb_clone.selected_rows().iter()
-                    .map(|r| r.property::<String>("name").parse::<usize>().unwrap_or(usize::MAX))
+                let selected_indices: Vec<usize> = lb_clone
+                    .selected_rows()
+                    .iter()
+                    .map(|r| {
+                        r.property::<String>("name")
+                            .parse::<usize>()
+                            .unwrap_or(usize::MAX)
+                    })
                     .filter(|&idx| idx != usize::MAX)
                     .collect();
                 let b = e_ref.borrow();
                 for idx in selected_indices {
                     if idx < b.len() {
                         let entry = &b[idx];
-                        if matches!(entry.file_type, babydra_common::FileType::Directory) {
+                        if matches!(entry.file_type, babydra_core::FileType::Directory) {
                             nav(entry.path.clone());
                         } else {
                             let uri = format!("file://{}", entry.path.to_string_lossy());
-                            let _ = gtk4::gio::AppInfo::launch_default_for_uri(&uri, gtk4::gio::AppLaunchContext::NONE);
+                            let _ = gtk4::gio::AppInfo::launch_default_for_uri(
+                                &uri,
+                                gtk4::gio::AppLaunchContext::NONE,
+                            );
                         }
                     }
                 }
                 glib::Propagation::Stop
             } else if has_ctrl && (keyval == gtk4::gdk::Key::x || keyval == gtk4::gdk::Key::X) {
-                super::handle_cut(sel_paths.borrow().clone(), cp_ref.borrow().clone(), nav.clone());
+                super::handle_cut(
+                    sel_paths.borrow().clone(),
+                    cp_ref.borrow().clone(),
+                    nav.clone(),
+                );
                 glib::Propagation::Stop
             } else if has_ctrl && (keyval == gtk4::gdk::Key::c || keyval == gtk4::gdk::Key::C) {
-                super::handle_copy(sel_paths.borrow().clone(), cp_ref.borrow().clone(), nav.clone());
+                super::handle_copy(
+                    sel_paths.borrow().clone(),
+                    cp_ref.borrow().clone(),
+                    nav.clone(),
+                );
                 glib::Propagation::Stop
             } else if has_ctrl && (keyval == gtk4::gdk::Key::v || keyval == gtk4::gdk::Key::V) {
                 super::handle_paste(cp_ref.borrow().clone(), nav.clone());
