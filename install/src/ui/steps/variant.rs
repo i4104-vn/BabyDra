@@ -54,7 +54,7 @@ pub fn draw_variant_step(f: &mut Frame, app: &App, area: Rect) {
 
             let placeholder_hint = if v.selected {
                 Span::styled(
-                    " [Đang chọn] ",
+                    " [Selected] ",
                     Style::default()
                         .fg(THEME.mint)
                         .bg(THEME.bg_badge)
@@ -62,7 +62,7 @@ pub fn draw_variant_step(f: &mut Frame, app: &App, area: Rect) {
                 )
             } else if is_cursor {
                 Span::styled(
-                    " [Space: Chọn Variant] ",
+                    " [Space: Select Variant] ",
                     Style::default()
                         .fg(THEME.amber)
                         .bg(THEME.bg_badge)

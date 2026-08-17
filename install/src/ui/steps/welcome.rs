@@ -129,7 +129,7 @@ pub fn draw_welcome_step(f: &mut Frame, app: &App, area: Rect) {
             );
 
             let hint = if is_selected {
-                Span::styled("  [↑/↓: Đổi Profile]", Style::default().fg(THEME.amber).add_modifier(Modifier::BOLD))
+                Span::styled("  [↑/↓: Change Profile]", Style::default().fg(THEME.amber).add_modifier(Modifier::BOLD))
             } else {
                 Span::raw("")
             };

@@ -85,7 +85,7 @@ pub fn draw_binaries_step(f: &mut Frame, app: &App, area: Rect) {
         let name_line = if is_cursor {
             Line::from(vec![
                 Span::styled(&b.name, name_style),
-                Span::styled(" [Space: Bật/Tắt]", Style::default().fg(THEME.amber).add_modifier(Modifier::BOLD)),
+                Span::styled(" [Space: Toggle]", Style::default().fg(THEME.amber).add_modifier(Modifier::BOLD)),
             ])
         } else {
             Line::from(Span::styled(&b.name, name_style))

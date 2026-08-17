@@ -254,16 +254,16 @@ pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
 
 pub fn draw_shortcuts_panel(f: &mut Frame, _app: &App, area: Rect) {
     let shortcuts = [
-        ("Space", "Chọn / Bật tắt", THEME.mint),
-        ("Tab / n", "Bước tiếp theo", THEME.cyan),
-        ("p", "Bước trước đó", THEME.cyan),
-        ("↑ / ↓", "Di chuyển chọn", THEME.cyan),
-        ("a", "Chọn tất cả", THEME.cyan),
-        ("i / ↵", "Cài đặt ngay", THEME.mint),
-        ("s", "Đổi thư mục src", THEME.amber),
-        ("r", "Quét lại file", THEME.purple),
-        ("?", "Trợ giúp", THEME.purple),
-        ("q", "Thoát installer", THEME.rose),
+        ("Space", "Toggle / Select", THEME.mint),
+        ("Tab / n", "Next Step", THEME.cyan),
+        ("p", "Previous Step", THEME.cyan),
+        ("↑ / ↓", "Navigate Items", THEME.cyan),
+        ("a", "Select All", THEME.cyan),
+        ("i / ↵", "Start Install", THEME.mint),
+        ("s", "Binary Folder", THEME.amber),
+        ("r", "Rescan Source", THEME.purple),
+        ("?", "Help Dialog", THEME.purple),
+        ("q", "Quit Installer", THEME.rose),
     ];
 
     let items: Vec<ListItem> = shortcuts
@@ -287,7 +287,7 @@ pub fn draw_shortcuts_panel(f: &mut Frame, _app: &App, area: Rect) {
 
     let list = List::new(items).block(
         Block::default()
-            .title(" 󰌌 Phím tắt ")
+            .title(" 󰌌 Shortcuts ")
             .title_style(THEME.title_cyan())
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
@@ -301,20 +301,20 @@ pub fn draw_footer(f: &mut Frame, app: &App, area: Rect) {
     let footer_text = vec![
         Span::styled(" 🐉 BabyDra Installer ", THEME.title_cyan()),
         Span::styled("│ Wayland Compositor ", Style::default().fg(THEME.text_muted)),
-        Span::styled("│ Bước: ", Style::default().fg(THEME.text_dim)),
+        Span::styled("│ Step: ", Style::default().fg(THEME.text_dim)),
         Span::styled(step_info, Style::default().fg(THEME.amber).add_modifier(Modifier::BOLD)),
         Span::styled(" │ ", Style::default().fg(THEME.text_muted)),
         Span::styled(" Space ", THEME.key_badge_green()),
-        Span::styled(" Chọn/Đổi ", Style::default().fg(THEME.mint).add_modifier(Modifier::BOLD)),
+        Span::styled(" Toggle ", Style::default().fg(THEME.mint).add_modifier(Modifier::BOLD)),
         Span::styled("│ ", Style::default().fg(THEME.text_muted)),
         Span::styled(" Tab/n ", THEME.key_badge()),
-        Span::styled(" Tiếp ", Style::default().fg(THEME.text_body)),
+        Span::styled(" Next ", Style::default().fg(THEME.text_body)),
         Span::styled("│ ", Style::default().fg(THEME.text_muted)),
         Span::styled(" p ", THEME.key_badge()),
-        Span::styled(" Lùi ", Style::default().fg(THEME.text_body)),
+        Span::styled(" Prev ", Style::default().fg(THEME.text_body)),
         Span::styled("│ ", Style::default().fg(THEME.text_muted)),
         Span::styled(" ? ", Style::default().fg(THEME.purple).bg(THEME.bg_badge).add_modifier(Modifier::BOLD)),
-        Span::styled(" Trợ giúp ", Style::default().fg(THEME.text_body)),
+        Span::styled(" Help ", Style::default().fg(THEME.text_body)),
     ];
 
     let footer = Paragraph::new(Line::from(footer_text))

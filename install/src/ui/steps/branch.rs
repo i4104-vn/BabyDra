@@ -179,7 +179,7 @@ fn branch_row<'a>(
     } else if is_cursor {
         spans.push(Span::raw(" "));
         spans.push(Span::styled(
-            " [Space: Chọn Target] ",
+            " [Space: Select Branch] ",
             Style::default()
                 .fg(THEME.mint)
                 .bg(THEME.bg_badge)

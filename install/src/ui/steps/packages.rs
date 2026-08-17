@@ -67,7 +67,7 @@ pub fn draw_system_packages_step(f: &mut Frame, app: &App, area: Rect) {
 
             let placeholder_hint = if is_cursor {
                 Span::styled(
-                    " [Space: Bật/Tắt] ",
+                    " [Space: Toggle] ",
                     Style::default()
                         .fg(THEME.amber)
                         .bg(THEME.bg_badge)
