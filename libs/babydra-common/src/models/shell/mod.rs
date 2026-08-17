@@ -12,7 +12,7 @@ pub mod battery;
 pub mod power;
 pub mod network;
 
-pub use theme_config::ThemeConfig;
+pub use theme_config::{ThemeConfig, ThemeSelection};
 pub use shell_config::ShellConfig;
 pub use island_state::IslandState;
 pub use notification::{ActiveNotification, NotificationMsg};
