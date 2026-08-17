@@ -23,7 +23,7 @@ pub fn draw_welcome_step(f: &mut Frame, app: &App, area: Rect) {
         Line::from(Span::styled("Welcome to BabyDra Desktop Shell Installer", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))),
         Line::from(""),
         Line::from("This TUI wizard will guide you through setting up BabyDra Wayland shell on Arch Linux."),
-        Line::from(Span::styled("Key feature: It installs pre-built binaries directly without requiring cargo build from source.", Style::default().fg(Color::Green))),
+        Line::from(Span::styled("Two install modes: copy pre-built binaries directly, or pick a git branch and rebuild everything from source.", Style::default().fg(Color::Green))),
         Line::from("All binary executables are copied to ~/.local/bin and staged in /var/lib/babydra for system-wide access."),
     ];
 

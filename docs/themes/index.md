@@ -196,4 +196,4 @@ system defaults < configs/ seed < theme package < variant < ~/.babydra/ (user)
 | DO NOT | Không hardcode màu/font trong code app — đi qua theme package |
 | DO NOT | Không sửa theme/variant của người khác — mỗi người 1 thư mục |
 
-Xem thêm: `WORKFLOW.md` (gốc repo), [design/theming](../design/theming.md), [design/tokens](../design/tokens.md).
+Xem thêm: [design/theming](../design/theming.md), [design/tokens](../design/tokens.md).

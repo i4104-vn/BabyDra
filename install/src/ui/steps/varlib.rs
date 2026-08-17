@@ -60,7 +60,7 @@ pub fn draw_varlib_bundle_step(f: &mut Frame, app: &App, area: Rect) {
 
     let list = List::new(items).block(
         Block::default()
-            .title(" 4. System Staging & /var/lib/babydra Bundle [Space: Toggle | Enter/n: Next] ")
+            .title(" 5. System Staging & /var/lib/babydra Bundle [Space: Toggle | Enter/n: Next] ")
             .title_style(
                 Style::default()
                     .fg(Color::Magenta)

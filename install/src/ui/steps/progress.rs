@@ -104,7 +104,7 @@ pub fn draw_execute_install_step(f: &mut Frame, app: &App, area: Rect) {
 
     let logs_block = Block::default()
         .title(format!(
-            " 7. Live Installation Logs ({}) [j/k: Scroll | c: Clear | g/G: Top/Bottom] ",
+            " 9. Live Installation Logs ({}) [j/k: Scroll | c: Clear | g/G: Top/Bottom] ",
             app.logs.len()
         ))
         .title_style(

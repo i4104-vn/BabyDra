@@ -13,7 +13,7 @@ pub fn draw_help_modal(f: &mut Frame, area: Rect) {
     f.render_widget(Clear, popup_area);
 
     let shortcuts = vec![
-        ("1 - 9", "Jump directly to wizard step 1 through 9"),
+        ("1 - 9 / 0", "Jump directly to wizard step (0 = Summary)"),
         ("Tab / n", "Navigate to Next step"),
         ("BackTab / p", "Navigate to Previous step"),
         (
@@ -26,6 +26,10 @@ pub fn draw_help_modal(f: &mut Frame, area: Rect) {
         (
             "s",
             "Change binary source folder path (e.g. target/release)",
+        ),
+        (
+            "Sudo modal",
+            "Password is masked; Enter validates once before any change",
         ),
         ("r", "Rescan source directory for binary files"),
         ("c", "Clear installation log buffer"),

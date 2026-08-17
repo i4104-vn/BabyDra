@@ -1,14 +1,14 @@
 use crate::models::{GenericOptionItem, LogLevel};
-use crate::system::{get_user_home, is_root, safe_copy_binary};
+use crate::system::{get_user_home, SudoSession};
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 
 pub fn execute_varlib_task<F>(
     opt: &GenericOptionItem,
     workspace_root: &Path,
     source_binary_dir: &Path,
+    sudo: &SudoSession,
     mut log: F,
 ) -> (usize, usize)
 where
@@ -25,13 +25,7 @@ where
                 LogLevel::Bundle,
                 "Staging all built binaries into /var/lib/babydra/bin/...".into(),
             );
-            if is_root() {
-                let _ = fs::create_dir_all(&var_lib_bin);
-            } else {
-                let _ = Command::new("sudo")
-                    .args(["mkdir", "-p", var_lib_bin.to_str().unwrap()])
-                    .status();
-            }
+            let _ = sudo.run_root_quiet(&["mkdir", "-p", var_lib_bin.to_str().unwrap_or("/")]);
 
             let all_binary_names = [
                 "babydra-panel",
@@ -49,20 +43,25 @@ where
                 let src = source_binary_dir.join(bname);
                 let dst = var_lib_bin.join(bname);
                 if src.exists() {
-                    if is_root() {
-                        let _ = safe_copy_binary(&src, &dst);
-                    } else {
-                        let _ = Command::new("sudo")
-                            .args(["cp", src.to_str().unwrap(), dst.to_str().unwrap()])
-                            .status();
-                        let _ = Command::new("sudo")
-                            .args(["chmod", "755", dst.to_str().unwrap()])
-                            .status();
+                    let out = sudo.run_root(&[
+                        "cp",
+                        src.to_str().unwrap_or(""),
+                        dst.to_str().unwrap_or(""),
+                    ]);
+                    let _ = sudo.run_root_quiet(&["chmod", "755", dst.to_str().unwrap_or("")]);
+                    if let Ok(o) = out {
+                        if o.success {
+                            log(
+                                LogLevel::Bundle,
+                                format!("Staged binary -> /var/lib/babydra/bin/{bname}"),
+                            );
+                        } else {
+                            log(
+                                LogLevel::Warn,
+                                format!("Failed to stage {bname}: {}", o.stderr.trim()),
+                            );
+                        }
                     }
-                    log(
-                        LogLevel::Bundle,
-                        format!("Staged binary -> /var/lib/babydra/bin/{}", bname),
-                    );
                 }
             }
             log(
@@ -84,30 +83,18 @@ where
             if wp.exists() {
                 let _ = fs::copy(&wp, user_babydra.join("wallpaper.png"));
 
-                if is_root() {
-                    let _ = fs::create_dir_all(&var_lib_babydra);
-                    let _ = fs::create_dir_all("/usr/share/babydra");
-                    let _ = fs::copy(&wp, var_lib_babydra.join("greeter_wallpaper.png"));
-                    let _ = fs::copy(&wp, "/usr/share/babydra/wallpaper.png");
-                } else {
-                    let _ = Command::new("sudo")
-                        .args(["mkdir", "-p", "/usr/share/babydra", "/var/lib/babydra"])
-                        .status();
-                    let _ = Command::new("sudo")
-                        .args([
-                            "cp",
-                            wp.to_str().unwrap(),
-                            "/var/lib/babydra/greeter_wallpaper.png",
-                        ])
-                        .status();
-                    let _ = Command::new("sudo")
-                        .args([
-                            "cp",
-                            wp.to_str().unwrap(),
-                            "/usr/share/babydra/wallpaper.png",
-                        ])
-                        .status();
-                }
+                let _ =
+                    sudo.run_root_quiet(&["mkdir", "-p", "/usr/share/babydra", "/var/lib/babydra"]);
+                let _ = sudo.run_root_quiet(&[
+                    "cp",
+                    wp.to_str().unwrap_or(""),
+                    "/var/lib/babydra/greeter_wallpaper.png",
+                ]);
+                let _ = sudo.run_root_quiet(&[
+                    "cp",
+                    wp.to_str().unwrap_or(""),
+                    "/usr/share/babydra/wallpaper.png",
+                ]);
                 log(LogLevel::Success, "Deployed system wallpapers.".into());
             }
             copied += 1;
@@ -125,37 +112,16 @@ where
             if logo.exists() {
                 let _ = fs::copy(&logo, user_babydra.join("logo.png"));
 
-                if is_root() {
-                    let _ = fs::create_dir_all(&var_lib_babydra);
-                    let _ = fs::create_dir_all("/usr/share/babydra");
-                    let _ = fs::copy(&logo, var_lib_babydra.join("logo.png"));
-                    let _ = fs::copy(&logo, "/usr/share/babydra/logo.png");
-                    let _ = fs::copy(&logo, "/usr/share/babydra/babydra-preview.png");
-                    let _ = fs::copy(&logo, "/usr/share/babydra/babydra-settings.png");
-                } else {
-                    let _ = Command::new("sudo")
-                        .args(["mkdir", "-p", "/usr/share/babydra", "/var/lib/babydra"])
-                        .status();
-                    let _ = Command::new("sudo")
-                        .args(["cp", logo.to_str().unwrap(), "/var/lib/babydra/logo.png"])
-                        .status();
-                    let _ = Command::new("sudo")
-                        .args(["cp", logo.to_str().unwrap(), "/usr/share/babydra/logo.png"])
-                        .status();
-                    let _ = Command::new("sudo")
-                        .args([
-                            "cp",
-                            logo.to_str().unwrap(),
-                            "/usr/share/babydra/babydra-preview.png",
-                        ])
-                        .status();
-                    let _ = Command::new("sudo")
-                        .args([
-                            "cp",
-                            logo.to_str().unwrap(),
-                            "/usr/share/babydra/babydra-settings.png",
-                        ])
-                        .status();
+                let _ =
+                    sudo.run_root_quiet(&["mkdir", "-p", "/usr/share/babydra", "/var/lib/babydra"]);
+                let logo_str = logo.to_str().unwrap_or("");
+                for dest in [
+                    "/var/lib/babydra/logo.png",
+                    "/usr/share/babydra/logo.png",
+                    "/usr/share/babydra/babydra-preview.png",
+                    "/usr/share/babydra/babydra-settings.png",
+                ] {
+                    let _ = sudo.run_root_quiet(&["cp", logo_str, dest]);
                 }
                 log(
                     LogLevel::Success,
@@ -170,16 +136,14 @@ where
                 LogLevel::Config,
                 "Setting chmod 777 on /var/lib/babydra for greeter/user access...".into(),
             );
-            if is_root() {
+            if SudoSession::is_root() {
                 let mut perms = fs::metadata(&var_lib_babydra)
                     .map(|m| m.permissions())
                     .unwrap_or_else(|_| fs::Permissions::from_mode(0o777));
                 perms.set_mode(0o777);
                 let _ = fs::set_permissions(&var_lib_babydra, perms);
             } else {
-                let _ = Command::new("sudo")
-                    .args(["chmod", "777", "/var/lib/babydra"])
-                    .status();
+                let _ = sudo.run_root_quiet(&["chmod", "777", "/var/lib/babydra"]);
             }
             log(
                 LogLevel::Success,

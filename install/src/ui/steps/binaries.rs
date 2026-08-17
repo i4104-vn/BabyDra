@@ -16,6 +16,8 @@ pub fn draw_binaries_step(f: &mut Frame, app: &App, area: Rect) {
         .constraints([Constraint::Min(11), Constraint::Length(6)])
         .split(area);
 
+    let build_from_source = app.is_build_from_source();
+
     let header_cells = ["", "Binary Name", "Status", "Size", "Target Location"]
         .into_iter()
         .map(|h| {
@@ -40,18 +42,24 @@ pub fn draw_binaries_step(f: &mut Frame, app: &App, area: Rect) {
             Span::styled("[ ]", Style::default().fg(Color::DarkGray))
         };
 
+        // In build-from-source mode every binary will be produced by the
+        // release build, so treat missing files as "will build".
+        let available = b.exists_in_source || build_from_source;
+
         let name_style = if is_cursor {
             Style::default()
                 .fg(Color::Cyan)
                 .add_modifier(Modifier::BOLD | Modifier::UNDERLINED)
-        } else if b.exists_in_source {
+        } else if available {
             Style::default().fg(Color::White)
         } else {
             Style::default().fg(Color::DarkGray)
         };
 
-        let status_span = if !b.exists_in_source {
+        let status_span = if !available {
             Span::styled("Missing in src", Style::default().fg(Color::Red))
+        } else if build_from_source {
+            Span::styled("Build from source", Style::default().fg(Color::Cyan))
         } else if b.exists_in_target {
             Span::styled("Installed (Update)", Style::default().fg(Color::Green))
         } else {
@@ -100,7 +108,7 @@ pub fn draw_binaries_step(f: &mut Frame, app: &App, area: Rect) {
     .header(header)
     .block(
         Block::default()
-            .title(" 3. BabyDra Pre-built Binaries [Direct Copy without Rebuilding] ")
+            .title(" 4. BabyDra Binaries [Pre-built Copy or Build-from-Source] ")
             .title_style(
                 Style::default()
                     .fg(Color::Cyan)

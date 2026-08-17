@@ -65,7 +65,7 @@ pub fn draw_system_packages_step(f: &mut Frame, app: &App, area: Rect) {
 
     let list = List::new(items).block(
         Block::default()
-            .title(" 2. System Packages & Dependencies [Space: Toggle | a: Select All | Enter/n: Next] ")
+            .title(" 3. System Packages & Dependencies [Space: Toggle | a: Select All | Enter/n: Next] ")
             .title_style(Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)

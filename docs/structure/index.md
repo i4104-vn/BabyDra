@@ -23,9 +23,10 @@
 ## 1. Tổng quan cấu trúc thư mục
 
 > [!IMPORTANT]
-> Kho mã nguồn phân tách theo mô hình 3 nhánh (xem `WORKFLOW.md` ở gốc repository):
-> - **Nhánh `main`** — chỉ chứa `install/`, `install.sh`, tài liệu.
-> - **Nhánh `release`/`develop`** — chứa thêm `crates/`, `libs/`, `configs/`, `themes/`, `variants/`, `scripts/`, `tests/`, `start.sh`, `update.sh`.
+> Kho mã nguồn phân tách theo mô hình 3 nhánh:
+> - **Nhánh `main`** — chỉ chứa bộ cài đặt (`install/`) và tài liệu.
+> - **Nhánh `release`** (mặc định) và **`develop`** — chứa mã nguồn đầy đủ: `crates/`, `libs/`, `configs/`, `themes/`, `variants/`, `scripts/`, `tests/`, `start.sh`, `update.sh`.
+> - Chỉ tác giả push được vào 3 nhánh trên; người đóng góp làm việc trên nhánh riêng tách từ `develop`.
 
 ### 1.1. Nhánh `main` (Kênh phân phối)
 
@@ -35,7 +36,6 @@ BabyDra/                          <- Thư mục gốc repository (nhánh main)
 ├── Cargo.lock                    <- Khóa phiên bản dependency (không chỉnh tay)
 ├── install.sh                    <- Script khởi chạy bộ cài đặt TUI
 ├── README.md                     <- Hướng dẫn tổng quan người dùng cuối
-├── WORKFLOW.md                   <- Quy chuẩn phân nhánh và phát triển
 ├── docs/                         <- Toàn bộ tài liệu dự án (xem mục 8)
 └── install/                      <- Bộ cài đặt TUI (babydra-installer)
 ```
@@ -49,7 +49,6 @@ BabyDra/                          <- Thư mục gốc repository (nhánh release
 ├── scripts/                      <- Scripts: install.sh, start.sh, update.sh, check.sh
 ├── wallpaper.png                 <- Hình nền mặc định của hệ thống
 ├── README.md
-├── WORKFLOW.md                   <- Mô hình branch + ma trận sở hữu
 ├── CONTRIBUTING.md               <- Checklist PR
 ├── CHANGELOG.md                  <- Lịch sử phiên bản (SemVer)
 ├── docs/                         <- Tài liệu (đồng bộ với nhánh main)

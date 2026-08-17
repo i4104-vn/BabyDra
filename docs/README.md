@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/badge/rust-1.80+-de a5844f?style=for-the-badge&logo=rust&logoColor=white" alt="Rust">
   <img src="https://img.shields.io/badge/GTK4-0.9-blue?style=for-the-badge&logo=gtk&logoColor=white" alt="GTK4">
   <img src="https://img.shields.io/badge/Wayland-labwc-4bc0c0?style=for-the-badge" alt="Wayland">
-  <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License">
+  <img src="https://img.shields.io/badge/license-Apache_2.0-blue?style=for-the-badge" alt="License">
 </p>
 
 <p align="center">Tài liệu kỹ thuật & hướng dẫn của môi trường desktop BabyDra — viết cho người phát triển, không phải người dùng cuối.</p>

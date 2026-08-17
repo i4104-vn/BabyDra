@@ -55,7 +55,7 @@ pub fn draw_configs_themes_step(f: &mut Frame, app: &App, area: Rect) {
 
     let list = List::new(items).block(
         Block::default()
-            .title(" 5. Desktop Dotfiles, Themes & Configurations [Space: Toggle | a: All | Enter/n: Next] ")
+            .title(" 6. Desktop Dotfiles, Themes & Configurations [Space: Toggle | a: All | Enter/n: Next] ")
             .title_style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)

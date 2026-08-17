@@ -1,19 +1,21 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum WizardStep {
     Welcome = 0,
-    SystemPackages = 1,
-    Binaries = 2,
-    VarLibBundle = 3,
-    ConfigsThemes = 4,
-    VariantSelection = 5,
-    DisplayManager = 6,
-    ExecuteInstall = 7,
-    Summary = 8,
+    SourceBranch = 1,
+    SystemPackages = 2,
+    Binaries = 3,
+    VarLibBundle = 4,
+    ConfigsThemes = 5,
+    VariantSelection = 6,
+    DisplayManager = 7,
+    ExecuteInstall = 8,
+    Summary = 9,
 }
 
 impl WizardStep {
-    pub const ALL: [WizardStep; 9] = [
+    pub const ALL: [WizardStep; 10] = [
         WizardStep::Welcome,
+        WizardStep::SourceBranch,
         WizardStep::SystemPackages,
         WizardStep::Binaries,
         WizardStep::VarLibBundle,
@@ -27,20 +29,22 @@ impl WizardStep {
     pub fn title(&self) -> &'static str {
         match self {
             WizardStep::Welcome => "1. Welcome & Overview",
-            WizardStep::SystemPackages => "2. System Packages & Deps",
-            WizardStep::Binaries => "3. BabyDra Binaries",
-            WizardStep::VarLibBundle => "4. /var/lib Staging Bundle",
-            WizardStep::ConfigsThemes => "5. Configs, Themes & Icons",
-            WizardStep::VariantSelection => "6. Variant Selection",
-            WizardStep::DisplayManager => "7. Greetd Display Manager",
-            WizardStep::ExecuteInstall => "8. Execute Installation",
-            WizardStep::Summary => "9. Summary & Launch",
+            WizardStep::SourceBranch => "2. Source Branch & Build",
+            WizardStep::SystemPackages => "3. System Packages & Deps",
+            WizardStep::Binaries => "4. BabyDra Binaries",
+            WizardStep::VarLibBundle => "5. /var/lib Staging Bundle",
+            WizardStep::ConfigsThemes => "6. Configs, Themes & Icons",
+            WizardStep::VariantSelection => "7. Variant Selection",
+            WizardStep::DisplayManager => "8. Greetd Display Manager",
+            WizardStep::ExecuteInstall => "9. Execute Installation",
+            WizardStep::Summary => "10. Summary & Launch",
         }
     }
 
     pub fn short_name(&self) -> &'static str {
         match self {
             WizardStep::Welcome => "Welcome",
+            WizardStep::SourceBranch => "Branch",
             WizardStep::SystemPackages => "Packages",
             WizardStep::Binaries => "Binaries",
             WizardStep::VarLibBundle => "VarLib Bundle",

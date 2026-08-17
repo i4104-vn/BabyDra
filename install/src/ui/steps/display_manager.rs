@@ -60,7 +60,7 @@ pub fn draw_display_manager_step(f: &mut Frame, app: &App, area: Rect) {
 
     let list = List::new(items).block(
         Block::default()
-            .title(" 7. Display Manager & Greetd Login Setup [Space: Toggle | Enter: Confirm Install] ")
+            .title(" 8. Display Manager & Greetd Login Setup [Space: Toggle | Enter: Confirm Install] ")
             .title_style(Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
@@ -70,7 +70,7 @@ pub fn draw_display_manager_step(f: &mut Frame, app: &App, area: Rect) {
 
     let prompt_box = Paragraph::new(vec![
         Line::from(Span::styled("Ready to Execute Installation?", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD))),
-        Line::from("All configuration steps have been specified. Press [Enter] or [i] to begin direct binary deployment."),
+        Line::from("All configuration steps have been specified. Press [Enter] or [i] to begin installation."),
         Line::from(Span::styled("Or use [p] to review previous configuration steps.", Style::default().fg(Color::DarkGray))),
     ])
     .block(

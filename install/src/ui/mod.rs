@@ -41,6 +41,8 @@ pub fn draw(f: &mut Frame, app: &App) {
         modals::draw_edit_path_modal(f, app, size);
     } else if app.show_confirm_dialog {
         modals::draw_confirm_modal(f, app, size);
+    } else if app.show_sudo_modal {
+        modals::draw_sudo_modal(f, app, size);
     } else if app.show_help {
         modals::draw_help_modal(f, size);
     }
@@ -49,6 +51,7 @@ pub fn draw(f: &mut Frame, app: &App) {
 fn draw_content(f: &mut Frame, app: &App, area: Rect) {
     match app.current_step {
         WizardStep::Welcome => steps::draw_welcome_step(f, app, area),
+        WizardStep::SourceBranch => steps::draw_branch_step(f, app, area),
         WizardStep::SystemPackages => steps::draw_system_packages_step(f, app, area),
         WizardStep::Binaries => steps::draw_binaries_step(f, app, area),
         WizardStep::VarLibBundle => steps::draw_varlib_bundle_step(f, app, area),

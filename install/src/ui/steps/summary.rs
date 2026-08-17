@@ -79,6 +79,25 @@ pub fn draw_summary_step(f: &mut Frame, app: &App, area: Rect) {
             ),
             Span::styled(&app.selected_variant, Style::default().fg(Color::Magenta)),
         ]),
+        Line::from(vec![
+            Span::styled(
+                "Install Source:       ",
+                Style::default()
+                    .fg(Color::Yellow)
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::styled(
+                if app.is_build_from_source() {
+                    format!(
+                        "Branch '{}' (checked out, pulled, built from source)",
+                        app.selected_branch
+                    )
+                } else {
+                    "Pre-built binaries (direct copy)".to_string()
+                },
+                Style::default().fg(Color::Cyan),
+            ),
+        ]),
         Line::from(""),
         Line::from(Span::styled(
             "Next Steps & Launching:",
@@ -98,7 +117,7 @@ pub fn draw_summary_step(f: &mut Frame, app: &App, area: Rect) {
 
     let summary_widget = Paragraph::new(summary_lines).block(
         Block::default()
-            .title(" 9. Summary & Launch Instructions ")
+            .title(" 10. Summary & Launch Instructions ")
             .title_style(
                 Style::default()
                     .fg(status_color)

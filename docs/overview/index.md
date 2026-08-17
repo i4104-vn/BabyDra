@@ -118,13 +118,16 @@ Trình chọn kênh hiển thị **metadata của nhánh** (tên nhánh, commit 
 
 ## 4. Mô hình phân phối và phân nhánh
 
-Kho mã nguồn áp dụng mô hình 3 nhánh:
+Kho mã nguồn áp dụng mô hình 3 nhánh chính (tất cả do tác giả quản lý):
 
-1. **`main`** — phân phối tinh gọn: chỉ chứa `install/`, `install.sh`, tài liệu.
-2. **`release`** — mã nguồn chính thức ổn định: toàn bộ `crates/`, `libs/`, `configs/`, `themes/`, `variants/`, `scripts/`, `tests/`.
-3. **`develop`** — nhánh phát triển chung, checkout từ `release`; developer tạo nhánh `feature/<tên-user>` từ đây.
+1. **`main`** — kênh phân phối tinh gọn: **chỉ chứa bộ cài đặt** (`install/`) và tài liệu.
+2. **`release`** — **nhánh mặc định**: mã nguồn chính thức ổn định do tác giả push lên (toàn bộ `crates/`, `libs/`, `configs/`, `themes/`, `variants/`, `scripts/`, `tests/`).
+3. **`develop`** — nhánh phát triển, tách ra từ `release`.
 
-Quy trình phân nhánh chi tiết: `WORKFLOW.md` (ở thư mục gốc repository).
+Không ai ngoài tác giả có thể push vào `main`/`release`/`develop`. Người đóng góp
+tạo nhánh riêng từ `develop` và chỉ làm việc trong nhánh của mình. Bộ cài đặt
+(`babydra-installer`) liệt kê toàn bộ nhánh có thể cài đặt (trừ `main`) để build
+và triển khai từ bất kỳ nhánh nào trong số đó.
 
 ---
 
@@ -168,4 +171,4 @@ Toàn bộ giao diện được tô màu bởi CSS dùng chung từ `babydra-ui-
 | Đa ngôn ngữ (i18n) | `libs/babydra-core/src/i18n/` + `locales/*/en.json`, `vi.json` | [apis/core](../apis/core.md) |
 | Hướng dẫn biên dịch | `cargo build --release --workspace` | [setup](../setup/index.md) |
 | Mở rộng Dynamic Island | `libs/babydra-island/` | [guides/island](../guides/island.md) |
-| Quy trình phân nhánh | Git workflow | `WORKFLOW.md` (gốc repo) |
+| Quy trình phân nhánh | Git workflow | [CONTRIBUTING](../../CONTRIBUTING.md), [structure](../structure/index.md) |

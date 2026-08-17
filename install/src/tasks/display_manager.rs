@@ -1,9 +1,12 @@
 use crate::models::{GenericOptionItem, LogLevel};
-use crate::system::is_root;
-use std::fs;
-use std::process::Command;
+use crate::system::SudoSession;
+use std::path::Path;
 
-pub fn execute_display_manager_task<F>(opt: &GenericOptionItem, mut log: F) -> (usize, usize)
+pub fn execute_display_manager_task<F>(
+    opt: &GenericOptionItem,
+    sudo: &SudoSession,
+    mut log: F,
+) -> (usize, usize)
 where
     F: FnMut(LogLevel, String),
 {
@@ -17,20 +20,20 @@ where
             );
             let greetd_toml = "[terminal]\nvt = 1\n\n[default_session]\ncommand = \"sh -c 'clear 2>/dev/null; setterm -cursor off 2>/dev/null; exec cage -s -- /usr/bin/babydra-greeter'\"\nuser = \"greeter\"\n";
 
-            if is_root() {
-                let _ = fs::create_dir_all("/etc/greetd");
-                let _ = fs::write("/etc/greetd/config.toml", greetd_toml);
-            } else {
-                let _ = Command::new("sudo")
-                    .args(["mkdir", "-p", "/etc/greetd"])
-                    .status();
-                let _ = Command::new("sudo").args(["sh", "-c", "echo '[terminal]\nvt = 1\n\n[default_session]\ncommand = \"sh -c \\'clear 2>/dev/null; setterm -cursor off 2>/dev/null; exec cage -s -- /usr/bin/babydra-greeter\\'\"\nuser = \"greeter\"' > /etc/greetd/config.toml"]).status();
+            // Write via temp file + sudo cp (avoids fragile `sudo sh -c echo`).
+            match sudo.write_root_file(Path::new("/etc/greetd/config.toml"), greetd_toml) {
+                Ok(()) => {
+                    log(
+                        LogLevel::Success,
+                        "Configured /etc/greetd/config.toml.".into(),
+                    );
+                    copied += 1;
+                }
+                Err(e) => log(
+                    LogLevel::Error,
+                    format!("Failed to write /etc/greetd/config.toml: {e}"),
+                ),
             }
-            log(
-                LogLevel::Success,
-                "Configured /etc/greetd/config.toml.".into(),
-            );
-            copied += 1;
         }
 
         "mask_gettys" => {
@@ -39,18 +42,9 @@ where
                 "Masking getty on tty2-6 to eliminate terminal screen flash...".into(),
             );
             for vt in 2..=6 {
-                let service = format!("getty@tty{}.service", vt);
-                if is_root() {
-                    let _ = Command::new("systemctl").args(["stop", &service]).status();
-                    let _ = Command::new("systemctl").args(["mask", &service]).status();
-                } else {
-                    let _ = Command::new("sudo")
-                        .args(["systemctl", "stop", &service])
-                        .status();
-                    let _ = Command::new("sudo")
-                        .args(["systemctl", "mask", &service])
-                        .status();
-                }
+                let service = format!("getty@tty{vt}.service");
+                let _ = sudo.run_root_quiet(&["systemctl", "stop", &service]);
+                let _ = sudo.run_root_quiet(&["systemctl", "mask", &service]);
             }
             log(
                 LogLevel::Success,
@@ -61,15 +55,7 @@ where
 
         "enable_greetd" => {
             log(LogLevel::Config, "Enabling greetd.service...".into());
-            if is_root() {
-                let _ = Command::new("systemctl")
-                    .args(["enable", "greetd.service"])
-                    .status();
-            } else {
-                let _ = Command::new("sudo")
-                    .args(["systemctl", "enable", "greetd.service"])
-                    .status();
-            }
+            let _ = sudo.run_root_quiet(&["systemctl", "enable", "greetd.service"]);
             log(
                 LogLevel::Success,
                 "Enabled greetd.service on system boot.".into(),

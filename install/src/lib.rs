@@ -13,12 +13,13 @@ pub mod ui;
 
 pub use app::App;
 pub use models::{
-    BinaryItem, BinaryLocation, GenericOptionItem, InstallState, LogLevel, LogMessage,
+    BinaryItem, BinaryLocation, BranchItem, GenericOptionItem, InstallState, LogLevel, LogMessage,
     PresetProfile, VariantItem, WizardStep,
 };
 pub use system::{
-    default_binary_source_dir, find_workspace_root, initial_binaries_list,
-    initial_configs_themes_options, initial_display_manager_options, initial_package_options,
-    initial_variant_options, initial_varlib_options,
+    build_workspace, checkout_and_pull, default_binary_source_dir, find_workspace_root,
+    initial_binaries_list, initial_configs_themes_options, initial_display_manager_options,
+    initial_package_options, initial_variant_options, initial_varlib_options, list_branches,
+    SudoSession,
 };
 pub use tasks::{spawn_installation_worker, InstallEvent, InstallPlan};

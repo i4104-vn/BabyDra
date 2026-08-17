@@ -129,7 +129,7 @@ pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
 
     let steps_list = List::new(items).block(
         Block::default()
-            .title(" Steps [1-9] ")
+            .title(" Steps [1-9, 0] ")
             .title_style(
                 Style::default()
                     .fg(Color::Cyan)
@@ -141,10 +141,11 @@ pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
     );
     f.render_widget(steps_list, sidebar_chunks[0]);
 
+    let build_from_source = app.is_build_from_source();
     let selected_bins = app
         .binaries
         .iter()
-        .filter(|b| b.selected && b.exists_in_source)
+        .filter(|b| b.selected && (b.exists_in_source || build_from_source))
         .count();
     let total_bins = app.binaries.len();
     let selected_varlib = app.varlib_options.iter().filter(|o| o.selected).count();
@@ -207,6 +208,17 @@ pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
         Line::from(vec![
             Span::styled("• Variant:  ", Style::default().fg(Color::DarkGray)),
             Span::styled(selected_variant, Style::default().fg(Color::Magenta)),
+        ]),
+        Line::from(vec![
+            Span::styled("• Source:   ", Style::default().fg(Color::DarkGray)),
+            Span::styled(
+                if build_from_source {
+                    format!("branch {}", app.selected_branch)
+                } else {
+                    "pre-built".to_string()
+                },
+                Style::default().fg(Color::Cyan),
+            ),
         ]),
     ];
 
