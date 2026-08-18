@@ -28,28 +28,28 @@ fn ui_kit_prelude_exposes_components_and_helpers() {
     let _: fn(&gtk4::Box, &str) = ui_prelude::set_tooltip;
     let _: fn(&str, &str) -> (gtk4::Box, ui_prelude::CustomSwitch) = ui_prelude::create_switch_card;
     let _: fn(ui_prelude::PlaceholderState) -> gtk4::ListBoxRow =
-        ui_prelude::create_placeholder_row;
+        ui_prelude::create_placeholder;
     let _: fn(bool, fn(bool)) -> ui_prelude::CustomSwitch = ui_prelude::create_switch;
 
     // Context menu builders.
     let _: fn(&str, &str) -> gtk4::Button = ui_prelude::create_menu_item;
-    let _: fn(&str, &str, &str) -> gtk4::Button = ui_prelude::create_menu_item_with_shortcut;
-    let _: fn(&str, &str) -> gtk4::Button = ui_prelude::create_menu_item_destructive;
-    let _: fn() -> gtk4::Separator = ui_prelude::create_menu_separator;
-    let _: fn(&str) -> gtk4::Label = ui_prelude::create_menu_group_header;
-    let _: fn() -> (gtk4::Box, gtk4::Box) = ui_prelude::create_footer_container;
-    let _: fn(&str, &str) -> gtk4::Button = ui_prelude::create_footer_icon_button;
+    let _: fn(&str, &str, &str) -> gtk4::Button = ui_prelude::create_menu_shortcut;
+    let _: fn(&str, &str) -> gtk4::Button = ui_prelude::create_danger_item;
+    let _: fn() -> gtk4::Separator = ui_prelude::create_menu_sep;
+    let _: fn(&str) -> gtk4::Label = ui_prelude::create_group_header;
+    let _: fn() -> (gtk4::Box, gtk4::Box) = ui_prelude::create_footer_box;
+    let _: fn(&str, &str) -> gtk4::Button = ui_prelude::create_footer_btn;
     let _: fn(&gtk4::Widget, f64, f64) -> (gtk4::Popover, gtk4::Box) =
-        ui_prelude::create_context_menu_popover;
+        ui_prelude::create_menu_popover;
     let _: fn(&gtk4::Widget, gtk4::PositionType) -> (gtk4::Popover, gtk4::Box) =
-        ui_prelude::create_context_menu_for_widget;
+        ui_prelude::create_menu_for;
     let _: fn(&gtk4::Button, &str, &[babydra_core::tray::MenuItem]) =
-        ui_prelude::show_tray_context_menu;
+        ui_prelude::show_tray_menu;
 
     // UI helpers.
     let _: fn(&str, i32) -> gtk4::Image = ui_prelude::get_icon;
     let _: fn(&str, i32, &str) -> gtk4::Image = ui_prelude::get_icon_colored;
-    let _: fn(u32, bool) -> &'static str = ui_prelude::get_battery_color_hex;
+    let _: fn(u32, bool) -> &'static str = ui_prelude::get_battery_hex;
     let _: fn() = ui_prelude::init_theme;
     let _: fn(bool) = ui_prelude::set_dark_mode;
     let _: fn(&gtk4::ApplicationWindow) = ui_prelude::apply_theme_class;
@@ -64,7 +64,7 @@ fn explore_prelude_exposes_features() {
         std::path::PathBuf,
         std::rc::Rc<dyn Fn(std::path::PathBuf)>,
         Option<&gtk4::ApplicationWindow>,
-    ) = explore_prelude::show_new_folder_dialog;
+    ) = explore_prelude::show_folder_dialog;
     let _: fn(&str, &str, Option<&gtk4::ApplicationWindow>) = explore_prelude::show_alert_dialog;
     let _: fn(
         &std::path::PathBuf,
@@ -73,10 +73,10 @@ fn explore_prelude_exposes_features() {
         Option<&gtk4::ApplicationWindow>,
     ) = explore_prelude::show_rename_dialog;
     let _: fn(std::vec::Vec<std::path::PathBuf>, Option<&gtk4::ApplicationWindow>) =
-        explore_prelude::show_properties_dialog;
+        explore_prelude::show_properties;
 
     // Drag & drop / selection / items.
-    let _: fn(std::path::PathBuf) -> gtk4::DropTarget = explore_prelude::create_dir_drop_target;
+    let _: fn(std::path::PathBuf) -> gtk4::DropTarget = explore_prelude::create_drop_target;
     let _: fn(&gtk4::Widget, gtk4::Box, gtk4::Fixed, gtk4::Box) =
         explore_prelude::wire_rubberband_grid;
     let _: fn(
@@ -84,7 +84,7 @@ fn explore_prelude_exposes_features() {
         &babydra_core::FileEntry,
         std::rc::Rc<std::cell::RefCell<Vec<std::path::PathBuf>>>,
         fn(&gtk4::Widget, f64, f64),
-    ) -> gtk4::FlowBoxChild = explore_prelude::create_grid_file_item;
+    ) -> gtk4::FlowBoxChild = explore_prelude::create_grid_file;
 
     // Helpers.
     let _: fn(u64) -> String = explore_prelude::format_size;

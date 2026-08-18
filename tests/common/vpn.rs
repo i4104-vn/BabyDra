@@ -3,7 +3,7 @@
 //! Verifies that `.ovpn` (OpenVPN) and `.conf` (WireGuard) profile files
 //! are parsed into structured connection details.
 
-use babydra_core::services::system::vpn::config::parse_vpn_config_file;
+use babydra_core::services::system::vpn::config::parse_vpn_config;
 use std::io::Write;
 
 fn write_temp_config(name: &str, content: &str) -> std::path::PathBuf {
@@ -23,7 +23,7 @@ fn parses_openvpn_config() {
         "office.ovpn",
         "client\ndev tun\nremote vpn.company.com 1194\nca ca.crt\n",
     );
-    let details = parse_vpn_config_file(path.to_str().unwrap());
+    let details = parse_vpn_config(path.to_str().unwrap());
     let _ = std::fs::remove_file(&path);
 
     assert_eq!(details.name, "office");
@@ -35,7 +35,7 @@ fn parses_openvpn_config() {
 #[test]
 fn parses_openvpn_remote_without_port() {
     let path = write_temp_config("simple.ovpn", "remote vpn.example.com\n");
-    let details = parse_vpn_config_file(path.to_str().unwrap());
+    let details = parse_vpn_config(path.to_str().unwrap());
     let _ = std::fs::remove_file(&path);
 
     assert_eq!(details.gateway, "vpn.example.com");
@@ -47,7 +47,7 @@ fn parses_wireguard_endpoint() {
         "wg0.conf",
         "[Interface]\nPrivateKey = x\nEndpoint = 203.0.113.1:51820\n",
     );
-    let details = parse_vpn_config_file(path.to_str().unwrap());
+    let details = parse_vpn_config(path.to_str().unwrap());
     let _ = std::fs::remove_file(&path);
 
     assert_eq!(details.name, "wg0");
@@ -60,8 +60,8 @@ fn type_detected_from_extension() {
     let ovpn = write_temp_config("any.ovpn", "");
     let conf = write_temp_config("any.conf", "");
 
-    let details_ovpn = parse_vpn_config_file(ovpn.to_str().unwrap());
-    let details_conf = parse_vpn_config_file(conf.to_str().unwrap());
+    let details_ovpn = parse_vpn_config(ovpn.to_str().unwrap());
+    let details_conf = parse_vpn_config(conf.to_str().unwrap());
 
     let _ = std::fs::remove_file(&ovpn);
     let _ = std::fs::remove_file(&conf);
@@ -76,7 +76,7 @@ fn ignores_comments_and_blank_lines() {
         "commented.ovpn",
         "# remote hidden.example.com\n\n; another comment\nremote visible.example.com 443\n",
     );
-    let details = parse_vpn_config_file(path.to_str().unwrap());
+    let details = parse_vpn_config(path.to_str().unwrap());
     let _ = std::fs::remove_file(&path);
 
     assert_eq!(details.gateway, "visible.example.com:443");
@@ -84,7 +84,7 @@ fn ignores_comments_and_blank_lines() {
 
 #[test]
 fn missing_file_returns_partial_defaults() {
-    let details = parse_vpn_config_file("/nonexistent/profile.ovpn");
+    let details = parse_vpn_config("/nonexistent/profile.ovpn");
     assert_eq!(details.name, "profile");
     assert_eq!(details.vpn_type, "openvpn");
     assert!(details.gateway.is_empty());
@@ -97,7 +97,7 @@ fn records_config_file_path() {
         "office.ovpn",
         "client\nremote vpn.company.com 1194\nca ca.crt\n",
     );
-    let details = parse_vpn_config_file(path.to_str().unwrap());
+    let details = parse_vpn_config(path.to_str().unwrap());
     let _ = std::fs::remove_file(&path);
 
     assert_eq!(details.config_file.as_deref(), Some(path.to_str().unwrap()));

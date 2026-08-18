@@ -3,7 +3,7 @@
 //! Verifies the circular-mask pixbuf helper keeps corners transparent and
 //! the center opaque. Skips when no avatar is configured on the machine.
 
-use babydra_core::services::wallpaper::{crop_to_circle_pixbuf, get_avatar_bytes};
+use babydra_core::services::wallpaper::{crop_circle, get_avatar_bytes};
 
 fn read_alpha(pixbuf: &gtk4::gdk_pixbuf::Pixbuf, x: i32, y: i32) -> u8 {
     let rowstride = pixbuf.rowstride() as usize;
@@ -17,7 +17,7 @@ fn circular_mask_makes_corners_transparent() {
         eprintln!("SKIP: no avatar configured");
         return;
     };
-    let Some(pixbuf) = crop_to_circle_pixbuf(&bytes, 80) else {
+    let Some(pixbuf) = crop_circle(&bytes, 80) else {
         panic!("failed to build circular pixbuf");
     };
     assert_eq!(pixbuf.width(), 80);

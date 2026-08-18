@@ -5,24 +5,24 @@
 //! so they can be tested without running the system updater.
 
 use babydra_core::models::system_update::{PackageUpdate, UpdateStatus};
-use babydra_core::services::system::updates::{get_update_log_path, parse_pacman_progress_line};
+use babydra_core::services::system::updates::{get_update_log_path, parse_pacman_prog};
 
 #[test]
 fn parses_pacman_progress_line() {
-    let parsed = parse_pacman_progress_line("(1/3) installing firefox...");
+    let parsed = parse_pacman_prog("(1/3) installing firefox...");
     assert_eq!(parsed, Some((1, 3, "firefox...".to_string())));
 }
 
 #[test]
 fn parses_pacman_progress_with_spaces() {
-    let parsed = parse_pacman_progress_line("(12/45) upgrading  linux-firmware");
+    let parsed = parse_pacman_prog("(12/45) upgrading  linux-firmware");
     assert_eq!(parsed, Some((12, 45, "linux-firmware".to_string())));
 }
 
 #[test]
 fn ignores_lines_without_progress() {
-    assert_eq!(parse_pacman_progress_line("loading packages..."), None);
-    assert_eq!(parse_pacman_progress_line(""), None);
+    assert_eq!(parse_pacman_prog("loading packages..."), None);
+    assert_eq!(parse_pacman_prog(""), None);
 }
 
 #[test]
@@ -30,17 +30,17 @@ fn malformed_progress_falls_back_to_action_parse() {
     // Non-numeric progress falls back to the action-based branch and still
     // extracts the package name.
     assert_eq!(
-        parse_pacman_progress_line("(a/b) installing foo"),
+        parse_pacman_prog("(a/b) installing foo"),
         Some((1, 1, "foo".to_string()))
     );
     // A line with no progress and no known action yields nothing.
-    assert_eq!(parse_pacman_progress_line("random noise"), None);
+    assert_eq!(parse_pacman_prog("random noise"), None);
 }
 
 #[test]
 fn parses_fallback_action_style() {
     // Handles the "upgrading <name>" fallback branch too.
-    let parsed = parse_pacman_progress_line("(2/3) upgrading firefox");
+    let parsed = parse_pacman_prog("(2/3) upgrading firefox");
     assert_eq!(parsed, Some((2, 3, "firefox".to_string())));
 }
 

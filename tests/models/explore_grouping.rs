@@ -3,7 +3,7 @@
 //! Verifies locale-aware group naming for today/folders/other files through
 //! the public `get_group_name` API.
 
-use babydra_core::i18n::{set_locale, t};
+use babydra_core::i18n::{set_locale, trans};
 use babydra_core::models::explore::file_entry::{FileEntry, FileType};
 use babydra_core::models::explore::grouping::get_group_name;
 use std::ffi::OsString;
@@ -49,7 +49,7 @@ fn group_folders_uses_locale() {
     set_locale("vi");
     assert_eq!(
         get_group_name(&entry(FileType::Directory), "group"),
-        t("explore.group_folders")
+        trans("explore.group_folders")
     );
 }
 
@@ -59,6 +59,6 @@ fn group_other_files_uses_locale() {
     set_locale("en");
     assert_eq!(
         get_group_name(&entry(FileType::RegularFile), "group"),
-        t("explore.group_other_files")
+        trans("explore.group_other_files")
     );
 }

@@ -1,50 +1,50 @@
 //! Integration tests: internationalization (i18n).
 //!
-//! Verifies locale-aware key lookup through the public `t()` API for both
+//! Verifies locale-aware key lookup through the public `trans()` API for both
 //! the `en` and `vi` locales.
 
-use babydra_core::i18n::{get_locale, set_locale, t};
+use babydra_core::i18n::{get_locale, set_locale, trans};
 use std::sync::Mutex;
 
-// `t()` reads a process-global locale; serialize these tests to avoid races.
+// `trans()` reads a process-global locale; serialize these tests to avoid races.
 static I18N_LOCK: Mutex<()> = Mutex::new(());
 
 #[test]
 fn english_lookup_returns_translations() {
     let _guard = I18N_LOCK.lock().unwrap();
     set_locale("en");
-    assert_eq!(t("menu.terminal"), "Terminal");
-    assert_eq!(t("panel.no_notifications"), "No new notifications");
-    assert_eq!(t("desktop.new_folder"), "New Folder");
-    assert_eq!(t("desktop.open_in_terminal"), "Open in Terminal");
-    assert_eq!(t("explore.menu_open_with"), "Open With...");
+    assert_eq!(trans("menu.terminal"), "Terminal");
+    assert_eq!(trans("panel.no_notifications"), "No new notifications");
+    assert_eq!(trans("desktop.new_folder"), "New Folder");
+    assert_eq!(trans("desktop.open_in_terminal"), "Open in Terminal");
+    assert_eq!(trans("explore.menu_open_with"), "Open With...");
 }
 
 #[test]
 fn vietnamese_lookup_returns_translations() {
     let _guard = I18N_LOCK.lock().unwrap();
     set_locale("vi");
-    assert_eq!(t("menu.file_manager"), "Trình quản lý tệp");
-    assert_eq!(t("weekday.mon"), "Thứ Hai");
-    assert_eq!(t("desktop.new_folder"), "Thư mục mới");
-    assert_eq!(t("desktop.open_in_terminal"), "Mở trong Terminal");
-    assert_eq!(t("explore.menu_open_with"), "Mở bằng...");
+    assert_eq!(trans("menu.file_manager"), "Trình quản lý tệp");
+    assert_eq!(trans("weekday.mon"), "Thứ Hai");
+    assert_eq!(trans("desktop.new_folder"), "Thư mục mới");
+    assert_eq!(trans("desktop.open_in_terminal"), "Mở trong Terminal");
+    assert_eq!(trans("explore.menu_open_with"), "Mở bằng...");
 }
 
 #[test]
 fn missing_key_returns_key_itself() {
     let _guard = I18N_LOCK.lock().unwrap();
     set_locale("en");
-    assert_eq!(t("this.key.does.not.exist"), "this.key.does.not.exist");
+    assert_eq!(trans("this.key.does.not.exist"), "this.key.does.not.exist");
 }
 
 #[test]
 fn locale_switch_changes_language() {
     let _guard = I18N_LOCK.lock().unwrap();
     set_locale("en");
-    let en = t("menu.change_wallpaper");
+    let en = trans("menu.change_wallpaper");
     set_locale("vi");
-    let vi = t("menu.change_wallpaper");
+    let vi = trans("menu.change_wallpaper");
     assert_eq!(en, "Change Wallpaper");
     assert_eq!(vi, "Thay đổi hình nền");
 }
