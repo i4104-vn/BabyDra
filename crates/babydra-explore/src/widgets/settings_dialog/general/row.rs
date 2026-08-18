@@ -45,12 +45,12 @@ pub fn add_switch_row(
     vbox_lbl.append(&lbl_desc);
     hbox.append(&vbox_lbl);
 
-    let sw = babydra_ui_kit::components::CustomSwitch::new(active);
-    sw.connect_state_set(move |state| {
+    let switch = babydra_ui_kit::components::CustomSwitch::new(active);
+    switch.connect_state_set(move |state| {
         on_toggle(state);
     });
 
-    hbox.append(&sw.container);
+    hbox.append(&switch.container);
     row.set_child(Some(&hbox));
     listbox.append(&row);
 }

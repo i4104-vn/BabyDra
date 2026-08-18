@@ -1,5 +1,5 @@
 use babydra_core::config::settings::CustomContextItem;
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Align, Box, Entry, Grid, Label, ListBox, ListBoxRow, Orientation};
 
@@ -48,7 +48,7 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
         "rename",
         16,
         &["flat", "circular", "row-action-btn", "edit-btn"],
-        Some(&t("explore.settings_edit")),
+        Some(&trans("explore.settings_edit")),
         || {},
     );
     btn_edit.set_valign(Align::Center);
@@ -59,7 +59,7 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
         "trash",
         16,
         &["flat", "circular", "row-action-btn", "delete-btn"],
-        Some(&t("explore.settings_delete")),
+        Some(&trans("explore.settings_delete")),
         || {},
     );
     btn_del.set_valign(Align::Center);
@@ -171,7 +171,7 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
         btn_ph.remove_css_class("baby-button");
         btn_ph.add_css_class("flat");
         btn_ph.add_css_class("placeholder-btn-small");
-        btn_ph.set_tooltip_text(Some(&t(desc_key)));
+        btn_ph.set_tooltip_text(Some(&trans(desc_key)));
         btn_ph.set_cursor_from_name(Some("pointer"));
         let entry_edit_cmd_c = entry_edit_cmd.clone();
         btn_ph.connect_clicked(move |_| {
@@ -187,10 +187,10 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
     vbox_buttons.set_valign(Align::Start);
     hbox_edit.append(&vbox_buttons);
 
-    let btn_save = babydra_ui_kit::components::create_accent_button(&t("explore.settings_save"));
+    let btn_save = babydra_ui_kit::components::create_accent_button(&trans("explore.settings_save"));
     btn_save.add_css_class("small-btn");
     btn_save.set_cursor_from_name(Some("pointer"));
-    let btn_cancel = babydra_ui_kit::components::create_button(&t("explore.settings_cancel"));
+    let btn_cancel = babydra_ui_kit::components::create_button(&trans("explore.settings_cancel"));
     btn_cancel.remove_css_class("baby-button");
     btn_cancel.add_css_class("flat");
     btn_cancel.add_css_class("small-btn");
@@ -274,7 +274,7 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
                 s.icon = Some(new_icon.clone());
             }
 
-            let mut s = babydra_core::load_explore_settings();
+            let mut s = babydra_core::load_explore_cfg();
             if let Some(idx) = s
                 .custom_context_items
                 .iter()
@@ -283,7 +283,7 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
                 s.custom_context_items[idx].name = new_name;
                 s.custom_context_items[idx].command = new_cmd;
                 s.custom_context_items[idx].icon = Some(new_icon);
-                babydra_core::save_explore_settings(&s);
+                babydra_core::save_explore_cfg(&s);
             }
 
             update_lbls();
@@ -298,10 +298,10 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
     btn_del.connect_clicked(move |_| {
         listbox_c2.remove(&row_c4);
         let item = saved3.borrow();
-        let mut s = babydra_core::load_explore_settings();
+        let mut s = babydra_core::load_explore_cfg();
         s.custom_context_items
             .retain(|i| i.name != item.name || i.command != item.command);
-        babydra_core::save_explore_settings(&s);
+        babydra_core::save_explore_cfg(&s);
     });
 
     row.set_child(Some(&hbox_view));

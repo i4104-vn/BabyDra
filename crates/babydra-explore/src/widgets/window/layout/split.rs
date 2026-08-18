@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 /// Update pane nav visibility.
-fn update_pane_nav_visibility(handle: &ContentViewHandle, is_split: bool) {
+fn update_pane_nav(handle: &ContentViewHandle, is_split: bool) {
     let widgets = &handle.widgets;
     widgets.btn_back.set_visible(!is_split);
     widgets.btn_forward.set_visible(!is_split);
@@ -47,7 +47,7 @@ pub fn setup_split_view(
             active_pane_c.set(ActivePane::Left);
 
             // Restore buttons/search on left pane
-            update_pane_nav_visibility(&left_handle_c, false);
+            update_pane_nav(&left_handle_c, false);
         } else {
             let current_p = session_c.borrow().active_tab().current_path.clone();
             let (tx_right, mut rx_right) = tokio::sync::mpsc::unbounded_channel::<PathBuf>();
@@ -84,7 +84,7 @@ pub fn setup_split_view(
                     crate::widgets::info_panel::update_info_panel(&info_panel_c, &sel);
                 });
 
-            update_pane_nav_visibility(&right_handle, true);
+            update_pane_nav(&right_handle, true);
 
             split_paned_c.set_end_child(Some(&right_scroll));
             split_paned_c.set_position(390);
@@ -93,7 +93,7 @@ pub fn setup_split_view(
             right_handle_c.replace(Some(Rc::new(right_handle)));
             is_split_c.set(true);
 
-            update_pane_nav_visibility(&left_handle_c, true);
+            update_pane_nav(&left_handle_c, true);
 
             active_pane_c.set(ActivePane::Right);
             if let Some(ref f) = *nav_c.borrow() {

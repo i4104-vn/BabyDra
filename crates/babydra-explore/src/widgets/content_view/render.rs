@@ -1,11 +1,11 @@
 use crate::widgets::state::ContentViewWidgets;
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Align, Box, Entry, FlowBox, ListBox, Orientation, ScrolledWindow, Stack};
 
 /// Builds the content view widgets: icon grid, list view, navigation bar, and search entry.
-pub fn build_content_view_ui() -> ContentViewWidgets {
-    let settings = babydra_core::load_explore_settings();
+pub fn build_content_view() -> ContentViewWidgets {
+    let settings = babydra_core::load_explore_cfg();
     let activate_on_single = !settings.double_click_to_open;
 
     let scroll_win = ScrolledWindow::new();
@@ -75,7 +75,7 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
         "back",
         16,
         &["nav-btn"],
-        Some(&t("explore.back")),
+        Some(&trans("explore.back")),
         || {},
     );
     btn_back.set_size_request(28, 28);
@@ -86,7 +86,7 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
         "forward",
         16,
         &["nav-btn"],
-        Some(&t("explore.forward")),
+        Some(&trans("explore.forward")),
         || {},
     );
     btn_forward.set_size_request(28, 28);
@@ -97,7 +97,7 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
         "up",
         16,
         &["nav-btn"],
-        Some(&t("explore.up")),
+        Some(&trans("explore.up")),
         || {},
     );
     btn_up.set_size_request(28, 28);
@@ -108,7 +108,7 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
         "refresh",
         16,
         &["nav-btn"],
-        Some(&t("explore.refresh")),
+        Some(&trans("explore.refresh")),
         || {},
     );
     btn_refresh.set_size_request(28, 28);
@@ -141,7 +141,7 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
     pane_nav_row.append(&address_wrap);
 
     let search = Entry::builder()
-        .placeholder_text(&t("explore.search_placeholder"))
+        .placeholder_text(&trans("explore.search_placeholder"))
         .primary_icon_name("system-search-symbolic")
         .css_classes(vec!["search-entry".to_string()])
         .build();
@@ -187,17 +187,17 @@ pub fn build_content_view_ui() -> ContentViewWidgets {
 use crate::widgets::state::ContentViewHandle;
 
 /// Update content view ui silent.
-pub fn update_content_view_ui_silent(handle: &ContentViewHandle) {
-    update_content_view_ui_internal(handle, true);
+pub fn render_silent(handle: &ContentViewHandle) {
+    update_content_internal(handle, true);
 }
 
 /// Update content view ui.
-pub fn update_content_view_ui(handle: &ContentViewHandle) {
-    update_content_view_ui_internal(handle, false);
+pub fn update_content_ui(handle: &ContentViewHandle) {
+    update_content_internal(handle, false);
 }
 
 /// Update content view ui internal.
-fn update_content_view_ui_internal(handle: &ContentViewHandle, silent: bool) {
+fn update_content_internal(handle: &ContentViewHandle, silent: bool) {
     let widgets = handle.widgets.clone();
     let entries = handle.entries.borrow().clone();
     let nav_callback = handle.nav_callback.clone();

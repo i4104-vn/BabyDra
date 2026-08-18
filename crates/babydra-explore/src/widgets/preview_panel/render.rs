@@ -1,5 +1,5 @@
 /// Renders `markdown to pango`.
-pub fn render_markdown_to_pango(markdown: &str) -> String {
+pub fn render_md_to_pango(markdown: &str) -> String {
     let options = pulldown_cmark::Options::empty();
     let parser = pulldown_cmark::Parser::new_ext(markdown, options);
     let mut html_output = String::new();

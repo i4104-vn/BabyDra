@@ -1,6 +1,6 @@
 mod render;
 
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Align, Box, Label, ListBox, ListBoxRow, Orientation};
 use std::rc::Rc;
@@ -27,7 +27,7 @@ pub fn build_keybinds_page(
     scroll.set_child(Some(&listbox));
 
     // Load settings to fetch the currently active shortcuts
-    let settings = babydra_core::load_explore_settings();
+    let settings = babydra_core::load_explore_cfg();
 
     // Keep track of shortcut labels so we can update them on capture
     let on_changed = Rc::new(on_keybinds_changed);
@@ -82,11 +82,11 @@ pub fn build_keybinds_page(
             let lbl_inner = lbl_shortcut_c.clone();
             let on_changed_inner = on_changed_c.clone();
             render::show_capture_dialog(&parent_win_c, &action_desc_c, move |new_shortcut| {
-                let mut current_settings = babydra_core::load_explore_settings();
+                let mut current_settings = babydra_core::load_explore_cfg();
                 current_settings
                     .keybinds
                     .insert(action_id_inner.clone(), new_shortcut.clone());
-                babydra_core::save_explore_settings(&current_settings);
+                babydra_core::save_explore_cfg(&current_settings);
 
                 lbl_inner.set_text(&new_shortcut);
 
@@ -96,12 +96,12 @@ pub fn build_keybinds_page(
         row.add_controller(click_gesture);
     };
 
-    add_keybind_row("display", "toggle_split", &t("explore.shortcut_split"));
-    add_keybind_row("sidebar", "toggle_preview", &t("explore.shortcut_preview"));
-    add_keybind_row("eye-off", "toggle_hidden", &t("explore.shortcut_hidden"));
-    add_keybind_row("copy", "copy", &t("explore.shortcut_copy"));
-    add_keybind_row("cut", "cut", &t("explore.shortcut_cut"));
-    add_keybind_row("paste", "paste", &t("explore.shortcut_paste"));
+    add_keybind_row("display", "toggle_split", &trans("explore.shortcut_split"));
+    add_keybind_row("sidebar", "toggle_preview", &trans("explore.shortcut_preview"));
+    add_keybind_row("eye-off", "toggle_hidden", &trans("explore.shortcut_hidden"));
+    add_keybind_row("copy", "copy", &trans("explore.shortcut_copy"));
+    add_keybind_row("cut", "cut", &trans("explore.shortcut_cut"));
+    add_keybind_row("paste", "paste", &trans("explore.shortcut_paste"));
     add_keybind_row("refresh", "undo", "Undo");
 
     page

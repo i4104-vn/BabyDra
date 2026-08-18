@@ -77,7 +77,7 @@ pub fn update_info_panel(widgets: &InfoPanelWidgets, selection: &[FileEntry]) {
         if entry.mime_type.starts_with("image/") {
             widgets.img_preview.set_from_file(Some(&entry.path));
         } else {
-            babydra_ui_kit::ui::icon::set_system_or_file_icon(
+            babydra_ui_kit::ui::icon::set_fallback_icon(
                 &widgets.img_preview,
                 &entry.icon_name,
                 "text-x-generic",
@@ -95,7 +95,7 @@ pub fn update_info_panel(widgets: &InfoPanelWidgets, selection: &[FileEntry]) {
         let lbl_size = widgets.lbl_size.clone();
         glib::spawn_future_local(async move {
             let size_res = tokio::task::spawn_blocking(move || {
-                babydra_core::calculate_dir_size_parallel(&path)
+                babydra_core::calc_dir_size(&path)
             })
             .await;
             let size = size_res.unwrap_or(0);

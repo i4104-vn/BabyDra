@@ -28,7 +28,7 @@ pub fn create_header_bar(
 
     // Sort dropdown wiring
     {
-        let cb = sort_cb.clone();
+        let callback = sort_cb.clone();
         widgets.dropdown_sort.connect_selected_notify(move |dd| {
             let selected = dd.selected();
             let mode = match selected {
@@ -37,29 +37,29 @@ pub fn create_header_bar(
                 2 => "group".to_string(),
                 _ => "auto".to_string(),
             };
-            cb(mode);
+            callback(mode);
         });
     }
 
     // View toggle wiring
     {
-        let cb = view_mode_cb.clone();
+        let callback = view_mode_cb.clone();
         widgets.btn_view_icons.connect_clicked(move |_| {
-            cb("icons".to_string());
+            callback("icons".to_string());
         });
     }
     {
-        let cb = view_mode_cb.clone();
+        let callback = view_mode_cb.clone();
         widgets.btn_view_list.connect_clicked(move |_| {
-            cb("list".to_string());
+            callback("list".to_string());
         });
     }
 
     // Search entry wiring
     {
-        let cb = search_cb.clone();
+        let callback = search_cb.clone();
         widgets.search.connect_changed(move |entry| {
-            cb(entry.text().to_string());
+            callback(entry.text().to_string());
         });
     }
 

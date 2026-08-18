@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 /// Wires event controllers, double click activation and keys for individual FlowBox
-pub fn wire_grid_flowbox_controllers(
+pub fn wire_grid_ctrls(
     flowbox: &gtk4::FlowBox,
     entries: Rc<RefCell<Vec<FileEntry>>>,
     nav_cb: Rc<dyn Fn(PathBuf)>,
@@ -16,7 +16,7 @@ pub fn wire_grid_flowbox_controllers(
 ) {
     // 1. Selection changed
     {
-        let sc = sc_fn.clone();
+        let scroll_fn = sc_fn.clone();
         let grid_c = grid_container.clone();
         let fb_weak = flowbox.downgrade();
         flowbox.connect_selected_children_changed(move |fb| {
@@ -50,7 +50,7 @@ pub fn wire_grid_flowbox_controllers(
                 }
                 sibling = child.next_sibling();
             }
-            sc(sel);
+            scroll_fn(sel);
         });
     }
 
@@ -78,10 +78,10 @@ pub fn wire_grid_flowbox_controllers(
                     selected_indices.push(idx);
                 }
             }
-            let b = e_ref.borrow();
+            let borrowed = e_ref.borrow();
             for idx in selected_indices {
-                if idx < b.len() {
-                    let entry = &b[idx];
+                if idx < borrowed.len() {
+                    let entry = &borrowed[idx];
                     if matches!(entry.file_type, babydra_core::FileType::Directory) {
                         nav(entry.path.clone());
                     } else {
@@ -117,10 +117,10 @@ pub fn wire_grid_flowbox_controllers(
                     })
                     .filter(|&idx| idx != usize::MAX)
                     .collect();
-                let b = e_ref.borrow();
+                let borrowed = e_ref.borrow();
                 for idx in selected_indices {
-                    if idx < b.len() {
-                        let entry = &b[idx];
+                    if idx < borrowed.len() {
+                        let entry = &borrowed[idx];
                         if matches!(entry.file_type, babydra_core::FileType::Directory) {
                             nav(entry.path.clone());
                         } else {
@@ -159,11 +159,11 @@ pub fn wire_grid_flowbox_controllers(
 
     // 4. Click empty area to reset selection
     {
-        let sc = sc_fn.clone();
+        let scroll_fn = sc_fn.clone();
         let gesture = gtk4::GestureClick::new();
         gesture.set_button(1);
         gesture.connect_pressed(move |_, _, _, _| {
-            sc(Vec::new());
+            scroll_fn(Vec::new());
         });
         flowbox.add_controller(gesture);
     }

@@ -1,4 +1,4 @@
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Align, Box, Entry, Grid, Label, ListBox, Orientation, Overlay, Window};
 use std::cell::RefCell;
@@ -14,8 +14,8 @@ const AVAILABLE_ICONS: &[&str] = &[
 /// Builds the context menu options page inside the Settings Dialog.
 /// Features a full-height scrolled list of options and a floating action button (FAB)
 /// at the bottom-right corner to open the "Add Option" dialog.
-pub fn build_context_menu_page(parent_window: &Window) -> Overlay {
-    let settings = babydra_core::load_explore_settings();
+pub fn build_context_page(parent_window: &Window) -> Overlay {
+    let settings = babydra_core::load_explore_cfg();
     let overlay = Overlay::new();
     overlay.set_hexpand(true);
     overlay.set_vexpand(true);
@@ -42,7 +42,7 @@ pub fn build_context_menu_page(parent_window: &Window) -> Overlay {
     btn_fab.add_css_class("circular");
     btn_fab.set_margin_bottom(10);
     btn_fab.set_margin_end(10);
-    btn_fab.set_tooltip_text(Some(&t("explore.settings_add_option")));
+    btn_fab.set_tooltip_text(Some(&trans("explore.settings_add_option")));
     btn_fab.set_cursor_from_name(Some("pointer"));
 
     overlay.add_overlay(&btn_fab);
@@ -59,7 +59,7 @@ pub fn build_context_menu_page(parent_window: &Window) -> Overlay {
 /// Displays a dedicated modal dialog for adding a new custom context menu option.
 fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
     let dialog = Window::builder()
-        .title(&t("explore.settings_add_option"))
+        .title(&trans("explore.settings_add_option"))
         .transient_for(parent)
         .modal(true)
         .resizable(false)
@@ -77,7 +77,7 @@ fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
     dialog.set_child(Some(&vbox));
 
     let lbl_add_title = Label::builder()
-        .label(&t("explore.settings_add_option"))
+        .label(&trans("explore.settings_add_option"))
         .halign(Align::Start)
         .build();
     lbl_add_title.add_css_class("settings-row-title");
@@ -89,13 +89,13 @@ fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
     vbox.append(&grid);
 
     // Row 0: Option Name & Circular Icon Button
-    let lbl_name_field = Label::new(Some(&t("explore.settings_option_name")));
+    let lbl_name_field = Label::new(Some(&trans("explore.settings_option_name")));
     lbl_name_field.set_halign(Align::Start);
     lbl_name_field.add_css_class("settings-row-desc");
 
     let name_hbox = Box::new(Orientation::Horizontal, 8);
     let entry_name = Entry::builder()
-        .placeholder_text(&t("explore.settings_placeholder_name"))
+        .placeholder_text(&trans("explore.settings_placeholder_name"))
         .hexpand(true)
         .css_classes(vec!["small-entry".to_string(), "inline-entry".to_string()])
         .build();
@@ -163,13 +163,13 @@ fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
     grid.attach(&name_hbox, 1, 0, 1, 1);
 
     // Row 1: Command & Placeholders
-    let lbl_cmd_field = Label::new(Some(&t("explore.settings_option_command")));
+    let lbl_cmd_field = Label::new(Some(&trans("explore.settings_option_command")));
     lbl_cmd_field.set_halign(Align::Start);
     lbl_cmd_field.add_css_class("settings-row-desc");
 
     let entry_cmd_vbox = Box::new(Orientation::Vertical, 4);
     let entry_cmd = Entry::builder()
-        .placeholder_text(&t("explore.settings_placeholder_command"))
+        .placeholder_text(&trans("explore.settings_placeholder_command"))
         .hexpand(true)
         .css_classes(vec!["small-entry".to_string(), "inline-entry".to_string()])
         .build();
@@ -189,7 +189,7 @@ fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
         btn_p.remove_css_class("baby-button");
         btn_p.add_css_class("flat");
         btn_p.add_css_class("placeholder-btn");
-        btn_p.set_tooltip_text(Some(&t(desc_key)));
+        btn_p.set_tooltip_text(Some(&trans(desc_key)));
         btn_p.set_cursor_from_name(Some("pointer"));
         let entry_cmd_c = entry_cmd.clone();
         btn_p.connect_clicked(move |_| {
@@ -210,8 +210,8 @@ fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
     bbox.set_margin_top(8);
     vbox.append(&bbox);
 
-    let btn_cancel = babydra_ui_kit::components::create_button(&t("explore.settings_cancel"));
-    let btn_add = babydra_ui_kit::components::create_accent_button(&t("explore.settings_add"));
+    let btn_cancel = babydra_ui_kit::components::create_button(&trans("explore.settings_cancel"));
+    let btn_add = babydra_ui_kit::components::create_accent_button(&trans("explore.settings_add"));
     btn_add.set_cursor_from_name(Some("pointer"));
 
     bbox.append(&btn_cancel);
@@ -261,9 +261,9 @@ fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
                 icon: Some(icon_str),
             };
 
-            let mut s = babydra_core::load_explore_settings();
+            let mut s = babydra_core::load_explore_cfg();
             s.custom_context_items.push(item.clone());
-            babydra_core::save_explore_settings(&s);
+            babydra_core::save_explore_cfg(&s);
 
             row::render_option_row(&listbox_c, item);
             win_add.close();

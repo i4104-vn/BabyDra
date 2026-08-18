@@ -18,7 +18,7 @@ pub fn create_flow_child(
     let nav = nav_callback.clone();
 
     let sel_paths = selected_paths.clone();
-    let flow_child = babydra_ui_kit::components::explore::create_grid_file_item(
+    let flow_child = babydra_ui_kit::components::explore::create_grid_file(
         idx,
         entry,
         selected_paths,
@@ -64,7 +64,7 @@ pub fn create_flow_child(
     let is_dir = matches!(entry.file_type, babydra_core::FileType::Directory);
     let nav_c = nav_callback.clone();
     double_click_gesture.connect_pressed(move |_, n_press, _, _| {
-        let settings = babydra_core::load_explore_settings();
+        let settings = babydra_core::load_explore_cfg();
         let trigger = if settings.double_click_to_open {
             n_press == 2
         } else {

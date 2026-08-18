@@ -1,4 +1,4 @@
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Align, Box, Button, Label, Orientation, Window};
 use std::cell::RefCell;
@@ -11,7 +11,7 @@ pub fn show_capture_dialog(
     on_capture: impl Fn(String) + 'static,
 ) {
     let window = Window::builder()
-        .title(&t("explore.settings_capture_title"))
+        .title(&trans("explore.settings_capture_title"))
         .transient_for(parent)
         .modal(true)
         .resizable(false)
@@ -30,7 +30,7 @@ pub fn show_capture_dialog(
     window.set_child(Some(&vbox));
 
     let lbl_desc = Label::builder()
-        .label(&t("explore.settings_press_for").replace("{}", action_desc))
+        .label(&trans("explore.settings_press_for").replace("{}", action_desc))
         .halign(Align::Center)
         .justify(gtk4::Justification::Center)
         .build();
@@ -38,7 +38,7 @@ pub fn show_capture_dialog(
     vbox.append(&lbl_desc);
 
     let lbl_shortcut = Label::builder()
-        .label(&t("explore.settings_press_any"))
+        .label(&trans("explore.settings_press_any"))
         .halign(Align::Center)
         .build();
     lbl_shortcut.add_css_class("keybind-pill");
@@ -76,12 +76,12 @@ pub fn show_capture_dialog(
     bbox.set_halign(Align::Center);
     vbox.append(&bbox);
 
-    let btn_save = Button::builder().label(&t("explore.settings_save")).build();
+    let btn_save = Button::builder().label(&trans("explore.settings_save")).build();
     btn_save.add_css_class("baby-button");
     btn_save.set_cursor_from_name(Some("pointer"));
 
     let btn_cancel = Button::builder()
-        .label(&t("explore.settings_cancel"))
+        .label(&trans("explore.settings_cancel"))
         .build();
     btn_cancel.add_css_class("baby-button");
     btn_cancel.set_cursor_from_name(Some("pointer"));

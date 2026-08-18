@@ -1,5 +1,5 @@
 use crate::widgets::state::MainWindowWidgets;
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{ApplicationWindow, Box, Orientation, Paned};
 
@@ -7,7 +7,7 @@ use gtk4::{ApplicationWindow, Box, Orientation, Paned};
 pub fn build_window_ui(app: &gtk4::Application) -> MainWindowWidgets {
     let window = ApplicationWindow::builder()
         .application(app)
-        .title(&t("common.app_explore_title"))
+        .title(&trans("common.app_explore_title"))
         .default_width(1000)
         .default_height(700)
         .build();

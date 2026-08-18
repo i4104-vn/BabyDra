@@ -10,11 +10,11 @@ pub mod layout;
 mod render;
 
 /// Creates and configures the main file explorer window, wires all component widgets (header, sidebar, content panes, tabs, info panel, status bar), and launches the navigation loops.
-pub fn create_explore_window(
+pub fn create_explore_win(
     app: &gtk4::Application,
     session: Rc<RefCell<SessionState>>,
 ) -> ApplicationWindow {
-    let settings = babydra_core::load_explore_settings();
+    let settings = babydra_core::load_explore_cfg();
 
     {
         let mut s = session.borrow_mut();
@@ -130,9 +130,9 @@ pub fn create_explore_window(
             };
 
             {
-                let mut current_settings = babydra_core::load_explore_settings();
+                let mut current_settings = babydra_core::load_explore_cfg();
                 current_settings.show_hidden = show_hidden_now;
-                babydra_core::save_explore_settings(&current_settings);
+                babydra_core::save_explore_cfg(&current_settings);
             }
 
             let path = session_c.borrow().active_tab().current_path.clone();
@@ -177,15 +177,15 @@ pub fn create_explore_window(
         let right = right_content_handle.clone();
         let status_bar_widgets_c = status_bar_widgets_cell.clone();
         move |mode: String| {
-            crate::widgets::content_view::set_content_view_mode(&left, &mode);
+            crate::widgets::content_view::set_view_mode(&left, &mode);
             if let Some(ref r) = *right.borrow() {
-                crate::widgets::content_view::set_content_view_mode(r, &mode);
+                crate::widgets::content_view::set_view_mode(r, &mode);
             }
 
             {
-                let mut current_settings = babydra_core::load_explore_settings();
+                let mut current_settings = babydra_core::load_explore_cfg();
                 current_settings.view_mode = mode.clone();
-                babydra_core::save_explore_settings(&current_settings);
+                babydra_core::save_explore_cfg(&current_settings);
             }
 
             if let Some(ref sw) = *status_bar_widgets_c.borrow() {
@@ -207,9 +207,9 @@ pub fn create_explore_window(
         let active = active_pane.clone();
         move |sort_mode: String| {
             if active.get() == ActivePane::Left {
-                crate::widgets::content_view::set_content_view_sort(&left, &sort_mode);
+                crate::widgets::content_view::set_view_sort(&left, &sort_mode);
             } else if let Some(ref r) = *right.borrow() {
-                crate::widgets::content_view::set_content_view_sort(r, &sort_mode);
+                crate::widgets::content_view::set_view_sort(r, &sort_mode);
             }
         }
     };
@@ -225,7 +225,7 @@ pub fn create_explore_window(
     );
 
     // Wire status bar buttons click
-    handlers::events::setup_status_bar_wiring(
+    handlers::events::setup_status_wiring(
         status_bar_widgets_cell.clone(),
         toggle_preview_rc.clone(),
         view_mode_callback_rc.clone(),
@@ -286,7 +286,7 @@ pub fn create_explore_window(
             };
             if !paths.is_empty() {
                 let current_path = session.borrow().active_tab().current_path.clone();
-                babydra_ui_kit::components::explore::context_menu::clipboard::set_system_clipboard_files(
+                babydra_ui_kit::components::explore::context_menu::clipboard::set_clipboard_files(
                     &paths, true,
                 );
                 babydra_ui_kit::components::explore::CLIPBOARD
@@ -317,7 +317,7 @@ pub fn create_explore_window(
             };
             if !paths.is_empty() {
                 let current_path = session.borrow().active_tab().current_path.clone();
-                babydra_ui_kit::components::explore::context_menu::clipboard::set_system_clipboard_files(
+                babydra_ui_kit::components::explore::context_menu::clipboard::set_clipboard_files(
                     &paths, false,
                 );
                 babydra_ui_kit::components::explore::CLIPBOARD
@@ -345,7 +345,7 @@ pub fn create_explore_window(
                     }
                 }) as Rc<dyn Fn(PathBuf)>
             };
-            babydra_ui_kit::components::explore::context_menu::clipboard::execute_paste_from_system_clipboard(
+            babydra_ui_kit::components::explore::context_menu::clipboard::paste_from_clipboard(
                 current_path.clone(),
                 current_path,
                 nav_cb,
@@ -378,7 +378,7 @@ pub fn create_explore_window(
     let undo_cb_rc = Rc::new(undo_cb) as Rc<dyn Fn()>;
 
     // Install keyboard shortcuts
-    handlers::events::setup_window_shortcuts(
+    handlers::events::setup_shortcuts(
         &ui.window,
         toggle_split_view_rc.clone(),
         toggle_preview_rc.clone(),
@@ -390,7 +390,7 @@ pub fn create_explore_window(
         rebuild_shortcuts_cell.clone(),
     );
 
-    handlers::setup_window_resize_handler(
+    handlers::setup_resize_handler(
         &ui.window,
         ui.layout_paned.clone(),
         revealer.clone(),
@@ -400,7 +400,7 @@ pub fn create_explore_window(
     );
 
     // Watcher event receiver loop
-    handlers::setup_file_watcher_receiver(
+    handlers::setup_file_watcher(
         session.clone(),
         navigate_pane_no_watch_ref.clone(),
         active_pane.clone(),
@@ -431,15 +431,15 @@ pub fn create_explore_window(
         // Rebuild status bar tooltips
         if let Some(ref sw) = *status_bar_c.borrow() {
             sw.dropdown_sort
-                .set_tooltip_text(Some(&babydra_core::i18n::t("explore.sort_by")));
+                .set_tooltip_text(Some(&babydra_core::i18n::trans("explore.sort_by")));
             sw.btn_view_icons
-                .set_tooltip_text(Some(&babydra_core::i18n::t("explore.view_grid")));
+                .set_tooltip_text(Some(&babydra_core::i18n::trans("explore.view_grid")));
             sw.btn_view_list
-                .set_tooltip_text(Some(&babydra_core::i18n::t("explore.view_list")));
+                .set_tooltip_text(Some(&babydra_core::i18n::trans("explore.view_list")));
             sw.btn_toggle_preview
-                .set_tooltip_text(Some(&babydra_core::i18n::t("explore.toggle_preview")));
+                .set_tooltip_text(Some(&babydra_core::i18n::trans("explore.toggle_preview")));
             sw.btn_settings
-                .set_tooltip_text(Some(&babydra_core::i18n::t("explore.settings")));
+                .set_tooltip_text(Some(&babydra_core::i18n::trans("explore.settings")));
         }
     });
 

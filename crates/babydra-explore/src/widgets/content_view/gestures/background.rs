@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 /// Wires background click gestures, context menus, drag select, and drag drop to the view container
-pub fn wire_background_controllers(
+pub fn wire_bg_controllers(
     widgets: &ContentViewWidgets,
     current_path: Rc<RefCell<PathBuf>>,
     nav_cb: Rc<dyn Fn(PathBuf)>,
@@ -49,7 +49,7 @@ pub fn wire_background_controllers(
 
     // 3. Drop target to background
     {
-        let drop_target = babydra_ui_kit::components::explore::create_background_drop_target(
+        let drop_target = babydra_ui_kit::components::explore::create_bg_drop(
             current_path.clone(),
         );
         widgets.container.add_controller(drop_target);

@@ -1,4 +1,4 @@
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use babydra_core::SessionState;
 use gtk4::prelude::*;
 use gtk4::{Box, ScrolledWindow};
@@ -17,12 +17,12 @@ pub fn create_sidebar(
     let nav_cb = Rc::new(nav_callback) as Rc<dyn Fn(PathBuf)>;
 
     // ── Section: Places ────────────────────────────────────────
-    let places_lbl = render::create_section_title(&t("explore.places"));
+    let places_lbl = render::create_section_title(&trans("explore.places"));
     vbox.append(&places_lbl);
 
     add_sidebar_item(
         &vbox,
-        &t("explore.home"),
+        &trans("explore.home"),
         "user-home",
         glib::home_dir(),
         &session,
@@ -71,7 +71,7 @@ pub fn create_sidebar(
             let _ = std::fs::create_dir_all(&path);
         }
 
-        add_sidebar_item(&vbox, &t(key), icon, path, &session, &nav_cb);
+        add_sidebar_item(&vbox, &trans(key), icon, path, &session, &nav_cb);
     }
 
     let trash_path = glib::user_data_dir().join("Trash/files");
@@ -79,7 +79,7 @@ pub fn create_sidebar(
     let _ = std::fs::create_dir_all(glib::user_data_dir().join("Trash/info"));
     add_sidebar_item(
         &vbox,
-        &t("explore.trash"),
+        &trans("explore.trash"),
         "user-trash",
         trash_path,
         &session,
@@ -102,21 +102,21 @@ pub fn create_sidebar(
     for (key, icon, dir) in &optional_dirs {
         if let Some(path) = glib::user_special_dir(*dir) {
             if path.exists() {
-                add_sidebar_item(&vbox, &t(key), icon, path, &session, &nav_cb);
+                add_sidebar_item(&vbox, &trans(key), icon, path, &session, &nav_cb);
             }
         }
     }
 
     // ── Separator ──────────────────────────────────────────────
-    vbox.append(&render::create_sidebar_separator());
+    vbox.append(&render::create_sidebar_sep());
 
     // ── Section: This PC ───────────────────────────────────────
-    let pc_lbl = render::create_section_title(&t("explore.this_pc"));
+    let pc_lbl = render::create_section_title(&trans("explore.this_pc"));
     vbox.append(&pc_lbl);
 
     add_sidebar_item(
         &vbox,
-        &t("explore.local_disk"),
+        &trans("explore.local_disk"),
         "drive-harddisk",
         PathBuf::from("/"),
         &session,
@@ -139,7 +139,7 @@ fn add_sidebar_item(
     let session_clone = session.clone();
     let target_path = path.clone();
 
-    let btn = babydra_ui_kit::components::create_sidebar_item_button(
+    let btn = babydra_ui_kit::components::create_sidebar_btn(
         name,
         icon_name,
         "sidebar-item",
@@ -153,7 +153,7 @@ fn add_sidebar_item(
     );
 
     // Attach Drop Target so files can be dragged and moved into sidebar folders
-    let drop_target = babydra_ui_kit::components::explore::create_dir_drop_target_with_nav(
+    let drop_target = babydra_ui_kit::components::explore::create_drop_nav(
         path.clone(),
         Some(nav_callback.clone()),
     );

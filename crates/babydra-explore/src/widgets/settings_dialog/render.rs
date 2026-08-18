@@ -1,6 +1,6 @@
 //! Settings dialog UI construction: sidebar navigation, content stack, and page wiring.
 
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Box, Orientation, Stack, Window};
 use std::rc::Rc;
@@ -12,7 +12,7 @@ use super::keybinds;
 /// Displays the main settings dialog with vertical icon-only pill navigation and card content stack.
 pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn() + 'static) {
     let window = Window::builder()
-        .title(&t("explore.settings"))
+        .title(&trans("explore.settings"))
         .transient_for(parent)
         .modal(true)
         .resizable(false)
@@ -43,8 +43,8 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     main_hbox.append(&sidebar);
 
     // 1. General (Settings Icon)
-    let btn_general = babydra_ui_kit::components::create_sidebar_item_button(
-        &t("explore.settings_general"),
+    let btn_general = babydra_ui_kit::components::create_sidebar_btn(
+        &trans("explore.settings_general"),
         "settings",
         "sidebar-item",
         || {},
@@ -53,8 +53,8 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     btn_general.set_cursor_from_name(Some("pointer"));
 
     // 2. Keybinds (Terminal/Command Icon)
-    let btn_keybinds = babydra_ui_kit::components::create_sidebar_item_button(
-        &t("explore.settings_keybinds"),
+    let btn_keybinds = babydra_ui_kit::components::create_sidebar_btn(
+        &trans("explore.settings_keybinds"),
         "terminal",
         "sidebar-item",
         || {},
@@ -62,8 +62,8 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     btn_keybinds.set_cursor_from_name(Some("pointer"));
 
     // 3. Context Menu (Folder/Menu Icon)
-    let btn_context = babydra_ui_kit::components::create_sidebar_item_button(
-        &t("explore.settings_context_menu"),
+    let btn_context = babydra_ui_kit::components::create_sidebar_btn(
+        &trans("explore.settings_context_menu"),
         "folder",
         "sidebar-item",
         || {},
@@ -100,7 +100,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
     let tab_keybinds = keybinds::build_keybinds_page(&window, move || {
         on_change_k();
     });
-    let tab_context = context_menu::build_context_menu_page(&window);
+    let tab_context = context_menu::build_context_page(&window);
 
     stack.add_named(&tab_general, Some("general"));
     stack.add_named(&tab_keybinds, Some("keybinds"));

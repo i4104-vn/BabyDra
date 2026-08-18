@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 /// Wires event controllers, drag select, click activation and keys for ListBox
-pub fn wire_listbox_controllers(
+pub fn wire_listbox_ctrls(
     widgets: &ContentViewWidgets,
     entries: Rc<RefCell<Vec<FileEntry>>>,
     nav_cb: Rc<dyn Fn(PathBuf)>,
@@ -16,7 +16,7 @@ pub fn wire_listbox_controllers(
 ) {
     // 1. Selection changed
     {
-        let sc = sc_fn.clone();
+        let scroll_fn = sc_fn.clone();
         widgets.listbox.connect_selected_rows_changed(move |lb| {
             let sel: Vec<PathBuf> = lb
                 .selected_rows()
@@ -24,19 +24,19 @@ pub fn wire_listbox_controllers(
                 .map(|r| PathBuf::from(r.widget_name().to_string()))
                 .filter(|p| p.is_absolute())
                 .collect();
-            sc(sel);
+            scroll_fn(sel);
         });
     }
 
     // 2. Pane activation click on empty space
     {
         let lb_clone = widgets.listbox.clone();
-        let sc = sc_fn.clone();
+        let scroll_fn = sc_fn.clone();
         let gesture = gtk4::GestureClick::new();
         gesture.set_button(1);
         gesture.connect_pressed(move |_, _, _, y| {
             if lb_clone.row_at_y(y as i32).is_none() {
-                sc(Vec::new());
+                scroll_fn(Vec::new());
             }
         });
         widgets.listbox.add_controller(gesture);
@@ -66,10 +66,10 @@ pub fn wire_listbox_controllers(
                     selected_indices.push(idx);
                 }
             }
-            let b = e_ref.borrow();
+            let borrowed = e_ref.borrow();
             for idx in selected_indices {
-                if idx < b.len() {
-                    let entry = &b[idx];
+                if idx < borrowed.len() {
+                    let entry = &borrowed[idx];
                     if matches!(entry.file_type, babydra_core::FileType::Directory) {
                         nav(entry.path.clone());
                     } else {
@@ -105,10 +105,10 @@ pub fn wire_listbox_controllers(
                     })
                     .filter(|&idx| idx != usize::MAX)
                     .collect();
-                let b = e_ref.borrow();
+                let borrowed = e_ref.borrow();
                 for idx in selected_indices {
-                    if idx < b.len() {
-                        let entry = &b[idx];
+                    if idx < borrowed.len() {
+                        let entry = &borrowed[idx];
                         if matches!(entry.file_type, babydra_core::FileType::Directory) {
                             nav(entry.path.clone());
                         } else {
@@ -147,7 +147,7 @@ pub fn wire_listbox_controllers(
 
     // 5. Drag-to-select with rubberband selection
     if let Some(list_overlay) = widgets.list_fixed.parent() {
-        babydra_ui_kit::components::explore::wire_rubberband_listbox(
+        babydra_ui_kit::components::explore::wire_rubberband(
             &list_overlay,
             widgets.listbox.clone(),
             widgets.list_fixed.clone(),

@@ -25,7 +25,7 @@ pub fn create_section_title(label: &str) -> Label {
 }
 
 /// Helper to build a horizontal separator.
-pub fn create_sidebar_separator() -> Separator {
+pub fn create_sidebar_sep() -> Separator {
     let sep = Separator::new(Orientation::Horizontal);
     sep.set_margin_top(8);
     sep.set_margin_bottom(4);

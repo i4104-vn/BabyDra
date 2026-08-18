@@ -37,9 +37,9 @@ pub fn setup_preview_toggle(
         }
 
         {
-            let mut current_settings = babydra_core::load_explore_settings();
+            let mut current_settings = babydra_core::load_explore_cfg();
             current_settings.preview_visible = now_visible;
-            babydra_core::save_explore_settings(&current_settings);
+            babydra_core::save_explore_cfg(&current_settings);
         }
 
         if let Some(ref sw) = *status_widgets_c.borrow() {

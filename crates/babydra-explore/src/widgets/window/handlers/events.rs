@@ -83,7 +83,7 @@ pub fn setup_key_shortcuts(
 }
 
 /// Automatically hides or shows the preview panel depending on window width changes.
-pub fn setup_window_resize_handler(
+pub fn setup_resize_handler(
     window: &gtk4::ApplicationWindow,
     layout_paned: gtk4::Paned,
     revealer: gtk4::Revealer,
@@ -119,7 +119,7 @@ pub fn setup_window_resize_handler(
 }
 
 /// Sets up the hot-reload receiver loop responding to directory watcher triggers.
-pub fn setup_file_watcher_receiver(
+pub fn setup_file_watcher(
     session: Rc<RefCell<SessionState>>,
     _navigate_pane_no_watch_ref: Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>,
     _active_pane: Rc<Cell<ActivePane>>,
@@ -158,7 +158,7 @@ pub fn setup_file_watcher_receiver(
                             babydra_core::load_directory(left_path.clone(), show_hidden).await
                         {
                             if *left_handle.current_path.borrow() == left_path {
-                                crate::widgets::content_view::update_content_view_silent(
+                                crate::widgets::content_view::update_content_quiet(
                                     &left_handle,
                                     &entries,
                                     left_path,
@@ -175,7 +175,7 @@ pub fn setup_file_watcher_receiver(
                                 babydra_core::load_directory(right_path.clone(), show_hidden).await
                             {
                                 if *r_handle_c.current_path.borrow() == right_path {
-                                    crate::widgets::content_view::update_content_view_silent(
+                                    crate::widgets::content_view::update_content_quiet(
                                         &r_handle_c,
                                         &entries,
                                         right_path,
@@ -213,7 +213,7 @@ pub fn setup_dbus_receiver(
 }
 
 /// Connects status bar button signals (view modes, sort dropdown, toggle preview, settings dialog).
-pub fn setup_status_bar_wiring(
+pub fn setup_status_wiring(
     status_bar_widgets_cell: Rc<RefCell<Option<StatusBarWidgets>>>,
     toggle_preview_rc: Rc<dyn Fn()>,
     view_mode_callback_rc: Rc<dyn Fn(String)>,
@@ -272,7 +272,7 @@ pub fn setup_status_bar_wiring(
             let toggle_p_inner_cb = toggle_p_inner.clone();
 
             crate::widgets::settings_dialog::show_settings_dialog(&parent_win_c, move || {
-                let settings = babydra_core::load_explore_settings();
+                let settings = babydra_core::load_explore_cfg();
 
                 {
                     let mut s = session_inner_cb.borrow_mut();
@@ -296,7 +296,7 @@ pub fn setup_status_bar_wiring(
             });
         });
 
-        let settings = babydra_core::load_explore_settings();
+        let settings = babydra_core::load_explore_cfg();
         if settings.view_mode == "list" {
             sw.btn_view_list.add_css_class("status-bar-btn-active");
             sw.btn_view_icons.remove_css_class("status-bar-btn-active");
@@ -308,7 +308,7 @@ pub fn setup_status_bar_wiring(
 }
 
 /// Connects global application key shortcuts and rebuild callback.
-pub fn setup_window_shortcuts(
+pub fn setup_shortcuts(
     window: &gtk4::ApplicationWindow,
     toggle_split_view_rc: Rc<dyn Fn()>,
     toggle_preview_rc: Rc<dyn Fn()>,
@@ -328,7 +328,7 @@ pub fn setup_window_shortcuts(
             window.remove_controller(old_controller);
         }
 
-        let settings = babydra_core::load_explore_settings();
+        let settings = babydra_core::load_explore_cfg();
         let mut shortcuts = Vec::new();
 
         let mut add_shortcut = |action: &str, cb: Rc<dyn Fn()>| {

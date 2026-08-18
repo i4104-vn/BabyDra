@@ -16,7 +16,7 @@ pub fn create_preview_panel() -> (ScrolledWindow, PreviewPanelWidgets) {
     vbox.set_vexpand(true);
     container.set_child(Some(&vbox));
 
-    let lbl_status = Label::new(Some(&babydra_core::i18n::t("explore.preview_no_selection")));
+    let lbl_status = Label::new(Some(&babydra_core::i18n::trans("explore.preview_no_selection")));
     lbl_status.set_css_classes(&["dim-label"]);
     lbl_status.set_margin_bottom(6);
     vbox.append(&lbl_status);

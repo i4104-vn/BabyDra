@@ -1,15 +1,15 @@
-use super::render::render_markdown_to_pango;
+use super::render::render_md_to_pango;
 use crate::widgets::state::PreviewPanelWidgets;
 use std::fs;
 use std::path::Path;
 
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 
 /// Clear preview.
 pub fn clear_preview(widgets: &PreviewPanelWidgets) {
     widgets
         .lbl_status
-        .set_text(&t("explore.preview_no_selection"));
+        .set_text(&trans("explore.preview_no_selection"));
     widgets.lbl_content.set_text("");
     widgets.current_file.replace(None);
     widgets.watcher.replace(None);
@@ -20,7 +20,7 @@ pub fn show_file_preview(widgets: &PreviewPanelWidgets, path: &Path) {
     let filename = path.file_name().unwrap_or_default().to_string_lossy();
     widgets
         .lbl_status
-        .set_text(&t("explore.previewing").replace("{}", &filename));
+        .set_text(&trans("explore.previewing").replace("{}", &filename));
     widgets.current_file.replace(Some(path.to_path_buf()));
 
     // Read file contents (limit to 1MB to avoid freezing)
@@ -28,7 +28,7 @@ pub fn show_file_preview(widgets: &PreviewPanelWidgets, path: &Path) {
         if metadata.len() > 1024 * 1024 {
             widgets
                 .lbl_content
-                .set_text(&t("explore.preview_too_large"));
+                .set_text(&trans("explore.preview_too_large"));
             widgets.watcher.replace(None);
             return;
         }
@@ -37,14 +37,14 @@ pub fn show_file_preview(widgets: &PreviewPanelWidgets, path: &Path) {
     if let Ok(content) = fs::read_to_string(path) {
         let is_markdown = path.extension().and_then(|e| e.to_str()) == Some("md");
         if is_markdown {
-            let parsed = render_markdown_to_pango(&content);
+            let parsed = render_md_to_pango(&content);
             widgets.lbl_content.set_markup(&parsed);
         } else {
             let escaped = glib::markup_escape_text(&content);
             widgets.lbl_content.set_markup(&escaped);
         }
     } else {
-        widgets.lbl_content.set_text(&t("explore.preview_failed"));
+        widgets.lbl_content.set_text(&trans("explore.preview_failed"));
     }
 
     // Setup unbounded channel for thread-safe UI updates
@@ -56,7 +56,7 @@ pub fn show_file_preview(widgets: &PreviewPanelWidgets, path: &Path) {
         while let Some(new_content) = rx.recv().await {
             let is_md = path_p.extension().and_then(|e| e.to_str()) == Some("md");
             if is_md {
-                let parsed = render_markdown_to_pango(&new_content);
+                let parsed = render_md_to_pango(&new_content);
                 label_clone.set_markup(&parsed);
             } else {
                 let escaped = glib::markup_escape_text(&new_content);

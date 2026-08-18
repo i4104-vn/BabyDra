@@ -12,10 +12,10 @@ pub fn handle_cut(paths: Vec<PathBuf>, current_path: PathBuf, _nav_cb: Rc<dyn Fn
         babydra_ui_kit::components::explore::CLIPBOARD.with(|cb| {
             cb.replace(Some((paths.clone(), true)));
         });
-        babydra_ui_kit::components::explore::context_menu::clipboard::set_system_clipboard_files(
+        babydra_ui_kit::components::explore::context_menu::clipboard::set_clipboard_files(
             &paths, true,
         );
-        babydra_ui_kit::components::explore::context_menu::clipboard::apply_cut_dimming_global(
+        babydra_ui_kit::components::explore::context_menu::clipboard::apply_cut_everywhere(
             &paths,
         );
     }
@@ -27,10 +27,10 @@ pub fn handle_copy(paths: Vec<PathBuf>, current_path: PathBuf, _nav_cb: Rc<dyn F
         babydra_ui_kit::components::explore::CLIPBOARD.with(|cb| {
             cb.replace(Some((paths.clone(), false)));
         });
-        babydra_ui_kit::components::explore::context_menu::clipboard::set_system_clipboard_files(
+        babydra_ui_kit::components::explore::context_menu::clipboard::set_clipboard_files(
             &paths, false,
         );
-        babydra_ui_kit::components::explore::context_menu::clipboard::apply_cut_dimming_global(&[]);
+        babydra_ui_kit::components::explore::context_menu::clipboard::apply_cut_everywhere(&[]);
     }
 }
 
@@ -39,7 +39,7 @@ pub fn handle_paste(current_path: PathBuf, nav_cb: Rc<dyn Fn(PathBuf)>) {
     if is_in_trash(&current_path) {
         return;
     }
-    babydra_ui_kit::components::explore::context_menu::clipboard::execute_paste_from_system_clipboard(
+    babydra_ui_kit::components::explore::context_menu::clipboard::paste_from_clipboard(
         current_path.clone(),
         current_path,
         nav_cb,

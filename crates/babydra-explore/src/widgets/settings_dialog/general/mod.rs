@@ -1,4 +1,4 @@
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Box, ListBox, Orientation};
 
@@ -6,7 +6,7 @@ pub mod row;
 
 /// Builds the general settings page, mounting various toggles for file exploration features.
 pub fn build_general_page() -> Box {
-    let settings = babydra_core::load_explore_settings();
+    let settings = babydra_core::load_explore_cfg();
     let tab_general = Box::new(Orientation::Vertical, 10);
     tab_general.set_margin_top(8);
     tab_general.set_margin_bottom(8);
@@ -20,13 +20,13 @@ pub fn build_general_page() -> Box {
     row::add_switch_row(
         &listbox,
         "eye-off",
-        &t("explore.toggle_hidden"),
-        &t("explore.settings_toggle_hidden_desc"),
+        &trans("explore.toggle_hidden"),
+        &trans("explore.settings_toggle_hidden_desc"),
         settings.show_hidden,
         std::boxed::Box::new(|state| {
-            let mut s = babydra_core::load_explore_settings();
+            let mut s = babydra_core::load_explore_cfg();
             s.show_hidden = state;
-            babydra_core::save_explore_settings(&s);
+            babydra_core::save_explore_cfg(&s);
         }),
     );
 
@@ -34,13 +34,13 @@ pub fn build_general_page() -> Box {
     row::add_switch_row(
         &listbox,
         "sidebar",
-        &t("explore.toggle_preview"),
-        &t("explore.settings_toggle_preview_desc"),
+        &trans("explore.toggle_preview"),
+        &trans("explore.settings_toggle_preview_desc"),
         settings.preview_visible,
         std::boxed::Box::new(|state| {
-            let mut s = babydra_core::load_explore_settings();
+            let mut s = babydra_core::load_explore_cfg();
             s.preview_visible = state;
-            babydra_core::save_explore_settings(&s);
+            babydra_core::save_explore_cfg(&s);
         }),
     );
 
@@ -48,13 +48,13 @@ pub fn build_general_page() -> Box {
     row::add_switch_row(
         &listbox,
         "activity",
-        &t("explore.settings_double_click"),
-        &t("explore.settings_double_click_desc"),
+        &trans("explore.settings_double_click"),
+        &trans("explore.settings_double_click_desc"),
         settings.double_click_to_open,
         std::boxed::Box::new(|state| {
-            let mut s = babydra_core::load_explore_settings();
+            let mut s = babydra_core::load_explore_cfg();
             s.double_click_to_open = state;
-            babydra_core::save_explore_settings(&s);
+            babydra_core::save_explore_cfg(&s);
         }),
     );
 
@@ -62,13 +62,13 @@ pub fn build_general_page() -> Box {
     row::add_switch_row(
         &listbox,
         "trash",
-        &t("explore.settings_permanent_delete"),
-        &t("explore.settings_permanent_delete_desc"),
+        &trans("explore.settings_permanent_delete"),
+        &trans("explore.settings_permanent_delete_desc"),
         settings.permanent_delete,
         std::boxed::Box::new(|state| {
-            let mut s = babydra_core::load_explore_settings();
+            let mut s = babydra_core::load_explore_cfg();
             s.permanent_delete = state;
-            babydra_core::save_explore_settings(&s);
+            babydra_core::save_explore_cfg(&s);
         }),
     );
 
@@ -76,13 +76,13 @@ pub fn build_general_page() -> Box {
     row::add_switch_row(
         &listbox,
         "info",
-        &t("explore.settings_calculate_size"),
-        &t("explore.settings_calculate_size_desc"),
+        &trans("explore.settings_calculate_size"),
+        &trans("explore.settings_calculate_size_desc"),
         settings.calculate_dir_size,
         std::boxed::Box::new(|state| {
-            let mut s = babydra_core::load_explore_settings();
+            let mut s = babydra_core::load_explore_cfg();
             s.calculate_dir_size = state;
-            babydra_core::save_explore_settings(&s);
+            babydra_core::save_explore_cfg(&s);
         }),
     );
 

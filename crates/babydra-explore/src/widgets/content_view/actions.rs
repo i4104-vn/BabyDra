@@ -4,7 +4,7 @@ use gtk4::prelude::*;
 use std::path::PathBuf;
 
 /// Changes the layout style of content view stack.
-pub fn set_content_view_mode(handle: &ContentViewHandle, mode: &str) {
+pub fn set_view_mode(handle: &ContentViewHandle, mode: &str) {
     handle.current_mode.replace(mode.to_string());
     handle.widgets.stack.set_visible_child_name(mode);
 
@@ -15,11 +15,11 @@ pub fn set_content_view_mode(handle: &ContentViewHandle, mode: &str) {
     sort_entries(&mut e, &sort);
     handle.entries.replace(e.clone());
 
-    super::render::update_content_view_ui(handle);
+    super::render::update_content_ui(handle);
 }
 
 /// Changes the sorting mode of the content view and updates the layout.
-pub fn set_content_view_sort(handle: &ContentViewHandle, sort_mode: &str) {
+pub fn set_view_sort(handle: &ContentViewHandle, sort_mode: &str) {
     handle.sort_mode.replace(sort_mode.to_string());
 
     // Sort current entries
@@ -32,7 +32,7 @@ pub fn set_content_view_sort(handle: &ContentViewHandle, sort_mode: &str) {
     sort_entries(&mut all, sort_mode);
     handle.all_entries.replace(all);
 
-    super::render::update_content_view_ui(handle);
+    super::render::update_content_ui(handle);
 }
 
 /// Updates files in view area.
@@ -52,11 +52,11 @@ pub fn update_content_view(
 
     handle.widgets.stack.set_visible_child_name(&mode);
 
-    super::render::update_content_view_ui(handle);
+    super::render::update_content_ui(handle);
 }
 
 /// Updates files in view area silently without resetting progress bar or layout flash.
-pub fn update_content_view_silent(
+pub fn update_content_quiet(
     handle: &ContentViewHandle,
     entries: &[FileEntry],
     current_path: PathBuf,
@@ -72,7 +72,7 @@ pub fn update_content_view_silent(
 
     handle.widgets.stack.set_visible_child_name(&mode);
 
-    super::render::update_content_view_ui_silent(handle);
+    super::render::render_silent(handle);
 }
 
 /// Filters content files list.
@@ -84,11 +84,11 @@ pub fn filter_content_view(handle: &ContentViewHandle, query: &str) {
     sort_entries(&mut filtered, &sort);
     handle.entries.replace(filtered.clone());
 
-    super::render::update_content_view_ui(handle);
+    super::render::update_content_ui(handle);
 }
 
 /// Wires navigation buttons (back, forward, up, refresh) and address bar entry handlers.
-pub fn wire_content_view_navigation(
+pub fn wire_content_nav(
     widgets: &crate::widgets::state::ContentViewWidgets,
     nav_cb: std::rc::Rc<dyn Fn(PathBuf)>,
     current_path: std::rc::Rc<std::cell::RefCell<PathBuf>>,

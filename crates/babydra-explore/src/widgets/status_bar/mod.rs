@@ -1,4 +1,4 @@
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Align, Box, Label, Orientation};
 
@@ -19,7 +19,7 @@ pub fn create_status_bar() -> StatusBarWidgets {
     container.set_css_classes(&["status-bar"]);
 
     let lbl_status = Label::builder()
-        .label(&format!("0 {}", t("explore.items")))
+        .label(&format!("0 {}", trans("explore.items")))
         .halign(Align::Start)
         .hexpand(true)
         .build();
@@ -27,21 +27,21 @@ pub fn create_status_bar() -> StatusBarWidgets {
 
     // DropDown for sorting (Auto, By date, By group)
     let sort_options = [
-        t("explore.sort_auto"),
-        t("explore.sort_date"),
-        t("explore.sort_group"),
+        trans("explore.sort_auto"),
+        trans("explore.sort_date"),
+        trans("explore.sort_group"),
     ];
     let sort_options_strs: Vec<&str> = sort_options.iter().map(|s| s.as_str()).collect();
     let dropdown_sort = gtk4::DropDown::from_strings(&sort_options_strs);
     dropdown_sort.set_css_classes(&["status-bar-dropdown"]);
-    dropdown_sort.set_tooltip_text(Some(&t("explore.sort_by")));
+    dropdown_sort.set_tooltip_text(Some(&trans("explore.sort_by")));
     container.append(&dropdown_sort);
 
     let btn_view_icons = babydra_ui_kit::components::create_icon_button(
         "view-grid",
         16,
         &["status-bar-btn"],
-        Some(&t("explore.view_grid")),
+        Some(&trans("explore.view_grid")),
         || {},
     );
     container.append(&btn_view_icons);
@@ -50,7 +50,7 @@ pub fn create_status_bar() -> StatusBarWidgets {
         "view-list",
         16,
         &["status-bar-btn"],
-        Some(&t("explore.view_list")),
+        Some(&trans("explore.view_list")),
         || {},
     );
     container.append(&btn_view_list);
@@ -59,7 +59,7 @@ pub fn create_status_bar() -> StatusBarWidgets {
         "sidebar",
         16,
         &["status-bar-btn", "status-bar-btn-active"],
-        Some(&t("explore.toggle_preview")),
+        Some(&trans("explore.toggle_preview")),
         || {},
     );
     container.append(&btn_toggle_preview);
@@ -73,7 +73,7 @@ pub fn create_status_bar() -> StatusBarWidgets {
         "settings",
         16,
         &["status-bar-btn"],
-        Some(&t("explore.settings")),
+        Some(&trans("explore.settings")),
         || {},
     );
     container.append(&btn_settings);
@@ -95,8 +95,8 @@ pub fn update_status_bar(lbl_status: &Label, count: usize, total_size: u64) {
     lbl_status.set_text(&format!(
         "{} {} | {}: {}",
         count,
-        t("explore.items"),
-        t("explore.total_size"),
+        trans("explore.items"),
+        trans("explore.total_size"),
         size_str
     ));
 }

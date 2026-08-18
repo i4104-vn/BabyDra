@@ -21,7 +21,7 @@ fn main() {
 
         let session = std::rc::Rc::new(std::cell::RefCell::new(SessionState::new(target_dir)));
 
-        let main_window = crate::widgets::window::create_explore_window(app, session);
+        let main_window = crate::widgets::window::create_explore_win(app, session);
         main_window.present();
     });
 
