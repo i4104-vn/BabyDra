@@ -7,11 +7,11 @@ use std::rc::Rc;
 use tokio::io::{AsyncBufReadExt, BufReader};
 
 use crate::components::explore::dialogs::shared::scroll_to_end;
-use babydra_core::i18n::t;
-use babydra_core::services::explore::spawn_compress_command;
+use babydra_core::i18n::trans;
+use babydra_core::services::explore::spawn_compress;
 
 /// Show compress log dialog.
-pub fn show_compress_log_dialog(
+pub fn show_compress_log(
     target_paths: Vec<PathBuf>,
     archive_path: PathBuf,
     current_path: PathBuf,
@@ -20,7 +20,7 @@ pub fn show_compress_log_dialog(
     parent: Option<&impl IsA<gtk4::Window>>,
 ) {
     let window = Window::builder()
-        .title(&t("explore.dialog_archive_title"))
+        .title(&trans("explore.dialog_archive_title"))
         .modal(true)
         .resizable(true)
         .default_width(500)
@@ -41,7 +41,7 @@ pub fn show_compress_log_dialog(
 
     let status_box = Box::new(Orientation::Horizontal, 10);
     let lbl_status = Label::builder()
-        .label(&t("explore.compressing_running"))
+        .label(&trans("explore.compressing_running"))
         .halign(Align::Start)
         .hexpand(true)
         .build();
@@ -78,14 +78,14 @@ pub fn show_compress_log_dialog(
         .to_string();
     buffer.set_text(&format!(
         "$ {}\n\n",
-        t("explore.creating_archive").replace("{}", &fname)
+        trans("explore.creating_archive").replace("{}", &fname)
     ));
 
     scroll.set_child(Some(&text_view));
     vbox.append(&scroll);
 
     let btn_close = Button::builder()
-        .label(&t("explore.settings_close"))
+        .label(&trans("explore.settings_close"))
         .sensitive(false)
         .halign(Align::End)
         .build();
@@ -126,9 +126,9 @@ pub fn show_compress_log_dialog(
                 pb_finish.set_fraction(0.0);
                 lbl_status_c.set_markup(&format!(
                     "<b><span foreground='#ef4444'>{}</span></b>",
-                    t("explore.compress_failed")
+                    trans("explore.compress_failed")
                 ));
-                buffer_c.set_text(&t("explore.invalid_parent_dir"));
+                buffer_c.set_text(&trans("explore.invalid_parent_dir"));
                 btn_close_c.set_sensitive(true);
                 return;
             }
@@ -144,7 +144,7 @@ pub fn show_compress_log_dialog(
             .filter_map(|p| p.file_name().map(|f| f.to_string_lossy().to_string()))
             .collect();
 
-        match spawn_compress_command(&parent_dir, &archive_filename, &files, is_zip) {
+        match spawn_compress(&parent_dir, &archive_filename, &files, is_zip) {
             Ok(mut child) => {
                 let stdout = child.stdout.take().unwrap();
                 let stderr = child.stderr.take().unwrap();
@@ -176,14 +176,14 @@ pub fn show_compress_log_dialog(
                             let success = status.map(|s| s.success()).unwrap_or(false);
                             if success {
                                 pb_finish.set_fraction(1.0);
-                                lbl_status_c.set_markup(&format!("<b><span foreground='#22c55e'>{}</span></b>", t("explore.compress_success")));
+                                lbl_status_c.set_markup(&format!("<b><span foreground='#22c55e'>{}</span></b>", trans("explore.compress_success")));
                                 let mut end = buffer_c.end_iter();
-                                buffer_c.insert(&mut end, &format!("\n✓ {}\n", t("explore.compress_completed")));
+                                buffer_c.insert(&mut end, &format!("\n✓ {}\n", trans("explore.compress_completed")));
                             } else {
                                 pb_finish.set_fraction(0.0);
-                                lbl_status_c.set_markup(&format!("<b><span foreground='#ef4444'>{}</span></b>", t("explore.compress_failed")));
+                                lbl_status_c.set_markup(&format!("<b><span foreground='#ef4444'>{}</span></b>", trans("explore.compress_failed")));
                                 let mut end = buffer_c.end_iter();
-                                buffer_c.insert(&mut end, &format!("\n✗ {}\n", t("explore.compress_failed_detail")));
+                                buffer_c.insert(&mut end, &format!("\n✗ {}\n", trans("explore.compress_failed_detail")));
                             }
                             scroll_to_end(&text_view_c);
                             break;
@@ -198,14 +198,14 @@ pub fn show_compress_log_dialog(
                 pb_finish.set_fraction(0.0);
                 lbl_status_c.set_markup(&format!(
                     "<b><span foreground='#ef4444'>{}</span></b>",
-                    t("explore.compress_failed")
+                    trans("explore.compress_failed")
                 ));
                 let mut end = buffer_c.end_iter();
                 buffer_c.insert(
                     &mut end,
                     &format!(
                         "{}\n",
-                        t("explore.spawn_compress_failed").replace("{}", &e.to_string())
+                        trans("explore.spawn_compress_failed").replace("{}", &e.to_string())
                     ),
                 );
                 scroll_to_end(&text_view_c);

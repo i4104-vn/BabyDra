@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 /// Returns the current `permissions string`.
-pub fn get_permissions_string(mode: u32) -> String {
+pub fn get_perm_string(mode: u32) -> String {
     let mut s = String::with_capacity(9);
 
     // Owner
@@ -23,7 +23,7 @@ pub fn get_permissions_string(mode: u32) -> String {
 }
 
 /// Count dir contents recursive.
-pub fn count_dir_contents_recursive(path: &Path) -> (usize, usize) {
+pub fn count_dir_contents(path: &Path) -> (usize, usize) {
     let mut files = 0;
     let mut folders = 0;
     if let Ok(entries) = std::fs::read_dir(path) {
@@ -31,7 +31,7 @@ pub fn count_dir_contents_recursive(path: &Path) -> (usize, usize) {
             if let Ok(meta) = entry.metadata() {
                 if meta.is_dir() {
                     folders += 1;
-                    let (sub_files, sub_folders) = count_dir_contents_recursive(&entry.path());
+                    let (sub_files, sub_folders) = count_dir_contents(&entry.path());
                     files += sub_files;
                     folders += sub_folders;
                 } else {

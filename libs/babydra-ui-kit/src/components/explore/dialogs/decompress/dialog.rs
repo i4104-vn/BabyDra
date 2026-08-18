@@ -3,8 +3,8 @@ use gtk4::{Align, Box, Button, Entry, Label, Orientation, Window};
 use std::path::PathBuf;
 use std::rc::Rc;
 
-use super::log_dialog::show_decompress_log_dialog;
-use babydra_core::i18n::t;
+use super::log_dialog::show_decompress_log;
+use babydra_core::i18n::trans;
 use babydra_core::services::explore::check_zip_password as check_password_correct;
 
 /// Show password dialog.
@@ -15,7 +15,7 @@ pub fn show_password_dialog(
     parent: Option<&gtk4::Window>,
 ) {
     let window = Window::builder()
-        .title(&t("explore.dialog_password_title"))
+        .title(&trans("explore.dialog_password_title"))
         .modal(true)
         .resizable(false)
         .default_width(360)
@@ -35,7 +35,7 @@ pub fn show_password_dialog(
     window.set_child(Some(&vbox));
 
     let lbl = Label::builder()
-        .label(&t("explore.dialog_password_label"))
+        .label(&trans("explore.dialog_password_label"))
         .halign(Align::Start)
         .wrap(true)
         .build();
@@ -56,9 +56,9 @@ pub fn show_password_dialog(
     bbox.set_halign(Align::End);
     vbox.append(&bbox);
 
-    let btn_cancel = Button::with_label(&t("explore.settings_cancel"));
+    let btn_cancel = Button::with_label(&trans("explore.settings_cancel"));
     let btn_extract = Button::builder()
-        .label(&t("explore.menu_decompress"))
+        .label(&trans("explore.menu_decompress"))
         .css_classes(vec!["suggested-action".to_string()])
         .build();
 
@@ -91,7 +91,7 @@ pub fn show_password_dialog(
             let correct = check_password_correct(&archive_path_f, &password).await;
             if correct {
                 win_f.close();
-                show_decompress_log_dialog(
+                show_decompress_log(
                     archive_path_f,
                     current_path_f,
                     nav_f,
@@ -101,7 +101,7 @@ pub fn show_password_dialog(
             } else {
                 lbl_err_f.set_markup(&format!(
                     "<span foreground='#ef4444'>{}</span>",
-                    t("explore.dialog_password_incorrect")
+                    trans("explore.dialog_password_incorrect")
                 ));
             }
         });

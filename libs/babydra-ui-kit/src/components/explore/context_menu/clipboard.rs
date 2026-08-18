@@ -16,7 +16,7 @@ thread_local! {
 }
 
 /// Sets the files on the system clipboard using FileList and x-special/gnome-copied-files.
-pub fn set_system_clipboard_files(paths: &[PathBuf], is_cut: bool) {
+pub fn set_clipboard_files(paths: &[PathBuf], is_cut: bool) {
     let display = gtk4::gdk::Display::default().unwrap();
     let clipboard = display.clipboard();
 
@@ -41,7 +41,7 @@ pub fn set_system_clipboard_files(paths: &[PathBuf], is_cut: bool) {
     let _ = clipboard.set_content(Some(&union_provider));
 }
 
-pub use super::dimming::{apply_cut_dimming, apply_cut_dimming_global};
+pub use super::dimming::{apply_cut_dimming, apply_cut_everywhere};
 
 /// Executes paste (copy or cut) operation asynchronously and triggers navigation refresh.
 pub fn execute_paste(
@@ -86,7 +86,7 @@ pub fn execute_paste(
         let conflict_name = if conflicts.len() == 1 {
             conflicts[0].clone()
         } else {
-            t("explore.conflict_items").replace("{}", &conflicts.len().to_string())
+            trans("explore.conflict_items").replace("{}", &conflicts.len().to_string())
         };
         crate::components::explore::dialogs::show_conflict_dialog(
             &conflict_name,
@@ -98,7 +98,7 @@ pub fn execute_paste(
     }
 }
 
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::{Align, Box, Label, Orientation, ProgressBar, Window};
 
 fn perform_execute_paste(
@@ -113,9 +113,9 @@ fn perform_execute_paste(
     }
 
     let title_str = if is_cut {
-        t("explore.moving_title")
+        trans("explore.moving_title")
     } else {
-        t("explore.copying_title")
+        trans("explore.copying_title")
     };
 
     let dialog = Window::builder()
@@ -209,7 +209,7 @@ fn perform_execute_paste(
             let _ = display
                 .clipboard()
                 .set_content(None::<&gtk4::gdk::ContentProvider>);
-            apply_cut_dimming_global(&[]);
+            apply_cut_everywhere(&[]);
         }
 
         dialog_c.close();
@@ -219,7 +219,7 @@ fn perform_execute_paste(
 
 /// Reads files from the system clipboard (supporting both text/uri-list and x-special/gnome-copied-files)
 /// and performs the paste operation.
-pub fn execute_paste_from_system_clipboard(
+pub fn paste_from_clipboard(
     dest_dir: PathBuf,
     current_path: PathBuf,
     nav_callback: Rc<dyn Fn(PathBuf)>,

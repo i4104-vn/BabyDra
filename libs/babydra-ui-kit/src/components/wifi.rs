@@ -3,7 +3,7 @@
 use gtk4::prelude::*;
 
 /// Renders clean SVG string for Wi-Fi signal waves (0 to 4 bars).
-pub fn render_wifi_signal_svg(
+pub fn render_wifi_svg(
     strength_pct: u32,
     is_enabled: bool,
     is_connected: bool,
@@ -50,32 +50,32 @@ pub fn render_wifi_signal_svg(
 }
 
 /// Creates a Wi-Fi signal strength icon widget from explicit signal strength and connection state.
-pub fn create_wifi_signal_icon_from_strength(
+pub fn create_rssi_icon(
     strength_pct: u32,
     is_enabled: bool,
     is_connected: bool,
     size: i32,
     custom_color: Option<&str>,
 ) -> gtk4::Widget {
-    let svg = render_wifi_signal_svg(strength_pct, is_enabled, is_connected, size, custom_color);
+    let svg = render_wifi_svg(strength_pct, is_enabled, is_connected, size, custom_color);
     crate::ui::icon::get_icon_from_svg(&svg, size).upcast()
 }
 
 /// Creates a Wi-Fi signal icon widget for a specific network (from signal percentage 0-100).
-pub fn create_wifi_signal_icon_for_network(
+pub fn create_wifi_net_icon(
     signal_pct: u32,
     is_connected: bool,
     size: i32,
     custom_color: Option<&str>,
 ) -> gtk4::Widget {
-    create_wifi_signal_icon_from_strength(signal_pct, true, is_connected, size, custom_color)
+    create_rssi_icon(signal_pct, true, is_connected, size, custom_color)
 }
 
 /// Creates a dynamic Wi-Fi signal icon widget querying current system Wi-Fi state.
-pub fn create_system_wifi_signal_icon(size: i32, custom_color: Option<&str>) -> gtk4::Widget {
+pub fn create_sys_wifi_icon(size: i32, custom_color: Option<&str>) -> gtk4::Widget {
     let (is_enabled, is_connected, strength_pct) =
-        babydra_core::services::system::wifi::get_wifi_signal_strength();
-    create_wifi_signal_icon_from_strength(
+        babydra_core::services::system::wifi::get_wifi_signal();
+    create_rssi_icon(
         strength_pct as u32,
         is_enabled,
         is_connected,

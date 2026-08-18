@@ -1,7 +1,7 @@
 use crate::components::context_menu::ContextMenuBuilder;
 use crate::components::explore::context_menu::{
     clipboard::execute_paste,
-    custom_items::append_custom_context_items,
+    custom_items::append_custom_items,
     CLIPBOARD,
 };
 use crate::components::explore::helpers::is_archive_file;
@@ -9,7 +9,7 @@ use gtk4::prelude::*;
 use std::path::PathBuf;
 use std::rc::Rc;
 
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 
 /// Renders the standard context menu for files/directories outside the Trash.
 pub fn show_for_file_normal(
@@ -33,7 +33,7 @@ pub fn show_for_file_normal(
     let target_paths_open = target_paths.clone();
     let nav = nav_callback.clone();
     builder = builder.item(
-        &t("explore.menu_open"),
+        &trans("explore.menu_open"),
         if is_any_dir { "folder" } else { "text" },
         move || {
             for path in &target_paths_open {
@@ -51,7 +51,7 @@ pub fn show_for_file_normal(
     );
 
     // 2. Open in New Window
-    builder = builder.item(&t("explore.menu_open_new_window"), "external-link", move || {
+    builder = builder.item(&trans("explore.menu_open_new_window"), "external-link", move || {
         let path_to_open = if let Some(dir) = target_paths_win.iter().find(|p| p.is_dir()) {
             dir.clone()
         } else if let Some(first) = target_paths_win.first() {
@@ -84,14 +84,14 @@ pub fn show_for_file_normal(
     // 3. Refresh
     let nav_refresh = nav_callback.clone();
     let current_p_refresh = current_path.clone();
-    builder = builder.item(&t("explore.menu_refresh"), "refresh", move || {
+    builder = builder.item(&trans("explore.menu_refresh"), "refresh", move || {
         nav_refresh(current_p_refresh.clone());
     });
 
     // 4. Copy location
     let target_paths_loc = target_paths.clone();
     let current_path_loc = current_path.clone();
-    builder = builder.item(&t("explore.menu_copy_location"), "copy", move || {
+    builder = builder.item(&trans("explore.menu_copy_location"), "copy", move || {
         let text = if target_paths_loc.is_empty() {
             current_path_loc.to_string_lossy().to_string()
         } else if target_paths_loc.len() == 1 {
@@ -113,7 +113,7 @@ pub fn show_for_file_normal(
     let nav_compress = nav_callback.clone();
     let current_p_compress = current_path.clone();
     let parent_compress = parent.clone();
-    builder = builder.item(&t("explore.menu_compress"), "folder", move || {
+    builder = builder.item(&trans("explore.menu_compress"), "folder", move || {
         crate::components::explore::dialogs::show_compress_dialog(
             target_paths_compress.clone(),
             current_p_compress.clone(),
@@ -129,10 +129,10 @@ pub fn show_for_file_normal(
         let nav_decompress = nav_callback.clone();
         let current_p_decompress = current_path.clone();
         let parent_decompress = parent.clone();
-        builder = builder.item(&t("explore.menu_decompress"), "download", move || {
+        builder = builder.item(&trans("explore.menu_decompress"), "download", move || {
             for path in &target_paths_decompress {
                 if is_archive_file(path) {
-                    crate::components::explore::dialogs::perform_decompress_async(
+                    crate::components::explore::dialogs::decompress_async(
                         path.clone(),
                         current_p_decompress.clone(),
                         nav_decompress.clone(),
@@ -146,7 +146,7 @@ pub fn show_for_file_normal(
     // 7. Custom Context Options
     let target_paths_custom = target_paths.clone();
     builder = builder.custom_items(move |vbox, popover| {
-        append_custom_context_items(vbox, popover, target_paths_custom, false);
+        append_custom_items(vbox, popover, target_paths_custom, false);
     });
 
     builder = builder.separator();
@@ -154,8 +154,8 @@ pub fn show_for_file_normal(
     // 8. Properties
     let target_paths_props = target_paths.clone();
     let parent_props = parent.clone();
-    builder = builder.item(&t("explore.menu_properties"), "info", move || {
-        crate::components::explore::dialogs::show_properties_dialog(
+    builder = builder.item(&trans("explore.menu_properties"), "info", move || {
+        crate::components::explore::dialogs::show_properties(
             target_paths_props.clone(),
             Some(&parent_props),
         );
@@ -193,7 +193,7 @@ pub fn show_for_file_normal(
     let pop_copy = pop_ref.clone();
 
     builder = builder
-        .footer_button_sensitive("cut", &t("explore.menu_cut"), !target_paths.is_empty(), move || {
+        .footer_sensitive("cut", &trans("explore.menu_cut"), !target_paths.is_empty(), move || {
             if let Some(root) = pop_cut.root() {
                 crate::components::explore::context_menu::clipboard::apply_cut_dimming(&root, &target_paths_cut);
             }
@@ -201,7 +201,7 @@ pub fn show_for_file_normal(
                 cb.replace(Some((target_paths_cut.clone(), true)));
             });
         })
-        .footer_button_sensitive("copy", &t("explore.menu_copy"), !target_paths.is_empty(), move || {
+        .footer_sensitive("copy", &trans("explore.menu_copy"), !target_paths.is_empty(), move || {
             if let Some(root) = pop_copy.root() {
                 crate::components::explore::context_menu::clipboard::apply_cut_dimming(&root, &[]);
             }
@@ -209,12 +209,12 @@ pub fn show_for_file_normal(
                 cb.replace(Some((target_paths_copy.clone(), false)));
             });
         })
-        .footer_button_sensitive("paste", &t("explore.menu_paste"), has_paste_items, move || {
+        .footer_sensitive("paste", &trans("explore.menu_paste"), has_paste_items, move || {
             if let Some((sources, is_cut)) = clipboard_data_paste.clone() {
                 execute_paste(sources, dest_dir.clone(), is_cut, current_p_paste.clone(), nav_paste.clone());
             }
         })
-        .footer_button_sensitive("rename", &t("explore.menu_rename"), is_single, move || {
+        .footer_sensitive("rename", &trans("explore.menu_rename"), is_single, move || {
             if is_single {
                 crate::components::explore::dialogs::show_rename_dialog(
                     &rename_path,
@@ -224,7 +224,7 @@ pub fn show_for_file_normal(
                 );
             }
         })
-        .footer_button_sensitive("trash", &t("explore.menu_trash"), !target_paths.is_empty(), move || {
+        .footer_sensitive("trash", &trans("explore.menu_trash"), !target_paths.is_empty(), move || {
             let paths_c = target_paths_trash.clone();
             let nav_c = nav_trash.clone();
             let cp_c = current_p_trash.clone();

@@ -123,7 +123,7 @@ mod tests {
     }
 
     #[test]
-    fn theme_helpers_switch_on_dark_flag() {
+    fn switch_on_dark() {
         assert_eq!(track_rgba(true), TRACK_DARK_RGBA);
         assert_eq!(track_rgba(false), TRACK_LIGHT_RGBA);
         assert_eq!(slider_track_rgba(true), SLIDER_TRACK_DARK_RGBA);
@@ -133,7 +133,7 @@ mod tests {
     }
 
     #[test]
-    fn accent_alpha_values_are_sane() {
+    fn check_alpha_sane() {
         assert!(ACCENT_ALPHA <= 1.0);
         assert!(ACCENT_DIM_ALPHA <= ACCENT_ALPHA);
     }

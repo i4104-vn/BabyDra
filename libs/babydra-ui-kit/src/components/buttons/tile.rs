@@ -99,7 +99,7 @@ pub fn create_toggle_tile(
 }
 
 /// Updates a toggle tile's active state, icon circle styling, and icon color.
-pub fn update_toggle_tile_state(btn: &gtk4::Button, is_active: bool, icon_name: &str) {
+pub fn update_toggle_state(btn: &gtk4::Button, is_active: bool, icon_name: &str) {
     if is_active {
         btn.add_css_class("active");
     } else {
@@ -135,7 +135,7 @@ pub fn update_toggle_tile_state(btn: &gtk4::Button, is_active: bool, icon_name: 
 }
 
 /// Creates a square panel toggle tile with active/inactive state.
-pub fn create_square_toggle_tile(
+pub fn create_square_tile(
     icon_name: &str,
     label_text: &str,
     initial_active: bool,

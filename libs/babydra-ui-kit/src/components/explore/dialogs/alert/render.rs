@@ -1,4 +1,4 @@
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Align, Box, Button, Label, Orientation, Window};
 
@@ -9,7 +9,7 @@ pub struct AlertDialogWidgets {
 }
 
 /// Builds the alert dialog UI.
-pub fn build_alert_dialog_ui(
+pub fn build_alert_dialog(
     title: &str,
     message: &str,
     parent: Option<&impl IsA<gtk4::Window>>,
@@ -48,7 +48,7 @@ pub fn build_alert_dialog_ui(
     vbox.append(&bbox);
 
     let btn_ok = Button::builder()
-        .label(&t("explore.settings_close"))
+        .label(&trans("explore.settings_close"))
         .css_classes(vec!["suggested-action".to_string()])
         .build();
 

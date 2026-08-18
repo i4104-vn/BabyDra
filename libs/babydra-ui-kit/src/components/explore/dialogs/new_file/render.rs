@@ -1,4 +1,4 @@
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Align, Box, Button, Entry, Label, Orientation, Window};
 
@@ -12,9 +12,9 @@ pub struct NewFileDialogWidgets {
 }
 
 /// Build new file dialog ui.
-pub fn build_new_file_dialog_ui(parent: Option<&impl IsA<gtk4::Window>>) -> NewFileDialogWidgets {
+pub fn build_file_dialog(parent: Option<&impl IsA<gtk4::Window>>) -> NewFileDialogWidgets {
     let window = Window::builder()
-        .title(&t("explore.dialog_new_file_title"))
+        .title(&trans("explore.dialog_new_file_title"))
         .modal(true)
         .resizable(false)
         .default_width(320)
@@ -35,13 +35,13 @@ pub fn build_new_file_dialog_ui(parent: Option<&impl IsA<gtk4::Window>>) -> NewF
     window.set_child(Some(&vbox));
 
     let lbl = Label::builder()
-        .label(&t("explore.dialog_new_file_label"))
+        .label(&trans("explore.dialog_new_file_label"))
         .halign(Align::Start)
         .build();
     vbox.append(&lbl);
 
     let entry = Entry::new();
-    entry.set_text(&t("explore.menu_new_file"));
+    entry.set_text(&trans("explore.menu_new_file"));
     entry.set_hexpand(true);
     vbox.append(&entry);
 
@@ -58,9 +58,9 @@ pub fn build_new_file_dialog_ui(parent: Option<&impl IsA<gtk4::Window>>) -> NewF
     bbox.set_halign(Align::End);
     vbox.append(&bbox);
 
-    let btn_cancel = Button::with_label(&t("explore.settings_cancel"));
+    let btn_cancel = Button::with_label(&trans("explore.settings_cancel"));
     let btn_create = Button::builder()
-        .label(&t("explore.settings_add"))
+        .label(&trans("explore.settings_add"))
         .css_classes(vec!["suggested-action".to_string()])
         .build();
 

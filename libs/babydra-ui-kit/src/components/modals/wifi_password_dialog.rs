@@ -1,4 +1,4 @@
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Entry, Label, Orientation, PasswordEntry};
 
@@ -29,11 +29,11 @@ impl WifiPasswordDialog {
         header_box.append(&wifi_icon);
 
         let title_box = Box::new(Orientation::Vertical, 2);
-        let ssid_lbl = Label::new(Some(&t("wifi.connect_to").replace("{}", "Wi-Fi")));
+        let ssid_lbl = Label::new(Some(&trans("wifi.connect_to").replace("{}", "Wi-Fi")));
         ssid_lbl.add_css_class("settings-row-title");
         ssid_lbl.set_halign(gtk4::Align::Start);
 
-        let sub_lbl = Label::new(Some(&t("wifi.requires_password")));
+        let sub_lbl = Label::new(Some(&trans("wifi.requires_password")));
         sub_lbl.add_css_class("settings-row-desc");
         sub_lbl.set_halign(gtk4::Align::Start);
 
@@ -46,13 +46,13 @@ impl WifiPasswordDialog {
         let username_box = Box::new(Orientation::Vertical, 4);
         username_box.set_visible(false);
 
-        let user_lbl = Label::new(Some(&t("wifi.username_identity")));
+        let user_lbl = Label::new(Some(&trans("wifi.username_identity")));
         user_lbl.add_css_class("wifi-info-label");
         user_lbl.set_halign(gtk4::Align::Start);
 
         let username_entry = Entry::new();
         username_entry.add_css_class("sidebar-search-entry");
-        username_entry.set_placeholder_text(Some(&t("wifi.enter_username")));
+        username_entry.set_placeholder_text(Some(&trans("wifi.enter_username")));
 
         username_box.append(&user_lbl);
         username_box.append(&username_entry);
@@ -60,13 +60,13 @@ impl WifiPasswordDialog {
 
         // Password Entry
         let pwd_box = Box::new(Orientation::Vertical, 4);
-        let pwd_lbl = Label::new(Some(&t("common.password")));
+        let pwd_lbl = Label::new(Some(&trans("common.password")));
         pwd_lbl.add_css_class("wifi-info-label");
         pwd_lbl.set_halign(gtk4::Align::Start);
 
         let password_entry = PasswordEntry::new();
         password_entry.add_css_class("sidebar-search-entry");
-        password_entry.set_placeholder_text(Some(&t("wifi.enter_password")));
+        password_entry.set_placeholder_text(Some(&trans("wifi.enter_password")));
 
         pwd_box.append(&pwd_lbl);
         pwd_box.append(&password_entry);
@@ -83,11 +83,11 @@ impl WifiPasswordDialog {
         let actions_box = Box::new(Orientation::Horizontal, 8);
         actions_box.set_halign(gtk4::Align::End);
 
-        let cancel_btn = Button::with_label(&t("common.cancel"));
+        let cancel_btn = Button::with_label(&trans("common.cancel"));
         cancel_btn.add_css_class("connect-pill-btn");
         cancel_btn.set_cursor_from_name(Some("pointer"));
 
-        let connect_btn = Button::with_label(&t("common.connect"));
+        let connect_btn = Button::with_label(&trans("common.connect"));
         connect_btn.add_css_class("suggested-action");
         connect_btn.set_cursor_from_name(Some("pointer"));
 
@@ -119,17 +119,17 @@ impl WifiPasswordDialog {
 
     pub fn show_for(&self, ssid: &str, security: &str) {
         self.ssid_lbl
-            .set_text(&t("wifi.connect_to").replace("{}", ssid));
+            .set_text(&trans("wifi.connect_to").replace("{}", ssid));
         self.password_entry.set_text("");
         self.username_entry.set_text("");
         self.error_lbl.set_visible(false);
 
         if security == "8021x" {
-            self.sub_lbl.set_text(&t("wifi.enterprise_requires"));
+            self.sub_lbl.set_text(&trans("wifi.enterprise_requires"));
             self.username_box.set_visible(true);
             self.username_entry.grab_focus();
         } else {
-            self.sub_lbl.set_text(&t("wifi.requires_password"));
+            self.sub_lbl.set_text(&trans("wifi.requires_password"));
             self.username_box.set_visible(false);
             self.password_entry.grab_focus();
         }

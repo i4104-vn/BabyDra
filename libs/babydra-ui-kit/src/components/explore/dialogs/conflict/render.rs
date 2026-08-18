@@ -1,4 +1,4 @@
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Align, Box, Button, Label, Orientation, Window};
 
@@ -10,11 +10,11 @@ pub struct ConflictDialogWidgets {
 }
 
 /// Build conflict dialog ui.
-pub fn build_conflict_dialog_ui(
+pub fn build_conflict(
     item_name: &str,
     parent: Option<&impl IsA<gtk4::Window>>,
 ) -> ConflictDialogWidgets {
-    let title = t("explore.dialog_conflict_title");
+    let title = trans("explore.dialog_conflict_title");
     let window = Window::builder()
         .title(&title)
         .modal(true)
@@ -36,7 +36,7 @@ pub fn build_conflict_dialog_ui(
     vbox.set_margin_end(16);
     window.set_child(Some(&vbox));
 
-    let msg_template = t("explore.dialog_conflict_msg");
+    let msg_template = trans("explore.dialog_conflict_msg");
     let msg = msg_template.replace("{}", item_name);
     let lbl = Label::builder()
         .label(&msg)
@@ -50,9 +50,9 @@ pub fn build_conflict_dialog_ui(
     bbox.set_halign(Align::End);
     vbox.append(&bbox);
 
-    let btn_cancel = Button::with_label(&t("explore.settings_cancel"));
+    let btn_cancel = Button::with_label(&trans("explore.settings_cancel"));
     let btn_override = Button::builder()
-        .label(&t("explore.dialog_override"))
+        .label(&trans("explore.dialog_override"))
         .css_classes(vec![
             "suggested-action".to_string(),
             "destructive-action".to_string(),

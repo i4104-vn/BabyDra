@@ -36,7 +36,7 @@ pub fn create_list_row(
 
     // If directory, add Drop Target to item_box
     if matches!(entry.file_type, babydra_core::FileType::Directory) {
-        let drop_target = crate::components::explore::create_dir_drop_target(entry.path.clone());
+        let drop_target = crate::components::explore::create_drop_target(entry.path.clone());
         item_box.add_controller(drop_target);
     }
 

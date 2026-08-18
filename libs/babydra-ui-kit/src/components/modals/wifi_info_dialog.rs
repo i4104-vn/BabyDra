@@ -1,4 +1,4 @@
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use babydra_core::models::wifi::{WifiConfig, WifiNetwork};
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Label, Orientation, ScrolledWindow};
@@ -27,7 +27,7 @@ impl WifiInfoDialog {
         let header_box = Box::new(Orientation::Horizontal, 12);
         header_box.set_hexpand(true);
 
-        let ssid_lbl = Label::new(Some(&t("wifi.details")));
+        let ssid_lbl = Label::new(Some(&trans("wifi.details")));
         ssid_lbl.add_css_class("settings-row-title");
         ssid_lbl.set_halign(gtk4::Align::Start);
         ssid_lbl.set_hexpand(true);
@@ -41,7 +41,7 @@ impl WifiInfoDialog {
         status_dot.add_css_class("wifi-saved-dot");
         status_badge.append(&status_dot);
 
-        let status_lbl = Label::new(Some(&t("wifi.saved")));
+        let status_lbl = Label::new(Some(&trans("wifi.saved")));
         status_lbl.add_css_class("wifi-status-text");
         status_badge.append(&status_lbl);
 
@@ -69,7 +69,7 @@ impl WifiInfoDialog {
         forget_btn.set_size_request(36, 36);
         forget_btn.set_valign(gtk4::Align::Center);
         forget_btn.set_cursor_from_name(Some("pointer"));
-        forget_btn.set_tooltip_text(Some(&t("wifi.forget_network")));
+        forget_btn.set_tooltip_text(Some(&trans("wifi.forget_network")));
 
         let trash_icon = crate::ui::icon::get_icon("edit-delete", 16);
         trash_icon.set_pixel_size(16);
@@ -79,11 +79,11 @@ impl WifiInfoDialog {
         actions_right.set_hexpand(true);
         actions_right.set_halign(gtk4::Align::End);
 
-        let close_btn = Button::with_label(&t("common.close"));
+        let close_btn = Button::with_label(&trans("common.close"));
         close_btn.add_css_class("connect-pill-btn");
         close_btn.set_cursor_from_name(Some("pointer"));
 
-        let configure_btn = Button::with_label(&t("wifi.configure_ip"));
+        let configure_btn = Button::with_label(&trans("wifi.configure_ip"));
         configure_btn.add_css_class("suggested-action");
         configure_btn.set_cursor_from_name(Some("pointer"));
 
@@ -121,11 +121,11 @@ impl WifiInfoDialog {
         if net.is_connected {
             self.status_dot.remove_css_class("wifi-saved-dot");
             self.status_dot.add_css_class("wifi-connected-dot");
-            self.status_lbl.set_text(&t("control.connected"));
+            self.status_lbl.set_text(&trans("control.connected"));
         } else {
             self.status_dot.remove_css_class("wifi-connected-dot");
             self.status_dot.add_css_class("wifi-saved-dot");
-            self.status_lbl.set_text(&t("wifi.saved"));
+            self.status_lbl.set_text(&trans("wifi.saved"));
         }
 
         while let Some(child) = self.body_box.first_child() {
@@ -133,7 +133,7 @@ impl WifiInfoDialog {
         }
 
         // Section 1: Wireless Connection
-        let sec1_title = Label::new(Some(&t("wifi.wireless_connection")));
+        let sec1_title = Label::new(Some(&trans("wifi.wireless_connection")));
         sec1_title.add_css_class("wifi-info-section-title");
         sec1_title.set_halign(gtk4::Align::Start);
         self.body_box.append(&sec1_title);
@@ -143,37 +143,37 @@ impl WifiInfoDialog {
         grid1.set_row_spacing(8);
 
         let sec_label = if net.security == "open" {
-            t("wifi.open_unsecured")
+            trans("wifi.open_unsecured")
         } else if net.security == "8021x" {
-            t("wifi.enterprise")
+            trans("wifi.enterprise")
         } else {
-            t("wifi.wpa_personal")
+            trans("wifi.wpa_personal")
         };
-        self.add_grid_row(&grid1, 0, &t("wifi.security"), &sec_label);
+        self.add_grid_row(&grid1, 0, &trans("wifi.security"), &sec_label);
 
         let signal_label = if net.signal > 80 {
-            t("wifi.signal_strong").replace("{}", &net.signal.to_string())
+            trans("wifi.signal_strong").replace("{}", &net.signal.to_string())
         } else if net.signal > 50 {
-            t("wifi.signal_medium").replace("{}", &net.signal.to_string())
+            trans("wifi.signal_medium").replace("{}", &net.signal.to_string())
         } else if net.signal > 20 {
-            t("wifi.signal_weak").replace("{}", &net.signal.to_string())
+            trans("wifi.signal_weak").replace("{}", &net.signal.to_string())
         } else {
-            t("wifi.signal_very_weak").replace("{}", &net.signal.to_string())
+            trans("wifi.signal_very_weak").replace("{}", &net.signal.to_string())
         };
-        self.add_grid_row(&grid1, 1, &t("wifi.signal_strength"), &signal_label);
+        self.add_grid_row(&grid1, 1, &trans("wifi.signal_strength"), &signal_label);
 
         if let Some(cfg) = config {
             if let Some(ref iface) = cfg.interface {
-                self.add_grid_row(&grid1, 2, &t("wifi.interface"), iface);
+                self.add_grid_row(&grid1, 2, &trans("wifi.interface"), iface);
             }
             if let Some(ref mac) = cfg.mac_address {
-                self.add_grid_row(&grid1, 3, &t("wifi.mac_address"), mac);
+                self.add_grid_row(&grid1, 3, &trans("wifi.mac_address"), mac);
             }
         }
         self.body_box.append(&grid1);
 
         // Section 2: IPv4 Configuration
-        let sec2_title = Label::new(Some(&t("wifi.ipv4_config")));
+        let sec2_title = Label::new(Some(&trans("wifi.ipv4_config")));
         sec2_title.add_css_class("wifi-info-section-title");
         sec2_title.set_halign(gtk4::Align::Start);
         self.body_box.append(&sec2_title);
@@ -184,47 +184,47 @@ impl WifiInfoDialog {
 
         if let Some(cfg) = config {
             let method_str = if cfg.method == "manual" {
-                t("wifi.static_manual")
+                trans("wifi.static_manual")
             } else {
-                t("wifi.dhcp_automatic")
+                trans("wifi.dhcp_automatic")
             };
-            self.add_grid_row(&grid2, 0, &t("wifi.ip_assignment"), &method_str);
+            self.add_grid_row(&grid2, 0, &trans("wifi.ip_assignment"), &method_str);
 
             let ip_str = if cfg.ip_address.is_empty() {
-                t("wifi.not_assigned")
+                trans("wifi.not_assigned")
             } else {
                 cfg.ip_address.clone()
             };
-            self.add_grid_row(&grid2, 1, &t("wifi.ipv4_address"), &ip_str);
+            self.add_grid_row(&grid2, 1, &trans("wifi.ipv4_address"), &ip_str);
 
             let prefix_str = if cfg.ip_address.is_empty() {
-                t("wifi.not_available")
+                trans("wifi.not_available")
             } else {
                 format!("/{}", cfg.prefix)
             };
-            self.add_grid_row(&grid2, 2, &t("wifi.prefix"), &prefix_str);
+            self.add_grid_row(&grid2, 2, &trans("wifi.prefix"), &prefix_str);
 
             let gw_str = if cfg.gateway.is_empty() {
-                t("wifi.not_available")
+                trans("wifi.not_available")
             } else {
                 cfg.gateway.clone()
             };
-            self.add_grid_row(&grid2, 3, &t("wifi.default_gateway"), &gw_str);
+            self.add_grid_row(&grid2, 3, &trans("wifi.default_gateway"), &gw_str);
 
             let dns_str = if cfg.dns.is_empty() {
-                t("wifi.router_default")
+                trans("wifi.router_default")
             } else {
                 cfg.dns.clone()
             };
-            self.add_grid_row(&grid2, 4, &t("wifi.dns_servers"), &dns_str);
+            self.add_grid_row(&grid2, 4, &trans("wifi.dns_servers"), &dns_str);
         } else {
             self.add_grid_row(
                 &grid2,
                 0,
-                &t("wifi.ip_assignment"),
-                &t("wifi.dhcp_automatic"),
+                &trans("wifi.ip_assignment"),
+                &trans("wifi.dhcp_automatic"),
             );
-            self.add_grid_row(&grid2, 1, &t("wifi.ipv4_address"), &t("wifi.not_assigned"));
+            self.add_grid_row(&grid2, 1, &trans("wifi.ipv4_address"), &trans("wifi.not_assigned"));
         }
         self.body_box.append(&grid2);
 

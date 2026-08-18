@@ -1,21 +1,21 @@
-use crate::components::context_menu::{create_menu_item, create_menu_separator};
-use babydra_core::services::explore::execute_custom_command;
+use crate::components::context_menu::{create_menu_item, create_menu_sep};
+use babydra_core::services::explore::exec_custom_cmd;
 use gtk4::prelude::*;
 use std::path::PathBuf;
 
 /// Appends user-defined custom context menu items to the vbox.
-pub fn append_custom_context_items(
+pub fn append_custom_items(
     vbox: &gtk4::Box,
     popover: &gtk4::Popover,
     target_paths: Vec<PathBuf>,
     is_dir_context: bool,
 ) {
-    let settings = babydra_core::load_explore_settings();
+    let settings = babydra_core::load_explore_cfg();
     if settings.custom_context_items.is_empty() {
         return;
     }
 
-    vbox.append(&create_menu_separator());
+    vbox.append(&create_menu_sep());
 
     for item in settings.custom_context_items {
         let icon_key = item.icon.as_deref().unwrap_or_else(|| {
@@ -64,7 +64,7 @@ pub fn append_custom_context_items(
                     .replace("{stem}", &stem_str)
                     .replace("{ext}", &ext_str);
 
-                let _ = execute_custom_command(&cmd_str);
+                let _ = exec_custom_cmd(&cmd_str);
             }
         });
     }

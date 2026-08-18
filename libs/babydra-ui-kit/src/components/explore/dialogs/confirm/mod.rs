@@ -4,13 +4,13 @@ use std::rc::Rc;
 mod render;
 
 /// Presents a delete confirmation dialog. Calls `on_confirm` if the user clicks "Delete".
-pub fn show_delete_confirm_dialog(
+pub fn show_delete_confirm(
     title: &str,
     message: &str,
     on_confirm: impl Fn() + 'static,
     parent: Option<&impl IsA<gtk4::Window>>,
 ) {
-    let widgets = render::build_confirm_dialog_ui(title, message, parent);
+    let widgets = render::build_confirm_dialog(title, message, parent);
     let window = widgets.window;
     let _vbox = widgets.vbox;
 

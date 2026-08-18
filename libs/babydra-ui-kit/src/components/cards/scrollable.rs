@@ -1,7 +1,7 @@
 use gtk4::prelude::*;
 
 /// Creates a ScrolledWindow + ListBox combo.
-pub fn create_scrollable_list(css_class: &str) -> (gtk4::ScrolledWindow, gtk4::ListBox) {
+pub fn create_scroll_list(css_class: &str) -> (gtk4::ScrolledWindow, gtk4::ListBox) {
     let scroll = gtk4::ScrolledWindow::new();
     scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
     scroll.set_vexpand(true);

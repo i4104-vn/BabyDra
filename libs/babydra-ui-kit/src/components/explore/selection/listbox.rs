@@ -4,7 +4,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 /// Wires rubberband select gesture for a ListBox view overlay.
-pub fn wire_rubberband_listbox(
+pub fn wire_rubberband(
     list_overlay: &gtk4::Widget,
     listbox: ListBox,
     list_fixed: Fixed,

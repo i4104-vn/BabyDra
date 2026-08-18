@@ -8,7 +8,7 @@ use std::rc::Rc;
 mod render;
 
 /// Creates a generic grid card representation for a file or directory.
-pub fn create_grid_file_item(
+pub fn create_grid_file(
     idx: usize,
     entry: &FileEntry,
     selected_paths: Rc<RefCell<Vec<PathBuf>>>,
@@ -35,7 +35,7 @@ pub fn create_grid_file_item(
 
     // If directory, add Drop Target to item_box
     if matches!(entry.file_type, babydra_core::FileType::Directory) {
-        let drop_target = crate::components::explore::create_dir_drop_target(entry.path.clone());
+        let drop_target = crate::components::explore::create_drop_target(entry.path.clone());
         item_box.add_controller(drop_target);
     }
 

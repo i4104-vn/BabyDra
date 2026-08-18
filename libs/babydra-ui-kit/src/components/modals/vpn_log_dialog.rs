@@ -1,4 +1,4 @@
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Label, Orientation, ScrolledWindow, TextView};
 use std::cell::RefCell;
@@ -28,7 +28,7 @@ impl VpnLogDialog {
         let header_box = Box::new(Orientation::Horizontal, 12);
         header_box.set_hexpand(true);
 
-        let title_lbl = Label::new(Some(&t("vpn.logs_title")));
+        let title_lbl = Label::new(Some(&trans("vpn.logs_title")));
         title_lbl.add_css_class("settings-row-title");
         title_lbl.set_halign(gtk4::Align::Start);
         title_lbl.set_hexpand(true);
@@ -57,15 +57,15 @@ impl VpnLogDialog {
         let actions_box = Box::new(Orientation::Horizontal, 8);
         actions_box.set_halign(gtk4::Align::End);
 
-        let clear_btn = Button::with_label(&t("common.clear"));
+        let clear_btn = Button::with_label(&trans("common.clear"));
         clear_btn.add_css_class("connect-pill-btn");
         clear_btn.set_cursor_from_name(Some("pointer"));
 
-        let refresh_btn = Button::with_label(&t("common.refresh"));
+        let refresh_btn = Button::with_label(&trans("common.refresh"));
         refresh_btn.add_css_class("connect-pill-btn");
         refresh_btn.set_cursor_from_name(Some("pointer"));
 
-        let close_btn = Button::with_label(&t("common.close"));
+        let close_btn = Button::with_label(&trans("common.close"));
         close_btn.add_css_class("suggested-action");
         close_btn.set_cursor_from_name(Some("pointer"));
 
@@ -123,7 +123,7 @@ impl VpnLogDialog {
         }
         *self.current_vpn.borrow_mut() = vpn_name.to_string();
         self.title_lbl
-            .set_text(&t("vpn.logs_for").replace("{}", vpn_name));
+            .set_text(&trans("vpn.logs_for").replace("{}", vpn_name));
         let since = self.cleared_at.borrow().clone();
         Self::fetch_and_set_logs(&self.log_view, vpn_name, since.as_deref());
         self.container.set_visible(true);
@@ -131,7 +131,7 @@ impl VpnLogDialog {
 
     fn fetch_and_set_logs(log_view: &TextView, vpn_name: &str, since: Option<&str>) {
         let buffer = log_view.buffer();
-        buffer.set_text(&t("vpn.fetching_logs"));
+        buffer.set_text(&trans("vpn.fetching_logs"));
 
         let (tx, rx) = std::sync::mpsc::channel::<String>();
         let vpn = vpn_name.to_string();

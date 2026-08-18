@@ -1,4 +1,4 @@
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Align, Box, Button, Entry, Label, Orientation, Window};
 use std::path::PathBuf;
@@ -13,12 +13,12 @@ pub struct RenameDialogWidgets {
 }
 
 /// Build rename dialog ui.
-pub fn build_rename_dialog_ui(
+pub fn build_rename_dialog(
     path: &PathBuf,
     parent: Option<&impl IsA<gtk4::Window>>,
 ) -> RenameDialogWidgets {
     let window = Window::builder()
-        .title(&t("explore.dialog_rename_title"))
+        .title(&trans("explore.dialog_rename_title"))
         .modal(true)
         .resizable(false)
         .default_width(320)
@@ -39,7 +39,7 @@ pub fn build_rename_dialog_ui(
     window.set_child(Some(&vbox));
 
     let lbl = Label::builder()
-        .label(&t("explore.dialog_rename_label"))
+        .label(&trans("explore.dialog_rename_label"))
         .halign(Align::Start)
         .build();
     vbox.append(&lbl);
@@ -62,9 +62,9 @@ pub fn build_rename_dialog_ui(
     bbox.set_halign(Align::End);
     vbox.append(&bbox);
 
-    let btn_cancel = Button::with_label(&t("explore.settings_cancel"));
+    let btn_cancel = Button::with_label(&trans("explore.settings_cancel"));
     let btn_rename = Button::builder()
-        .label(&t("explore.menu_rename"))
+        .label(&trans("explore.menu_rename"))
         .css_classes(vec!["suggested-action".to_string()])
         .build();
 

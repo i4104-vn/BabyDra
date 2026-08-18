@@ -9,11 +9,11 @@ pub mod tray;
 
 pub use builder::ContextMenuBuilder;
 pub use items::{
-    create_menu_for_widget, create_menu_popover, create_footer_container,
-    create_footer_icon_button, create_menu_group_header, create_menu_item,
-    create_destructive_item, create_destructive_sensitive, create_menu_item_full,
-    create_menu_sensitive, create_menu_shortcut, create_menu_separator,
-    create_menu_text_item, create_submenu_item,
+    create_menu_for, create_menu_popover, create_footer_box,
+    create_footer_btn, create_group_header, create_menu_item,
+    create_danger_item, create_danger_btn, create_menu_full,
+    create_menu_sens, create_menu_shortcut, create_menu_sep,
+    create_menu_text, create_submenu_item,
 };
-pub use tray::{build_tray_gio_menu, close_active_tray_menu, show_tray_context_menu};
+pub use tray::{build_tray_gio_menu, close_tray_menu, show_tray_menu};
 

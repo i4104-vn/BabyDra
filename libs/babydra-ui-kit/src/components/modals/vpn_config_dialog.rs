@@ -1,5 +1,5 @@
-use babydra_core::i18n::t;
-use babydra_core::services::system::vpn::{parse_vpn_config_file, VpnConnDetails};
+use babydra_core::i18n::trans;
+use babydra_core::services::system::vpn::{parse_vpn_config, VpnConnDetails};
 use gtk4::prelude::*;
 use gtk4::{Box, Button, DropDown, Entry, Label, Orientation, PasswordEntry, StringList};
 use std::cell::RefCell;
@@ -40,11 +40,11 @@ impl VpnConfigDialog {
         header_box.append(&shield_icon);
 
         let title_box = Box::new(Orientation::Vertical, 2);
-        let title_lbl = Label::new(Some(&t("vpn.configure_title")));
+        let title_lbl = Label::new(Some(&trans("vpn.configure_title")));
         title_lbl.add_css_class("settings-row-title");
         title_lbl.set_halign(gtk4::Align::Start);
 
-        let sub_lbl = Label::new(Some(&t("vpn.nm_settings")));
+        let sub_lbl = Label::new(Some(&trans("vpn.nm_settings")));
         sub_lbl.add_css_class("settings-row-desc");
         sub_lbl.set_halign(gtk4::Align::Start);
 
@@ -55,7 +55,7 @@ impl VpnConfigDialog {
 
         // Import Config File Row (Auto-fill fields)
         let cfg_grp = Box::new(Orientation::Vertical, 4);
-        let cfg_lbl = Label::new(Some(&t("vpn.config_file")));
+        let cfg_lbl = Label::new(Some(&trans("vpn.config_file")));
         cfg_lbl.add_css_class("wifi-info-label");
         cfg_lbl.set_halign(gtk4::Align::Start);
 
@@ -63,9 +63,9 @@ impl VpnConfigDialog {
         let config_file_entry = Entry::new();
         config_file_entry.add_css_class("sidebar-search-entry");
         config_file_entry.set_hexpand(true);
-        config_file_entry.set_placeholder_text(Some(&t("vpn.select_profile")));
+        config_file_entry.set_placeholder_text(Some(&trans("vpn.select_profile")));
 
-        let browse_config_btn = Button::with_label(&t("vpn.browse_config"));
+        let browse_config_btn = Button::with_label(&trans("vpn.browse_config"));
         browse_config_btn.add_css_class("connect-pill-btn");
         browse_config_btn.set_cursor_from_name(Some("pointer"));
 
@@ -77,19 +77,19 @@ impl VpnConfigDialog {
 
         // Connection Name Row
         let name_grp = Box::new(Orientation::Vertical, 4);
-        let name_lbl = Label::new(Some(&t("vpn.connection_name")));
+        let name_lbl = Label::new(Some(&trans("vpn.connection_name")));
         name_lbl.add_css_class("wifi-info-label");
         name_lbl.set_halign(gtk4::Align::Start);
         let name_entry = Entry::new();
         name_entry.add_css_class("sidebar-search-entry");
-        name_entry.set_placeholder_text(Some(&t("vpn.my_vpn")));
+        name_entry.set_placeholder_text(Some(&trans("vpn.my_vpn")));
         name_grp.append(&name_lbl);
         name_grp.append(&name_entry);
         container.append(&name_grp);
 
         // VPN Type Dropdown Row
         let type_grp = Box::new(Orientation::Vertical, 4);
-        let type_lbl = Label::new(Some(&t("vpn.type")));
+        let type_lbl = Label::new(Some(&trans("vpn.type")));
         type_lbl.add_css_class("wifi-info-label");
         type_lbl.set_halign(gtk4::Align::Start);
 
@@ -112,12 +112,12 @@ impl VpnConfigDialog {
 
         // Gateway / Server Row
         let gw_grp = Box::new(Orientation::Vertical, 4);
-        let gw_lbl = Label::new(Some(&t("vpn.gateway_server")));
+        let gw_lbl = Label::new(Some(&trans("vpn.gateway_server")));
         gw_lbl.add_css_class("wifi-info-label");
         gw_lbl.set_halign(gtk4::Align::Start);
         let gateway_entry = Entry::new();
         gateway_entry.add_css_class("sidebar-search-entry");
-        gateway_entry.set_placeholder_text(Some(&t("vpn.gateway_hint")));
+        gateway_entry.set_placeholder_text(Some(&trans("vpn.gateway_hint")));
         gw_grp.append(&gw_lbl);
         gw_grp.append(&gateway_entry);
         container.append(&gw_grp);
@@ -127,24 +127,24 @@ impl VpnConfigDialog {
 
         let user_grp = Box::new(Orientation::Vertical, 4);
         user_grp.set_hexpand(true);
-        let user_lbl = Label::new(Some(&t("common.username")));
+        let user_lbl = Label::new(Some(&trans("common.username")));
         user_lbl.add_css_class("wifi-info-label");
         user_lbl.set_halign(gtk4::Align::Start);
         let user_entry = Entry::new();
         user_entry.add_css_class("sidebar-search-entry");
-        user_entry.set_placeholder_text(Some(&t("common.username")));
+        user_entry.set_placeholder_text(Some(&trans("common.username")));
         user_grp.append(&user_lbl);
         user_grp.append(&user_entry);
         user_pass_row.append(&user_grp);
 
         let pass_grp = Box::new(Orientation::Vertical, 4);
         pass_grp.set_hexpand(true);
-        let pass_lbl = Label::new(Some(&t("common.password")));
+        let pass_lbl = Label::new(Some(&trans("common.password")));
         pass_lbl.add_css_class("wifi-info-label");
         pass_lbl.set_halign(gtk4::Align::Start);
         let password_entry = PasswordEntry::new();
         password_entry.add_css_class("sidebar-search-entry");
-        password_entry.set_placeholder_text(Some(&t("common.password_placeholder")));
+        password_entry.set_placeholder_text(Some(&trans("common.password_placeholder")));
         pass_grp.append(&pass_lbl);
         pass_grp.append(&password_entry);
         user_pass_row.append(&pass_grp);
@@ -153,7 +153,7 @@ impl VpnConfigDialog {
 
         // CA Certificate Row
         let ca_grp = Box::new(Orientation::Vertical, 4);
-        let ca_lbl = Label::new(Some(&t("vpn.ca_optional")));
+        let ca_lbl = Label::new(Some(&trans("vpn.ca_optional")));
         ca_lbl.add_css_class("wifi-info-label");
         ca_lbl.set_halign(gtk4::Align::Start);
 
@@ -161,9 +161,9 @@ impl VpnConfigDialog {
         let ca_entry = Entry::new();
         ca_entry.add_css_class("sidebar-search-entry");
         ca_entry.set_hexpand(true);
-        ca_entry.set_placeholder_text(Some(&t("vpn.ca_path")));
+        ca_entry.set_placeholder_text(Some(&trans("vpn.ca_path")));
 
-        let browse_ca_btn = Button::with_label(&t("common.browse"));
+        let browse_ca_btn = Button::with_label(&trans("common.browse"));
         browse_ca_btn.add_css_class("connect-pill-btn");
         browse_ca_btn.set_cursor_from_name(Some("pointer"));
 
@@ -192,11 +192,11 @@ impl VpnConfigDialog {
         actions_right.set_hexpand(true);
         actions_right.set_halign(gtk4::Align::End);
 
-        let cancel_btn = Button::with_label(&t("common.cancel"));
+        let cancel_btn = Button::with_label(&trans("common.cancel"));
         cancel_btn.add_css_class("connect-pill-btn");
         cancel_btn.set_cursor_from_name(Some("pointer"));
 
-        let save_btn = Button::with_label(&t("common.save"));
+        let save_btn = Button::with_label(&trans("common.save"));
         save_btn.add_css_class("suggested-action");
         save_btn.set_cursor_from_name(Some("pointer"));
 
@@ -243,10 +243,10 @@ impl VpnConfigDialog {
                 .and_then(|r| r.downcast::<gtk4::Window>().ok())
             {
                 let file_dialog = gtk4::FileDialog::new();
-                file_dialog.set_title(&t("vpn.select_config_file"));
+                file_dialog.set_title(&trans("vpn.select_config_file"));
 
                 let filter = gtk4::FileFilter::new();
-                filter.set_name(Some(&t("vpn.config_filter")));
+                filter.set_name(Some(&trans("vpn.config_filter")));
                 filter.add_pattern("*.ovpn");
                 filter.add_pattern("*.conf");
                 file_dialog.set_default_filter(Some(&filter));
@@ -272,7 +272,7 @@ impl VpnConfigDialog {
                 .and_then(|r| r.downcast::<gtk4::Window>().ok())
             {
                 let file_dialog = gtk4::FileDialog::new();
-                file_dialog.set_title(&t("vpn.select_ca_cert"));
+                file_dialog.set_title(&trans("vpn.select_ca_cert"));
 
                 let ca_entry_cb = ca_entry_c.clone();
                 file_dialog.open(Some(&win), None::<&gio::Cancellable>, move |res| {
@@ -292,7 +292,7 @@ impl VpnConfigDialog {
         *self.selected_config_path.borrow_mut() = Some(path.to_string());
         self.config_file_entry.set_text(path);
 
-        let parsed = parse_vpn_config_file(path);
+        let parsed = parse_vpn_config(path);
         if !parsed.name.is_empty() {
             self.name_entry.set_text(&parsed.name);
         }
@@ -323,7 +323,7 @@ impl VpnConfigDialog {
     pub fn show_for_new(&self) {
         *self.original_name.borrow_mut() = None;
         *self.selected_config_path.borrow_mut() = None;
-        self.title_lbl.set_text(&t("vpn.add_custom"));
+        self.title_lbl.set_text(&trans("vpn.add_custom"));
         self.config_file_entry.set_text("");
         self.name_entry.set_text("");
         self.type_dropdown.set_selected(0);
@@ -341,7 +341,7 @@ impl VpnConfigDialog {
         *self.selected_config_path.borrow_mut() = details.config_file.clone();
 
         self.title_lbl
-            .set_text(&t("vpn.configure_name").replace("{}", &details.name));
+            .set_text(&trans("vpn.configure_name").replace("{}", &details.name));
         self.config_file_entry
             .set_text(details.config_file.as_deref().unwrap_or(""));
         self.name_entry.set_text(&details.name);

@@ -3,7 +3,7 @@ use crate::components::explore::helpers::restore_from_trash;
 use std::path::PathBuf;
 use std::rc::Rc;
 
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 
 /// Renders the context menu for files/directories inside the Trash (Restore, Delete Permanently).
 pub fn show_for_file_trash(
@@ -23,7 +23,7 @@ pub fn show_for_file_trash(
     let target_paths_restore = target_paths.clone();
     let nav = nav_callback.clone();
     let current_p = current_path.clone();
-    builder = builder.item(&t("explore.menu_restore"), "restart", move || {
+    builder = builder.item(&trans("explore.menu_restore"), "restart", move || {
         let nav_c = nav.clone();
         let cp_c = current_p.clone();
         let paths_c = target_paths_restore.clone();
@@ -42,20 +42,20 @@ pub fn show_for_file_trash(
     let nav = nav_callback.clone();
     let current_p = current_path.clone();
     let parent_c = parent.clone();
-    builder = builder.destructive_item(&t("explore.menu_delete_perm"), "trash", move || {
+    builder = builder.destructive_item(&trans("explore.menu_delete_perm"), "trash", move || {
         let nav_c = nav.clone();
         let cp_c = current_p.clone();
         let paths_c = target_paths_del.clone();
 
         let message = if paths_c.len() == 1 {
-            t("explore.dialog_confirm_delete_single")
+            trans("explore.dialog_confirm_delete_single")
                 .replace("{}", &paths_c[0].file_name().unwrap().to_string_lossy())
         } else {
-            t("explore.dialog_confirm_delete_multi").replace("{}", &paths_c.len().to_string())
+            trans("explore.dialog_confirm_delete_multi").replace("{}", &paths_c.len().to_string())
         };
 
-        crate::components::explore::dialogs::show_delete_confirm_dialog(
-            &t("explore.dialog_confirm_delete_title"),
+        crate::components::explore::dialogs::show_delete_confirm(
+            &trans("explore.dialog_confirm_delete_title"),
             &message,
             move || {
                 let nav_f = nav_c.clone();

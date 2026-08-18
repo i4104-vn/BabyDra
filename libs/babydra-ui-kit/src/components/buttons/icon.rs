@@ -24,7 +24,7 @@ pub fn create_icon_button(
 }
 
 /// Creates a generic icon button using a **colored** icon.
-pub fn create_colored_icon_button(
+pub fn create_color_btn(
     icon_name: &str,
     size: i32,
     color: &str,
@@ -48,7 +48,7 @@ pub fn create_colored_icon_button(
 }
 
 /// Creates an icon + label button.
-pub fn create_icon_label_button(
+pub fn create_icon_btn(
     icon_name: &str,
     label_text: &str,
     css_class: &str,
@@ -67,7 +67,7 @@ pub fn create_icon_label_button(
 }
 
 /// Creates a generic sidebar-style item button with an icon and label.
-pub fn create_sidebar_item_button(
+pub fn create_sidebar_btn(
     name: &str,
     icon_name: &str,
     css_class: &str,
@@ -104,7 +104,7 @@ pub fn create_sidebar_item_button(
 }
 
 /// Creates a generic sidebar-style item button using a custom widget icon.
-pub fn create_sidebar_item_button_with_widget(
+pub fn create_sidebar_wbtn(
     name: &str,
     icon_widget: &impl IsA<gtk4::Widget>,
     css_class: &str,
@@ -139,12 +139,12 @@ pub fn create_sidebar_item_button_with_widget(
 }
 
 /// Dynamic Wi-Fi signal waves icon widget (0 to 4 wave bars).
-pub fn create_wifi_signal_icon(size: i32) -> gtk4::Widget {
-    crate::components::wifi::create_system_wifi_signal_icon(size, None)
+pub fn create_wifi_icon(size: i32) -> gtk4::Widget {
+    crate::components::wifi::create_sys_wifi_icon(size, None)
 }
 
 /// Dynamic battery level % icon widget (matches Cairo battery card style).
-pub fn create_battery_percentage_icon(_size: i32) -> gtk4::Widget {
+pub fn create_battery_icon(_size: i32) -> gtk4::Widget {
     let (pct, is_charging) =
         if let Some(info) = babydra_core::services::system::battery::get_battery_info() {
             (info.percentage, info.is_charging)
@@ -152,11 +152,11 @@ pub fn create_battery_percentage_icon(_size: i32) -> gtk4::Widget {
             (100, false)
         };
 
-    crate::ui::battery::create_battery_drawing_area(pct, is_charging, 22, 12).upcast()
+    crate::ui::battery::create_battery_area(pct, is_charging, 22, 12).upcast()
 }
 
 /// VPN shield icon widget with a small lock overlay at the bottom-right corner when connected.
-pub fn create_vpn_shield_icon(size: i32) -> gtk4::Widget {
+pub fn create_vpn_icon(size: i32) -> gtk4::Widget {
     let is_connected = babydra_core::services::system::vpn::get_vpn_connections()
         .iter()
         .any(|c| c.active);
@@ -194,8 +194,8 @@ pub fn create_vpn_shield_icon(size: i32) -> gtk4::Widget {
 }
 
 /// Small wallpaper thumbnail preview icon for Wallpaper & Themes section.
-pub fn create_wallpaper_thumbnail_icon(size: i32) -> gtk4::Widget {
-    if let Some(wp_path) = babydra_core::services::wallpaper::get_current_wallpaper() {
+pub fn create_wp_thumb(size: i32) -> gtk4::Widget {
+    if let Some(wp_path) = babydra_core::services::wallpaper::get_wallpaper() {
         if wp_path.exists() {
             if let Ok(orig) = gdk_pixbuf::Pixbuf::from_file(&wp_path) {
                 let w = orig.width();
@@ -259,6 +259,6 @@ pub fn create_wallpaper_thumbnail_icon(size: i32) -> gtk4::Widget {
 }
 
 /// Generic colored SVG icon builder for standard icons using embedded theme assets.
-pub fn create_colored_icon_widget(icon_name: &str, size: i32, color_hex: &str) -> gtk4::Widget {
+pub fn create_colored_icon(icon_name: &str, size: i32, color_hex: &str) -> gtk4::Widget {
     crate::ui::icon::get_icon_colored(icon_name, size, color_hex).upcast()
 }

@@ -11,10 +11,10 @@ pub mod shared;
 
 pub use alert::show_alert_dialog;
 pub use archive::show_compress_dialog;
-pub use confirm::show_delete_confirm_dialog;
+pub use confirm::show_delete_confirm;
 pub use conflict::show_conflict_dialog;
-pub use decompress::perform_decompress_async;
+pub use decompress::decompress_async;
 pub use new_file::show_new_file_dialog;
-pub use new_folder::show_new_folder_dialog;
-pub use properties::show_properties_dialog;
+pub use new_folder::show_folder_dialog;
+pub use properties::show_properties;
 pub use rename::show_rename_dialog;

@@ -5,11 +5,11 @@ use std::path::PathBuf;
 
 use super::helpers::count_dialog_height;
 use super::info_grid::build_info_grid;
-use super::permissions::{apply_permissions, build_permission_matrix};
-use babydra_core::i18n::t;
+use super::permissions::{apply_permissions, build_perm_matrix};
+use babydra_core::i18n::trans;
 
 /// Show properties dialog.
-pub fn show_properties_dialog(target_paths: Vec<PathBuf>, parent: Option<&impl IsA<gtk4::Window>>) {
+pub fn show_properties(target_paths: Vec<PathBuf>, parent: Option<&impl IsA<gtk4::Window>>) {
     if target_paths.is_empty() {
         return;
     }
@@ -17,7 +17,7 @@ pub fn show_properties_dialog(target_paths: Vec<PathBuf>, parent: Option<&impl I
     let dialog_height = count_dialog_height(&target_paths);
 
     let window = Window::builder()
-        .title(&t("explore.dialog_properties_title"))
+        .title(&trans("explore.dialog_properties_title"))
         .modal(true)
         .resizable(false)
         .default_width(400)
@@ -48,7 +48,7 @@ pub fn show_properties_dialog(target_paths: Vec<PathBuf>, parent: Option<&impl I
         let path = &target_paths[0];
         if let Ok(meta) = std::fs::metadata(path) {
             let mode = meta.mode();
-            checkboxes = Some(build_permission_matrix(&vbox, mode));
+            checkboxes = Some(build_perm_matrix(&vbox, mode));
         }
     }
 
@@ -58,7 +58,7 @@ pub fn show_properties_dialog(target_paths: Vec<PathBuf>, parent: Option<&impl I
     bbox.set_margin_top(4);
     vbox.append(&bbox);
 
-    let btn_cancel = Button::with_label(&t("explore.settings_cancel"));
+    let btn_cancel = Button::with_label(&trans("explore.settings_cancel"));
     btn_cancel.add_css_class("properties-btn-cancel");
     bbox.append(&btn_cancel);
 
@@ -69,7 +69,7 @@ pub fn show_properties_dialog(target_paths: Vec<PathBuf>, parent: Option<&impl I
 
     if target_paths.len() == 1 {
         let btn_save = Button::builder()
-            .label(&t("explore.settings_save"))
+            .label(&trans("explore.settings_save"))
             .css_classes(vec!["suggested-action".to_string()])
             .build();
         bbox.append(&btn_save);

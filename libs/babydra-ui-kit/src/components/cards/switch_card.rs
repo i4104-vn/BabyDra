@@ -26,8 +26,8 @@ pub fn create_switch_card(
     spacer.set_hexpand(true);
     card.append(&spacer);
 
-    let sw = crate::components::switch::create_switch(false, |_| {});
-    card.append(&sw.container);
+    let switch = crate::components::switch::create_switch(false, |_| {});
+    card.append(&switch.container);
 
-    (card, sw)
+    (card, switch)
 }

@@ -1,8 +1,8 @@
 //! Context menu integration for System Tray icons and DBus menu specifications.
 
 use super::items::{
-    create_menu_for_widget, create_menu_box, create_menu_separator,
-    create_menu_text_item, create_submenu_item, create_submenu_popover,
+    create_menu_for, create_menu_box, create_menu_sep,
+    create_menu_text, create_submenu_item, create_submenu_popover,
 };
 use gtk4::prelude::*;
 use std::cell::RefCell;
@@ -13,7 +13,7 @@ thread_local! {
 }
 
 /// Closes and unparents the currently active tray context menu popover if one exists.
-pub fn close_active_tray_menu() {
+pub fn close_tray_menu() {
     ACTIVE_TRAY_POPOVER.with(|p| {
         if let Some(old_popover) = p.borrow_mut().take() {
             old_popover.popdown();
@@ -23,15 +23,15 @@ pub fn close_active_tray_menu() {
 }
 
 /// Displays a context menu for a system tray item based on DBus menu items using hierarchical Popovers.
-pub fn show_tray_context_menu(
+pub fn show_tray_menu(
     btn: &gtk4::Button,
     service: &str,
     items: &[babydra_core::tray::MenuItem],
 ) {
-    close_active_tray_menu();
+    close_tray_menu();
 
     let (popover, _) =
-        create_menu_for_widget(btn.upcast_ref::<gtk4::Widget>(), gtk4::PositionType::Bottom);
+        create_menu_for(btn.upcast_ref::<gtk4::Widget>(), gtk4::PositionType::Bottom);
 
     let active_sub_popover = Rc::new(RefCell::new(None::<gtk4::Popover>));
     let vbox = build_tray_menu_box(items, service, &popover, active_sub_popover);
@@ -58,7 +58,7 @@ pub fn build_tray_menu_box(
             continue;
         }
         if item.is_separator {
-            vbox.append(&create_menu_separator());
+            vbox.append(&create_menu_sep());
             continue;
         }
 
@@ -119,7 +119,7 @@ pub fn build_tray_menu_box(
             let root_pop_c = root_popover.clone();
             let active_sub_c = active_sub_popover.clone();
 
-            let btn = create_menu_text_item(&label_text, is_checked, is_destructive, item.enabled);
+            let btn = create_menu_text(&label_text, is_checked, is_destructive, item.enabled);
 
             let active_sub_leaf = active_sub_popover.clone();
             let motion = gtk4::EventControllerMotion::new();
@@ -135,7 +135,7 @@ pub fn build_tray_menu_box(
                     old_pop.popdown();
                 }
                 root_pop_c.popdown();
-                close_active_tray_menu();
+                close_tray_menu();
                 babydra_core::tray::activate_menu_item(&s_name, item_id);
             });
 

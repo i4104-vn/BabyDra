@@ -27,7 +27,7 @@ pub fn create_menu_popover(parent: &gtk4::Widget, x: f64, y: f64) -> (Popover, B
 }
 
 /// Creates a context menu popover anchored relative to a target widget (e.g. Tray or Header button).
-pub fn create_menu_for_widget(
+pub fn create_menu_for(
     parent: &gtk4::Widget,
     position: PositionType,
 ) -> (Popover, Box) {
@@ -71,31 +71,31 @@ pub(super) fn create_submenu_popover(
 
 /// Creates a standard menu item button with an icon and label.
 pub fn create_menu_item(label: &str, icon: &str) -> Button {
-    create_menu_item_full(label, icon, None, false, true)
+    create_menu_full(label, icon, None, false, true)
 }
 
 /// Creates a menu item button with sensitivity control.
-pub fn create_menu_sensitive(label: &str, icon: &str, sensitive: bool) -> Button {
-    create_menu_item_full(label, icon, None, false, sensitive)
+pub fn create_menu_sens(label: &str, icon: &str, sensitive: bool) -> Button {
+    create_menu_full(label, icon, None, false, sensitive)
 }
 
 /// Creates a menu item button with an icon, label, and shortcut hint (e.g. "Ctrl+C").
 pub fn create_menu_shortcut(label: &str, icon: &str, shortcut: &str) -> Button {
-    create_menu_item_full(label, icon, Some(shortcut), false, true)
+    create_menu_full(label, icon, Some(shortcut), false, true)
 }
 
 /// Creates a destructive/danger menu item button (e.g. Delete).
-pub fn create_destructive_item(label: &str, icon: &str) -> Button {
-    create_menu_item_full(label, icon, None, true, true)
+pub fn create_danger_item(label: &str, icon: &str) -> Button {
+    create_menu_full(label, icon, None, true, true)
 }
 
 /// Creates a destructive/danger menu item button with sensitivity control.
-pub fn create_destructive_sensitive(label: &str, icon: &str, sensitive: bool) -> Button {
-    create_menu_item_full(label, icon, None, true, sensitive)
+pub fn create_danger_btn(label: &str, icon: &str, sensitive: bool) -> Button {
+    create_menu_full(label, icon, None, true, sensitive)
 }
 
 /// Creates a full-featured menu item button with optional shortcut, destructive styling, and sensitivity.
-pub fn create_menu_item_full(
+pub fn create_menu_full(
     label: &str,
     icon: &str,
     shortcut: Option<&str>,
@@ -114,7 +114,7 @@ pub fn create_menu_item_full(
 }
 
 /// Creates a text-only menu item button (no leading icon), with optional checkmark, destructive style, and sensitivity.
-pub fn create_menu_text_item(
+pub fn create_menu_text(
     label: &str,
     is_checked: bool,
     is_destructive: bool,
@@ -145,7 +145,7 @@ pub fn create_submenu_item(label: &str, icon: Option<&str>, is_sensitive: bool) 
 }
 
 /// Creates a horizontal separator for dividing context menu sections.
-pub fn create_menu_separator() -> Separator {
+pub fn create_menu_sep() -> Separator {
     let sep = Separator::new(Orientation::Horizontal);
     sep.add_css_class("context-menu-separator");
     sep.add_css_class("menu-sep");
@@ -153,7 +153,7 @@ pub fn create_menu_separator() -> Separator {
 }
 
 /// Creates an uppercase group header label for dividing sections in the menu.
-pub fn create_menu_group_header(label: &str) -> Label {
+pub fn create_group_header(label: &str) -> Label {
     Label::builder()
         .label(label)
         .halign(Align::Start)
@@ -165,7 +165,7 @@ pub fn create_menu_group_header(label: &str) -> Label {
 }
 
 /// Creates a horizontal footer container with a button box for compact quick actions.
-pub fn create_footer_container() -> (Box, Box) {
+pub fn create_footer_box() -> (Box, Box) {
     let footer_container = Box::new(Orientation::Horizontal, 0);
     footer_container.add_css_class("context-menu-footer");
     footer_container.set_halign(Align::Fill);
@@ -179,7 +179,7 @@ pub fn create_footer_container() -> (Box, Box) {
 }
 
 /// Creates a compact icon button for context menu footers.
-pub fn create_footer_icon_button(icon: &str, tooltip: &str) -> Button {
+pub fn create_footer_btn(icon: &str, tooltip: &str) -> Button {
     let img = get_icon(icon, 14);
     img.set_pixel_size(14);
 

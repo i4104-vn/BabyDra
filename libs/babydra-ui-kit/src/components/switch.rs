@@ -21,7 +21,7 @@ mod tests {
     }
 
     #[test]
-    fn ease_out_cubic_is_monotonic() {
+    fn check_cubic_monotonic() {
         let mut prev = ease_out_cubic(0.0);
         for i in 1..=10 {
             let t = i as f64 / 10.0;
@@ -32,7 +32,7 @@ mod tests {
     }
 
     #[test]
-    fn ease_out_cubic_starts_slow_ends_fast() {
+    fn check_cubic_shape() {
         // Ease-out: first quarter moves less than the last quarter.
         let early = ease_out_cubic(0.25);
         let late = ease_out_cubic(0.75);
@@ -253,9 +253,9 @@ impl CustomSwitch {
 
 /// Creates a standalone CustomSwitch widget.
 pub fn create_switch(initial_active: bool, on_changed: impl Fn(bool) + 'static) -> CustomSwitch {
-    let sw = CustomSwitch::new(initial_active);
-    sw.connect_state_set(on_changed);
-    sw
+    let switch = CustomSwitch::new(initial_active);
+    switch.connect_state_set(on_changed);
+    switch
 }
 
 /// ToggleRow: A component containing an "On/Off" status Label and a CustomSwitch.
@@ -292,11 +292,11 @@ impl ToggleRow {
         let label_c = row.label.clone();
         row.switch.connect_state_set(move |active| {
             if active {
-                label_c.set_text(&babydra_core::i18n::t("settings.on"));
+                label_c.set_text(&babydra_core::i18n::trans("settings.on"));
                 label_c.remove_css_class("toggle-status-off");
                 label_c.add_css_class("toggle-status-on");
             } else {
-                label_c.set_text(&babydra_core::i18n::t("settings.off"));
+                label_c.set_text(&babydra_core::i18n::trans("settings.off"));
                 label_c.remove_css_class("toggle-status-on");
                 label_c.add_css_class("toggle-status-off");
             }
@@ -310,11 +310,11 @@ impl ToggleRow {
     pub fn set_active(&self, active: bool) {
         self.switch.set_active(active);
         if active {
-            self.label.set_text(&babydra_core::i18n::t("settings.on"));
+            self.label.set_text(&babydra_core::i18n::trans("settings.on"));
             self.label.remove_css_class("toggle-status-off");
             self.label.add_css_class("toggle-status-on");
         } else {
-            self.label.set_text(&babydra_core::i18n::t("settings.off"));
+            self.label.set_text(&babydra_core::i18n::trans("settings.off"));
             self.label.remove_css_class("toggle-status-on");
             self.label.add_css_class("toggle-status-off");
         }

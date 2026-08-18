@@ -5,7 +5,7 @@ pub mod resolver;
 
 pub use assets::*;
 pub use resolver::{
-    get_icon_from_svg, get_logo_png, get_system_or_file_icon, set_system_or_file_icon,
+    get_icon_from_svg, get_logo_png, get_fallback_icon, set_fallback_icon,
 };
 
 /// Whether dark mode is currently active.
@@ -38,7 +38,7 @@ pub fn get_icon_colored(name: &str, size: i32, color_hex: &str) -> gtk4::Image {
             .replace("#1C1C1E", &final_color);
         return get_icon_from_svg(&colored_svg, size);
     }
-    get_system_or_file_icon(name, "image-missing")
+    get_fallback_icon(name, "image-missing")
 }
 
 /// Maps an icon name alias to its corresponding (Dark SVG, Light SVG) tuple.
@@ -158,7 +158,7 @@ fn load_icon_image_data(img: &gtk4::Image, name: &str, size: i32) {
         img.set_paintable(icon_img.paintable().as_ref());
         img.set_pixel_size(size);
     } else {
-        let icon_img = get_system_or_file_icon(name, "image-missing");
+        let icon_img = get_fallback_icon(name, "image-missing");
         img.set_paintable(icon_img.paintable().as_ref());
         img.set_pixel_size(size);
     }

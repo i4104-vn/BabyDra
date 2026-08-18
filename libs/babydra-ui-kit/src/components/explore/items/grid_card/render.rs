@@ -1,4 +1,4 @@
-use babydra_core::{load_cropped_square_pixbuf, FileEntry};
+use babydra_core::{load_cropped_square, FileEntry};
 use gtk4::prelude::*;
 use gtk4::{Align, Box, Label, Orientation, Picture};
 
@@ -39,7 +39,7 @@ pub fn build_grid_card_ui(entry: &FileEntry) -> Box {
         overlay.set_valign(Align::Center);
 
         let temp_icon =
-            crate::ui::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
+            crate::ui::icon::get_fallback_icon(&entry.icon_name, "text-x-generic");
         temp_icon.set_pixel_size(64);
         temp_icon.set_halign(Align::Center);
         temp_icon.set_valign(Align::Center);
@@ -55,7 +55,7 @@ pub fn build_grid_card_ui(entry: &FileEntry) -> Box {
 
         glib::spawn_future_local(async move {
             let res = tokio::task::spawn_blocking(move || {
-                load_cropped_square_pixbuf(&path_clone, 68).map(|pb| SendWrapper(pb))
+                load_cropped_square(&path_clone, 68).map(|pb| SendWrapper(pb))
             })
             .await;
 
@@ -71,7 +71,7 @@ pub fn build_grid_card_ui(entry: &FileEntry) -> Box {
             }
         });
     } else {
-        let icon = crate::ui::icon::get_system_or_file_icon(&entry.icon_name, "text-x-generic");
+        let icon = crate::ui::icon::get_fallback_icon(&entry.icon_name, "text-x-generic");
         icon.set_pixel_size(68);
         icon.set_halign(Align::Center);
         icon.set_valign(Align::Center);

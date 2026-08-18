@@ -1,6 +1,6 @@
-use super::helpers::count_dir_contents_recursive;
+use super::helpers::count_dir_contents;
 use crate::components::explore::helpers::{format_date, format_size};
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Align, Box, Label, Orientation};
 use std::path::PathBuf;
@@ -49,14 +49,14 @@ pub fn build_info_grid(parent_vbox: &Box, target_paths: &[PathBuf]) {
         header_text_box.append(&lbl_name);
 
         let file_type_desc = if is_dir {
-            t("explore.prop_folder")
+            trans("explore.prop_folder")
         } else if path.is_symlink() {
-            t("explore.prop_symlink")
+            trans("explore.prop_symlink")
         } else {
             path.extension()
                 .and_then(|ext| ext.to_str())
-                .map(|ext| format!("{} {}", ext.to_uppercase(), t("explore.prop_file")))
-                .unwrap_or_else(|| t("explore.prop_file"))
+                .map(|ext| format!("{} {}", ext.to_uppercase(), trans("explore.prop_file")))
+                .unwrap_or_else(|| trans("explore.prop_file"))
         };
 
         let lbl_subtitle = Label::builder()
@@ -76,7 +76,7 @@ pub fn build_info_grid(parent_vbox: &Box, target_paths: &[PathBuf]) {
         general_card.set_css_classes(&["properties-card"]);
 
         let lbl_section_title = Label::builder()
-            .label(&t("explore.prop_general_info"))
+            .label(&trans("explore.prop_general_info"))
             .halign(Align::Start)
             .build();
         lbl_section_title.set_css_classes(&["properties-section-title"]);
@@ -85,8 +85,8 @@ pub fn build_info_grid(parent_vbox: &Box, target_paths: &[PathBuf]) {
         let lbl_val_size = create_prop_row(
             &general_card,
             "drive-harddisk",
-            &t("explore.prop_size"),
-            &t("explore.prop_calculating"),
+            &trans("explore.prop_size"),
+            &trans("explore.prop_calculating"),
         );
 
         let mut lbl_val_contents = None;
@@ -94,8 +94,8 @@ pub fn build_info_grid(parent_vbox: &Box, target_paths: &[PathBuf]) {
             let lbl_contents = create_prop_row(
                 &general_card,
                 "info",
-                &t("explore.prop_contents"),
-                &t("explore.prop_counting"),
+                &trans("explore.prop_contents"),
+                &trans("explore.prop_counting"),
             );
             lbl_val_contents = Some(lbl_contents);
         }
@@ -115,19 +115,19 @@ pub fn build_info_grid(parent_vbox: &Box, target_paths: &[PathBuf]) {
             let _ = create_prop_row(
                 &general_card,
                 "clock",
-                &t("explore.prop_created"),
+                &trans("explore.prop_created"),
                 &created_desc,
             );
             let _ = create_prop_row(
                 &general_card,
                 "clock",
-                &t("explore.prop_modified"),
+                &trans("explore.prop_modified"),
                 &modified_desc,
             );
             let _ = create_prop_row(
                 &general_card,
                 "user",
-                &t("explore.prop_owner_group"),
+                &trans("explore.prop_owner_group"),
                 &owner_group_desc,
             );
 
@@ -139,7 +139,7 @@ pub fn build_info_grid(parent_vbox: &Box, target_paths: &[PathBuf]) {
             glib::spawn_future_local(async move {
                 let size = if is_dir {
                     tokio::task::spawn_blocking(move || {
-                        babydra_core::services::explore::dir_size::calculate_dir_size_parallel(
+                        babydra_core::services::explore::dir_size::calc_dir_size(
                             &path_c,
                         )
                     })
@@ -154,11 +154,11 @@ pub fn build_info_grid(parent_vbox: &Box, target_paths: &[PathBuf]) {
                     if let Some(lbl_contents) = lbl_contents_c {
                         let path_c2 = path_c_contents.clone();
                         let counts = tokio::task::spawn_blocking(move || {
-                            count_dir_contents_recursive(&path_c2)
+                            count_dir_contents(&path_c2)
                         })
                         .await
                         .unwrap_or((0, 0));
-                        let contents_template = t("explore.prop_contents_format");
+                        let contents_template = trans("explore.prop_contents_format");
                         let formatted_contents = contents_template
                             .replacen("{}", &counts.0.to_string(), 1)
                             .replacen("{}", &counts.1.to_string(), 1);
@@ -191,7 +191,7 @@ pub fn build_info_grid(parent_vbox: &Box, target_paths: &[PathBuf]) {
         header_text_box.set_hexpand(true);
         header_text_box.set_valign(Align::Center);
 
-        let selected_title = t("explore.prop_selected_items").replace("{}", &count.to_string());
+        let selected_title = trans("explore.prop_selected_items").replace("{}", &count.to_string());
         let lbl_name = Label::builder()
             .label(&selected_title)
             .halign(Align::Start)
@@ -200,7 +200,7 @@ pub fn build_info_grid(parent_vbox: &Box, target_paths: &[PathBuf]) {
         lbl_name.set_css_classes(&["properties-title-label"]);
         header_text_box.append(&lbl_name);
 
-        let subtitle_text = format!("{} {}", t("explore.prop_location"), location);
+        let subtitle_text = format!("{} {}", trans("explore.prop_location"), location);
         let lbl_subtitle = Label::builder()
             .label(&subtitle_text)
             .halign(Align::Start)
@@ -217,24 +217,24 @@ pub fn build_info_grid(parent_vbox: &Box, target_paths: &[PathBuf]) {
         general_card.set_css_classes(&["properties-card"]);
 
         let lbl_section_title = Label::builder()
-            .label(&t("explore.prop_selection_details"))
+            .label(&trans("explore.prop_selection_details"))
             .halign(Align::Start)
             .build();
         lbl_section_title.set_css_classes(&["properties-section-title"]);
         general_card.append(&lbl_section_title);
 
-        let items_count_str = t("explore.prop_items_count").replace("{}", &count.to_string());
+        let items_count_str = trans("explore.prop_items_count").replace("{}", &count.to_string());
         let _ = create_prop_row(
             &general_card,
             "info",
-            &t("explore.prop_count"),
+            &trans("explore.prop_count"),
             &items_count_str,
         );
         let lbl_val_size = create_prop_row(
             &general_card,
             "drive-harddisk",
-            &t("explore.prop_total_size"),
-            &t("explore.prop_calculating"),
+            &trans("explore.prop_total_size"),
+            &trans("explore.prop_calculating"),
         );
 
         let paths_c = target_paths.to_vec();
@@ -245,7 +245,7 @@ pub fn build_info_grid(parent_vbox: &Box, target_paths: &[PathBuf]) {
                 for p in paths_c {
                     if let Ok(meta) = std::fs::metadata(&p) {
                         if meta.is_dir() {
-                            size += babydra_core::services::explore::dir_size::calculate_dir_size_parallel(&p);
+                            size += babydra_core::services::explore::dir_size::calc_dir_size(&p);
                         } else {
                             size += meta.len();
                         }

@@ -7,11 +7,11 @@ use std::rc::Rc;
 use tokio::io::{AsyncBufReadExt, BufReader};
 
 use crate::components::explore::dialogs::shared::scroll_to_end;
-use babydra_core::i18n::t;
-use babydra_core::services::explore::spawn_decompress_command;
+use babydra_core::i18n::trans;
+use babydra_core::services::explore::spawn_decompress;
 
 /// Show decompress log dialog.
-pub fn show_decompress_log_dialog(
+pub fn show_decompress_log(
     archive_path: PathBuf,
     current_path: PathBuf,
     nav_callback: Rc<dyn Fn(PathBuf)>,
@@ -19,7 +19,7 @@ pub fn show_decompress_log_dialog(
     parent: Option<&gtk4::Window>,
 ) {
     let window = Window::builder()
-        .title(&t("explore.dialog_decompress_title"))
+        .title(&trans("explore.dialog_decompress_title"))
         .modal(true)
         .resizable(true)
         .default_width(500)
@@ -40,7 +40,7 @@ pub fn show_decompress_log_dialog(
 
     let status_box = Box::new(Orientation::Horizontal, 10);
     let lbl_status = Label::builder()
-        .label(&t("explore.decompressing_running"))
+        .label(&trans("explore.decompressing_running"))
         .halign(Align::Start)
         .hexpand(true)
         .build();
@@ -77,14 +77,14 @@ pub fn show_decompress_log_dialog(
         .to_string();
     buffer.set_text(&format!(
         "$ {}\n\n",
-        t("explore.extracting_archive").replace("{}", &fname)
+        trans("explore.extracting_archive").replace("{}", &fname)
     ));
 
     scroll.set_child(Some(&text_view));
     vbox.append(&scroll);
 
     let btn_close = Button::builder()
-        .label(&t("explore.settings_close"))
+        .label(&trans("explore.settings_close"))
         .sensitive(false)
         .halign(Align::End)
         .build();
@@ -125,9 +125,9 @@ pub fn show_decompress_log_dialog(
                 pb_finish.set_fraction(0.0);
                 lbl_status_c.set_markup(&format!(
                     "<b><span foreground='#ef4444'>{}</span></b>",
-                    t("explore.decompress_failed")
+                    trans("explore.decompress_failed")
                 ));
-                buffer_c.set_text(&t("explore.invalid_parent_dir"));
+                buffer_c.set_text(&trans("explore.invalid_parent_dir"));
                 btn_close_c.set_sensitive(true);
                 return;
             }
@@ -139,7 +139,7 @@ pub fn show_decompress_log_dialog(
             .to_string_lossy()
             .to_string();
 
-        match spawn_decompress_command(&parent_dir, &filename, password.as_deref()) {
+        match spawn_decompress(&parent_dir, &filename, password.as_deref()) {
             Ok(mut child) => {
                 let stdout = child.stdout.take().unwrap();
                 let stderr = child.stderr.take().unwrap();
@@ -171,14 +171,14 @@ pub fn show_decompress_log_dialog(
                             let success = status.map(|s| s.success()).unwrap_or(false);
                             if success {
                                 pb_finish.set_fraction(1.0);
-                                lbl_status_c.set_markup(&format!("<b><span foreground='#22c55e'>{}</span></b>", t("explore.decompress_success")));
+                                lbl_status_c.set_markup(&format!("<b><span foreground='#22c55e'>{}</span></b>", trans("explore.decompress_success")));
                                 let mut end = buffer_c.end_iter();
-                                buffer_c.insert(&mut end, &format!("\n✓ {}\n", t("explore.decompress_completed")));
+                                buffer_c.insert(&mut end, &format!("\n✓ {}\n", trans("explore.decompress_completed")));
                             } else {
                                 pb_finish.set_fraction(0.0);
-                                lbl_status_c.set_markup(&format!("<b><span foreground='#ef4444'>{}</span></b>", t("explore.decompress_failed")));
+                                lbl_status_c.set_markup(&format!("<b><span foreground='#ef4444'>{}</span></b>", trans("explore.decompress_failed")));
                                 let mut end = buffer_c.end_iter();
-                                buffer_c.insert(&mut end, &format!("\n✗ {}\n", t("explore.decompress_failed_detail")));
+                                buffer_c.insert(&mut end, &format!("\n✗ {}\n", trans("explore.decompress_failed_detail")));
                             }
                             scroll_to_end(&text_view_c);
                             break;
@@ -193,14 +193,14 @@ pub fn show_decompress_log_dialog(
                 pb_finish.set_fraction(0.0);
                 lbl_status_c.set_markup(&format!(
                     "<b><span foreground='#ef4444'>{}</span></b>",
-                    t("explore.decompress_failed")
+                    trans("explore.decompress_failed")
                 ));
                 let mut end = buffer_c.end_iter();
                 buffer_c.insert(
                     &mut end,
                     &format!(
                         "{}\n",
-                        t("explore.spawn_decompress_failed").replace("{}", &e.to_string())
+                        trans("explore.spawn_decompress_failed").replace("{}", &e.to_string())
                     ),
                 );
                 scroll_to_end(&text_view_c);

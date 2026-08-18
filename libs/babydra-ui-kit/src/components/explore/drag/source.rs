@@ -1,4 +1,4 @@
-use babydra_core::load_cropped_square_pixbuf;
+use babydra_core::load_cropped_square;
 use gtk4::gdk::FileList;
 use gtk4::prelude::*;
 use std::cell::RefCell;
@@ -48,7 +48,7 @@ pub fn create_drag_source(
     };
 
     if has_preview {
-        if let Ok(pixbuf) = load_cropped_square_pixbuf(path, 85) {
+        if let Ok(pixbuf) = load_cropped_square(path, 85) {
             let texture = gtk4::gdk::Texture::for_pixbuf(&pixbuf);
             drag_source.set_icon(Some(&texture), 42, 42);
             return drag_source;

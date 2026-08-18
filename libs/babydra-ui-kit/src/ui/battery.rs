@@ -4,7 +4,7 @@ use gtk4::prelude::*;
 use gtk4::DrawingArea;
 
 /// Returns the hex color string matching the battery state.
-pub fn get_battery_color_hex(percentage: u32, is_charging: bool) -> &'static str {
+pub fn get_battery_hex(percentage: u32, is_charging: bool) -> &'static str {
     if is_charging || percentage > 30 {
         "#22c55e" // Green
     } else if percentage > 15 {
@@ -15,7 +15,7 @@ pub fn get_battery_color_hex(percentage: u32, is_charging: bool) -> &'static str
 }
 
 /// Returns Cairo RGB tuples (0.0 .. 1.0) matching the battery state.
-pub fn get_battery_color_rgb(percentage: u32, is_charging: bool) -> (f64, f64, f64) {
+pub fn get_battery_rgb(percentage: u32, is_charging: bool) -> (f64, f64, f64) {
     if is_charging || percentage > 30 {
         (0.13, 0.77, 0.36) // Green (#22c55e)
     } else if percentage > 15 {
@@ -40,7 +40,7 @@ pub fn draw_cairo_battery(
         (0.15, 0.15, 0.15)
     };
 
-    let (fill_r, fill_g, fill_b) = get_battery_color_rgb(percentage, is_charging);
+    let (fill_r, fill_g, fill_b) = get_battery_rgb(percentage, is_charging);
 
     let shell_x = 1.5;
     let shell_y = 1.5;
@@ -110,7 +110,7 @@ pub fn draw_cairo_battery(
 }
 
 /// Creates a new `battery drawing area`.
-pub fn create_battery_drawing_area(
+pub fn create_battery_area(
     percentage: u32,
     is_charging: bool,
     width: i32,

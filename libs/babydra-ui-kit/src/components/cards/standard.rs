@@ -8,7 +8,7 @@ pub fn create_card(orientation: gtk4::Orientation, spacing: i32) -> gtk4::Box {
 }
 
 /// Creates a box container styled as a card with a custom CSS class.
-pub fn create_card_with_class(
+pub fn create_css_card(
     orientation: gtk4::Orientation,
     spacing: i32,
     css_class: &str,

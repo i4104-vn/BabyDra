@@ -1,5 +1,5 @@
-use super::helpers::get_permissions_string;
-use babydra_core::i18n::t;
+use super::helpers::get_perm_string;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Align, Box, CheckButton, Grid, Label, Orientation};
 use std::os::unix::fs::MetadataExt;
@@ -19,7 +19,7 @@ pub struct PermissionCheckboxes {
 }
 
 /// Build permission matrix.
-pub fn build_permission_matrix(parent_vbox: &Box, mode: u32) -> PermissionCheckboxes {
+pub fn build_perm_matrix(parent_vbox: &Box, mode: u32) -> PermissionCheckboxes {
     let perm_card = Box::new(Orientation::Vertical, 8);
     perm_card.set_css_classes(&["properties-card"]);
 
@@ -27,14 +27,14 @@ pub fn build_permission_matrix(parent_vbox: &Box, mode: u32) -> PermissionCheckb
     let top_hbox = Box::new(Orientation::Horizontal, 8);
 
     let lbl_title = Label::builder()
-        .label(&t("explore.perm_access"))
+        .label(&trans("explore.perm_access"))
         .halign(Align::Start)
         .valign(Align::Center)
         .build();
     lbl_title.set_css_classes(&["properties-section-title"]);
     top_hbox.append(&lbl_title);
 
-    let perm_str = format!("{} ({:o})", get_permissions_string(mode), mode & 0o777);
+    let perm_str = format!("{} ({:o})", get_perm_string(mode), mode & 0o777);
     let lbl_badge = Label::builder()
         .label(&perm_str)
         .halign(Align::End)
@@ -59,15 +59,15 @@ pub fn build_permission_matrix(parent_vbox: &Box, mode: u32) -> PermissionCheckb
 
     // Column Headers
     let lbl_owner = Label::builder()
-        .label(&t("explore.perm_owner"))
+        .label(&trans("explore.perm_owner"))
         .halign(Align::Center)
         .build();
     let lbl_group = Label::builder()
-        .label(&t("explore.perm_group"))
+        .label(&trans("explore.perm_group"))
         .halign(Align::Center)
         .build();
     let lbl_others = Label::builder()
-        .label(&t("explore.perm_others"))
+        .label(&trans("explore.perm_others"))
         .halign(Align::Center)
         .build();
     lbl_owner.set_css_classes(&["properties-matrix-col-title"]);
@@ -80,15 +80,15 @@ pub fn build_permission_matrix(parent_vbox: &Box, mode: u32) -> PermissionCheckb
 
     // Row Titles
     let lbl_read = Label::builder()
-        .label(&t("explore.perm_read"))
+        .label(&trans("explore.perm_read"))
         .halign(Align::Start)
         .build();
     let lbl_write = Label::builder()
-        .label(&t("explore.perm_write"))
+        .label(&trans("explore.perm_write"))
         .halign(Align::Start)
         .build();
     let lbl_exec = Label::builder()
-        .label(&t("explore.perm_execute"))
+        .label(&trans("explore.perm_execute"))
         .halign(Align::Start)
         .build();
     lbl_read.set_css_classes(&["properties-key-label"]);

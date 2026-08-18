@@ -2,14 +2,14 @@ pub mod dialog;
 pub mod log_dialog;
 
 pub use dialog::show_password_dialog;
-pub use log_dialog::show_decompress_log_dialog;
+pub use log_dialog::show_decompress_log;
 
 use babydra_core::services::explore::is_zip_encrypted;
 use std::path::PathBuf;
 use std::rc::Rc;
 
 /// Perform decompress async.
-pub fn perform_decompress_async(
+pub fn decompress_async(
     archive_path: PathBuf,
     current_path: PathBuf,
     nav_callback: Rc<dyn Fn(PathBuf)>,
@@ -27,7 +27,7 @@ pub fn perform_decompress_async(
         if is_zip && is_zip_encrypted(&archive_path_c).await {
             show_password_dialog(archive_path_c, cp_c, nav_c, parent_c.as_ref());
         } else {
-            show_decompress_log_dialog(archive_path_c, cp_c, nav_c, None, parent_c.as_ref());
+            show_decompress_log(archive_path_c, cp_c, nav_c, None, parent_c.as_ref());
         }
     });
 }

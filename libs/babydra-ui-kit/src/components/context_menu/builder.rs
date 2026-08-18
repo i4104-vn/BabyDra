@@ -74,7 +74,7 @@ impl ContextMenuBuilder {
         sensitive: bool,
         on_click: impl Fn() + 'static,
     ) -> Self {
-        self.append_item(create_menu_sensitive(label, icon, sensitive), on_click)
+        self.append_item(create_menu_sens(label, icon, sensitive), on_click)
     }
 
     /// Appends an item with a keyboard shortcut hint.
@@ -90,11 +90,11 @@ impl ContextMenuBuilder {
 
     /// Appends a destructive/danger item (e.g. Delete).
     pub fn destructive_item(self, label: &str, icon: &str, on_click: impl Fn() + 'static) -> Self {
-        self.append_item(create_destructive_item(label, icon), on_click)
+        self.append_item(create_danger_item(label, icon), on_click)
     }
 
     /// Appends a destructive/danger item with sensitivity control.
-    pub fn destructive_item_sensitive(
+    pub fn danger_sensitive(
         self,
         label: &str,
         icon: &str,
@@ -102,26 +102,26 @@ impl ContextMenuBuilder {
         on_click: impl Fn() + 'static,
     ) -> Self {
         self.append_item(
-            create_destructive_sensitive(label, icon, sensitive),
+            create_danger_btn(label, icon, sensitive),
             on_click,
         )
     }
 
     /// Appends a horizontal separator.
     pub fn separator(self) -> Self {
-        self.vbox.append(&create_menu_separator());
+        self.vbox.append(&create_menu_sep());
         self
     }
 
     /// Appends a section group header.
     pub fn group_header(self, label: &str) -> Self {
-        self.vbox.append(&create_menu_group_header(label));
+        self.vbox.append(&create_group_header(label));
         self
     }
 
     /// Appends a text-only clickable item (no leading icon).
     pub fn text_item(self, label: &str, on_click: impl Fn() + 'static) -> Self {
-        self.append_item(create_menu_text_item(label, false, false, true), on_click)
+        self.append_item(create_menu_text(label, false, false, true), on_click)
     }
 
     /// Appends a text-only clickable item with sensitivity control.
@@ -131,7 +131,7 @@ impl ContextMenuBuilder {
         sensitive: bool,
         on_click: impl Fn() + 'static,
     ) -> Self {
-        self.append_item(create_menu_text_item(label, false, false, sensitive), on_click)
+        self.append_item(create_menu_text(label, false, false, sensitive), on_click)
     }
 
     /// Appends a text-only checkable item with a checkmark icon.
@@ -141,7 +141,7 @@ impl ContextMenuBuilder {
         is_checked: bool,
         on_click: impl Fn() + 'static,
     ) -> Self {
-        self.append_item(create_menu_text_item(label, is_checked, false, true), on_click)
+        self.append_item(create_menu_text(label, is_checked, false, true), on_click)
     }
 
     /// Appends a submenu item with child options inside a sub-popover.
@@ -207,14 +207,14 @@ impl ContextMenuBuilder {
         on_click: impl Fn() + 'static,
     ) -> Self {
         let footer_box = self.ensure_footer_box();
-        let btn = create_footer_icon_button(icon, tooltip);
+        let btn = create_footer_btn(icon, tooltip);
         self.wire_click(&btn, on_click);
         footer_box.append(&btn);
         self
     }
 
     /// Appends a quick action icon button to the footer row with sensitivity control.
-    pub fn footer_button_sensitive(
+    pub fn footer_sensitive(
         mut self,
         icon: &str,
         tooltip: &str,
@@ -222,7 +222,7 @@ impl ContextMenuBuilder {
         on_click: impl Fn() + 'static,
     ) -> Self {
         let footer_box = self.ensure_footer_box();
-        let btn = create_footer_icon_button(icon, tooltip);
+        let btn = create_footer_btn(icon, tooltip);
         btn.set_sensitive(sensitive);
         self.wire_click(&btn, on_click);
         footer_box.append(&btn);
@@ -253,10 +253,10 @@ impl ContextMenuBuilder {
     /// Wires a button click to dismiss the popover and then run `on_click`.
     fn wire_click(&self, btn: &Button, on_click: impl Fn() + 'static) {
         let pop = self.popover.clone();
-        let cb = Rc::new(on_click);
+        let callback = Rc::new(on_click);
         btn.connect_clicked(move |_| {
             pop.popdown();
-            cb();
+            callback();
         });
     }
 
@@ -273,8 +273,8 @@ impl ContextMenuBuilder {
             return fb.clone();
         }
 
-        let (footer_container, fb) = create_footer_container();
-        self.vbox.append(&create_menu_separator());
+        let (footer_container, fb) = create_footer_box();
+        self.vbox.append(&create_menu_sep());
         self.vbox.append(&footer_container);
         self.footer_box = Some(fb.clone());
         fb

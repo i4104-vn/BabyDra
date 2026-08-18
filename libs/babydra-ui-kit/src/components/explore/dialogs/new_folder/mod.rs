@@ -1,4 +1,4 @@
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -6,12 +6,12 @@ use std::rc::Rc;
 mod render;
 
 /// Presents a dialog window to create a new folder under a directory.
-pub fn show_new_folder_dialog(
+pub fn show_folder_dialog(
     current_path: PathBuf,
     nav_callback: Rc<dyn Fn(PathBuf)>,
     parent: Option<&impl IsA<gtk4::Window>>,
 ) {
-    let widgets = render::build_new_folder_dialog_ui(parent);
+    let widgets = render::build_folder_dialog(parent);
     let window = widgets.window;
     let _vbox = widgets.vbox;
     let entry = widgets.entry;
@@ -42,7 +42,7 @@ pub fn show_new_folder_dialog(
         if !name.is_empty() {
             let folder_path = current_p.join(&name);
             if folder_path.exists() {
-                lbl_err_create.set_text(&t("explore.error_folder_exists"));
+                lbl_err_create.set_text(&trans("explore.error_folder_exists"));
                 lbl_err_create.set_visible(true);
                 entry_c.add_css_class("error-entry");
             } else {

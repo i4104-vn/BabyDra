@@ -9,7 +9,7 @@ pub struct ConfirmDialogWidgets {
 }
 
 /// Build confirm dialog ui.
-pub fn build_confirm_dialog_ui(
+pub fn build_confirm_dialog(
     title: &str,
     message: &str,
     parent: Option<&impl IsA<gtk4::Window>>,
@@ -46,9 +46,9 @@ pub fn build_confirm_dialog_ui(
     bbox.set_halign(Align::End);
     vbox.append(&bbox);
 
-    let btn_cancel = Button::with_label(&babydra_core::i18n::t("explore.settings_cancel"));
+    let btn_cancel = Button::with_label(&babydra_core::i18n::trans("explore.settings_cancel"));
     let btn_confirm = Button::builder()
-        .label(&babydra_core::i18n::t("explore.settings_delete"))
+        .label(&babydra_core::i18n::trans("explore.settings_delete"))
         .css_classes(vec!["destructive-action".to_string()])
         .build();
 

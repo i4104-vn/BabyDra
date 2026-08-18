@@ -3,8 +3,8 @@ use gtk4::{Align, Box, Button, CheckButton, Entry, Label, Orientation, Window};
 use std::path::PathBuf;
 use std::rc::Rc;
 
-use super::log_dialog::show_compress_log_dialog;
-use babydra_core::i18n::t;
+use super::log_dialog::show_compress_log;
+use babydra_core::i18n::trans;
 
 /// Presents a dialog window to compress selected files/folders.
 pub fn show_compress_dialog(
@@ -18,7 +18,7 @@ pub fn show_compress_dialog(
     }
 
     let window = Window::builder()
-        .title(&t("explore.dialog_archive_title"))
+        .title(&trans("explore.dialog_archive_title"))
         .modal(true)
         .resizable(false)
         .default_width(320)
@@ -38,7 +38,7 @@ pub fn show_compress_dialog(
     window.set_child(Some(&vbox));
 
     let lbl = Label::builder()
-        .label(&t("explore.dialog_archive_label"))
+        .label(&trans("explore.dialog_archive_label"))
         .halign(Align::Start)
         .build();
     vbox.append(&lbl);
@@ -67,9 +67,9 @@ pub fn show_compress_dialog(
     bbox.set_halign(Align::End);
     vbox.append(&bbox);
 
-    let btn_cancel = Button::with_label(&t("explore.settings_cancel"));
+    let btn_cancel = Button::with_label(&trans("explore.settings_cancel"));
     let btn_create = Button::builder()
-        .label(&t("explore.menu_compress"))
+        .label(&trans("explore.menu_compress"))
         .css_classes(vec!["suggested-action".to_string()])
         .build();
 
@@ -97,7 +97,7 @@ pub fn show_compress_dialog(
             let archive_name = format!("{}.{}", name, ext);
             let archive_path = current_p.join(archive_name);
 
-            show_compress_log_dialog(
+            show_compress_log(
                 paths.clone(),
                 archive_path,
                 current_p.clone(),

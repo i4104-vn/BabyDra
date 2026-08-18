@@ -7,7 +7,7 @@ pub fn apply_cut_dimming(root_widget: &impl IsA<gtk4::Widget>, cut_paths: &[Path
 }
 
 /// Applies cut dimming across all active top-level windows in the application.
-pub fn apply_cut_dimming_global(cut_paths: &[PathBuf]) {
+pub fn apply_cut_everywhere(cut_paths: &[PathBuf]) {
     let toplevels = gtk4::Window::toplevels();
     for i in 0..toplevels.n_items() {
         if let Some(item) = toplevels.item(i) {

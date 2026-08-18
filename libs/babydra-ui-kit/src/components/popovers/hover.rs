@@ -19,7 +19,7 @@ impl HoverPopoverRow {
 }
 
 /// Build hover popover card.
-pub fn build_hover_popover_card(title: &str, rows: Vec<HoverPopoverRow>) -> gtk4::Box {
+pub fn build_hover_card(title: &str, rows: Vec<HoverPopoverRow>) -> gtk4::Box {
     let card = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
     card.add_css_class("status-popover-card");
     card.set_margin_top(4);

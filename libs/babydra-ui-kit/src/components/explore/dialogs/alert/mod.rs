@@ -5,7 +5,7 @@ mod render;
 
 /// Presents a simple error/alert modal dialog with a Close/OK button.
 pub fn show_alert_dialog(title: &str, message: &str, parent: Option<&impl IsA<gtk4::Window>>) {
-    let widgets = render::build_alert_dialog_ui(title, message, parent);
+    let widgets = render::build_alert_dialog(title, message, parent);
     let window = widgets.window;
     let vbox = widgets.vbox;
 

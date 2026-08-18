@@ -5,12 +5,12 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 /// Creates a DropTarget for dropping files/folders into a target directory.
-pub fn create_dir_drop_target(dest_path: PathBuf) -> gtk4::DropTarget {
-    create_dir_drop_target_with_nav(dest_path, None)
+pub fn create_drop_target(dest_path: PathBuf) -> gtk4::DropTarget {
+    create_drop_nav(dest_path, None)
 }
 
 /// Creates a DropTarget for dropping files/folders into a target directory with optional navigation refresh.
-pub fn create_dir_drop_target_with_nav(
+pub fn create_drop_nav(
     dest_path: PathBuf,
     nav_callback: Option<Rc<dyn Fn(PathBuf)>>,
 ) -> gtk4::DropTarget {
@@ -64,7 +64,7 @@ pub fn create_dir_drop_target_with_nav(
                                 );
                             });
                         }
-                        crate::components::explore::context_menu::clipboard::apply_cut_dimming_global(&[]);
+                        crate::components::explore::context_menu::clipboard::apply_cut_everywhere(&[]);
                         if let Some(nav_fn) = nav {
                             if let Some(rp) = refresh_path {
                                 nav_fn(rp);
@@ -81,7 +81,7 @@ pub fn create_dir_drop_target_with_nav(
 }
 
 /// Creates a DropTarget for dropping files/folders into a dynamic background path.
-pub fn create_background_drop_target(current_path: Rc<RefCell<PathBuf>>) -> gtk4::DropTarget {
+pub fn create_bg_drop(current_path: Rc<RefCell<PathBuf>>) -> gtk4::DropTarget {
     let drop_target = gtk4::DropTarget::new(
         FileList::static_type(),
         gtk4::gdk::DragAction::MOVE | gtk4::gdk::DragAction::COPY,
@@ -117,7 +117,7 @@ pub fn create_background_drop_target(current_path: Rc<RefCell<PathBuf>>) -> gtk4
                                 },
                             );
                         });
-                        crate::components::explore::context_menu::clipboard::apply_cut_dimming_global(&[]);
+                        crate::components::explore::context_menu::clipboard::apply_cut_everywhere(&[]);
                     }
                 });
                 return true;

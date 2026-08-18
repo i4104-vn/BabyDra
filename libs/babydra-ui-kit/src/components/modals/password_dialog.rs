@@ -1,4 +1,4 @@
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Label, Orientation, PasswordEntry};
 
@@ -41,17 +41,17 @@ impl PasswordDialog {
 
         let password_entry = PasswordEntry::new();
         password_entry.add_css_class("sidebar-search-entry");
-        password_entry.set_placeholder_text(Some(&t("common.password_placeholder")));
+        password_entry.set_placeholder_text(Some(&trans("common.password_placeholder")));
         container.append(&password_entry);
 
         let actions_box = Box::new(Orientation::Horizontal, 8);
         actions_box.set_halign(gtk4::Align::End);
 
-        let cancel_btn = Button::with_label(&t("common.cancel"));
+        let cancel_btn = Button::with_label(&trans("common.cancel"));
         cancel_btn.add_css_class("connect-pill-btn");
         cancel_btn.set_cursor_from_name(Some("pointer"));
 
-        let confirm_btn = Button::with_label(&t("common.confirm"));
+        let confirm_btn = Button::with_label(&trans("common.confirm"));
         confirm_btn.add_css_class("suggested-action");
         confirm_btn.set_cursor_from_name(Some("pointer"));
 

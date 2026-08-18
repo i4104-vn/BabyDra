@@ -139,7 +139,7 @@ fn populate_theme_cache(theme_name: &str) -> HashMap<String, PathBuf> {
 }
 
 /// Returns the current `resolved icon path`.
-pub fn get_resolved_icon_path(icon_name: &str) -> Option<PathBuf> {
+pub fn get_resolved_icon(icon_name: &str) -> Option<PathBuf> {
     let cache = ICON_PATH_CACHE.get_or_init(|| {
         let gsettings = gio::Settings::new("org.gnome.desktop.interface");
         let theme_name = gsettings.string("icon-theme");
@@ -150,7 +150,7 @@ pub fn get_resolved_icon_path(icon_name: &str) -> Option<PathBuf> {
 }
 
 /// Resolves and caches the icon for the given path (system icon or file icon).
-pub fn set_system_or_file_icon(img: &gtk4::Image, icon_path_or_name: &str, default_fallback: &str) {
+pub fn set_fallback_icon(img: &gtk4::Image, icon_path_or_name: &str, default_fallback: &str) {
     if icon_path_or_name.is_empty() {
         img.set_icon_name(Some(default_fallback));
         return;
@@ -169,7 +169,7 @@ pub fn set_system_or_file_icon(img: &gtk4::Image, icon_path_or_name: &str, defau
         }
     }
 
-    if let Some(resolved_path) = get_resolved_icon_path(&clean_name) {
+    if let Some(resolved_path) = get_resolved_icon(&clean_name) {
         img.set_from_file(Some(resolved_path.to_string_lossy().as_ref()));
         return;
     }
@@ -220,8 +220,8 @@ pub fn set_system_or_file_icon(img: &gtk4::Image, icon_path_or_name: &str, defau
 }
 
 /// Returns the resolved icon for the given path, falling back to a file icon.
-pub fn get_system_or_file_icon(icon_path_or_name: &str, default_fallback: &str) -> gtk4::Image {
+pub fn get_fallback_icon(icon_path_or_name: &str, default_fallback: &str) -> gtk4::Image {
     let img = gtk4::Image::new();
-    set_system_or_file_icon(&img, icon_path_or_name, default_fallback);
+    set_fallback_icon(&img, icon_path_or_name, default_fallback);
     img
 }

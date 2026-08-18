@@ -221,7 +221,7 @@ pub fn is_dark_mode() -> bool {
 /// Sets the color scheme preference in GSettings.
 pub fn set_dark_mode(dark: bool) {
     std::thread::spawn(move || {
-        let _ = babydra_core::services::system::set_gsettings_color_scheme(dark);
+        let _ = babydra_core::services::system::set_color_scheme(dark);
 
         gtk4::glib::idle_add_local_once(move || {
             if let Some(settings) = gtk4::Settings::default() {

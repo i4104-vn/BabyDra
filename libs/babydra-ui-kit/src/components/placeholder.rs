@@ -17,7 +17,7 @@ pub enum PlaceholderState<'a> {
 }
 
 /// Constructs a unified ListBoxRow placeholder for disabled, loading, or empty states.
-pub fn create_placeholder_row(state: PlaceholderState) -> gtk4::ListBoxRow {
+pub fn create_placeholder(state: PlaceholderState) -> gtk4::ListBoxRow {
     let row = gtk4::ListBoxRow::new();
     row.add_css_class("settings-card-row");
     row.set_selectable(false);
@@ -42,12 +42,12 @@ pub fn create_placeholder_row(state: PlaceholderState) -> gtk4::ListBoxRow {
             let badge = create_icon_badge(icon_name, 24, false);
             placeholder_box.append(&badge);
 
-            let lbl = gtk4::Label::new(Some(&babydra_core::i18n::t(title_key)));
+            let lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans(title_key)));
             lbl.add_css_class("settings-row-title");
             lbl.set_halign(gtk4::Align::Center);
             placeholder_box.append(&lbl);
 
-            let desc = gtk4::Label::new(Some(&babydra_core::i18n::t(desc_key)));
+            let desc = gtk4::Label::new(Some(&babydra_core::i18n::trans(desc_key)));
             desc.add_css_class("settings-row-desc");
             desc.set_halign(gtk4::Align::Center);
             placeholder_box.append(&desc);
@@ -59,7 +59,7 @@ pub fn create_placeholder_row(state: PlaceholderState) -> gtk4::ListBoxRow {
             spinner.start();
             placeholder_box.append(&spinner);
 
-            let lbl = gtk4::Label::new(Some(&babydra_core::i18n::t("settings.loading")));
+            let lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.loading")));
             lbl.add_css_class("settings-row-title");
             lbl.set_halign(gtk4::Align::Center);
             placeholder_box.append(&lbl);
@@ -72,13 +72,13 @@ pub fn create_placeholder_row(state: PlaceholderState) -> gtk4::ListBoxRow {
             let badge = create_icon_badge(icon_name, 24, false);
             placeholder_box.append(&badge);
 
-            let lbl = gtk4::Label::new(Some(&babydra_core::i18n::t(title_key)));
+            let lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans(title_key)));
             lbl.add_css_class("settings-row-title");
             lbl.set_halign(gtk4::Align::Center);
             placeholder_box.append(&lbl);
 
             if let Some(desc_k) = desc_key {
-                let desc = gtk4::Label::new(Some(&babydra_core::i18n::t(desc_k)));
+                let desc = gtk4::Label::new(Some(&babydra_core::i18n::trans(desc_k)));
                 desc.add_css_class("settings-row-desc");
                 desc.set_halign(gtk4::Align::Center);
                 placeholder_box.append(&desc);

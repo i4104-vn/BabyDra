@@ -16,7 +16,7 @@ pub fn create_popover(
 }
 
 /// Creates a Popover widget and directly sets its child content.
-pub fn create_popover_with_content(
+pub fn create_popover_box(
     parent: &impl IsA<gtk4::Widget>,
     position: gtk4::PositionType,
     css_class: &str,
@@ -28,4 +28,4 @@ pub fn create_popover_with_content(
 }
 
 pub mod hover;
-pub use hover::{attach_hover_popover, build_hover_popover_card, HoverPopoverRow};
+pub use hover::{attach_hover_popover, build_hover_card, HoverPopoverRow};

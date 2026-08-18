@@ -4,7 +4,7 @@ pub mod dimming;
 pub mod empty_actions;
 pub mod file_actions;
 
-pub use dimming::{apply_cut_dimming, apply_cut_dimming_global};
+pub use dimming::{apply_cut_dimming, apply_cut_everywhere};
 pub use empty_actions::show_for_empty;
 
 use std::path::PathBuf;

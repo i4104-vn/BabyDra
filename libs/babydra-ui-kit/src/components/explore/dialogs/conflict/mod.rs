@@ -11,7 +11,7 @@ pub fn show_conflict_dialog(
     on_override: impl FnOnce() + 'static,
     parent: Option<&impl IsA<gtk4::Window>>,
 ) {
-    let widgets = render::build_conflict_dialog_ui(item_name, parent);
+    let widgets = render::build_conflict(item_name, parent);
     let window = widgets.window;
     let _vbox = widgets.vbox;
 

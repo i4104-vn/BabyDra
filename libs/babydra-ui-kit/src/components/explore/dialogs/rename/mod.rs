@@ -1,4 +1,4 @@
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -12,7 +12,7 @@ pub fn show_rename_dialog(
     nav_callback: Rc<dyn Fn(PathBuf)>,
     parent: Option<&impl IsA<gtk4::Window>>,
 ) {
-    let widgets = render::build_rename_dialog_ui(path, parent);
+    let widgets = render::build_rename_dialog(path, parent);
     let window = widgets.window;
     let _vbox = widgets.vbox;
     let entry = widgets.entry;
@@ -49,7 +49,7 @@ pub fn show_rename_dialog(
             let old_name = path.file_name().unwrap_or_default().to_string_lossy();
 
             if new_name != old_name && target_dest.exists() {
-                lbl_err_rename.set_text(&t("explore.error_item_exists"));
+                lbl_err_rename.set_text(&trans("explore.error_item_exists"));
                 lbl_err_rename.set_visible(true);
                 entry_c.add_css_class("error-entry");
             } else {
