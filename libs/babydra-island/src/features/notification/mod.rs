@@ -148,14 +148,14 @@ impl IslandFeature for NotificationFeature {
             }
 
             if let Some(app) = found_app {
-                babydra_core::helper::window::focus_app(
+                babydra_core::services::window::focus_app(
                     &app.name,
                     &app.exec,
                     app.app_id.as_deref(),
                     app.window_title.as_deref(),
                 );
             } else {
-                babydra_core::helper::window::focus_app(&app_name, "", Some(&app_name), None);
+                babydra_core::services::window::focus_app(&app_name, "", Some(&app_name), None);
             }
         }
     }
