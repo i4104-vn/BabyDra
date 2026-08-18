@@ -1,6 +1,6 @@
 //! UI renderer and event handlers for the switcher overlay window.
 
-use crate::widgets::list::build_apps_list;
+use crate::widgets::render::build_apps_list;
 use babydra_core::DesktopApp;
 use babydra_core::{activate_app, save_history};
 use gtk4::prelude::*;
@@ -38,6 +38,7 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
             (Edge::Right, true),
         ],
         0,
+        None,
     );
     window.add_css_class("switcher-window");
 

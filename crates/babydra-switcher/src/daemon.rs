@@ -6,12 +6,7 @@ use std::io::Read;
 use std::os::unix::net::UnixListener;
 use std::sync::mpsc::{Receiver, Sender};
 
-pub enum DaemonMessage {
-    /// Show the switcher window (cycle to next if already visible)
-    ShowOrNext,
-    /// Hide/close the switcher window (Alt was released)
-    Hide,
-}
+pub use babydra_core::models::shell::DaemonMessage;
 
 /// Spawns the background thread that listens on the Unix socket and forwards
 /// messages to the GTK main thread via the provided channel.
