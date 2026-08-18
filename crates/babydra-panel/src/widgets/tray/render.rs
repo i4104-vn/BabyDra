@@ -24,12 +24,3 @@ pub fn build_tray_button(icon_name: &str, title: &str) -> gtk4::Button {
 
     btn
 }
-
-/// Shows the context menu for a tray item using unified UI Kit context menu.
-pub fn show_context_menu(
-    btn: &gtk4::Button,
-    service: &str,
-    items: &[babydra_core::tray::MenuItem],
-) {
-    babydra_ui_kit::components::context_menu::show_tray_context_menu(btn, service, items);
-}
