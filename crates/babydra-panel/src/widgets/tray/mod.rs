@@ -14,13 +14,15 @@ pub fn create_tray_widget(window: &gtk4::ApplicationWindow) -> gtk4::Box {
     let last_snapshot_clone = last_snapshot.clone();
     let window_clone = window.clone();
 
-    gtk4::glib::timeout_add_local(std::time::Duration::from_secs(1), move || {
+    gtk4::glib::timeout_add_local(std::time::Duration::from_millis(500), move || {
         let current_items = babydra_core::tray::get_tray_items();
         let current_snapshot: Vec<TraySnapshot> = current_items
             .iter()
             .map(|x| TraySnapshot {
                 service: x.service.clone(),
+                path: x.path.clone(),
                 icon_name: x.icon_name.clone(),
+                title: x.title.clone(),
             })
             .collect();
 
@@ -37,6 +39,7 @@ pub fn create_tray_widget(window: &gtk4::ApplicationWindow) -> gtk4::Box {
             for item in &current_items {
                 let btn = render::build_tray_button(&item.icon_name, &item.title);
                 let service_name = item.service.clone();
+                let path_name = item.path.clone();
                 let btn_c = btn.clone();
                 let win_c = window_clone.clone();
 
@@ -58,13 +61,15 @@ pub fn create_tray_widget(window: &gtk4::ApplicationWindow) -> gtk4::Box {
                     if is_right_click {
                         let (tx, rx) = std::sync::mpsc::channel();
                         let s_name_clone = service_name.clone();
+                        let path_clone = path_name.clone();
                         std::thread::spawn(move || {
-                            let menu_opt = babydra_core::tray::get_dbus_menu(&s_name_clone);
+                            let menu_opt = babydra_core::tray::get_dbus_menu(&s_name_clone, &path_clone);
                             let _ = tx.send(menu_opt);
                         });
 
                         let btn_clone = btn_c.clone();
                         let s_name_main = service_name.clone();
+                        let path_main = path_name.clone();
 
                         gtk4::glib::timeout_add_local(
                             std::time::Duration::from_millis(10),
@@ -76,6 +81,7 @@ pub fn create_tray_widget(window: &gtk4::ApplicationWindow) -> gtk4::Box {
                                     } else {
                                         babydra_core::tray::activate_item(
                                             &s_name_main,
+                                            &path_main,
                                             abs_x,
                                             abs_y,
                                             true,
@@ -92,7 +98,7 @@ pub fn create_tray_widget(window: &gtk4::ApplicationWindow) -> gtk4::Box {
                             },
                         );
                     } else {
-                        babydra_core::tray::activate_item(&service_name, abs_x, abs_y, false);
+                        babydra_core::tray::activate_item(&service_name, &path_name, abs_x, abs_y, false);
                     }
                 });
 
