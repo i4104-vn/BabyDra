@@ -1,10 +1,9 @@
 //! Wi-Fi popover UI (network list, connect forms, connecting state).
 //! Split out of `render.rs` to keep the tile builder focused.
 
-use super::{connect_wifi_async, get_wifi_state, scan_networks};
+use super::{connect_wifi_async, scan_networks};
 use babydra_core::i18n::t;
 use gtk4::prelude::*;
-use std::rc::Rc;
 use tokio::sync::mpsc;
 
 pub(crate) fn setup_wifi_popover(

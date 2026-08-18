@@ -224,7 +224,7 @@ pub fn update_battery_card_ui(card: &Box, info_opt: Option<BatteryInfo>) {
     specs_grid.set_row_spacing(4);
     specs_grid.set_halign(gtk4::Align::End);
 
-    let mut specs: Vec<(String, Option<String>)> = if info.is_ac_only {
+    let specs: Vec<(String, Option<String>)> = if info.is_ac_only {
         vec![
             (
                 babydra_core::i18n::t("settings.power_active_profile"),

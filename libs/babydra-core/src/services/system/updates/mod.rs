@@ -5,7 +5,6 @@ pub use state::*;
 
 use crate::error::CoreResult;
 use crate::models::system_update::PackageUpdate;
-use std::fs::OpenOptions;
 use std::io::{Read, Write};
 use std::process::{Command, Stdio};
 

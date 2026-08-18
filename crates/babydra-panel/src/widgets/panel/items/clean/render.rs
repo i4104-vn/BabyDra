@@ -1,13 +1,6 @@
-use super::popover::{setup_clean_popover, CleanProgress, CleanState};
-use babydra_core::helper::clean::{
-    clean_all_native, format_bytes, get_journal_logs_size, get_pacman_cache_size, get_trash_size,
-    get_user_cache_size,
-};
-use babydra_core::i18n::t;
+use super::popover::setup_clean_popover;
 use gtk4::prelude::*;
-use std::cell::RefCell;
 use std::rc::Rc;
-use tokio::sync::mpsc;
 
 /// Creates a new `clean tile`.
 pub fn create_clean_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) -> gtk4::Button {

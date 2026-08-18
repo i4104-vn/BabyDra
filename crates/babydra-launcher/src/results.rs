@@ -3,7 +3,6 @@
 
 use crate::widgets::app_row::create_list_app_widget;
 use crate::widgets::file_search::create_file_row;
-use crate::widgets::footer::create_launcher_footer;
 use crate::widgets::search::build_browser_search_button;
 use babydra_core::search_files;
 use std::cell::RefCell;

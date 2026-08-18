@@ -26,6 +26,7 @@ exclude = [
 
 [workspace.package]
 version = "1.0.0"
+edition = "2021"
 
 [workspace.dependencies]
 # libs/
@@ -53,3 +54,6 @@ thiserror = "2.0"
 trash = "3.0"
 dirs = "5.0"
 base64 = "0.23.1"
+rayon = "1.10"
+tracing = "0.1"
+kamadak-exif = "0.5"

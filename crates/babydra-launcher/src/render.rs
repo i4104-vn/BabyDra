@@ -1,12 +1,8 @@
 //! UI renderer and main window coordinator for the search/app launcher overlay.
 
 use crate::results::{get_visible_selectable_buttons, repopulate_results, update_highlight};
-use crate::widgets::app_row::create_list_app_widget;
-use crate::widgets::file_search::create_file_row;
 use crate::widgets::footer::create_launcher_footer;
-use crate::widgets::search::build_browser_search_button;
 use babydra_core::find_desktop_apps;
-use babydra_core::search_files;
 use gtk4::prelude::*;
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer};
 use std::cell::RefCell;

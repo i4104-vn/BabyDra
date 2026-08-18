@@ -1,13 +1,13 @@
 [package]
 name = "babydra-greeter"
-edition = "2024"
+edition.workspace = true
 version.workspace = true
 
 [dependencies]
 gtk4 = { workspace = true }
 gtk4-layer-shell = { workspace = true }
 tokio = { workspace = true }
-tracing = "0.1"
+tracing = { workspace = true }
 dirs = { workspace = true }
 glib = { workspace = true }
 greetd_ipc = { version = "0.10", features = ["codec"] }

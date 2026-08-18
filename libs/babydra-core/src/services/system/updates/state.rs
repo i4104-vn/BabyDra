@@ -3,13 +3,13 @@
 use crate::error::CoreResult;
 use crate::models::system_update::{PackageUpdate, SystemUpdateState};
 use std::fs::OpenOptions;
-use std::io::{Read, Write};
+use std::io::Write;
 use std::path::PathBuf;
-use std::process::{Command, Stdio};
+use std::process::Command;
 
 use super::{execute_cmd_with_log_stream, validate_sudo_password};
 
-pub fn get_update_log_path() -> std::path::PathBuf {
+pub fn get_update_log_path() -> PathBuf {
     std::env::temp_dir().join("babydra-update.log")
 }
 
@@ -103,7 +103,7 @@ pub fn get_update_state_path() -> std::path::PathBuf {
 
 /// Persists `update state`.
 pub fn save_update_state(is_updating: bool, is_syncing: bool, packages: &[PackageUpdate]) {
-    let state = crate::models::system_update::SystemUpdateState {
+    let state = SystemUpdateState {
         is_updating,
         is_syncing,
         packages: packages.to_vec(),
@@ -114,13 +114,11 @@ pub fn save_update_state(is_updating: bool, is_syncing: bool, packages: &[Packag
 }
 
 /// Loads `update state`.
-pub fn load_update_state() -> Option<crate::models::system_update::SystemUpdateState> {
+pub fn load_update_state() -> Option<SystemUpdateState> {
     let path = get_update_state_path();
     if path.exists() {
         if let Ok(content) = std::fs::read_to_string(path) {
-            if let Ok(state) =
-                serde_json::from_str::<crate::models::system_update::SystemUpdateState>(&content)
-            {
+            if let Ok(state) = serde_json::from_str::<SystemUpdateState>(&content) {
                 return Some(state);
             }
         }

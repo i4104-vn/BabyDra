@@ -1,5 +1,5 @@
-use super::popover::{refresh_wifi_popover_list, setup_wifi_popover};
-use super::{connect_wifi_async, get_wifi_state, scan_networks};
+use super::popover::setup_wifi_popover;
+use super::get_wifi_state;
 use babydra_core::i18n::t;
 use gtk4::prelude::*;
 use std::rc::Rc;
