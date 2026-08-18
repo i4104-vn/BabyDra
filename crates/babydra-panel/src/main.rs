@@ -7,6 +7,8 @@ use std::rc::Rc;
 
 /// Application entry point: `main`.
 fn main() {
+    babydra_core::services::logger::init_logger("babydra-panel", "babydra-panel.log");
+
     // Initialize D-Bus StatusNotifierWatcher system tray listener daemon
     babydra_core::tray::spawn_watcher_service();
 

@@ -9,6 +9,8 @@ use gtk4::prelude::*;
 
 /// Application entry point: `main`.
 fn main() {
+    babydra_core::services::logger::init_logger("babydra-lock", "babydra-lock.log");
+
     let args: Vec<String> = std::env::args().collect();
     let mut custom_image = None;
     if args.len() > 1 {

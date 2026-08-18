@@ -6,6 +6,8 @@ use gtk4::Application;
 
 /// Application entry point: `main`.
 fn main() {
+    babydra_core::services::logger::init_logger("babydra-explore", "babydra-explore.log");
+
     let rt = tokio::runtime::Runtime::new().unwrap();
     let _guard = rt.enter();
 

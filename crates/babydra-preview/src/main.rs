@@ -9,6 +9,8 @@ mod widgets;
 
 /// Application entry point: `main`.
 fn main() {
+    babydra_core::services::logger::init_logger("babydra-preview", "babydra-preview.log");
+
     let app = gtk4::Application::new(Some("com.babydra.preview"), Default::default());
 
     app.connect_activate(|app| {

@@ -4,6 +4,8 @@ use std::rc::Rc;
 
 /// Application entry point: `main`.
 fn main() {
+    babydra_core::services::logger::init_logger("babydra-launcher", "babydra-launcher.log");
+
     let application = gtk4::Application::new(Some("org.babydra.launcher"), Default::default());
 
     application.connect_activate(|app| {

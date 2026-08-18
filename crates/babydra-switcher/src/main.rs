@@ -33,6 +33,8 @@ fn try_signal_daemon(msg: &[u8]) -> bool {
 
 /// Application entry point: `main`.
 fn main() {
+    babydra_core::services::logger::init_logger("babydra-switcher", "babydra-switcher.log");
+
     let args: Vec<String> = std::env::args().collect();
     let is_daemon = args.iter().any(|a| a == "--daemon");
 

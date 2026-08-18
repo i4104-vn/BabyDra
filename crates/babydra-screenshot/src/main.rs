@@ -8,6 +8,8 @@ use widgets::editor::build_editor_ui;
 
 /// Application entry point: `main`.
 fn main() {
+    babydra_core::services::logger::init_logger("babydra-screenshot", "babydra-screenshot.log");
+
     let args: Vec<String> = env::args().collect();
 
     // 1. Handle Fullscreen Immediate Capture

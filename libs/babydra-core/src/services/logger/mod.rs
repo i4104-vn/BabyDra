@@ -21,6 +21,7 @@ pub fn get_log_path(filename: &str) -> PathBuf {
 pub struct BabyDraLogger {
     file: Mutex<Option<File>>,
     log_path: PathBuf,
+    is_debug_mode: bool,
 }
 
 impl BabyDraLogger {
@@ -47,9 +48,13 @@ impl BabyDraLogger {
             })
             .ok();
 
+        let is_debug_mode = std::env::var("BABYDRA_DEBUG").map(|v| v == "1" || v == "true").unwrap_or(false)
+            || std::env::var("RUST_LOG").map(|v| v.to_lowercase().contains("debug") || v.to_lowercase().contains("trace")).unwrap_or(false);
+
         Self {
             file: Mutex::new(file),
             log_path,
+            is_debug_mode,
         }
     }
 
@@ -57,12 +62,14 @@ impl BabyDraLogger {
         let timestamp = chrono::Local::now().format("%Y-%m-%d %H:%M:%S%.3f");
         let formatted = format!("[{}] [{}] [{}] {}\n", timestamp, level, target, msg);
 
-        if level == "ERROR" {
+        // Terminal output: Only output WARN & ERROR to stderr (or INFO when debug mode is explicitly set)
+        if level.starts_with("ERROR") || level.starts_with("WARN") {
             eprint!("{}", formatted);
-        } else {
+        } else if self.is_debug_mode {
             print!("{}", formatted);
         }
 
+        // Always write to persistent app log file (~/.babydra/logs/<app>.log)
         if let Ok(mut guard) = self.file.lock() {
             if let Some(ref mut f) = *guard {
                 let _ = f.write_all(formatted.as_bytes());
@@ -96,8 +103,27 @@ impl Visit for MessageVisitor {
 }
 
 impl Subscriber for BabyDraLogger {
-    fn enabled(&self, _metadata: &Metadata<'_>) -> bool {
-        true
+    fn enabled(&self, metadata: &Metadata<'_>) -> bool {
+        let target = metadata.target();
+        let level = *metadata.level();
+
+        // Filter out noisy third-party internal events (e.g. zbus D-Bus packets, polling sockets)
+        if target.starts_with("zbus")
+            || target.starts_with("polling")
+            || target.starts_with("async_io")
+            || target.starts_with("gio")
+            || target.starts_with("glib")
+            || target.starts_with("calloop")
+        {
+            return level <= Level::WARN;
+        }
+
+        // Standard filter: INFO, WARN, ERROR (or DEBUG if BABYDRA_DEBUG is active)
+        if self.is_debug_mode {
+            level <= Level::DEBUG
+        } else {
+            level <= Level::INFO
+        }
     }
 
     fn new_span(&self, _span: &tracing::span::Attributes<'_>) -> tracing::span::Id {
@@ -109,6 +135,10 @@ impl Subscriber for BabyDraLogger {
     fn record_follows_from(&self, _span: &tracing::span::Id, _follows: &tracing::span::Id) {}
 
     fn event(&self, event: &Event<'_>) {
+        if !self.enabled(event.metadata()) {
+            return;
+        }
+
         let metadata = event.metadata();
         let level_str = match *metadata.level() {
             Level::ERROR => "ERROR",
