@@ -1,7 +1,7 @@
 @keyframes context-menu-pop {
     0% {
         opacity: 0;
-        margin-top: -8px;
+        margin-top: -6px;
     }
     100% {
         opacity: 1;
@@ -40,7 +40,7 @@ popover.desktop-context-menu>arrow {
     border-radius: 12px;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
     padding: 4px;
-    animation: context-menu-pop 280ms cubic-bezier(0.16, 1, 0.3, 1);
+    animation: context-menu-pop 160ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 button.context-menu-item {
@@ -53,7 +53,7 @@ button.context-menu-item {
     padding: 6px 12px;
     font-size: 13px;
     min-height: 30px;
-    transition: background-color 100ms ease, color 100ms ease;
+    transition: background-color 140ms ease, color 140ms ease, padding-left 140ms ease;
 }
 
 button.context-menu-item:focus,
@@ -61,6 +61,7 @@ button.context-menu-item:hover {
     background-image: none;
     outline: none;
     box-shadow: none;
+    padding-left: 14px;
 }
 
 button.context-menu-item.destructive {
@@ -75,6 +76,7 @@ button.context-menu-item.destructive:hover {
     font-size: 11px;
     opacity: 0.55;
     margin-left: 12px;
+    transition: opacity 140ms ease;
 }
 
 button.context-menu-item:hover .shortcut-label {
@@ -115,7 +117,7 @@ button.context-menu-footer-btn {
     margin: 2px;
     min-width: 26px;
     min-height: 26px;
-    transition: background-color 100ms ease, color 100ms ease;
+    transition: background-color 140ms ease, color 140ms ease;
 }
 
 button.context-menu-footer-btn:hover,
