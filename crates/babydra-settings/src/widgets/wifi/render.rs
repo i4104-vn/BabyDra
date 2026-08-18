@@ -2,10 +2,10 @@
 
 use gtk4::prelude::*;
 
-use babydra_ui_kit::components::modal::{WifiConfigDialog, WifiInfoDialog, WifiPasswordDialog};
+use babydra_ui_kit::components::modals::{WifiConfigDialog, WifiInfoDialog, WifiPasswordDialog};
 use babydra_ui_kit::components::ToggleRow;
 
-/// Builds the `wifi ui` UI.
+/// Builds the Wi-Fi settings page UI.
 pub fn build_wifi_ui() -> (
     gtk4::Overlay,
     ToggleRow,

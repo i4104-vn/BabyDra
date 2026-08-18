@@ -1,18 +1,13 @@
 use crate::widgets::state::AppsWidget;
-use babydra_ui_kit::components::modal::PasswordDialog;
+use babydra_core::models::settings::AppActionType;
+use babydra_ui_kit::components::modals::PasswordDialog;
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub enum PendingActionType {
-    Uninstall,
-    Downgrade,
-}
-
 #[derive(Clone)]
 pub struct PendingAction {
-    pub action_type: PendingActionType,
+    pub action_type: AppActionType,
     pub pkg_name: String,
     pub row_box: gtk4::Box,
     pub parent_list: gtk4::ListBox,
@@ -186,8 +181,8 @@ pub fn wire_main_events(
             progress_bar.set_fraction(0.05);
 
             let log_title_key = match action_type {
-                PendingActionType::Uninstall => "settings.apps_uninstall_log_title",
-                PendingActionType::Downgrade => "settings.apps_downgrade_log_title",
+                AppActionType::Uninstall => "settings.apps_uninstall_log_title",
+                AppActionType::Downgrade => "settings.apps_downgrade_log_title",
             };
             console_title_lbl.set_text(&format!(
                 "{} - {}",
@@ -202,14 +197,14 @@ pub fn wire_main_events(
 
             std::thread::spawn(move || {
                 let res = match act_type_clone {
-                    PendingActionType::Uninstall => {
+                    AppActionType::Uninstall => {
                         babydra_core::services::apps::pacman::stream_uninstall_package(
                             &pkg_name_clone,
                             pwd_clone.as_deref(),
                             tx.clone(),
                         )
                     }
-                    PendingActionType::Downgrade => {
+                    AppActionType::Downgrade => {
                         babydra_core::services::apps::pacman::stream_downgrade_package(
                             &pkg_name_clone,
                             pwd_clone.as_deref(),
@@ -221,8 +216,8 @@ pub fn wire_main_events(
                     let _ = tx.send(format!("\nError: {}", e));
                 } else {
                     let success_key = match act_type_clone {
-                        PendingActionType::Uninstall => "settings.apps_uninstall_success",
-                        PendingActionType::Downgrade => "settings.apps_downgrade_success",
+                        AppActionType::Uninstall => "settings.apps_uninstall_success",
+                        AppActionType::Downgrade => "settings.apps_downgrade_success",
                     };
                     let success_msg =
                         babydra_core::i18n::t(success_key).replace("{}", &pkg_name_clone);
@@ -268,7 +263,7 @@ pub fn wire_main_events(
                         {
                             if !line.contains("Error:") {
                                 progress_bar_c.set_fraction(1.0);
-                                if act_type_check == PendingActionType::Uninstall {
+                                if act_type_check == AppActionType::Uninstall {
                                     parent_list_c.remove(&row_box_c);
                                 }
                             }
@@ -280,7 +275,7 @@ pub fn wire_main_events(
                     }
                     Err(std::sync::mpsc::TryRecvError::Disconnected) => {
                         progress_bar_c.set_fraction(1.0);
-                        if act_type_check == PendingActionType::Uninstall {
+                        if act_type_check == AppActionType::Uninstall {
                             parent_list_c.remove(&row_box_c);
                         }
                         return glib::ControlFlow::Break;
@@ -302,14 +297,14 @@ pub fn wire_uninstall_items(
         let pending_c = pending_action.clone();
         let pkg_name = item.pkg_name;
         let action_type = match item.action_type {
-            super::render::AppActionType::Uninstall => PendingActionType::Uninstall,
-            super::render::AppActionType::Downgrade => PendingActionType::Downgrade,
+            AppActionType::Uninstall => AppActionType::Uninstall,
+            AppActionType::Downgrade => AppActionType::Downgrade,
         };
         let row_box = item.row_box;
         let parent_list = item.parent_list;
 
         item.button.connect_clicked(move |_| {
-            if action_type == PendingActionType::Downgrade {
+            if action_type == AppActionType::Downgrade {
                 if babydra_core::services::apps::pacman::find_cached_older_package(&pkg_name)
                     .is_none()
                 {
@@ -331,11 +326,11 @@ pub fn wire_uninstall_items(
             });
 
             let (title, prompt) = match action_type {
-                PendingActionType::Uninstall => (
+                AppActionType::Uninstall => (
                     "Uninstall Authentication",
                     format!("Enter sudo password to uninstall '{}':", pkg_name),
                 ),
-                PendingActionType::Downgrade => (
+                AppActionType::Downgrade => (
                     "Downgrade Authentication",
                     format!(
                         "Enter sudo password to downgrade '{}' to cached version:",

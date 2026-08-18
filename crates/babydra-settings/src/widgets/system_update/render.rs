@@ -1,6 +1,6 @@
 use crate::widgets::state::SystemUpdateWidget;
 use babydra_core::models::system_update::{PackageUpdate, UpdateStatus};
-use babydra_ui_kit::components::modal::PasswordDialog;
+use babydra_ui_kit::components::modals::PasswordDialog;
 use gtk4::prelude::*;
 use gtk4::{
     Box, Button, Label, ListBox, ListBoxRow, Orientation, Overlay, ProgressBar, ScrolledWindow,

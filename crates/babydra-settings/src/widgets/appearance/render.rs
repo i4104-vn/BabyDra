@@ -2,7 +2,7 @@
 
 use gtk4::prelude::*;
 
-/// Builds the `appearance ui` UI.
+/// Builds the appearance settings page UI.
 pub fn build_appearance_ui(
     current_wallpaper_path: &str,
     _current_greeter_path: &str,

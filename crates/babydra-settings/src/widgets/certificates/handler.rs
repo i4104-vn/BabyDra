@@ -1,6 +1,6 @@
 use crate::widgets::state::CertificatesWidget;
 use babydra_core::services::system::certificates;
-use babydra_ui_kit::components::modal::PasswordDialog;
+use babydra_ui_kit::components::modals::PasswordDialog;
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;

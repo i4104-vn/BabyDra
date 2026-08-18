@@ -1,8 +1,8 @@
 use crate::widgets::state::CertificatesWidget;
-use babydra_ui_kit::components::modal::PasswordDialog;
+use babydra_ui_kit::components::modals::PasswordDialog;
 use gtk4::prelude::*;
 
-/// Builds the `certificates ui` UI.
+/// Builds the certificates settings page UI.
 pub fn build_certificates_ui() -> (CertificatesWidget, PasswordDialog) {
     let root = gtk4::Overlay::new();
     root.set_vexpand(true);

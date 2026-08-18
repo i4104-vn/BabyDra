@@ -1,5 +1,5 @@
 use babydra_core::PerformanceProfile;
-use babydra_ui_kit::components::modal::PasswordDialog;
+use babydra_ui_kit::components::modals::PasswordDialog;
 use babydra_ui_kit::components::CustomSlider;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Label, Orientation, Overlay, ScrolledWindow};

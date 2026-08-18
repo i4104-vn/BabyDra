@@ -1,9 +1,9 @@
 //! VPN UI layout generator synchronized with Wi-Fi layout & FAB button.
 
-use babydra_ui_kit::components::modal::{VpnConfigDialog, VpnLogDialog};
+use babydra_ui_kit::components::modals::{VpnConfigDialog, VpnLogDialog};
 use gtk4::prelude::*;
 
-/// Builds the `VPN ui` UI.
+/// Builds the VPN settings page UI.
 pub fn build_vpn_ui() -> (
     gtk4::Box,
     gtk4::Button,

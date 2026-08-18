@@ -1,6 +1,6 @@
 use super::WifiState;
 use babydra_core::i18n::t;
-use babydra_ui_kit::components::modal::{WifiConfigDialog, WifiInfoDialog, WifiPasswordDialog};
+use babydra_ui_kit::components::modals::{WifiConfigDialog, WifiInfoDialog, WifiPasswordDialog};
 use gtk4::prelude::*;
 use std::rc::Rc;
 

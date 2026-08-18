@@ -4,7 +4,7 @@ use babydra_core::models::system_update::{PackageUpdate, UpdateStatus};
 use babydra_core::services::system::updates::{
     check_updates, clear_update_state, is_pacman_running, load_update_state, save_update_state,
 };
-use babydra_ui_kit::components::modal::PasswordDialog;
+use babydra_ui_kit::components::modals::PasswordDialog;
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::io::Write;

@@ -13,7 +13,7 @@ pub struct SystemInfoLabels {
     pub gpu_lbl: gtk4::Label,
 }
 
-/// Builds the `system ui` UI.
+/// Builds the system information settings page UI.
 pub fn build_system_ui(
     hostname: &str,
     os_name: &str,

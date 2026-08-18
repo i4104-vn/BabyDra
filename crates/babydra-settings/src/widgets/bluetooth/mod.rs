@@ -4,17 +4,13 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::mpsc::channel;
 
-use babydra_core::{get_bluetooth_devices, is_bluetooth_enabled, set_bluetooth_enabled, BtDevice};
+pub use babydra_core::models::settings::BluetoothState;
+use babydra_core::models::settings::bluetooth::BtDevice;
+use babydra_core::{get_bluetooth_devices, is_bluetooth_enabled, set_bluetooth_enabled};
 use gtk4::prelude::*;
 
 mod handler;
 mod render;
-
-pub struct BluetoothState {
-    pub enabled: bool,
-    pub devices: Vec<BtDevice>,
-    pub is_loading: bool,
-}
 
 /// Creates a new `bluetooth widget`.
 pub fn create_bluetooth_widget() -> gtk4::Widget {

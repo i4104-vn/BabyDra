@@ -1,19 +1,13 @@
 //! Wi-Fi configurations control panel.
 
-use babydra_core::models::wifi::WifiNetwork;
+pub use babydra_core::models::settings::WifiState;
+use babydra_core::models::settings::wifi::WifiNetwork;
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
 mod handler;
 mod render;
-
-pub struct WifiState {
-    pub enabled: bool,
-    pub networks: Vec<WifiNetwork>,
-    pub is_loading: bool,
-    pub connecting_ssid: Option<String>,
-}
 
 /// Creates a new `wifi widget`.
 pub fn create_wifi_widget() -> gtk4::Widget {

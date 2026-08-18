@@ -7,7 +7,7 @@ use std::rc::Rc;
 use std::sync::mpsc::Sender;
 
 use babydra_core::services::system::vpn::{connect_vpn, disconnect_vpn, get_vpn_details, VpnConn};
-use babydra_ui_kit::components::modal::{VpnConfigDialog, VpnLogDialog};
+use babydra_ui_kit::components::modals::{VpnConfigDialog, VpnLogDialog};
 
 pub fn render_vpn_list<F: Fn() + Clone + 'static>(
     list_box: &gtk4::ListBox,

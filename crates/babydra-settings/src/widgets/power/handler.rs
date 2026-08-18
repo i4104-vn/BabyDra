@@ -6,7 +6,7 @@ use babydra_core::{
     load_babydra_config, save_babydra_config, set_performance_profile,
     set_performance_profile_with_password, PerformanceProfile,
 };
-use babydra_ui_kit::components::modal::PasswordDialog;
+use babydra_ui_kit::components::modals::PasswordDialog;
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;

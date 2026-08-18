@@ -1,14 +1,10 @@
 pub mod handler;
 pub mod render;
 
-use babydra_core::models::app_info::{InstalledApp, InstalledPackage};
+use babydra_core::models::app_info::InstalledApp;
+use babydra_core::models::settings::AppsData;
 use gtk4::prelude::*;
 use gtk4::Widget;
-
-pub struct AppsData {
-    pub apps_data: Vec<InstalledApp>,
-    pub pkgs: Vec<InstalledPackage>,
-}
 
 /// Creates a new `apps widget`.
 pub fn create_apps_widget() -> Widget {

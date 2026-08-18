@@ -3,7 +3,7 @@
 use babydra_ui_kit::components::ToggleRow;
 use gtk4::prelude::*;
 
-/// Builds the `bluetooth ui` UI.
+/// Builds the Bluetooth settings page UI.
 pub fn build_bluetooth_ui() -> (gtk4::Box, ToggleRow, gtk4::ListBox) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
     main_box.set_vexpand(true);

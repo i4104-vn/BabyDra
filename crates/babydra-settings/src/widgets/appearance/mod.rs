@@ -1,6 +1,6 @@
 //! Appearance and themes personalization panel.
 
-mod handlers;
+mod handler;
 mod render;
 
 /// Creates a new `appearance widget`.
@@ -38,7 +38,7 @@ pub fn create_appearance_widget() -> gtk4::Widget {
         &cursor_sizes,
     );
 
-    handlers::setup_appearance_handlers(
+    handler::setup_appearance_handlers(
         &main_box,
         &preview_pic,
         &pick_btn,

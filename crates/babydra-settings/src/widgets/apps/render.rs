@@ -2,18 +2,13 @@
 
 use crate::widgets::state::AppsWidget;
 use babydra_core::models::app_info::{InstalledApp, InstalledPackage};
-use babydra_ui_kit::components::modal::PasswordDialog;
+use babydra_core::models::settings::AppActionType;
+use babydra_ui_kit::components::modals::PasswordDialog;
 use gtk4::prelude::*;
 use gtk4::{
     Box, Button, Entry, Label, ListBox, Orientation, Overlay, ProgressBar, ScrolledWindow, Stack,
     TextView,
 };
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub enum AppActionType {
-    Uninstall,
-    Downgrade,
-}
 
 #[derive(Clone)]
 pub struct AppRowActionItem {
