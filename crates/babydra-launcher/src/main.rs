@@ -1,4 +1,7 @@
+//! babydra-launcher — Application launcher overlay window.
+
 use gtk4::prelude::*;
+use gtk4::Application;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -6,9 +9,11 @@ use std::rc::Rc;
 fn main() {
     babydra_core::services::logger::init_logger("babydra-launcher", "babydra-launcher.log");
 
-    let application = gtk4::Application::new(Some("org.babydra.launcher"), Default::default());
+    let app = Application::builder()
+        .application_id("org.babydra.launcher")
+        .build();
 
-    application.connect_activate(|app| {
+    app.connect_activate(|app| {
         babydra_ui_kit::ui::theme::init_theme();
         let launcher_window = Rc::new(RefCell::new(None));
         let window = babydra_launcher::build_launcher_ui(app, launcher_window.clone());
@@ -16,5 +21,6 @@ fn main() {
         *launcher_window.borrow_mut() = Some(window);
     });
 
-    application.run();
+    let exit_code = app.run().value();
+    std::process::exit(exit_code);
 }

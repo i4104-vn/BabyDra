@@ -29,6 +29,7 @@ pub fn build_launcher_ui(
             (Edge::Right, true),
         ],
         -1,
+        None,
     );
 
     window.add_css_class("launcher-window");
