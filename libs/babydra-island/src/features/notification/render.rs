@@ -58,7 +58,7 @@ impl NotificationFeature {
         let notif_icon = if use_logo {
             babydra_ui_kit::ui::icon::get_icon("logo", 24)
         } else {
-            babydra_ui_kit::ui::icon::get_system_or_file_icon(
+            babydra_ui_kit::ui::icon::get_fallback_icon(
                 &notif.icon,
                 "preferences-system-notifications-symbolic",
             )

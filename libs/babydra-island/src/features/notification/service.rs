@@ -7,7 +7,7 @@
 use crate::models::NotificationMsg;
 
 /// Hosts the D-Bus notification daemon and the main-thread message bridge.
-pub(crate) fn spawn_notification_dbus_service() {
+pub(crate) fn spawn_notif_dbus() {
     let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<NotificationMsg>();
     crate::widgets::notification::spawn_dbus_listener(tx);
     glib::MainContext::default().spawn_local(async move {
@@ -20,12 +20,12 @@ pub(crate) fn spawn_notification_dbus_service() {
                     app_name,
                     timeout,
                 } => {
-                    crate::widgets::notification::show_notification_popup(
+                    crate::widgets::notification::show_notif_popup(
                         &summary, &body, &icon, &app_name, timeout,
                     );
                 }
                 NotificationMsg::Close => {
-                    crate::widgets::notification::close_notification_popup();
+                    crate::widgets::notification::close_notif_popup();
                 }
             }
         }

@@ -25,7 +25,7 @@ pub(crate) fn create_visualizer() -> (gtk4::Box, Vec<gtk4::Box>) {
 
 /// Registers tick callbacks on visualizer bars to animate heights with mixed
 /// sine/cosine waves while music is playing.
-pub(crate) fn start_visualizer_animation(bars: Vec<gtk4::Box>, is_playing: Rc<Cell<bool>>) {
+pub(crate) fn start_visualizer(bars: Vec<gtk4::Box>, is_playing: Rc<Cell<bool>>) {
     if bars.is_empty() {
         return;
     }

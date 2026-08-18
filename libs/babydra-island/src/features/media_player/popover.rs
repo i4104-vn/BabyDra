@@ -6,7 +6,7 @@
 use std::cell::Cell;
 use std::rc::Rc;
 
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 
 /// Widget references of the media control popover.
@@ -53,7 +53,7 @@ impl MediaPopover {
         popover_header.add_css_class("media-popover-header");
         popover_header.set_valign(gtk4::Align::Center);
         let popover_app_icon = babydra_ui_kit::ui::icon::get_icon_colored("logo", 14, "#3b82f6");
-        let app_name = gtk4::Label::new(Some(&t("island.music_player")));
+        let app_name = gtk4::Label::new(Some(&trans("island.music_player")));
         app_name.add_css_class("media-popover-app-name");
         popover_header.append(&popover_app_icon);
         popover_header.append(&app_name);
@@ -64,14 +64,14 @@ impl MediaPopover {
         art_container.set_halign(gtk4::Align::Fill);
         popover_box.append(&art_container);
 
-        let title = gtk4::Label::new(Some(&t("island.unknown_title")));
+        let title = gtk4::Label::new(Some(&trans("island.unknown_title")));
         title.add_css_class("media-popover-title");
         title.set_halign(gtk4::Align::Center);
         title.set_justify(gtk4::Justification::Center);
         title.set_wrap(true);
         title.set_max_width_chars(25);
 
-        let artist = gtk4::Label::new(Some(&t("island.unknown_artist")));
+        let artist = gtk4::Label::new(Some(&trans("island.unknown_artist")));
         artist.add_css_class("media-popover-artist");
         artist.set_halign(gtk4::Align::Center);
         artist.set_justify(gtk4::Justification::Center);

@@ -8,7 +8,7 @@ use std::rc::Rc;
 
 use gtk4::prelude::*;
 
-use super::visualizer::{create_visualizer, start_visualizer_animation};
+use super::visualizer::{create_visualizer, start_visualizer};
 
 /// Widget references of the compact notch player view.
 pub(crate) struct PlayerWidgets {
@@ -34,7 +34,7 @@ impl PlayerWidgets {
         art_container.set_valign(gtk4::Align::Center);
         art_container.set_vexpand(true);
 
-        let track_label = gtk4::Label::new(Some(&babydra_core::i18n::t("island.no_media")));
+        let track_label = gtk4::Label::new(Some(&babydra_core::i18n::trans("island.no_media")));
         track_label.add_css_class("notch-player-text");
         track_label.set_hexpand(true);
         track_label.set_vexpand(true);
@@ -45,7 +45,7 @@ impl PlayerWidgets {
         music_view.append(&track_label);
         music_view.append(&visualizer_box);
 
-        start_visualizer_animation(bars, is_playing.clone());
+        start_visualizer(bars, is_playing.clone());
 
         (
             Self {

@@ -35,7 +35,7 @@ pub struct NotificationFeature {
 
 impl NotificationFeature {
     pub fn new() -> Self {
-        service::spawn_notification_dbus_service();
+        service::spawn_notif_dbus();
         Self {
             handle: None,
             view: NotificationView::build(),
