@@ -5,7 +5,7 @@
 use babydra_core::i18n::t;
 use gtk4::prelude::*;
 use gtk4::{Align, ApplicationWindow, Box as GtkBox, ContentFit, Orientation, Overlay};
-use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
+use gtk4_layer_shell::{Edge, KeyboardMode, Layer};
 use tracing::info;
 
 use crate::theme;
@@ -15,7 +15,7 @@ use crate::widgets::splash::SplashWidget;
 use crate::widgets::top_bar::TopBarWidget;
 
 /// Handles to the greeter window and its top-level widget groups.
-/// Passed to `handlers::setup_handlers` so signal wiring stays out of the layout builder.
+/// Passed to `handler::setup_handlers` so signal wiring stays out of the layout builder.
 pub struct GreeterWidgets {
     pub window: ApplicationWindow,
     pub top_bar: TopBarWidget,
@@ -23,7 +23,7 @@ pub struct GreeterWidgets {
     pub login: LoginWidget,
 }
 
-/// Builds the `greeter ui` UI.
+/// Builds the greeter window layout with top bar, splash, and login widgets.
 pub fn build_greeter_ui(app: &gtk4::Application) -> GreeterWidgets {
     info!(target: "babydra-greeter", "Building GTK Application Window UI");
 
@@ -38,14 +38,20 @@ pub fn build_greeter_ui(app: &gtk4::Application) -> GreeterWidgets {
 
     // Layer shell: fullscreen overlay with exclusive keyboard on Wayland compositors
     info!(target: "babydra-greeter", "Configuring GTK Layer Shell (Overlay Layer, Exclusive Keyboard Mode)");
-    window.init_layer_shell();
-    window.set_layer(Layer::Overlay);
-    window.set_keyboard_mode(KeyboardMode::Exclusive);
-    window.set_anchor(Edge::Top, true);
-    window.set_anchor(Edge::Bottom, true);
-    window.set_anchor(Edge::Left, true);
-    window.set_anchor(Edge::Right, true);
-    window.set_exclusive_zone(-1);
+    babydra_ui_kit::ui::window::init_layer_window(
+        &window,
+        Layer::Overlay,
+        KeyboardMode::Exclusive,
+        -1,
+        &[
+            (Edge::Top, true),
+            (Edge::Bottom, true),
+            (Edge::Left, true),
+            (Edge::Right, true),
+        ],
+        0,
+        None,
+    );
 
     // Fallback fullscreen
     info!(target: "babydra-greeter", "Applying fullscreen layout mode");

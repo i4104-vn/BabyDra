@@ -1,12 +1,10 @@
+//! Splash screen UI construction: logo, title, and loading spinner.
+
 use gtk4::prelude::*;
 use gtk4::{Align, Box as GtkBox, Label, Orientation, Spinner};
 
-pub struct SplashWidget {
-    pub container: GtkBox,
-}
-
-/// Build.
-pub fn build() -> SplashWidget {
+/// Builds the splash widget with the OS logo and initial loading spinner.
+pub fn build() -> super::SplashWidget {
     tracing::info!(target: "babydra-greeter", "Building SplashWidget container and initial loading spinner");
     let splash_container = GtkBox::new(Orientation::Vertical, 16);
     splash_container.set_valign(Align::Center);
@@ -40,7 +38,7 @@ pub fn build() -> SplashWidget {
     splash_content.append(&spinner);
     splash_container.append(&splash_content);
 
-    SplashWidget {
+    super::SplashWidget {
         container: splash_container,
     }
 }

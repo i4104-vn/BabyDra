@@ -1,74 +1,15 @@
+//! Login panel UI construction: avatar, username dropdown, password capsule, and error box.
+
 use gtk4::prelude::*;
 use gtk4::{
     Align, Box as GtkBox, Button, DropDown, Image, Label, Orientation, PasswordEntry, Spinner,
 };
 
-use super::LAST_USER_FILE;
+use crate::widgets::LAST_USER_FILE;
+use crate::widgets::login::get_system_users;
 
-pub struct LoginWidget {
-    pub container: GtkBox,
-    pub login_panel: GtkBox,
-    pub user_dropdown: DropDown,
-    pub users: Vec<String>,
-    pub pass_entry: PasswordEntry,
-    pub login_btn: Button,
-    pub btn_spinner: Spinner,
-    pub error_box: GtkBox,
-    pub error_label: Label,
-}
-
-/// Helper function to retrieve all system users excluding `root`.
-/// Returns a list of usernames filtered to normal/login users.
-pub fn get_system_users() -> Vec<String> {
-    let mut normal_users = Vec::new();
-    let mut fallback_users = Vec::new();
-
-    if let Ok(content) = std::fs::read_to_string("/etc/passwd") {
-        for line in content.lines() {
-            let line = line.trim();
-            if line.is_empty() || line.starts_with('#') {
-                continue;
-            }
-            let parts: Vec<&str> = line.split(':').collect();
-            if parts.len() >= 7 {
-                let username = parts[0];
-                let uid: u32 = parts[2].parse().unwrap_or(0);
-                let shell = parts[6];
-
-                // Exclude root and greeter system daemon account
-                if username == "root" || username == "greeter" {
-                    continue;
-                }
-
-                let is_nologin = shell.ends_with("nologin")
-                    || shell.ends_with("false")
-                    || shell.ends_with("git-shell");
-
-                // Standard non-root login users have UID >= 1000 and UID != 65534 (nobody)
-                if uid >= 1000 && uid != 65534 && !is_nologin {
-                    normal_users.push(username.to_string());
-                } else if !is_nologin {
-                    fallback_users.push(username.to_string());
-                }
-            }
-        }
-    }
-
-    let mut result = if !normal_users.is_empty() {
-        normal_users
-    } else if !fallback_users.is_empty() {
-        fallback_users
-    } else {
-        vec![std::env::var("USER").unwrap_or_else(|_| "user".to_string())]
-    };
-
-    result.sort();
-    result.dedup();
-    result
-}
-
-/// Build.
-pub fn build() -> LoginWidget {
+/// Builds the login panel with avatar, username dropdown, password entry, and submit button.
+pub fn build() -> super::LoginWidget {
     tracing::info!(target: "babydra-greeter", "Building LoginWidget (avatar, username dropdown/password capsules, submit button)");
     let login_container = GtkBox::new(Orientation::Vertical, 0);
     login_container.set_valign(Align::End);
@@ -92,7 +33,7 @@ pub fn build() -> LoginWidget {
     avatar_inner.set_halign(Align::Center);
     avatar_inner.set_valign(Align::Center);
 
-    let avatar_img = super::create_avatar_picture(110);
+    let avatar_img = crate::widgets::create_avatar_picture(110);
     avatar_img.add_css_class("avatar-img");
     avatar_inner.append(&avatar_img);
     avatar_ring.append(&avatar_inner);
@@ -210,7 +151,7 @@ pub fn build() -> LoginWidget {
         }
     });
 
-    LoginWidget {
+    super::LoginWidget {
         container: login_container,
         login_panel,
         user_dropdown,

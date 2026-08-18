@@ -1,5 +1,5 @@
 //! Signal wiring for the greeter UI: clock, splash transition, power actions and login flow.
-//! Follows the `handlers.rs` convention used by babydra-settings widgets, keeping all
+//! Follows the `handler.rs` convention used by babydra-settings widgets, keeping all
 //! event wiring out of the layout builder.
 
 use gtk4::prelude::*;

@@ -7,7 +7,7 @@ pub mod splash;
 pub mod top_bar;
 
 /// Path to the file that persists the last successfully logged-in username.
-/// Single source of truth shared by the `login` widget and `handlers`.
+/// Single source of truth shared by the `login` widget and `handler`.
 pub const LAST_USER_FILE: &str = "/tmp/babydra-last-user";
 
 pub fn create_logo_picture(size: i32) -> gtk4::Widget {

@@ -1,17 +1,10 @@
+//! Top bar UI construction: clock, date, and power action buttons.
+
 use gtk4::prelude::*;
 use gtk4::{Align, Box as GtkBox, Button, Label, Orientation};
 
-pub struct TopBarWidget {
-    pub container: GtkBox,
-    pub power_btn: Button,
-    pub reboot_btn: Button,
-    pub suspend_btn: Button,
-    pub clock_label: Label,
-    pub date_label: Label,
-}
-
-/// Build.
-pub fn build() -> TopBarWidget {
+/// Builds the top bar with clock/date display and suspend/reboot/power buttons.
+pub fn build() -> super::TopBarWidget {
     tracing::info!(target: "babydra-greeter", "Building TopBar Widget (clock, date, power buttons)");
     let top_bar = GtkBox::new(Orientation::Horizontal, 0);
     top_bar.add_css_class("top-bar");
@@ -65,7 +58,7 @@ pub fn build() -> TopBarWidget {
     top_bar.append(&time_box);
     top_bar.append(&actions_box);
 
-    TopBarWidget {
+    super::TopBarWidget {
         container: top_bar,
         power_btn,
         reboot_btn,

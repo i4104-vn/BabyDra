@@ -1,9 +1,9 @@
 //! Main entry point for the BabyDra greeter (greetd display manager).
 //! Minimal bootstrap: shared logging, GTK Application, then hand off to the
-//! render and handlers modules.
+//! render and handler modules.
 
 mod auth;
-mod handlers;
+mod handler;
 mod render;
 mod theme;
 mod widgets;
@@ -14,7 +14,7 @@ use tracing::info;
 /// Application entry point: `main`.
 fn main() {
     // 1. Initialize reusable logging system from babydra-core
-    babydra_core::init_logger("babydra-greeter", "displaymanager.log");
+    babydra_core::services::logger::init_logger("babydra-greeter", "displaymanager.log");
 
     let pid = std::process::id();
     let greetd_sock = std::env::var("GREETD_SOCK").unwrap_or_else(|_| "<NOT SET>".to_string());
@@ -35,7 +35,7 @@ fn main() {
 
     app.connect_activate(|app| {
         let greeter = render::build_greeter_ui(app);
-        handlers::setup_handlers(&greeter);
+        handler::setup_handlers(&greeter);
         greeter.window.present();
     });
 
