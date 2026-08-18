@@ -25,7 +25,7 @@ pub fn create_status_bar() -> StatusBarWidgets {
         .build();
     container.append(&lbl_status);
 
-    // DropDown for sorting (Auto, Theo ngày, Theo group)
+    // DropDown for sorting (Auto, By date, By group)
     let sort_options = [
         t("explore.sort_auto"),
         t("explore.sort_date"),

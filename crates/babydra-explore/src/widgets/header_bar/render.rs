@@ -155,7 +155,7 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
     spacer.set_hexpand(true);
     toolbar.append(&spacer);
 
-    // DropDown for sorting (Auto, Theo ngày, Theo group)
+    // DropDown for sorting (Auto, By date, By group)
     let sort_options = [
         t("explore.sort_auto"),
         t("explore.sort_date"),

@@ -1,4 +1,4 @@
-mod dialog;
+mod render;
 
 use babydra_core::i18n::t;
 use gtk4::prelude::*;
@@ -81,7 +81,7 @@ pub fn build_keybinds_page(
             let action_id_inner = action_id_c.clone();
             let lbl_inner = lbl_shortcut_c.clone();
             let on_changed_inner = on_changed_c.clone();
-            dialog::show_capture_dialog(&parent_win_c, &action_desc_c, move |new_shortcut| {
+            render::show_capture_dialog(&parent_win_c, &action_desc_c, move |new_shortcut| {
                 let mut current_settings = babydra_core::load_explore_settings();
                 current_settings
                     .keybinds

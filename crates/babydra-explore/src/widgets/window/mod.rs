@@ -8,7 +8,6 @@ use std::rc::Rc;
 pub mod handlers;
 pub mod layout;
 mod render;
-pub mod widgets;
 
 /// Creates and configures the main file explorer window, wires all component widgets (header, sidebar, content panes, tabs, info panel, status bar), and launches the navigation loops.
 pub fn create_explore_window(
@@ -239,7 +238,7 @@ pub fn create_explore_window(
         preview_visible.clone(),
     );
 
-    let _rebuild_tabs_rc = widgets::setup_tab_bar(
+    let _rebuild_tabs_rc = crate::widgets::tab_bar::setup_tab_bar(
         &ui.vbox,
         session.clone(),
         navigate_pane_ref.clone(),

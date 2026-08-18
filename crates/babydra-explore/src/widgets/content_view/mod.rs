@@ -8,15 +8,16 @@ use std::rc::Rc;
 
 mod actions;
 mod gestures;
+mod grid_renderer;
 pub mod items;
+mod list_renderer;
 mod render;
-mod rendering;
 
 pub use actions::{
     filter_content_view, set_content_view_mode, set_content_view_sort, update_content_view,
     update_content_view_silent,
 };
-pub use rendering::renderer::{update_content_view_ui, update_content_view_ui_silent};
+pub use render::{update_content_view_ui, update_content_view_ui_silent};
 
 /// Creates the content view area widgets and returns the scroll container and ContentViewHandle state handle.
 pub fn create_content_view(
