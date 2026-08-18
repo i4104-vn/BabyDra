@@ -64,7 +64,7 @@ pub fn get_orphans_size() -> u64 {
 }
 
 /// Returns the current `pacman cache size`.
-pub fn get_pacman_cache_size() -> u64 {
+pub fn get_cache_size() -> u64 {
     let pacman_pkg_dir = Path::new("/var/cache/pacman/pkg");
     let mut size = 0;
     if pacman_pkg_dir.exists() && is_dir_writable(pacman_pkg_dir) {

@@ -3,7 +3,7 @@
 use crate::models::AudioDevice;
 
 /// Check node is default.
-pub fn check_node_is_default(node_id: i64, is_source: bool) -> bool {
+pub fn check_default_node(node_id: i64, is_source: bool) -> bool {
     let output = std::process::Command::new("wpctl").arg("status").output();
     if let Ok(out) = output {
         let stdout = String::from_utf8_lossy(&out.stdout);
@@ -48,7 +48,7 @@ pub fn check_node_is_default(node_id: i64, is_source: bool) -> bool {
 }
 
 /// Returns the current `audio devices wpctl fallback`.
-pub fn get_audio_devices_wpctl_fallback(is_source: bool) -> Vec<AudioDevice> {
+pub fn get_wpctl_devices(is_source: bool) -> Vec<AudioDevice> {
     let mut devices = Vec::new();
     let output = std::process::Command::new("wpctl").arg("status").output();
 

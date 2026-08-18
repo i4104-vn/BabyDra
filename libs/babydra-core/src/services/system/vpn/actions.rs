@@ -13,7 +13,7 @@ pub fn disconnect_vpn(name: &str) -> bool {
 }
 
 /// Delete VPN connection.
-pub fn delete_vpn_connection(name: &str) -> bool {
+pub fn delete_vpn(name: &str) -> bool {
     run_cmd_bool(&["nmcli", "connection", "delete", name])
 }
 
@@ -21,7 +21,7 @@ pub fn delete_vpn_connection(name: &str) -> bool {
 pub fn save_vpn_connection(details: &VpnConnDetails) -> CoreResult<()> {
     if let Some(ref src_path) = details.config_file {
         if !src_path.is_empty() {
-            let _ = crate::services::system::vpn::config::copy_vpn_config_to_babydra_dir(src_path);
+            let _ = crate::services::system::vpn::config::copy_vpn_config(src_path);
         }
     }
 

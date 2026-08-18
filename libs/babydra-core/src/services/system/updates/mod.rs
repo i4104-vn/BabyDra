@@ -50,7 +50,7 @@ pub fn check_updates() -> CoreResult<Vec<PackageUpdate>> {
 }
 
 /// Validate sudo password.
-pub fn validate_sudo_password(password: &str) -> bool {
+pub fn validate_sudo(password: &str) -> bool {
     let mut child = match Command::new("sudo")
         .arg("-S")
         .arg("-v")
@@ -74,7 +74,7 @@ pub fn validate_sudo_password(password: &str) -> bool {
 }
 
 /// Updates a single package securely using sudo stdin password or pkexec.
-pub fn update_single_package(pkg_name: &str, password: Option<&str>) -> CoreResult<()> {
+pub fn update_single_pkg(pkg_name: &str, password: Option<&str>) -> CoreResult<()> {
     if std::path::Path::new("/var/lib/pacman/db.lck").exists() && !is_pacman_running() {
         let _ = std::fs::remove_file("/var/lib/pacman/db.lck");
     }
@@ -141,7 +141,7 @@ pub fn update_system() -> CoreResult<()> {
 }
 
 /// Executes a privileged command and streams stdout/stderr lines via channel.
-pub fn execute_cmd_with_log_stream(
+pub fn exec_cmd_stream(
     args: &[&str],
     password: Option<&str>,
     sender: std::sync::mpsc::Sender<String>,

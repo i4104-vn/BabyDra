@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 pub struct PowerConfig {
     #[serde(default = "default_power_profile")]
     pub profile: String,
-    #[serde(default = "default_auto_saver_enabled")]
+    #[serde(default = "is_auto_saver_on")]
     pub auto_saver_enabled: bool,
     #[serde(default = "default_saver_threshold")]
     pub saver_threshold: u32,
@@ -19,7 +19,7 @@ pub struct PowerConfig {
 fn default_power_profile() -> String {
     "balanced".to_string()
 }
-fn default_auto_saver_enabled() -> bool {
+fn is_auto_saver_on() -> bool {
     true
 }
 fn default_saver_threshold() -> u32 {
@@ -33,7 +33,7 @@ impl Default for PowerConfig {
     fn default() -> Self {
         Self {
             profile: default_power_profile(),
-            auto_saver_enabled: default_auto_saver_enabled(),
+            auto_saver_enabled: is_auto_saver_on(),
             saver_threshold: default_saver_threshold(),
             charge_limit: default_charge_limit(),
         }

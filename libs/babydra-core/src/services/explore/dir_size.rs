@@ -11,7 +11,7 @@ lazy_static::lazy_static! {
 
 /// Calculates the size of a directory and all its subdirectories in parallel using Rayon.
 /// Caches the results with a 60-second Time-To-Live (TTL).
-pub fn calculate_dir_size_parallel(path: &Path) -> u64 {
+pub fn calc_dir_size(path: &Path) -> u64 {
     let path_buf = path.to_path_buf();
 
     // 1. Check the cache

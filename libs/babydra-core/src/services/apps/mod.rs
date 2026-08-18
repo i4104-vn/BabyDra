@@ -9,7 +9,7 @@ use std::hash::{Hash, Hasher};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, OnceLock};
 
-pub use discovery::{parse_desktop_file, scan_desktop_apps_from_filesystem};
+pub use discovery::{parse_desktop_file, scan_desktop_apps};
 
 static CACHE: OnceLock<Arc<Mutex<Option<DesktopCache>>>> = OnceLock::new();
 
@@ -33,8 +33,8 @@ fn get_dir_mtime(path: &Path) -> u64 {
 }
 
 /// Force-scans the system applications directories and updates both the memory and disk caches.
-pub fn refresh_desktop_apps_cache() -> Vec<DesktopApp> {
-    let apps = scan_desktop_apps_from_filesystem();
+pub fn refresh_desktop_apps() -> Vec<DesktopApp> {
+    let apps = scan_desktop_apps();
 
     let system_mtime = get_dir_mtime(Path::new("/usr/share/applications"));
     let local_path = dirs::data_dir()
@@ -108,7 +108,7 @@ pub fn find_desktop_apps() -> Vec<DesktopApp> {
         }
     }
 
-    refresh_desktop_apps_cache()
+    refresh_desktop_apps()
 }
 
 /// Generates a unique hash string representing a specific Wayland window based on its app_id and title.

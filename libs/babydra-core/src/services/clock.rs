@@ -17,11 +17,11 @@ pub fn format_clock_date(date_format_key: &str) -> (String, String) {
     let time = now.format("%H:%M").to_string();
 
     let weekday_key = format!("weekday.{}", now.format("%a").to_string().to_lowercase());
-    let weekday = crate::i18n::t(&weekday_key);
+    let weekday = crate::i18n::trans(&weekday_key);
     let month_key = format!("month.{}", now.format("%m"));
-    let month = crate::i18n::t(&month_key);
+    let month = crate::i18n::trans(&month_key);
 
-    let date = crate::i18n::t(date_format_key)
+    let date = crate::i18n::trans(date_format_key)
         .replace("{weekday}", &weekday)
         .replace("{day}", &now.format("%d").to_string())
         .replace("{month}", &month)

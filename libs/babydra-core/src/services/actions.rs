@@ -17,7 +17,7 @@ pub fn execute_file_manager() {
 }
 
 /// Signals the compositor window manager to reload configurations.
-pub fn execute_reconfigure_shell() {
+pub fn reconfigure_shell() {
     let _ = Command::new("labwc").arg("--reconfigure").spawn();
 }
 

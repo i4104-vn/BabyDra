@@ -5,7 +5,7 @@ use crate::models::app_info::InstalledPackage;
 use std::path::Path;
 
 /// Returns the set of packages explicitly installed by the user (`pacman -Qqe`).
-pub fn get_explicitly_installed_packages() -> std::collections::HashSet<String> {
+pub fn get_explicit_pkgs() -> std::collections::HashSet<String> {
     let mut set = std::collections::HashSet::new();
     if let Ok(output) = std::process::Command::new("pacman")
         .args(&["-Qqe"])
@@ -21,7 +21,7 @@ pub fn get_explicitly_installed_packages() -> std::collections::HashSet<String> 
 }
 
 /// Returns the current `installed packages list`.
-pub fn get_installed_packages_list() -> Vec<InstalledPackage> {
+pub fn get_installed_pkgs() -> Vec<InstalledPackage> {
     let mut pkgs = Vec::new();
     if let Ok(output) = std::process::Command::new("pacman").args(&["-Qe"]).output() {
         if output.status.success() {
@@ -53,7 +53,7 @@ pub fn get_package_owner(path: &Path) -> Option<String> {
 }
 
 /// Returns `true` when `dependency heuristic` holds, `false` otherwise.
-pub fn is_dependency_heuristic(filename: &str, _name: &str, exec: &str) -> bool {
+pub fn is_dep_heuristic(filename: &str, _name: &str, exec: &str) -> bool {
     let filename_lower = filename.to_lowercase();
     let exec_lower = exec.to_lowercase();
 
@@ -119,7 +119,7 @@ pub fn uninstall_package(name: &str) -> CoreResult<()> {
 }
 
 /// Uninstall app by path.
-pub fn uninstall_app_by_path(full_path: &str) -> CoreResult<()> {
+pub fn uninstall_app(full_path: &str) -> CoreResult<()> {
     let path = Path::new(full_path);
     if let Some(pkg) = get_package_owner(path) {
         uninstall_package(&pkg)
@@ -129,14 +129,14 @@ pub fn uninstall_app_by_path(full_path: &str) -> CoreResult<()> {
 }
 
 /// Stream uninstall package.
-pub fn stream_uninstall_package(
+pub fn stream_uninstall(
     pkg_name: &str,
     password: Option<&str>,
     sender: std::sync::mpsc::Sender<String>,
 ) -> CoreResult<()> {
     crate::services::system::updates::clean_pacman_lock(password, sender.clone());
     let cmd = format!("yes | pacman -Rns --noconfirm {}", pkg_name.trim());
-    crate::services::system::updates::execute_cmd_with_log_stream(
+    crate::services::system::updates::exec_cmd_stream(
         &["sh", "-c", &cmd],
         password,
         sender,
@@ -144,7 +144,7 @@ pub fn stream_uninstall_package(
 }
 
 /// Find cached older package.
-pub fn find_cached_older_package(pkg_name: &str) -> Option<std::path::PathBuf> {
+pub fn find_cached_pkg(pkg_name: &str) -> Option<std::path::PathBuf> {
     let cache_dir = Path::new("/var/cache/pacman/pkg");
     if !cache_dir.exists() {
         return None;
@@ -198,16 +198,16 @@ pub fn find_cached_older_package(pkg_name: &str) -> Option<std::path::PathBuf> {
 }
 
 /// Stream downgrade package.
-pub fn stream_downgrade_package(
+pub fn stream_downgrade(
     pkg_name: &str,
     password: Option<&str>,
     sender: std::sync::mpsc::Sender<String>,
 ) -> CoreResult<()> {
     crate::services::system::updates::clean_pacman_lock(password, sender.clone());
-    if let Some(cached_file) = find_cached_older_package(pkg_name) {
+    if let Some(cached_file) = find_cached_pkg(pkg_name) {
         let path_str = cached_file.to_string_lossy().to_string();
         let cmd = format!("pacman -U --noconfirm {}", path_str);
-        crate::services::system::updates::execute_cmd_with_log_stream(
+        crate::services::system::updates::exec_cmd_stream(
             &["sh", "-c", &cmd],
             password,
             sender,

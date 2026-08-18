@@ -218,7 +218,7 @@ pub fn get_battery_info() -> Option<BatteryInfo> {
                             temperature,
                             active_profile,
                         };
-                        check_and_apply_auto_battery_saver(&info);
+                        apply_battery_saver(&info);
                         return Some(info);
                     }
                 }
@@ -270,14 +270,14 @@ pub fn get_battery_info() -> Option<BatteryInfo> {
         temperature: None,
         active_profile,
     };
-    check_and_apply_auto_battery_saver(&bat);
+    apply_battery_saver(&bat);
     Some(bat)
 }
 
 static LAST_SAVER_CHECK: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 
 /// Check and apply auto battery saver.
-pub fn check_and_apply_auto_battery_saver(battery_info: &BatteryInfo) {
+pub fn apply_battery_saver(battery_info: &BatteryInfo) {
     let now = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap_or_default()
@@ -298,18 +298,18 @@ pub fn check_and_apply_auto_battery_saver(battery_info: &BatteryInfo) {
     if battery_info.percentage <= conf.power.saver_threshold {
         let cur_profile = crate::services::system::power::profile::get_current_profile();
         if cur_profile != crate::PerformanceProfile::Normal {
-            if crate::services::system::power::profile::set_performance_profile(
+            if crate::services::system::power::profile::set_perf_profile(
                 crate::PerformanceProfile::Normal,
             )
             .is_ok()
             {
-                let title = crate::i18n::t("settings.notif_auto_saver_title");
-                let msg = crate::i18n::t("settings.notif_auto_saver_msg")
+                let title = crate::i18n::trans("settings.notif_auto_saver_title");
+                let msg = crate::i18n::trans("settings.notif_auto_saver_msg")
                     .replace("{level}", &battery_info.percentage.to_string());
                 crate::send_notification(&title, &msg);
 
                 // Reduce screen brightness by 50% when auto saver mode activates
-                let cur_b = crate::services::system::backlight::get_current_brightness();
+                let cur_b = crate::services::system::backlight::get_brightness();
                 let target_b = (cur_b * 0.5).max(10.0);
                 crate::services::system::backlight::set_brightness(target_b);
             }
@@ -318,7 +318,7 @@ pub fn check_and_apply_auto_battery_saver(battery_info: &BatteryInfo) {
 }
 
 /// Returns `true` when `charge limit support` is available.
-pub fn has_charge_limit_support() -> bool {
+pub fn has_charge_limit() -> bool {
     charge_limit_path().is_some()
 }
 
@@ -367,7 +367,7 @@ pub fn set_charge_limit(limit: u32) -> CoreResult<()> {
 }
 
 /// Sets `charge limit auth` to the given value.
-pub fn set_charge_limit_auth(limit: u32, pwd: &str) -> CoreResult<()> {
+pub fn set_charge_limit_pw(limit: u32, pwd: &str) -> CoreResult<()> {
     let limit = limit.clamp(80, 100);
     let path = match charge_limit_path() {
         Some(p) => p,

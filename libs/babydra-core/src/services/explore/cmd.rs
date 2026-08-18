@@ -7,7 +7,7 @@ pub fn shell_quote(s: &str) -> String {
 }
 
 /// Executes a custom context menu shell command string.
-pub fn execute_custom_command(command_str: &str) -> std::io::Result<std::process::Child> {
+pub fn exec_custom_cmd(command_str: &str) -> std::io::Result<std::process::Child> {
     std::process::Command::new("sh")
         .arg("-c")
         .arg(command_str)
@@ -15,7 +15,7 @@ pub fn execute_custom_command(command_str: &str) -> std::io::Result<std::process
 }
 
 /// Spawns a Tokio process command for compression (ZIP or TAR).
-pub fn spawn_compress_command(
+pub fn spawn_compress(
     parent_dir: &Path,
     archive_filename: &str,
     target_files: &[String],
@@ -52,7 +52,7 @@ pub fn spawn_compress_command(
 }
 
 /// Spawns a Tokio process command for decompression based on file extension.
-pub fn spawn_decompress_command(
+pub fn spawn_decompress(
     parent_dir: &Path,
     filename: &str,
     password: Option<&str>,

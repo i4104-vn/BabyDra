@@ -140,7 +140,7 @@ fn load_vi_map() -> HashMap<String, String> {
 
 /// Translates a given key into the current active locale's string.
 /// If the key is not found, returns the key itself.
-pub fn t(key: &str) -> String {
+pub fn trans(key: &str) -> String {
     let locale = get_locale();
     let map = match locale.as_str() {
         "en" => EN_MAP.get_or_init(load_en_map),

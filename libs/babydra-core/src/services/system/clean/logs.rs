@@ -5,7 +5,7 @@ use std::fs;
 use std::path::Path;
 
 /// Returns the current `journal logs size`.
-pub fn get_journal_logs_size() -> u64 {
+pub fn get_journal_size() -> u64 {
     let journal_dir = Path::new("/var/log/journal");
     let mut size = 0;
     if journal_dir.exists() {

@@ -2,7 +2,7 @@ use gdk_pixbuf::Pixbuf;
 use std::path::Path;
 
 /// Helper to load an image, crop it to a center square, and scale it.
-pub fn load_cropped_square_pixbuf(path: &Path, size: i32) -> Result<Pixbuf, glib::Error> {
+pub fn load_cropped_square(path: &Path, size: i32) -> Result<Pixbuf, glib::Error> {
     let pixbuf = Pixbuf::from_file_at_scale(path, size * 2, size * 2, true)?;
     let w = pixbuf.width();
     let h = pixbuf.height();

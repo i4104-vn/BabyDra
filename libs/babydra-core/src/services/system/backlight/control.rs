@@ -51,7 +51,7 @@ fn get_active_session_path(
     None
 }
 
-fn set_backlight_brightness_logind(
+fn set_brightness_logind(
     device: &str,
     val: f64,
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -101,7 +101,7 @@ pub fn set_brightness(val: f64) {
     }
     if let Some(device) = get_backlight_device() {
         // Laptop/internal: use logind SetBrightness via system D-Bus
-        let _ = set_backlight_brightness_logind(&device, val);
+        let _ = set_brightness_logind(&device, val);
     } else {
         // External monitor: use ddcutil-service via session D-Bus
         let tx = DDC_SET_SENDER.get_or_init(init_ddc_set_worker);

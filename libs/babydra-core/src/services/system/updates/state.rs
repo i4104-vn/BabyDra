@@ -7,7 +7,7 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::process::Command;
 
-use super::{execute_cmd_with_log_stream, validate_sudo_password};
+use super::{exec_cmd_stream, validate_sudo};
 
 pub fn get_update_log_path() -> PathBuf {
     std::env::temp_dir().join("babydra-update.log")
@@ -29,12 +29,12 @@ pub fn read_update_log() -> String {
 }
 
 /// Starts `background update`.
-pub fn start_background_update(password: Option<String>) {
-    start_background_update_with_sender(password, None);
+pub fn start_bg_update(password: Option<String>) {
+    start_bg_update_tx(password, None);
 }
 
 /// Starts `background update with sender`.
-pub fn start_background_update_with_sender(
+pub fn start_bg_update_tx(
     password: Option<String>,
     external_tx: Option<std::sync::mpsc::Sender<String>>,
 ) {
@@ -74,7 +74,7 @@ pub fn clean_pacman_lock(password: Option<&str>, sender: std::sync::mpsc::Sender
     if std::path::Path::new("/var/lib/pacman/db.lck").exists() {
         if !is_pacman_running() {
             let _ = sender.send(":: Detected stale pacman lock file (/var/lib/pacman/db.lck). Cleaning lock file...".to_string());
-            let _ = execute_cmd_with_log_stream(
+            let _ = exec_cmd_stream(
                 &["rm", "-f", "/var/lib/pacman/db.lck"],
                 password,
                 sender,
@@ -89,7 +89,7 @@ pub fn stream_update_system(
     sender: std::sync::mpsc::Sender<String>,
 ) -> CoreResult<()> {
     clean_pacman_lock(password, sender.clone());
-    execute_cmd_with_log_stream(
+    exec_cmd_stream(
         &["pacman", "-Syu", "--noconfirm", "--needed"],
         password,
         sender,
@@ -97,7 +97,7 @@ pub fn stream_update_system(
 }
 
 /// Returns the current `update state path`.
-pub fn get_update_state_path() -> std::path::PathBuf {
+pub fn get_update_path() -> std::path::PathBuf {
     std::env::temp_dir().join("babydra-update-state.json")
 }
 
@@ -109,13 +109,13 @@ pub fn save_update_state(is_updating: bool, is_syncing: bool, packages: &[Packag
         packages: packages.to_vec(),
     };
     if let Ok(json) = serde_json::to_string_pretty(&state) {
-        let _ = std::fs::write(get_update_state_path(), json);
+        let _ = std::fs::write(get_update_path(), json);
     }
 }
 
 /// Loads `update state`.
 pub fn load_update_state() -> Option<SystemUpdateState> {
-    let path = get_update_state_path();
+    let path = get_update_path();
     if path.exists() {
         if let Ok(content) = std::fs::read_to_string(path) {
             if let Ok(state) = serde_json::from_str::<SystemUpdateState>(&content) {
@@ -128,7 +128,7 @@ pub fn load_update_state() -> Option<SystemUpdateState> {
 
 /// Clear update state.
 pub fn clear_update_state() {
-    let path = get_update_state_path();
+    let path = get_update_path();
     if path.exists() {
         let _ = std::fs::remove_file(path);
     }
@@ -142,7 +142,7 @@ pub fn clear_update_state() {
 }
 
 /// Parses `pacman progress line`.
-pub fn parse_pacman_progress_line(line: &str) -> Option<(usize, usize, String)> {
+pub fn parse_pacman_prog(line: &str) -> Option<(usize, usize, String)> {
     let line_trimmed = line.trim();
 
     if let Some(start) = line_trimmed.find('(') {
@@ -186,21 +186,21 @@ pub fn parse_pacman_progress_line(line: &str) -> Option<(usize, usize, String)> 
 }
 
 /// Run background update loop.
-pub fn run_background_update_loop(password: Option<&str>) {
+pub fn run_bg_update_loop(password: Option<&str>) {
     let mut state = match load_update_state() {
         Some(s) if !s.packages.is_empty() => s,
         _ => return,
     };
 
     if let Some(pwd) = password {
-        if !validate_sudo_password(pwd) {
+        if !validate_sudo(pwd) {
             for pkg in state.packages.iter_mut() {
                 pkg.status = crate::models::system_update::UpdateStatus::Failed;
             }
             state.is_updating = false;
             save_update_state(false, false, &state.packages);
-            crate::send_settings_notification(
-                &crate::i18n::t("settings.update_title"),
+            crate::send_settings_notif(
+                &crate::i18n::trans("settings.update_title"),
                 "Authentication Failed: Incorrect sudo password.",
             );
             return;
@@ -228,7 +228,7 @@ pub fn run_background_update_loop(password: Option<&str>) {
     let mut current_updating_pkg: Option<String> = None;
 
     while let Ok(line) = rx.recv() {
-        if let Some((_curr, _total, pkg_name)) = parse_pacman_progress_line(&line) {
+        if let Some((_curr, _total, pkg_name)) = parse_pacman_prog(&line) {
             if let Some(prev) = current_updating_pkg.take() {
                 if let Some(pkg) = state.packages.iter_mut().find(|p| p.name == prev) {
                     pkg.status = crate::models::system_update::UpdateStatus::Done;
@@ -273,14 +273,14 @@ pub fn run_background_update_loop(password: Option<&str>) {
         .iter()
         .filter(|p| p.status == crate::models::system_update::UpdateStatus::Failed)
         .count();
-    let title = crate::i18n::t("settings.update_title");
+    let title = crate::i18n::trans("settings.update_title");
     let msg = if failed_count == 0 {
-        crate::i18n::t("settings.update_complete")
+        crate::i18n::trans("settings.update_complete")
     } else {
-        crate::i18n::t("settings.update_failed").replace("{count}", &failed_count.to_string())
+        crate::i18n::trans("settings.update_failed").replace("{count}", &failed_count.to_string())
     };
 
-    crate::send_settings_notification(&title, &msg);
+    crate::send_settings_notif(&title, &msg);
 
     if failed_count == 0 {
         let log_path = get_update_log_path();

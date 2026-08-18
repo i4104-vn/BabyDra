@@ -1,6 +1,6 @@
 //! Audio device source and sink enumerations.
 
-use super::helper::{check_node_is_default, get_audio_devices_wpctl_fallback, parse_profile_parts};
+use super::helper::{check_default_node, get_wpctl_devices, parse_profile_parts};
 pub use crate::models::AudioDevice;
 
 /// Returns the current `audio devices`.
@@ -288,7 +288,7 @@ pub fn get_audio_devices(is_source: bool) -> Vec<AudioDevice> {
                         .and_then(|d| d.as_str())
                         .unwrap_or("Virtual Device");
 
-                    let is_default = check_node_is_default(node_id, is_source);
+                    let is_default = check_default_node(node_id, is_source);
 
                     devices.push(AudioDevice {
                         name: node_id.to_string(),
@@ -301,7 +301,7 @@ pub fn get_audio_devices(is_source: bool) -> Vec<AudioDevice> {
     }
 
     if devices.is_empty() {
-        return get_audio_devices_wpctl_fallback(is_source);
+        return get_wpctl_devices(is_source);
     }
 
     devices.sort_by(|a, b| a.description.cmp(&b.description));

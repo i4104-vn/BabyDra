@@ -107,7 +107,7 @@ pub fn get_icon_themes() -> Vec<String> {
 }
 
 /// Returns the current `current appearance`.
-pub fn get_current_appearance() -> CurrentAppearance {
+pub fn get_appearance() -> CurrentAppearance {
     let get_val = |key: &str| -> String {
         if let Some(s) = run_cmd(&["gsettings", "get", "org.gnome.desktop.interface", key]) {
             if s.starts_with('\'') && s.ends_with('\'') && s.len() >= 2 {

@@ -27,7 +27,7 @@ pub fn is_bluetooth_enabled() -> bool {
 }
 
 /// Enables or disables the Bluetooth adapter.
-pub fn set_bluetooth_enabled(enabled: bool) {
+pub fn set_bt_enabled(enabled: bool) {
     let rf_arg = if enabled { "unblock" } else { "block" };
     let _ = Command::new("rfkill").args([rf_arg, "bluetooth"]).spawn();
 
@@ -39,7 +39,7 @@ pub fn set_bluetooth_enabled(enabled: bool) {
 }
 
 /// Returns the current `bluetooth devices`.
-pub fn get_bluetooth_devices() -> Vec<BtDevice> {
+pub fn get_bt_devices() -> Vec<BtDevice> {
     let mut devices = Vec::new();
 
     let output = match Command::new("bluetoothctl")

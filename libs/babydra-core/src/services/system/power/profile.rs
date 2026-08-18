@@ -19,7 +19,7 @@ fn save_profile_to_config(profile: PerformanceProfile) {
 }
 
 /// Sets `performance profile` to the given value.
-pub fn set_performance_profile(profile: PerformanceProfile) -> CoreResult<()> {
+pub fn set_perf_profile(profile: PerformanceProfile) -> CoreResult<()> {
     save_profile_to_config(profile);
 
     let (governor, epp) = match profile {
@@ -59,7 +59,7 @@ pub fn set_performance_profile(profile: PerformanceProfile) -> CoreResult<()> {
 }
 
 /// Sets `performance profile with password` to the given value.
-pub fn set_performance_profile_with_password(
+pub fn set_perf_profile_pw(
     profile: PerformanceProfile,
     password: &str,
 ) -> CoreResult<()> {
@@ -102,5 +102,5 @@ pub fn set_performance_profile_with_password(
 /// Applies `saved profile`.
 pub fn apply_saved_profile() {
     let profile = get_current_profile();
-    let _ = set_performance_profile(profile);
+    let _ = set_perf_profile(profile);
 }

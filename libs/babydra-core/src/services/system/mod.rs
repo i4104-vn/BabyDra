@@ -18,4 +18,4 @@ pub mod volume;
 pub mod vpn;
 pub mod wifi;
 
-pub use gsettings::set_gsettings_color_scheme;
+pub use gsettings::set_color_scheme;

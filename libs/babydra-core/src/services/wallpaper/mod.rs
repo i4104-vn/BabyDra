@@ -39,15 +39,15 @@ pub fn set_wallpaper(path: &Path) -> CoreResult<()> {
 }
 
 /// Applies the currently saved wallpaper from babydra.conf.
-pub fn apply_saved_wallpaper() {
-    if let Some(path) = get_current_wallpaper() {
+pub fn apply_wallpaper() {
+    if let Some(path) = get_wallpaper() {
         let _ = set_wallpaper(&path);
     }
 }
 
 /// Retrieves the path to the currently active wallpaper from user configuration or wallpaper directory.
-pub fn get_current_wallpaper() -> Option<PathBuf> {
-    crate::config::invalidate_config_cache();
+pub fn get_wallpaper() -> Option<PathBuf> {
+    crate::config::invalidate_cache();
     let conf = crate::config::load_babydra_config();
     if !conf.wallpaper.current.is_empty() {
         let path = PathBuf::from(&conf.wallpaper.current);
@@ -115,7 +115,7 @@ pub fn get_local_wallpapers() -> Vec<PathBuf> {
 }
 
 /// Sets the greeter background image path in babydra.conf as a base64 string.
-pub fn set_greeter_wallpaper(path: &Path) -> CoreResult<()> {
+pub fn set_greeter_wp(path: &Path) -> CoreResult<()> {
     if !path.exists() {
         return Err(format!("Greeter background file does not exist at: {:?}", path).into());
     }
@@ -131,12 +131,12 @@ pub fn set_greeter_wallpaper(path: &Path) -> CoreResult<()> {
 }
 
 /// No longer mirrors to system path, just a no-op placeholder for compatibility
-pub fn apply_saved_greeter_wallpaper() {
+pub fn apply_greeter_wp() {
     // No-op
 }
 
 /// Retrieves the active greeter background as raw bytes.
-pub fn get_greeter_wallpaper_bytes() -> Option<Vec<u8>> {
+pub fn get_greeter_wp_bytes() -> Option<Vec<u8>> {
     let conf = crate::config::load_babydra_config();
     if !conf.lockscreen.background.is_empty() {
         use base64::{engine::general_purpose::STANDARD, Engine as _};
@@ -175,8 +175,8 @@ fn detect_image_mime(bytes: &[u8]) -> &'static str {
 /// Retrieves the active greeter background as a CSS URL string.
 /// The MIME type is sniffed from the bytes so JPEG/WebP images embedded as
 /// base64 data URLs are loaded correctly (previously always labelled image/png).
-pub fn get_greeter_wallpaper_css() -> String {
-    if let Some(bytes) = get_greeter_wallpaper_bytes() {
+pub fn get_greeter_wp_css() -> String {
+    if let Some(bytes) = get_greeter_wp_bytes() {
         use base64::{engine::general_purpose::STANDARD, Engine as _};
         let b64 = STANDARD.encode(&bytes);
         let mime = detect_image_mime(&bytes);
@@ -215,7 +215,7 @@ pub fn get_avatar_bytes() -> Option<Vec<u8>> {
 }
 
 /// Helper to convert raw image bytes into a square, scaled Pixbuf
-pub fn crop_to_square_pixbuf(bytes: &[u8], size: i32) -> Option<gdk_pixbuf::Pixbuf> {
+pub fn crop_square(bytes: &[u8], size: i32) -> Option<gdk_pixbuf::Pixbuf> {
     let stream = gio::MemoryInputStream::from_bytes(&glib::Bytes::from(bytes));
     if let Ok(pixbuf) = gdk_pixbuf::Pixbuf::from_stream(&stream, gio::Cancellable::NONE) {
         let w = pixbuf.width();
@@ -275,7 +275,7 @@ fn apply_circular_mask(pixbuf: &gdk_pixbuf::Pixbuf) -> gdk_pixbuf::Pixbuf {
 
 /// Converts raw image bytes into a square, scaled Pixbuf masked into a circle.
 /// Used for circular avatar displays (greeter, lock screen, settings preview).
-pub fn crop_to_circle_pixbuf(bytes: &[u8], size: i32) -> Option<gdk_pixbuf::Pixbuf> {
-    let square = crop_to_square_pixbuf(bytes, size)?;
+pub fn crop_circle(bytes: &[u8], size: i32) -> Option<gdk_pixbuf::Pixbuf> {
+    let square = crop_square(bytes, size)?;
     Some(apply_circular_mask(&square))
 }

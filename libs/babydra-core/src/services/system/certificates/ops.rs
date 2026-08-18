@@ -36,7 +36,7 @@ pub fn add_ca_certificate(src_path: &str, filename: &str, sudo_password: &str) -
 }
 
 /// Delete ca certificate.
-pub fn delete_ca_certificate(filename: &str, sudo_password: &str) -> CoreResult<()> {
+pub fn delete_ca_cert(filename: &str, sudo_password: &str) -> CoreResult<()> {
     let cmd_str = format!(
         "rm -f '/etc/ca-certificates/trust-source/anchors/{}' && update-ca-trust",
         filename

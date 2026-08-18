@@ -37,7 +37,7 @@ pub fn snap_to_grid(
 }
 
 /// Computes auto-arrange layout: fills columns top-to-bottom, then left-to-right.
-pub fn calculate_auto_arrange(
+pub fn calc_auto_arrange(
     entries: &[FileEntry],
     cell_w: i32,
     cell_h: i32,
@@ -304,14 +304,14 @@ mod tests {
     }
 
     #[test]
-    fn test_calculate_auto_arrange() {
+    fn test_calc_auto_arrange() {
         let entries = vec![
             mock_entry("A", true, 0),
             mock_entry("B", false, 100),
             mock_entry("C", false, 200),
         ];
 
-        let positions = calculate_auto_arrange(&entries, 96, 104, 1080, 16, 48);
+        let positions = calc_auto_arrange(&entries, 96, 104, 1080, 16, 48);
         assert_eq!(positions.len(), 3);
         assert_eq!(positions.get("A"), Some(&(16, 48)));
         assert_eq!(positions.get("B"), Some(&(16, 152)));

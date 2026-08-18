@@ -11,7 +11,7 @@ pub use crate::models::config::{
 use std::path::PathBuf;
 
 /// Gets path to `~/.babydra/babydra.conf`
-pub fn get_babydra_conf_path() -> PathBuf {
+pub fn get_conf_path() -> PathBuf {
     dirs::home_dir()
         .unwrap_or_else(|| PathBuf::from("."))
         .join(".babydra")
@@ -22,7 +22,7 @@ static CONFIG_CACHE: std::sync::OnceLock<std::sync::RwLock<BabyDraConfig>> =
     std::sync::OnceLock::new();
 
 fn load_from_disk() -> BabyDraConfig {
-    let path = get_babydra_conf_path();
+    let path = get_conf_path();
     if path.exists() {
         if let Ok(content) = std::fs::read_to_string(&path) {
             if let Ok(config) = toml::from_str::<BabyDraConfig>(&content) {
@@ -36,7 +36,7 @@ fn load_from_disk() -> BabyDraConfig {
     // Migration logic from legacy standalone files if present
 
     if let Some(home) = dirs::home_dir() {
-        let legacy_explore = super::get_babydra_config_dir().join("explore.json");
+        let legacy_explore = super::get_config_dir().join("explore.json");
         if legacy_explore.exists() {
             if let Ok(content) = std::fs::read_to_string(&legacy_explore) {
                 if let Ok(exp) = serde_json::from_str(&content) {
@@ -66,7 +66,7 @@ fn load_from_disk() -> BabyDraConfig {
     }
 
     // Don't call save_babydra_config here to avoid deadlock, just write to disk
-    let path = get_babydra_conf_path();
+    let path = get_conf_path();
     if let Some(parent) = path.parent() {
         let _ = std::fs::create_dir_all(parent);
     }
@@ -90,7 +90,7 @@ pub fn save_babydra_config(config: &BabyDraConfig) {
         }
     }
 
-    let path = get_babydra_conf_path();
+    let path = get_conf_path();
     if let Some(parent) = path.parent() {
         let _ = std::fs::create_dir_all(parent);
     }
@@ -100,7 +100,7 @@ pub fn save_babydra_config(config: &BabyDraConfig) {
 }
 
 /// Invalidate config cache.
-pub fn invalidate_config_cache() {
+pub fn invalidate_cache() {
     if let Some(cache) = CONFIG_CACHE.get() {
         if let Ok(mut guard) = cache.write() {
             *guard = load_from_disk();
@@ -109,12 +109,12 @@ pub fn invalidate_config_cache() {
 }
 
 /// Loads `explore settings`.
-pub fn load_explore_settings() -> ExploreSettings {
+pub fn load_explore_cfg() -> ExploreSettings {
     load_babydra_config().explore
 }
 
 /// Persists `explore settings`.
-pub fn save_explore_settings(settings: &ExploreSettings) {
+pub fn save_explore_cfg(settings: &ExploreSettings) {
     let mut config = load_babydra_config();
     config.explore = settings.clone();
     save_babydra_config(&config);

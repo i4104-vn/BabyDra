@@ -77,7 +77,7 @@ pub fn set_wifi_enabled(enabled: bool) -> bool {
 }
 
 /// Returns the current `wifi signal strength`.
-pub fn get_wifi_signal_strength() -> (bool, bool, u8) {
+pub fn get_wifi_signal() -> (bool, bool, u8) {
     let conn = match Connection::system() {
         Ok(c) => c,
         Err(_) => return (false, false, 0),

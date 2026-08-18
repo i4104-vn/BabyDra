@@ -1,7 +1,7 @@
 //! Filesystem scanning and parsing of `.desktop` files.
 
 use super::pacman::{
-    get_explicitly_installed_packages, get_package_owner, is_dependency_heuristic,
+    get_explicit_pkgs, get_package_owner, is_dep_heuristic,
 };
 use super::DesktopApp;
 use std::fs::File;
@@ -9,7 +9,7 @@ use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 
 /// Scans for `desktop apps from filesystem`.
-pub fn scan_desktop_apps_from_filesystem() -> Vec<DesktopApp> {
+pub fn scan_desktop_apps() -> Vec<DesktopApp> {
     let mut apps = Vec::new();
     let paths = vec![
         PathBuf::from("/usr/share/applications"),
@@ -21,7 +21,7 @@ pub fn scan_desktop_apps_from_filesystem() -> Vec<DesktopApp> {
             .join("applications"),
     ];
 
-    let explicit_packages = get_explicitly_installed_packages();
+    let explicit_packages = get_explicit_pkgs();
 
     for path in paths {
         if !path.exists() {
@@ -51,7 +51,7 @@ pub fn scan_desktop_apps_from_filesystem() -> Vec<DesktopApp> {
                                 }
                             }
                             if !pacman_success {
-                                is_dep = is_dependency_heuristic(filename, &app.name, &app.exec);
+                                is_dep = is_dep_heuristic(filename, &app.name, &app.exec);
                             }
                         }
                         app.is_dependency = is_dep;

@@ -8,8 +8,8 @@ pub mod trash;
 
 pub use cache::{get_user_cache_size, remove_user_cache};
 pub use helper::{format_bytes, get_dir_size, get_dir_size_native, is_dir_writable};
-pub use logs::{get_journal_logs_size, remove_journal_logs};
-pub use pacman::{get_orphans_size, get_pacman_cache_size, remove_pacman_cache};
+pub use logs::{get_journal_size, remove_journal_logs};
+pub use pacman::{get_orphans_size, get_cache_size, remove_pacman_cache};
 pub use trash::{get_trash_size, remove_trash};
 
 /// Clean all native.

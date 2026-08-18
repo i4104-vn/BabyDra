@@ -139,13 +139,13 @@ pub fn spawn_dbus_listener(tx: tokio::sync::mpsc::UnboundedSender<NotificationMs
 }
 
 /// Dismisses popup display window.
-pub fn close_notification_popup() {
+pub fn close_notif_popup() {
     // Managed inside the island notification feature, no-op here.
     // The island controller handles the state machine for visibility.
 }
 
 /// Registers the incoming desktop notification, caching it to the rolling historical notifications log.
-pub fn show_notification_popup(
+pub fn show_notif_popup(
     summary: &str,
     body: &str,
     icon_name: &str,
@@ -197,21 +197,21 @@ trait Notifications {
 
 /// Sends a desktop notification using the default theme/common logo.
 pub fn send_notification(title: &str, body: &str) {
-    send_app_notification("BabyDra", title, body, "babydra");
+    send_app_notif("BabyDra", title, body, "babydra");
 }
 
 /// Sends a desktop notification for Settings using the logo as icon.
-pub fn send_settings_notification(title: &str, body: &str) {
-    send_app_notification("Settings", title, body, "");
+pub fn send_settings_notif(title: &str, body: &str) {
+    send_app_notif("Settings", title, body, "");
 }
 
 /// Sends a desktop notification specifying an explicit icon name.
-pub fn send_notification_with_icon(title: &str, body: &str, icon_name: &str) {
-    send_app_notification("BabyDra", title, body, icon_name);
+pub fn send_notif_icon(title: &str, body: &str, icon_name: &str) {
+    send_app_notif("BabyDra", title, body, icon_name);
 }
 
 /// Sends a desktop notification with a custom app name and icon.
-pub fn send_app_notification(app_name: &str, title: &str, body: &str, icon_name: &str) {
+pub fn send_app_notif(app_name: &str, title: &str, body: &str, icon_name: &str) {
     let system_logo = "/usr/share/babydra/logo.png";
 
     let logo_str = if icon_name.is_empty() {

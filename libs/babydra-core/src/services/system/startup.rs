@@ -63,7 +63,7 @@ pub fn get_startup_commands() -> Vec<StartupCommand> {
 }
 
 /// Saves autostart commands to labwc autostart file.
-pub fn save_startup_commands(commands: &[StartupCommand]) -> CoreResult<()> {
+pub fn save_startup_cmds(commands: &[StartupCommand]) -> CoreResult<()> {
     let home = get_home_dir();
     let user_config = Path::new(&home).join(".config/labwc/autostart");
 

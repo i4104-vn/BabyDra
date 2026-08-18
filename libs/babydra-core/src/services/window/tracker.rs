@@ -6,7 +6,7 @@ use std::time::{Duration, Instant};
 
 /// Spawns a background thread to track the focused application, clean up stale caches,
 /// and capture window screenshots after 5 seconds of active focus.
-pub fn spawn_switcher_tracker() {
+pub fn spawn_switcher() {
     std::thread::spawn(|| {
         let cache_dir = "/tmp/babydra-switcher-cache";
         let _ = fs::create_dir_all(cache_dir);

@@ -37,7 +37,7 @@ pub struct StatusNotifierWatcher;
 
 #[interface(name = "org.kde.StatusNotifierWatcher")]
 impl StatusNotifierWatcher {
-    async fn register_status_notifier_item(
+    async fn reg_notifier_item(
         &self,
         service: String,
         #[zbus(header)] header: zbus::message::Header<'_>,
@@ -93,15 +93,15 @@ impl StatusNotifierWatcher {
         lock.push(item);
     }
 
-    async fn register_status_notifier_host(&self, _service: String) {}
+    async fn reg_notifier_host(&self, _service: String) {}
 
     #[zbus(property)]
-    async fn registered_status_notifier_items(&self) -> Vec<String> {
+    async fn get_notifier_items(&self) -> Vec<String> {
         get_tray_items().into_iter().map(|x| x.service).collect()
     }
 
     #[zbus(property)]
-    async fn is_status_notifier_host_registered(&self) -> bool {
+    async fn is_notifier_host_reg(&self) -> bool {
         true
     }
 
@@ -113,7 +113,7 @@ impl StatusNotifierWatcher {
 
 /// Spawns the D-Bus StatusNotifierWatcher service in a background tokio thread.
 /// Also starts a periodic health check loop to remove disconnected tray icons.
-pub fn spawn_watcher_service() {
+pub fn spawn_watcher() {
     std::thread::spawn(move || {
         let rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(async {

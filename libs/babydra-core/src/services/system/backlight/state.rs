@@ -30,7 +30,7 @@ pub trait Ddcutil {
 }
 
 /// Queries `ddcutil brightness`.
-pub fn query_ddcutil_brightness() -> Option<f64> {
+pub fn query_ddc_brightness() -> Option<f64> {
     if let Ok(conn) = zbus::blocking::Connection::session() {
         if let Ok(proxy) = DdcutilProxyBlocking::new(&conn) {
             if let Ok((current, _max, _formatted, status, _msg)) = proxy.get_vcp(1, "", 0x10, 0) {
@@ -44,7 +44,7 @@ pub fn query_ddcutil_brightness() -> Option<f64> {
 }
 
 /// Returns the current brightness level (0–100).
-pub fn get_current_brightness() -> f64 {
+pub fn get_brightness() -> f64 {
     if let Some(device) = get_backlight_device() {
         let path = format!("/sys/class/backlight/{}/brightness", device);
         let max_path = format!("/sys/class/backlight/{}/max_brightness", device);

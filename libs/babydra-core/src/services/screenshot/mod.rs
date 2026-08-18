@@ -38,7 +38,7 @@ pub fn draw_pixelated_rect(
 }
 
 /// Resolves the default file path to save screenshots in `~/Pictures/Screenshots/`.
-pub fn get_screenshot_save_path() -> PathBuf {
+pub fn get_screenshot_path() -> PathBuf {
     let pictures_dir = dirs::picture_dir().unwrap_or_else(|| {
         let home = dirs::home_dir().unwrap_or_else(|| PathBuf::from("/tmp"));
         home.join("Pictures")
@@ -51,7 +51,7 @@ pub fn get_screenshot_save_path() -> PathBuf {
 }
 
 /// Invokes `grim` to capture the Wayland display screen and save it to a temporary file.
-pub fn capture_screen_to_temp() -> Option<String> {
+pub fn capture_screen() -> Option<String> {
     let temp_path = "/tmp/babydra-screenshot-temp.png";
     let _ = std::fs::remove_file(temp_path);
 
@@ -126,11 +126,11 @@ pub fn save_cropped_surface(state: &EditorState) -> Option<cairo::ImageSurface> 
 /// Writes the cropped annotated screenshot to a local PNG file and displays a desktop notification.
 pub fn trigger_save(state: &EditorState) -> bool {
     if let Some(surface) = save_cropped_surface(state) {
-        let save_path = get_screenshot_save_path();
+        let save_path = get_screenshot_path();
         if let Ok(mut file) = std::fs::File::create(&save_path) {
             if surface.write_to_png(&mut file).is_ok() {
-                let notif_title = crate::i18n::t("screenshot.saved_title");
-                let notif_msg = crate::i18n::t("screenshot.saved_msg")
+                let notif_title = crate::i18n::trans("screenshot.saved_title");
+                let notif_msg = crate::i18n::trans("screenshot.saved_msg")
                     .replace("{}", &format!("{:?}", save_path));
 
                 crate::services::notification::service::send_notification(
@@ -145,13 +145,13 @@ pub fn trigger_save(state: &EditorState) -> bool {
 }
 
 /// Performs a fullscreen screenshot capture, saves it, triggers a desktop notification, and returns success status.
-pub fn handle_fullscreen_capture() -> bool {
-    if let Some(temp_path) = capture_screen_to_temp() {
-        let save_path = get_screenshot_save_path();
+pub fn capture_fullscreen() -> bool {
+    if let Some(temp_path) = capture_screen() {
+        let save_path = get_screenshot_path();
         if std::fs::copy(&temp_path, &save_path).is_ok() {
-            let notif_title = crate::i18n::t("screenshot.full_saved_title");
+            let notif_title = crate::i18n::trans("screenshot.full_saved_title");
             let notif_msg =
-                crate::i18n::t("screenshot.saved_msg").replace("{}", &format!("{:?}", save_path));
+                crate::i18n::trans("screenshot.saved_msg").replace("{}", &format!("{:?}", save_path));
 
             crate::services::notification::service::send_notification(&notif_title, &notif_msg);
             let _ = std::fs::remove_file(temp_path);
