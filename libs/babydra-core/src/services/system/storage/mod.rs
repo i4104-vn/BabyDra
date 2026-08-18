@@ -1,6 +1,6 @@
 //! Storage disk query subsystem module wrapper.
 
 pub mod helper;
-pub mod query;
+pub mod queries;
 
-pub use query::{get_disk_list, DiskInfo};
+pub use queries::{get_disk_list, DiskInfo};

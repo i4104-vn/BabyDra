@@ -133,7 +133,10 @@ pub fn trigger_save(state: &EditorState) -> bool {
                 let notif_msg = crate::i18n::t("screenshot.saved_msg")
                     .replace("{}", &format!("{:?}", save_path));
 
-                crate::helper::notification::send_notification(&notif_title, &notif_msg);
+                crate::services::notification::service::send_notification(
+                    &notif_title,
+                    &notif_msg,
+                );
                 return true;
             }
         }
@@ -150,7 +153,7 @@ pub fn handle_fullscreen_capture() -> bool {
             let notif_msg =
                 crate::i18n::t("screenshot.saved_msg").replace("{}", &format!("{:?}", save_path));
 
-            crate::helper::notification::send_notification(&notif_title, &notif_msg);
+            crate::services::notification::service::send_notification(&notif_title, &notif_msg);
             let _ = std::fs::remove_file(temp_path);
             return true;
         }

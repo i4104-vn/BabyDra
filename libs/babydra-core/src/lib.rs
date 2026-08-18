@@ -9,7 +9,7 @@ pub mod services;
 
 pub use error::{CoreError, CoreResult};
 pub use services::logger;
-pub use services::logger::{get_log_dir, get_log_path, init_logger};
+pub use services::logger::{get_log_dir, get_log_path};
 
 // Re-export models for convenient flat access
 pub use models::explore::{
@@ -89,18 +89,6 @@ pub use services::system::bluetooth::{
     get_bluetooth_devices, is_bluetooth_enabled, set_bluetooth_enabled, BtDevice,
 };
 pub use services::system::vpn::{get_vpn_connections, VpnConn};
-
-// Re-export helper submodules under a unified layout for compatibility where needed
-pub mod helper {
-    pub use crate::services::notification::service as notification;
-    pub use crate::services::system::backlight;
-    pub use crate::services::system::clean;
-    pub use crate::services::system::network;
-    pub use crate::services::system::storage;
-    pub use crate::services::system::volume;
-    pub use crate::services::system::wifi;
-    pub use crate::services::window;
-}
 
 /// Applies all saved user settings from unified babydra.conf (CPU performance profile, Display monitors resolution/refresh rates, Wallpaper, Auto Battery Saver).
 pub fn apply_all_saved_settings() {

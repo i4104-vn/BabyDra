@@ -1,6 +1,6 @@
 //! Sizing disk partitions and storage query.
 
-use super::helper::{format_size, get_parent_drive};
+use super::helper::{format_disk_size, get_parent_drive};
 pub use crate::models::DiskInfo;
 use std::collections::HashMap;
 
@@ -42,8 +42,8 @@ pub fn get_disk_list() -> Vec<DiskInfo> {
             let percent = (used as f64 / total as f64) * 100.0;
             list.push(DiskInfo {
                 filesystem: drive.clone(),
-                size: format_size(total),
-                used: format_size(used),
+                size: format_disk_size(total),
+                used: format_disk_size(used),
                 percent,
                 mount_point: drive,
             });

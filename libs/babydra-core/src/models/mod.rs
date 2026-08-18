@@ -1,6 +1,7 @@
 //! Shared configuration and state data models for BabyDra.
 //! Categorized into `shell`, `settings`, `explore`, and `screenshot`.
 
+pub mod config;
 pub mod explore;
 pub mod screenshot;
 pub mod settings;
@@ -24,7 +25,7 @@ pub use settings::wifi;
 pub use shell::app;
 pub use shell::appearance;
 pub use shell::battery;
-pub use shell::dbusmenu;
+pub use shell::dbus_menu;
 pub use shell::exif;
 pub use shell::island_state;
 pub use shell::monitor;
@@ -36,6 +37,8 @@ pub use shell::storage;
 pub use shell::theme_config;
 pub use shell::tray_item;
 pub use shell::volume;
+
+pub use config::*;
 
 // Direct type re-exports
 pub use explore::{

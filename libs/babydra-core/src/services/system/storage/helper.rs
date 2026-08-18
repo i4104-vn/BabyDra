@@ -16,8 +16,8 @@ pub fn get_parent_drive(filesystem: &str) -> String {
     filesystem.to_string()
 }
 
-/// Format size.
-pub fn format_size(kb: u64) -> String {
+/// Formats a drive capacity given in kilobytes as a human-readable string.
+pub fn format_disk_size(kb: u64) -> String {
     let gb = kb as f64 / 1024.0 / 1024.0;
     if gb >= 1000.0 {
         format!("{:.1} TB", gb / 1024.0)

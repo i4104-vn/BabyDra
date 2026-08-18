@@ -7,29 +7,13 @@
 //! ```text
 //! system defaults < configs/ seed < theme package < variant < ~/.babydra/
 //! ```
+//!
+//! The `Variant` data model lives in `models::config` and is re-exported here
+//! as a legacy bridge so existing `config::variant::Variant` imports keep working.
 
+pub use crate::models::config::Variant;
 use crate::error::CoreResult;
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-
-/// Parsed `variant.toml`.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct Variant {
-    #[serde(default)]
-    pub name: String,
-    /// Theme package id to use (see `themes/`).
-    pub theme: String,
-    /// List of apps this variant installs / runs.
-    #[serde(default)]
-    pub apps: Vec<String>,
-    /// Keybind map (action → target).
-    #[serde(default)]
-    pub keybinds: HashMap<String, String>,
-    /// Config overrides (dotted path → value).
-    #[serde(default)]
-    pub config_overrides: HashMap<String, toml::Value>,
-}
 
 /// Root of the variants tree (env override for tests / flexible deployments).
 pub fn variants_root() -> PathBuf {

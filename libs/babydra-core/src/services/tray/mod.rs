@@ -2,7 +2,7 @@
 //! Implements DBuswatcher daemon specifications to allow client apps to register system tray items.
 
 pub mod client;
-pub mod dbusmenu;
+pub mod dbus_menu;
 pub mod watcher;
 
 pub use crate::models::MenuItem;

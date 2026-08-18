@@ -66,7 +66,7 @@ pub fn get_dbus_menu(service: &str) -> Option<Vec<crate::models::MenuItem>> {
         let conn = zbus::Connection::session().await.ok()?;
         let bus_name = zbus::names::BusName::try_from(service_str).ok()?;
 
-        let proxy = super::dbusmenu::DbusMenuProxy::builder(&conn)
+        let proxy = super::dbus_menu::DbusMenuProxy::builder(&conn)
             .destination(bus_name)
             .unwrap()
             .path(menu_path)
@@ -83,7 +83,7 @@ pub fn get_dbus_menu(service: &str) -> Option<Vec<crate::models::MenuItem>> {
             )
             .await;
         if let Ok((_, layout_item)) = layout_res {
-            let menu = super::dbusmenu::parse_layout_item(&layout_item);
+            let menu = super::dbus_menu::parse_layout_item(&layout_item);
             Some(menu.children)
         } else {
             None
@@ -102,7 +102,7 @@ pub fn activate_menu_item(service: &str, item_id: i32) {
 
         if let Ok(conn) = zbus::Connection::session().await {
             if let Ok(bus_name) = zbus::names::BusName::try_from(service_str) {
-                if let Ok(proxy) = super::dbusmenu::DbusMenuProxy::builder(&conn)
+                if let Ok(proxy) = super::dbus_menu::DbusMenuProxy::builder(&conn)
                     .destination(bus_name)
                     .unwrap()
                     .path(menu_path)
