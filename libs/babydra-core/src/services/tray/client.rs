@@ -3,8 +3,14 @@
 use super::watcher::StatusNotifierItemProxy;
 
 /// Sends an Activate or ContextMenu signal to the item's D-Bus service, letting the application open its menu or window.
-pub fn activate_item(service: &str, x: i32, y: i32, is_right_click: bool) {
+pub fn activate_item(service: &str, path: &str, x: i32, y: i32, is_right_click: bool) {
     let service_str = service.to_string();
+    let path_str = if path.is_empty() {
+        "/StatusNotifierItem".to_string()
+    } else {
+        path.to_string()
+    };
+
     glib::spawn_future_local(async move {
         if let Ok(conn) = zbus::Connection::session().await {
             let bus_name = match zbus::names::BusName::try_from(service_str.clone()) {
@@ -15,7 +21,7 @@ pub fn activate_item(service: &str, x: i32, y: i32, is_right_click: bool) {
             let proxy = match StatusNotifierItemProxy::builder(&conn)
                 .destination(bus_name)
                 .unwrap()
-                .path("/StatusNotifierItem")
+                .path(path_str)
                 .unwrap()
                 .build()
                 .await
@@ -37,14 +43,19 @@ pub fn activate_item(service: &str, x: i32, y: i32, is_right_click: bool) {
     });
 }
 
-pub async fn fetch_menu_path(service: &str) -> Option<String> {
+pub async fn fetch_menu_path(service: &str, path: &str) -> Option<String> {
     let conn = zbus::Connection::session().await.ok()?;
     let bus_name = zbus::names::BusName::try_from(service.to_string()).ok()?;
+    let path_str = if path.is_empty() {
+        "/StatusNotifierItem"
+    } else {
+        path
+    };
 
     let proxy = StatusNotifierItemProxy::builder(&conn)
         .destination(bus_name)
         .unwrap()
-        .path("/StatusNotifierItem")
+        .path(path_str)
         .unwrap()
         .build()
         .await
@@ -54,11 +65,12 @@ pub async fn fetch_menu_path(service: &str) -> Option<String> {
 }
 
 /// Returns the current `dbus menu`.
-pub fn get_dbus_menu(service: &str) -> Option<Vec<crate::models::MenuItem>> {
+pub fn get_dbus_menu(service: &str, path: &str) -> Option<Vec<crate::models::MenuItem>> {
     let service_str = service.to_string();
+    let path_str = path.to_string();
     let rt = tokio::runtime::Runtime::new().unwrap();
     rt.block_on(async {
-        let menu_path = fetch_menu_path(&service_str).await?;
+        let menu_path = fetch_menu_path(&service_str, &path_str).await?;
         if menu_path.is_empty() {
             return None;
         }
@@ -95,7 +107,9 @@ pub fn get_dbus_menu(service: &str) -> Option<Vec<crate::models::MenuItem>> {
 pub fn activate_menu_item(service: &str, item_id: i32) {
     let service_str = service.to_string();
     glib::spawn_future_local(async move {
-        let menu_path = fetch_menu_path(&service_str).await.unwrap_or_default();
+        let menu_path = fetch_menu_path(&service_str, "/StatusNotifierItem")
+            .await
+            .unwrap_or_default();
         if menu_path.is_empty() {
             return;
         }

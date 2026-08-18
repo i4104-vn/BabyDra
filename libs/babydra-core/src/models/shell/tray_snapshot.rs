@@ -2,8 +2,10 @@
 
 /// A lightweight snapshot of a tray icon used by the panel to detect when the
 /// tray contents changed and trigger a rebuild.
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub struct TraySnapshot {
     pub service: String,
+    pub path: String,
     pub icon_name: String,
+    pub title: String,
 }

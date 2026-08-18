@@ -13,6 +13,19 @@ pub fn get_tray_items() -> Vec<TrayItem> {
     registry.lock().unwrap().clone()
 }
 
+/// Helper to parse service registration string and sender header into bus name and object path.
+pub fn parse_service_and_path(service: &str, sender: &str) -> (String, String) {
+    if service.starts_with('/') {
+        (sender.to_string(), service.to_string())
+    } else if let Some(slash_idx) = service.find('/') {
+        let bus = &service[..slash_idx];
+        let path = &service[slash_idx..];
+        (bus.to_string(), path.to_string())
+    } else {
+        (service.to_string(), "/StatusNotifierItem".to_string())
+    }
+}
+
 #[zbus::proxy(
     interface = "org.kde.StatusNotifierItem",
     default_path = "/StatusNotifierItem"
@@ -23,10 +36,19 @@ pub trait StatusNotifierItem {
     fn context_menu(&self, x: i32, y: i32) -> zbus::Result<()>;
 
     #[zbus(property)]
-    fn icon_name(&self) -> zbus::Result<String>;
+    fn id(&self) -> zbus::Result<String>;
 
     #[zbus(property)]
     fn title(&self) -> zbus::Result<String>;
+
+    #[zbus(property)]
+    fn icon_name(&self) -> zbus::Result<String>;
+
+    #[zbus(property)]
+    fn icon_theme_path(&self) -> zbus::Result<String>;
+
+    #[zbus(property)]
+    fn attention_icon_name(&self) -> zbus::Result<String>;
 
     #[zbus(property)]
     fn menu(&self) -> zbus::Result<zbus::zvariant::ObjectPath<'_>>;
@@ -37,19 +59,16 @@ pub struct StatusNotifierWatcher;
 
 #[interface(name = "org.kde.StatusNotifierWatcher")]
 impl StatusNotifierWatcher {
-    async fn reg_notifier_item(
+    #[zbus(name = "RegisterStatusNotifierItem")]
+    async fn register_status_notifier_item(
         &self,
         service: String,
         #[zbus(header)] header: zbus::message::Header<'_>,
     ) {
         let sender = header.sender().map(|s| s.to_string()).unwrap_or_default();
-        let target_service = if service.starts_with('/') {
-            sender.clone()
-        } else {
-            service.clone()
-        };
+        let (bus_name_str, object_path) = parse_service_and_path(&service, &sender);
 
-        if target_service.is_empty() {
+        if bus_name_str.is_empty() {
             return;
         }
 
@@ -58,7 +77,7 @@ impl StatusNotifierWatcher {
             Err(_) => return,
         };
 
-        let bus_name = match zbus::names::BusName::try_from(target_service.clone()) {
+        let bus_name = match zbus::names::BusName::try_from(bus_name_str.clone()) {
             Ok(name) => name,
             Err(_) => return,
         };
@@ -66,7 +85,7 @@ impl StatusNotifierWatcher {
         let proxy = match StatusNotifierItemProxy::builder(&connection)
             .destination(bus_name)
             .unwrap()
-            .path("/StatusNotifierItem")
+            .path(object_path.clone())
             .unwrap()
             .build()
             .await
@@ -75,33 +94,67 @@ impl StatusNotifierWatcher {
             Err(_) => return,
         };
 
-        let icon_name = proxy
-            .icon_name()
-            .await
-            .unwrap_or_else(|_| "image-missing".to_string());
-        let title = proxy.title().await.unwrap_or_else(|_| String::new());
+        let icon_name = match proxy.icon_name().await {
+            Ok(name) if !name.is_empty() => name,
+            _ => proxy.attention_icon_name().await.unwrap_or_default(),
+        };
+
+        let id = proxy.id().await.unwrap_or_default();
+        let title = proxy.title().await.unwrap_or_else(|_| id.clone());
+
+        let final_icon = if !icon_name.is_empty() {
+            if let Ok(theme_path) = proxy.icon_theme_path().await {
+                if !theme_path.is_empty() {
+                    let p = std::path::PathBuf::from(&theme_path).join(&icon_name);
+                    if p.exists() {
+                        p.to_string_lossy().to_string()
+                    } else {
+                        icon_name
+                    }
+                } else {
+                    icon_name
+                }
+            } else {
+                icon_name
+            }
+        } else if !id.is_empty() {
+            id
+        } else {
+            "application-x-executable".to_string()
+        };
 
         let item = TrayItem {
-            service: target_service,
-            icon_name,
+            service: bus_name_str,
+            path: object_path,
+            icon_name: final_icon,
             title,
         };
 
         let registry = TRAY_ITEMS.get_or_init(|| Arc::new(Mutex::new(Vec::new())));
         let mut lock = registry.lock().unwrap();
-        lock.retain(|x| x.service != item.service);
+        lock.retain(|x| !(x.service == item.service && x.path == item.path));
         lock.push(item);
     }
 
-    async fn reg_notifier_host(&self, _service: String) {}
+    #[zbus(name = "RegisterStatusNotifierHost")]
+    async fn register_status_notifier_host(&self, _service: String) {}
 
     #[zbus(property)]
-    async fn get_notifier_items(&self) -> Vec<String> {
-        get_tray_items().into_iter().map(|x| x.service).collect()
+    async fn registered_status_notifier_items(&self) -> Vec<String> {
+        get_tray_items()
+            .into_iter()
+            .map(|x| {
+                if x.path == "/StatusNotifierItem" {
+                    x.service
+                } else {
+                    format!("{}/{}", x.service, x.path.trim_start_matches('/'))
+                }
+            })
+            .collect()
     }
 
     #[zbus(property)]
-    async fn is_notifier_host_reg(&self) -> bool {
+    async fn is_status_notifier_host_registered(&self) -> bool {
         true
     }
 
@@ -133,7 +186,7 @@ pub fn spawn_watcher() {
             };
 
             loop {
-                tokio::time::sleep(Duration::from_secs(1)).await;
+                tokio::time::sleep(Duration::from_millis(500)).await;
                 let registry = TRAY_ITEMS.get_or_init(|| Arc::new(Mutex::new(Vec::new())));
                 let current_items = {
                     let lock = registry.lock().unwrap();
@@ -151,16 +204,14 @@ pub fn spawn_watcher() {
                                 zbus::names::BusName::try_from(item.service.clone())
                             {
                                 let has_owner = tokio::time::timeout(
-                                    Duration::from_millis(100),
+                                    Duration::from_millis(200),
                                     dbus_proxy_clone.name_has_owner(bus_name.clone()),
                                 )
                                 .await;
 
                                 match has_owner {
                                     Ok(Ok(true)) => {
-                                        let service_clone = item.service.clone();
-                                        let icon_name_clone = item.icon_name.clone();
-                                        let title_clone = item.title.clone();
+                                        let item_clone = item.clone();
                                         let conn_clone2 = conn_clone.clone();
 
                                         let query_fut = async move {
@@ -168,25 +219,42 @@ pub fn spawn_watcher() {
                                                 StatusNotifierItemProxy::builder(&conn_clone2)
                                                     .destination(bus_name)
                                                     .unwrap()
-                                                    .path("/StatusNotifierItem")
+                                                    .path(item_clone.path.clone())
                                                     .unwrap()
                                                     .build()
                                                     .await
                                             {
-                                                let new_icon = proxy
-                                                    .icon_name()
-                                                    .await
-                                                    .unwrap_or_else(|_| icon_name_clone.clone());
-                                                let final_icon = if new_icon.is_empty() {
-                                                    icon_name_clone
-                                                } else {
-                                                    new_icon
+                                                let icon_name = match proxy.icon_name().await {
+                                                    Ok(name) if !name.is_empty() => name,
+                                                    _ => proxy.attention_icon_name().await.unwrap_or_default(),
                                                 };
-                                                let new_title = proxy
-                                                    .title()
-                                                    .await
-                                                    .unwrap_or_else(|_| title_clone);
-                                                Some((final_icon, new_title))
+                                                let id = proxy.id().await.unwrap_or_default();
+                                                let title = proxy.title().await.unwrap_or_else(|_| id.clone());
+
+                                                let final_icon = if !icon_name.is_empty() {
+                                                    if let Ok(theme_path) = proxy.icon_theme_path().await {
+                                                        if !theme_path.is_empty() {
+                                                            let p = std::path::PathBuf::from(&theme_path).join(&icon_name);
+                                                            if p.exists() {
+                                                                p.to_string_lossy().to_string()
+                                                            } else {
+                                                                icon_name
+                                                            }
+                                                        } else {
+                                                            icon_name
+                                                        }
+                                                    } else {
+                                                        icon_name
+                                                    }
+                                                } else if !id.is_empty() {
+                                                    id
+                                                } else if !item_clone.icon_name.is_empty() {
+                                                    item_clone.icon_name.clone()
+                                                } else {
+                                                    "application-x-executable".to_string()
+                                                };
+
+                                                Some((final_icon, title))
                                             } else {
                                                 None
                                             }
@@ -194,16 +262,19 @@ pub fn spawn_watcher() {
 
                                         if let Ok(Some((new_icon, new_title))) =
                                             tokio::time::timeout(
-                                                Duration::from_millis(150),
+                                                Duration::from_millis(250),
                                                 query_fut,
                                             )
                                             .await
                                         {
                                             return Some(TrayItem {
-                                                service: service_clone,
+                                                service: item.service,
+                                                path: item.path,
                                                 icon_name: new_icon,
                                                 title: new_title,
                                             });
+                                        } else {
+                                            return Some(item);
                                         }
                                     }
                                     _ => {
