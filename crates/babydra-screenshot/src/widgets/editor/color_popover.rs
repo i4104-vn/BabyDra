@@ -26,42 +26,42 @@ pub fn create_color_popover(
 
     let colors = vec![
         (
-            babydra_core::i18n::t("color.red"),
+            babydra_core::i18n::trans("color.red"),
             "red",
             (0.93, 0.15, 0.15),
         ),
         (
-            babydra_core::i18n::t("color.orange"),
+            babydra_core::i18n::trans("color.orange"),
             "orange",
             (0.98, 0.45, 0.09),
         ),
         (
-            babydra_core::i18n::t("color.yellow"),
+            babydra_core::i18n::trans("color.yellow"),
             "yellow",
             (0.92, 0.70, 0.15),
         ),
         (
-            babydra_core::i18n::t("color.green"),
+            babydra_core::i18n::trans("color.green"),
             "green",
             (0.13, 0.77, 0.36),
         ),
         (
-            babydra_core::i18n::t("color.blue"),
+            babydra_core::i18n::trans("color.blue"),
             "blue",
             (0.23, 0.51, 0.96),
         ),
         (
-            babydra_core::i18n::t("color.purple"),
+            babydra_core::i18n::trans("color.purple"),
             "purple",
             (0.66, 0.33, 0.97),
         ),
         (
-            babydra_core::i18n::t("color.white"),
+            babydra_core::i18n::trans("color.white"),
             "white",
             (1.0, 1.0, 1.0),
         ),
         (
-            babydra_core::i18n::t("color.black"),
+            babydra_core::i18n::trans("color.black"),
             "black",
             (0.0, 0.0, 0.0),
         ),

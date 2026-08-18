@@ -58,7 +58,7 @@ pub fn copy_to_clipboard(state: &EditorState, window: &gtk4::ApplicationWindow) 
 }
 
 fn notify_copied() {
-    let notif_title = babydra_core::i18n::t("screenshot.copied_title");
-    let notif_msg = babydra_core::i18n::t("screenshot.copied_msg");
+    let notif_title = babydra_core::i18n::trans("screenshot.copied_title");
+    let notif_msg = babydra_core::i18n::trans("screenshot.copied_msg");
     babydra_core::send_notification(&notif_title, &notif_msg);
 }

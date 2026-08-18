@@ -8,7 +8,7 @@ use std::rc::Rc;
 use babydra_core::models::{EditorState, Tool};
 use babydra_core::services::screenshot::trigger_save;
 
-use super::canvas::{draw_editor_canvas, setup_editor_gestures};
+use super::canvas::{draw_editor_canvas, setup_editor_gest};
 use super::clipboard::copy_to_clipboard;
 use super::color_popover::create_color_popover;
 use crate::widgets::editor::setup_editor_keys;
@@ -76,40 +76,40 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
     let btn_reset = gtk4::Button::builder()
         .child(&babydra_ui_kit::ui::icon::get_icon("refresh", 16))
         .build();
-    btn_reset.set_tooltip_text(Some(&babydra_core::i18n::t("screenshot.reset_tooltip")));
+    btn_reset.set_tooltip_text(Some(&babydra_core::i18n::trans("screenshot.reset_tooltip")));
     btn_reset.add_css_class("flat");
     btn_reset.add_css_class("screenshot-toolbar-btn");
 
     let btn_pen = gtk4::Button::builder()
         .child(&babydra_ui_kit::ui::icon::get_icon("edit", 16))
         .build();
-    btn_pen.set_tooltip_text(Some(&babydra_core::i18n::t("screenshot.pen_tooltip")));
+    btn_pen.set_tooltip_text(Some(&babydra_core::i18n::trans("screenshot.pen_tooltip")));
     btn_pen.add_css_class("flat");
     btn_pen.add_css_class("screenshot-toolbar-btn");
 
     let btn_rect = gtk4::Button::builder()
         .child(&babydra_ui_kit::ui::icon::get_icon("rect", 16))
         .build();
-    btn_rect.set_tooltip_text(Some(&babydra_core::i18n::t("screenshot.rect_tooltip")));
+    btn_rect.set_tooltip_text(Some(&babydra_core::i18n::trans("screenshot.rect_tooltip")));
     btn_rect.add_css_class("flat");
     btn_rect.add_css_class("screenshot-toolbar-btn");
 
     let btn_blur = gtk4::Button::builder()
         .child(&babydra_ui_kit::ui::icon::get_icon("blur", 16))
         .build();
-    btn_blur.set_tooltip_text(Some(&babydra_core::i18n::t("screenshot.blur_tooltip")));
+    btn_blur.set_tooltip_text(Some(&babydra_core::i18n::trans("screenshot.blur_tooltip")));
     btn_blur.add_css_class("flat");
     btn_blur.add_css_class("screenshot-toolbar-btn");
 
     let btn_eraser = gtk4::Button::builder()
         .child(&babydra_ui_kit::ui::icon::get_icon("broom", 16))
         .build();
-    btn_eraser.set_tooltip_text(Some(&babydra_core::i18n::t("screenshot.eraser_tooltip")));
+    btn_eraser.set_tooltip_text(Some(&babydra_core::i18n::trans("screenshot.eraser_tooltip")));
     btn_eraser.add_css_class("flat");
     btn_eraser.add_css_class("screenshot-toolbar-btn");
 
     let color_btn = gtk4::Button::new();
-    color_btn.set_tooltip_text(Some(&babydra_core::i18n::t("screenshot.color_tooltip")));
+    color_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("screenshot.color_tooltip")));
     color_btn.add_css_class("flat");
     color_btn.add_css_class("screenshot-toolbar-btn");
 
@@ -185,7 +185,7 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
     let btn_copy = gtk4::Button::builder()
         .child(&babydra_ui_kit::ui::icon::get_icon("copy", 16))
         .build();
-    btn_copy.set_tooltip_text(Some(&babydra_core::i18n::t("screenshot.copy_tooltip")));
+    btn_copy.set_tooltip_text(Some(&babydra_core::i18n::trans("screenshot.copy_tooltip")));
     btn_copy.add_css_class("flat");
     btn_copy.add_css_class("screenshot-toolbar-btn");
 
@@ -200,7 +200,7 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
     let btn_save = gtk4::Button::builder()
         .child(&babydra_ui_kit::ui::icon::get_icon("download", 16))
         .build();
-    btn_save.set_tooltip_text(Some(&babydra_core::i18n::t("screenshot.save_tooltip")));
+    btn_save.set_tooltip_text(Some(&babydra_core::i18n::trans("screenshot.save_tooltip")));
     btn_save.add_css_class("flat");
     btn_save.add_css_class("screenshot-toolbar-btn");
 
@@ -215,7 +215,7 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
     let btn_cancel = gtk4::Button::builder()
         .child(&babydra_ui_kit::ui::icon::get_icon("close", 16))
         .build();
-    btn_cancel.set_tooltip_text(Some(&babydra_core::i18n::t("screenshot.cancel_tooltip")));
+    btn_cancel.set_tooltip_text(Some(&babydra_core::i18n::trans("screenshot.cancel_tooltip")));
     btn_cancel.add_css_class("flat");
     btn_cancel.add_css_class("screenshot-toolbar-btn");
 
@@ -253,7 +253,7 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
     overlay.add_overlay(&toolbar_wrapper);
 
     // Mouse gestures setup
-    setup_editor_gestures(&drawing_area, state.clone(), &toolbar_wrapper, &btn_pen);
+    setup_editor_gest(&drawing_area, state.clone(), &toolbar_wrapper, &btn_pen);
 
     // Keyboard shortcuts setup
     setup_editor_keys(&window, state.clone());

@@ -2,7 +2,7 @@
 
 mod widgets;
 
-use babydra_core::{capture_screen_to_temp, handle_fullscreen_capture};
+use babydra_core::{capture_screen, capture_fullscreen};
 use gtk4::prelude::*;
 use gtk4::Application;
 use std::env;
@@ -16,12 +16,12 @@ fn main() {
 
     // 1. Handle Fullscreen Immediate Capture
     if args.contains(&"--full".to_string()) {
-        handle_fullscreen_capture();
+        capture_fullscreen();
         return;
     }
 
     // 2. Interactive Regional Capture (Default)
-    let temp_path = match capture_screen_to_temp() {
+    let temp_path = match capture_screen() {
         Some(path) => path,
         None => return,
     };

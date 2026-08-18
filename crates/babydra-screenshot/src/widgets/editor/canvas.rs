@@ -117,7 +117,7 @@ pub fn draw_editor_canvas(cr: &cairo::Context, s: &EditorState, width: f64, heig
 
 /// Sets up pointer/mouse drag gestures on the canvas to handle regional selection,
 /// free-hand strokes, drawing boxes, and eraser/blur selection.
-pub fn setup_editor_gestures(
+pub fn setup_editor_gest(
     drawing_area: &gtk4::DrawingArea,
     state: Rc<RefCell<EditorState>>,
     toolbar_wrapper: &gtk4::Box,
