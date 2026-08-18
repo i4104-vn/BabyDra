@@ -1,10 +1,10 @@
 //! Context menu displayed when right-clicking on files or folders on ~/Desktop.
 
+use super::refresh_nav_cb;
 use babydra_core::i18n::t;
 use babydra_core::models::explore::{FileEntry, FileType};
 use babydra_ui_kit::components::context_menu::ContextMenuBuilder;
 use babydra_ui_kit::components::explore::prelude::*;
-use gtk4::prelude::*;
 use std::rc::Rc;
 
 /// Shows the context menu for a specific file or folder entry.
@@ -89,17 +89,9 @@ pub fn show_desktop_file_menu(
     let ref_cb_c = refresh_cb.clone();
     let ddir_c = desktop_dir.clone();
     let parent_win_c = parent_window.clone();
-    builder = builder.item(
-        &t("desktop.rename"),
-        "rename",
-        move || {
-            let ref_cb = ref_cb_c.clone();
-            let nav_cb: Rc<dyn Fn(std::path::PathBuf)> = Rc::new(move |_| {
-                ref_cb();
-            });
-            show_rename_dialog(&path_c, ddir_c.clone(), nav_cb, Some(&parent_win_c));
-        },
-    );
+    builder = builder.item(&t("desktop.rename"), "rename", move || {
+        show_rename_dialog(&path_c, ddir_c.clone(), refresh_nav_cb(ref_cb_c.clone()), Some(&parent_win_c));
+    });
 
     // 6. Move to Trash
     let path_c = entry.path.clone();
@@ -157,8 +149,10 @@ pub fn show_desktop_file_menu(
     );
 
     // 9. Custom Context Options from babydra.conf
-    let (popover, vbox) = builder.build();
-    append_custom_context_items(&vbox, &popover, vec![entry.path.clone()], false);
+    let entry_path = entry.path.clone();
+    builder = builder.custom_items(move |vbox, popover| {
+        append_custom_context_items(vbox, popover, vec![entry_path], false);
+    });
 
-    popover.popup();
+    builder.popup();
 }

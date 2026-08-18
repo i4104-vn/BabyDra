@@ -1,10 +1,10 @@
 //! Context menu displayed when right-clicking on empty desktop background.
 
+use super::{refresh_nav_cb, update_desktop_config};
 use babydra_core::i18n::t;
 use babydra_ui_kit::components::context_menu::ContextMenuBuilder;
 use babydra_ui_kit::components::explore::prelude::*;
 use crate::state::DesktopState;
-use gtk4::prelude::*;
 use std::rc::Rc;
 
 /// Shows the context menu for empty desktop areas.
@@ -22,56 +22,32 @@ pub fn show_desktop_empty_menu(
     let ref_cb_c = refresh_cb.clone();
     let ddir_c = desktop_dir.clone();
     let parent_win_c = parent_window.clone();
-    builder = builder.item(
-        &t("desktop.new_folder"),
-        "folder-new",
-        move || {
-            let ref_cb = ref_cb_c.clone();
-            let nav_cb: Rc<dyn Fn(std::path::PathBuf)> = Rc::new(move |_| {
-                ref_cb();
-            });
-            show_new_folder_dialog(ddir_c.clone(), nav_cb, Some(&parent_win_c));
-        },
-    );
+    builder = builder.item(&t("desktop.new_folder"), "folder-new", move || {
+        show_new_folder_dialog(ddir_c.clone(), refresh_nav_cb(ref_cb_c.clone()), Some(&parent_win_c));
+    });
 
     // 2. New Document (reusing ui-kit show_new_file_dialog)
     let ref_cb_c = refresh_cb.clone();
     let ddir_c = desktop_dir.clone();
     let parent_win_c = parent_window.clone();
-    builder = builder.item(
-        &t("desktop.new_file"),
-        "text",
-        move || {
-            let ref_cb = ref_cb_c.clone();
-            let nav_cb: Rc<dyn Fn(std::path::PathBuf)> = Rc::new(move |_| {
-                ref_cb();
-            });
-            show_new_file_dialog(ddir_c.clone(), nav_cb, Some(&parent_win_c));
-        },
-    );
+    builder = builder.item(&t("desktop.new_file"), "text", move || {
+        show_new_file_dialog(ddir_c.clone(), refresh_nav_cb(ref_cb_c.clone()), Some(&parent_win_c));
+    });
 
     // 3. Paste (if clipboard has files)
     let clipboard_data = CLIPBOARD.with(|cb| cb.borrow().clone());
     if let Some((sources, is_cut)) = clipboard_data {
         let ref_cb_c = refresh_cb.clone();
         let ddir_c = desktop_dir.clone();
-        builder = builder.item(
-            &t("desktop.paste"),
-            "paste",
-            move || {
-                let ref_cb = ref_cb_c.clone();
-                let nav_cb: Rc<dyn Fn(std::path::PathBuf)> = Rc::new(move |_| {
-                    ref_cb();
-                });
-                execute_paste(
-                    sources.clone(),
-                    ddir_c.clone(),
-                    is_cut,
-                    ddir_c.clone(),
-                    nav_cb,
-                );
-            },
-        );
+        builder = builder.item(&t("desktop.paste"), "paste", move || {
+            execute_paste(
+                sources.clone(),
+                ddir_c.clone(),
+                is_cut,
+                ddir_c.clone(),
+                refresh_nav_cb(ref_cb_c.clone()),
+            );
+        });
     }
 
     builder = builder.separator();
@@ -119,30 +95,26 @@ pub fn show_desktop_empty_menu(
     // 6. Sort Options
     let ref_cb_c = refresh_cb.clone();
     builder = builder.item(&t("desktop.sort_by_name"), "view-list", move || {
-        let mut conf = babydra_core::load_desktop_config();
-        conf.sort_by = "name".to_string();
-        babydra_core::save_desktop_config(&conf);
+        update_desktop_config(|conf| conf.sort_by = "name".to_string());
         ref_cb_c();
     });
 
     let ref_cb_c = refresh_cb.clone();
     builder = builder.item(&t("desktop.sort_by_date"), "calendar", move || {
-        let mut conf = babydra_core::load_desktop_config();
-        conf.sort_by = "modified".to_string();
-        babydra_core::save_desktop_config(&conf);
+        update_desktop_config(|conf| conf.sort_by = "modified".to_string());
         ref_cb_c();
     });
 
     // 7. Icon Size Options (Toggle: 36 -> 48 -> 64)
     let ref_cb_c = refresh_cb.clone();
     builder = builder.item(&t("desktop.toggle_icon_size"), "view-grid", move || {
-        let mut conf = babydra_core::load_desktop_config();
-        conf.icon_size = match conf.icon_size {
-            36 => 48,
-            48 => 64,
-            _ => 36,
-        };
-        babydra_core::save_desktop_config(&conf);
+        update_desktop_config(|conf| {
+            conf.icon_size = match conf.icon_size {
+                36 => 48,
+                48 => 64,
+                _ => 36,
+            };
+        });
         ref_cb_c();
     });
 
@@ -165,8 +137,9 @@ pub fn show_desktop_empty_menu(
     });
 
     // 10. Custom Context Options from babydra.conf
-    let (popover, vbox) = builder.build();
-    append_custom_context_items(&vbox, &popover, vec![desktop_dir], true);
+    builder = builder.custom_items(move |vbox, popover| {
+        append_custom_context_items(vbox, popover, vec![desktop_dir], true);
+    });
 
-    popover.popup();
+    builder.popup();
 }

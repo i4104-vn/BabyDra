@@ -18,6 +18,31 @@ use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
 
+/// Builds a refresh callback that reloads desktop entries and rebuilds the icon grid.
+fn make_refresh_cb(
+    fixed: &Fixed,
+    state: &Rc<RefCell<DesktopState>>,
+    parent_window: &gtk4::ApplicationWindow,
+    rubberband: &Box,
+) -> Rc<dyn Fn()> {
+    let fixed_c = fixed.clone();
+    let state_c = state.clone();
+    let parent_win_c = parent_window.clone();
+    let rubberband_c = rubberband.clone();
+
+    Rc::new(move || {
+        let f = fixed_c.clone();
+        let s = state_c.clone();
+        let p = parent_win_c.clone();
+        let r = rubberband_c.clone();
+
+        glib::spawn_future_local(async move {
+            s.borrow_mut().reload_entries().await;
+            rebuild_grid_icons(&f, &s, &p, &r);
+        });
+    })
+}
+
 /// Builds the desktop grid fixed layout, attaching gestures, keyboard shortcuts, and file watching.
 pub fn create_desktop_grid(
     parent_window: &gtk4::ApplicationWindow,
@@ -38,22 +63,7 @@ pub fn create_desktop_grid(
     fixed.put(&rubberband, 0.0, 0.0);
 
     // 2. Refresh callback
-    let fixed_c = fixed.clone();
-    let state_c = state.clone();
-    let parent_win_c = parent_window.clone();
-    let rubberband_c = rubberband.clone();
-
-    let refresh_fn: Rc<dyn Fn()> = Rc::new(move || {
-        let f = fixed_c.clone();
-        let s = state_c.clone();
-        let p = parent_win_c.clone();
-        let r = rubberband_c.clone();
-
-        glib::spawn_future_local(async move {
-            s.borrow_mut().reload_entries().await;
-            rebuild_grid_icons(&f, &s, &p, &r);
-        });
-    });
+    let refresh_fn = make_refresh_cb(&fixed, &state, parent_window, &rubberband);
 
     // 3. Desktop Background Click Gesture (Deselect / Focus)
     let bg_click = GestureClick::new();
@@ -154,10 +164,7 @@ pub fn create_desktop_grid(
                 let ddir = DesktopState::desktop_dir();
                 let clipboard_data = CLIPBOARD.with(|cb| cb.borrow().clone());
                 if let Some((sources, is_cut)) = clipboard_data {
-                    let ref_cb = ref_cb_key.clone();
-                    let nav_cb: Rc<dyn Fn(std::path::PathBuf)> = Rc::new(move |_| {
-                        ref_cb();
-                    });
+                    let nav_cb = crate::widgets::context_menu::refresh_nav_cb(ref_cb_key.clone());
                     execute_paste(
                         sources,
                         ddir.clone(),
@@ -294,16 +301,7 @@ pub fn rebuild_grid_icons(
             let parent_win_ref = parent_win_rc.clone();
             let rubberband_ref = rubberband_rc.clone();
 
-            let refresh_cb = Rc::new(move || {
-                let f = fixed_ref.clone();
-                let s = state_ref.clone();
-                let p = parent_win_ref.clone();
-                let r = rubberband_ref.clone();
-                glib::spawn_future_local(async move {
-                    s.borrow_mut().reload_entries().await;
-                    rebuild_grid_icons(&f, &s, &p, &r);
-                });
-            });
+            let refresh_cb = make_refresh_cb(&fixed_ref, &state_ref, &parent_win_ref, &rubberband_ref);
 
             show_desktop_file_menu(
                 fixed_rc.upcast_ref::<gtk4::Widget>(),
@@ -330,16 +328,7 @@ pub fn rebuild_grid_icons(
             let parent_f = parent_window.clone();
             let rubber_f = rubberband.clone();
 
-            let ref_folder_cb: Rc<dyn Fn()> = Rc::new(move || {
-                let f = fixed_f.clone();
-                let s = state_f.clone();
-                let p = parent_f.clone();
-                let r = rubber_f.clone();
-                glib::spawn_future_local(async move {
-                    s.borrow_mut().reload_entries().await;
-                    rebuild_grid_icons(&f, &s, &p, &r);
-                });
-            });
+            let ref_folder_cb = make_refresh_cb(&fixed_f, &state_f, &parent_f, &rubber_f);
 
             let folder_drop = create_folder_drop_target(entry.path.clone(), icon_widget.clone(), ref_folder_cb);
             icon_widget.add_controller(folder_drop);
