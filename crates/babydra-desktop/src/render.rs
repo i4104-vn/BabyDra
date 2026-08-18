@@ -2,8 +2,9 @@
 
 use crate::widgets::grid::create_desktop_grid;
 use crate::widgets::wallpaper::create_wallpaper_widget;
+use babydra_ui_kit::ui::window::init_layer_window;
 use gtk4::prelude::*;
-use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
+use gtk4_layer_shell::{Edge, KeyboardMode, Layer};
 
 /// Builds the desktop background window with wallpaper and icon grid.
 pub fn build_desktop_window(app: &gtk4::Application) -> gtk4::ApplicationWindow {
@@ -11,17 +12,20 @@ pub fn build_desktop_window(app: &gtk4::Application) -> gtk4::ApplicationWindow 
     babydra_ui_kit::ui::theme::apply_theme_class(&window);
 
     // 1. Layer Shell Configuration — Strictly Layer::Background to always stay at the absolute bottom
-    window.init_layer_shell();
-    window.set_namespace("desktop");
-    window.set_layer(Layer::Background);
-    window.set_keyboard_mode(KeyboardMode::None);
-    window.set_exclusive_zone(-1);
-
-    // Anchor to all 4 edges of the screen for full-screen coverage
-    window.set_anchor(Edge::Top, true);
-    window.set_anchor(Edge::Bottom, true);
-    window.set_anchor(Edge::Left, true);
-    window.set_anchor(Edge::Right, true);
+    init_layer_window(
+        &window,
+        Layer::Background,
+        KeyboardMode::None,
+        -1,
+        &[
+            (Edge::Top, true),
+            (Edge::Bottom, true),
+            (Edge::Left, true),
+            (Edge::Right, true),
+        ],
+        0,
+        Some("desktop"),
+    );
 
     window.add_css_class("desktop-window");
 
