@@ -4,6 +4,7 @@ use gtk4::prelude::*;
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
 
 /// Standard window layer shell initialization helper to configure widgets as desktop shell layers.
+#[allow(clippy::too_many_arguments)]
 pub fn init_layer_window(
     window: &gtk4::ApplicationWindow,
     layer: Layer,
@@ -11,8 +12,12 @@ pub fn init_layer_window(
     exclusive_zone: i32,
     anchors: &[(Edge, bool)],
     margin_bottom: i32,
+    namespace: Option<&str>,
 ) {
     window.init_layer_shell();
+    if let Some(ns) = namespace {
+        window.set_namespace(ns);
+    }
     window.set_layer(layer);
     window.set_keyboard_mode(kbd_mode);
     window.set_exclusive_zone(exclusive_zone);

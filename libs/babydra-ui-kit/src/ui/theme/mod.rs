@@ -20,7 +20,7 @@ const SHARED_CSS: &str = concat!(
     "\n",
     include_str!("../../styles/shared/panel/status.css"),
     "\n",
-    include_str!("../../styles/shared/panel/sys_monitor.css"),
+    include_str!("../../styles/shared/panel/system_monitor.css"),
     "\n",
     include_str!("../../styles/shared/panel/tray.css"),
     "\n",

@@ -1,10 +1,10 @@
 pub mod badge;
 pub mod buttons;
-pub mod card;
+pub mod cards;
 pub mod context_menu;
 pub mod explore;
 pub mod list_group;
-pub mod modal;
+pub mod modals;
 pub mod placeholder;
 pub mod popovers;
 pub mod slider;
@@ -21,7 +21,7 @@ pub use buttons::{
     create_square_toggle_tile, create_toggle_tile, create_vpn_shield_icon,
     create_wallpaper_thumbnail_icon, create_wifi_signal_icon, update_toggle_tile_state,
 };
-pub use card::{
+pub use cards::{
     create_card, create_card_with_class, create_scrollable_list, create_subtitle,
     create_switch_card, create_title,
 };
@@ -34,7 +34,7 @@ pub use context_menu::{
     create_submenu_item, show_tray_context_menu, ContextMenuBuilder,
 };
 pub use list_group::{clear_box, clear_list_box, create_list_row};
-pub use modal::{
+pub use modals::{
     PasswordDialog, VpnConfigDialog, VpnLogDialog, WifiConfigDialog, WifiInfoDialog,
     WifiPasswordDialog,
 };

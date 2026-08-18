@@ -43,8 +43,9 @@ pub mod prelude {
         create_context_menu_popover, create_footer_container, create_footer_icon_button,
         create_menu_group_header, create_menu_item, create_menu_item_destructive,
         create_menu_item_destructive_sensitive, create_menu_item_full, create_menu_item_sensitive,
-        create_menu_item_with_shortcut, create_menu_separator, show_tray_context_menu,
-        ContextMenuBuilder, CustomSlider, CustomSwitch, HoverPopoverRow, PasswordDialog,
+        create_menu_item_with_shortcut, create_menu_separator, create_menu_text_item,
+        create_submenu_item, show_tray_context_menu, ContextMenuBuilder, CustomSlider,
+        CustomSwitch, HoverPopoverRow, PasswordDialog,
         PlaceholderState, ToggleRow, VpnConfigDialog, VpnLogDialog, WifiConfigDialog,
         WifiInfoDialog, WifiPasswordDialog,
     };

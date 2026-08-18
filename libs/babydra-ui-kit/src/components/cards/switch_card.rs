@@ -1,4 +1,4 @@
-use crate::components::card::standard::create_card;
+use crate::components::cards::standard::create_card;
 use gtk4::prelude::*;
 
 /// Creates a switch card containing a title, subtitle, and an active switch.
