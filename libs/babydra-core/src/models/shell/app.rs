@@ -2,6 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 use std::hash::{Hash, Hasher};
+use std::path::PathBuf;
 
 /// Information model of a parsed desktop entry application.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -12,6 +13,9 @@ pub struct DesktopApp {
     pub exec: String,
     /// System icon theme name or filepath.
     pub icon: Option<String>,
+    /// Path to the .desktop file on disk.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_path: Option<PathBuf>,
     /// Whether this app was installed as a dependency / system helper.
     #[serde(default)]
     pub is_dependency: bool,

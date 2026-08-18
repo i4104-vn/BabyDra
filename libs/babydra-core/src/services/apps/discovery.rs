@@ -128,6 +128,7 @@ pub fn parse_desktop_file(path: &Path) -> Option<DesktopApp> {
             name: n,
             exec: e,
             icon,
+            file_path: Some(path.to_path_buf()),
             is_dependency: false,
             app_id: None,
             window_title: None,

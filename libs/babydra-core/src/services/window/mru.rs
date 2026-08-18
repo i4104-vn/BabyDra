@@ -122,6 +122,7 @@ pub fn get_running_apps() -> Vec<DesktopApp> {
                 name: display_name,
                 exec: app_id.clone(),
                 icon: Some(app_id.clone()),
+                file_path: None,
                 is_dependency: false,
                 app_id: Some(app_id.clone()),
                 window_title: Some(title.clone()),
