@@ -34,9 +34,9 @@ pub fn create_logo_picture(size: i32) -> gtk4::Widget {
 
 /// Builds a scaled-down avatar `Image` at the requested size.
 /// Shared by the splash screen and the login panel to avoid duplicated logic.
-pub fn create_avatar_picture(size: i32) -> gtk4::Widget {
+pub fn create_avatar_img(size: i32) -> gtk4::Widget {
     if let Some(bytes) = babydra_core::get_avatar_bytes() {
-        if let Some(pixbuf) = babydra_core::crop_to_circle_pixbuf(&bytes, size) {
+        if let Some(pixbuf) = babydra_core::crop_circle(&bytes, size) {
             let texture = gtk4::gdk::Texture::for_pixbuf(&pixbuf);
             let img = gtk4::Image::from_paintable(Some(&texture));
             img.set_pixel_size(size);

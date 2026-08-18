@@ -33,13 +33,13 @@ pub fn build() -> super::LoginWidget {
     avatar_inner.set_halign(Align::Center);
     avatar_inner.set_valign(Align::Center);
 
-    let avatar_img = crate::widgets::create_avatar_picture(110);
+    let avatar_img = crate::widgets::create_avatar_img(110);
     avatar_img.add_css_class("avatar-img");
     avatar_inner.append(&avatar_img);
     avatar_ring.append(&avatar_inner);
 
     // 2. User Display Name Label
-    let username_label = Label::new(Some(&babydra_core::i18n::t("greeter.user")));
+    let username_label = Label::new(Some(&babydra_core::i18n::trans("greeter.user")));
     username_label.add_css_class("login-username-label");
     username_label.set_halign(Align::Center);
 
@@ -77,7 +77,7 @@ pub fn build() -> super::LoginWidget {
     pass_icon.add_css_class("input-icon");
 
     let pass_entry = PasswordEntry::new();
-    pass_entry.set_placeholder_text(Some(&babydra_core::i18n::t("greeter.password")));
+    pass_entry.set_placeholder_text(Some(&babydra_core::i18n::trans("greeter.password")));
     pass_entry.add_css_class("login-input");
     pass_entry.set_hexpand(true);
     pass_entry.set_valign(Align::Center);

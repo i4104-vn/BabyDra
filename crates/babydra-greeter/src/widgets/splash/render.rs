@@ -21,10 +21,10 @@ pub fn build() -> super::SplashWidget {
     let logo_splash = babydra_ui_kit::ui::icon::get_logo_png(110);
     logo_wrapper.append(&logo_splash);
 
-    let splash_title = Label::new(Some(&babydra_core::i18n::t("greeter.os_name")));
+    let splash_title = Label::new(Some(&babydra_core::i18n::trans("greeter.os_name")));
     splash_title.add_css_class("splash-title");
 
-    let splash_subtitle = Label::new(Some(&babydra_core::i18n::t("greeter.initializing")));
+    let splash_subtitle = Label::new(Some(&babydra_core::i18n::trans("greeter.initializing")));
     splash_subtitle.add_css_class("splash-subtitle");
 
     let spinner = Spinner::new();

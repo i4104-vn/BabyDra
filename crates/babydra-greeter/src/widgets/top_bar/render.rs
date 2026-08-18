@@ -31,7 +31,7 @@ pub fn build() -> super::TopBarWidget {
     let suspend_btn = Button::new();
     suspend_btn.add_css_class("power-btn");
     suspend_btn.add_css_class("action-btn-suspend");
-    suspend_btn.set_tooltip_text(Some(&babydra_core::i18n::t("greeter.suspend")));
+    suspend_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("greeter.suspend")));
     suspend_btn.set_cursor_from_name(Some("pointer"));
     let suspend_icon = babydra_ui_kit::ui::icon::get_icon_colored("sleep", 18, "#ffffff");
     suspend_btn.set_child(Some(&suspend_icon));
@@ -39,14 +39,14 @@ pub fn build() -> super::TopBarWidget {
     let reboot_btn = Button::new();
     reboot_btn.add_css_class("power-btn");
     reboot_btn.add_css_class("action-btn-reboot");
-    reboot_btn.set_tooltip_text(Some(&babydra_core::i18n::t("greeter.reboot")));
+    reboot_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("greeter.reboot")));
     reboot_btn.set_cursor_from_name(Some("pointer"));
     let reboot_icon = babydra_ui_kit::ui::icon::get_icon_colored("restart", 18, "#ffffff");
     reboot_btn.set_child(Some(&reboot_icon));
 
     let power_btn = Button::new();
     power_btn.add_css_class("power-btn");
-    power_btn.set_tooltip_text(Some(&babydra_core::i18n::t("greeter.power_off")));
+    power_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("greeter.power_off")));
     power_btn.set_cursor_from_name(Some("pointer"));
     let power_icon = babydra_ui_kit::ui::icon::get_icon_colored("power", 18, "#ffffff");
     power_btn.set_child(Some(&power_icon));
