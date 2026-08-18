@@ -4,7 +4,7 @@ use crate::widgets::list::build_apps_list;
 use babydra_core::DesktopApp;
 use babydra_core::{activate_app, save_history};
 use gtk4::prelude::*;
-use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
+use gtk4_layer_shell::{Edge, KeyboardMode, Layer};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -26,15 +26,19 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
 
     let window = gtk4::ApplicationWindow::new(app);
     babydra_ui_kit::ui::theme::apply_theme_class(&window);
-    window.init_layer_shell();
-    window.set_layer(Layer::Overlay);
-    window.set_keyboard_mode(KeyboardMode::Exclusive);
-    window.set_exclusive_zone(-1);
-
-    window.set_anchor(Edge::Top, true);
-    window.set_anchor(Edge::Bottom, true);
-    window.set_anchor(Edge::Left, true);
-    window.set_anchor(Edge::Right, true);
+    babydra_ui_kit::ui::window::init_layer_window(
+        &window,
+        Layer::Overlay,
+        KeyboardMode::Exclusive,
+        -1,
+        &[
+            (Edge::Top, true),
+            (Edge::Bottom, true),
+            (Edge::Left, true),
+            (Edge::Right, true),
+        ],
+        0,
+    );
     window.add_css_class("switcher-window");
 
     let main_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);

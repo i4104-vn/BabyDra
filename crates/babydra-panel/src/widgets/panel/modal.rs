@@ -1,7 +1,7 @@
 //! Control Center modal window UI construction and animation callbacks.
 
 use gtk4::prelude::*;
-use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
+use gtk4_layer_shell::{Edge, KeyboardMode, Layer};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -15,15 +15,19 @@ pub fn build_control_center_window_ui(
 ) -> (gtk4::ApplicationWindow, gtk4::Box) {
     let q_win = gtk4::ApplicationWindow::new(app);
     babydra_ui_kit::ui::theme::apply_theme_class(&q_win);
-    q_win.init_layer_shell();
-    q_win.set_layer(Layer::Overlay);
-    q_win.set_keyboard_mode(KeyboardMode::OnDemand);
-
-    // Anchor to all 4 edges to cover the entire screen transparently
-    q_win.set_anchor(Edge::Top, true);
-    q_win.set_anchor(Edge::Bottom, true);
-    q_win.set_anchor(Edge::Left, true);
-    q_win.set_anchor(Edge::Right, true);
+    babydra_ui_kit::ui::window::init_layer_window(
+        &q_win,
+        Layer::Overlay,
+        KeyboardMode::OnDemand,
+        0,
+        &[
+            (Edge::Top, true),
+            (Edge::Bottom, true),
+            (Edge::Left, true),
+            (Edge::Right, true),
+        ],
+        0,
+    );
     q_win.add_css_class("control-center-window");
 
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 14);

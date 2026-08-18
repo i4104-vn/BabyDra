@@ -46,9 +46,26 @@ pub fn create_lock_window(
 ) {
     let window = gtk4::ApplicationWindow::new(app);
     babydra_ui_kit::ui::theme::apply_theme_class(&window);
-    window.init_layer_shell();
-    window.set_layer(Layer::Overlay);
-    window.set_exclusive_zone(-1);
+
+    let kbd_mode = if is_primary {
+        KeyboardMode::Exclusive
+    } else {
+        KeyboardMode::None
+    };
+
+    babydra_ui_kit::ui::window::init_layer_window(
+        &window,
+        Layer::Overlay,
+        kbd_mode,
+        -1,
+        &[
+            (Edge::Top, true),
+            (Edge::Bottom, true),
+            (Edge::Left, true),
+            (Edge::Right, true),
+        ],
+        0,
+    );
     // Ensure the window is fully opaque — prevents Wayland compositor from rendering it transparent
     window.set_opacity(1.0);
 
@@ -56,16 +73,6 @@ pub fn create_lock_window(
         window.set_monitor(m);
     }
 
-    if is_primary {
-        window.set_keyboard_mode(KeyboardMode::Exclusive);
-    } else {
-        window.set_keyboard_mode(KeyboardMode::None);
-    }
-
-    window.set_anchor(Edge::Top, true);
-    window.set_anchor(Edge::Bottom, true);
-    window.set_anchor(Edge::Left, true);
-    window.set_anchor(Edge::Right, true);
     window.add_css_class("lock-window");
 
     window.connect_close_request(|_| glib::Propagation::Stop);
