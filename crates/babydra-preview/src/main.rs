@@ -3,6 +3,7 @@
 
 use babydra_core::i18n::t;
 use gtk4::prelude::*;
+use gtk4::Application;
 use std::path::PathBuf;
 
 mod widgets;
@@ -11,7 +12,9 @@ mod widgets;
 fn main() {
     babydra_core::services::logger::init_logger("babydra-preview", "babydra-preview.log");
 
-    let app = gtk4::Application::new(Some("com.babydra.preview"), Default::default());
+    let app = Application::builder()
+        .application_id("com.babydra.preview")
+        .build();
 
     app.connect_activate(|app| {
         babydra_ui_kit::ui::theme::init_theme();
@@ -62,5 +65,6 @@ fn main() {
         fallback_window.present();
     });
 
-    app.run_with_args(&["babydra-preview"]);
+    let exit_code = app.run().value();
+    std::process::exit(exit_code);
 }
