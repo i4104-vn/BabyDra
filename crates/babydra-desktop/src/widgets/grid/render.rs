@@ -37,15 +37,16 @@ pub fn rebuild_grid_icons(
     let icon_size = state_ref.config.icon_size;
     let entries = state_ref.entries.clone();
     let selected_paths = state_ref.selected_paths.clone();
+    let positions = state_ref.compute_all_positions();
     drop(state_ref);
 
-    for (index, entry) in entries.iter().enumerate() {
+    for entry in &entries {
         let is_sel = selected_paths.contains(&entry.path);
         let icon_widget = create_desktop_icon(entry, icon_size, is_sel);
         icon_widget.set_widget_name(&entry.path.to_string_lossy());
 
         let file_name = entry.name.to_string_lossy().to_string();
-        let (pos_x, pos_y) = state.borrow().get_entry_position(&file_name, index);
+        let (pos_x, pos_y) = positions.get(&file_name).copied().unwrap_or((16, 48));
 
         // 1. Single click / double click gesture
         let click_gesture = GestureClick::new();

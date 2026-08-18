@@ -1,6 +1,6 @@
 //! Drag and Drop subsystem for Desktop: DragSource, Desktop DropTarget, and Folder DropTarget.
 
-use crate::state::DesktopState;
+use crate::state::{snap_to_grid, DesktopState};
 use babydra_core::load_cropped_square;
 use gtk4::gdk::FileList;
 use gtk4::prelude::*;
@@ -112,9 +112,16 @@ pub fn create_desktop_drop(
 
             // 1. Internal Repositioning (Drag icon to a new spot on the desktop)
             if !internal_sources.is_empty() {
-                let spacing = state_drop.borrow().config.grid_spacing.max(64) as i32;
-                let base_x = (x as i32 / spacing) * spacing + 16;
-                let mut base_y = (y as i32 / spacing) * spacing + 16;
+                let cell_w = state_drop.borrow().config.grid_spacing.max(80) as i32;
+                let cell_h = cell_w + 14;
+                let (base_x, mut base_y) = snap_to_grid(
+                    x as i32,
+                    y as i32,
+                    cell_w,
+                    cell_h,
+                    crate::state::DEFAULT_MARGIN_X,
+                    crate::state::DEFAULT_MARGIN_Y,
+                );
 
                 for src in internal_sources {
                     if let Some(file_name) = src.file_name().and_then(|n| n.to_str()) {
@@ -123,7 +130,7 @@ pub fn create_desktop_drop(
                             base_x,
                             base_y,
                         );
-                        base_y += spacing; // Stack multiple moved items vertically
+                        base_y += cell_h;
                     }
                 }
                 ref_cb();
@@ -133,13 +140,20 @@ pub fn create_desktop_drop(
             if !external_sources.is_empty() {
                 let ref_cb_inner = ref_cb.clone();
                 let state_inner = state_drop.clone();
-                let start_x = x as i32;
-                let start_y = y as i32;
+                let drop_x = x as i32;
+                let drop_y = y as i32;
 
                 glib::spawn_future_local(async move {
-                    let spacing = state_inner.borrow().config.grid_spacing.max(64) as i32;
-                    let cur_x = (start_x / spacing) * spacing + 16;
-                    let mut cur_y = (start_y / spacing) * spacing + 16;
+                    let cell_w = state_inner.borrow().config.grid_spacing.max(80) as i32;
+                    let cell_h = cell_w + 14;
+                    let (base_x, mut base_y) = snap_to_grid(
+                        drop_x,
+                        drop_y,
+                        cell_w,
+                        cell_h,
+                        crate::state::DEFAULT_MARGIN_X,
+                        crate::state::DEFAULT_MARGIN_Y,
+                    );
 
                     for src in external_sources {
                         if let Some(filename) = src.file_name().map(|n| n.to_os_string()) {
@@ -158,10 +172,10 @@ pub fn create_desktop_drop(
                                     if let Some(name_str) = filename.to_str() {
                                         state_inner.borrow_mut().set_icon_position(
                                             name_str.to_string(),
-                                            cur_x,
-                                            cur_y,
+                                            base_x,
+                                            base_y,
                                         );
-                                        cur_y += spacing;
+                                        base_y += cell_h;
                                     }
                                 }
                             }
