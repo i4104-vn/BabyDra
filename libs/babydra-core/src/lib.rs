@@ -19,9 +19,10 @@ pub use models::explore::{
 
 // Flat re-exports at root for convenience and backward compatibility
 pub use config::{
-    get_babydra_conf_path, get_babydra_config_dir, load_babydra_config, load_explore_settings,
-    save_babydra_config, save_explore_settings, BabyDraConfig, ExploreSettings, NotificationConfig,
-    PowerConfig, ShellConfig, ThemeConfig, WallpaperConfig,
+    get_babydra_conf_path, get_babydra_config_dir, load_babydra_config, load_desktop_config,
+    load_explore_settings, save_babydra_config, save_desktop_config, save_explore_settings,
+    BabyDraConfig, DesktopConfig, ExploreSettings, NotificationConfig, PowerConfig, ShellConfig,
+    ThemeConfig, WallpaperConfig,
 };
 
 pub use models::shell::battery::BatteryInfo;

@@ -52,6 +52,8 @@ const SHARED_CSS: &str = concat!(
     "\n",
     include_str!("../../styles/shared/apps/switcher.css"),
     "\n",
+    include_str!("../../styles/shared/apps/desktop.css"),
+    "\n",
     include_str!("../../styles/shared/explore/window.css"),
     "\n",
     include_str!("../../styles/shared/explore/header_bar.css"),

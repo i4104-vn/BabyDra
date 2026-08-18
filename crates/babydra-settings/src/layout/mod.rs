@@ -129,11 +129,13 @@ fn ensure_page_loaded(stack: &gtk4::Stack, name: &str) {
 pub mod sidebar;
 pub use sidebar::*;
 
-pub fn build_main_window(app: &gtk4::Application) {
+pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     let window = gtk4::ApplicationWindow::new(app);
     window.set_title(Some("Settings"));
     window.set_default_size(1000, 750);
     window.add_css_class("settings-window");
+
+    let target_page_id = initial_page.unwrap_or("system");
 
     let overlay = gtk4::Overlay::new();
     let main_layout = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
@@ -206,6 +208,9 @@ pub fn build_main_window(app: &gtk4::Application) {
                 || {},
             );
             btn.set_cursor_from_name(Some("pointer"));
+            if item.id == target_page_id {
+                btn.add_css_class("active-nav");
+            }
             nav_container.append(&btn);
             nav_buttons
                 .borrow_mut()
@@ -221,7 +226,9 @@ pub fn build_main_window(app: &gtk4::Application) {
         "sidebar-item",
         || {},
     );
-    btn_sys.add_css_class("active-nav");
+    if FOOTER_ITEM.id == target_page_id {
+        btn_sys.add_css_class("active-nav");
+    }
     btn_sys.set_cursor_from_name(Some("pointer"));
     nav_buttons.borrow_mut().push((
         FOOTER_ITEM.id,
@@ -253,9 +260,9 @@ pub fn build_main_window(app: &gtk4::Application) {
     content_stack.set_vexpand(true);
     content_stack.add_css_class("settings-content");
 
-    // Eagerly load initial default page only ("system")
-    ensure_page_loaded(&content_stack, "system");
-    content_stack.set_visible_child_name("system");
+    // Eagerly load target initial page
+    ensure_page_loaded(&content_stack, target_page_id);
+    content_stack.set_visible_child_name(target_page_id);
 
     let right_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     right_box.set_hexpand(true);

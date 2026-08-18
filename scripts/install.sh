@@ -38,7 +38,7 @@ if ! command -v yay &> /dev/null; then
 fi
 
 # Install AUR packages using yay
-yay -S --noconfirm github-desktop fastfetch neovim awww ddcutil-service kitty
+yay -S --noconfirm github-desktop fastfetch neovim ddcutil-service kitty
 # Core UI and Coding fonts (Windows 11 Segoe UI Variable, VS Code Cascadia Code, JetBrains Mono, Inter)
 yay -S --noconfirm ttf-segoe-ui-variable ttf-cascadia-code-nerd inter-font ttf-ubuntu-font-family ttf-jetbrains-mono-nerd
 
@@ -89,6 +89,7 @@ cargo build --release
 # 5. Stop running panel/menu/switcher/lock instances
 echo "Stopping active processes..."
 killall babydra-panel || true
+killall babydra-desktop || true
 killall babydra-switcher || true
 killall babydra-screenshot || true
 killall babydra-lock || true
@@ -102,6 +103,7 @@ killall babydra-greeter || true
 # 6. Install the binaries
 echo "Installing binaries to $LOCAL_BIN..."
 cp target/release/babydra-panel "$LOCAL_BIN/babydra-panel"
+cp target/release/babydra-desktop "$LOCAL_BIN/babydra-desktop"
 cp target/release/babydra-switcher "$LOCAL_BIN/babydra-switcher"
 cp target/release/babydra-screenshot "$LOCAL_BIN/babydra-screenshot"
 cp target/release/babydra-lock "$LOCAL_BIN/babydra-lock"

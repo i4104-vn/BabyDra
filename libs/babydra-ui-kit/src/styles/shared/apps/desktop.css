@@ -1,0 +1,74 @@
+/* Desktop Shell Styling */
+
+.desktop-window {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+}
+
+.desktop-wallpaper-container {
+    background-color: #000000;
+}
+
+.desktop-grid {
+    background: transparent;
+    background-color: transparent;
+}
+
+.desktop-icon {
+    min-width: 84px;
+    max-width: 96px;
+    min-height: 88px;
+    border-radius: 10px;
+    padding: 6px 4px 6px 4px;
+    background: transparent;
+    background-color: transparent;
+    border: 1px solid transparent;
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.desktop-icon:hover {
+    background-color: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.desktop-icon.selected {
+    background-color: rgba(255, 255, 255, 0.26);
+    border-color: rgba(255, 255, 255, 0.45);
+}
+
+.desktop-icon.drop-target-hover {
+    background-color: rgba(96, 165, 250, 0.35);
+    border-color: rgba(96, 165, 250, 0.9);
+    box-shadow: 0 0 12px rgba(96, 165, 250, 0.5);
+    transform: scale(1.05);
+}
+
+.desktop-icon.cut-item {
+    opacity: 0.45;
+}
+
+.desktop-icon.hidden-item {
+    opacity: 0.65;
+}
+
+.desktop-icon-image {
+    margin-bottom: 3px;
+}
+
+.desktop-icon-label {
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.2;
+    text-align: center;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 2px rgba(0, 0, 0, 0.8);
+    padding: 0 2px;
+}
+
+.desktop-rubberband {
+    background-color: rgba(100, 180, 255, 0.25);
+    border: 1px solid rgba(100, 180, 255, 0.7);
+    border-radius: 4px;
+}

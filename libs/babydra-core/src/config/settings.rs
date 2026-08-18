@@ -183,6 +183,54 @@ pub struct LockscreenConfig {
     pub avatar: String,
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct DesktopConfig {
+    #[serde(default = "default_show_icons")]
+    pub show_icons: bool,
+    #[serde(default = "default_icon_size")]
+    pub icon_size: u32,
+    #[serde(default = "default_grid_spacing")]
+    pub grid_spacing: u32,
+    #[serde(default = "default_desktop_sort_by")]
+    pub sort_by: String, // "name" | "type" | "modified" | "size"
+    #[serde(default = "default_auto_arrange")]
+    pub auto_arrange: bool,
+    #[serde(default)]
+    pub icon_positions: std::collections::HashMap<String, (i32, i32)>,
+    #[serde(default)]
+    pub custom_context_items: Vec<CustomContextItem>,
+}
+
+fn default_show_icons() -> bool {
+    true
+}
+fn default_icon_size() -> u32 {
+    48
+}
+fn default_grid_spacing() -> u32 {
+    100
+}
+fn default_desktop_sort_by() -> String {
+    "name".to_string()
+}
+fn default_auto_arrange() -> bool {
+    true
+}
+
+impl Default for DesktopConfig {
+    fn default() -> Self {
+        Self {
+            show_icons: default_show_icons(),
+            icon_size: default_icon_size(),
+            grid_spacing: default_grid_spacing(),
+            sort_by: default_desktop_sort_by(),
+            auto_arrange: default_auto_arrange(),
+            icon_positions: std::collections::HashMap::new(),
+            custom_context_items: Vec::new(),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct BabyDraConfig {
     #[serde(default)]
@@ -197,6 +245,8 @@ pub struct BabyDraConfig {
     pub display: DisplayConfig,
     #[serde(default)]
     pub lockscreen: LockscreenConfig,
+    #[serde(default)]
+    pub desktop: DesktopConfig,
     /// Theme package selection (id + dark preference).
     /// Empty `id` = engine default (`babydra-default`).
     #[serde(default)]
@@ -304,3 +354,16 @@ pub fn save_explore_settings(settings: &ExploreSettings) {
     config.explore = settings.clone();
     save_babydra_config(&config);
 }
+
+/// Loads `desktop config`.
+pub fn load_desktop_config() -> DesktopConfig {
+    load_babydra_config().desktop
+}
+
+/// Persists `desktop config`.
+pub fn save_desktop_config(desktop: &DesktopConfig) {
+    let mut config = load_babydra_config();
+    config.desktop = desktop.clone();
+    save_babydra_config(&config);
+}
+

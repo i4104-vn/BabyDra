@@ -14,7 +14,7 @@
     border-radius: 9999px;
     min-width: 0;
     min-height: 26px;
-    padding: 2px 10px;
+    padding: 0 10px;
     margin-top: 0;
     box-shadow: none;
 }
@@ -30,17 +30,21 @@
     opacity: 1.0;
     min-width: 0;
     min-height: 0;
+    margin: 0;
+    padding: 0;
 }
 
 .notch-player-text {
     font-size: 10px;
     font-weight: 700;
-    margin: 0 2px;
+    margin: 0 4px;
+    padding: 0;
 }
 
 .notch-album-art {
-    border-radius: 8px;
-    padding: 3px;
+    border-radius: 6px;
+    padding: 1px;
+    margin: 0;
 }
 
 .notch-visualizer {

@@ -19,14 +19,17 @@ impl NotificationView {
         root.set_valign(gtk4::Align::Center);
         root.set_halign(gtk4::Align::Fill);
         root.set_hexpand(true);
+        root.set_vexpand(true);
 
         let art_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
         art_container.add_css_class("notif-icon-box");
         art_container.set_valign(gtk4::Align::Center);
+        art_container.set_vexpand(true);
 
-        let text_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
+        let text_box = gtk4::Box::new(gtk4::Orientation::Vertical, 1);
         text_box.set_valign(gtk4::Align::Center);
         text_box.set_hexpand(true);
+        text_box.set_vexpand(true);
 
         let title_lbl = gtk4::Label::new(None);
         title_lbl.add_css_class("badge-title");

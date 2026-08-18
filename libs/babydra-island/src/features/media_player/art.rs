@@ -36,6 +36,8 @@ pub(crate) fn load_album_art_from_bytes(bytes: &[u8], size: i32) -> Option<gtk4:
     let picture = gtk4::Picture::for_paintable(&texture);
     picture.set_size_request(dest_w, dest_h);
     picture.set_content_fit(gtk4::ContentFit::Contain);
+    picture.set_valign(gtk4::Align::Center);
+    picture.set_halign(gtk4::Align::Center);
     Some(picture.upcast())
 }
 

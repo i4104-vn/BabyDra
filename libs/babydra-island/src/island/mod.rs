@@ -205,6 +205,7 @@ impl Island {
         container.set_valign(gtk4::Align::Center);
         container.set_halign(gtk4::Align::Fill);
         container.set_hexpand(true);
+        container.set_vexpand(true);
         container.set_visible(false);
         container.append(&content);
 
@@ -355,6 +356,7 @@ fn build_island(builder: IslandBuilder) -> Island {
     content_box.set_valign(gtk4::Align::Center);
     content_box.set_halign(gtk4::Align::Fill);
     content_box.set_hexpand(true);
+    content_box.set_vexpand(true);
     capsule.append(&content_box);
 
     if let Some(idle) = &builder.idle {

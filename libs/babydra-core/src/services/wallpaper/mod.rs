@@ -1,20 +1,10 @@
 //! Wallpaper management utilities.
-//! Supported backends: swww, swaybg, feh.
+//! Rendered directly by babydra-desktop shell on Wayland Background layer.
 
 use crate::error::CoreResult;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 
-/// Checks if a command binary exists in the system's PATH.
-fn has_binary(name: &str) -> bool {
-    Command::new("which")
-        .arg(name)
-        .output()
-        .map(|o| o.status.success())
-        .unwrap_or(false)
-}
-
-/// Sets the desktop wallpaper using the best available backend utility (awww, swww, swaybg, feh).
+/// Sets the desktop wallpaper and persists the path in babydra.conf.
 pub fn set_wallpaper(path: &Path) -> CoreResult<()> {
     if !path.exists() {
         return Err(format!("Wallpaper file does not exist at: {:?}", path).into());
@@ -45,26 +35,7 @@ pub fn set_wallpaper(path: &Path) -> CoreResult<()> {
     conf.wallpaper.current = path_str.to_string();
     crate::config::save_babydra_config(&conf);
 
-    if has_binary("awww") {
-        let daemon_running = Command::new("pgrep")
-            .arg("-x")
-            .arg("awww-daemon")
-            .output()
-            .map(|o| o.status.success())
-            .unwrap_or(false);
-        if !daemon_running {
-            let _ = Command::new("awww-daemon").spawn();
-        }
-        let status = Command::new("awww")
-            .args(["img", path_str])
-            .status()
-            .map_err(|e| e.to_string())?;
-        if status.success() {
-            return Ok(());
-        }
-    }
-
-    Err("No compatible wallpaper backend - awww was found in PATH".into())
+    Ok(())
 }
 
 /// Applies the currently saved wallpaper from babydra.conf.
@@ -74,21 +45,9 @@ pub fn apply_saved_wallpaper() {
     }
 }
 
-/// Retrieves the path to the currently active wallpaper from user configuration or daemon query.
+/// Retrieves the path to the currently active wallpaper from user configuration or wallpaper directory.
 pub fn get_current_wallpaper() -> Option<PathBuf> {
-    if let Ok(output) = Command::new("awww").arg("query").output() {
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        for line in stdout.lines() {
-            if let Some(idx) = line.find("image:") {
-                let raw_path = line[idx + "image:".len()..].trim();
-                let path = PathBuf::from(raw_path);
-                if path.exists() {
-                    return Some(path);
-                }
-            }
-        }
-    }
-
+    crate::config::invalidate_config_cache();
     let conf = crate::config::load_babydra_config();
     if !conf.wallpaper.current.is_empty() {
         let path = PathBuf::from(&conf.wallpaper.current);

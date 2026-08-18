@@ -32,7 +32,7 @@ use view::PlayerWidgets;
 
 pub const PRIORITY: u8 = 50;
 const TARGET_WIDTH: i32 = 200;
-const TARGET_HEIGHT: i32 = 30;
+const TARGET_HEIGHT: i32 = 28;
 
 /// Media player island feature: requests the compact player view while an
 /// MPRIS player is active and keeps the popover in sync.

@@ -28,14 +28,18 @@ impl PlayerWidgets {
         music_view.set_valign(gtk4::Align::Center);
         music_view.set_halign(gtk4::Align::Fill);
         music_view.set_hexpand(true);
+        music_view.set_vexpand(true);
 
         let art_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
         art_container.set_valign(gtk4::Align::Center);
+        art_container.set_vexpand(true);
 
         let track_label = gtk4::Label::new(Some(&babydra_core::i18n::t("island.no_media")));
         track_label.add_css_class("notch-player-text");
         track_label.set_hexpand(true);
+        track_label.set_vexpand(true);
         track_label.set_halign(gtk4::Align::Center);
+        track_label.set_valign(gtk4::Align::Center);
 
         music_view.append(&art_container);
         music_view.append(&track_label);
