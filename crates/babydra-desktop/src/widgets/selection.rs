@@ -7,18 +7,18 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 /// Updates CSS classes (`selected`) on all icon widgets inside `Fixed` based on current `DesktopState`.
-pub fn update_icons_selection_state(
+pub fn update_icon_sel(
     fixed: &Fixed,
     state: &Rc<RefCell<DesktopState>>,
     rubberband: &Box,
 ) {
-    let st = state.borrow();
+    let state_ref = state.borrow();
     let mut child_opt = fixed.first_child();
     while let Some(child) = child_opt {
         if child != rubberband.clone().upcast::<gtk4::Widget>() && child.has_css_class("desktop-icon") {
             if let Some(name) = child.widget_name().as_str().into() {
                 let p = std::path::PathBuf::from(name);
-                if st.is_selected(&p) {
+                if state_ref.is_selected(&p) {
                     child.add_css_class("selected");
                 } else {
                     child.remove_css_class("selected");
@@ -30,7 +30,7 @@ pub fn update_icons_selection_state(
 }
 
 /// Attaches the rubberband lasso selection controller to the desktop fixed container.
-pub fn attach_rubberband_controller(
+pub fn attach_rubberband(
     desktop_fixed: &Fixed,
     state: Rc<RefCell<DesktopState>>,
     rubberband: Box,
@@ -71,7 +71,7 @@ pub fn attach_rubberband_controller(
 
             if !is_ctrl {
                 state_begin.borrow_mut().clear_selection();
-                update_icons_selection_state(&fixed_begin, &state_begin, &rb_begin);
+                update_icon_sel(&fixed_begin, &state_begin, &rb_begin);
             }
 
             drag_active_begin.replace(true);
@@ -114,9 +114,9 @@ pub fn attach_rubberband_controller(
                 .map(|e| e.modifier_state().contains(gtk4::gdk::ModifierType::CONTROL_MASK))
                 .unwrap_or(false);
 
-            let mut st = state_update.borrow_mut();
+            let mut state_ref = state_update.borrow_mut();
             if !is_ctrl {
-                st.clear_selection();
+                state_ref.clear_selection();
             }
 
             let mut child_opt = fixed_update.first_child();
@@ -132,7 +132,7 @@ pub fn attach_rubberband_controller(
                         if intersects {
                             if let Some(file_path_str) = child.widget_name().as_str().into() {
                                 if !file_path_str.is_empty() {
-                                    st.select(std::path::PathBuf::from(file_path_str), true, false);
+                                    state_ref.select(std::path::PathBuf::from(file_path_str), true, false);
                                 }
                             }
                         }
@@ -140,8 +140,8 @@ pub fn attach_rubberband_controller(
                 }
                 child_opt = child.next_sibling();
             }
-            drop(st);
-            update_icons_selection_state(&fixed_update, &state_update, &rb_update);
+            drop(state_ref);
+            update_icon_sel(&fixed_update, &state_update, &rb_update);
         }
     });
 

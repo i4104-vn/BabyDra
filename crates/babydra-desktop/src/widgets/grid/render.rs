@@ -1,11 +1,11 @@
 //! Desktop icon grid rendering: builds icon widgets and attaches per-icon gestures.
 
-use super::dnd::{create_folder_drop_target, create_icon_drag_source};
+use super::dnd::{create_folder_drop, create_icon_drag};
 use super::make_refresh_cb;
 use crate::state::DesktopState;
-use crate::widgets::context_menu::show_desktop_file_menu;
-use crate::widgets::icon::{create_desktop_icon_widget, launch_entry};
-use crate::widgets::selection::update_icons_selection_state;
+use crate::widgets::context_menu::show_file_menu;
+use crate::widgets::icon::{create_desktop_icon, launch_entry};
+use crate::widgets::selection::update_icon_sel;
 use babydra_core::models::explore::FileType;
 use gtk4::prelude::*;
 use gtk4::{Box, Fixed, GestureClick};
@@ -33,15 +33,15 @@ pub fn rebuild_grid_icons(
         fixed.remove(&w);
     }
 
-    let st = state.borrow();
-    let icon_size = st.config.icon_size;
-    let entries = st.entries.clone();
-    let selected_paths = st.selected_paths.clone();
-    drop(st);
+    let state_ref = state.borrow();
+    let icon_size = state_ref.config.icon_size;
+    let entries = state_ref.entries.clone();
+    let selected_paths = state_ref.selected_paths.clone();
+    drop(state_ref);
 
     for (index, entry) in entries.iter().enumerate() {
         let is_sel = selected_paths.contains(&entry.path);
-        let icon_widget = create_desktop_icon_widget(entry, icon_size, is_sel);
+        let icon_widget = create_desktop_icon(entry, icon_size, is_sel);
         icon_widget.set_widget_name(&entry.path.to_string_lossy());
 
         let file_name = entry.name.to_string_lossy().to_string();
@@ -67,7 +67,7 @@ pub fn rebuild_grid_icons(
                 state_click
                     .borrow_mut()
                     .select(entry_click.path.clone(), is_ctrl, is_ctrl);
-                update_icons_selection_state(&fixed_click, &state_click, &rubberband_click);
+                update_icon_sel(&fixed_click, &state_click, &rubberband_click);
             } else if n_press == 2 {
                 launch_entry(&entry_click);
             }
@@ -85,7 +85,7 @@ pub fn rebuild_grid_icons(
 
         right_click.connect_pressed(move |_, _, x, y| {
             state_rc.borrow_mut().select(entry_rc.path.clone(), false, false);
-            update_icons_selection_state(&fixed_rc, &state_rc, &rubberband_rc);
+            update_icon_sel(&fixed_rc, &state_rc, &rubberband_rc);
 
             let fixed_ref = fixed_rc.clone();
             let state_ref = state_rc.clone();
@@ -94,7 +94,7 @@ pub fn rebuild_grid_icons(
 
             let refresh_cb = make_refresh_cb(&fixed_ref, &state_ref, &parent_win_ref, &rubberband_ref);
 
-            show_desktop_file_menu(
+            show_file_menu(
                 fixed_rc.upcast_ref::<gtk4::Widget>(),
                 pos_x as f64 + x,
                 pos_y as f64 + y,
@@ -109,7 +109,7 @@ pub fn rebuild_grid_icons(
         let sel_paths_rc = Rc::new(RefCell::new(
             selected_paths.iter().cloned().collect::<Vec<PathBuf>>(),
         ));
-        let drag_src = create_icon_drag_source(&entry.path, &entry.icon_name, sel_paths_rc);
+        let drag_src = create_icon_drag(&entry.path, &entry.icon_name, sel_paths_rc);
         icon_widget.add_controller(drag_src);
 
         // 4. Folder Drop Target (If entry is a directory, accept dropping files into it)
@@ -121,7 +121,7 @@ pub fn rebuild_grid_icons(
 
             let ref_folder_cb = make_refresh_cb(&fixed_f, &state_f, &parent_f, &rubber_f);
 
-            let folder_drop = create_folder_drop_target(entry.path.clone(), icon_widget.clone(), ref_folder_cb);
+            let folder_drop = create_folder_drop(entry.path.clone(), icon_widget.clone(), ref_folder_cb);
             icon_widget.add_controller(folder_drop);
         }
 

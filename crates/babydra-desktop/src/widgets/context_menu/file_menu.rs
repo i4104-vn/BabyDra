@@ -1,14 +1,14 @@
 //! Context menu displayed when right-clicking on files or folders on ~/Desktop.
 
 use super::refresh_nav_cb;
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use babydra_core::models::explore::{FileEntry, FileType};
 use babydra_ui_kit::components::context_menu::ContextMenuBuilder;
 use babydra_ui_kit::components::explore::prelude::*;
 use std::rc::Rc;
 
 /// Shows the context menu for a specific file or folder entry.
-pub fn show_desktop_file_menu(
+pub fn show_file_menu(
     parent: &gtk4::Widget,
     x: f64,
     y: f64,
@@ -23,7 +23,7 @@ pub fn show_desktop_file_menu(
     // 1. Open
     let entry_c = entry.clone();
     builder = builder.item(
-        &t("desktop.open"),
+        &trans("desktop.open"),
         if is_dir { "folder" } else { "text" },
         move || {
             crate::widgets::icon::launch_entry(&entry_c);
@@ -34,7 +34,7 @@ pub fn show_desktop_file_menu(
     if !is_dir {
         let path_c = entry.path.clone();
         builder = builder.item(
-            &t("desktop.open_with"),
+            &trans("desktop.open_with"),
             "external-link",
             move || {
                 let uri = format!("file://{}", path_c.to_string_lossy());
@@ -50,7 +50,7 @@ pub fn show_desktop_file_menu(
     let is_img = crate::widgets::icon::is_image_path(&entry.path);
     if is_img {
         let path_c = entry.path.clone();
-        builder = builder.item(&t("desktop.set_as_wallpaper"), "folder-pictures", move || {
+        builder = builder.item(&trans("desktop.set_as_wallpaper"), "folder-pictures", move || {
             let _ = babydra_core::wallpaper::set_wallpaper(&path_c);
         });
     }
@@ -62,24 +62,24 @@ pub fn show_desktop_file_menu(
     let path_c2 = entry.path.clone();
     builder = builder
         .item_with_shortcut(
-            &t("desktop.cut"),
+            &trans("desktop.cut"),
             "cut",
             "Ctrl+X",
             move || {
                 let p = path_c.clone();
                 CLIPBOARD.with(|cb| cb.replace(Some((vec![p.clone()], true))));
-                set_system_clipboard_files(&[p.clone()], true);
-                apply_cut_dimming_global(&[p]);
+                set_clipboard_files(&[p.clone()], true);
+                apply_cut_everywhere(&[p]);
             },
         )
         .item_with_shortcut(
-            &t("desktop.copy"),
+            &trans("desktop.copy"),
             "copy",
             "Ctrl+C",
             move || {
                 let p = path_c2.clone();
                 CLIPBOARD.with(|cb| cb.replace(Some((vec![p.clone()], false))));
-                set_system_clipboard_files(&[p], false);
+                set_clipboard_files(&[p], false);
             },
         )
         .separator();
@@ -89,7 +89,7 @@ pub fn show_desktop_file_menu(
     let ref_cb_c = refresh_cb.clone();
     let ddir_c = desktop_dir.clone();
     let parent_win_c = parent_window.clone();
-    builder = builder.item(&t("desktop.rename"), "rename", move || {
+    builder = builder.item(&trans("desktop.rename"), "rename", move || {
         show_rename_dialog(&path_c, ddir_c.clone(), refresh_nav_cb(ref_cb_c.clone()), Some(&parent_win_c));
     });
 
@@ -97,7 +97,7 @@ pub fn show_desktop_file_menu(
     let path_c = entry.path.clone();
     let ref_cb_c = refresh_cb.clone();
     builder = builder.item(
-        &t("desktop.trash"),
+        &trans("desktop.trash"),
         "trash",
         move || {
             let p = path_c.clone();
@@ -114,14 +114,14 @@ pub fn show_desktop_file_menu(
     let ref_cb_c = refresh_cb.clone();
     let parent_win_c = parent_window.clone();
     builder = builder.destructive_item(
-        &t("desktop.delete"),
+        &trans("desktop.delete"),
         "trash",
         move || {
             let ref_cb = ref_cb_c.clone();
             let p = path_c.clone();
-            show_delete_confirm_dialog(
-                &t("explore.delete_confirm_title"),
-                &t("explore.delete_confirm_msg"),
+            show_delete_confirm(
+                &trans("explore.delete_confirm_title"),
+                &trans("explore.delete_confirm_msg"),
                 move || {
                     let ref_cb_inner = ref_cb.clone();
                     let path_to_del = p.clone();
@@ -141,17 +141,17 @@ pub fn show_desktop_file_menu(
     let path_c = entry.path.clone();
     let parent_win_c = parent_window.clone();
     builder = builder.item(
-        &t("desktop.properties"),
+        &trans("desktop.properties"),
         "info",
         move || {
-            show_properties_dialog(vec![path_c.clone()], Some(&parent_win_c));
+            show_properties(vec![path_c.clone()], Some(&parent_win_c));
         },
     );
 
     // 9. Custom Context Options from babydra.conf
     let entry_path = entry.path.clone();
     builder = builder.custom_items(move |vbox, popover| {
-        append_custom_context_items(vbox, popover, vec![entry_path], false);
+        append_custom_items(vbox, popover, vec![entry_path], false);
     });
 
     builder.popup();

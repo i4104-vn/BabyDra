@@ -5,5 +5,5 @@ mod render;
 pub mod thumbnail;
 
 pub use launcher::launch_entry;
-pub use render::create_desktop_icon_widget;
-pub use thumbnail::{build_icon_image_frame, is_image_path};
+pub use render::create_desktop_icon;
+pub use thumbnail::{build_icon_frame, is_image_path};

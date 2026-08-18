@@ -1,12 +1,12 @@
 //! Desktop icon widget rendering for files and shortcuts on ~/Desktop.
 
-use super::thumbnail::build_icon_image_frame;
+use super::thumbnail::build_icon_frame;
 use babydra_core::models::explore::FileEntry;
 use gtk4::prelude::*;
 use gtk4::{Align, Box, Label, Orientation};
 
 /// Creates a desktop icon widget for a single file entry.
-pub fn create_desktop_icon_widget(
+pub fn create_desktop_icon(
     entry: &FileEntry,
     icon_size: u32,
     is_selected: bool,
@@ -29,7 +29,7 @@ pub fn create_desktop_icon_widget(
     container.set_valign(Align::Center);
 
     // 1. Icon Container with thumbnail / theme icon
-    let icon_frame = build_icon_image_frame(entry, icon_px);
+    let icon_frame = build_icon_frame(entry, icon_px);
     container.append(&icon_frame);
 
     // 2. Multiline Label with text-shadow

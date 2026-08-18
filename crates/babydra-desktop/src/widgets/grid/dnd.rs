@@ -1,7 +1,7 @@
 //! Drag and Drop subsystem for Desktop: DragSource, Desktop DropTarget, and Folder DropTarget.
 
 use crate::state::DesktopState;
-use babydra_core::load_cropped_square_pixbuf;
+use babydra_core::load_cropped_square;
 use gtk4::gdk::FileList;
 use gtk4::prelude::*;
 use std::cell::RefCell;
@@ -9,7 +9,7 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 /// Creates a DragSource on an icon widget for dragging files to other grid slots, folders, or external apps.
-pub fn create_icon_drag_source(
+pub fn create_icon_drag(
     path: &PathBuf,
     icon_name: &str,
     selected_paths: Rc<RefCell<Vec<PathBuf>>>,
@@ -50,7 +50,7 @@ pub fn create_icon_drag_source(
     };
 
     if has_preview {
-        if let Ok(pixbuf) = load_cropped_square_pixbuf(path, 64) {
+        if let Ok(pixbuf) = load_cropped_square(path, 64) {
             let texture = gtk4::gdk::Texture::for_pixbuf(&pixbuf);
             drag_source.set_icon(Some(&texture), 32, 32);
             return drag_source;
@@ -74,7 +74,7 @@ pub fn create_icon_drag_source(
 }
 
 /// Creates a DropTarget on the desktop background to handle internal repositioning and external file drops.
-pub fn create_desktop_drop_target(
+pub fn create_desktop_drop(
     state: Rc<RefCell<DesktopState>>,
     refresh_cb: Rc<dyn Fn()>,
 ) -> gtk4::DropTarget {
@@ -171,7 +171,7 @@ pub fn create_desktop_drop_target(
 }
 
 /// Creates a DropTarget on a directory icon on desktop to allow dropping files inside that directory.
-pub fn create_folder_drop_target(
+pub fn create_folder_drop(
     target_folder: PathBuf,
     widget: gtk4::Box,
     refresh_cb: Rc<dyn Fn()>,

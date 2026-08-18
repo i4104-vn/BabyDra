@@ -1,7 +1,7 @@
 //! Window rendering and Layer Shell setup for the babydra-desktop crate.
 
 use crate::widgets::grid::create_desktop_grid;
-use crate::widgets::wallpaper::create_wallpaper_widget;
+use crate::widgets::wallpaper::create_wallpaper_w;
 use babydra_ui_kit::ui::window::init_layer_window;
 use gtk4::prelude::*;
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer};
@@ -34,7 +34,7 @@ pub fn build_desktop_window(app: &gtk4::Application) -> gtk4::ApplicationWindow 
     overlay.set_hexpand(true);
     overlay.set_vexpand(true);
 
-    let wallpaper_widget = create_wallpaper_widget();
+    let wallpaper_widget = create_wallpaper_w();
     let (desktop_grid, _state, _refresh_fn) = create_desktop_grid(&window);
 
     overlay.set_child(Some(&wallpaper_widget));

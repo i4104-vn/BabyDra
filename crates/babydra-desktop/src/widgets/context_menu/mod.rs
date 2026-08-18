@@ -3,8 +3,8 @@
 pub mod empty_menu;
 pub mod file_menu;
 
-pub use empty_menu::show_desktop_empty_menu;
-pub use file_menu::show_desktop_file_menu;
+pub use empty_menu::show_empty_menu;
+pub use file_menu::show_file_menu;
 
 use babydra_core::config::DesktopConfig;
 use std::path::PathBuf;

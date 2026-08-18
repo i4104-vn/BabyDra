@@ -23,7 +23,7 @@ pub fn is_image_path(path: &Path) -> bool {
 }
 
 /// Builds the visual icon container for a file entry (with async image thumbnailing where applicable).
-pub fn build_icon_image_frame(entry: &FileEntry, icon_px: i32) -> Box {
+pub fn build_icon_frame(entry: &FileEntry, icon_px: i32) -> Box {
     let icon_frame = Box::new(Orientation::Vertical, 0);
     icon_frame.set_size_request(icon_px, icon_px);
     icon_frame.set_halign(Align::Center);
@@ -31,7 +31,7 @@ pub fn build_icon_image_frame(entry: &FileEntry, icon_px: i32) -> Box {
     icon_frame.add_css_class("desktop-icon-image");
 
     if entry.file_type == FileType::Directory {
-        let folder_icon = get_system_or_file_icon(&entry.icon_name, "folder");
+        let folder_icon = get_fallback_icon(&entry.icon_name, "folder");
         folder_icon.set_pixel_size(icon_px);
         folder_icon.set_halign(Align::Center);
         folder_icon.set_valign(Align::Center);
@@ -45,7 +45,7 @@ pub fn build_icon_image_frame(entry: &FileEntry, icon_px: i32) -> Box {
         overlay.set_halign(Align::Center);
         overlay.set_valign(Align::Center);
 
-        let fallback_icon = get_system_or_file_icon(&entry.icon_name, "image-x-generic");
+        let fallback_icon = get_fallback_icon(&entry.icon_name, "image-x-generic");
         fallback_icon.set_pixel_size(icon_px - 4);
         fallback_icon.set_halign(Align::Center);
         fallback_icon.set_valign(Align::Center);
@@ -58,7 +58,7 @@ pub fn build_icon_image_frame(entry: &FileEntry, icon_px: i32) -> Box {
 
         glib::spawn_future_local(async move {
             let res = tokio::task::spawn_blocking(move || {
-                babydra_core::load_cropped_square_pixbuf(&path_clone, thumb_size)
+                babydra_core::load_cropped_square(&path_clone, thumb_size)
                     .map(SendWrapper)
             })
             .await;
@@ -81,7 +81,7 @@ pub fn build_icon_image_frame(entry: &FileEntry, icon_px: i32) -> Box {
             "text-x-generic"
         };
 
-        let icon = get_system_or_file_icon(&entry.icon_name, fallback);
+        let icon = get_fallback_icon(&entry.icon_name, fallback);
         icon.set_pixel_size(icon_px);
         icon.set_halign(Align::Center);
         icon.set_valign(Align::Center);

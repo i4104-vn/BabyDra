@@ -18,7 +18,7 @@ fn ease_out_quart(t: f64) -> f64 {
 }
 
 /// Dynamically queries the current display/monitor geometry and scale factor.
-fn get_current_monitor_resolution(drawing_area: &gtk4::DrawingArea) -> (i32, i32) {
+fn get_monitor_res(drawing_area: &gtk4::DrawingArea) -> (i32, i32) {
     let w = drawing_area.width();
     let h = drawing_area.height();
     if w > 100 && h > 100 {
@@ -131,7 +131,7 @@ fn draw_surface_aspect_fill(
 }
 
 /// Creates a fullscreen wallpaper widget with a water-drop ripple transition opening from the corner.
-pub fn create_wallpaper_widget() -> gtk4::DrawingArea {
+pub fn create_wallpaper_w() -> gtk4::DrawingArea {
     let drawing_area = gtk4::DrawingArea::new();
     drawing_area.set_hexpand(true);
     drawing_area.set_vexpand(true);
@@ -146,8 +146,8 @@ pub fn create_wallpaper_widget() -> gtk4::DrawingArea {
     let ripple_origin: Rc<Cell<(f64, f64)>> = Rc::new(Cell::new((1.0, 0.0)));
 
     // Initial wallpaper load with dynamic monitor resolution detection
-    let (init_w, init_h) = get_current_monitor_resolution(&drawing_area);
-    if let Some(path) = babydra_core::wallpaper::get_current_wallpaper() {
+    let (init_w, init_h) = get_monitor_res(&drawing_area);
+    if let Some(path) = babydra_core::wallpaper::get_wallpaper() {
         if let Some(surf) = load_and_prescale(&path, init_w, init_h) {
             *current_surface.borrow_mut() = Some(surf);
             *current_wp_path.borrow_mut() = Some(path);
@@ -239,7 +239,7 @@ pub fn create_wallpaper_widget() -> gtk4::DrawingArea {
         let origin_c = ripple_origin.clone();
 
         Rc::new(move || {
-            let new_path = babydra_core::wallpaper::get_current_wallpaper();
+            let new_path = babydra_core::wallpaper::get_wallpaper();
             let changed = match (&new_path, &*cur_path_c.borrow()) {
                 (Some(p1), Some(p2)) => p1 != p2,
                 (Some(_), None) => true,
@@ -268,7 +268,7 @@ pub fn create_wallpaper_widget() -> gtk4::DrawingArea {
                     let idx = (nanos as usize) % choices.len();
                     origin_c.set(choices[idx]);
 
-                    let (mon_w, mon_h) = get_current_monitor_resolution(&da_c);
+                    let (mon_w, mon_h) = get_monitor_res(&da_c);
                     if let Some(new_surf) = load_and_prescale(path, mon_w, mon_h) {
                         let has_prev = cur_surf_c.borrow().is_some();
                         if has_prev {

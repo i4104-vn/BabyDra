@@ -3,13 +3,13 @@
 pub mod dnd;
 mod render;
 
-pub use dnd::{create_desktop_drop_target, create_folder_drop_target, create_icon_drag_source};
+pub use dnd::{create_desktop_drop, create_folder_drop, create_icon_drag};
 
 use crate::state::DesktopState;
-use crate::widgets::context_menu::show_desktop_empty_menu;
+use crate::widgets::context_menu::show_empty_menu;
 use crate::widgets::icon::launch_entry;
 use crate::widgets::selection::{
-    attach_rubberband_controller, update_icons_selection_state,
+    attach_rubberband, update_icon_sel,
 };
 use babydra_ui_kit::components::explore::prelude::*;
 use gtk4::prelude::*;
@@ -75,7 +75,7 @@ pub fn create_desktop_grid(
     bg_click.connect_pressed(move |_, _, _, _| {
         fixed_bg.grab_focus();
         state_bg.borrow_mut().clear_selection();
-        update_icons_selection_state(&fixed_bg, &state_bg, &rubberband_bg);
+        update_icon_sel(&fixed_bg, &state_bg, &rubberband_bg);
     });
     fixed.add_controller(bg_click);
 
@@ -88,7 +88,7 @@ pub fn create_desktop_grid(
 
     bg_right_click.connect_pressed(move |_, _, x, y| {
         fixed_right.grab_focus();
-        show_desktop_empty_menu(
+        show_empty_menu(
             fixed_right.upcast_ref::<gtk4::Widget>(),
             x,
             y,
@@ -99,11 +99,11 @@ pub fn create_desktop_grid(
     fixed.add_controller(bg_right_click);
 
     // 5. Desktop Background DropTarget (Ingestion + Repositioning)
-    let drop_target = create_desktop_drop_target(state.clone(), refresh_fn.clone());
+    let drop_target = create_desktop_drop(state.clone(), refresh_fn.clone());
     fixed.add_controller(drop_target);
 
     // 6. Rubberband Lasso Selection Controller
-    attach_rubberband_controller(&fixed, state.clone(), rubberband.clone());
+    attach_rubberband(&fixed, state.clone(), rubberband.clone());
 
     // 7. Desktop Keyboard Shortcuts
     let key_controller = EventControllerKey::new();
@@ -119,9 +119,9 @@ pub fn create_desktop_grid(
         match keyval {
             // Enter / Return: Launch all selected items
             gtk4::gdk::Key::Return | gtk4::gdk::Key::KP_Enter => {
-                let st = state_key.borrow();
-                for entry in &st.entries {
-                    if st.is_selected(&entry.path) {
+                let state_ref = state_key.borrow();
+                for entry in &state_ref.entries {
+                    if state_ref.is_selected(&entry.path) {
                         launch_entry(entry);
                     }
                 }
@@ -130,7 +130,7 @@ pub fn create_desktop_grid(
             // Ctrl + A: Select All
             gtk4::gdk::Key::A | gtk4::gdk::Key::a if has_ctrl => {
                 state_key.borrow_mut().select_all();
-                update_icons_selection_state(&fixed_key, &state_key, &rubberband_key);
+                update_icon_sel(&fixed_key, &state_key, &rubberband_key);
                 glib::Propagation::Stop
             }
             // F5 / Ctrl + R: Refresh
@@ -140,22 +140,22 @@ pub fn create_desktop_grid(
             }
             // Ctrl + C: Copy selected
             gtk4::gdk::Key::C | gtk4::gdk::Key::c if has_ctrl => {
-                let st = state_key.borrow();
-                let selected: Vec<PathBuf> = st.selected_paths.iter().cloned().collect();
+                let state_ref = state_key.borrow();
+                let selected: Vec<PathBuf> = state_ref.selected_paths.iter().cloned().collect();
                 if !selected.is_empty() {
                     CLIPBOARD.with(|cb| cb.replace(Some((selected.clone(), false))));
-                    set_system_clipboard_files(&selected, false);
+                    set_clipboard_files(&selected, false);
                 }
                 glib::Propagation::Stop
             }
             // Ctrl + X: Cut selected
             gtk4::gdk::Key::X | gtk4::gdk::Key::x if has_ctrl => {
-                let st = state_key.borrow();
-                let selected: Vec<PathBuf> = st.selected_paths.iter().cloned().collect();
+                let state_ref = state_key.borrow();
+                let selected: Vec<PathBuf> = state_ref.selected_paths.iter().cloned().collect();
                 if !selected.is_empty() {
                     CLIPBOARD.with(|cb| cb.replace(Some((selected.clone(), true))));
-                    set_system_clipboard_files(&selected, true);
-                    apply_cut_dimming_global(&selected);
+                    set_clipboard_files(&selected, true);
+                    apply_cut_everywhere(&selected);
                 }
                 glib::Propagation::Stop
             }
@@ -177,8 +177,8 @@ pub fn create_desktop_grid(
             }
             // Delete: Move selected to trash
             gtk4::gdk::Key::Delete | gtk4::gdk::Key::KP_Delete => {
-                let st = state_key.borrow();
-                let selected: Vec<PathBuf> = st.selected_paths.iter().cloned().collect();
+                let state_ref = state_key.borrow();
+                let selected: Vec<PathBuf> = state_ref.selected_paths.iter().cloned().collect();
                 if !selected.is_empty() {
                     let ref_cb_inner = ref_cb_key.clone();
                     glib::spawn_future_local(async move {
