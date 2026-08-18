@@ -2,6 +2,7 @@
 
 use babydra_core::models::explore::{FileEntry, FileType};
 use babydra_core::services::apps::parse_desktop_file;
+use gtk4::gio::prelude::AppInfoExt;
 
 /// Launches a file entry: executes .desktop app, opens directory in file manager, or launches default app for file.
 pub fn launch_entry(entry: &FileEntry) {
@@ -28,16 +29,25 @@ pub fn launch_entry(entry: &FileEntry) {
         .map(|e| e == "desktop")
         .unwrap_or(false)
     {
+        if let Some(app_info) = gtk4::gio::DesktopAppInfo::from_filename(&entry.path) {
+            if app_info.launch(&[], gtk4::gio::AppLaunchContext::NONE).is_ok() {
+                return;
+            }
+        }
+
         if let Some(app) = parse_desktop_file(&entry.path) {
-            let exec_cmd = app.exec.split_whitespace().collect::<Vec<&str>>();
-            if let Some((prog, args)) = exec_cmd.split_first() {
-                // Filter out desktop field codes (%f, %F, %u, %U, %i, %c, %k)
-                let clean_args: Vec<&str> = args
-                    .iter()
-                    .filter(|a| !a.starts_with('%'))
-                    .copied()
-                    .collect();
-                let _ = std::process::Command::new(prog).args(&clean_args).spawn();
+            let clean_exec = app
+                .exec
+                .split_whitespace()
+                .filter(|a| !a.starts_with('%'))
+                .collect::<Vec<&str>>()
+                .join(" ");
+
+            if !clean_exec.is_empty() {
+                let _ = std::process::Command::new("sh")
+                    .arg("-c")
+                    .arg(format!("{} &", clean_exec))
+                    .spawn();
                 return;
             }
         }
