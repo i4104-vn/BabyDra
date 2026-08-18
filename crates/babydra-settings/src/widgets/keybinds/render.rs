@@ -11,18 +11,18 @@ pub fn build(keybinds: &[Keybind]) -> KeybindsWidget {
 
     // Header
     let header_box = Box::new(Orientation::Horizontal, 12);
-    let title_label = Label::new(Some(&babydra_core::i18n::t("settings.keybinds_title_page")));
+    let title_label = Label::new(Some(&babydra_core::i18n::trans("settings.keybinds_title_page")));
     title_label.add_css_class("settings-page-title");
     title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);
 
-    let refresh_btn = Button::with_label(&babydra_core::i18n::t("settings.refresh"));
+    let refresh_btn = Button::with_label(&babydra_core::i18n::trans("settings.refresh"));
     refresh_btn.add_css_class("connect-pill-btn");
 
-    let add_btn = Button::with_label(&babydra_core::i18n::t("settings.startup_add_new"));
+    let add_btn = Button::with_label(&babydra_core::i18n::trans("settings.startup_add_new"));
     add_btn.add_css_class("connect-pill-btn");
 
-    let save_btn = Button::with_label(&babydra_core::i18n::t("settings.save_changes"));
+    let save_btn = Button::with_label(&babydra_core::i18n::trans("settings.save_changes"));
     save_btn.add_css_class("suggested-action");
 
     header_box.append(&title_label);
@@ -44,23 +44,23 @@ pub fn build(keybinds: &[Keybind]) -> KeybindsWidget {
     th_row.add_css_class("settings-card-row");
     th_row.set_margin_bottom(8);
 
-    let col_type = Label::new(Some(&babydra_core::i18n::t("settings.keybind_type")));
+    let col_type = Label::new(Some(&babydra_core::i18n::trans("settings.keybind_type")));
     col_type.set_width_request(100);
     col_type.add_css_class("settings-section-title");
 
-    let col_mod = Label::new(Some(&babydra_core::i18n::t("settings.keybind_modifier")));
+    let col_mod = Label::new(Some(&babydra_core::i18n::trans("settings.keybind_modifier")));
     col_mod.set_width_request(120);
     col_mod.add_css_class("settings-section-title");
 
-    let col_key = Label::new(Some(&babydra_core::i18n::t("settings.keybind_key")));
+    let col_key = Label::new(Some(&babydra_core::i18n::trans("settings.keybind_key")));
     col_key.set_width_request(80);
     col_key.add_css_class("settings-section-title");
 
-    let col_disp = Label::new(Some(&babydra_core::i18n::t("settings.keybind_dispatch")));
+    let col_disp = Label::new(Some(&babydra_core::i18n::trans("settings.keybind_dispatch")));
     col_disp.set_hexpand(true);
     col_disp.add_css_class("settings-section-title");
 
-    let col_args = Label::new(Some(&babydra_core::i18n::t("settings.keybind_args")));
+    let col_args = Label::new(Some(&babydra_core::i18n::trans("settings.keybind_args")));
     col_args.set_hexpand(true);
     col_args.add_css_class("settings-section-title");
 

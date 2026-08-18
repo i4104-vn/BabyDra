@@ -5,7 +5,7 @@ use gtk4::prelude::*;
 use gtk4::Widget;
 
 /// Creates a new `keybinds widget`.
-pub fn create_keybinds_widget() -> Widget {
+pub fn create_keybinds() -> Widget {
     let keybinds = vec![
         Keybind {
             id: 1,

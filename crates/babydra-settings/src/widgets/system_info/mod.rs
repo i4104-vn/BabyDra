@@ -84,7 +84,7 @@ pub fn create_system_widget() -> gtk4::Widget {
             labels.sub_label.set_text(&sub_title);
 
             let formatted_uptime =
-                babydra_core::i18n::t("settings.up_time").replace("{}", &data.uptime_text);
+                babydra_core::i18n::trans("settings.up_time").replace("{}", &data.uptime_text);
             labels.uptime_lbl.set_text(&formatted_uptime);
 
             labels.kernel_lbl.set_text(&data.kernel_version);

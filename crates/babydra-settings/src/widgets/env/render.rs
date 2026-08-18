@@ -15,21 +15,21 @@ pub fn build(vars: &[EnvVar]) -> EnvWidget {
     title_box.set_hexpand(true);
     title_box.set_halign(gtk4::Align::Start);
 
-    let title_label = Label::new(Some(&babydra_core::i18n::t("settings.env_title")));
+    let title_label = Label::new(Some(&babydra_core::i18n::trans("settings.env_title")));
     title_label.add_css_class("settings-page-title");
     title_label.set_halign(gtk4::Align::Start);
 
-    let subtitle_label = Label::new(Some(&babydra_core::i18n::t("settings.env_subtitle")));
+    let subtitle_label = Label::new(Some(&babydra_core::i18n::trans("settings.env_subtitle")));
     subtitle_label.add_css_class("settings-page-subtitle");
     subtitle_label.set_halign(gtk4::Align::Start);
 
     title_box.append(&title_label);
     title_box.append(&subtitle_label);
 
-    let add_btn = Button::with_label(&babydra_core::i18n::t("settings.startup_add_new"));
+    let add_btn = Button::with_label(&babydra_core::i18n::trans("settings.startup_add_new"));
     add_btn.add_css_class("connect-pill-btn");
 
-    let save_btn = Button::with_label(&babydra_core::i18n::t("settings.save_changes"));
+    let save_btn = Button::with_label(&babydra_core::i18n::trans("settings.save_changes"));
     save_btn.add_css_class("suggested-action");
 
     header_box.append(&title_box);

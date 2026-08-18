@@ -1,5 +1,5 @@
 use super::WifiState;
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use babydra_ui_kit::components::modals::{WifiConfigDialog, WifiInfoDialog, WifiPasswordDialog};
 use gtk4::prelude::*;
 use std::rc::Rc;
@@ -7,7 +7,7 @@ use std::rc::Rc;
 /// Renders `network list`.
 pub fn render_network_list(
     container: &gtk4::Box,
-    st: &WifiState,
+    state_ref: &WifiState,
     info_dialog: &Rc<WifiInfoDialog>,
     password_dialog: &Rc<WifiPasswordDialog>,
     _config_dialog: &Rc<WifiConfigDialog>,
@@ -23,9 +23,9 @@ pub fn render_network_list(
         lb
     };
 
-    if !st.enabled {
+    if !state_ref.enabled {
         container.append(&create_placeholder(
-            crate::widgets::helpers::create_placeholder_row(
+            crate::widgets::helpers::create_placeholder(
                 crate::widgets::helpers::PlaceholderState::Disabled {
                     title_key: "settings.wifi_disabled",
                     desc_key: "settings.wifi_disabled_sub",
@@ -36,18 +36,18 @@ pub fn render_network_list(
         return;
     }
 
-    if st.enabled && st.is_loading && st.networks.is_empty() {
+    if state_ref.enabled && state_ref.is_loading && state_ref.networks.is_empty() {
         container.append(&create_placeholder(
-            crate::widgets::helpers::create_placeholder_row(
+            crate::widgets::helpers::create_placeholder(
                 crate::widgets::helpers::PlaceholderState::Loading,
             ),
         ));
         return;
     }
 
-    if st.networks.is_empty() {
+    if state_ref.networks.is_empty() {
         container.append(&create_placeholder(
-            crate::widgets::helpers::create_placeholder_row(
+            crate::widgets::helpers::create_placeholder(
                 crate::widgets::helpers::PlaceholderState::Empty {
                     title_key: "settings.wifi_no_networks",
                     desc_key: None,
@@ -58,10 +58,10 @@ pub fn render_network_list(
         return;
     }
 
-    let mut display_networks = st.networks.clone();
+    let mut display_networks = state_ref.networks.clone();
     display_networks.sort_by(|a, b| {
-        let a_conn = a.is_connected || st.connecting_ssid.as_ref() == Some(&a.ssid);
-        let b_conn = b.is_connected || st.connecting_ssid.as_ref() == Some(&b.ssid);
+        let a_conn = a.is_connected || state_ref.connecting_ssid.as_ref() == Some(&a.ssid);
+        let b_conn = b.is_connected || state_ref.connecting_ssid.as_ref() == Some(&b.ssid);
         if a_conn != b_conn {
             return b_conn.cmp(&a_conn);
         }
@@ -75,7 +75,7 @@ pub fn render_network_list(
     let mut current_lb: Option<gtk4::ListBox> = None;
 
     for net in &display_networks {
-        let section = if net.is_connected || st.connecting_ssid.as_ref() == Some(&net.ssid) {
+        let section = if net.is_connected || state_ref.connecting_ssid.as_ref() == Some(&net.ssid) {
             1
         } else if net.is_saved {
             2
@@ -92,7 +92,7 @@ pub fn render_network_list(
                 _ => "",
             };
 
-            let header_lbl = gtk4::Label::new(Some(&babydra_core::i18n::t(title_key)));
+            let header_lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans(title_key)));
             header_lbl.add_css_class("settings-row-desc");
             header_lbl.set_halign(gtk4::Align::Start);
             header_lbl.set_margin_start(12);
@@ -122,7 +122,7 @@ pub fn render_network_list(
         icon_badge.set_halign(gtk4::Align::Start);
         icon_badge.set_hexpand(false);
 
-        let wifi_icon = babydra_ui_kit::components::create_wifi_signal_icon_for_network(
+        let wifi_icon = babydra_ui_kit::components::create_wifi_net_icon(
             net.signal as u32,
             net.is_connected,
             18,
@@ -192,11 +192,11 @@ pub fn render_network_list(
         click_box.append(&name_box);
         hbox.append(&click_box);
 
-        let is_connecting_this = st.connecting_ssid.as_ref() == Some(&net.ssid);
-        let is_connecting_other = st.connecting_ssid.is_some() && !is_connecting_this;
+        let is_connecting_this = state_ref.connecting_ssid.as_ref() == Some(&net.ssid);
+        let is_connecting_other = state_ref.connecting_ssid.is_some() && !is_connecting_this;
 
         if is_connecting_this {
-            let conn_lbl = gtk4::Label::new(Some(&t("wifi.connecting")));
+            let conn_lbl = gtk4::Label::new(Some(&trans("wifi.connecting")));
             conn_lbl.add_css_class("settings-row-desc");
             conn_lbl.set_valign(gtk4::Align::Center);
             conn_lbl.set_margin_end(8);
@@ -211,7 +211,7 @@ pub fn render_network_list(
             check_icon.set_pixel_size(18);
             check_icon.set_valign(gtk4::Align::Center);
             check_icon.add_css_class("connected-text");
-            check_icon.set_tooltip_text(Some(&babydra_core::i18n::t("settings.wifi_connected")));
+            check_icon.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.wifi_connected")));
             hbox.append(&check_icon);
         }
 
@@ -250,7 +250,7 @@ pub fn render_network_list(
         let pwd_dlg_c = password_dialog.clone();
         let tx_req = tx_connect_req.clone();
 
-        if !st.connecting_ssid.is_some() {
+        if !state_ref.connecting_ssid.is_some() {
             let gesture = gtk4::GestureClick::new();
             gesture.connect_pressed(move |_, _, _, _| {
                 if net_conn.is_connected {

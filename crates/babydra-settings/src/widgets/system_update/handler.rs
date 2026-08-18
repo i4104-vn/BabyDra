@@ -48,7 +48,7 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
 
             let mut pkgs = current_updates.borrow().clone();
             if pkgs.is_empty() {
-                list_box.append(&render::create_empty_up_to_date_row());
+                list_box.append(&render::create_uptodate_row());
             } else {
                 pkgs.sort_by_key(|p| status_rank(&p.status));
                 for pkg in pkgs.iter() {
@@ -117,10 +117,10 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
                     if state.is_updating && completed < total {
                         if state.is_syncing && completed == 0 {
                             status_label_poller
-                                .set_text(&babydra_core::i18n::t("settings.update_syncing"));
+                                .set_text(&babydra_core::i18n::trans("settings.update_syncing"));
                             progress_bar_poller.set_fraction(0.0);
                         } else {
-                            let prog_text = babydra_core::i18n::t("settings.update_progress")
+                            let prog_text = babydra_core::i18n::trans("settings.update_progress")
                                 .replace("{current}", &completed.to_string())
                                 .replace("{total}", &total.to_string());
                             status_label_poller.set_text(&prog_text);
@@ -138,13 +138,13 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
                             .count();
                         if failed_count == 0 {
                             status_label_poller
-                                .set_text(&babydra_core::i18n::t("settings.update_complete"));
+                                .set_text(&babydra_core::i18n::trans("settings.update_complete"));
                             count_badge_poller
-                                .set_text(&babydra_core::i18n::t("settings.up_to_date"));
+                                .set_text(&babydra_core::i18n::trans("settings.up_to_date"));
                             update_all_btn_poller.set_visible(false);
                             refresh_btn_poller.set_visible(true);
                         } else {
-                            let fail_text = babydra_core::i18n::t("settings.update_failed")
+                            let fail_text = babydra_core::i18n::trans("settings.update_failed")
                                 .replace("{count}", &failed_count.to_string());
                             status_label_poller.set_text(&fail_text);
                             update_all_btn_poller.set_visible(true);
@@ -202,12 +202,12 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
             glib::timeout_add_local(std::time::Duration::from_millis(100), move || {
                 if let Ok(updates) = rx.try_recv() {
                     let count_text = if updates.is_empty() {
-                        babydra_core::i18n::t("settings.up_to_date")
+                        babydra_core::i18n::trans("settings.up_to_date")
                     } else {
                         format!(
                             "{} {}",
                             updates.len(),
-                            babydra_core::i18n::t("settings.updates_available")
+                            babydra_core::i18n::trans("settings.updates_available")
                         )
                     };
                     count_badge_sub.set_text(&count_text);
@@ -218,7 +218,7 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
                     }
 
                     if updates.is_empty() {
-                        list_box_sub.append(&render::create_empty_up_to_date_row());
+                        list_box_sub.append(&render::create_uptodate_row());
                         update_all_btn_sub.set_visible(false);
                         refresh_btn_sub.set_visible(true);
                     } else {
@@ -270,7 +270,7 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
                 let count_text = format!(
                     "{} {}",
                     total,
-                    babydra_core::i18n::t("settings.updates_available")
+                    babydra_core::i18n::trans("settings.updates_available")
                 );
                 count_badge_init.set_text(&count_text);
                 update_all_btn_init.set_visible(true);
@@ -295,10 +295,10 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
 
                     if saved_state.is_syncing && completed == 0 {
                         status_label_init
-                            .set_text(&babydra_core::i18n::t("settings.update_syncing"));
+                            .set_text(&babydra_core::i18n::trans("settings.update_syncing"));
                         progress_bar_init.set_fraction(0.0);
                     } else {
-                        let prog_text = babydra_core::i18n::t("settings.update_progress")
+                        let prog_text = babydra_core::i18n::trans("settings.update_progress")
                             .replace("{current}", &completed.to_string())
                             .replace("{total}", &total.to_string());
                         status_label_init.set_text(&prog_text);
@@ -313,12 +313,12 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
                         .count();
                     if failed_count == 0 {
                         status_label_init
-                            .set_text(&babydra_core::i18n::t("settings.update_complete"));
-                        count_badge_init.set_text(&babydra_core::i18n::t("settings.up_to_date"));
+                            .set_text(&babydra_core::i18n::trans("settings.update_complete"));
+                        count_badge_init.set_text(&babydra_core::i18n::trans("settings.up_to_date"));
                         update_all_btn_init.set_visible(false);
                         refresh_btn_init.set_visible(true);
                     } else {
-                        let fail_text = babydra_core::i18n::t("settings.update_failed")
+                        let fail_text = babydra_core::i18n::trans("settings.update_failed")
                             .replace("{count}", &failed_count.to_string());
                         status_label_init.set_text(&fail_text);
                         update_all_btn_init.set_visible(true);
@@ -389,7 +389,7 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
         }
         progress_bar_start.set_fraction(0.0);
 
-        let initial_status_text = babydra_core::i18n::t("settings.update_syncing");
+        let initial_status_text = babydra_core::i18n::trans("settings.update_syncing");
         status_label_start.set_text(&initial_status_text);
 
         // Mark all as Pending initially and save state with is_syncing = true

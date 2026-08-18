@@ -24,7 +24,7 @@ pub fn create_apps_widget() -> Widget {
     let (tx, rx) = std::sync::mpsc::channel::<AppsData>();
     std::thread::spawn(move || {
         let installed_apps =
-            babydra_core::services::apps::discovery::scan_desktop_apps_from_filesystem();
+            babydra_core::services::apps::discovery::scan_desktop_apps();
         let apps_data: Vec<InstalledApp> = installed_apps
             .into_iter()
             .map(|app| InstalledApp {
@@ -35,7 +35,7 @@ pub fn create_apps_widget() -> Widget {
             })
             .collect();
 
-        let pkgs = babydra_core::services::apps::pacman::get_installed_packages_list();
+        let pkgs = babydra_core::services::apps::pacman::get_installed_pkgs();
 
         let _ = tx.send(AppsData { apps_data, pkgs });
     });

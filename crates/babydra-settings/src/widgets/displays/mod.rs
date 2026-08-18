@@ -44,7 +44,7 @@ fn save_display_configs(monitors: &[MonitorConfig], card_rows: &[DisplayCardRow]
 }
 
 /// Creates the display settings widget with event bindings
-pub fn create_displays_widget() -> Widget {
+pub fn create_displays() -> Widget {
     // Initial 0ms layout build
     let widget = render::build(&[]);
     let container_box = widget.container.clone();

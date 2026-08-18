@@ -34,13 +34,13 @@ pub fn build(
     let header_box = Box::new(Orientation::Horizontal, 12);
     header_box.set_margin_bottom(4);
 
-    let title_label = Label::new(Some(&babydra_core::i18n::t("settings.apps_title")));
+    let title_label = Label::new(Some(&babydra_core::i18n::trans("settings.apps_title")));
     title_label.add_css_class("settings-page-title");
     title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);
 
     let search_entry = Entry::new();
-    search_entry.set_placeholder_text(Some(&babydra_core::i18n::t(
+    search_entry.set_placeholder_text(Some(&babydra_core::i18n::trans(
         "settings.apps_search_placeholder",
     )));
     search_entry.add_css_class("sidebar-search-entry");
@@ -62,12 +62,12 @@ pub fn build(
 
     // Tabs Bar Row
     let tabs_box = Box::new(Orientation::Horizontal, 12);
-    let tab_apps_btn = Button::with_label(&babydra_core::i18n::t("settings.apps_tab_apps"));
+    let tab_apps_btn = Button::with_label(&babydra_core::i18n::trans("settings.apps_tab_apps"));
     tab_apps_btn.add_css_class("app-tab-btn");
     tab_apps_btn.add_css_class("active");
     tab_apps_btn.set_cursor_from_name(Some("pointer"));
 
-    let tab_packages_btn = Button::with_label(&babydra_core::i18n::t("settings.apps_tab_packages"));
+    let tab_packages_btn = Button::with_label(&babydra_core::i18n::trans("settings.apps_tab_packages"));
     tab_packages_btn.add_css_class("app-tab-btn");
     tab_packages_btn.set_cursor_from_name(Some("pointer"));
 
@@ -116,7 +116,7 @@ pub fn build(
             .as_deref()
             .filter(|s| !s.is_empty())
             .unwrap_or("application-x-executable");
-        let icon_img = babydra_ui_kit::ui::icon::get_system_or_file_icon(
+        let icon_img = babydra_ui_kit::ui::icon::get_fallback_icon(
             icon_name,
             "application-x-executable",
         );
@@ -146,7 +146,7 @@ pub fn build(
 
         let pkg_name = app.name.to_lowercase().replace(' ', "-");
 
-        if babydra_core::services::apps::pacman::find_cached_older_package(&pkg_name).is_some() {
+        if babydra_core::services::apps::pacman::find_cached_pkg(&pkg_name).is_some() {
             let downgrade_btn = Button::new();
             downgrade_btn.add_css_class("icon-btn");
             downgrade_btn.add_css_class("circular");
@@ -226,7 +226,7 @@ pub fn build(
         icon_box.set_valign(gtk4::Align::Center);
         icon_box.set_halign(gtk4::Align::Start);
 
-        let icon_img = babydra_ui_kit::ui::icon::get_system_or_file_icon(
+        let icon_img = babydra_ui_kit::ui::icon::get_fallback_icon(
             &pkg.name,
             "application-x-executable",
         );
@@ -254,7 +254,7 @@ pub fn build(
 
         row_box.append(&text_box);
 
-        if babydra_core::services::apps::pacman::find_cached_older_package(&pkg.name).is_some() {
+        if babydra_core::services::apps::pacman::find_cached_pkg(&pkg.name).is_some() {
             let downgrade_btn = Button::new();
             downgrade_btn.add_css_class("icon-btn");
             downgrade_btn.add_css_class("circular");
@@ -323,7 +323,7 @@ pub fn build(
     console_icon.set_pixel_size(18);
     console_header.append(&console_icon);
 
-    let console_title_lbl = Label::new(Some(&babydra_core::i18n::t(
+    let console_title_lbl = Label::new(Some(&babydra_core::i18n::trans(
         "settings.apps_uninstall_log_title",
     )));
     console_title_lbl.add_css_class("settings-row-title");
@@ -358,7 +358,7 @@ pub fn build(
     let actions_box = Box::new(Orientation::Horizontal, 8);
     actions_box.set_halign(gtk4::Align::End);
 
-    let console_close_btn = Button::with_label(&babydra_core::i18n::t("explore.settings_close"));
+    let console_close_btn = Button::with_label(&babydra_core::i18n::trans("explore.settings_close"));
     console_close_btn.add_css_class("connect-pill-btn");
     console_close_btn.set_cursor_from_name(Some("pointer"));
     actions_box.append(&console_close_btn);

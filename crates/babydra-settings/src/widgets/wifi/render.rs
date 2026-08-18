@@ -24,7 +24,7 @@ pub fn build_wifi_ui() -> (
     let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
     header_box.set_margin_bottom(4);
 
-    let page_title = gtk4::Label::new(Some(&babydra_core::i18n::t("settings.wifi_title")));
+    let page_title = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.wifi_title")));
     page_title.add_css_class("settings-page-title");
     page_title.set_halign(gtk4::Align::Start);
     page_title.set_hexpand(true);

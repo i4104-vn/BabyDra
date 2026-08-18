@@ -33,7 +33,7 @@ pub fn get_cpu_frequency() -> Option<(f64, String)> {
 }
 
 /// Update battery card ui.
-pub fn update_battery_card_ui(card: &Box, info_opt: Option<BatteryInfo>) {
+pub fn update_battery_card(card: &Box, info_opt: Option<BatteryInfo>) {
     while let Some(child) = card.first_child() {
         card.remove(&child);
     }
@@ -57,7 +57,7 @@ pub fn update_battery_card_ui(card: &Box, info_opt: Option<BatteryInfo>) {
     let left_box = Box::new(Orientation::Vertical, 6);
     left_box.set_valign(gtk4::Align::Start);
 
-    let title_lbl = Label::new(Some(&babydra_core::i18n::t(
+    let title_lbl = Label::new(Some(&babydra_core::i18n::trans(
         "settings.power_battery_status",
     )));
     title_lbl.add_css_class("settings-section-title");
@@ -69,7 +69,7 @@ pub fn update_battery_card_ui(card: &Box, info_opt: Option<BatteryInfo>) {
     let left_h_box = Box::new(Orientation::Horizontal, 14);
     left_h_box.set_valign(gtk4::Align::Center);
 
-    let huge_battery = babydra_ui_kit::ui::battery::create_battery_drawing_area(
+    let huge_battery = babydra_ui_kit::ui::battery::create_battery_area(
         info.percentage,
         info.is_charging,
         96,
@@ -80,11 +80,11 @@ pub fn update_battery_card_ui(card: &Box, info_opt: Option<BatteryInfo>) {
     left_text_box.set_valign(gtk4::Align::Center);
 
     if info.is_ac_only {
-        let hero_label = Label::new(Some(&babydra_core::i18n::t("settings.power_direct_ac")));
+        let hero_label = Label::new(Some(&babydra_core::i18n::trans("settings.power_direct_ac")));
         hero_label.add_css_class("settings-row-title");
         hero_label.set_halign(gtk4::Align::Start);
 
-        let sub_label = Label::new(Some(&babydra_core::i18n::t(
+        let sub_label = Label::new(Some(&babydra_core::i18n::trans(
             "settings.power_ac_connected_sub",
         )));
         sub_label.add_css_class("settings-row-desc");
@@ -119,15 +119,15 @@ pub fn update_battery_card_ui(card: &Box, info_opt: Option<BatteryInfo>) {
     // Optional Hardware Info in Left Box
     let hw_specs: Vec<(String, Option<String>)> = vec![
         (
-            babydra_core::i18n::t("settings.power_manufacturer"),
+            babydra_core::i18n::trans("settings.power_manufacturer"),
             info.manufacturer.clone(),
         ),
         (
-            babydra_core::i18n::t("settings.power_model"),
+            babydra_core::i18n::trans("settings.power_model"),
             info.model_name.clone(),
         ),
         (
-            babydra_core::i18n::t("settings.power_serial"),
+            babydra_core::i18n::trans("settings.power_serial"),
             info.serial_number.clone(),
         ),
     ];
@@ -178,7 +178,7 @@ pub fn update_battery_card_ui(card: &Box, info_opt: Option<BatteryInfo>) {
     right_header.append(&dummy_space);
 
     let badge_text = if info.is_ac_only {
-        babydra_core::i18n::t("settings.power_ac_badge")
+        babydra_core::i18n::trans("settings.power_ac_badge")
     } else {
         info.status_text.clone()
     };
@@ -201,7 +201,7 @@ pub fn update_battery_card_ui(card: &Box, info_opt: Option<BatteryInfo>) {
         progress.add_css_class("battery-level-bar");
 
         let fill_color =
-            babydra_ui_kit::ui::battery::get_battery_color_hex(info.percentage, info.is_charging);
+            babydra_ui_kit::ui::battery::get_battery_hex(info.percentage, info.is_charging);
 
         let provider = gtk4::CssProvider::new();
         provider.load_from_data(&format!(
@@ -227,66 +227,66 @@ pub fn update_battery_card_ui(card: &Box, info_opt: Option<BatteryInfo>) {
     let specs: Vec<(String, Option<String>)> = if info.is_ac_only {
         vec![
             (
-                babydra_core::i18n::t("settings.power_active_profile"),
+                babydra_core::i18n::trans("settings.power_active_profile"),
                 info.active_profile,
             ),
             (
-                babydra_core::i18n::t("settings.power_power_source"),
+                babydra_core::i18n::trans("settings.power_power_source"),
                 info.power_source,
             ),
             (
-                babydra_core::i18n::t("settings.power_system_type"),
-                Some(babydra_core::i18n::t("settings.power_desktop_mains")),
+                babydra_core::i18n::trans("settings.power_system_type"),
+                Some(babydra_core::i18n::trans("settings.power_desktop_mains")),
             ),
             (
-                babydra_core::i18n::t("settings.power_battery_health"),
+                babydra_core::i18n::trans("settings.power_battery_health"),
                 info.health,
             ),
             (
-                babydra_core::i18n::t("settings.power_battery_tech"),
+                babydra_core::i18n::trans("settings.power_battery_tech"),
                 info.technology,
             ),
         ]
     } else {
         vec![
             (
-                babydra_core::i18n::t("settings.power_active_profile"),
+                babydra_core::i18n::trans("settings.power_active_profile"),
                 info.active_profile,
             ),
             (
-                babydra_core::i18n::t("settings.power_battery_health"),
+                babydra_core::i18n::trans("settings.power_battery_health"),
                 info.health,
             ),
             (
-                babydra_core::i18n::t("settings.power_power_source"),
+                babydra_core::i18n::trans("settings.power_power_source"),
                 info.power_source,
             ),
             (
-                babydra_core::i18n::t("settings.power_energy_rate"),
+                babydra_core::i18n::trans("settings.power_energy_rate"),
                 info.energy_rate,
             ),
             (
-                babydra_core::i18n::t("settings.power_voltage"),
+                babydra_core::i18n::trans("settings.power_voltage"),
                 info.voltage,
             ),
             (
-                babydra_core::i18n::t("settings.power_capacity"),
+                babydra_core::i18n::trans("settings.power_capacity"),
                 info.capacity_wh,
             ),
             (
-                babydra_core::i18n::t("settings.power_design_capacity"),
+                babydra_core::i18n::trans("settings.power_design_capacity"),
                 info.design_capacity,
             ),
             (
-                babydra_core::i18n::t("settings.power_temperature"),
+                babydra_core::i18n::trans("settings.power_temperature"),
                 info.temperature,
             ),
             (
-                babydra_core::i18n::t("settings.power_cycle_count"),
+                babydra_core::i18n::trans("settings.power_cycle_count"),
                 info.cycle_count.map(|c| format!("{} cycles", c)),
             ),
             (
-                babydra_core::i18n::t("settings.power_battery_tech"),
+                babydra_core::i18n::trans("settings.power_battery_tech"),
                 info.technology,
             ),
         ]

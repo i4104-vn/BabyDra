@@ -5,7 +5,7 @@ use gtk4::prelude::*;
 use gtk4::{Box, Button, Entry, Orientation, Widget};
 
 /// Creates a new `startup widget`.
-pub fn create_startup_widget() -> Widget {
+pub fn create_startup() -> Widget {
     let commands = babydra_core::services::system::startup::get_startup_commands();
     let widget = render::build(&commands);
 
@@ -15,7 +15,7 @@ pub fn create_startup_widget() -> Widget {
         row.add_css_class("settings-card-row");
 
         let entry = Entry::new();
-        entry.set_placeholder_text(Some(&babydra_core::i18n::t(
+        entry.set_placeholder_text(Some(&babydra_core::i18n::trans(
             "settings.startup_command_placeholder",
         )));
         entry.set_hexpand(true);
@@ -63,7 +63,7 @@ pub fn create_startup_widget() -> Widget {
             }
             row_child = c.next_sibling();
         }
-        let _ = babydra_core::services::system::startup::save_startup_commands(&cmds);
+        let _ = babydra_core::services::system::startup::save_startup_cmds(&cmds);
     });
 
     widget.container.into()

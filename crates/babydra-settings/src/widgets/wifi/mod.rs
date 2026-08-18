@@ -60,10 +60,10 @@ pub fn create_wifi_widget() -> gtk4::Widget {
         let cfg_dlg_c = config_dialog.clone();
         let tx_req_c = tx_connect_req.clone();
         move || {
-            let st = state_clone.borrow();
+            let state_ref = state_clone.borrow();
             handler::render_network_list(
                 &list_box_clone,
-                &st,
+                &state_ref,
                 &info_dlg_c,
                 &pwd_dlg_c,
                 &cfg_dlg_c,
@@ -152,8 +152,8 @@ pub fn create_wifi_widget() -> gtk4::Widget {
             }
 
             let (enabled, is_empty) = {
-                let st = state_c.borrow();
-                (st.enabled, st.networks.is_empty())
+                let state_ref = state_c.borrow();
+                (state_ref.enabled, state_ref.networks.is_empty())
             };
 
             if enabled {
@@ -202,9 +202,9 @@ pub fn create_wifi_widget() -> gtk4::Widget {
     glib::timeout_add_local(std::time::Duration::from_millis(150), move || {
         let mut updated = false;
         while let Ok(nets) = rx_scan.try_recv() {
-            let mut st = state_scan_render.borrow_mut();
-            st.networks = nets;
-            st.is_loading = false;
+            let mut state_ref = state_scan_render.borrow_mut();
+            state_ref.networks = nets;
+            state_ref.is_loading = false;
             updated = true;
         }
         if updated {
@@ -240,11 +240,11 @@ pub fn create_wifi_widget() -> gtk4::Widget {
         let is_active_bool = is_active;
         toggle_row_switch.set_active(is_active_bool);
         {
-            let mut st = state_switch.borrow_mut();
-            st.enabled = is_active_bool;
+            let mut state_ref = state_switch.borrow_mut();
+            state_ref.enabled = is_active_bool;
             if !is_active_bool {
-                st.networks.clear();
-                st.is_loading = false;
+                state_ref.networks.clear();
+                state_ref.is_loading = false;
             }
         }
         std::thread::spawn(move || {

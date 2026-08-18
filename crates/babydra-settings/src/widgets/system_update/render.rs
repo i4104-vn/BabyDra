@@ -83,25 +83,25 @@ pub fn create_update_row(pkg: &PackageUpdate) -> ListBoxRow {
     // Right status indicator badge
     let status_badge_lbl = match pkg.status {
         UpdateStatus::Pending => {
-            let lbl = Label::new(Some(&babydra_core::i18n::t("settings.status_waiting")));
+            let lbl = Label::new(Some(&babydra_core::i18n::trans("settings.status_waiting")));
             lbl.add_css_class("settings-row-desc");
             lbl.set_valign(gtk4::Align::Center);
             Some(lbl)
         }
         UpdateStatus::Updating => {
-            let lbl = Label::new(Some(&babydra_core::i18n::t("settings.status_pending")));
+            let lbl = Label::new(Some(&babydra_core::i18n::trans("settings.status_pending")));
             lbl.add_css_class("settings-row-desc");
             lbl.set_valign(gtk4::Align::Center);
             Some(lbl)
         }
         UpdateStatus::Done => {
-            let lbl = Label::new(Some(&babydra_core::i18n::t("settings.status_done")));
+            let lbl = Label::new(Some(&babydra_core::i18n::trans("settings.status_done")));
             lbl.add_css_class("status-success-badge");
             lbl.set_valign(gtk4::Align::Center);
             Some(lbl)
         }
         UpdateStatus::Failed => {
-            let lbl = Label::new(Some(&babydra_core::i18n::t("settings.status_failed")));
+            let lbl = Label::new(Some(&babydra_core::i18n::trans("settings.status_failed")));
             lbl.add_css_class("status-error-badge");
             lbl.set_valign(gtk4::Align::Center);
             Some(lbl)
@@ -117,7 +117,7 @@ pub fn create_update_row(pkg: &PackageUpdate) -> ListBoxRow {
 }
 
 /// Creates a new `empty up to date row`.
-pub fn create_empty_up_to_date_row() -> ListBoxRow {
+pub fn create_uptodate_row() -> ListBoxRow {
     let row = ListBoxRow::new();
     row.set_selectable(false);
     row.set_activatable(false);
@@ -146,7 +146,7 @@ pub fn create_empty_up_to_date_row() -> ListBoxRow {
     icon_badge.append(&icon_img);
     row_box.append(&icon_badge);
 
-    let text_lbl = Label::new(Some(&babydra_core::i18n::t("settings.up_to_date")));
+    let text_lbl = Label::new(Some(&babydra_core::i18n::trans("settings.up_to_date")));
     text_lbl.add_css_class("settings-row-title");
     text_lbl.set_halign(gtk4::Align::Center);
 
@@ -166,17 +166,17 @@ pub fn build(updates: &[PackageUpdate]) -> (SystemUpdateWidget, PasswordDialog) 
     // Header Row with Title, Count Badge, Spinner & Actions
     let header_box = Box::new(Orientation::Horizontal, 12);
 
-    let title_label = Label::new(Some(&babydra_core::i18n::t("settings.update_title")));
+    let title_label = Label::new(Some(&babydra_core::i18n::trans("settings.update_title")));
     title_label.add_css_class("settings-page-title");
     title_label.set_halign(gtk4::Align::Start);
 
     let count_text = if updates.is_empty() {
-        babydra_core::i18n::t("settings.up_to_date")
+        babydra_core::i18n::trans("settings.up_to_date")
     } else {
         format!(
             "{} {}",
             updates.len(),
-            babydra_core::i18n::t("settings.updates_available")
+            babydra_core::i18n::trans("settings.updates_available")
         )
     };
     let count_badge = Label::new(Some(&count_text));
@@ -187,11 +187,11 @@ pub fn build(updates: &[PackageUpdate]) -> (SystemUpdateWidget, PasswordDialog) 
     let spinner = Spinner::new();
     spinner.set_visible(false);
 
-    let refresh_btn = Button::with_label(&babydra_core::i18n::t("settings.update_check"));
+    let refresh_btn = Button::with_label(&babydra_core::i18n::trans("settings.update_check"));
     refresh_btn.add_css_class("connect-pill-btn");
     refresh_btn.set_cursor_from_name(Some("pointer"));
 
-    let update_all_btn = Button::with_label(&babydra_core::i18n::t("settings.update_all"));
+    let update_all_btn = Button::with_label(&babydra_core::i18n::trans("settings.update_all"));
     update_all_btn.add_css_class("suggested-action");
     update_all_btn.set_cursor_from_name(Some("pointer"));
 
@@ -236,7 +236,7 @@ pub fn build(updates: &[PackageUpdate]) -> (SystemUpdateWidget, PasswordDialog) 
     list_box.set_selection_mode(gtk4::SelectionMode::None);
 
     if updates.is_empty() {
-        list_box.append(&create_empty_up_to_date_row());
+        list_box.append(&create_uptodate_row());
     } else {
         for pkg in updates {
             list_box.append(&create_update_row(pkg));

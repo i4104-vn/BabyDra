@@ -5,11 +5,11 @@ use babydra_core::services::system::bluetooth::{connect_device, disconnect_devic
 use gtk4::prelude::*;
 
 /// Renders `device list`.
-pub fn render_device_list(list_box: &gtk4::ListBox, st: &BluetoothState) {
+pub fn render_device_list(list_box: &gtk4::ListBox, state_ref: &BluetoothState) {
     crate::widgets::helpers::clear_list_box(list_box);
 
-    if !st.enabled {
-        list_box.append(&crate::widgets::helpers::create_placeholder_row(
+    if !state_ref.enabled {
+        list_box.append(&crate::widgets::helpers::create_placeholder(
             crate::widgets::helpers::PlaceholderState::Disabled {
                 title_key: "settings.bt_off",
                 desc_key: "settings.bt_off_sub",
@@ -19,15 +19,15 @@ pub fn render_device_list(list_box: &gtk4::ListBox, st: &BluetoothState) {
         return;
     }
 
-    if st.enabled && st.is_loading && st.devices.is_empty() {
-        list_box.append(&crate::widgets::helpers::create_placeholder_row(
+    if state_ref.enabled && state_ref.is_loading && state_ref.devices.is_empty() {
+        list_box.append(&crate::widgets::helpers::create_placeholder(
             crate::widgets::helpers::PlaceholderState::Loading,
         ));
         return;
     }
 
-    if st.devices.is_empty() {
-        list_box.append(&crate::widgets::helpers::create_placeholder_row(
+    if state_ref.devices.is_empty() {
+        list_box.append(&crate::widgets::helpers::create_placeholder(
             crate::widgets::helpers::PlaceholderState::Empty {
                 title_key: "settings.bt_no_devices",
                 desc_key: Some("settings.bt_no_devices_sub"),
@@ -37,7 +37,7 @@ pub fn render_device_list(list_box: &gtk4::ListBox, st: &BluetoothState) {
         return;
     }
 
-    for dev in &st.devices {
+    for dev in &state_ref.devices {
         let row = gtk4::ListBoxRow::new();
         row.add_css_class("settings-card-row");
 
@@ -78,7 +78,7 @@ pub fn render_device_list(list_box: &gtk4::ListBox, st: &BluetoothState) {
             hbox.append(&check_badge);
 
             let disconnect_btn =
-                gtk4::Button::with_label(&babydra_core::i18n::t("settings.disconnect"));
+                gtk4::Button::with_label(&babydra_core::i18n::trans("settings.disconnect"));
             disconnect_btn.set_valign(gtk4::Align::Center);
             disconnect_btn.add_css_class("connect-pill-btn");
             let mac_clone = dev.mac.clone();
@@ -90,7 +90,7 @@ pub fn render_device_list(list_box: &gtk4::ListBox, st: &BluetoothState) {
             });
             hbox.append(&disconnect_btn);
         } else {
-            let connect_btn = gtk4::Button::with_label(&babydra_core::i18n::t("settings.connect"));
+            let connect_btn = gtk4::Button::with_label(&babydra_core::i18n::trans("settings.connect"));
             connect_btn.set_valign(gtk4::Align::Center);
             connect_btn.add_css_class("suggested-action");
             let mac_clone = dev.mac.clone();

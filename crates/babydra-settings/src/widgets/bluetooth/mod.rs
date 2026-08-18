@@ -6,14 +6,14 @@ use std::sync::mpsc::channel;
 
 pub use babydra_core::models::settings::BluetoothState;
 use babydra_core::models::settings::bluetooth::BtDevice;
-use babydra_core::{get_bluetooth_devices, is_bluetooth_enabled, set_bluetooth_enabled};
+use babydra_core::{get_bt_devices, is_bluetooth_enabled, set_bt_enabled};
 use gtk4::prelude::*;
 
 mod handler;
 mod render;
 
 /// Creates a new `bluetooth widget`.
-pub fn create_bluetooth_widget() -> gtk4::Widget {
+pub fn create_bt_widget() -> gtk4::Widget {
     let (main_box, toggle_row, list_box) = render::build_bluetooth_ui();
 
     let state = Rc::new(RefCell::new(BluetoothState {
@@ -48,8 +48,8 @@ pub fn create_bluetooth_widget() -> gtk4::Widget {
         let list_box_clone = list_box.clone();
         let state_clone = state.clone();
         move || {
-            let st = state_clone.borrow();
-            handler::render_device_list(&list_box_clone, &st);
+            let state_ref = state_clone.borrow();
+            handler::render_device_list(&list_box_clone, &state_ref);
         }
     };
 
@@ -68,8 +68,8 @@ pub fn create_bluetooth_widget() -> gtk4::Widget {
             }
 
             let (enabled, is_empty) = {
-                let st = state_c.borrow();
-                (st.enabled, st.devices.is_empty())
+                let state_ref = state_c.borrow();
+                (state_ref.enabled, state_ref.devices.is_empty())
             };
 
             if enabled {
@@ -79,7 +79,7 @@ pub fn create_bluetooth_widget() -> gtk4::Widget {
                 }
                 let tx_sub = tx_c.clone();
                 std::thread::spawn(move || {
-                    let devs = get_bluetooth_devices();
+                    let devs = get_bt_devices();
                     let _ = tx_sub.send(devs);
                 });
             }
@@ -91,9 +91,9 @@ pub fn create_bluetooth_widget() -> gtk4::Widget {
     glib::timeout_add_local(std::time::Duration::from_millis(150), move || {
         let mut updated = false;
         while let Ok(devs) = rx_devs.try_recv() {
-            let mut st = state_c_rx.borrow_mut();
-            st.devices = devs;
-            st.is_loading = false;
+            let mut state_ref = state_c_rx.borrow_mut();
+            state_ref.devices = devs;
+            state_ref.is_loading = false;
             updated = true;
         }
         if updated {
@@ -129,14 +129,14 @@ pub fn create_bluetooth_widget() -> gtk4::Widget {
     toggle_row.switch.connect_state_set(move |is_active| {
         toggle_row_switch.set_active(is_active);
         std::thread::spawn(move || {
-            set_bluetooth_enabled(is_active);
+            set_bt_enabled(is_active);
         });
         {
-            let mut st = state_switch.borrow_mut();
-            st.enabled = is_active;
+            let mut state_ref = state_switch.borrow_mut();
+            state_ref.enabled = is_active;
             if !is_active {
-                st.devices.clear();
-                st.is_loading = false;
+                state_ref.devices.clear();
+                state_ref.is_loading = false;
             }
         }
         if !is_active {

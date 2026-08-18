@@ -94,7 +94,7 @@ pub fn wire_main_events(
         let (tx, rx) = std::sync::mpsc::channel::<super::AppsData>();
         std::thread::spawn(move || {
             let installed_apps =
-                babydra_core::services::apps::discovery::scan_desktop_apps_from_filesystem();
+                babydra_core::services::apps::discovery::scan_desktop_apps();
             let apps_data: Vec<babydra_core::models::app_info::InstalledApp> = installed_apps
                 .into_iter()
                 .map(|app| babydra_core::models::app_info::InstalledApp {
@@ -105,7 +105,7 @@ pub fn wire_main_events(
                 })
                 .collect();
 
-            let pkgs = babydra_core::services::apps::pacman::get_installed_packages_list();
+            let pkgs = babydra_core::services::apps::pacman::get_installed_pkgs();
 
             let _ = tx.send(super::AppsData { apps_data, pkgs });
         });
@@ -186,7 +186,7 @@ pub fn wire_main_events(
             };
             console_title_lbl.set_text(&format!(
                 "{} - {}",
-                babydra_core::i18n::t(log_title_key),
+                babydra_core::i18n::trans(log_title_key),
                 pkg_name
             ));
 
@@ -198,14 +198,14 @@ pub fn wire_main_events(
             std::thread::spawn(move || {
                 let res = match act_type_clone {
                     AppActionType::Uninstall => {
-                        babydra_core::services::apps::pacman::stream_uninstall_package(
+                        babydra_core::services::apps::pacman::stream_uninstall(
                             &pkg_name_clone,
                             pwd_clone.as_deref(),
                             tx.clone(),
                         )
                     }
                     AppActionType::Downgrade => {
-                        babydra_core::services::apps::pacman::stream_downgrade_package(
+                        babydra_core::services::apps::pacman::stream_downgrade(
                             &pkg_name_clone,
                             pwd_clone.as_deref(),
                             tx.clone(),
@@ -220,7 +220,7 @@ pub fn wire_main_events(
                         AppActionType::Downgrade => "settings.apps_downgrade_success",
                     };
                     let success_msg =
-                        babydra_core::i18n::t(success_key).replace("{}", &pkg_name_clone);
+                        babydra_core::i18n::trans(success_key).replace("{}", &pkg_name_clone);
                     let _ = tx.send(format!("\n{}", success_msg));
                 }
             });
@@ -305,13 +305,13 @@ pub fn wire_uninstall_items(
 
         item.button.connect_clicked(move |_| {
             if action_type == AppActionType::Downgrade {
-                if babydra_core::services::apps::pacman::find_cached_older_package(&pkg_name)
+                if babydra_core::services::apps::pacman::find_cached_pkg(&pkg_name)
                     .is_none()
                 {
-                    let msg = babydra_core::i18n::t("settings.apps_downgrade_not_found")
+                    let msg = babydra_core::i18n::trans("settings.apps_downgrade_not_found")
                         .replace("{}", &pkg_name);
-                    babydra_core::send_settings_notification(
-                        &babydra_core::i18n::t("settings.apps_downgrade_log_title"),
+                    babydra_core::send_settings_notif(
+                        &babydra_core::i18n::trans("settings.apps_downgrade_log_title"),
                         &msg,
                     );
                     return;

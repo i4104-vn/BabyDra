@@ -7,15 +7,15 @@ use gtk4::{Box, Button, DropDown, Label, Orientation, StringList};
 fn build_header() -> (Box, Button, Button) {
     let header_box = Box::new(Orientation::Horizontal, 12);
 
-    let title_label = Label::new(Some(&babydra_core::i18n::t("settings.displays_title")));
+    let title_label = Label::new(Some(&babydra_core::i18n::trans("settings.displays_title")));
     title_label.add_css_class("settings-page-title");
     title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);
 
-    let refresh_btn = Button::with_label(&babydra_core::i18n::t("settings.refresh"));
+    let refresh_btn = Button::with_label(&babydra_core::i18n::trans("settings.refresh"));
     refresh_btn.add_css_class("connect-pill-btn");
 
-    let save_btn = Button::with_label(&babydra_core::i18n::t("settings.save"));
+    let save_btn = Button::with_label(&babydra_core::i18n::trans("settings.save"));
     save_btn.add_css_class("suggested-action");
 
     header_box.append(&title_label);
@@ -91,10 +91,10 @@ fn build_monitor_card(mon: &MonitorConfig) -> DisplayCardRow {
 
     // 4. Orientation Dropdown
     let orient_items_owned = vec![
-        babydra_core::i18n::t("settings.orientation_normal"),
-        babydra_core::i18n::t("settings.orientation_left"),
-        babydra_core::i18n::t("settings.orientation_inverted"),
-        babydra_core::i18n::t("settings.orientation_right"),
+        babydra_core::i18n::trans("settings.orientation_normal"),
+        babydra_core::i18n::trans("settings.orientation_left"),
+        babydra_core::i18n::trans("settings.orientation_inverted"),
+        babydra_core::i18n::trans("settings.orientation_right"),
     ];
     let orient_items: Vec<&str> = orient_items_owned.iter().map(|s| s.as_str()).collect();
     let orientation_dropdown = DropDown::new(

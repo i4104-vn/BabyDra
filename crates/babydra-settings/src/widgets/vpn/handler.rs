@@ -22,14 +22,14 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
     crate::widgets::helpers::clear_list_box(list_box);
 
     if is_loading && vpns.is_empty() {
-        list_box.append(&crate::widgets::helpers::create_placeholder_row(
+        list_box.append(&crate::widgets::helpers::create_placeholder(
             crate::widgets::helpers::PlaceholderState::Loading,
         ));
         return;
     }
 
     if vpns.is_empty() {
-        list_box.append(&crate::widgets::helpers::create_placeholder_row(
+        list_box.append(&crate::widgets::helpers::create_placeholder(
             crate::widgets::helpers::PlaceholderState::Empty {
                 title_key: "settings.vpn_no_profiles",
                 desc_key: Some("settings.vpn_no_profiles_sub"),
@@ -81,7 +81,7 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
         let sub_text = if vpn.active {
             let mut info_parts = vec![format!(
                 "{}: {}",
-                babydra_core::i18n::t("settings.vpn_type"),
+                babydra_core::i18n::trans("settings.vpn_type"),
                 vpn.conn_type.to_uppercase()
             )];
             if !vpn.ip_address.is_empty() {
@@ -91,7 +91,7 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
         } else {
             format!(
                 "{}: {}",
-                babydra_core::i18n::t("settings.vpn_type"),
+                babydra_core::i18n::trans("settings.vpn_type"),
                 vpn.conn_type.to_uppercase()
             )
         };
@@ -108,7 +108,7 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
         log_btn.add_css_class("icon-btn");
         log_btn.set_valign(gtk4::Align::Center);
         log_btn.set_cursor_from_name(Some("pointer"));
-        log_btn.set_tooltip_text(Some(&babydra_core::i18n::t("settings.vpn_view_logs")));
+        log_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.vpn_view_logs")));
 
         let log_icon = babydra_ui_kit::ui::icon::get_icon("terminal", 14);
         log_icon.set_pixel_size(14);
@@ -156,7 +156,7 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
             hbox.append(&spinner);
         } else if vpn.active {
             let disconnect_btn =
-                gtk4::Button::with_label(&babydra_core::i18n::t("settings.disconnect"));
+                gtk4::Button::with_label(&babydra_core::i18n::trans("settings.disconnect"));
             disconnect_btn.set_valign(gtk4::Align::Center);
             disconnect_btn.add_css_class("connect-pill-btn");
             disconnect_btn.add_css_class("delete-btn");
@@ -175,7 +175,7 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
             });
             hbox.append(&disconnect_btn);
         } else {
-            let connect_btn = gtk4::Button::with_label(&babydra_core::i18n::t("settings.connect"));
+            let connect_btn = gtk4::Button::with_label(&babydra_core::i18n::trans("settings.connect"));
             connect_btn.set_valign(gtk4::Align::Center);
             connect_btn.add_css_class("suggested-action");
 

@@ -1,10 +1,10 @@
 use super::render::{
-    update_battery_card_ui, update_power_widget_labels, update_profile_selection, PowerWidget,
+    update_battery_card, update_power_labels, update_profile_sel, PowerWidget,
 };
 use babydra_core::{
-    battery::check_and_apply_auto_battery_saver, get_battery_info, get_current_profile,
-    load_babydra_config, save_babydra_config, set_performance_profile,
-    set_performance_profile_with_password, PerformanceProfile,
+    battery::apply_battery_saver, get_battery_info, get_current_profile,
+    load_babydra_config, save_babydra_config, set_perf_profile,
+    set_perf_profile_pw, PerformanceProfile,
 };
 use babydra_ui_kit::components::modals::PasswordDialog;
 use gtk4::prelude::*;
@@ -18,7 +18,7 @@ pub fn wire_events(widget: &PowerWidget, auth_dialog: PasswordDialog) {
     // Watch locale changes to update labels dynamically
     let widget_rc = widget.clone();
     babydra_core::i18n::watch_locale_change(move |_| {
-        update_power_widget_labels(&widget_rc);
+        update_power_labels(&widget_rc);
     });
 
     // Initial Load for Auto Battery Saver Settings
@@ -56,10 +56,10 @@ pub fn wire_events(widget: &PowerWidget, auth_dialog: PasswordDialog) {
                     save_babydra_config(&conf);
 
                     // Send Notification
-                    let title = babydra_core::i18n::t("settings.notif_saver_threshold_title");
-                    let msg = babydra_core::i18n::t("settings.notif_saver_threshold_msg")
+                    let title = babydra_core::i18n::trans("settings.notif_saver_threshold_title");
+                    let msg = babydra_core::i18n::trans("settings.notif_saver_threshold_msg")
                         .replace("{threshold}", &threshold.to_string());
-                    babydra_core::send_settings_notification(&title, &msg);
+                    babydra_core::send_settings_notif(&title, &msg);
 
                     // Check and apply auto battery saver
                     let (tx, rx) = std::sync::mpsc::channel();
@@ -70,7 +70,7 @@ pub fn wire_events(widget: &PowerWidget, auth_dialog: PasswordDialog) {
                     });
                     glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
                         if let Ok(info) = rx.try_recv() {
-                            check_and_apply_auto_battery_saver(&info);
+                            apply_battery_saver(&info);
                             glib::ControlFlow::Break
                         } else {
                             glib::ControlFlow::Continue
@@ -124,10 +124,10 @@ pub fn wire_events(widget: &PowerWidget, auth_dialog: PasswordDialog) {
                             conf.power.charge_limit = limit;
                             save_babydra_config(&conf);
 
-                            let title = babydra_core::i18n::t("settings.notif_charge_limit_title");
-                            let msg = babydra_core::i18n::t("settings.notif_charge_limit_msg")
+                            let title = babydra_core::i18n::trans("settings.notif_charge_limit_title");
+                            let msg = babydra_core::i18n::trans("settings.notif_charge_limit_msg")
                                 .replace("{limit}", &limit.to_string());
-                            babydra_core::send_settings_notification(&title, &msg);
+                            babydra_core::send_settings_notif(&title, &msg);
                         }
                         Err(babydra_core::CoreError::Message(ref msg))
                             if msg == "permission_denied" =>
@@ -143,10 +143,10 @@ pub fn wire_events(widget: &PowerWidget, auth_dialog: PasswordDialog) {
                             conf.power.charge_limit = limit;
                             save_babydra_config(&conf);
 
-                            let title = babydra_core::i18n::t("settings.notif_charge_limit_title");
-                            let msg = babydra_core::i18n::t("settings.notif_charge_limit_msg")
+                            let title = babydra_core::i18n::trans("settings.notif_charge_limit_title");
+                            let msg = babydra_core::i18n::trans("settings.notif_charge_limit_msg")
                                 .replace("{limit}", &limit.to_string());
-                            babydra_core::send_settings_notification(&title, &msg);
+                            babydra_core::send_settings_notif(&title, &msg);
                         }
                     }
 
@@ -167,7 +167,7 @@ pub fn wire_events(widget: &PowerWidget, auth_dialog: PasswordDialog) {
         });
         glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
             if let Ok(bat_info) = rx.try_recv() {
-                update_battery_card_ui(&card_c, bat_info);
+                update_battery_card(&card_c, bat_info);
                 glib::ControlFlow::Break
             } else {
                 glib::ControlFlow::Continue
@@ -180,7 +180,7 @@ pub fn wire_events(widget: &PowerWidget, auth_dialog: PasswordDialog) {
 
     // Initial Profile state update
     let current_profile = get_current_profile();
-    update_profile_selection(
+    update_profile_sel(
         &widget.profile_balanced_btn,
         &widget.profile_normal_btn,
         &widget.profile_high_btn,
@@ -201,18 +201,18 @@ pub fn wire_events(widget: &PowerWidget, auth_dialog: PasswordDialog) {
                 return;
             }
 
-            match set_performance_profile(target_profile) {
+            match set_perf_profile(target_profile) {
                 Ok(()) => {
                     let mut conf = load_babydra_config();
                     conf.power.profile = target_profile.key().to_string();
                     save_babydra_config(&conf);
 
-                    update_profile_selection(&balanced_c, &normal_c, &high_c, target_profile);
+                    update_profile_sel(&balanced_c, &normal_c, &high_c, target_profile);
 
-                    let title = babydra_core::i18n::t("settings.notif_power_title");
-                    let msg = babydra_core::i18n::t("settings.notif_power_msg")
+                    let title = babydra_core::i18n::trans("settings.notif_power_title");
+                    let msg = babydra_core::i18n::trans("settings.notif_power_msg")
                         .replace("{profile}", target_profile.label());
-                    babydra_core::send_settings_notification(&title, &msg);
+                    babydra_core::send_settings_notif(&title, &msg);
                 }
                 Err(_) => {
                     *pending_c.borrow_mut() = Some(target_profile);
@@ -246,32 +246,32 @@ pub fn wire_events(widget: &PowerWidget, auth_dialog: PasswordDialog) {
         };
 
         if let Some(target_prof) = *pending_auth.borrow() {
-            if set_performance_profile_with_password(target_prof, &pwd).is_ok() {
+            if set_perf_profile_pw(target_prof, &pwd).is_ok() {
                 let mut conf = load_babydra_config();
                 conf.power.profile = target_prof.key().to_string();
                 save_babydra_config(&conf);
 
-                update_profile_selection(&balanced_auth, &normal_auth, &high_auth, target_prof);
+                update_profile_sel(&balanced_auth, &normal_auth, &high_auth, target_prof);
 
-                let title = babydra_core::i18n::t("settings.notif_power_title");
-                let msg = babydra_core::i18n::t("settings.notif_power_msg")
+                let title = babydra_core::i18n::trans("settings.notif_power_title");
+                let msg = babydra_core::i18n::trans("settings.notif_power_msg")
                     .replace("{profile}", target_prof.label());
-                babydra_core::send_settings_notification(&title, &msg);
+                babydra_core::send_settings_notif(&title, &msg);
 
                 *pending_auth.borrow_mut() = None;
             }
         }
 
         if let Some(limit) = *pending_charge_auth.borrow() {
-            if babydra_core::services::system::battery::set_charge_limit_auth(limit, &pwd).is_ok() {
+            if babydra_core::services::system::battery::set_charge_limit_pw(limit, &pwd).is_ok() {
                 let mut conf = load_babydra_config();
                 conf.power.charge_limit = limit;
                 save_babydra_config(&conf);
 
-                let title = babydra_core::i18n::t("settings.notif_charge_limit_title");
-                let msg = babydra_core::i18n::t("settings.notif_charge_limit_msg")
+                let title = babydra_core::i18n::trans("settings.notif_charge_limit_title");
+                let msg = babydra_core::i18n::trans("settings.notif_charge_limit_msg")
                     .replace("{limit}", &limit.to_string());
-                babydra_core::send_settings_notification(&title, &msg);
+                babydra_core::send_settings_notif(&title, &msg);
 
                 *pending_charge_auth.borrow_mut() = None;
             }

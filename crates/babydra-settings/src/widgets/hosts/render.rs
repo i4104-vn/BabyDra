@@ -14,7 +14,7 @@ pub fn build() -> (HostsWidget, PasswordDialog) {
     // Header Row with Title, Status Badge & Action Buttons
     let header_box = Box::new(Orientation::Horizontal, 12);
 
-    let title_label = Label::new(Some(&babydra_core::i18n::t("settings.hosts_title")));
+    let title_label = Label::new(Some(&babydra_core::i18n::trans("settings.hosts_title")));
     title_label.add_css_class("settings-page-title");
     title_label.set_halign(gtk4::Align::Start);
 
@@ -23,11 +23,11 @@ pub fn build() -> (HostsWidget, PasswordDialog) {
     status_badge.set_hexpand(true);
     status_badge.set_halign(gtk4::Align::Start);
 
-    let reload_btn = Button::with_label(&babydra_core::i18n::t("settings.refresh"));
+    let reload_btn = Button::with_label(&babydra_core::i18n::trans("settings.refresh"));
     reload_btn.add_css_class("connect-pill-btn");
     reload_btn.set_cursor_from_name(Some("pointer"));
 
-    let save_btn = Button::with_label(&babydra_core::i18n::t("settings.save_changes"));
+    let save_btn = Button::with_label(&babydra_core::i18n::trans("settings.save_changes"));
     save_btn.add_css_class("suggested-action");
     save_btn.set_cursor_from_name(Some("pointer"));
 

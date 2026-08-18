@@ -104,15 +104,15 @@ fn create_widget_page(name: &str) -> gtk4::Widget {
         "vpn" => widgets::vpn::create_vpn_widget(),
         "hosts" => widgets::hosts::create_hosts_widget(),
         "env" => widgets::env::create_env_widget(),
-        "bluetooth" => widgets::bluetooth::create_bluetooth_widget(),
-        "displays" => widgets::displays::create_displays_widget(),
+        "bluetooth" => widgets::bluetooth::create_bt_widget(),
+        "displays" => widgets::displays::create_displays(),
         "power" => widgets::power::create_power_widget(),
-        "keybinds" => widgets::keybinds::create_keybinds_widget(),
-        "appearance" => widgets::appearance::create_appearance_widget(),
+        "keybinds" => widgets::keybinds::create_keybinds(),
+        "appearance" => widgets::appearance::create_appearance(),
         "apps" => widgets::apps::create_apps_widget(),
-        "startup" => widgets::startup::create_startup_widget(),
-        "certificates" => widgets::certificates::create_certificates_widget(),
-        "system_update" => widgets::system_update::create_system_update_widget(),
+        "startup" => widgets::startup::create_startup(),
+        "certificates" => widgets::certificates::create_cert_widget(),
+        "system_update" => widgets::system_update::create_update_widget(),
         "system" => widgets::system_info::create_system_widget(),
         _ => gtk4::Box::new(gtk4::Orientation::Vertical, 0).upcast(),
     }
@@ -165,11 +165,11 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     let title_info_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     title_info_box.set_valign(gtk4::Align::Center);
 
-    let app_title_lbl = gtk4::Label::new(Some(&babydra_core::i18n::t("settings.title")));
+    let app_title_lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.title")));
     app_title_lbl.add_css_class("profile-user-name");
     app_title_lbl.set_halign(gtk4::Align::Start);
 
-    let app_sub_lbl = gtk4::Label::new(Some(&babydra_core::i18n::t("settings.subtitle")));
+    let app_sub_lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.subtitle")));
     app_sub_lbl.add_css_class("settings-row-desc");
     app_sub_lbl.set_halign(gtk4::Align::Start);
 
@@ -195,14 +195,14 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
         Rc::new(RefCell::new(Vec::new()));
 
     for cat in NAV_CATEGORIES {
-        let hdr = sidebar::create_sidebar_category_header(cat.title_key);
+        let hdr = sidebar::create_sidebar_cat(cat.title_key);
         nav_container.append(&hdr);
         category_labels.borrow_mut().push((hdr, cat.title_key));
 
         for item in cat.items {
-            let icon_w = sidebar::create_sidebar_icon_for_item(item.id, item.icon);
-            let btn = babydra_ui_kit::components::create_sidebar_item_button_with_widget(
-                &babydra_core::i18n::t(item.i18n_key),
+            let icon_w = sidebar::create_sidebar_icon(item.id, item.icon);
+            let btn = babydra_ui_kit::components::create_sidebar_wbtn(
+                &babydra_core::i18n::trans(item.i18n_key),
                 &icon_w,
                 "sidebar-item",
                 || {},
@@ -219,9 +219,9 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     }
 
     // Pinned Footer Item (About System)
-    let sys_icon_w = sidebar::create_sidebar_icon_for_item(FOOTER_ITEM.id, FOOTER_ITEM.icon);
-    let btn_sys = babydra_ui_kit::components::create_sidebar_item_button_with_widget(
-        &babydra_core::i18n::t(FOOTER_ITEM.i18n_key),
+    let sys_icon_w = sidebar::create_sidebar_icon(FOOTER_ITEM.id, FOOTER_ITEM.icon);
+    let btn_sys = babydra_ui_kit::components::create_sidebar_wbtn(
+        &babydra_core::i18n::trans(FOOTER_ITEM.i18n_key),
         &sys_icon_w,
         "sidebar-item",
         || {},
@@ -286,7 +286,7 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     let spinner = gtk4::Spinner::new();
     spinner.set_size_request(48, 48);
 
-    let loading_lbl = gtk4::Label::new(Some(&babydra_core::i18n::t("settings.loading")));
+    let loading_lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.loading")));
     loading_lbl.add_css_class("settings-row-title");
 
     loading_box.append(&spinner);
@@ -361,15 +361,15 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
             gtk4::glib::idle_add_local_once(move || {
                 // 1. Update category header labels
                 for (lbl, key) in cat_labels.borrow().iter() {
-                    lbl.set_text(&babydra_core::i18n::t(key));
+                    lbl.set_text(&babydra_core::i18n::trans(key));
                 }
 
                 // 2. Update sidebar item icons and labels
                 refresh_sidebar(&buttons);
 
                 // 3. Update main header labels
-                title.set_text(&babydra_core::i18n::t("settings.title"));
-                sub.set_text(&babydra_core::i18n::t("settings.subtitle"));
+                title.set_text(&babydra_core::i18n::trans("settings.title"));
+                sub.set_text(&babydra_core::i18n::trans("settings.subtitle"));
 
                 // 4. Clear unvisited cached pages and rebuild current active page
                 if let Some(current_name) = stack.visible_child_name().map(|s| s.to_string()) {

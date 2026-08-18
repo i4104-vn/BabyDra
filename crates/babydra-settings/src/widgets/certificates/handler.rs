@@ -19,7 +19,7 @@ pub fn reload_cert_list(
     let certs = certificates::list_ca_certificates();
 
     if certs.is_empty() {
-        list_box.append(&crate::widgets::helpers::create_placeholder_row(
+        list_box.append(&crate::widgets::helpers::create_placeholder(
             crate::widgets::helpers::PlaceholderState::Empty {
                 title_key: "settings.cert_no_items",
                 desc_key: None,
@@ -80,7 +80,7 @@ pub fn reload_cert_list(
         let del_icon = babydra_ui_kit::ui::icon::get_icon("edit-delete", 16);
         del_icon.set_pixel_size(16);
         del_btn.set_child(Some(&del_icon));
-        del_btn.set_tooltip_text(Some(&babydra_core::i18n::t("settings.cert_delete")));
+        del_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.cert_delete")));
 
         let fname_del = cert.filename.clone();
         let auth_dialog_c = auth_dialog.clone();
@@ -187,7 +187,7 @@ pub fn wire_events(widget: &CertificatesWidget, auth_dialog: PasswordDialog) {
                     Err(babydra_core::CoreError::msg("Invalid certificate path"))
                 }
             } else {
-                certificates::delete_ca_certificate(&payload, &password)
+                certificates::delete_ca_cert(&payload, &password)
             };
 
             let _ = tx.send(res);

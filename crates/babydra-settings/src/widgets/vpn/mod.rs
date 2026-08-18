@@ -7,7 +7,7 @@ use std::rc::Rc;
 use std::sync::mpsc::channel;
 
 use babydra_core::services::system::vpn::{
-    delete_vpn_connection, get_vpn_connections, import_vpn_profile, save_vpn_connection, VpnConn,
+    delete_vpn, get_vpn_connections, import_vpn_profile, save_vpn_connection, VpnConn,
 };
 
 mod handler;
@@ -125,7 +125,7 @@ pub fn create_vpn_widget() -> gtk4::Widget {
     config_dialog.connect_delete(move |name| {
         let trigger_cb = trigger_on_delete.clone();
         std::thread::spawn(move || {
-            let _ = delete_vpn_connection(&name);
+            let _ = delete_vpn(&name);
             trigger_cb();
         });
     });
@@ -139,10 +139,10 @@ pub fn create_vpn_widget() -> gtk4::Widget {
             .and_then(|r| r.downcast::<gtk4::Window>().ok())
         {
             let file_dialog = gtk4::FileDialog::new();
-            file_dialog.set_title(&babydra_core::i18n::t("settings.open_vpn_profile"));
+            file_dialog.set_title(&babydra_core::i18n::trans("settings.open_vpn_profile"));
 
             let filter = gtk4::FileFilter::new();
-            filter.set_name(Some(&babydra_core::i18n::t("settings.vpn_filter")));
+            filter.set_name(Some(&babydra_core::i18n::trans("settings.vpn_filter")));
             filter.add_pattern("*.ovpn");
             filter.add_pattern("*.conf");
             file_dialog.set_default_filter(Some(&filter));

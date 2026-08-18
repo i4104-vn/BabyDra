@@ -18,7 +18,7 @@ pub fn build_vpn_ui() -> (
     let header_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
     header_row.set_margin_bottom(4);
 
-    let title_lbl = gtk4::Label::new(Some(&babydra_core::i18n::t("settings.vpn_title")));
+    let title_lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.vpn_title")));
     title_lbl.add_css_class("settings-page-title");
     title_lbl.set_halign(gtk4::Align::Start);
     header_row.append(&title_lbl);
@@ -28,7 +28,7 @@ pub fn build_vpn_ui() -> (
     header_row.append(&spacer);
 
     let add_custom_btn =
-        gtk4::Button::with_label(&babydra_core::i18n::t("settings.vpn_add_profile"));
+        gtk4::Button::with_label(&babydra_core::i18n::trans("settings.vpn_add_profile"));
     add_custom_btn.add_css_class("connect-pill-btn");
     add_custom_btn.set_cursor_from_name(Some("pointer"));
     add_custom_btn.set_valign(gtk4::Align::Center);
@@ -58,7 +58,7 @@ pub fn build_vpn_ui() -> (
 
     // Floating Action Button Component (import_btn)
     let import_btn = babydra_ui_kit::components::create_fab("plus");
-    import_btn.set_tooltip_text(Some(&babydra_core::i18n::t("settings.vpn_add_tooltip")));
+    import_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.vpn_add_tooltip")));
     import_btn.set_margin_end(24);
     import_btn.set_margin_bottom(24);
 

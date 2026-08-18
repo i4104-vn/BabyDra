@@ -29,7 +29,7 @@ pub fn build_system_ui(
     main_box.set_valign(gtk4::Align::Fill);
 
     // Page Title
-    let page_title = gtk4::Label::new(Some(&babydra_core::i18n::t("settings.about_title")));
+    let page_title = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.about_title")));
     page_title.add_css_class("settings-page-title");
     page_title.set_halign(gtk4::Align::Start);
     main_box.append(&page_title);
@@ -102,7 +102,7 @@ pub fn build_system_ui(
     clock_icon.set_valign(gtk4::Align::Center);
     uptime_badge.append(&clock_icon);
 
-    let formatted_uptime = babydra_core::i18n::t("settings.up_time").replace("{}", uptime_text);
+    let formatted_uptime = babydra_core::i18n::trans("settings.up_time").replace("{}", uptime_text);
     let uptime_lbl = gtk4::Label::new(Some(&formatted_uptime));
     uptime_lbl.add_css_class("hero-uptime-label");
     uptime_lbl.set_valign(gtk4::Align::Center);
@@ -176,22 +176,22 @@ pub fn build_system_ui(
     let specs: Vec<(&str, String, &gtk4::Label)> = vec![
         (
             "cog",
-            babydra_core::i18n::t("settings.spec_kernel"),
+            babydra_core::i18n::trans("settings.spec_kernel"),
             &kernel_lbl,
         ),
         (
             "sliders",
-            babydra_core::i18n::t("settings.spec_processor"),
+            babydra_core::i18n::trans("settings.spec_processor"),
             &cpu_lbl,
         ),
         (
             "history",
-            babydra_core::i18n::t("settings.spec_memory"),
+            babydra_core::i18n::trans("settings.spec_memory"),
             &mem_lbl,
         ),
         (
             "palette",
-            babydra_core::i18n::t("settings.spec_graphics"),
+            babydra_core::i18n::trans("settings.spec_graphics"),
             &gpu_lbl,
         ),
     ];

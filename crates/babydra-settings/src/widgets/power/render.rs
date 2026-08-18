@@ -47,12 +47,12 @@ fn create_profile_button(
     icon_badge.set_halign(gtk4::Align::Center);
     icon_badge.set_margin_bottom(2);
 
-    let t_lbl = Label::new(Some(&babydra_core::i18n::t(title_key)));
+    let t_lbl = Label::new(Some(&babydra_core::i18n::trans(title_key)));
     t_lbl.add_css_class("settings-row-title");
     t_lbl.set_halign(gtk4::Align::Center);
     t_lbl.set_justify(gtk4::Justification::Center);
 
-    let s_lbl = Label::new(Some(&babydra_core::i18n::t(subtitle_key)));
+    let s_lbl = Label::new(Some(&babydra_core::i18n::trans(subtitle_key)));
     s_lbl.add_css_class("settings-row-desc");
     s_lbl.set_halign(gtk4::Align::Center);
     s_lbl.set_justify(gtk4::Justification::Center);
@@ -69,7 +69,7 @@ fn create_profile_button(
 }
 
 /// Update profile selection.
-pub fn update_profile_selection(
+pub fn update_profile_sel(
     balanced_btn: &Button,
     normal_btn: &Button,
     high_btn: &Button,
@@ -92,44 +92,44 @@ pub fn update_profile_selection(
 }
 
 /// Update power widget labels.
-pub fn update_power_widget_labels(widget: &PowerWidget) {
+pub fn update_power_labels(widget: &PowerWidget) {
     widget
         .title_lbl
-        .set_text(&babydra_core::i18n::t("settings.power_title"));
+        .set_text(&babydra_core::i18n::trans("settings.power_title"));
     widget
         .desc_lbl
-        .set_text(&babydra_core::i18n::t("settings.power_desc"));
+        .set_text(&babydra_core::i18n::trans("settings.power_desc"));
     widget
         .saver_title
-        .set_text(&babydra_core::i18n::t("settings.power_auto_saver_title"));
+        .set_text(&babydra_core::i18n::trans("settings.power_auto_saver_title"));
     widget
         .perf_title
-        .set_text(&babydra_core::i18n::t("settings.power_perf_profile"));
+        .set_text(&babydra_core::i18n::trans("settings.power_perf_profile"));
     widget
         .perf_desc
-        .set_text(&babydra_core::i18n::t("settings.power_perf_desc"));
+        .set_text(&babydra_core::i18n::trans("settings.power_perf_desc"));
 
     widget
         .profile_balanced_title
-        .set_text(&babydra_core::i18n::t("settings.power_balanced"));
+        .set_text(&babydra_core::i18n::trans("settings.power_balanced"));
     widget
         .profile_balanced_desc
-        .set_text(&babydra_core::i18n::t("settings.power_balanced_desc"));
+        .set_text(&babydra_core::i18n::trans("settings.power_balanced_desc"));
     widget
         .profile_normal_title
-        .set_text(&babydra_core::i18n::t("settings.power_saver"));
+        .set_text(&babydra_core::i18n::trans("settings.power_saver"));
     widget
         .profile_normal_desc
-        .set_text(&babydra_core::i18n::t("settings.power_saver_desc"));
+        .set_text(&babydra_core::i18n::trans("settings.power_saver_desc"));
     widget
         .profile_high_title
-        .set_text(&babydra_core::i18n::t("settings.power_high"));
+        .set_text(&babydra_core::i18n::trans("settings.power_high"));
     widget
         .profile_high_desc
-        .set_text(&babydra_core::i18n::t("settings.power_high_desc"));
+        .set_text(&babydra_core::i18n::trans("settings.power_high_desc"));
 }
 
-pub use super::battery_card::update_battery_card_ui;
+pub use super::battery_card::update_battery_card;
 
 /// Builds the power settings page and its password dialog.
 pub fn build() -> (PowerWidget, PasswordDialog) {
@@ -146,11 +146,11 @@ pub fn build() -> (PowerWidget, PasswordDialog) {
     let header_box = Box::new(Orientation::Vertical, 2);
     header_box.set_margin_bottom(4);
 
-    let title_lbl = Label::new(Some(&babydra_core::i18n::t("settings.power_title")));
+    let title_lbl = Label::new(Some(&babydra_core::i18n::trans("settings.power_title")));
     title_lbl.add_css_class("settings-page-title");
     title_lbl.set_halign(gtk4::Align::Start);
 
-    let desc_lbl = Label::new(Some(&babydra_core::i18n::t("settings.power_desc")));
+    let desc_lbl = Label::new(Some(&babydra_core::i18n::trans("settings.power_desc")));
     desc_lbl.add_css_class("settings-page-subtitle");
     desc_lbl.set_halign(gtk4::Align::Start);
 
@@ -169,13 +169,13 @@ pub fn build() -> (PowerWidget, PasswordDialog) {
     saver_section.add_css_class("glass-panel");
     saver_section.set_vexpand(false);
 
-    let saver_title = Label::new(Some(&babydra_core::i18n::t(
+    let saver_title = Label::new(Some(&babydra_core::i18n::trans(
         "settings.power_auto_saver_title",
     )));
     saver_title.add_css_class("settings-section-title");
     saver_title.set_halign(gtk4::Align::Start);
 
-    let saver_desc = Label::new(Some(&babydra_core::i18n::t(
+    let saver_desc = Label::new(Some(&babydra_core::i18n::trans(
         "settings.power_auto_saver_desc",
     )));
     saver_desc.add_css_class("settings-row-desc");
@@ -192,15 +192,15 @@ pub fn build() -> (PowerWidget, PasswordDialog) {
     let charge_section = Box::new(Orientation::Vertical, 6);
     charge_section.add_css_class("glass-panel");
     charge_section.set_vexpand(false);
-    charge_section.set_visible(babydra_core::services::system::battery::has_charge_limit_support());
+    charge_section.set_visible(babydra_core::services::system::battery::has_charge_limit());
 
-    let charge_title = Label::new(Some(&babydra_core::i18n::t(
+    let charge_title = Label::new(Some(&babydra_core::i18n::trans(
         "settings.power_charge_limit_title",
     )));
     charge_title.add_css_class("settings-section-title");
     charge_title.set_halign(gtk4::Align::Start);
 
-    let charge_desc = Label::new(Some(&babydra_core::i18n::t(
+    let charge_desc = Label::new(Some(&babydra_core::i18n::trans(
         "settings.power_charge_limit_desc",
     )));
     charge_desc.add_css_class("settings-row-desc");
@@ -218,7 +218,7 @@ pub fn build() -> (PowerWidget, PasswordDialog) {
     perf_section.add_css_class("glass-panel");
     perf_section.set_vexpand(false);
 
-    let perf_title = Label::new(Some(&babydra_core::i18n::t("settings.power_perf_profile")));
+    let perf_title = Label::new(Some(&babydra_core::i18n::trans("settings.power_perf_profile")));
     perf_title.add_css_class("settings-section-title");
     perf_title.set_halign(gtk4::Align::Start);
     perf_title.set_margin_top(0);
@@ -286,7 +286,7 @@ pub fn build() -> (PowerWidget, PasswordDialog) {
         perf_header.append(&cpu_freq_lbl);
     }
 
-    let perf_desc = Label::new(Some(&babydra_core::i18n::t("settings.power_perf_desc")));
+    let perf_desc = Label::new(Some(&babydra_core::i18n::trans("settings.power_perf_desc")));
     perf_desc.add_css_class("settings-row-desc");
     perf_desc.set_halign(gtk4::Align::Start);
 
