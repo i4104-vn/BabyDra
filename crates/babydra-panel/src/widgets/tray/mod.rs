@@ -1,14 +1,9 @@
+use babydra_core::models::shell::TraySnapshot;
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
 mod render;
-
-#[derive(Clone, PartialEq, Debug)]
-struct TraySnapshot {
-    service: String,
-    icon_name: String,
-}
 
 /// Creates a new `tray widget`.
 pub fn create_tray_widget(window: &gtk4::ApplicationWindow) -> gtk4::Box {

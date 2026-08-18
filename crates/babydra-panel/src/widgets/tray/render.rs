@@ -1,6 +1,6 @@
 use gtk4::prelude::*;
 
-/// Builds the `tray container` UI.
+/// Builds the system tray container box.
 pub fn build_tray_container() -> gtk4::Box {
     let tray_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
     tray_container.add_css_class("panel-tray-box");
@@ -9,7 +9,7 @@ pub fn build_tray_container() -> gtk4::Box {
     tray_container
 }
 
-/// Builds the `tray button` UI.
+/// Builds a single tray icon button.
 pub fn build_tray_button(icon_name: &str, title: &str) -> gtk4::Button {
     let btn = gtk4::Button::new();
     btn.add_css_class("panel-tray-item-btn");

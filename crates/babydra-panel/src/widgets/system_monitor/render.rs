@@ -8,7 +8,7 @@ use std::rc::Rc;
 /// Builds widgets for system monitoring.
 ///
 /// Returns labels, popover, drawings areas, and details components.
-pub fn build_sys_monitor_ui(
+pub fn build_system_monitor_ui(
     capsule: &gtk4::Box,
 ) -> (
     gtk4::Label,

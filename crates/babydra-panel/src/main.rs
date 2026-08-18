@@ -1,7 +1,10 @@
+//! babydra-panel — Top bar panel with system tray, clock, and control center.
+
 mod render;
 mod widgets;
 
 use gtk4::prelude::*;
+use gtk4::Application;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -22,9 +25,12 @@ fn main() {
 
     babydra_core::spawn_switcher_tracker();
 
-    let application = gtk4::Application::new(Some("org.babydra.panel"), Default::default());
+    let app = Application::builder()
+        .application_id("org.babydra.panel")
+        .flags(gtk4::gio::ApplicationFlags::NON_UNIQUE)
+        .build();
 
-    application.connect_activate(|app| {
+    app.connect_activate(|app| {
         // Initialize style provider
         babydra_ui_kit::ui::theme::init_theme();
 
@@ -49,6 +55,6 @@ fn main() {
         window.present();
     });
 
-    // Run the GTK loop (this blocks until application exits)
-    application.run();
+    let exit_code = app.run().value();
+    std::process::exit(exit_code);
 }

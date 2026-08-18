@@ -1,7 +1,7 @@
 pub mod popover;
 pub mod render;
 
-pub use babydra_core::helper::wifi::{connect_wifi, get_wifi_state, scan_networks};
+pub use babydra_core::services::system::wifi::{connect_wifi, get_wifi_state, scan_networks};
 
 use gtk4::prelude::*;
 use tokio::sync::mpsc;

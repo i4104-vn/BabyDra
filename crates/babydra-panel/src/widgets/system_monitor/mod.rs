@@ -1,18 +1,12 @@
 //! System resource monitor widget for CPU load and RAM usage statistics.
 //! Periodically polls procfs files (`/proc/stat` and `/proc/meminfo`) to feed historical data charts.
 
+use babydra_core::models::shell::CpuTime;
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
 mod render;
-
-/// Raw CPU time values used to calculate delta load values.
-#[derive(Clone, Debug)]
-struct CpuTime {
-    total: u64,
-    idle: u64,
-}
 
 /// Reads raw CPU tick numbers from `/proc/stat`.
 fn get_cpu_raw() -> Option<CpuTime> {
@@ -74,11 +68,11 @@ fn get_ram_usage() -> Option<(f64, f64, f64)> {
 
 /// Creates a system resource monitoring capsule.
 /// Displays basic stats on hover and draws CPU/RAM utilization graphs on a popup card.
-pub fn create_sys_monitor_widget() -> gtk4::Box {
+pub fn create_system_monitor_widget() -> gtk4::Box {
     let capsule = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
 
     let (sys_label, popover, cpu_chart, ram_chart, cpu_label, ram_label, ram_detail) =
-        render::build_sys_monitor_ui(&capsule);
+        render::build_system_monitor_ui(&capsule);
 
     let cpu_history = Rc::new(RefCell::new(std::collections::VecDeque::from(vec![
         0.0;

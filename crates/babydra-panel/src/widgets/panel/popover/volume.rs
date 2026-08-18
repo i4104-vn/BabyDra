@@ -5,7 +5,7 @@ use babydra_ui_kit::components::popovers::hover::{
 use gtk4::prelude::*;
 use std::rc::Rc;
 
-/// Builds the `volume update fn` UI.
+/// Builds the volume slider indicator UI.
 pub fn build_volume_update_fn(vol_icon: &gtk4::Image, vol_popover: &gtk4::Popover) -> Rc<dyn Fn()> {
     let vol_icon_c = vol_icon.clone();
     let vol_popover_c = vol_popover.clone();

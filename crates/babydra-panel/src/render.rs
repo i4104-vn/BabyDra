@@ -1,10 +1,10 @@
 use crate::widgets::panel::create_status_indicators;
-use crate::widgets::sys_monitor::create_sys_monitor_widget;
+use crate::widgets::system_monitor::create_system_monitor_widget;
 use crate::widgets::tray::create_tray_widget;
 use crate::widgets::workspace::create_workspace_switcher;
 use babydra_island::create_system_island;
 use gtk4::prelude::*;
-use gtk4_layer_shell::{Edge, Layer, LayerShell};
+use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -73,7 +73,7 @@ pub fn rebuild_panel_window(
         launcher_window.clone(),
     );
 
-    let sys_monitor = create_sys_monitor_widget();
+    let system_monitor = create_system_monitor_widget();
     let tray_widget = create_tray_widget(window);
 
     // Left Wrapper
@@ -103,7 +103,7 @@ pub fn rebuild_panel_window(
     right_box.set_halign(gtk4::Align::End);
     right_box.set_valign(gtk4::Align::Center);
     right_box.append(&tray_widget);
-    right_box.append(&sys_monitor);
+    right_box.append(&system_monitor);
     right_box.append(&status_indicators);
 
     let right_wrapper = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
@@ -148,7 +148,7 @@ pub fn rebuild_panel_window(
     });
 }
 
-/// Builds the `panel ui` UI.
+/// Builds the top panel window UI.
 pub fn build_panel_ui(
     app: &gtk4::Application,
     control_center_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
@@ -159,18 +159,19 @@ pub fn build_panel_ui(
     babydra_ui_kit::ui::theme::apply_theme_class(&window);
 
     // Initialize layer shell properties on the window
-    window.init_layer_shell();
-
-    // Assign to the Top layer so it renders above normal windows
-    window.set_layer(Layer::Top);
-
-    // Keep the panel in its own exclusive zone so maximized windows don't overlap it
-    window.set_exclusive_zone(38);
-
-    // Anchor it to the top, left, and right edges of the screen
-    window.set_anchor(Edge::Top, true);
-    window.set_anchor(Edge::Left, true);
-    window.set_anchor(Edge::Right, true);
+    babydra_ui_kit::ui::window::init_layer_window(
+        &window,
+        Layer::Top,
+        KeyboardMode::OnDemand,
+        38,
+        &[
+            (Edge::Top, true),
+            (Edge::Left, true),
+            (Edge::Right, true),
+        ],
+        0,
+        None,
+    );
 
     // Float topbar flush against top edge
     window.set_margin(Edge::Top, 8);

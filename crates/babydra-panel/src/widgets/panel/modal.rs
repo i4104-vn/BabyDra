@@ -9,7 +9,7 @@ use super::items;
 use super::items::header::render::create_header_row;
 use super::toggle_grid::create_control_center_grid;
 
-/// Builds the `control center window ui` UI.
+/// Builds the control center window UI.
 pub fn build_control_center_window_ui(
     app: &gtk4::Application,
 ) -> (gtk4::ApplicationWindow, gtk4::Box) {
@@ -27,6 +27,7 @@ pub fn build_control_center_window_ui(
             (Edge::Right, true),
         ],
         0,
+        None,
     );
     q_win.add_css_class("control-center-window");
 

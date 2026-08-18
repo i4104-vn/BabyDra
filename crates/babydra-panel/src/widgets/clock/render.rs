@@ -1,7 +1,7 @@
 use gtk4::prelude::*;
-use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
+use gtk4_layer_shell::{Edge, KeyboardMode, Layer};
 
-/// Builds the `clock ui` UI.
+/// Builds the clock button widget in the panel.
 pub fn build_clock_ui() -> (gtk4::Button, gtk4::Label, gtk4::Widget) {
     let clock_button = gtk4::Button::new();
     clock_button.add_css_class("panel-clock-btn");
@@ -35,7 +35,7 @@ pub fn build_clock_ui() -> (gtk4::Button, gtk4::Label, gtk4::Widget) {
     (clock_button, clock_label, red_dot.upcast::<gtk4::Widget>())
 }
 
-/// Builds the `calendar window ui` UI.
+/// Builds the calendar popup window anchored to the clock button.
 pub fn build_calendar_window_ui(
     app: &gtk4::Application,
 ) -> (
@@ -49,15 +49,22 @@ pub fn build_calendar_window_ui(
 ) {
     let c_win = gtk4::ApplicationWindow::new(app);
     babydra_ui_kit::ui::theme::apply_theme_class(&c_win);
-    c_win.init_layer_shell();
-    c_win.set_layer(Layer::Overlay);
-    c_win.set_keyboard_mode(KeyboardMode::OnDemand);
 
     // Anchor to all 4 edges to cover the entire screen transparently
-    c_win.set_anchor(Edge::Top, true);
-    c_win.set_anchor(Edge::Bottom, true);
-    c_win.set_anchor(Edge::Left, true);
-    c_win.set_anchor(Edge::Right, true);
+    babydra_ui_kit::ui::window::init_layer_window(
+        &c_win,
+        Layer::Overlay,
+        KeyboardMode::OnDemand,
+        0,
+        &[
+            (Edge::Top, true),
+            (Edge::Bottom, true),
+            (Edge::Left, true),
+            (Edge::Right, true),
+        ],
+        0,
+        None,
+    );
     c_win.add_css_class("calendar-window");
 
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 12);

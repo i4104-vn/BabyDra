@@ -1,7 +1,7 @@
 pub mod render;
 use gtk4::prelude::*;
 
-pub use babydra_core::helper::volume::{
+pub use babydra_core::services::system::volume::{
     get_audio_devices, get_current_volume, is_muted, set_volume,
 };
 

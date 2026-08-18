@@ -175,7 +175,7 @@ fn refresh_vpn_popover_list(main_box: &gtk4::Box, tile_btn: Option<gtk4::Button>
     });
 }
 
-/// Builds the `VPN list ui` UI.
+/// Builds the VPN connection list UI.
 fn build_vpn_list_ui(main_box: &gtk4::Box, vpns: Vec<VpnConn>, tile_btn: Option<gtk4::Button>) {
     if let Some(ref btn) = tile_btn {
         update_vpn_tile_icon_state_async(btn);

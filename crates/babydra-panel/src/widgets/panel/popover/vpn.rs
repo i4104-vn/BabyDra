@@ -4,7 +4,7 @@ use babydra_ui_kit::components::popovers::hover::{
 use gtk4::prelude::*;
 use std::rc::Rc;
 
-/// Builds the `VPN update fn` UI.
+/// Builds the VPN status indicator UI.
 pub fn build_vpn_update_fn(vpn_icon: &gtk4::Image, vpn_popover: &gtk4::Popover) -> Rc<dyn Fn()> {
     let vpn_icon_c = vpn_icon.clone();
     let vpn_popover_c = vpn_popover.clone();

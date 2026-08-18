@@ -33,7 +33,7 @@ pub fn create_battery_widget() -> Option<gtk4::DrawingArea> {
     Some(drawing_area)
 }
 
-/// Builds the `status indicators ui` UI.
+/// Builds the panel status indicators row.
 pub fn build_status_indicators_ui() -> (
     gtk4::Box,
     gtk4::Button,

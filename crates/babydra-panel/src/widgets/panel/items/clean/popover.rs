@@ -1,7 +1,7 @@
 //! Clean-item popover UI.
 //! Split out of `render.rs` to keep the tile builder focused.
 
-use babydra_core::helper::clean::{
+use babydra_core::services::system::clean::{
     clean_all_native, format_bytes, get_journal_logs_size, get_pacman_cache_size, get_trash_size,
     get_user_cache_size,
 };

@@ -111,10 +111,10 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
     left_btn.connect_clicked(move |b| {
         let is_now_active = b.has_css_class("active");
         if is_now_active {
-            babydra_core::helper::wifi::set_wifi_enabled(true);
+            babydra_core::services::system::wifi::set_wifi_enabled(true);
             sub_label_c.set_text(&t("control.scanning"));
         } else {
-            babydra_core::helper::wifi::set_wifi_enabled(false);
+            babydra_core::services::system::wifi::set_wifi_enabled(false);
             sub_label_c.set_text(&t("control.off"));
         }
     });

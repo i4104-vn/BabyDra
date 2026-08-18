@@ -17,7 +17,7 @@ pub struct PopoverState {
 
 /// Returns the current `active app id`.
 fn get_active_app_id() -> Option<String> {
-    babydra_core::helper::window::get_active_window().map(|(app_id, _)| app_id)
+    babydra_core::services::window::get_active_window().map(|(app_id, _)| app_id)
 }
 
 /// Helper to generate a signature representing current taskbar state (apps only, not active).

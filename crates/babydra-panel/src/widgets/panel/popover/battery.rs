@@ -5,7 +5,7 @@ use babydra_ui_kit::components::popovers::hover::{
 use gtk4::prelude::*;
 use std::rc::Rc;
 
-/// Builds the `battery update fn` UI.
+/// Builds the battery status indicator UI.
 pub fn build_battery_update_fn(bat_popover_opt: &Option<gtk4::Popover>) -> Rc<dyn Fn()> {
     let bat_popover_c = bat_popover_opt.clone();
 

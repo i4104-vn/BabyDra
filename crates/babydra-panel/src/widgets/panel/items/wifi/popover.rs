@@ -100,7 +100,7 @@ pub(crate) fn refresh_wifi_popover_list(
     });
 }
 
-/// Builds the `wifi list ui` UI.
+/// Builds the Wi-Fi network list UI.
 fn build_wifi_list_ui(
     main_box: &gtk4::Box,
     networks: Vec<babydra_core::models::wifi::WifiNetwork>,
