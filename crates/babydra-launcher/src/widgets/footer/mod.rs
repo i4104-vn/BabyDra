@@ -6,7 +6,7 @@ use gtk4::prelude::*;
 mod render;
 
 /// Creates a footer component containing the logged-in username and a sliding power selection.
-pub fn create_launcher_footer() -> gtk4::Box {
+pub fn create_launcher_foot() -> gtk4::Box {
     let (footer_box, shutdown_btn, reboot_btn, suspend_btn, logout_btn) =
         render::build_footer_layout();
 

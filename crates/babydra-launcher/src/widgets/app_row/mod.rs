@@ -7,7 +7,7 @@ use std::process::Command;
 mod render;
 
 /// Creates a grid layout application button widget, binding its click event to launch the app.
-pub fn create_grid_app_widget(app: &DesktopApp, window: &gtk4::ApplicationWindow) -> gtk4::Button {
+pub fn create_grid_app(app: &DesktopApp, window: &gtk4::ApplicationWindow) -> gtk4::Button {
     let (btn, _, _) = render::build_grid_app_ui(app);
 
     let exec_cmd = app.exec.clone();
@@ -34,7 +34,7 @@ pub fn create_grid_app_widget(app: &DesktopApp, window: &gtk4::ApplicationWindow
 }
 
 /// Creates a list row application button widget, binding its click event to launch the app.
-pub fn create_list_app_widget(app: &DesktopApp, window: &gtk4::ApplicationWindow) -> gtk4::Button {
+pub fn create_list_app(app: &DesktopApp, window: &gtk4::ApplicationWindow) -> gtk4::Button {
     let (btn, _, _) = render::build_list_app_ui(app);
 
     let exec_cmd = app.exec.clone();

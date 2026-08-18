@@ -1,7 +1,7 @@
 //! UI renderer and main window coordinator for the search/app launcher overlay.
 
-use crate::results::{get_visible_selectable_buttons, repopulate_results, update_highlight};
-use crate::widgets::footer::create_launcher_footer;
+use crate::results::{get_visible_buttons, repopulate_results, update_highlight};
+use crate::widgets::footer::create_launcher_foot;
 use babydra_core::find_desktop_apps;
 use gtk4::prelude::*;
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer};
@@ -53,7 +53,7 @@ pub fn build_launcher_ui(
     let brand_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
     brand_box.set_valign(gtk4::Align::Center);
 
-    let brand_label = gtk4::Label::new(Some(&babydra_core::i18n::t("launcher.apps")));
+    let brand_label = gtk4::Label::new(Some(&babydra_core::i18n::trans("launcher.apps")));
     brand_label.add_css_class("brand-text");
     brand_label.set_valign(gtk4::Align::Center);
 
@@ -64,7 +64,7 @@ pub fn build_launcher_ui(
 
     // --- Search Entry ---
     let search_entry = gtk4::Entry::new();
-    search_entry.set_placeholder_text(Some(&babydra_core::i18n::t("launcher.search_hint")));
+    search_entry.set_placeholder_text(Some(&babydra_core::i18n::trans("launcher.search_hint")));
     search_entry.add_css_class("launcher-search");
     search_entry.set_margin_start(24);
     search_entry.set_margin_end(24);
@@ -93,7 +93,7 @@ pub fn build_launcher_ui(
     footer_sep.set_margin_bottom(6);
     box_layout.append(&footer_sep);
 
-    let footer = create_launcher_footer();
+    let footer = create_launcher_foot();
     footer.set_margin_start(20);
     footer.set_margin_end(20);
     footer.set_margin_bottom(14);
@@ -115,7 +115,7 @@ pub fn build_launcher_ui(
     toggle_btn.add_css_class("launcher-toggle-btn");
     toggle_btn.set_cursor_from_name(Some("pointer"));
     let toggle_label_text_collapsed =
-        format!("{}  ▶", babydra_core::i18n::t("launcher.other_apps"));
+        format!("{}  ▶", babydra_core::i18n::trans("launcher.other_apps"));
     toggle_btn.set_label(&toggle_label_text_collapsed);
 
     let expanded_clone = expanded.clone();
@@ -131,9 +131,9 @@ pub fn build_launcher_ui(
         *exp = !*exp;
 
         let toggle_label_text = if *exp {
-            format!("{}  ▼", babydra_core::i18n::t("launcher.other_apps"))
+            format!("{}  ▼", babydra_core::i18n::trans("launcher.other_apps"))
         } else {
-            format!("{}  ▶", babydra_core::i18n::t("launcher.other_apps"))
+            format!("{}  ▶", babydra_core::i18n::trans("launcher.other_apps"))
         };
         toggle_btn_clone.set_label(&toggle_label_text);
 
@@ -255,7 +255,7 @@ pub fn build_launcher_ui(
             gtk4::glib::Propagation::Stop
         }
         gtk4::gdk::Key::Down => {
-            let buttons = get_visible_selectable_buttons(&list_box_key);
+            let buttons = get_visible_buttons(&list_box_key);
             if !buttons.is_empty() {
                 let current = selected_index_key.borrow().unwrap_or(0);
                 let next = (current + 1) % buttons.len();
@@ -266,7 +266,7 @@ pub fn build_launcher_ui(
             gtk4::glib::Propagation::Stop
         }
         gtk4::gdk::Key::Up => {
-            let buttons = get_visible_selectable_buttons(&list_box_key);
+            let buttons = get_visible_buttons(&list_box_key);
             if !buttons.is_empty() {
                 let current = selected_index_key.borrow().unwrap_or(0);
                 let prev = if current == 0 {
@@ -281,7 +281,7 @@ pub fn build_launcher_ui(
             gtk4::glib::Propagation::Stop
         }
         gtk4::gdk::Key::Return | gtk4::gdk::Key::KP_Enter => {
-            let buttons = get_visible_selectable_buttons(&list_box_key);
+            let buttons = get_visible_buttons(&list_box_key);
             if let Some(idx) = *selected_index_key.borrow() {
                 if idx < buttons.len() {
                     buttons[idx].activate();
@@ -321,7 +321,7 @@ pub fn build_launcher_ui(
 
     window.connect_focus_widget_notify(move |win| {
         if let Some(focus_widget) = gtk4::prelude::RootExt::focus(win) {
-            let buttons = get_visible_selectable_buttons(&list_box_focus);
+            let buttons = get_visible_buttons(&list_box_focus);
             if let Some(pos) = buttons
                 .iter()
                 .position(|b| b.clone().upcast::<gtk4::Widget>() == focus_widget)
@@ -339,7 +339,7 @@ pub fn build_launcher_ui(
             let list_box = list_box_map.clone();
             let search_entry = search_entry_map.clone();
             move || {
-                let buttons = get_visible_selectable_buttons(&list_box);
+                let buttons = get_visible_buttons(&list_box);
                 if !buttons.is_empty() {
                     buttons[0].grab_focus();
                 } else {

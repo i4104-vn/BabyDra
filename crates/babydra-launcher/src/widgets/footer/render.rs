@@ -33,7 +33,7 @@ pub fn build_footer_layout() -> (
     shutdown_btn.add_css_class("launcher-power-option-btn");
     shutdown_btn.add_css_class("shutdown");
     shutdown_btn.set_cursor_from_name(Some("pointer"));
-    shutdown_btn.set_tooltip_text(Some(&babydra_core::i18n::t("launcher.shutdown")));
+    shutdown_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("launcher.shutdown")));
     let shutdown_icon = babydra_ui_kit::ui::icon::get_icon_colored("power", 18, "#ff5555");
     shutdown_btn.set_child(Some(&shutdown_icon));
 
@@ -41,7 +41,7 @@ pub fn build_footer_layout() -> (
     reboot_btn.add_css_class("launcher-power-option-btn");
     reboot_btn.add_css_class("reboot");
     reboot_btn.set_cursor_from_name(Some("pointer"));
-    reboot_btn.set_tooltip_text(Some(&babydra_core::i18n::t("launcher.restart")));
+    reboot_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("launcher.restart")));
     let reboot_icon = babydra_ui_kit::ui::icon::get_icon_colored("restart", 18, "#ffb86c");
     reboot_btn.set_child(Some(&reboot_icon));
 
@@ -49,7 +49,7 @@ pub fn build_footer_layout() -> (
     suspend_btn.add_css_class("launcher-power-option-btn");
     suspend_btn.add_css_class("suspend");
     suspend_btn.set_cursor_from_name(Some("pointer"));
-    suspend_btn.set_tooltip_text(Some(&babydra_core::i18n::t("launcher.suspend")));
+    suspend_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("launcher.suspend")));
     let suspend_icon = babydra_ui_kit::ui::icon::get_icon_colored("sleep", 18, "#89b4fa");
     suspend_btn.set_child(Some(&suspend_icon));
 
@@ -57,7 +57,7 @@ pub fn build_footer_layout() -> (
     logout_btn.add_css_class("launcher-power-option-btn");
     logout_btn.add_css_class("logout");
     logout_btn.set_cursor_from_name(Some("pointer"));
-    logout_btn.set_tooltip_text(Some(&babydra_core::i18n::t("launcher.logout")));
+    logout_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("launcher.logout")));
     let logout_icon = babydra_ui_kit::ui::icon::get_icon_colored("logout", 18, "#cba6f7");
     logout_btn.set_child(Some(&logout_icon));
 

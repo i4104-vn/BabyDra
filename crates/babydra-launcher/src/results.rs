@@ -1,16 +1,16 @@
 //! Result list helpers for the launcher (keyboard navigation, highlight, repopulation).
 //! Split out of `render.rs` to keep the main builder focused on layout.
 
-use crate::widgets::app_row::create_list_app_widget;
+use crate::widgets::app_row::create_list_app;
 use crate::widgets::file_search::create_file_row;
-use crate::widgets::search::build_browser_search_button;
+use crate::widgets::search::build_search_button;
 use babydra_core::search_files;
 use std::cell::RefCell;
 use std::rc::Rc;
 
 use gtk4::prelude::*;
 
-pub fn get_visible_selectable_buttons(list_box: &gtk4::Box) -> Vec<gtk4::Button> {
+pub fn get_visible_buttons(list_box: &gtk4::Box) -> Vec<gtk4::Button> {
     let mut buttons = Vec::new();
     let mut child = list_box.first_child();
     while let Some(w) = child {
@@ -36,7 +36,7 @@ pub fn get_visible_selectable_buttons(list_box: &gtk4::Box) -> Vec<gtk4::Button>
 
 /// Applies active highlit/selected styling to the active child button index while removing it from others.
 pub fn update_highlight(list_box: &gtk4::Box, selected_idx: Option<usize>) {
-    let buttons = get_visible_selectable_buttons(list_box);
+    let buttons = get_visible_buttons(list_box);
     for (i, btn) in buttons.iter().enumerate() {
         if Some(i) == selected_idx {
             btn.add_css_class("selected");
@@ -65,7 +65,7 @@ pub fn repopulate_results(
 
     if q.is_empty() {
         // --- 1. APPLICATIONS GROUP (When empty query) ---
-        let app_title = gtk4::Label::new(Some(&babydra_core::i18n::t("launcher.apps")));
+        let app_title = gtk4::Label::new(Some(&babydra_core::i18n::trans("launcher.apps")));
         app_title.add_css_class("launcher-section-title");
         app_title.set_halign(gtk4::Align::Start);
         list_box.append(&app_title);
@@ -73,7 +73,7 @@ pub fn repopulate_results(
         let mut dep_count = 0;
         for app in apps {
             if !app.is_dependency {
-                let btn = create_list_app_widget(app, window);
+                let btn = create_list_app(app, window);
                 list_box.append(&btn);
             } else {
                 dep_count += 1;
@@ -87,7 +87,7 @@ pub fn repopulate_results(
             // Add dependency apps (visible only if expanded)
             for app in apps {
                 if app.is_dependency {
-                    let btn = create_list_app_widget(app, window);
+                    let btn = create_list_app(app, window);
                     btn.set_visible(expanded);
                     list_box.append(&btn);
                 }
@@ -103,24 +103,24 @@ pub fn repopulate_results(
         }
 
         if !matched_apps.is_empty() {
-            let app_title = gtk4::Label::new(Some(&babydra_core::i18n::t("launcher.apps")));
+            let app_title = gtk4::Label::new(Some(&babydra_core::i18n::trans("launcher.apps")));
             app_title.add_css_class("launcher-section-title");
             app_title.set_halign(gtk4::Align::Start);
             list_box.append(&app_title);
 
             for app in &matched_apps {
-                let btn = create_list_app_widget(app, window);
+                let btn = create_list_app(app, window);
                 list_box.append(&btn);
             }
         }
 
         // --- 2. WEB SEARCH GROUP ---
-        let web_title = gtk4::Label::new(Some(&babydra_core::i18n::t("launcher.web_search")));
+        let web_title = gtk4::Label::new(Some(&babydra_core::i18n::trans("launcher.web_search")));
         web_title.add_css_class("launcher-section-title");
         web_title.set_halign(gtk4::Align::Start);
         list_box.append(&web_title);
 
-        let (browser_btn, _) = build_browser_search_button(&query);
+        let (browser_btn, _) = build_search_button(&query);
         let q_for_browser = query.to_string();
         let win_to_close = window.clone();
         browser_btn.connect_clicked(move |_| {
@@ -159,7 +159,7 @@ pub fn repopulate_results(
                 Ok(matched_files) => {
                     if !matched_files.is_empty() {
                         let files_title =
-                            gtk4::Label::new(Some(&babydra_core::i18n::t("launcher.files_dirs")));
+                            gtk4::Label::new(Some(&babydra_core::i18n::trans("launcher.files_dirs")));
                         files_title.add_css_class("launcher-section-title");
                         files_title.set_halign(gtk4::Align::Start);
                         files_container.append(&files_title);
