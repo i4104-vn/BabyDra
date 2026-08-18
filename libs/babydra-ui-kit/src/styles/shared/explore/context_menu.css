@@ -1,5 +1,22 @@
+@keyframes context-menu-pop {
+    0% {
+        opacity: 0;
+        margin-top: -8px;
+    }
+    100% {
+        opacity: 1;
+        margin-top: 0px;
+    }
+}
+
+popover.context-menu-popover,
 popover.explore-popover,
-popover.explore-popover>contents {
+popover.tray-context-menu,
+popover.desktop-context-menu,
+popover.context-menu-popover>contents,
+popover.explore-popover>contents,
+popover.tray-context-menu>contents,
+popover.desktop-context-menu>contents {
     background: none;
     background-color: transparent;
     background-image: none;
@@ -10,7 +27,10 @@ popover.explore-popover>contents {
     margin: 0;
 }
 
-popover.explore-popover>arrow {
+popover.context-menu-popover>arrow,
+popover.explore-popover>arrow,
+popover.tray-context-menu>arrow,
+popover.desktop-context-menu>arrow {
     background: none;
     border: none;
 }
@@ -18,8 +38,9 @@ popover.explore-popover>arrow {
 .context-menu-box {
     background-image: none;
     border-radius: 12px;
-    box-shadow: none;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
     padding: 4px;
+    animation: context-menu-pop 280ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 button.context-menu-item {
@@ -32,7 +53,7 @@ button.context-menu-item {
     padding: 6px 12px;
     font-size: 13px;
     min-height: 30px;
-    transition: background-color 0.1s ease;
+    transition: background-color 100ms ease, color 100ms ease;
 }
 
 button.context-menu-item:focus,
@@ -42,13 +63,40 @@ button.context-menu-item:hover {
     box-shadow: none;
 }
 
-.explore-window .group-header-label {
+button.context-menu-item.destructive {
+    color: #ef4444;
+}
+
+button.context-menu-item.destructive:hover {
+    background-color: rgba(239, 68, 68, 0.15);
+}
+
+.shortcut-label {
+    font-size: 11px;
+    opacity: 0.55;
+    margin-left: 12px;
+}
+
+button.context-menu-item:hover .shortcut-label {
+    opacity: 0.85;
+}
+
+.context-menu-separator {
+    margin-top: 3px;
+    margin-bottom: 3px;
+    opacity: 0.35;
+}
+
+.context-menu-header,
+.group-header-label {
     font-weight: 700;
     font-size: 11px;
     letter-spacing: 0.8px;
     text-transform: uppercase;
     margin-top: 6px;
     margin-bottom: 2px;
+    padding-left: 10px;
+    opacity: 0.7;
 }
 
 .context-menu-footer {
@@ -67,7 +115,7 @@ button.context-menu-footer-btn {
     margin: 2px;
     min-width: 26px;
     min-height: 26px;
-    transition: background-color 0.1s ease;
+    transition: background-color 100ms ease, color 100ms ease;
 }
 
 button.context-menu-footer-btn:hover,

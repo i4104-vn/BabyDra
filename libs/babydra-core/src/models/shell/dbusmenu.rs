@@ -19,5 +19,7 @@ pub struct MenuItem {
     pub enabled: bool,
     pub visible: bool,
     pub is_separator: bool,
+    pub toggle_type: Option<String>,
+    pub toggle_state: Option<i32>,
     pub children: Vec<MenuItem>,
 }

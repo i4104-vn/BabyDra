@@ -30,6 +30,8 @@ pub fn parse_layout_item(item: &LayoutItem) -> MenuItem {
     let mut enabled = true;
     let mut visible = true;
     let mut is_separator = false;
+    let mut toggle_type = None;
+    let mut toggle_state = None;
 
     if let Some(v) = props.get("label") {
         if let Value::Str(s) = &**v {
@@ -55,6 +57,18 @@ pub fn parse_layout_item(item: &LayoutItem) -> MenuItem {
         }
     }
 
+    if let Some(v) = props.get("toggle-type") {
+        if let Value::Str(s) = &**v {
+            toggle_type = Some(s.as_str().to_string());
+        }
+    }
+
+    if let Some(v) = props.get("toggle-state") {
+        if let Value::I32(i) = &**v {
+            toggle_state = Some(*i);
+        }
+    }
+
     let mut children = Vec::new();
     for child_val in children_vals {
         if let Some(child_menu) = parse_zval(&**child_val) {
@@ -68,6 +82,8 @@ pub fn parse_layout_item(item: &LayoutItem) -> MenuItem {
         enabled,
         visible,
         is_separator,
+        toggle_type,
+        toggle_state,
         children,
     }
 }
@@ -96,6 +112,8 @@ fn parse_zval(val: &Value<'_>) -> Option<MenuItem> {
     let mut enabled = true;
     let mut visible = true;
     let mut is_separator = false;
+    let mut toggle_type = None;
+    let mut toggle_state = None;
 
     if let Value::Dict(d) = &fields[1] {
         if let Ok(Some(v)) = d.get::<_, Value<'_>>(&"label") {
@@ -137,6 +155,26 @@ fn parse_zval(val: &Value<'_>) -> Option<MenuItem> {
                 is_separator = s.as_str() == "separator";
             }
         }
+
+        if let Ok(Some(v)) = d.get::<_, Value<'_>>(&"toggle-type") {
+            if let Value::Value(var) = v {
+                if let Value::Str(s) = &*var {
+                    toggle_type = Some(s.as_str().to_string());
+                }
+            } else if let Value::Str(s) = v {
+                toggle_type = Some(s.as_str().to_string());
+            }
+        }
+
+        if let Ok(Some(v)) = d.get::<_, Value<'_>>(&"toggle-state") {
+            if let Value::Value(var) = v {
+                if let Value::I32(i) = &*var {
+                    toggle_state = Some(*i);
+                }
+            } else if let Value::I32(i) = v {
+                toggle_state = Some(i);
+            }
+        }
     }
 
     let mut children = Vec::new();
@@ -156,6 +194,8 @@ fn parse_zval(val: &Value<'_>) -> Option<MenuItem> {
         enabled,
         visible,
         is_separator,
+        toggle_type,
+        toggle_state,
         children,
     })
 }

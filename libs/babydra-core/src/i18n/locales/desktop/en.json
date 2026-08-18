@@ -1,0 +1,22 @@
+{
+  "desktop.new_folder": "New Folder",
+  "desktop.new_file": "New Document",
+  "desktop.paste": "Paste",
+  "desktop.open_in_terminal": "Open in Terminal",
+  "desktop.open_in_file_manager": "Open in File Manager",
+  "desktop.sort_by": "Sort",
+  "desktop.sort_by_name": "Sort: By Name",
+  "desktop.sort_by_date": "Sort: By Modified Time",
+  "desktop.toggle_icon_size": "Toggle Icon Size",
+  "desktop.change_wallpaper": "Change Wallpaper...",
+  "desktop.display_settings": "Display Settings...",
+  "desktop.set_as_wallpaper": "Set as Desktop Wallpaper",
+  "desktop.open": "Open",
+  "desktop.open_with": "Open With...",
+  "desktop.cut": "Cut",
+  "desktop.copy": "Copy",
+  "desktop.rename": "Rename",
+  "desktop.trash": "Move to Trash",
+  "desktop.delete": "Delete Permanently",
+  "desktop.properties": "Properties"
+}

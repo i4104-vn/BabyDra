@@ -30,6 +30,7 @@ mkdir -p "$LOG_DIR"
 # 4. Stop running panel/menu/switcher instances
 echo "Stopping active processes..."
 killall babydra-panel || true
+killall babydra-desktop || true
 killall babydra-switcher || true
 killall babydra-screenshot || true
 killall babydra-lock || true
@@ -42,13 +43,14 @@ killall babydra-greeter || true
 # 5. Overwrite binaries in ~/.local/bin and /usr/bin
 echo "Installing new binaries..."
 cp target/release/babydra-panel "$LOCAL_BIN/babydra-panel"
+cp target/release/babydra-desktop "$LOCAL_BIN/babydra-desktop"
 cp target/release/babydra-switcher "$LOCAL_BIN/babydra-switcher"
 cp target/release/babydra-screenshot "$LOCAL_BIN/babydra-screenshot"
 cp target/release/babydra-lock "$LOCAL_BIN/babydra-lock"
 cp target/release/babydra-preview "$LOCAL_BIN/babydra-preview"
 cp target/release/babydra-settings "$LOCAL_BIN/babydra-settings"
 cp target/release/babydra-explore "$LOCAL_BIN/babydra-explore"
-sudo cp target/release/babydra-greeter /usr/bin/babydra-greeter
+sudo cp target/release/babydra-greeter /usr/bin/babydra-greeter 2>/dev/null || true
 
 # Register default image handler in ~/.local/share/applications
 echo "Registering default image handler..."
@@ -193,9 +195,10 @@ fi
 
 echo "✓ All configurations synced successfully!"
 
-# 7. Start the panel and redirect stdout/stderr to log file
-echo "Starting babydra-panel..."
+# 7. Start shell components (panel, desktop) and redirect stdout/stderr to log file
+echo "Starting shell services..."
 killall fnott || true
 killall xfce4-notifyd || true
 
 ~/.local/bin/babydra-panel &
+~/.local/bin/babydra-desktop &
