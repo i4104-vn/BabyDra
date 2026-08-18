@@ -192,35 +192,111 @@ impl DesktopState {
         self.selected_paths.clear();
     }
 
-    /// Gets position for an entry (either manual or auto-arranged).
-    pub fn get_entry_position(&self, file_name: &str, index: usize) -> (i32, i32) {
-        let cell_w = self.config.grid_spacing as i32;
+    /// Computes non-overlapping positions for all current desktop entries.
+    /// Ensures that no two icons ever overlap or occupy the same grid slot.
+    pub fn compute_all_positions(&self) -> HashMap<String, (i32, i32)> {
+        let mut result = HashMap::new();
+        let cell_w = self.config.grid_spacing.max(80) as i32;
         let cell_h = cell_w + 14;
 
-        if !self.config.auto_arrange {
-            if let Some(&(x, y)) = self.config.icon_positions.get(file_name) {
-                return (x, y);
-            }
-        }
-
-        // Fallback auto-arrange column layout
         let margin_x = DEFAULT_MARGIN_X;
         let margin_y = DEFAULT_MARGIN_Y;
         let usable_height = (self.screen_size.1 - margin_y - 40).max(cell_h);
         let max_rows = (usable_height / cell_h).max(1);
 
-        let row = (index as i32) % max_rows;
-        let col = (index as i32) / max_rows;
+        if self.config.auto_arrange {
+            for (index, entry) in self.entries.iter().enumerate() {
+                let index = index as i32;
+                let row = index % max_rows;
+                let col = index / max_rows;
+                let x = margin_x + col * cell_w;
+                let y = margin_y + row * cell_h;
+                let name = entry.name.to_string_lossy().to_string();
+                result.insert(name, (x, y));
+            }
+            return result;
+        }
 
-        let x = margin_x + col * cell_w;
-        let y = margin_y + row * cell_h;
+        // Manual mode:
+        // 1. Keep track of occupied (col, row) grid slots
+        let mut occupied_slots = HashSet::new();
+        let mut pending_entries = Vec::new();
 
-        (x, y)
+        for entry in &self.entries {
+            let name = entry.name.to_string_lossy().to_string();
+            if let Some(&(saved_x, saved_y)) = self.config.icon_positions.get(&name) {
+                let (snapped_x, snapped_y) = snap_to_grid(
+                    saved_x,
+                    saved_y,
+                    cell_w,
+                    cell_h,
+                    margin_x,
+                    margin_y,
+                );
+                let col = ((snapped_x - margin_x) / cell_w).max(0);
+                let row = ((snapped_y - margin_y) / cell_h).max(0);
+
+                if !occupied_slots.contains(&(col, row)) {
+                    occupied_slots.insert((col, row));
+                    result.insert(name, (snapped_x, snapped_y));
+                } else {
+                    pending_entries.push(name);
+                }
+            } else {
+                pending_entries.push(name);
+            }
+        }
+
+        // 2. Place remaining pending entries into the nearest free grid slots
+        let mut cur_col = 0;
+        let mut cur_row = 0;
+
+        for name in pending_entries {
+            while occupied_slots.contains(&(cur_col, cur_row)) {
+                cur_row += 1;
+                if cur_row >= max_rows {
+                    cur_row = 0;
+                    cur_col += 1;
+                }
+            }
+
+            let x = margin_x + cur_col * cell_w;
+            let y = margin_y + cur_row * cell_h;
+            occupied_slots.insert((cur_col, cur_row));
+            result.insert(name, (x, y));
+
+            cur_row += 1;
+            if cur_row >= max_rows {
+                cur_row = 0;
+                cur_col += 1;
+            }
+        }
+
+        result
+    }
+
+    /// Gets position for an entry (either manual or auto-arranged).
+    pub fn get_entry_position(&self, file_name: &str, index: usize) -> (i32, i32) {
+        let all_pos = self.compute_all_positions();
+        if let Some(&pos) = all_pos.get(file_name) {
+            pos
+        } else {
+            let cell_w = self.config.grid_spacing.max(80) as i32;
+            let cell_h = cell_w + 14;
+            let margin_x = DEFAULT_MARGIN_X;
+            let margin_y = DEFAULT_MARGIN_Y;
+            let usable_height = (self.screen_size.1 - margin_y - 40).max(cell_h);
+            let max_rows = (usable_height / cell_h).max(1);
+
+            let row = (index as i32) % max_rows;
+            let col = (index as i32) / max_rows;
+            (margin_x + col * cell_w, margin_y + row * cell_h)
+        }
     }
 
     /// Saves a manual icon position and persists configuration.
     pub fn set_icon_position(&mut self, file_name: String, x: i32, y: i32) {
-        let cell_w = self.config.grid_spacing as i32;
+        let cell_w = self.config.grid_spacing.max(80) as i32;
         let cell_h = cell_w + 14;
 
         let (snapped_x, snapped_y) = snap_to_grid(
