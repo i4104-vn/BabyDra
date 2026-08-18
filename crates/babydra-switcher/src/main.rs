@@ -72,7 +72,7 @@ fn run_daemon() {
         let is_visible = std::rc::Rc::new(std::cell::RefCell::new(false));
 
         let (tx, rx) = std::sync::mpsc::channel::<daemon::DaemonMessage>();
-        daemon::spawn_socket_listener(SOCKET_PATH, tx);
+        daemon::spawn_socket(SOCKET_PATH, tx);
 
         let show_fn_pump = show_fn.clone();
         let next_fn_pump = next_fn.clone();
@@ -137,7 +137,7 @@ fn run_oneshot() {
         // Listen for subsequent Alt+Tab presses from other process invocations.
         // Mirror daemon mode logic: show if hidden, cycle if already visible.
         let (tx, rx) = std::sync::mpsc::channel::<daemon::DaemonMessage>();
-        daemon::spawn_socket_listener(SOCKET_PATH, tx);
+        daemon::spawn_socket(SOCKET_PATH, tx);
 
         let show_fn_pump = show_fn.clone();
         let next_fn_pump = next_fn.clone();

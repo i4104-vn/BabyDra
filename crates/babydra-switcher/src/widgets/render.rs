@@ -67,7 +67,7 @@ pub fn create_app_button(app_item: &DesktopApp) -> gtk4::Button {
         picture.add_css_class("switcher-preview-image");
         picture.upcast()
     } else {
-        create_placeholder_preview(app_icon_str, preview_width, preview_height)
+        create_placeholder_img(app_icon_str, preview_width, preview_height)
     };
     overlay.set_child(Some(&base_widget));
 
@@ -79,7 +79,7 @@ pub fn create_app_button(app_item: &DesktopApp) -> gtk4::Button {
     icon_container.set_margin_start(8);
 
     let icon_widget =
-        babydra_ui_kit::ui::icon::get_system_or_file_icon(app_icon_str, "application-x-executable");
+        babydra_ui_kit::ui::icon::get_fallback_icon(app_icon_str, "application-x-executable");
     icon_widget.set_pixel_size(20);
     icon_widget.add_css_class("switcher-item-icon");
     icon_container.append(&icon_widget);
@@ -111,7 +111,7 @@ pub fn create_app_button(app_item: &DesktopApp) -> gtk4::Button {
 }
 
 /// Creates a fallback placeholder widget displaying a centered application icon.
-fn create_placeholder_preview(app_icon_str: &str, width: i32, height: i32) -> gtk4::Widget {
+fn create_placeholder_img(app_icon_str: &str, width: i32, height: i32) -> gtk4::Widget {
     let placeholder_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     placeholder_box.add_css_class("switcher-item-placeholder");
     placeholder_box.set_size_request(width, height);
@@ -119,7 +119,7 @@ fn create_placeholder_preview(app_icon_str: &str, width: i32, height: i32) -> gt
     placeholder_box.set_valign(gtk4::Align::Fill);
 
     let icon_widget =
-        babydra_ui_kit::ui::icon::get_system_or_file_icon(app_icon_str, "application-x-executable");
+        babydra_ui_kit::ui::icon::get_fallback_icon(app_icon_str, "application-x-executable");
     icon_widget.set_pixel_size(48);
     icon_widget.add_css_class("switcher-item-icon");
     icon_widget.set_valign(gtk4::Align::Center);

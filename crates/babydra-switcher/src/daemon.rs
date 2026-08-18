@@ -10,7 +10,7 @@ pub use babydra_core::models::shell::DaemonMessage;
 
 /// Spawns the background thread that listens on the Unix socket and forwards
 /// messages to the GTK main thread via the provided channel.
-pub fn spawn_socket_listener(socket_path: &str, tx: Sender<DaemonMessage>) {
+pub fn spawn_socket(socket_path: &str, tx: Sender<DaemonMessage>) {
     let socket_path = socket_path.to_string();
     std::thread::spawn(move || {
         loop {
