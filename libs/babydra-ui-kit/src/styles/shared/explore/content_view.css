@@ -47,12 +47,32 @@
     margin-top: 2px;
 }
 
-.explore-window flowboxchild {
-    min-width: 114px;
-    min-height: 114px;
-    padding: 0;
-    margin: 4px;
-    border-radius: 12px;
+.explore-window flowbox > selection,
+.explore-window flowbox selection,
+.explore-window flowbox > rubberband,
+.explore-window flowbox rubberband,
+.explore-window flowboxchild,
+.explore-window flowboxchild:selected,
+.explore-window flowboxchild:focus {
+    background: transparent;
+    background-color: transparent;
+    outline: none;
+    border: none;
+    box-shadow: none;
+}
+
+.explore-window listbox > selection,
+.explore-window listbox selection,
+.explore-window listbox > rubberband,
+.explore-window listbox rubberband,
+.explore-window row,
+.explore-window row:selected,
+.explore-window row:focus {
+    background: transparent;
+    background-color: transparent;
+    outline: none;
+    border: none;
+    box-shadow: none;
 }
 
 .explore-window .file-item {
@@ -61,16 +81,6 @@
     border-radius: 12px;
     padding: 6px;
     transition: background-color 0.15s ease;
-}
-
-.explore-window flowboxchild:selected {
-    background-color: transparent;
-    outline: none;
-}
-
-.explore-window row:selected {
-    background-color: transparent;
-    outline: none;
 }
 
 .explore-window .file-item-label {
@@ -100,7 +110,7 @@
 }
 
 .explore-window .rubberband {
-    border-radius: 2px;
+    border-radius: 4px;
 }
 
 .explore-window .hidden-item {

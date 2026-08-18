@@ -70,7 +70,7 @@ pub fn wire_rubberband_listbox(
 
             let mut child = lb_update.first_child();
             while let Some(c) = child {
-                if let Some((cx, cy)) = c.translate_coordinates(&lb_update, 0.0, 0.0) {
+                if let Some((cx, cy)) = c.translate_coordinates(&lf_update, 0.0, 0.0) {
                     let cw = c.width() as f64;
                     let ch = c.height() as f64;
 
@@ -94,6 +94,7 @@ pub fn wire_rubberband_listbox(
     drag_gesture.connect_drag_end(move |_, _, _| {
         if *drag_select_active_end.borrow() {
             rb_end.set_visible(false);
+            *drag_select_active_end.borrow_mut() = false;
         }
     });
 

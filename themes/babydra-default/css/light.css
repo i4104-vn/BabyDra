@@ -2199,14 +2199,14 @@ scale.settings-scale:disabled mark label {
 }
 
 .explore-window flowboxchild:selected .file-item {
-    background-color: rgba(0, 0, 0, 0.08);
-    outline: 2px solid rgba(0, 0, 0, 0.15);
+    background-color: rgba(52, 152, 219, 0.18);
+    outline: 2px solid rgba(52, 152, 219, 0.6);
 }
 
 .explore-window row:selected .list-row {
-    background-color: rgba(0, 0, 0, 0.08);
+    background-color: rgba(52, 152, 219, 0.18);
     color: #000000;
-    outline: 2px solid rgba(0, 0, 0, 0.15);
+    outline: 2px solid rgba(52, 152, 219, 0.6);
 }
 
 .explore-window .file-item-label {
@@ -2228,7 +2228,8 @@ scale.settings-scale:disabled mark label {
 
 .explore-window .rubberband {
     background-color: rgba(52, 152, 219, 0.18);
-    border: 1.5px solid rgba(52, 152, 219, 0.6);
+    border: 1.5px solid rgba(52, 152, 219, 0.7);
+    border-radius: 4px;
 }
 
 .explore-window .loading-label {

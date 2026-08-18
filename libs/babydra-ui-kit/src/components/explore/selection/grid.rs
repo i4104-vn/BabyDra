@@ -73,7 +73,7 @@ pub fn wire_rubberband_grid(
                 if let Some(fb) = child.downcast_ref::<FlowBox>() {
                     let mut item_child = fb.first_child();
                     while let Some(c) = item_child {
-                        if let Some((cx, cy)) = c.translate_coordinates(&gc_update, 0.0, 0.0) {
+                        if let Some((cx, cy)) = c.translate_coordinates(&gf_update, 0.0, 0.0) {
                             let cw = c.width() as f64;
                             let ch = c.height() as f64;
 
@@ -100,6 +100,7 @@ pub fn wire_rubberband_grid(
     drag_gesture.connect_drag_end(move |_, _, _| {
         if *drag_select_active_end.borrow() {
             rb_end.set_visible(false);
+            *drag_select_active_end.borrow_mut() = false;
         }
     });
 
