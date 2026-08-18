@@ -3,7 +3,7 @@
 use gtk4::prelude::*;
 
 /// Builds a wallpaper `Picture` widget from a custom path or saved greeter background.
-pub fn build_wallpaper_picture(custom_path: Option<&str>) -> gtk4::Picture {
+pub fn build_wallpaper_img(custom_path: Option<&str>) -> gtk4::Picture {
     let bg_picture = gtk4::Picture::new();
     bg_picture.set_can_shrink(true);
     bg_picture.set_content_fit(gtk4::ContentFit::Cover);
@@ -22,7 +22,7 @@ pub fn build_wallpaper_picture(custom_path: Option<&str>) -> gtk4::Picture {
         }
     }
 
-    if let Some(bytes) = babydra_core::get_greeter_wallpaper_bytes() {
+    if let Some(bytes) = babydra_core::get_greeter_wp_bytes() {
         let stream = gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(&bytes));
         if let Ok(pixbuf) =
             gtk4::gdk_pixbuf::Pixbuf::from_stream(&stream, gtk4::gio::Cancellable::NONE)
@@ -55,7 +55,7 @@ pub fn build_primary_card(
     gtk4::Label,
     gtk4::Label,
 ) {
-    let card_box = babydra_ui_kit::components::create_card_with_class(
+    let card_box = babydra_ui_kit::components::create_css_card(
         gtk4::Orientation::Vertical,
         10,
         "lock-card",
@@ -66,7 +66,7 @@ pub fn build_primary_card(
     let (clock_label, date_label) = build_clock_labels();
 
     let avatar_widget: gtk4::Widget = if let Some(bytes) = babydra_core::get_avatar_bytes() {
-        if let Some(pixbuf) = babydra_core::crop_to_circle_pixbuf(&bytes, 110) {
+        if let Some(pixbuf) = babydra_core::crop_circle(&bytes, 110) {
             let texture = gtk4::gdk::Texture::for_pixbuf(&pixbuf);
             let img = gtk4::Image::from_paintable(Some(&texture));
             img.set_pixel_size(110);
@@ -76,7 +76,7 @@ pub fn build_primary_card(
             img.upcast()
         } else {
             let icon =
-                babydra_ui_kit::ui::icon::get_system_or_file_icon("user-info", "user-info");
+                babydra_ui_kit::ui::icon::get_fallback_icon("user-info", "user-info");
             icon.set_pixel_size(110);
             icon.add_css_class("lock-avatar-fallback");
             icon.set_halign(gtk4::Align::Center);
@@ -98,12 +98,12 @@ pub fn build_primary_card(
     let entry = gtk4::Entry::new();
     entry.set_property("im-module", "none");
     entry.set_visibility(false);
-    entry.set_placeholder_text(Some(&babydra_core::i18n::t("lock.placeholder")));
+    entry.set_placeholder_text(Some(&babydra_core::i18n::trans("lock.placeholder")));
     entry.add_css_class("lock-input");
     entry.set_halign(gtk4::Align::Center);
     entry.set_max_length(100);
 
-    let status_label = gtk4::Label::new(Some(&babydra_core::i18n::t("lock.status")));
+    let status_label = gtk4::Label::new(Some(&babydra_core::i18n::trans("lock.status")));
     status_label.add_css_class("lock-status");
 
     card_box.append(&clock_label);

@@ -49,7 +49,7 @@ pub fn create_lock_window(
 
     let overlay = gtk4::Overlay::new();
 
-    let bg_picture = render::build_wallpaper_picture(custom_wallpaper);
+    let bg_picture = render::build_wallpaper_img(custom_wallpaper);
     overlay.set_child(Some(&bg_picture));
 
     let tint_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
@@ -94,14 +94,14 @@ pub fn create_lock_window(
             if verify_password(&username_clone, &password) {
                 std::process::exit(0);
             } else {
-                status_label_clone.set_text(&babydra_core::i18n::t("lock.status_incorrect"));
+                status_label_clone.set_text(&babydra_core::i18n::trans("lock.status_incorrect"));
                 status_label_clone.add_css_class("error");
                 card_clone.add_css_class("shake-error");
 
                 let status_lbl = status_label_clone.clone();
                 let card_box_ref = card_clone.clone();
                 glib::timeout_add_local_once(std::time::Duration::from_millis(1600), move || {
-                    status_lbl.set_text(&babydra_core::i18n::t("lock.status"));
+                    status_lbl.set_text(&babydra_core::i18n::trans("lock.status"));
                     status_lbl.remove_css_class("error");
                     card_box_ref.remove_css_class("shake-error");
                 });
