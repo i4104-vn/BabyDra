@@ -1,7 +1,7 @@
 //! Context menu integration for System Tray icons and DBus menu specifications.
 
 use super::items::{
-    create_context_menu_for_widget, create_menu_box, create_menu_separator,
+    create_menu_for_widget, create_menu_box, create_menu_separator,
     create_menu_text_item, create_submenu_item, create_submenu_popover,
 };
 use gtk4::prelude::*;
@@ -31,7 +31,7 @@ pub fn show_tray_context_menu(
     close_active_tray_menu();
 
     let (popover, _) =
-        create_context_menu_for_widget(btn.upcast_ref::<gtk4::Widget>(), gtk4::PositionType::Bottom);
+        create_menu_for_widget(btn.upcast_ref::<gtk4::Widget>(), gtk4::PositionType::Bottom);
 
     let active_sub_popover = Rc::new(RefCell::new(None::<gtk4::Popover>));
     let vbox = build_tray_menu_box(items, service, &popover, active_sub_popover);

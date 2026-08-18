@@ -26,11 +26,11 @@ pub use cards::{
     create_switch_card, create_title,
 };
 pub use context_menu::{
-    build_tray_gio_menu, close_active_tray_menu, create_context_menu_for_widget,
-    create_context_menu_popover, create_footer_container, create_footer_icon_button,
-    create_menu_group_header, create_menu_item, create_menu_item_destructive,
-    create_menu_item_destructive_sensitive, create_menu_item_full, create_menu_item_sensitive,
-    create_menu_item_with_shortcut, create_menu_separator, create_menu_text_item,
+    build_tray_gio_menu, close_active_tray_menu, create_menu_for_widget,
+    create_menu_popover, create_footer_container, create_footer_icon_button,
+    create_menu_group_header, create_menu_item, create_destructive_item,
+    create_destructive_sensitive, create_menu_item_full, create_menu_sensitive,
+    create_menu_shortcut, create_menu_separator, create_menu_text_item,
     create_submenu_item, show_tray_context_menu, ContextMenuBuilder,
 };
 pub use list_group::{clear_box, clear_list_box, create_list_row};

@@ -74,7 +74,7 @@ impl ContextMenuBuilder {
         sensitive: bool,
         on_click: impl Fn() + 'static,
     ) -> Self {
-        self.append_item(create_menu_item_sensitive(label, icon, sensitive), on_click)
+        self.append_item(create_menu_sensitive(label, icon, sensitive), on_click)
     }
 
     /// Appends an item with a keyboard shortcut hint.
@@ -85,12 +85,12 @@ impl ContextMenuBuilder {
         shortcut: &str,
         on_click: impl Fn() + 'static,
     ) -> Self {
-        self.append_item(create_menu_item_with_shortcut(label, icon, shortcut), on_click)
+        self.append_item(create_menu_shortcut(label, icon, shortcut), on_click)
     }
 
     /// Appends a destructive/danger item (e.g. Delete).
     pub fn destructive_item(self, label: &str, icon: &str, on_click: impl Fn() + 'static) -> Self {
-        self.append_item(create_menu_item_destructive(label, icon), on_click)
+        self.append_item(create_destructive_item(label, icon), on_click)
     }
 
     /// Appends a destructive/danger item with sensitivity control.
@@ -102,7 +102,7 @@ impl ContextMenuBuilder {
         on_click: impl Fn() + 'static,
     ) -> Self {
         self.append_item(
-            create_menu_item_destructive_sensitive(label, icon, sensitive),
+            create_destructive_sensitive(label, icon, sensitive),
             on_click,
         )
     }

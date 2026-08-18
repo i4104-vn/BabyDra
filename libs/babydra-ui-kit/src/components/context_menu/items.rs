@@ -8,7 +8,7 @@ use gtk4::{Align, Box, Button, Image, Label, Orientation, Popover, PositionType,
 const MENU_ROW_SPACING: i32 = 8;
 
 /// Creates a new context menu popover positioned at specific `(x, y)` coordinates.
-pub fn create_context_menu_popover(parent: &gtk4::Widget, x: f64, y: f64) -> (Popover, Box) {
+pub fn create_menu_popover(parent: &gtk4::Widget, x: f64, y: f64) -> (Popover, Box) {
     let popover = Popover::builder()
         .has_arrow(false)
         .autohide(true)
@@ -27,7 +27,7 @@ pub fn create_context_menu_popover(parent: &gtk4::Widget, x: f64, y: f64) -> (Po
 }
 
 /// Creates a context menu popover anchored relative to a target widget (e.g. Tray or Header button).
-pub fn create_context_menu_for_widget(
+pub fn create_menu_for_widget(
     parent: &gtk4::Widget,
     position: PositionType,
 ) -> (Popover, Box) {
@@ -75,22 +75,22 @@ pub fn create_menu_item(label: &str, icon: &str) -> Button {
 }
 
 /// Creates a menu item button with sensitivity control.
-pub fn create_menu_item_sensitive(label: &str, icon: &str, sensitive: bool) -> Button {
+pub fn create_menu_sensitive(label: &str, icon: &str, sensitive: bool) -> Button {
     create_menu_item_full(label, icon, None, false, sensitive)
 }
 
 /// Creates a menu item button with an icon, label, and shortcut hint (e.g. "Ctrl+C").
-pub fn create_menu_item_with_shortcut(label: &str, icon: &str, shortcut: &str) -> Button {
+pub fn create_menu_shortcut(label: &str, icon: &str, shortcut: &str) -> Button {
     create_menu_item_full(label, icon, Some(shortcut), false, true)
 }
 
 /// Creates a destructive/danger menu item button (e.g. Delete).
-pub fn create_menu_item_destructive(label: &str, icon: &str) -> Button {
+pub fn create_destructive_item(label: &str, icon: &str) -> Button {
     create_menu_item_full(label, icon, None, true, true)
 }
 
 /// Creates a destructive/danger menu item button with sensitivity control.
-pub fn create_menu_item_destructive_sensitive(label: &str, icon: &str, sensitive: bool) -> Button {
+pub fn create_destructive_sensitive(label: &str, icon: &str, sensitive: bool) -> Button {
     create_menu_item_full(label, icon, None, true, sensitive)
 }
 
