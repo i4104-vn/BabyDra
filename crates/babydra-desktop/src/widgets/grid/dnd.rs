@@ -145,7 +145,16 @@ pub fn create_desktop_drop(
                         if let Some(filename) = src.file_name().map(|n| n.to_os_string()) {
                             let dest = desktop_dir.join(&filename);
                             if src != dest {
-                                if babydra_core::copy_path(src, dest).await.is_ok() {
+                                if babydra_core::copy_path(src, dest.clone()).await.is_ok() {
+                                    #[cfg(unix)]
+                                    {
+                                        use std::os::unix::fs::PermissionsExt;
+                                        if let Ok(metadata) = std::fs::metadata(&dest) {
+                                            let mut perms = metadata.permissions();
+                                            perms.set_mode(perms.mode() | 0o755);
+                                            let _ = std::fs::set_permissions(&dest, perms);
+                                        }
+                                    }
                                     if let Some(name_str) = filename.to_str() {
                                         state_inner.borrow_mut().set_icon_position(
                                             name_str.to_string(),
