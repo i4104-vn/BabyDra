@@ -7,10 +7,10 @@ use std::rc::Rc;
 
 use super::items;
 use super::items::header::render::create_header_row;
-use super::toggle_grid::create_control_center_grid;
+use super::toggle_grid::create_cc_grid;
 
 /// Builds the control center window UI.
-pub fn build_control_center_window_ui(
+pub fn build_control_center(
     app: &gtk4::Application,
 ) -> (gtk4::ApplicationWindow, gtk4::Box) {
     let q_win = gtk4::ApplicationWindow::new(app);
@@ -45,12 +45,12 @@ pub fn build_control_center_window_ui(
 }
 
 /// Rebuild control center contents.
-pub fn rebuild_control_center_contents(
+pub fn rebuild_cc_contents(
     main_box: &gtk4::Box,
     on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>,
     vol_icon: gtk4::Image,
 ) {
-    items::volume::update_topbar_volume_icon(&vol_icon);
+    items::volume::update_topbar_volume(&vol_icon);
 
     // 1. Remove all existing children
     while let Some(child) = main_box.first_child() {
@@ -61,7 +61,7 @@ pub fn rebuild_control_center_contents(
     main_box.append(&create_header_row(on_popover_toggled.clone()));
 
     // 3. Append grid
-    main_box.append(&create_control_center_grid(on_popover_toggled.clone()));
+    main_box.append(&create_cc_grid(on_popover_toggled.clone()));
 
     // 4. Append volume slider
     let (volume_row, _volume_scale) =
@@ -69,7 +69,7 @@ pub fn rebuild_control_center_contents(
     main_box.append(&volume_row);
 
     // 5. Append brightness slider
-    let (brightness_row, _brightness_scale) = items::backlight::render::create_brightness_row();
+    let (brightness_row, _brightness_scale) = items::backlight::render::create_brightness();
     main_box.append(&brightness_row);
 
     // 6. Append disk monitor box
@@ -79,12 +79,12 @@ pub fn rebuild_control_center_contents(
 /// Builds and maps a glassmorphic Control Center popup ApplicationWindow anchored
 /// to the top-right corner. It binds volume and brightness sliders, grid toggles,
 /// and registers Genie animations on close and map events.
-pub fn create_control_center_window(
+pub fn create_cc_window(
     app: &gtk4::Application,
     control_center_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
     vol_icon: gtk4::Image,
 ) -> gtk4::ApplicationWindow {
-    let (q_win, main_box) = build_control_center_window_ui(app);
+    let (q_win, main_box) = build_control_center(app);
 
     let popover_active = Rc::new(std::cell::Cell::new(false));
     let popover_active_clone = popover_active.clone();
@@ -106,14 +106,14 @@ pub fn create_control_center_window(
     }) as Rc<dyn Fn(bool)>;
 
     let on_popover_toggled_opt = Some(on_popover_toggled.clone());
-    rebuild_control_center_contents(&main_box, on_popover_toggled_opt.clone(), vol_icon.clone());
+    rebuild_cc_contents(&main_box, on_popover_toggled_opt.clone(), vol_icon.clone());
 
     if let Some(settings) = gtk4::Settings::default() {
         let main_box_c = main_box.clone();
         let on_popover_toggled_c = on_popover_toggled_opt.clone();
         let vol_icon_c = vol_icon.clone();
         settings.connect_gtk_application_prefer_dark_theme_notify(move |_| {
-            rebuild_control_center_contents(
+            rebuild_cc_contents(
                 &main_box_c,
                 on_popover_toggled_c.clone(),
                 vol_icon_c.clone(),

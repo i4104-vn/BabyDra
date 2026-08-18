@@ -36,7 +36,7 @@ pub fn build_clock_ui() -> (gtk4::Button, gtk4::Label, gtk4::Widget) {
 }
 
 /// Builds the calendar popup window anchored to the clock button.
-pub fn build_calendar_window_ui(
+pub fn build_calendar(
     app: &gtk4::Application,
 ) -> (
     gtk4::ApplicationWindow,
@@ -89,7 +89,7 @@ pub fn build_calendar_window_ui(
     top_row.append(&date_label);
     main_box.append(&top_row);
 
-    // Dummy time label to satisfy setup_notifications_list signature without displaying it
+    // Dummy time label to satisfy setup_notifs_list signature without displaying it
     let dummy_time = gtk4::Label::new(None);
 
     // 3. Calendar widget
@@ -101,12 +101,12 @@ pub fn build_calendar_window_ui(
     let notif_header = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
     notif_header.set_hexpand(true);
 
-    let notif_title = gtk4::Label::new(Some(&babydra_core::i18n::t("panel.notifications")));
+    let notif_title = gtk4::Label::new(Some(&babydra_core::i18n::trans("panel.notifications")));
     notif_title.add_css_class("notif-panel-title");
     notif_title.set_halign(gtk4::Align::Start);
     notif_title.set_hexpand(true);
 
-    let clear_btn = gtk4::Button::with_label(&babydra_core::i18n::t("panel.clear_all"));
+    let clear_btn = gtk4::Button::with_label(&babydra_core::i18n::trans("panel.clear_all"));
     clear_btn.add_css_class("clear-all-btn");
     clear_btn.set_halign(gtk4::Align::End);
 

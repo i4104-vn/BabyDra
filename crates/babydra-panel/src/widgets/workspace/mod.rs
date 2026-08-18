@@ -84,9 +84,9 @@ fn rebuild_taskbar(
 
         let window_count = windows.len();
         // Delegate button layout rendering
-        let btn = render::build_taskbar_item_button(first_app, is_active, window_count);
+        let btn = render::build_taskbar_btn(first_app, is_active, window_count);
 
-        let popover = render::build_popover_container(&btn);
+        let popover = render::build_popover_box(&btn);
 
         // Setup click action
         let pop_clone = popover.clone();
@@ -107,7 +107,7 @@ fn rebuild_taskbar(
                 .collect();
 
             if app_windows.len() > 1 {
-                preview::populate_popover_previews(&pop_clone, &app_windows, &app_id_clone);
+                preview::populate_previews(&pop_clone, &app_windows, &app_id_clone);
                 pop_clone.popup();
             } else if let Some(single_window) = app_windows.first() {
                 let target_app_id = single_window.app_id.as_deref().unwrap_or(&app_id_clone);
@@ -151,8 +151,8 @@ fn update_active_highlight(apps_box: &gtk4::Box, active_app_id: Option<&str>) ->
 }
 
 /// Creates and returns a taskbar container showing running windows grouped by app class.
-pub fn create_workspace_switcher() -> gtk4::Box {
-    let (parent_box, apps_box) = render::build_workspace_container();
+pub fn create_workspace_sw() -> gtk4::Box {
+    let (parent_box, apps_box) = render::build_workspace_box();
 
     let popovers = Rc::new(RefCell::new(Vec::new()));
     let last_apps_sig = Rc::new(RefCell::new(String::new()));

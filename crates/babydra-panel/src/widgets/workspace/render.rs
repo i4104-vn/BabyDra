@@ -4,7 +4,7 @@ use babydra_core::DesktopApp;
 use gtk4::prelude::*;
 
 /// Builds the base container box for the taskbar.
-pub fn build_workspace_container() -> (gtk4::Box, gtk4::Box) {
+pub fn build_workspace_box() -> (gtk4::Box, gtk4::Box) {
     let parent_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 4);
     parent_box.add_css_class("taskbar-parent-box");
     parent_box.set_valign(gtk4::Align::Center);
@@ -19,7 +19,7 @@ pub fn build_workspace_container() -> (gtk4::Box, gtk4::Box) {
 }
 
 /// Creates a Popover widget anchored to the parent taskbar button.
-pub fn build_popover_container(parent: &gtk4::Button) -> gtk4::Popover {
+pub fn build_popover_box(parent: &gtk4::Button) -> gtk4::Popover {
     let popover = babydra_ui_kit::components::create_popover(
         parent,
         gtk4::PositionType::Bottom,
@@ -30,7 +30,7 @@ pub fn build_popover_container(parent: &gtk4::Button) -> gtk4::Popover {
 }
 
 /// Constructs a taskbar item button with application icon, dot indicators for window count, and tooltip.
-pub fn build_taskbar_item_button(
+pub fn build_taskbar_btn(
     app: &DesktopApp,
     is_active: bool,
     window_count: usize,
@@ -66,7 +66,7 @@ pub fn build_taskbar_item_button(
 
     container.append(&dots_box);
 
-    let icon = babydra_ui_kit::ui::icon::get_system_or_file_icon(
+    let icon = babydra_ui_kit::ui::icon::get_fallback_icon(
         app.icon.as_deref().unwrap_or(""),
         "application-x-executable",
     );
@@ -80,7 +80,7 @@ pub fn build_taskbar_item_button(
 
 /// Renders the list of active window previews inside the Popover dropdown.
 /// Includes buttons to open a new app instance and to close all windows of this app.
-pub fn render_popover_previews(
+pub fn render_previews(
     popover: &gtk4::Popover,
     windows: &[DesktopApp],
     app_id: &str,
@@ -98,7 +98,7 @@ pub fn render_popover_previews(
 
     if let Some(first_app) = windows.first() {
         let icon_name = first_app.icon.as_deref().unwrap_or(app_id);
-        let header_icon = babydra_ui_kit::ui::icon::get_system_or_file_icon(
+        let header_icon = babydra_ui_kit::ui::icon::get_fallback_icon(
             icon_name,
             "application-x-executable",
         );
@@ -110,7 +110,7 @@ pub fn render_popover_previews(
         header_label.set_ellipsize(gtk4::pango::EllipsizeMode::End);
         header.append(&header_label);
     } else {
-        let header_label = gtk4::Label::new(Some(&babydra_core::i18n::t("taskbar.tasks")));
+        let header_label = gtk4::Label::new(Some(&babydra_core::i18n::trans("taskbar.tasks")));
         header_label.add_css_class("taskbar-previews-header-label");
         header.append(&header_label);
     }
@@ -197,7 +197,7 @@ pub fn render_popover_previews(
 
         let open_new_content = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
         open_new_content.set_halign(gtk4::Align::Start);
-        let open_new_icon = babydra_ui_kit::ui::icon::get_system_or_file_icon(
+        let open_new_icon = babydra_ui_kit::ui::icon::get_fallback_icon(
             &icon_name,
             "application-x-executable",
         );
@@ -226,7 +226,7 @@ pub fn render_popover_previews(
         close_all_icon.set_pixel_size(14);
         close_all_icon.add_css_class("taskbar-preview-action-icon");
 
-        let close_all_label = gtk4::Label::new(Some(&babydra_core::i18n::t("taskbar.close_all")));
+        let close_all_label = gtk4::Label::new(Some(&babydra_core::i18n::trans("taskbar.close_all")));
         close_all_label.add_css_class("taskbar-preview-action-label");
         close_all_label.add_css_class("close-all-text");
         close_all_content.append(&close_all_icon);

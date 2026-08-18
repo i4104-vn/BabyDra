@@ -10,7 +10,7 @@ use std::rc::Rc;
 
 /// Configures and manages the interactive historical notifications list stack.
 /// Sets up periodic timers to update clock time, date, and detects when new notifications arrive.
-pub fn setup_notifications_list(
+pub fn setup_notifs_list(
     notif_stack: &gtk4::Box,
     clear_btn: &gtk4::Button,
     big_time: &gtk4::Label,
@@ -43,7 +43,7 @@ pub fn setup_notifications_list(
 
             if notifications.is_empty() {
                 let empty_label =
-                    gtk4::Label::new(Some(&babydra_core::i18n::t("panel.no_notifications")));
+                    gtk4::Label::new(Some(&babydra_core::i18n::trans("panel.no_notifications")));
                 empty_label.add_css_class("notif-empty-label");
                 empty_label.set_halign(gtk4::Align::Center);
                 empty_label.set_valign(gtk4::Align::Center);
@@ -51,12 +51,12 @@ pub fn setup_notifications_list(
                 notif_stack.append(&empty_label);
             } else {
                 let (grouped, app_order) =
-                    super::notification_group::group_notifications_by_app(&notifications);
+                    super::notification_group::group_notifs_by_app(&notifications);
 
                 for app_key in app_order {
                     let list = &grouped[&app_key];
                     let display_app_name = if app_key == "system" {
-                        babydra_core::i18n::t("panel.system")
+                        babydra_core::i18n::trans("panel.system")
                     } else {
                         let mut chars = app_key.chars();
                         match chars.next() {
@@ -99,7 +99,7 @@ pub fn setup_notifications_list(
     let clear_btn_render_clone = render_rc.clone();
     let notif_stack_clear_clone = notif_stack.clone();
     clear_btn.connect_clicked(move |_| {
-        let cb = clear_btn_render_clone.clone();
+        let callback = clear_btn_render_clone.clone();
         babydra_island::widgets::notification::SHARED_NOTIFICATION.with(|sn| {
             *sn.borrow_mut() = None;
         });
@@ -113,7 +113,7 @@ pub fn setup_notifications_list(
             450,
             false,
             move || {
-                cb();
+                callback();
             },
         );
     });
@@ -135,11 +135,11 @@ pub fn setup_notifications_list(
             "weekday.{}",
             current_now.format("%a").to_string().to_lowercase()
         );
-        let weekday = babydra_core::i18n::t(&weekday_key);
+        let weekday = babydra_core::i18n::trans(&weekday_key);
         let month_key = format!("month.{}", current_now.format("%m").to_string());
-        let month_str = babydra_core::i18n::t(&month_key);
+        let month_str = babydra_core::i18n::trans(&month_key);
 
-        let date_str = babydra_core::i18n::t("panel.date_format")
+        let date_str = babydra_core::i18n::trans("panel.date_format")
             .replace("{weekday}", &weekday)
             .replace("{day}", &current_now.format("%d").to_string())
             .replace("{month}", &month_str);

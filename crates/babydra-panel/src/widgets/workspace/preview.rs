@@ -3,9 +3,9 @@ use babydra_core::{close_window, focus_window, DesktopApp};
 use gtk4::prelude::*;
 
 /// Populates a Popover widget containing a vertical list of window titles grouped by app
-pub fn populate_popover_previews(popover: &gtk4::Popover, windows: &[DesktopApp], app_id: &str) {
+pub fn populate_previews(popover: &gtk4::Popover, windows: &[DesktopApp], app_id: &str) {
     let (action_triggers, open_new_info, close_all_btn_opt) =
-        render::render_popover_previews(popover, windows, app_id);
+        render::render_previews(popover, windows, app_id);
 
     for (preview_btn, kill_btn, app) in action_triggers {
         let pop_close = popover.clone();

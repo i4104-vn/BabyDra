@@ -3,7 +3,7 @@ use gtk4::prelude::*;
 use std::rc::Rc;
 
 /// Creates a new `control center grid`.
-pub fn create_control_center_grid(
+pub fn create_cc_grid(
     on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>,
 ) -> gtk4::Box {
     let main_layout = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
@@ -38,7 +38,7 @@ pub fn create_control_center_grid(
     bottom_small_box.set_vexpand(true);
     bottom_small_box.set_valign(gtk4::Align::Fill);
 
-    let night_btn = create_night_light_tile();
+    let night_btn = create_night_tile();
     let clean_btn = items::clean::render::create_clean_tile(on_popover_toggled);
 
     bottom_small_box.append(&clean_btn);
@@ -58,7 +58,7 @@ fn create_left_box_toggles(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>
     container.set_vexpand(true);
 
     let wifi_tile = items::wifi::render::create_wifi_tile(on_popover_toggled);
-    let bt_btn = items::bluetooth::render::create_bluetooth_tile();
+    let bt_btn = items::bluetooth::render::create_bt_tile();
 
     container.append(&wifi_tile);
     container.append(&bt_btn);
@@ -73,7 +73,7 @@ fn is_dnd_active() -> bool {
 /// Creates a new `dnd tile`.
 pub fn create_dnd_tile() -> gtk4::Button {
     let active = is_dnd_active();
-    babydra_ui_kit::components::create_square_toggle_tile("bell-off", "", active, |new_active| {
+    babydra_ui_kit::components::create_square_tile("bell-off", "", active, |new_active| {
         babydra_island::widgets::notification::set_dnd_active(new_active);
     })
 }
@@ -102,9 +102,9 @@ fn is_night_light_active() -> bool {
 }
 
 /// Creates a new `night light tile`.
-pub fn create_night_light_tile() -> gtk4::Button {
+pub fn create_night_tile() -> gtk4::Button {
     let active = is_night_light_active();
-    babydra_ui_kit::components::create_square_toggle_tile("night-light", "", active, |new_active| {
+    babydra_ui_kit::components::create_square_tile("night-light", "", active, |new_active| {
         if new_active {
             let _ = std::process::Command::new("gammastep")
                 .args(&["-O", "4500", "-b", "1.0:1.0"])

@@ -1,5 +1,5 @@
 use babydra_ui_kit::components::popovers::hover::{
-    build_hover_popover_card as build_popover_card, HoverPopoverRow as PopoverRow,
+    build_hover_card as build_popover_card, HoverPopoverRow as PopoverRow,
 };
 use gtk4::prelude::*;
 use std::rc::Rc;

@@ -1,23 +1,23 @@
 use babydra_core::services::system::bluetooth::{
-    get_bluetooth_devices, is_bluetooth_enabled, set_bluetooth_enabled,
+    get_bt_devices, is_bluetooth_enabled, set_bt_enabled,
 };
 use gtk4::prelude::*;
 use tokio::sync::mpsc;
 
 /// Creates a new `bluetooth tile`.
-pub fn create_bluetooth_tile() -> gtk4::Button {
-    let title = babydra_core::i18n::t("control.bluetooth");
+pub fn create_bt_tile() -> gtk4::Button {
+    let title = babydra_core::i18n::trans("control.bluetooth");
 
     // Non-blocking initial state construction
     let (btn, sub_label) = babydra_ui_kit::components::create_toggle_tile(
         "bluetooth",
         &title,
-        &babydra_core::i18n::t("control.off"),
+        &babydra_core::i18n::trans("control.off"),
         "",
         false,
         move |new_active| {
             std::thread::spawn(move || {
-                set_bluetooth_enabled(new_active);
+                set_bt_enabled(new_active);
             });
         },
     );
@@ -30,14 +30,14 @@ pub fn create_bluetooth_tile() -> gtk4::Button {
         std::thread::spawn(move || {
             let bt_on = is_bluetooth_enabled();
             let subtitle = if bt_on {
-                let devs = get_bluetooth_devices();
+                let devs = get_bt_devices();
                 if let Some(conn) = devs.iter().find(|d| d.connected) {
                     conn.name.clone()
                 } else {
-                    babydra_core::i18n::t("control.on")
+                    babydra_core::i18n::trans("control.on")
                 }
             } else {
-                babydra_core::i18n::t("control.off")
+                babydra_core::i18n::trans("control.off")
             };
             let _ = tx.send((bt_on, subtitle));
         });
@@ -47,7 +47,7 @@ pub fn create_bluetooth_tile() -> gtk4::Button {
         glib::spawn_future_local(async move {
             if let Some((bt_on, sub_text)) = rx.recv().await {
                 sub_lbl.set_text(&sub_text);
-                babydra_ui_kit::components::update_toggle_tile_state(&tile_btn, bt_on, "bluetooth");
+                babydra_ui_kit::components::update_toggle_state(&tile_btn, bt_on, "bluetooth");
             }
         });
     };

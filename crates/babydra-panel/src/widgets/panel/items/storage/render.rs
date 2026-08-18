@@ -8,7 +8,7 @@ pub fn create_disk_list_box() -> gtk4::Box {
 
     let title_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
     let disk_icon = babydra_ui_kit::ui::icon::get_icon_colored("server", 12, "#10b981");
-    let title_label = gtk4::Label::new(Some(&babydra_core::i18n::t("panel.storage_usage")));
+    let title_label = gtk4::Label::new(Some(&babydra_core::i18n::trans("panel.storage_usage")));
     title_label.add_css_class("control-slider-title");
 
     title_row.append(&disk_icon);
@@ -19,7 +19,7 @@ pub fn create_disk_list_box() -> gtk4::Box {
 
     let disks = get_disk_list();
     if disks.is_empty() {
-        let no_disks = gtk4::Label::new(Some(&babydra_core::i18n::t("panel.no_storage")));
+        let no_disks = gtk4::Label::new(Some(&babydra_core::i18n::trans("panel.no_storage")));
         no_disks.add_css_class("tile-subtitle");
         list_container.append(&no_disks);
     } else {

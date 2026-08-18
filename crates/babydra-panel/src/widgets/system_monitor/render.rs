@@ -1,6 +1,6 @@
 //! UI rendering structure for the system monitor popover and draw graphs.
 
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -8,7 +8,7 @@ use std::rc::Rc;
 /// Builds widgets for system monitoring.
 ///
 /// Returns labels, popover, drawings areas, and details components.
-pub fn build_system_monitor_ui(
+pub fn build_sys_monitor(
     capsule: &gtk4::Box,
 ) -> (
     gtk4::Label,
@@ -22,7 +22,7 @@ pub fn build_system_monitor_ui(
     capsule.add_css_class("sys-monitor-box");
     capsule.set_valign(gtk4::Align::Center);
 
-    let sys_tpl = t("sysmon.cpu_ram");
+    let sys_tpl = trans("sysmon.cpu_ram");
     let sys_label = gtk4::Label::new(Some(&sys_tpl.replace("{cpu}", "0").replace("{ram}", "0")));
     sys_label.add_css_class("status-text");
     capsule.append(&sys_label);
@@ -37,12 +37,12 @@ pub fn build_system_monitor_ui(
     let popover_box = gtk4::Box::new(gtk4::Orientation::Vertical, 10);
     popover_box.set_size_request(200, -1);
 
-    let popover_title = gtk4::Label::new(Some(&babydra_core::i18n::t("panel.system_resources")));
+    let popover_title = gtk4::Label::new(Some(&babydra_core::i18n::trans("panel.system_resources")));
     popover_title.add_css_class("tile-title");
     popover_title.set_xalign(0.0);
     popover_title.set_margin_bottom(4);
 
-    let cpu_label = gtk4::Label::new(Some(&t("sysmon.cpu_usage")));
+    let cpu_label = gtk4::Label::new(Some(&trans("sysmon.cpu_usage")));
     cpu_label.set_xalign(0.0);
     cpu_label.add_css_class("tile-subtitle");
 
@@ -50,7 +50,7 @@ pub fn build_system_monitor_ui(
     cpu_chart.set_size_request(200, 60);
     cpu_chart.add_css_class("sys-chart");
 
-    let ram_label = gtk4::Label::new(Some(&t("sysmon.ram_usage")));
+    let ram_label = gtk4::Label::new(Some(&trans("sysmon.ram_usage")));
     ram_label.set_xalign(0.0);
     ram_label.add_css_class("tile-subtitle");
 

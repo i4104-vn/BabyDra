@@ -1,7 +1,7 @@
 use super::{
-    get_audio_devices, get_current_volume, is_muted, set_volume, update_topbar_volume_icon,
+    get_audio_devices, get_current_volume, is_muted, set_volume, update_topbar_volume,
 };
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use std::cell::Cell;
 use std::rc::Rc;
@@ -15,7 +15,7 @@ pub fn create_volume_row(
     main_box.add_css_class("control-slider-card");
 
     let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    let title_label = gtk4::Label::new(Some(&t("volume.title")));
+    let title_label = gtk4::Label::new(Some(&trans("volume.title")));
     title_label.add_css_class("control-slider-title");
     title_label.set_xalign(0.0);
     title_label.set_hexpand(true);
@@ -69,7 +69,7 @@ pub fn create_volume_row(
             muted_state_clone.set(new_mute);
             babydra_core::volume::set_muted(new_mute);
             update_mute_icon_clone(new_mute);
-            update_topbar_volume_icon(&vol_icon_c);
+            update_topbar_volume(&vol_icon_c);
         });
     }
     update_mute_icon(muted_state.get());
@@ -108,7 +108,7 @@ pub fn create_volume_row(
                     muted_state_inner.set(false);
                     update_mute_icon_inner(false);
                 }
-                update_topbar_volume_icon(&vol_icon_inner);
+                update_topbar_volume(&vol_icon_inner);
             });
         last_source_clone.set(Some(new_id));
     });
@@ -178,14 +178,14 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
     container.add_css_class("audio-menu-popover");
     container.set_size_request(260, -1);
 
-    let out_label = gtk4::Label::new(Some(&t("volume.output_devices")));
+    let out_label = gtk4::Label::new(Some(&trans("volume.output_devices")));
     out_label.add_css_class("audio-menu-section-title");
     out_label.set_xalign(0.0);
     container.append(&out_label);
 
     let sinks = get_audio_devices(false);
     if sinks.is_empty() {
-        let empty = gtk4::Label::new(Some(&t("volume.no_output")));
+        let empty = gtk4::Label::new(Some(&trans("volume.no_output")));
         empty.add_css_class("tile-subtitle");
         container.append(&empty);
     } else {
@@ -245,7 +245,7 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
     sep.set_margin_bottom(4);
     container.append(&sep);
 
-    let in_label = gtk4::Label::new(Some(&t("volume.input_devices")));
+    let in_label = gtk4::Label::new(Some(&trans("volume.input_devices")));
     in_label.add_css_class("audio-menu-section-title");
     in_label.set_xalign(0.0);
     container.append(&in_label);
@@ -304,7 +304,7 @@ fn populate_audio_menu(popover: &gtk4::Popover, update_mute_btn: Rc<dyn Fn()>) {
     }
 
     if !input_added {
-        let empty = gtk4::Label::new(Some(&t("volume.no_input")));
+        let empty = gtk4::Label::new(Some(&trans("volume.no_input")));
         empty.add_css_class("tile-subtitle");
         container.append(&empty);
     }

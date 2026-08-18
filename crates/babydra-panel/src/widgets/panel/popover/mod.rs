@@ -17,7 +17,7 @@ pub struct StatusPopovers {
 }
 
 /// Sets up `status popovers`.
-pub fn setup_status_popovers(
+pub fn setup_status_popover(
     vol_icon: &gtk4::Image,
     net_icon: &gtk4::Image,
     vpn_icon: &gtk4::Image,
@@ -51,9 +51,9 @@ pub fn setup_status_popovers(
     };
 
     let update_vpn_tooltip = vpn::build_vpn_update_fn(vpn_icon, &vpn_popover);
-    let update_network_tooltip = network::build_network_update_fn(&net_popover);
-    let update_volume_popover = volume::build_volume_update_fn(vol_icon, &vol_popover);
-    let update_battery_popover = battery::build_battery_update_fn(&bat_popover_opt);
+    let update_network_tooltip = network::build_network_update(&net_popover);
+    let update_volume_popover = volume::build_volume_update(vol_icon, &vol_popover);
+    let update_battery_popover = battery::build_battery_update(&bat_popover_opt);
 
     if babydra_core::services::system::vpn::get_active_vpn_fast().is_some() {
         vpn_icon.set_visible(true);

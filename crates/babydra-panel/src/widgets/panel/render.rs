@@ -2,7 +2,7 @@ pub use babydra_core::get_battery_info;
 use gtk4::prelude::*;
 
 /// Creates a new `battery widget`.
-pub fn create_battery_widget() -> Option<gtk4::DrawingArea> {
+pub fn create_battery_w() -> Option<gtk4::DrawingArea> {
     if get_battery_info().is_none() {
         return None;
     }
@@ -34,7 +34,7 @@ pub fn create_battery_widget() -> Option<gtk4::DrawingArea> {
 }
 
 /// Builds the panel status indicators row.
-pub fn build_status_indicators_ui() -> (
+pub fn build_status_row() -> (
     gtk4::Box,
     gtk4::Button,
     gtk4::Label,
@@ -69,7 +69,7 @@ pub fn build_status_indicators_ui() -> (
     inner_layout.append(&net_icon);
     inner_layout.append(&vol_icon);
 
-    let bat_widget = create_battery_widget();
+    let bat_widget = create_battery_w();
     if let Some(ref bat_area) = bat_widget {
         bat_area.add_css_class("status-icon");
         inner_layout.append(bat_area);

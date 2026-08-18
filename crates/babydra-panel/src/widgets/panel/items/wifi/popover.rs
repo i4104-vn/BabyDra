@@ -2,7 +2,7 @@
 //! Split out of `render.rs` to keep the tile builder focused.
 
 use super::{connect_wifi_async, scan_networks};
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use tokio::sync::mpsc;
 
@@ -51,7 +51,7 @@ pub(crate) fn refresh_wifi_popover_list(
     main_box.set_size_request(260, -1);
     main_box.add_css_class("audio-menu-popover");
 
-    let title = gtk4::Label::new(Some(&t("wifi.networks")));
+    let title = gtk4::Label::new(Some(&trans("wifi.networks")));
     title.add_css_class("audio-menu-section-title");
     title.set_xalign(0.0);
     main_box.append(&title);
@@ -65,7 +65,7 @@ pub(crate) fn refresh_wifi_popover_list(
     spinner.start();
     scanning_box.append(&spinner);
 
-    let scan_label = gtk4::Label::new(Some(&t("wifi.scanning_networks")));
+    let scan_label = gtk4::Label::new(Some(&trans("wifi.scanning_networks")));
     scanning_box.append(&scan_label);
     main_box.append(&scanning_box);
 
@@ -118,7 +118,7 @@ fn build_wifi_list_ui(
     main_box.set_size_request(260, -1);
     main_box.add_css_class("audio-menu-popover");
 
-    let title = gtk4::Label::new(Some(&t("wifi.networks")));
+    let title = gtk4::Label::new(Some(&trans("wifi.networks")));
     title.add_css_class("audio-menu-section-title");
     title.set_xalign(0.0);
     main_box.append(&title);
@@ -144,7 +144,7 @@ fn build_wifi_list_ui(
         } else {
             "rgba(255, 255, 255, 0.5)"
         };
-        let wifi_icon = babydra_ui_kit::components::create_wifi_signal_icon_for_network(
+        let wifi_icon = babydra_ui_kit::components::create_wifi_net_icon(
             net.signal,
             is_connected,
             14,
@@ -239,7 +239,7 @@ fn show_connecting_state(main_box: &gtk4::Box, ssid: &str) {
     main_box.set_size_request(260, -1);
     main_box.add_css_class("audio-menu-popover");
 
-    let label = gtk4::Label::new(Some(&t("wifi.connecting_to").replace("{}", ssid)));
+    let label = gtk4::Label::new(Some(&trans("wifi.connecting_to").replace("{}", ssid)));
     label.add_css_class("audio-menu-section-title");
     label.set_margin_bottom(10);
     main_box.append(&label);
@@ -268,7 +268,7 @@ fn show_credentials_form(
     main_box.set_size_request(260, -1);
     main_box.add_css_class("audio-menu-popover");
 
-    let title = gtk4::Label::new(Some(&t("wifi.connect_to").replace("{}", ssid)));
+    let title = gtk4::Label::new(Some(&trans("wifi.connect_to").replace("{}", ssid)));
     title.add_css_class("audio-menu-section-title");
     title.set_xalign(0.0);
     main_box.append(&title);
@@ -279,7 +279,7 @@ fn show_credentials_form(
 
     let username_entry = if security == "8021x" {
         let entry = gtk4::Entry::new();
-        entry.set_placeholder_text(Some(&t("common.username")));
+        entry.set_placeholder_text(Some(&trans("common.username")));
         entry.add_css_class("wifi-input-field");
         form_box.append(&entry);
         Some(entry)
@@ -288,7 +288,7 @@ fn show_credentials_form(
     };
 
     let password_entry = gtk4::Entry::new();
-    password_entry.set_placeholder_text(Some(&t("common.password")));
+    password_entry.set_placeholder_text(Some(&trans("common.password")));
     password_entry.set_visibility(false);
     password_entry.add_css_class("wifi-input-field");
     form_box.append(&password_entry);
@@ -298,11 +298,11 @@ fn show_credentials_form(
     button_box.set_homogeneous(true);
 
     let cancel_btn = gtk4::Button::new();
-    cancel_btn.set_label(&t("common.cancel"));
+    cancel_btn.set_label(&trans("common.cancel"));
     cancel_btn.add_css_class("wifi-btn-secondary");
 
     let connect_btn = gtk4::Button::new();
-    connect_btn.set_label(&t("common.connect"));
+    connect_btn.set_label(&trans("common.connect"));
     connect_btn.add_css_class("wifi-btn-primary");
 
     button_box.append(&cancel_btn);

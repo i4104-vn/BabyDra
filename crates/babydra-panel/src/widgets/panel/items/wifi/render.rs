@@ -1,6 +1,6 @@
 use super::popover::setup_wifi_popover;
 use super::get_wifi_state;
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use std::rc::Rc;
 use tokio::sync::mpsc;
@@ -13,7 +13,7 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
 
     let (left_btn, sub_label) = babydra_ui_kit::components::create_toggle_tile(
         "wifi",
-        &babydra_core::i18n::t("control.network"),
+        &babydra_core::i18n::trans("control.network"),
         "...",
         "control-tile-left-btn",
         false,
@@ -33,7 +33,7 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
         if let Some((is_act, ssid_str)) = rx.recv().await {
             sub_label_init.set_text(&ssid_str);
             let is_connected = is_act && ssid_str != "Off" && ssid_str != "Disconnected";
-            babydra_ui_kit::components::update_toggle_tile_state(
+            babydra_ui_kit::components::update_toggle_state(
                 &left_btn_init,
                 is_connected,
                 "wifi",
@@ -53,7 +53,7 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
         .and_then(|img| img.downcast::<gtk4::Image>().ok())
         .unwrap();
 
-    let right_btn = babydra_ui_kit::components::create_colored_icon_button(
+    let right_btn = babydra_ui_kit::components::create_color_btn(
         "go-next-symbolic",
         12,
         "rgba(255, 255, 255, 0.7)",
@@ -112,10 +112,10 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
         let is_now_active = b.has_css_class("active");
         if is_now_active {
             babydra_core::services::system::wifi::set_wifi_enabled(true);
-            sub_label_c.set_text(&t("control.scanning"));
+            sub_label_c.set_text(&trans("control.scanning"));
         } else {
             babydra_core::services::system::wifi::set_wifi_enabled(false);
-            sub_label_c.set_text(&t("control.off"));
+            sub_label_c.set_text(&trans("control.off"));
         }
     });
 

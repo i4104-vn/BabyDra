@@ -1,12 +1,12 @@
 use super::super::render;
 use babydra_ui_kit::components::popovers::hover::{
-    build_hover_popover_card as build_popover_card, HoverPopoverRow as PopoverRow,
+    build_hover_card as build_popover_card, HoverPopoverRow as PopoverRow,
 };
 use gtk4::prelude::*;
 use std::rc::Rc;
 
 /// Builds the battery status indicator UI.
-pub fn build_battery_update_fn(bat_popover_opt: &Option<gtk4::Popover>) -> Rc<dyn Fn()> {
+pub fn build_battery_update(bat_popover_opt: &Option<gtk4::Popover>) -> Rc<dyn Fn()> {
     let bat_popover_c = bat_popover_opt.clone();
 
     Rc::new(move || {

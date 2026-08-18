@@ -6,7 +6,7 @@ pub use babydra_core::services::system::volume::{
 };
 
 /// Returns the current `active output device name`.
-pub fn get_active_output_device_name() -> Option<String> {
+pub fn get_active_output() -> Option<String> {
     if let Ok(out) = std::process::Command::new("wpctl")
         .args(["inspect", "@DEFAULT_AUDIO_SINK@"])
         .output()
@@ -25,7 +25,7 @@ pub fn get_active_output_device_name() -> Option<String> {
 }
 
 /// Update topbar volume icon.
-pub fn update_topbar_volume_icon(vol_icon: &gtk4::Image) {
+pub fn update_topbar_volume(vol_icon: &gtk4::Image) {
     let is_m = is_muted();
     let vol_pct = get_current_volume();
     let is_dark = babydra_ui_kit::ui::icon::is_dark_mode();
@@ -54,7 +54,7 @@ pub fn update_topbar_volume_icon(vol_icon: &gtk4::Image) {
         vol_icon.set_paintable(Some(&paintable));
     }
 
-    let dev_name = get_active_output_device_name();
+    let dev_name = get_active_output();
     let dev_suffix = dev_name
         .as_deref()
         .map(|d| format!(" • {}", d))

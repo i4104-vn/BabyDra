@@ -72,7 +72,7 @@ pub fn create_tray_widget(window: &gtk4::ApplicationWindow) -> gtk4::Box {
                                 Ok(menu_opt) => {
                                     if let Some(menu) = menu_opt {
                                         babydra_ui_kit::components::context_menu::
-                                            show_tray_context_menu(&btn_clone, &s_name_main, &menu);
+                                            show_tray_menu(&btn_clone, &s_name_main, &menu);
                                     } else {
                                         babydra_core::tray::activate_item(
                                             &s_name_main,

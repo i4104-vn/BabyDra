@@ -13,17 +13,17 @@ fn main() {
     babydra_core::services::logger::init_logger("babydra-panel", "babydra-panel.log");
 
     // Initialize D-Bus StatusNotifierWatcher system tray listener daemon
-    babydra_core::tray::spawn_watcher_service();
+    babydra_core::tray::spawn_watcher();
 
     // Detect DDC/CI bus for desktop monitors on startup
     widgets::panel::detect_ddc_bus();
 
     // Spawn a background thread to refresh desktop apps cache asynchronously on startup
     std::thread::spawn(|| {
-        babydra_core::refresh_desktop_apps_cache();
+        babydra_core::refresh_desktop_apps();
     });
 
-    babydra_core::spawn_switcher_tracker();
+    babydra_core::spawn_switcher();
 
     let app = Application::builder()
         .application_id("org.babydra.panel")

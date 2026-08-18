@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 /// Creates a new `clean tile`.
 pub fn create_clean_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) -> gtk4::Button {
-    let btn = babydra_ui_kit::components::create_colored_icon_button(
+    let btn = babydra_ui_kit::components::create_color_btn(
         "broom",
         18,
         "rgba(255, 255, 255, 0.8)",

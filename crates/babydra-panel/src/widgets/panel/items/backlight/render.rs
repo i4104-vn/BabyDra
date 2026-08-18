@@ -1,24 +1,24 @@
 use super::{
-    get_current_brightness, has_backlight, query_ddcutil_brightness, set_brightness,
+    get_brightness, has_backlight, query_ddc_brightness, set_brightness,
     BRIGHTNESS_STATE, BRIGHTNESS_SYNCED,
 };
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use std::cell::Cell;
 use std::rc::Rc;
 
 /// Creates a new `brightness row`.
-pub fn create_brightness_row() -> (gtk4::Box, gtk4::Scale) {
+pub fn create_brightness() -> (gtk4::Box, gtk4::Scale) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
     main_box.add_css_class("control-slider-card");
 
     let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    let title_label = gtk4::Label::new(Some(&t("common.brightness")));
+    let title_label = gtk4::Label::new(Some(&trans("common.brightness")));
     title_label.add_css_class("control-slider-title");
     title_label.set_xalign(0.0);
     title_label.set_hexpand(true);
 
-    let initial_val = get_current_brightness();
+    let initial_val = get_brightness();
     let value_label = gtk4::Label::new(Some(&format!("{:.0}%", initial_val)));
     value_label.add_css_class("control-slider-value");
     value_label.set_xalign(1.0);
@@ -111,7 +111,7 @@ fn sync_ddc_brightness_async(brightness_scale: &gtk4::Scale) {
             });
 
             std::thread::spawn(move || {
-                if let Some(val) = query_ddcutil_brightness() {
+                if let Some(val) = query_ddc_brightness() {
                     let _ = tx.send(val);
                 }
             });

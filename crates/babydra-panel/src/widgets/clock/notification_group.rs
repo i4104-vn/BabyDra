@@ -5,18 +5,18 @@ use std::time::Instant;
 pub fn format_elapsed_time(instant: Instant) -> String {
     let secs = instant.elapsed().as_secs();
     if secs < 60 {
-        babydra_core::i18n::t("panel.just_now")
+        babydra_core::i18n::trans("panel.just_now")
     } else if secs < 3600 {
-        babydra_core::i18n::t("panel.minutes_ago").replace("{}", &(secs / 60).to_string())
+        babydra_core::i18n::trans("panel.minutes_ago").replace("{}", &(secs / 60).to_string())
     } else if secs < 86400 {
-        babydra_core::i18n::t("panel.hours_ago").replace("{}", &(secs / 3600).to_string())
+        babydra_core::i18n::trans("panel.hours_ago").replace("{}", &(secs / 3600).to_string())
     } else {
-        babydra_core::i18n::t("panel.days_ago").replace("{}", &(secs / 86400).to_string())
+        babydra_core::i18n::trans("panel.days_ago").replace("{}", &(secs / 86400).to_string())
     }
 }
 
 /// Groups active notifications by application key and returns the app order.
-pub fn group_notifications_by_app(
+pub fn group_notifs_by_app(
     notifications: &[babydra_island::models::ActiveNotification],
 ) -> (
     HashMap<String, Vec<babydra_island::models::ActiveNotification>>,

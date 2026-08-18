@@ -1,7 +1,7 @@
-use crate::widgets::panel::create_status_indicators;
-use crate::widgets::system_monitor::create_system_monitor_widget;
+use crate::widgets::panel::create_status_icons;
+use crate::widgets::system_monitor::create_sys_monitor_w;
 use crate::widgets::tray::create_tray_widget;
-use crate::widgets::workspace::create_workspace_switcher;
+use crate::widgets::workspace::create_workspace_sw;
 use babydra_island::create_system_island;
 use gtk4::prelude::*;
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
@@ -58,7 +58,7 @@ pub fn rebuild_panel_window(
     });
 
     // 4. Workspace Switcher
-    let workspace_box = create_workspace_switcher();
+    let workspace_box = create_workspace_sw();
     let separator = gtk4::Label::new(Some("│"));
     separator.add_css_class("capsule-separator");
     separator.set_valign(gtk4::Align::Center);
@@ -66,14 +66,14 @@ pub fn rebuild_panel_window(
     workspace_box.prepend(&logo_btn);
 
     // 5. Unified Status and Clock Capsule
-    let status_indicators = create_status_indicators(
+    let status_indicators = create_status_icons(
         app,
         control_center_window.clone(),
         calendar_window.clone(),
         launcher_window.clone(),
     );
 
-    let system_monitor = create_system_monitor_widget();
+    let system_monitor = create_sys_monitor_w();
     let tray_widget = create_tray_widget(window);
 
     // Left Wrapper

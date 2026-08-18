@@ -2,10 +2,10 @@
 //! Split out of `render.rs` to keep the tile builder focused.
 
 use babydra_core::services::system::clean::{
-    clean_all_native, format_bytes, get_journal_logs_size, get_pacman_cache_size, get_trash_size,
+    clean_all_native, format_bytes, get_journal_size, get_cache_size, get_trash_size,
     get_user_cache_size,
 };
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 #[derive(Clone)]
 pub(crate) enum CleanProgress {
     Log(String),
@@ -50,7 +50,7 @@ pub(crate) fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
     popover_header.add_css_class("media-popover-header");
     popover_header.set_valign(gtk4::Align::Center);
     let popover_app_icon = babydra_ui_kit::ui::icon::get_icon_colored("broom", 14, "#ef4444");
-    let popover_app_name = gtk4::Label::new(Some(&babydra_core::i18n::t("control.clean_my_linux")));
+    let popover_app_name = gtk4::Label::new(Some(&babydra_core::i18n::trans("control.clean_my_linux")));
     popover_app_name.add_css_class("media-popover-app-name");
     popover_header.append(&popover_app_icon);
     popover_header.append(&popover_app_name);
@@ -70,7 +70,7 @@ pub(crate) fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
     center_box.set_valign(gtk4::Align::Center);
     center_box.set_halign(gtk4::Align::Center);
 
-    let percent_label = gtk4::Label::new(Some(&t("common.ready_upper")));
+    let percent_label = gtk4::Label::new(Some(&trans("common.ready_upper")));
     percent_label.add_css_class("clean-popover-percent");
 
     let size_label = gtk4::Label::new(Some("0 B"));
@@ -112,10 +112,10 @@ pub(crate) fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
         (row, val_lbl)
     };
 
-    let (row1, val1) = create_target_row(&t("clean.user_cache"));
-    let (row2, val2) = create_target_row(&t("clean.package_cache"));
-    let (row3, val3) = create_target_row(&t("clean.system_logs"));
-    let (row4, val4) = create_target_row(&t("clean.trash_bin"));
+    let (row1, val1) = create_target_row(&trans("clean.user_cache"));
+    let (row2, val2) = create_target_row(&trans("clean.package_cache"));
+    let (row3, val3) = create_target_row(&trans("clean.system_logs"));
+    let (row4, val4) = create_target_row(&trans("clean.trash_bin"));
 
     target_list_box.append(&row1);
     target_list_box.append(&row2);
@@ -130,14 +130,14 @@ pub(crate) fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
     btn_container.set_margin_bottom(8);
 
     let action_btn =
-        babydra_ui_kit::components::create_accent_button(&babydra_core::i18n::t("control.scan"));
+        babydra_ui_kit::components::create_accent_button(&babydra_core::i18n::trans("control.scan"));
     action_btn.add_css_class("wifi-btn-primary");
     action_btn.set_size_request(120, -1);
     btn_container.append(&action_btn);
     popover_box.append(&btn_container);
 
     // Log label at the bottom
-    let log_label = gtk4::Label::new(Some(&t("common.ready")));
+    let log_label = gtk4::Label::new(Some(&trans("common.ready")));
     log_label.add_css_class("media-time-label");
     log_label.set_halign(gtk4::Align::Center);
     log_label.set_justify(gtk4::Justification::Center);
@@ -286,24 +286,24 @@ pub(crate) fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
 
     action_btn.connect_clicked(move |btn| {
         let label = btn.label().unwrap_or_default().to_string();
-        let scan_label_str = babydra_core::i18n::t("control.scan");
-        let free_label_str = babydra_core::i18n::t("control.free");
+        let scan_label_str = babydra_core::i18n::trans("control.scan");
+        let free_label_str = babydra_core::i18n::trans("control.free");
 
         if label == scan_label_str {
             btn.set_sensitive(false);
-            btn.set_label(&babydra_core::i18n::t("control.scanning"));
+            btn.set_label(&babydra_core::i18n::trans("control.scanning"));
 
             percent_label_c.remove_css_class("cleaning");
             percent_label_c.remove_css_class("finished");
             percent_label_c.add_css_class("scanning");
-            percent_label_c.set_text(&t("common.scan_upper"));
+            percent_label_c.set_text(&trans("common.scan_upper"));
             size_label_c.set_text("...");
-            log_label_c.set_text(&t("clean.analyzing_disk"));
+            log_label_c.set_text(&trans("clean.analyzing_disk"));
 
-            val1_c.set_text(&t("control.scanning"));
-            val2_c.set_text(&t("common.pending"));
-            val3_c.set_text(&t("common.pending"));
-            val4_c.set_text(&t("common.pending"));
+            val1_c.set_text(&trans("control.scanning"));
+            val2_c.set_text(&trans("common.pending"));
+            val3_c.set_text(&trans("common.pending"));
+            val4_c.set_text(&trans("common.pending"));
 
             *state_c.borrow_mut() = CleanState::Scanning { angle: 0.0 };
             progress_drawing_c.queue_draw();
@@ -327,7 +327,7 @@ pub(crate) fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
             std::thread::spawn(move || {
                 let mut total = 0u64;
 
-                let _ = tx.send(CleanProgress::Log(t("clean.analyzing_user_cache")));
+                let _ = tx.send(CleanProgress::Log(trans("clean.analyzing_user_cache")));
                 std::thread::sleep(std::time::Duration::from_millis(300));
                 let u_sz = get_user_cache_size();
                 total += u_sz;
@@ -336,25 +336,25 @@ pub(crate) fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
                     size: u_sz,
                 });
 
-                let _ = tx.send(CleanProgress::Log(t("clean.checking_package_cache")));
+                let _ = tx.send(CleanProgress::Log(trans("clean.checking_package_cache")));
                 std::thread::sleep(std::time::Duration::from_millis(300));
-                let p_sz = get_pacman_cache_size();
+                let p_sz = get_cache_size();
                 total += p_sz;
                 let _ = tx.send(CleanProgress::ScanStep {
                     step: 1,
                     size: p_sz,
                 });
 
-                let _ = tx.send(CleanProgress::Log(t("clean.reading_log_size")));
+                let _ = tx.send(CleanProgress::Log(trans("clean.reading_log_size")));
                 std::thread::sleep(std::time::Duration::from_millis(300));
-                let j_sz = get_journal_logs_size();
+                let j_sz = get_journal_size();
                 total += j_sz;
                 let _ = tx.send(CleanProgress::ScanStep {
                     step: 2,
                     size: j_sz,
                 });
 
-                let _ = tx.send(CleanProgress::Log(t("clean.checking_trash")));
+                let _ = tx.send(CleanProgress::Log(trans("clean.checking_trash")));
                 std::thread::sleep(std::time::Duration::from_millis(300));
                 let t_sz = get_trash_size();
                 total += t_sz;
@@ -393,17 +393,17 @@ pub(crate) fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
                             0 => {
                                 *user_size_inner.borrow_mut() = size;
                                 val1_inner.set_text(&format_bytes(size));
-                                val2_inner.set_text(&t("control.scanning"));
+                                val2_inner.set_text(&trans("control.scanning"));
                             }
                             1 => {
                                 *pacman_size_inner.borrow_mut() = size;
                                 val2_inner.set_text(&format_bytes(size));
-                                val3_inner.set_text(&t("control.scanning"));
+                                val3_inner.set_text(&trans("control.scanning"));
                             }
                             2 => {
                                 *journal_size_inner.borrow_mut() = size;
                                 val3_inner.set_text(&format_bytes(size));
-                                val4_inner.set_text(&t("control.scanning"));
+                                val4_inner.set_text(&trans("control.scanning"));
                             }
                             3 => {
                                 *trash_size_inner.borrow_mut() = size;
@@ -412,7 +412,7 @@ pub(crate) fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
                             _ => {}
                         },
                         CleanProgress::ScanFinished { total_bytes } => {
-                            log_inner.set_text(&t("clean.scan_complete"));
+                            log_inner.set_text(&trans("clean.scan_complete"));
                             *total_inner.borrow_mut() = total_bytes;
                             action_btn_inner.set_sensitive(true);
 
@@ -421,21 +421,21 @@ pub(crate) fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
                             if total_bytes > 0 {
                                 *state_inner.borrow_mut() =
                                     CleanState::ScanFinished { total_bytes };
-                                percent_label_inner.set_text(&t("common.ready_upper"));
+                                percent_label_inner.set_text(&trans("common.ready_upper"));
                                 size_label_inner.set_text(&format_bytes(total_bytes));
 
                                 let size_str = format_bytes(total_bytes);
-                                let desc = babydra_core::i18n::t("control.bytes_can_be_freed")
+                                let desc = babydra_core::i18n::trans("control.bytes_can_be_freed")
                                     .replace("{}", &size_str);
                                 log_inner.set_text(&desc);
-                                action_btn_inner.set_label(&babydra_core::i18n::t("control.free"));
+                                action_btn_inner.set_label(&babydra_core::i18n::trans("control.free"));
                             } else {
                                 *state_inner.borrow_mut() = CleanState::Idle;
-                                percent_label_inner.set_text(&t("common.ready_upper"));
+                                percent_label_inner.set_text(&trans("common.ready_upper"));
                                 size_label_inner.set_text("0 B");
                                 log_inner
-                                    .set_text(&babydra_core::i18n::t("control.nothing_to_free"));
-                                action_btn_inner.set_label(&babydra_core::i18n::t("control.scan"));
+                                    .set_text(&babydra_core::i18n::trans("control.nothing_to_free"));
+                                action_btn_inner.set_label(&babydra_core::i18n::trans("control.scan"));
                             }
                             progress_drawing_inner.queue_draw();
                         }
@@ -445,14 +445,14 @@ pub(crate) fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
             });
         } else if label == free_label_str {
             btn.set_sensitive(false);
-            btn.set_label(&t("common.cleaning"));
+            btn.set_label(&trans("common.cleaning"));
 
             percent_label_c.remove_css_class("scanning");
             percent_label_c.remove_css_class("finished");
             percent_label_c.add_css_class("cleaning");
             percent_label_c.set_text("0%");
 
-            log_label_c.set_text(&t("clean.running_cleanup"));
+            log_label_c.set_text(&trans("clean.running_cleanup"));
 
             let total_bytes = *total_reclaimable_c.borrow();
             *state_c.borrow_mut() = CleanState::Cleaning {
@@ -466,13 +466,13 @@ pub(crate) fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
             // Background Clean Thread
             let (tx, mut rx) = mpsc::unbounded_channel::<CleanProgress>();
             std::thread::spawn(move || {
-                let _ = tx.send(CleanProgress::Log(t("clean.purging_caches")));
+                let _ = tx.send(CleanProgress::Log(trans("clean.purging_caches")));
                 std::thread::sleep(std::time::Duration::from_millis(300));
 
-                let _ = tx.send(CleanProgress::Log(t("clean.cleaning_logs")));
+                let _ = tx.send(CleanProgress::Log(trans("clean.cleaning_logs")));
                 std::thread::sleep(std::time::Duration::from_millis(300));
 
-                let _ = tx.send(CleanProgress::Log(t("clean.emptying_trash")));
+                let _ = tx.send(CleanProgress::Log(trans("clean.emptying_trash")));
                 let freed = clean_all_native();
                 std::thread::sleep(std::time::Duration::from_millis(300));
 
@@ -518,7 +518,7 @@ pub(crate) fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
 
                         percent_lbl_loop.remove_css_class("cleaning");
                         percent_lbl_loop.add_css_class("finished");
-                        percent_lbl_loop.set_text(&t("common.done_upper"));
+                        percent_lbl_loop.set_text(&trans("common.done_upper"));
                         size_lbl_loop.set_text("0 B");
 
                         val1_loop.set_text("0 B");
@@ -528,11 +528,11 @@ pub(crate) fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
 
                         let size_str = format_bytes(actual_freed);
                         let success_msg =
-                            babydra_core::i18n::t("control.freed_success").replace("{}", &size_str);
+                            babydra_core::i18n::trans("control.freed_success").replace("{}", &size_str);
                         log_lbl_loop.set_text(&success_msg);
 
                         action_btn_loop.set_sensitive(true);
-                        action_btn_loop.set_label(&babydra_core::i18n::t("control.scan"));
+                        action_btn_loop.set_label(&babydra_core::i18n::trans("control.scan"));
 
                         drawing_loop.queue_draw();
                         gtk4::glib::ControlFlow::Break

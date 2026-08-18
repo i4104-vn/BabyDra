@@ -32,7 +32,7 @@ pub fn create_header_row(_on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>
     let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     header_box.set_hexpand(true);
 
-    let title = gtk4::Label::new(Some(&babydra_core::i18n::t("control.title")));
+    let title = gtk4::Label::new(Some(&babydra_core::i18n::trans("control.title")));
     title.add_css_class("control-center-title");
     title.set_xalign(0.0);
     title.set_hexpand(true);
@@ -47,10 +47,10 @@ pub fn create_header_row(_on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>
     } else {
         "rgba(255,255,255,0.8)"
     };
-    let theme_tooltip = babydra_core::i18n::t("control.dark_mode");
+    let theme_tooltip = babydra_core::i18n::trans("control.dark_mode");
 
     // Theme toggle button
-    let theme_btn = babydra_ui_kit::components::create_colored_icon_button(
+    let theme_btn = babydra_ui_kit::components::create_color_btn(
         theme_icon_name,
         16,
         icon_color,
@@ -89,7 +89,7 @@ pub fn create_header_row(_on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>
         "settings",
         16,
         &["circle-btn"],
-        Some(&babydra_core::i18n::t("control.settings")),
+        Some(&babydra_core::i18n::trans("control.settings")),
         || {
             launch_settings_app();
         },

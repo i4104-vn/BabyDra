@@ -1,5 +1,5 @@
 use babydra_ui_kit::components::popovers::hover::{
-    build_hover_popover_card as build_popover_card, HoverPopoverRow as PopoverRow,
+    build_hover_card as build_popover_card, HoverPopoverRow as PopoverRow,
 };
 use gtk4::prelude::*;
 use std::rc::Rc;
@@ -16,7 +16,7 @@ fn get_speed_color_class(bytes_per_sec: f64) -> &'static str {
 }
 
 /// Builds the network speed indicator UI.
-pub fn build_network_update_fn(net_popover: &gtk4::Popover) -> Rc<dyn Fn()> {
+pub fn build_network_update(net_popover: &gtk4::Popover) -> Rc<dyn Fn()> {
     let net_popover_c = net_popover.clone();
 
     Rc::new(move || {

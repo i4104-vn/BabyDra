@@ -10,10 +10,10 @@ pub fn show_calendar_window(
     cw_clone: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
 ) -> gtk4::ApplicationWindow {
     let (c_win, main_box, date_label, dummy_time, _calendar, clear_btn, notif_stack) =
-        render::build_calendar_window_ui(app);
+        render::build_calendar(app);
 
     // 7. Setup and Render Notifications list
-    notifications::setup_notifications_list(&notif_stack, &clear_btn, &dummy_time, &date_label);
+    notifications::setup_notifs_list(&notif_stack, &clear_btn, &dummy_time, &date_label);
 
     // Dismiss when clicking outside the calendar box area using common helper
     babydra_ui_kit::ui::window::setup_click_outside_dismiss(&c_win, &main_box);
