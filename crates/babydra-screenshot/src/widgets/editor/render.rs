@@ -1,7 +1,7 @@
-//! UI layout and drawing canvas handler for the screenshot crop/annotation editor window.
+//! Editor window UI construction: overlay layout, glassmorphic toolbar, and canvas.
 
 use gtk4::prelude::*;
-use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
+use gtk4_layer_shell::{Edge, KeyboardMode, Layer};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -11,41 +11,7 @@ use babydra_core::services::screenshot::trigger_save;
 use super::canvas::{draw_editor_canvas, setup_editor_gestures};
 use super::clipboard::copy_to_clipboard;
 use super::color_popover::create_color_popover;
-
-/// Sets up keyboard event controllers to handle global shortcuts like Escape (cancel),
-/// Return (copy to clipboard), and Ctrl+S (save to file).
-fn setup_editor_keys(window: &gtk4::ApplicationWindow, state: Rc<RefCell<EditorState>>) {
-    let key_controller = gtk4::EventControllerKey::new();
-    key_controller.set_propagation_phase(gtk4::PropagationPhase::Capture);
-
-    let state_key = state.clone();
-    let win_key = window.clone();
-    key_controller.connect_key_pressed(move |_, key, _, state_flags| match key {
-        gtk4::gdk::Key::Escape => {
-            win_key.close();
-            gtk4::glib::Propagation::Stop
-        }
-        gtk4::gdk::Key::Return => {
-            if copy_to_clipboard(&state_key.borrow(), &win_key) {
-                win_key.close();
-            }
-            gtk4::glib::Propagation::Stop
-        }
-        gtk4::gdk::Key::s | gtk4::gdk::Key::S => {
-            if state_flags.contains(gtk4::gdk::ModifierType::CONTROL_MASK) {
-                if trigger_save(&state_key.borrow()) {
-                    win_key.close();
-                }
-                gtk4::glib::Propagation::Stop
-            } else {
-                gtk4::glib::Propagation::Proceed
-            }
-        }
-        _ => gtk4::glib::Propagation::Proceed,
-    });
-
-    window.add_controller(key_controller);
-}
+use crate::widgets::editor::setup_editor_keys;
 
 /// Constructs the screenshot editor window, maps its overlay design,
 /// initializes the canvas, and builds the editing toolbars.
@@ -59,16 +25,22 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
 
     let window = gtk4::ApplicationWindow::new(app);
     babydra_ui_kit::ui::theme::apply_theme_class(&window);
-    window.init_layer_shell();
-    window.set_layer(Layer::Overlay);
-    window.set_keyboard_mode(KeyboardMode::Exclusive);
 
     // Stretch across the entire screen, ignoring panel exclusive zones
-    window.set_anchor(Edge::Top, true);
-    window.set_anchor(Edge::Bottom, true);
-    window.set_anchor(Edge::Left, true);
-    window.set_anchor(Edge::Right, true);
-    window.set_exclusive_zone(-1);
+    babydra_ui_kit::ui::window::init_layer_window(
+        &window,
+        Layer::Overlay,
+        KeyboardMode::Exclusive,
+        -1,
+        &[
+            (Edge::Top, true),
+            (Edge::Bottom, true),
+            (Edge::Left, true),
+            (Edge::Right, true),
+        ],
+        0,
+        None,
+    );
     window.add_css_class("screenshot-window");
 
     let overlay = gtk4::Overlay::new();

@@ -1,9 +1,11 @@
-use gtk4::prelude::*;
-use std::env;
+//! babydra-screenshot — Regional and fullscreen screen capture with annotation editor.
 
 mod widgets;
 
 use babydra_core::{capture_screen_to_temp, handle_fullscreen_capture};
+use gtk4::prelude::*;
+use gtk4::Application;
+use std::env;
 use widgets::editor::build_editor_ui;
 
 /// Application entry point: `main`.
@@ -27,16 +29,20 @@ fn main() {
     let temp_path_for_activate = temp_path.clone();
     let temp_path_for_cleanup = temp_path.clone();
 
-    let application = gtk4::Application::new(Some("org.babydra.screenshot"), Default::default());
+    let app = Application::builder()
+        .application_id("org.babydra.screenshot")
+        .build();
 
-    application.connect_activate(move |app| {
+    app.connect_activate(move |app| {
         babydra_ui_kit::ui::theme::init_theme();
         let window = build_editor_ui(app, &temp_path_for_activate);
         window.present();
     });
 
-    application.run();
+    let exit_code = app.run().value();
 
     // Clean up temporary screenshot file on exit
     std::fs::remove_file(&temp_path_for_cleanup).ok();
+
+    std::process::exit(exit_code);
 }
