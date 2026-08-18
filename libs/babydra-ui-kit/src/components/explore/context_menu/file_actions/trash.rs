@@ -1,6 +1,5 @@
-use crate::components::explore::context_menu::widgets::ContextMenuBuilder;
+use crate::components::context_menu::ContextMenuBuilder;
 use crate::components::explore::helpers::restore_from_trash;
-use gtk4::prelude::*;
 use std::path::PathBuf;
 use std::rc::Rc;
 
@@ -8,14 +7,17 @@ use babydra_core::i18n::t;
 
 /// Renders the context menu for files/directories inside the Trash (Restore, Delete Permanently).
 pub fn show_for_file_trash(
-    popover: &gtk4::Popover,
-    vbox: &gtk4::Box,
+    parent_widget: &gtk4::Widget,
+    x: f64,
+    y: f64,
     target_paths: Vec<PathBuf>,
     current_path: PathBuf,
     nav_callback: Rc<dyn Fn(PathBuf)>,
     parent: &gtk4::Window,
 ) {
-    let mut builder = ContextMenuBuilder::new(parent).with_width(200);
+    let mut builder = ContextMenuBuilder::new(parent_widget)
+        .at_coords(x, y)
+        .with_width(200);
 
     // Restore action
     let target_paths_restore = target_paths.clone();
@@ -72,10 +74,6 @@ pub fn show_for_file_trash(
         );
     });
 
-    let (_, built_box) = builder.build();
-    while let Some(child) = built_box.first_child() {
-        built_box.remove(&child);
-        vbox.append(&child);
-    }
-    popover.popup();
+    builder.popup();
 }
+

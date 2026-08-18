@@ -7,6 +7,10 @@
 //! Kept separate from the crate-level [`crate::prelude`] so names shared with
 //! the generic component API (e.g. `create_list_row`) do not clash.
 
+pub use crate::components::context_menu::{
+    create_footer_container, create_footer_icon_button, create_menu_item, create_menu_separator,
+    ContextMenuBuilder,
+};
 pub use crate::components::explore::context_menu::{
     clipboard::{
         execute_paste, execute_paste_from_system_clipboard, execute_undo,
@@ -16,9 +20,6 @@ pub use crate::components::explore::context_menu::{
     dimming::{apply_cut_dimming, apply_cut_dimming_global},
     file_actions::{show_for_file_normal, show_for_file_trash},
     show_for_empty, show_for_file,
-    widgets::{
-        create_footer_container, create_footer_icon_button, create_menu_button, create_menu_popover,
-    },
     CLIPBOARD,
 };
 pub use crate::components::explore::dialogs::{

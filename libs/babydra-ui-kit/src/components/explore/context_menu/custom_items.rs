@@ -1,4 +1,4 @@
-use crate::components::explore::context_menu::widgets::create_menu_button;
+use crate::components::context_menu::{create_menu_item, create_menu_separator};
 use babydra_core::services::explore::execute_custom_command;
 use gtk4::prelude::*;
 use std::path::PathBuf;
@@ -15,9 +15,7 @@ pub fn append_custom_context_items(
         return;
     }
 
-    let sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
-    sep.add_css_class("menu-sep");
-    vbox.append(&sep);
+    vbox.append(&create_menu_separator());
 
     for item in settings.custom_context_items {
         let icon_key = item.icon.as_deref().unwrap_or_else(|| {
@@ -27,7 +25,7 @@ pub fn append_custom_context_items(
                 "settings"
             }
         });
-        let btn_custom = create_menu_button(&item.name, icon_key);
+        let btn_custom = create_menu_item(&item.name, icon_key);
         vbox.append(&btn_custom);
 
         let pop_c = popover.clone();

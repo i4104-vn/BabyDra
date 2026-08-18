@@ -1,7 +1,7 @@
+use crate::components::context_menu::ContextMenuBuilder;
 use crate::components::explore::context_menu::{
     clipboard::execute_paste,
     custom_items::append_custom_context_items,
-    widgets::{create_menu_button, ContextMenuBuilder},
     CLIPBOARD,
 };
 use gtk4::prelude::*;
@@ -40,37 +40,33 @@ pub fn show_for_empty(
         }
     });
 
-    // 3. Sub-popover containing create options
-    let btn_create_new = create_menu_button(&t("explore.menu_new"), "plus");
-    let sub_popover = crate::components::popovers::create_popover(
-        &btn_create_new,
-        gtk4::PositionType::Right,
-        "explore-popover",
-    );
-    let sub_vbox = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-    sub_vbox.set_css_classes(&["context-menu-box"]);
-    sub_vbox.set_width_request(150);
+    // 3. Submenu: New (Folder, Document)
+    let nav_new_folder = nav_callback.clone();
+    let current_p_folder = current_path.clone();
+    let parent_win_folder = parent_window.clone();
 
-    let btn_new_folder = create_menu_button(&t("explore.menu_new_folder"), "folder-new");
-    let btn_new_file = create_menu_button(&t("explore.menu_new_file"), "text");
+    let nav_new_file = nav_callback.clone();
+    let current_p_file = current_path.clone();
+    let parent_win_file = parent_window.clone();
 
-    sub_vbox.append(&btn_new_folder);
-    sub_vbox.append(&btn_new_file);
-    sub_popover.set_child(Some(&sub_vbox));
-
-    let sub_popover_c = sub_popover.clone();
-    btn_create_new.connect_clicked(move |_| {
-        sub_popover_c.popup();
+    builder = builder.submenu(&t("explore.menu_new"), Some("plus"), move |sub| {
+        sub.item(&t("explore.menu_new_folder"), "folder-new", move || {
+            crate::components::explore::dialogs::show_new_folder_dialog(
+                current_p_folder.clone(),
+                nav_new_folder.clone(),
+                Some(&parent_win_folder),
+            );
+        })
+        .item(&t("explore.menu_new_file"), "text", move || {
+            crate::components::explore::dialogs::show_new_file_dialog(
+                current_p_file.clone(),
+                nav_new_file.clone(),
+                Some(&parent_win_file),
+            );
+        })
     });
-    let sub_popover_c2 = sub_popover.clone();
-    let motion = gtk4::EventControllerMotion::new();
-    motion.connect_enter(move |_, _, _| {
-        sub_popover_c2.popup();
-    });
-    btn_create_new.add_controller(motion);
-    builder = builder.raw_item(&btn_create_new);
 
-    // 4. Check clipboard state for paste availability
+    // 4. Paste
     let clipboard_data = CLIPBOARD.with(|cb| cb.borrow().clone());
     let has_paste_items = clipboard_data
         .as_ref()
@@ -94,41 +90,13 @@ pub fn show_for_empty(
         });
     }
 
-    // Sub-popover click actions
-    let pop_c1 = builder.popover().clone();
-    let sub_pop_c1 = sub_popover.clone();
-    let nav = nav_callback.clone();
-    let current_p = current_path.clone();
-    let parent_win_c1 = parent_window.clone();
-    btn_new_folder.connect_clicked(move |_| {
-        sub_pop_c1.popdown();
-        pop_c1.popdown();
-        crate::components::explore::dialogs::show_new_folder_dialog(
-            current_p.clone(),
-            nav.clone(),
-            Some(&parent_win_c1),
-        );
+    // 5. Custom Context Options for empty area
+    let current_p_custom = current_path.clone();
+    builder = builder.custom_items(move |vbox, popover| {
+        append_custom_context_items(vbox, popover, vec![current_p_custom], true);
     });
 
-    let pop_c2 = builder.popover().clone();
-    let sub_pop_c2 = sub_popover.clone();
-    let nav2 = nav_callback.clone();
-    let current_p2 = current_path.clone();
-    let parent_win_c2 = parent_window.clone();
-    btn_new_file.connect_clicked(move |_| {
-        sub_pop_c2.popdown();
-        pop_c2.popdown();
-        crate::components::explore::dialogs::show_new_file_dialog(
-            current_p2.clone(),
-            nav2.clone(),
-            Some(&parent_win_c2),
-        );
-    });
-
-    // Custom Context Options for empty area
-    append_custom_context_items(builder.container(), builder.popover(), vec![current_path.clone()], true);
-
-    // Footer actions (Cut, Copy, Paste, Rename, Trash)
+    // 6. Footer actions (Cut, Copy, Paste, Rename, Trash)
     let dest_dir = current_path.clone();
     let nav = nav_callback.clone();
     let current_p = current_path.clone();
@@ -153,3 +121,4 @@ pub fn show_for_empty(
 
     builder.popup();
 }
+

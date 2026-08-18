@@ -1,7 +1,7 @@
+use crate::components::context_menu::ContextMenuBuilder;
 use crate::components::explore::context_menu::{
     clipboard::execute_paste,
     custom_items::append_custom_context_items,
-    widgets::ContextMenuBuilder,
     CLIPBOARD,
 };
 use crate::components::explore::helpers::is_archive_file;
@@ -13,18 +13,18 @@ use babydra_core::i18n::t;
 
 /// Renders the standard context menu for files/directories outside the Trash.
 pub fn show_for_file_normal(
-    popover: &gtk4::Popover,
-    vbox: &gtk4::Box,
+    parent_widget: &gtk4::Widget,
+    x: f64,
+    y: f64,
     target_paths: Vec<PathBuf>,
     current_path: PathBuf,
     nav_callback: Rc<dyn Fn(PathBuf)>,
     parent: &gtk4::Window,
 ) {
-    let mut builder = ContextMenuBuilder::new(parent)
+    let mut builder = ContextMenuBuilder::new(parent_widget)
+        .at_coords(x, y)
         .with_width(200);
 
-    // Swap popover/container references
-    let pop_c = popover.clone();
     let current_path_win = current_path.clone();
     let target_paths_win = target_paths.clone();
 
@@ -36,18 +36,19 @@ pub fn show_for_file_normal(
         &t("explore.menu_open"),
         if is_any_dir { "folder" } else { "text" },
         move || {
-        for path in &target_paths_open {
-            if path.is_dir() {
-                nav(path.clone());
-            } else {
-                let uri = format!("file://{}", path.to_string_lossy());
-                let _ = gtk4::gio::AppInfo::launch_default_for_uri(
-                    &uri,
-                    gtk4::gio::AppLaunchContext::NONE,
-                );
+            for path in &target_paths_open {
+                if path.is_dir() {
+                    nav(path.clone());
+                } else {
+                    let uri = format!("file://{}", path.to_string_lossy());
+                    let _ = gtk4::gio::AppInfo::launch_default_for_uri(
+                        &uri,
+                        gtk4::gio::AppLaunchContext::NONE,
+                    );
+                }
             }
-        }
-    });
+        },
+    );
 
     // 2. Open in New Window
     builder = builder.item(&t("explore.menu_open_new_window"), "external-link", move || {
@@ -142,12 +143,15 @@ pub fn show_for_file_normal(
         });
     }
 
-    // Custom Context Options
-    append_custom_context_items(builder.container(), builder.popover(), target_paths.clone(), false);
+    // 7. Custom Context Options
+    let target_paths_custom = target_paths.clone();
+    builder = builder.custom_items(move |vbox, popover| {
+        append_custom_context_items(vbox, popover, target_paths_custom, false);
+    });
 
     builder = builder.separator();
 
-    // 7. Properties
+    // 8. Properties
     let target_paths_props = target_paths.clone();
     let parent_props = parent.clone();
     builder = builder.item(&t("explore.menu_properties"), "info", move || {
@@ -157,7 +161,7 @@ pub fn show_for_file_normal(
         );
     });
 
-    // 8. Footer actions (Cut, Copy, Paste, Rename, Trash)
+    // 9. Footer actions (Cut, Copy, Paste, Rename, Trash)
     let target_paths_cut = target_paths.clone();
     let target_paths_copy = target_paths.clone();
     let target_paths_trash = target_paths.clone();
@@ -166,9 +170,6 @@ pub fn show_for_file_normal(
     let has_paste_items = clipboard_data
         .as_ref()
         .map_or(false, |(sources, _)| !sources.is_empty());
-
-    let pop_cut = pop_c.clone();
-    let pop_copy = pop_c.clone();
 
     let dest_dir = if target_paths.len() == 1 && target_paths[0].is_dir() {
         target_paths[0].clone()
@@ -186,6 +187,10 @@ pub fn show_for_file_normal(
 
     let nav_trash = nav_callback.clone();
     let current_p_trash = current_path.clone();
+
+    let pop_ref = builder.popover().clone();
+    let pop_cut = pop_ref.clone();
+    let pop_copy = pop_ref.clone();
 
     builder = builder
         .footer_button_sensitive("cut", &t("explore.menu_cut"), !target_paths.is_empty(), move || {
@@ -231,10 +236,6 @@ pub fn show_for_file_normal(
             });
         });
 
-    let (_, built_box) = builder.build();
-    while let Some(child) = built_box.first_child() {
-        built_box.remove(&child);
-        vbox.append(&child);
-    }
-    popover.popup();
+    builder.popup();
 }
+

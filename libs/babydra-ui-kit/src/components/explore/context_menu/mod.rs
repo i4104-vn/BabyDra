@@ -3,11 +3,9 @@ pub mod custom_items;
 pub mod dimming;
 pub mod empty_actions;
 pub mod file_actions;
-pub mod widgets;
 
 pub use dimming::{apply_cut_dimming, apply_cut_dimming_global};
 pub use empty_actions::show_for_empty;
-pub use widgets::{create_footer_icon_button, create_menu_button, create_menu_popover};
 
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -26,12 +24,12 @@ pub fn show_for_file(
     nav_callback: Rc<dyn Fn(PathBuf)>,
     parent_window: &gtk4::Window,
 ) {
-    let (popover, vbox) = create_menu_popover(parent, x, y);
     let is_in_trash = current_path.to_string_lossy().contains("Trash/files");
     if is_in_trash {
         file_actions::show_for_file_trash(
-            &popover,
-            &vbox,
+            parent,
+            x,
+            y,
             target_paths,
             current_path,
             nav_callback,
@@ -39,8 +37,9 @@ pub fn show_for_file(
         );
     } else {
         file_actions::show_for_file_normal(
-            &popover,
-            &vbox,
+            parent,
+            x,
+            y,
             target_paths,
             current_path,
             nav_callback,
@@ -48,3 +47,4 @@ pub fn show_for_file(
         );
     }
 }
+

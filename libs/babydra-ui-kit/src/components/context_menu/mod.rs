@@ -13,5 +13,7 @@ pub use items::{
     create_footer_icon_button, create_menu_group_header, create_menu_item,
     create_menu_item_destructive, create_menu_item_destructive_sensitive, create_menu_item_full,
     create_menu_item_sensitive, create_menu_item_with_shortcut, create_menu_separator,
+    create_menu_text_item, create_submenu_item,
 };
 pub use tray::{build_tray_gio_menu, close_active_tray_menu, show_tray_context_menu};
+
