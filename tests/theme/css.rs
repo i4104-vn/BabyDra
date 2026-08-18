@@ -20,7 +20,7 @@ fn test_gtk_css_parsing() {
         "libs/babydra-ui-kit/src/styles/shared/panel/workspaces.css",
         "libs/babydra-ui-kit/src/styles/shared/panel/clock.css",
         "libs/babydra-ui-kit/src/styles/shared/panel/status.css",
-        "libs/babydra-ui-kit/src/styles/shared/panel/sys_monitor.css",
+        "libs/babydra-ui-kit/src/styles/shared/panel/system_monitor.css",
         "libs/babydra-ui-kit/src/styles/shared/panel/tray.css",
         "libs/babydra-ui-kit/src/styles/shared/panel/taskbar.css",
         "libs/babydra-ui-kit/src/styles/shared/control_center/control_center.css",

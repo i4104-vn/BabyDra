@@ -3,19 +3,19 @@
 //! Verifies human-readable capacity formatting and partition → parent
 //! drive mapping through the public helper API.
 
-use babydra_core::services::system::storage::helper::{format_size, get_parent_drive};
+use babydra_core::services::system::storage::helper::{format_disk_size, get_parent_drive};
 
 #[test]
-fn format_size_uses_gb_below_1000() {
-    assert_eq!(format_size(1024 * 1024), "1.0 GB");
-    assert_eq!(format_size(512 * 1024), "0.5 GB");
-    assert_eq!(format_size(0), "0.0 GB");
+fn format_disk_size_uses_gb_below_1000() {
+    assert_eq!(format_disk_size(1024 * 1024), "1.0 GB");
+    assert_eq!(format_disk_size(512 * 1024), "0.5 GB");
+    assert_eq!(format_disk_size(0), "0.0 GB");
 }
 
 #[test]
-fn format_size_switches_to_tb_at_1000_gb() {
-    assert_eq!(format_size(1000 * 1024 * 1024), "1.0 TB");
-    assert_eq!(format_size(2048 * 1024 * 1024), "2.0 TB");
+fn format_disk_size_switches_to_tb_at_1000_gb() {
+    assert_eq!(format_disk_size(1000 * 1024 * 1024), "1.0 TB");
+    assert_eq!(format_disk_size(2048 * 1024 * 1024), "2.0 TB");
 }
 
 #[test]
@@ -39,10 +39,10 @@ fn parent_drive_leaves_other_paths_untouched() {
 }
 
 #[test]
-fn format_size_rounds_to_one_decimal() {
-    assert_eq!(format_size((1.5 * 1024.0 * 1024.0) as u64), "1.5 GB");
+fn format_disk_size_rounds_to_one_decimal() {
+    assert_eq!(format_disk_size((1.5 * 1024.0 * 1024.0) as u64), "1.5 GB");
     assert_eq!(
-        format_size((2.5 * 1024.0 * 1024.0 * 1024.0) as u64),
+        format_disk_size((2.5 * 1024.0 * 1024.0 * 1024.0) as u64),
         "2.5 TB"
     );
 }
