@@ -2,7 +2,7 @@
 
 mod render;
 
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::path::PathBuf;
@@ -22,30 +22,30 @@ struct ImageState {
 }
 
 /// Clamps the image position so it cannot be dragged away from the viewport.
-fn clamp_position(st: &mut ImageState, area_w: f64, area_h: f64) {
-    let scaled_w = st.img_w * st.scale;
-    let scaled_h = st.img_h * st.scale;
+fn clamp_position(state_ref: &mut ImageState, area_w: f64, area_h: f64) {
+    let scaled_w = state_ref.img_w * state_ref.scale;
+    let scaled_h = state_ref.img_h * state_ref.scale;
 
     let limit_x = ((scaled_w - area_w) / 2.0).max(0.0);
     let limit_y = ((scaled_h - area_h) / 2.0).max(0.0);
 
-    st.offset_x = st.offset_x.clamp(-limit_x, limit_x);
-    st.offset_y = st.offset_y.clamp(-limit_y, limit_y);
+    state_ref.offset_x = state_ref.offset_x.clamp(-limit_x, limit_x);
+    state_ref.offset_y = state_ref.offset_y.clamp(-limit_y, limit_y);
 }
 
 /// Updates the zoom percentage label.
-fn update_zoom_display(st: &ImageState, lbl: &gtk4::Label) {
-    lbl.set_text(&format!("{:.0}%", st.scale * 100.0));
+fn update_zoom_display(state_ref: &ImageState, lbl: &gtk4::Label) {
+    lbl.set_text(&format!("{:.0}%", state_ref.scale * 100.0));
 }
 
 /// Fits the image to the viewport and sets the minimum zoom scale.
-fn fit_to_screen(st: &mut ImageState, area_w: f64, area_h: f64) {
-    let scale_x = area_w / st.img_w;
-    let scale_y = area_h / st.img_h;
-    st.min_scale = scale_x.min(scale_y).min(1.0).max(0.05);
-    st.scale = st.min_scale;
-    st.offset_x = 0.0;
-    st.offset_y = 0.0;
+fn fit_to_screen(state_ref: &mut ImageState, area_w: f64, area_h: f64) {
+    let scale_x = area_w / state_ref.img_w;
+    let scale_y = area_h / state_ref.img_h;
+    state_ref.min_scale = scale_x.min(scale_y).min(1.0).max(0.05);
+    state_ref.scale = state_ref.min_scale;
+    state_ref.offset_x = 0.0;
+    state_ref.offset_y = 0.0;
 }
 
 /// Applies a zoom delta around the current position, clamped to the allowed range.
@@ -55,21 +55,21 @@ fn do_zoom(
     lbl: &gtk4::Label,
     delta: f64,
 ) {
-    let mut st = state.borrow_mut();
+    let mut state_ref = state.borrow_mut();
     let area_w = area.width() as f64;
     let area_h = area.height() as f64;
 
-    let next_scale = (st.scale + delta).clamp(st.min_scale, 5.0);
-    st.scale = next_scale;
+    let next_scale = (state_ref.scale + delta).clamp(state_ref.min_scale, 5.0);
+    state_ref.scale = next_scale;
 
-    if st.scale <= st.min_scale + 0.001 {
-        st.offset_x = 0.0;
-        st.offset_y = 0.0;
+    if state_ref.scale <= state_ref.min_scale + 0.001 {
+        state_ref.offset_x = 0.0;
+        state_ref.offset_y = 0.0;
     } else {
-        clamp_position(&mut *st, area_w, area_h);
+        clamp_position(&mut *state_ref, area_w, area_h);
     }
 
-    update_zoom_display(&st, lbl);
+    update_zoom_display(&state_ref, lbl);
     area.queue_draw();
 }
 
@@ -81,7 +81,7 @@ pub fn build_ui(app: &gtk4::Application, path: PathBuf) {
             let err_window = gtk4::ApplicationWindow::new(app);
             err_window.set_default_size(600, 400);
             err_window.add_css_class("viewer-window");
-            let err_label = gtk4::Label::new(Some(&t("preview.failed_load")));
+            let err_label = gtk4::Label::new(Some(&trans("preview.failed_load")));
             err_label.add_css_class("brand-text");
             err_window.set_child(Some(&err_label));
             err_window.present();
@@ -119,7 +119,7 @@ pub fn build_ui(app: &gtk4::Application, path: PathBuf) {
     // --- Helpers / Closures ---
     let state_draw = state.clone();
     drawing_area.set_draw_func(move |_area, cr, width, height| {
-        let st = state_draw.borrow();
+        let state_ref = state_draw.borrow();
         let w = width as f64;
         let h = height as f64;
 
@@ -128,15 +128,15 @@ pub fn build_ui(app: &gtk4::Application, path: PathBuf) {
         cr.paint().unwrap();
 
         // Calculate layout coordinates
-        let draw_w = st.img_w * st.scale;
-        let draw_h = st.img_h * st.scale;
-        let start_x = (w - draw_w) / 2.0 + st.offset_x;
-        let start_y = (h - draw_h) / 2.0 + st.offset_y;
+        let draw_w = state_ref.img_w * state_ref.scale;
+        let draw_h = state_ref.img_h * state_ref.scale;
+        let start_x = (w - draw_w) / 2.0 + state_ref.offset_x;
+        let start_y = (h - draw_h) / 2.0 + state_ref.offset_y;
 
         cr.save().unwrap();
         cr.translate(start_x, start_y);
-        cr.scale(st.scale, st.scale);
-        cr.set_source_pixbuf(&st.pixbuf, 0.0, 0.0);
+        cr.scale(state_ref.scale, state_ref.scale);
+        cr.set_source_pixbuf(&state_ref.pixbuf, 0.0, 0.0);
         cr.paint().unwrap();
         cr.restore().unwrap();
     });
@@ -146,9 +146,9 @@ pub fn build_ui(app: &gtk4::Application, path: PathBuf) {
     let area_clone = drawing_area.clone();
     let scale_lbl_clone = scale_lbl.clone();
     drawing_area.connect_resize(move |_, w, h| {
-        let mut st = state_resize.borrow_mut();
-        fit_to_screen(&mut st, w as f64, h as f64);
-        update_zoom_display(&st, &scale_lbl_clone);
+        let mut state_ref = state_resize.borrow_mut();
+        fit_to_screen(&mut state_ref, w as f64, h as f64);
+        update_zoom_display(&state_ref, &scale_lbl_clone);
         area_clone.queue_draw();
     });
 
@@ -170,13 +170,13 @@ pub fn build_ui(app: &gtk4::Application, path: PathBuf) {
     let area_reset = drawing_area.clone();
     let lbl_reset = scale_lbl.clone();
     reset_btn.connect_clicked(move |_| {
-        let mut st = state_reset.borrow_mut();
+        let mut state_ref = state_reset.borrow_mut();
         fit_to_screen(
-            &mut st,
+            &mut state_ref,
             area_reset.width() as f64,
             area_reset.height() as f64,
         );
-        update_zoom_display(&st, &lbl_reset);
+        update_zoom_display(&state_ref, &lbl_reset);
         area_reset.queue_draw();
     });
 
@@ -197,23 +197,23 @@ pub fn build_ui(app: &gtk4::Application, path: PathBuf) {
     let drag_gesture = gtk4::GestureDrag::new();
     let state_drag = state.clone();
     drag_gesture.connect_drag_begin(move |gesture, _x, _y| {
-        let mut st = state_drag.borrow_mut();
-        st.drag_start_x = st.offset_x;
-        st.drag_start_y = st.offset_y;
+        let mut state_ref = state_drag.borrow_mut();
+        state_ref.drag_start_x = state_ref.offset_x;
+        state_ref.drag_start_y = state_ref.offset_y;
         gesture.set_state(gtk4::EventSequenceState::Claimed);
     });
 
     let state_drag_update = state.clone();
     let area_drag_update = drawing_area.clone();
     drag_gesture.connect_drag_update(move |_, offset_x, offset_y| {
-        let mut st = state_drag_update.borrow_mut();
+        let mut state_ref = state_drag_update.borrow_mut();
         let area_w = area_drag_update.width() as f64;
         let area_h = area_drag_update.height() as f64;
 
-        st.offset_x = st.drag_start_x + offset_x;
-        st.offset_y = st.drag_start_y + offset_y;
+        state_ref.offset_x = state_ref.drag_start_x + offset_x;
+        state_ref.offset_y = state_ref.drag_start_y + offset_y;
 
-        clamp_position(&mut st, area_w, area_h);
+        clamp_position(&mut state_ref, area_w, area_h);
         area_drag_update.queue_draw();
     });
     drawing_area.add_controller(drag_gesture);
@@ -241,9 +241,9 @@ pub fn build_ui(app: &gtk4::Application, path: PathBuf) {
                 do_zoom(&state_key, &area_key, &lbl_key, -0.1);
             }
             Some("0") => {
-                let mut st = state_key.borrow_mut();
-                fit_to_screen(&mut st, area_key.width() as f64, area_key.height() as f64);
-                update_zoom_display(&st, &lbl_key);
+                let mut state_ref = state_key.borrow_mut();
+                fit_to_screen(&mut state_ref, area_key.width() as f64, area_key.height() as f64);
+                update_zoom_display(&state_ref, &lbl_key);
                 area_key.queue_draw();
             }
             _ => {}

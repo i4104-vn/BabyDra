@@ -1,6 +1,6 @@
 //! Image viewer UI builders (window, info card, zoom controls, EXIF box).
 
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use std::path::PathBuf;
 
@@ -44,7 +44,7 @@ pub fn build_viewer_ui(
     img_h: u32,
 ) -> ViewerUi {
     let window = gtk4::ApplicationWindow::new(app);
-    window.set_title(Some(&t("preview.title").replace(
+    window.set_title(Some(&trans("preview.title").replace(
         "{}",
         &path.file_name().unwrap_or_default().to_string_lossy(),
     )));
@@ -59,7 +59,7 @@ pub fn build_viewer_ui(
     overlay.set_child(Some(&drawing_area));
 
     // --- Bottom-Right Info Box Overlay ---
-    let info_box = babydra_ui_kit::components::create_card_with_class(
+    let info_box = babydra_ui_kit::components::create_css_card(
         gtk4::Orientation::Vertical,
         4,
         "info-card",
@@ -142,7 +142,7 @@ pub fn build_viewer_ui(
     exif_box.set_valign(gtk4::Align::Center);
     exif_box.set_visible(false);
 
-    let exif_title = gtk4::Label::new(Some(&t("preview.camera_info")));
+    let exif_title = gtk4::Label::new(Some(&trans("preview.camera_info")));
     exif_title.add_css_class("exif-title");
     exif_box.append(&exif_title);
 
@@ -188,7 +188,7 @@ pub fn build_viewer_ui(
             add_exif_row("Date Original", val);
         }
     } else {
-        let no_exif_lbl = gtk4::Label::new(Some(&t("preview.no_exif")));
+        let no_exif_lbl = gtk4::Label::new(Some(&trans("preview.no_exif")));
         no_exif_lbl.add_css_class("exif-value");
         grid.attach(&no_exif_lbl, 0, 0, 2, 1);
     }
