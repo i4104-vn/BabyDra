@@ -2327,8 +2327,13 @@ button.context-menu-item:hover label {
     color: #000000;
 }
 
-.explore-window .group-header-label {
+.context-menu-header,
+.group-header-label {
     color: #0066cc;
+}
+
+.context-menu-separator {
+    background-color: rgba(0, 0, 0, 0.10);
 }
 
 .context-menu-footer {

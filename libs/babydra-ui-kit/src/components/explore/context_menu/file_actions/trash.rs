@@ -1,4 +1,4 @@
-use crate::components::explore::context_menu::widgets::create_menu_button;
+use crate::components::explore::context_menu::widgets::ContextMenuBuilder;
 use crate::components::explore::helpers::restore_from_trash;
 use gtk4::prelude::*;
 use std::path::PathBuf;
@@ -15,19 +15,13 @@ pub fn show_for_file_trash(
     nav_callback: Rc<dyn Fn(PathBuf)>,
     parent: &gtk4::Window,
 ) {
-    let btn_restore = create_menu_button(&t("explore.menu_restore"), "restart");
-    let btn_delete = create_menu_button(&t("explore.menu_delete_perm"), "trash");
-
-    vbox.append(&btn_restore);
-    vbox.append(&btn_delete);
+    let mut builder = ContextMenuBuilder::new(parent).with_width(200);
 
     // Restore action
-    let pop_c = popover.clone();
     let target_paths_restore = target_paths.clone();
     let nav = nav_callback.clone();
     let current_p = current_path.clone();
-    btn_restore.connect_clicked(move |_| {
-        pop_c.popdown();
+    builder = builder.item(&t("explore.menu_restore"), "restart", move || {
         let nav_c = nav.clone();
         let cp_c = current_p.clone();
         let paths_c = target_paths_restore.clone();
@@ -42,13 +36,11 @@ pub fn show_for_file_trash(
     });
 
     // Permanent delete
-    let pop_c = popover.clone();
     let target_paths_del = target_paths.clone();
     let nav = nav_callback.clone();
     let current_p = current_path.clone();
     let parent_c = parent.clone();
-    btn_delete.connect_clicked(move |_| {
-        pop_c.popdown();
+    builder = builder.destructive_item(&t("explore.menu_delete_perm"), "trash", move || {
         let nav_c = nav.clone();
         let cp_c = current_p.clone();
         let paths_c = target_paths_del.clone();
@@ -80,5 +72,10 @@ pub fn show_for_file_trash(
         );
     });
 
+    let (_, built_box) = builder.build();
+    while let Some(child) = built_box.first_child() {
+        built_box.remove(&child);
+        vbox.append(&child);
+    }
     popover.popup();
 }

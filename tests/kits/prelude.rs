@@ -31,6 +31,21 @@ fn ui_kit_prelude_exposes_components_and_helpers() {
         ui_prelude::create_placeholder_row;
     let _: fn(bool, fn(bool)) -> ui_prelude::CustomSwitch = ui_prelude::create_switch;
 
+    // Context menu builders.
+    let _: fn(&str, &str) -> gtk4::Button = ui_prelude::create_menu_item;
+    let _: fn(&str, &str, &str) -> gtk4::Button = ui_prelude::create_menu_item_with_shortcut;
+    let _: fn(&str, &str) -> gtk4::Button = ui_prelude::create_menu_item_destructive;
+    let _: fn() -> gtk4::Separator = ui_prelude::create_menu_separator;
+    let _: fn(&str) -> gtk4::Label = ui_prelude::create_menu_group_header;
+    let _: fn() -> (gtk4::Box, gtk4::Box) = ui_prelude::create_footer_container;
+    let _: fn(&str, &str) -> gtk4::Button = ui_prelude::create_footer_icon_button;
+    let _: fn(&gtk4::Widget, f64, f64) -> (gtk4::Popover, gtk4::Box) =
+        ui_prelude::create_context_menu_popover;
+    let _: fn(&gtk4::Widget, gtk4::PositionType) -> (gtk4::Popover, gtk4::Box) =
+        ui_prelude::create_context_menu_for_widget;
+    let _: fn(&gtk4::Button, &str, &[babydra_core::tray::MenuItem]) =
+        ui_prelude::show_tray_context_menu;
+
     // UI helpers.
     let _: fn(&str, i32) -> gtk4::Image = ui_prelude::get_icon;
     let _: fn(&str, i32, &str) -> gtk4::Image = ui_prelude::get_icon_colored;

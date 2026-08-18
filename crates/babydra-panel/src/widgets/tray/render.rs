@@ -25,79 +25,11 @@ pub fn build_tray_button(icon_name: &str, title: &str) -> gtk4::Button {
     btn
 }
 
-thread_local! {
-    static ACTIVE_POPOVER: std::cell::RefCell<Option<gtk4::Popover>> = std::cell::RefCell::new(None);
-}
-
-/// Shows the `context menu`.
+/// Shows the context menu for a tray item using unified UI Kit context menu.
 pub fn show_context_menu(
     btn: &gtk4::Button,
     service: &str,
     items: &[babydra_core::tray::MenuItem],
 ) {
-    ACTIVE_POPOVER.with(|p| {
-        if let Some(old_popover) = p.borrow_mut().take() {
-            old_popover.popdown();
-            old_popover.unparent();
-        }
-    });
-
-    let action_group = gtk4::gio::SimpleActionGroup::new();
-    let menu_model = build_gio_menu(items, &action_group, service);
-
-    let popover = gtk4::PopoverMenu::from_model(Some(&menu_model));
-    popover.set_parent(btn);
-    popover.set_position(gtk4::PositionType::Bottom);
-    popover.set_has_arrow(true);
-    popover.add_css_class("tray-context-menu");
-
-    btn.insert_action_group("tray", Some(&action_group));
-
-    popover.popup();
-
-    ACTIVE_POPOVER.with(|p| {
-        *p.borrow_mut() = Some(popover.upcast::<gtk4::Popover>());
-    });
-}
-
-/// Builds the `gio menu` UI.
-fn build_gio_menu(
-    items: &[babydra_core::tray::MenuItem],
-    action_group: &gtk4::gio::SimpleActionGroup,
-    service: &str,
-) -> gtk4::gio::Menu {
-    let menu = gtk4::gio::Menu::new();
-
-    for item in items {
-        if item.is_separator {
-            continue;
-        }
-
-        let action_name = format!("a{}", item.id);
-        let detailed_action = format!("tray.{}", action_name);
-
-        let menu_item = gtk4::gio::MenuItem::new(Some(&item.label), Some(&detailed_action));
-
-        if !item.children.is_empty() {
-            let submenu = build_gio_menu(&item.children, action_group, service);
-            menu_item.set_submenu(Some(&submenu));
-        }
-
-        let s_name = service.to_string();
-        let item_id = item.id;
-        let action = gtk4::gio::SimpleAction::new(&action_name, None);
-        action.set_enabled(item.enabled);
-
-        action.connect_activate(move |_, _| {
-            babydra_core::tray::activate_menu_item(&s_name, item_id);
-        });
-
-        action_group.add_action(&action);
-
-        if item.visible {
-            menu.append_item(&menu_item);
-        }
-    }
-
-    menu
+    babydra_ui_kit::components::context_menu::show_tray_context_menu(btn, service, items);
 }

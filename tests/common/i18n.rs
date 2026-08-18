@@ -15,6 +15,9 @@ fn english_lookup_returns_translations() {
     set_locale("en");
     assert_eq!(t("menu.terminal"), "Terminal");
     assert_eq!(t("panel.no_notifications"), "No new notifications");
+    assert_eq!(t("desktop.new_folder"), "New Folder");
+    assert_eq!(t("desktop.open_in_terminal"), "Open in Terminal");
+    assert_eq!(t("explore.menu_open_with"), "Open With...");
 }
 
 #[test]
@@ -23,6 +26,9 @@ fn vietnamese_lookup_returns_translations() {
     set_locale("vi");
     assert_eq!(t("menu.file_manager"), "Trình quản lý tệp");
     assert_eq!(t("weekday.mon"), "Thứ Hai");
+    assert_eq!(t("desktop.new_folder"), "Thư mục mới");
+    assert_eq!(t("desktop.open_in_terminal"), "Mở trong Terminal");
+    assert_eq!(t("explore.menu_open_with"), "Mở bằng...");
 }
 
 #[test]

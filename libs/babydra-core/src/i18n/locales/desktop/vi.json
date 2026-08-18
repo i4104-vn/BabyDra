@@ -1,0 +1,22 @@
+{
+  "desktop.new_folder": "Thư mục mới",
+  "desktop.new_file": "Tài liệu mới",
+  "desktop.paste": "Dán",
+  "desktop.open_in_terminal": "Mở trong Terminal",
+  "desktop.open_in_file_manager": "Mở trong Trình quản lý tệp",
+  "desktop.sort_by": "Sắp xếp",
+  "desktop.sort_by_name": "Sắp xếp: Theo tên",
+  "desktop.sort_by_date": "Sắp xếp: Theo thời gian sửa đổi",
+  "desktop.toggle_icon_size": "Đổi kích thước biểu tượng",
+  "desktop.change_wallpaper": "Thay đổi hình nền...",
+  "desktop.display_settings": "Cài đặt màn hình...",
+  "desktop.set_as_wallpaper": "Đặt làm hình nền Desktop",
+  "desktop.open": "Mở",
+  "desktop.open_with": "Mở bằng...",
+  "desktop.cut": "Cắt",
+  "desktop.copy": "Sao chép",
+  "desktop.rename": "Đổi tên",
+  "desktop.trash": "Chuyển vào Thùng rác",
+  "desktop.delete": "Xóa vĩnh viễn",
+  "desktop.properties": "Thuộc tính"
+}

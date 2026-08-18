@@ -1,6 +1,7 @@
 pub mod badge;
 pub mod buttons;
 pub mod card;
+pub mod context_menu;
 pub mod explore;
 pub mod list_group;
 pub mod modal;
@@ -23,6 +24,14 @@ pub use buttons::{
 pub use card::{
     create_card, create_card_with_class, create_scrollable_list, create_subtitle,
     create_switch_card, create_title,
+};
+pub use context_menu::{
+    build_tray_gio_menu, close_active_tray_menu, create_context_menu_for_widget,
+    create_context_menu_popover, create_footer_container, create_footer_icon_button,
+    create_menu_group_header, create_menu_item, create_menu_item_destructive,
+    create_menu_item_destructive_sensitive, create_menu_item_full, create_menu_item_sensitive,
+    create_menu_item_with_shortcut, create_menu_separator, show_tray_context_menu,
+    ContextMenuBuilder,
 };
 pub use list_group::{clear_box, clear_list_box, create_list_row};
 pub use modal::{

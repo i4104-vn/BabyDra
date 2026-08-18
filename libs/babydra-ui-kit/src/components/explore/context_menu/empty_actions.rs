@@ -1,9 +1,7 @@
 use crate::components::explore::context_menu::{
     clipboard::execute_paste,
     custom_items::append_custom_context_items,
-    widgets::{
-        create_footer_container, create_footer_icon_button, create_menu_button, create_menu_popover,
-    },
+    widgets::{create_menu_button, ContextMenuBuilder},
     CLIPBOARD,
 };
 use gtk4::prelude::*;
@@ -24,26 +22,26 @@ pub fn show_for_empty(
     if current_path.to_string_lossy().contains("Trash/files") {
         return;
     }
-    let (popover, vbox) = create_menu_popover(parent_widget, x, y);
 
-    let btn_refresh = create_menu_button(&t("explore.menu_refresh"), "refresh");
-    let btn_copy_location = create_menu_button(&t("explore.menu_copy_location"), "copy");
-    let btn_create_new = create_menu_button(&t("explore.menu_new"), "plus");
+    let mut builder = ContextMenuBuilder::new(parent_widget).at_coords(x, y);
 
-    vbox.append(&btn_refresh);
-    vbox.append(&btn_copy_location);
-    vbox.append(&btn_create_new);
+    // 1. Refresh
+    let nav_refresh = nav_callback.clone();
+    let current_path_refresh = current_path.clone();
+    builder = builder.item(&t("explore.menu_refresh"), "refresh", move || {
+        nav_refresh(current_path_refresh.clone());
+    });
 
-    let pop_c = popover.clone();
+    // 2. Copy Location
     let cur_p_loc = current_path.clone();
-    btn_copy_location.connect_clicked(move |_| {
-        pop_c.popdown();
+    builder = builder.item(&t("explore.menu_copy_location"), "copy", move || {
         if let Some(display) = gtk4::gdk::Display::default() {
             display.clipboard().set_text(&cur_p_loc.to_string_lossy());
         }
     });
 
-    // Sub-popover containing create options
+    // 3. Sub-popover containing create options
+    let btn_create_new = create_menu_button(&t("explore.menu_new"), "plus");
     let sub_popover = crate::components::popovers::create_popover(
         &btn_create_new,
         gtk4::PositionType::Right,
@@ -64,25 +62,26 @@ pub fn show_for_empty(
     btn_create_new.connect_clicked(move |_| {
         sub_popover_c.popup();
     });
+    let sub_popover_c2 = sub_popover.clone();
+    let motion = gtk4::EventControllerMotion::new();
+    motion.connect_enter(move |_, _, _| {
+        sub_popover_c2.popup();
+    });
+    btn_create_new.add_controller(motion);
+    builder = builder.raw_item(&btn_create_new);
 
-    // Check clipboard state for paste availability
+    // 4. Check clipboard state for paste availability
     let clipboard_data = CLIPBOARD.with(|cb| cb.borrow().clone());
     let has_paste_items = clipboard_data
         .as_ref()
         .map_or(false, |(sources, _)| !sources.is_empty());
 
-    // Only render top Paste menu button if clipboard has files to move/paste (Hidden if empty)
     if has_paste_items {
-        let btn_paste = create_menu_button(&t("explore.menu_paste"), "paste");
-        vbox.append(&btn_paste);
-
-        let pop_c = popover.clone();
         let dest_dir = current_path.clone();
         let nav = nav_callback.clone();
         let current_p = current_path.clone();
         let clipboard_data_c1 = clipboard_data.clone();
-        btn_paste.connect_clicked(move |_| {
-            pop_c.popdown();
+        builder = builder.item(&t("explore.menu_paste"), "paste", move || {
             if let Some((sources, is_cut)) = clipboard_data_c1.clone() {
                 execute_paste(
                     sources,
@@ -95,16 +94,8 @@ pub fn show_for_empty(
         });
     }
 
-    let pop_c = popover.clone();
-    let nav_refresh = nav_callback.clone();
-    let current_path_refresh = current_path.clone();
-    btn_refresh.connect_clicked(move |_| {
-        pop_c.popdown();
-        nav_refresh(current_path_refresh.clone());
-    });
-
     // Sub-popover click actions
-    let pop_c1 = popover.clone();
+    let pop_c1 = builder.popover().clone();
     let sub_pop_c1 = sub_popover.clone();
     let nav = nav_callback.clone();
     let current_p = current_path.clone();
@@ -119,7 +110,7 @@ pub fn show_for_empty(
         );
     });
 
-    let pop_c2 = popover.clone();
+    let pop_c2 = builder.popover().clone();
     let sub_pop_c2 = sub_popover.clone();
     let nav2 = nav_callback.clone();
     let current_p2 = current_path.clone();
@@ -135,37 +126,18 @@ pub fn show_for_empty(
     });
 
     // Custom Context Options for empty area
-    append_custom_context_items(&vbox, &popover, vec![current_path.clone()], true);
+    append_custom_context_items(builder.container(), builder.popover(), vec![current_path.clone()], true);
 
-    // Footer Container (Footer buttons remain visible, paste is disabled if clipboard is empty)
-    let (footer_container, footer_box) = create_footer_container();
+    // Footer actions (Cut, Copy, Paste, Rename, Trash)
+    let dest_dir = current_path.clone();
+    let nav = nav_callback.clone();
+    let current_p = current_path.clone();
+    let clipboard_data_c2 = clipboard_data.clone();
 
-    let btn_footer_cut = create_footer_icon_button("cut", &t("explore.menu_cut"));
-    let btn_footer_copy = create_footer_icon_button("copy", &t("explore.menu_copy"));
-    let btn_footer_paste = create_footer_icon_button("paste", &t("explore.menu_paste"));
-    let btn_footer_rename = create_footer_icon_button("rename", &t("explore.menu_rename"));
-    let btn_footer_trash = create_footer_icon_button("trash", &t("explore.menu_trash"));
-
-    btn_footer_cut.set_sensitive(false);
-    btn_footer_copy.set_sensitive(false);
-    btn_footer_paste.set_sensitive(has_paste_items);
-    btn_footer_rename.set_sensitive(false);
-    btn_footer_trash.set_sensitive(false);
-
-    footer_box.append(&btn_footer_cut);
-    footer_box.append(&btn_footer_copy);
-    footer_box.append(&btn_footer_paste);
-    footer_box.append(&btn_footer_rename);
-    footer_box.append(&btn_footer_trash);
-
-    if has_paste_items {
-        let pop_c = popover.clone();
-        let dest_dir = current_path.clone();
-        let nav = nav_callback.clone();
-        let current_p = current_path.clone();
-        let clipboard_data_c2 = clipboard_data.clone();
-        btn_footer_paste.connect_clicked(move |_| {
-            pop_c.popdown();
+    builder = builder
+        .footer_button_sensitive("cut", &t("explore.menu_cut"), false, || {})
+        .footer_button_sensitive("copy", &t("explore.menu_copy"), false, || {})
+        .footer_button_sensitive("paste", &t("explore.menu_paste"), has_paste_items, move || {
             if let Some((sources, is_cut)) = clipboard_data_c2.clone() {
                 execute_paste(
                     sources,
@@ -175,10 +147,9 @@ pub fn show_for_empty(
                     nav.clone(),
                 );
             }
-        });
-    }
+        })
+        .footer_button_sensitive("rename", &t("explore.menu_rename"), false, || {})
+        .footer_button_sensitive("trash", &t("explore.menu_trash"), false, || {});
 
-    vbox.append(&footer_container);
-
-    popover.popup();
+    builder.popup();
 }
