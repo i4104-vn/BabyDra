@@ -1,21 +1,10 @@
 //! EXIF tag metadata extraction parser.
 
+pub use crate::models::shell::exif::ExifData;
 use exif::{In, Reader, Tag};
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
-
-#[derive(Debug, Clone)]
-pub struct ExifData {
-    pub make: Option<String>,
-    pub model: Option<String>,
-    pub aperture: Option<String>,
-    pub exposure_time: Option<String>,
-    pub iso: Option<String>,
-    pub focal_length: Option<String>,
-    pub lens_model: Option<String>,
-    pub date_time: Option<String>,
-}
 
 /// Attempts to open the image file and extract camera parameters from EXIF headers.
 pub fn read_exif(path: &Path) -> Option<ExifData> {

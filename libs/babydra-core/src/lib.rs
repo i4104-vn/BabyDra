@@ -44,7 +44,7 @@ pub use services::system::power::{
     set_performance_profile_with_password, suspend,
 };
 pub use services::system::storage::DiskInfo;
-pub use services::system::volume::AudioDevice;
+pub use services::system::volume::{get_audio_backend, AudioBackendType, AudioDevice};
 pub use services::window::mru::{activate_app, get_history, get_running_apps, save_history};
 pub use services::window::tracker::spawn_switcher_tracker;
 pub use services::window::{close_window, focus_window};

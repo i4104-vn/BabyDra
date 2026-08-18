@@ -1,15 +1,6 @@
-//! Bluetooth subsystem interface querying bluetoothctl.
-
-use serde::{Deserialize, Serialize};
+pub use crate::models::settings::bluetooth::BtDevice;
 use std::collections::HashSet;
 use std::process::Command;
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct BtDevice {
-    pub mac: String,
-    pub name: String,
-    pub connected: bool,
-}
 
 /// Returns `true` when `bluetooth enabled` holds, `false` otherwise.
 pub fn is_bluetooth_enabled() -> bool {

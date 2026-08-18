@@ -1,11 +1,6 @@
 //! System resource monitor statistical helper calculations.
 
-/// Raw CPU time values used to calculate delta load values.
-#[derive(Clone, Debug)]
-pub struct CpuTime {
-    pub total: u64,
-    pub idle: u64,
-}
+pub use crate::models::shell::monitor::CpuTime;
 
 /// Reads raw CPU tick numbers from `/proc/stat`.
 pub fn get_cpu_raw() -> Option<CpuTime> {

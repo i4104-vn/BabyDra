@@ -1,14 +1,7 @@
+pub use crate::models::shell::appearance::CurrentAppearance;
 use crate::services::utils::{get_home_dir, run_cmd};
 use std::fs;
 use std::path::Path;
-
-#[derive(Debug, Clone)]
-pub struct CurrentAppearance {
-    pub gtk_theme: String,
-    pub icon_theme: String,
-    pub cursor_theme: String,
-    pub cursor_size: u32,
-}
 
 /// Returns the current `gtk themes`.
 pub fn get_gtk_themes() -> Vec<String> {

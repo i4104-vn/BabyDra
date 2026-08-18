@@ -5,18 +5,8 @@ use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use babydra_core::models::settings::nav::{NavCategory, NavItem};
 use crate::widgets;
-
-struct NavItem {
-    id: &'static str,
-    icon: &'static str,
-    i18n_key: &'static str,
-}
-
-struct NavCategory {
-    title_key: &'static str,
-    items: &'static [NavItem],
-}
 
 const NAV_CATEGORIES: &[NavCategory] = &[
     NavCategory {
