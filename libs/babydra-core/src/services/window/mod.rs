@@ -161,3 +161,19 @@ pub fn focus_window(app_id: &str, title: &str) {
         .args(&["window", "focus", app_id])
         .status();
 }
+
+/// Minimizes all open application windows to show the desktop.
+pub fn minimize_all_windows() {
+    let running = get_running_windows();
+    for (app_id, title) in running {
+        if !title.is_empty() {
+            let _ = std::process::Command::new("wlrctl")
+                .args(&["toplevel", "minimize", &format!("title:{}", title)])
+                .status();
+        } else if !app_id.is_empty() {
+            let _ = std::process::Command::new("wlrctl")
+                .args(&["toplevel", "minimize", &app_id])
+                .status();
+        }
+    }
+}

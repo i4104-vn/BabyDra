@@ -29,6 +29,7 @@ pub fn rebuild_panel_window(
     logo_btn.set_cursor_from_name(Some("pointer"));
     logo_btn.set_valign(gtk4::Align::Center);
     logo_btn.set_halign(gtk4::Align::Center);
+    logo_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("panel.logo_tooltip")));
     let logo_icon = babydra_ui_kit::ui::icon::get_icon("logo", 16);
     logo_btn.set_child(Some(&logo_icon));
 
@@ -36,7 +37,12 @@ pub fn rebuild_panel_window(
     let ccw_clone = control_center_window.clone();
     let cw_clone = calendar_window.clone();
     let app_clone = app.clone();
-    logo_btn.connect_clicked(move |_| {
+
+    let click_gesture = gtk4::GestureClick::new();
+    click_gesture.set_button(0); // Listen to both left (1) and right (3) click
+    click_gesture.connect_pressed(move |gesture, _, _, _| {
+        let button = gesture.current_button();
+
         let cc_win = { ccw_clone.borrow().clone() };
         if let Some(win) = cc_win {
             win.close();
@@ -45,17 +51,29 @@ pub fn rebuild_panel_window(
         if let Some(win) = cal_win {
             win.close();
         }
-        let existing = { lw_clone.borrow().clone() };
-        if let Some(win) = existing {
-            win.close();
-        } else {
-            let l_win = babydra_launcher::build_launcher_ui(&app_clone, lw_clone.clone());
-            l_win.present();
-            if let Ok(mut borrow) = lw_clone.try_borrow_mut() {
-                *borrow = Some(l_win);
+
+        if button == 1 {
+            // Left-click: Toggle Launcher
+            let existing = { lw_clone.borrow().clone() };
+            if let Some(win) = existing {
+                win.close();
+            } else {
+                let l_win = babydra_launcher::build_launcher_ui(&app_clone, lw_clone.clone());
+                l_win.present();
+                if let Ok(mut borrow) = lw_clone.try_borrow_mut() {
+                    *borrow = Some(l_win);
+                }
             }
+        } else if button == 3 {
+            // Right-click: Minimize all application windows to show desktop
+            let existing = { lw_clone.borrow().clone() };
+            if let Some(win) = existing {
+                win.close();
+            }
+            babydra_core::services::window::minimize_all_windows();
         }
     });
+    logo_btn.add_controller(click_gesture);
 
     // 4. Workspace Switcher
     let workspace_box = create_workspace_sw();

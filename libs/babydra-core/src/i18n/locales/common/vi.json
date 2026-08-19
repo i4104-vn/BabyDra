@@ -17,6 +17,7 @@
   "panel.system_resources": "Tài nguyên hệ thống",
   "panel.cpu_load": "Tải CPU",
   "panel.ram_usage": "Sử dụng RAM",
+  "panel.logo_tooltip": "Chuột trái: Mở Launcher\nChuột phải: Hiển thị Desktop",
   "control.network": "Mạng",
   "control.connected": "Đã kết nối",
   "control.bluetooth": "Bluetooth",

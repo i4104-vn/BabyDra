@@ -17,6 +17,7 @@
   "panel.system_resources": "System Resources",
   "panel.cpu_load": "CPU Load",
   "panel.ram_usage": "RAM Usage",
+  "panel.logo_tooltip": "Left-click: Open Launcher\nRight-click: Show Desktop",
   "control.network": "Network",
   "control.connected": "Connected",
   "control.bluetooth": "Bluetooth",
