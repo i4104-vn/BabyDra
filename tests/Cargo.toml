@@ -83,3 +83,8 @@ path = "theme/css.rs"
 name = "kits_prelude"
 path = "kits/prelude.rs"
 
+[[test]]
+name = "kits_icon"
+path = "kits/icon.rs"
+
+

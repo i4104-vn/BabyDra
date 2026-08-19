@@ -163,3 +163,11 @@ pub const DARK_RECT_SVG: &str = include_str!("../../assets/dark/rect.svg");
 pub const LIGHT_RECT_SVG: &str = include_str!("../../assets/light/rect.svg");
 pub const DARK_BLUR_SVG: &str = include_str!("../../assets/dark/blur.svg");
 pub const LIGHT_BLUR_SVG: &str = include_str!("../../assets/light/blur.svg");
+
+pub const DARK_ZOOM_IN_SVG: &str = include_str!("../../assets/dark/zoom-in.svg");
+pub const LIGHT_ZOOM_IN_SVG: &str = include_str!("../../assets/light/zoom-in.svg");
+pub const DARK_ZOOM_OUT_SVG: &str = include_str!("../../assets/dark/zoom-out.svg");
+pub const LIGHT_ZOOM_OUT_SVG: &str = include_str!("../../assets/light/zoom-out.svg");
+pub const DARK_ZOOM_FIT_SVG: &str = include_str!("../../assets/dark/zoom-fit.svg");
+pub const LIGHT_ZOOM_FIT_SVG: &str = include_str!("../../assets/light/zoom-fit.svg");
+

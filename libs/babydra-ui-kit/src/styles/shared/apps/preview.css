@@ -145,9 +145,52 @@
     transition: opacity 150ms ease;
 }
 
-.info-card {
-    border-radius: 12px;
-    padding: 12px 18px;
-    font-size: 13px;
+.controls-bar {
+    border-radius: 9999px;
+    padding: 4px 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+button.control-btn {
+    border-radius: 9999px;
+    padding: 6px;
+    min-width: 32px;
+    min-height: 32px;
+    transition: all 150ms ease;
     box-shadow: none;
 }
+
+.info-card {
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 13px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.info-item {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.exif-dialog {
+    border-radius: 16px;
+    padding: 18px 22px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+}
+
+.exif-title {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.exif-label {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.exif-value {
+    font-size: 12px;
+    font-weight: 600;
+}
+

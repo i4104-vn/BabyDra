@@ -36,6 +36,69 @@ fn format_aspect_ratio(w: u32, h: u32) -> String {
     }
 }
 
+/// Calculates the initial window size matching the image aspect ratio and screen size.
+fn calculate_initial_window_size(img_w: u32, img_h: u32) -> (i32, i32) {
+    if img_w == 0 || img_h == 0 {
+        return (800, 600);
+    }
+
+    let (screen_w, screen_h) = if let Some(display) = gtk4::gdk::Display::default() {
+        let monitors = display.monitors();
+        if let Some(monitor) = monitors
+            .item(0)
+            .and_then(|obj| obj.downcast::<gtk4::gdk::Monitor>().ok())
+        {
+            let geom = monitor.geometry();
+            (geom.width() as f64, geom.height() as f64)
+        } else {
+            (1920.0, 1080.0)
+        }
+    } else {
+        (1920.0, 1080.0)
+    };
+
+    let max_w = (screen_w * 0.85).max(600.0);
+    let max_h = (screen_h * 0.85).max(400.0);
+    let min_w = 480.0;
+    let min_h = 360.0;
+
+    let img_w = img_w as f64;
+    let img_h = img_h as f64;
+    let aspect = img_w / img_h;
+
+    let mut w = img_w;
+    let mut h = img_h;
+
+    if w > max_w {
+        w = max_w;
+        h = w / aspect;
+    }
+    if h > max_h {
+        h = max_h;
+        w = h * aspect;
+    }
+
+    if w < min_w {
+        w = min_w;
+        h = w / aspect;
+    }
+    if h < min_h {
+        h = min_h;
+        w = h * aspect;
+    }
+
+    if w > max_w {
+        w = max_w;
+        h = w / aspect;
+    }
+    if h > max_h {
+        h = max_h;
+        w = h * aspect;
+    }
+
+    (w.round().max(300.0) as i32, h.round().max(200.0) as i32)
+}
+
 /// Builds the full viewer window UI (image canvas, info card, zoom bar, EXIF box).
 pub fn build_viewer_ui(
     app: &gtk4::Application,
@@ -49,7 +112,9 @@ pub fn build_viewer_ui(
         &path.file_name().unwrap_or_default().to_string_lossy(),
     )));
     window.set_icon_name(Some("babydra-preview"));
-    window.set_default_size(800, 600);
+
+    let (win_w, win_h) = calculate_initial_window_size(img_w, img_h);
+    window.set_default_size(win_w, win_h);
     window.add_css_class("viewer-window");
 
     let overlay = gtk4::Overlay::new();
@@ -107,27 +172,33 @@ pub fn build_viewer_ui(
     controls_box.set_valign(gtk4::Align::End);
     controls_box.set_margin_bottom(20);
 
-    let zoom_out_btn = gtk4::Button::builder()
-        .child(&babydra_ui_kit::ui::icon::get_icon("zoom-out-symbolic", 16))
-        .build();
-    zoom_out_btn.add_css_class("control-btn");
+    let zoom_out_btn = babydra_ui_kit::components::create_icon_button(
+        "zoom-out",
+        16,
+        &["control-btn"],
+        None,
+        || {},
+    );
     zoom_out_btn.set_cursor_from_name(Some("pointer"));
     controls_box.append(&zoom_out_btn);
 
-    let reset_btn = gtk4::Button::builder()
-        .child(&babydra_ui_kit::ui::icon::get_icon(
-            "zoom-original-symbolic",
-            16,
-        ))
-        .build();
-    reset_btn.add_css_class("control-btn");
+    let reset_btn = babydra_ui_kit::components::create_icon_button(
+        "zoom-fit",
+        16,
+        &["control-btn"],
+        None,
+        || {},
+    );
     reset_btn.set_cursor_from_name(Some("pointer"));
     controls_box.append(&reset_btn);
 
-    let zoom_in_btn = gtk4::Button::builder()
-        .child(&babydra_ui_kit::ui::icon::get_icon("zoom-in-symbolic", 16))
-        .build();
-    zoom_in_btn.add_css_class("control-btn");
+    let zoom_in_btn = babydra_ui_kit::components::create_icon_button(
+        "zoom-in",
+        16,
+        &["control-btn"],
+        None,
+        || {},
+    );
     zoom_in_btn.set_cursor_from_name(Some("pointer"));
     controls_box.append(&zoom_in_btn);
 

@@ -1178,8 +1178,52 @@ button.screenshot-toolbar-btn.selected, button.screenshot-toolbar-btn.selected i
 }
 
 .info-card {
-    background-color: rgba(255, 255, 255, 0.98);
+    background-color: rgba(255, 255, 255, 0.92);
     border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+    color: #1c1c1e;
+}
+
+.controls-bar {
+    background-color: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+}
+
+button.control-btn {
+    background-color: transparent;
+    border: none;
+    color: rgba(0, 0, 0, 0.85);
+}
+
+button.control-btn:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    color: #000000;
+}
+
+button.control-btn:active {
+    background-color: rgba(0, 0, 0, 0.14);
+}
+
+.info-item {
+    color: rgba(0, 0, 0, 0.85);
+}
+
+.exif-dialog {
+    background-color: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
+}
+
+.exif-title {
+    color: #1c1c1e;
+}
+
+.exif-label {
+    color: rgba(0, 0, 0, 0.60);
+}
+
+.exif-value {
     color: #1c1c1e;
 }
 
