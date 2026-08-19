@@ -2,8 +2,8 @@ use babydra_core::i18n::trans;
 use babydra_core::services::apps::DesktopApp;
 use gtk4::prelude::*;
 use gtk4::{
-    Align, Box, Button, CheckButton, Label, ListBox, ListBoxRow, Orientation, ScrolledWindow,
-    SearchEntry, Window,
+    Align, Box, CheckButton, Label, ListBox, ListBoxRow, Orientation, ScrolledWindow, SearchEntry,
+    Window,
 };
 use std::path::Path;
 
@@ -12,8 +12,6 @@ pub struct OpenWithDialogWidgets {
     pub search_entry: SearchEntry,
     pub listbox: ListBox,
     pub check_always: CheckButton,
-    pub btn_cancel: Button,
-    pub btn_open: Button,
     pub apps: Vec<DesktopApp>,
 }
 
@@ -28,7 +26,7 @@ pub fn build_open_with_dialog(
         .modal(true)
         .resizable(false)
         .default_width(420)
-        .default_height(520)
+        .default_height(480)
         .css_classes(vec![
             "explore-dialog".to_string(),
             "open-with-dialog".to_string(),
@@ -159,29 +157,11 @@ pub fn build_open_with_dialog(
     check_always.set_active(false);
     vbox.append(&check_always);
 
-    // Bottom action buttons
-    let bbox = Box::new(Orientation::Horizontal, 8);
-    bbox.set_halign(Align::End);
-    bbox.set_margin_top(4);
-    vbox.append(&bbox);
-
-    let btn_cancel = Button::with_label(&trans("explore.settings_cancel"));
-    let btn_open = Button::builder()
-        .label(trans("explore.menu_open"))
-        .css_classes(vec!["suggested-action".to_string()])
-        .sensitive(false)
-        .build();
-
-    bbox.append(&btn_cancel);
-    bbox.append(&btn_open);
-
     OpenWithDialogWidgets {
         window,
         search_entry,
         listbox,
         check_always,
-        btn_cancel,
-        btn_open,
         apps,
     }
 }

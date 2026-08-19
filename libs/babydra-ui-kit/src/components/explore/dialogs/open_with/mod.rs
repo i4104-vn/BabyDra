@@ -64,15 +64,20 @@ pub fn show_open_with_dialog(path: &Path, parent: Option<&impl IsA<gtk4::Window>
     let search_entry = widgets.search_entry;
     let listbox = widgets.listbox;
     let check_always = widgets.check_always;
-    let btn_cancel = widgets.btn_cancel;
-    let btn_open = widgets.btn_open;
     let apps = Rc::new(widgets.apps);
 
-    // Cancel button
-    let win_cancel = window.clone();
-    btn_cancel.connect_clicked(move |_| {
-        win_cancel.close();
+    // Escape key to close
+    let key_controller = gtk4::EventControllerKey::new();
+    let win_esc = window.clone();
+    key_controller.connect_key_pressed(move |_, key, _, _| {
+        if key == gtk4::gdk::Key::Escape {
+            win_esc.close();
+            glib::Propagation::Stop
+        } else {
+            glib::Propagation::Proceed
+        }
     });
+    window.add_controller(key_controller);
 
     // Real-time search filter
     let apps_filter = apps.clone();
@@ -96,45 +101,47 @@ pub fn show_open_with_dialog(path: &Path, parent: Option<&impl IsA<gtk4::Window>
         lb_search.invalidate_filter();
     });
 
-    // Enable Open button on selection
-    let btn_open_sel = btn_open.clone();
-    listbox.connect_row_selected(move |_, row| {
-        btn_open_sel.set_sensitive(row.is_some());
+    // Clicking / activating an app in the list immediately opens it
+    let window_c = window.clone();
+    let path_buf = path.to_path_buf();
+    let apps_c = apps.clone();
+    let check_always_c = check_always.clone();
+
+    listbox.connect_row_activated(move |_, row| {
+        let idx = row.index() as usize;
+        if let Some(app) = apps_c.get(idx) {
+            if check_always_c.is_active() {
+                set_default_app_for_file(app, &path_buf);
+            }
+            launch_app_with_file(app, &path_buf);
+            window_c.close();
+        }
     });
 
-    // Open action handler
-    let path_buf = path.to_path_buf();
-    let perform_open = {
-        let window = window.clone();
-        let path = path_buf;
-        let apps = apps.clone();
-        let check_always = check_always.clone();
-        let listbox = listbox.clone();
-        move || {
-            if let Some(row) = listbox.selected_row() {
-                let idx = row.index() as usize;
-                if let Some(app) = apps.get(idx) {
-                    if check_always.is_active() {
-                        set_default_app_for_file(app, &path);
+    // Enter in search bar activates first visible matching row
+    let listbox_c = listbox.clone();
+    let window_enter = window.clone();
+    let path_enter = path.to_path_buf();
+    let apps_enter = apps.clone();
+    let check_always_enter = check_always.clone();
+    search_entry.connect_activate(move |_| {
+        let mut row_opt = listbox_c.first_child();
+        while let Some(widget) = row_opt {
+            if let Ok(row) = widget.clone().downcast::<gtk4::ListBoxRow>() {
+                if row.is_child_visible() {
+                    let idx = row.index() as usize;
+                    if let Some(app) = apps_enter.get(idx) {
+                        if check_always_enter.is_active() {
+                            set_default_app_for_file(app, &path_enter);
+                        }
+                        launch_app_with_file(app, &path_enter);
+                        window_enter.close();
+                        break;
                     }
-                    launch_app_with_file(app, &path);
-                    window.close();
                 }
             }
+            row_opt = widget.next_sibling();
         }
-    };
-
-    let perform_open_rc = Rc::new(perform_open);
-
-    let po_btn = perform_open_rc.clone();
-    btn_open.connect_clicked(move |_| {
-        po_btn();
-    });
-
-    // Double click / Enter on row immediately opens
-    let po_row = perform_open_rc.clone();
-    listbox.connect_row_activated(move |_, _| {
-        po_row();
     });
 
     window.present();
