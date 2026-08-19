@@ -3,7 +3,7 @@ use babydra_core::FileEntry;
 use gtk4::prelude::*;
 use gtk4::{Align, Label};
 
-use crate::widgets::content_view::items::grid_item::create_flow_child;
+use crate::widgets::content_view::grid_item::create_flow_child;
 
 /// Renders entries as a flat icon grid (no grouping headers).
 pub async fn render_flat_grid(

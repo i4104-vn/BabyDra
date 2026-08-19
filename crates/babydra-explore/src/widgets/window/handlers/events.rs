@@ -5,82 +5,7 @@ use std::cell::{Cell, RefCell};
 use std::path::PathBuf;
 use std::rc::Rc;
 
-pub struct KeyShortcut {
-    pub keyval: gtk4::gdk::Key,
-    pub modifiers: gtk4::gdk::ModifierType,
-    pub callback: Rc<dyn Fn()>,
-}
-
-/// Parse shortcut.
-pub fn parse_shortcut(shortcut_str: &str) -> Option<(gtk4::gdk::Key, gtk4::gdk::ModifierType)> {
-    let parts: Vec<&str> = shortcut_str.split('+').map(|s| s.trim()).collect();
-    let mut modifiers = gtk4::gdk::ModifierType::empty();
-    let mut key = None;
-
-    for part in parts {
-        let part_lower = part.to_lowercase();
-        if part_lower == "ctrl" || part_lower == "control" {
-            modifiers |= gtk4::gdk::ModifierType::CONTROL_MASK;
-        } else if part_lower == "shift" {
-            modifiers |= gtk4::gdk::ModifierType::SHIFT_MASK;
-        } else if part_lower == "alt" {
-            modifiers |= gtk4::gdk::ModifierType::ALT_MASK;
-        } else {
-            let k = match part_lower.as_str() {
-                "f1" => Some(gtk4::gdk::Key::F1),
-                "f2" => Some(gtk4::gdk::Key::F2),
-                "f3" => Some(gtk4::gdk::Key::F3),
-                "f4" => Some(gtk4::gdk::Key::F4),
-                "f5" => Some(gtk4::gdk::Key::F5),
-                "f6" => Some(gtk4::gdk::Key::F6),
-                "f7" => Some(gtk4::gdk::Key::F7),
-                "f8" => Some(gtk4::gdk::Key::F8),
-                "f9" => Some(gtk4::gdk::Key::F9),
-                "f10" => Some(gtk4::gdk::Key::F10),
-                "f11" => Some(gtk4::gdk::Key::F11),
-                "f12" => Some(gtk4::gdk::Key::F12),
-                "enter" => Some(gtk4::gdk::Key::Return),
-                "space" => Some(gtk4::gdk::Key::space),
-                "escape" | "esc" => Some(gtk4::gdk::Key::Escape),
-                "delete" | "del" => Some(gtk4::gdk::Key::Delete),
-                "backspace" => Some(gtk4::gdk::Key::BackSpace),
-                s if s.len() == 1 => {
-                    let c = s.chars().next().unwrap();
-                    gtk4::gdk::Key::from_name(&c.to_string())
-                }
-                s => gtk4::gdk::Key::from_name(s),
-            };
-            if let Some(keyval) = k {
-                key = Some(keyval);
-            }
-        }
-    }
-
-    key.map(|k| (k, modifiers))
-}
-
-/// Registers keyboard shortcut events.
-pub fn setup_key_shortcuts(
-    window: &gtk4::ApplicationWindow,
-    shortcuts: Vec<KeyShortcut>,
-) -> gtk4::EventControllerKey {
-    let key_controller = gtk4::EventControllerKey::new();
-    key_controller.connect_key_pressed(move |_, keyval, _, state| {
-        let clean_state = state
-            & (gtk4::gdk::ModifierType::CONTROL_MASK
-                | gtk4::gdk::ModifierType::SHIFT_MASK
-                | gtk4::gdk::ModifierType::ALT_MASK);
-        for shortcut in &shortcuts {
-            if shortcut.keyval == keyval && shortcut.modifiers == clean_state {
-                (shortcut.callback)();
-                return glib::Propagation::Stop;
-            }
-        }
-        glib::Propagation::Proceed
-    });
-    window.add_controller(key_controller.clone());
-    key_controller
-}
+use super::shortcuts::{parse_shortcut, setup_key_shortcuts, KeyShortcut};
 
 /// Automatically hides or shows the preview panel depending on window width changes.
 pub fn setup_resize_handler(
@@ -132,10 +57,8 @@ pub fn setup_file_watcher(
     glib::MainContext::default().spawn_local(async move {
         let pending_timer = Rc::new(RefCell::new(None::<glib::SourceId>));
         while let Some(_) = watch_rx.recv().await {
-            // Drain all queued events
             while watch_rx.try_recv().is_ok() {}
 
-            // Cancel any previously scheduled refresh timer
             if let Some(source_id) = pending_timer.borrow_mut().take() {
                 source_id.remove();
             }
@@ -145,7 +68,6 @@ pub fn setup_file_watcher(
             let timer_ref = pending_timer.clone();
             let session_c = session.clone();
 
-            // Schedule quiet background refresh after 350ms of quiet time
             let source_id =
                 glib::timeout_add_local_once(std::time::Duration::from_millis(350), move || {
                     timer_ref.borrow_mut().take();
@@ -231,7 +153,6 @@ pub fn setup_status_wiring(
             toggle_p();
         });
 
-        // View modes (Grid / List)
         let cb1 = view_mode_callback_rc.clone();
         sw.btn_view_icons.connect_clicked(move |_| {
             cb1("icons".to_string());
@@ -241,7 +162,6 @@ pub fn setup_status_wiring(
             cb2("list".to_string());
         });
 
-        // Sort Dropdown
         let sort_cb = sort_callback_rc.clone();
         sw.dropdown_sort.connect_selected_notify(move |dd| {
             let selected = dd.selected();
@@ -254,7 +174,6 @@ pub fn setup_status_wiring(
             sort_cb(mode);
         });
 
-        // Settings button
         let parent_win_c = parent_win.clone();
         let rebuild_c = rebuild_shortcuts_cell.clone();
         let session_inner = session.clone();
@@ -307,7 +226,7 @@ pub fn setup_status_wiring(
     }
 }
 
-/// Connects global application key shortcuts and rebuild callback.
+/// Connects global application key shortcuts and returns a rebuild callback.
 pub fn setup_shortcuts(
     window: &gtk4::ApplicationWindow,
     toggle_split_view_rc: Rc<dyn Fn()>,

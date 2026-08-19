@@ -155,7 +155,6 @@ pub fn create_explore_win(
             let active = active_pane_for_header.get();
             f(active, path);
 
-            // If split view is open, refresh the other pane too to keep listings in sync
             if let Some(ref right) = *right_handle_for_nav.borrow() {
                 let other_pane = if active == ActivePane::Left {
                     ActivePane::Right
@@ -269,115 +268,14 @@ pub fn create_explore_win(
         left_content_handle.clone(),
     );
 
-    // Define clipboard and undo callbacks
-    let cut_cb = {
-        let left = left_content_handle.clone();
-        let right = right_content_handle.clone();
-        let act = active_pane.clone();
-        let session = session.clone();
-        let nav = navigate_pane_ref.clone();
-        move || {
-            let paths = if act.get() == ActivePane::Left {
-                left.selected_paths.borrow().clone()
-            } else {
-                right
-                    .borrow()
-                    .as_ref()
-                    .map(|r| r.selected_paths.borrow().clone())
-                    .unwrap_or_default()
-            };
-            if !paths.is_empty() {
-                let current_path = session.borrow().active_tab().current_path.clone();
-                babydra_ui_kit::components::explore::context_menu::clipboard::set_clipboard_files(
-                    &paths, true,
-                );
-                babydra_ui_kit::components::explore::CLIPBOARD
-                    .with(|cb| cb.replace(Some((paths, true))));
-                if let Some(ref f) = *nav.borrow() {
-                    f(act.get(), current_path);
-                }
-            }
-        }
-    };
-    let cut_cb_rc = Rc::new(cut_cb) as Rc<dyn Fn()>;
-
-    let copy_cb = {
-        let left = left_content_handle.clone();
-        let right = right_content_handle.clone();
-        let act = active_pane.clone();
-        let session = session.clone();
-        let nav = navigate_pane_ref.clone();
-        move || {
-            let paths = if act.get() == ActivePane::Left {
-                left.selected_paths.borrow().clone()
-            } else {
-                right
-                    .borrow()
-                    .as_ref()
-                    .map(|r| r.selected_paths.borrow().clone())
-                    .unwrap_or_default()
-            };
-            if !paths.is_empty() {
-                let current_path = session.borrow().active_tab().current_path.clone();
-                babydra_ui_kit::components::explore::context_menu::clipboard::set_clipboard_files(
-                    &paths, false,
-                );
-                babydra_ui_kit::components::explore::CLIPBOARD
-                    .with(|cb| cb.replace(Some((paths, false))));
-                if let Some(ref f) = *nav.borrow() {
-                    f(act.get(), current_path);
-                }
-            }
-        }
-    };
-    let copy_cb_rc = Rc::new(copy_cb) as Rc<dyn Fn()>;
-
-    let paste_cb = {
-        let session = session.clone();
-        let act = active_pane.clone();
-        let nav = navigate_pane_ref.clone();
-        move || {
-            let current_path = session.borrow().active_tab().current_path.clone();
-            let nav_cb = {
-                let nav = nav.clone();
-                let act = act.clone();
-                Rc::new(move |p| {
-                    if let Some(ref f) = *nav.borrow() {
-                        f(act.get(), p);
-                    }
-                }) as Rc<dyn Fn(PathBuf)>
-            };
-            babydra_ui_kit::components::explore::context_menu::clipboard::paste_from_clipboard(
-                current_path.clone(),
-                current_path,
-                nav_cb,
-            );
-        }
-    };
-    let paste_cb_rc = Rc::new(paste_cb) as Rc<dyn Fn()>;
-
-    let undo_cb = {
-        let session = session.clone();
-        let act = active_pane.clone();
-        let nav = navigate_pane_ref.clone();
-        move || {
-            let current_path = session.borrow().active_tab().current_path.clone();
-            let nav_cb = {
-                let nav = nav.clone();
-                let act = act.clone();
-                Rc::new(move |p| {
-                    if let Some(ref f) = *nav.borrow() {
-                        f(act.get(), p);
-                    }
-                }) as Rc<dyn Fn(PathBuf)>
-            };
-            babydra_ui_kit::components::explore::context_menu::clipboard::execute_undo(
-                nav_cb,
-                current_path,
-            );
-        }
-    };
-    let undo_cb_rc = Rc::new(undo_cb) as Rc<dyn Fn()>;
+    // Clipboard and undo callbacks
+    let clip_cbs = handlers::create_clipboard_callbacks(
+        left_content_handle.clone(),
+        right_content_handle.clone(),
+        active_pane.clone(),
+        session.clone(),
+        navigate_pane_ref.clone(),
+    );
 
     // Install keyboard shortcuts
     handlers::events::setup_shortcuts(
@@ -385,10 +283,10 @@ pub fn create_explore_win(
         toggle_split_view_rc.clone(),
         toggle_preview_rc.clone(),
         toggle_hidden_rc.clone(),
-        cut_cb_rc.clone(),
-        copy_cb_rc.clone(),
-        paste_cb_rc.clone(),
-        undo_cb_rc.clone(),
+        clip_cbs.cut,
+        clip_cbs.copy,
+        clip_cbs.paste,
+        clip_cbs.undo,
         rebuild_shortcuts_cell.clone(),
     );
 

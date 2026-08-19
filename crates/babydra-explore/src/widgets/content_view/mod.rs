@@ -8,8 +8,8 @@ use std::rc::Rc;
 
 mod actions;
 mod gestures;
+mod grid_item;
 mod grid_renderer;
-pub mod items;
 mod list_renderer;
 mod render;
 
