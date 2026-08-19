@@ -2,7 +2,7 @@
 
 mod widgets;
 
-use babydra_core::{capture_screen, capture_fullscreen};
+use babydra_core::{capture_fullscreen, capture_screen};
 use gtk4::prelude::*;
 use gtk4::Application;
 use std::env;

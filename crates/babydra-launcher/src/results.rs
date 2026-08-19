@@ -158,8 +158,9 @@ pub fn repopulate_results(
             match receiver.try_recv() {
                 Ok(matched_files) => {
                     if !matched_files.is_empty() {
-                        let files_title =
-                            gtk4::Label::new(Some(&babydra_core::i18n::trans("launcher.files_dirs")));
+                        let files_title = gtk4::Label::new(Some(&babydra_core::i18n::trans(
+                            "launcher.files_dirs",
+                        )));
                         files_title.add_css_class("launcher-section-title");
                         files_title.set_halign(gtk4::Align::Start);
                         files_container.append(&files_title);

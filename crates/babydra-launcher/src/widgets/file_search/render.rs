@@ -42,8 +42,7 @@ pub fn build_file_row_ui(path: &Path) -> (gtk4::Button, gtk4::Box, gtk4::Label) 
     icon_wrapper.set_halign(gtk4::Align::Center);
     icon_wrapper.set_valign(gtk4::Align::Center);
 
-    let icon_widget =
-        babydra_ui_kit::ui::icon::get_fallback_icon(&icon_name, "text-x-generic");
+    let icon_widget = babydra_ui_kit::ui::icon::get_fallback_icon(&icon_name, "text-x-generic");
     icon_widget.set_pixel_size(24);
     icon_widget.set_halign(gtk4::Align::Center);
     icon_widget.set_valign(gtk4::Align::Center);

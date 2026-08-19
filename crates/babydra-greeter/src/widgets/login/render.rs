@@ -5,8 +5,8 @@ use gtk4::{
     Align, Box as GtkBox, Button, DropDown, Image, Label, Orientation, PasswordEntry, Spinner,
 };
 
-use crate::widgets::LAST_USER_FILE;
 use crate::widgets::login::get_system_users;
+use crate::widgets::LAST_USER_FILE;
 
 /// Builds the login panel with avatar, username dropdown, password entry, and submit button.
 pub fn build() -> super::LoginWidget {

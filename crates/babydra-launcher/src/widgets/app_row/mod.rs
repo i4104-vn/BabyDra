@@ -86,12 +86,7 @@ pub fn pin_app_to_desktop(app: &DesktopApp) {
         None
     }
     .or_else(|| {
-        let exec_bin = app
-            .exec
-            .split_whitespace()
-            .next()?
-            .split('/')
-            .last()?;
+        let exec_bin = app.exec.split_whitespace().next()?.split('/').last()?;
         let sys_path = PathBuf::from(format!("/usr/share/applications/{}.desktop", exec_bin));
         if sys_path.exists() {
             Some(sys_path)
@@ -177,12 +172,7 @@ fn attach_app_drag_source(btn: &gtk4::Button, app: &DesktopApp, window: &gtk4::A
         };
 
         let final_path = file_path.or_else(|| {
-            let exec_bin = app_c
-                .exec
-                .split_whitespace()
-                .next()?
-                .split('/')
-                .last()?;
+            let exec_bin = app_c.exec.split_whitespace().next()?.split('/').last()?;
             let sys_path = PathBuf::from(format!("/usr/share/applications/{}.desktop", exec_bin));
             if sys_path.exists() {
                 Some(sys_path)

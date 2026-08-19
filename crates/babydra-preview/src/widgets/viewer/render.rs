@@ -59,11 +59,8 @@ pub fn build_viewer_ui(
     overlay.set_child(Some(&drawing_area));
 
     // --- Bottom-Right Info Box Overlay ---
-    let info_box = babydra_ui_kit::components::create_css_card(
-        gtk4::Orientation::Vertical,
-        4,
-        "info-card",
-    );
+    let info_box =
+        babydra_ui_kit::components::create_css_card(gtk4::Orientation::Vertical, 4, "info-card");
     info_box.set_halign(gtk4::Align::End);
     info_box.set_valign(gtk4::Align::End);
     info_box.set_margin_end(20);

@@ -47,19 +47,15 @@ pub fn build_clock_labels() -> (gtk4::Label, gtk4::Label) {
 }
 
 /// Builds the primary auth card: clock, avatar, username, password entry and status label.
-pub fn build_primary_card(
-) -> (
+pub fn build_primary_card() -> (
     gtk4::Box,
     gtk4::Entry,
     gtk4::Label,
     gtk4::Label,
     gtk4::Label,
 ) {
-    let card_box = babydra_ui_kit::components::create_css_card(
-        gtk4::Orientation::Vertical,
-        10,
-        "lock-card",
-    );
+    let card_box =
+        babydra_ui_kit::components::create_css_card(gtk4::Orientation::Vertical, 10, "lock-card");
     card_box.set_valign(gtk4::Align::Center);
     card_box.set_halign(gtk4::Align::Center);
 
@@ -75,8 +71,7 @@ pub fn build_primary_card(
             img.set_valign(gtk4::Align::Center);
             img.upcast()
         } else {
-            let icon =
-                babydra_ui_kit::ui::icon::get_fallback_icon("user-info", "user-info");
+            let icon = babydra_ui_kit::ui::icon::get_fallback_icon("user-info", "user-info");
             icon.set_pixel_size(110);
             icon.add_css_class("lock-avatar-fallback");
             icon.set_halign(gtk4::Align::Center);

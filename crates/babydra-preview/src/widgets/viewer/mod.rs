@@ -242,7 +242,11 @@ pub fn build_ui(app: &gtk4::Application, path: PathBuf) {
             }
             Some("0") => {
                 let mut state_ref = state_key.borrow_mut();
-                fit_to_screen(&mut state_ref, area_key.width() as f64, area_key.height() as f64);
+                fit_to_screen(
+                    &mut state_ref,
+                    area_key.width() as f64,
+                    area_key.height() as f64,
+                );
                 update_zoom_display(&state_ref, &lbl_key);
                 area_key.queue_draw();
             }

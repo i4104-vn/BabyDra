@@ -104,7 +104,9 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
     let btn_eraser = gtk4::Button::builder()
         .child(&babydra_ui_kit::ui::icon::get_icon("broom", 16))
         .build();
-    btn_eraser.set_tooltip_text(Some(&babydra_core::i18n::trans("screenshot.eraser_tooltip")));
+    btn_eraser.set_tooltip_text(Some(&babydra_core::i18n::trans(
+        "screenshot.eraser_tooltip",
+    )));
     btn_eraser.add_css_class("flat");
     btn_eraser.add_css_class("screenshot-toolbar-btn");
 
@@ -215,7 +217,9 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
     let btn_cancel = gtk4::Button::builder()
         .child(&babydra_ui_kit::ui::icon::get_icon("close", 16))
         .build();
-    btn_cancel.set_tooltip_text(Some(&babydra_core::i18n::trans("screenshot.cancel_tooltip")));
+    btn_cancel.set_tooltip_text(Some(&babydra_core::i18n::trans(
+        "screenshot.cancel_tooltip",
+    )));
     btn_cancel.add_css_class("flat");
     btn_cancel.add_css_class("screenshot-toolbar-btn");
 
