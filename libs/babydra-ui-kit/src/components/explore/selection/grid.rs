@@ -18,7 +18,6 @@ pub fn wire_rubberband_grid(
     let start_pos_c = start_pos.clone();
     let drag_select_active = Rc::new(RefCell::new(false));
 
-    let rb_begin = grid_rubberband.clone();
     let drag_select_active_begin = drag_select_active.clone();
     let gf_parent = grid_fixed.parent().map(|p| p.clone());
     drag_gesture.connect_drag_begin(move |gesture, x, y| {
