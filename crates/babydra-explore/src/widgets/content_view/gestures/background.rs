@@ -49,9 +49,7 @@ pub fn wire_bg_controllers(
 
     // 3. Drop target to background
     {
-        let drop_target = babydra_ui_kit::components::explore::create_bg_drop(
-            current_path.clone(),
-        );
+        let drop_target = babydra_ui_kit::components::explore::create_bg_drop(current_path.clone());
         widgets.container.add_controller(drop_target);
     }
 }

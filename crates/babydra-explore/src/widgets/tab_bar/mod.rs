@@ -200,7 +200,8 @@ pub fn setup_tab_bar(
                 let on_cre: Rc<dyn Fn()> = Rc::new(on_tab_created);
                 *rebuild_tabs_c.borrow_mut() = Some(std::boxed::Box::new(move || {
                     rebuild_tab_bar(&tbb_c, &sess_c, &on_act, &on_cls, &on_cre);
-                }) as std::boxed::Box<dyn Fn()>);
+                })
+                    as std::boxed::Box<dyn Fn()>);
 
                 let borrow = rebuild_tabs_c.borrow();
                 if let Some(ref reb) = *borrow {

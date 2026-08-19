@@ -94,10 +94,8 @@ pub fn update_info_panel(widgets: &InfoPanelWidgets, selection: &[FileEntry]) {
         let path = entry.path.clone();
         let lbl_size = widgets.lbl_size.clone();
         glib::spawn_future_local(async move {
-            let size_res = tokio::task::spawn_blocking(move || {
-                babydra_core::calc_dir_size(&path)
-            })
-            .await;
+            let size_res =
+                tokio::task::spawn_blocking(move || babydra_core::calc_dir_size(&path)).await;
             let size = size_res.unwrap_or(0);
             let size_str = explore::format_size(size);
             lbl_size.set_text(&size_str);

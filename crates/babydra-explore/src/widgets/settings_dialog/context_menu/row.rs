@@ -187,7 +187,8 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
     vbox_buttons.set_valign(Align::Start);
     hbox_edit.append(&vbox_buttons);
 
-    let btn_save = babydra_ui_kit::components::create_accent_button(&trans("explore.settings_save"));
+    let btn_save =
+        babydra_ui_kit::components::create_accent_button(&trans("explore.settings_save"));
     btn_save.add_css_class("small-btn");
     btn_save.set_cursor_from_name(Some("pointer"));
     let btn_cancel = babydra_ui_kit::components::create_button(&trans("explore.settings_cancel"));

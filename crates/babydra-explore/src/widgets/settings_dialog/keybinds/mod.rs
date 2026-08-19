@@ -97,8 +97,16 @@ pub fn build_keybinds_page(
     };
 
     add_keybind_row("display", "toggle_split", &trans("explore.shortcut_split"));
-    add_keybind_row("sidebar", "toggle_preview", &trans("explore.shortcut_preview"));
-    add_keybind_row("eye-off", "toggle_hidden", &trans("explore.shortcut_hidden"));
+    add_keybind_row(
+        "sidebar",
+        "toggle_preview",
+        &trans("explore.shortcut_preview"),
+    );
+    add_keybind_row(
+        "eye-off",
+        "toggle_hidden",
+        &trans("explore.shortcut_hidden"),
+    );
     add_keybind_row("copy", "copy", &trans("explore.shortcut_copy"));
     add_keybind_row("cut", "cut", &trans("explore.shortcut_cut"));
     add_keybind_row("paste", "paste", &trans("explore.shortcut_paste"));

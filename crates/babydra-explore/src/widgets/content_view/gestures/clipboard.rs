@@ -15,9 +15,7 @@ pub fn handle_cut(paths: Vec<PathBuf>, current_path: PathBuf, _nav_cb: Rc<dyn Fn
         babydra_ui_kit::components::explore::context_menu::clipboard::set_clipboard_files(
             &paths, true,
         );
-        babydra_ui_kit::components::explore::context_menu::clipboard::apply_cut_everywhere(
-            &paths,
-        );
+        babydra_ui_kit::components::explore::context_menu::clipboard::apply_cut_everywhere(&paths);
     }
 }
 

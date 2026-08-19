@@ -44,7 +44,9 @@ pub fn show_file_preview(widgets: &PreviewPanelWidgets, path: &Path) {
             widgets.lbl_content.set_markup(&escaped);
         }
     } else {
-        widgets.lbl_content.set_text(&trans("explore.preview_failed"));
+        widgets
+            .lbl_content
+            .set_text(&trans("explore.preview_failed"));
     }
 
     // Setup unbounded channel for thread-safe UI updates

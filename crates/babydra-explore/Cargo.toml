@@ -21,4 +21,5 @@ gdk-pixbuf = { workspace = true }
 pulldown-cmark = "0.11"
 rayon = "1.10"
 chrono = { workspace = true }
+uuid = { version = "1.24.1", features = ["v4"] }
 

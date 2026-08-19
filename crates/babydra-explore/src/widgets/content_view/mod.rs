@@ -14,10 +14,9 @@ mod list_renderer;
 mod render;
 
 pub use actions::{
-    filter_content_view, set_view_mode, set_view_sort, update_content_view,
-    update_content_quiet,
+    filter_content_view, set_view_mode, set_view_sort, update_content_quiet, update_content_view,
 };
-pub use render::{update_content_ui, render_silent};
+pub use render::{render_silent, update_content_ui};
 
 /// Creates the content view area widgets and returns the scroll container and ContentViewHandle state handle.
 pub fn create_content_view(

@@ -18,6 +18,7 @@ pub fn setup_navigation(
     _tab_bar_box: Rc<RefCell<Option<gtk4::Box>>>,
     status_bar_lbl: Rc<gtk4::Label>,
     rebuild_tabs_cell: Rc<RefCell<Option<Rc<dyn Fn()>>>>,
+    focus_item_cell: Rc<RefCell<Option<PathBuf>>>,
     watch_tx: tokio::sync::mpsc::UnboundedSender<()>,
     mut left_rx: tokio::sync::mpsc::UnboundedReceiver<PathBuf>,
 ) -> (
@@ -95,6 +96,7 @@ pub fn setup_navigation(
                 let rebuild_tabs_cell_c2 = rebuild_tabs_cell_c.clone();
                 let status_lbl_c = status_bar_lbl.clone();
                 let content_handle_err = content_handle.clone();
+                let focus_item_cell_c = focus_item_cell.clone();
 
                 glib::spawn_future_local(async move {
                     match babydra_core::load_directory(path.clone(), show_hidden).await {
@@ -118,6 +120,12 @@ pub fn setup_navigation(
                             let total_size: u64 = entries.iter().map(|e| e.size).sum();
 
                             if let Some(ref handle) = content_handle {
+                                if let Some(focus_path) = focus_item_cell_c.borrow_mut().take() {
+                                    *handle.selected_paths.borrow_mut() = vec![focus_path.clone()];
+                                } else {
+                                    handle.selected_paths.borrow_mut().clear();
+                                }
+
                                 crate::widgets::content_view::update_content_view(
                                     handle, &entries, path,
                                 );

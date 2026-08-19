@@ -13,6 +13,7 @@ mod render;
 pub fn create_explore_win(
     app: &gtk4::Application,
     session: Rc<RefCell<SessionState>>,
+    focus_item: Option<PathBuf>,
 ) -> ApplicationWindow {
     let settings = babydra_core::load_explore_cfg();
 
@@ -112,6 +113,7 @@ pub fn create_explore_win(
         tab_bar_box.clone(),
         status_bar_lbl_rc.clone(),
         rebuild_tabs_cell.clone(),
+        Rc::new(RefCell::new(focus_item)),
         watch_tx.clone(),
         left_rx,
     );
