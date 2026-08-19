@@ -16,6 +16,7 @@ pub fn build_alert_dialog(
 ) -> AlertDialogWidgets {
     let window = Window::builder()
         .title(title)
+        .icon_name("babydra")
         .modal(true)
         .resizable(false)
         .default_width(340)

@@ -17,6 +17,7 @@ pub fn build_conflict(
     let title = trans("explore.dialog_conflict_title");
     let window = Window::builder()
         .title(&title)
+        .icon_name("babydra")
         .modal(true)
         .resizable(false)
         .default_width(380)

@@ -48,6 +48,7 @@ pub fn build_viewer_ui(
         "{}",
         &path.file_name().unwrap_or_default().to_string_lossy(),
     )));
+    window.set_icon_name(Some("babydra-preview"));
     window.set_default_size(800, 600);
     window.add_css_class("viewer-window");
 

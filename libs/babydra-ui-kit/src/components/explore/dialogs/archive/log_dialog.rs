@@ -21,6 +21,7 @@ pub fn show_compress_log(
 ) {
     let window = Window::builder()
         .title(&trans("explore.dialog_archive_title"))
+        .icon_name("babydra")
         .modal(true)
         .resizable(true)
         .default_width(500)

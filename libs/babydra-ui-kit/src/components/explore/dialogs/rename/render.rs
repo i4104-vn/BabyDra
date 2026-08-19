@@ -19,6 +19,7 @@ pub fn build_rename_dialog(
 ) -> RenameDialogWidgets {
     let window = Window::builder()
         .title(&trans("explore.dialog_rename_title"))
+        .icon_name("babydra")
         .modal(true)
         .resizable(false)
         .default_width(320)

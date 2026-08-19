@@ -132,6 +132,7 @@ pub use sidebar::*;
 pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     let window = gtk4::ApplicationWindow::new(app);
     window.set_title(Some("Settings"));
+    window.set_icon_name(Some("babydra-settings"));
     window.set_default_size(1000, 750);
     window.add_css_class("settings-window");
 

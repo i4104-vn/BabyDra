@@ -31,6 +31,7 @@ fn main() {
         // Fallback file selector if no path is given or if the path is invalid
         let fallback_window = gtk4::ApplicationWindow::new(app);
         fallback_window.set_title(Some(&trans("common.app_preview_title")));
+        fallback_window.set_icon_name(Some("babydra-preview"));
         fallback_window.set_default_size(400, 200);
 
         let file_dialog = gtk4::FileDialog::new();

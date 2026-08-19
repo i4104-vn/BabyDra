@@ -24,6 +24,7 @@ pub fn build_open_with_dialog(
 ) -> OpenWithDialogWidgets {
     let window = Window::builder()
         .title(trans("explore.dialog_open_with_title"))
+        .icon_name("babydra")
         .modal(true)
         .resizable(false)
         .default_width(420)

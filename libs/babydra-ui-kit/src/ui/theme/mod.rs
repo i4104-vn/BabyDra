@@ -138,12 +138,18 @@ pub fn init_theme() {
         let user_icon_theme = user_icon_theme.trim();
         settings.set_gtk_icon_theme_name(Some(user_icon_theme));
 
+        crate::ui::icon::resolver::ensure_embedded_logo_installed();
+
         if let Some(display) = gtk4::gdk::Display::default() {
             let icon_theme = gtk4::IconTheme::for_display(&display);
             let home = glib::home_dir();
             let local_path = home.join(".local/share/icons");
             if local_path.exists() {
                 icon_theme.add_search_path(local_path);
+            }
+            let local_pixmaps = home.join(".local/share/pixmaps");
+            if local_pixmaps.exists() {
+                icon_theme.add_search_path(local_pixmaps);
             }
             icon_theme.add_search_path("/usr/share/icons");
             icon_theme.add_search_path("/usr/share/pixmaps");

@@ -15,6 +15,7 @@ pub struct NewFolderDialogWidgets {
 pub fn build_folder_dialog(parent: Option<&impl IsA<gtk4::Window>>) -> NewFolderDialogWidgets {
     let window = Window::builder()
         .title(&trans("explore.dialog_new_folder_title"))
+        .icon_name("babydra")
         .modal(true)
         .resizable(false)
         .default_width(320)

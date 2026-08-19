@@ -15,6 +15,7 @@ pub struct NewFileDialogWidgets {
 pub fn build_file_dialog(parent: Option<&impl IsA<gtk4::Window>>) -> NewFileDialogWidgets {
     let window = Window::builder()
         .title(&trans("explore.dialog_new_file_title"))
+        .icon_name("babydra")
         .modal(true)
         .resizable(false)
         .default_width(320)

@@ -18,6 +18,7 @@ pub fn show_properties(target_paths: Vec<PathBuf>, parent: Option<&impl IsA<gtk4
 
     let window = Window::builder()
         .title(&trans("explore.dialog_properties_title"))
+        .icon_name("babydra")
         .modal(true)
         .resizable(false)
         .default_width(400)

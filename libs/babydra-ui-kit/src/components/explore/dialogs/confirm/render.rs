@@ -16,6 +16,7 @@ pub fn build_confirm_dialog(
 ) -> ConfirmDialogWidgets {
     let window = Window::builder()
         .title(title)
+        .icon_name("babydra")
         .modal(true)
         .resizable(false)
         .default_width(360)

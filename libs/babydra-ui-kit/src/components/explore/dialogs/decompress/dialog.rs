@@ -16,6 +16,7 @@ pub fn show_password_dialog(
 ) {
     let window = Window::builder()
         .title(&trans("explore.dialog_password_title"))
+        .icon_name("babydra")
         .modal(true)
         .resizable(false)
         .default_width(360)

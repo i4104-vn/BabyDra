@@ -26,22 +26,73 @@ pub fn get_icon_from_svg(svg_content: &str, size: i32) -> gtk4::Image {
     }
 }
 
-/// Returns the current `logo png`.
-pub fn get_logo_png(size: i32) -> gtk4::Image {
-    const PNG_BYTES: &[u8] = include_bytes!("../logo.png");
-    let bytes = glib::Bytes::from(PNG_BYTES);
+/// Embedded bytes of the BabyDra logo.
+pub const LOGO_BYTES: &[u8] = include_bytes!("../logo.png");
+
+/// Returns the embedded logo paintable at the requested size.
+pub fn get_logo_paintable(size: i32) -> Option<Texture> {
+    let bytes = glib::Bytes::from(LOGO_BYTES);
     let stream = gio::MemoryInputStream::from_bytes(&bytes);
+    Pixbuf::from_stream_at_scale(&stream, size, size, true, gio::Cancellable::NONE)
+        .ok()
+        .map(|pb| Texture::for_pixbuf(&pb))
+}
 
-    let pixbuf = Pixbuf::from_stream_at_scale(&stream, size, size, true, gio::Cancellable::NONE);
+/// Returns the current `logo png` as a GTK Image.
+pub fn get_logo_png(size: i32) -> gtk4::Image {
+    if let Some(texture) = get_logo_paintable(size) {
+        let img = gtk4::Image::from_paintable(Some(&texture));
+        img.set_pixel_size(size);
+        img
+    } else {
+        gtk4::Image::from_icon_name("image-missing")
+    }
+}
 
-    match pixbuf {
-        Ok(pb) => {
-            let texture = Texture::for_pixbuf(&pb);
-            let img = gtk4::Image::from_paintable(Some(&texture));
-            img.set_pixel_size(size);
-            img
+/// Ensures the embedded logo is registered into user icon cache directories at runtime.
+pub fn ensure_embedded_logo_installed() {
+    let home = glib::home_dir();
+    let dirs = [
+        home.join(".local/share/icons/hicolor/256x256/apps"),
+        home.join(".local/share/icons/hicolor/scalable/apps"),
+        home.join(".local/share/pixmaps"),
+        home.join(".babydra"),
+    ];
+
+    for dir in &dirs {
+        let _ = std::fs::create_dir_all(dir);
+    }
+
+    let babydra_logo = home.join(".babydra/logo.png");
+    if !babydra_logo.exists() {
+        let _ = std::fs::write(&babydra_logo, LOGO_BYTES);
+    }
+
+    let names = [
+        "babydra.png",
+        "babydra-explore.png",
+        "babydra-settings.png",
+        "babydra-preview.png",
+        "babydra-desktop.png",
+        "org.babydra.explore.png",
+        "org.babydra.settings.png",
+        "org.babydra.preview.png",
+        "org.babydra.desktop.png",
+        "com.babydra.settings.png",
+        "com.babydra.preview.png",
+    ];
+
+    for dir in &dirs[..3] {
+        for name in &names {
+            let file_path = dir.join(name);
+            if !file_path.exists()
+                || std::fs::metadata(&file_path)
+                    .map(|m| m.len() == 0)
+                    .unwrap_or(true)
+            {
+                let _ = std::fs::write(&file_path, LOGO_BYTES);
+            }
         }
-        Err(_) => gtk4::Image::from_icon_name("image-missing"),
     }
 }
 
@@ -169,6 +220,13 @@ pub fn set_fallback_icon(img: &gtk4::Image, icon_path_or_name: &str, default_fal
         }
     }
 
+    if clean_name == "logo" || clean_name.starts_with("babydra") {
+        if let Some(tex) = get_logo_paintable(32) {
+            img.set_paintable(Some(&tex));
+            return;
+        }
+    }
+
     if let Some(resolved_path) = get_resolved_icon(&clean_name) {
         img.set_from_file(Some(resolved_path.to_string_lossy().as_ref()));
         return;
@@ -205,14 +263,24 @@ pub fn set_fallback_icon(img: &gtk4::Image, icon_path_or_name: &str, default_fal
                     break;
                 }
             }
+            if clean_resolved == "logo" || clean_resolved.starts_with("babydra") {
+                if let Some(tex) = get_logo_paintable(32) {
+                    img.set_paintable(Some(&tex));
+                    return;
+                }
+            }
             img.set_icon_name(Some(&clean_resolved));
         } else if let Some(ref disp) = display {
             let theme = gtk4::IconTheme::for_display(disp);
-            if theme.has_icon(default_fallback) {
+            if default_fallback != "image-missing" && theme.has_icon(default_fallback) {
                 img.set_icon_name(Some(default_fallback));
+            } else if let Some(tex) = get_logo_paintable(32) {
+                img.set_paintable(Some(&tex));
             } else {
                 img.set_icon_name(Some("image-missing"));
             }
+        } else if let Some(tex) = get_logo_paintable(32) {
+            img.set_paintable(Some(&tex));
         } else {
             img.set_icon_name(Some("image-missing"));
         }

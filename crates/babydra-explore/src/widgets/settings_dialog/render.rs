@@ -13,6 +13,7 @@ use super::keybinds;
 pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn() + 'static) {
     let window = Window::builder()
         .title(&trans("explore.settings"))
+        .icon_name("babydra-explore")
         .transient_for(parent)
         .modal(true)
         .resizable(false)
