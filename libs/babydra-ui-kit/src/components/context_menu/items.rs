@@ -9,10 +9,7 @@ const MENU_ROW_SPACING: i32 = 8;
 
 /// Creates a new context menu popover positioned at specific `(x, y)` coordinates.
 pub fn create_menu_popover(parent: &gtk4::Widget, x: f64, y: f64) -> (Popover, Box) {
-    let popover = Popover::builder()
-        .has_arrow(false)
-        .autohide(true)
-        .build();
+    let popover = Popover::builder().has_arrow(false).autohide(true).build();
     popover.set_parent(parent);
     popover.add_css_class("context-menu-popover");
     popover.add_css_class("explore-popover");
@@ -27,10 +24,7 @@ pub fn create_menu_popover(parent: &gtk4::Widget, x: f64, y: f64) -> (Popover, B
 }
 
 /// Creates a context menu popover anchored relative to a target widget (e.g. Tray or Header button).
-pub fn create_menu_for(
-    parent: &gtk4::Widget,
-    position: PositionType,
-) -> (Popover, Box) {
+pub fn create_menu_for(parent: &gtk4::Widget, position: PositionType) -> (Popover, Box) {
     let popover = Popover::builder()
         .has_arrow(true)
         .autohide(true)

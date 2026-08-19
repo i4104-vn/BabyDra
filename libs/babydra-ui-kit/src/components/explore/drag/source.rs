@@ -1,32 +1,38 @@
 use babydra_core::load_cropped_square;
 use gtk4::gdk::FileList;
 use gtk4::prelude::*;
-use std::cell::RefCell;
+use std::cell::Cell;
 use std::path::PathBuf;
 use std::rc::Rc;
 
-/// Creates a DragSource for a file path, setting preview thumbnails or fallback icons.
+/// Creates a DragSource. `get_targets` is a closure called at drag-begin time to
+/// collect the paths that should be dragged. Using a closure lets callers snapshot
+/// selection state before GTK4's FlowBox/ListBox automatically deselects items.
 pub fn create_drag_source(
-    path: &PathBuf,
+    preview_path: &PathBuf,
     icon_name: &str,
-    selected_paths: Rc<RefCell<Vec<PathBuf>>>,
+    is_dragging: Rc<Cell<bool>>,
+    get_targets: impl Fn() -> Vec<PathBuf> + 'static,
 ) -> gtk4::DragSource {
     let drag_source = gtk4::DragSource::new();
     drag_source.set_actions(gtk4::gdk::DragAction::MOVE | gtk4::gdk::DragAction::COPY);
-    let path_clone = path.clone();
-    let sel_paths = selected_paths.clone();
+
+    let is_drag_begin = is_dragging.clone();
+    drag_source.connect_drag_begin(move |_, _| {
+        is_drag_begin.set(true);
+    });
+
+    let is_drag_end = is_dragging.clone();
+    drag_source.connect_drag_end(move |_, _, _| {
+        is_drag_end.set(false);
+    });
 
     drag_source.connect_prepare(move |_, _, _| {
-        // If the path being dragged is part of the current selection, drag the whole selection.
-        // Otherwise, drag only the single item.
-        let targets = {
-            let s = sel_paths.borrow();
-            if s.contains(&path_clone) {
-                s.clone()
-            } else {
-                vec![path_clone.clone()]
-            }
-        };
+        let targets = get_targets();
+
+        if targets.is_empty() {
+            return None;
+        }
 
         let gio_files: Vec<gtk4::gio::File> = targets
             .iter()
@@ -37,7 +43,7 @@ pub fn create_drag_source(
         Some(gtk4::gdk::ContentProvider::for_value(&file_list.to_value()))
     });
 
-    let has_preview = if let Some(ext) = path.extension() {
+    let has_preview = if let Some(ext) = preview_path.extension() {
         let ext_str = ext.to_string_lossy().to_lowercase();
         matches!(
             ext_str.as_str(),
@@ -48,7 +54,7 @@ pub fn create_drag_source(
     };
 
     if has_preview {
-        if let Ok(pixbuf) = load_cropped_square(path, 85) {
+        if let Ok(pixbuf) = load_cropped_square(preview_path, 85) {
             let texture = gtk4::gdk::Texture::for_pixbuf(&pixbuf);
             drag_source.set_icon(Some(&texture), 42, 42);
             return drag_source;

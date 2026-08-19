@@ -1,8 +1,6 @@
 use crate::components::context_menu::ContextMenuBuilder;
 use crate::components::explore::context_menu::{
-    clipboard::execute_paste,
-    custom_items::append_custom_items,
-    CLIPBOARD,
+    clipboard::execute_paste, custom_items::append_custom_items, CLIPBOARD,
 };
 use crate::components::explore::helpers::is_archive_file;
 use gtk4::prelude::*;
@@ -51,35 +49,39 @@ pub fn show_for_file_normal(
     );
 
     // 2. Open in New Window
-    builder = builder.item(&trans("explore.menu_open_new_window"), "external-link", move || {
-        let path_to_open = if let Some(dir) = target_paths_win.iter().find(|p| p.is_dir()) {
-            dir.clone()
-        } else if let Some(first) = target_paths_win.first() {
-            first.parent().unwrap_or(&current_path_win).to_path_buf()
-        } else {
-            current_path_win.clone()
-        };
+    builder = builder.item(
+        &trans("explore.menu_open_new_window"),
+        "external-link",
+        move || {
+            let path_to_open = if let Some(dir) = target_paths_win.iter().find(|p| p.is_dir()) {
+                dir.clone()
+            } else if let Some(first) = target_paths_win.first() {
+                first.parent().unwrap_or(&current_path_win).to_path_buf()
+            } else {
+                current_path_win.clone()
+            };
 
-        if let Ok(home) = std::env::var("HOME") {
-            let local_bin = format!("{}/.local/bin/babydra-explore", home);
-            if std::path::Path::new(&local_bin).exists() {
-                if let Ok(_) = std::process::Command::new(&local_bin)
-                    .arg(&path_to_open)
-                    .spawn()
-                {
+            if let Ok(home) = std::env::var("HOME") {
+                let local_bin = format!("{}/.local/bin/babydra-explore", home);
+                if std::path::Path::new(&local_bin).exists() {
+                    if let Ok(_) = std::process::Command::new(&local_bin)
+                        .arg(&path_to_open)
+                        .spawn()
+                    {
+                        return;
+                    }
+                }
+            }
+            if let Ok(exe) = std::env::current_exe() {
+                if let Ok(_) = std::process::Command::new(exe).arg(&path_to_open).spawn() {
                     return;
                 }
             }
-        }
-        if let Ok(exe) = std::env::current_exe() {
-            if let Ok(_) = std::process::Command::new(exe).arg(&path_to_open).spawn() {
-                return;
-            }
-        }
-        let _ = std::process::Command::new("babydra-explore")
-            .arg(&path_to_open)
-            .spawn();
-    });
+            let _ = std::process::Command::new("babydra-explore")
+                .arg(&path_to_open)
+                .spawn();
+        },
+    );
 
     // 3. Refresh
     let nav_refresh = nav_callback.clone();
@@ -180,7 +182,11 @@ pub fn show_for_file_normal(
     let current_p_paste = current_path.clone();
     let clipboard_data_paste = clipboard_data.clone();
 
-    let rename_path = if is_single { target_paths[0].clone() } else { PathBuf::new() };
+    let rename_path = if is_single {
+        target_paths[0].clone()
+    } else {
+        PathBuf::new()
+    };
     let nav_rename = nav_callback.clone();
     let current_p_rename = current_path.clone();
     let parent_rename = parent.clone();
@@ -193,49 +199,85 @@ pub fn show_for_file_normal(
     let pop_copy = pop_ref.clone();
 
     builder = builder
-        .footer_sensitive("cut", &trans("explore.menu_cut"), !target_paths.is_empty(), move || {
-            if let Some(root) = pop_cut.root() {
-                crate::components::explore::context_menu::clipboard::apply_cut_dimming(&root, &target_paths_cut);
-            }
-            CLIPBOARD.with(|cb| {
-                cb.replace(Some((target_paths_cut.clone(), true)));
-            });
-        })
-        .footer_sensitive("copy", &trans("explore.menu_copy"), !target_paths.is_empty(), move || {
-            if let Some(root) = pop_copy.root() {
-                crate::components::explore::context_menu::clipboard::apply_cut_dimming(&root, &[]);
-            }
-            CLIPBOARD.with(|cb| {
-                cb.replace(Some((target_paths_copy.clone(), false)));
-            });
-        })
-        .footer_sensitive("paste", &trans("explore.menu_paste"), has_paste_items, move || {
-            if let Some((sources, is_cut)) = clipboard_data_paste.clone() {
-                execute_paste(sources, dest_dir.clone(), is_cut, current_p_paste.clone(), nav_paste.clone());
-            }
-        })
-        .footer_sensitive("rename", &trans("explore.menu_rename"), is_single, move || {
-            if is_single {
-                crate::components::explore::dialogs::show_rename_dialog(
-                    &rename_path,
-                    current_p_rename.clone(),
-                    nav_rename.clone(),
-                    Some(&parent_rename),
-                );
-            }
-        })
-        .footer_sensitive("trash", &trans("explore.menu_trash"), !target_paths.is_empty(), move || {
-            let paths_c = target_paths_trash.clone();
-            let nav_c = nav_trash.clone();
-            let cp_c = current_p_trash.clone();
-            glib::spawn_future_local(async move {
-                for path in paths_c {
-                    let _ = babydra_core::send_to_trash(path).await;
+        .footer_sensitive(
+            "cut",
+            &trans("explore.menu_cut"),
+            !target_paths.is_empty(),
+            move || {
+                if let Some(root) = pop_cut.root() {
+                    crate::components::explore::context_menu::clipboard::apply_cut_dimming(
+                        &root,
+                        &target_paths_cut,
+                    );
                 }
-                nav_c(cp_c);
-            });
-        });
+                CLIPBOARD.with(|cb| {
+                    cb.replace(Some((target_paths_cut.clone(), true)));
+                });
+            },
+        )
+        .footer_sensitive(
+            "copy",
+            &trans("explore.menu_copy"),
+            !target_paths.is_empty(),
+            move || {
+                if let Some(root) = pop_copy.root() {
+                    crate::components::explore::context_menu::clipboard::apply_cut_dimming(
+                        &root,
+                        &[],
+                    );
+                }
+                CLIPBOARD.with(|cb| {
+                    cb.replace(Some((target_paths_copy.clone(), false)));
+                });
+            },
+        )
+        .footer_sensitive(
+            "paste",
+            &trans("explore.menu_paste"),
+            has_paste_items,
+            move || {
+                if let Some((sources, is_cut)) = clipboard_data_paste.clone() {
+                    execute_paste(
+                        sources,
+                        dest_dir.clone(),
+                        is_cut,
+                        current_p_paste.clone(),
+                        nav_paste.clone(),
+                    );
+                }
+            },
+        )
+        .footer_sensitive(
+            "rename",
+            &trans("explore.menu_rename"),
+            is_single,
+            move || {
+                if is_single {
+                    crate::components::explore::dialogs::show_rename_dialog(
+                        &rename_path,
+                        current_p_rename.clone(),
+                        nav_rename.clone(),
+                        Some(&parent_rename),
+                    );
+                }
+            },
+        )
+        .footer_sensitive(
+            "trash",
+            &trans("explore.menu_trash"),
+            !target_paths.is_empty(),
+            move || {
+                let paths_c = target_paths_trash.clone();
+                let nav_c = nav_trash.clone();
+                let cp_c = current_p_trash.clone();
+                glib::spawn_future_local(async move {
+                    for path in paths_c {
+                        let _ = babydra_core::send_to_trash(path).await;
+                    }
+                    nav_c(cp_c);
+                });
+            },
+        );
 
     builder.popup();
 }
-

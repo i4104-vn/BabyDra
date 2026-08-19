@@ -76,4 +76,3 @@ pub fn show_for_file_trash(
 
     builder.popup();
 }
-

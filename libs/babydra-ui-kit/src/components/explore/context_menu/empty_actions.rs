@@ -1,8 +1,6 @@
 use crate::components::context_menu::ContextMenuBuilder;
 use crate::components::explore::context_menu::{
-    clipboard::execute_paste,
-    custom_items::append_custom_items,
-    CLIPBOARD,
+    clipboard::execute_paste, custom_items::append_custom_items, CLIPBOARD,
 };
 use gtk4::prelude::*;
 use std::path::PathBuf;
@@ -105,20 +103,24 @@ pub fn show_for_empty(
     builder = builder
         .footer_sensitive("cut", &trans("explore.menu_cut"), false, || {})
         .footer_sensitive("copy", &trans("explore.menu_copy"), false, || {})
-        .footer_sensitive("paste", &trans("explore.menu_paste"), has_paste_items, move || {
-            if let Some((sources, is_cut)) = clipboard_data_c2.clone() {
-                execute_paste(
-                    sources,
-                    dest_dir.clone(),
-                    is_cut,
-                    current_p.clone(),
-                    nav.clone(),
-                );
-            }
-        })
+        .footer_sensitive(
+            "paste",
+            &trans("explore.menu_paste"),
+            has_paste_items,
+            move || {
+                if let Some((sources, is_cut)) = clipboard_data_c2.clone() {
+                    execute_paste(
+                        sources,
+                        dest_dir.clone(),
+                        is_cut,
+                        current_p.clone(),
+                        nav.clone(),
+                    );
+                }
+            },
+        )
         .footer_sensitive("rename", &trans("explore.menu_rename"), false, || {})
         .footer_sensitive("trash", &trans("explore.menu_trash"), false, || {});
 
     builder.popup();
 }
-

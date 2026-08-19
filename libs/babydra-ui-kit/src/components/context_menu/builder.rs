@@ -15,10 +15,7 @@ pub struct ContextMenuBuilder {
 impl ContextMenuBuilder {
     /// Starts building a context menu attached to `parent`.
     pub fn new(parent: &impl IsA<gtk4::Widget>) -> Self {
-        let popover = Popover::builder()
-            .has_arrow(false)
-            .autohide(true)
-            .build();
+        let popover = Popover::builder().has_arrow(false).autohide(true).build();
         popover.set_parent(parent.as_ref());
         popover.add_css_class("context-menu-popover");
         popover.add_css_class("explore-popover");
@@ -101,10 +98,7 @@ impl ContextMenuBuilder {
         sensitive: bool,
         on_click: impl Fn() + 'static,
     ) -> Self {
-        self.append_item(
-            create_danger_btn(label, icon, sensitive),
-            on_click,
-        )
+        self.append_item(create_danger_btn(label, icon, sensitive), on_click)
     }
 
     /// Appends a horizontal separator.

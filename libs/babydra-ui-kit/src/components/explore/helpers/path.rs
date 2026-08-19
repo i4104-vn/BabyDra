@@ -18,8 +18,10 @@ pub fn sanitize_path(path: &Path) -> PathBuf {
 }
 
 /// Parses command line arguments to determine target directory, decoding URI if necessary.
-pub fn parse_target_dir() -> PathBuf {
+pub fn parse_target_dir() -> (PathBuf, Option<PathBuf>) {
     let mut target_dir = glib::home_dir();
+    let mut focus_item = None;
+
     if let Some(arg) = std::env::args().nth(1) {
         let path_str = if arg.starts_with("file://") {
             babydra_core::mpris::decode_uri(&arg.replacen("file://", "", 1))
@@ -27,9 +29,14 @@ pub fn parse_target_dir() -> PathBuf {
             arg
         };
         let path = PathBuf::from(path_str);
-        if path.exists() {
+        if path.is_dir() {
             target_dir = path;
+        } else if path.is_file() {
+            if let Some(parent) = path.parent() {
+                target_dir = parent.to_path_buf();
+                focus_item = Some(path);
+            }
         }
     }
-    target_dir
+    (target_dir, focus_item)
 }

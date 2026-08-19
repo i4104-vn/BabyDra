@@ -224,7 +224,12 @@ impl WifiInfoDialog {
                 &trans("wifi.ip_assignment"),
                 &trans("wifi.dhcp_automatic"),
             );
-            self.add_grid_row(&grid2, 1, &trans("wifi.ipv4_address"), &trans("wifi.not_assigned"));
+            self.add_grid_row(
+                &grid2,
+                1,
+                &trans("wifi.ipv4_address"),
+                &trans("wifi.not_assigned"),
+            );
         }
         self.body_box.append(&grid2);
 

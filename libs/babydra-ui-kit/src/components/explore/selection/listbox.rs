@@ -12,6 +12,7 @@ pub fn wire_rubberband(
 ) {
     let drag_gesture = GestureDrag::new();
     drag_gesture.set_button(1);
+    drag_gesture.set_propagation_phase(gtk4::PropagationPhase::Capture);
 
     let start_pos = Rc::new(RefCell::new(None::<(f64, f64)>));
     let start_pos_c = start_pos.clone();
@@ -20,7 +21,7 @@ pub fn wire_rubberband(
     let rb_begin = list_rubberband.clone();
     let drag_select_active_begin = drag_select_active.clone();
     let lf_parent = list_fixed.parent().map(|p| p.clone());
-    drag_gesture.connect_drag_begin(move |_, x, y| {
+    drag_gesture.connect_drag_begin(move |gesture, x, y| {
         let mut is_item = false;
         if let Some(ref parent) = lf_parent {
             let picked = parent.pick(x, y, PickFlags::empty());
@@ -39,8 +40,8 @@ pub fn wire_rubberband(
         if !is_item || x > 200.0 {
             drag_select_active_begin.replace(true);
             start_pos_c.replace(Some((x, y)));
-            rb_begin.set_visible(true);
-            rb_begin.set_size_request(0, 0);
+            // Show rubberband in drag_update, not here — avoids 1-frame flash on plain clicks
+            gesture.set_state(gtk4::EventSequenceState::Claimed);
         } else {
             drag_select_active_begin.replace(false);
         }
@@ -56,6 +57,12 @@ pub fn wire_rubberband(
             return;
         }
         if let Some((start_x, start_y)) = *start_pos_update.borrow() {
+            if !lr_update.is_visible() {
+                lf_update.move_(&lr_update, start_x, start_y);
+                lr_update.set_size_request(0, 0);
+                lr_update.set_visible(true);
+            }
+
             let current_x = start_x + offset_x;
             let current_y = start_y + offset_y;
             let min_x = start_x.min(current_x);

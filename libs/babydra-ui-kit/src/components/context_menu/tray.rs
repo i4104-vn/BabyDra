@@ -1,8 +1,8 @@
 //! Context menu integration for System Tray icons and DBus menu specifications.
 
 use super::items::{
-    create_menu_for, create_menu_box, create_menu_sep,
-    create_menu_text, create_submenu_item, create_submenu_popover,
+    create_menu_box, create_menu_for, create_menu_sep, create_menu_text, create_submenu_item,
+    create_submenu_popover,
 };
 use gtk4::prelude::*;
 use std::cell::RefCell;
@@ -23,11 +23,7 @@ pub fn close_tray_menu() {
 }
 
 /// Displays a context menu for a system tray item based on DBus menu items using hierarchical Popovers.
-pub fn show_tray_menu(
-    btn: &gtk4::Button,
-    service: &str,
-    items: &[babydra_core::tray::MenuItem],
-) {
+pub fn show_tray_menu(btn: &gtk4::Button, service: &str, items: &[babydra_core::tray::MenuItem]) {
     close_tray_menu();
 
     let (popover, _) =

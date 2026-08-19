@@ -86,7 +86,9 @@ button.context-menu-item:hover .shortcut-label {
 .context-menu-separator {
     margin-top: 3px;
     margin-bottom: 3px;
-    opacity: 0.35;
+    min-height: 1px;
+    background-color: rgba(128, 128, 128, 0.25);
+    opacity: 1;
 }
 
 .context-menu-header,
@@ -104,6 +106,7 @@ button.context-menu-item:hover .shortcut-label {
 .context-menu-footer {
     margin-top: 4px;
     padding-top: 4px;
+    border-top: 1px solid rgba(128, 128, 128, 0.25);
 }
 
 button.context-menu-footer-btn {

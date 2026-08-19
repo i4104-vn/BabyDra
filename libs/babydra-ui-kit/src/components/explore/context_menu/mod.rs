@@ -47,4 +47,3 @@ pub fn show_for_file(
         );
     }
 }
-

@@ -12,9 +12,7 @@ pub struct NewFolderDialogWidgets {
 }
 
 /// Build new folder dialog ui.
-pub fn build_folder_dialog(
-    parent: Option<&impl IsA<gtk4::Window>>,
-) -> NewFolderDialogWidgets {
+pub fn build_folder_dialog(parent: Option<&impl IsA<gtk4::Window>>) -> NewFolderDialogWidgets {
     let window = Window::builder()
         .title(&trans("explore.dialog_new_folder_title"))
         .modal(true)

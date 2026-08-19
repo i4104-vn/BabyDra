@@ -48,11 +48,7 @@ pub fn create_color_btn(
 }
 
 /// Creates an icon + label button.
-pub fn create_icon_btn(
-    icon_name: &str,
-    label_text: &str,
-    css_class: &str,
-) -> gtk4::Button {
+pub fn create_icon_btn(icon_name: &str, label_text: &str, css_class: &str) -> gtk4::Button {
     let btn = gtk4::Button::new();
     if !css_class.is_empty() {
         btn.add_css_class(css_class);

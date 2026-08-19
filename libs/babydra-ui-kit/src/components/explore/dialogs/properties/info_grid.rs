@@ -139,9 +139,7 @@ pub fn build_info_grid(parent_vbox: &Box, target_paths: &[PathBuf]) {
             glib::spawn_future_local(async move {
                 let size = if is_dir {
                     tokio::task::spawn_blocking(move || {
-                        babydra_core::services::explore::dir_size::calc_dir_size(
-                            &path_c,
-                        )
+                        babydra_core::services::explore::dir_size::calc_dir_size(&path_c)
                     })
                     .await
                     .unwrap_or(0)
@@ -153,11 +151,10 @@ pub fn build_info_grid(parent_vbox: &Box, target_paths: &[PathBuf]) {
                 if is_dir {
                     if let Some(lbl_contents) = lbl_contents_c {
                         let path_c2 = path_c_contents.clone();
-                        let counts = tokio::task::spawn_blocking(move || {
-                            count_dir_contents(&path_c2)
-                        })
-                        .await
-                        .unwrap_or((0, 0));
+                        let counts =
+                            tokio::task::spawn_blocking(move || count_dir_contents(&path_c2))
+                                .await
+                                .unwrap_or((0, 0));
                         let contents_template = trans("explore.prop_contents_format");
                         let formatted_contents = contents_template
                             .replacen("{}", &counts.0.to_string(), 1)
@@ -252,7 +249,9 @@ pub fn build_info_grid(parent_vbox: &Box, target_paths: &[PathBuf]) {
                     }
                 }
                 size
-            }).await.unwrap_or(0);
+            })
+            .await
+            .unwrap_or(0);
             lbl_size_c.set_text(&format_size(total_size));
         });
 

@@ -310,11 +310,13 @@ impl ToggleRow {
     pub fn set_active(&self, active: bool) {
         self.switch.set_active(active);
         if active {
-            self.label.set_text(&babydra_core::i18n::trans("settings.on"));
+            self.label
+                .set_text(&babydra_core::i18n::trans("settings.on"));
             self.label.remove_css_class("toggle-status-off");
             self.label.add_css_class("toggle-status-on");
         } else {
-            self.label.set_text(&babydra_core::i18n::trans("settings.off"));
+            self.label
+                .set_text(&babydra_core::i18n::trans("settings.off"));
             self.label.remove_css_class("toggle-status-on");
             self.label.add_css_class("toggle-status-off");
         }

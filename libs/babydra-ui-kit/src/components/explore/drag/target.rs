@@ -108,16 +108,20 @@ pub fn create_bg_drop(current_path: Rc<RefCell<PathBuf>>) -> gtk4::DropTarget {
                         }
                     }
                     if !destinations.is_empty() {
-                        crate::components::explore::context_menu::clipboard::UNDO_STACK.with(|stack| {
-                            stack.borrow_mut().push(
+                        crate::components::explore::context_menu::clipboard::UNDO_STACK.with(
+                            |stack| {
+                                stack.borrow_mut().push(
                                 crate::components::explore::context_menu::clipboard::UndoOperation {
                                     is_cut: true,
                                     sources: actual_sources,
                                     destinations,
                                 },
                             );
-                        });
-                        crate::components::explore::context_menu::clipboard::apply_cut_everywhere(&[]);
+                            },
+                        );
+                        crate::components::explore::context_menu::clipboard::apply_cut_everywhere(
+                            &[],
+                        );
                     }
                 });
                 return true;
