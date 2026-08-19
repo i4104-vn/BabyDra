@@ -90,7 +90,8 @@ pub fn render_device_list(list_box: &gtk4::ListBox, state_ref: &BluetoothState) 
             });
             hbox.append(&disconnect_btn);
         } else {
-            let connect_btn = gtk4::Button::with_label(&babydra_core::i18n::trans("settings.connect"));
+            let connect_btn =
+                gtk4::Button::with_label(&babydra_core::i18n::trans("settings.connect"));
             connect_btn.set_valign(gtk4::Align::Center);
             connect_btn.add_css_class("suggested-action");
             let mac_clone = dev.mac.clone();

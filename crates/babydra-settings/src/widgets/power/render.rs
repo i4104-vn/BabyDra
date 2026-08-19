@@ -99,9 +99,9 @@ pub fn update_power_labels(widget: &PowerWidget) {
     widget
         .desc_lbl
         .set_text(&babydra_core::i18n::trans("settings.power_desc"));
-    widget
-        .saver_title
-        .set_text(&babydra_core::i18n::trans("settings.power_auto_saver_title"));
+    widget.saver_title.set_text(&babydra_core::i18n::trans(
+        "settings.power_auto_saver_title",
+    ));
     widget
         .perf_title
         .set_text(&babydra_core::i18n::trans("settings.power_perf_profile"));
@@ -218,7 +218,9 @@ pub fn build() -> (PowerWidget, PasswordDialog) {
     perf_section.add_css_class("glass-panel");
     perf_section.set_vexpand(false);
 
-    let perf_title = Label::new(Some(&babydra_core::i18n::trans("settings.power_perf_profile")));
+    let perf_title = Label::new(Some(&babydra_core::i18n::trans(
+        "settings.power_perf_profile",
+    )));
     perf_title.add_css_class("settings-section-title");
     perf_title.set_halign(gtk4::Align::Start);
     perf_title.set_margin_top(0);

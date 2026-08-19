@@ -175,7 +175,8 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
             });
             hbox.append(&disconnect_btn);
         } else {
-            let connect_btn = gtk4::Button::with_label(&babydra_core::i18n::trans("settings.connect"));
+            let connect_btn =
+                gtk4::Button::with_label(&babydra_core::i18n::trans("settings.connect"));
             connect_btn.set_valign(gtk4::Align::Center);
             connect_btn.add_css_class("suggested-action");
 

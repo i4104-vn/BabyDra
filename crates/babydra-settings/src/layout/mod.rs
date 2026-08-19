@@ -5,8 +5,8 @@ use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use babydra_core::models::settings::nav::{NavCategory, NavItem};
 use crate::widgets;
+use babydra_core::models::settings::nav::{NavCategory, NavItem};
 
 const NAV_CATEGORIES: &[NavCategory] = &[
     NavCategory {

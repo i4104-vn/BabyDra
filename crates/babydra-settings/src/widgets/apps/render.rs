@@ -67,7 +67,8 @@ pub fn build(
     tab_apps_btn.add_css_class("active");
     tab_apps_btn.set_cursor_from_name(Some("pointer"));
 
-    let tab_packages_btn = Button::with_label(&babydra_core::i18n::trans("settings.apps_tab_packages"));
+    let tab_packages_btn =
+        Button::with_label(&babydra_core::i18n::trans("settings.apps_tab_packages"));
     tab_packages_btn.add_css_class("app-tab-btn");
     tab_packages_btn.set_cursor_from_name(Some("pointer"));
 
@@ -116,10 +117,8 @@ pub fn build(
             .as_deref()
             .filter(|s| !s.is_empty())
             .unwrap_or("application-x-executable");
-        let icon_img = babydra_ui_kit::ui::icon::get_fallback_icon(
-            icon_name,
-            "application-x-executable",
-        );
+        let icon_img =
+            babydra_ui_kit::ui::icon::get_fallback_icon(icon_name, "application-x-executable");
         icon_img.set_pixel_size(18);
         icon_img.set_valign(gtk4::Align::Center);
         icon_img.set_halign(gtk4::Align::Center);
@@ -226,10 +225,8 @@ pub fn build(
         icon_box.set_valign(gtk4::Align::Center);
         icon_box.set_halign(gtk4::Align::Start);
 
-        let icon_img = babydra_ui_kit::ui::icon::get_fallback_icon(
-            &pkg.name,
-            "application-x-executable",
-        );
+        let icon_img =
+            babydra_ui_kit::ui::icon::get_fallback_icon(&pkg.name, "application-x-executable");
         icon_img.set_pixel_size(18);
         icon_img.set_valign(gtk4::Align::Center);
         icon_img.set_halign(gtk4::Align::Center);
@@ -358,7 +355,8 @@ pub fn build(
     let actions_box = Box::new(Orientation::Horizontal, 8);
     actions_box.set_halign(gtk4::Align::End);
 
-    let console_close_btn = Button::with_label(&babydra_core::i18n::trans("explore.settings_close"));
+    let console_close_btn =
+        Button::with_label(&babydra_core::i18n::trans("explore.settings_close"));
     console_close_btn.add_css_class("connect-pill-btn");
     console_close_btn.set_cursor_from_name(Some("pointer"));
     actions_box.append(&console_close_btn);

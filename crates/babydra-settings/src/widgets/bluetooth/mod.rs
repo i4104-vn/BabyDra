@@ -4,8 +4,8 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::mpsc::channel;
 
-pub use babydra_core::models::settings::BluetoothState;
 use babydra_core::models::settings::bluetooth::BtDevice;
+pub use babydra_core::models::settings::BluetoothState;
 use babydra_core::{get_bt_devices, is_bluetooth_enabled, set_bt_enabled};
 use gtk4::prelude::*;
 

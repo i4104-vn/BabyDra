@@ -211,7 +211,8 @@ pub fn render_network_list(
             check_icon.set_pixel_size(18);
             check_icon.set_valign(gtk4::Align::Center);
             check_icon.add_css_class("connected-text");
-            check_icon.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.wifi_connected")));
+            check_icon
+                .set_tooltip_text(Some(&babydra_core::i18n::trans("settings.wifi_connected")));
             hbox.append(&check_icon);
         }
 

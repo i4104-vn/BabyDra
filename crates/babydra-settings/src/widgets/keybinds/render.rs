@@ -11,7 +11,9 @@ pub fn build(keybinds: &[Keybind]) -> KeybindsWidget {
 
     // Header
     let header_box = Box::new(Orientation::Horizontal, 12);
-    let title_label = Label::new(Some(&babydra_core::i18n::trans("settings.keybinds_title_page")));
+    let title_label = Label::new(Some(&babydra_core::i18n::trans(
+        "settings.keybinds_title_page",
+    )));
     title_label.add_css_class("settings-page-title");
     title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);
@@ -48,7 +50,9 @@ pub fn build(keybinds: &[Keybind]) -> KeybindsWidget {
     col_type.set_width_request(100);
     col_type.add_css_class("settings-section-title");
 
-    let col_mod = Label::new(Some(&babydra_core::i18n::trans("settings.keybind_modifier")));
+    let col_mod = Label::new(Some(&babydra_core::i18n::trans(
+        "settings.keybind_modifier",
+    )));
     col_mod.set_width_request(120);
     col_mod.add_css_class("settings-section-title");
 
@@ -56,7 +60,9 @@ pub fn build(keybinds: &[Keybind]) -> KeybindsWidget {
     col_key.set_width_request(80);
     col_key.add_css_class("settings-section-title");
 
-    let col_disp = Label::new(Some(&babydra_core::i18n::trans("settings.keybind_dispatch")));
+    let col_disp = Label::new(Some(&babydra_core::i18n::trans(
+        "settings.keybind_dispatch",
+    )));
     col_disp.set_hexpand(true);
     col_disp.add_css_class("settings-section-title");
 

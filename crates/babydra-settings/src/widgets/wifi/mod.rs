@@ -1,7 +1,7 @@
 //! Wi-Fi configurations control panel.
 
-pub use babydra_core::models::settings::WifiState;
 use babydra_core::models::settings::wifi::WifiNetwork;
+pub use babydra_core::models::settings::WifiState;
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;

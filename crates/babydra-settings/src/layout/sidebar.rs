@@ -10,13 +10,9 @@ pub(crate) fn create_sidebar_icon(id: &str, default_icon: &str) -> gtk4::Widget 
         "appearance" => babydra_ui_kit::components::create_wp_thumb(18),
         "power" => babydra_ui_kit::components::create_battery_icon(18),
         "vpn" => babydra_ui_kit::components::create_vpn_icon(18),
-        "bluetooth" => {
-            babydra_ui_kit::components::create_colored_icon("bluetooth", 18, "#2563EB")
-        }
+        "bluetooth" => babydra_ui_kit::components::create_colored_icon("bluetooth", 18, "#2563EB"),
         "hosts" => babydra_ui_kit::components::create_colored_icon("hosts", 18, "#10B981"),
-        "displays" => {
-            babydra_ui_kit::components::create_colored_icon("displays", 18, "#0EA5E9")
-        }
+        "displays" => babydra_ui_kit::components::create_colored_icon("displays", 18, "#0EA5E9"),
         "keybinds" => babydra_ui_kit::components::create_colored_icon("cog", 18, "#F97316"),
         "apps" => babydra_ui_kit::components::create_colored_icon("apps", 18, "#A855F7"),
         "startup" => babydra_ui_kit::components::create_colored_icon("cog", 18, "#6366F1"),

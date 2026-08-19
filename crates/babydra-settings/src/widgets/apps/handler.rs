@@ -93,8 +93,7 @@ pub fn wire_main_events(
 
         let (tx, rx) = std::sync::mpsc::channel::<super::AppsData>();
         std::thread::spawn(move || {
-            let installed_apps =
-                babydra_core::services::apps::discovery::scan_desktop_apps();
+            let installed_apps = babydra_core::services::apps::discovery::scan_desktop_apps();
             let apps_data: Vec<babydra_core::models::app_info::InstalledApp> = installed_apps
                 .into_iter()
                 .map(|app| babydra_core::models::app_info::InstalledApp {
@@ -305,9 +304,7 @@ pub fn wire_uninstall_items(
 
         item.button.connect_clicked(move |_| {
             if action_type == AppActionType::Downgrade {
-                if babydra_core::services::apps::pacman::find_cached_pkg(&pkg_name)
-                    .is_none()
-                {
+                if babydra_core::services::apps::pacman::find_cached_pkg(&pkg_name).is_none() {
                     let msg = babydra_core::i18n::trans("settings.apps_downgrade_not_found")
                         .replace("{}", &pkg_name);
                     babydra_core::send_settings_notif(

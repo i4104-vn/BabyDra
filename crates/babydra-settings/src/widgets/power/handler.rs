@@ -1,10 +1,7 @@
-use super::render::{
-    update_battery_card, update_power_labels, update_profile_sel, PowerWidget,
-};
+use super::render::{update_battery_card, update_power_labels, update_profile_sel, PowerWidget};
 use babydra_core::{
-    battery::apply_battery_saver, get_battery_info, get_current_profile,
-    load_babydra_config, save_babydra_config, set_perf_profile,
-    set_perf_profile_pw, PerformanceProfile,
+    battery::apply_battery_saver, get_battery_info, get_current_profile, load_babydra_config,
+    save_babydra_config, set_perf_profile, set_perf_profile_pw, PerformanceProfile,
 };
 use babydra_ui_kit::components::modals::PasswordDialog;
 use gtk4::prelude::*;
@@ -124,7 +121,8 @@ pub fn wire_events(widget: &PowerWidget, auth_dialog: PasswordDialog) {
                             conf.power.charge_limit = limit;
                             save_babydra_config(&conf);
 
-                            let title = babydra_core::i18n::trans("settings.notif_charge_limit_title");
+                            let title =
+                                babydra_core::i18n::trans("settings.notif_charge_limit_title");
                             let msg = babydra_core::i18n::trans("settings.notif_charge_limit_msg")
                                 .replace("{limit}", &limit.to_string());
                             babydra_core::send_settings_notif(&title, &msg);
@@ -143,7 +141,8 @@ pub fn wire_events(widget: &PowerWidget, auth_dialog: PasswordDialog) {
                             conf.power.charge_limit = limit;
                             save_babydra_config(&conf);
 
-                            let title = babydra_core::i18n::trans("settings.notif_charge_limit_title");
+                            let title =
+                                babydra_core::i18n::trans("settings.notif_charge_limit_title");
                             let msg = babydra_core::i18n::trans("settings.notif_charge_limit_msg")
                                 .replace("{limit}", &limit.to_string());
                             babydra_core::send_settings_notif(&title, &msg);

@@ -23,8 +23,7 @@ pub fn create_apps_widget() -> Widget {
     // Offload desktop app scanning & pacman query to background thread
     let (tx, rx) = std::sync::mpsc::channel::<AppsData>();
     std::thread::spawn(move || {
-        let installed_apps =
-            babydra_core::services::apps::discovery::scan_desktop_apps();
+        let installed_apps = babydra_core::services::apps::discovery::scan_desktop_apps();
         let apps_data: Vec<InstalledApp> = installed_apps
             .into_iter()
             .map(|app| InstalledApp {

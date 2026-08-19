@@ -314,7 +314,8 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
                     if failed_count == 0 {
                         status_label_init
                             .set_text(&babydra_core::i18n::trans("settings.update_complete"));
-                        count_badge_init.set_text(&babydra_core::i18n::trans("settings.up_to_date"));
+                        count_badge_init
+                            .set_text(&babydra_core::i18n::trans("settings.up_to_date"));
                         update_all_btn_init.set_visible(false);
                         refresh_btn_init.set_visible(true);
                     } else {

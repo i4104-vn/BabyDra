@@ -69,12 +69,8 @@ pub fn update_battery_card(card: &Box, info_opt: Option<BatteryInfo>) {
     let left_h_box = Box::new(Orientation::Horizontal, 14);
     left_h_box.set_valign(gtk4::Align::Center);
 
-    let huge_battery = babydra_ui_kit::ui::battery::create_battery_area(
-        info.percentage,
-        info.is_charging,
-        96,
-        52,
-    );
+    let huge_battery =
+        babydra_ui_kit::ui::battery::create_battery_area(info.percentage, info.is_charging, 96, 52);
 
     let left_text_box = Box::new(Orientation::Vertical, 2);
     left_text_box.set_valign(gtk4::Align::Center);

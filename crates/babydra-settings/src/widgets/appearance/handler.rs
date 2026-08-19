@@ -253,8 +253,9 @@ pub fn setup_appearance(
                 title.add_css_class("settings-row-title");
                 empty_box.append(&title);
 
-                let sub =
-                    gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.no_wallpapers_sub")));
+                let sub = gtk4::Label::new(Some(&babydra_core::i18n::trans(
+                    "settings.no_wallpapers_sub",
+                )));
                 sub.add_css_class("settings-row-desc");
                 empty_box.append(&sub);
 
@@ -292,7 +293,9 @@ pub fn setup_appearance(
                             *greeter_wp_cb.borrow_mut() = Some(wp_clone.clone());
                             preview_cb.set_filename(Some(&wp_clone));
                             babydra_core::send_settings_notif(
-                                &babydra_core::i18n::trans("settings.notif_greeter_wallpaper_title"),
+                                &babydra_core::i18n::trans(
+                                    "settings.notif_greeter_wallpaper_title",
+                                ),
                                 &babydra_core::i18n::trans("settings.notif_greeter_wallpaper_msg"),
                             );
                         } else {
@@ -371,7 +374,9 @@ pub fn setup_appearance(
                                     &babydra_core::i18n::trans(
                                         "settings.notif_greeter_wallpaper_title",
                                     ),
-                                    &babydra_core::i18n::trans("settings.notif_greeter_wallpaper_msg"),
+                                    &babydra_core::i18n::trans(
+                                        "settings.notif_greeter_wallpaper_msg",
+                                    ),
                                 );
                             } else {
                                 let _ = babydra_core::set_wallpaper(&dest_path);
@@ -417,9 +422,7 @@ pub fn setup_appearance(
                     if let Some(path) = file.path() {
                         if babydra_core::set_avatar(&path).is_ok() {
                             if let Ok(bytes) = std::fs::read(&path) {
-                                if let Some(pixbuf) =
-                                    babydra_core::crop_circle(&bytes, 42)
-                                {
+                                if let Some(pixbuf) = babydra_core::crop_circle(&bytes, 42) {
                                     preview_cb.set_pixbuf(Some(&pixbuf));
                                 }
                             }

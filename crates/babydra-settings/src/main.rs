@@ -1,8 +1,8 @@
 //! Native Arch Linux settings manager built with GTK4 + Rust.
 
 use babydra_core::{
-    battery::apply_battery_saver, get_battery_info, get_current_profile,
-    load_babydra_config, save_babydra_config, set_perf_profile, PerformanceProfile,
+    battery::apply_battery_saver, get_battery_info, get_current_profile, load_babydra_config,
+    save_babydra_config, set_perf_profile, PerformanceProfile,
 };
 use gtk4::prelude::*;
 
@@ -101,7 +101,9 @@ fn handle_cli_args() -> (bool, Option<String>) {
             println!("  --sync-greeter-wallpaper      Sync lock screen wallpaper");
             println!("  --apply-battery-saver         Switch to battery saver profile");
             println!("  --check-battery-saver         Check battery and apply auto-saver");
-            println!("  --set-power-profile <profile> Set CPU profile (normal|balanced|performance)");
+            println!(
+                "  --set-power-profile <profile> Set CPU profile (normal|balanced|performance)"
+            );
             println!("  --run-background-update       Run background update loop");
             return (true, None);
         } else if arg == "--page" || arg == "-p" || arg == "--tab" {
