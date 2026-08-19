@@ -40,6 +40,8 @@ where
 
             match safe_copy_binary(&src_file, &dst_file) {
                 Ok(()) => {
+                    use std::os::unix::fs::PermissionsExt;
+                    let _ = fs::set_permissions(&dst_file, fs::Permissions::from_mode(0o755));
                     log(
                         LogLevel::Success,
                         format!("Installed {} to ~/.local/bin", bin.name),

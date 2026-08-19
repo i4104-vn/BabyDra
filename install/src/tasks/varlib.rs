@@ -1,12 +1,12 @@
 use crate::models::{GenericOptionItem, LogLevel};
-use crate::system::{get_user_home, SudoSession};
+use crate::system::SudoSession;
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 
 pub fn execute_varlib_task<F>(
     opt: &GenericOptionItem,
-    workspace_root: &Path,
+    _workspace_root: &Path,
     source_binary_dir: &Path,
     sudo: &SudoSession,
     mut log: F,
@@ -17,7 +17,6 @@ where
     let mut copied = 0;
     let var_lib_babydra = PathBuf::from("/var/lib/babydra");
     let var_lib_bin = var_lib_babydra.join("bin");
-    let home = get_user_home();
 
     match opt.id.as_str() {
         "stage_binaries" => {
@@ -29,6 +28,7 @@ where
 
             let all_binary_names = [
                 "babydra-panel",
+                "babydra-desktop",
                 "babydra-switcher",
                 "babydra-screenshot",
                 "babydra-lock",
@@ -68,66 +68,6 @@ where
                 LogLevel::Success,
                 "Staged binaries to /var/lib/babydra/bin/".into(),
             );
-            copied += 1;
-        }
-
-        "stage_wallpapers" => {
-            log(
-                LogLevel::Bundle,
-                "Staging wallpapers to /var/lib/babydra and /usr/share/babydra...".into(),
-            );
-            let wp = workspace_root.join("wallpaper.png");
-            let user_babydra = home.join(".babydra");
-            let _ = fs::create_dir_all(&user_babydra);
-
-            if wp.exists() {
-                let _ = fs::copy(&wp, user_babydra.join("wallpaper.png"));
-
-                let _ =
-                    sudo.run_root_quiet(&["mkdir", "-p", "/usr/share/babydra", "/var/lib/babydra"]);
-                let _ = sudo.run_root_quiet(&[
-                    "cp",
-                    wp.to_str().unwrap_or(""),
-                    "/var/lib/babydra/greeter_wallpaper.png",
-                ]);
-                let _ = sudo.run_root_quiet(&[
-                    "cp",
-                    wp.to_str().unwrap_or(""),
-                    "/usr/share/babydra/wallpaper.png",
-                ]);
-                log(LogLevel::Success, "Deployed system wallpapers.".into());
-            }
-            copied += 1;
-        }
-
-        "stage_logos" => {
-            log(
-                LogLevel::Bundle,
-                "Deploying logos & icons to /var/lib/babydra & /usr/share/babydra...".into(),
-            );
-            let logo = workspace_root.join("libs/babydra-core/src/services/logo.png");
-            let user_babydra = home.join(".babydra");
-            let _ = fs::create_dir_all(&user_babydra);
-
-            if logo.exists() {
-                let _ = fs::copy(&logo, user_babydra.join("logo.png"));
-
-                let _ =
-                    sudo.run_root_quiet(&["mkdir", "-p", "/usr/share/babydra", "/var/lib/babydra"]);
-                let logo_str = logo.to_str().unwrap_or("");
-                for dest in [
-                    "/var/lib/babydra/logo.png",
-                    "/usr/share/babydra/logo.png",
-                    "/usr/share/babydra/babydra-preview.png",
-                    "/usr/share/babydra/babydra-settings.png",
-                ] {
-                    let _ = sudo.run_root_quiet(&["cp", logo_str, dest]);
-                }
-                log(
-                    LogLevel::Success,
-                    "Deployed brand logos & preview icons.".into(),
-                );
-            }
             copied += 1;
         }
 

@@ -108,7 +108,9 @@ pub fn get_user_local_bin() -> PathBuf {
 }
 
 pub fn get_user_home() -> PathBuf {
-    dirs::home_dir().unwrap_or_else(|| PathBuf::from("/home/i4104"))
+    dirs::home_dir()
+        .or_else(|| std::env::var("HOME").ok().map(PathBuf::from))
+        .unwrap_or_else(|| PathBuf::from("/root"))
 }
 
 #[cfg(test)]

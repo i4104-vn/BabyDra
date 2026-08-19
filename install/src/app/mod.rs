@@ -203,14 +203,13 @@ impl App {
 
     pub fn apply_profile(&mut self, profile: PresetProfile) {
         self.current_profile = profile;
-        let build_from_source = self.is_build_from_source();
         match profile {
             PresetProfile::FullDesktop => {
                 for opt in &mut self.package_options {
                     opt.selected = true;
                 }
                 for b in &mut self.binaries {
-                    b.selected = b.exists_in_source || build_from_source;
+                    b.selected = true;
                 }
                 for opt in &mut self.varlib_options {
                     opt.selected = true;
@@ -228,7 +227,7 @@ impl App {
                     opt.selected = false;
                 }
                 for b in &mut self.binaries {
-                    b.selected = b.exists_in_source || build_from_source;
+                    b.selected = true;
                 }
                 for opt in &mut self.varlib_options {
                     opt.selected = true;

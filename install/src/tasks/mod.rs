@@ -180,6 +180,7 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             );
             let procs = [
                 "babydra-panel",
+                "babydra-desktop",
                 "babydra-switcher",
                 "babydra-screenshot",
                 "babydra-lock",

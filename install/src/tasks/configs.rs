@@ -298,6 +298,22 @@ where
                 );
             }
 
+            // Remove stale socket and restart switcher daemon
+            let switcher_bin = user_bin_dir.join("babydra-switcher");
+            if switcher_bin.exists() {
+                let _ = fs::remove_file("/tmp/babydra-switcher.socket");
+                let _ = Command::new(&switcher_bin)
+                    .arg("--daemon")
+                    .stdin(std::process::Stdio::null())
+                    .stdout(std::process::Stdio::null())
+                    .stderr(std::process::Stdio::null())
+                    .spawn();
+                log(
+                    LogLevel::Success,
+                    "babydra-switcher --daemon started in background.".into(),
+                );
+            }
+
             let panel_bin = user_bin_dir.join("babydra-panel");
             if panel_bin.exists() {
                 log(
@@ -329,6 +345,19 @@ where
                 log(
                     LogLevel::Success,
                     format!("babydra-panel started (logs: {}).", log_file.display()),
+                );
+            }
+
+            let desktop_bin = user_bin_dir.join("babydra-desktop");
+            if desktop_bin.exists() {
+                let _ = Command::new(&desktop_bin)
+                    .stdin(std::process::Stdio::null())
+                    .stdout(std::process::Stdio::null())
+                    .stderr(std::process::Stdio::null())
+                    .spawn();
+                log(
+                    LogLevel::Success,
+                    "babydra-desktop started in background.".into(),
                 );
             }
             copied += 1;
