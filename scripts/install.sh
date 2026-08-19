@@ -111,25 +111,26 @@ cp target/release/babydra-launcher "$LOCAL_BIN/babydra-launcher"
 cp target/release/babydra-preview "$LOCAL_BIN/babydra-preview"
 cp target/release/babydra-settings "$LOCAL_BIN/babydra-settings"
 cp target/release/babydra-explore "$LOCAL_BIN/babydra-explore"
+chmod +x "$LOCAL_BIN"/babydra-* 2>/dev/null || true
 sudo cp target/release/babydra-greeter /usr/bin/babydra-greeter
 
 
 # Copy wallpaper and logos to standard config & system resource dirs
 mkdir -p "$HOME/.babydra"
-cp wallpaper.png "$HOME/.babydra/wallpaper.png"
-cp libs/babydra-core/src/services/logo.png "$HOME/.babydra/logo.png"
+cp "$REPO_ROOT/wallpaper.png" "$HOME/.babydra/wallpaper.png"
+cp "$REPO_ROOT/libs/babydra-core/src/services/logo.png" "$HOME/.babydra/logo.png"
 
 sudo mkdir -p /usr/share/babydra
 sudo mkdir -p /var/lib/babydra
 sudo chmod 777 /var/lib/babydra
 
-sudo cp libs/babydra-core/src/services/logo.png /usr/share/babydra/babydra-preview.png
-sudo cp libs/babydra-core/src/services/logo.png /usr/share/babydra/babydra-settings.png
-sudo cp libs/babydra-core/src/services/logo.png /usr/share/babydra/logo.png
-sudo cp libs/babydra-core/src/services/logo.png /var/lib/babydra/logo.png
+sudo cp "$REPO_ROOT/libs/babydra-core/src/services/logo.png" /usr/share/babydra/babydra-preview.png
+sudo cp "$REPO_ROOT/libs/babydra-core/src/services/logo.png" /usr/share/babydra/babydra-settings.png
+sudo cp "$REPO_ROOT/libs/babydra-core/src/services/logo.png" /usr/share/babydra/logo.png
+sudo cp "$REPO_ROOT/libs/babydra-core/src/services/logo.png" /var/lib/babydra/logo.png
 
-sudo cp wallpaper.png /usr/share/babydra/wallpaper.png
-sudo cp wallpaper.png /var/lib/babydra/greeter_wallpaper.png
+sudo cp "$REPO_ROOT/wallpaper.png" /usr/share/babydra/wallpaper.png
+sudo cp "$REPO_ROOT/wallpaper.png" /var/lib/babydra/greeter_wallpaper.png
 
 # 7. Copy labwc configuration files from configs/labwc/
 echo "Configuring labwc compositor integrations..."
@@ -154,12 +155,16 @@ fi
 cp -r "$REPO_ROOT/configs/themes/BabyDra" "$HOME/.local/share/themes/"
 
 mkdir -p "$HOME/.local/share/icons"
-tar -xf "$REPO_ROOT/configs/themes/cursor/aosp-cursors.tar" -C "$HOME/.local/share/icons/"
-tar -xf "$REPO_ROOT/configs/themes/icons/We10X.tar" -C "$HOME/.local/share/icons/"
-tar -xf "$REPO_ROOT/configs/themes/icons/We10X-blue.tar" -C "$HOME/.local/share/icons/"
-tar -xf "$REPO_ROOT/configs/themes/icons/We10X-blue-dark.tar" -C "$HOME/.local/share/icons/"
-tar -xf "$REPO_ROOT/configs/themes/icons/We10X-dark.tar" -C "$HOME/.local/share/icons/"
-tar -xf "$REPO_ROOT/configs/themes/cursor/Twilight-cursors.tar" -C "$HOME/.local/share/icons/"
+if [ -d "$REPO_ROOT/configs/themes/cursor" ]; then
+    for archive in "$REPO_ROOT/configs/themes/cursor/"*.tar; do
+        [ -f "$archive" ] && tar -xf "$archive" -C "$HOME/.local/share/icons/" 2>/dev/null || true
+    done
+fi
+if [ -d "$REPO_ROOT/configs/themes/icons" ]; then
+    for archive in "$REPO_ROOT/configs/themes/icons/"*.tar; do
+        [ -f "$archive" ] && tar -xf "$archive" -C "$HOME/.local/share/icons/" 2>/dev/null || true
+    done
+fi
 
 # 8. Reload configuration and restart panel
 echo "Reloading labwc configuration and starting panel..."
@@ -177,10 +182,12 @@ cp "$REPO_ROOT/configs/labwc/fonts.conf" "$HOME/.config/fontconfig/fonts.conf"
 cp -r "$REPO_ROOT/configs/kitty/"* "$HOME/.config/kitty/" 2>/dev/null || true
 cp -r "$REPO_ROOT/configs/nvim/"* "$HOME/.config/nvim/" 2>/dev/null || true
 
-# Apply font to GNOME/GTK desktop interface via gsettings
+# Apply font, icon theme, and cursor theme to GNOME/GTK desktop interface via gsettings
 gsettings set org.gnome.desktop.interface font-name 'Segoe UI Variable Static Text 13' 2>/dev/null || true
 gsettings set org.gnome.desktop.interface document-font-name 'Segoe UI Variable Static Text 13' 2>/dev/null || true
 gsettings set org.gnome.desktop.interface monospace-font-name 'CaskaydiaCove Nerd Font 11' 2>/dev/null || true
+gsettings set org.gnome.desktop.interface icon-theme 'We10X' 2>/dev/null || true
+gsettings set org.gnome.desktop.interface cursor-theme 'Twilight-cursors' 2>/dev/null || true
 
 # 10. Configure fastfetch
 echo "Configuring fastfetch..."

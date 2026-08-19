@@ -20,39 +20,43 @@ killall babydra-settings || true
 killall fnott || true
 killall xfce4-notifyd || true 
 
+# Resolve the repo root (parent of scripts/) so this script works from any CWD.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+LOCAL_BIN="$HOME/.local/bin"
+
 # Copy wallpaper to standard config dir
 mkdir -p "$HOME/.babydra"
-cp wallpaper.png "$HOME/.babydra/wallpaper.png"
+cp "$REPO_ROOT/wallpaper.png" "$HOME/.babydra/wallpaper.png" 2>/dev/null || true
 
 # Setup default autostart and rc.xml by copying them from configs/labwc/
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cp "$SCRIPT_DIR/configs/labwc/autostart" "$AUTOSTART_FILE"
+cp "$REPO_ROOT/configs/labwc/autostart" "$AUTOSTART_FILE"
 chmod +x "$AUTOSTART_FILE"
 echo "Configured labwc autostart at $AUTOSTART_FILE"
 
-cp "$SCRIPT_DIR/configs/labwc/rc.xml" "$RC_FILE"
+cp "$REPO_ROOT/configs/labwc/rc.xml" "$RC_FILE"
 echo "Configured labwc rc.xml at $RC_FILE"
 
-cp "$SCRIPT_DIR/configs/labwc/themerc-override" "$HOME/.config/labwc/themerc-override"
+cp "$REPO_ROOT/configs/labwc/themerc-override" "$HOME/.config/labwc/themerc-override"
 echo "Configured labwc themerc-override at $HOME/.config/labwc/themerc-override"
 mkdir -p "$HOME/.config/labwc/themes"
-cp -r "$SCRIPT_DIR/configs/labwc/themes/"* "$HOME/.config/labwc/themes/"
+cp -r "$REPO_ROOT/configs/labwc/themes/"* "$HOME/.config/labwc/themes/"
 mkdir -p "$HOME/.config/labwc/scripts"
-cp -r "$SCRIPT_DIR/configs/labwc/scripts/"* "$HOME/.config/labwc/scripts/"
+cp -r "$REPO_ROOT/configs/labwc/scripts/"* "$HOME/.config/labwc/scripts/"
 chmod +x "$HOME/.config/labwc/scripts/"*
-cp -r "$SCRIPT_DIR/configs/themes/BabyDra" "$HOME/.local/share/themes/"
+cp -r "$REPO_ROOT/configs/themes/BabyDra" "$HOME/.local/share/themes/"
 echo "Configured labwc theme BabyDra"
 
 # Register default image handler in ~/.local/share/applications
 echo "Registering default image handler..."
 mkdir -p "$HOME/.local/share/applications"
-cat << 'EOF' > "$HOME/.local/share/applications/babydra-preview.desktop"
+cat << EOF > "$HOME/.local/share/applications/babydra-preview.desktop"
 [Desktop Entry]
 Type=Application
 Name=BabyDra Preview
 Comment=Viewer for images
-Exec=/home/i4104/.local/bin/babydra-preview %f
-Icon=image-x-generic
+Exec=$LOCAL_BIN/babydra-preview %f
+Icon=/usr/share/babydra/babydra-preview.png
 Terminal=false
 Categories=Graphics;Viewer;GTK;
 MimeType=image/png;image/jpeg;image/gif;image/webp;image/bmp;
@@ -65,13 +69,13 @@ xdg-mime default babydra-preview.desktop image/png image/jpeg image/gif image/we
 
 # Register Settings application entry
 echo "Registering settings manager entry..."
-cat << 'EOF' > "$HOME/.local/share/applications/babydra-settings.desktop"
+cat << EOF > "$HOME/.local/share/applications/babydra-settings.desktop"
 [Desktop Entry]
 Type=Application
 Name=BabyDra Settings
 Comment=Configure system settings
-Exec=/home/i4104/.local/bin/babydra-settings
-Icon=preferences-system
+Exec=$LOCAL_BIN/babydra-settings
+Icon=/usr/share/babydra/babydra-settings.png
 Terminal=false
 Categories=Settings;HardwareSettings;GTK;
 NoDisplay=false

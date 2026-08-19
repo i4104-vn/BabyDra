@@ -34,6 +34,7 @@ killall babydra-desktop || true
 killall babydra-switcher || true
 killall babydra-screenshot || true
 killall babydra-lock || true
+killall babydra-launcher || true
 killall babydra-image-preview || true
 killall babydra-preview || true
 killall babydra-settings || true
@@ -47,9 +48,11 @@ cp target/release/babydra-desktop "$LOCAL_BIN/babydra-desktop"
 cp target/release/babydra-switcher "$LOCAL_BIN/babydra-switcher"
 cp target/release/babydra-screenshot "$LOCAL_BIN/babydra-screenshot"
 cp target/release/babydra-lock "$LOCAL_BIN/babydra-lock"
+cp target/release/babydra-launcher "$LOCAL_BIN/babydra-launcher"
 cp target/release/babydra-preview "$LOCAL_BIN/babydra-preview"
 cp target/release/babydra-settings "$LOCAL_BIN/babydra-settings"
 cp target/release/babydra-explore "$LOCAL_BIN/babydra-explore"
+chmod +x "$LOCAL_BIN"/babydra-* 2>/dev/null || true
 sudo cp target/release/babydra-greeter /usr/bin/babydra-greeter 2>/dev/null || true
 
 # Register default image handler in ~/.local/share/applications
@@ -61,7 +64,7 @@ Type=Application
 Name=BabyDra Preview
 Comment=Viewer for images
 Exec=$LOCAL_BIN/babydra-preview %f
-Icon=image-x-generic
+Icon=/usr/share/babydra/babydra-preview.png
 Terminal=false
 Categories=Graphics;Viewer;GTK;
 MimeType=image/png;image/jpeg;image/gif;image/webp;image/bmp;
@@ -80,7 +83,7 @@ Type=Application
 Name=BabyDra Settings
 Comment=Configure system settings
 Exec=$LOCAL_BIN/babydra-settings
-Icon=preferences-system
+Icon=/usr/share/babydra/babydra-settings.png
 Terminal=false
 Categories=Settings;HardwareSettings;GTK;
 NoDisplay=false
@@ -203,10 +206,12 @@ fi
 
 echo "✓ All configurations synced successfully!"
 
-# 7. Start shell components (panel, desktop) and redirect stdout/stderr to log file
+# 7. Start shell components (switcher daemon, panel, desktop)
 echo "Starting shell services..."
 killall fnott || true
 killall xfce4-notifyd || true
 
+rm -f /tmp/babydra-switcher.socket
+~/.local/bin/babydra-switcher --daemon &
 ~/.local/bin/babydra-panel &
 ~/.local/bin/babydra-desktop &
