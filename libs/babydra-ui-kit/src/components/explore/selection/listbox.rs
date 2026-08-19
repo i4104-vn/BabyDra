@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Fixed, FlowBoxChild, GestureDrag, ListBox, ListBoxRow, PickFlags};
+use gtk4::{Box, Fixed, GestureDrag, ListBox, ListBoxRow};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -19,24 +19,25 @@ pub fn wire_rubberband(
     let drag_select_active = Rc::new(RefCell::new(false));
 
     let drag_select_active_begin = drag_select_active.clone();
-    let lf_parent = list_fixed.parent().map(|p| p.clone());
+    let lb_begin = listbox.clone();
+    let lf_begin = list_fixed.clone();
+
     drag_gesture.connect_drag_begin(move |gesture, x, y| {
         let mut is_item = false;
-        if let Some(ref parent) = lf_parent {
-            let picked = parent.pick(x, y, PickFlags::empty());
-            let mut next = picked;
-            while let Some(w) = next {
-                if w.downcast_ref::<FlowBoxChild>().is_some()
-                    || w.downcast_ref::<ListBoxRow>().is_some()
-                {
+        let mut child = lb_begin.first_child();
+        while let Some(c) = child {
+            if let Some((cx, cy)) = c.translate_coordinates(&lf_begin, 0.0, 0.0) {
+                let cw = c.width() as f64;
+                let ch = c.height() as f64;
+                if x >= cx && x <= cx + cw && y >= cy && y <= cy + ch {
                     is_item = true;
                     break;
                 }
-                next = w.parent();
             }
+            child = c.next_sibling();
         }
 
-        if !is_item || x > 200.0 {
+        if !is_item {
             drag_select_active_begin.replace(true);
             start_pos_c.replace(Some((x, y)));
             // Show rubberband in drag_update, not here — avoids 1-frame flash on plain clicks

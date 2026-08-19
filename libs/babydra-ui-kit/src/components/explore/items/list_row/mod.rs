@@ -96,7 +96,6 @@ pub fn create_list_row(
             snap_rel.borrow_mut().clear();
         }
     });
-    item_box.add_controller(saver);
 
     let path_drag = entry.path.clone();
     let sel_drag = selected_paths.clone();
@@ -121,7 +120,9 @@ pub fn create_list_row(
         },
     );
     drag_source.set_propagation_phase(gtk4::PropagationPhase::Capture);
-    item_box.add_controller(drag_source);
+
+    list_row.add_controller(saver);
+    list_row.add_controller(drag_source);
 
     list_row
 }

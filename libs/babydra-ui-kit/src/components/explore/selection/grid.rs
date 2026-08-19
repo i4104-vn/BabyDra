@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Box, Fixed, FlowBox, FlowBoxChild, GestureDrag, ListBoxRow, PickFlags};
+use gtk4::{Box, Fixed, FlowBox, FlowBoxChild, GestureDrag};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -19,21 +19,31 @@ pub fn wire_rubberband_grid(
     let drag_select_active = Rc::new(RefCell::new(false));
 
     let drag_select_active_begin = drag_select_active.clone();
-    let gf_parent = grid_fixed.parent().map(|p| p.clone());
+    let gc_begin = grid_container.clone();
+    let gf_begin = grid_fixed.clone();
+
     drag_gesture.connect_drag_begin(move |gesture, x, y| {
         let mut is_item = false;
-        if let Some(ref parent) = gf_parent {
-            let picked = parent.pick(x, y, PickFlags::empty());
-            let mut next = picked;
-            while let Some(w) = next {
-                if w.downcast_ref::<FlowBoxChild>().is_some()
-                    || w.downcast_ref::<ListBoxRow>().is_some()
-                {
-                    is_item = true;
-                    break;
+        let mut sibling = gc_begin.first_child();
+        while let Some(child) = sibling {
+            if let Some(fb) = child.downcast_ref::<FlowBox>() {
+                let mut item_child = fb.first_child();
+                while let Some(c) = item_child {
+                    if let Some((cx, cy)) = c.translate_coordinates(&gf_begin, 0.0, 0.0) {
+                        let cw = c.width() as f64;
+                        let ch = c.height() as f64;
+                        if x >= cx && x <= cx + cw && y >= cy && y <= cy + ch {
+                            is_item = true;
+                            break;
+                        }
+                    }
+                    item_child = c.next_sibling();
                 }
-                next = w.parent();
             }
+            if is_item {
+                break;
+            }
+            sibling = child.next_sibling();
         }
 
         if !is_item {

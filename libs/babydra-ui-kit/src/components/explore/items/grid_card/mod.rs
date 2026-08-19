@@ -58,7 +58,6 @@ pub fn create_grid_file(
             snap_rel.borrow_mut().clear();
         }
     });
-    item_box.add_controller(saver);
 
     let path_drag = entry.path.clone();
     let sel_drag = selected_paths.clone();
@@ -83,7 +82,6 @@ pub fn create_grid_file(
         },
     );
     drag_source.set_propagation_phase(gtk4::PropagationPhase::Capture);
-    item_box.add_controller(drag_source);
 
     let flow_child = FlowBoxChild::new();
     flow_child.set_size_request(114, 114);
@@ -94,6 +92,9 @@ pub fn create_grid_file(
     flow_child.set_child(Some(&item_box));
     flow_child.set_property("name", &format!("{}", idx));
     flow_child.set_widget_name(&entry.path.to_string_lossy());
+
+    flow_child.add_controller(saver);
+    flow_child.add_controller(drag_source);
 
     flow_child
 }
