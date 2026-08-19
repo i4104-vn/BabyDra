@@ -54,7 +54,8 @@ pub fn launch_entry(entry: &FileEntry) {
         }
     }
 
-    let _ = std::process::Command::new("xdg-open")
-        .arg(&entry.path)
-        .spawn();
+    babydra_ui_kit::components::explore::prelude::launch_file_or_open_with(
+        &entry.path,
+        None::<&gtk4::Window>,
+    );
 }

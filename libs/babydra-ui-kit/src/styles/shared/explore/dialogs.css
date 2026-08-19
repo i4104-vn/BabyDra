@@ -377,3 +377,42 @@ button.properties-btn-cancel {
     font-weight: 600;
     transition: background-color 150ms ease;
 }
+
+.open-with-dialog {
+    min-width: 380px;
+}
+
+.open-with-scrolled {
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+.open-with-list {
+    background-color: transparent;
+}
+
+.open-with-row {
+    border-radius: 6px;
+    margin: 2px 4px;
+    padding: 2px;
+    transition: background-color 120ms ease;
+}
+
+.open-with-row:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.open-with-row:selected {
+    background-color: rgba(59, 130, 246, 0.25);
+}
+
+.app-name {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.app-exec {
+    font-size: 11px;
+    opacity: 0.65;
+}

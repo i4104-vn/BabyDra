@@ -22,11 +22,12 @@ pub use crate::components::explore::context_menu::{
 pub use crate::components::explore::dialogs::{
     archive::show_compress_log,
     decompress::{show_decompress_log, show_password_dialog},
-    decompress_async,
+    decompress_async, launch_file_or_open_with,
     properties::helpers::{count_dialog_height, count_dir_contents, get_perm_string},
     properties::permissions::{apply_permissions, build_perm_matrix, PermissionCheckboxes},
     show_alert_dialog, show_compress_dialog, show_conflict_dialog, show_delete_confirm,
-    show_folder_dialog, show_new_file_dialog, show_properties, show_rename_dialog,
+    show_folder_dialog, show_new_file_dialog, show_open_with_dialog, show_properties,
+    show_rename_dialog,
 };
 pub use crate::components::explore::drag::{
     create_bg_drop, create_drag_source, create_drop_nav, create_drop_target,

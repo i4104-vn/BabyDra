@@ -173,5 +173,9 @@
   "explore.spawn_compress_failed": "Failed to spawn compress process: {}",
   "explore.spawn_decompress_failed": "Failed to spawn decompress process: {}",
   "explore.settings_press_for": "Press key combination for:\n{}",
-  "explore.settings_press_any": "Press any keys..."
+  "explore.settings_press_any": "Press any keys...",
+  "explore.dialog_open_with_title": "Choose Application",
+  "explore.dialog_open_with_search": "Search installed applications...",
+  "explore.dialog_open_with_always": "Always use this application to open this file type",
+  "explore.dialog_open_with_no_apps": "No matching applications found"
 }

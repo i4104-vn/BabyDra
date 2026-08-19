@@ -173,5 +173,9 @@
   "explore.spawn_compress_failed": "Không thể khởi chạy tiến trình nén: {}",
   "explore.spawn_decompress_failed": "Không thể khởi chạy tiến trình giải nén: {}",
   "explore.settings_press_for": "Nhấn tổ hợp phím cho:\n{}",
-  "explore.settings_press_any": "Nhấn bất kỳ phím nào..."
+  "explore.settings_press_any": "Nhấn bất kỳ phím nào...",
+  "explore.dialog_open_with_title": "Chọn ứng dụng mở",
+  "explore.dialog_open_with_search": "Tìm kiếm ứng dụng...",
+  "explore.dialog_open_with_always": "Luôn sử dụng ứng dụng này cho loại tệp này",
+  "explore.dialog_open_with_no_apps": "Không tìm thấy ứng dụng phù hợp"
 }

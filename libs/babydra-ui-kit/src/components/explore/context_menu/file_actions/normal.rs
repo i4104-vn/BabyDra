@@ -30,6 +30,7 @@ pub fn show_for_file_normal(
     let is_any_dir = target_paths.iter().any(|p| p.is_dir());
     let target_paths_open = target_paths.clone();
     let nav = nav_callback.clone();
+    let parent_open = parent.clone();
     builder = builder.item(
         &trans("explore.menu_open"),
         if is_any_dir { "folder" } else { "text" },
@@ -38,15 +39,30 @@ pub fn show_for_file_normal(
                 if path.is_dir() {
                     nav(path.clone());
                 } else {
-                    let uri = format!("file://{}", path.to_string_lossy());
-                    let _ = gtk4::gio::AppInfo::launch_default_for_uri(
-                        &uri,
-                        gtk4::gio::AppLaunchContext::NONE,
+                    crate::components::explore::dialogs::launch_file_or_open_with(
+                        path,
+                        Some(&parent_open),
                     );
                 }
             }
         },
     );
+
+    // 1.1. Open With... (for non-directory files)
+    if !is_any_dir && !target_paths.is_empty() {
+        let path_to_open = target_paths[0].clone();
+        let parent_open_with = parent.clone();
+        builder = builder.item(
+            &trans("explore.menu_open_with"),
+            "external-link",
+            move || {
+                crate::components::explore::dialogs::show_open_with_dialog(
+                    &path_to_open,
+                    Some(&parent_open_with),
+                );
+            },
+        );
+    }
 
     // 2. Open in New Window
     builder = builder.item(

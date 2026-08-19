@@ -52,10 +52,9 @@ pub fn create_list_row(
             if is_dir {
                 nav_callback(target_path.clone());
             } else {
-                let uri = format!("file://{}", target_path.to_string_lossy());
-                let _ = gtk4::gio::AppInfo::launch_default_for_uri(
-                    &uri,
-                    gtk4::gio::AppLaunchContext::NONE,
+                crate::components::explore::dialogs::launch_file_or_open_with(
+                    &target_path,
+                    None::<&gtk4::Window>,
                 );
             }
         }

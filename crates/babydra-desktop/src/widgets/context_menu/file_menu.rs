@@ -32,13 +32,12 @@ pub fn show_file_menu(
         },
     );
 
-    // 2. Open With Default / App Picker
+    // 2. Open With App Picker
     if !is_dir {
         let path_c = entry.path.clone();
+        let parent_win_c = parent_window.clone();
         builder = builder.item(&trans("desktop.open_with"), "external-link", move || {
-            let uri = format!("file://{}", path_c.to_string_lossy());
-            let _ =
-                gtk4::gio::AppInfo::launch_default_for_uri(&uri, gtk4::gio::AppLaunchContext::NONE);
+            show_open_with_dialog(&path_c, Some(&parent_win_c));
         });
     }
 
