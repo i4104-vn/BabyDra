@@ -20,25 +20,3 @@ button.panel-tray-item-btn {
     transition: all 150ms ease;
 }
 
-popover.tray-context-menu {
-    padding: 6px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-button.tray-menu-item {
-    padding: 6px 12px;
-    border-radius: 6px;
-    border: none;
-    background: transparent;
-    transition: background-color 150ms ease;
-}
-
-separator.tray-menu-separator {
-    margin: 4px 0;
-    opacity: 0.2;
-}
-
-.tray-menu-submenu {
-    padding-left: 12px;
-}

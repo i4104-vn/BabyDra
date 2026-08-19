@@ -124,21 +124,14 @@ button.panel-tray-item-btn:hover {
     background-color: rgba(255, 255, 255, 0.10);
 }
 
+popover.tray-context-menu,
 popover.tray-context-menu > contents {
-    background-color: rgba(14, 14, 18, 0.98);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-}
-
-button.tray-menu-item {
-    color: rgba(255, 255, 255, 0.9);
-}
-
-button.tray-menu-item:hover {
-    background-color: rgba(255, 255, 255, 0.10);
-}
-
-separator.tray-menu-separator {
-    background-color: rgba(255, 255, 255, 0.2);
+    background: transparent;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
 }
 
 /* === panel/taskbar.css === */
@@ -2268,6 +2261,32 @@ scale.settings-scale:disabled mark label {
 }
 
 /* === explore/context_menu.css === */
+popover.context-menu-popover,
+popover.explore-popover,
+popover.tray-context-menu,
+popover.desktop-context-menu,
+popover.context-menu-popover > contents,
+popover.explore-popover > contents,
+popover.tray-context-menu > contents,
+popover.desktop-context-menu > contents {
+    background: transparent;
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+}
+
+popover.context-menu-popover > arrow,
+popover.explore-popover > arrow,
+popover.tray-context-menu > arrow,
+popover.desktop-context-menu > arrow {
+    background: none;
+    border: none;
+}
+
 .context-menu-box {
     background-color: rgb(20, 20, 22);
     color: #e8e8e8;

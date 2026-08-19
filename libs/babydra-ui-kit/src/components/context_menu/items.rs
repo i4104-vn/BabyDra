@@ -26,7 +26,7 @@ pub fn create_menu_popover(parent: &gtk4::Widget, x: f64, y: f64) -> (Popover, B
 /// Creates a context menu popover anchored relative to a target widget (e.g. Tray or Header button).
 pub fn create_menu_for(parent: &gtk4::Widget, position: PositionType) -> (Popover, Box) {
     let popover = Popover::builder()
-        .has_arrow(true)
+        .has_arrow(false)
         .autohide(true)
         .position(position)
         .build();
@@ -53,7 +53,7 @@ pub(super) fn create_submenu_popover(
     extra_class: &str,
 ) -> Popover {
     let sub_popover = Popover::builder()
-        .has_arrow(true)
+        .has_arrow(false)
         .autohide(false)
         .position(PositionType::Right)
         .build();
