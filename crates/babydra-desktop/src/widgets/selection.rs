@@ -60,7 +60,10 @@ pub fn attach_rubberband(desktop_fixed: &Fixed, state: Rc<RefCell<DesktopState>>
         if !is_icon {
             let is_ctrl = gesture
                 .current_event()
-                .map(|e| e.modifier_state().contains(gtk4::gdk::ModifierType::CONTROL_MASK))
+                .map(|e| {
+                    e.modifier_state()
+                        .contains(gtk4::gdk::ModifierType::CONTROL_MASK)
+                })
                 .unwrap_or(false);
 
             if !is_ctrl {
@@ -111,7 +114,10 @@ pub fn attach_rubberband(desktop_fixed: &Fixed, state: Rc<RefCell<DesktopState>>
 
             let is_ctrl = gesture
                 .current_event()
-                .map(|e| e.modifier_state().contains(gtk4::gdk::ModifierType::CONTROL_MASK))
+                .map(|e| {
+                    e.modifier_state()
+                        .contains(gtk4::gdk::ModifierType::CONTROL_MASK)
+                })
                 .unwrap_or(false);
 
             let mut state_ref = state_update.borrow_mut();

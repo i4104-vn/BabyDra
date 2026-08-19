@@ -10,7 +10,6 @@ use babydra_core::models::explore::FileType;
 use gtk4::prelude::*;
 use gtk4::{Box, Fixed, GestureClick};
 use std::cell::{Cell, RefCell};
-use std::path::PathBuf;
 use std::rc::Rc;
 
 /// Rebuilds all icon widgets inside the Fixed layout based on the current DesktopState.
