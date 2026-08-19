@@ -164,11 +164,7 @@ pub fn build_panel_ui(
         Layer::Top,
         KeyboardMode::OnDemand,
         38,
-        &[
-            (Edge::Top, true),
-            (Edge::Left, true),
-            (Edge::Right, true),
-        ],
+        &[(Edge::Top, true), (Edge::Left, true), (Edge::Right, true)],
         0,
         None,
     );

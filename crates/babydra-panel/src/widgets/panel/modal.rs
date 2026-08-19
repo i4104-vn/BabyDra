@@ -10,9 +10,7 @@ use super::items::header::render::create_header_row;
 use super::toggle_grid::create_cc_grid;
 
 /// Builds the control center window UI.
-pub fn build_control_center(
-    app: &gtk4::Application,
-) -> (gtk4::ApplicationWindow, gtk4::Box) {
+pub fn build_control_center(app: &gtk4::Application) -> (gtk4::ApplicationWindow, gtk4::Box) {
     let q_win = gtk4::ApplicationWindow::new(app);
     babydra_ui_kit::ui::theme::apply_theme_class(&q_win);
     babydra_ui_kit::ui::window::init_layer_window(

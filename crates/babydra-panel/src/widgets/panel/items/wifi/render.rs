@@ -1,5 +1,5 @@
-use super::popover::setup_wifi_popover;
 use super::get_wifi_state;
+use super::popover::setup_wifi_popover;
 use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use std::rc::Rc;
@@ -33,11 +33,7 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
         if let Some((is_act, ssid_str)) = rx.recv().await {
             sub_label_init.set_text(&ssid_str);
             let is_connected = is_act && ssid_str != "Off" && ssid_str != "Disconnected";
-            babydra_ui_kit::components::update_toggle_state(
-                &left_btn_init,
-                is_connected,
-                "wifi",
-            );
+            babydra_ui_kit::components::update_toggle_state(&left_btn_init, is_connected, "wifi");
         }
     });
 

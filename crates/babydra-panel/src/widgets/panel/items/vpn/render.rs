@@ -237,8 +237,9 @@ fn build_vpn_list_ui(main_box: &gtk4::Box, vpns: Vec<VpnConn>, tile_btn: Option<
         empty_icon.set_halign(gtk4::Align::Center);
         empty_box.append(&empty_icon);
 
-        let empty_lbl =
-            gtk4::Label::new(Some(&babydra_core::i18n::trans("control.vpn_no_connections")));
+        let empty_lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans(
+            "control.vpn_no_connections",
+        )));
         empty_lbl.add_css_class("media-time-label");
         empty_lbl.set_halign(gtk4::Align::Center);
         empty_box.append(&empty_lbl);

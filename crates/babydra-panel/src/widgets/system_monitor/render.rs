@@ -37,7 +37,8 @@ pub fn build_sys_monitor(
     let popover_box = gtk4::Box::new(gtk4::Orientation::Vertical, 10);
     popover_box.set_size_request(200, -1);
 
-    let popover_title = gtk4::Label::new(Some(&babydra_core::i18n::trans("panel.system_resources")));
+    let popover_title =
+        gtk4::Label::new(Some(&babydra_core::i18n::trans("panel.system_resources")));
     popover_title.add_css_class("tile-title");
     popover_title.set_xalign(0.0);
     popover_title.set_margin_bottom(4);

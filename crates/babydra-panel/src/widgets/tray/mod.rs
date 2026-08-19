@@ -63,7 +63,8 @@ pub fn create_tray_widget(window: &gtk4::ApplicationWindow) -> gtk4::Box {
                         let s_name_clone = service_name.clone();
                         let path_clone = path_name.clone();
                         std::thread::spawn(move || {
-                            let menu_opt = babydra_core::tray::get_dbus_menu(&s_name_clone, &path_clone);
+                            let menu_opt =
+                                babydra_core::tray::get_dbus_menu(&s_name_clone, &path_clone);
                             let _ = tx.send(menu_opt);
                         });
 
@@ -76,8 +77,11 @@ pub fn create_tray_widget(window: &gtk4::ApplicationWindow) -> gtk4::Box {
                             move || match rx.try_recv() {
                                 Ok(menu_opt) => {
                                     if let Some(menu) = menu_opt {
-                                        babydra_ui_kit::components::context_menu::
-                                            show_tray_menu(&btn_clone, &s_name_main, &menu);
+                                        babydra_ui_kit::components::context_menu::show_tray_menu(
+                                            &btn_clone,
+                                            &s_name_main,
+                                            &menu,
+                                        );
                                     } else {
                                         babydra_core::tray::activate_item(
                                             &s_name_main,
@@ -98,7 +102,13 @@ pub fn create_tray_widget(window: &gtk4::ApplicationWindow) -> gtk4::Box {
                             },
                         );
                     } else {
-                        babydra_core::tray::activate_item(&service_name, &path_name, abs_x, abs_y, false);
+                        babydra_core::tray::activate_item(
+                            &service_name,
+                            &path_name,
+                            abs_x,
+                            abs_y,
+                            false,
+                        );
                     }
                 });
 

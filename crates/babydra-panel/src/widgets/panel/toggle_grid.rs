@@ -3,9 +3,7 @@ use gtk4::prelude::*;
 use std::rc::Rc;
 
 /// Creates a new `control center grid`.
-pub fn create_cc_grid(
-    on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>,
-) -> gtk4::Box {
+pub fn create_cc_grid(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) -> gtk4::Box {
     let main_layout = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
     main_layout.add_css_class("control-center-grid");
     main_layout.set_hexpand(true);

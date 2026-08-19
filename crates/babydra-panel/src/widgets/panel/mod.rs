@@ -79,11 +79,8 @@ pub fn create_status_icons(
         if let Some(existing_window) = existing {
             existing_window.close();
         } else {
-            let q_win = modal::create_cc_window(
-                &app_clone,
-                ccw_clone.clone(),
-                vol_icon_clone.clone(),
-            );
+            let q_win =
+                modal::create_cc_window(&app_clone, ccw_clone.clone(), vol_icon_clone.clone());
             if let Ok(mut borrow) = ccw_clone.try_borrow_mut() {
                 *borrow = Some(q_win);
             }

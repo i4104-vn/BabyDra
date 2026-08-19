@@ -1,6 +1,6 @@
 use super::{
-    get_brightness, has_backlight, query_ddc_brightness, set_brightness,
-    BRIGHTNESS_STATE, BRIGHTNESS_SYNCED,
+    get_brightness, has_backlight, query_ddc_brightness, set_brightness, BRIGHTNESS_STATE,
+    BRIGHTNESS_SYNCED,
 };
 use babydra_core::i18n::trans;
 use gtk4::prelude::*;

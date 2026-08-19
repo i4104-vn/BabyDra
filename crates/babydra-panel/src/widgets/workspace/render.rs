@@ -30,11 +30,7 @@ pub fn build_popover_box(parent: &gtk4::Button) -> gtk4::Popover {
 }
 
 /// Constructs a taskbar item button with application icon, dot indicators for window count, and tooltip.
-pub fn build_taskbar_btn(
-    app: &DesktopApp,
-    is_active: bool,
-    window_count: usize,
-) -> gtk4::Button {
+pub fn build_taskbar_btn(app: &DesktopApp, is_active: bool, window_count: usize) -> gtk4::Button {
     let btn = gtk4::Button::new();
     btn.add_css_class("taskbar-app-btn");
     btn.set_cursor_from_name(Some("pointer"));
@@ -98,10 +94,8 @@ pub fn render_previews(
 
     if let Some(first_app) = windows.first() {
         let icon_name = first_app.icon.as_deref().unwrap_or(app_id);
-        let header_icon = babydra_ui_kit::ui::icon::get_fallback_icon(
-            icon_name,
-            "application-x-executable",
-        );
+        let header_icon =
+            babydra_ui_kit::ui::icon::get_fallback_icon(icon_name, "application-x-executable");
         header_icon.set_pixel_size(14);
         header.append(&header_icon);
 
@@ -197,10 +191,8 @@ pub fn render_previews(
 
         let open_new_content = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
         open_new_content.set_halign(gtk4::Align::Start);
-        let open_new_icon = babydra_ui_kit::ui::icon::get_fallback_icon(
-            &icon_name,
-            "application-x-executable",
-        );
+        let open_new_icon =
+            babydra_ui_kit::ui::icon::get_fallback_icon(&icon_name, "application-x-executable");
         open_new_icon.set_pixel_size(14);
         let open_new_label = gtk4::Label::new(Some(&format!("Open new {}", app_name)));
         open_new_label.add_css_class("taskbar-preview-action-label");
@@ -226,7 +218,8 @@ pub fn render_previews(
         close_all_icon.set_pixel_size(14);
         close_all_icon.add_css_class("taskbar-preview-action-icon");
 
-        let close_all_label = gtk4::Label::new(Some(&babydra_core::i18n::trans("taskbar.close_all")));
+        let close_all_label =
+            gtk4::Label::new(Some(&babydra_core::i18n::trans("taskbar.close_all")));
         close_all_label.add_css_class("taskbar-preview-action-label");
         close_all_label.add_css_class("close-all-text");
         close_all_content.append(&close_all_icon);

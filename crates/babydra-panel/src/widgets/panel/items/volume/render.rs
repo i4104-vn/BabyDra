@@ -1,6 +1,4 @@
-use super::{
-    get_audio_devices, get_current_volume, is_muted, set_volume, update_topbar_volume,
-};
+use super::{get_audio_devices, get_current_volume, is_muted, set_volume, update_topbar_volume};
 use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use std::cell::Cell;
