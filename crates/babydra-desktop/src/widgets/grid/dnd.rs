@@ -35,7 +35,13 @@ pub fn create_icon_drag(
         let targets = {
             let s = state_clone.borrow();
             if s.is_selected(&path_clone) {
-                s.selected_paths.iter().cloned().collect::<Vec<_>>()
+                let mut list = vec![path_clone.clone()];
+                for p in &s.selected_paths {
+                    if p != &path_clone {
+                        list.push(p.clone());
+                    }
+                }
+                list
             } else {
                 vec![path_clone.clone()]
             }

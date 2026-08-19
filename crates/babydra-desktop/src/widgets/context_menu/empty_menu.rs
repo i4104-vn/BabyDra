@@ -104,6 +104,7 @@ pub fn show_empty_menu(
                 &trans("desktop.sort_by_name"),
                 current_sort == "name",
                 move || {
+                    babydra_core::config::desktop_layout::clear();
                     update_desktop_config(|conf| conf.sort_by = "name".to_string());
                     ref_cb_1();
                 },
@@ -114,6 +115,7 @@ pub fn show_empty_menu(
                 &trans("desktop.sort_by_date"),
                 current_sort == "modified",
                 move || {
+                    babydra_core::config::desktop_layout::clear();
                     update_desktop_config(|conf| conf.sort_by = "modified".to_string());
                     ref_cb_2();
                 },
@@ -124,6 +126,7 @@ pub fn show_empty_menu(
                 &trans("desktop.sort_by_type"),
                 current_sort == "type",
                 move || {
+                    babydra_core::config::desktop_layout::clear();
                     update_desktop_config(|conf| conf.sort_by = "type".to_string());
                     ref_cb_3();
                 },
@@ -134,6 +137,7 @@ pub fn show_empty_menu(
                 &trans("desktop.sort_by_size"),
                 current_sort == "size",
                 move || {
+                    babydra_core::config::desktop_layout::clear();
                     update_desktop_config(|conf| conf.sort_by = "size".to_string());
                     ref_cb_4();
                 },

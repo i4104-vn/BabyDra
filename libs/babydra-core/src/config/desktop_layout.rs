@@ -72,6 +72,13 @@ pub fn cleanup_stale(existing_names: &[String]) {
     }
 }
 
+/// Clears all saved positions.
+pub fn clear() {
+    let mut map = POSITIONS.write().unwrap();
+    map.clear();
+    DIRTY.store(true, Ordering::Relaxed);
+}
+
 /// Flush to disk if dirty. Called by debounce timer.
 pub fn flush_if_dirty() {
     if DIRTY

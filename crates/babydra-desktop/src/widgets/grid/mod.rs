@@ -32,6 +32,7 @@ fn make_refresh_cb(
         let p = parent_win_c.clone();
         let r = rubberband_c.clone();
         glib::spawn_future_local(async move {
+            s.borrow_mut().config = babydra_core::config::load_desktop_config();
             let sort_by = s.borrow().config.sort_by.clone();
             let new_entries =
                 babydra_core::models::shell::desktop_state::DesktopState::fetch_entries(&sort_by)
