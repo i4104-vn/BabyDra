@@ -62,19 +62,49 @@ where
                 "[Desktop Entry]\nType=Application\nName=BabyDra Preview\nComment=Viewer for images\nExec={}/.local/bin/babydra-preview %f\nIcon=/usr/share/babydra/babydra-preview.png\nTerminal=false\nCategories=Graphics;Viewer;GTK;\nMimeType=image/png;image/jpeg;image/gif;image/webp;image/bmp;\nNoDisplay=false\n",
                 home.display()
             );
-            let _ = fs::write(apps_dir.join("babydra-preview.desktop"), preview_desktop);
+            let preview_path = apps_dir.join("babydra-preview.desktop");
+            let _ = fs::write(&preview_path, preview_desktop);
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                let _ = fs::set_permissions(&preview_path, fs::Permissions::from_mode(0o755));
+            }
 
             let settings_desktop = format!(
                 "[Desktop Entry]\nType=Application\nName=BabyDra Settings\nComment=Configure system settings\nExec={}/.local/bin/babydra-settings\nIcon=/usr/share/babydra/babydra-settings.png\nTerminal=false\nCategories=Settings;HardwareSettings;GTK;\nNoDisplay=false\n",
                 home.display()
             );
-            let _ = fs::write(apps_dir.join("babydra-settings.desktop"), settings_desktop);
+            let settings_path = apps_dir.join("babydra-settings.desktop");
+            let _ = fs::write(&settings_path, settings_desktop);
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                let _ = fs::set_permissions(&settings_path, fs::Permissions::from_mode(0o755));
+            }
 
             let explore_desktop = format!(
                 "[Desktop Entry]\nType=Application\nName=BabyDra Explore\nComment=Explore files and folders\nExec={}/.local/bin/babydra-explore %u\nIcon=system-file-manager\nTerminal=false\nCategories=System;FileTools;FileManager;GTK;\nMimeType=inode/directory;\nNoDisplay=false\n",
                 home.display()
             );
-            let _ = fs::write(apps_dir.join("babydra-explore.desktop"), explore_desktop);
+            let explore_path = apps_dir.join("babydra-explore.desktop");
+            let _ = fs::write(&explore_path, explore_desktop);
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                let _ = fs::set_permissions(&explore_path, fs::Permissions::from_mode(0o755));
+            }
+
+            // Register DBus service for FileManager1
+            let dbus_services_dir = home.join(".local/share/dbus-1/services");
+            let _ = fs::create_dir_all(&dbus_services_dir);
+            let file_manager_service = format!(
+                "[D-BUS Service]\nName=org.freedesktop.FileManager1\nExec={}/.local/bin/babydra-explore\n",
+                home.display()
+            );
+            let _ = fs::write(
+                dbus_services_dir.join("org.freedesktop.FileManager1.service"),
+                file_manager_service,
+            );
 
             // All external commands run through the safe executor: stdout/stderr
             // are captured, never printed over the raw-mode TUI.
@@ -101,7 +131,7 @@ where
 
             log(
                 LogLevel::Success,
-                "Registered .desktop files & MIME associations.".into(),
+                "Registered .desktop files, FileManager1 DBus service & MIME associations.".into(),
             );
             copied += 1;
         }
