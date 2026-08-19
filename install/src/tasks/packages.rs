@@ -60,6 +60,8 @@ where
                 "bluez-utils",
                 "greetd",
                 "cage",
+                "chafa",
+                "imagemagick",
             ];
 
             // Root: run pacman directly. Non-root: `sudo -S pacman` with the
