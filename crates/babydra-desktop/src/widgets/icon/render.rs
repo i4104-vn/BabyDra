@@ -6,11 +6,7 @@ use gtk4::prelude::*;
 use gtk4::{Align, Box, Label, Orientation};
 
 /// Creates a desktop icon widget for a single file entry.
-pub fn create_desktop_icon(
-    entry: &FileEntry,
-    icon_size: u32,
-    is_selected: bool,
-) -> Box {
+pub fn create_desktop_icon(entry: &FileEntry, icon_size: u32, is_selected: bool) -> Box {
     let container = Box::new(Orientation::Vertical, 2);
     container.set_css_classes(&["desktop-icon"]);
     if is_selected {

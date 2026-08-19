@@ -12,19 +12,30 @@ use std::rc::Rc;
 pub fn create_icon_drag(
     path: &PathBuf,
     icon_name: &str,
-    selected_paths: Rc<RefCell<Vec<PathBuf>>>,
+    state: Rc<RefCell<DesktopState>>,
+    is_dragging: Rc<std::cell::Cell<bool>>,
 ) -> gtk4::DragSource {
     let drag_source = gtk4::DragSource::new();
     drag_source.set_actions(gtk4::gdk::DragAction::MOVE | gtk4::gdk::DragAction::COPY);
 
     let path_clone = path.clone();
-    let sel_paths = selected_paths.clone();
+    let state_clone = state.clone();
+
+    let is_drag_begin = is_dragging.clone();
+    drag_source.connect_drag_begin(move |_, _| {
+        is_drag_begin.set(true);
+    });
+
+    let is_drag_end = is_dragging.clone();
+    drag_source.connect_drag_end(move |_, _, _| {
+        is_drag_end.set(false);
+    });
 
     drag_source.connect_prepare(move |_, _, _| {
         let targets = {
-            let s = sel_paths.borrow();
-            if s.contains(&path_clone) {
-                s.clone()
+            let s = state_clone.borrow();
+            if s.is_selected(&path_clone) {
+                s.selected_paths.iter().cloned().collect::<Vec<_>>()
             } else {
                 vec![path_clone.clone()]
             }
@@ -76,7 +87,7 @@ pub fn create_icon_drag(
 /// Creates a DropTarget on the desktop background to handle internal repositioning and external file drops.
 pub fn create_desktop_drop(
     state: Rc<RefCell<DesktopState>>,
-    refresh_cb: Rc<dyn Fn()>,
+    refresh_pos_cb: Rc<dyn Fn()>,
 ) -> gtk4::DropTarget {
     let drop_target = gtk4::DropTarget::new(
         FileList::static_type(),
@@ -84,16 +95,12 @@ pub fn create_desktop_drop(
     );
 
     let state_drop = state.clone();
-    let ref_cb = refresh_cb.clone();
+    let ref_pos_cb = refresh_pos_cb.clone();
 
     drop_target.connect_drop(move |_, value, x, y| {
         let desktop_dir = DesktopState::desktop_dir();
         if let Ok(file_list) = value.get::<FileList>() {
-            let sources: Vec<PathBuf> = file_list
-                .files()
-                .iter()
-                .filter_map(|f| f.path())
-                .collect();
+            let sources: Vec<PathBuf> = file_list.files().iter().filter_map(|f| f.path()).collect();
 
             if sources.is_empty() {
                 return false;
@@ -114,7 +121,22 @@ pub fn create_desktop_drop(
             if !internal_sources.is_empty() {
                 let cell_w = state_drop.borrow().config.grid_spacing.max(80) as i32;
                 let cell_h = cell_w + 14;
-                let (base_x, mut base_y) = snap_to_grid(
+
+                let state_ref = state_drop.borrow();
+                let current_positions = state_ref.compute_all_positions();
+
+                let anchor_src = &internal_sources[0];
+                let anchor_name = anchor_src
+                    .file_name()
+                    .and_then(|n| n.to_str())
+                    .unwrap_or("");
+                let anchor_current_pos = current_positions
+                    .get(anchor_name)
+                    .copied()
+                    .unwrap_or((0, 0));
+                drop(state_ref);
+
+                let (base_x, base_y) = snap_to_grid(
                     x as i32,
                     y as i32,
                     cell_w,
@@ -123,25 +145,34 @@ pub fn create_desktop_drop(
                     crate::state::DEFAULT_MARGIN_Y,
                 );
 
+                let offset_x = base_x - anchor_current_pos.0;
+                let offset_y = base_y - anchor_current_pos.1;
+
                 for src in internal_sources {
                     if let Some(file_name) = src.file_name().and_then(|n| n.to_str()) {
+                        let cur_pos = current_positions
+                            .get(file_name)
+                            .copied()
+                            .unwrap_or(anchor_current_pos);
+                        let new_x = cur_pos.0 + offset_x;
+                        let new_y = cur_pos.1 + offset_y;
+
                         state_drop.borrow_mut().set_icon_position(
                             file_name.to_string(),
-                            base_x,
-                            base_y,
+                            new_x,
+                            new_y,
                         );
-                        base_y += cell_h;
                     }
                 }
-                ref_cb();
+                ref_pos_cb();
             }
 
             // 2. External Files Ingestion (Copy files dropped from external apps to ~/Desktop)
             if !external_sources.is_empty() {
-                let ref_cb_inner = ref_cb.clone();
                 let state_inner = state_drop.clone();
                 let drop_x = x as i32;
                 let drop_y = y as i32;
+                let ref_pos_cb_inner = ref_pos_cb.clone();
 
                 glib::spawn_future_local(async move {
                     let cell_w = state_inner.borrow().config.grid_spacing.max(80) as i32;
@@ -162,11 +193,13 @@ pub fn create_desktop_drop(
                                 if babydra_core::copy_path(src, dest.clone()).await.is_ok() {
                                     #[cfg(unix)]
                                     {
-                                        use std::os::unix::fs::PermissionsExt;
-                                        if let Ok(metadata) = std::fs::metadata(&dest) {
-                                            let mut perms = metadata.permissions();
-                                            perms.set_mode(perms.mode() | 0o755);
-                                            let _ = std::fs::set_permissions(&dest, perms);
+                                        if dest.extension().is_some_and(|e| e == "desktop") {
+                                            use std::os::unix::fs::PermissionsExt;
+                                            if let Ok(metadata) = std::fs::metadata(&dest) {
+                                                let mut perms = metadata.permissions();
+                                                perms.set_mode(perms.mode() | 0o755);
+                                                let _ = std::fs::set_permissions(&dest, perms);
+                                            }
                                         }
                                     }
                                     if let Some(name_str) = filename.to_str() {
@@ -181,7 +214,7 @@ pub fn create_desktop_drop(
                             }
                         }
                     }
-                    ref_cb_inner();
+                    ref_pos_cb_inner();
                 });
             }
 
@@ -222,11 +255,7 @@ pub fn create_folder_drop(
     drop_target.connect_drop(move |_, value, _, _| {
         w_drop.remove_css_class("drop-target-hover");
         if let Ok(file_list) = value.get::<FileList>() {
-            let sources: Vec<PathBuf> = file_list
-                .files()
-                .iter()
-                .filter_map(|f| f.path())
-                .collect();
+            let sources: Vec<PathBuf> = file_list.files().iter().filter_map(|f| f.path()).collect();
 
             if !sources.is_empty() {
                 let ref_cb_inner = ref_cb.clone();

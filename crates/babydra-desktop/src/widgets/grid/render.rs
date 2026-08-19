@@ -9,7 +9,7 @@ use crate::widgets::selection::update_icon_sel;
 use babydra_core::models::explore::FileType;
 use gtk4::prelude::*;
 use gtk4::{Box, Fixed, GestureClick};
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::path::PathBuf;
 use std::rc::Rc;
 
@@ -48,9 +48,12 @@ pub fn rebuild_grid_icons(
         let file_name = entry.name.to_string_lossy().to_string();
         let (pos_x, pos_y) = positions.get(&file_name).copied().unwrap_or((16, 48));
 
+        let is_dragging = Rc::new(Cell::new(false));
+
         // 1. Single click / double click gesture
         let click_gesture = GestureClick::new();
         click_gesture.set_button(1); // Left click
+        click_gesture.set_propagation_phase(gtk4::PropagationPhase::Bubble);
 
         let entry_click = entry.clone();
         let state_click = state.clone();
@@ -58,22 +61,59 @@ pub fn rebuild_grid_icons(
         let rubberband_click = rubberband.clone();
 
         click_gesture.connect_pressed(move |gesture, n_press, _, _| {
-            if n_press == 1 {
-                let event = gesture.current_event();
-                let is_ctrl = event
-                    .as_ref()
-                    .map(|e| e.modifier_state().contains(gtk4::gdk::ModifierType::CONTROL_MASK))
-                    .unwrap_or(false);
+            let event = gesture.current_event();
+            let is_ctrl = event
+                .as_ref()
+                .map(|e| {
+                    e.modifier_state()
+                        .contains(gtk4::gdk::ModifierType::CONTROL_MASK)
+                })
+                .unwrap_or(false);
 
-                state_click
-                    .borrow_mut()
-                    .select(entry_click.path.clone(), is_ctrl, is_ctrl);
-                update_icon_sel(&fixed_click, &state_click, &rubberband_click);
+            if n_press == 1 {
+                let mut s = state_click.borrow_mut();
+                // If it's already selected and we aren't using Ctrl, do NOT clear selection yet.
+                // We'll clear it on Release if it was just a click (no drag).
+                if !s.is_selected(&entry_click.path) || is_ctrl {
+                    s.select(entry_click.path.clone(), is_ctrl, is_ctrl);
+                    drop(s);
+                    update_icon_sel(&fixed_click, &state_click, &rubberband_click);
+                }
             } else if n_press == 2 {
                 launch_entry(&entry_click);
             }
         });
         icon_widget.add_controller(click_gesture);
+
+        let release_gesture = GestureClick::new();
+        release_gesture.set_button(1);
+        release_gesture.set_propagation_phase(gtk4::PropagationPhase::Bubble);
+        let entry_rel = entry.clone();
+        let state_rel = state.clone();
+        let fixed_rel = fixed.clone();
+        let rubberband_rel = rubberband.clone();
+        let is_drag_rel = is_dragging.clone();
+
+        release_gesture.connect_released(move |gesture, n_press, _, _| {
+            let event = gesture.current_event();
+            let is_ctrl = event
+                .as_ref()
+                .map(|e| {
+                    e.modifier_state()
+                        .contains(gtk4::gdk::ModifierType::CONTROL_MASK)
+                })
+                .unwrap_or(false);
+
+            if n_press == 1 && !is_ctrl && !is_drag_rel.get() {
+                let mut s = state_rel.borrow_mut();
+                if s.is_selected(&entry_rel.path) && s.selected_paths.len() > 1 {
+                    s.select(entry_rel.path.clone(), false, false);
+                    drop(s);
+                    update_icon_sel(&fixed_rel, &state_rel, &rubberband_rel);
+                }
+            }
+        });
+        icon_widget.add_controller(release_gesture);
 
         // 2. Right click gesture (File context menu)
         let right_click = GestureClick::new();
@@ -85,7 +125,9 @@ pub fn rebuild_grid_icons(
         let rubberband_rc = rubberband.clone();
 
         right_click.connect_pressed(move |_, _, x, y| {
-            state_rc.borrow_mut().select(entry_rc.path.clone(), false, false);
+            state_rc
+                .borrow_mut()
+                .select(entry_rc.path.clone(), false, false);
             update_icon_sel(&fixed_rc, &state_rc, &rubberband_rc);
 
             let fixed_ref = fixed_rc.clone();
@@ -93,7 +135,8 @@ pub fn rebuild_grid_icons(
             let parent_win_ref = parent_win_rc.clone();
             let rubberband_ref = rubberband_rc.clone();
 
-            let refresh_cb = make_refresh_cb(&fixed_ref, &state_ref, &parent_win_ref, &rubberband_ref);
+            let refresh_cb =
+                make_refresh_cb(&fixed_ref, &state_ref, &parent_win_ref, &rubberband_ref);
 
             show_file_menu(
                 fixed_rc.upcast_ref::<gtk4::Widget>(),
@@ -107,10 +150,13 @@ pub fn rebuild_grid_icons(
         icon_widget.add_controller(right_click);
 
         // 3. Drag Source (DND for repositioning, moving to folders, or dragging to external apps)
-        let sel_paths_rc = Rc::new(RefCell::new(
-            selected_paths.iter().cloned().collect::<Vec<PathBuf>>(),
-        ));
-        let drag_src = create_icon_drag(&entry.path, &entry.icon_name, sel_paths_rc);
+        let drag_src = create_icon_drag(
+            &entry.path,
+            &entry.icon_name,
+            state.clone(),
+            is_dragging.clone(),
+        );
+        drag_src.set_propagation_phase(gtk4::PropagationPhase::Capture);
         icon_widget.add_controller(drag_src);
 
         // 4. Folder Drop Target (If entry is a directory, accept dropping files into it)
@@ -122,7 +168,8 @@ pub fn rebuild_grid_icons(
 
             let ref_folder_cb = make_refresh_cb(&fixed_f, &state_f, &parent_f, &rubber_f);
 
-            let folder_drop = create_folder_drop(entry.path.clone(), icon_widget.clone(), ref_folder_cb);
+            let folder_drop =
+                create_folder_drop(entry.path.clone(), icon_widget.clone(), ref_folder_cb);
             icon_widget.add_controller(folder_drop);
         }
 

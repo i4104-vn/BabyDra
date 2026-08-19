@@ -7,15 +7,13 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 /// Updates CSS classes (`selected`) on all icon widgets inside `Fixed` based on current `DesktopState`.
-pub fn update_icon_sel(
-    fixed: &Fixed,
-    state: &Rc<RefCell<DesktopState>>,
-    rubberband: &Box,
-) {
+pub fn update_icon_sel(fixed: &Fixed, state: &Rc<RefCell<DesktopState>>, rubberband: &Box) {
     let state_ref = state.borrow();
     let mut child_opt = fixed.first_child();
     while let Some(child) = child_opt {
-        if child != rubberband.clone().upcast::<gtk4::Widget>() && child.has_css_class("desktop-icon") {
+        if child != rubberband.clone().upcast::<gtk4::Widget>()
+            && child.has_css_class("desktop-icon")
+        {
             if let Some(name) = child.widget_name().as_str().into() {
                 let p = std::path::PathBuf::from(name);
                 if state_ref.is_selected(&p) {
@@ -30,13 +28,10 @@ pub fn update_icon_sel(
 }
 
 /// Attaches the rubberband lasso selection controller to the desktop fixed container.
-pub fn attach_rubberband(
-    desktop_fixed: &Fixed,
-    state: Rc<RefCell<DesktopState>>,
-    rubberband: Box,
-) {
+pub fn attach_rubberband(desktop_fixed: &Fixed, state: Rc<RefCell<DesktopState>>, rubberband: Box) {
     let drag_gesture = GestureDrag::new();
     drag_gesture.set_button(1);
+    drag_gesture.set_propagation_phase(gtk4::PropagationPhase::Capture);
 
     let start_pos = Rc::new(RefCell::new(None::<(f64, f64)>));
     let start_pos_begin = start_pos.clone();
@@ -63,9 +58,8 @@ pub fn attach_rubberband(
         }
 
         if !is_icon {
-            let event = gesture.current_event();
-            let is_ctrl = event
-                .as_ref()
+            let is_ctrl = gesture
+                .current_event()
                 .map(|e| e.modifier_state().contains(gtk4::gdk::ModifierType::CONTROL_MASK))
                 .unwrap_or(false);
 
@@ -76,9 +70,9 @@ pub fn attach_rubberband(
 
             drag_active_begin.replace(true);
             start_pos_begin.replace(Some((x, y)));
-            fixed_begin.move_(&rb_begin, x, y);
-            rb_begin.set_size_request(0, 0);
-            rb_begin.set_visible(true);
+            // Don't show rubberband here — wait for actual drag movement in drag_update
+            // to avoid a 1-frame flash on plain clicks
+            gesture.set_state(gtk4::EventSequenceState::Claimed);
         } else {
             drag_active_begin.replace(false);
         }
@@ -96,6 +90,13 @@ pub fn attach_rubberband(
         }
 
         if let Some((start_x, start_y)) = *start_pos_update.borrow() {
+            // Show on first meaningful move
+            if !rb_update.is_visible() {
+                fixed_update.move_(&rb_update, start_x, start_y);
+                rb_update.set_size_request(0, 0);
+                rb_update.set_visible(true);
+            }
+
             let current_x = start_x + offset_x;
             let current_y = start_y + offset_y;
             let min_x = start_x.min(current_x);
@@ -108,9 +109,8 @@ pub fn attach_rubberband(
             fixed_update.move_(&rb_update, min_x, min_y);
             rb_update.set_size_request(width as i32, height as i32);
 
-            let event = gesture.current_event();
-            let is_ctrl = event
-                .as_ref()
+            let is_ctrl = gesture
+                .current_event()
                 .map(|e| e.modifier_state().contains(gtk4::gdk::ModifierType::CONTROL_MASK))
                 .unwrap_or(false);
 
@@ -128,11 +128,16 @@ pub fn attach_rubberband(
                         let cw = child.width() as f64;
                         let ch = child.height() as f64;
 
-                        let intersects = !(cx > max_x || cx + cw < min_x || cy > max_y || cy + ch < min_y);
+                        let intersects =
+                            !(cx > max_x || cx + cw < min_x || cy > max_y || cy + ch < min_y);
                         if intersects {
                             if let Some(file_path_str) = child.widget_name().as_str().into() {
                                 if !file_path_str.is_empty() {
-                                    state_ref.select(std::path::PathBuf::from(file_path_str), true, false);
+                                    state_ref.select(
+                                        std::path::PathBuf::from(file_path_str),
+                                        true,
+                                        false,
+                                    );
                                 }
                             }
                         }

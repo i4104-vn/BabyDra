@@ -58,8 +58,7 @@ pub fn build_icon_frame(entry: &FileEntry, icon_px: i32) -> Box {
 
         glib::spawn_future_local(async move {
             let res = tokio::task::spawn_blocking(move || {
-                babydra_core::load_cropped_square(&path_clone, thumb_size)
-                    .map(SendWrapper)
+                babydra_core::load_cropped_square(&path_clone, thumb_size).map(SendWrapper)
             })
             .await;
 
@@ -75,7 +74,12 @@ pub fn build_icon_frame(entry: &FileEntry, icon_px: i32) -> Box {
             }
         });
     } else {
-        let fallback = if entry.path.extension().map(|e| e == "desktop").unwrap_or(false) {
+        let fallback = if entry
+            .path
+            .extension()
+            .map(|e| e == "desktop")
+            .unwrap_or(false)
+        {
             "application-x-executable"
         } else {
             "text-x-generic"

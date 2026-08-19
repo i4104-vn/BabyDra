@@ -8,9 +8,7 @@ pub use dnd::{create_desktop_drop, create_folder_drop, create_icon_drag};
 use crate::state::DesktopState;
 use crate::widgets::context_menu::show_empty_menu;
 use crate::widgets::icon::launch_entry;
-use crate::widgets::selection::{
-    attach_rubberband, update_icon_sel,
-};
+use crate::widgets::selection::{attach_rubberband, update_icon_sel};
 use babydra_ui_kit::components::explore::prelude::*;
 use gtk4::prelude::*;
 use gtk4::{Box, EventControllerKey, Fixed, GestureClick};
@@ -37,9 +35,29 @@ pub(super) fn make_refresh_cb(
         let r = rubberband_c.clone();
 
         glib::spawn_future_local(async move {
-            s.borrow_mut().reload_entries().await;
+            let sort_by = s.borrow().config.sort_by.clone();
+            let new_entries =
+                babydra_core::models::shell::desktop_state::DesktopState::fetch_entries(&sort_by)
+                    .await;
+            s.borrow_mut().update_entries(new_entries);
             render::rebuild_grid_icons(&f, &s, &p, &r);
         });
+    })
+}
+
+pub(super) fn make_refresh_positions_cb(
+    fixed: &Fixed,
+    state: &Rc<RefCell<DesktopState>>,
+    parent_window: &gtk4::ApplicationWindow,
+    rubberband: &Box,
+) -> Rc<dyn Fn()> {
+    let fixed_c = fixed.clone();
+    let state_c = state.clone();
+    let parent_win_c = parent_window.clone();
+    let rubberband_c = rubberband.clone();
+
+    Rc::new(move || {
+        render::rebuild_grid_icons(&fixed_c, &state_c, &parent_win_c, &rubberband_c);
     })
 }
 
@@ -99,7 +117,8 @@ pub fn create_desktop_grid(
     fixed.add_controller(bg_right_click);
 
     // 5. Desktop Background DropTarget (Ingestion + Repositioning)
-    let drop_target = create_desktop_drop(state.clone(), refresh_fn.clone());
+    let refresh_pos_fn = make_refresh_positions_cb(&fixed, &state, parent_window, &rubberband);
+    let drop_target = create_desktop_drop(state.clone(), refresh_pos_fn.clone());
     fixed.add_controller(drop_target);
 
     // 6. Rubberband Lasso Selection Controller
@@ -134,7 +153,9 @@ pub fn create_desktop_grid(
                 glib::Propagation::Stop
             }
             // F5 / Ctrl + R: Refresh
-            gtk4::gdk::Key::F5 | gtk4::gdk::Key::R | gtk4::gdk::Key::r if has_ctrl || keyval == gtk4::gdk::Key::F5 => {
+            gtk4::gdk::Key::F5 | gtk4::gdk::Key::R | gtk4::gdk::Key::r
+                if has_ctrl || keyval == gtk4::gdk::Key::F5 =>
+            {
                 ref_cb_key();
                 glib::Propagation::Stop
             }
@@ -165,13 +186,7 @@ pub fn create_desktop_grid(
                 let clipboard_data = CLIPBOARD.with(|cb| cb.borrow().clone());
                 if let Some((sources, is_cut)) = clipboard_data {
                     let nav_cb = crate::widgets::context_menu::refresh_nav_cb(ref_cb_key.clone());
-                    execute_paste(
-                        sources,
-                        ddir.clone(),
-                        is_cut,
-                        ddir.clone(),
-                        nav_cb,
-                    );
+                    execute_paste(sources, ddir.clone(), is_cut, ddir.clone(), nav_cb);
                 }
                 glib::Propagation::Stop
             }
@@ -219,6 +234,10 @@ pub fn create_desktop_grid(
         std::mem::forget(_watcher);
     }
 
+    glib::timeout_add_local(std::time::Duration::from_millis(500), || {
+        babydra_core::config::desktop_layout::flush_if_dirty();
+        glib::ControlFlow::Continue
+    });
+
     (fixed, state, refresh_fn)
 }
-

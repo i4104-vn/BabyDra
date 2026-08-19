@@ -80,11 +80,12 @@ fn load_and_prescale(path: &PathBuf, target_w: i32, target_h: i32) -> Option<cai
     let scaled_w = (orig_w * scale).round() as i32;
     let scaled_h = (orig_h * scale).round() as i32;
 
-    let scaled_pixbuf = if (scaled_w - orig_w as i32).abs() < 50 && (scaled_h - orig_h as i32).abs() < 50 {
-        pixbuf
-    } else {
-        pixbuf.scale_simple(scaled_w, scaled_h, gdk_pixbuf::InterpType::Bilinear)?
-    };
+    let scaled_pixbuf =
+        if (scaled_w - orig_w as i32).abs() < 50 && (scaled_h - orig_h as i32).abs() < 50 {
+            pixbuf
+        } else {
+            pixbuf.scale_simple(scaled_w, scaled_h, gdk_pixbuf::InterpType::Bilinear)?
+        };
 
     pixbuf_to_surface(&scaled_pixbuf)
 }
@@ -195,7 +196,13 @@ pub fn create_wallpaper_w() -> gtk4::DrawingArea {
 
                 // Circular mask clip for new wallpaper
                 let _ = cr.save();
-                cr.arc(origin_x, origin_y, current_radius, 0.0, 2.0 * std::f64::consts::PI);
+                cr.arc(
+                    origin_x,
+                    origin_y,
+                    current_radius,
+                    0.0,
+                    2.0 * std::f64::consts::PI,
+                );
                 cr.clip();
                 let zoom = 1.02 - eased * 0.02;
                 draw_surface_aspect_fill(cr, cur_surf, w, h, 1.0, zoom);
@@ -208,14 +215,26 @@ pub fn create_wallpaper_w() -> gtk4::DrawingArea {
                     // Primary ripple wavefront
                     cr.set_source_rgba(1.0, 1.0, 1.0, wave_alpha);
                     cr.set_line_width(3.5 * (1.0 - p * 0.4));
-                    cr.arc(origin_x, origin_y, current_radius, 0.0, 2.0 * std::f64::consts::PI);
+                    cr.arc(
+                        origin_x,
+                        origin_y,
+                        current_radius,
+                        0.0,
+                        2.0 * std::f64::consts::PI,
+                    );
                     let _ = cr.stroke();
 
                     // Secondary subtle trailing ripple
                     if current_radius > 25.0 {
                         cr.set_source_rgba(1.0, 1.0, 1.0, wave_alpha * 0.35);
                         cr.set_line_width(1.5);
-                        cr.arc(origin_x, origin_y, (current_radius - 12.0).max(0.0), 0.0, 2.0 * std::f64::consts::PI);
+                        cr.arc(
+                            origin_x,
+                            origin_y,
+                            (current_radius - 12.0).max(0.0),
+                            0.0,
+                            2.0 * std::f64::consts::PI,
+                        );
                         let _ = cr.stroke();
                     }
                     let _ = cr.restore();
@@ -295,7 +314,8 @@ pub fn create_wallpaper_w() -> gtk4::DrawingArea {
 
                                     let start = start_time_tick.get().unwrap();
                                     let elapsed = (now - start) as f64;
-                                    let progress = (elapsed / TRANSITION_DURATION_US).clamp(0.0, 1.0);
+                                    let progress =
+                                        (elapsed / TRANSITION_DURATION_US).clamp(0.0, 1.0);
                                     prog_tick.set(progress);
                                     da_tick.queue_draw();
 

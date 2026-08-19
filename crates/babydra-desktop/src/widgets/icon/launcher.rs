@@ -13,11 +13,9 @@ pub fn launch_entry(entry: &FileEntry) {
             .spawn()
             .is_err()
         {
-            let uri = format!("file://{}", path_str);
-            let _ = gtk4::gio::AppInfo::launch_default_for_uri(
-                &uri,
-                gtk4::gio::AppLaunchContext::NONE,
-            );
+            let _ = std::process::Command::new("xdg-open")
+                .arg(&*path_str)
+                .spawn();
         }
         return;
     }
@@ -30,7 +28,10 @@ pub fn launch_entry(entry: &FileEntry) {
         .unwrap_or(false)
     {
         if let Some(app_info) = gtk4::gio::DesktopAppInfo::from_filename(&entry.path) {
-            if app_info.launch(&[], gtk4::gio::AppLaunchContext::NONE).is_ok() {
+            if app_info
+                .launch(&[], gtk4::gio::AppLaunchContext::NONE)
+                .is_ok()
+            {
                 return;
             }
         }
@@ -53,6 +54,7 @@ pub fn launch_entry(entry: &FileEntry) {
         }
     }
 
-    let uri = format!("file://{}", entry.path.to_string_lossy());
-    let _ = gtk4::gio::AppInfo::launch_default_for_uri(&uri, gtk4::gio::AppLaunchContext::NONE);
+    let _ = std::process::Command::new("xdg-open")
+        .arg(&entry.path)
+        .spawn();
 }
