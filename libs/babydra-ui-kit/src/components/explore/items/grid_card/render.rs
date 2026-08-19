@@ -46,6 +46,8 @@ pub fn build_grid_card_ui(entry: &FileEntry) -> Box {
         overlay.set_child(Some(&temp_icon));
         icon_frame.append(&overlay);
 
+        static THUMBNAIL_SEMAPHORE: std::sync::OnceLock<tokio::sync::Semaphore> = std::sync::OnceLock::new();
+
         struct SendWrapper<T>(T);
         unsafe impl<T> Send for SendWrapper<T> {}
 
@@ -53,10 +55,13 @@ pub fn build_grid_card_ui(entry: &FileEntry) -> Box {
         let overlay_c = overlay.clone();
 
         glib::spawn_future_local(async move {
+            let sem = THUMBNAIL_SEMAPHORE.get_or_init(|| tokio::sync::Semaphore::new(4));
+            let permit = sem.acquire().await;
             let res = tokio::task::spawn_blocking(move || {
                 load_cropped_square(&path_clone, 68).map(|pb| SendWrapper(pb))
             })
             .await;
+            drop(permit);
 
             if let Ok(Ok(wrapper)) = res {
                 let pixbuf = wrapper.0;

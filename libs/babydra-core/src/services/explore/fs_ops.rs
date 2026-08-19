@@ -81,7 +81,6 @@ pub async fn load_directory(
 
         for entry in entries {
             let entry = entry?;
-            let entry_path = entry.path();
             let name = entry.file_name();
             let name_str = name.to_string_lossy().into_owned();
 
@@ -90,10 +89,28 @@ pub async fn load_directory(
                 continue;
             }
 
-            let metadata = match entry.metadata() {
+            let entry_path = entry.path();
+            let sym_meta = match std::fs::symlink_metadata(&entry_path) {
                 Ok(meta) => meta,
-                Err(_) => continue, // skip unreadable files
+                Err(_) => continue,
             };
+
+            let is_symlink = sym_meta.file_type().is_symlink();
+            let metadata = if is_symlink {
+                match std::fs::metadata(&entry_path) {
+                    Ok(meta) => meta,
+                    Err(_) => sym_meta.clone(),
+                }
+            } else {
+                sym_meta.clone()
+            };
+
+            let mut final_path = entry_path.clone();
+            if is_symlink {
+                if let Ok(target) = std::fs::canonicalize(&entry_path) {
+                    final_path = target;
+                }
+            }
 
             let file_type = if metadata.is_dir() {
                 FileType::Directory
@@ -131,7 +148,7 @@ pub async fn load_directory(
             let (owner, group) = get_owner_group(&metadata);
 
             file_entries.push(FileEntry {
-                path: entry_path,
+                path: final_path,
                 name,
                 display_name,
                 file_type,
@@ -159,16 +176,43 @@ pub async fn load_directory(
     })
 }
 
-/// Helper to recursively copy directories.
+/// Helper to recursively copy directories with infinite cycle protection.
 fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> std::io::Result<()> {
-    fs::create_dir_all(&dst)?;
-    for entry in fs::read_dir(src)? {
+    let src_path = src.as_ref();
+    let dst_path = dst.as_ref();
+
+    let src_canon = fs::canonicalize(src_path).unwrap_or_else(|_| src_path.to_path_buf());
+    let dst_canon = fs::canonicalize(dst_path)
+        .ok()
+        .or_else(|| {
+            dst_path
+                .parent()
+                .and_then(|p| fs::canonicalize(p).ok())
+                .map(|p| p.join(dst_path.file_name().unwrap_or_default()))
+        })
+        .unwrap_or_else(|| dst_path.to_path_buf());
+
+    if dst_canon.starts_with(&src_canon) || dst_canon == src_canon {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            "Cannot copy a directory into itself or a subdirectory of itself",
+        ));
+    }
+
+    fs::create_dir_all(dst_path)?;
+    for entry in fs::read_dir(src_path)? {
         let entry = entry?;
+        let entry_path = entry.path();
+        let entry_canon = fs::canonicalize(&entry_path).unwrap_or_else(|_| entry_path.clone());
+        if entry_canon == dst_canon || dst_canon.starts_with(&entry_canon) {
+            continue;
+        }
+
         let ty = entry.file_type()?;
         if ty.is_dir() {
-            copy_dir_all(entry.path(), dst.as_ref().join(entry.file_name()))?;
+            copy_dir_all(&entry_path, dst_path.join(entry.file_name()))?;
         } else {
-            fs::copy(entry.path(), dst.as_ref().join(entry.file_name()))?;
+            fs::copy(&entry_path, dst_path.join(entry.file_name()))?;
         }
     }
     Ok(())
@@ -177,6 +221,9 @@ fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> std::io::Result
 /// Asynchronously copies a file or directory.
 pub async fn copy_path(src: PathBuf, dest: PathBuf) -> Result<(), std::io::Error> {
     tokio::task::spawn_blocking(move || {
+        if src == dest {
+            return Ok(());
+        }
         let metadata = fs::metadata(&src)?;
         if metadata.is_dir() {
             copy_dir_all(&src, &dest)
@@ -185,12 +232,15 @@ pub async fn copy_path(src: PathBuf, dest: PathBuf) -> Result<(), std::io::Error
         }
     })
     .await
-    .unwrap()
+    .unwrap_or_else(|e| Err(std::io::Error::new(std::io::ErrorKind::Other, e.to_string())))
 }
 
 /// Asynchronously moves a file or directory (handles cross-device move).
 pub async fn move_path(src: PathBuf, dest: PathBuf) -> Result<(), std::io::Error> {
     tokio::task::spawn_blocking(move || {
+        if src == dest {
+            return Ok(());
+        }
         if fs::rename(&src, &dest).is_err() {
             let metadata = fs::metadata(&src)?;
             if metadata.is_dir() {
@@ -204,7 +254,7 @@ pub async fn move_path(src: PathBuf, dest: PathBuf) -> Result<(), std::io::Error
         Ok(())
     })
     .await
-    .unwrap()
+    .unwrap_or_else(|e| Err(std::io::Error::new(std::io::ErrorKind::Other, e.to_string())))
 }
 
 /// Asynchronously deletes a file or directory.

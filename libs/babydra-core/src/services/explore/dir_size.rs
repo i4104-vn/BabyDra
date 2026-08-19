@@ -25,6 +25,7 @@ pub fn calc_dir_size(path: &Path) -> u64 {
 
     // 2. Perform parallel directory traversal and size summation
     let total_size: u64 = WalkDir::new(path)
+        .max_depth(6)
         .into_iter()
         .filter_map(Result::ok)
         .par_bridge() // Parallelize WalkDir iterator

@@ -85,10 +85,9 @@ pub fn wire_grid_ctrls(
                     if matches!(entry.file_type, babydra_core::FileType::Directory) {
                         nav(entry.path.clone());
                     } else {
-                        let uri = format!("file://{}", entry.path.to_string_lossy());
-                        let _ = gtk4::gio::AppInfo::launch_default_for_uri(
-                            &uri,
-                            gtk4::gio::AppLaunchContext::NONE,
+                        babydra_ui_kit::components::explore::prelude::launch_file_or_open_with(
+                            &entry.path,
+                            None::<&gtk4::Window>,
                         );
                     }
                 }
@@ -124,10 +123,9 @@ pub fn wire_grid_ctrls(
                         if matches!(entry.file_type, babydra_core::FileType::Directory) {
                             nav(entry.path.clone());
                         } else {
-                            let uri = format!("file://{}", entry.path.to_string_lossy());
-                            let _ = gtk4::gio::AppInfo::launch_default_for_uri(
-                                &uri,
-                                gtk4::gio::AppLaunchContext::NONE,
+                            babydra_ui_kit::components::explore::prelude::launch_file_or_open_with(
+                                &entry.path,
+                                None::<&gtk4::Window>,
                             );
                         }
                     }

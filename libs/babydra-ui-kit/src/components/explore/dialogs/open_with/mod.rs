@@ -151,16 +151,33 @@ pub fn show_open_with_dialog(path: &Path, parent: Option<&impl IsA<gtk4::Window>
 /// Attempts to launch a file using the system default handler, or opens the App Picker dialog if none exists.
 pub fn launch_file_or_open_with(path: &Path, parent: Option<&impl IsA<gtk4::Window>>) {
     let (content_type, _) = gtk4::gio::content_type_guess(Some(path), &[]);
-    let has_default_app = gtk4::gio::AppInfo::default_for_type(&content_type, false).is_some();
+    let mime_type = gtk4::gio::content_type_get_mime_type(&content_type)
+        .map(|s| s.to_string())
+        .unwrap_or_else(|| content_type.to_string());
+
     let uri = format!("file://{}", path.to_string_lossy());
 
-    if has_default_app
-        && gtk4::gio::AppInfo::launch_default_for_uri(&uri, gtk4::gio::AppLaunchContext::NONE)
+    if let Some(app_info) = gtk4::gio::AppInfo::default_for_type(&mime_type, false)
+        .or_else(|| gtk4::gio::AppInfo::default_for_type(&content_type, false))
+    {
+        if app_info
+            .launch_uris(&[&uri], gtk4::gio::AppLaunchContext::NONE)
             .is_ok()
+        {
+            return;
+        }
+    }
+
+    if gtk4::gio::AppInfo::launch_default_for_uri(&uri, gtk4::gio::AppLaunchContext::NONE).is_ok() {
+        return;
+    }
+
+    if let Ok(_child) = std::process::Command::new("xdg-open")
+        .arg(path.to_string_lossy().as_ref())
+        .spawn()
     {
         return;
     }
 
-    // Fallback: show the Open With application chooser dialog
     show_open_with_dialog(path, parent);
 }

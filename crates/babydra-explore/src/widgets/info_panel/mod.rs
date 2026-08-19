@@ -16,8 +16,8 @@ pub fn create_info_panel() -> (ScrolledWindow, InfoPanelWidgets) {
 /// Clears info panel values.
 pub fn clear_info_panel(widgets: &InfoPanelWidgets) {
     preview_panel::clear_preview(&widgets.preview_widgets);
-    widgets.stack.set_visible_child_name("image");
-    widgets.img_preview.set_icon_name(Some("text-x-generic"));
+    widgets.stack.set_visible_child_name("image_icon");
+    widgets.img_preview_icon.set_icon_name(Some("text-x-generic"));
     widgets.lbl_name.set_text("--");
     widgets.lbl_type.set_text("--");
     widgets.lbl_size.set_text("--");
@@ -35,9 +35,9 @@ pub fn update_info_panel(widgets: &InfoPanelWidgets, selection: &[FileEntry]) {
 
     if selection.len() > 1 {
         preview_panel::clear_preview(&widgets.preview_widgets);
-        widgets.stack.set_visible_child_name("image");
+        widgets.stack.set_visible_child_name("image_icon");
         widgets
-            .img_preview
+            .img_preview_icon
             .set_icon_name(Some("dialog-information"));
         widgets
             .lbl_name
@@ -69,21 +69,28 @@ pub fn update_info_panel(widgets: &InfoPanelWidgets, selection: &[FileEntry]) {
         || ext == "rs"
         || ext == "sh";
 
+    let is_image = entry.mime_type.starts_with("image/")
+        || matches!(
+            ext.as_str(),
+            "png" | "jpg" | "jpeg" | "webp" | "gif" | "bmp" | "svg" | "ico" | "avif" | "tiff"
+        );
+
     if is_txt_or_md && !is_dir {
         preview_panel::show_file_preview(&widgets.preview_widgets, &entry.path);
         widgets.stack.set_visible_child_name("text");
     } else {
         preview_panel::clear_preview(&widgets.preview_widgets);
-        if entry.mime_type.starts_with("image/") {
-            widgets.img_preview.set_from_file(Some(&entry.path));
+        if is_image && !is_dir {
+            widgets.img_preview_picture.set_filename(Some(&entry.path));
+            widgets.stack.set_visible_child_name("image_picture");
         } else {
             babydra_ui_kit::ui::icon::set_fallback_icon(
-                &widgets.img_preview,
+                &widgets.img_preview_icon,
                 &entry.icon_name,
                 "text-x-generic",
             );
+            widgets.stack.set_visible_child_name("image_icon");
         }
-        widgets.stack.set_visible_child_name("image");
     }
 
     widgets.lbl_name.set_text(&entry.display_name);

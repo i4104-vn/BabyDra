@@ -51,7 +51,7 @@ pub async fn render_flat_grid(
         flowbox.append(&flow_child);
 
         counter += 1;
-        if counter >= 40 {
+        if counter >= 80 {
             counter = 0;
             glib::timeout_future(std::time::Duration::from_millis(2)).await;
         }
@@ -128,7 +128,7 @@ pub async fn render_grouped_grid(
         }
 
         counter += 1;
-        if counter >= 40 {
+        if counter >= 80 {
             counter = 0;
             glib::timeout_future(std::time::Duration::from_millis(2)).await;
         }

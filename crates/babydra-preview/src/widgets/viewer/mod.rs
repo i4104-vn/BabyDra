@@ -118,6 +118,9 @@ pub fn build_ui(app: &gtk4::Application, path: PathBuf) {
 
     // --- Helpers / Closures ---
     let state_draw = state.clone();
+    let scaled_cache: Rc<RefCell<Option<(i32, i32, gdk_pixbuf::Pixbuf)>>> = Rc::new(RefCell::new(None));
+    let scaled_cache_draw = scaled_cache.clone();
+
     drawing_area.set_draw_func(move |_area, cr, width, height| {
         let state_ref = state_draw.borrow();
         let w = width as f64;
@@ -125,20 +128,48 @@ pub fn build_ui(app: &gtk4::Application, path: PathBuf) {
 
         // Draw Dark Background
         cr.set_source_rgb(15.0 / 255.0, 15.0 / 255.0, 15.0 / 255.0);
-        cr.paint().unwrap();
+        let _ = cr.paint();
 
         // Calculate layout coordinates
-        let draw_w = state_ref.img_w * state_ref.scale;
-        let draw_h = state_ref.img_h * state_ref.scale;
-        let start_x = (w - draw_w) / 2.0 + state_ref.offset_x;
-        let start_y = (h - draw_h) / 2.0 + state_ref.offset_y;
+        let target_w = (state_ref.img_w * state_ref.scale).round() as i32;
+        let target_h = (state_ref.img_h * state_ref.scale).round() as i32;
+        if target_w <= 0 || target_h <= 0 {
+            return;
+        }
 
-        cr.save().unwrap();
-        cr.translate(start_x, start_y);
-        cr.scale(state_ref.scale, state_ref.scale);
-        cr.set_source_pixbuf(&state_ref.pixbuf, 0.0, 0.0);
-        cr.paint().unwrap();
-        cr.restore().unwrap();
+        let start_x = (w - target_w as f64) / 2.0 + state_ref.offset_x;
+        let start_y = (h - target_h as f64) / 2.0 + state_ref.offset_y;
+
+        // Use Hyper-interpolated downscaled pixbuf when not at 100% for maximum sharpness
+        let mut cache_borrow = scaled_cache_draw.borrow_mut();
+        let needs_rescale = match *cache_borrow {
+            Some((cw, ch, _)) => cw != target_w || ch != target_h,
+            None => true,
+        };
+
+        if needs_rescale {
+            if (state_ref.scale - 1.0).abs() < 0.001 {
+                *cache_borrow = Some((target_w, target_h, state_ref.pixbuf.clone()));
+            } else if let Some(scaled) = state_ref.pixbuf.scale_simple(target_w, target_h, gdk_pixbuf::InterpType::Hyper) {
+                *cache_borrow = Some((target_w, target_h, scaled));
+            }
+        }
+
+        if let Some((_, _, ref pb)) = *cache_borrow {
+            cr.save().unwrap();
+            cr.set_source_pixbuf(pb, start_x, start_y);
+            cr.source().set_filter(cairo::Filter::Best);
+            let _ = cr.paint();
+            cr.restore().unwrap();
+        } else {
+            cr.save().unwrap();
+            cr.translate(start_x, start_y);
+            cr.scale(state_ref.scale, state_ref.scale);
+            cr.set_source_pixbuf(&state_ref.pixbuf, 0.0, 0.0);
+            cr.source().set_filter(cairo::Filter::Best);
+            let _ = cr.paint();
+            cr.restore().unwrap();
+        }
     });
 
     // --- Event Handlers & Gestures ---

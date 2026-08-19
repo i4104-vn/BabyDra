@@ -124,19 +124,21 @@ pub fn build_viewer_ui(
     drawing_area.set_vexpand(true);
     overlay.set_child(Some(&drawing_area));
 
-    // --- Bottom-Right Info Box Overlay ---
+    // --- Top-Left Info Box Overlay ---
     let info_box =
-        babydra_ui_kit::components::create_css_card(gtk4::Orientation::Vertical, 4, "info-card");
-    info_box.set_halign(gtk4::Align::End);
-    info_box.set_valign(gtk4::Align::End);
-    info_box.set_margin_end(20);
-    info_box.set_margin_bottom(20);
+        babydra_ui_kit::components::create_css_card(gtk4::Orientation::Vertical, 2, "info-card");
+    info_box.set_halign(gtk4::Align::Start);
+    info_box.set_valign(gtk4::Align::Start);
+    info_box.set_margin_start(16);
+    info_box.set_margin_top(16);
 
     let name_lbl = gtk4::Label::new(Some(
         &path.file_name().unwrap_or_default().to_string_lossy(),
     ));
     name_lbl.add_css_class("info-item");
     name_lbl.set_halign(gtk4::Align::Start);
+    name_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::Middle);
+    name_lbl.set_max_width_chars(32);
     info_box.append(&name_lbl);
 
     let res_aspect = format_aspect_ratio(img_w, img_h);
@@ -145,32 +147,25 @@ pub fn build_viewer_ui(
     } else {
         format!("{}x{}", img_w, img_h)
     };
-    let resolution_lbl = gtk4::Label::new(Some(&res_text));
-    resolution_lbl.add_css_class("info-item");
-    resolution_lbl.set_halign(gtk4::Align::Start);
-    info_box.append(&resolution_lbl);
-
     let size_bytes = std::fs::metadata(path).map(|m| m.len()).unwrap_or(0);
-    let size_lbl = gtk4::Label::new(Some(&babydra_ui_kit::components::explore::format_size(
-        size_bytes,
-    )));
-    size_lbl.add_css_class("info-item");
-    size_lbl.set_halign(gtk4::Align::Start);
-    info_box.append(&size_lbl);
-
-    let scale_lbl = gtk4::Label::new(Some("100%"));
-    scale_lbl.add_css_class("info-item");
-    scale_lbl.set_halign(gtk4::Align::Start);
-    info_box.append(&scale_lbl);
+    let meta_text = format!(
+        "{} • {}",
+        res_text,
+        babydra_ui_kit::components::explore::format_size(size_bytes)
+    );
+    let meta_lbl = gtk4::Label::new(Some(&meta_text));
+    meta_lbl.add_css_class("info-item");
+    meta_lbl.set_halign(gtk4::Align::Start);
+    info_box.append(&meta_lbl);
 
     overlay.add_overlay(&info_box);
 
     // --- Bottom-Center Zoom Controls Pill ---
-    let controls_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+    let controls_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
     controls_box.add_css_class("controls-bar");
     controls_box.set_halign(gtk4::Align::Center);
     controls_box.set_valign(gtk4::Align::End);
-    controls_box.set_margin_bottom(20);
+    controls_box.set_margin_bottom(16);
 
     let zoom_out_btn = babydra_ui_kit::components::create_icon_button(
         "zoom-out",
@@ -181,6 +176,13 @@ pub fn build_viewer_ui(
     );
     zoom_out_btn.set_cursor_from_name(Some("pointer"));
     controls_box.append(&zoom_out_btn);
+
+    let scale_lbl = gtk4::Label::new(Some("100%"));
+    scale_lbl.add_css_class("info-item");
+    scale_lbl.set_valign(gtk4::Align::Center);
+    scale_lbl.set_margin_start(4);
+    scale_lbl.set_margin_end(4);
+    controls_box.append(&scale_lbl);
 
     let reset_btn = babydra_ui_kit::components::create_icon_button(
         "zoom-fit",

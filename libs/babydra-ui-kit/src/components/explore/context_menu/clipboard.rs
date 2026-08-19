@@ -171,8 +171,34 @@ fn perform_execute_paste(
                 let fraction = (idx + 1) as f64 / total as f64;
                 progress_bar.set_fraction(fraction);
 
-                let dest = dest_dir.join(filename);
+                if dest_dir.starts_with(&src) {
+                    continue;
+                }
+
+                let mut dest = dest_dir.join(filename);
+                if !is_cut && dest.exists() {
+                    let file_stem = src.file_stem().unwrap_or_default().to_string_lossy();
+                    let ext = src.extension().map(|e| format!(".{}", e.to_string_lossy())).unwrap_or_default();
+                    let mut counter = 1;
+                    loop {
+                        let candidate_name = if counter == 1 {
+                            format!("{} (copy){}", file_stem, ext)
+                        } else {
+                            format!("{} (copy {}){}", file_stem, counter, ext)
+                        };
+                        let candidate = dest_dir.join(&candidate_name);
+                        if !candidate.exists() {
+                            dest = candidate;
+                            break;
+                        }
+                        counter += 1;
+                    }
+                }
+
                 if is_cut {
+                    if src == dest {
+                        continue;
+                    }
                     if let Err(e) = babydra_core::move_path(src.clone(), dest.clone()).await {
                         eprintln!("Failed to move file: {}", e);
                         all_success = false;

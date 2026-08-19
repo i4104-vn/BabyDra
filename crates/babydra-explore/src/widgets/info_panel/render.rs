@@ -22,11 +22,18 @@ pub fn build_info_panel_ui() -> InfoPanelWidgets {
     stack.set_size_request(-1, 240);
     stack.set_transition_type(gtk4::StackTransitionType::Crossfade);
 
-    let img_preview = Image::from_icon_name("text-x-generic");
-    img_preview.set_pixel_size(96);
-    img_preview.set_halign(Align::Center);
-    img_preview.set_valign(Align::Center);
-    stack.add_named(&img_preview, Some("image"));
+    let img_preview_icon = Image::from_icon_name("text-x-generic");
+    img_preview_icon.set_pixel_size(96);
+    img_preview_icon.set_halign(Align::Center);
+    img_preview_icon.set_valign(Align::Center);
+    stack.add_named(&img_preview_icon, Some("image_icon"));
+
+    let img_preview_picture = gtk4::Picture::new();
+    img_preview_picture.set_can_shrink(true);
+    img_preview_picture.set_content_fit(gtk4::ContentFit::Contain);
+    img_preview_picture.set_halign(Align::Fill);
+    img_preview_picture.set_valign(Align::Fill);
+    stack.add_named(&img_preview_picture, Some("image_picture"));
 
     let (preview_container, preview_widgets) = create_preview_panel();
     stack.add_named(&preview_container, Some("text"));
@@ -53,7 +60,8 @@ pub fn build_info_panel_ui() -> InfoPanelWidgets {
 
     InfoPanelWidgets {
         container,
-        img_preview,
+        img_preview_icon,
+        img_preview_picture,
         preview_widgets,
         stack,
         lbl_name,

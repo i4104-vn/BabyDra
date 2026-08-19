@@ -46,8 +46,21 @@ pub fn setup_navigation(
         let navigate_pane_no_watch_ref_c = navigate_pane_no_watch_ref.clone();
         let rebuild_tabs_cell_c = rebuild_tabs_cell.clone();
 
+        let last_nav_time = Rc::new(RefCell::new(std::time::Instant::now() - std::time::Duration::from_secs(1)));
+        let last_nav_path = Rc::new(RefCell::new(None::<PathBuf>));
+
         *navigate_pane_no_watch_ref.borrow_mut() =
             Some(Rc::new(move |pane: ActivePane, path: PathBuf| {
+                // Debounce rapid identical navigation triggers (< 200ms)
+                let now = std::time::Instant::now();
+                if let Some(ref last_p) = *last_nav_path.borrow() {
+                    if last_p == &path && now.duration_since(*last_nav_time.borrow()).as_millis() < 200 {
+                        return;
+                    }
+                }
+                *last_nav_time.borrow_mut() = now;
+                *last_nav_path.borrow_mut() = Some(path.clone());
+
                 // Highlight active pane
                 active_pane.set(pane);
                 if pane == ActivePane::Left {

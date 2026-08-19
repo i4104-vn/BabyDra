@@ -94,7 +94,8 @@ pub struct PreviewPanelWidgets {
 
 pub struct InfoPanelWidgets {
     pub container: ScrolledWindow,
-    pub img_preview: Image,
+    pub img_preview_icon: Image,
+    pub img_preview_picture: gtk4::Picture,
     pub preview_widgets: PreviewPanelWidgets,
     pub stack: Stack,
     pub lbl_name: Label,

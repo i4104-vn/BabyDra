@@ -14,7 +14,19 @@ fn main() {
 
     let app = Application::builder()
         .application_id("com.babydra.preview")
+        .flags(gtk4::gio::ApplicationFlags::HANDLES_OPEN | gtk4::gio::ApplicationFlags::NON_UNIQUE)
         .build();
+
+    app.connect_open(|app, files, _hint| {
+        babydra_ui_kit::ui::theme::init_theme();
+        for file in files {
+            if let Some(path) = file.path() {
+                if path.exists() {
+                    widgets::build_ui(app, path);
+                }
+            }
+        }
+    });
 
     app.connect_activate(|app| {
         babydra_ui_kit::ui::theme::init_theme();

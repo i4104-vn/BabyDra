@@ -42,7 +42,7 @@ pub fn create_drop_nav(
                             }
                         } else if let Some(filename) = src.file_name() {
                             let dest = dest_dir.join(filename);
-                            if src != dest {
+                            if src != dest && !dest_dir.starts_with(&src) {
                                 if let Ok(_) =
                                     babydra_core::move_path(src.clone(), dest.clone()).await
                                 {
@@ -97,7 +97,7 @@ pub fn create_bg_drop(current_path: Rc<RefCell<PathBuf>>) -> gtk4::DropTarget {
                     for src in sources {
                         if let Some(filename) = src.file_name() {
                             let dest = dest_dir.join(filename);
-                            if src != dest {
+                            if src != dest && !dest_dir.starts_with(&src) {
                                 if let Ok(_) =
                                     babydra_core::move_path(src.clone(), dest.clone()).await
                                 {

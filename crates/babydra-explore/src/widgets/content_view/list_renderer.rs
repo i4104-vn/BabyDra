@@ -64,7 +64,7 @@ pub async fn render_list_view(
         widgets.listbox.append(&list_row);
 
         counter += 1;
-        if counter >= 40 {
+        if counter >= 80 {
             counter = 0;
             glib::timeout_future(std::time::Duration::from_millis(2)).await;
         }
