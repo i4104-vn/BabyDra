@@ -48,8 +48,8 @@ pub fn show_for_file_normal(
         },
     );
 
-    // 1.1. Open With... (for non-directory files)
-    if !is_any_dir && !target_paths.is_empty() {
+    // 1.1. Open With... (for single non-directory file)
+    if !is_any_dir && target_paths.len() == 1 {
         let path_to_open = target_paths[0].clone();
         let parent_open_with = parent.clone();
         builder = builder.item(

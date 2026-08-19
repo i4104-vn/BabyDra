@@ -74,7 +74,7 @@ pub fn create_flow_child(
             if is_dir {
                 nav_c(target_path.clone());
             } else {
-                babydra_ui_kit::components::explore::dialogs::launch_file_or_open_with(
+                babydra_ui_kit::components::explore::prelude::launch_file_or_open_with(
                     &target_path,
                     None::<&gtk4::Window>,
                 );

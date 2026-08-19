@@ -5,11 +5,10 @@ use gtk4::{
     Align, Box, Button, CheckButton, Label, ListBox, ListBoxRow, Orientation, ScrolledWindow,
     SearchEntry, Window,
 };
-use std::path::PathBuf;
+use std::path::Path;
 
 pub struct OpenWithDialogWidgets {
     pub window: Window,
-    pub _vbox: Box,
     pub search_entry: SearchEntry,
     pub listbox: ListBox,
     pub check_always: CheckButton,
@@ -20,11 +19,11 @@ pub struct OpenWithDialogWidgets {
 
 /// Builds the UI layout for the Open With (App Picker) dialog.
 pub fn build_open_with_dialog(
-    path: &PathBuf,
+    path: &Path,
     parent: Option<&impl IsA<gtk4::Window>>,
 ) -> OpenWithDialogWidgets {
     let window = Window::builder()
-        .title(&trans("explore.dialog_open_with_title"))
+        .title(trans("explore.dialog_open_with_title"))
         .modal(true)
         .resizable(false)
         .default_width(420)
@@ -56,7 +55,7 @@ pub fn build_open_with_dialog(
 
     let header_box = Box::new(Orientation::Vertical, 2);
     let lbl_title = Label::builder()
-        .label(&trans("explore.dialog_open_with_title"))
+        .label(trans("explore.dialog_open_with_title"))
         .halign(Align::Start)
         .css_classes(vec!["dialog-title".to_string()])
         .build();
@@ -167,7 +166,7 @@ pub fn build_open_with_dialog(
 
     let btn_cancel = Button::with_label(&trans("explore.settings_cancel"));
     let btn_open = Button::builder()
-        .label(&trans("explore.menu_open"))
+        .label(trans("explore.menu_open"))
         .css_classes(vec!["suggested-action".to_string()])
         .sensitive(false)
         .build();
@@ -177,7 +176,6 @@ pub fn build_open_with_dialog(
 
     OpenWithDialogWidgets {
         window,
-        _vbox: vbox,
         search_entry,
         listbox,
         check_always,

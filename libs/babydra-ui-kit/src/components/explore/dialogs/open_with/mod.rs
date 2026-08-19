@@ -1,6 +1,6 @@
 use babydra_core::services::apps::DesktopApp;
 use gtk4::prelude::*;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::rc::Rc;
 
 mod render;
@@ -58,7 +58,7 @@ pub fn set_default_app_for_file(app: &DesktopApp, path: &Path) {
 }
 
 /// Presents the Open With application chooser dialog for a file.
-pub fn show_open_with_dialog(path: &PathBuf, parent: Option<&impl IsA<gtk4::Window>>) {
+pub fn show_open_with_dialog(path: &Path, parent: Option<&impl IsA<gtk4::Window>>) {
     let widgets = render::build_open_with_dialog(path, parent);
     let window = widgets.window;
     let search_entry = widgets.search_entry;
@@ -85,8 +85,7 @@ pub fn show_open_with_dialog(path: &PathBuf, parent: Option<&impl IsA<gtk4::Wind
 
         let idx = row.index() as usize;
         if let Some(app) = apps_filter.get(idx) {
-            app.name.to_lowercase().contains(&text)
-                || app.exec.to_lowercase().contains(&text)
+            app.name.to_lowercase().contains(&text) || app.exec.to_lowercase().contains(&text)
         } else {
             true
         }
@@ -104,9 +103,10 @@ pub fn show_open_with_dialog(path: &PathBuf, parent: Option<&impl IsA<gtk4::Wind
     });
 
     // Open action handler
+    let path_buf = path.to_path_buf();
     let perform_open = {
         let window = window.clone();
-        let path = path.clone();
+        let path = path_buf;
         let apps = apps.clone();
         let check_always = check_always.clone();
         let listbox = listbox.clone();
@@ -142,39 +142,18 @@ pub fn show_open_with_dialog(path: &PathBuf, parent: Option<&impl IsA<gtk4::Wind
 }
 
 /// Attempts to launch a file using the system default handler, or opens the App Picker dialog if none exists.
-pub fn launch_file_or_open_with(path: &PathBuf, parent: Option<&impl IsA<gtk4::Window>>) {
+pub fn launch_file_or_open_with(path: &Path, parent: Option<&impl IsA<gtk4::Window>>) {
     let (content_type, _) = gtk4::gio::content_type_guess(Some(path), &[]);
-
     let has_default_app = gtk4::gio::AppInfo::default_for_type(&content_type, false).is_some();
     let uri = format!("file://{}", path.to_string_lossy());
 
-    if has_default_app {
-        if gtk4::gio::AppInfo::launch_default_for_uri(&uri, gtk4::gio::AppLaunchContext::NONE).is_ok() {
-            return;
-        }
-    }
-
-    // Try xdg-open directly
-    if let Ok(mut child) = std::process::Command::new("xdg-open")
-        .arg(path)
-        .stderr(std::process::Stdio::null())
-        .stdout(std::process::Stdio::null())
-        .spawn()
+    if has_default_app
+        && gtk4::gio::AppInfo::launch_default_for_uri(&uri, gtk4::gio::AppLaunchContext::NONE)
+            .is_ok()
     {
-        // Check if xdg-open exited immediately with failure (status != 0)
-        let path_c = path.clone();
-        let parent_win = parent.map(|p| p.clone().upcast::<gtk4::Window>());
-        glib::spawn_future_local(async move {
-            let res = tokio::task::spawn_blocking(move || child.wait()).await;
-            if let Ok(Ok(status)) = res {
-                if !status.success() {
-                    show_open_with_dialog(&path_c, parent_win.as_ref());
-                }
-            }
-        });
         return;
     }
 
-    // Fallback: show dialog directly
+    // Fallback: show the Open With application chooser dialog
     show_open_with_dialog(path, parent);
 }
