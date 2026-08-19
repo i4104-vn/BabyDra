@@ -136,11 +136,7 @@ pub fn stream_uninstall(
 ) -> CoreResult<()> {
     crate::services::system::updates::clean_pacman_lock(password, sender.clone());
     let cmd = format!("yes | pacman -Rns --noconfirm {}", pkg_name.trim());
-    crate::services::system::updates::exec_cmd_stream(
-        &["sh", "-c", &cmd],
-        password,
-        sender,
-    )
+    crate::services::system::updates::exec_cmd_stream(&["sh", "-c", &cmd], password, sender)
 }
 
 /// Find cached older package.
@@ -207,11 +203,7 @@ pub fn stream_downgrade(
     if let Some(cached_file) = find_cached_pkg(pkg_name) {
         let path_str = cached_file.to_string_lossy().to_string();
         let cmd = format!("pacman -U --noconfirm {}", path_str);
-        crate::services::system::updates::exec_cmd_stream(
-            &["sh", "-c", &cmd],
-            password,
-            sender,
-        )
+        crate::services::system::updates::exec_cmd_stream(&["sh", "-c", &cmd], password, sender)
     } else {
         Err(format!(
             "No cached older version found for '{}' in /var/cache/pacman/pkg/",

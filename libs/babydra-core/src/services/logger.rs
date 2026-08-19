@@ -48,8 +48,12 @@ impl BabyDraLogger {
             })
             .ok();
 
-        let is_debug_mode = std::env::var("BABYDRA_DEBUG").map(|v| v == "1" || v == "true").unwrap_or(false)
-            || std::env::var("RUST_LOG").map(|v| v.to_lowercase().contains("debug") || v.to_lowercase().contains("trace")).unwrap_or(false);
+        let is_debug_mode = std::env::var("BABYDRA_DEBUG")
+            .map(|v| v == "1" || v == "true")
+            .unwrap_or(false)
+            || std::env::var("RUST_LOG")
+                .map(|v| v.to_lowercase().contains("debug") || v.to_lowercase().contains("trace"))
+                .unwrap_or(false);
 
         Self {
             file: Mutex::new(file),

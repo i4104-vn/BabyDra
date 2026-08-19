@@ -74,11 +74,7 @@ pub fn clean_pacman_lock(password: Option<&str>, sender: std::sync::mpsc::Sender
     if std::path::Path::new("/var/lib/pacman/db.lck").exists() {
         if !is_pacman_running() {
             let _ = sender.send(":: Detected stale pacman lock file (/var/lib/pacman/db.lck). Cleaning lock file...".to_string());
-            let _ = exec_cmd_stream(
-                &["rm", "-f", "/var/lib/pacman/db.lck"],
-                password,
-                sender,
-            );
+            let _ = exec_cmd_stream(&["rm", "-f", "/var/lib/pacman/db.lck"], password, sender);
         }
     }
 }

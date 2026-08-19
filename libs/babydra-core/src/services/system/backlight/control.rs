@@ -51,10 +51,7 @@ fn get_active_session_path(
     None
 }
 
-fn set_brightness_logind(
-    device: &str,
-    val: f64,
-) -> Result<(), Box<dyn std::error::Error>> {
+fn set_brightness_logind(device: &str, val: f64) -> Result<(), Box<dyn std::error::Error>> {
     let conn = zbus::blocking::Connection::system()?;
     let manager = LogindManagerProxyBlocking::new(&conn)?;
     let session_path = manager

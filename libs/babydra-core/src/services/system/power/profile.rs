@@ -59,10 +59,7 @@ pub fn set_perf_profile(profile: PerformanceProfile) -> CoreResult<()> {
 }
 
 /// Sets `performance profile with password` to the given value.
-pub fn set_perf_profile_pw(
-    profile: PerformanceProfile,
-    password: &str,
-) -> CoreResult<()> {
+pub fn set_perf_profile_pw(profile: PerformanceProfile, password: &str) -> CoreResult<()> {
     let (governor, epp) = match profile {
         PerformanceProfile::Normal => ("powersave", "power"),
         PerformanceProfile::Balanced => ("powersave", "balance_performance"),

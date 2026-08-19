@@ -27,8 +27,7 @@ fn ui_kit_prelude_exposes_components_and_helpers() {
         ui_prelude::create_icon_button;
     let _: fn(&gtk4::Box, &str) = ui_prelude::set_tooltip;
     let _: fn(&str, &str) -> (gtk4::Box, ui_prelude::CustomSwitch) = ui_prelude::create_switch_card;
-    let _: fn(ui_prelude::PlaceholderState) -> gtk4::ListBoxRow =
-        ui_prelude::create_placeholder;
+    let _: fn(ui_prelude::PlaceholderState) -> gtk4::ListBoxRow = ui_prelude::create_placeholder;
     let _: fn(bool, fn(bool)) -> ui_prelude::CustomSwitch = ui_prelude::create_switch;
 
     // Context menu builders.
@@ -43,8 +42,7 @@ fn ui_kit_prelude_exposes_components_and_helpers() {
         ui_prelude::create_menu_popover;
     let _: fn(&gtk4::Widget, gtk4::PositionType) -> (gtk4::Popover, gtk4::Box) =
         ui_prelude::create_menu_for;
-    let _: fn(&gtk4::Button, &str, &[babydra_core::tray::MenuItem]) =
-        ui_prelude::show_tray_menu;
+    let _: fn(&gtk4::Button, &str, &[babydra_core::tray::MenuItem]) = ui_prelude::show_tray_menu;
 
     // UI helpers.
     let _: fn(&str, i32) -> gtk4::Image = ui_prelude::get_icon;

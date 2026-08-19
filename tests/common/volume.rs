@@ -45,7 +45,10 @@ fn empty_input_yields_empty_vectors() {
 fn backend_detection_resolves_and_caches_consistently() {
     let backend1 = get_audio_backend();
     let backend2 = get_audio_backend();
-    assert_eq!(backend1, backend2, "Cached audio backend must be stable across repeated queries");
+    assert_eq!(
+        backend1, backend2,
+        "Cached audio backend must be stable across repeated queries"
+    );
 }
 
 #[test]

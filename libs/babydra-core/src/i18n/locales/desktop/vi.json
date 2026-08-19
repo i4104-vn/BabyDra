@@ -7,6 +7,8 @@
   "desktop.sort_by": "Sắp xếp",
   "desktop.sort_by_name": "Sắp xếp: Theo tên",
   "desktop.sort_by_date": "Sắp xếp: Theo thời gian sửa đổi",
+  "desktop.sort_by_type": "Sắp xếp: Theo loại tệp",
+  "desktop.sort_by_size": "Sắp xếp: Theo kích thước",
   "desktop.toggle_icon_size": "Đổi kích thước biểu tượng",
   "desktop.change_wallpaper": "Thay đổi hình nền...",
   "desktop.display_settings": "Cài đặt màn hình...",

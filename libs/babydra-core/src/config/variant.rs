@@ -11,8 +11,8 @@
 //! The `Variant` data model lives in `models::config` and is re-exported here
 //! as a legacy bridge so existing `config::variant::Variant` imports keep working.
 
-pub use crate::models::config::Variant;
 use crate::error::CoreResult;
+pub use crate::models::config::Variant;
 use std::path::{Path, PathBuf};
 
 /// Root of the variants tree (env override for tests / flexible deployments).

@@ -226,15 +226,26 @@ pub fn spawn_watcher() {
                                             {
                                                 let icon_name = match proxy.icon_name().await {
                                                     Ok(name) if !name.is_empty() => name,
-                                                    _ => proxy.attention_icon_name().await.unwrap_or_default(),
+                                                    _ => proxy
+                                                        .attention_icon_name()
+                                                        .await
+                                                        .unwrap_or_default(),
                                                 };
                                                 let id = proxy.id().await.unwrap_or_default();
-                                                let title = proxy.title().await.unwrap_or_else(|_| id.clone());
+                                                let title = proxy
+                                                    .title()
+                                                    .await
+                                                    .unwrap_or_else(|_| id.clone());
 
                                                 let final_icon = if !icon_name.is_empty() {
-                                                    if let Ok(theme_path) = proxy.icon_theme_path().await {
+                                                    if let Ok(theme_path) =
+                                                        proxy.icon_theme_path().await
+                                                    {
                                                         if !theme_path.is_empty() {
-                                                            let p = std::path::PathBuf::from(&theme_path).join(&icon_name);
+                                                            let p = std::path::PathBuf::from(
+                                                                &theme_path,
+                                                            )
+                                                            .join(&icon_name);
                                                             if p.exists() {
                                                                 p.to_string_lossy().to_string()
                                                             } else {

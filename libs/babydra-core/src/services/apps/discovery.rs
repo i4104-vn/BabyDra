@@ -1,8 +1,6 @@
 //! Filesystem scanning and parsing of `.desktop` files.
 
-use super::pacman::{
-    get_explicit_pkgs, get_package_owner, is_dep_heuristic,
-};
+use super::pacman::{get_explicit_pkgs, get_package_owner, is_dep_heuristic};
 use super::DesktopApp;
 use std::fs::File;
 use std::io::{BufRead, BufReader};

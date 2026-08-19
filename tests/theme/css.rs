@@ -1,6 +1,6 @@
 use std::cell::RefCell;
-use std::rc::Rc;
 use std::path::PathBuf;
+use std::rc::Rc;
 
 fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..")
@@ -65,7 +65,8 @@ fn test_gtk_css_parsing() {
 
     for rel_path in &files {
         let full_path = repo_root().join(rel_path);
-        let content = std::fs::read_to_string(&full_path).unwrap_or_else(|e| panic!("Could not read {}: {}", rel_path, e));
+        let content = std::fs::read_to_string(&full_path)
+            .unwrap_or_else(|e| panic!("Could not read {}: {}", rel_path, e));
         let provider = gtk4::CssProvider::new();
         let errors = Rc::new(RefCell::new(Vec::new()));
         let errors_clone = errors.clone();
@@ -95,7 +96,13 @@ fn test_gtk_css_parsing() {
     }
 
     // Now test resolved themes (concatenated layers)
-    let theme_names = ["babydra-default", "babydra-blue", "babydra-green", "babydra-purple", "babydra-rose"];
+    let theme_names = [
+        "babydra-default",
+        "babydra-blue",
+        "babydra-green",
+        "babydra-purple",
+        "babydra-rose",
+    ];
     for theme_name in &theme_names {
         let theme = babydra_theme::resolve_theme(theme_name).expect("Failed to resolve theme");
 
@@ -140,5 +147,9 @@ fn test_gtk_css_parsing() {
     }
 
     println!("\nTotal CSS parsing errors found: {}", total_errors);
-    assert_eq!(total_errors, 0, "Found {} CSS parsing errors in GTK stylesheets", total_errors);
+    assert_eq!(
+        total_errors, 0,
+        "Found {} CSS parsing errors in GTK stylesheets",
+        total_errors
+    );
 }

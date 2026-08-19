@@ -7,6 +7,8 @@
   "desktop.sort_by": "Sort",
   "desktop.sort_by_name": "Sort: By Name",
   "desktop.sort_by_date": "Sort: By Modified Time",
+  "desktop.sort_by_type": "Sort: By Type",
+  "desktop.sort_by_size": "Sort: By Size",
   "desktop.toggle_icon_size": "Toggle Icon Size",
   "desktop.change_wallpaper": "Change Wallpaper...",
   "desktop.display_settings": "Display Settings...",

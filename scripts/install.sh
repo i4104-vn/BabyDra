@@ -272,6 +272,14 @@ chmod +x "$HOME/.local/share/applications/babydra-explore.desktop"
 update-desktop-database "$HOME/.local/share/applications" || true
 xdg-mime default babydra-explore.desktop inode/directory || true
 
+echo "Registering DBus service for FileManager1..."
+mkdir -p "$HOME/.local/share/dbus-1/services"
+cat << EOF > "$HOME/.local/share/dbus-1/services/org.freedesktop.FileManager1.service"
+[D-BUS Service]
+Name=org.freedesktop.FileManager1
+Exec=$LOCAL_BIN/babydra-explore
+EOF
+
 echo "============================================="
 echo "Installation & Setup complete!"
 echo "Binaries installed to: $LOCAL_BIN"

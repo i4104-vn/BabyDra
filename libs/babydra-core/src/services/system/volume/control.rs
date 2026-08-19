@@ -41,7 +41,11 @@ pub fn set_volume(val: f64) {
     match get_audio_backend() {
         AudioBackendType::Wpctl => {
             let _ = Command::new("wpctl")
-                .args(["set-volume", "@DEFAULT_AUDIO_SINK@", &format!("{}%", percent)])
+                .args([
+                    "set-volume",
+                    "@DEFAULT_AUDIO_SINK@",
+                    &format!("{}%", percent),
+                ])
                 .spawn();
             if percent > 0 {
                 let _ = Command::new("wpctl")
@@ -51,7 +55,11 @@ pub fn set_volume(val: f64) {
         }
         AudioBackendType::Pactl => {
             let _ = Command::new("pactl")
-                .args(["set-sink-volume", "@DEFAULT_SINK@", &format!("{}%", percent)])
+                .args([
+                    "set-sink-volume",
+                    "@DEFAULT_SINK@",
+                    &format!("{}%", percent),
+                ])
                 .spawn();
             if percent > 0 {
                 let _ = Command::new("pactl")
@@ -122,9 +130,7 @@ pub fn select_audio_device(name: &str) {
                         .status();
                 }
             } else {
-                let _ = Command::new("wpctl")
-                    .args(["set-default", name])
-                    .status();
+                let _ = Command::new("wpctl").args(["set-default", name]).status();
             }
         }
         AudioBackendType::Pactl => {

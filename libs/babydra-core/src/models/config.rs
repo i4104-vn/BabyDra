@@ -189,7 +189,7 @@ pub struct DesktopConfig {
     pub sort_by: String, // "name" | "type" | "modified" | "size"
     #[serde(default = "default_auto_arrange")]
     pub auto_arrange: bool,
-    #[serde(default)]
+    #[serde(skip)]
     pub icon_positions: std::collections::HashMap<String, (i32, i32)>,
     #[serde(default)]
     pub custom_context_items: Vec<CustomContextItem>,

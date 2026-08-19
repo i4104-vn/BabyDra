@@ -12,7 +12,11 @@ pub fn get_group_name(entry: &FileEntry, sort_mode: &str) -> String {
             let now_naive = now.date_naive();
             let date_str = datetime.format(" (%d/%m)").to_string();
             if date_naive == now_naive {
-                format!("{}{}", trans("explore.group_today").replace("{}", ""), date_str)
+                format!(
+                    "{}{}",
+                    trans("explore.group_today").replace("{}", ""),
+                    date_str
+                )
             } else if date_naive == now_naive - Duration::days(1) {
                 format!(
                     "{}{}",
@@ -35,7 +39,11 @@ pub fn get_group_name(entry: &FileEntry, sort_mode: &str) -> String {
                 } else if diff > 7 {
                     trans("explore.group_older_week")
                 } else {
-                    format!("{}{}", trans("explore.group_today").replace("{}", ""), date_str)
+                    format!(
+                        "{}{}",
+                        trans("explore.group_today").replace("{}", ""),
+                        date_str
+                    )
                 }
             }
         } else {
@@ -50,9 +58,8 @@ pub fn get_group_name(entry: &FileEntry, sort_mode: &str) -> String {
             trans("explore.group_folders")
         } else {
             match entry.path.extension() {
-                Some(ext) => {
-                    trans("explore.group_files").replace("{}", &ext.to_string_lossy().to_uppercase())
-                }
+                Some(ext) => trans("explore.group_files")
+                    .replace("{}", &ext.to_string_lossy().to_uppercase()),
                 None => trans("explore.group_other_files"),
             }
         }

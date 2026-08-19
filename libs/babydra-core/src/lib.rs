@@ -19,10 +19,9 @@ pub use models::explore::{
 
 // Flat re-exports at root for convenience and backward compatibility
 pub use config::{
-    get_conf_path, get_config_dir, load_babydra_config, load_desktop_config,
-    load_explore_cfg, save_babydra_config, save_desktop_config, save_explore_cfg,
-    BabyDraConfig, DesktopConfig, ExploreSettings, NotificationConfig, PowerConfig, ShellConfig,
-    ThemeConfig, WallpaperConfig,
+    get_conf_path, get_config_dir, load_babydra_config, load_desktop_config, load_explore_cfg,
+    save_babydra_config, save_desktop_config, save_explore_cfg, BabyDraConfig, DesktopConfig,
+    ExploreSettings, NotificationConfig, PowerConfig, ShellConfig, ThemeConfig, WallpaperConfig,
 };
 
 pub use models::shell::battery::BatteryInfo;
@@ -32,11 +31,11 @@ pub use services::notification::island::{
     clear_island_state, get_island_path, update_island_state, IslandState,
 };
 pub use services::notification::service::{
-    send_app_notif, send_notification, send_notif_icon,
-    send_settings_notif, ActiveNotification, NotificationMsg,
+    send_app_notif, send_notif_icon, send_notification, send_settings_notif, ActiveNotification,
+    NotificationMsg,
 };
 pub use services::screenshot::{
-    capture_screen, get_screenshot_path, capture_fullscreen, trigger_save,
+    capture_fullscreen, capture_screen, get_screenshot_path, trigger_save,
 };
 pub use services::system::auth::verify_password;
 pub use services::system::battery::get_battery_info;
@@ -66,9 +65,9 @@ pub use services::system::wifi;
 pub use services::tray;
 pub use services::wallpaper;
 pub use services::wallpaper::{
-    apply_greeter_wp, apply_wallpaper, crop_circle,
-    crop_square, get_avatar_bytes, get_wallpaper, get_greeter_wp_bytes,
-    get_greeter_wp_css, set_avatar, set_greeter_wp, set_wallpaper,
+    apply_greeter_wp, apply_wallpaper, crop_circle, crop_square, get_avatar_bytes,
+    get_greeter_wp_bytes, get_greeter_wp_css, get_wallpaper, set_avatar, set_greeter_wp,
+    set_wallpaper,
 };
 pub use services::window;
 
@@ -77,9 +76,9 @@ pub use services::clock::format_clock_date;
 pub use services::exif;
 pub use services::exif::{read_exif, ExifData};
 pub use services::explore::{
-    calc_dir_size, copy_path, delete_path, filter_entries, get_icon_name,
-    get_owner_group, load_cropped_square, load_directory, move_path, rename_path,
-    send_to_trash, sort_entries, start_dbus_service, FileWatcher,
+    calc_dir_size, copy_path, delete_path, filter_entries, get_icon_name, get_owner_group,
+    load_cropped_square, load_directory, move_path, rename_path, send_to_trash, sort_entries,
+    start_dbus_service, FileWatcher,
 };
 pub use services::mpris;
 pub use services::mpris::{decode_uri, run_playerctl};

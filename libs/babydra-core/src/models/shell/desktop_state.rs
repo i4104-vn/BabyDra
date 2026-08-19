@@ -2,7 +2,7 @@
 //! `DesktopState` holds runtime desktop state; `layout` provides positioning
 //! and sorting algorithms. Both were moved here from `babydra-desktop`.
 
-use crate::config::{load_desktop_config, save_desktop_config, DesktopConfig};
+use crate::config::{desktop_layout, load_desktop_config, save_desktop_config, DesktopConfig};
 use crate::models::explore::FileEntry;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
@@ -77,7 +77,10 @@ pub fn sort_entries(entries: &mut [FileEntry], sort_by: &str) {
                 match (a_is_dir, b_is_dir) {
                     (true, false) => std::cmp::Ordering::Less,
                     (false, true) => std::cmp::Ordering::Greater,
-                    _ => a.display_name.to_lowercase().cmp(&b.display_name.to_lowercase()),
+                    _ => a
+                        .display_name
+                        .to_lowercase()
+                        .cmp(&b.display_name.to_lowercase()),
                 }
             });
         }
@@ -95,7 +98,10 @@ pub fn sort_entries(entries: &mut [FileEntry], sort_by: &str) {
                 match (a_is_dir, b_is_dir) {
                     (true, false) => std::cmp::Ordering::Less,
                     (false, true) => std::cmp::Ordering::Greater,
-                    _ => a.display_name.to_lowercase().cmp(&b.display_name.to_lowercase()),
+                    _ => a
+                        .display_name
+                        .to_lowercase()
+                        .cmp(&b.display_name.to_lowercase()),
                 }
             });
         }
@@ -142,20 +148,25 @@ impl DesktopState {
         })
     }
 
-    /// Reloads files from `~/Desktop` directory.
-    pub async fn reload_entries(&mut self) {
+    /// Asynchronously fetches and sorts files from `~/Desktop` directory.
+    pub async fn fetch_entries(sort_by: &str) -> Vec<FileEntry> {
         let dir = Self::desktop_dir();
         let _ = std::fs::create_dir_all(&dir);
 
         let show_hidden = false;
-        if let Ok(entries) = crate::services::explore::load_directory(dir, show_hidden).await {
-            let mut list = entries;
-            sort_entries(&mut list, &self.config.sort_by);
-            self.entries = list;
+        if let Ok(mut entries) = crate::services::explore::load_directory(dir, show_hidden).await {
+            sort_entries(&mut entries, sort_by);
+            return entries;
         }
+        Vec::new()
+    }
 
+    /// Synchronously updates the state with newly fetched entries.
+    pub fn update_entries(&mut self, new_entries: Vec<FileEntry>) {
+        self.entries = new_entries;
         // Clean up selected paths that no longer exist
-        let existing_paths: HashSet<PathBuf> = self.entries.iter().map(|e| e.path.clone()).collect();
+        let existing_paths: HashSet<PathBuf> =
+            self.entries.iter().map(|e| e.path.clone()).collect();
         self.selected_paths.retain(|p| existing_paths.contains(p));
     }
 
@@ -224,15 +235,9 @@ impl DesktopState {
 
         for entry in &self.entries {
             let name = entry.name.to_string_lossy().to_string();
-            if let Some(&(saved_x, saved_y)) = self.config.icon_positions.get(&name) {
-                let (snapped_x, snapped_y) = snap_to_grid(
-                    saved_x,
-                    saved_y,
-                    cell_w,
-                    cell_h,
-                    margin_x,
-                    margin_y,
-                );
+            if let Some((saved_x, saved_y)) = desktop_layout::get_position(&name) {
+                let (snapped_x, snapped_y) =
+                    snap_to_grid(saved_x, saved_y, cell_w, cell_h, margin_x, margin_y);
                 let col = ((snapped_x - margin_x) / cell_w).max(0);
                 let row = ((snapped_y - margin_y) / cell_h).max(0);
 
@@ -299,18 +304,14 @@ impl DesktopState {
         let cell_w = self.config.grid_spacing.max(80) as i32;
         let cell_h = cell_w + 14;
 
-        let (snapped_x, snapped_y) = snap_to_grid(
-            x,
-            y,
-            cell_w,
-            cell_h,
-            DEFAULT_MARGIN_X,
-            DEFAULT_MARGIN_Y,
-        );
+        let (snapped_x, snapped_y) =
+            snap_to_grid(x, y, cell_w, cell_h, DEFAULT_MARGIN_X, DEFAULT_MARGIN_Y);
 
-        self.config.icon_positions.insert(file_name, (snapped_x, snapped_y));
-        self.config.auto_arrange = false;
-        save_desktop_config(&self.config);
+        desktop_layout::set_position(file_name, snapped_x, snapped_y);
+        if self.config.auto_arrange {
+            self.config.auto_arrange = false;
+            save_desktop_config(&self.config);
+        }
     }
 
     /// Updates sort order and re-sorts entries.
@@ -324,7 +325,7 @@ impl DesktopState {
     pub fn set_auto_arrange(&mut self, auto: bool) {
         self.config.auto_arrange = auto;
         if auto {
-            self.config.icon_positions.clear();
+            desktop_layout::cleanup_stale(&[]);
         }
         save_desktop_config(&self.config);
     }

@@ -8,8 +8,8 @@ pub mod sort;
 pub mod watcher;
 
 pub use cmd::{
-    check_zip_password, exec_custom_cmd, is_zip_encrypted, shell_quote,
-    spawn_compress, spawn_decompress,
+    check_zip_password, exec_custom_cmd, is_zip_encrypted, shell_quote, spawn_compress,
+    spawn_decompress,
 };
 pub use dbus::start_dbus_service;
 pub use dir_size::calc_dir_size;
