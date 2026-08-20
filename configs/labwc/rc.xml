@@ -48,8 +48,8 @@
   <theme>
     <name>BabyDra</name>
     <cornerRadius>12</cornerRadius>
-
-    <dropShadows>yes</dropShadows>
+    <keepBorder>no</keepBorder>
+    <dropShadows>no</dropShadows>
     <titlebar>
       <layout>iconify,max,close</layout>
       <showTitle>yes</showTitle>
