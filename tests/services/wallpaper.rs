@@ -41,3 +41,26 @@ fn circular_mask_makes_corners_transparent() {
     let _ = pixbuf.savev("/tmp/avatar_circle_test.png", "png", &[]);
     eprintln!("saved /tmp/avatar_circle_test.png");
 }
+
+#[test]
+fn set_greeter_wp_and_avatar_persist_cleanly() {
+    let temp_img = std::env::temp_dir().join("babydra_test_wp.png");
+    let pix = gtk4::gdk_pixbuf::Pixbuf::new(gtk4::gdk_pixbuf::Colorspace::Rgb, true, 8, 100, 100).unwrap();
+    pix.fill(0xffffffff);
+    let _ = pix.savev(&temp_img, "png", &[]);
+
+    let avatar_res = babydra_core::set_avatar(&temp_img);
+    assert!(avatar_res.is_ok(), "Setting avatar should succeed");
+
+    let wp_res = babydra_core::set_greeter_wp(&temp_img);
+    assert!(wp_res.is_ok(), "Setting greeter wp should succeed");
+
+    // Both avatar and greeter wp should be retrievable
+    let av_bytes = babydra_core::get_avatar_bytes();
+    assert!(av_bytes.is_some(), "Avatar bytes must be retrievable after set_avatar");
+
+    let wp_bytes = babydra_core::get_greeter_wp_bytes();
+    assert!(wp_bytes.is_some(), "Greeter wp bytes must be retrievable after set_greeter_wp");
+
+    let _ = std::fs::remove_file(&temp_img);
+}

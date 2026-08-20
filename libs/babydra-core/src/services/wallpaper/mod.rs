@@ -114,18 +114,39 @@ pub fn get_local_wallpapers() -> Vec<PathBuf> {
     files
 }
 
-/// Sets the greeter background image path in babydra.conf as a base64 string.
+/// Sets the greeter background image path in babydra.conf.
 pub fn set_greeter_wp(path: &Path) -> CoreResult<()> {
     if !path.exists() {
         return Err(format!("Greeter background file does not exist at: {:?}", path).into());
     }
 
-    let bytes = std::fs::read(path).map_err(|e| e.to_string())?;
-    use base64::{engine::general_purpose::STANDARD, Engine as _};
-    let b64 = STANDARD.encode(&bytes);
+    let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".to_string());
+    let target_dir = PathBuf::from(&home).join(".babydra").join("wallpaper");
+    let _ = std::fs::create_dir_all(&target_dir);
+
+    // Save image to ~/.babydra/wallpaper if not already there
+    let target_path = if path.parent() != Some(&target_dir) {
+        if let Some(file_name) = path.file_name() {
+            let dest = target_dir.join(file_name);
+            if path != dest {
+                let _ = std::fs::copy(path, &dest);
+            }
+            dest
+        } else {
+            path.to_path_buf()
+        }
+    } else {
+        path.to_path_buf()
+    };
+
+    // Also mirror to ~/.babydra/greeter_wallpaper.png for fallback
+    let greeter_wp_fallback = PathBuf::from(&home).join(".babydra").join("greeter_wallpaper.png");
+    let _ = std::fs::copy(&target_path, &greeter_wp_fallback);
+
+    let path_str = target_path.to_str().ok_or("Invalid path encoding")?;
 
     let mut conf = crate::config::load_babydra_config();
-    conf.lockscreen.background = b64;
+    conf.lockscreen.background = path_str.to_string();
     crate::config::save_babydra_config(&conf);
     Ok(())
 }
@@ -137,16 +158,42 @@ pub fn apply_greeter_wp() {
 
 /// Retrieves the active greeter background as raw bytes.
 pub fn get_greeter_wp_bytes() -> Option<Vec<u8>> {
+    crate::config::invalidate_cache();
     let conf = crate::config::load_babydra_config();
     if !conf.lockscreen.background.is_empty() {
+        let p = PathBuf::from(&conf.lockscreen.background);
+        if p.exists() {
+            if let Ok(bytes) = std::fs::read(&p) {
+                return Some(bytes);
+            }
+        }
+        // Backward compatibility: decode legacy base64 if not a file path
         use base64::{engine::general_purpose::STANDARD, Engine as _};
         if let Ok(bytes) = STANDARD.decode(&conf.lockscreen.background) {
             return Some(bytes);
         }
     }
 
+    // Check user fallback files
+    if let Ok(home) = std::env::var("HOME") {
+        let user_candidates = [
+            PathBuf::from(&home).join(".babydra/greeter_wallpaper.png"),
+            PathBuf::from(&home).join(".babydra/wallpaper.png"),
+        ];
+        for c in &user_candidates {
+            if c.exists() {
+                if let Ok(bytes) = std::fs::read(c) {
+                    return Some(bytes);
+                }
+            }
+        }
+    }
+
     // Default system wallpaper
-    let system_candidates = ["/usr/share/babydra/wallpaper.png"];
+    let system_candidates = [
+        "/usr/share/babydra/wallpaper.png",
+        "/usr/share/babydra/greeter_wallpaper.png",
+    ];
     for c in &system_candidates {
         let p = PathBuf::from(c);
         if p.exists() {
@@ -173,9 +220,15 @@ fn detect_image_mime(bytes: &[u8]) -> &'static str {
 }
 
 /// Retrieves the active greeter background as a CSS URL string.
-/// The MIME type is sniffed from the bytes so JPEG/WebP images embedded as
-/// base64 data URLs are loaded correctly (previously always labelled image/png).
 pub fn get_greeter_wp_css() -> String {
+    let conf = crate::config::load_babydra_config();
+    if !conf.lockscreen.background.is_empty() {
+        let p = PathBuf::from(&conf.lockscreen.background);
+        if p.exists() {
+            return format!("url('file://{}')", p.display());
+        }
+    }
+
     if let Some(bytes) = get_greeter_wp_bytes() {
         use base64::{engine::general_purpose::STANDARD, Engine as _};
         let b64 = STANDARD.encode(&bytes);
@@ -187,30 +240,67 @@ pub fn get_greeter_wp_css() -> String {
     }
 }
 
-/// Sets the avatar image path in babydra.conf as a base64 string.
+/// Sets the avatar image path in babydra.conf.
 pub fn set_avatar(path: &Path) -> CoreResult<()> {
     if !path.exists() {
         return Err(format!("Avatar file does not exist at: {:?}", path).into());
     }
-    let bytes = std::fs::read(path).map_err(|e| e.to_string())?;
-    use base64::{engine::general_purpose::STANDARD, Engine as _};
-    let b64 = STANDARD.encode(&bytes);
+
+    let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".to_string());
+    let babydra_dir = PathBuf::from(&home).join(".babydra");
+    let _ = std::fs::create_dir_all(&babydra_dir);
+
+    let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("png");
+    let dest = babydra_dir.join(format!("avatar.{}", ext));
+    if path != dest {
+        let _ = std::fs::copy(path, &dest);
+    }
+
+    let path_str = dest.to_str().ok_or("Invalid path encoding")?;
 
     let mut conf = crate::config::load_babydra_config();
-    conf.lockscreen.avatar = b64;
+    conf.lockscreen.avatar = path_str.to_string();
     crate::config::save_babydra_config(&conf);
     Ok(())
 }
 
 /// Retrieves the active avatar as raw bytes.
 pub fn get_avatar_bytes() -> Option<Vec<u8>> {
+    crate::config::invalidate_cache();
     let conf = crate::config::load_babydra_config();
     if !conf.lockscreen.avatar.is_empty() {
+        let p = PathBuf::from(&conf.lockscreen.avatar);
+        if p.exists() {
+            if let Ok(bytes) = std::fs::read(&p) {
+                return Some(bytes);
+            }
+        }
+        // Backward compatibility: decode legacy base64 if not a file path
         use base64::{engine::general_purpose::STANDARD, Engine as _};
         if let Ok(bytes) = STANDARD.decode(&conf.lockscreen.avatar) {
             return Some(bytes);
         }
     }
+
+    // Check user avatar fallbacks
+    if let Ok(home) = std::env::var("HOME") {
+        let candidates = [
+            PathBuf::from(&home).join(".babydra/avatar.png"),
+            PathBuf::from(&home).join(".babydra/avatar.jpg"),
+            PathBuf::from(&home).join(".babydra/avatar.jpeg"),
+            PathBuf::from(&home).join(".babydra/avatar.webp"),
+            PathBuf::from(&home).join(".face"),
+            PathBuf::from(&home).join(".face.icon"),
+        ];
+        for c in &candidates {
+            if c.exists() {
+                if let Ok(bytes) = std::fs::read(c) {
+                    return Some(bytes);
+                }
+            }
+        }
+    }
+
     None
 }
 
