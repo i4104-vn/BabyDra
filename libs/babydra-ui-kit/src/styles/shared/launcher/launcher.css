@@ -172,22 +172,24 @@ entry.launcher-search:focus {
     border-radius: 14px;
 }
 
+.launcher-avatar {
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    border-radius: 9999px;
+}
+
+.launcher-avatar-fallback {
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    border-radius: 9999px;
+}
+
 .launcher-profile-label {
     font-size: 13px;
     font-weight: 600;
 }
 
-.launcher-power-btn {
-    background-color: rgba(59, 130, 246, 0.05);
-    border: 1px solid rgba(59, 130, 246, 0.1);
-    border-radius: 8px;
-    padding: 6px;
-    transition: all 200ms ease;
-    box-shadow: none;
-}
-
-.launcher-power-btn:hover {
-    box-shadow: none;
+.launcher-profile-uptime {
+    font-size: 11px;
+    opacity: 0.6;
 }
 
 .launcher-power-option-btn {

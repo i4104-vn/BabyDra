@@ -700,8 +700,22 @@ entry.launcher-search>text>placeholder {
     background-color: rgba(59, 130, 246, 0.15);
 }
 
+.launcher-avatar {
+    border: 1.5px solid rgba(255, 255, 255, 0.22);
+    border-radius: 9999px;
+}
+
+.launcher-avatar-fallback {
+    border: 1.5px solid rgba(255, 255, 255, 0.22);
+    border-radius: 9999px;
+}
+
 .launcher-profile-label {
     color: #bac2de;
+}
+
+.launcher-profile-uptime {
+    color: rgba(255, 255, 255, 0.50);
 }
 
 .launcher-power-btn {

@@ -13,22 +13,65 @@ pub fn build_footer_layout() -> (
     let footer_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
     footer_box.add_css_class("launcher-footer-box");
 
-    let profile_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+    let profile_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
     profile_box.set_valign(gtk4::Align::Center);
-    let user_icon = babydra_ui_kit::ui::icon::get_icon_colored("user", 20, "#ffffff");
+
+    // Circular avatar loaded from config (identical to lock screen)
+    let avatar_widget: gtk4::Widget = if let Some(bytes) = babydra_core::get_avatar_bytes() {
+        if let Some(pixbuf) = babydra_core::crop_circle(&bytes, 34) {
+            let texture = gtk4::gdk::Texture::for_pixbuf(&pixbuf);
+            let img = gtk4::Image::from_paintable(Some(&texture));
+            img.set_pixel_size(34);
+            img.add_css_class("launcher-avatar");
+            img.set_halign(gtk4::Align::Center);
+            img.set_valign(gtk4::Align::Center);
+            img.upcast()
+        } else {
+            let icon = babydra_ui_kit::ui::icon::get_fallback_icon("user-info", "user-info");
+            icon.set_pixel_size(34);
+            icon.add_css_class("launcher-avatar-fallback");
+            icon.set_halign(gtk4::Align::Center);
+            icon.set_valign(gtk4::Align::Center);
+            icon.upcast()
+        }
+    } else {
+        let avatar_icon = babydra_ui_kit::ui::icon::get_icon("avatar-default", 34);
+        avatar_icon.add_css_class("launcher-avatar");
+        avatar_icon.set_halign(gtk4::Align::Center);
+        avatar_icon.set_valign(gtk4::Align::Center);
+        avatar_icon.upcast()
+    };
+
+    let user_info_box = gtk4::Box::new(gtk4::Orientation::Vertical, 1);
+    user_info_box.set_valign(gtk4::Align::Center);
+    user_info_box.set_hexpand(false);
+
     let username = std::env::var("USER").unwrap_or_else(|_| "User".to_string());
-    let user_label = gtk4::Label::new(Some(&username));
-    user_label.add_css_class("launcher-profile-label");
-    profile_box.append(&user_icon);
-    profile_box.append(&user_label);
 
-    let power_btn = gtk4::Button::new();
-    power_btn.add_css_class("launcher-power-btn");
-    power_btn.set_cursor_from_name(Some("pointer"));
-    let power_icon = babydra_ui_kit::ui::icon::get_icon_colored("power", 20, "#ff5555");
-    power_btn.set_child(Some(&power_icon));
+    let user_label = gtk4::Label::builder()
+        .label(&username)
+        .halign(gtk4::Align::Start)
+        .ellipsize(gtk4::pango::EllipsizeMode::End)
+        .max_width_chars(14)
+        .css_classes(vec!["launcher-profile-label".to_string()])
+        .build();
 
-    // Power options buttons
+    let uptime = babydra_core::get_formatted_uptime();
+    let uptime_label = gtk4::Label::builder()
+        .label(&format!("Up: {}", uptime))
+        .halign(gtk4::Align::Start)
+        .ellipsize(gtk4::pango::EllipsizeMode::End)
+        .max_width_chars(14)
+        .css_classes(vec!["launcher-profile-uptime".to_string()])
+        .build();
+
+    user_info_box.append(&user_label);
+    user_info_box.append(&uptime_label);
+
+    profile_box.append(&avatar_widget);
+    profile_box.append(&user_info_box);
+
+    // Primary shutdown button (always visible on the right)
     let shutdown_btn = gtk4::Button::new();
     shutdown_btn.add_css_class("launcher-power-option-btn");
     shutdown_btn.add_css_class("shutdown");
@@ -37,13 +80,14 @@ pub fn build_footer_layout() -> (
     let shutdown_icon = babydra_ui_kit::ui::icon::get_icon_colored("power", 18, "#ff5555");
     shutdown_btn.set_child(Some(&shutdown_icon));
 
-    let reboot_btn = gtk4::Button::new();
-    reboot_btn.add_css_class("launcher-power-option-btn");
-    reboot_btn.add_css_class("reboot");
-    reboot_btn.set_cursor_from_name(Some("pointer"));
-    reboot_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("launcher.restart")));
-    let reboot_icon = babydra_ui_kit::ui::icon::get_icon_colored("restart", 18, "#ffb86c");
-    reboot_btn.set_child(Some(&reboot_icon));
+    // Secondary power option buttons (revealed on hover)
+    let logout_btn = gtk4::Button::new();
+    logout_btn.add_css_class("launcher-power-option-btn");
+    logout_btn.add_css_class("logout");
+    logout_btn.set_cursor_from_name(Some("pointer"));
+    logout_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("launcher.logout")));
+    let logout_icon = babydra_ui_kit::ui::icon::get_icon_colored("logout", 18, "#cba6f7");
+    logout_btn.set_child(Some(&logout_icon));
 
     let suspend_btn = gtk4::Button::new();
     suspend_btn.add_css_class("launcher-power-option-btn");
@@ -53,47 +97,40 @@ pub fn build_footer_layout() -> (
     let suspend_icon = babydra_ui_kit::ui::icon::get_icon_colored("sleep", 18, "#89b4fa");
     suspend_btn.set_child(Some(&suspend_icon));
 
-    let logout_btn = gtk4::Button::new();
-    logout_btn.add_css_class("launcher-power-option-btn");
-    logout_btn.add_css_class("logout");
-    logout_btn.set_cursor_from_name(Some("pointer"));
-    logout_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("launcher.logout")));
-    let logout_icon = babydra_ui_kit::ui::icon::get_icon_colored("logout", 18, "#cba6f7");
-    logout_btn.set_child(Some(&logout_icon));
+    let reboot_btn = gtk4::Button::new();
+    reboot_btn.add_css_class("launcher-power-option-btn");
+    reboot_btn.add_css_class("reboot");
+    reboot_btn.set_cursor_from_name(Some("pointer"));
+    reboot_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("launcher.restart")));
+    let reboot_icon = babydra_ui_kit::ui::icon::get_icon_colored("restart", 18, "#ffb86c");
+    reboot_btn.set_child(Some(&reboot_icon));
 
-    let power_options_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
-    power_options_box.append(&logout_btn);
-    power_options_box.append(&suspend_btn);
-    power_options_box.append(&reboot_btn);
-    power_options_box.append(&shutdown_btn);
+    let options_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
+    options_box.append(&logout_btn);
+    options_box.append(&suspend_btn);
+    options_box.append(&reboot_btn);
 
-    // Revealer to animate slide left
+    // Revealer for the 3 secondary power buttons
     let revealer = gtk4::Revealer::new();
     revealer.set_transition_type(gtk4::RevealerTransitionType::SlideLeft);
-    revealer.set_transition_duration(300);
+    revealer.set_transition_duration(250);
     revealer.set_reveal_child(false);
-    revealer.set_child(Some(&power_options_box));
+    revealer.set_child(Some(&options_box));
 
-    // Power container box
+    // Power container box hosting the revealer and the main shutdown button
     let power_container_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
     power_container_box.append(&revealer);
-    power_container_box.append(&power_btn);
-
-    let revealer_click = revealer.clone();
-    power_btn.connect_clicked(move |_| {
-        let is_revealed = revealer_click.reveals_child();
-        revealer_click.set_reveal_child(!is_revealed);
-    });
+    power_container_box.append(&shutdown_btn);
 
     let motion = gtk4::EventControllerMotion::new();
-    let revealer_clone = revealer.clone();
+    let rev_enter = revealer.clone();
     motion.connect_enter(move |_, _, _| {
-        revealer_clone.set_reveal_child(true);
+        rev_enter.set_reveal_child(true);
     });
 
-    let revealer_clone2 = revealer.clone();
+    let rev_leave = revealer.clone();
     motion.connect_leave(move |_| {
-        revealer_clone2.set_reveal_child(false);
+        rev_leave.set_reveal_child(false);
     });
 
     power_container_box.add_controller(motion);
