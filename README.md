@@ -28,13 +28,14 @@
 
 ## Giới thiệu
 
-BabyDra là một **môi trường desktop (Desktop Shell) Linux nhẹ** xây dựng trên nền tảng giao thức Wayland dành cho Arch Linux. Dự án kết hợp trình quản lý cửa sổ `labwc` với bộ công cụ đồ họa `GTK4 Layer Shell` nhằm tối ưu hiệu năng, giảm độ trễ phản hồi, tận dụng GPU cho FPS cao và duy trì tính thẩm mỹ (glassmorphism, design tokens đồng nhất).
+BabyDra là một **môi trường desktop (Desktop Shell) Linux nhẹ** xây dựng trên nền tảng giao thức Wayland dành cho Arch Linux. Dự án kết hợp trình quản lý cửa sổ `labwc` với bộ công cụ đồ họa `GTK4 Layer Shell` nhằm tối ưu hiệu năng, giảm độ trễ phản hồi.
 
 Các thành phần chính:
 
 | Thành phần | Crate | Vai trò |
 | :--- | :--- | :--- |
-| Dynamic Island & Panel | `babydra-panel` | Island, dock, status bar, notification |
+| Panel | `babydra-panel` | Island, dock, status bar, notification |
+| Desktop | `babydra-desktop` | Canvas desktop, icon lối tắt, menu chuột phải |
 | Window Switcher | `babydra-switcher` | Alt-Tab với icon & preview cửa sổ |
 | File Explorer | `babydra-explore` | Trình duyệt file GTK4 hiện đại |
 | Settings | `babydra-settings` | Trung tâm cấu hình hệ thống |
@@ -54,7 +55,6 @@ Các thành phần chính:
 - Hệ điều hành: Arch Linux hoặc bản phân phối tương thích.
 - Trình quản lý gói: `pacman` và `yay` (hoặc trình trợ giúp AUR tương đương).
 - Môi trường Wayland: trình quản lý cửa sổ `labwc`.
-- Rust toolchain: phiên bản 1.80.0 trở lên.
 
 ### Bộ cài đặt TUI (babydra-installer)
 
@@ -71,20 +71,17 @@ Hoặc dùng script kèm theo:
 ./install/run.sh
 ```
 
-> [!NOTE]
-> Script tự động không tương tác `scripts/install.sh` nằm ở nhánh `release`/`develop` — nơi có mã nguồn để build.
-
 ### Cơ chế hoạt động của bộ cài đặt
 
 `babydra-installer` liệt kê **toàn bộ nhánh có thể cài đặt** (trừ `main` — nhánh chỉ chứa bộ cài đặt, không có mã nguồn để build):
 
-1. **Release Channel** — đồng bộ mã nguồn từ nhánh `release` (mặc định), biên dịch tối ưu và triển khai tệp nhị phân chính thức.
+1. **Release Channel** — đồng bộ mã nguồn từ nhánh `release` (mặc định)
 2. **Develop Channel** — đồng bộ mã nguồn từ nhánh `develop` để cài đặt các tính năng mới nhất.
-3. **Nhánh đóng góp viên** — bất kỳ nhánh nào khác được tạo từ `develop` đều có thể chọn để cài đặt thử nghiệm.
+3. **Nhánh đóng góp** — bất kỳ nhánh nào khác được tạo từ `develop` đều có thể chọn để cài đặt thử nghiệm.
 
 Khi chạy, bộ cài đặt:
 
-1. Yêu cầu **mật khẩu sudo trước** (modal che ký tự, xác thực 1 lần trước khi thay đổi bất cứ điều gì — tránh khóa tài khoản).
+1. Yêu cầu **mật khẩu sudo**
 2. Checkout nhánh đã chọn → `git pull` → `cargo build --release`.
 3. Sao chép binaries vào `~/.local/bin` (riêng `babydra-greeter` vào `/usr/bin`).
 4. Đưa binaries + wallpapers + logo vào `/var/lib/babydra` và `/usr/share/babydra`.
@@ -113,7 +110,7 @@ Nhà phát triển làm việc trên nhánh `develop`:
 ```bash
 git checkout develop
 git pull origin develop
-git checkout -b <tên-bạn>/<tên-công-việc>   # nhánh riêng của bạn
+git checkout -b <user>/<workspace>   # nhánh riêng của bạn
 cargo check --workspace
 ```
 

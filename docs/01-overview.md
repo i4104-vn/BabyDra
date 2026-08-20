@@ -27,6 +27,7 @@ Mục tiêu:
 flowchart TB
     subgraph Shell["Desktop Shell (labwc)"]
         Panel["babydra-panel — Island + dock + status bar + notification"]
+        Desktop["babydra-desktop — Desktop canvas + wallpaper + context menu"]
         Switcher["babydra-switcher — Alt-Tab window switcher"]
         Lock["babydra-lock — màn hình khóa (PAM)"]
         Greeter["babydra-greeter — login greeter (greetd + cage)"]
@@ -60,6 +61,7 @@ flowchart TB
 | Crate | Loại | Vai trò |
 | :--- | :--- | :--- |
 | `babydra-panel` | Binary | Island, dock, status bar, notification (daemon chạy nền) |
+| `babydra-desktop` | Binary | Desktop canvas: icon lưới, hình nền, menu chuột phải, DBus FileManager1 |
 | `babydra-switcher` | Binary | Alt-Tab: icon + preview cửa sổ |
 | `babydra-lock` | Binary | Màn hình khóa, xác thực PAM |
 | `babydra-greeter` | Binary | Màn hình đăng nhập cho greetd/cage (`/usr/bin`) |

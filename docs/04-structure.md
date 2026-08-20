@@ -13,6 +13,7 @@ BabyDra/
 ├── Cargo.toml                ← workspace: libs/ + crates/ + install/ + tests/
 ├── crates/                   ← Ứng dụng (mỗi crate 1 binary)
 │   ├── babydra-panel/        ← Island, dock, status bar (daemon)
+│   ├── babydra-desktop/      ← Desktop canvas, icons, context menu, DBus
 │   ├── babydra-switcher/     ← Alt-Tab switcher (daemon)
 │   ├── babydra-screenshot/   ← Chụp màn hình
 │   ├── babydra-lock/         ← Màn hình khóa
