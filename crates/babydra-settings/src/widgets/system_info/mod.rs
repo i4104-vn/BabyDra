@@ -40,20 +40,7 @@ pub fn create_system_widget() -> gtk4::Widget {
         let memory_text = format!("{:.1} GB", total_mem_gb);
 
         let gpu_info = get_gpu_info();
-
-        let uptime_secs = System::uptime();
-        let days = uptime_secs / 86400;
-        let hours = (uptime_secs % 86400) / 3600;
-        let mins = (uptime_secs % 3600) / 60;
-
-        let uptime_text = if days > 0 {
-            format!("{}d {}h {}m", days, hours, mins)
-        } else if hours > 0 {
-            format!("{}h {}m", hours, mins)
-        } else {
-            format!("{}m", mins)
-        };
-
+        let uptime_text = babydra_core::get_formatted_uptime();
         let cpu_arch = System::cpu_arch().unwrap_or_else(|| "x86_64".to_string());
 
         let _ = tx.send(SystemInfoData {

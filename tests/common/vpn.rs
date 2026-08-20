@@ -7,9 +7,12 @@ use babydra_core::services::system::vpn::config::parse_vpn_config;
 use std::io::Write;
 
 fn write_temp_config(name: &str, content: &str) -> std::path::PathBuf {
+    use std::sync::atomic::{AtomicU64, Ordering};
+    static COUNTER: AtomicU64 = AtomicU64::new(0);
+    let id = COUNTER.fetch_add(1, Ordering::SeqCst);
     let dir = std::env::temp_dir()
         .join("babydra_test_vpn")
-        .join(std::process::id().to_string());
+        .join(format!("{}_{}", std::process::id(), id));
     std::fs::create_dir_all(&dir).expect("create temp dir");
     let path = dir.join(name);
     let mut file = std::fs::File::create(&path).expect("create temp file");

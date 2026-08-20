@@ -56,7 +56,7 @@ pub use services::system::battery;
 pub use services::system::bluetooth;
 pub use services::system::clean;
 pub use services::system::display::{apply_saved_displays, get_displays, save_displays};
-pub use services::system::monitor;
+pub use services::system::monitor::{self, get_formatted_uptime};
 pub use services::system::power;
 pub use services::system::storage;
 pub use services::system::volume;

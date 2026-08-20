@@ -59,3 +59,39 @@ pub fn get_ram_usage() -> Option<(f64, f64, f64)> {
         None
     }
 }
+
+/// Reads and formats the current system uptime (e.g. "3d 2h 15m", "4h 20m", or "45m").
+pub fn get_formatted_uptime() -> String {
+    if let Ok(content) = std::fs::read_to_string("/proc/uptime") {
+        if let Some(first) = content.split_whitespace().next() {
+            if let Ok(secs_f) = first.parse::<f64>() {
+                let uptime_secs = secs_f as u64;
+                let days = uptime_secs / 86400;
+                let hours = (uptime_secs % 86400) / 3600;
+                let mins = (uptime_secs % 3600) / 60;
+
+                return if days > 0 {
+                    format!("{}d {}h {}m", days, hours, mins)
+                } else if hours > 0 {
+                    format!("{}h {}m", hours, mins)
+                } else {
+                    format!("{}m", mins)
+                };
+            }
+        }
+    }
+    "0m".to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_uptime_formatting() {
+        let uptime = get_formatted_uptime();
+        assert!(!uptime.is_empty(), "Uptime string should not be empty");
+        assert!(uptime.ends_with('m'), "Uptime string should end with 'm' (e.g. 5m, 1h 20m): {}", uptime);
+    }
+}
+
