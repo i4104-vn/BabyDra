@@ -114,7 +114,9 @@ pub fn get_local_wallpapers() -> Vec<PathBuf> {
     files
 }
 
-/// Sets the greeter background image by copying it to ~/.babydra/greeter_wallpaper.png.
+/// Sets the greeter / lock background image.
+/// - Saves the image to ~/.babydra/wallpaper/<filename> for reuse in user's wallpaper library.
+/// - Copies to the shared location /var/lib/babydra/greeter_wallpaper.png so greetd can access it.
 pub fn set_greeter_wp(path: &Path) -> CoreResult<()> {
     if !path.exists() {
         return Err(format!("Greeter background file does not exist at: {:?}", path).into());
@@ -122,11 +124,10 @@ pub fn set_greeter_wp(path: &Path) -> CoreResult<()> {
 
     let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".to_string());
     let babydra_dir = PathBuf::from(&home).join(".babydra");
-    let _ = std::fs::create_dir_all(&babydra_dir);
-
-    // Save to ~/.babydra/wallpaper if from an external directory
     let target_dir = babydra_dir.join("wallpaper");
     let _ = std::fs::create_dir_all(&target_dir);
+
+    // Save to ~/.babydra/wallpaper for future reuse
     if path.parent() != Some(&target_dir) {
         if let Some(file_name) = path.file_name() {
             let dest = target_dir.join(file_name);
@@ -136,9 +137,13 @@ pub fn set_greeter_wp(path: &Path) -> CoreResult<()> {
         }
     }
 
-    // Direct lock screen wallpaper file
-    let greeter_wp = babydra_dir.join("greeter_wallpaper.png");
-    let _ = std::fs::copy(path, &greeter_wp);
+    // Copy to shared system path accessible by greetd
+    let system_dir = PathBuf::from("/var/lib/babydra");
+    let _ = std::fs::create_dir_all(&system_dir);
+    let _ = std::fs::copy(path, system_dir.join("greeter_wallpaper.png"));
+
+    // Mirror to user directory
+    let _ = std::fs::copy(path, babydra_dir.join("greeter_wallpaper.png"));
 
     Ok(())
 }
@@ -150,29 +155,21 @@ pub fn apply_greeter_wp() {
 
 /// Retrieves the active greeter background as raw bytes.
 pub fn get_greeter_wp_bytes() -> Option<Vec<u8>> {
+    let mut candidates = vec![
+        PathBuf::from("/var/lib/babydra/greeter_wallpaper.png"),
+    ];
+
     if let Ok(home) = std::env::var("HOME") {
-        let candidates = [
-            PathBuf::from(&home).join(".babydra/greeter_wallpaper.png"),
-            PathBuf::from(&home).join(".babydra/wallpaper.png"),
-        ];
-        for c in &candidates {
-            if c.exists() {
-                if let Ok(bytes) = std::fs::read(c) {
-                    return Some(bytes);
-                }
-            }
-        }
+        candidates.push(PathBuf::from(&home).join(".babydra/greeter_wallpaper.png"));
+        candidates.push(PathBuf::from(&home).join(".babydra/wallpaper.png"));
     }
 
-    // Default system wallpapers
-    let system_candidates = [
-        "/usr/share/babydra/greeter_wallpaper.png",
-        "/usr/share/babydra/wallpaper.png",
-    ];
-    for c in &system_candidates {
-        let p = PathBuf::from(c);
-        if p.exists() {
-            if let Ok(bytes) = std::fs::read(&p) {
+    candidates.push(PathBuf::from("/usr/share/babydra/greeter_wallpaper.png"));
+    candidates.push(PathBuf::from("/usr/share/babydra/wallpaper.png"));
+
+    for c in &candidates {
+        if c.exists() && c.is_file() {
+            if let Ok(bytes) = std::fs::read(c) {
                 return Some(bytes);
             }
         }
@@ -183,21 +180,28 @@ pub fn get_greeter_wp_bytes() -> Option<Vec<u8>> {
 
 /// Retrieves the active greeter background as a CSS URL string.
 pub fn get_greeter_wp_css() -> String {
-    let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".to_string());
-    let greeter_wp = PathBuf::from(&home).join(".babydra/greeter_wallpaper.png");
-    if greeter_wp.exists() {
-        return format!("url('file://{}')", greeter_wp.display());
+    let shared = PathBuf::from("/var/lib/babydra/greeter_wallpaper.png");
+    if shared.exists() {
+        return format!("url('file://{}')", shared.display());
     }
 
-    let default_wp = PathBuf::from(&home).join(".babydra/wallpaper.png");
-    if default_wp.exists() {
-        return format!("url('file://{}')", default_wp.display());
+    if let Ok(home) = std::env::var("HOME") {
+        let user_wp = PathBuf::from(&home).join(".babydra/greeter_wallpaper.png");
+        if user_wp.exists() {
+            return format!("url('file://{}')", user_wp.display());
+        }
+        let default_wp = PathBuf::from(&home).join(".babydra/wallpaper.png");
+        if default_wp.exists() {
+            return format!("url('file://{}')", default_wp.display());
+        }
     }
 
     "url('file:///usr/share/babydra/wallpaper.png')".to_string()
 }
 
-/// Sets the avatar image by copying it to ~/.babydra/avatar.png.
+/// Sets the avatar image.
+/// - Copies to shared location /var/lib/babydra/avatar.png so greetd can access it.
+/// - Also mirrors to ~/.babydra/avatar.png.
 pub fn set_avatar(path: &Path) -> CoreResult<()> {
     if !path.exists() {
         return Err(format!("Avatar file does not exist at: {:?}", path).into());
@@ -207,6 +211,12 @@ pub fn set_avatar(path: &Path) -> CoreResult<()> {
     let babydra_dir = PathBuf::from(&home).join(".babydra");
     let _ = std::fs::create_dir_all(&babydra_dir);
 
+    // Copy to shared system path accessible by greetd
+    let system_dir = PathBuf::from("/var/lib/babydra");
+    let _ = std::fs::create_dir_all(&system_dir);
+    let _ = std::fs::copy(path, system_dir.join("avatar.png"));
+
+    // Mirror to user directory
     let dest = babydra_dir.join("avatar.png");
     let _ = std::fs::copy(path, &dest);
 
@@ -215,20 +225,23 @@ pub fn set_avatar(path: &Path) -> CoreResult<()> {
 
 /// Retrieves the active avatar as raw bytes.
 pub fn get_avatar_bytes() -> Option<Vec<u8>> {
+    let mut candidates = vec![
+        PathBuf::from("/var/lib/babydra/avatar.png"),
+    ];
+
     if let Ok(home) = std::env::var("HOME") {
-        let candidates = [
-            PathBuf::from(&home).join(".babydra/avatar.png"),
-            PathBuf::from(&home).join(".babydra/avatar.jpg"),
-            PathBuf::from(&home).join(".babydra/avatar.jpeg"),
-            PathBuf::from(&home).join(".babydra/avatar.webp"),
-            PathBuf::from(&home).join(".face"),
-            PathBuf::from(&home).join(".face.icon"),
-        ];
-        for c in &candidates {
-            if c.exists() {
-                if let Ok(bytes) = std::fs::read(c) {
-                    return Some(bytes);
-                }
+        candidates.push(PathBuf::from(&home).join(".babydra/avatar.png"));
+        candidates.push(PathBuf::from(&home).join(".babydra/avatar.jpg"));
+        candidates.push(PathBuf::from(&home).join(".babydra/avatar.jpeg"));
+        candidates.push(PathBuf::from(&home).join(".babydra/avatar.webp"));
+        candidates.push(PathBuf::from(&home).join(".face"));
+        candidates.push(PathBuf::from(&home).join(".face.icon"));
+    }
+
+    for c in &candidates {
+        if c.exists() && c.is_file() {
+            if let Ok(bytes) = std::fs::read(c) {
+                return Some(bytes);
             }
         }
     }
