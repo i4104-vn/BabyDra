@@ -3,9 +3,11 @@ pub mod custom_items;
 pub mod dimming;
 pub mod empty_actions;
 pub mod file_actions;
+pub mod more;
 
 pub use dimming::{apply_cut_dimming, apply_cut_everywhere};
 pub use empty_actions::show_for_empty;
+pub use more::{append_more_submenu, get_apps_for_path, launch_app};
 
 use std::path::PathBuf;
 use std::rc::Rc;

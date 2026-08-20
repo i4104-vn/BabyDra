@@ -20,5 +20,8 @@
   "desktop.rename": "Rename",
   "desktop.trash": "Move to Trash",
   "desktop.delete": "Delete Permanently",
-  "desktop.properties": "Properties"
+  "desktop.properties": "Properties",
+  "desktop.more": "More...",
+  "desktop.other_apps": "Other Applications",
+  "desktop.back": "Back"
 }

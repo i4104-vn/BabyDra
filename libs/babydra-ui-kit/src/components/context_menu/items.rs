@@ -68,6 +68,32 @@ pub fn create_menu_item(label: &str, icon: &str) -> Button {
     create_menu_full(label, icon, None, false, true)
 }
 
+/// Creates a menu item button with a gio::Icon and label.
+pub fn create_menu_item_gicon(label: &str, icon: &impl IsA<gtk4::gio::Icon>) -> Button {
+    let img = gtk4::Image::from_gicon(icon);
+    img.set_pixel_size(16);
+    img.set_valign(Align::Center);
+
+    let hbox = menu_row();
+    hbox.append(&img);
+    hbox.append(&menu_label(label));
+
+    build_menu_button(hbox, false, true)
+}
+
+/// Creates a menu item button resolving full icon name or file path via the icon resolver.
+pub fn create_menu_item_resolved(label: &str, icon_name_or_path: &str) -> Button {
+    let img = crate::ui::icon::get_fallback_icon(icon_name_or_path, "application-x-executable");
+    img.set_pixel_size(16);
+    img.set_valign(Align::Center);
+
+    let hbox = menu_row();
+    hbox.append(&img);
+    hbox.append(&menu_label(label));
+
+    build_menu_button(hbox, false, true)
+}
+
 /// Creates a menu item button with sensitivity control.
 pub fn create_menu_sens(label: &str, icon: &str, sensitive: bool) -> Button {
     create_menu_full(label, icon, None, false, sensitive)

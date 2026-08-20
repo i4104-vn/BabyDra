@@ -3,10 +3,10 @@
 use super::dnd::{create_folder_drop, create_icon_drag};
 use super::make_refresh_cb;
 use crate::state::DesktopState;
-use crate::widgets::context_menu::show_file_menu;
 use crate::widgets::icon::{create_desktop_icon, launch_entry};
 use crate::widgets::selection::update_icon_sel;
 use babydra_core::models::explore::FileType;
+use babydra_ui_kit::components::explore::context_menu::show_for_file;
 use gtk4::prelude::*;
 use gtk4::{Box, Fixed, GestureClick};
 use std::cell::{Cell, RefCell};
@@ -137,13 +137,15 @@ pub fn rebuild_grid_icons(
             let refresh_cb =
                 make_refresh_cb(&fixed_ref, &state_ref, &parent_win_ref, &rubberband_ref);
 
-            show_file_menu(
+            let desktop_dir = DesktopState::desktop_dir();
+            show_for_file(
                 fixed_rc.upcast_ref::<gtk4::Widget>(),
                 pos_x as f64 + x,
                 pos_y as f64 + y,
-                &entry_rc,
-                refresh_cb,
-                &parent_win_rc,
+                vec![entry_rc.path.clone()],
+                desktop_dir,
+                Rc::new(move |_| refresh_cb()),
+                parent_win_rc.upcast_ref::<gtk4::Window>(),
             );
         });
         icon_widget.add_controller(right_click);

@@ -20,5 +20,8 @@
   "desktop.rename": "Đổi tên",
   "desktop.trash": "Chuyển vào Thùng rác",
   "desktop.delete": "Xóa vĩnh viễn",
-  "desktop.properties": "Thuộc tính"
+  "desktop.properties": "Thuộc tính",
+  "desktop.more": "Thêm...",
+  "desktop.other_apps": "Ứng dụng khác",
+  "desktop.back": "Quay lại"
 }

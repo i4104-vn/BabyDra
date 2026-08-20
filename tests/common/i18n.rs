@@ -17,6 +17,9 @@ fn english_lookup_returns_translations() {
     assert_eq!(trans("panel.no_notifications"), "No new notifications");
     assert_eq!(trans("desktop.new_folder"), "New Folder");
     assert_eq!(trans("desktop.open_in_terminal"), "Open in Terminal");
+    assert_eq!(trans("desktop.more"), "More...");
+    assert_eq!(trans("desktop.other_apps"), "Other Applications");
+    assert_eq!(trans("desktop.back"), "Back");
     assert_eq!(trans("explore.menu_open_with"), "Open With...");
 }
 
@@ -28,6 +31,9 @@ fn vietnamese_lookup_returns_translations() {
     assert_eq!(trans("weekday.mon"), "Thứ Hai");
     assert_eq!(trans("desktop.new_folder"), "Thư mục mới");
     assert_eq!(trans("desktop.open_in_terminal"), "Mở trong Terminal");
+    assert_eq!(trans("desktop.more"), "Thêm...");
+    assert_eq!(trans("desktop.other_apps"), "Ứng dụng khác");
+    assert_eq!(trans("desktop.back"), "Quay lại");
     assert_eq!(trans("explore.menu_open_with"), "Mở bằng...");
 }
 

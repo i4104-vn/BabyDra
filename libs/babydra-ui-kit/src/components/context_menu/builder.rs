@@ -3,6 +3,7 @@
 use super::items::*;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Popover, PositionType};
+use std::cell::RefCell;
 use std::rc::Rc;
 
 /// Fluent builder for constructing and presenting context menus declaratively.
@@ -10,6 +11,8 @@ pub struct ContextMenuBuilder {
     vbox: Box,
     popover: Popover,
     footer_box: Option<Box>,
+    active_subpopover: Rc<RefCell<Option<Popover>>>,
+    ancestor_popovers: Vec<Popover>,
 }
 
 impl ContextMenuBuilder {
@@ -24,10 +27,20 @@ impl ContextMenuBuilder {
         let vbox = create_menu_box(200);
         popover.set_child(Some(&vbox));
 
+        let active_subpopover: Rc<RefCell<Option<Popover>>> = Rc::new(RefCell::new(None));
+        let active_sub_close = active_subpopover.clone();
+        popover.connect_closed(move |_| {
+            if let Some(sub) = active_sub_close.borrow_mut().take() {
+                sub.popdown();
+            }
+        });
+
         Self {
             vbox,
             popover,
             footer_box: None,
+            active_subpopover,
+            ancestor_popovers: Vec::new(),
         }
     }
 
@@ -61,6 +74,26 @@ impl ContextMenuBuilder {
     /// Appends a standard clickable item.
     pub fn item(self, label: &str, icon: &str, on_click: impl Fn() + 'static) -> Self {
         self.append_item(create_menu_item(label, icon), on_click)
+    }
+
+    /// Appends a clickable item using a gio::Icon.
+    pub fn item_with_gicon(
+        self,
+        label: &str,
+        icon: &impl IsA<gtk4::gio::Icon>,
+        on_click: impl Fn() + 'static,
+    ) -> Self {
+        self.append_item(create_menu_item_gicon(label, icon), on_click)
+    }
+
+    /// Appends a clickable item resolving icon name or file path.
+    pub fn item_with_icon_name(
+        self,
+        label: &str,
+        icon_name_or_path: &str,
+        on_click: impl Fn() + 'static,
+    ) -> Self {
+        self.append_item(create_menu_item_resolved(label, icon_name_or_path), on_click)
     }
 
     /// Appends a standard clickable item with sensitivity control.
@@ -151,10 +184,16 @@ impl ContextMenuBuilder {
         let sub_vbox = create_menu_box(180);
         sub_popover.set_child(Some(&sub_vbox));
 
+        let sub_active_tracker = Rc::new(RefCell::new(None));
+        let mut sub_ancestors = self.ancestor_popovers.clone();
+        sub_ancestors.push(self.popover.clone());
+
         let sub_builder = Self {
             vbox: sub_vbox,
             popover: sub_popover.clone(),
             footer_box: None,
+            active_subpopover: sub_active_tracker,
+            ancestor_popovers: sub_ancestors,
         };
 
         let _ = build_fn(sub_builder);
@@ -165,9 +204,17 @@ impl ContextMenuBuilder {
         });
 
         let sub_pop_hover = sub_popover.clone();
+        let active_sub = self.active_subpopover.clone();
         let motion = gtk4::EventControllerMotion::new();
         motion.connect_enter(move |_, _, _| {
+            let mut cur = active_sub.borrow_mut();
+            if let Some(prev) = cur.take() {
+                if prev != sub_pop_hover {
+                    prev.popdown();
+                }
+            }
             sub_pop_hover.popup();
+            *cur = Some(sub_pop_hover.clone());
         });
         btn.add_controller(motion);
 
@@ -203,6 +250,14 @@ impl ContextMenuBuilder {
         let footer_box = self.ensure_footer_box();
         let btn = create_footer_btn(icon, tooltip);
         self.wire_click(&btn, on_click);
+        let active_sub = self.active_subpopover.clone();
+        let motion = gtk4::EventControllerMotion::new();
+        motion.connect_enter(move |_, _, _| {
+            if let Some(pop) = active_sub.borrow_mut().take() {
+                pop.popdown();
+            }
+        });
+        btn.add_controller(motion);
         footer_box.append(&btn);
         self
     }
@@ -219,6 +274,14 @@ impl ContextMenuBuilder {
         let btn = create_footer_btn(icon, tooltip);
         btn.set_sensitive(sensitive);
         self.wire_click(&btn, on_click);
+        let active_sub = self.active_subpopover.clone();
+        let motion = gtk4::EventControllerMotion::new();
+        motion.connect_enter(move |_, _, _| {
+            if let Some(pop) = active_sub.borrow_mut().take() {
+                pop.popdown();
+            }
+        });
+        btn.add_controller(motion);
         footer_box.append(&btn);
         self
     }
@@ -244,12 +307,16 @@ impl ContextMenuBuilder {
         (self.popover, self.vbox)
     }
 
-    /// Wires a button click to dismiss the popover and then run `on_click`.
+    /// Wires a button click to dismiss the popover (and all ancestor popovers) and then run `on_click`.
     fn wire_click(&self, btn: &Button, on_click: impl Fn() + 'static) {
         let pop = self.popover.clone();
+        let ancestors = self.ancestor_popovers.clone();
         let callback = Rc::new(on_click);
         btn.connect_clicked(move |_| {
             pop.popdown();
+            for ancestor in &ancestors {
+                ancestor.popdown();
+            }
             callback();
         });
     }
@@ -257,6 +324,14 @@ impl ContextMenuBuilder {
     /// Appends a wired clickable button to the menu container.
     fn append_item(self, btn: Button, on_click: impl Fn() + 'static) -> Self {
         self.wire_click(&btn, on_click);
+        let active_sub = self.active_subpopover.clone();
+        let motion = gtk4::EventControllerMotion::new();
+        motion.connect_enter(move |_, _, _| {
+            if let Some(pop) = active_sub.borrow_mut().take() {
+                pop.popdown();
+            }
+        });
+        btn.add_controller(motion);
         self.vbox.append(&btn);
         self
     }
@@ -268,7 +343,6 @@ impl ContextMenuBuilder {
         }
 
         let (footer_container, fb) = create_footer_box();
-        self.vbox.append(&create_menu_sep());
         self.vbox.append(&footer_container);
         self.footer_box = Some(fb.clone());
         fb

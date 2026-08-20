@@ -64,6 +64,29 @@ pub fn show_for_file_normal(
         );
     }
 
+    // 1.2. Set as Wallpaper (for single image file)
+    if target_paths.len() == 1 {
+        let ext = target_paths[0]
+            .extension()
+            .and_then(|e| e.to_str())
+            .unwrap_or("")
+            .to_lowercase();
+        let is_img = matches!(
+            ext.as_str(),
+            "jpg" | "jpeg" | "png" | "webp" | "gif" | "bmp" | "avif" | "svg"
+        );
+        if is_img {
+            let path_c = target_paths[0].clone();
+            builder = builder.item(
+                &trans("desktop.set_as_wallpaper"),
+                "folder-pictures",
+                move || {
+                    let _ = babydra_core::wallpaper::set_wallpaper(&path_c);
+                },
+            );
+        }
+    }
+
     // 2. Open in New Window
     builder = builder.item(
         &trans("explore.menu_open_new_window"),
@@ -167,19 +190,15 @@ pub fn show_for_file_normal(
         append_custom_items(vbox, popover, target_paths_custom, false);
     });
 
-    builder = builder.separator();
-
-    // 8. Properties
-    let target_paths_props = target_paths.clone();
-    let parent_props = parent.clone();
-    builder = builder.item(&trans("explore.menu_properties"), "info", move || {
-        crate::components::explore::dialogs::show_properties(
-            target_paths_props.clone(),
-            Some(&parent_props),
+    // 8. More... submenu (options provided by other apps)
+    if target_paths.len() == 1 {
+        builder = crate::components::explore::context_menu::more::append_more_submenu(
+            builder,
+            &target_paths[0],
         );
-    });
+    }
 
-    // 9. Footer actions (Cut, Copy, Paste, Rename, Trash)
+    // 8. Footer actions (Cut, Copy, Paste, Rename, Trash, Properties)
     let target_paths_cut = target_paths.clone();
     let target_paths_copy = target_paths.clone();
     let target_paths_trash = target_paths.clone();
@@ -209,6 +228,15 @@ pub fn show_for_file_normal(
 
     let nav_trash = nav_callback.clone();
     let current_p_trash = current_path.clone();
+
+    let target_paths_props = target_paths.clone();
+    let parent_props = parent.clone();
+    let props_cb = move || {
+        crate::components::explore::dialogs::show_properties(
+            target_paths_props.clone(),
+            Some(&parent_props),
+        );
+    };
 
     let pop_ref = builder.popover().clone();
     let pop_cut = pop_ref.clone();
@@ -293,6 +321,12 @@ pub fn show_for_file_normal(
                     nav_c(cp_c);
                 });
             },
+        )
+        .footer_sensitive(
+            "info",
+            &trans("explore.menu_properties"),
+            !target_paths.is_empty(),
+            props_cb,
         );
 
     builder.popup();

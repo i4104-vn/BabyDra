@@ -5,6 +5,7 @@ use crate::state::DesktopState;
 use babydra_core::i18n::trans;
 use babydra_ui_kit::components::context_menu::ContextMenuBuilder;
 use babydra_ui_kit::components::explore::prelude::*;
+use gtk4::prelude::*;
 use std::rc::Rc;
 
 /// Shows the context menu for empty desktop areas.
@@ -167,10 +168,11 @@ pub fn show_empty_menu(
             .or_else(|_| std::process::Command::new("babydra-settings").spawn());
     });
 
-    // 10. Custom Context Options from babydra.conf
-    builder = builder.custom_items(move |vbox, popover| {
-        append_custom_items(vbox, popover, vec![desktop_dir.clone()], true);
-    });
+    // 10. More... submenu (only if other apps are available)
+    builder = babydra_ui_kit::components::explore::context_menu::append_more_submenu(
+        builder,
+        &desktop_dir,
+    );
 
     // 11. Footer Buttons
     let clipboard_data = CLIPBOARD.with(|cb| cb.borrow().clone());
@@ -192,13 +194,22 @@ pub fn show_empty_menu(
         }
     };
 
+    let ddir_props = desktop_dir.clone();
+    let parent_win_props = parent_window.clone();
+    let props_cb = move || {
+        show_properties(
+            vec![ddir_props.clone()],
+            Some(parent_win_props.upcast_ref::<gtk4::Window>()),
+        );
+    };
+
     builder = builder
         .footer_sensitive("cut", &trans("desktop.cut"), false, || {})
         .footer_sensitive("copy", &trans("desktop.copy"), false, || {})
         .footer_sensitive("paste", &trans("desktop.paste"), can_paste, paste_cb)
         .footer_sensitive("rename", &trans("desktop.rename"), false, || {})
         .footer_sensitive("trash", &trans("desktop.trash"), false, || {})
-        .footer_sensitive("info", &trans("desktop.properties"), false, || {});
+        .footer_sensitive("info", &trans("desktop.properties"), true, props_cb);
 
     builder.popup();
 }

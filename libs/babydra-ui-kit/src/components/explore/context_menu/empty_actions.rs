@@ -94,11 +94,26 @@ pub fn show_for_empty(
         append_custom_items(vbox, popover, vec![current_p_custom], true);
     });
 
-    // 6. Footer actions (Cut, Copy, Paste, Rename, Trash)
+    // 6. More... submenu (only if other apps are available)
+    builder = crate::components::explore::context_menu::more::append_more_submenu(
+        builder,
+        &current_path,
+    );
+
+    // 6. Footer actions (Cut, Copy, Paste, Rename, Trash, Properties)
     let dest_dir = current_path.clone();
     let nav = nav_callback.clone();
     let current_p = current_path.clone();
     let clipboard_data_c2 = clipboard_data.clone();
+
+    let cur_p_props = current_path.clone();
+    let parent_props = parent_window.clone();
+    let props_cb = move || {
+        crate::components::explore::dialogs::show_properties(
+            vec![cur_p_props.clone()],
+            Some(&parent_props),
+        );
+    };
 
     builder = builder
         .footer_sensitive("cut", &trans("explore.menu_cut"), false, || {})
@@ -120,7 +135,13 @@ pub fn show_for_empty(
             },
         )
         .footer_sensitive("rename", &trans("explore.menu_rename"), false, || {})
-        .footer_sensitive("trash", &trans("explore.menu_trash"), false, || {});
+        .footer_sensitive("trash", &trans("explore.menu_trash"), false, || {})
+        .footer_sensitive(
+            "info",
+            &trans("explore.menu_properties"),
+            true,
+            props_cb,
+        );
 
     builder.popup();
 }

@@ -1,10 +1,8 @@
 //! Context menu dispatcher for desktop background and file entries.
 
 pub mod empty_menu;
-pub mod file_menu;
 
 pub use empty_menu::show_empty_menu;
-pub use file_menu::show_file_menu;
 
 use babydra_core::config::DesktopConfig;
 use std::path::PathBuf;
