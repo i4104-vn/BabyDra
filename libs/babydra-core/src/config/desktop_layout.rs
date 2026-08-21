@@ -3,7 +3,7 @@
 //! Positions are kept in a `LazyLock<RwLock<HashMap>>` in-memory cache.
 //! All mutations go into the cache instantly (zero disk I/O on the GTK thread).
 //! A background debounce timer coalesces rapid changes and flushes to
-//! `~/.babydra/desktop_layout.json` after 500ms of quiet time.
+//! `~/.babydra/configs/desktop_layout.json` after 500ms of quiet time.
 
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -15,9 +15,7 @@ static POSITIONS: LazyLock<RwLock<HashMap<String, (i32, i32)>>> =
 static DIRTY: AtomicBool = AtomicBool::new(false);
 
 fn layout_path() -> PathBuf {
-    dirs::home_dir()
-        .unwrap_or_default()
-        .join(".babydra/desktop_layout.json")
+    crate::config::get_config_dir().join("desktop_layout.json")
 }
 
 fn load_from_disk() -> HashMap<String, (i32, i32)> {

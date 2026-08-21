@@ -11,9 +11,7 @@ pub struct SidebarItem {
 }
 
 pub fn get_sidebar_layout_path() -> PathBuf {
-    dirs::home_dir()
-        .unwrap_or_default()
-        .join(".babydra/sidebar_layout.json")
+    crate::config::get_config_dir().join("sidebar_layout.json")
 }
 
 pub fn load_sidebar_layout() -> Vec<SidebarItem> {
