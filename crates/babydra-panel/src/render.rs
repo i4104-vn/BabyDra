@@ -15,6 +15,7 @@ pub fn rebuild_panel_window(
     control_center_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
     calendar_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
     launcher_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
+    is_startup: bool,
 ) {
     // 1. Remove child
     window.set_child(None::<&gtk4::Widget>);
@@ -136,6 +137,19 @@ pub fn rebuild_panel_window(
 
     window.set_child(Some(&box_layout));
 
+    // Trigger startup cascade animation
+    if is_startup {
+        babydra_ui_kit::ui::animation::topbar_startup_cascade(
+            window,
+            &workspace_box,
+            &logo_btn,
+            notch_capsule.upcast_ref(),
+            tray_widget.upcast_ref(),
+            system_monitor.upcast_ref(),
+            status_indicators.upcast_ref(),
+        );
+    }
+
     // Input region handler: Ensure transparent areas outside top bar and notch capsule pass mouse clicks to underlying windows
     let notch_clone = notch_capsule.clone();
     window.add_tick_callback(move |win, _| {
@@ -208,11 +222,12 @@ pub fn build_panel_ui(
         control_center_window.clone(),
         calendar_window.clone(),
         launcher_window.clone(),
+        true,
     );
 
     if let Some(settings) = gtk4::Settings::default() {
         settings.connect_gtk_application_prefer_dark_theme_notify(move |_| {
-            rebuild_panel_window(&window_c, &app_c, ccw_c.clone(), cw_c.clone(), lw_c.clone());
+            rebuild_panel_window(&window_c, &app_c, ccw_c.clone(), cw_c.clone(), lw_c.clone(), false);
         });
     }
 
@@ -228,6 +243,7 @@ pub fn build_panel_ui(
             ccw_c2.clone(),
             cw_c2.clone(),
             lw_c2.clone(),
+            false,
         );
     });
 

@@ -9,6 +9,13 @@ button,
     transition: all 200ms ease;
 }
 
+.startup-animating,
+.startup-animating button,
+.startup-animating .workspace-dot,
+.startup-animating .panel-notch {
+    transition: none;
+}
+
 popover {
     background-color: transparent;
     padding: 0;
