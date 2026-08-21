@@ -139,7 +139,7 @@ pub fn build_appearance_ui(
     avatar_pic.set_size_request(42, 42);
     avatar_pic.add_css_class("avatar-preview-picture");
     if let Some(bytes) = babydra_core::get_avatar_bytes() {
-        if let Some(pixbuf) = babydra_core::crop_circle(&bytes, 42) {
+        if let Some(pixbuf) = babydra_ui_kit::ui::image::crop_circle(&bytes, 42) {
             avatar_pic.set_pixbuf(Some(&pixbuf));
         }
     }

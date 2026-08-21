@@ -5,6 +5,7 @@ use gtk4::prelude::*;
 use gtk4::{Box, Button, Label, Orientation, Overlay, ScrolledWindow};
 
 #[derive(Clone)]
+#[allow(dead_code)]
 pub struct PowerWidget {
     pub root: Overlay,
     pub battery_card: Box,

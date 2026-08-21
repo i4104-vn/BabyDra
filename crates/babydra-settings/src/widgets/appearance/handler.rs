@@ -185,7 +185,7 @@ pub fn setup_appearance(
 
     // Dynamic Target Selection & Wallpaper State Management
     let desktop_wp_path = Rc::new(RefCell::new(babydra_core::get_wallpaper()));
-    let greeter_wp_path: Rc<RefCell<Option<std::path::PathBuf>>> = Rc::new(RefCell::new(None));
+    let greeter_wp_path = Rc::new(RefCell::new(babydra_core::get_greeter_wp()));
     let target_mode = Rc::new(Cell::new(0u32)); // 0 = Desktop, 1 = Lock screen
 
     let preview_pic_target = preview_pic.clone();
@@ -203,19 +203,16 @@ pub fn setup_appearance(
                 preview_pic_target.set_filename(None::<&str>);
             }
         } else {
-            if let Some(ref p) = *greeter_wp_ref.borrow() {
-                preview_pic_target.set_filename(Some(p));
-            } else if let Some(bytes) = babydra_core::get_greeter_wp_bytes() {
-                let stream =
-                    gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(&bytes));
-                if let Ok(pixbuf) = gtk4::gdk_pixbuf::Pixbuf::from_stream_at_scale(
-                    &stream,
-                    800,
-                    600,
-                    true,
-                    gtk4::gio::Cancellable::NONE,
-                ) {
+            if let Some(bytes) = babydra_core::get_greeter_wp_bytes() {
+                let stream = gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(&bytes));
+                if let Ok(pixbuf) =
+                    gtk4::gdk_pixbuf::Pixbuf::from_stream(&stream, gtk4::gio::Cancellable::NONE)
+                {
                     preview_pic_target.set_pixbuf(Some(&pixbuf));
+                }
+            } else if let Some(ref p) = *greeter_wp_ref.borrow() {
+                if p.extension().and_then(|e| e.to_str()) != Some("bb") {
+                    preview_pic_target.set_filename(Some(p));
                 }
             } else {
                 preview_pic_target.set_filename(None::<&str>);
@@ -421,8 +418,8 @@ pub fn setup_appearance(
                 if let Ok(file) = res {
                     if let Some(path) = file.path() {
                         if babydra_core::set_avatar(&path).is_ok() {
-                            if let Ok(bytes) = std::fs::read(&path) {
-                                if let Some(pixbuf) = babydra_core::crop_circle(&bytes, 42) {
+                            if let Some(bytes) = babydra_core::get_avatar_bytes() {
+                                if let Some(pixbuf) = babydra_ui_kit::ui::image::crop_circle(&bytes, 42) {
                                     preview_cb.set_pixbuf(Some(&pixbuf));
                                 }
                             }

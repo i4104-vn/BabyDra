@@ -52,12 +52,17 @@ pub mod prelude {
             genie::{genie_in, genie_out},
             island::{island_animate_size, island_animate_width, island_zoom_in, island_zoom_out},
             slide::{slide_in, slide_out, slide_out_cb, SlideDirection},
+            topbar::topbar_startup_cascade,
         },
         battery::{create_battery_area, draw_cairo_battery, get_battery_hex, get_battery_rgb},
         icon::resolver::get_resolved_icon,
         icon::{
             get_fallback_icon, get_icon, get_icon_colored, get_icon_from_svg, get_logo_png,
             set_fallback_icon, set_image_from_icon,
+        },
+        image::{
+            apply_circular_mask, apply_rounded_mask, create_circle_avatar, create_rounded_picture,
+            crop_circle, crop_rounded, crop_square, crop_square_pixbuf,
         },
         theme::{apply_theme_class, init_theme, is_dark_mode, set_dark_mode},
         window::{init_layer_window, setup_click_outside_dismiss},

@@ -60,7 +60,7 @@ pub fn build_greeter_ui(app: &gtk4::Application) -> GreeterWidgets {
     info!(target: "babydra-greeter", "Triggering CSS theme loading");
     theme::load_css();
 
-    // Background wallpaper resolved via babydra_core::get_greeter_wp_bytes()
+    // Background wallpaper resolved via Base64/bytes with fallback
     let bg_picture = gtk4::Picture::new();
     if let Some(bytes) = babydra_core::get_greeter_wp_bytes() {
         let stream = gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(&bytes));
@@ -68,8 +68,15 @@ pub fn build_greeter_ui(app: &gtk4::Application) -> GreeterWidgets {
             gtk4::gdk_pixbuf::Pixbuf::from_stream(&stream, gtk4::gio::Cancellable::NONE)
         {
             bg_picture.set_pixbuf(Some(&pixbuf));
+            info!(target: "babydra-greeter", "Asset loaded: greeter wallpaper decoded from Base64 .bb/bytes");
+        } else {
+            info!(target: "babydra-greeter", "Asset warning: failed to decode pixbuf from greeter wallpaper bytes");
         }
-        info!(target: "babydra-greeter", "Asset loaded: greeter wallpaper base64 rendered");
+    } else if let Some(path) = babydra_core::get_greeter_wp() {
+        if path.extension().and_then(|e| e.to_str()) != Some("bb") {
+            bg_picture.set_filename(Some(&path));
+            info!(target: "babydra-greeter", "Asset loaded: greeter wallpaper from {:?}", path);
+        }
     } else {
         info!(target: "babydra-greeter", "Asset warning: no greeter wallpaper resolved");
     }

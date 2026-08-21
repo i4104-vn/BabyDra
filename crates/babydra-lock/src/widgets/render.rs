@@ -1,5 +1,6 @@
 //! Lock screen UI builders (wallpaper, clock, primary auth card).
 
+use base64::prelude::*;
 use gtk4::prelude::*;
 
 /// Builds a wallpaper `Picture` widget from a custom path or saved greeter background.
@@ -11,14 +12,21 @@ pub fn build_wallpaper_img(custom_path: Option<&str>) -> gtk4::Picture {
     bg_picture.set_vexpand(true);
 
     if let Some(path) = custom_path {
-        if let Ok(bytes) = std::fs::read(path) {
-            let stream = gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(&bytes));
-            if let Ok(pixbuf) =
-                gtk4::gdk_pixbuf::Pixbuf::from_stream(&stream, gtk4::gio::Cancellable::NONE)
-            {
-                bg_picture.set_pixbuf(Some(&pixbuf));
-                return bg_picture;
+        if path.ends_with(".bb") {
+            if let Ok(content) = std::fs::read_to_string(path) {
+                if let Ok(bytes) = BASE64_STANDARD.decode(content.trim().as_bytes()) {
+                    let stream = gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(&bytes));
+                    if let Ok(pixbuf) =
+                        gtk4::gdk_pixbuf::Pixbuf::from_stream(&stream, gtk4::gio::Cancellable::NONE)
+                    {
+                        bg_picture.set_pixbuf(Some(&pixbuf));
+                        return bg_picture;
+                    }
+                }
             }
+        } else {
+            bg_picture.set_filename(Some(path));
+            return bg_picture;
         }
     }
 
@@ -28,6 +36,13 @@ pub fn build_wallpaper_img(custom_path: Option<&str>) -> gtk4::Picture {
             gtk4::gdk_pixbuf::Pixbuf::from_stream(&stream, gtk4::gio::Cancellable::NONE)
         {
             bg_picture.set_pixbuf(Some(&pixbuf));
+            return bg_picture;
+        }
+    }
+
+    if let Some(path) = babydra_core::get_greeter_wp() {
+        if path.extension().and_then(|e| e.to_str()) != Some("bb") {
+            bg_picture.set_filename(Some(&path));
             return bg_picture;
         }
     }
@@ -62,14 +77,10 @@ pub fn build_primary_card() -> (
     let (clock_label, date_label) = build_clock_labels();
 
     let avatar_widget: gtk4::Widget = if let Some(bytes) = babydra_core::get_avatar_bytes() {
-        if let Some(pixbuf) = babydra_core::crop_circle(&bytes, 110) {
-            let texture = gtk4::gdk::Texture::for_pixbuf(&pixbuf);
-            let img = gtk4::Image::from_paintable(Some(&texture));
-            img.set_pixel_size(110);
-            img.add_css_class("lock-avatar");
-            img.set_halign(gtk4::Align::Center);
-            img.set_valign(gtk4::Align::Center);
-            img.upcast()
+        if let Some(img) =
+            babydra_ui_kit::ui::image::create_circle_avatar(&bytes, 110, Some("lock-avatar"))
+        {
+            img
         } else {
             let icon = babydra_ui_kit::ui::icon::get_fallback_icon("user-info", "user-info");
             icon.set_pixel_size(110);

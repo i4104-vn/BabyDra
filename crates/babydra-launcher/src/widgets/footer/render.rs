@@ -18,14 +18,10 @@ pub fn build_footer_layout() -> (
 
     // Circular avatar loaded from config (identical to lock screen)
     let avatar_widget: gtk4::Widget = if let Some(bytes) = babydra_core::get_avatar_bytes() {
-        if let Some(pixbuf) = babydra_core::crop_circle(&bytes, 34) {
-            let texture = gtk4::gdk::Texture::for_pixbuf(&pixbuf);
-            let img = gtk4::Image::from_paintable(Some(&texture));
-            img.set_pixel_size(34);
-            img.add_css_class("launcher-avatar");
-            img.set_halign(gtk4::Align::Center);
-            img.set_valign(gtk4::Align::Center);
-            img.upcast()
+        if let Some(img) =
+            babydra_ui_kit::ui::image::create_circle_avatar(&bytes, 34, Some("launcher-avatar"))
+        {
+            img
         } else {
             let icon = babydra_ui_kit::ui::icon::get_fallback_icon("user-info", "user-info");
             icon.set_pixel_size(34);

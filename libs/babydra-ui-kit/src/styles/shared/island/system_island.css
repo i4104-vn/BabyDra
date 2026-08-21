@@ -42,8 +42,10 @@
 }
 
 .notch-album-art {
-    border-radius: 6px;
-    padding: 1px;
+    border-radius: 9999px;
+    min-width: 18px;
+    min-height: 18px;
+    padding: 0;
     margin: 0;
 }
 

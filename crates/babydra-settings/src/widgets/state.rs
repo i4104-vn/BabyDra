@@ -4,6 +4,8 @@
 //! historically part of `babydra-core`; they live here so core stays
 //! GTK-free and settings owns its own UI state.
 
+#![allow(dead_code)]
+
 use gtk4::{
     Box, Button, DropDown, Entry, Label, ListBox, Overlay, ProgressBar, ScrolledWindow, Spinner,
     Stack, TextBuffer, TextView,
