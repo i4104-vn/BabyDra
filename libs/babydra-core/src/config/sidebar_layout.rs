@@ -11,7 +11,7 @@ pub struct SidebarItem {
 }
 
 pub fn get_sidebar_layout_path() -> PathBuf {
-    crate::config::get_config_dir().join("sidebar_layout.json")
+    crate::config::get_config_dir().join("explore.json")
 }
 
 pub fn load_sidebar_layout() -> Vec<SidebarItem> {

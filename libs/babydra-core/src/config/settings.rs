@@ -34,16 +34,7 @@ fn load_from_disk() -> BabyDraConfig {
     let mut config = BabyDraConfig::default();
 
     // Migration logic from legacy standalone files if present
-
     if let Some(home) = dirs::home_dir() {
-        let legacy_explore = super::get_config_dir().join("explore.json");
-        if legacy_explore.exists() {
-            if let Ok(content) = std::fs::read_to_string(&legacy_explore) {
-                if let Ok(exp) = serde_json::from_str(&content) {
-                    config.explore = exp;
-                }
-            }
-        }
 
         let legacy_perf = home.join(".babydra/perf_profile");
         if legacy_perf.exists() {
