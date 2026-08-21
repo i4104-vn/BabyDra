@@ -7,9 +7,20 @@ use babydra_core::services::screenshot::draw_pixelated_rect;
 
 /// Draws the background image, crop selection window shadow, and annotation marks (strokes, boxes, blur).
 pub fn draw_editor_canvas(cr: &cairo::Context, s: &EditorState, width: f64, height: f64) {
-    // 1. Draw Background Screenshot
+    let bg_w = s.bg_pixbuf.width() as f64;
+    let bg_h = s.bg_pixbuf.height() as f64;
+
+    cr.set_antialias(cairo::Antialias::Best);
+
+    // 1. Draw Background Screenshot accurately scaled to canvas viewport
+    cr.save().unwrap();
+    if width > 0.0 && height > 0.0 && (bg_w != width || bg_h != height) {
+        cr.scale(width / bg_w, height / bg_h);
+    }
     cr.set_source_pixbuf(&s.bg_pixbuf, 0.0, 0.0);
+    cr.source().set_filter(cairo::Filter::Best);
     cr.paint().unwrap();
+    cr.restore().unwrap();
 
     // 2. Draw Dark Overlay
     cr.set_source_rgba(0.0, 0.0, 0.0, 0.45);

@@ -51,6 +51,7 @@
   "screenshot.blur_tooltip": "Làm mờ thông tin",
   "screenshot.eraser_tooltip": "Tẩy hình vẽ",
   "screenshot.color_tooltip": "Chọn màu vẽ",
+  "screenshot.upscale_tooltip": "Tối ưu hóa & Tăng độ nét 2x (HD Upscale)",
   "screenshot.copy_tooltip": "Sao chép vào Bộ nhớ tạm (Enter)",
   "screenshot.save_tooltip": "Lưu ảnh chụp (Ctrl+S)",
   "screenshot.cancel_tooltip": "Hủy bỏ (Escape)",

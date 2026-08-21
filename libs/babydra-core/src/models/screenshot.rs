@@ -39,6 +39,8 @@ pub struct EditorState {
     pub crop_y: f64,
     pub crop_w: f64,
     pub crop_h: f64,
+    pub canvas_w: f64,
+    pub canvas_h: f64,
     pub has_selection: bool,
     pub drag_start_x: f64,
     pub drag_start_y: f64,
@@ -48,6 +50,7 @@ pub struct EditorState {
     pub drawings: Vec<Drawing>,
     pub active_stroke: Option<Vec<(f64, f64)>>,
     pub active_rect: Option<(f64, f64, f64, f64)>,
+    pub upscale: bool,
 }
 
 impl EditorState {
@@ -59,6 +62,8 @@ impl EditorState {
             crop_y: 0.0,
             crop_w: 0.0,
             crop_h: 0.0,
+            canvas_w: 0.0,
+            canvas_h: 0.0,
             has_selection: false,
             drag_start_x: 0.0,
             drag_start_y: 0.0,
@@ -68,6 +73,7 @@ impl EditorState {
             drawings: Vec::new(),
             active_stroke: None,
             active_rect: None,
+            upscale: true,
         }
     }
 }

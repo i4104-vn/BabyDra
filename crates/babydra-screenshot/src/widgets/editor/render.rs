@@ -54,6 +54,11 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
 
     let state_draw = state.clone();
     drawing_area.set_draw_func(move |_, cr, width, height| {
+        {
+            let mut s_mut = state_draw.borrow_mut();
+            s_mut.canvas_w = width as f64;
+            s_mut.canvas_h = height as f64;
+        }
         let s = state_draw.borrow();
         draw_editor_canvas(cr, &s, width as f64, height as f64);
     });
@@ -228,6 +233,27 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
         win_cancel.close();
     });
 
+    let btn_hd = gtk4::Button::new();
+    let hd_label = gtk4::Label::new(Some("HD 2X"));
+    hd_label.add_css_class("screenshot-hd-label");
+    btn_hd.set_child(Some(&hd_label));
+    btn_hd.set_tooltip_text(Some(&babydra_core::i18n::trans("screenshot.upscale_tooltip")));
+    btn_hd.add_css_class("flat");
+    btn_hd.add_css_class("screenshot-toolbar-btn");
+    btn_hd.add_css_class("selected");
+
+    let state_hd = state.clone();
+    let btn_hd_c = btn_hd.clone();
+    btn_hd.connect_clicked(move |_| {
+        let mut s = state_hd.borrow_mut();
+        s.upscale = !s.upscale;
+        if s.upscale {
+            btn_hd_c.add_css_class("selected");
+        } else {
+            btn_hd_c.remove_css_class("selected");
+        }
+    });
+
     // Assemble toolbar
     toolbar.append(&btn_reset);
 
@@ -244,6 +270,7 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
     sep1.add_css_class("capsule-separator");
     toolbar.append(&sep1);
     toolbar.append(&color_btn);
+    toolbar.append(&btn_hd);
 
     let sep2 = gtk4::Label::new(Some("│"));
     sep2.add_css_class("capsule-separator");

@@ -51,6 +51,7 @@
   "screenshot.blur_tooltip": "Blur information",
   "screenshot.eraser_tooltip": "Erase drawings",
   "screenshot.color_tooltip": "Select drawing color",
+  "screenshot.upscale_tooltip": "2x HD Upscale & Sharpness Optimization",
   "screenshot.copy_tooltip": "Copy to Clipboard (Enter)",
   "screenshot.save_tooltip": "Save screenshot (Ctrl+S)",
   "screenshot.cancel_tooltip": "Cancel (Escape)",

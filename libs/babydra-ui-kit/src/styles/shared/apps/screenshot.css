@@ -47,6 +47,13 @@ label.capsule-separator {
     margin: 0 2px;
 }
 
+label.screenshot-hd-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 0 2px;
+}
+
 box.color-dot-indicator {
     border-radius: 9999px;
     min-width: 14px;
