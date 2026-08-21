@@ -90,6 +90,9 @@ pub async fn start_dbus_service(
 
     let _ = _conn.request_name("org.freedesktop.FileManager1").await;
 
+    // Keep D-Bus session connection alive while the explore window/process runs
+    std::future::pending::<()>().await;
+
     Ok(())
 }
 
