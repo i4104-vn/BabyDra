@@ -14,19 +14,24 @@ pub fn copy_to_clipboard(state: &EditorState, window: &gtk4::ApplicationWindow) 
     if let Some(mut surface) = save_cropped_surface(state) {
         let temp_copy_path = "/tmp/babydra-screenshot-copy.png";
 
-        if let Ok(mut file) = std::fs::File::create(temp_copy_path) {
-            if surface.write_to_png(&mut file).is_ok() {
-                if let Ok(file_in) = std::fs::File::open(temp_copy_path) {
-                    let status = std::process::Command::new("wl-copy")
-                        .args(["-t", "image/png"])
-                        .stdin(file_in)
-                        .status();
+        let mut png_bytes = Vec::new();
+        if surface.write_to_png(&mut png_bytes).is_ok() {
+            let _ = std::fs::write(temp_copy_path, &png_bytes);
 
-                    if let Ok(s) = status {
-                        if s.success() {
-                            notify_copied();
-                            return true;
-                        }
+            let child = std::process::Command::new("wl-copy")
+                .args(["-t", "image/png"])
+                .stdin(std::process::Stdio::piped())
+                .spawn();
+
+            if let Ok(mut c) = child {
+                use std::io::Write;
+                if let Some(mut stdin) = c.stdin.take() {
+                    let _ = stdin.write_all(&png_bytes);
+                }
+                if let Ok(s) = c.wait() {
+                    if s.success() {
+                        notify_copied();
+                        return true;
                     }
                 }
             }

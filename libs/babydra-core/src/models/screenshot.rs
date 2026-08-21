@@ -50,7 +50,6 @@ pub struct EditorState {
     pub drawings: Vec<Drawing>,
     pub active_stroke: Option<Vec<(f64, f64)>>,
     pub active_rect: Option<(f64, f64, f64, f64)>,
-    pub upscale: bool,
 }
 
 impl EditorState {
@@ -73,7 +72,6 @@ impl EditorState {
             drawings: Vec::new(),
             active_stroke: None,
             active_rect: None,
-            upscale: true,
         }
     }
 }
