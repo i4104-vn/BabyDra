@@ -64,13 +64,6 @@ pub fn setup_navigation(
                 *last_nav_time.borrow_mut() = now;
                 *last_nav_path.borrow_mut() = Some(path.clone());
 
-                tracing::info!(
-                    "navigate_pane: pane={:?}, path={:?}, pending_focus={:?}",
-                    pane,
-                    path,
-                    *focus_item_cell.borrow()
-                );
-
                 // Highlight active pane
                 active_pane.set(pane);
                 if pane == ActivePane::Left {
@@ -125,7 +118,6 @@ pub fn setup_navigation(
                     match babydra_core::load_directory(path.clone(), show_hidden).await {
                         Ok(entries) => {
                             if session_c.borrow().active_tab().current_path != path {
-                                tracing::info!("discarding outdated load_directory result for {:?}", path);
                                 return;
                             }
 
@@ -160,12 +152,6 @@ pub fn setup_navigation(
                                         None
                                     }
                                 };
-                                tracing::info!(
-                                    "directory loaded: {:?}, entries count={}, applying focus={:?}",
-                                    path,
-                                    entries.len(),
-                                    focus_opt
-                                );
                                 if let Some(focus_path) = focus_opt {
                                     *handle.selected_paths.borrow_mut() = vec![focus_path.clone()];
                                     (handle.selection_callback)(vec![focus_path]);
