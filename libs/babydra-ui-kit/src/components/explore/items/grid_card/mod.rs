@@ -14,6 +14,9 @@ pub fn create_grid_file(
     on_right_click: impl Fn(&gtk4::Widget, f64, f64) + 'static,
 ) -> FlowBoxChild {
     let item_box = render::build_grid_card_ui(entry);
+    if selected_paths.borrow().contains(&entry.path) {
+        item_box.add_css_class("selected");
+    }
 
     let rc_gesture = gtk4::GestureClick::new();
     rc_gesture.set_button(3);

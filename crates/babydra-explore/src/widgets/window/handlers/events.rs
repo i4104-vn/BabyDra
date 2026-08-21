@@ -117,13 +117,20 @@ pub fn setup_file_watcher(
 pub fn setup_dbus_receiver(
     navigate_pane_no_watch_ref: Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>,
     active_pane: Rc<Cell<ActivePane>>,
+    focus_item_cell: Rc<RefCell<Option<PathBuf>>>,
+    window: gtk4::ApplicationWindow,
 ) {
-    let (dbus_tx, mut dbus_rx) = tokio::sync::mpsc::unbounded_channel::<std::path::PathBuf>();
+    let (dbus_tx, mut dbus_rx) =
+        tokio::sync::mpsc::unbounded_channel::<(std::path::PathBuf, Option<std::path::PathBuf>)>();
+    let focus_item_c = focus_item_cell.clone();
+    let win_c = window.clone();
     glib::MainContext::default().spawn_local(async move {
-        while let Some(path) = dbus_rx.recv().await {
+        while let Some((path, focus)) = dbus_rx.recv().await {
+            *focus_item_c.borrow_mut() = focus;
             if let Some(ref f) = *navigate_pane_no_watch_ref.borrow() {
                 f(active_pane.get(), path);
             }
+            win_c.present();
         }
     });
 

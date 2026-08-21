@@ -2175,12 +2175,14 @@ scale.settings-scale:disabled mark label {
     background-color: rgba(255, 255, 255, 0.12);
 }
 
-.explore-window flowboxchild:selected .file-item {
+.explore-window flowboxchild:selected .file-item,
+.explore-window .file-item.selected {
     background-color: rgba(96, 205, 255, 0.18);
     outline: 2px solid rgba(96, 205, 255, 0.6);
 }
 
-.explore-window row:selected .list-row {
+.explore-window row:selected .list-row,
+.explore-window .list-row.selected {
     background-color: rgba(96, 205, 255, 0.18);
     color: #ffffff;
     outline: 2px solid rgba(96, 205, 255, 0.6);

@@ -50,6 +50,11 @@ pub async fn render_flat_grid(
         );
         flowbox.append(&flow_child);
 
+        if selected_paths.borrow().contains(&entry.path) {
+            flowbox.select_child(&flow_child);
+            flow_child.grab_focus();
+        }
+
         counter += 1;
         if counter >= 80 {
             counter = 0;
@@ -125,6 +130,11 @@ pub async fn render_grouped_grid(
                 selected_paths.clone(),
             );
             flowbox.append(&flow_child);
+
+            if selected_paths.borrow().contains(&entry.path) {
+                flowbox.select_child(&flow_child);
+                flow_child.grab_focus();
+            }
         }
 
         counter += 1;

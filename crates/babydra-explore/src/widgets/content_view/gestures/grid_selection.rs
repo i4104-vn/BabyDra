@@ -59,36 +59,30 @@ pub fn wire_grid_ctrls(
         let e_ref = entries.clone();
         let nav = nav_cb.clone();
         flowbox.connect_child_activated(move |fb, child| {
-            let mut selected_indices: Vec<usize> = fb
-                .selected_children()
-                .iter()
-                .map(|c| {
-                    c.property::<String>("name")
-                        .parse::<usize>()
-                        .unwrap_or(usize::MAX)
-                })
-                .filter(|&idx| idx != usize::MAX)
-                .collect();
-            if selected_indices.is_empty() {
-                let idx = child
-                    .property::<String>("name")
-                    .parse::<usize>()
-                    .unwrap_or(usize::MAX);
-                if idx != usize::MAX {
-                    selected_indices.push(idx);
-                }
-            }
+            let path_str = child.widget_name();
+            let path = PathBuf::from(path_str.to_string());
             let borrowed = e_ref.borrow();
-            for idx in selected_indices {
-                if idx < borrowed.len() {
-                    let entry = &borrowed[idx];
-                    if matches!(entry.file_type, babydra_core::FileType::Directory) {
-                        nav(entry.path.clone());
-                    } else {
-                        babydra_ui_kit::components::explore::prelude::launch_file_or_open_with(
-                            &entry.path,
-                            None::<&gtk4::Window>,
-                        );
+            if let Some(entry) = borrowed.iter().find(|e| e.path == path) {
+                if matches!(entry.file_type, babydra_core::FileType::Directory) {
+                    nav(entry.path.clone());
+                } else {
+                    babydra_ui_kit::components::explore::prelude::launch_file_or_open_with(
+                        &entry.path,
+                        None::<&gtk4::Window>,
+                    );
+                }
+            } else {
+                for c in fb.selected_children() {
+                    let p = PathBuf::from(c.widget_name().to_string());
+                    if let Some(entry) = borrowed.iter().find(|e| e.path == p) {
+                        if matches!(entry.file_type, babydra_core::FileType::Directory) {
+                            nav(entry.path.clone());
+                        } else {
+                            babydra_ui_kit::components::explore::prelude::launch_file_or_open_with(
+                                &entry.path,
+                                None::<&gtk4::Window>,
+                            );
+                        }
                     }
                 }
             }
@@ -106,20 +100,10 @@ pub fn wire_grid_ctrls(
         key_controller.connect_key_pressed(move |_, keyval, _, state| {
             let has_ctrl = state.contains(gtk4::gdk::ModifierType::CONTROL_MASK);
             if keyval == gtk4::gdk::Key::Return || keyval == gtk4::gdk::Key::KP_Enter {
-                let selected_indices: Vec<usize> = fb_clone
-                    .selected_children()
-                    .iter()
-                    .map(|c| {
-                        c.property::<String>("name")
-                            .parse::<usize>()
-                            .unwrap_or(usize::MAX)
-                    })
-                    .filter(|&idx| idx != usize::MAX)
-                    .collect();
                 let borrowed = e_ref.borrow();
-                for idx in selected_indices {
-                    if idx < borrowed.len() {
-                        let entry = &borrowed[idx];
+                for c in fb_clone.selected_children() {
+                    let p = PathBuf::from(c.widget_name().to_string());
+                    if let Some(entry) = borrowed.iter().find(|e| e.path == p) {
                         if matches!(entry.file_type, babydra_core::FileType::Directory) {
                             nav(entry.path.clone());
                         } else {

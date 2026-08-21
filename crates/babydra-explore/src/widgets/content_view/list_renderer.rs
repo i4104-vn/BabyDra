@@ -63,6 +63,11 @@ pub async fn render_list_view(
         );
         widgets.listbox.append(&list_row);
 
+        if selected_paths.borrow().contains(&entry.path) {
+            widgets.listbox.select_row(Some(&list_row));
+            list_row.grab_focus();
+        }
+
         counter += 1;
         if counter >= 80 {
             counter = 0;

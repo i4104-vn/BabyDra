@@ -135,8 +135,10 @@ pub fn setup_navigation(
                             if let Some(ref handle) = content_handle {
                                 if let Some(focus_path) = focus_item_cell_c.borrow_mut().take() {
                                     *handle.selected_paths.borrow_mut() = vec![focus_path.clone()];
+                                    (handle.selection_callback)(vec![focus_path]);
                                 } else {
                                     handle.selected_paths.borrow_mut().clear();
+                                    (handle.selection_callback)(Vec::new());
                                 }
 
                                 crate::widgets::content_view::update_content_view(

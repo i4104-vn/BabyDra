@@ -102,6 +102,7 @@ pub fn create_explore_win(
 
     // Setup navigation closures
     let rebuild_tabs_cell = Rc::new(RefCell::new(None::<Rc<dyn Fn()>>));
+    let focus_item_cell = Rc::new(RefCell::new(focus_item));
     let (navigate_pane_ref, navigate_pane_no_watch_ref, _watchers) = handlers::setup_navigation(
         session.clone(),
         active_pane.clone(),
@@ -113,7 +114,7 @@ pub fn create_explore_win(
         tab_bar_box.clone(),
         status_bar_lbl_rc.clone(),
         rebuild_tabs_cell.clone(),
-        Rc::new(RefCell::new(focus_item)),
+        focus_item_cell.clone(),
         watch_tx.clone(),
         left_rx,
     );
@@ -310,7 +311,12 @@ pub fn create_explore_win(
     );
 
     // D-Bus service loop
-    handlers::setup_dbus_receiver(navigate_pane_no_watch_ref.clone(), active_pane.clone());
+    handlers::setup_dbus_receiver(
+        navigate_pane_no_watch_ref.clone(),
+        active_pane.clone(),
+        focus_item_cell.clone(),
+        ui.window.clone(),
+    );
 
     let session_sidebar = session.clone();
     let nav_sidebar = nav_callback_rc.clone();

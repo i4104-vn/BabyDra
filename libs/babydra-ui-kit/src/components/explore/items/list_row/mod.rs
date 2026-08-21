@@ -15,6 +15,9 @@ pub fn create_list_row(
     on_right_click: impl Fn(&gtk4::Widget, f64, f64) + 'static,
 ) -> ListBoxRow {
     let item_box = render::build_list_row_ui(entry);
+    if selected_paths.borrow().contains(&entry.path) {
+        item_box.add_css_class("selected");
+    }
 
     let rc_gesture = gtk4::GestureClick::new();
     rc_gesture.set_button(3);
