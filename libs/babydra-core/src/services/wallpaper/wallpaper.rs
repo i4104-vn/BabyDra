@@ -137,6 +137,11 @@ pub fn get_greeter_wp() -> Option<PathBuf> {
         }
     }
 
+    let fallback = PathBuf::from("/var/lib/babydra/lock_wallpaper.bb");
+    if fallback.exists() && fallback.is_file() {
+        return Some(fallback);
+    }
+
     get_wallpaper()
 }
 
@@ -168,7 +173,7 @@ pub fn set_greeter_wp(path: &Path) -> CoreResult<()> {
     let encoded = BASE64_STANDARD.encode(&raw_bytes);
 
     let user_dest = babydra_dir.join("lock_wallpaper.bb");
-    std::fs::write(&user_dest, encoded)?;
+    std::fs::write(&user_dest, &encoded)?;
 
     // Clean up legacy files if present
     let _ = std::fs::remove_file(babydra_dir.join("greeter_wallpaper.bb"));
@@ -178,6 +183,17 @@ pub fn set_greeter_wp(path: &Path) -> CoreResult<()> {
     let mut conf = crate::config::load_babydra_config();
     conf.lockscreen.background = path_str.to_string();
     crate::config::save_babydra_config(&conf);
+
+    // Save fallback for greetd which runs as another user.
+    use std::os::unix::fs::PermissionsExt;
+    let shared_dir = PathBuf::from("/var/lib/babydra");
+    if std::fs::create_dir_all(&shared_dir).is_ok() {
+        let _ = std::fs::set_permissions(&shared_dir, std::fs::Permissions::from_mode(0o777));
+    }
+    let public_dest = shared_dir.join("lock_wallpaper.bb");
+    if std::fs::write(&public_dest, &encoded).is_ok() {
+        let _ = std::fs::set_permissions(&public_dest, std::fs::Permissions::from_mode(0o666));
+    }
 
     Ok(())
 }
@@ -202,6 +218,7 @@ pub fn get_greeter_wp_bytes() -> Option<Vec<u8>> {
         },
         dirs::home_dir().map(|h| h.join(".babydra").join("lock_wallpaper.bb")),
         dirs::home_dir().map(|h| h.join(".babydra").join("greeter_wallpaper.bb")),
+        Some(PathBuf::from("/var/lib/babydra/lock_wallpaper.bb")),
     ];
 
     for candidate in candidate_paths.into_iter().flatten() {

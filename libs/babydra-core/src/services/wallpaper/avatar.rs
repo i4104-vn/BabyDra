@@ -30,7 +30,7 @@ pub fn set_avatar(path: &Path) -> CoreResult<()> {
 
     let encoded = BASE64_STANDARD.encode(&png_bytes);
     let user_dest = babydra_dir.join("avatar.bb");
-    std::fs::write(&user_dest, encoded)?;
+    std::fs::write(&user_dest, &encoded)?;
 
     // Clean up legacy avatar.png if present
     let _ = std::fs::remove_file(babydra_dir.join("avatar.png"));
@@ -38,6 +38,17 @@ pub fn set_avatar(path: &Path) -> CoreResult<()> {
     let mut conf = crate::config::load_babydra_config();
     conf.lockscreen.avatar = user_dest.to_str().unwrap_or_default().to_string();
     crate::config::save_babydra_config(&conf);
+
+    // Save fallback for greetd which runs as another user.
+    use std::os::unix::fs::PermissionsExt;
+    let shared_dir = PathBuf::from("/var/lib/babydra");
+    if std::fs::create_dir_all(&shared_dir).is_ok() {
+        let _ = std::fs::set_permissions(&shared_dir, std::fs::Permissions::from_mode(0o777));
+    }
+    let public_dest = shared_dir.join("avatar_fallback.bb");
+    if std::fs::write(&public_dest, &encoded).is_ok() {
+        let _ = std::fs::set_permissions(&public_dest, std::fs::Permissions::from_mode(0o666));
+    }
 
     Ok(())
 }
@@ -53,6 +64,11 @@ pub fn get_avatar_path() -> Option<PathBuf> {
         if user_logo.exists() && user_logo.is_file() {
             return Some(user_logo);
         }
+    }
+
+    let fallback = PathBuf::from("/var/lib/babydra/avatar_fallback.bb");
+    if fallback.exists() && fallback.is_file() {
+        return Some(fallback);
     }
 
     None
@@ -71,6 +87,7 @@ pub fn get_avatar_bytes() -> Option<Vec<u8>> {
             None
         },
         dirs::home_dir().map(|h| h.join(".babydra").join("avatar.bb")),
+        Some(PathBuf::from("/var/lib/babydra/avatar_fallback.bb")),
     ];
 
     for candidate in candidate_paths.into_iter().flatten() {
