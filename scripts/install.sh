@@ -119,6 +119,7 @@ sudo cp target/release/babydra-greeter /usr/bin/babydra-greeter
 mkdir -p "$HOME/.babydra"
 cp "$REPO_ROOT/wallpaper.png" "$HOME/.babydra/wallpaper.png"
 cp "$REPO_ROOT/libs/babydra-core/src/services/logo.png" "$HOME/.babydra/logo.png"
+[ -f "$REPO_ROOT/wallpaper.png" ] && base64 -w 0 "$REPO_ROOT/wallpaper.png" > "$HOME/.babydra/lock_wallpaper.bb" 2>/dev/null || true
 
 sudo mkdir -p /usr/share/babydra
 sudo mkdir -p /var/lib/babydra
@@ -130,7 +131,6 @@ sudo cp "$REPO_ROOT/libs/babydra-core/src/services/logo.png" /usr/share/babydra/
 sudo cp "$REPO_ROOT/libs/babydra-core/src/services/logo.png" /var/lib/babydra/logo.png
 
 sudo cp "$REPO_ROOT/wallpaper.png" /usr/share/babydra/wallpaper.png
-sudo cp "$REPO_ROOT/wallpaper.png" /var/lib/babydra/greeter_wallpaper.png
 
 # 7. Copy labwc configuration files from configs/labwc/
 echo "Configuring labwc compositor integrations..."

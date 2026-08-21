@@ -25,9 +25,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 LOCAL_BIN="$HOME/.local/bin"
 
-# Copy wallpaper to standard config dir
+# Copy wallpaper to standard config dir if missing
 mkdir -p "$HOME/.babydra"
-cp "$REPO_ROOT/wallpaper.png" "$HOME/.babydra/wallpaper.png" 2>/dev/null || true
+[ -f "$HOME/.babydra/wallpaper.png" ] || cp "$REPO_ROOT/wallpaper.png" "$HOME/.babydra/wallpaper.png" 2>/dev/null || true
 
 # Setup default autostart and rc.xml by copying them from configs/labwc/
 cp "$REPO_ROOT/configs/labwc/autostart" "$AUTOSTART_FILE"

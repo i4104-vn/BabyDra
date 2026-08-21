@@ -2,6 +2,7 @@
 //! Handles desktop and lock/greeter wallpaper resolution and persistence.
 
 use crate::error::CoreResult;
+use base64::prelude::*;
 use std::path::{Path, PathBuf};
 
 /// Sets the desktop wallpaper and persists the path in babydra.conf.
@@ -114,9 +115,35 @@ pub fn get_local_wallpapers() -> Vec<PathBuf> {
     files
 }
 
+/// Retrieves the path to the currently active lock/greeter wallpaper (.bb file or image).
+pub fn get_greeter_wp() -> Option<PathBuf> {
+    crate::config::invalidate_cache();
+    let conf = crate::config::load_babydra_config();
+    if !conf.lockscreen.background.is_empty() {
+        let path = PathBuf::from(&conf.lockscreen.background);
+        if path.exists() && path.is_file() {
+            return Some(path);
+        }
+    }
+
+    if let Ok(home) = std::env::var("HOME") {
+        let lock_bb = PathBuf::from(&home).join(".babydra/lock_wallpaper.bb");
+        if lock_bb.exists() && lock_bb.is_file() {
+            return Some(lock_bb);
+        }
+        let greeter_bb = PathBuf::from(&home).join(".babydra/greeter_wallpaper.bb");
+        if greeter_bb.exists() && greeter_bb.is_file() {
+            return Some(greeter_bb);
+        }
+    }
+
+    get_wallpaper()
+}
+
 /// Sets the greeter / lock background image.
 /// - Saves the image to ~/.babydra/wallpaper/<filename> for reuse in user's wallpaper library.
-/// - Copies to ~/.babydra/greeter_wallpaper.png and shared /var/lib/babydra/greeter_wallpaper.png for greetd.
+/// - Encodes the image bytes to Base64 and persists in `~/.babydra/lock_wallpaper.bb`.
+/// - Persists the path in babydra.conf under `[lockscreen] background`.
 pub fn set_greeter_wp(path: &Path) -> CoreResult<()> {
     if !path.exists() {
         return Err(format!("Greeter background file does not exist at: {:?}", path).into());
@@ -137,44 +164,77 @@ pub fn set_greeter_wp(path: &Path) -> CoreResult<()> {
         }
     }
 
-    // Mirror to user directory
-    let user_dest = babydra_dir.join("greeter_wallpaper.png");
-    let _ = std::fs::remove_file(&user_dest);
-    let _ = std::fs::copy(path, &user_dest);
+    let raw_bytes = std::fs::read(path)?;
+    let encoded = BASE64_STANDARD.encode(&raw_bytes);
 
-    // Copy to shared system path accessible by greetd
-    let system_dest = PathBuf::from("/var/lib/babydra/greeter_wallpaper.png");
-    let _ = std::fs::remove_file(&system_dest);
-    let _ = std::fs::copy(path, &system_dest);
+    let user_dest = babydra_dir.join("lock_wallpaper.bb");
+    std::fs::write(&user_dest, encoded)?;
+
+    // Clean up legacy files if present
+    let _ = std::fs::remove_file(babydra_dir.join("greeter_wallpaper.bb"));
+    let _ = std::fs::remove_file(babydra_dir.join("greeter_wallpaper.png"));
+
+    let path_str = user_dest.to_str().ok_or("Invalid path encoding")?;
+    let mut conf = crate::config::load_babydra_config();
+    conf.lockscreen.background = path_str.to_string();
+    crate::config::save_babydra_config(&conf);
 
     Ok(())
 }
 
-/// No longer mirrors to system path, just a no-op placeholder for compatibility
+/// Applies the currently saved greeter/lock wallpaper from babydra.conf.
 pub fn apply_greeter_wp() {
-    // No-op
+    if let Some(path) = get_greeter_wp() {
+        let _ = set_greeter_wp(&path);
+    }
 }
 
-/// Retrieves the active greeter background as raw bytes.
+/// Retrieves the active greeter/lock background as raw bytes decoded from Base64 `.bb` (or raw image fallback).
 pub fn get_greeter_wp_bytes() -> Option<Vec<u8>> {
-    let mut candidates = Vec::new();
+    crate::config::invalidate_cache();
+    let conf = crate::config::load_babydra_config();
 
-    if let Ok(home) = std::env::var("HOME") {
-        candidates.push(PathBuf::from(&home).join(".babydra/greeter_wallpaper.png"));
+    let candidate_paths = [
+        if !conf.lockscreen.background.is_empty() {
+            Some(PathBuf::from(&conf.lockscreen.background))
+        } else {
+            None
+        },
+        dirs::home_dir().map(|h| h.join(".babydra").join("lock_wallpaper.bb")),
+        dirs::home_dir().map(|h| h.join(".babydra").join("greeter_wallpaper.bb")),
+    ];
+
+    for candidate in candidate_paths.into_iter().flatten() {
+        if candidate.exists() && candidate.is_file() {
+            if candidate.extension().and_then(|e| e.to_str()) == Some("bb") {
+                if let Ok(content) = std::fs::read_to_string(&candidate) {
+                    let trimmed = content.trim();
+                    if let Ok(bytes) = BASE64_STANDARD.decode(trimmed.as_bytes()) {
+                        if !bytes.is_empty() {
+                            return Some(bytes);
+                        }
+                    }
+                }
+            } else if let Ok(bytes) = std::fs::read(&candidate) {
+                return Some(bytes);
+            }
+        }
     }
 
-    candidates.push(PathBuf::from("/var/lib/babydra/greeter_wallpaper.png"));
-
-    if let Ok(home) = std::env::var("HOME") {
-        candidates.push(PathBuf::from(&home).join(".babydra/wallpaper.png"));
+    // Fallback to desktop wallpaper
+    if let Some(wp_path) = get_wallpaper() {
+        if let Ok(bytes) = std::fs::read(wp_path) {
+            return Some(bytes);
+        }
     }
 
-    candidates.push(PathBuf::from("/usr/share/babydra/greeter_wallpaper.png"));
-    candidates.push(PathBuf::from("/usr/share/babydra/wallpaper.png"));
-
-    for c in &candidates {
-        if c.exists() && c.is_file() {
-            if let Ok(bytes) = std::fs::read(c) {
+    let default_paths = [
+        PathBuf::from("/usr/share/babydra/wallpaper.png"),
+        dirs::home_dir().unwrap_or_default().join(".babydra/wallpaper.png"),
+    ];
+    for def in &default_paths {
+        if def.exists() {
+            if let Ok(bytes) = std::fs::read(def) {
                 return Some(bytes);
             }
         }
@@ -185,22 +245,9 @@ pub fn get_greeter_wp_bytes() -> Option<Vec<u8>> {
 
 /// Retrieves the active greeter background as a CSS URL string.
 pub fn get_greeter_wp_css() -> String {
-    if let Ok(home) = std::env::var("HOME") {
-        let user_wp = PathBuf::from(&home).join(".babydra/greeter_wallpaper.png");
-        if user_wp.exists() {
-            return format!("url('file://{}')", user_wp.display());
-        }
-    }
-
-    let shared = PathBuf::from("/var/lib/babydra/greeter_wallpaper.png");
-    if shared.exists() {
-        return format!("url('file://{}')", shared.display());
-    }
-
-    if let Ok(home) = std::env::var("HOME") {
-        let default_wp = PathBuf::from(&home).join(".babydra/wallpaper.png");
-        if default_wp.exists() {
-            return format!("url('file://{}')", default_wp.display());
+    if let Some(path) = get_greeter_wp() {
+        if path.extension().and_then(|e| e.to_str()) != Some("bb") {
+            return format!("url('file://{}')", path.display());
         }
     }
 

@@ -2,11 +2,16 @@
 //! Handles avatar storage, retrieval, and circular pixbuf masking.
 
 use crate::error::CoreResult;
-use gdk_pixbuf::prelude::*;
+use base64::prelude::*;
 use std::path::{Path, PathBuf};
 
+/// Default system logo bytes bundled in babydra-core
+pub const DEFAULT_LOGO_BYTES: &[u8] = include_bytes!("../logo.png");
+
 /// Sets the avatar image.
-/// - Copies to ~/.babydra/avatar.png and shared location /var/lib/babydra/avatar.png so greetd can access it.
+/// - Crops and normalizes the image to 256x256 square.
+/// - Encodes the image bytes to Base64 and persists in `~/.babydra/avatar.bb`.
+/// - Persists the avatar path in `babydra.conf` under `[lockscreen] avatar`.
 pub fn set_avatar(path: &Path) -> CoreResult<()> {
     if !path.exists() {
         return Err(format!("Avatar file does not exist at: {:?}", path).into());
@@ -16,50 +21,86 @@ pub fn set_avatar(path: &Path) -> CoreResult<()> {
     let babydra_dir = PathBuf::from(&home).join(".babydra");
     let _ = std::fs::create_dir_all(&babydra_dir);
 
-    // Mirror to user directory
-    let user_dest = babydra_dir.join("avatar.png");
-    let _ = std::fs::remove_file(&user_dest);
-    let _ = std::fs::copy(path, &user_dest);
+    let raw_bytes = std::fs::read(path)?;
+    let png_bytes = if let Some(pix) = crop_square(&raw_bytes, 256) {
+        pix.save_to_bufferv("png", &[]).unwrap_or(raw_bytes)
+    } else {
+        raw_bytes
+    };
 
-    // Copy to shared system path accessible by greetd
-    let system_dest = PathBuf::from("/var/lib/babydra/avatar.png");
-    let _ = std::fs::remove_file(&system_dest);
-    let _ = std::fs::copy(path, &system_dest);
+    let encoded = BASE64_STANDARD.encode(&png_bytes);
+    let user_dest = babydra_dir.join("avatar.bb");
+    std::fs::write(&user_dest, encoded)?;
+
+    // Clean up legacy avatar.png if present
+    let _ = std::fs::remove_file(babydra_dir.join("avatar.png"));
+
+    let mut conf = crate::config::load_babydra_config();
+    conf.lockscreen.avatar = user_dest.to_str().unwrap_or_default().to_string();
+    crate::config::save_babydra_config(&conf);
 
     Ok(())
 }
 
-/// Retrieves the active avatar as raw bytes.
-pub fn get_avatar_bytes() -> Option<Vec<u8>> {
-    let mut candidates = Vec::new();
-
+/// Retrieves the path to the currently active avatar file (.bb or logo).
+pub fn get_avatar_path() -> Option<PathBuf> {
     if let Ok(home) = std::env::var("HOME") {
-        candidates.push(PathBuf::from(&home).join(".babydra/avatar.png"));
-    }
-
-    candidates.push(PathBuf::from("/var/lib/babydra/avatar.png"));
-
-    if let Ok(home) = std::env::var("HOME") {
-        candidates.push(PathBuf::from(&home).join(".babydra/avatar.jpg"));
-        candidates.push(PathBuf::from(&home).join(".babydra/avatar.jpeg"));
-        candidates.push(PathBuf::from(&home).join(".babydra/avatar.webp"));
-        candidates.push(PathBuf::from(&home).join(".face"));
-        candidates.push(PathBuf::from(&home).join(".face.icon"));
-    }
-
-    for c in &candidates {
-        if c.exists() && c.is_file() {
-            if let Ok(bytes) = std::fs::read(c) {
-                return Some(bytes);
-            }
+        let user_bb = PathBuf::from(&home).join(".babydra/avatar.bb");
+        if user_bb.exists() && user_bb.is_file() {
+            return Some(user_bb);
+        }
+        let user_logo = PathBuf::from(&home).join(".babydra/logo.png");
+        if user_logo.exists() && user_logo.is_file() {
+            return Some(user_logo);
         }
     }
 
     None
 }
 
+/// Retrieves the active avatar as raw image bytes decoded from Base64 `.bb`.
+/// If no `.bb` avatar file exists, falls back directly to the user's logo.
+pub fn get_avatar_bytes() -> Option<Vec<u8>> {
+    crate::config::invalidate_cache();
+    let conf = crate::config::load_babydra_config();
+
+    let candidate_paths = [
+        if !conf.lockscreen.avatar.is_empty() {
+            Some(PathBuf::from(&conf.lockscreen.avatar))
+        } else {
+            None
+        },
+        dirs::home_dir().map(|h| h.join(".babydra").join("avatar.bb")),
+    ];
+
+    for candidate in candidate_paths.into_iter().flatten() {
+        if candidate.exists() && candidate.is_file() {
+            if let Ok(content) = std::fs::read_to_string(&candidate) {
+                let trimmed = content.trim();
+                if let Ok(bytes) = BASE64_STANDARD.decode(trimmed.as_bytes()) {
+                    if !bytes.is_empty() {
+                        return Some(bytes);
+                    }
+                }
+            }
+        }
+    }
+
+    // Fallback directly to logo if no avatar.bb is configured or found
+    if let Some(home) = dirs::home_dir() {
+        let logo_path = home.join(".babydra/logo.png");
+        if logo_path.exists() && logo_path.is_file() {
+            if let Ok(bytes) = std::fs::read(&logo_path) {
+                return Some(bytes);
+            }
+        }
+    }
+
+    Some(DEFAULT_LOGO_BYTES.to_vec())
+}
+
 /// Helper to convert raw image bytes into a square, scaled Pixbuf
-pub fn crop_square(bytes: &[u8], size: i32) -> Option<gdk_pixbuf::Pixbuf> {
+fn crop_square(bytes: &[u8], size: i32) -> Option<gdk_pixbuf::Pixbuf> {
     let stream = gio::MemoryInputStream::from_bytes(&glib::Bytes::from(bytes));
     if let Ok(pixbuf) = gdk_pixbuf::Pixbuf::from_stream(&stream, gio::Cancellable::NONE) {
         let w = pixbuf.width();
@@ -72,54 +113,4 @@ pub fn crop_square(bytes: &[u8], size: i32) -> Option<gdk_pixbuf::Pixbuf> {
         return sub.scale_simple(size, size, gdk_pixbuf::InterpType::Bilinear);
     }
     None
-}
-
-/// Applies an anti-aliased circular alpha mask to a square pixbuf so the avatar
-/// renders as a circle instead of a square. CSS `border-radius` does not
-/// clip widget content, so the mask must be applied to the pixels themselves.
-fn apply_circular_mask(pixbuf: &gdk_pixbuf::Pixbuf) -> gdk_pixbuf::Pixbuf {
-    let w = pixbuf.width();
-    let h = pixbuf.height();
-    let n_channels = pixbuf.n_channels();
-    let rowstride = pixbuf.rowstride();
-
-    // Owned snapshot of the source pixels (avoids aliasing with the new buffer).
-    let src: Vec<u8> = pixbuf
-        .pixel_bytes()
-        .map(|b| b.as_ref().to_vec())
-        .unwrap_or_default();
-
-    let Some(out) = gdk_pixbuf::Pixbuf::new(gdk_pixbuf::Colorspace::Rgb, true, 8, w, h) else {
-        return pixbuf.clone();
-    };
-
-    let center_x = (w - 1) as f64 / 2.0;
-    let center_y = (h - 1) as f64 / 2.0;
-    let radius = (w.min(h) as f64 - 1.0) / 2.0;
-    // Feather band (normalized distance) for a smooth, anti-aliased edge.
-    let feather = 1.5 / radius;
-
-    for y in 0..h {
-        for x in 0..w {
-            let dx = (x as f64 - center_x) / radius;
-            let dy = (y as f64 - center_y) / radius;
-            let dist = (dx * dx + dy * dy).sqrt();
-            let alpha = (((1.0 - dist) / feather).clamp(0.0, 1.0) * 255.0).round() as u8;
-
-            let pos = (y as usize) * (rowstride as usize) + (x as usize) * (n_channels as usize);
-            let (r, g, b) = match src.get(pos..pos + 3) {
-                Some(rgb) => (rgb[0], rgb[1], rgb[2]),
-                None => (0, 0, 0),
-            };
-            out.put_pixel(x as u32, y as u32, r, g, b, alpha);
-        }
-    }
-    out
-}
-
-/// Converts raw image bytes into a square, scaled Pixbuf masked into a circle.
-/// Used for circular avatar displays (greeter, lock screen, settings preview, launcher).
-pub fn crop_circle(bytes: &[u8], size: i32) -> Option<gdk_pixbuf::Pixbuf> {
-    let square = crop_square(bytes, size)?;
-    Some(apply_circular_mask(&square))
 }

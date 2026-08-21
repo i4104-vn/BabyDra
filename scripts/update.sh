@@ -123,8 +123,9 @@ echo "============================================="
 
 # 6.1 Copy wallpapers and brand assets
 mkdir -p "$HOME/.babydra"
-cp "$REPO_DIR/wallpaper.png" "$HOME/.babydra/wallpaper.png" 2>/dev/null || true
+[ -f "$HOME/.babydra/wallpaper.png" ] || cp "$REPO_DIR/wallpaper.png" "$HOME/.babydra/wallpaper.png" 2>/dev/null || true
 cp "$REPO_DIR/libs/babydra-core/src/services/logo.png" "$HOME/.babydra/logo.png" 2>/dev/null || true
+[ -f "$HOME/.babydra/lock_wallpaper.bb" ] || ([ -f "$REPO_DIR/wallpaper.png" ] && base64 -w 0 "$REPO_DIR/wallpaper.png" > "$HOME/.babydra/lock_wallpaper.bb" 2>/dev/null) || true
 
 sudo mkdir -p /usr/share/babydra /var/lib/babydra 2>/dev/null || true
 sudo chmod 777 /var/lib/babydra 2>/dev/null || true
@@ -133,7 +134,6 @@ sudo cp "$REPO_DIR/libs/babydra-core/src/services/logo.png" /usr/share/babydra/b
 sudo cp "$REPO_DIR/libs/babydra-core/src/services/logo.png" /usr/share/babydra/logo.png 2>/dev/null || true
 sudo cp "$REPO_DIR/libs/babydra-core/src/services/logo.png" /var/lib/babydra/logo.png 2>/dev/null || true
 sudo cp "$REPO_DIR/wallpaper.png" /usr/share/babydra/wallpaper.png 2>/dev/null || true
-sudo cp "$REPO_DIR/wallpaper.png" /var/lib/babydra/greeter_wallpaper.png 2>/dev/null || true
 
 # 6.2 Sync labwc configuration
 mkdir -p "$DEST_DIR"
