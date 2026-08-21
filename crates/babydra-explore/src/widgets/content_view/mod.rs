@@ -14,7 +14,8 @@ mod list_renderer;
 mod render;
 
 pub use actions::{
-    filter_content_view, set_view_mode, set_view_sort, update_content_quiet, update_content_view,
+    filter_content_view, select_all_items, set_view_mode, set_view_sort, update_content_quiet,
+    update_content_view,
 };
 pub use render::{render_silent, update_content_ui};
 
@@ -97,7 +98,12 @@ pub fn create_content_view(
         current_path.clone(),
         selected_paths.clone(),
     );
-    gestures::wire_bg_controllers(&widgets, current_path.clone(), nav_cb.clone());
+    gestures::wire_bg_controllers(
+        &widgets,
+        current_path.clone(),
+        nav_cb.clone(),
+        selected_paths.clone(),
+    );
 
     (widgets.container.clone(), handle)
 }

@@ -15,7 +15,11 @@ pub fn create_drag_source(
     get_targets: impl Fn() -> Vec<PathBuf> + 'static,
 ) -> gtk4::DragSource {
     let drag_source = gtk4::DragSource::new();
-    drag_source.set_actions(gtk4::gdk::DragAction::MOVE | gtk4::gdk::DragAction::COPY);
+    drag_source.set_actions(
+        gtk4::gdk::DragAction::COPY
+            | gtk4::gdk::DragAction::MOVE
+            | gtk4::gdk::DragAction::ASK,
+    );
 
     let is_drag_begin = is_dragging.clone();
     drag_source.connect_drag_begin(move |_, _| {
@@ -39,8 +43,47 @@ pub fn create_drag_source(
             .map(|p| gtk4::gio::File::for_path(p))
             .collect();
 
+        // 1. GdkFileList provider for GTK4 apps
         let file_list = FileList::from_array(&gio_files);
-        Some(gtk4::gdk::ContentProvider::for_value(&file_list.to_value()))
+        let file_provider = gtk4::gdk::ContentProvider::for_value(&file_list.to_value());
+
+        // 2. RFC 2483 text/uri-list for web browsers, electron apps (Discord, Telegram, VS Code), and external apps
+        let mut uri_list = String::new();
+        for f in &gio_files {
+            uri_list.push_str(&f.uri());
+            uri_list.push_str("\r\n");
+        }
+        let uri_bytes = glib::Bytes::from(uri_list.as_bytes());
+        let uri_provider = gtk4::gdk::ContentProvider::for_bytes("text/uri-list", &uri_bytes);
+
+        // 3. x-special/gnome-copied-files for Linux desktop file managers
+        let mut gnome_content = "copy\n".to_string();
+        for f in &gio_files {
+            gnome_content.push_str(&f.uri());
+            gnome_content.push('\n');
+        }
+        let gnome_bytes = glib::Bytes::from(gnome_content.as_bytes());
+        let gnome_provider =
+            gtk4::gdk::ContentProvider::for_bytes("x-special/gnome-copied-files", &gnome_bytes);
+
+        // 4. Plain text for terminals and editors
+        let text_plain = targets
+            .iter()
+            .map(|p| p.to_string_lossy().to_string())
+            .collect::<Vec<_>>()
+            .join("\n");
+        let text_bytes = glib::Bytes::from(text_plain.as_bytes());
+        let text_provider =
+            gtk4::gdk::ContentProvider::for_bytes("text/plain;charset=utf-8", &text_bytes);
+
+        let union_provider = gtk4::gdk::ContentProvider::new_union(&[
+            file_provider,
+            uri_provider,
+            gnome_provider,
+            text_provider,
+        ]);
+
+        Some(union_provider)
     });
 
     let has_preview = if let Some(ext) = preview_path.extension() {

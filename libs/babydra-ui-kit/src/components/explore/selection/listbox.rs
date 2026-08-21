@@ -9,6 +9,7 @@ pub fn wire_rubberband(
     listbox: ListBox,
     list_fixed: Fixed,
     list_rubberband: Box,
+    selected_paths: Rc<RefCell<Vec<std::path::PathBuf>>>,
 ) {
     let drag_gesture = GestureDrag::new();
     drag_gesture.set_button(1);
@@ -19,31 +20,32 @@ pub fn wire_rubberband(
     let drag_select_active = Rc::new(RefCell::new(false));
 
     let drag_select_active_begin = drag_select_active.clone();
-    let lb_begin = listbox.clone();
-    let lf_begin = list_fixed.clone();
+    let list_overlay_begin = list_overlay.clone();
 
     drag_gesture.connect_drag_begin(move |gesture, x, y| {
+        let picked = list_overlay_begin.pick(x, y, gtk4::PickFlags::empty());
         let mut is_item = false;
-        let mut child = lb_begin.first_child();
-        while let Some(c) = child {
-            if let Some((cx, cy)) = c.translate_coordinates(&lf_begin, 0.0, 0.0) {
-                let cw = c.width() as f64;
-                let ch = c.height() as f64;
-                if x >= cx && x <= cx + cw && y >= cy && y <= cy + ch {
-                    is_item = true;
-                    break;
-                }
+        let mut curr = picked;
+        while let Some(w) = curr {
+            if let Some(_row) = w.downcast_ref::<ListBoxRow>() {
+                is_item = true;
+                break;
             }
-            child = c.next_sibling();
+            if w == list_overlay_begin {
+                break;
+            }
+            curr = w.parent();
         }
 
-        if !is_item {
+        if is_item {
+            // User clicked and dragged an item -> Treat as MOVE (Drag and Drop)
+            drag_select_active_begin.replace(false);
+            gesture.set_state(gtk4::EventSequenceState::Denied);
+        } else {
+            // User clicked on empty space or unselected item and dragged -> Treat as SELECT (Rubberband)
             drag_select_active_begin.replace(true);
             start_pos_c.replace(Some((x, y)));
-            // Show rubberband in drag_update, not here — avoids 1-frame flash on plain clicks
             gesture.set_state(gtk4::EventSequenceState::Claimed);
-        } else {
-            drag_select_active_begin.replace(false);
         }
     });
 
@@ -52,32 +54,35 @@ pub fn wire_rubberband(
     let lb_update = listbox.clone();
     let lf_update = list_fixed.clone();
     let lr_update = list_rubberband.clone();
+    let list_overlay_update = list_overlay.clone();
+
     drag_gesture.connect_drag_update(move |_, offset_x, offset_y| {
         if !*drag_select_active_update.borrow() {
             return;
         }
         if let Some((start_x, start_y)) = *start_pos_update.borrow() {
-            if !lr_update.is_visible() {
-                lf_update.move_(&lr_update, start_x, start_y);
-                lr_update.set_size_request(0, 0);
-                lr_update.set_visible(true);
-            }
-
             let current_x = start_x + offset_x;
             let current_y = start_y + offset_y;
             let min_x = start_x.min(current_x);
             let max_x = start_x.max(current_x);
             let min_y = start_y.min(current_y);
             let max_y = start_y.max(current_y);
-            let width = max_x - min_x;
-            let height = max_y - min_y;
+            let width = (max_x - min_x).max(0.0);
+            let height = (max_y - min_y).max(0.0);
 
-            lf_update.move_(&lr_update, min_x, min_y);
+            if !lr_update.is_visible() {
+                lr_update.set_visible(true);
+            }
+
+            let fixed_pos = list_overlay_update.translate_coordinates(&lf_update, min_x, min_y);
+            if let Some((fx, fy)) = fixed_pos {
+                lf_update.move_(&lr_update, fx, fy);
+            }
             lr_update.set_size_request(width as i32, height as i32);
 
             let mut child = lb_update.first_child();
             while let Some(c) = child {
-                if let Some((cx, cy)) = c.translate_coordinates(&lf_update, 0.0, 0.0) {
+                if let Some((cx, cy)) = c.translate_coordinates(&list_overlay_update, 0.0, 0.0) {
                     let cw = c.width() as f64;
                     let ch = c.height() as f64;
 

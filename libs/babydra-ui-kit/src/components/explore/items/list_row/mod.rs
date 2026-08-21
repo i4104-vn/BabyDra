@@ -70,60 +70,24 @@ pub fn create_list_row(
     list_row.add_controller(double_click_gesture);
 
     let is_dragging = Rc::new(Cell::new(false));
-    let snapshot: Rc<RefCell<Vec<PathBuf>>> = Rc::new(RefCell::new(Vec::new()));
-
-    let saver = gtk4::GestureClick::new();
-    saver.set_button(1);
-    saver.set_propagation_phase(gtk4::PropagationPhase::Capture);
-
-    let sel_save = selected_paths.clone();
-    let path_save = entry.path.clone();
-    let snap_save = snapshot.clone();
-
-    saver.connect_pressed(move |_, n_press, _, _| {
-        if n_press == 1 {
-            let s = sel_save.borrow();
-            if s.contains(&path_save) && s.len() > 1 {
-                *snap_save.borrow_mut() = s.clone();
-            } else {
-                snap_save.borrow_mut().clear();
-            }
-        }
-    });
-
-    let snap_rel = snapshot.clone();
-    let is_drag_rel = is_dragging.clone();
-    saver.connect_released(move |_, _, _, _| {
-        if !is_drag_rel.get() {
-            snap_rel.borrow_mut().clear();
-        }
-    });
-
     let path_drag = entry.path.clone();
     let sel_drag = selected_paths.clone();
-    let snap_drag = snapshot.clone();
 
     let drag_source = crate::components::explore::create_drag_source(
         &entry.path,
         &entry.icon_name,
         is_dragging,
         move || {
-            let snap = snap_drag.borrow();
-            if !snap.is_empty() {
-                snap.clone()
+            let s = sel_drag.borrow();
+            if s.contains(&path_drag) && s.len() > 1 {
+                s.clone()
             } else {
-                let s = sel_drag.borrow();
-                if s.contains(&path_drag) {
-                    s.clone()
-                } else {
-                    vec![path_drag.clone()]
-                }
+                vec![path_drag.clone()]
             }
         },
     );
     drag_source.set_propagation_phase(gtk4::PropagationPhase::Capture);
 
-    list_row.add_controller(saver);
     list_row.add_controller(drag_source);
 
     list_row

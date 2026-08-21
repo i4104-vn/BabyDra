@@ -120,6 +120,21 @@ pub fn wire_listbox_ctrls(
             } else if has_ctrl && (keyval == gtk4::gdk::Key::v || keyval == gtk4::gdk::Key::V) {
                 super::handle_paste(cp_ref.borrow().clone(), nav.clone());
                 glib::Propagation::Stop
+            } else if keyval == gtk4::gdk::Key::Delete || keyval == gtk4::gdk::Key::KP_Delete {
+                if state.contains(gtk4::gdk::ModifierType::SHIFT_MASK) {
+                    super::handle_permanent_delete(
+                        sel_paths.borrow().clone(),
+                        cp_ref.borrow().clone(),
+                        nav.clone(),
+                    );
+                } else {
+                    super::handle_delete(
+                        sel_paths.borrow().clone(),
+                        cp_ref.borrow().clone(),
+                        nav.clone(),
+                    );
+                }
+                glib::Propagation::Stop
             } else {
                 glib::Propagation::Proceed
             }
@@ -134,6 +149,7 @@ pub fn wire_listbox_ctrls(
             widgets.listbox.clone(),
             widgets.list_fixed.clone(),
             widgets.list_rubberband.clone(),
+            selected_paths,
         );
     }
 }

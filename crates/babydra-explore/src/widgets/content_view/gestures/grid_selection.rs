@@ -132,6 +132,21 @@ pub fn wire_grid_ctrls(
             } else if has_ctrl && (keyval == gtk4::gdk::Key::v || keyval == gtk4::gdk::Key::V) {
                 super::handle_paste(cp_ref.borrow().clone(), nav.clone());
                 glib::Propagation::Stop
+            } else if keyval == gtk4::gdk::Key::Delete || keyval == gtk4::gdk::Key::KP_Delete {
+                if state.contains(gtk4::gdk::ModifierType::SHIFT_MASK) {
+                    super::handle_permanent_delete(
+                        sel_paths.borrow().clone(),
+                        cp_ref.borrow().clone(),
+                        nav.clone(),
+                    );
+                } else {
+                    super::handle_delete(
+                        sel_paths.borrow().clone(),
+                        cp_ref.borrow().clone(),
+                        nav.clone(),
+                    );
+                }
+                glib::Propagation::Stop
             } else {
                 glib::Propagation::Proceed
             }
@@ -139,14 +154,5 @@ pub fn wire_grid_ctrls(
         flowbox.add_controller(key_controller);
     }
 
-    // 4. Click empty area to reset selection
-    {
-        let scroll_fn = sc_fn.clone();
-        let gesture = gtk4::GestureClick::new();
-        gesture.set_button(1);
-        gesture.connect_pressed(move |_, _, _, _| {
-            scroll_fn(Vec::new());
-        });
-        flowbox.add_controller(gesture);
-    }
+
 }

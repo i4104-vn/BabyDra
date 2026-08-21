@@ -9,6 +9,7 @@ pub fn wire_bg_controllers(
     widgets: &ContentViewWidgets,
     current_path: Rc<RefCell<PathBuf>>,
     nav_cb: Rc<dyn Fn(PathBuf)>,
+    selected_paths: Rc<RefCell<Vec<PathBuf>>>,
 ) {
     // 1. Drag-to-select for Grid overlay
     if let Some(grid_overlay) = widgets.grid_fixed.parent() {
@@ -17,6 +18,7 @@ pub fn wire_bg_controllers(
             widgets.grid_container.clone(),
             widgets.grid_fixed.clone(),
             widgets.grid_rubberband.clone(),
+            selected_paths,
         );
     }
 
