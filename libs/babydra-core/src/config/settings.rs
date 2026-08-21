@@ -99,16 +99,38 @@ pub fn invalidate_cache() {
     }
 }
 
-/// Loads `explore settings`.
+/// Loads `explore settings` from `~/.babydra/configs/explore.json`.
 pub fn load_explore_cfg() -> ExploreSettings {
-    load_babydra_config().explore
+    let path = crate::config::get_config_dir().join("explore.json");
+    if let Ok(content) = std::fs::read_to_string(&path) {
+        if let Ok(mut settings) = serde_json::from_str::<ExploreSettings>(&content) {
+            if settings.sidebar_items.is_empty() {
+                settings.sidebar_items = crate::config::sidebar_layout::default_sidebar_items();
+            }
+            return settings;
+        } else if let Ok(items) =
+            serde_json::from_str::<Vec<crate::models::config::SidebarItem>>(&content)
+        {
+            let mut s = ExploreSettings::default();
+            s.sidebar_items = items;
+            return s;
+        }
+    }
+
+    let mut s = ExploreSettings::default();
+    s.sidebar_items = crate::config::sidebar_layout::default_sidebar_items();
+    s
 }
 
-/// Persists `explore settings`.
+/// Persists `explore settings` directly to `~/.babydra/configs/explore.json`.
 pub fn save_explore_cfg(settings: &ExploreSettings) {
-    let mut config = load_babydra_config();
-    config.explore = settings.clone();
-    save_babydra_config(&config);
+    let path = crate::config::get_config_dir().join("explore.json");
+    if let Some(parent) = path.parent() {
+        let _ = std::fs::create_dir_all(parent);
+    }
+    if let Ok(json) = serde_json::to_string_pretty(settings) {
+        let _ = std::fs::write(path, json);
+    }
 }
 
 /// Loads `desktop config`.

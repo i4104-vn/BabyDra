@@ -278,6 +278,54 @@ pub fn create_explore_win(
         navigate_pane_ref.clone(),
     );
 
+    let new_tab_rc = {
+        let session = session.clone();
+        let nav = navigate_pane_ref.clone();
+        let active = active_pane.clone();
+        let rebuild_tabs = rebuild_tabs_cell.clone();
+        Rc::new(move || {
+            let current = session.borrow().active_tab().current_path.clone();
+            let target = if current.as_os_str().is_empty() {
+                glib::home_dir()
+            } else {
+                current
+            };
+            {
+                let mut sess = session.borrow_mut();
+                sess.add_tab(target.clone());
+            }
+            if let Some(ref f) = *nav.borrow() {
+                f(active.get(), target);
+            }
+            if let Some(ref reb) = *rebuild_tabs.borrow() {
+                reb();
+            }
+        }) as Rc<dyn Fn()>
+    };
+
+    let close_tab_rc = {
+        let session = session.clone();
+        let nav = navigate_pane_ref.clone();
+        let active = active_pane.clone();
+        let rebuild_tabs = rebuild_tabs_cell.clone();
+        Rc::new(move || {
+            let should_navigate = {
+                let mut sess = session.borrow_mut();
+                let idx = sess.active_tab_index;
+                sess.close_tab(idx)
+            };
+            if should_navigate {
+                let path = session.borrow().active_tab().current_path.clone();
+                if let Some(ref f) = *nav.borrow() {
+                    f(active.get(), path);
+                }
+            }
+            if let Some(ref reb) = *rebuild_tabs.borrow() {
+                reb();
+            }
+        }) as Rc<dyn Fn()>
+    };
+
     // Install keyboard shortcuts
     handlers::events::setup_shortcuts(
         &ui.window,
@@ -288,6 +336,11 @@ pub fn create_explore_win(
         clip_cbs.copy,
         clip_cbs.paste,
         clip_cbs.undo,
+        clip_cbs.delete,
+        clip_cbs.permanent_delete,
+        clip_cbs.select_all,
+        new_tab_rc,
+        close_tab_rc,
         rebuild_shortcuts_cell.clone(),
     );
 
@@ -336,6 +389,8 @@ pub fn create_explore_win(
 
         // Rebuild status bar tooltips
         if let Some(ref sw) = *status_bar_c.borrow() {
+            sw.btn_empty_trash
+                .set_tooltip_text(Some(&babydra_core::i18n::trans("explore.empty_trash")));
             sw.dropdown_sort
                 .set_tooltip_text(Some(&babydra_core::i18n::trans("explore.sort_by")));
             sw.btn_view_icons

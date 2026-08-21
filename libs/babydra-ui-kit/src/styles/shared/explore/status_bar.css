@@ -47,3 +47,25 @@
     min-width: 1px;
     margin: 4px 6px;
 }
+
+.explore-window button.status-bar-trash-btn {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #ffffff;
+    border-radius: 6px;
+    padding: 3px 10px;
+    margin: 0 4px;
+    border: none;
+    box-shadow: 0 2px 6px rgba(220, 38, 38, 0.35);
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.explore-window button.status-bar-trash-btn:hover {
+    background: linear-gradient(135deg, #f87171, #ef4444);
+    box-shadow: 0 3px 10px rgba(220, 38, 38, 0.5);
+}
+
+.explore-window label.status-bar-trash-lbl {
+    font-weight: 600;
+    font-size: 11px;
+    color: #ffffff;
+}

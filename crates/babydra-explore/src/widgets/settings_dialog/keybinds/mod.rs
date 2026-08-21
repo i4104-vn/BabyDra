@@ -110,7 +110,12 @@ pub fn build_keybinds_page(
     add_keybind_row("copy", "copy", &trans("explore.shortcut_copy"));
     add_keybind_row("cut", "cut", &trans("explore.shortcut_cut"));
     add_keybind_row("paste", "paste", &trans("explore.shortcut_paste"));
-    add_keybind_row("refresh", "undo", "Undo");
+    add_keybind_row("refresh", "undo", &trans("explore.shortcut_undo"));
+    add_keybind_row("trash", "delete", &trans("explore.shortcut_delete"));
+    add_keybind_row("trash", "permanent_delete", &trans("explore.shortcut_perm_delete"));
+    add_keybind_row("check", "select_all", &trans("explore.shortcut_select_all"));
+    add_keybind_row("plus", "new_tab", &trans("explore.shortcut_new_tab"));
+    add_keybind_row("close", "close_tab", &trans("explore.shortcut_close_tab"));
 
     page
 }

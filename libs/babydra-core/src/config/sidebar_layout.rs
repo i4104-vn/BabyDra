@@ -1,28 +1,11 @@
-use serde::{Deserialize, Serialize};
+pub use crate::models::config::SidebarItem;
 use std::path::PathBuf;
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
-pub struct SidebarItem {
-    pub id: String,
-    pub name: String,
-    pub icon: String,
-    pub path: PathBuf,
-    pub is_bookmark: bool,
-}
 
 pub fn get_sidebar_layout_path() -> PathBuf {
     crate::config::get_config_dir().join("explore.json")
 }
 
-pub fn load_sidebar_layout() -> Vec<SidebarItem> {
-    let path = get_sidebar_layout_path();
-    if let Ok(data) = std::fs::read_to_string(&path) {
-        if let Ok(items) = serde_json::from_str(&data) {
-            return items;
-        }
-    }
-
-    // Default layout
+pub fn default_sidebar_items() -> Vec<SidebarItem> {
     let mut default_items = Vec::new();
 
     // Places
@@ -111,12 +94,17 @@ pub fn load_sidebar_layout() -> Vec<SidebarItem> {
     default_items
 }
 
+pub fn load_sidebar_layout() -> Vec<SidebarItem> {
+    let cfg = crate::config::load_explore_cfg();
+    if cfg.sidebar_items.is_empty() {
+        default_sidebar_items()
+    } else {
+        cfg.sidebar_items
+    }
+}
+
 pub fn save_sidebar_layout(items: &[SidebarItem]) {
-    let path = get_sidebar_layout_path();
-    if let Some(parent) = path.parent() {
-        let _ = std::fs::create_dir_all(parent);
-    }
-    if let Ok(json) = serde_json::to_string_pretty(items) {
-        let _ = std::fs::write(path, json);
-    }
+    let mut cfg = crate::config::load_explore_cfg();
+    cfg.sidebar_items = items.to_vec();
+    crate::config::save_explore_cfg(&cfg);
 }

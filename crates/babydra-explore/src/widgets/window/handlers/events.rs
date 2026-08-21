@@ -160,6 +160,21 @@ pub fn setup_status_wiring(
             toggle_p();
         });
 
+        let session_trash = session.clone();
+        let nav_trash = nav_c.clone();
+        let act_trash = act_c.clone();
+        sw.btn_empty_trash.connect_clicked(move |_| {
+            let freed = babydra_core::remove_trash();
+            let size_str = babydra_ui_kit::components::explore::format_size(freed);
+            let notif_title = babydra_core::i18n::trans("explore.trash");
+            let notif_msg = format!("{}: {}", babydra_core::i18n::trans("clean.emptying_trash"), size_str);
+            babydra_core::send_notification(&notif_title, &notif_msg);
+            let current = session_trash.borrow().active_tab().current_path.clone();
+            if let Some(ref f) = *nav_trash.borrow() {
+                f(act_trash.get(), current);
+            }
+        });
+
         let cb1 = view_mode_callback_rc.clone();
         sw.btn_view_icons.connect_clicked(move |_| {
             cb1("icons".to_string());
@@ -243,6 +258,11 @@ pub fn setup_shortcuts(
     copy_cb_rc: Rc<dyn Fn()>,
     paste_cb_rc: Rc<dyn Fn()>,
     undo_cb_rc: Rc<dyn Fn()>,
+    delete_cb_rc: Rc<dyn Fn()>,
+    permanent_delete_cb_rc: Rc<dyn Fn()>,
+    select_all_cb_rc: Rc<dyn Fn()>,
+    new_tab_cb_rc: Rc<dyn Fn()>,
+    close_tab_cb_rc: Rc<dyn Fn()>,
     rebuild_shortcuts_cell: Rc<RefCell<Option<Rc<dyn Fn()>>>>,
 ) -> Rc<dyn Fn()> {
     let window = window.clone();
@@ -288,6 +308,73 @@ pub fn setup_shortcuts(
         add_shortcut("copy", copy_cb_rc.clone());
         add_shortcut("paste", paste_cb_rc.clone());
         add_shortcut("undo", undo_cb_rc.clone());
+        add_shortcut("delete", delete_cb_rc.clone());
+        add_shortcut("permanent_delete", permanent_delete_cb_rc.clone());
+        add_shortcut("select_all", select_all_cb_rc.clone());
+        add_shortcut("new_tab", new_tab_cb_rc.clone());
+        add_shortcut("close_tab", close_tab_cb_rc.clone());
+
+        // Always guarantee fundamental keys work reliably
+        shortcuts.push(KeyShortcut {
+            keyval: gtk4::gdk::Key::a,
+            modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
+            callback: select_all_cb_rc.clone(),
+        });
+        shortcuts.push(KeyShortcut {
+            keyval: gtk4::gdk::Key::A,
+            modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
+            callback: select_all_cb_rc.clone(),
+        });
+        shortcuts.push(KeyShortcut {
+            keyval: gtk4::gdk::Key::z,
+            modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
+            callback: undo_cb_rc.clone(),
+        });
+        shortcuts.push(KeyShortcut {
+            keyval: gtk4::gdk::Key::Z,
+            modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
+            callback: undo_cb_rc.clone(),
+        });
+        shortcuts.push(KeyShortcut {
+            keyval: gtk4::gdk::Key::n,
+            modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
+            callback: new_tab_cb_rc.clone(),
+        });
+        shortcuts.push(KeyShortcut {
+            keyval: gtk4::gdk::Key::N,
+            modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
+            callback: new_tab_cb_rc.clone(),
+        });
+        shortcuts.push(KeyShortcut {
+            keyval: gtk4::gdk::Key::w,
+            modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
+            callback: close_tab_cb_rc.clone(),
+        });
+        shortcuts.push(KeyShortcut {
+            keyval: gtk4::gdk::Key::W,
+            modifiers: gtk4::gdk::ModifierType::CONTROL_MASK,
+            callback: close_tab_cb_rc.clone(),
+        });
+        shortcuts.push(KeyShortcut {
+            keyval: gtk4::gdk::Key::Delete,
+            modifiers: gtk4::gdk::ModifierType::empty(),
+            callback: delete_cb_rc.clone(),
+        });
+        shortcuts.push(KeyShortcut {
+            keyval: gtk4::gdk::Key::KP_Delete,
+            modifiers: gtk4::gdk::ModifierType::empty(),
+            callback: delete_cb_rc.clone(),
+        });
+        shortcuts.push(KeyShortcut {
+            keyval: gtk4::gdk::Key::Delete,
+            modifiers: gtk4::gdk::ModifierType::SHIFT_MASK,
+            callback: permanent_delete_cb_rc.clone(),
+        });
+        shortcuts.push(KeyShortcut {
+            keyval: gtk4::gdk::Key::KP_Delete,
+            modifiers: gtk4::gdk::ModifierType::SHIFT_MASK,
+            callback: permanent_delete_cb_rc.clone(),
+        });
 
         let new_controller = setup_key_shortcuts(&window, shortcuts);
         current_controller.replace(Some(new_controller));

@@ -75,8 +75,13 @@ fn explore_prelude_exposes_features() {
 
     // Drag & drop / selection / items.
     let _: fn(std::path::PathBuf) -> gtk4::DropTarget = explore_prelude::create_drop_target;
-    let _: fn(&gtk4::Widget, gtk4::Box, gtk4::Fixed, gtk4::Box) =
-        explore_prelude::wire_rubberband_grid;
+    let _: fn(
+        &gtk4::Widget,
+        gtk4::Box,
+        gtk4::Fixed,
+        gtk4::Box,
+        std::rc::Rc<std::cell::RefCell<Vec<std::path::PathBuf>>>,
+    ) = explore_prelude::wire_rubberband_grid;
     let _: fn(
         usize,
         &babydra_core::FileEntry,

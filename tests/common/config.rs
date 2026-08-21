@@ -22,7 +22,14 @@ fn explore_settings_default_keybinds_are_available() {
     assert_eq!(settings.get_keybind("toggle_split"), "F3");
     assert_eq!(settings.get_keybind("toggle_preview"), "F4");
     assert_eq!(settings.get_keybind("cut"), "Ctrl + X");
+    assert_eq!(settings.get_keybind("copy"), "Ctrl + C");
+    assert_eq!(settings.get_keybind("paste"), "Ctrl + V");
     assert_eq!(settings.get_keybind("undo"), "Ctrl + Z");
+    assert_eq!(settings.get_keybind("delete"), "Delete");
+    assert_eq!(settings.get_keybind("permanent_delete"), "Shift + Delete");
+    assert_eq!(settings.get_keybind("select_all"), "Ctrl + A");
+    assert_eq!(settings.get_keybind("new_tab"), "Ctrl + N");
+    assert_eq!(settings.get_keybind("close_tab"), "Ctrl + W");
 }
 
 #[test]
@@ -50,9 +57,18 @@ fn power_config_defaults_apply() {
 fn config_roundtrip_preserves_nested_sections() {
     let mut config = BabyDraConfig::default();
     config.notification.dnd = true;
-    config.explore.view_mode = "list".to_string();
-    config
-        .explore
+
+    let encoded = toml::to_string(&config).expect("serialize");
+    let decoded: BabyDraConfig = toml::from_str(&encoded).expect("deserialize");
+
+    assert!(decoded.notification.dnd);
+}
+
+#[test]
+fn explore_config_json_roundtrip_preserves_settings_and_sidebar() {
+    let mut settings = ExploreSettings::default();
+    settings.view_mode = "list".to_string();
+    settings
         .custom_context_items
         .push(babydra_core::config::settings::CustomContextItem {
             name: "Open in terminal".to_string(),
@@ -60,14 +76,13 @@ fn config_roundtrip_preserves_nested_sections() {
             icon: Some("terminal".to_string()),
         });
 
-    let encoded = toml::to_string(&config).expect("serialize");
-    let decoded: BabyDraConfig = toml::from_str(&encoded).expect("deserialize");
+    let encoded = serde_json::to_string(&settings).expect("serialize");
+    let decoded: ExploreSettings = serde_json::from_str(&encoded).expect("deserialize");
 
-    assert!(decoded.notification.dnd);
-    assert_eq!(decoded.explore.view_mode, "list");
-    assert_eq!(decoded.explore.custom_context_items.len(), 1);
+    assert_eq!(decoded.view_mode, "list");
+    assert_eq!(decoded.custom_context_items.len(), 1);
     assert_eq!(
-        decoded.explore.custom_context_items[0].name,
+        decoded.custom_context_items[0].name,
         "Open in terminal"
     );
 }

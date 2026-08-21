@@ -52,7 +52,7 @@ pub struct NotificationConfig {
     pub dnd: bool,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct CustomContextItem {
     pub name: String,
     pub command: String,
@@ -60,17 +60,42 @@ pub struct CustomContextItem {
     pub icon: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct SidebarItem {
+    pub id: String,
+    pub name: String,
+    pub icon: String,
+    pub path: std::path::PathBuf,
+    pub is_bookmark: bool,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct ExploreSettings {
+    #[serde(default = "default_view_mode")]
     pub view_mode: String,          // "icons" | "list"
+    #[serde(default = "default_true")]
     pub preview_visible: bool,      // true | false
+    #[serde(default)]
     pub show_hidden: bool,          // true | false
+    #[serde(default = "default_true")]
     pub double_click_to_open: bool, // true | false
+    #[serde(default)]
     pub permanent_delete: bool,     // true | false
+    #[serde(default = "default_true")]
     pub calculate_dir_size: bool,   // true | false
+    #[serde(default)]
     pub custom_context_items: Vec<CustomContextItem>,
     #[serde(default)]
     pub keybinds: std::collections::HashMap<String, String>,
+    #[serde(default)]
+    pub sidebar_items: Vec<SidebarItem>,
+}
+
+fn default_view_mode() -> String {
+    "icons".to_string()
+}
+fn default_true() -> bool {
+    true
 }
 
 impl ExploreSettings {
@@ -86,6 +111,11 @@ impl ExploreSettings {
                 "copy" => "Ctrl + C".to_string(),
                 "paste" => "Ctrl + V".to_string(),
                 "undo" => "Ctrl + Z".to_string(),
+                "delete" => "Delete".to_string(),
+                "permanent_delete" => "Shift + Delete".to_string(),
+                "select_all" => "Ctrl + A".to_string(),
+                "new_tab" => "Ctrl + N".to_string(),
+                "close_tab" => "Ctrl + W".to_string(),
                 _ => "".to_string(),
             })
     }
@@ -94,14 +124,15 @@ impl ExploreSettings {
 impl Default for ExploreSettings {
     fn default() -> Self {
         Self {
-            view_mode: "icons".to_string(),
-            preview_visible: true,
+            view_mode: default_view_mode(),
+            preview_visible: default_true(),
             show_hidden: false,
-            double_click_to_open: true,
+            double_click_to_open: default_true(),
             permanent_delete: false,
-            calculate_dir_size: true,
+            calculate_dir_size: default_true(),
             custom_context_items: Vec::new(),
             keybinds: std::collections::HashMap::new(),
+            sidebar_items: Vec::new(),
         }
     }
 }
@@ -229,7 +260,7 @@ impl Default for DesktopConfig {
 pub struct BabyDraConfig {
     #[serde(default)]
     pub power: PowerConfig,
-    #[serde(default)]
+    #[serde(default, skip_serializing)]
     pub explore: ExploreSettings,
     #[serde(default)]
     pub wallpaper: WallpaperConfig,
@@ -239,7 +270,7 @@ pub struct BabyDraConfig {
     pub display: DisplayConfig,
     #[serde(default)]
     pub lockscreen: LockscreenConfig,
-    #[serde(default)]
+    #[serde(default, skip_serializing)]
     pub desktop: DesktopConfig,
     /// Theme package selection (id + dark preference).
     /// Empty `id` = engine default (`babydra-default`).

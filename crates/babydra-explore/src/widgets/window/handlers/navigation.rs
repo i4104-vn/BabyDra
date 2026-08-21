@@ -14,9 +14,9 @@ pub fn setup_navigation(
     right_content_handle: Rc<RefCell<Option<Rc<ContentViewHandle>>>>,
     left_scroll_cell: Rc<RefCell<Option<gtk4::Box>>>,
     right_scroll_cell: Rc<RefCell<Option<gtk4::Box>>>,
-    _status_bar_widgets_cell: Rc<RefCell<Option<StatusBarWidgets>>>,
+    status_bar_widgets_cell: Rc<RefCell<Option<StatusBarWidgets>>>,
     _tab_bar_box: Rc<RefCell<Option<gtk4::Box>>>,
-    status_bar_lbl: Rc<gtk4::Label>,
+    _status_bar_lbl: Rc<gtk4::Label>,
     rebuild_tabs_cell: Rc<RefCell<Option<Rc<dyn Fn()>>>>,
     focus_item_cell: Rc<RefCell<Option<PathBuf>>>,
     watch_tx: tokio::sync::mpsc::UnboundedSender<()>,
@@ -42,7 +42,7 @@ pub fn setup_navigation(
         let right_handle = right_content_handle.clone();
         let right_s = right_scroll_cell.clone();
         let left_s = left_scroll_cell.clone();
-        let status_bar_lbl = status_bar_lbl.clone();
+        let status_bar_widgets_c = status_bar_widgets_cell.clone();
         let navigate_pane_no_watch_ref_c = navigate_pane_no_watch_ref.clone();
         let rebuild_tabs_cell_c = rebuild_tabs_cell.clone();
 
@@ -110,9 +110,9 @@ pub fn setup_navigation(
                 let session_c = session.clone();
                 let nav_no_watch_c = navigate_pane_no_watch_ref_c.clone();
                 let rebuild_tabs_cell_c2 = rebuild_tabs_cell_c.clone();
-                let status_lbl_c = status_bar_lbl.clone();
                 let content_handle_err = content_handle.clone();
                 let focus_item_cell_c = focus_item_cell.clone();
+                let status_bar_widgets_inner = status_bar_widgets_c.clone();
 
                 glib::spawn_future_local(async move {
                     match babydra_core::load_directory(path.clone(), show_hidden).await {
@@ -161,15 +161,20 @@ pub fn setup_navigation(
                                 }
 
                                 crate::widgets::content_view::update_content_view(
-                                    handle, &entries, path,
+                                    handle,
+                                    &entries,
+                                    path.clone(),
                                 );
                             }
 
-                            crate::widgets::status_bar::update_status_bar(
-                                &status_lbl_c,
-                                entries.len(),
-                                total_size,
-                            );
+                            if let Some(ref sw) = *status_bar_widgets_inner.borrow() {
+                                crate::widgets::status_bar::update_status_bar(
+                                    sw,
+                                    entries.len(),
+                                    total_size,
+                                    &path,
+                                );
+                            }
 
                             if let Some(ref rebuild) = *rebuild_tabs_cell_c2.borrow() {
                                 rebuild();

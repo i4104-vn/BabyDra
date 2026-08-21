@@ -6,6 +6,7 @@ use gtk4::{Align, Box, Label, Orientation};
 pub struct StatusBarWidgets {
     pub container: Box,
     pub lbl_status: Label,
+    pub btn_empty_trash: gtk4::Button,
     pub btn_toggle_preview: gtk4::Button,
     pub btn_view_icons: gtk4::Button,
     pub btn_view_list: gtk4::Button,
@@ -24,6 +25,25 @@ pub fn create_status_bar() -> StatusBarWidgets {
         .hexpand(true)
         .build();
     container.append(&lbl_status);
+
+    // Empty Trash button (visible only in Trash folder)
+    let btn_empty_trash = gtk4::Button::builder()
+        .valign(Align::Center)
+        .css_classes(vec!["status-bar-trash-btn".to_string()])
+        .visible(false)
+        .tooltip_text(&trans("explore.empty_trash"))
+        .build();
+    btn_empty_trash.set_cursor_from_name(Some("pointer"));
+
+    let trash_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
+    let trash_icon = babydra_ui_kit::ui::icon::get_icon("user-trash-full-symbolic", 14);
+    let trash_lbl = gtk4::Label::new(Some(&trans("explore.empty_trash")));
+    trash_lbl.add_css_class("status-bar-trash-lbl");
+    trash_box.append(&trash_icon);
+    trash_box.append(&trash_lbl);
+    btn_empty_trash.set_child(Some(&trash_box));
+
+    container.append(&btn_empty_trash);
 
     // DropDown for sorting (Auto, By date, By group)
     let sort_options = [
@@ -81,6 +101,7 @@ pub fn create_status_bar() -> StatusBarWidgets {
     StatusBarWidgets {
         container,
         lbl_status,
+        btn_empty_trash,
         btn_toggle_preview,
         btn_view_icons,
         btn_view_list,
@@ -89,14 +110,22 @@ pub fn create_status_bar() -> StatusBarWidgets {
     }
 }
 
-/// Updates the status bar label content.
-pub fn update_status_bar(lbl_status: &Label, count: usize, total_size: u64) {
+/// Updates the status bar content and empty trash button visibility.
+pub fn update_status_bar(
+    widgets: &StatusBarWidgets,
+    count: usize,
+    total_size: u64,
+    current_path: &std::path::Path,
+) {
     let size_str = babydra_ui_kit::components::explore::format_size(total_size);
-    lbl_status.set_text(&format!(
+    widgets.lbl_status.set_text(&format!(
         "{} {} | {}: {}",
         count,
         trans("explore.items"),
         trans("explore.total_size"),
         size_str
     ));
+
+    let is_trash = babydra_ui_kit::components::explore::is_in_trash(current_path);
+    widgets.btn_empty_trash.set_visible(is_trash);
 }

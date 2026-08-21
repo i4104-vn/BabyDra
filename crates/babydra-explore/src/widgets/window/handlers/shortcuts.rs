@@ -63,13 +63,31 @@ pub fn setup_key_shortcuts(
     shortcuts: Vec<KeyShortcut>,
 ) -> gtk4::EventControllerKey {
     let key_controller = gtk4::EventControllerKey::new();
+    key_controller.set_propagation_phase(gtk4::PropagationPhase::Capture);
+    let win = window.clone();
+
     key_controller.connect_key_pressed(move |_, keyval, _, state| {
+        // If an entry or editable text field is currently focused, allow normal typing
+        if let Some(focus) = gtk4::prelude::GtkWindowExt::focus(&win) {
+            if focus.downcast_ref::<gtk4::Editable>().is_some() {
+                return glib::Propagation::Proceed;
+            }
+        }
+
         let clean_state = state
             & (gtk4::gdk::ModifierType::CONTROL_MASK
                 | gtk4::gdk::ModifierType::SHIFT_MASK
                 | gtk4::gdk::ModifierType::ALT_MASK);
+
         for shortcut in &shortcuts {
-            if shortcut.keyval == keyval && shortcut.modifiers == clean_state {
+            let key_matches = shortcut.keyval == keyval
+                || shortcut.keyval.to_lower() == keyval.to_lower()
+                || (shortcut.keyval == gtk4::gdk::Key::Delete
+                    && keyval == gtk4::gdk::Key::KP_Delete)
+                || (shortcut.keyval == gtk4::gdk::Key::Return
+                    && keyval == gtk4::gdk::Key::KP_Enter);
+
+            if key_matches && shortcut.modifiers == clean_state {
                 (shortcut.callback)();
                 return glib::Propagation::Stop;
             }

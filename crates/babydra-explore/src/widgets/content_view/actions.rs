@@ -187,3 +187,25 @@ pub fn wire_content_nav(
         });
     }
 }
+
+/// Selects all items in the active content view (grid or list).
+pub fn select_all_items(handle: &ContentViewHandle) {
+    let mode = handle.current_mode.borrow().clone();
+    let entries = handle.entries.borrow().clone();
+    let all_paths: Vec<PathBuf> = entries.iter().map(|e| e.path.clone()).collect();
+
+    if mode == "list" {
+        handle.widgets.listbox.select_all();
+    } else {
+        let mut sibling = handle.widgets.grid_container.first_child();
+        while let Some(child) = sibling {
+            if let Some(fb) = child.downcast_ref::<gtk4::FlowBox>() {
+                fb.select_all();
+            }
+            sibling = child.next_sibling();
+        }
+    }
+
+    *handle.selected_paths.borrow_mut() = all_paths.clone();
+    (handle.selection_callback)(all_paths);
+}

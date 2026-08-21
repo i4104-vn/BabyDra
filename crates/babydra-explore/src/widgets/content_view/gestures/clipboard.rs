@@ -43,3 +43,36 @@ pub fn handle_paste(current_path: PathBuf, nav_cb: Rc<dyn Fn(PathBuf)>) {
         nav_cb,
     );
 }
+
+/// Shared handler for Delete operation.
+pub fn handle_delete(paths: Vec<PathBuf>, current_path: PathBuf, nav_cb: Rc<dyn Fn(PathBuf)>) {
+    if !paths.is_empty() {
+        let is_trash = is_in_trash(&current_path);
+        glib::spawn_future_local(async move {
+            for p in paths {
+                if is_trash {
+                    let _ = babydra_core::delete_path(p).await;
+                } else {
+                    let _ = babydra_core::send_to_trash(p).await;
+                }
+            }
+            nav_cb(current_path);
+        });
+    }
+}
+
+/// Shared handler for Permanent Delete (Shift+Delete) operation.
+pub fn handle_permanent_delete(
+    paths: Vec<PathBuf>,
+    current_path: PathBuf,
+    nav_cb: Rc<dyn Fn(PathBuf)>,
+) {
+    if !paths.is_empty() {
+        glib::spawn_future_local(async move {
+            for p in paths {
+                let _ = babydra_core::delete_path(p).await;
+            }
+            nav_cb(current_path);
+        });
+    }
+}

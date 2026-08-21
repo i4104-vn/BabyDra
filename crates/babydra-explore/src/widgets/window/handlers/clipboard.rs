@@ -10,6 +10,9 @@ pub struct ClipboardCallbacks {
     pub copy: Rc<dyn Fn()>,
     pub paste: Rc<dyn Fn()>,
     pub undo: Rc<dyn Fn()>,
+    pub delete: Rc<dyn Fn()>,
+    pub permanent_delete: Rc<dyn Fn()>,
+    pub select_all: Rc<dyn Fn()>,
 }
 
 pub fn create_clipboard_callbacks(
@@ -124,10 +127,95 @@ pub fn create_clipboard_callbacks(
         }
     };
 
+    let delete_cb = {
+        let left = left_content_handle.clone();
+        let right = right_content_handle.clone();
+        let act = active_pane.clone();
+        let session = session.clone();
+        let nav = navigate_pane_ref.clone();
+        move || {
+            let paths = if act.get() == ActivePane::Left {
+                left.selected_paths.borrow().clone()
+            } else {
+                right
+                    .borrow()
+                    .as_ref()
+                    .map(|r| r.selected_paths.borrow().clone())
+                    .unwrap_or_default()
+            };
+            if !paths.is_empty() {
+                let current_path = session.borrow().active_tab().current_path.clone();
+                let is_trash = babydra_ui_kit::components::explore::is_in_trash(&current_path);
+                let nav_c = nav.clone();
+                let act_c = act.clone();
+                glib::spawn_future_local(async move {
+                    for p in paths {
+                        if is_trash {
+                            let _ = babydra_core::delete_path(p).await;
+                        } else {
+                            let _ = babydra_core::send_to_trash(p).await;
+                        }
+                    }
+                    if let Some(ref f) = *nav_c.borrow() {
+                        f(act_c.get(), current_path);
+                    }
+                });
+            }
+        }
+    };
+
+    let permanent_delete_cb = {
+        let left = left_content_handle.clone();
+        let right = right_content_handle.clone();
+        let act = active_pane.clone();
+        let session = session.clone();
+        let nav = navigate_pane_ref.clone();
+        move || {
+            let paths = if act.get() == ActivePane::Left {
+                left.selected_paths.borrow().clone()
+            } else {
+                right
+                    .borrow()
+                    .as_ref()
+                    .map(|r| r.selected_paths.borrow().clone())
+                    .unwrap_or_default()
+            };
+            if !paths.is_empty() {
+                let current_path = session.borrow().active_tab().current_path.clone();
+                let nav_c = nav.clone();
+                let act_c = act.clone();
+                glib::spawn_future_local(async move {
+                    for p in paths {
+                        let _ = babydra_core::delete_path(p).await;
+                    }
+                    if let Some(ref f) = *nav_c.borrow() {
+                        f(act_c.get(), current_path);
+                    }
+                });
+            }
+        }
+    };
+
+    let select_all_cb = {
+        let left = left_content_handle.clone();
+        let right = right_content_handle.clone();
+        let act = active_pane.clone();
+        move || {
+            if act.get() == ActivePane::Left {
+                crate::widgets::content_view::select_all_items(&left);
+            } else if let Some(ref r) = *right.borrow() {
+                crate::widgets::content_view::select_all_items(r);
+            }
+        }
+    };
+
     ClipboardCallbacks {
         cut: Rc::new(cut_cb),
         copy: Rc::new(copy_cb),
         paste: Rc::new(paste_cb),
         undo: Rc::new(undo_cb),
+        delete: Rc::new(delete_cb),
+        permanent_delete: Rc::new(permanent_delete_cb),
+        select_all: Rc::new(select_all_cb),
     }
 }
