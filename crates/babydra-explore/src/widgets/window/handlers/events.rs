@@ -126,6 +126,7 @@ pub fn setup_dbus_receiver(
     let win_c = window.clone();
     glib::MainContext::default().spawn_local(async move {
         while let Some((path, focus)) = dbus_rx.recv().await {
+            tracing::info!("setup_dbus_receiver received path: {:?}, focus: {:?}", path, focus);
             *focus_item_c.borrow_mut() = focus;
             if let Some(ref f) = *navigate_pane_no_watch_ref.borrow() {
                 f(active_pane.get(), path);
@@ -136,7 +137,7 @@ pub fn setup_dbus_receiver(
 
     tokio::spawn(async move {
         if let Err(e) = babydra_core::start_dbus_service(dbus_tx).await {
-            eprintln!("Failed to start D-Bus service: {}", e);
+            tracing::error!("Failed to start D-Bus service: {}", e);
         }
     });
 }

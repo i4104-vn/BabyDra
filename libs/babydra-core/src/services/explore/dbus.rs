@@ -8,6 +8,7 @@ pub struct ExploreDbusService {
 #[interface(name = "org.babydra.Explore")]
 impl ExploreDbusService {
     async fn show_folder(&self, path: String) -> zbus::fdo::Result<()> {
+        tracing::info!("ExploreDbusService.show_folder called with path: {}", path);
         let (target_dir, focus_item) = crate::services::explore::resolve_target_from_uri(&path);
         let _ = self.nav_tx.send((target_dir, focus_item));
         Ok(())
@@ -21,6 +22,7 @@ pub struct FileManager1Service {
 #[interface(name = "org.freedesktop.FileManager1")]
 impl FileManager1Service {
     async fn show_folders(&self, uris: Vec<String>, _startup_id: String) -> zbus::fdo::Result<()> {
+        tracing::info!("FileManager1Service.show_folders called with uris: {:?}", uris);
         for uri in uris {
             let (target_dir, focus_item) = crate::services::explore::resolve_target_from_uri(&uri);
             if self.nav_tx.send((target_dir.clone(), focus_item.clone())).is_err() {
@@ -37,6 +39,7 @@ impl FileManager1Service {
     }
 
     async fn show_items(&self, uris: Vec<String>, _startup_id: String) -> zbus::fdo::Result<()> {
+        tracing::info!("FileManager1Service.show_items called with uris: {:?}", uris);
         for uri in uris {
             let (target_dir, focus_item) = crate::services::explore::resolve_target_from_uri(&uri);
             if self.nav_tx.send((target_dir.clone(), focus_item.clone())).is_err() {
@@ -57,6 +60,7 @@ impl FileManager1Service {
         uris: Vec<String>,
         _startup_id: String,
     ) -> zbus::fdo::Result<()> {
+        tracing::info!("FileManager1Service.show_item_properties called with uris: {:?}", uris);
         for uri in uris {
             let (target_dir, focus_item) = crate::services::explore::resolve_target_from_uri(&uri);
             if self.nav_tx.send((target_dir.clone(), focus_item.clone())).is_err() {

@@ -51,15 +51,25 @@ pub fn setup_navigation(
 
         *navigate_pane_no_watch_ref.borrow_mut() =
             Some(Rc::new(move |pane: ActivePane, path: PathBuf| {
-                // Debounce rapid identical navigation triggers (< 200ms)
+                // Debounce rapid identical navigation triggers (< 200ms) unless a focus item is pending
                 let now = std::time::Instant::now();
-                if let Some(ref last_p) = *last_nav_path.borrow() {
-                    if last_p == &path && now.duration_since(*last_nav_time.borrow()).as_millis() < 200 {
-                        return;
+                let has_focus = focus_item_cell.borrow().is_some();
+                if !has_focus {
+                    if let Some(ref last_p) = *last_nav_path.borrow() {
+                        if last_p == &path && now.duration_since(*last_nav_time.borrow()).as_millis() < 200 {
+                            return;
+                        }
                     }
                 }
                 *last_nav_time.borrow_mut() = now;
                 *last_nav_path.borrow_mut() = Some(path.clone());
+
+                tracing::info!(
+                    "navigate_pane: pane={:?}, path={:?}, pending_focus={:?}",
+                    pane,
+                    path,
+                    *focus_item_cell.borrow()
+                );
 
                 // Highlight active pane
                 active_pane.set(pane);
@@ -114,6 +124,11 @@ pub fn setup_navigation(
                 glib::spawn_future_local(async move {
                     match babydra_core::load_directory(path.clone(), show_hidden).await {
                         Ok(entries) => {
+                            if session_c.borrow().active_tab().current_path != path {
+                                tracing::info!("discarding outdated load_directory result for {:?}", path);
+                                return;
+                            }
+
                             if let Some(ref handle) = content_handle {
                                 let nav_cb: Rc<dyn Fn(PathBuf)> = Rc::new(move |p: PathBuf| {
                                     if let Some(ref f) = *nav_no_watch_c.borrow() {
@@ -133,7 +148,25 @@ pub fn setup_navigation(
                             let total_size: u64 = entries.iter().map(|e| e.size).sum();
 
                             if let Some(ref handle) = content_handle {
-                                if let Some(focus_path) = focus_item_cell_c.borrow_mut().take() {
+                                let focus_opt = {
+                                    let mut cell = focus_item_cell_c.borrow_mut();
+                                    if let Some(ref fp) = *cell {
+                                        if fp.parent() == Some(&path) || fp == &path {
+                                            cell.take()
+                                        } else {
+                                            None
+                                        }
+                                    } else {
+                                        None
+                                    }
+                                };
+                                tracing::info!(
+                                    "directory loaded: {:?}, entries count={}, applying focus={:?}",
+                                    path,
+                                    entries.len(),
+                                    focus_opt
+                                );
+                                if let Some(focus_path) = focus_opt {
                                     *handle.selected_paths.borrow_mut() = vec![focus_path.clone()];
                                     (handle.selection_callback)(vec![focus_path]);
                                 } else {
