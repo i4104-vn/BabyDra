@@ -14,20 +14,32 @@ pub fn run_playerctl(args: &[&str]) -> Option<String> {
     None
 }
 
-/// Decodes %-encoded (URL-encoded) string characters back into standard text.
+/// Decodes %-encoded (URL-encoded) string characters back into standard text with full UTF-8 support.
 pub fn decode_uri(uri: &str) -> String {
-    let mut decoded = String::new();
-    let mut chars = uri.chars();
-    while let Some(c) = chars.next() {
-        if c == '%' {
-            if let (Some(h1), Some(h2)) = (chars.next(), chars.next()) {
-                if let Some(hex) = u8::from_str_radix(&format!("{}{}", h1, h2), 16).ok() {
-                    decoded.push(hex as char);
-                    continue;
+    let mut bytes = Vec::new();
+    let mut bytes_iter = uri.as_bytes().iter();
+    while let Some(&b) = bytes_iter.next() {
+        if b == b'%' {
+            let mut hex = Vec::with_capacity(2);
+            if let Some(&h1) = bytes_iter.next() {
+                hex.push(h1);
+            }
+            if let Some(&h2) = bytes_iter.next() {
+                hex.push(h2);
+            }
+            if hex.len() == 2 {
+                if let Ok(s) = std::str::from_utf8(&hex) {
+                    if let Ok(val) = u8::from_str_radix(s, 16) {
+                        bytes.push(val);
+                        continue;
+                    }
                 }
             }
+            bytes.push(b'%');
+            bytes.extend(hex);
+        } else {
+            bytes.push(b);
         }
-        decoded.push(c);
     }
-    decoded
+    String::from_utf8_lossy(&bytes).to_string()
 }

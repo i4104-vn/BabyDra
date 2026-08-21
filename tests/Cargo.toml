@@ -68,6 +68,10 @@ name = "services_display"
 path = "services/display.rs"
 
 [[test]]
+name = "services_explore_uri"
+path = "services/explore_uri.rs"
+
+[[test]]
 name = "theme_engine"
 path = "theme/engine.rs"
 

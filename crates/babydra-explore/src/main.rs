@@ -30,26 +30,14 @@ fn main() {
 
         if let Some(file) = files.first() {
             if let Some(path) = file.path() {
-                if path.is_dir() {
-                    target_dir = path;
-                } else if path.is_file() {
-                    if let Some(parent) = path.parent() {
-                        target_dir = parent.to_path_buf();
-                        focus_item = Some(path);
-                    }
-                }
+                let (dir, focus) = babydra_core::services::explore::resolve_target_from_path(&path);
+                target_dir = dir;
+                focus_item = focus;
             } else {
                 let uri = file.uri();
-                let decoded = babydra_core::mpris::decode_uri(&uri.as_str().replace("file://", ""));
-                let path = std::path::PathBuf::from(decoded);
-                if path.is_dir() {
-                    target_dir = path;
-                } else if path.is_file() {
-                    if let Some(parent) = path.parent() {
-                        target_dir = parent.to_path_buf();
-                        focus_item = Some(path);
-                    }
-                }
+                let (dir, focus) = babydra_core::services::explore::resolve_target_from_uri(uri.as_str());
+                target_dir = dir;
+                focus_item = focus;
             }
         }
 
