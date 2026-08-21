@@ -8,7 +8,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 /// Reads selected UI values from card rows and persists updated monitor configurations
-fn save_display_configs(monitors: &[MonitorConfig], card_rows: &[DisplayCardRow]) {
+fn save_display_configs(monitors: &[MonitorConfig], card_rows: &[DisplayCardRow]) -> Vec<MonitorConfig> {
     let mut current_monitors = monitors.to_vec();
     for (i, row) in card_rows.iter().enumerate() {
         if let Some(mon) = current_monitors.get_mut(i) {
@@ -40,7 +40,13 @@ fn save_display_configs(monitors: &[MonitorConfig], card_rows: &[DisplayCardRow]
         }
     }
 
-    let _ = babydra_core::services::system::display::save_displays(&current_monitors);
+    if babydra_core::services::system::display::save_displays(&current_monitors).is_ok() {
+        let title = babydra_core::i18n::trans("settings.notif_displays_saved_title");
+        let msg = babydra_core::i18n::trans("settings.notif_displays_saved_msg");
+        babydra_core::send_settings_notif(&title, &msg);
+    }
+
+    current_monitors
 }
 
 /// Creates the display settings widget with event bindings
@@ -70,8 +76,9 @@ pub fn create_displays() -> Widget {
             let monitors_c = monitors_rc.clone();
             let card_rows_c = card_rows_rc.clone();
             new_widget.save_btn.connect_clicked(move |_| {
-                let monitors = monitors_c.borrow();
-                save_display_configs(&monitors, &card_rows_c);
+                let current = monitors_c.borrow().clone();
+                let updated = save_display_configs(&current, &card_rows_c);
+                *monitors_c.borrow_mut() = updated;
             });
 
             new_widget.refresh_btn.connect_clicked(move |b| {

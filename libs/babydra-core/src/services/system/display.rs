@@ -148,27 +148,8 @@ pub fn get_displays() -> Vec<MonitorConfig> {
     monitors
 }
 
-/// Saves monitor configurations into babydra.conf and applies changes via wlr-randr.
-pub fn save_displays(monitors: &[MonitorConfig]) -> CoreResult<()> {
-    // 1. Save monitor settings into unified babydra.conf
-    let mut conf = crate::config::load_babydra_config();
-    conf.display.monitors = monitors
-        .iter()
-        .map(|m| crate::config::settings::DisplayMonitorSetting {
-            name: m.name.clone(),
-            resolution_width: m.resolution_width,
-            resolution_height: m.resolution_height,
-            refresh_rate: m.refresh_rate,
-            position_x: m.position_x,
-            position_y: m.position_y,
-            orientation: m.orientation.clone(),
-            enabled: m.enabled,
-            scale: 1.0,
-        })
-        .collect();
-    crate::config::save_babydra_config(&conf);
-
-    // 2. Apply via wlr-randr immediately
+/// Applies display configurations directly via wlr-randr.
+pub fn apply_display_configs(monitors: &[MonitorConfig]) -> CoreResult<()> {
     let wlr_json_val: Option<serde_json::Value> = Command::new("wlr-randr")
         .arg("--json")
         .output()
@@ -223,7 +204,7 @@ pub fn save_displays(monitors: &[MonitorConfig]) -> CoreResult<()> {
                                 }
                                 if let Some((_, exact_refresh)) = best_match {
                                     exact_mode_str = Some(format!(
-                                        "{}x{}@{}",
+                                        "{}x{}@{}Hz",
                                         m.resolution_width, m.resolution_height, exact_refresh
                                     ));
                                 }
@@ -234,10 +215,17 @@ pub fn save_displays(monitors: &[MonitorConfig]) -> CoreResult<()> {
             }
 
             let mode_arg = exact_mode_str.unwrap_or_else(|| {
-                format!(
-                    "{}x{}@{:.1}",
-                    m.resolution_width, m.resolution_height, m.refresh_rate
-                )
+                if (m.refresh_rate.fract()).abs() < 0.001 {
+                    format!(
+                        "{}x{}@{:.0}Hz",
+                        m.resolution_width, m.resolution_height, m.refresh_rate
+                    )
+                } else {
+                    format!(
+                        "{}x{}@{:.3}Hz",
+                        m.resolution_width, m.resolution_height, m.refresh_rate
+                    )
+                }
             });
 
             let output = Command::new("wlr-randr")
@@ -264,7 +252,7 @@ pub fn save_displays(monitors: &[MonitorConfig]) -> CoreResult<()> {
 
             if !success {
                 let fallback_mode_str = format!(
-                    "{}x{}@{:.1}",
+                    "{}x{}@{:.0}Hz",
                     m.resolution_width, m.resolution_height, m.refresh_rate
                 );
                 let output2 = Command::new("wlr-randr")
@@ -310,6 +298,30 @@ pub fn save_displays(monitors: &[MonitorConfig]) -> CoreResult<()> {
     Ok(())
 }
 
+/// Saves monitor configurations into babydra.conf and applies changes via wlr-randr.
+pub fn save_displays(monitors: &[MonitorConfig]) -> CoreResult<()> {
+    // 1. Save monitor settings into unified babydra.conf
+    let mut conf = crate::config::load_babydra_config();
+    conf.display.monitors = monitors
+        .iter()
+        .map(|m| crate::config::settings::DisplayMonitorSetting {
+            name: m.name.clone(),
+            resolution_width: m.resolution_width,
+            resolution_height: m.resolution_height,
+            refresh_rate: m.refresh_rate,
+            position_x: m.position_x,
+            position_y: m.position_y,
+            orientation: m.orientation.clone(),
+            enabled: m.enabled,
+            scale: 1.0,
+        })
+        .collect();
+    crate::config::save_babydra_config(&conf);
+
+    // 2. Apply via wlr-randr immediately
+    apply_display_configs(monitors)
+}
+
 /// Reads saved monitor configurations from babydra.conf and applies them via wlr-randr.
 pub fn apply_saved_displays() {
     let conf = crate::config::load_babydra_config();
@@ -339,5 +351,6 @@ pub fn apply_saved_displays() {
         })
         .collect();
 
-    let _ = save_displays(&monitors);
+    let _ = apply_display_configs(&monitors);
 }
+

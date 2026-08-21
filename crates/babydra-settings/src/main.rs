@@ -72,6 +72,11 @@ fn handle_cli_args() -> (bool, Option<String>) {
             babydra_core::apply_saved_settings();
             println!("All saved settings applied successfully.");
             return (true, None);
+        } else if arg == "--apply-displays" || arg == "--apply-display" {
+            println!("Applying saved display settings...");
+            babydra_core::services::system::display::apply_saved_displays();
+            println!("Saved display settings applied successfully.");
+            return (true, None);
         } else if arg == "--sync-greeter-wallpaper" {
             println!("Syncing greeter wallpaper to world-readable system path...");
             babydra_core::apply_greeter_wp();

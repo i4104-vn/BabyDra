@@ -166,6 +166,8 @@
   "settings.orientation_right": "Phải (270°)",
   "settings.notif_theme_title": "Giao diện hệ thống",
   "settings.notif_theme_msg": "Đã áp dụng GTK: {gtk}, Icon: {icon}",
+  "settings.notif_displays_saved_title": "Cài đặt màn hình",
+  "settings.notif_displays_saved_msg": "Đã lưu và áp dụng cấu hình màn hình",
   "settings.notif_display_mode_title": "Chế độ hiển thị",
   "settings.notif_dark_mode_enabled": "Đã chuyển sang Chế độ Tối (Dark Mode)",
   "settings.notif_light_mode_enabled": "Đã chuyển sang Chế độ Sáng (Light Mode)",

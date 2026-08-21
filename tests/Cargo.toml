@@ -64,6 +64,10 @@ name = "services_updates"
 path = "services/updates.rs"
 
 [[test]]
+name = "services_display"
+path = "services/display.rs"
+
+[[test]]
 name = "theme_engine"
 path = "theme/engine.rs"
 

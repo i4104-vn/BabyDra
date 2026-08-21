@@ -117,3 +117,31 @@ fn babydra_config_toml_roundtrip() {
     assert_eq!(decoded.power.profile, "performance");
     assert!(decoded.notification.dnd);
 }
+
+#[test]
+fn display_config_toml_roundtrip() {
+    use babydra_core::config::settings::DisplayMonitorSetting;
+    let mut original = BabyDraConfig::default();
+    original.display.monitors.push(DisplayMonitorSetting {
+        name: "HDMI-A-1".to_string(),
+        resolution_width: 1920,
+        resolution_height: 1080,
+        refresh_rate: 100.0,
+        position_x: 0,
+        position_y: 0,
+        orientation: "normal".to_string(),
+        enabled: true,
+        scale: 1.0,
+    });
+
+    let encoded_pretty = toml::to_string_pretty(&original).expect("serialize pretty");
+    println!("ENCODED PRETTY:\n{}", encoded_pretty);
+
+    let decoded: BabyDraConfig = toml::from_str(&encoded_pretty).expect("deserialize pretty");
+    assert_eq!(decoded.display.monitors.len(), 1);
+    assert_eq!(decoded.display.monitors[0].name, "HDMI-A-1");
+    assert_eq!(decoded.display.monitors[0].resolution_width, 1920);
+    assert_eq!(decoded.display.monitors[0].resolution_height, 1080);
+    assert_eq!(decoded.display.monitors[0].refresh_rate, 100.0);
+}
+
