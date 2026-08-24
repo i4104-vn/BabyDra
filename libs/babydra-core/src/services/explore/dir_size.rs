@@ -9,6 +9,9 @@ lazy_static::lazy_static! {
     static ref DIR_SIZE_CACHE: RwLock<FxHashMap<PathBuf, (u64, Instant)>> = RwLock::new(FxHashMap::default());
 }
 
+/// Maximum number of cached directory sizes before stale entries are evicted.
+const DIR_SIZE_CACHE_CAP: usize = 512;
+
 /// Calculates the size of a directory and all its subdirectories in parallel using Rayon.
 /// Caches the results with a 60-second Time-To-Live (TTL).
 pub fn calc_dir_size(path: &Path) -> u64 {
@@ -38,8 +41,14 @@ pub fn calc_dir_size(path: &Path) -> u64 {
         })
         .sum();
 
-    // 3. Write to the cache
+    // 3. Write to the cache, evicting expired entries once the cap is reached
     if let Ok(mut cache) = DIR_SIZE_CACHE.write() {
+        if cache.len() >= DIR_SIZE_CACHE_CAP {
+            cache.retain(|_, (_, timestamp)| timestamp.elapsed() < Duration::from_secs(60));
+        }
+        if cache.len() >= DIR_SIZE_CACHE_CAP {
+            cache.clear();
+        }
         cache.insert(path_buf, (total_size, Instant::now()));
     }
 
