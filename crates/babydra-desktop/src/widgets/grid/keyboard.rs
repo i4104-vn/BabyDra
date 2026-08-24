@@ -3,7 +3,7 @@
 use crate::state::DesktopState;
 use crate::widgets::icon::launch_entry;
 use crate::widgets::selection::update_icon_sel;
-use babydra_ui_kit::components::explore::prelude::*;
+use babydra_ui_kit::components::explore::*;
 use gtk4::prelude::*;
 use gtk4::{EventControllerKey, Fixed};
 use std::cell::RefCell;

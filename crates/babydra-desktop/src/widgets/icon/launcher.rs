@@ -54,7 +54,7 @@ pub fn launch_entry(entry: &FileEntry) {
         }
     }
 
-    babydra_ui_kit::components::explore::prelude::launch_file_or_open_with(
+    babydra_ui_kit::components::explore::launch_file_or_open_with(
         &entry.path,
         None::<&gtk4::Window>,
     );

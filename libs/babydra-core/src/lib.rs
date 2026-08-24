@@ -12,10 +12,7 @@ pub use services::logger;
 pub use services::logger::{get_log_dir, get_log_path};
 
 // Re-export models for convenient flat access
-pub use models::explore::{
-    get_group_name, ActivePane, DirectoryModel, FileEntry, FileType, SessionState, SortColumn,
-    SortOrder, TabState,
-};
+pub use models::explore::{get_group_name, ActivePane, FileEntry, FileType, SessionState, TabState};
 
 // Flat re-exports at root for convenience and backward compatibility
 pub use config::{

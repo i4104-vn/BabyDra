@@ -54,7 +54,7 @@ pub fn wire_listbox_ctrls(
                 if matches!(entry.file_type, babydra_core::FileType::Directory) {
                     nav(entry.path.clone());
                 } else {
-                    babydra_ui_kit::components::explore::prelude::launch_file_or_open_with(
+                    babydra_ui_kit::components::explore::launch_file_or_open_with(
                         &entry.path,
                         None::<&gtk4::Window>,
                     );
@@ -66,7 +66,7 @@ pub fn wire_listbox_ctrls(
                         if matches!(entry.file_type, babydra_core::FileType::Directory) {
                             nav(entry.path.clone());
                         } else {
-                            babydra_ui_kit::components::explore::prelude::launch_file_or_open_with(
+                            babydra_ui_kit::components::explore::launch_file_or_open_with(
                                 &entry.path,
                                 None::<&gtk4::Window>,
                             );
@@ -95,7 +95,7 @@ pub fn wire_listbox_ctrls(
                         if matches!(entry.file_type, babydra_core::FileType::Directory) {
                             nav(entry.path.clone());
                         } else {
-                            babydra_ui_kit::components::explore::prelude::launch_file_or_open_with(
+                            babydra_ui_kit::components::explore::launch_file_or_open_with(
                                 &entry.path,
                                 None::<&gtk4::Window>,
                             );

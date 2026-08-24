@@ -41,9 +41,7 @@ pub use shell::volume;
 pub use config::*;
 
 // Direct type re-exports
-pub use explore::{
-    DirectoryModel, FileEntry, FileType, SessionState, SortColumn, SortOrder, TabState,
-};
+pub use explore::{FileEntry, FileType, SessionState, TabState};
 pub use screenshot::{Drawing, EditorState, Tool, STROKE_WIDTHS};
 pub use settings::*;
 pub use shell::*;

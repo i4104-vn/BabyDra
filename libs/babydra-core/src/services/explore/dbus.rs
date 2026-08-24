@@ -18,19 +18,25 @@ pub struct FileManager1Service {
     nav_tx: tokio::sync::mpsc::UnboundedSender<(PathBuf, Option<PathBuf>)>,
 }
 
+/// Opens the target in a new explore process when the in-process channel is
+/// unavailable (e.g. no window running yet).
+fn open_in_new_process(target_dir: PathBuf, focus_item: Option<PathBuf>) {
+    let mut cmd = std::process::Command::new("babydra-explore");
+    if let Some(focus) = focus_item {
+        cmd.arg(focus);
+    } else {
+        cmd.arg(target_dir);
+    }
+    let _ = cmd.spawn();
+}
+
 #[interface(name = "org.freedesktop.FileManager1")]
 impl FileManager1Service {
     async fn show_folders(&self, uris: Vec<String>, _startup_id: String) -> zbus::fdo::Result<()> {
         for uri in uris {
             let (target_dir, focus_item) = crate::services::explore::resolve_target_from_uri(&uri);
             if self.nav_tx.send((target_dir.clone(), focus_item.clone())).is_err() {
-                let mut cmd = std::process::Command::new("babydra-explore");
-                if let Some(focus) = focus_item {
-                    cmd.arg(focus);
-                } else {
-                    cmd.arg(target_dir);
-                }
-                let _ = cmd.spawn();
+                open_in_new_process(target_dir, focus_item);
             }
         }
         Ok(())
@@ -40,13 +46,7 @@ impl FileManager1Service {
         for uri in uris {
             let (target_dir, focus_item) = crate::services::explore::resolve_target_from_uri(&uri);
             if self.nav_tx.send((target_dir.clone(), focus_item.clone())).is_err() {
-                let mut cmd = std::process::Command::new("babydra-explore");
-                if let Some(focus) = focus_item {
-                    cmd.arg(focus);
-                } else {
-                    cmd.arg(target_dir);
-                }
-                let _ = cmd.spawn();
+                open_in_new_process(target_dir, focus_item);
             }
         }
         Ok(())
@@ -60,13 +60,7 @@ impl FileManager1Service {
         for uri in uris {
             let (target_dir, focus_item) = crate::services::explore::resolve_target_from_uri(&uri);
             if self.nav_tx.send((target_dir.clone(), focus_item.clone())).is_err() {
-                let mut cmd = std::process::Command::new("babydra-explore");
-                if let Some(focus) = focus_item {
-                    cmd.arg(focus);
-                } else {
-                    cmd.arg(target_dir);
-                }
-                let _ = cmd.spawn();
+                open_in_new_process(target_dir, focus_item);
             }
         }
         Ok(())
