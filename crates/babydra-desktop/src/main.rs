@@ -26,6 +26,9 @@ fn main() {
         // Apply saved display monitor settings (resolution, refresh rate, orientation)
         babydra_core::services::system::display::apply_saved_displays();
 
+        // Refresh the shared greeter assets (lock wallpaper, avatar) for greetd
+        std::thread::spawn(babydra_core::sync_shared_assets);
+
         // Sync system color-scheme changes (GSettings) to GTK settings in real-time
         let gsettings = gtk4::gio::Settings::new("org.gnome.desktop.interface");
         gsettings.connect_changed(Some("color-scheme"), |_, _| {

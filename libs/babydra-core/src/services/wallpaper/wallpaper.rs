@@ -302,3 +302,51 @@ pub fn get_greeter_wp_css() -> String {
 
     "url('file:///usr/share/babydra/wallpaper.png')".to_string()
 }
+
+/// Refreshes the shared `/var/lib/babydra` copies of the lock wallpaper and
+/// avatar so the greeter (which runs as the `greeter` user and cannot read the
+/// session user's home) always sees the current assets after a reboot.
+/// Called once when the desktop session starts.
+pub fn sync_shared_assets() {
+    let shared_dir = PathBuf::from("/var/lib/babydra");
+    if std::fs::create_dir_all(&shared_dir).is_err() {
+        return;
+    }
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let _ = std::fs::set_permissions(&shared_dir, std::fs::Permissions::from_mode(0o777));
+    }
+
+    let sync = |src: Option<PathBuf>, dest: PathBuf| {
+        let Some(src) = src else { return };
+        if !src.is_file() {
+            return;
+        }
+        // Skip when the shared copy is already up to date
+        if let (Ok(a), Ok(b)) = (std::fs::metadata(&src), std::fs::metadata(&dest)) {
+            if let (Ok(a), Ok(b)) = (a.modified(), b.modified()) {
+                if a <= b {
+                    return;
+                }
+            }
+        }
+        if std::fs::copy(&src, &dest).is_ok() {
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                let _ = std::fs::set_permissions(&dest, std::fs::Permissions::from_mode(0o666));
+            }
+        }
+    };
+
+    let home = dirs::home_dir();
+    sync(
+        home.as_ref().map(|h| h.join(".babydra/lock_wallpaper.bb")),
+        shared_dir.join("lock_wallpaper.bb"),
+    );
+    sync(
+        home.as_ref().map(|h| h.join(".babydra/avatar.bb")),
+        shared_dir.join("avatar_fallback.bb"),
+    );
+}
