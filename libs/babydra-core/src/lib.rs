@@ -70,8 +70,8 @@ pub use services::tray;
 pub use services::wallpaper;
 pub use services::wallpaper::{
     apply_greeter_wp, apply_wallpaper, get_avatar_bytes, get_avatar_path, get_greeter_wp,
-    get_greeter_wp_bytes, get_greeter_wp_css, get_wallpaper, set_avatar, set_greeter_wp,
-    set_wallpaper,
+    get_greeter_wp_bytes, get_greeter_wp_css, get_wallpaper, read_image_bytes, set_avatar,
+    set_greeter_wp, set_wallpaper,
 };
 pub use services::window;
 
