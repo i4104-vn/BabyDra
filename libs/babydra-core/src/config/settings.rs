@@ -99,8 +99,12 @@ pub fn invalidate_cache() {
     }
 }
 
-/// Loads `explore settings` from `~/.babydra/configs/explore.json`.
-pub fn load_explore_cfg() -> ExploreSettings {
+/// In-memory cache for `explore.json` so hot paths (clicks, renders, renders
+/// per flowbox) do not re-read and re-parse the file from disk every call.
+static EXPLORE_CFG_CACHE: std::sync::OnceLock<std::sync::RwLock<Option<ExploreSettings>>> =
+    std::sync::OnceLock::new();
+
+fn load_explore_cfg_from_disk() -> ExploreSettings {
     let path = crate::config::get_config_dir().join("explore.json");
     if let Ok(content) = std::fs::read_to_string(&path) {
         if let Ok(mut settings) = serde_json::from_str::<ExploreSettings>(&content) {
@@ -122,8 +126,31 @@ pub fn load_explore_cfg() -> ExploreSettings {
     s
 }
 
+/// Loads `explore settings` from `~/.babydra/configs/explore.json` (cached in memory).
+pub fn load_explore_cfg() -> ExploreSettings {
+    let cache = EXPLORE_CFG_CACHE.get_or_init(|| std::sync::RwLock::new(None));
+    if let Ok(guard) = cache.read() {
+        if let Some(settings) = guard.as_ref() {
+            return settings.clone();
+        }
+    }
+
+    let settings = load_explore_cfg_from_disk();
+    if let Ok(mut guard) = cache.write() {
+        *guard = Some(settings.clone());
+    }
+    settings
+}
+
 /// Persists `explore settings` directly to `~/.babydra/configs/explore.json`.
 pub fn save_explore_cfg(settings: &ExploreSettings) {
+    if let Ok(mut guard) = EXPLORE_CFG_CACHE
+        .get_or_init(|| std::sync::RwLock::new(None))
+        .write()
+    {
+        *guard = Some(settings.clone());
+    }
+
     let path = crate::config::get_config_dir().join("explore.json");
     if let Some(parent) = path.parent() {
         let _ = std::fs::create_dir_all(parent);
