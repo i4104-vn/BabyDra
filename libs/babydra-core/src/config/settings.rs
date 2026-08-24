@@ -18,8 +18,15 @@ pub fn get_conf_path() -> PathBuf {
         .join("babydra.conf")
 }
 
-static CONFIG_CACHE: std::sync::OnceLock<std::sync::RwLock<BabyDraConfig>> =
-    std::sync::OnceLock::new();
+static CONFIG_CACHE: std::sync::OnceLock<
+    std::sync::RwLock<Option<(Option<std::time::SystemTime>, BabyDraConfig)>>,
+> = std::sync::OnceLock::new();
+
+fn conf_mtime() -> Option<std::time::SystemTime> {
+    std::fs::metadata(get_conf_path())
+        .and_then(|m| m.modified())
+        .ok()
+}
 
 fn load_from_disk() -> BabyDraConfig {
     let path = get_conf_path();
@@ -67,20 +74,28 @@ fn load_from_disk() -> BabyDraConfig {
     config
 }
 
-/// Loads `babydra config`.
+/// Loads `babydra config` (cached; the disk is only re-read when the file mtime changes).
 pub fn load_babydra_config() -> BabyDraConfig {
-    let cache = CONFIG_CACHE.get_or_init(|| std::sync::RwLock::new(load_from_disk()));
-    cache.read().unwrap().clone()
+    let cache = CONFIG_CACHE.get_or_init(|| std::sync::RwLock::new(None));
+    {
+        let guard = cache.read().unwrap();
+        if let Some((mtime, config)) = guard.as_ref() {
+            if *mtime == conf_mtime() {
+                return config.clone();
+            }
+        }
+    }
+
+    let mtime = conf_mtime();
+    let config = load_from_disk();
+    if let Ok(mut guard) = cache.write() {
+        *guard = Some((mtime, config.clone()));
+    }
+    config
 }
 
 /// Persists `babydra config`.
 pub fn save_babydra_config(config: &BabyDraConfig) {
-    if let Some(cache) = CONFIG_CACHE.get() {
-        if let Ok(mut guard) = cache.write() {
-            *guard = config.clone();
-        }
-    }
-
     let path = get_conf_path();
     if let Some(parent) = path.parent() {
         let _ = std::fs::create_dir_all(parent);
@@ -88,14 +103,22 @@ pub fn save_babydra_config(config: &BabyDraConfig) {
     if let Ok(content) = toml::to_string_pretty(config) {
         let _ = std::fs::write(&path, content);
     }
+
+    if let Ok(mut guard) = CONFIG_CACHE
+        .get_or_init(|| std::sync::RwLock::new(None))
+        .write()
+    {
+        *guard = Some((conf_mtime(), config.clone()));
+    }
 }
 
-/// Invalidate config cache.
+/// Invalidate config cache (forces the next load to re-read from disk).
 pub fn invalidate_cache() {
-    if let Some(cache) = CONFIG_CACHE.get() {
-        if let Ok(mut guard) = cache.write() {
-            *guard = load_from_disk();
-        }
+    if let Ok(mut guard) = CONFIG_CACHE
+        .get_or_init(|| std::sync::RwLock::new(None))
+        .write()
+    {
+        *guard = None;
     }
 }
 
