@@ -17,7 +17,9 @@ pub fn create_info_panel() -> (ScrolledWindow, InfoPanelWidgets) {
 pub fn clear_info_panel(widgets: &InfoPanelWidgets) {
     preview_panel::clear_preview(&widgets.preview_widgets);
     widgets.stack.set_visible_child_name("image_icon");
-    widgets.img_preview_icon.set_icon_name(Some("text-x-generic"));
+    widgets
+        .img_preview_icon
+        .set_icon_name(Some("text-x-generic"));
     widgets.lbl_name.set_text("--");
     widgets.lbl_type.set_text("--");
     widgets.lbl_size.set_text("--");

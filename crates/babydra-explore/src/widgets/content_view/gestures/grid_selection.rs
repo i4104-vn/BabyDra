@@ -153,6 +153,4 @@ pub fn wire_grid_ctrls(
         });
         flowbox.add_controller(key_controller);
     }
-
-
 }

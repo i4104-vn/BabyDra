@@ -192,7 +192,11 @@ pub fn wire_content_nav(
         let tab_c = tab.clone();
         let nav_c = nav_cb.clone();
         widgets.btn_up.connect_clicked(move |_| {
-            let parent = tab_c.borrow().current_path.parent().map(|p| p.to_path_buf());
+            let parent = tab_c
+                .borrow()
+                .current_path
+                .parent()
+                .map(|p| p.to_path_buf());
             if let Some(parent) = parent {
                 nav_c(parent);
             }

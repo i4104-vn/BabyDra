@@ -35,7 +35,8 @@ fn main() {
                 focus_item = focus;
             } else {
                 let uri = file.uri();
-                let (dir, focus) = babydra_core::services::explore::resolve_target_from_uri(uri.as_str());
+                let (dir, focus) =
+                    babydra_core::services::explore::resolve_target_from_uri(uri.as_str());
                 target_dir = dir;
                 focus_item = focus;
             }

@@ -46,7 +46,9 @@ pub fn setup_navigation(
         let navigate_pane_no_watch_ref_c = navigate_pane_no_watch_ref.clone();
         let rebuild_tabs_cell_c = rebuild_tabs_cell.clone();
 
-        let last_nav_time = Rc::new(RefCell::new(std::time::Instant::now() - std::time::Duration::from_secs(1)));
+        let last_nav_time = Rc::new(RefCell::new(
+            std::time::Instant::now() - std::time::Duration::from_secs(1),
+        ));
         let last_nav_path = Rc::new(RefCell::new(None::<PathBuf>));
 
         *navigate_pane_no_watch_ref.borrow_mut() =
@@ -56,7 +58,9 @@ pub fn setup_navigation(
                 let has_focus = focus_item_cell.borrow().is_some();
                 if !has_focus {
                     if let Some(ref last_p) = *last_nav_path.borrow() {
-                        if last_p == &path && now.duration_since(*last_nav_time.borrow()).as_millis() < 200 {
+                        if last_p == &path
+                            && now.duration_since(*last_nav_time.borrow()).as_millis() < 200
+                        {
                             return;
                         }
                     }
@@ -92,10 +96,7 @@ pub fn setup_navigation(
 
                 // Record navigation in both the window-level session tab and the
                 // pane's own history so back/forward stay consistent everywhere.
-                session
-                    .borrow_mut()
-                    .active_tab_mut()
-                    .current_path = path.clone();
+                session.borrow_mut().active_tab_mut().current_path = path.clone();
 
                 if let Some(ref handle) = content_handle {
                     handle.widgets.progress_bar.set_visible(true);

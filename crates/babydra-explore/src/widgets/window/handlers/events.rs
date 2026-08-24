@@ -188,7 +188,11 @@ pub fn setup_status_wiring(
             let freed = babydra_core::remove_trash();
             let size_str = babydra_ui_kit::components::explore::format_size(freed);
             let notif_title = babydra_core::i18n::trans("explore.trash");
-            let notif_msg = format!("{}: {}", babydra_core::i18n::trans("clean.emptying_trash"), size_str);
+            let notif_msg = format!(
+                "{}: {}",
+                babydra_core::i18n::trans("clean.emptying_trash"),
+                size_str
+            );
             babydra_core::send_notification(&notif_title, &notif_msg);
             let current = session_trash.borrow().active_tab().current_path.clone();
             if let Some(ref f) = *nav_trash.borrow() {
