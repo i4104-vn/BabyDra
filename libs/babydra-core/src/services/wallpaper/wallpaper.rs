@@ -5,6 +5,41 @@ use crate::error::CoreResult;
 use base64::prelude::*;
 use std::path::{Path, PathBuf};
 
+/// Reads raw image bytes from a path, transparently decoding Base64 `.bb` files.
+pub fn read_image_bytes(path: &Path) -> Option<Vec<u8>> {
+    if path.extension().and_then(|e| e.to_str()) == Some("bb") {
+        let content = std::fs::read_to_string(path).ok()?;
+        BASE64_STANDARD.decode(content.trim().as_bytes()).ok()
+    } else {
+        std::fs::read(path).ok()
+    }
+}
+
+/// Returns the most recently modified existing path from the given candidates.
+///
+/// The greeter runs as the `greeter` user (HOME=/) so `$HOME`-relative paths are
+/// unreadable there; picking the freshest existing copy lets the session-owned
+/// file in `~/.babydra` and the shared copy in `/var/lib/babydra` stay in sync
+/// regardless of which one was updated last.
+pub(crate) fn newest_existing(paths: Vec<Option<PathBuf>>) -> Option<PathBuf> {
+    let mut best: Option<(std::time::SystemTime, PathBuf)> = None;
+    for path in paths.into_iter().flatten() {
+        if !path.is_file() {
+            continue;
+        }
+        let mtime = std::fs::metadata(&path).and_then(|m| m.modified()).ok();
+        let better = match (&best, mtime) {
+            (_, None) => best.is_none(),
+            (None, Some(_)) => true,
+            (Some((best_time, _)), Some(mtime)) => mtime > *best_time,
+        };
+        if better {
+            best = Some((mtime.unwrap_or(std::time::UNIX_EPOCH), path));
+        }
+    }
+    best.map(|(_, path)| path)
+}
+
 /// Sets the desktop wallpaper and persists the path in babydra.conf.
 pub fn set_wallpaper(path: &Path) -> CoreResult<()> {
     if !path.exists() {
@@ -210,29 +245,26 @@ pub fn get_greeter_wp_bytes() -> Option<Vec<u8>> {
     crate::config::invalidate_cache();
     let conf = crate::config::load_babydra_config();
 
-    let candidate_paths = [
-        if !conf.lockscreen.background.is_empty() {
-            Some(PathBuf::from(&conf.lockscreen.background))
-        } else {
-            None
-        },
+    // Explicit user selection wins when it exists
+    if !conf.lockscreen.background.is_empty() {
+        let path = PathBuf::from(&conf.lockscreen.background);
+        if path.is_file() {
+            if let Some(bytes) = read_image_bytes(&path) {
+                if !bytes.is_empty() {
+                    return Some(bytes);
+                }
+            }
+        }
+    }
+
+    // Otherwise use the freshest copy across the user home and shared store
+    if let Some(path) = newest_existing(vec![
         dirs::home_dir().map(|h| h.join(".babydra").join("lock_wallpaper.bb")),
         dirs::home_dir().map(|h| h.join(".babydra").join("greeter_wallpaper.bb")),
         Some(PathBuf::from("/var/lib/babydra/lock_wallpaper.bb")),
-    ];
-
-    for candidate in candidate_paths.into_iter().flatten() {
-        if candidate.exists() && candidate.is_file() {
-            if candidate.extension().and_then(|e| e.to_str()) == Some("bb") {
-                if let Ok(content) = std::fs::read_to_string(&candidate) {
-                    let trimmed = content.trim();
-                    if let Ok(bytes) = BASE64_STANDARD.decode(trimmed.as_bytes()) {
-                        if !bytes.is_empty() {
-                            return Some(bytes);
-                        }
-                    }
-                }
-            } else if let Ok(bytes) = std::fs::read(&candidate) {
+    ]) {
+        if let Some(bytes) = read_image_bytes(&path) {
+            if !bytes.is_empty() {
                 return Some(bytes);
             }
         }
@@ -240,7 +272,7 @@ pub fn get_greeter_wp_bytes() -> Option<Vec<u8>> {
 
     // Fallback to desktop wallpaper
     if let Some(wp_path) = get_wallpaper() {
-        if let Ok(bytes) = std::fs::read(wp_path) {
+        if let Some(bytes) = read_image_bytes(&wp_path) {
             return Some(bytes);
         }
     }

@@ -75,30 +75,32 @@ pub fn get_avatar_path() -> Option<PathBuf> {
 }
 
 /// Retrieves the active avatar as raw image bytes decoded from Base64 `.bb`.
-/// If no `.bb` avatar file exists, falls back directly to the user's logo.
+/// Falls back to the freshest copy across the user home and the shared
+/// `/var/lib/babydra` store, then the user's logo, then the embedded logo.
 pub fn get_avatar_bytes() -> Option<Vec<u8>> {
     crate::config::invalidate_cache();
     let conf = crate::config::load_babydra_config();
 
-    let candidate_paths = [
-        if !conf.lockscreen.avatar.is_empty() {
-            Some(PathBuf::from(&conf.lockscreen.avatar))
-        } else {
-            None
-        },
+    // Explicit user selection wins when it exists
+    if !conf.lockscreen.avatar.is_empty() {
+        let path = PathBuf::from(&conf.lockscreen.avatar);
+        if path.is_file() {
+            if let Some(bytes) = super::wallpaper::read_image_bytes(&path) {
+                if !bytes.is_empty() {
+                    return Some(bytes);
+                }
+            }
+        }
+    }
+
+    // Otherwise use the freshest copy across the user home and shared store
+    if let Some(path) = super::wallpaper::newest_existing(vec![
         dirs::home_dir().map(|h| h.join(".babydra").join("avatar.bb")),
         Some(PathBuf::from("/var/lib/babydra/avatar_fallback.bb")),
-    ];
-
-    for candidate in candidate_paths.into_iter().flatten() {
-        if candidate.exists() && candidate.is_file() {
-            if let Ok(content) = std::fs::read_to_string(&candidate) {
-                let trimmed = content.trim();
-                if let Ok(bytes) = BASE64_STANDARD.decode(trimmed.as_bytes()) {
-                    if !bytes.is_empty() {
-                        return Some(bytes);
-                    }
-                }
+    ]) {
+        if let Some(bytes) = super::wallpaper::read_image_bytes(&path) {
+            if !bytes.is_empty() {
+                return Some(bytes);
             }
         }
     }
