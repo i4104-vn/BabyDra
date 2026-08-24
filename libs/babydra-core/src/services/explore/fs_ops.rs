@@ -1,17 +1,26 @@
 use crate::error::{CoreError, CoreResult};
 use crate::models::explore::file_entry::{FileEntry, FileType};
 use mime_guess::from_path;
+use rustc_hash::FxHashMap;
 use std::ffi::CStr;
 use std::fs;
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
+use std::sync::Mutex;
 
-/// Gets the owner and group names of a file from its metadata on Linux.
-pub fn get_owner_group(metadata: &fs::Metadata) -> (String, String) {
-    let uid = metadata.uid();
-    let gid = metadata.gid();
+/// uid/gid -> name caches. Directory scans hit the same handful of users, so
+/// resolving them once avoids a libc passwd/group lookup per file entry.
+static OWNER_CACHE: Mutex<Option<(FxHashMap<u32, String>, FxHashMap<u32, String>)>> =
+    Mutex::new(None);
 
-    let owner = unsafe {
+fn cached_owner_group(uid: u32, gid: u32) -> (String, String) {
+    let mut guard = match OWNER_CACHE.lock() {
+        Ok(g) => g,
+        Err(_) => return (uid.to_string(), gid.to_string()),
+    };
+    let (users, groups) = guard.get_or_insert_with(Default::default);
+
+    let owner = users.entry(uid).or_insert_with(|| unsafe {
         let passwd = libc::getpwuid(uid);
         if !passwd.is_null() {
             CStr::from_ptr((*passwd).pw_name)
@@ -20,9 +29,9 @@ pub fn get_owner_group(metadata: &fs::Metadata) -> (String, String) {
         } else {
             uid.to_string()
         }
-    };
+    });
 
-    let group = unsafe {
+    let group = groups.entry(gid).or_insert_with(|| unsafe {
         let grp = libc::getgrgid(gid);
         if !grp.is_null() {
             CStr::from_ptr((*grp).gr_name)
@@ -31,9 +40,14 @@ pub fn get_owner_group(metadata: &fs::Metadata) -> (String, String) {
         } else {
             gid.to_string()
         }
-    };
+    });
 
-    (owner, group)
+    (owner.clone(), group.clone())
+}
+
+/// Gets the owner and group names of a file from its metadata on Linux.
+pub fn get_owner_group(metadata: &fs::Metadata) -> (String, String) {
+    cached_owner_group(metadata.uid(), metadata.gid())
 }
 
 /// Resolves standard icon name based on file path, type, and MIME.
