@@ -10,12 +10,12 @@ pub fn set_view_mode(handle: &ContentViewHandle, mode: &str) {
     handle.current_mode.replace(mode.to_string());
     handle.widgets.stack.set_visible_child_name(mode);
 
-    let mut e = handle.entries.borrow().clone();
-    let sort = handle.sort_mode.borrow().clone();
-
-    // Sort with the new mode
-    sort_entries(&mut e, &sort);
-    handle.entries.replace(e.clone());
+    // Sort in place to avoid deep-cloning every FileEntry
+    {
+        let sort = handle.sort_mode.borrow().clone();
+        let mut e = handle.entries.borrow_mut();
+        sort_entries(&mut e, &sort);
+    }
 
     super::render::update_content_ui(handle);
 }
@@ -24,15 +24,15 @@ pub fn set_view_mode(handle: &ContentViewHandle, mode: &str) {
 pub fn set_view_sort(handle: &ContentViewHandle, sort_mode: &str) {
     handle.sort_mode.replace(sort_mode.to_string());
 
-    // Sort current entries
-    let mut e = handle.entries.borrow().clone();
-    sort_entries(&mut e, sort_mode);
-    handle.entries.replace(e.clone());
-
-    // Sort all entries
-    let mut all = handle.all_entries.borrow().clone();
-    sort_entries(&mut all, sort_mode);
-    handle.all_entries.replace(all);
+    // Sort in place to avoid deep-cloning every FileEntry
+    {
+        let mut e = handle.entries.borrow_mut();
+        sort_entries(&mut e, sort_mode);
+    }
+    {
+        let mut all = handle.all_entries.borrow_mut();
+        sort_entries(&mut all, sort_mode);
+    }
 
     super::render::update_content_ui(handle);
 }
@@ -49,7 +49,7 @@ pub fn update_content_view(
     let mut sorted = entries.to_vec();
     sort_entries(&mut sorted, &sort);
     handle.all_entries.replace(sorted.clone());
-    handle.entries.replace(sorted.clone());
+    handle.entries.replace(sorted);
     handle.current_path.replace(current_path);
 
     handle.widgets.stack.set_visible_child_name(&mode);
@@ -69,7 +69,7 @@ pub fn update_content_quiet(
     let mut sorted = entries.to_vec();
     sort_entries(&mut sorted, &sort);
     handle.all_entries.replace(sorted.clone());
-    handle.entries.replace(sorted.clone());
+    handle.entries.replace(sorted);
     handle.current_path.replace(current_path);
 
     handle.widgets.stack.set_visible_child_name(&mode);
@@ -84,7 +84,7 @@ pub fn filter_content_view(handle: &ContentViewHandle, query: &str) {
     let all = handle.all_entries.borrow().clone();
     let mut filtered = babydra_core::filter_entries(&all, query);
     sort_entries(&mut filtered, &sort);
-    handle.entries.replace(filtered.clone());
+    handle.entries.replace(filtered);
 
     super::render::update_content_ui(handle);
 }
