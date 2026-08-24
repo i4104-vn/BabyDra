@@ -116,34 +116,39 @@ pub fn wire_grid_ctrls(
                 }
                 glib::Propagation::Stop
             } else if has_ctrl && (keyval == gtk4::gdk::Key::x || keyval == gtk4::gdk::Key::X) {
-                super::handle_cut(
+                crate::widgets::clipboard_ops::put_on_clipboard(
                     sel_paths.borrow().clone(),
-                    cp_ref.borrow().current_path.clone(),
-                    nav.clone(),
+                    true,
+                    true,
                 );
                 glib::Propagation::Stop
             } else if has_ctrl && (keyval == gtk4::gdk::Key::c || keyval == gtk4::gdk::Key::C) {
-                super::handle_copy(
+                crate::widgets::clipboard_ops::put_on_clipboard(
                     sel_paths.borrow().clone(),
+                    false,
+                    true,
+                );
+                glib::Propagation::Stop
+            } else if has_ctrl && (keyval == gtk4::gdk::Key::v || keyval == gtk4::gdk::Key::V) {
+                crate::widgets::clipboard_ops::paste(
                     cp_ref.borrow().current_path.clone(),
                     nav.clone(),
                 );
                 glib::Propagation::Stop
-            } else if has_ctrl && (keyval == gtk4::gdk::Key::v || keyval == gtk4::gdk::Key::V) {
-                super::handle_paste(cp_ref.borrow().current_path.clone(), nav.clone());
-                glib::Propagation::Stop
             } else if keyval == gtk4::gdk::Key::Delete || keyval == gtk4::gdk::Key::KP_Delete {
                 if state.contains(gtk4::gdk::ModifierType::SHIFT_MASK) {
-                    super::handle_permanent_delete(
+                    crate::widgets::clipboard_ops::delete_paths(
                         sel_paths.borrow().clone(),
                         cp_ref.borrow().current_path.clone(),
                         nav.clone(),
+                        true,
                     );
                 } else {
-                    super::handle_delete(
+                    crate::widgets::clipboard_ops::delete_paths(
                         sel_paths.borrow().clone(),
                         cp_ref.borrow().current_path.clone(),
                         nav.clone(),
+                        false,
                     );
                 }
                 glib::Propagation::Stop

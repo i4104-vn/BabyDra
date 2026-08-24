@@ -1,3 +1,4 @@
+pub mod clipboard_ops;
 pub mod content_view;
 pub mod header_bar;
 pub mod info_panel;
