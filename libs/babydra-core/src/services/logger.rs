@@ -5,12 +5,20 @@ use std::sync::Mutex;
 use tracing::field::Visit;
 use tracing::{Event, Level, Metadata, Subscriber};
 
-/// Resolves the global log directory path `~/.babydra/logs`
+/// Resolves the global log directory path `~/.babydra/logs`.
+///
+/// Falls back to a writable temp directory when the home directory cannot be
+/// used (e.g. the greetd greeter runs with HOME=/ and no write permission).
 pub fn get_log_dir() -> PathBuf {
     if let Some(home) = dirs::home_dir() {
-        return home.join(".babydra").join("logs");
+        let dir = home.join(".babydra").join("logs");
+        if std::fs::create_dir_all(&dir).is_ok() {
+            return dir;
+        }
     }
-    PathBuf::from(".babydra/logs")
+    let fallback = std::env::temp_dir().join("babydra").join("logs");
+    let _ = std::fs::create_dir_all(&fallback);
+    fallback
 }
 
 /// Resolves the full log file path `~/.babydra/logs/<filename>`
