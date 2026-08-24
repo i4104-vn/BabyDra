@@ -64,6 +64,7 @@ pub fn build_info_panel_ui() -> InfoPanelWidgets {
         img_preview_picture,
         preview_widgets,
         stack,
+        size_calc_generation: std::rc::Rc::new(std::cell::Cell::new(0)),
         lbl_name,
         lbl_type,
         lbl_size,

@@ -100,12 +100,18 @@ pub fn update_info_panel(widgets: &InfoPanelWidgets, selection: &[FileEntry]) {
         widgets.lbl_size.set_text("Calculating...");
         let path = entry.path.clone();
         let lbl_size = widgets.lbl_size.clone();
+        let size_generation = widgets.size_calc_generation.clone();
+        let generation = size_generation.get() + 1;
+        size_generation.set(generation);
         glib::spawn_future_local(async move {
             let size_res =
                 tokio::task::spawn_blocking(move || babydra_core::calc_dir_size(&path)).await;
-            let size = size_res.unwrap_or(0);
-            let size_str = explore::format_size(size);
-            lbl_size.set_text(&size_str);
+            // Drop stale results when the selection changed meanwhile
+            if size_generation.get() == generation {
+                let size = size_res.unwrap_or(0);
+                let size_str = explore::format_size(size);
+                lbl_size.set_text(&size_str);
+            }
         });
     } else {
         widgets.lbl_size.set_text(&explore::format_size(entry.size));

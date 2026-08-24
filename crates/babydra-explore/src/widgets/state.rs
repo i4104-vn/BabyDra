@@ -100,6 +100,9 @@ pub struct InfoPanelWidgets {
     pub img_preview_picture: gtk4::Picture,
     pub preview_widgets: PreviewPanelWidgets,
     pub stack: Stack,
+    /// Token incremented on each selection so stale async dir-size results
+    /// from a previous selection never overwrite the current labels.
+    pub size_calc_generation: Rc<std::cell::Cell<u64>>,
     pub lbl_name: Label,
     pub lbl_type: Label,
     pub lbl_size: Label,
