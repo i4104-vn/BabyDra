@@ -14,6 +14,8 @@ pub fn build_grid_card_ui(entry: &FileEntry) -> Box {
     item_box.set_valign(Align::Center);
     item_box.set_hexpand(false);
     item_box.set_vexpand(false);
+    // Full name on hover — the visible label may be truncated
+    item_box.set_tooltip_text(Some(&entry.display_name));
 
     let icon_frame = Box::new(Orientation::Vertical, 0);
     icon_frame.set_size_request(68, 68);

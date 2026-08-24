@@ -13,6 +13,8 @@ pub fn build_list_row_ui(entry: &FileEntry) -> Box {
     item_box.set_margin_bottom(2);
     item_box.set_margin_start(6);
     item_box.set_margin_end(6);
+    // Full name on hover — the visible label is ellipsized when too long
+    item_box.set_tooltip_text(Some(&entry.display_name));
 
     let img = crate::ui::icon::get_fallback_icon(&entry.icon_name, "text-x-generic");
     img.set_pixel_size(24);

@@ -26,22 +26,17 @@ pub fn create_status_bar() -> StatusBarWidgets {
         .build();
     container.append(&lbl_status);
 
-    // Empty Trash button (visible only in Trash folder)
-    let btn_empty_trash = gtk4::Button::builder()
-        .valign(Align::Center)
-        .css_classes(vec!["status-bar-trash-btn".to_string()])
-        .visible(false)
-        .tooltip_text(&trans("explore.empty_trash"))
-        .build();
-    btn_empty_trash.set_cursor_from_name(Some("pointer"));
-
-    let trash_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
-    let trash_icon = babydra_ui_kit::ui::icon::get_icon("user-trash-full-symbolic", 14);
-    let trash_lbl = gtk4::Label::new(Some(&trans("explore.empty_trash")));
-    trash_lbl.add_css_class("status-bar-trash-lbl");
-    trash_box.append(&trash_icon);
-    trash_box.append(&trash_lbl);
-    btn_empty_trash.set_child(Some(&trash_box));
+    // Empty Trash button (visible only in Trash folder) — same styling as the
+    // other status bar icon buttons
+    let btn_empty_trash = babydra_ui_kit::components::create_icon_button(
+        "user-trash-full-symbolic",
+        16,
+        &["status-bar-btn"],
+        Some(&trans("explore.empty_trash")),
+        || {},
+    );
+    btn_empty_trash.set_valign(Align::Center);
+    btn_empty_trash.set_visible(false);
 
     container.append(&btn_empty_trash);
 
