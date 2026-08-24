@@ -217,9 +217,9 @@ fn update_content_internal(handle: &ContentViewHandle, silent: bool) {
     let widgets = handle.widgets.clone();
     let entries = handle.entries.borrow().clone();
     let nav_callback = handle.nav_callback.clone();
-    let current_path = handle.current_path.borrow().clone();
+    let current_path = handle.tab.borrow().current_path.clone();
     let start_path = current_path.clone();
-    let current_mode = handle.current_mode.borrow().clone();
+    let current_mode = handle.tab.borrow().view_mode.clone();
     let sort_mode = handle.sort_mode.borrow().clone();
     let selected_paths = handle.selected_paths.clone();
     let handle_c = handle.clone();
@@ -314,7 +314,7 @@ fn update_content_internal(handle: &ContentViewHandle, silent: bool) {
         }
 
         // Hide progress bar when layout completes successfully
-        if *handle_c.current_path.borrow() == start_path
+        if handle_c.tab.borrow().current_path == start_path
             && *handle_c.render_generation.borrow() == gen
         {
             handle_c.widgets.progress_bar.set_visible(false);

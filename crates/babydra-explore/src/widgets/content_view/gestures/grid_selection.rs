@@ -1,4 +1,4 @@
-use babydra_core::FileEntry;
+use babydra_core::{FileEntry, TabState};
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::path::PathBuf;
@@ -11,7 +11,7 @@ pub fn wire_grid_ctrls(
     nav_cb: Rc<dyn Fn(PathBuf)>,
     sc_fn: Rc<dyn Fn(Vec<PathBuf>)>,
     grid_container: &gtk4::Box,
-    current_path: Rc<RefCell<PathBuf>>,
+    tab: Rc<RefCell<TabState>>,
     selected_paths: Rc<RefCell<Vec<PathBuf>>>,
 ) {
     // 1. Selection changed
@@ -94,7 +94,7 @@ pub fn wire_grid_ctrls(
         let fb_clone = flowbox.clone();
         let e_ref = entries.clone();
         let nav = nav_cb.clone();
-        let cp_ref = current_path.clone();
+        let cp_ref = tab.clone();
         let sel_paths = selected_paths.clone();
         let key_controller = gtk4::EventControllerKey::new();
         key_controller.connect_key_pressed(move |_, keyval, _, state| {
@@ -118,31 +118,31 @@ pub fn wire_grid_ctrls(
             } else if has_ctrl && (keyval == gtk4::gdk::Key::x || keyval == gtk4::gdk::Key::X) {
                 super::handle_cut(
                     sel_paths.borrow().clone(),
-                    cp_ref.borrow().clone(),
+                    cp_ref.borrow().current_path.clone(),
                     nav.clone(),
                 );
                 glib::Propagation::Stop
             } else if has_ctrl && (keyval == gtk4::gdk::Key::c || keyval == gtk4::gdk::Key::C) {
                 super::handle_copy(
                     sel_paths.borrow().clone(),
-                    cp_ref.borrow().clone(),
+                    cp_ref.borrow().current_path.clone(),
                     nav.clone(),
                 );
                 glib::Propagation::Stop
             } else if has_ctrl && (keyval == gtk4::gdk::Key::v || keyval == gtk4::gdk::Key::V) {
-                super::handle_paste(cp_ref.borrow().clone(), nav.clone());
+                super::handle_paste(cp_ref.borrow().current_path.clone(), nav.clone());
                 glib::Propagation::Stop
             } else if keyval == gtk4::gdk::Key::Delete || keyval == gtk4::gdk::Key::KP_Delete {
                 if state.contains(gtk4::gdk::ModifierType::SHIFT_MASK) {
                     super::handle_permanent_delete(
                         sel_paths.borrow().clone(),
-                        cp_ref.borrow().clone(),
+                        cp_ref.borrow().current_path.clone(),
                         nav.clone(),
                     );
                 } else {
                     super::handle_delete(
                         sel_paths.borrow().clone(),
-                        cp_ref.borrow().clone(),
+                        cp_ref.borrow().current_path.clone(),
                         nav.clone(),
                     );
                 }

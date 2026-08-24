@@ -89,14 +89,14 @@ pub fn setup_file_watcher(
                             .any(|p| p.starts_with(dir) || dir.starts_with(p))
                     };
 
-                    let left_path = left_c.current_path.borrow().clone();
+                    let left_path = left_c.tab.borrow().current_path.clone();
                     if affects(&left_path) {
                         let left_handle = left_c.clone();
                         glib::spawn_future_local(async move {
                             if let Ok(entries) =
                                 babydra_core::load_directory(left_path.clone(), show_hidden).await
                             {
-                                if *left_handle.current_path.borrow() == left_path {
+                                if left_handle.tab.borrow().current_path == left_path {
                                     crate::widgets::content_view::update_content_quiet(
                                         &left_handle,
                                         &entries,
@@ -108,7 +108,7 @@ pub fn setup_file_watcher(
                     }
 
                     if let Some(ref r_handle) = *right_c.borrow() {
-                        let right_path = r_handle.current_path.borrow().clone();
+                        let right_path = r_handle.tab.borrow().current_path.clone();
                         if !affects(&right_path) {
                             return;
                         }
@@ -117,7 +117,7 @@ pub fn setup_file_watcher(
                             if let Ok(entries) =
                                 babydra_core::load_directory(right_path.clone(), show_hidden).await
                             {
-                                if *r_handle_c.current_path.borrow() == right_path {
+                                if r_handle_c.tab.borrow().current_path == right_path {
                                     crate::widgets::content_view::update_content_quiet(
                                         &r_handle_c,
                                         &entries,

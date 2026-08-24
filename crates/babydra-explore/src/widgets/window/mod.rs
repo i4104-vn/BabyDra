@@ -163,9 +163,9 @@ pub fn create_explore_win(
                     ActivePane::Left
                 };
                 let other_path = if other_pane == ActivePane::Left {
-                    left_handle_for_nav.current_path.borrow().clone()
+                    left_handle_for_nav.tab.borrow().current_path.clone()
                 } else {
-                    right.current_path.borrow().clone()
+                    right.tab.borrow().current_path.clone()
                 };
                 f(other_pane, other_path);
             }

@@ -90,21 +90,18 @@ pub fn setup_navigation(
                     right_handle.borrow().clone()
                 };
 
-                session.borrow_mut().active_tab_mut().current_path = path.clone();
+                // Record navigation in both the window-level session tab and the
+                // pane's own history so back/forward stay consistent everywhere.
+                session
+                    .borrow_mut()
+                    .active_tab_mut()
+                    .current_path = path.clone();
 
                 if let Some(ref handle) = content_handle {
                     handle.widgets.progress_bar.set_visible(true);
                     handle.widgets.progress_bar.set_fraction(0.0);
 
-                    let mut hist = handle.history.borrow_mut();
-                    let mut idx = handle.history_index.borrow_mut();
-                    if hist.is_empty() || hist[*idx] != path {
-                        if *idx + 1 < hist.len() {
-                            hist.truncate(*idx + 1);
-                        }
-                        hist.push(path.clone());
-                        *idx = hist.len() - 1;
-                    }
+                    handle.tab.borrow_mut().navigate_to(path.clone());
                 }
 
                 let session_c = session.clone();

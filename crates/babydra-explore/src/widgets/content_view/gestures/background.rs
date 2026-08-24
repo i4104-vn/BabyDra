@@ -1,13 +1,15 @@
-use crate::widgets::state::ContentViewWidgets;
+use babydra_core::TabState;
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
 
+use crate::widgets::state::ContentViewWidgets;
+
 /// Wires background click gestures, context menus, drag select, and drag drop to the view container
 pub fn wire_bg_controllers(
     widgets: &ContentViewWidgets,
-    current_path: Rc<RefCell<PathBuf>>,
+    tab: Rc<RefCell<TabState>>,
     nav_cb: Rc<dyn Fn(PathBuf)>,
     selected_paths: Rc<RefCell<Vec<PathBuf>>>,
 ) {
@@ -24,14 +26,14 @@ pub fn wire_bg_controllers(
 
     // 2. Right click context menu on empty space
     {
-        let cp = current_path.clone();
+        let cp = tab.clone();
         let nav = nav_cb.clone();
         let container_widget = widgets.container.clone();
         let gesture = gtk4::GestureClick::new();
         gesture.set_button(3);
         gesture.connect_pressed(move |gesture, _, x, y| {
             gesture.set_state(gtk4::EventSequenceState::Claimed);
-            let path = cp.borrow().clone();
+            let path = cp.borrow().current_path.clone();
             if let Some(win) = container_widget
                 .root()
                 .and_then(|r| r.downcast::<gtk4::Window>().ok())
@@ -51,7 +53,7 @@ pub fn wire_bg_controllers(
 
     // 3. Drop target to background
     {
-        let drop_target = babydra_ui_kit::components::explore::create_bg_drop(current_path.clone());
+        let drop_target = babydra_ui_kit::components::explore::create_bg_drop(tab.clone());
         widgets.container.add_controller(drop_target);
     }
 }

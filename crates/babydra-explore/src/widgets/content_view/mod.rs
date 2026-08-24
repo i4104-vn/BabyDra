@@ -1,6 +1,5 @@
 pub use crate::widgets::state::{ContentViewHandle, ContentViewWidgets};
-pub use babydra_core::sort_entries;
-use babydra_core::FileEntry;
+use babydra_core::{FileEntry, TabState};
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -30,8 +29,9 @@ pub fn create_content_view(
 
     let entries: Rc<RefCell<Vec<FileEntry>>> = Rc::new(RefCell::new(Vec::new()));
     let all_entries: Rc<RefCell<Vec<FileEntry>>> = Rc::new(RefCell::new(Vec::new()));
-    let current_path = Rc::new(RefCell::new(PathBuf::new()));
-    let current_mode = Rc::new(RefCell::new(settings.view_mode));
+    let mut tab = TabState::new(PathBuf::new());
+    tab.view_mode = settings.view_mode.clone();
+    let tab = Rc::new(RefCell::new(tab));
     let sort_mode = Rc::new(RefCell::new("auto".to_string()));
     let nav_cb = Rc::new(nav_callback) as Rc<dyn Fn(PathBuf)>;
 
@@ -58,32 +58,21 @@ pub fn create_content_view(
 
     let render_generation = Rc::new(RefCell::new(0u64));
     let render_signature: Rc<RefCell<Option<u64>>> = Rc::new(RefCell::new(None));
-    let history = Rc::new(RefCell::new(Vec::<PathBuf>::new()));
-    let history_index = Rc::new(RefCell::new(0usize));
 
     // Wire pane navigation & address bar entry
-    actions::wire_content_nav(
-        &widgets,
-        nav_cb.clone(),
-        current_path.clone(),
-        history.clone(),
-        history_index.clone(),
-    );
+    actions::wire_content_nav(&widgets, nav_cb.clone(), tab.clone());
 
     let handle = ContentViewHandle {
         widgets: widgets.clone(),
         entries: entries.clone(),
         all_entries: all_entries.clone(),
-        current_path: current_path.clone(),
-        current_mode: current_mode.clone(),
+        tab: tab.clone(),
         sort_mode: sort_mode.clone(),
         nav_callback: nav_cb.clone(),
         selection_callback: sc_fn.clone(),
         selected_paths: selected_paths.clone(),
         render_generation: render_generation.clone(),
         render_signature: render_signature.clone(),
-        history: history.clone(),
-        history_index: history_index.clone(),
     };
 
     // Wire search filter change callback (debounced, matched off-thread)
@@ -95,12 +84,12 @@ pub fn create_content_view(
         entries.clone(),
         nav_cb.clone(),
         sc_fn.clone(),
-        current_path.clone(),
+        tab.clone(),
         selected_paths.clone(),
     );
     gestures::wire_bg_controllers(
         &widgets,
-        current_path.clone(),
+        tab.clone(),
         nav_cb.clone(),
         selected_paths.clone(),
     );
@@ -114,7 +103,7 @@ pub fn create_grid_flowbox(
     nav_cb: Rc<dyn Fn(PathBuf)>,
     sc_fn: Rc<dyn Fn(Vec<PathBuf>)>,
     grid_container: &gtk4::Box,
-    current_path: Rc<RefCell<PathBuf>>,
+    tab: Rc<RefCell<TabState>>,
     selected_paths: Rc<RefCell<Vec<PathBuf>>>,
 ) -> gtk4::FlowBox {
     let settings = babydra_core::load_explore_cfg();
@@ -139,7 +128,7 @@ pub fn create_grid_flowbox(
         nav_cb,
         sc_fn,
         grid_container,
-        current_path,
+        tab,
         selected_paths,
     );
 

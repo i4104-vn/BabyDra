@@ -17,7 +17,7 @@ pub async fn render_list_view(
 ) {
     let mut counter = 0;
     for (idx, entry) in entries.iter().enumerate() {
-        if *handle_c.current_path.borrow() != *start_path
+        if handle_c.tab.borrow().current_path != *start_path
             || *handle_c.render_generation.borrow() != gen
         {
             return;
@@ -75,7 +75,7 @@ pub async fn render_list_view(
         }
     }
 
-    if *handle_c.current_path.borrow() == *start_path && *handle_c.render_generation.borrow() == gen
+    if handle_c.tab.borrow().current_path == *start_path && *handle_c.render_generation.borrow() == gen
     {
         let entries_clone = entries.to_vec();
         let sort_mode_clone = sort_mode.to_string();

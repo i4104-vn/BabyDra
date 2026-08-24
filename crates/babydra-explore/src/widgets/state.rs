@@ -6,6 +6,7 @@
 
 use babydra_core::models::explore::file_entry::FileEntry;
 use babydra_core::services::explore::FileWatcher;
+use babydra_core::TabState;
 use gtk4::{ApplicationWindow, Box, Button, Entry, Image, Label, Paned, ScrolledWindow, Stack};
 use std::cell::RefCell;
 use std::path::PathBuf;
@@ -72,8 +73,9 @@ pub struct ContentViewHandle {
     pub widgets: ContentViewWidgets,
     pub entries: Rc<RefCell<Vec<FileEntry>>>,
     pub all_entries: Rc<RefCell<Vec<FileEntry>>>,
-    pub current_path: Rc<RefCell<PathBuf>>,
-    pub current_mode: Rc<RefCell<String>>,
+    /// Per-pane navigation state (path, history, view mode) — the single
+    /// source of truth for this pane's location.
+    pub tab: Rc<RefCell<TabState>>,
     pub sort_mode: Rc<RefCell<String>>,
     pub nav_callback: Rc<dyn Fn(PathBuf)>,
     pub selection_callback: Rc<dyn Fn(Vec<PathBuf>)>,
@@ -81,8 +83,6 @@ pub struct ContentViewHandle {
     pub render_generation: Rc<RefCell<u64>>,
     /// Hash of the last rendered view state; used to skip redundant full rebuilds.
     pub render_signature: Rc<RefCell<Option<u64>>>,
-    pub history: Rc<RefCell<Vec<PathBuf>>>,
-    pub history_index: Rc<RefCell<usize>>,
 }
 
 #[derive(Clone)]

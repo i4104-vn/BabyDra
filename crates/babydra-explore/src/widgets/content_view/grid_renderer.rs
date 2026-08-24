@@ -21,14 +21,14 @@ pub async fn render_flat_grid(
         handle_c.nav_callback.clone(),
         handle_c.selection_callback.clone(),
         &widgets.grid_container,
-        handle_c.current_path.clone(),
+        handle_c.tab.clone(),
         handle_c.selected_paths.clone(),
     );
     widgets.grid_container.append(&flowbox);
 
     let mut counter = 0;
     for (idx, entry) in entries.iter().enumerate() {
-        if *handle_c.current_path.borrow() != *start_path
+        if handle_c.tab.borrow().current_path != *start_path
             || *handle_c.render_generation.borrow() != gen
         {
             return;
@@ -84,7 +84,7 @@ pub async fn render_grouped_grid(
 
     let mut counter = 0;
     for (idx, entry) in entries.iter().enumerate() {
-        if *handle_c.current_path.borrow() != *start_path
+        if handle_c.tab.borrow().current_path != *start_path
             || *handle_c.render_generation.borrow() != gen
         {
             return;
@@ -114,7 +114,7 @@ pub async fn render_grouped_grid(
                 handle_c.nav_callback.clone(),
                 handle_c.selection_callback.clone(),
                 &widgets.grid_container,
-                handle_c.current_path.clone(),
+                handle_c.tab.clone(),
                 handle_c.selected_paths.clone(),
             );
             widgets.grid_container.append(&flowbox);

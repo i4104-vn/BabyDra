@@ -80,14 +80,14 @@ pub fn create_drop_nav(
     drop_target
 }
 
-/// Creates a DropTarget for dropping files/folders into a dynamic background path.
-pub fn create_bg_drop(current_path: Rc<RefCell<PathBuf>>) -> gtk4::DropTarget {
+/// Creates a DropTarget for dropping files/folders into the pane's current directory.
+pub fn create_bg_drop(tab: Rc<RefCell<babydra_core::TabState>>) -> gtk4::DropTarget {
     let drop_target = gtk4::DropTarget::new(
         FileList::static_type(),
         gtk4::gdk::DragAction::MOVE | gtk4::gdk::DragAction::COPY,
     );
     drop_target.connect_drop(move |_, value, _, _| {
-        let dest_dir = current_path.borrow().clone();
+        let dest_dir = tab.borrow().current_path.clone();
         if let Ok(file_list) = value.get::<FileList>() {
             let sources: Vec<PathBuf> = file_list.files().iter().filter_map(|f| f.path()).collect();
             if !sources.is_empty() {
