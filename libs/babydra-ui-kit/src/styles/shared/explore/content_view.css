@@ -158,5 +158,32 @@
     border: none;
     border-bottom-left-radius: 13px;
     border-bottom-right-radius: 13px;
-    min-height: 3px;
+}
+
+/* Permanent content scrollbar: wide enough to grab and drag through big folders */
+.explore-window .content-view scrollbar {
+    background: transparent;
+    border: none;
+}
+
+.explore-window .content-view scrollbar trough {
+    background-color: transparent;
+    border: none;
+    min-width: 14px;
+}
+
+.explore-window .content-view scrollbar slider {
+    min-width: 10px;
+    min-height: 40px;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    background-clip: padding-box;
+    transition: background-color 0.15s ease, border-width 0.15s ease;
+}
+
+.explore-window .content-view scrollbar.slider:hover,
+.explore-window .content-view scrollbar slider:hover,
+.explore-window .content-view scrollbar slider:hover:active {
+    min-width: 12px;
+    border-width: 1px;
 }

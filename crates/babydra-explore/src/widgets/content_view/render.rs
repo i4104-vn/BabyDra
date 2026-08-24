@@ -9,6 +9,10 @@ pub fn build_content_view() -> ContentViewWidgets {
     let activate_on_single = !settings.double_click_to_open;
 
     let scroll_win = ScrolledWindow::new();
+    // The per-view inner scrolled windows own scrolling; keep this outer one inert
+    scroll_win.set_overlay_scrolling(false);
+    scroll_win.set_vscrollbar_policy(gtk4::PolicyType::Never);
+    scroll_win.set_hscrollbar_policy(gtk4::PolicyType::Never);
 
     let stack = Stack::new();
     stack.set_transition_type(gtk4::StackTransitionType::Crossfade);
@@ -43,6 +47,10 @@ pub fn build_content_view() -> ContentViewWidgets {
     grid_fixed.put(&grid_rubberband, 0.0, 0.0);
 
     let flow_scroll = ScrolledWindow::new();
+    // Permanent (non-overlay) scrollbar so large folders can be navigated fast
+    flow_scroll.set_overlay_scrolling(false);
+    flow_scroll.set_vscrollbar_policy(gtk4::PolicyType::Automatic);
+    flow_scroll.set_hscrollbar_policy(gtk4::PolicyType::Never);
     flow_scroll.set_child(Some(&grid_overlay));
     stack.add_named(&flow_scroll, Some("icons"));
 
@@ -64,6 +72,10 @@ pub fn build_content_view() -> ContentViewWidgets {
     list_fixed.put(&list_rubberband, 0.0, 0.0);
 
     let list_scroll = ScrolledWindow::new();
+    // Permanent (non-overlay) scrollbar so large folders can be navigated fast
+    list_scroll.set_overlay_scrolling(false);
+    list_scroll.set_vscrollbar_policy(gtk4::PolicyType::Automatic);
+    list_scroll.set_hscrollbar_policy(gtk4::PolicyType::Never);
     list_scroll.set_child(Some(&list_overlay));
     stack.add_named(&list_scroll, Some("list"));
 
