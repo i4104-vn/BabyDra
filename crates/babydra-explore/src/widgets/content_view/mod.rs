@@ -130,6 +130,9 @@ pub fn create_grid_flowbox(
         .column_spacing(10)
         .build();
 
+    // Item drags must start DnD, not the FlowBox native rubberband
+    babydra_ui_kit::components::explore::disable_native_rubberband(&flowbox);
+
     gestures::wire_grid_ctrls(
         &flowbox,
         entries,

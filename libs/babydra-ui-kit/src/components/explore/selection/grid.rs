@@ -3,6 +3,22 @@ use gtk4::{Box, Fixed, FlowBox, FlowBoxChild, GestureDrag};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+/// Disables the GtkFlowBox built-in rubberband selection gesture.
+///
+/// GTK's internal drag gesture (CAPTURE phase on the FlowBox) claims the
+/// pointer sequence after ~32px even when the press started on a child item,
+/// which cancels the child's DragSource and turns item drags into multi-select.
+/// Disabling it lets items be drag-and-dropped normally; empty-space rubberband
+/// selection remains handled by the custom overlay gesture (`wire_rubberband_grid`).
+pub fn disable_native_rubberband(flowbox: &FlowBox) {
+    let controllers = flowbox.observe_controllers();
+    for i in 0..controllers.n_items() {
+        if let Some(controller) = controllers.item(i).and_then(|o| o.downcast::<gtk4::GestureDrag>().ok()) {
+            controller.set_propagation_phase(gtk4::PropagationPhase::None);
+        }
+    }
+}
+
 /// Wires rubberband select gesture for a Grid view container.
 pub fn wire_rubberband_grid(
     grid_overlay: &gtk4::Widget,

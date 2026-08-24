@@ -24,6 +24,9 @@ pub fn build_content_view() -> ContentViewWidgets {
     flowbox.set_row_spacing(10);
     flowbox.set_column_spacing(10);
 
+    // Item drags must start DnD, not the FlowBox native rubberband
+    babydra_ui_kit::components::explore::disable_native_rubberband(&flowbox);
+
     let grid_container = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     grid_container.set_valign(Align::Start);
 
