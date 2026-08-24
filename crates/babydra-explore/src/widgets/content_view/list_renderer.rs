@@ -28,7 +28,6 @@ pub async fn render_list_view(
         } else {
             (idx + 1) as f64 / entries.len() as f64
         };
-        handle_c.widgets.progress_bar.set_fraction(fraction);
 
         let target_entry = entry.clone();
         let cp = current_path.clone();
@@ -71,6 +70,7 @@ pub async fn render_list_view(
         counter += 1;
         if counter >= 80 {
             counter = 0;
+            handle_c.widgets.progress_bar.set_fraction(fraction);
             glib::timeout_future(std::time::Duration::from_millis(2)).await;
         }
     }

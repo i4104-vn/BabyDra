@@ -39,7 +39,6 @@ pub async fn render_flat_grid(
         } else {
             (idx + 1) as f64 / entries.len() as f64
         };
-        handle_c.widgets.progress_bar.set_fraction(fraction);
 
         let flow_child = create_flow_child(
             idx,
@@ -55,9 +54,11 @@ pub async fn render_flat_grid(
             flow_child.grab_focus();
         }
 
+        // Update the progress bar once per batch to avoid a repaint per item
         counter += 1;
         if counter >= 80 {
             counter = 0;
+            handle_c.widgets.progress_bar.set_fraction(fraction);
             glib::timeout_future(std::time::Duration::from_millis(2)).await;
         }
     }
@@ -94,7 +95,6 @@ pub async fn render_grouped_grid(
         } else {
             (idx + 1) as f64 / entries.len() as f64
         };
-        handle_c.widgets.progress_bar.set_fraction(fraction);
 
         let group_name = get_group_name(entry);
         if group_name != current_group_name {
@@ -140,6 +140,7 @@ pub async fn render_grouped_grid(
         counter += 1;
         if counter >= 80 {
             counter = 0;
+            handle_c.widgets.progress_bar.set_fraction(fraction);
             glib::timeout_future(std::time::Duration::from_millis(2)).await;
         }
     }
