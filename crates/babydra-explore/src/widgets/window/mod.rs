@@ -32,8 +32,8 @@ pub fn create_explore_win(
     let preview_visible = Rc::new(Cell::new(settings.preview_visible));
     let user_wants_preview = Rc::new(Cell::new(settings.preview_visible));
 
-    // Channels for file watching/reloading
-    let (watch_tx, watch_rx) = tokio::sync::mpsc::unbounded_channel::<()>();
+    // Channels for file watching/reloading (carries the changed filesystem path)
+    let (watch_tx, watch_rx) = tokio::sync::mpsc::unbounded_channel::<PathBuf>();
 
     let (info_panel_container, info_widgets) = crate::widgets::info_panel::create_info_panel();
     let revealer = gtk4::Revealer::builder()

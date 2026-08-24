@@ -19,7 +19,7 @@ pub fn setup_navigation(
     _status_bar_lbl: Rc<gtk4::Label>,
     rebuild_tabs_cell: Rc<RefCell<Option<Rc<dyn Fn()>>>>,
     focus_item_cell: Rc<RefCell<Option<PathBuf>>>,
-    watch_tx: tokio::sync::mpsc::UnboundedSender<()>,
+    watch_tx: tokio::sync::mpsc::UnboundedSender<PathBuf>,
     mut left_rx: tokio::sync::mpsc::UnboundedReceiver<PathBuf>,
 ) -> (
     Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>, // navigate_pane_ref
@@ -210,8 +210,10 @@ pub fn setup_navigation(
                 let _ = w.watch(&path);
             } else {
                 let tx_clone = watch_tx.clone();
-                if let Ok(w) = babydra_core::FileWatcher::new(path.clone(), move |_event| {
-                    let _ = tx_clone.send(());
+                if let Ok(w) = babydra_core::FileWatcher::new(path.clone(), move |event| {
+                    for changed in &event.paths {
+                        let _ = tx_clone.send(changed.clone());
+                    }
                 }) {
                     *watcher_borrow = Some(w);
                 }

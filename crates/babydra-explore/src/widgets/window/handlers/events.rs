@@ -44,20 +44,25 @@ pub fn setup_resize_handler(
 }
 
 /// Sets up the hot-reload receiver loop responding to directory watcher triggers.
+/// Only panes whose current directory is affected by the changed path are reloaded.
 pub fn setup_file_watcher(
     session: Rc<RefCell<SessionState>>,
     _navigate_pane_no_watch_ref: Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>,
     _active_pane: Rc<Cell<ActivePane>>,
     left_content_handle: Rc<crate::widgets::state::ContentViewHandle>,
     right_content_handle: Rc<RefCell<Option<Rc<crate::widgets::state::ContentViewHandle>>>>,
-    mut watch_rx: tokio::sync::mpsc::UnboundedReceiver<()>,
+    mut watch_rx: tokio::sync::mpsc::UnboundedReceiver<PathBuf>,
 ) {
     let left = left_content_handle;
     let right = right_content_handle;
     glib::MainContext::default().spawn_local(async move {
         let pending_timer = Rc::new(RefCell::new(None::<glib::SourceId>));
-        while let Some(_) = watch_rx.recv().await {
-            while watch_rx.try_recv().is_ok() {}
+        let pending_paths = Rc::new(RefCell::new(Vec::<PathBuf>::new()));
+        while let Some(changed) = watch_rx.recv().await {
+            while let Ok(more) = watch_rx.try_recv() {
+                pending_paths.borrow_mut().push(more);
+            }
+            pending_paths.borrow_mut().push(changed);
 
             if let Some(source_id) = pending_timer.borrow_mut().take() {
                 source_id.remove();
@@ -66,31 +71,47 @@ pub fn setup_file_watcher(
             let left_c = left.clone();
             let right_c = right.clone();
             let timer_ref = pending_timer.clone();
+            let paths_ref = pending_paths.clone();
             let session_c = session.clone();
 
             let source_id =
                 glib::timeout_add_local_once(std::time::Duration::from_millis(350), move || {
                     timer_ref.borrow_mut().take();
+                    let changed_paths = std::mem::take(&mut *paths_ref.borrow_mut());
+                    if changed_paths.is_empty() {
+                        return;
+                    }
                     let show_hidden = session_c.borrow().active_tab().show_hidden;
 
+                    let affects = |dir: &std::path::Path| {
+                        changed_paths
+                            .iter()
+                            .any(|p| p.starts_with(dir) || dir.starts_with(p))
+                    };
+
                     let left_path = left_c.current_path.borrow().clone();
-                    let left_handle = left_c.clone();
-                    glib::spawn_future_local(async move {
-                        if let Ok(entries) =
-                            babydra_core::load_directory(left_path.clone(), show_hidden).await
-                        {
-                            if *left_handle.current_path.borrow() == left_path {
-                                crate::widgets::content_view::update_content_quiet(
-                                    &left_handle,
-                                    &entries,
-                                    left_path,
-                                );
+                    if affects(&left_path) {
+                        let left_handle = left_c.clone();
+                        glib::spawn_future_local(async move {
+                            if let Ok(entries) =
+                                babydra_core::load_directory(left_path.clone(), show_hidden).await
+                            {
+                                if *left_handle.current_path.borrow() == left_path {
+                                    crate::widgets::content_view::update_content_quiet(
+                                        &left_handle,
+                                        &entries,
+                                        left_path,
+                                    );
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
 
                     if let Some(ref r_handle) = *right_c.borrow() {
                         let right_path = r_handle.current_path.borrow().clone();
+                        if !affects(&right_path) {
+                            return;
+                        }
                         let r_handle_c = r_handle.clone();
                         glib::spawn_future_local(async move {
                             if let Ok(entries) =
