@@ -41,13 +41,17 @@ pub fn create_content_view(
     let sel_cb = Rc::new(selection_callback) as Rc<dyn Fn(Vec<FileEntry>)>;
 
     let sc_fn = Rc::new(move |selected_paths_list: Vec<PathBuf>| {
-        let mut list = Vec::new();
+        // Index entries once so select-all stays linear instead of O(selected x entries)
         let borrowed = entries_clone.borrow();
-        for path in &selected_paths_list {
-            if let Some(entry) = borrowed.iter().find(|e| e.path == *path) {
-                list.push(entry.clone());
-            }
+        let mut by_path = std::collections::HashMap::with_capacity(borrowed.len());
+        for e in borrowed.iter() {
+            by_path.insert(&e.path, e);
         }
+        let list = selected_paths_list
+            .iter()
+            .filter_map(|path| by_path.get(path).map(|e| (*e).clone()))
+            .collect();
+        drop(borrowed);
         *selected_paths_c.borrow_mut() = selected_paths_list;
         sel_cb(list);
     }) as Rc<dyn Fn(Vec<PathBuf>)>;
