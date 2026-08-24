@@ -160,15 +160,16 @@
     border-bottom-right-radius: 13px;
 }
 
-/* Permanent content scrollbar: wide enough to grab and drag through big folders */
+/* Permanent content scrollbar: clearly visible and easy to grab in big folders */
 .explore-window .content-view scrollbar {
     background: transparent;
     border: none;
 }
 
 .explore-window .content-view scrollbar trough {
-    background-color: transparent;
+    background-color: alpha(@theme_fg_color, 0.08);
     border: none;
+    border-radius: 8px;
     min-width: 14px;
 }
 
@@ -178,12 +179,13 @@
     border: 2px solid transparent;
     border-radius: 8px;
     background-clip: padding-box;
-    transition: background-color 0.15s ease, border-width 0.15s ease;
+    background-color: alpha(@theme_fg_color, 0.45);
+    transition: background-color 0.15s ease, min-width 0.15s ease;
 }
 
-.explore-window .content-view scrollbar.slider:hover,
 .explore-window .content-view scrollbar slider:hover,
 .explore-window .content-view scrollbar slider:hover:active {
     min-width: 12px;
     border-width: 1px;
+    background-color: alpha(@theme_fg_color, 0.7);
 }
