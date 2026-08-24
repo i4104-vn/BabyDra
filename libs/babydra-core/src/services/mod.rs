@@ -3,6 +3,7 @@ pub mod apps;
 pub mod clock;
 pub mod exif;
 pub mod explore;
+pub mod last_user;
 pub mod logger;
 pub mod mpris;
 pub mod notification;

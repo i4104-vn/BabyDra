@@ -49,6 +49,7 @@ pub use services::window::mru::{activate_app, get_history, get_running_apps, sav
 pub use services::window::tracker::spawn_switcher;
 pub use services::window::{close_window, focus_window};
 
+pub use services::last_user::{get_last_user, save_last_user};
 pub use services::notification::island;
 pub use services::system::auth;
 pub use services::system::backlight;

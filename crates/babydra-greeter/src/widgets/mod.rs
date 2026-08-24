@@ -6,10 +6,6 @@ pub mod login;
 pub mod splash;
 pub mod top_bar;
 
-/// Path to the file that persists the last successfully logged-in username.
-/// Single source of truth shared by the `login` widget and `handler`.
-pub const LAST_USER_FILE: &str = "/tmp/babydra-last-user";
-
 pub fn create_logo_picture(size: i32) -> gtk4::Widget {
     let logo_bytes = include_bytes!("../../../../libs/babydra-core/src/services/logo.png");
     let stream = gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(logo_bytes));

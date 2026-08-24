@@ -7,7 +7,6 @@ use tokio::sync::oneshot;
 
 use crate::auth;
 use crate::render::GreeterWidgets;
-use crate::widgets;
 use crate::widgets::top_bar::TopBarWidget;
 
 /// Wires up every interactive handler on top of the pre-built greeter widgets.
@@ -132,11 +131,8 @@ fn setup_login_flow(g: &GreeterWidgets) {
         btn_spinner.start();
         login_btn.set_child(Some(&btn_spinner));
 
-        if let Err(e) = std::fs::write(widgets::LAST_USER_FILE, &user) {
-            tracing::warn!(target: "babydra-greeter", "Failed to save last user to {:?}: {}", widgets::LAST_USER_FILE, e);
-        } else {
-            tracing::info!(target: "babydra-greeter", "Saved last user {:?} to {:?}", user, widgets::LAST_USER_FILE);
-        }
+        babydra_core::save_last_user(&user);
+        tracing::info!(target: "babydra-greeter", "Saved last user {:?} to {:?}", user, babydra_core::services::last_user::get_last_user_path());
 
         let (tx, rx) = oneshot::channel();
 

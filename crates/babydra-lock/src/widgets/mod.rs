@@ -92,6 +92,8 @@ pub fn create_lock_window(
             entry_clone.set_text("");
 
             if verify_password(&username_clone, &password) {
+                // Keep the greeter's preselected user fresh across reboots
+                babydra_core::save_last_user(&username_clone);
                 std::process::exit(0);
             } else {
                 status_label_clone.set_text(&babydra_core::i18n::trans("lock.status_incorrect"));

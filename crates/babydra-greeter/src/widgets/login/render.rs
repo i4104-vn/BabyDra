@@ -6,7 +6,6 @@ use gtk4::{
 };
 
 use crate::widgets::login::get_system_users;
-use crate::widgets::LAST_USER_FILE;
 
 /// Builds the login panel with avatar, username dropdown, password entry, and submit button.
 pub fn build() -> super::LoginWidget {
@@ -121,9 +120,7 @@ pub fn build() -> super::LoginWidget {
     login_container.append(&login_panel);
 
     // Restore last logged in username if available in system user list
-    let last_user_opt = std::fs::read_to_string(LAST_USER_FILE)
-        .ok()
-        .map(|s| s.trim().to_string());
+    let last_user_opt = babydra_core::get_last_user();
     let default_user = std::env::var("USER").unwrap_or_else(|_| "user".to_string());
 
     let target_user = match last_user_opt {
