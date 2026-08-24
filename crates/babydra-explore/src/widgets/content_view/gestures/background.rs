@@ -11,7 +11,6 @@ pub fn wire_bg_controllers(
     widgets: &ContentViewWidgets,
     tab: Rc<RefCell<TabState>>,
     nav_cb: Rc<dyn Fn(PathBuf)>,
-    selected_paths: Rc<RefCell<Vec<PathBuf>>>,
 ) {
     // 1. Drag-to-select for Grid overlay
     if let Some(grid_overlay) = widgets.grid_fixed.parent() {

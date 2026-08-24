@@ -35,7 +35,11 @@ impl FileManager1Service {
     async fn show_folders(&self, uris: Vec<String>, _startup_id: String) -> zbus::fdo::Result<()> {
         for uri in uris {
             let (target_dir, focus_item) = crate::services::explore::resolve_target_from_uri(&uri);
-            if self.nav_tx.send((target_dir.clone(), focus_item.clone())).is_err() {
+            if self
+                .nav_tx
+                .send((target_dir.clone(), focus_item.clone()))
+                .is_err()
+            {
                 open_in_new_process(target_dir, focus_item);
             }
         }
@@ -45,7 +49,11 @@ impl FileManager1Service {
     async fn show_items(&self, uris: Vec<String>, _startup_id: String) -> zbus::fdo::Result<()> {
         for uri in uris {
             let (target_dir, focus_item) = crate::services::explore::resolve_target_from_uri(&uri);
-            if self.nav_tx.send((target_dir.clone(), focus_item.clone())).is_err() {
+            if self
+                .nav_tx
+                .send((target_dir.clone(), focus_item.clone()))
+                .is_err()
+            {
                 open_in_new_process(target_dir, focus_item);
             }
         }
@@ -59,7 +67,11 @@ impl FileManager1Service {
     ) -> zbus::fdo::Result<()> {
         for uri in uris {
             let (target_dir, focus_item) = crate::services::explore::resolve_target_from_uri(&uri);
-            if self.nav_tx.send((target_dir.clone(), focus_item.clone())).is_err() {
+            if self
+                .nav_tx
+                .send((target_dir.clone(), focus_item.clone()))
+                .is_err()
+            {
                 open_in_new_process(target_dir, focus_item);
             }
         }
@@ -78,7 +90,10 @@ pub async fn start_dbus_service(
                 nav_tx: nav_tx.clone(),
             },
         )?
-        .serve_at("/org/freedesktop/FileManager1", FileManager1Service { nav_tx })?
+        .serve_at(
+            "/org/freedesktop/FileManager1",
+            FileManager1Service { nav_tx },
+        )?
         .build()
         .await?;
 
@@ -89,5 +104,3 @@ pub async fn start_dbus_service(
 
     Ok(())
 }
-
-

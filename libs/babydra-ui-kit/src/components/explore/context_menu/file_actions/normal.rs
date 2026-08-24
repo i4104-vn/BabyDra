@@ -100,25 +100,7 @@ pub fn show_for_file_normal(
                 current_path_win.clone()
             };
 
-            if let Ok(home) = std::env::var("HOME") {
-                let local_bin = format!("{}/.local/bin/babydra-explore", home);
-                if std::path::Path::new(&local_bin).exists() {
-                    if let Ok(_) = std::process::Command::new(&local_bin)
-                        .arg(&path_to_open)
-                        .spawn()
-                    {
-                        return;
-                    }
-                }
-            }
-            if let Ok(exe) = std::env::current_exe() {
-                if let Ok(_) = std::process::Command::new(exe).arg(&path_to_open).spawn() {
-                    return;
-                }
-            }
-            let _ = std::process::Command::new("babydra-explore")
-                .arg(&path_to_open)
-                .spawn();
+            babydra_core::services::explore::spawn_explore_window(&path_to_open);
         },
     );
 

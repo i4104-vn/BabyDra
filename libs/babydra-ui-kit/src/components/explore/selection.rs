@@ -154,6 +154,8 @@ impl RubberbandItems for ListView {
 /// One drag gesture driving rectangle selection over any [`RubberbandItems`]
 /// view. Item rects are snapshotted at drag-begin; recomputing them per
 /// mouse-move via translate_coordinates would be O(n) layout traversal.
+type ItemRects<V> = Rc<RefCell<Vec<(<V as RubberbandItems>::Child, f64, f64, f64, f64)>>>;
+
 fn wire_rubberband_gesture<V: RubberbandItems>(
     overlay: &gtk4::Widget,
     view: V,
@@ -167,7 +169,7 @@ fn wire_rubberband_gesture<V: RubberbandItems>(
     let start_pos: Rc<RefCell<Option<(f64, f64)>>> = Rc::new(RefCell::new(None));
     let active: Rc<RefCell<bool>> = Rc::new(RefCell::new(false));
     let view = Rc::new(view);
-    let rects: Rc<RefCell<Vec<(V::Child, f64, f64, f64, f64)>>> = Rc::new(RefCell::new(Vec::new()));
+    let rects: ItemRects<V> = Rc::new(RefCell::new(Vec::new()));
 
     // --- drag begin: deny when starting on an item (that means item DnD) ---
     {

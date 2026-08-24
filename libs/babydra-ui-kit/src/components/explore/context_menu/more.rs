@@ -15,7 +15,10 @@ pub fn get_apps_for_path(path: &Path) -> Vec<gtk4::gio::AppInfo> {
 
     let mut try_add = |app: gtk4::gio::AppInfo| {
         if app.should_show() {
-            let id = app.id().map(|s| s.to_string()).unwrap_or_else(|| app.name().to_string());
+            let id = app
+                .id()
+                .map(|s| s.to_string())
+                .unwrap_or_else(|| app.name().to_string());
             if seen_ids.insert(id) {
                 result.push(app);
             }
@@ -28,7 +31,10 @@ pub fn get_apps_for_path(path: &Path) -> Vec<gtk4::gio::AppInfo> {
     }
 
     // 2. Generic text handlers for text-based file types
-    if !is_dir && content_type != "text/plain" && gtk4::gio::content_type_is_a(&content_type, "text/plain") {
+    if !is_dir
+        && content_type != "text/plain"
+        && gtk4::gio::content_type_is_a(&content_type, "text/plain")
+    {
         for app in gtk4::gio::AppInfo::all_for_type("text/plain") {
             try_add(app);
         }
@@ -46,7 +52,11 @@ pub fn get_apps_for_path(path: &Path) -> Vec<gtk4::gio::AppInfo> {
                 || gtk4::gio::content_type_is_a(&content_type, st)
                 || gtk4::gio::content_type_is_a(st, &content_type)
         });
-        let matches_dir = is_dir && (supported.is_empty() || supported.iter().any(|st| st == "inode/directory" || st.starts_with("text/")));
+        let matches_dir = is_dir
+            && (supported.is_empty()
+                || supported
+                    .iter()
+                    .any(|st| st == "inode/directory" || st.starts_with("text/")));
 
         if matches_type || matches_dir {
             try_add(app);
@@ -60,7 +70,10 @@ pub fn get_apps_for_path(path: &Path) -> Vec<gtk4::gio::AppInfo> {
 /// Launches an application with the given path.
 pub fn launch_app(app: &gtk4::gio::AppInfo, path: &Path) {
     let uri = format!("file://{}", path.to_string_lossy());
-    if app.launch_uris(&[&uri], gtk4::gio::AppLaunchContext::NONE).is_err() {
+    if app
+        .launch_uris(&[&uri], gtk4::gio::AppLaunchContext::NONE)
+        .is_err()
+    {
         if let Some(cmd) = app.commandline() {
             let clean_cmd = cmd
                 .to_string_lossy()
@@ -68,10 +81,11 @@ pub fn launch_app(app: &gtk4::gio::AppInfo, path: &Path) {
                 .filter(|w| !w.starts_with('%'))
                 .collect::<Vec<&str>>()
                 .join(" ");
-            let _ = std::process::Command::new("sh")
-                .arg("-c")
-                .arg(format!("{} \"{}\" &", clean_cmd, path.to_string_lossy()))
-                .spawn();
+            babydra_core::services::explore::spawn_sh_background(format!(
+                "{} \"{}\" &",
+                clean_cmd,
+                path.to_string_lossy()
+            ));
         }
     }
 }
@@ -118,6 +132,9 @@ mod tests {
         let apps = get_apps_for_path(Path::new(&home));
         assert!(!apps.is_empty());
         let names: Vec<String> = apps.iter().map(|a| a.name().to_string()).collect();
-        assert!(names.iter().any(|n| n.contains("Explore") || n.contains("Studio") || n.contains("IDE") || n.contains("Dolphin")));
+        assert!(names.iter().any(|n| n.contains("Explore")
+            || n.contains("Studio")
+            || n.contains("IDE")
+            || n.contains("Dolphin")));
     }
 }

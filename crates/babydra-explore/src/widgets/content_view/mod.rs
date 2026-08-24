@@ -87,12 +87,7 @@ pub fn create_content_view(
         tab.clone(),
         selected_paths.clone(),
     );
-    gestures::wire_bg_controllers(
-        &widgets,
-        tab.clone(),
-        nav_cb.clone(),
-        selected_paths.clone(),
-    );
+    gestures::wire_bg_controllers(&widgets, tab.clone(), nav_cb.clone());
 
     (widgets.container.clone(), handle)
 }

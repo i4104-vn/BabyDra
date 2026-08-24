@@ -1,5 +1,5 @@
 use crate::components::context_menu::ContextMenuBuilder;
-use crate::components::explore::helpers::restore_from_trash;
+use babydra_core::services::explore::restore_from_trash;
 use std::path::PathBuf;
 use std::rc::Rc;
 

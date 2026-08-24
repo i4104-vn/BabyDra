@@ -26,10 +26,11 @@ pub fn launch_app_with_file(app: &DesktopApp, path: &Path) {
         .collect::<Vec<&str>>()
         .join(" ");
 
-    let _ = std::process::Command::new("sh")
-        .arg("-c")
-        .arg(format!("{} \"{}\" &", clean_exec, path.to_string_lossy()))
-        .spawn();
+    babydra_core::services::explore::spawn_sh_background(format!(
+        "{} \"{}\" &",
+        clean_exec,
+        path.to_string_lossy()
+    ));
 }
 
 /// Sets a desktop application as the default handler for a file's MIME type.
@@ -49,11 +50,7 @@ pub fn set_default_app_for_file(app: &DesktopApp, path: &Path) {
             let _ = app_info.set_as_default_for_type(&mime_type);
         }
 
-        let _ = std::process::Command::new("xdg-mime")
-            .arg("default")
-            .arg(&*desktop_name)
-            .arg(&mime_type)
-            .spawn();
+        babydra_core::services::explore::set_default_mime_handler(&desktop_name, &mime_type);
     }
 }
 
@@ -172,12 +169,7 @@ pub fn launch_file_or_open_with(path: &Path, parent: Option<&impl IsA<gtk4::Wind
         return;
     }
 
-    if let Ok(_child) = std::process::Command::new("xdg-open")
-        .arg(path.to_string_lossy().as_ref())
-        .spawn()
-    {
-        return;
-    }
+    babydra_core::services::explore::open_with_system(path);
 
     show_open_with_dialog(path, parent);
 }

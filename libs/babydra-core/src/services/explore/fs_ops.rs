@@ -246,7 +246,12 @@ pub async fn copy_path(src: PathBuf, dest: PathBuf) -> Result<(), std::io::Error
         }
     })
     .await
-    .unwrap_or_else(|e| Err(std::io::Error::new(std::io::ErrorKind::Other, e.to_string())))
+    .unwrap_or_else(|e| {
+        Err(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            e.to_string(),
+        ))
+    })
 }
 
 /// Asynchronously moves a file or directory (handles cross-device move).
@@ -268,7 +273,12 @@ pub async fn move_path(src: PathBuf, dest: PathBuf) -> Result<(), std::io::Error
         Ok(())
     })
     .await
-    .unwrap_or_else(|e| Err(std::io::Error::new(std::io::ErrorKind::Other, e.to_string())))
+    .unwrap_or_else(|e| {
+        Err(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            e.to_string(),
+        ))
+    })
 }
 
 /// Asynchronously deletes a file or directory.
@@ -305,4 +315,122 @@ pub async fn send_to_trash(path: PathBuf) -> CoreResult<()> {
     })
     .await
     .unwrap()
+}
+
+/// Creates an empty file at `path`.
+pub async fn create_empty_file(path: PathBuf) -> Result<(), std::io::Error> {
+    tokio::task::spawn_blocking(move || fs::write(&path, b""))
+        .await
+        .unwrap_or_else(|e| {
+            Err(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                e.to_string(),
+            ))
+        })
+}
+
+/// Creates `path` and any missing parents.
+pub async fn create_dir(path: PathBuf) -> Result<(), std::io::Error> {
+    tokio::task::spawn_blocking(move || fs::create_dir_all(&path))
+        .await
+        .unwrap_or_else(|e| {
+            Err(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                e.to_string(),
+            ))
+        })
+}
+
+/// Applies `mode` to `path`, preserving special bits outside the rwx mask.
+pub fn set_unix_mode(path: &Path, mode: u32) -> Result<(), std::io::Error> {
+    use std::os::unix::fs::PermissionsExt;
+
+    let metadata = fs::metadata(path)?;
+    let final_mode = (metadata.mode() & !0o777) | mode;
+    let mut perms = metadata.permissions();
+    perms.set_mode(final_mode);
+    fs::set_permissions(path, perms)
+}
+
+/// Restores a trashed file to its original location using its `.trashinfo`
+/// metadata, removing the info entry afterwards.
+pub async fn restore_from_trash(trash_file_path: PathBuf) -> CoreResult<()> {
+    let file_name = trash_file_path
+        .file_name()
+        .ok_or_else(|| CoreError::Invalid("Invalid file name".into()))?;
+    let trash_dir = trash_file_path
+        .parent()
+        .ok_or_else(|| CoreError::Invalid("Invalid parent directory".into()))?;
+    let trash_root = trash_dir
+        .parent()
+        .ok_or_else(|| CoreError::Invalid("Invalid trash root".into()))?;
+    let info_dir = trash_root.join("info");
+
+    let info_file_name = format!("{}.trashinfo", file_name.to_string_lossy());
+    let info_path = info_dir.join(info_file_name);
+
+    if !info_path.exists() {
+        return Err(CoreError::NotFound("Trash info file does not exist".into()));
+    }
+
+    let content = tokio::task::spawn_blocking({
+        let info_path = info_path.clone();
+        move || fs::read_to_string(&info_path)
+    })
+    .await
+    .unwrap_or_else(|e| {
+        Err(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            e.to_string(),
+        ))
+    })?;
+
+    let mut original_path_str = None;
+    for line in content.lines() {
+        if let Some(path_part) = line.strip_prefix("Path=") {
+            original_path_str = Some(path_part.to_string());
+            break;
+        }
+    }
+
+    let original_path_str = original_path_str
+        .ok_or_else(|| CoreError::Invalid("Path field not found in trashinfo".into()))?;
+    let dest_path = PathBuf::from(percent_decode(&original_path_str));
+
+    if let Some(parent) = dest_path.parent() {
+        create_dir(parent.to_path_buf()).await?;
+    }
+
+    move_path(trash_file_path.clone(), dest_path.clone())
+        .await
+        .map_err(|e| CoreError::Message(e.to_string()))?;
+    let _ = tokio::task::spawn_blocking(move || fs::remove_file(&info_path))
+        .await
+        .unwrap_or_else(|e| {
+            Err(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                e.to_string(),
+            ))
+        });
+
+    Ok(())
+}
+
+/// Decodes percent-encoded characters (`%XX`) in a `.trashinfo` Path value.
+fn percent_decode(s: &str) -> String {
+    let mut bytes = Vec::new();
+    let mut chars = s.chars();
+    while let Some(c) = chars.next() {
+        if c == '%' {
+            let h1 = chars.next().unwrap_or('0');
+            let h2 = chars.next().unwrap_or('0');
+            let hex_str = format!("{}{}", h1, h2);
+            if let Ok(b) = u8::from_str_radix(&hex_str, 16) {
+                bytes.push(b);
+            }
+        } else {
+            bytes.push(c as u8);
+        }
+    }
+    String::from_utf8_lossy(&bytes).into_owned()
 }

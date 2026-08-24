@@ -2,8 +2,6 @@ use super::helpers::get_perm_string;
 use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Align, Box, CheckButton, Grid, Label, Orientation};
-use std::os::unix::fs::MetadataExt;
-use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 
 pub struct PermissionCheckboxes {
@@ -195,13 +193,7 @@ pub fn apply_permissions(path: &Path, checkboxes: &PermissionCheckboxes) {
         new_mode |= 0o001;
     }
 
-    if let Ok(meta) = std::fs::metadata(path) {
-        let original_mode = meta.mode();
-        let final_mode = (original_mode & !0o777) | new_mode;
-        let mut perms = meta.permissions();
-        perms.set_mode(final_mode);
-        if let Err(e) = std::fs::set_permissions(path, perms) {
-            eprintln!("Failed to set permissions: {}", e);
-        }
+    if let Err(e) = babydra_core::services::explore::set_unix_mode(path, new_mode) {
+        eprintln!("Failed to set permissions: {}", e);
     }
 }
