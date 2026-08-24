@@ -18,7 +18,6 @@ pub use context_menu::{
     show_for_empty, show_for_file, CLIPBOARD,
 };
 pub use dialogs::{
-    archive::show_compress_log, decompress::{show_decompress_log, show_password_dialog},
     decompress_async, launch_file_or_open_with,
     properties::helpers::{count_dialog_height, count_dir_contents, get_perm_string},
     properties::permissions::{apply_permissions, build_perm_matrix, PermissionCheckboxes},

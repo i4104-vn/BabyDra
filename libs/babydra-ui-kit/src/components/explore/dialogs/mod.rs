@@ -3,12 +3,15 @@ pub mod archive;
 pub mod confirm;
 pub mod conflict;
 pub mod decompress;
+pub mod job_log;
 pub mod new_file;
 pub mod new_folder;
 pub mod open_with;
 pub mod properties;
 pub mod rename;
-pub mod shared;
+pub mod shell;
+
+pub use job_log::{show_job_log, JobStrings};
 
 pub use alert::show_alert_dialog;
 pub use archive::show_compress_dialog;

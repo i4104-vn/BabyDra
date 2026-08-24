@@ -1,3 +1,6 @@
+//! Shared "run a command job and stream its output" dialog used by both the
+//! compress and decompress flows.
+
 use gtk4::prelude::*;
 use gtk4::{
     Align, Box, Button, Label, Orientation, ProgressBar, ScrolledWindow, Spinner, TextView, Window,
@@ -6,21 +9,32 @@ use std::path::PathBuf;
 use std::rc::Rc;
 use tokio::io::{AsyncBufReadExt, BufReader};
 
-use crate::components::explore::dialogs::shared::scroll_to_end;
 use babydra_core::i18n::trans;
-use babydra_core::services::explore::spawn_compress;
 
-/// Show compress log dialog.
-pub fn show_compress_log(
-    target_paths: Vec<PathBuf>,
+/// All user-facing strings for one job run.
+pub struct JobStrings {
+    pub title: String,
+    pub running: String,
+    pub start_line: String,
+    pub success: String,
+    pub completed: String,
+    pub failed: String,
+    pub failed_detail: String,
+}
+
+/// Runs `spawn_job` (receiving the archive's parent directory) inside a modal
+/// log window, streaming stdout/stderr into a text view with progress pulse.
+/// Enables Close and refreshes via `nav_callback` when finished.
+pub fn show_job_log(
+    strings: JobStrings,
     archive_path: PathBuf,
     current_path: PathBuf,
     nav_callback: Rc<dyn Fn(PathBuf)>,
-    is_zip: bool,
-    parent: Option<&impl IsA<gtk4::Window>>,
+    parent: Option<&impl IsA<Window>>,
+    spawn_job: impl FnOnce(&PathBuf) -> Result<tokio::process::Child, std::io::Error> + 'static,
 ) {
     let window = Window::builder()
-        .title(&trans("explore.dialog_archive_title"))
+        .title(&strings.title)
         .icon_name("babydra")
         .modal(true)
         .resizable(true)
@@ -42,7 +56,7 @@ pub fn show_compress_log(
 
     let status_box = Box::new(Orientation::Horizontal, 10);
     let lbl_status = Label::builder()
-        .label(&trans("explore.compressing_running"))
+        .label(&strings.running)
         .halign(Align::Start)
         .hexpand(true)
         .build();
@@ -72,21 +86,13 @@ pub fn show_compress_log(
     text_view.add_css_class("log-textview");
 
     let buffer = text_view.buffer();
-    let fname = archive_path
-        .file_name()
-        .unwrap_or_default()
-        .to_string_lossy()
-        .to_string();
-    buffer.set_text(&format!(
-        "$ {}\n\n",
-        trans("explore.creating_archive").replace("{}", &fname)
-    ));
+    buffer.set_text(&format!("$ {}\n\n", strings.start_line));
 
     scroll.set_child(Some(&text_view));
     vbox.append(&scroll);
 
     let btn_close = Button::builder()
-        .label(&trans("explore.settings_close"))
+        .label(trans("explore.settings_close"))
         .sensitive(false)
         .halign(Align::End)
         .build();
@@ -96,9 +102,6 @@ pub fn show_compress_log(
     btn_close.connect_clicked(move |_| {
         win_c.close();
     });
-
-    let nav_c = nav_callback.clone();
-    let current_path_c = current_path.clone();
 
     let is_running = Rc::new(std::cell::Cell::new(true));
     let is_running_c = is_running.clone();
@@ -117,35 +120,48 @@ pub fn show_compress_log(
     let btn_close_c = btn_close.clone();
     let text_view_c = text_view.clone();
 
+    fn append_line(buffer: &gtk4::TextBuffer, view: &TextView, line: &str) {
+        let mut end = buffer.end_iter();
+        buffer.insert(&mut end, &format!("{}\n", line));
+        let mark = view
+            .buffer()
+            .create_mark(None, &view.buffer().end_iter(), false);
+        view.scroll_to_mark(&mark, 0.0, true, 0.0, 1.0);
+        view.buffer().delete_mark(&mark);
+    }
+
+    fn fail(
+        is_running: &Rc<std::cell::Cell<bool>>,
+        spinner: &Spinner,
+        pb: &ProgressBar,
+        lbl: &Label,
+        msg: &str,
+    ) {
+        is_running.set(false);
+        spinner.stop();
+        spinner.set_visible(false);
+        pb.set_fraction(0.0);
+        lbl.set_markup(&format!("<b><span foreground='#ef4444'>{}</span></b>", msg));
+    }
+
     glib::spawn_future_local(async move {
         let parent_dir = match archive_path.parent() {
             Some(p) => p.to_path_buf(),
             None => {
-                is_running.set(false);
-                spinner_c.stop();
-                spinner_c.set_visible(false);
-                pb_finish.set_fraction(0.0);
-                lbl_status_c.set_markup(&format!(
-                    "<b><span foreground='#ef4444'>{}</span></b>",
-                    trans("explore.compress_failed")
-                ));
+                fail(
+                    &is_running,
+                    &spinner_c,
+                    &pb_finish,
+                    &lbl_status_c,
+                    &strings.failed,
+                );
                 buffer_c.set_text(&trans("explore.invalid_parent_dir"));
                 btn_close_c.set_sensitive(true);
                 return;
             }
         };
 
-        let archive_filename = archive_path
-            .file_name()
-            .unwrap_or_default()
-            .to_string_lossy()
-            .to_string();
-        let files: Vec<String> = target_paths
-            .iter()
-            .filter_map(|p| p.file_name().map(|f| f.to_string_lossy().to_string()))
-            .collect();
-
-        match spawn_compress(&parent_dir, &archive_filename, &files, is_zip) {
+        match spawn_job(&parent_dir) {
             Ok(mut child) => {
                 let stdout = child.stdout.take().unwrap();
                 let stderr = child.stderr.take().unwrap();
@@ -157,16 +173,12 @@ pub fn show_compress_log(
                     tokio::select! {
                         res = stdout_reader.next_line() => {
                             if let Ok(Some(line)) = res {
-                                let mut end = buffer_c.end_iter();
-                                buffer_c.insert(&mut end, &format!("{}\n", line));
-                                scroll_to_end(&text_view_c);
+                                append_line(&buffer_c, &text_view_c, &line);
                             }
                         }
                         res = stderr_reader.next_line() => {
                             if let Ok(Some(line)) = res {
-                                let mut end = buffer_c.end_iter();
-                                buffer_c.insert(&mut end, &format!("{}\n", line));
-                                scroll_to_end(&text_view_c);
+                                append_line(&buffer_c, &text_view_c, &line);
                             }
                         }
                         status = child.wait() => {
@@ -177,44 +189,42 @@ pub fn show_compress_log(
                             let success = status.map(|s| s.success()).unwrap_or(false);
                             if success {
                                 pb_finish.set_fraction(1.0);
-                                lbl_status_c.set_markup(&format!("<b><span foreground='#22c55e'>{}</span></b>", trans("explore.compress_success")));
-                                let mut end = buffer_c.end_iter();
-                                buffer_c.insert(&mut end, &format!("\n✓ {}\n", trans("explore.compress_completed")));
+                                lbl_status_c.set_markup(&format!(
+                                    "<b><span foreground='#22c55e'>{}</span></b>",
+                                    strings.success
+                                ));
+                                append_line(&buffer_c, &text_view_c, &format!("\n✓ {}", strings.completed));
                             } else {
                                 pb_finish.set_fraction(0.0);
-                                lbl_status_c.set_markup(&format!("<b><span foreground='#ef4444'>{}</span></b>", trans("explore.compress_failed")));
-                                let mut end = buffer_c.end_iter();
-                                buffer_c.insert(&mut end, &format!("\n✗ {}\n", trans("explore.compress_failed_detail")));
+                                lbl_status_c.set_markup(&format!(
+                                    "<b><span foreground='#ef4444'>{}</span></b>",
+                                    strings.failed
+                                ));
+                                append_line(&buffer_c, &text_view_c, &format!("\n✗ {}", strings.failed_detail));
                             }
-                            scroll_to_end(&text_view_c);
                             break;
                         }
                     }
                 }
             }
             Err(e) => {
-                is_running.set(false);
-                spinner_c.stop();
-                spinner_c.set_visible(false);
-                pb_finish.set_fraction(0.0);
-                lbl_status_c.set_markup(&format!(
-                    "<b><span foreground='#ef4444'>{}</span></b>",
-                    trans("explore.compress_failed")
-                ));
-                let mut end = buffer_c.end_iter();
-                buffer_c.insert(
-                    &mut end,
-                    &format!(
-                        "{}\n",
-                        trans("explore.spawn_compress_failed").replace("{}", &e.to_string())
-                    ),
+                fail(
+                    &is_running,
+                    &spinner_c,
+                    &pb_finish,
+                    &lbl_status_c,
+                    &strings.failed,
                 );
-                scroll_to_end(&text_view_c);
+                append_line(
+                    &buffer_c,
+                    &text_view_c,
+                    &trans("explore.spawn_compress_failed").replace("{}", &e.to_string()),
+                );
             }
         }
 
         btn_close_c.set_sensitive(true);
-        nav_c(current_path_c);
+        nav_callback(current_path);
     });
 
     window.present();
