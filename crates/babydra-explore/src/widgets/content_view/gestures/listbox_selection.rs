@@ -154,7 +154,6 @@ pub fn wire_listbox_ctrls(
             widgets.listbox.clone(),
             widgets.list_fixed.clone(),
             widgets.list_rubberband.clone(),
-            selected_paths,
         );
     }
 }

@@ -20,7 +20,6 @@ pub fn wire_bg_controllers(
             widgets.grid_container.clone(),
             widgets.grid_fixed.clone(),
             widgets.grid_rubberband.clone(),
-            selected_paths,
         );
     }
 

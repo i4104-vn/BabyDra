@@ -6,7 +6,7 @@ pub mod dialogs;
 pub mod drag;
 pub mod helpers;
 pub mod items;
-pub mod selection;
+mod selection;
 
 pub use context_menu::{
     clipboard::{execute_paste, execute_undo, paste_from_clipboard, set_clipboard_files,

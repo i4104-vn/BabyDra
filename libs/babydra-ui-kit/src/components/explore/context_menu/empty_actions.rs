@@ -17,7 +17,7 @@ pub fn show_for_empty(
     nav_callback: Rc<dyn Fn(PathBuf)>,
     parent_window: &gtk4::Window,
 ) {
-    if current_path.to_string_lossy().contains("Trash/files") {
+    if crate::components::explore::helpers::is_in_trash(&current_path) {
         return;
     }
 

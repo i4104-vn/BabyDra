@@ -26,7 +26,7 @@ pub fn show_for_file(
     nav_callback: Rc<dyn Fn(PathBuf)>,
     parent_window: &gtk4::Window,
 ) {
-    let is_in_trash = current_path.to_string_lossy().contains("Trash/files");
+    let is_in_trash = crate::components::explore::helpers::trash::is_in_trash(&current_path);
     if is_in_trash {
         file_actions::show_for_file_trash(
             parent,
