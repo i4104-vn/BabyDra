@@ -9,9 +9,10 @@ pub fn build_content_view() -> ContentViewWidgets {
     let activate_on_single = !settings.double_click_to_open;
 
     let scroll_win = ScrolledWindow::new();
-    // The per-view inner scrolled windows own scrolling; keep this outer one inert
+    // The per-view inner scrolled windows own scrolling; this outer one only
+    // clips, so it must not request the full natural height of the content
     scroll_win.set_overlay_scrolling(false);
-    scroll_win.set_vscrollbar_policy(gtk4::PolicyType::Never);
+    scroll_win.set_vscrollbar_policy(gtk4::PolicyType::Automatic);
     scroll_win.set_hscrollbar_policy(gtk4::PolicyType::Never);
 
     let stack = Stack::new();
