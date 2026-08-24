@@ -116,18 +116,10 @@ pub fn wire_grid_ctrls(
                 }
                 glib::Propagation::Stop
             } else if has_ctrl && (keyval == gtk4::gdk::Key::x || keyval == gtk4::gdk::Key::X) {
-                crate::widgets::clipboard_ops::put_on_clipboard(
-                    sel_paths.borrow().clone(),
-                    true,
-                    true,
-                );
+                crate::widgets::clipboard_ops::put_on_clipboard(sel_paths.borrow().clone(), true);
                 glib::Propagation::Stop
             } else if has_ctrl && (keyval == gtk4::gdk::Key::c || keyval == gtk4::gdk::Key::C) {
-                crate::widgets::clipboard_ops::put_on_clipboard(
-                    sel_paths.borrow().clone(),
-                    false,
-                    true,
-                );
+                crate::widgets::clipboard_ops::put_on_clipboard(sel_paths.borrow().clone(), false);
                 glib::Propagation::Stop
             } else if has_ctrl && (keyval == gtk4::gdk::Key::v || keyval == gtk4::gdk::Key::V) {
                 crate::widgets::clipboard_ops::paste(

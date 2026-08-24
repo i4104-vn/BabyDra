@@ -9,22 +9,20 @@ use babydra_ui_kit::components::explore::{apply_cut_everywhere, is_in_trash, CLI
 use std::path::PathBuf;
 use std::rc::Rc;
 
-/// Places paths on both the GDK clipboard and the in-app clipboard state.
-///
-/// `dim` mirrors the operation onto file icons (dimmed cut icons / cleared
-/// dimming on copy), matching the Ctrl+X/Ctrl+C presentation.
-pub fn put_on_clipboard(paths: Vec<PathBuf>, is_cut: bool, dim: bool) {
+/// Places paths on both the GDK clipboard and the in-app clipboard state,
+/// then mirrors the operation onto the visible icons: cut items get dimmed,
+/// a copy clears any previous dimming. This makes the change visible
+/// immediately without waiting for a directory reload.
+pub fn put_on_clipboard(paths: Vec<PathBuf>, is_cut: bool) {
     if paths.is_empty() {
         return;
     }
     set_clipboard_files(&paths, is_cut);
     CLIPBOARD.with(|cb| cb.replace(Some((paths.clone(), is_cut))));
-    if dim {
-        if is_cut {
-            apply_cut_everywhere(&paths);
-        } else {
-            apply_cut_everywhere(&[]);
-        }
+    if is_cut {
+        apply_cut_everywhere(&paths);
+    } else {
+        apply_cut_everywhere(&[]);
     }
 }
 

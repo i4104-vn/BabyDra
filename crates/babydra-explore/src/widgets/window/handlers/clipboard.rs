@@ -89,7 +89,7 @@ pub fn create_clipboard_callbacks(
             if paths.is_empty() {
                 return;
             }
-            crate::widgets::clipboard_ops::put_on_clipboard(paths, true, false);
+            crate::widgets::clipboard_ops::put_on_clipboard(paths, true);
             let p = session.borrow().active_tab().current_path.clone();
             if let Some(ref f) = *nav.borrow() {
                 f(act.get(), p);
@@ -107,7 +107,7 @@ pub fn create_clipboard_callbacks(
             if paths.is_empty() {
                 return;
             }
-            crate::widgets::clipboard_ops::put_on_clipboard(paths, false, false);
+            crate::widgets::clipboard_ops::put_on_clipboard(paths, false);
             let p = session.borrow().active_tab().current_path.clone();
             if let Some(ref f) = *nav.borrow() {
                 f(act.get(), p);
