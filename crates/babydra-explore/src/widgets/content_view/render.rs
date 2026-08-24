@@ -211,6 +211,32 @@ fn update_content_internal(handle: &ContentViewHandle, silent: bool) {
     let selected_paths = handle.selected_paths.clone();
     let handle_c = handle.clone();
 
+    // Skip the expensive full rebuild when the rendered view state is unchanged
+    // (e.g. watcher events that do not alter the listing)
+    {
+        use std::hash::{Hash, Hasher};
+        let mut hasher = std::collections::hash_map::DefaultHasher::new();
+        current_path.hash(&mut hasher);
+        current_mode.hash(&mut hasher);
+        sort_mode.hash(&mut hasher);
+        for e in &entries {
+            e.path.hash(&mut hasher);
+            e.size.hash(&mut hasher);
+            e.modified.hash(&mut hasher);
+            e.is_hidden.hash(&mut hasher);
+        }
+        for p in selected_paths.borrow().iter() {
+            p.hash(&mut hasher);
+        }
+        let signature = hasher.finish();
+
+        let mut last = handle.render_signature.borrow_mut();
+        if *last == Some(signature) && *handle.render_generation.borrow() > 0 {
+            return;
+        }
+        *last = Some(signature);
+    }
+
     // Increment and capture the render generation
     let gen = {
         let mut g = handle.render_generation.borrow_mut();

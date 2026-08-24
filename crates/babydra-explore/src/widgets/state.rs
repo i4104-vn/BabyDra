@@ -79,6 +79,8 @@ pub struct ContentViewHandle {
     pub selection_callback: Rc<dyn Fn(Vec<PathBuf>)>,
     pub selected_paths: Rc<RefCell<Vec<PathBuf>>>,
     pub render_generation: Rc<RefCell<u64>>,
+    /// Hash of the last rendered view state; used to skip redundant full rebuilds.
+    pub render_signature: Rc<RefCell<Option<u64>>>,
     pub history: Rc<RefCell<Vec<PathBuf>>>,
     pub history_index: Rc<RefCell<usize>>,
 }

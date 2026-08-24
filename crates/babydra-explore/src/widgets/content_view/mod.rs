@@ -53,6 +53,7 @@ pub fn create_content_view(
     }) as Rc<dyn Fn(Vec<PathBuf>)>;
 
     let render_generation = Rc::new(RefCell::new(0u64));
+    let render_signature: Rc<RefCell<Option<u64>>> = Rc::new(RefCell::new(None));
     let history = Rc::new(RefCell::new(Vec::<PathBuf>::new()));
     let history_index = Rc::new(RefCell::new(0usize));
 
@@ -76,6 +77,7 @@ pub fn create_content_view(
         selection_callback: sc_fn.clone(),
         selected_paths: selected_paths.clone(),
         render_generation: render_generation.clone(),
+        render_signature: render_signature.clone(),
         history: history.clone(),
         history_index: history_index.clone(),
     };
