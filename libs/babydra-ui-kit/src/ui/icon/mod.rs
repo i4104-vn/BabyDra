@@ -137,6 +137,9 @@ fn get_icon_svg_pair(name: &str) -> Option<(&'static str, &'static str)> {
         "minus" => Some((DARK_MINUS_SVG, LIGHT_MINUS_SVG)),
         "rect" => Some((DARK_RECT_SVG, LIGHT_RECT_SVG)),
         "blur" => Some((DARK_BLUR_SVG, LIGHT_BLUR_SVG)),
+        "ellipse" | "circle" => Some((DARK_ELLIPSE_SVG, LIGHT_ELLIPSE_SVG)),
+        "arrow" => Some((DARK_ARROW_SVG, LIGHT_ARROW_SVG)),
+        "line" => Some((DARK_LINE_SVG, LIGHT_LINE_SVG)),
         "zoom-in" => Some((DARK_ZOOM_IN_SVG, LIGHT_ZOOM_IN_SVG)),
         "zoom-out" => Some((DARK_ZOOM_OUT_SVG, LIGHT_ZOOM_OUT_SVG)),
         "zoom-fit" | "zoom-original" | "zoom-reset" => {

@@ -11,7 +11,19 @@ use babydra_core::services::screenshot::trigger_save;
 use super::canvas::{draw_editor_canvas, setup_editor_gest};
 use super::clipboard::copy_to_clipboard;
 use super::color_popover::create_color_popover;
+use super::shape_popover::create_shape_popover;
 use crate::widgets::editor::setup_editor_keys;
+
+/// Creates a flat toolbar button with the given icon.
+fn toolbar_button(icon: &str, tooltip: &str) -> gtk4::Button {
+    let btn = gtk4::Button::builder()
+        .child(&babydra_ui_kit::ui::icon::get_icon(icon, 16))
+        .build();
+    btn.set_tooltip_text(Some(tooltip));
+    btn.add_css_class("flat");
+    btn.add_css_class("screenshot-toolbar-btn");
+    btn
+}
 
 /// Constructs the screenshot editor window, maps its overlay design,
 /// initializes the canvas, and builds the editing toolbars.
@@ -53,14 +65,24 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
     overlay.set_child(Some(&drawing_area));
 
     let state_draw = state.clone();
+    let canvas_scale = drawing_area.clone();
+    let layer_cache: super::canvas::SharedCache = Rc::new(RefCell::new(None));
     drawing_area.set_draw_func(move |_, cr, width, height| {
+        let scale_factor = canvas_scale.scale_factor();
         {
             let mut s_mut = state_draw.borrow_mut();
             s_mut.canvas_w = width as f64;
             s_mut.canvas_h = height as f64;
         }
         let s = state_draw.borrow();
-        draw_editor_canvas(cr, &s, width as f64, height as f64);
+        draw_editor_canvas(
+            cr,
+            &s,
+            width as f64,
+            height as f64,
+            &layer_cache,
+            scale_factor,
+        );
     });
 
     // Floating macOS-style Glassmorphic Toolbar at the bottom-center
@@ -78,42 +100,23 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
     toolbar.set_margin_bottom(8);
 
     // Tool buttons
-    let btn_reset = gtk4::Button::builder()
-        .child(&babydra_ui_kit::ui::icon::get_icon("refresh", 16))
-        .build();
-    btn_reset.set_tooltip_text(Some(&babydra_core::i18n::trans("screenshot.reset_tooltip")));
-    btn_reset.add_css_class("flat");
-    btn_reset.add_css_class("screenshot-toolbar-btn");
-
-    let btn_pen = gtk4::Button::builder()
-        .child(&babydra_ui_kit::ui::icon::get_icon("edit", 16))
-        .build();
-    btn_pen.set_tooltip_text(Some(&babydra_core::i18n::trans("screenshot.pen_tooltip")));
-    btn_pen.add_css_class("flat");
-    btn_pen.add_css_class("screenshot-toolbar-btn");
-
-    let btn_rect = gtk4::Button::builder()
-        .child(&babydra_ui_kit::ui::icon::get_icon("rect", 16))
-        .build();
-    btn_rect.set_tooltip_text(Some(&babydra_core::i18n::trans("screenshot.rect_tooltip")));
-    btn_rect.add_css_class("flat");
-    btn_rect.add_css_class("screenshot-toolbar-btn");
-
-    let btn_blur = gtk4::Button::builder()
-        .child(&babydra_ui_kit::ui::icon::get_icon("blur", 16))
-        .build();
-    btn_blur.set_tooltip_text(Some(&babydra_core::i18n::trans("screenshot.blur_tooltip")));
-    btn_blur.add_css_class("flat");
-    btn_blur.add_css_class("screenshot-toolbar-btn");
-
-    let btn_eraser = gtk4::Button::builder()
-        .child(&babydra_ui_kit::ui::icon::get_icon("broom", 16))
-        .build();
-    btn_eraser.set_tooltip_text(Some(&babydra_core::i18n::trans(
-        "screenshot.eraser_tooltip",
-    )));
-    btn_eraser.add_css_class("flat");
-    btn_eraser.add_css_class("screenshot-toolbar-btn");
+    let btn_reset = toolbar_button(
+        "refresh",
+        &babydra_core::i18n::trans("screenshot.reset_tooltip"),
+    );
+    let btn_pen = toolbar_button("edit", &babydra_core::i18n::trans("screenshot.pen_tooltip"));
+    let btn_shape = toolbar_button(
+        "rect",
+        &babydra_core::i18n::trans("screenshot.shape_tooltip"),
+    );
+    let btn_blur = toolbar_button(
+        "blur",
+        &babydra_core::i18n::trans("screenshot.blur_tooltip"),
+    );
+    let btn_eraser = toolbar_button(
+        "broom",
+        &babydra_core::i18n::trans("screenshot.eraser_tooltip"),
+    );
 
     let color_btn = gtk4::Button::new();
     color_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("screenshot.color_tooltip")));
@@ -141,7 +144,7 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
         cr.stroke().unwrap();
     });
 
-    let popover = create_color_popover(&color_btn, state.clone(), &color_dot);
+    let popover = create_color_popover(&color_btn, state.clone(), &color_dot, &drawing_area);
 
     let popover_c = popover.clone();
     color_btn.connect_clicked(move |_| {
@@ -159,42 +162,57 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
         s.crop_w = 0.0;
         s.crop_h = 0.0;
         s.drawings.clear();
+        s.selected_drawing = None;
         s.active_stroke = None;
         s.active_rect = None;
+        s.active_line = None;
         s.current_tool = Tool::Select;
+        s.invalidate();
+        drop(s);
         toolbar_wrapper_reset.set_visible(false);
         canvas_reset.queue_draw();
     });
 
-    // Tool buttons click events
+    // Tool buttons click events: every tool button clears the highlight of the
+    // others; the shared shapes button owns Rect/Ellipse/Line/Arrow via popover.
+    let tool_buttons = vec![
+        btn_pen.clone(),
+        btn_shape.clone(),
+        btn_blur.clone(),
+        btn_eraser.clone(),
+    ];
+
     let tools = vec![
         (btn_pen.clone(), Tool::Pen),
-        (btn_rect.clone(), Tool::Rect),
         (btn_blur.clone(), Tool::Blur),
         (btn_eraser.clone(), Tool::Eraser),
     ];
 
-    let tools_list = Rc::new(tools.clone());
     for (btn, tool) in tools {
         let state_tool = state.clone();
         let btn_clone = btn.clone();
-        let tools_clone = tools_list.clone();
+        let tool_buttons_clone = tool_buttons.clone();
         btn.connect_clicked(move |_| {
             state_tool.borrow_mut().current_tool = tool;
-            for (t_btn, _) in tools_clone.iter() {
+            for t_btn in &tool_buttons_clone {
                 t_btn.remove_css_class("selected");
             }
             btn_clone.add_css_class("selected");
         });
     }
 
+    // Shared shapes popover
+    let shape_popover = create_shape_popover(&btn_shape, state.clone(), &tool_buttons);
+    let shape_popover_c = shape_popover.clone();
+    btn_shape.connect_clicked(move |_| {
+        shape_popover_c.popup();
+    });
+
     // Action buttons
-    let btn_copy = gtk4::Button::builder()
-        .child(&babydra_ui_kit::ui::icon::get_icon("copy", 16))
-        .build();
-    btn_copy.set_tooltip_text(Some(&babydra_core::i18n::trans("screenshot.copy_tooltip")));
-    btn_copy.add_css_class("flat");
-    btn_copy.add_css_class("screenshot-toolbar-btn");
+    let btn_copy = toolbar_button(
+        "copy",
+        &babydra_core::i18n::trans("screenshot.copy_tooltip"),
+    );
 
     let state_copy = state.clone();
     let win_copy = window.clone();
@@ -204,12 +222,10 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
         }
     });
 
-    let btn_save = gtk4::Button::builder()
-        .child(&babydra_ui_kit::ui::icon::get_icon("download", 16))
-        .build();
-    btn_save.set_tooltip_text(Some(&babydra_core::i18n::trans("screenshot.save_tooltip")));
-    btn_save.add_css_class("flat");
-    btn_save.add_css_class("screenshot-toolbar-btn");
+    let btn_save = toolbar_button(
+        "download",
+        &babydra_core::i18n::trans("screenshot.save_tooltip"),
+    );
 
     let state_save = state.clone();
     let win_save = window.clone();
@@ -219,14 +235,10 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
         }
     });
 
-    let btn_cancel = gtk4::Button::builder()
-        .child(&babydra_ui_kit::ui::icon::get_icon("close", 16))
-        .build();
-    btn_cancel.set_tooltip_text(Some(&babydra_core::i18n::trans(
-        "screenshot.cancel_tooltip",
-    )));
-    btn_cancel.add_css_class("flat");
-    btn_cancel.add_css_class("screenshot-toolbar-btn");
+    let btn_cancel = toolbar_button(
+        "close",
+        &babydra_core::i18n::trans("screenshot.cancel_tooltip"),
+    );
 
     let win_cancel = window.clone();
     btn_cancel.connect_clicked(move |_| {
@@ -240,10 +252,9 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
     sep0.add_css_class("capsule-separator");
     toolbar.append(&sep0);
 
-    toolbar.append(&btn_pen);
-    toolbar.append(&btn_rect);
-    toolbar.append(&btn_blur);
-    toolbar.append(&btn_eraser);
+    for btn in [&btn_pen, &btn_shape, &btn_blur, &btn_eraser] {
+        toolbar.append(btn);
+    }
 
     let sep1 = gtk4::Label::new(Some("│"));
     sep1.add_css_class("capsule-separator");
@@ -262,10 +273,16 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
     overlay.add_overlay(&toolbar_wrapper);
 
     // Mouse gestures setup
-    setup_editor_gest(&drawing_area, state.clone(), &toolbar_wrapper, &btn_pen);
+    setup_editor_gest(
+        &drawing_area,
+        state.clone(),
+        &toolbar_wrapper,
+        &btn_pen,
+        &popover,
+    );
 
     // Keyboard shortcuts setup
-    setup_editor_keys(&window, state.clone());
+    setup_editor_keys(&window, state.clone(), &drawing_area);
 
     window
 }

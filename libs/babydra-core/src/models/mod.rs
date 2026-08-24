@@ -44,6 +44,6 @@ pub use config::*;
 pub use explore::{
     DirectoryModel, FileEntry, FileType, SessionState, SortColumn, SortOrder, TabState,
 };
-pub use screenshot::{Drawing, EditorState, Tool};
+pub use screenshot::{Drawing, EditorState, Tool, STROKE_WIDTHS};
 pub use settings::*;
 pub use shell::*;

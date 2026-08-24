@@ -3,16 +3,60 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use babydra_core::models::{Drawing, EditorState, Tool};
-use babydra_core::services::screenshot::draw_pixelated_rect;
+use babydra_core::services::screenshot::{draw_pixelated_rect, render_shape};
 
-/// Draws the background image, crop selection window shadow, and annotation marks (strokes, boxes, blur).
-pub fn draw_editor_canvas(cr: &cairo::Context, s: &EditorState, width: f64, height: f64) {
+/// Cached static scene (background + overlay + finished drawings).
+/// Rebuilt only when content version, canvas size, or scale factor changes,
+/// so pointer drags only repaint the active shape on top of a cheap blit.
+pub(crate) struct LayerCache {
+    version: u64,
+    width: i32,
+    height: i32,
+    scale: i32,
+    surface: cairo::ImageSurface,
+}
+
+/// Handle shared between the draw function and gesture controllers.
+pub type SharedCache = Rc<RefCell<Option<LayerCache>>>;
+
+/// Renders a blur annotation, mapping canvas-space bounds into pixbuf-space
+/// sampling coordinates so the mosaic always samples the correct region.
+fn draw_blur_on_canvas(cr: &cairo::Context, s: &EditorState, x: f64, y: f64, w: f64, h: f64) {
+    let bg_w = s.bg_pixbuf.width();
+    let bg_h = s.bg_pixbuf.height();
+    let sx = if s.canvas_w > 0.0 {
+        bg_w as f64 / s.canvas_w
+    } else {
+        1.0
+    };
+    let sy = if s.canvas_h > 0.0 {
+        bg_h as f64 / s.canvas_h
+    } else {
+        1.0
+    };
+
+    let src_x = (x * sx).floor() as i32;
+    let src_y = (y * sy).floor() as i32;
+    let src_w = ((x + w) * sx).ceil() as i32 - src_x;
+    let src_h = ((y + h) * sy).ceil() as i32 - src_y;
+    let src_x = src_x.clamp(0, bg_w - 2);
+    let src_y = src_y.clamp(0, bg_h - 2);
+    let src_w = src_w.clamp(2, bg_w - src_x);
+    let src_h = src_h.clamp(2, bg_h - src_y);
+
+    draw_pixelated_rect(cr, &s.bg_pixbuf, (src_x, src_y, src_w, src_h), (x, y, w, h));
+}
+
+/// Draws everything that only changes when editor content changes: background
+/// screenshot, dark overlay with crop hole, crop border, finished drawings, and
+/// the selection highlight.
+fn render_scene(cr: &cairo::Context, s: &EditorState, width: f64, height: f64) {
     let bg_w = s.bg_pixbuf.width() as f64;
     let bg_h = s.bg_pixbuf.height() as f64;
 
     cr.set_antialias(cairo::Antialias::Best);
 
-    // 1. Draw Background Screenshot accurately scaled to canvas viewport
+    // 1. Background screenshot accurately scaled to canvas viewport
     cr.save().unwrap();
     if width > 0.0 && height > 0.0 && (bg_w != width || bg_h != height) {
         cr.scale(width / bg_w, height / bg_h);
@@ -22,84 +66,131 @@ pub fn draw_editor_canvas(cr: &cairo::Context, s: &EditorState, width: f64, heig
     cr.paint().unwrap();
     cr.restore().unwrap();
 
-    // 2. Draw Dark Overlay
-    cr.set_source_rgba(0.0, 0.0, 0.0, 0.45);
-
+    // 2. Dark overlay
     let has_clip = s.has_selection && s.crop_w > 5.0 && s.crop_h > 5.0;
+    cr.set_source_rgba(0.0, 0.0, 0.0, 0.45);
     if has_clip {
-        let rx = s.crop_x;
-        let ry = s.crop_y;
-        let rw = s.crop_w;
-        let rh = s.crop_h;
-
         // Clip out the selection area so it remains bright
         cr.save().unwrap();
         cr.rectangle(0.0, 0.0, width, height);
-        cr.rectangle(rx, ry + rh, rw, -rh); // Hole
+        cr.rectangle(s.crop_x, s.crop_y + s.crop_h, s.crop_w, -s.crop_h);
         cr.set_fill_rule(cairo::FillRule::EvenOdd);
         cr.fill().unwrap();
         cr.restore().unwrap();
 
-        // Draw Selection Border
-        cr.set_source_rgba(0.23, 0.51, 0.96, 0.85); // Blue
+        // Selection border
+        cr.set_source_rgba(0.23, 0.51, 0.96, 0.85);
         cr.set_line_width(2.0);
-        cr.rectangle(rx, ry, rw, rh);
+        cr.rectangle(s.crop_x, s.crop_y, s.crop_w, s.crop_h);
         cr.stroke().unwrap();
     } else {
         cr.paint().unwrap();
     }
 
-    // Clip drawings to the crop selection so they don't draw over the dark overlay
+    // Clip drawings to the crop selection so they never cover the dark overlay
     if has_clip {
         cr.save().unwrap();
         cr.rectangle(s.crop_x, s.crop_y, s.crop_w, s.crop_h);
         cr.clip();
     }
 
-    // 3. Draw All Completed Annotations
+    // 3. Finished annotations
     for drawing in &s.drawings {
         match drawing {
-            Drawing::Blur { x, y, w, h } => {
-                draw_pixelated_rect(cr, &s.bg_pixbuf, *x, *y, *w, *h);
-            }
-            Drawing::Stroke {
-                points,
-                color,
-                width,
-            } => {
-                if points.len() < 2 {
-                    continue;
-                }
-                cr.set_source_rgb(color.0, color.1, color.2);
-                cr.set_line_width(*width);
-                cr.set_line_cap(cairo::LineCap::Round);
-                cr.set_line_join(cairo::LineJoin::Round);
-                cr.move_to(points[0].0, points[0].1);
-                for p in &points[1..] {
-                    cr.line_to(p.0, p.1);
-                }
-                cr.stroke().unwrap();
-            }
-            Drawing::Rect {
-                x,
-                y,
-                w,
-                h,
-                color,
-                width,
-            } => {
-                cr.set_source_rgb(color.0, color.1, color.2);
-                cr.set_line_width(*width);
-                cr.rectangle(*x, *y, *w, *h);
-                cr.stroke().unwrap();
-            }
+            Drawing::Blur { x, y, w, h } => draw_blur_on_canvas(cr, s, *x, *y, *w, *h),
+            other => render_shape(cr, other),
         }
+    }
+
+    // 4. Highlight for the drawing selected via right-click
+    if let Some(idx) = s.selected_drawing {
+        if let Some(d) = s.drawings.get(idx) {
+            let (bx, by, bw, bh) = d.bounds();
+            cr.set_source_rgba(0.23, 0.51, 0.96, 0.95);
+            cr.set_line_width(1.5);
+            cr.set_dash(&[6.0, 4.0], 0.0);
+            cr.rectangle(bx, by, bw, bh);
+            cr.stroke().unwrap();
+            cr.set_dash(&[], 0.0);
+        }
+    }
+
+    if has_clip {
+        cr.restore().unwrap();
+    }
+}
+
+fn render_cache_surface(
+    s: &EditorState,
+    width: i32,
+    height: i32,
+    scale: i32,
+) -> Option<cairo::ImageSurface> {
+    let surface =
+        cairo::ImageSurface::create(cairo::Format::ARgb32, width * scale, height * scale).ok()?;
+    let cr = cairo::Context::new(&surface).ok()?;
+    cr.scale(scale as f64, scale as f64);
+    render_scene(&cr, s, width as f64, height as f64);
+    Some(surface)
+}
+
+/// Draws the cached static layer plus the in-progress shape being dragged.
+pub fn draw_editor_canvas(
+    cr: &cairo::Context,
+    s: &EditorState,
+    width: f64,
+    height: f64,
+    cache: &SharedCache,
+    scale_factor: i32,
+) {
+    let wi = width.max(1.0) as i32;
+    let hi = height.max(1.0) as i32;
+
+    let mut cache_ref = cache.borrow_mut();
+    let stale = match cache_ref.as_ref() {
+        Some(c) => {
+            c.version != s.render_version
+                || c.width != wi
+                || c.height != hi
+                || c.scale != scale_factor
+        }
+        None => true,
+    };
+    if stale {
+        if let Some(surface) = render_cache_surface(s, wi, hi, scale_factor) {
+            *cache_ref = Some(LayerCache {
+                version: s.render_version,
+                width: wi,
+                height: hi,
+                scale: scale_factor,
+                surface,
+            });
+        }
+    }
+
+    // Blit the cached layer 1:1 in device pixels for maximum sharpness
+    if let Some(c) = cache_ref.as_ref() {
+        cr.save().unwrap();
+        cr.scale(1.0 / c.scale as f64, 1.0 / c.scale as f64);
+        cr.set_source_surface(&c.surface, 0.0, 0.0).unwrap();
+        cr.source().set_filter(cairo::Filter::Nearest);
+        cr.paint().unwrap();
+        cr.restore().unwrap();
+    }
+
+    // Live preview of the shape currently being drawn
+    cr.set_antialias(cairo::Antialias::Best);
+    let has_clip = s.has_selection && s.crop_w > 5.0 && s.crop_h > 5.0;
+    if has_clip {
+        cr.save().unwrap();
+        cr.rectangle(s.crop_x, s.crop_y, s.crop_w, s.crop_h);
+        cr.clip();
     }
 
     if let Some(points) = &s.active_stroke {
         if points.len() >= 2 {
             cr.set_source_rgb(s.current_color.0, s.current_color.1, s.current_color.2);
-            cr.set_line_width(3.5);
+            cr.set_line_width(s.current_width);
             cr.set_line_cap(cairo::LineCap::Round);
             cr.set_line_join(cairo::LineJoin::Round);
             cr.move_to(points[0].0, points[0].1);
@@ -111,14 +202,58 @@ pub fn draw_editor_canvas(cr: &cairo::Context, s: &EditorState, width: f64, heig
     }
 
     if let Some((x, y, w, h)) = s.active_rect {
-        if s.current_tool == Tool::Rect {
-            cr.set_source_rgb(s.current_color.0, s.current_color.1, s.current_color.2);
-            cr.set_line_width(3.0);
-            cr.rectangle(x, y, w, h);
-            cr.stroke().unwrap();
-        } else if s.current_tool == Tool::Blur {
-            draw_pixelated_rect(cr, &s.bg_pixbuf, x, y, w, h);
+        match s.current_tool {
+            Tool::Rect => {
+                render_shape(
+                    cr,
+                    &Drawing::Rect {
+                        x,
+                        y,
+                        w,
+                        h,
+                        color: s.current_color,
+                        width: s.current_width,
+                    },
+                );
+            }
+            Tool::Ellipse => {
+                render_shape(
+                    cr,
+                    &Drawing::Ellipse {
+                        x,
+                        y,
+                        w,
+                        h,
+                        color: s.current_color,
+                        width: s.current_width,
+                    },
+                );
+            }
+            Tool::Blur => draw_blur_on_canvas(cr, s, x, y, w, h),
+            _ => {}
         }
+    }
+
+    if let Some((x1, y1, x2, y2)) = s.active_line {
+        let drawing = match s.current_tool {
+            Tool::Line => Drawing::Line {
+                x1,
+                y1,
+                x2,
+                y2,
+                color: s.current_color,
+                width: s.current_width,
+            },
+            _ => Drawing::Arrow {
+                x1,
+                y1,
+                x2,
+                y2,
+                color: s.current_color,
+                width: s.current_width,
+            },
+        };
+        render_shape(cr, &drawing);
     }
 
     if has_clip {
@@ -126,14 +261,38 @@ pub fn draw_editor_canvas(cr: &cairo::Context, s: &EditorState, width: f64, heig
     }
 }
 
-/// Sets up pointer/mouse drag gestures on the canvas to handle regional selection,
-/// free-hand strokes, drawing boxes, and eraser/blur selection.
+/// Selects the topmost drawing under (`px`, `py`), returning `true` when one was hit.
+fn pick_drawing(s: &mut EditorState, px: f64, py: f64) -> bool {
+    let found = s.drawings.iter().rposition(|d| d.hit_test(px, py));
+    let changed = s.selected_drawing != found;
+    s.selected_drawing = found;
+    if changed {
+        s.invalidate();
+    }
+    found.is_some()
+}
+
+/// Removes the currently selected drawing, keeping indices consistent.
+pub fn delete_selected(s: &mut EditorState) {
+    if let Some(idx) = s.selected_drawing.take() {
+        if idx < s.drawings.len() {
+            s.drawings.remove(idx);
+            s.invalidate();
+        }
+    }
+}
+
+/// Sets up pointer/mouse gestures on the canvas to handle regional selection,
+/// free-hand strokes, shapes, eraser, and right-click drawing editing.
 pub fn setup_editor_gest(
     drawing_area: &gtk4::DrawingArea,
     state: Rc<RefCell<EditorState>>,
     toolbar_wrapper: &gtk4::Box,
     btn_pen: &gtk4::Button,
+    style_popover: &gtk4::Popover,
 ) {
+    let cache: SharedCache = Rc::new(RefCell::new(None));
+
     let drag_gesture = gtk4::GestureDrag::new();
     let state_mouse = state.clone();
     let canvas_mouse = drawing_area.clone();
@@ -157,6 +316,11 @@ pub fn setup_editor_gest(
             }
         }
 
+        // Any left-drag clears the current selection
+        if s.selected_drawing.take().is_some() {
+            s.invalidate();
+        }
+
         s.drag_start_x = start_x;
         s.drag_start_y = start_y;
 
@@ -169,26 +333,19 @@ pub fn setup_editor_gest(
                 s.crop_w = 0.0;
                 s.crop_h = 0.0;
                 toolbar_wrapper_begin.set_visible(false);
+                s.invalidate();
             }
             Tool::Pen => {
                 s.active_stroke = Some(vec![(start_x, start_y)]);
             }
-            Tool::Rect | Tool::Blur => {
+            Tool::Rect | Tool::Ellipse | Tool::Blur => {
                 s.active_rect = Some((start_x, start_y, 0.0, 0.0));
             }
+            Tool::Line | Tool::Arrow => {
+                s.active_line = Some((start_x, start_y, start_x, start_y));
+            }
             Tool::Eraser => {
-                let click_p = (start_x, start_y);
-                s.drawings.retain(|d| match d {
-                    Drawing::Stroke { points, .. } => !points.iter().any(|p| {
-                        ((p.0 - click_p.0).powi(2) + (p.1 - click_p.1).powi(2)).sqrt() < 10.0
-                    }),
-                    Drawing::Rect { x, y, w, h, .. } | Drawing::Blur { x, y, w, h } => {
-                        !(click_p.0 >= *x
-                            && click_p.0 <= x + w
-                            && click_p.1 >= *y
-                            && click_p.1 <= y + h)
-                    }
-                });
+                erase_at(s, start_x, start_y);
             }
         }
         canvas_mouse.queue_draw();
@@ -210,6 +367,8 @@ pub fn setup_editor_gest(
                     s.crop_y = ry;
                     s.crop_w = rw;
                     s.crop_h = rh;
+                    // The overlay hole must follow the drag, so refresh the cache
+                    s.invalidate();
                 }
             }
             Tool::Pen => {
@@ -218,17 +377,23 @@ pub fn setup_editor_gest(
                 if let Some(points) = &mut s.active_stroke {
                     let last = points.last().copied().unwrap_or((0.0, 0.0));
                     let next = (start_x + offset_x, start_y + offset_y);
-                    if ((last.0 - next.0).powi(2) + (last.1 - next.1).powi(2)).sqrt() > 2.0 {
+                    if (last.0 - next.0).powi(2) + (last.1 - next.1).powi(2) > 4.0 {
                         points.push(next);
                     }
                 }
             }
-            Tool::Rect | Tool::Blur => {
+            Tool::Rect | Tool::Ellipse | Tool::Blur => {
                 let rx = s.drag_start_x.min(s.drag_start_x + offset_x);
                 let ry = s.drag_start_y.min(s.drag_start_y + offset_y);
                 let rw = offset_x.abs();
                 let rh = offset_y.abs();
                 s.active_rect = Some((rx, ry, rw, rh));
+            }
+            Tool::Line | Tool::Arrow => {
+                if let Some(line) = &mut s.active_line {
+                    line.2 = s.drag_start_x + offset_x;
+                    line.3 = s.drag_start_y + offset_y;
+                }
             }
             _ => {}
         }
@@ -237,6 +402,7 @@ pub fn setup_editor_gest(
 
     let state_mouse_end = state.clone();
     let toolbar_wrapper_end = toolbar_wrapper.clone();
+    let cache_end = cache.clone();
     let canvas_mouse_end = drawing_area.clone();
     let btn_pen_end = btn_pen.clone();
     drag_gesture.connect_drag_end(move |_, _, _| {
@@ -255,21 +421,23 @@ pub fn setup_editor_gest(
                     s.crop_w = 0.0;
                     s.crop_h = 0.0;
                 }
+                s.invalidate();
             }
             Tool::Pen => {
                 let color = s.current_color;
+                let width = s.current_width;
                 if let Some(points) = s.active_stroke.take() {
                     if points.len() >= 2 {
                         s.drawings.push(Drawing::Stroke {
                             points,
                             color,
-                            width: 3.5,
+                            width,
                         });
+                        s.invalidate();
                     }
                 }
             }
             Tool::Rect => {
-                let color = s.current_color;
                 if let Some((x, y, w, h)) = s.active_rect.take() {
                     if w > 5.0 && h > 5.0 {
                         s.drawings.push(Drawing::Rect {
@@ -277,9 +445,25 @@ pub fn setup_editor_gest(
                             y,
                             w,
                             h,
-                            color,
-                            width: 3.0,
+                            color: s.current_color,
+                            width: s.current_width,
                         });
+                        s.invalidate();
+                    }
+                }
+            }
+            Tool::Ellipse => {
+                if let Some((x, y, w, h)) = s.active_rect.take() {
+                    if w > 5.0 && h > 5.0 {
+                        s.drawings.push(Drawing::Ellipse {
+                            x,
+                            y,
+                            w,
+                            h,
+                            color: s.current_color,
+                            width: s.current_width,
+                        });
+                        s.invalidate();
                     }
                 }
             }
@@ -287,19 +471,86 @@ pub fn setup_editor_gest(
                 if let Some((x, y, w, h)) = s.active_rect.take() {
                     if w > 5.0 && h > 5.0 {
                         s.drawings.push(Drawing::Blur { x, y, w, h });
+                        s.invalidate();
                     }
                 }
             }
-            _ => {}
+            Tool::Line => {
+                if let Some((x1, y1, x2, y2)) = s.active_line.take() {
+                    if (x2 - x1).hypot(y2 - y1) > 8.0 {
+                        s.drawings.push(Drawing::Line {
+                            x1,
+                            y1,
+                            x2,
+                            y2,
+                            color: s.current_color,
+                            width: s.current_width,
+                        });
+                        s.invalidate();
+                    }
+                }
+            }
+            Tool::Arrow => {
+                if let Some((x1, y1, x2, y2)) = s.active_line.take() {
+                    if (x2 - x1).hypot(y2 - y1) > 8.0 {
+                        s.drawings.push(Drawing::Arrow {
+                            x1,
+                            y1,
+                            x2,
+                            y2,
+                            color: s.current_color,
+                            width: s.current_width,
+                        });
+                        s.invalidate();
+                    }
+                }
+            }
+            Tool::Eraser => {}
         }
 
-        if s.has_selection {
-            toolbar_wrapper_end.set_visible(true);
-        } else {
-            toolbar_wrapper_end.set_visible(false);
-        }
+        toolbar_wrapper_end.set_visible(s.has_selection);
+        drop(s_mut);
+        // Content changed: force the next frame to rebuild the cached layer
+        cache_end.borrow_mut().take();
         canvas_mouse_end.queue_draw();
     });
 
     drawing_area.add_controller(drag_gesture);
+
+    // Right-click opens the style popover bound to the drawing under the cursor
+    let click_gesture = gtk4::GestureClick::new();
+    click_gesture.set_button(3);
+    let state_click = state;
+    let cache_click = cache;
+    let canvas_click = drawing_area.clone();
+    let popover_click = style_popover.clone();
+    click_gesture.connect_pressed(move |_, _, x, y| {
+        let mut s = state_click.borrow_mut();
+        if s.has_selection
+            && x >= s.crop_x
+            && x <= s.crop_x + s.crop_w
+            && y >= s.crop_y
+            && y <= s.crop_y + s.crop_h
+            && pick_drawing(&mut s, x, y)
+        {
+            drop(s);
+            cache_click.borrow_mut().take();
+            canvas_click.queue_draw();
+            popover_click.popup();
+        }
+    });
+    drawing_area.add_controller(click_gesture);
+}
+
+/// Erases the topmost drawing under (`x`, `y`).
+fn erase_at(s: &mut EditorState, x: f64, y: f64) {
+    if let Some(idx) = s.drawings.iter().rposition(|d| d.hit_test(x, y)) {
+        s.drawings.remove(idx);
+        s.selected_drawing = match s.selected_drawing {
+            Some(sel) if sel > idx => Some(sel - 1),
+            Some(sel) if sel == idx => None,
+            other => other,
+        };
+        s.invalidate();
+    }
 }

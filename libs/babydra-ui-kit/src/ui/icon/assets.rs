@@ -163,6 +163,12 @@ pub const DARK_RECT_SVG: &str = include_str!("../../assets/dark/rect.svg");
 pub const LIGHT_RECT_SVG: &str = include_str!("../../assets/light/rect.svg");
 pub const DARK_BLUR_SVG: &str = include_str!("../../assets/dark/blur.svg");
 pub const LIGHT_BLUR_SVG: &str = include_str!("../../assets/light/blur.svg");
+pub const DARK_ELLIPSE_SVG: &str = include_str!("../../assets/dark/ellipse.svg");
+pub const LIGHT_ELLIPSE_SVG: &str = include_str!("../../assets/light/ellipse.svg");
+pub const DARK_ARROW_SVG: &str = include_str!("../../assets/dark/arrow.svg");
+pub const LIGHT_ARROW_SVG: &str = include_str!("../../assets/light/arrow.svg");
+pub const DARK_LINE_SVG: &str = include_str!("../../assets/dark/line.svg");
+pub const LIGHT_LINE_SVG: &str = include_str!("../../assets/light/line.svg");
 
 pub const DARK_ZOOM_IN_SVG: &str = include_str!("../../assets/dark/zoom-in.svg");
 pub const LIGHT_ZOOM_IN_SVG: &str = include_str!("../../assets/light/zoom-in.svg");
@@ -170,4 +176,3 @@ pub const DARK_ZOOM_OUT_SVG: &str = include_str!("../../assets/dark/zoom-out.svg
 pub const LIGHT_ZOOM_OUT_SVG: &str = include_str!("../../assets/light/zoom-out.svg");
 pub const DARK_ZOOM_FIT_SVG: &str = include_str!("../../assets/dark/zoom-fit.svg");
 pub const LIGHT_ZOOM_FIT_SVG: &str = include_str!("../../assets/light/zoom-fit.svg");
-
