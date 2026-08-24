@@ -11,7 +11,7 @@ use babydra_core::services::screenshot::trigger_save;
 use super::canvas::{draw_editor_canvas, setup_editor_gest};
 use super::clipboard::copy_to_clipboard;
 use super::color_popover::create_color_popover;
-use super::shape_popover::create_shape_popover;
+use super::shape_popover::{create_shape_popover, is_shape_tool};
 use crate::widgets::editor::setup_editor_keys;
 
 /// Creates a flat toolbar button with the given icon.
@@ -201,11 +201,25 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
         });
     }
 
-    // Shared shapes popover
+    // Shared shapes button: first click activates the last-picked shape for
+    // immediate drawing; a second click (already active) opens the popover.
     let shape_popover = create_shape_popover(&btn_shape, state.clone(), &tool_buttons);
+    let state_shape_btn = state.clone();
     let shape_popover_c = shape_popover.clone();
+    let btn_shape_c = btn_shape.clone();
+    let tool_buttons_shape = tool_buttons.clone();
     btn_shape.connect_clicked(move |_| {
-        shape_popover_c.popup();
+        let active = is_shape_tool(state_shape_btn.borrow().current_tool);
+        if active {
+            shape_popover_c.popup();
+        } else {
+            let shape = state_shape_btn.borrow().current_shape;
+            state_shape_btn.borrow_mut().current_tool = shape;
+            for t_btn in &tool_buttons_shape {
+                t_btn.remove_css_class("selected");
+            }
+            btn_shape_c.add_css_class("selected");
+        }
     });
 
     // Action buttons

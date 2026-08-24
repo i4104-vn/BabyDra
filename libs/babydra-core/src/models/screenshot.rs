@@ -205,6 +205,9 @@ pub struct EditorState {
     pub drag_start_y: f64,
     pub is_selecting: bool,
     pub current_tool: Tool,
+    /// Last shape picked in the shapes popover; applied on first click of the
+    /// shared shapes button so drawing starts immediately.
+    pub current_shape: Tool,
     pub current_color: (f64, f64, f64),
     pub current_width: f64,
     pub drawings: Vec<Drawing>,
@@ -233,6 +236,7 @@ impl EditorState {
             drag_start_y: 0.0,
             is_selecting: false,
             current_tool: Tool::Select,
+            current_shape: Tool::Rect,
             current_color: (0.93, 0.15, 0.15),
             current_width: STROKE_WIDTHS[1],
             drawings: Vec::new(),

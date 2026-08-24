@@ -12,6 +12,11 @@ const SHAPES: &[(Tool, &str)] = &[
     (Tool::Arrow, "arrow"),
 ];
 
+/// Returns `true` when the tool belongs to the shared shapes button.
+pub fn is_shape_tool(tool: Tool) -> bool {
+    SHAPES.iter().any(|(t, _)| *t == tool)
+}
+
 /// Creates a Popover letting the user pick which shape the shared toolbar
 /// button draws. Picking one also swaps the parent button icon to match.
 pub fn create_shape_popover(
@@ -55,7 +60,11 @@ pub fn create_shape_popover(
         let tool = *tool;
         let icon = *icon;
         btn.connect_clicked(move |_| {
-            state_c.borrow_mut().current_tool = tool;
+            {
+                let mut s = state_c.borrow_mut();
+                s.current_tool = tool;
+                s.current_shape = tool;
+            }
             for b in &tool_btns_c {
                 b.remove_css_class("selected");
             }
