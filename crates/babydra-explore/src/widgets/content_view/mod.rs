@@ -1,7 +1,6 @@
 pub use crate::widgets::state::{ContentViewHandle, ContentViewWidgets};
 pub use babydra_core::sort_entries;
 use babydra_core::FileEntry;
-use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -15,7 +14,7 @@ mod render;
 
 pub use actions::{
     filter_content_view, select_all_items, set_view_mode, set_view_sort, update_content_quiet,
-    update_content_view,
+    update_content_view, wire_search_filter,
 };
 pub use render::{render_silent, update_content_ui};
 
@@ -81,13 +80,8 @@ pub fn create_content_view(
         history_index: history_index.clone(),
     };
 
-    // Wire search filter change callback
-    {
-        let handle_c = handle.clone();
-        widgets.search.connect_changed(move |entry| {
-            filter_content_view(&handle_c, &entry.text());
-        });
-    }
+    // Wire search filter change callback (debounced, matched off-thread)
+    actions::wire_search_filter(&widgets, &handle);
 
     // Wire all controllers/gestures for ListBox and overlay background
     gestures::wire_listbox_ctrls(

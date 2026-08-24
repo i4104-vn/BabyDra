@@ -1,7 +1,9 @@
 use crate::widgets::state::ContentViewHandle;
 use babydra_core::{sort_entries, FileEntry};
 use gtk4::prelude::*;
+use std::cell::RefCell;
 use std::path::PathBuf;
+use std::rc::Rc;
 
 /// Changes the layout style of content view stack.
 pub fn set_view_mode(handle: &ContentViewHandle, mode: &str) {
@@ -85,6 +87,59 @@ pub fn filter_content_view(handle: &ContentViewHandle, query: &str) {
     handle.entries.replace(filtered.clone());
 
     super::render::update_content_ui(handle);
+}
+
+const SEARCH_DEBOUNCE_MS: u64 = 200;
+
+/// Wires the search entry with a debounce and off-thread fuzzy matching so fast
+/// typing does not run rayon matching plus a full widget rebuild per keystroke.
+pub fn wire_search_filter(
+    widgets: &crate::widgets::state::ContentViewWidgets,
+    handle: &ContentViewHandle,
+) {
+    let handle_c = handle.clone();
+    let pending = Rc::new(RefCell::new(None::<glib::SourceId>));
+
+    widgets.search.connect_changed(move |entry| {
+        if let Some(source_id) = pending.borrow_mut().take() {
+            source_id.remove();
+        }
+
+        let query = entry.text().to_string();
+        if query.is_empty() {
+            filter_content_view(&handle_c, "");
+            return;
+        }
+
+        let handle_t = handle_c.clone();
+        let pending_t = pending.clone();
+        let source_id = glib::timeout_add_local_once(
+            std::time::Duration::from_millis(SEARCH_DEBOUNCE_MS),
+            move || {
+                pending_t.borrow_mut().take();
+                glib::spawn_future_local(async move {
+                    // Snapshot inputs and match on a worker thread
+                    let all = handle_t.all_entries.borrow().clone();
+                    let sort = handle_t.sort_mode.borrow().clone();
+                    let q = query.clone();
+                    let filtered = tokio::task::spawn_blocking(move || {
+                        let mut filtered = babydra_core::filter_entries(&all, &q);
+                        babydra_core::sort_entries(&mut filtered, &sort);
+                        filtered
+                    })
+                    .await
+                    .unwrap_or_default();
+
+                    // Ignore stale results when the query changed meanwhile
+                    if handle_t.widgets.search.text() == query {
+                        handle_t.entries.replace(filtered);
+                        super::render::update_content_ui(&handle_t);
+                    }
+                });
+            },
+        );
+        *pending.borrow_mut() = Some(source_id);
+    });
 }
 
 /// Wires navigation buttons (back, forward, up, refresh) and address bar entry handlers.
