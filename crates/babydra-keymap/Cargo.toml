@@ -1,0 +1,21 @@
+[package]
+name = "babydra-keymap"
+version.workspace = true
+edition = "2021"
+
+[dependencies]
+babydra-core = { workspace = true }
+
+# Async runtime
+tokio = { workspace = true }
+
+# Config
+serde = { workspace = true }
+toml = { workspace = true }
+dirs = { workspace = true }
+
+# Logging
+tracing = { workspace = true }
+
+# Keyboard input
+evdev = { workspace = true }
