@@ -27,4 +27,3 @@ pub fn parse_target_dir() -> (PathBuf, Option<PathBuf>) {
 
     (target_dir, focus_item)
 }
-

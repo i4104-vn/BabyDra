@@ -353,4 +353,3 @@ pub fn apply_saved_displays() {
 
     let _ = apply_display_configs(&monitors);
 }
-

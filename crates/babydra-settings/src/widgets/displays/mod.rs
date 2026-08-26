@@ -8,7 +8,10 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 /// Reads selected UI values from card rows and persists updated monitor configurations
-fn save_display_configs(monitors: &[MonitorConfig], card_rows: &[DisplayCardRow]) -> Vec<MonitorConfig> {
+fn save_display_configs(
+    monitors: &[MonitorConfig],
+    card_rows: &[DisplayCardRow],
+) -> Vec<MonitorConfig> {
     let mut current_monitors = monitors.to_vec();
     for (i, row) in card_rows.iter().enumerate() {
         if let Some(mon) = current_monitors.get_mut(i) {

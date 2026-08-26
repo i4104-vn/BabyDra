@@ -95,10 +95,8 @@ pub fn show_for_empty(
     });
 
     // 6. More... submenu (only if other apps are available)
-    builder = crate::components::explore::context_menu::more::append_more_submenu(
-        builder,
-        &current_path,
-    );
+    builder =
+        crate::components::explore::context_menu::more::append_more_submenu(builder, &current_path);
 
     // 6. Footer actions (Cut, Copy, Paste, Rename, Trash, Properties)
     let dest_dir = current_path.clone();
@@ -136,12 +134,7 @@ pub fn show_for_empty(
         )
         .footer_sensitive("rename", &trans("explore.menu_rename"), false, || {})
         .footer_sensitive("trash", &trans("explore.menu_trash"), false, || {})
-        .footer_sensitive(
-            "info",
-            &trans("explore.menu_properties"),
-            true,
-            props_cb,
-        );
+        .footer_sensitive("info", &trans("explore.menu_properties"), true, props_cb);
 
     builder.popup();
 }

@@ -72,17 +72,17 @@ pub struct SidebarItem {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct ExploreSettings {
     #[serde(default = "default_view_mode")]
-    pub view_mode: String,          // "icons" | "list"
+    pub view_mode: String, // "icons" | "list"
     #[serde(default = "default_true")]
-    pub preview_visible: bool,      // true | false
+    pub preview_visible: bool, // true | false
     #[serde(default)]
-    pub show_hidden: bool,          // true | false
+    pub show_hidden: bool, // true | false
     #[serde(default = "default_true")]
     pub double_click_to_open: bool, // true | false
     #[serde(default)]
-    pub permanent_delete: bool,     // true | false
+    pub permanent_delete: bool, // true | false
     #[serde(default = "default_true")]
-    pub calculate_dir_size: bool,   // true | false
+    pub calculate_dir_size: bool, // true | false
     #[serde(default)]
     pub custom_context_items: Vec<CustomContextItem>,
     #[serde(default)]

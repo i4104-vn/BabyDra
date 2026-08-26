@@ -93,7 +93,10 @@ impl ContextMenuBuilder {
         icon_name_or_path: &str,
         on_click: impl Fn() + 'static,
     ) -> Self {
-        self.append_item(create_menu_item_resolved(label, icon_name_or_path), on_click)
+        self.append_item(
+            create_menu_item_resolved(label, icon_name_or_path),
+            on_click,
+        )
     }
 
     /// Appends a standard clickable item with sensitivity control.

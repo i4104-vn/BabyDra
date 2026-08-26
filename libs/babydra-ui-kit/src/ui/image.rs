@@ -144,7 +144,11 @@ pub fn crop_rounded(bytes: &[u8], size: i32, radius: f64) -> Option<gdk_pixbuf::
 }
 
 /// Creates a circular avatar GTK `Image` widget at a fixed pixel size.
-pub fn create_circle_avatar(bytes: &[u8], size: i32, css_class: Option<&str>) -> Option<gtk4::Widget> {
+pub fn create_circle_avatar(
+    bytes: &[u8],
+    size: i32,
+    css_class: Option<&str>,
+) -> Option<gtk4::Widget> {
     let pixbuf = crop_circle(bytes, size)?;
     let texture = gdk4::Texture::for_pixbuf(&pixbuf);
     let img = gtk4::Image::from_paintable(Some(&texture));

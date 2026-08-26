@@ -9,8 +9,9 @@ pub mod items;
 mod selection;
 
 pub use context_menu::{
-    clipboard::{execute_paste, execute_undo, paste_from_clipboard, set_clipboard_files,
-        UndoOperation},
+    clipboard::{
+        execute_paste, execute_undo, paste_from_clipboard, set_clipboard_files, UndoOperation,
+    },
     custom_items::append_custom_items,
     dimming::{apply_cut_dimming, apply_cut_everywhere},
     file_actions::{show_for_file_normal, show_for_file_trash},

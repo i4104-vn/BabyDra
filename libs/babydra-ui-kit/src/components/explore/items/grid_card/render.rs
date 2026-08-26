@@ -48,7 +48,8 @@ pub fn build_grid_card_ui(entry: &FileEntry) -> Box {
         overlay.set_child(Some(&temp_icon));
         icon_frame.append(&overlay);
 
-        static THUMBNAIL_SEMAPHORE: std::sync::OnceLock<tokio::sync::Semaphore> = std::sync::OnceLock::new();
+        static THUMBNAIL_SEMAPHORE: std::sync::OnceLock<tokio::sync::Semaphore> =
+            std::sync::OnceLock::new();
 
         struct SendWrapper<T>(T);
         unsafe impl<T> Send for SendWrapper<T> {}

@@ -16,9 +16,7 @@ pub fn create_drag_source(
 ) -> gtk4::DragSource {
     let drag_source = gtk4::DragSource::new();
     drag_source.set_actions(
-        gtk4::gdk::DragAction::COPY
-            | gtk4::gdk::DragAction::MOVE
-            | gtk4::gdk::DragAction::ASK,
+        gtk4::gdk::DragAction::COPY | gtk4::gdk::DragAction::MOVE | gtk4::gdk::DragAction::ASK,
     );
 
     let is_drag_begin = is_dragging.clone();

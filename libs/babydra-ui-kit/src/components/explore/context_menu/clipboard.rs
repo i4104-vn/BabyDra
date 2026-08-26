@@ -178,7 +178,10 @@ fn perform_execute_paste(
                 let mut dest = dest_dir.join(filename);
                 if !is_cut && dest.exists() {
                     let file_stem = src.file_stem().unwrap_or_default().to_string_lossy();
-                    let ext = src.extension().map(|e| format!(".{}", e.to_string_lossy())).unwrap_or_default();
+                    let ext = src
+                        .extension()
+                        .map(|e| format!(".{}", e.to_string_lossy()))
+                        .unwrap_or_default();
                     let mut counter = 1;
                     loop {
                         let candidate_name = if counter == 1 {

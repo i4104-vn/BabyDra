@@ -279,7 +279,9 @@ pub fn get_greeter_wp_bytes() -> Option<Vec<u8>> {
 
     let default_paths = [
         PathBuf::from("/usr/share/babydra/wallpaper.png"),
-        dirs::home_dir().unwrap_or_default().join(".babydra/wallpaper.png"),
+        dirs::home_dir()
+            .unwrap_or_default()
+            .join(".babydra/wallpaper.png"),
     ];
     for def in &default_paths {
         if def.exists() {

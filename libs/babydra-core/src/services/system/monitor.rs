@@ -91,7 +91,10 @@ mod tests {
     fn test_uptime_formatting() {
         let uptime = get_formatted_uptime();
         assert!(!uptime.is_empty(), "Uptime string should not be empty");
-        assert!(uptime.ends_with('m'), "Uptime string should end with 'm' (e.g. 5m, 1h 20m): {}", uptime);
+        assert!(
+            uptime.ends_with('m'),
+            "Uptime string should end with 'm' (e.g. 5m, 1h 20m): {}",
+            uptime
+        );
     }
 }
-

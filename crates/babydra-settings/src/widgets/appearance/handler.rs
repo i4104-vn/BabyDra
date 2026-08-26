@@ -204,7 +204,8 @@ pub fn setup_appearance(
             }
         } else {
             if let Some(bytes) = babydra_core::get_greeter_wp_bytes() {
-                let stream = gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(&bytes));
+                let stream =
+                    gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(&bytes));
                 if let Ok(pixbuf) =
                     gtk4::gdk_pixbuf::Pixbuf::from_stream(&stream, gtk4::gio::Cancellable::NONE)
                 {
@@ -419,7 +420,9 @@ pub fn setup_appearance(
                     if let Some(path) = file.path() {
                         if babydra_core::set_avatar(&path).is_ok() {
                             if let Some(bytes) = babydra_core::get_avatar_bytes() {
-                                if let Some(pixbuf) = babydra_ui_kit::ui::image::crop_circle(&bytes, 42) {
+                                if let Some(pixbuf) =
+                                    babydra_ui_kit::ui::image::crop_circle(&bytes, 42)
+                                {
                                     preview_cb.set_pixbuf(Some(&pixbuf));
                                 }
                             }
