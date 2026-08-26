@@ -27,6 +27,13 @@ sudo systemd-tmpfiles --create /etc/tmpfiles.d/babydra-perf.conf || true
 sudo chmod 666 /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor 2>/dev/null || true
 sudo chmod 666 /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference 2>/dev/null || true
 
+# Ensure the user can read /dev/input (required by the babydra-keymap daemon)
+echo "Configuring input group for the keymap daemon..."
+if ! id -nG "$USER" | grep -qw input; then
+    sudo usermod -aG input "$USER"
+    echo "Added $USER to the input group — log out and back in for it to take effect."
+fi
+
 # Check if yay is installed, and install it from AUR if missing
 if ! command -v yay &> /dev/null; then
     echo "yay not found, installing yay-bin from AUR..."
@@ -88,31 +95,30 @@ cargo build --release
 
 # 5. Stop running panel/menu/switcher/lock instances
 echo "Stopping active processes..."
-killall babydra-panel || true
-killall babydra-desktop || true
-killall babydra-switcher || true
-killall babydra-screenshot || true
-killall babydra-lock || true
-killall babydra-launcher || true
-killall babydra-image-preview || true
-killall babydra-preview || true
-killall babydra-settings || true
-killall babydra-explore || true
-killall babydra-greeter || true
+for crate_dir in "$REPO_ROOT"/crates/*; do
+    if [ -d "$crate_dir" ]; then
+        crate_name="$(basename "$crate_dir")"
+        killall "$crate_name" 2>/dev/null || true
+    fi
+done
+killall babydra-image-preview 2>/dev/null || true
 
 # 6. Install the binaries
 echo "Installing binaries to $LOCAL_BIN..."
-cp target/release/babydra-panel "$LOCAL_BIN/babydra-panel"
-cp target/release/babydra-desktop "$LOCAL_BIN/babydra-desktop"
-cp target/release/babydra-switcher "$LOCAL_BIN/babydra-switcher"
-cp target/release/babydra-screenshot "$LOCAL_BIN/babydra-screenshot"
-cp target/release/babydra-lock "$LOCAL_BIN/babydra-lock"
-cp target/release/babydra-launcher "$LOCAL_BIN/babydra-launcher"
-cp target/release/babydra-preview "$LOCAL_BIN/babydra-preview"
-cp target/release/babydra-settings "$LOCAL_BIN/babydra-settings"
-cp target/release/babydra-explore "$LOCAL_BIN/babydra-explore"
+for crate_dir in "$REPO_ROOT"/crates/*; do
+    if [ -d "$crate_dir" ]; then
+        crate_name="$(basename "$crate_dir")"
+        if [ -f "target/release/$crate_name" ]; then
+            if [ "$crate_name" = "babydra-greeter" ]; then
+                sudo cp "target/release/$crate_name" "/usr/bin/$crate_name"
+            else
+                cp "target/release/$crate_name" "$LOCAL_BIN/$crate_name"
+            fi
+        fi
+    fi
+done
 chmod +x "$LOCAL_BIN"/babydra-* 2>/dev/null || true
-sudo cp target/release/babydra-greeter /usr/bin/babydra-greeter
+sudo chmod +x /usr/bin/babydra-greeter 2>/dev/null || true
 
 
 # Copy wallpaper and logos to standard config & system resource dirs
