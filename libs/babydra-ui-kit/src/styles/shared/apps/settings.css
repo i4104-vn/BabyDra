@@ -36,6 +36,22 @@ entry.sidebar-search-entry > text {
     border-radius: 10px;
 }
 
+/* Shortcut combo picker button (Keybinds page) — matches the row entries */
+button.shortcut-combo-btn {
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 500;
+    min-height: 32px;
+    padding: 0 16px;
+    box-shadow: none;
+    background-image: none;
+}
+
+/* Keybinds table: no row separators, cards float like the inputs */
+.keybinds-table .settings-card-row {
+    border-bottom: none;
+}
+
 .settings-content {
     background-color: transparent;
     padding: 28px 36px;

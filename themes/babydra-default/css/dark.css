@@ -1277,6 +1277,25 @@ entry.sidebar-search-entry>text {
     color: #ffffff;
 }
 
+button.shortcut-combo-btn {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    box-shadow: none;
+}
+
+button.shortcut-combo-btn:hover {
+    background-color: rgba(59, 130, 246, 0.08);
+    border-color: #3b82f6;
+    color: #60a5fa;
+}
+
+button.shortcut-combo-btn:active {
+    background-color: rgba(59, 130, 246, 0.15);
+    border-color: #3b82f6;
+    color: #60a5fa;
+}
+
 /* Active navigation item */
 button.sidebar-item.active-nav {
     background-color: rgba(59, 130, 246, 0.15);

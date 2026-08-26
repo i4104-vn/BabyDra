@@ -1271,6 +1271,25 @@ window.settings-window {
     border-color: #3b82f6;
 }
 
+button.shortcut-combo-btn {
+    background-color: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: #1c1c1e;
+    box-shadow: none;
+}
+
+button.shortcut-combo-btn:hover {
+    background-color: rgba(59, 130, 246, 0.04);
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+button.shortcut-combo-btn:active {
+    background-color: rgba(59, 130, 246, 0.12);
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
 /* Active Navigation Item */
 button.sidebar-item.active-nav {
     background-color: rgba(59, 130, 246, 0.12);
