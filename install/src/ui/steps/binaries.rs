@@ -19,11 +19,15 @@ pub fn draw_binaries_step(f: &mut Frame, app: &App, area: Rect) {
 
     let build_from_source = app.is_build_from_source();
 
-    let header_cells = ["", "Binary Executable", "Build Status", "Size", "Destination Target"]
-        .into_iter()
-        .map(|h| {
-            ratatui::widgets::Cell::from(h).style(THEME.title_cyan())
-        });
+    let header_cells = [
+        "",
+        "Binary Executable",
+        "Build Status",
+        "Size",
+        "Destination Target",
+    ]
+    .into_iter()
+    .map(|h| ratatui::widgets::Cell::from(h).style(THEME.title_cyan()));
     let header = Row::new(header_cells).height(1).bottom_margin(1);
 
     let rows = app.binaries.iter().enumerate().map(|(i, b)| {
@@ -31,9 +35,7 @@ pub fn draw_binaries_step(f: &mut Frame, app: &App, area: Rect) {
         let checkbox = if b.selected {
             Span::styled(
                 "[✔]",
-                Style::default()
-                    .fg(THEME.mint)
-                    .add_modifier(Modifier::BOLD),
+                Style::default().fg(THEME.mint).add_modifier(Modifier::BOLD),
             )
         } else {
             Span::styled("[ ]", Style::default().fg(THEME.text_muted))
@@ -42,9 +44,7 @@ pub fn draw_binaries_step(f: &mut Frame, app: &App, area: Rect) {
         let available = b.exists_in_source || build_from_source;
 
         let name_style = if is_cursor {
-            Style::default()
-                .fg(THEME.cyan)
-                .add_modifier(Modifier::BOLD)
+            Style::default().fg(THEME.cyan).add_modifier(Modifier::BOLD)
         } else if b.selected {
             Style::default()
                 .fg(THEME.text_bright)
@@ -58,7 +58,10 @@ pub fn draw_binaries_step(f: &mut Frame, app: &App, area: Rect) {
         let status_span = if !available {
             Span::styled("Missing in src", Style::default().fg(THEME.rose))
         } else if build_from_source {
-            Span::styled("▲ Build from source", Style::default().fg(THEME.cyan).add_modifier(Modifier::BOLD))
+            Span::styled(
+                "▲ Build from source",
+                Style::default().fg(THEME.cyan).add_modifier(Modifier::BOLD),
+            )
         } else if b.exists_in_target {
             Span::styled("● Installed (Update)", Style::default().fg(THEME.mint))
         } else {
@@ -85,7 +88,12 @@ pub fn draw_binaries_step(f: &mut Frame, app: &App, area: Rect) {
         let name_line = if is_cursor {
             Line::from(vec![
                 Span::styled(&b.name, name_style),
-                Span::styled(" [Space: Toggle]", Style::default().fg(THEME.amber).add_modifier(Modifier::BOLD)),
+                Span::styled(
+                    " [Space: Toggle]",
+                    Style::default()
+                        .fg(THEME.amber)
+                        .add_modifier(Modifier::BOLD),
+                ),
             ])
         } else {
             Line::from(Span::styled(&b.name, name_style))
@@ -95,7 +103,10 @@ pub fn draw_binaries_step(f: &mut Frame, app: &App, area: Rect) {
             ratatui::widgets::Cell::from(Line::from(checkbox)),
             ratatui::widgets::Cell::from(name_line),
             ratatui::widgets::Cell::from(status_span),
-            ratatui::widgets::Cell::from(Span::styled(size_str, Style::default().fg(THEME.text_dim))),
+            ratatui::widgets::Cell::from(Span::styled(
+                size_str,
+                Style::default().fg(THEME.text_dim),
+            )),
             ratatui::widgets::Cell::from(Span::styled(
                 target_str,
                 Style::default().fg(THEME.text_muted),

@@ -5,15 +5,12 @@ use std::path::PathBuf;
 use std::sync::mpsc::{channel, Receiver, Sender};
 
 use crate::models::{
-    BinaryItem, BranchItem, GenericOptionItem, InstallState, LogLevel, LogMessage, PresetProfile,
-    VariantItem, WizardStep,
+    BinaryItem, BranchItem, InstallState, LogLevel, LogMessage, VariantItem, WizardStep,
 };
 use crate::system::sudo::MAX_PASSWORD_ATTEMPTS;
 use crate::system::{
     checkout_and_pull, default_binary_source_dir, find_workspace_root, initial_binaries_list,
-    initial_configs_themes_options, initial_display_manager_options, initial_package_options,
-    initial_variant_options, initial_varlib_options, list_branches, update_binaries_status,
-    SudoSession,
+    initial_variant_options, list_branches, update_binaries_status, SudoSession,
 };
 use crate::tasks::{spawn_installation_worker, InstallEvent, InstallPlan};
 
@@ -26,12 +23,8 @@ pub enum BranchSwitchStatus {
 
 pub struct App {
     pub current_step: WizardStep,
-    pub current_profile: PresetProfile,
 
     // Step Data & Cursors
-    pub package_options: Vec<GenericOptionItem>,
-    pub package_cursor: usize,
-
     pub binaries: Vec<BinaryItem>,
     pub binary_cursor: usize,
 
@@ -40,15 +33,6 @@ pub struct App {
     /// Empty string = pre-built only; otherwise the branch to check out,
     /// pull and rebuild from source.
     pub selected_branch: String,
-
-    pub varlib_options: Vec<GenericOptionItem>,
-    pub varlib_cursor: usize,
-
-    pub configs_themes_options: Vec<GenericOptionItem>,
-    pub configs_themes_cursor: usize,
-
-    pub display_manager_options: Vec<GenericOptionItem>,
-    pub display_manager_cursor: usize,
 
     pub variant_options: Vec<VariantItem>,
     pub variant_cursor: usize,
@@ -90,19 +74,16 @@ pub struct App {
 }
 
 impl App {
+    #[allow(clippy::new_without_default)] // Default is never used — main constructs via App::new()
     pub fn new() -> Self {
         let (tx, rx) = channel();
         let workspace_root = find_workspace_root();
         let source_binary_dir = default_binary_source_dir(&workspace_root);
-        let binaries = initial_binaries_list(&source_binary_dir);
+        let binaries = initial_binaries_list(&workspace_root, &source_binary_dir);
         let branches = list_branches(&workspace_root);
 
         let mut app = Self {
             current_step: WizardStep::Welcome,
-            current_profile: PresetProfile::FullDesktop,
-
-            package_options: initial_package_options(),
-            package_cursor: 0,
 
             binaries,
             binary_cursor: 0,
@@ -110,15 +91,6 @@ impl App {
             branches,
             branch_cursor: 0,
             selected_branch: String::new(),
-
-            varlib_options: initial_varlib_options(),
-            varlib_cursor: 0,
-
-            configs_themes_options: initial_configs_themes_options(),
-            configs_themes_cursor: 0,
-
-            display_manager_options: initial_display_manager_options(),
-            display_manager_cursor: 0,
 
             variant_options: initial_variant_options(&workspace_root),
             variant_cursor: 0,
@@ -172,6 +144,12 @@ impl App {
                 format!("Detected {} git branch(es).", app.branches.len()),
             );
         }
+        if app.binaries.is_empty() {
+            app.add_log(
+                LogLevel::Warn,
+                "No components discovered (no crates/ in the checked-out branch and no pre-built binaries in the source directory).",
+            );
+        }
         app
     }
 
@@ -189,6 +167,23 @@ impl App {
     }
 
     pub fn rescan_binaries(&mut self) {
+        let fresh_binaries = initial_binaries_list(&self.workspace_root, &self.source_binary_dir);
+        let old_selections: std::collections::HashMap<String, bool> = self
+            .binaries
+            .iter()
+            .map(|b| (b.name.clone(), b.selected))
+            .collect();
+
+        self.binaries = fresh_binaries
+            .into_iter()
+            .map(|mut b| {
+                if let Some(&sel) = old_selections.get(&b.name) {
+                    b.selected = sel;
+                }
+                b
+            })
+            .collect();
+
         update_binaries_status(&mut self.binaries, &self.source_binary_dir);
         let found_count = self.binaries.iter().filter(|b| b.exists_in_source).count();
         self.add_log(
@@ -199,54 +194,6 @@ impl App {
                 self.binaries.len()
             ),
         );
-    }
-
-    pub fn apply_profile(&mut self, profile: PresetProfile) {
-        self.current_profile = profile;
-        match profile {
-            PresetProfile::FullDesktop => {
-                for opt in &mut self.package_options {
-                    opt.selected = true;
-                }
-                for b in &mut self.binaries {
-                    b.selected = true;
-                }
-                for opt in &mut self.varlib_options {
-                    opt.selected = true;
-                }
-                for opt in &mut self.configs_themes_options {
-                    opt.selected = true;
-                }
-                for opt in &mut self.display_manager_options {
-                    opt.selected = true;
-                }
-                self.add_log(LogLevel::Config, "Applied 'Full Desktop' preset profile.");
-            }
-            PresetProfile::BinariesAndBundle => {
-                for opt in &mut self.package_options {
-                    opt.selected = false;
-                }
-                for b in &mut self.binaries {
-                    b.selected = true;
-                }
-                for opt in &mut self.varlib_options {
-                    opt.selected = true;
-                }
-                for opt in &mut self.configs_themes_options {
-                    opt.selected = opt.id == "terminate_processes" || opt.id == "restart_services";
-                }
-                for opt in &mut self.display_manager_options {
-                    opt.selected = false;
-                }
-                self.add_log(
-                    LogLevel::Config,
-                    "Applied 'Binaries & /var/lib Only' preset profile.",
-                );
-            }
-            PresetProfile::Custom => {
-                self.add_log(LogLevel::Config, "Switched to 'Custom' profile.");
-            }
-        }
     }
 
     pub fn start_branch_switch(&mut self) {
@@ -260,27 +207,28 @@ impl App {
         self.branch_switch_spinner_tick = 0;
         self.add_log(
             LogLevel::Info,
-            format!("Switching to branch '{}' in background...", self.selected_branch),
+            format!(
+                "Switching to branch '{}' in background...",
+                self.selected_branch
+            ),
         );
 
         let workspace_root = self.workspace_root.clone();
         let branch = self.selected_branch.clone();
         let tx = self.tx.clone();
 
-        std::thread::spawn(move || {
-            match checkout_and_pull(&workspace_root, &branch) {
-                Ok(()) => {
-                    let _ = tx.send(InstallEvent::BranchSwitched {
-                        success: true,
-                        error_msg: None,
-                    });
-                }
-                Err(e) => {
-                    let _ = tx.send(InstallEvent::BranchSwitched {
-                        success: false,
-                        error_msg: Some(e.to_string()),
-                    });
-                }
+        std::thread::spawn(move || match checkout_and_pull(&workspace_root, &branch) {
+            Ok(()) => {
+                let _ = tx.send(InstallEvent::BranchSwitched {
+                    success: true,
+                    error_msg: None,
+                });
+            }
+            Err(e) => {
+                let _ = tx.send(InstallEvent::BranchSwitched {
+                    success: false,
+                    error_msg: Some(e.to_string()),
+                });
             }
         });
     }
@@ -320,17 +268,17 @@ impl App {
                         self.rescan_after_branch_switch();
                         self.add_log(
                             LogLevel::Success,
-                            format!("Switched to branch '{}' and loaded variants & components.", self.selected_branch),
+                            format!(
+                                "Switched to branch '{}' and loaded variants & components.",
+                                self.selected_branch
+                            ),
                         );
                         self.show_branch_switching_modal = false;
                         self.next_step();
                     } else {
                         let msg = error_msg.unwrap_or_else(|| "Unknown git error".into());
                         self.branch_switch_status = BranchSwitchStatus::Done(Err(msg.clone()));
-                        self.add_log(
-                            LogLevel::Error,
-                            format!("Branch switch failed: {}", msg),
-                        );
+                        self.add_log(LogLevel::Error, format!("Branch switch failed: {}", msg));
                     }
                 }
                 InstallEvent::SudoFailed(msg) => {
@@ -494,10 +442,6 @@ impl App {
                 self.source_binary_dir.clone()
             },
             selected_binaries,
-            selected_packages: self.package_options.clone(),
-            selected_varlib: self.varlib_options.clone(),
-            selected_configs_themes: self.configs_themes_options.clone(),
-            selected_display_manager: self.display_manager_options.clone(),
             variant: selected_variant,
             branch: self.selected_branch.clone(),
             sudo_password: if SudoSession::is_root() {
@@ -512,11 +456,5 @@ impl App {
 
     pub fn handle_key(&mut self, key: KeyEvent) {
         handlers::handle_key_event(self, key);
-    }
-}
-
-impl Default for App {
-    fn default() -> Self {
-        Self::new()
     }
 }

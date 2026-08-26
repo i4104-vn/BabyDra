@@ -19,13 +19,6 @@ pub fn draw_confirm_modal(f: &mut Frame, app: &App, area: Rect) {
         .iter()
         .filter(|b| b.selected && (b.exists_in_source || app.is_build_from_source()))
         .count();
-    let selected_varlib = app.varlib_options.iter().filter(|o| o.selected).count();
-    let selected_cfgs = app
-        .configs_themes_options
-        .iter()
-        .filter(|o| o.selected)
-        .count();
-    let selected_pkgs = app.package_options.iter().filter(|o| o.selected).count();
 
     let lines = vec![
         Line::from(Span::styled(
@@ -34,37 +27,28 @@ pub fn draw_confirm_modal(f: &mut Frame, app: &App, area: Rect) {
         )),
         Line::from(""),
         Line::from(vec![
-            Span::styled("◆ System Packages:  ", Style::default().fg(THEME.text_dim)),
+            Span::styled("◆ Components:       ", Style::default().fg(THEME.text_dim)),
             Span::styled(
-                format!("{selected_pkgs} selected (pacman, AUR yay, permissions)"),
-                Style::default().fg(THEME.amber).add_modifier(Modifier::BOLD),
-            ),
-        ]),
-        Line::from(vec![
-            Span::styled("◆ Binary Binaries:  ", Style::default().fg(THEME.text_dim)),
-            Span::styled(
-                format!("{selected_bins} selected (Deploy to ~/.local/bin)"),
+                format!("{selected_bins} selected (deploy to ~/.local/bin, /usr/bin)"),
                 Style::default().fg(THEME.cyan).add_modifier(Modifier::BOLD),
             ),
         ]),
         Line::from(vec![
-            Span::styled("◆ /var/lib Staging: ", Style::default().fg(THEME.text_dim)),
+            Span::styled("◆ Automatic tasks:  ", Style::default().fg(THEME.text_dim)),
             Span::styled(
-                format!("{selected_varlib} tasks enabled (/var/lib/babydra)"),
-                Style::default().fg(THEME.purple).add_modifier(Modifier::BOLD),
-            ),
-        ]),
-        Line::from(vec![
-            Span::styled("◆ Configs & Themes: ", Style::default().fg(THEME.text_dim)),
-            Span::styled(
-                format!("{selected_cfgs} dotfiles & themes enabled"),
-                Style::default().fg(THEME.mint).add_modifier(Modifier::BOLD),
+                "system packages, /var/lib staging, configs & themes, greetd",
+                Style::default()
+                    .fg(THEME.amber)
+                    .add_modifier(Modifier::BOLD),
             ),
         ]),
         Line::from(""),
         Line::from(Span::styled(
             if app.is_build_from_source() {
-                format!("Source: Branch '{}' will be compiled with cargo --release.", app.selected_branch)
+                format!(
+                    "Source: Branch '{}' will be compiled with cargo --release.",
+                    app.selected_branch
+                )
             } else {
                 "Source: Pre-built binaries will be copied directly.".to_string()
             },
@@ -73,7 +57,10 @@ pub fn draw_confirm_modal(f: &mut Frame, app: &App, area: Rect) {
         Line::from(""),
         Line::from(vec![
             Span::styled(" y / Enter ", THEME.key_badge_green()),
-            Span::styled(" Start Installation   ", Style::default().fg(THEME.mint).add_modifier(Modifier::BOLD)),
+            Span::styled(
+                " Start Installation   ",
+                Style::default().fg(THEME.mint).add_modifier(Modifier::BOLD),
+            ),
             Span::styled(" n / Esc ", THEME.key_badge_red()),
             Span::styled(" Cancel", Style::default().fg(THEME.rose)),
         ]),

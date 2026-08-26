@@ -117,17 +117,20 @@ pub fn checkout_and_pull(repo: &Path, branch: &str) -> Result<()> {
             let _ = git(repo, &["stash", "push", "-u", "-m", "installer-autostash"]);
 
             // Try checkout again after stash
-            if let Err(_) = git(repo, &["checkout", branch]) {
+            if git(repo, &["checkout", branch]).is_err() {
                 // If local branch doesn't exist or is in detached state, checkout from origin/<branch>
-                git(repo, &["checkout", "-B", branch, &format!("origin/{branch}")])
-                    .or_else(|_| git(repo, &["checkout", "-f", branch]))
-                    .with_context(|| format!("{orig_err}"))?;
+                git(
+                    repo,
+                    &["checkout", "-B", branch, &format!("origin/{branch}")],
+                )
+                .or_else(|_| git(repo, &["checkout", "-f", branch]))
+                .with_context(|| orig_err.to_string())?;
             }
         }
     }
 
     // Pull or fast-forward to latest remote origin/branch
-    if let Err(_) = git(repo, &["pull", "origin", branch]) {
+    if git(repo, &["pull", "origin", branch]).is_err() {
         // If pull fails due to local differences, reset to origin/branch
         let _ = git(repo, &["reset", "--hard", &format!("origin/{branch}")]);
     }

@@ -45,11 +45,7 @@ pub fn draw_execute_install_step(f: &mut Frame, app: &App, area: Rect) {
                 .border_type(BorderType::Rounded)
                 .border_style(Style::default().fg(gauge_color)),
         )
-        .gauge_style(
-            Style::default()
-                .fg(gauge_color)
-                .bg(THEME.bg_selected),
-        )
+        .gauge_style(Style::default().fg(gauge_color).bg(THEME.bg_selected))
         .percent(app.progress_percent);
     f.render_widget(gauge, chunks[0]);
 

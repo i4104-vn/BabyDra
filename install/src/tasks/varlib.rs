@@ -6,7 +6,6 @@ use std::path::{Path, PathBuf};
 
 pub fn execute_varlib_task<F>(
     opt: &GenericOptionItem,
-    _workspace_root: &Path,
     source_binary_dir: &Path,
     sudo: &SudoSession,
     mut log: F,
@@ -26,48 +25,46 @@ where
             );
             let _ = sudo.run_root_quiet(&["mkdir", "-p", var_lib_bin.to_str().unwrap_or("/")]);
 
-            let all_binary_names = [
-                "babydra-panel",
-                "babydra-desktop",
-                "babydra-switcher",
-                "babydra-screenshot",
-                "babydra-lock",
-                "babydra-launcher",
-                "babydra-preview",
-                "babydra-settings",
-                "babydra-explore",
-                "babydra-greeter",
-            ];
-
-            for bname in all_binary_names {
-                let src = source_binary_dir.join(bname);
-                let dst = var_lib_bin.join(bname);
-                if src.exists() {
-                    let out = sudo.run_root(&[
-                        "cp",
-                        src.to_str().unwrap_or(""),
-                        dst.to_str().unwrap_or(""),
-                    ]);
-                    let _ = sudo.run_root_quiet(&["chmod", "755", dst.to_str().unwrap_or("")]);
-                    if let Ok(o) = out {
-                        if o.success {
-                            log(
-                                LogLevel::Bundle,
-                                format!("Staged binary -> /var/lib/babydra/bin/{bname}"),
-                            );
-                        } else {
-                            log(
-                                LogLevel::Warn,
-                                format!("Failed to stage {bname}: {}", o.stderr.trim()),
-                            );
+            let mut staged_any = false;
+            if let Ok(entries) = fs::read_dir(source_binary_dir) {
+                for entry in entries.flatten() {
+                    let path = entry.path();
+                    if path.is_file() {
+                        let fname = path.file_name().unwrap_or_default().to_string_lossy();
+                        if fname.starts_with("babydra-") && !fname.contains('.') {
+                            let dst = var_lib_bin.join(&*fname);
+                            let out = sudo.run_root(&[
+                                "cp",
+                                path.to_str().unwrap_or(""),
+                                dst.to_str().unwrap_or(""),
+                            ]);
+                            let _ =
+                                sudo.run_root_quiet(&["chmod", "755", dst.to_str().unwrap_or("")]);
+                            if let Ok(o) = out {
+                                if o.success {
+                                    staged_any = true;
+                                    log(
+                                        LogLevel::Bundle,
+                                        format!("Staged binary -> /var/lib/babydra/bin/{fname}"),
+                                    );
+                                } else {
+                                    log(
+                                        LogLevel::Warn,
+                                        format!("Failed to stage {fname}: {}", o.stderr.trim()),
+                                    );
+                                }
+                            }
                         }
                     }
                 }
             }
-            log(
-                LogLevel::Success,
-                "Staged binaries to /var/lib/babydra/bin/".into(),
-            );
+
+            if staged_any {
+                log(
+                    LogLevel::Success,
+                    "Staged binaries to /var/lib/babydra/bin/".into(),
+                );
+            }
             copied += 1;
         }
 

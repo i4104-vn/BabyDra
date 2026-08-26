@@ -39,9 +39,7 @@ pub fn draw_header(f: &mut Frame, app: &App, area: Rect) {
     let title_line = Line::from(vec![
         Span::styled(
             " 🐉 BabyDra ",
-            Style::default()
-                .fg(THEME.cyan)
-                .add_modifier(Modifier::BOLD),
+            Style::default().fg(THEME.cyan).add_modifier(Modifier::BOLD),
         ),
         Span::styled(
             "Desktop Shell Installer ",
@@ -71,7 +69,9 @@ pub fn draw_header(f: &mut Frame, app: &App, area: Rect) {
         Span::styled("│ Step ", Style::default().fg(THEME.text_muted)),
         Span::styled(
             format!("{current_step_idx}/10: "),
-            Style::default().fg(THEME.amber).add_modifier(Modifier::BOLD),
+            Style::default()
+                .fg(THEME.amber)
+                .add_modifier(Modifier::BOLD),
         ),
         Span::styled(
             app.current_step.short_name(),
@@ -110,9 +110,7 @@ pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
             let (icon, style) = if is_current {
                 (
                     "▶ ",
-                    Style::default()
-                        .fg(THEME.cyan)
-                        .add_modifier(Modifier::BOLD),
+                    Style::default().fg(THEME.cyan).add_modifier(Modifier::BOLD),
                 )
             } else if step_idx < current_step_idx {
                 ("✔ ", Style::default().fg(THEME.mint))
@@ -161,17 +159,6 @@ pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
         .filter(|b| b.selected && (b.exists_in_source || build_from_source))
         .count();
     let total_bins = app.binaries.len();
-    let selected_varlib = app.varlib_options.iter().filter(|o| o.selected).count();
-    let selected_cfgs = app
-        .configs_themes_options
-        .iter()
-        .filter(|o| o.selected)
-        .count();
-    let selected_dm = app
-        .display_manager_options
-        .iter()
-        .filter(|o| o.selected)
-        .count();
     let selected_variant = app
         .variant_options
         .iter()
@@ -181,7 +168,7 @@ pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
 
     let summary_lines = vec![
         Line::from(vec![
-            Span::styled("◆ Binaries:  ", Style::default().fg(THEME.text_dim)),
+            Span::styled("\u{25c6} Components: ", Style::default().fg(THEME.text_dim)),
             Span::styled(
                 format!("{selected_bins}/{total_bins}"),
                 Style::default()
@@ -190,45 +177,19 @@ pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
             ),
         ]),
         Line::from(vec![
-            Span::styled("◆ /var/lib:  ", Style::default().fg(THEME.text_dim)),
+            Span::styled("\u{25c6} Variant:    ", Style::default().fg(THEME.text_dim)),
             Span::styled(
-                format!("{selected_varlib} staged"),
-                Style::default().fg(THEME.purple).add_modifier(Modifier::BOLD),
+                selected_variant,
+                Style::default().fg(THEME.pink).add_modifier(Modifier::BOLD),
             ),
         ]),
         Line::from(vec![
-            Span::styled("◆ Configs:   ", Style::default().fg(THEME.text_dim)),
-            Span::styled(
-                format!("{selected_cfgs} enabled"),
-                Style::default().fg(THEME.mint).add_modifier(Modifier::BOLD),
-            ),
-        ]),
-        Line::from(vec![
-            Span::styled("◆ Greetd DM: ", Style::default().fg(THEME.text_dim)),
-            Span::styled(
-                if selected_dm > 0 {
-                    "Enabled"
-                } else {
-                    "Skipped"
-                },
-                Style::default().fg(if selected_dm > 0 {
-                    THEME.cyan
-                } else {
-                    THEME.text_muted
-                }).add_modifier(Modifier::BOLD),
-            ),
-        ]),
-        Line::from(vec![
-            Span::styled("◆ Variant:   ", Style::default().fg(THEME.text_dim)),
-            Span::styled(selected_variant, Style::default().fg(THEME.pink).add_modifier(Modifier::BOLD)),
-        ]),
-        Line::from(vec![
-            Span::styled("◆ Mode:      ", Style::default().fg(THEME.text_dim)),
+            Span::styled("\u{25c6} Mode:       ", Style::default().fg(THEME.text_dim)),
             Span::styled(
                 if build_from_source {
-                    format!("★ branch '{}'", app.selected_branch)
+                    format!("branch '{}'", app.selected_branch)
                 } else {
-                    "● pre-built only".to_string()
+                    "pre-built only".to_string()
                 },
                 Style::default()
                     .fg(if build_from_source {
@@ -237,6 +198,13 @@ pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
                         THEME.mint
                     })
                     .add_modifier(Modifier::BOLD),
+            ),
+        ]),
+        Line::from(vec![
+            Span::styled("\u{25c6} Automatic:  ", Style::default().fg(THEME.text_dim)),
+            Span::styled(
+                "packages, configs, greetd",
+                Style::default().fg(THEME.text_body),
             ),
         ]),
     ];
@@ -293,10 +261,7 @@ pub fn draw_floating_shortcuts(f: &mut Frame, area: Rect) {
                         .bg(THEME.bg_badge)
                         .add_modifier(Modifier::BOLD),
                 ),
-                Span::styled(
-                    format!(" {desc}"),
-                    Style::default().fg(THEME.text_body),
-                ),
+                Span::styled(format!(" {desc}"), Style::default().fg(THEME.text_body)),
             ]))
         })
         .collect();
@@ -310,39 +275,6 @@ pub fn draw_floating_shortcuts(f: &mut Frame, area: Rect) {
             .border_style(Style::default().fg(THEME.cyan)),
     );
     f.render_widget(block, floating_area);
-}
-
-#[allow(dead_code)]
-pub fn draw_footer(f: &mut Frame, app: &App, area: Rect) {
-    let step_info = app.current_step.short_name();
-    let footer_text = vec![
-        Span::styled(" 🐉 BabyDra Installer ", THEME.title_cyan()),
-        Span::styled("│ Wayland Compositor ", Style::default().fg(THEME.text_muted)),
-        Span::styled("│ Step: ", Style::default().fg(THEME.text_dim)),
-        Span::styled(step_info, Style::default().fg(THEME.amber).add_modifier(Modifier::BOLD)),
-        Span::styled(" │ ", Style::default().fg(THEME.text_muted)),
-        Span::styled(" Space ", THEME.key_badge_green()),
-        Span::styled(" Toggle ", Style::default().fg(THEME.mint).add_modifier(Modifier::BOLD)),
-        Span::styled("│ ", Style::default().fg(THEME.text_muted)),
-        Span::styled(" Tab/n ", THEME.key_badge()),
-        Span::styled(" Next ", Style::default().fg(THEME.text_body)),
-        Span::styled("│ ", Style::default().fg(THEME.text_muted)),
-        Span::styled(" p ", THEME.key_badge()),
-        Span::styled(" Prev ", Style::default().fg(THEME.text_body)),
-        Span::styled("│ ", Style::default().fg(THEME.text_muted)),
-        Span::styled(" ? ", Style::default().fg(THEME.purple).bg(THEME.bg_badge).add_modifier(Modifier::BOLD)),
-        Span::styled(" Help ", Style::default().fg(THEME.text_body)),
-    ];
-
-    let footer = Paragraph::new(Line::from(footer_text))
-        .alignment(Alignment::Center)
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .border_type(BorderType::Rounded)
-                .border_style(Style::default().fg(THEME.border_normal)),
-        );
-    f.render_widget(footer, area);
 }
 
 pub fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
@@ -364,4 +296,3 @@ pub fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
         ])
         .split(popup_layout[1])[1]
 }
-

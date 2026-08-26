@@ -1,4 +1,4 @@
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub enum BinaryLocation {
     UserLocalBin, // ~/.local/bin
     SystemBin,    // /usr/bin
@@ -14,5 +14,4 @@ pub struct BinaryItem {
     pub exists_in_source: bool,
     pub source_size_bytes: Option<u64>,
     pub exists_in_target: bool,
-    pub status_note: String,
 }

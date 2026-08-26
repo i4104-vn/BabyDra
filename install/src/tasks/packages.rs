@@ -119,7 +119,11 @@ where
                 );
                 let _ = std::fs::remove_dir_all("/tmp/yay-bin");
                 let clone_res = Command::new("git")
-                    .args(["clone", "https://aur.archlinux.org/yay-bin.git", "/tmp/yay-bin"])
+                    .args([
+                        "clone",
+                        "https://aur.archlinux.org/yay-bin.git",
+                        "/tmp/yay-bin",
+                    ])
                     .stdin(std::process::Stdio::null())
                     .stdout(std::process::Stdio::piped())
                     .stderr(std::process::Stdio::piped())
@@ -144,7 +148,10 @@ where
                                     log(LogLevel::Info, line);
                                 }
                                 if bo.status.success() {
-                                    log(LogLevel::Success, "yay-bin installed successfully.".into());
+                                    log(
+                                        LogLevel::Success,
+                                        "yay-bin installed successfully.".into(),
+                                    );
                                     copied += 1;
                                 } else {
                                     log(
@@ -155,7 +162,10 @@ where
                                 }
                             }
                             Err(e) => {
-                                log(LogLevel::Error, format!("Failed to run makepkg for yay-bin: {e}"));
+                                log(
+                                    LogLevel::Error,
+                                    format!("Failed to run makepkg for yay-bin: {e}"),
+                                );
                                 errors += 1;
                             }
                         }
@@ -294,7 +304,11 @@ where
                             .stderr(std::process::Stdio::piped())
                             .output();
 
-                        let ninja_res = if setup_res.as_ref().map(|s| s.status.success()).unwrap_or(false) {
+                        let ninja_res = if setup_res
+                            .as_ref()
+                            .map(|s| s.status.success())
+                            .unwrap_or(false)
+                        {
                             Command::new("ninja")
                                 .args(["-C", "build"])
                                 .current_dir("/tmp/wtype")
@@ -311,12 +325,22 @@ where
                                 let built_file = std::path::Path::new("/tmp/wtype/build/wtype");
                                 if built_file.exists() {
                                     if let Err(e) = std::fs::copy(built_file, &wtype_dst) {
-                                        log(LogLevel::Error, format!("Failed to copy wtype binary: {e}"));
+                                        log(
+                                            LogLevel::Error,
+                                            format!("Failed to copy wtype binary: {e}"),
+                                        );
                                         errors += 1;
                                     } else {
                                         use std::os::unix::fs::PermissionsExt;
-                                        let _ = std::fs::set_permissions(&wtype_dst, std::fs::Permissions::from_mode(0o755));
-                                        log(LogLevel::Success, "Compiled and installed wtype to ~/.local/bin/wtype".into());
+                                        let _ = std::fs::set_permissions(
+                                            &wtype_dst,
+                                            std::fs::Permissions::from_mode(0o755),
+                                        );
+                                        log(
+                                            LogLevel::Success,
+                                            "Compiled and installed wtype to ~/.local/bin/wtype"
+                                                .into(),
+                                        );
                                         copied += 1;
                                     }
                                 } else {
@@ -327,12 +351,18 @@ where
                             Ok(no) => {
                                 log(
                                     LogLevel::Error,
-                                    format!("wtype compilation failed: {}", String::from_utf8_lossy(&no.stderr).trim()),
+                                    format!(
+                                        "wtype compilation failed: {}",
+                                        String::from_utf8_lossy(&no.stderr).trim()
+                                    ),
                                 );
                                 errors += 1;
                             }
                             Err(e) => {
-                                log(LogLevel::Error, format!("Failed to execute ninja for wtype: {e}"));
+                                log(
+                                    LogLevel::Error,
+                                    format!("Failed to execute ninja for wtype: {e}"),
+                                );
                                 errors += 1;
                             }
                         }
@@ -340,7 +370,10 @@ where
                     Ok(o) => {
                         log(
                             LogLevel::Error,
-                            format!("Failed to clone wtype repo: {}", String::from_utf8_lossy(&o.stderr).trim()),
+                            format!(
+                                "Failed to clone wtype repo: {}",
+                                String::from_utf8_lossy(&o.stderr).trim()
+                            ),
                         );
                         errors += 1;
                     }
@@ -389,9 +422,21 @@ where
                 "-c",
                 "chmod 666 /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference 2>/dev/null || true",
             ]);
+
+            // Add user to input group for babydra-keymap daemon
+            if let Ok(user) = std::env::var("USER") {
+                if !user.is_empty() {
+                    let _ = sudo.run_root(&["usermod", "-aG", "input", &user]);
+                    log(
+                        LogLevel::Success,
+                        format!("Added {user} to input group for keymap daemon."),
+                    );
+                }
+            }
+
             log(
                 LogLevel::Success,
-                "Configured CPU governor & i2c-dev permissions.".into(),
+                "Configured CPU governor, i2c-dev & input group permissions.".into(),
             );
             copied += 1;
         }

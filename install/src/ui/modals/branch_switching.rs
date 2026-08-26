@@ -68,15 +68,11 @@ pub fn draw_branch_switching_modal(f: &mut Frame, app: &App, area: Rect) {
                 Line::from(vec![
                     Span::styled(
                         " ✔ ",
-                        Style::default()
-                            .fg(THEME.mint)
-                            .add_modifier(Modifier::BOLD),
+                        Style::default().fg(THEME.mint).add_modifier(Modifier::BOLD),
                     ),
                     Span::styled(
                         format!("Successfully switched to branch '{}'!", branch),
-                        Style::default()
-                            .fg(THEME.mint)
-                            .add_modifier(Modifier::BOLD),
+                        Style::default().fg(THEME.mint).add_modifier(Modifier::BOLD),
                     ),
                 ]),
                 Line::from(""),
@@ -96,15 +92,11 @@ pub fn draw_branch_switching_modal(f: &mut Frame, app: &App, area: Rect) {
                 Line::from(vec![
                     Span::styled(
                         " ✖ ",
-                        Style::default()
-                            .fg(THEME.rose)
-                            .add_modifier(Modifier::BOLD),
+                        Style::default().fg(THEME.rose).add_modifier(Modifier::BOLD),
                     ),
                     Span::styled(
                         format!("Failed to switch to branch '{}'", branch),
-                        Style::default()
-                            .fg(THEME.rose)
-                            .add_modifier(Modifier::BOLD),
+                        Style::default().fg(THEME.rose).add_modifier(Modifier::BOLD),
                     ),
                 ]),
                 Line::from(""),
@@ -115,7 +107,10 @@ pub fn draw_branch_switching_modal(f: &mut Frame, app: &App, area: Rect) {
                 Line::from(""),
                 Line::from(vec![
                     Span::styled(" [Esc / Enter / q] ", THEME.key_badge_red()),
-                    Span::styled(" Dismiss and return to branch selection", Style::default().fg(THEME.text_body)),
+                    Span::styled(
+                        " Dismiss and return to branch selection",
+                        Style::default().fg(THEME.text_body),
+                    ),
                 ]),
             ],
         ),

@@ -80,24 +80,19 @@ where
                     );
                     copied += 1;
                 }
-                Ok(o) => {
+                other => {
+                    // Sudo copy failed or sudo unavailable — fall back to the
+                    // user's local bin so the component is still usable.
+                    let reason = match other {
+                        Ok(o) => o.stderr.trim().to_string(),
+                        Err(e) => e.to_string(),
+                    };
+                    let fallback = user_bin_dir.join(&bin.name);
                     log(
                         LogLevel::Warn,
-                        format!(
-                            "Sudo copy failed ({}). Installing fallback to {:?}",
-                            o.stderr.trim(),
-                            user_bin_dir.join(&bin.name)
-                        ),
+                        format!("Sudo copy failed ({reason}). Installing fallback to {fallback:?}"),
                     );
-                    let _ = safe_copy_binary(&src_file, &user_bin_dir.join(&bin.name));
-                    copied += 1;
-                }
-                Err(e) => {
-                    log(
-                        LogLevel::Warn,
-                        format!("Sudo unavailable ({e}). Fallback to ~/.local/bin"),
-                    );
-                    let _ = safe_copy_binary(&src_file, &user_bin_dir.join(&bin.name));
+                    let _ = safe_copy_binary(&src_file, &fallback);
                     copied += 1;
                 }
             }

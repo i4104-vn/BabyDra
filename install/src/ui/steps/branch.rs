@@ -69,7 +69,8 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
     } else {
         (
             THEME.mint,
-            "● Target mode: Pre-built binaries only (No git checkout or cargo rebuild).".to_string(),
+            "● Target mode: Pre-built binaries only (No git checkout or cargo rebuild)."
+                .to_string(),
         )
     };
 
@@ -118,18 +119,14 @@ fn branch_row<'a>(
     let radio = if is_selected {
         Span::styled(
             "(●) ",
-            Style::default()
-                .fg(THEME.mint)
-                .add_modifier(Modifier::BOLD),
+            Style::default().fg(THEME.mint).add_modifier(Modifier::BOLD),
         )
     } else {
         Span::styled("( ) ", Style::default().fg(THEME.text_muted))
     };
 
     let title_style = if is_cursor {
-        Style::default()
-            .fg(THEME.cyan)
-            .add_modifier(Modifier::BOLD)
+        Style::default().fg(THEME.cyan).add_modifier(Modifier::BOLD)
     } else if is_selected {
         Style::default()
             .fg(THEME.text_bright)
@@ -143,7 +140,10 @@ fn branch_row<'a>(
     let mut spans = vec![radio, Span::styled(name, title_style)];
     for t in tags {
         let tag_style = match *t {
-            "current" => Style::default().fg(THEME.mint).bg(THEME.bg_badge).add_modifier(Modifier::BOLD),
+            "current" => Style::default()
+                .fg(THEME.mint)
+                .bg(THEME.bg_badge)
+                .add_modifier(Modifier::BOLD),
             _ => Style::default().fg(THEME.text_dim).bg(THEME.bg_badge),
         };
         spans.push(Span::raw(" "));

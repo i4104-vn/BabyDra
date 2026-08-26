@@ -58,40 +58,61 @@ where
             let apps_dir = home.join(".local/share/applications");
             let _ = fs::create_dir_all(&apps_dir);
 
-            let preview_desktop = format!(
-                "[Desktop Entry]\nType=Application\nName=BabyDra Preview\nComment=Viewer for images\nExec={}/.local/bin/babydra-preview %f\nIcon=/usr/share/babydra/babydra-preview.png\nTerminal=false\nCategories=Graphics;Viewer;GTK;\nMimeType=image/png;image/jpeg;image/gif;image/webp;image/bmp;\nNoDisplay=false\n",
-                home.display()
-            );
-            let preview_path = apps_dir.join("babydra-preview.desktop");
-            let _ = fs::write(&preview_path, preview_desktop);
-            #[cfg(unix)]
-            {
-                use std::os::unix::fs::PermissionsExt;
-                let _ = fs::set_permissions(&preview_path, fs::Permissions::from_mode(0o755));
-            }
+            let entries: &[(&str, &str, &str, &str, &str)] = &[
+                (
+                    "babydra-preview",
+                    "BabyDra Preview",
+                    "Viewer for images",
+                    ".local/bin/babydra-preview %f",
+                    "/usr/share/babydra/babydra-preview.png",
+                ),
+                (
+                    "babydra-settings",
+                    "BabyDra Settings",
+                    "Configure system settings",
+                    ".local/bin/babydra-settings",
+                    "/usr/share/babydra/babydra-settings.png",
+                ),
+                (
+                    "babydra-explore",
+                    "BabyDra Explore",
+                    "Explore files and folders",
+                    ".local/bin/babydra-explore %u",
+                    "system-file-manager",
+                ),
+            ];
+            let mime_types = [
+                (
+                    "babydra-preview",
+                    "image/png;image/jpeg;image/gif;image/webp;image/bmp;",
+                ),
+                ("babydra-explore", "inode/directory;"),
+            ];
+            let categories = [
+                ("babydra-preview", "Graphics;Viewer;GTK;"),
+                ("babydra-settings", "Settings;HardwareSettings;GTK;"),
+                ("babydra-explore", "System;FileTools;FileManager;GTK;"),
+            ];
 
-            let settings_desktop = format!(
-                "[Desktop Entry]\nType=Application\nName=BabyDra Settings\nComment=Configure system settings\nExec={}/.local/bin/babydra-settings\nIcon=/usr/share/babydra/babydra-settings.png\nTerminal=false\nCategories=Settings;HardwareSettings;GTK;\nNoDisplay=false\n",
-                home.display()
-            );
-            let settings_path = apps_dir.join("babydra-settings.desktop");
-            let _ = fs::write(&settings_path, settings_desktop);
-            #[cfg(unix)]
-            {
-                use std::os::unix::fs::PermissionsExt;
-                let _ = fs::set_permissions(&settings_path, fs::Permissions::from_mode(0o755));
-            }
-
-            let explore_desktop = format!(
-                "[Desktop Entry]\nType=Application\nName=BabyDra Explore\nComment=Explore files and folders\nExec={}/.local/bin/babydra-explore %u\nIcon=system-file-manager\nTerminal=false\nCategories=System;FileTools;FileManager;GTK;\nMimeType=inode/directory;\nNoDisplay=false\n",
-                home.display()
-            );
-            let explore_path = apps_dir.join("babydra-explore.desktop");
-            let _ = fs::write(&explore_path, explore_desktop);
-            #[cfg(unix)]
-            {
-                use std::os::unix::fs::PermissionsExt;
-                let _ = fs::set_permissions(&explore_path, fs::Permissions::from_mode(0o755));
+            for (id, name, comment, exec, icon) in entries {
+                let mime = mime_types
+                    .iter()
+                    .find(|(m, _)| m == id)
+                    .map(|(_, m)| *m)
+                    .unwrap_or("");
+                let cats = categories
+                    .iter()
+                    .find(|(c, _)| c == id)
+                    .map(|(_, c)| *c)
+                    .unwrap_or("");
+                let desktop = format!(
+                    "[Desktop Entry]\nType=Application\nName={name}\nComment={comment}\nExec={}/{exec}\nIcon={icon}\nTerminal=false\nCategories={cats}\nMimeType={mime}\nNoDisplay=false\n",
+                    home.display()
+                );
+                let path = apps_dir.join(format!("{id}.desktop"));
+                let _ = fs::write(&path, desktop);
+                #[cfg(unix)]
+                let _ = fs::set_permissions(&path, fs::Permissions::from_mode(0o755));
             }
 
             // Register DBus service for FileManager1
@@ -189,60 +210,24 @@ where
                 log(LogLevel::Success, "Installed BabyDra GTK theme.".into());
             }
 
-            // Also deploy BabyDra CSS theme packages to ~/.babydra/themes & /usr/share/babydra/themes
-            let theme_pkgs_src = workspace_root.join("themes");
-            let user_themes_dst = home.join(".babydra/themes");
-            if theme_pkgs_src.is_dir() {
-                let _ = copy_recursive(&theme_pkgs_src, &user_themes_dst);
-                let _ = sudo.run_root_quiet(&["mkdir", "-p", "/usr/share/babydra/themes"]);
-                let _ = sudo.run_root_quiet(&[
-                    "cp",
-                    "-r",
-                    &format!("{}/.", theme_pkgs_src.to_str().unwrap_or("")),
-                    "/usr/share/babydra/themes/",
-                ]);
-                log(
-                    LogLevel::Success,
-                    "Installed BabyDra CSS theme packages (default, blue, green, purple, rose).".into(),
-                );
-            }
+            // CSS theme packages (`themes/`) are deployed separately by
+            // `deploy_theme_packages` (always runs as its own phase).
 
-            let cursor_dir = workspace_root.join("configs/themes/cursor");
-            if cursor_dir.exists() {
-                if let Ok(entries) = fs::read_dir(&cursor_dir) {
-                    for e in entries.flatten() {
-                        let path = e.path();
-                        if path.extension().and_then(|s| s.to_str()) == Some("tar") {
-                            log(
-                                LogLevel::Info,
-                                format!(
-                                    "Extracting cursor archive: {:?}",
-                                    path.file_name().unwrap()
-                                ),
-                            );
-                            let _ = sudo.run(
-                                "tar",
-                                &[
-                                    "-xf",
-                                    path.to_str().unwrap_or(""),
-                                    "-C",
-                                    icons_dst.to_str().unwrap_or(""),
-                                ],
-                            );
-                        }
-                    }
+            for (dir, label) in [
+                ("configs/themes/cursor", "cursor archive"),
+                ("configs/themes/icons", "icon theme"),
+            ] {
+                let archive_dir = workspace_root.join(dir);
+                if !archive_dir.exists() {
+                    continue;
                 }
-            }
-
-            let icon_dir = workspace_root.join("configs/themes/icons");
-            if icon_dir.exists() {
-                if let Ok(entries) = fs::read_dir(&icon_dir) {
+                if let Ok(entries) = fs::read_dir(&archive_dir) {
                     for e in entries.flatten() {
                         let path = e.path();
                         if path.extension().and_then(|s| s.to_str()) == Some("tar") {
                             log(
                                 LogLevel::Info,
-                                format!("Extracting icon theme: {:?}", path.file_name().unwrap()),
+                                format!("Extracting {label}: {:?}", path.file_name().unwrap()),
                             );
                             let _ = sudo.run(
                                 "tar",
@@ -405,8 +390,12 @@ where
 ///
 /// This makes the installer's variant step actually switch the theme
 /// the running desktop renders with — no code change required.
-pub fn deploy_theme_packages<F>(workspace_root: &Path, theme_id: &str, sudo: &SudoSession, mut log: F)
-where
+pub fn deploy_theme_packages<F>(
+    workspace_root: &Path,
+    theme_id: &str,
+    sudo: &SudoSession,
+    mut log: F,
+) where
     F: FnMut(LogLevel, String),
 {
     let home = get_user_home();
@@ -424,7 +413,10 @@ where
         ]);
         log(
             LogLevel::Success,
-            format!("Deployed theme packages to {} and /usr/share/babydra/themes", themes_dst.display()),
+            format!(
+                "Deployed theme packages to {} and /usr/share/babydra/themes",
+                themes_dst.display()
+            ),
         );
     } else {
         log(
@@ -435,7 +427,11 @@ where
 
     // Persist the selected theme id into ~/.babydra/babydra.conf
     let conf_path = home.join(".babydra/babydra.conf");
-    let selected_id = if theme_id.is_empty() { "babydra-default" } else { theme_id };
+    let selected_id = if theme_id.is_empty() {
+        "babydra-default"
+    } else {
+        theme_id
+    };
     if let Err(e) = write_theme_selection(&conf_path, selected_id) {
         log(
             LogLevel::Warn,

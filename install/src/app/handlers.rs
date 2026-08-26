@@ -2,14 +2,17 @@ use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use std::path::PathBuf;
 
 use super::App;
-use crate::models::{InstallState, PresetProfile, WizardStep};
+use crate::models::{InstallState, WizardStep};
 
 pub fn handle_key_event(app: &mut App, key: KeyEvent) {
     // 0. Branch Switching Modal
     if app.show_branch_switching_modal {
         match app.branch_switch_status {
             crate::app::BranchSwitchStatus::Done(Err(_)) => {
-                if key.code == KeyCode::Esc || key.code == KeyCode::Enter || key.code == KeyCode::Char('q') {
+                if key.code == KeyCode::Esc
+                    || key.code == KeyCode::Enter
+                    || key.code == KeyCode::Char('q')
+                {
                     app.show_branch_switching_modal = false;
                 }
             }
@@ -116,16 +119,12 @@ pub fn handle_key_event(app: &mut App, key: KeyEvent) {
             }
         }
 
-        // Direct Number Jumping (1-9, 0 = summary)
+        // Direct Number Jumping (1-5, 0 = summary)
         KeyCode::Char('1') => app.current_step = WizardStep::Welcome,
         KeyCode::Char('2') => app.current_step = WizardStep::SourceBranch,
-        KeyCode::Char('3') => app.current_step = WizardStep::SystemPackages,
-        KeyCode::Char('4') => app.current_step = WizardStep::Binaries,
-        KeyCode::Char('5') => app.current_step = WizardStep::VarLibBundle,
-        KeyCode::Char('6') => app.current_step = WizardStep::ConfigsThemes,
-        KeyCode::Char('7') => app.current_step = WizardStep::VariantSelection,
-        KeyCode::Char('8') => app.current_step = WizardStep::DisplayManager,
-        KeyCode::Char('9') => app.current_step = WizardStep::ExecuteInstall,
+        KeyCode::Char('3') => app.current_step = WizardStep::Binaries,
+        KeyCode::Char('4') => app.current_step = WizardStep::VariantSelection,
+        KeyCode::Char('5') => app.current_step = WizardStep::ExecuteInstall,
         KeyCode::Char('0') => app.current_step = WizardStep::Summary,
 
         // Step Navigation
@@ -143,28 +142,46 @@ pub fn handle_key_event(app: &mut App, key: KeyEvent) {
     }
 }
 
+/// Action derived from a key press on a checkbox-list step.
+enum ListAction {
+    None,
+    /// Space on the cursor row.
+    Toggle,
+    /// 'a' — the argument is the new "all selected" state.
+    ToggleAll,
+    Enter,
+}
+
+/// Shared Up/Down/Space/'a'/Enter handling for the checkbox-list steps.
+///
+/// Moves `cursor` within `len` and classifies the key; the caller applies
+/// the action to its own item list.
+fn list_action(key: KeyEvent, len: usize, cursor: &mut usize) -> ListAction {
+    match key.code {
+        KeyCode::Up | KeyCode::Char('k') => {
+            *cursor = cursor.saturating_sub(1);
+            ListAction::None
+        }
+        KeyCode::Down | KeyCode::Char('j') => {
+            if *cursor + 1 < len {
+                *cursor += 1;
+            }
+            ListAction::None
+        }
+        KeyCode::Char(' ') => ListAction::Toggle,
+        KeyCode::Char('a') | KeyCode::Char('A') => ListAction::ToggleAll,
+        KeyCode::Enter => ListAction::Enter,
+        _ => ListAction::None,
+    }
+}
+
 fn handle_step_interaction(app: &mut App, key: KeyEvent) {
     match app.current_step {
-        WizardStep::Welcome => match key.code {
-            KeyCode::Up | KeyCode::Char('k') => {
-                app.current_profile = match app.current_profile {
-                    PresetProfile::FullDesktop => PresetProfile::Custom,
-                    PresetProfile::BinariesAndBundle => PresetProfile::FullDesktop,
-                    PresetProfile::Custom => PresetProfile::BinariesAndBundle,
-                };
-                app.apply_profile(app.current_profile);
+        WizardStep::Welcome => {
+            if key.code == KeyCode::Enter {
+                app.next_step();
             }
-            KeyCode::Down | KeyCode::Char('j') => {
-                app.current_profile = match app.current_profile {
-                    PresetProfile::FullDesktop => PresetProfile::BinariesAndBundle,
-                    PresetProfile::BinariesAndBundle => PresetProfile::Custom,
-                    PresetProfile::Custom => PresetProfile::FullDesktop,
-                };
-                app.apply_profile(app.current_profile);
-            }
-            KeyCode::Enter => app.next_step(),
-            _ => {}
-        },
+        }
 
         WizardStep::SourceBranch => match key.code {
             KeyCode::Up | KeyCode::Char('k') => {
@@ -173,13 +190,14 @@ fn handle_step_interaction(app: &mut App, key: KeyEvent) {
                 }
             }
             KeyCode::Down | KeyCode::Char('j') => {
-                if app.branch_cursor <= app.branches.len() {
+                // Row 0 = pre-built only; rows 1..=N map to branches, so the
+                // cursor max is branches.len() (not len - 1).
+                if app.branch_cursor < app.branches.len() {
                     app.branch_cursor += 1;
                 }
             }
             KeyCode::Char(' ') => {
                 select_branch_at_cursor(app);
-                app.current_profile = PresetProfile::Custom;
             }
             KeyCode::Enter => {
                 if app.is_build_from_source() {
@@ -191,180 +209,43 @@ fn handle_step_interaction(app: &mut App, key: KeyEvent) {
             _ => {}
         },
 
-        WizardStep::SystemPackages => match key.code {
-            KeyCode::Up | KeyCode::Char('k') => {
-                if app.package_cursor > 0 {
-                    app.package_cursor -= 1;
-                }
-            }
-            KeyCode::Down | KeyCode::Char('j') => {
-                if app.package_cursor + 1 < app.package_options.len() {
-                    app.package_cursor += 1;
-                }
-            }
-            KeyCode::Char(' ') => {
-                if let Some(item) = app.package_options.get_mut(app.package_cursor) {
-                    item.selected = !item.selected;
-                    app.current_profile = PresetProfile::Custom;
-                }
-            }
-            KeyCode::Char('a') | KeyCode::Char('A') => {
-                let all_sel = app.package_options.iter().all(|o| o.selected);
-                for o in &mut app.package_options {
-                    o.selected = !all_sel;
-                }
-                app.current_profile = PresetProfile::Custom;
-            }
-            KeyCode::Enter => app.next_step(),
-            _ => {}
-        },
-
-        WizardStep::Binaries => match key.code {
-            KeyCode::Up | KeyCode::Char('k') => {
-                if app.binary_cursor > 0 {
-                    app.binary_cursor -= 1;
-                }
-            }
-            KeyCode::Down | KeyCode::Char('j') => {
-                if app.binary_cursor + 1 < app.binaries.len() {
-                    app.binary_cursor += 1;
-                }
-            }
-            KeyCode::Char(' ') => {
-                if let Some(item) = app.binaries.get_mut(app.binary_cursor) {
-                    item.selected = !item.selected;
-                    app.current_profile = PresetProfile::Custom;
-                }
-            }
-            KeyCode::Char('a') | KeyCode::Char('A') => {
-                let all_sel = app.binaries.iter().all(|b| b.selected);
-                for b in &mut app.binaries {
-                    b.selected = !all_sel;
-                }
-                app.current_profile = PresetProfile::Custom;
-            }
-            KeyCode::Enter => app.next_step(),
-            _ => {}
-        },
-
-        WizardStep::VarLibBundle => match key.code {
-            KeyCode::Up | KeyCode::Char('k') => {
-                if app.varlib_cursor > 0 {
-                    app.varlib_cursor -= 1;
-                }
-            }
-            KeyCode::Down | KeyCode::Char('j') => {
-                if app.varlib_cursor + 1 < app.varlib_options.len() {
-                    app.varlib_cursor += 1;
-                }
-            }
-            KeyCode::Char(' ') => {
-                if let Some(item) = app.varlib_options.get_mut(app.varlib_cursor) {
-                    item.selected = !item.selected;
-                    app.current_profile = PresetProfile::Custom;
-                }
-            }
-            KeyCode::Char('a') | KeyCode::Char('A') => {
-                let all_sel = app.varlib_options.iter().all(|o| o.selected);
-                for o in &mut app.varlib_options {
-                    o.selected = !all_sel;
-                }
-                app.current_profile = PresetProfile::Custom;
-            }
-            KeyCode::Enter => app.next_step(),
-            _ => {}
-        },
-
-        WizardStep::ConfigsThemes => match key.code {
-            KeyCode::Up | KeyCode::Char('k') => {
-                if app.configs_themes_cursor > 0 {
-                    app.configs_themes_cursor -= 1;
-                }
-            }
-            KeyCode::Down | KeyCode::Char('j') => {
-                if app.configs_themes_cursor + 1 < app.configs_themes_options.len() {
-                    app.configs_themes_cursor += 1;
-                }
-            }
-            KeyCode::Char(' ') => {
-                if let Some(item) = app
-                    .configs_themes_options
-                    .get_mut(app.configs_themes_cursor)
-                {
-                    item.selected = !item.selected;
-                    app.current_profile = PresetProfile::Custom;
-                }
-            }
-            KeyCode::Char('a') | KeyCode::Char('A') => {
-                let all_sel = app.configs_themes_options.iter().all(|o| o.selected);
-                for o in &mut app.configs_themes_options {
-                    o.selected = !all_sel;
-                }
-                app.current_profile = PresetProfile::Custom;
-            }
-            KeyCode::Enter => app.next_step(),
-            _ => {}
-        },
-
-        WizardStep::VariantSelection => match key.code {
-            KeyCode::Up | KeyCode::Char('k') => {
-                if app.variant_cursor > 0 {
-                    app.variant_cursor -= 1;
-                }
-            }
-            KeyCode::Down | KeyCode::Char('j') => {
-                if app.variant_cursor + 1 < app.variant_options.len() {
-                    app.variant_cursor += 1;
-                }
-            }
-            KeyCode::Char(' ') => {
-                if app.variant_cursor < app.variant_options.len() {
-                    for v in &mut app.variant_options {
-                        v.selected = false;
+        WizardStep::Binaries => {
+            let len = app.binaries.len();
+            match list_action(key, len, &mut app.binary_cursor) {
+                ListAction::Toggle => {
+                    if let Some(item) = app.binaries.get_mut(app.binary_cursor) {
+                        item.selected = !item.selected;
                     }
-                    if let Some(selected) = app.variant_options.get_mut(app.variant_cursor) {
-                        selected.selected = true;
-                        app.selected_variant = selected.name.clone();
+                }
+                ListAction::ToggleAll => {
+                    let all_sel = app.binaries.iter().all(|b| b.selected);
+                    for b in &mut app.binaries {
+                        b.selected = !all_sel;
                     }
-                    app.current_profile = PresetProfile::Custom;
                 }
+                ListAction::Enter => app.next_step(),
+                ListAction::None => {}
             }
-            KeyCode::Enter => app.next_step(),
-            _ => {}
-        },
+        }
 
-        WizardStep::DisplayManager => match key.code {
-            KeyCode::Up | KeyCode::Char('k') => {
-                if app.display_manager_cursor > 0 {
-                    app.display_manager_cursor -= 1;
+        WizardStep::VariantSelection => {
+            let len = app.variant_options.len();
+            match list_action(key, len, &mut app.variant_cursor) {
+                ListAction::Toggle => {
+                    if app.variant_cursor < app.variant_options.len() {
+                        for v in &mut app.variant_options {
+                            v.selected = false;
+                        }
+                        if let Some(selected) = app.variant_options.get_mut(app.variant_cursor) {
+                            selected.selected = true;
+                            app.selected_variant = selected.name.clone();
+                        }
+                    }
                 }
+                ListAction::Enter => app.next_step(),
+                _ => {}
             }
-            KeyCode::Down | KeyCode::Char('j') => {
-                if app.display_manager_cursor + 1 < app.display_manager_options.len() {
-                    app.display_manager_cursor += 1;
-                }
-            }
-            KeyCode::Char(' ') => {
-                if let Some(item) = app
-                    .display_manager_options
-                    .get_mut(app.display_manager_cursor)
-                {
-                    item.selected = !item.selected;
-                    app.current_profile = PresetProfile::Custom;
-                }
-            }
-            KeyCode::Char('a') | KeyCode::Char('A') => {
-                let all_sel = app.display_manager_options.iter().all(|o| o.selected);
-                for o in &mut app.display_manager_options {
-                    o.selected = !all_sel;
-                }
-                app.current_profile = PresetProfile::Custom;
-            }
-            KeyCode::Enter => {
-                app.show_confirm_dialog = true;
-            }
-            _ => {}
-        },
+        }
 
         WizardStep::ExecuteInstall => match key.code {
             KeyCode::Up | KeyCode::Char('k') => {

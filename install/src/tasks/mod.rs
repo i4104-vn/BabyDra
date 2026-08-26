@@ -9,7 +9,7 @@ use std::sync::mpsc::Sender;
 use std::thread;
 use std::time::Instant;
 
-use crate::models::{BinaryItem, GenericOptionItem, LogLevel, LogMessage, VariantItem};
+use crate::models::{BinaryItem, LogLevel, LogMessage, VariantItem};
 use crate::system::{build_workspace, checkout_and_pull, stop_process, SudoSession};
 
 pub enum InstallEvent {
@@ -39,11 +39,7 @@ pub struct InstallPlan {
     pub workspace_root: PathBuf,
     pub source_binary_dir: PathBuf,
     pub selected_binaries: Vec<BinaryItem>,
-    pub selected_packages: Vec<GenericOptionItem>,
-    pub selected_varlib: Vec<GenericOptionItem>,
-    pub selected_configs_themes: Vec<GenericOptionItem>,
-    pub selected_display_manager: Vec<GenericOptionItem>,
-    /// Variant selected in step 6 (theme + app list + keybinds source).
+    /// Variant selected in step 4 (theme + app list + keybinds source).
     pub variant: VariantItem,
     /// Branch to check out + pull before building (empty = skip git step).
     pub branch: String,
@@ -85,11 +81,19 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             }
         }
 
-        let total_steps = plan.selected_packages.len()
+        // The full task set always runs: system packages, /var/lib staging,
+        // configs/themes and the display manager are mandatory steps, so the
+        // installer never asks about them — only binaries are selectable.
+        let packages = crate::system::initial_package_options();
+        let varlib = crate::system::initial_varlib_options();
+        let configs = crate::system::initial_configs_themes_options();
+        let display_manager = crate::system::initial_display_manager_options();
+
+        let total_steps = packages.len()
             + plan.selected_binaries.len()
-            + plan.selected_varlib.len()
-            + plan.selected_configs_themes.len()
-            + plan.selected_display_manager.len()
+            + varlib.len()
+            + configs.len()
+            + display_manager.len()
             + 1 // theme packages
             + 2 * usize::from(!plan.branch.is_empty()); // checkout+pull, then build
         let mut current_step = 0;
@@ -167,43 +171,31 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             }
         }
 
-        // Phase 2: terminate old processes if requested.
-        let terminate_enabled = plan
-            .selected_configs_themes
-            .iter()
-            .any(|o| o.id == "terminate_processes" && o.selected);
-
-        if terminate_enabled {
+        // Phase 2: terminate old processes (always — prevents ETXTBSY when
+        // overwriting running executables).
+        {
             send_log(
                 LogLevel::Warn,
                 "Terminating active processes before overwrite...".into(),
             );
-            let procs = [
-                "babydra-panel",
-                "babydra-desktop",
-                "babydra-switcher",
-                "babydra-screenshot",
-                "babydra-lock",
-                "babydra-launcher",
+            // Stop all selected binaries
+            for bin in &plan.selected_binaries {
+                stop_process(&bin.name);
+            }
+            // Stop any extra daemons or notification services
+            for extra in &[
+                "babydra-keymap",
                 "babydra-image-preview",
-                "babydra-preview",
-                "babydra-settings",
-                "babydra-explore",
-                "babydra-greeter",
                 "fnott",
                 "xfce4-notifyd",
-            ];
-            for p in procs {
-                stop_process(p);
+            ] {
+                stop_process(extra);
             }
             thread::sleep(std::time::Duration::from_millis(250));
         }
 
-        // Phase 3: Packages.
-        for opt in &plan.selected_packages {
-            if !opt.selected {
-                continue;
-            }
+        // Phase 3: Packages (mandatory).
+        for opt in &packages {
             current_step += 1;
             let _ = tx.send(InstallEvent::Progress {
                 current: current_step,
@@ -229,24 +221,16 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             total_errors += e;
         }
 
-        // Phase 5: /var/lib Staging.
-        for opt in &plan.selected_varlib {
-            if !opt.selected {
-                continue;
-            }
+        // Phase 5: /var/lib Staging (mandatory).
+        for opt in &varlib {
             current_step += 1;
             let _ = tx.send(InstallEvent::Progress {
                 current: current_step,
                 total: total_steps,
                 current_step_name: opt.title.clone(),
             });
-            let (c, e) = varlib::execute_varlib_task(
-                opt,
-                &plan.workspace_root,
-                &plan.source_binary_dir,
-                &sudo,
-                &send_log,
-            );
+            let (c, e) =
+                varlib::execute_varlib_task(opt, &plan.source_binary_dir, &sudo, &send_log);
             total_copied += c;
             total_errors += e;
         }
@@ -259,13 +243,19 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
                 total: total_steps,
                 current_step_name: "Deploy theme packages".to_string(),
             });
-            configs::deploy_theme_packages(&plan.workspace_root, &plan.variant.theme, &sudo, &send_log);
+            configs::deploy_theme_packages(
+                &plan.workspace_root,
+                &plan.variant.theme,
+                &sudo,
+                &send_log,
+            );
             total_copied += 1;
         }
 
         // Phase 7: Configs & Desktop Environment Setup (including restarting panel service).
-        for opt in &plan.selected_configs_themes {
-            if !opt.selected || opt.id == "terminate_processes" {
+        // `terminate_processes` is handled unconditionally in Phase 2.
+        for opt in &configs {
+            if opt.id == "terminate_processes" {
                 continue;
             }
             current_step += 1;
@@ -279,11 +269,8 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             total_errors += e;
         }
 
-        // Phase 8: Display Manager.
-        for opt in &plan.selected_display_manager {
-            if !opt.selected {
-                continue;
-            }
+        // Phase 8: Display Manager (mandatory).
+        for opt in &display_manager {
             current_step += 1;
             let _ = tx.send(InstallEvent::Progress {
                 current: current_step,

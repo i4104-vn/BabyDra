@@ -18,7 +18,7 @@
 
 use std::io::Write;
 use std::path::Path;
-use std::process::{Command, Stdio};
+use std::process::{Command, Output, Stdio};
 
 use anyhow::{bail, Context, Result};
 
@@ -38,6 +38,32 @@ pub struct CmdOutput {
     pub success: bool,
     pub stdout: String,
     pub stderr: String,
+}
+
+impl CmdOutput {
+    fn from_output(output: Output) -> Self {
+        Self {
+            success: output.status.success(),
+            stdout: String::from_utf8_lossy(&output.stdout).into_owned(),
+            stderr: String::from_utf8_lossy(&output.stderr).into_owned(),
+        }
+    }
+}
+
+/// Spawns `cmd`, best-effort writes `stdin_data` to its piped stdin (sudo may
+/// skip reading stdin with cached credentials — a BrokenPipe is harmless),
+/// waits and captures the output. Nothing ever reaches the TUI.
+fn spawn_and_wait(mut cmd: Command, stdin_data: &[u8], what: &str) -> Result<CmdOutput> {
+    let mut child = cmd
+        .spawn()
+        .with_context(|| format!("failed to spawn {what}"))?;
+    if let Some(mut stdin) = child.stdin.take() {
+        let _ = stdin.write_all(stdin_data);
+    }
+    let output = child
+        .wait_with_output()
+        .with_context(|| format!("failed to wait for {what}"))?;
+    Ok(CmdOutput::from_output(output))
 }
 
 impl SudoSession {
@@ -66,25 +92,16 @@ impl SudoSession {
         cmd.stdout(Stdio::null());
         cmd.stderr(Stdio::null());
 
-        let mut child = cmd
-            .spawn()
-            .context("failed to spawn sudo -v (is sudo installed?)")?;
-        // Best-effort write: sudo may already have a cached credential and
-        // close stdin without reading — a BrokenPipe here is harmless.
-        if let Some(mut stdin) = child.stdin.take() {
-            let _ = stdin.write_all(format!("{pwd}\n").as_bytes());
-        }
-        let status = child.wait().context("failed to wait for sudo -v")?;
-
-        if status.success() {
+        let output = spawn_and_wait(cmd, format!("{pwd}\n").as_bytes(), "sudo -v")?;
+        if output.success {
             Ok(())
         } else {
             bail!("incorrect password or sudo unavailable (sudo -v failed)")
         }
     }
 
-    /// Runs a command, feeding the sudo password through piped stdin when
-    /// elevated, and captures stdout/stderr.
+    /// Runs a command, feeding a newline through piped stdin when elevated,
+    /// and captures stdout/stderr.
     ///
     /// This is the safe replacement for `Command::status()` everywhere in the
     /// installer: no output reaches the TUI, no TTY prompt is shown.
@@ -95,22 +112,7 @@ impl SudoSession {
         cmd.stdout(Stdio::piped());
         cmd.stderr(Stdio::piped());
 
-        let mut child = cmd
-            .spawn()
-            .with_context(|| format!("failed to spawn {program}"))?;
-        if let Some(mut stdin) = child.stdin.take() {
-            let _ = stdin.write_all(b"\n");
-        }
-
-        let output = child
-            .wait_with_output()
-            .with_context(|| format!("failed to wait for {program}"))?;
-
-        Ok(CmdOutput {
-            success: output.status.success(),
-            stdout: String::from_utf8_lossy(&output.stdout).into_owned(),
-            stderr: String::from_utf8_lossy(&output.stderr).into_owned(),
-        })
+        spawn_and_wait(cmd, b"\n", program)
     }
 
     /// Runs a command as root (via `sudo -S` when not root), capturing output.
@@ -131,22 +133,7 @@ impl SudoSession {
         cmd.stdout(Stdio::piped());
         cmd.stderr(Stdio::piped());
 
-        let mut child = cmd.spawn().context("failed to spawn sudo command")?;
-        // Best-effort write (see `preauth`): with cached credentials sudo
-        // skips reading stdin entirely.
-        if let Some(mut stdin) = child.stdin.take() {
-            let _ = stdin.write_all(format!("{pwd}\n").as_bytes());
-        }
-
-        let output = child
-            .wait_with_output()
-            .context("failed to wait for sudo command")?;
-
-        Ok(CmdOutput {
-            success: output.status.success(),
-            stdout: String::from_utf8_lossy(&output.stdout).into_owned(),
-            stderr: String::from_utf8_lossy(&output.stderr).into_owned(),
-        })
+        spawn_and_wait(cmd, format!("{pwd}\n").as_bytes(), "sudo command")
     }
 
     /// Runs a root command, discarding all output (safe for silent ops).
@@ -186,12 +173,6 @@ impl SudoSession {
         let mut cmd = Command::new("sudo");
         cmd.args(["-S", "-p", ""]);
         cmd
-    }
-}
-
-impl Default for SudoSession {
-    fn default() -> Self {
-        Self::new(None)
     }
 }
 

@@ -24,18 +24,14 @@ pub fn draw_variant_step(f: &mut Frame, app: &App, area: Rect) {
             let radio = if v.selected {
                 Span::styled(
                     "(●) ",
-                    Style::default()
-                        .fg(THEME.pink)
-                        .add_modifier(Modifier::BOLD),
+                    Style::default().fg(THEME.pink).add_modifier(Modifier::BOLD),
                 )
             } else {
                 Span::styled("( ) ", Style::default().fg(THEME.text_muted))
             };
 
             let title_style = if is_cursor {
-                Style::default()
-                    .fg(THEME.pink)
-                    .add_modifier(Modifier::BOLD)
+                Style::default().fg(THEME.pink).add_modifier(Modifier::BOLD)
             } else if v.selected {
                 Style::default()
                     .fg(THEME.text_bright)
@@ -86,7 +82,11 @@ pub fn draw_variant_step(f: &mut Frame, app: &App, area: Rect) {
                 ]),
                 Line::from(Span::styled(
                     format!("    Apps: {}", v.apps_preview()),
-                    Style::default().fg(if is_cursor { THEME.text_body } else { THEME.text_muted }),
+                    Style::default().fg(if is_cursor {
+                        THEME.text_body
+                    } else {
+                        THEME.text_muted
+                    }),
                 )),
             ])
             .style(row_style)

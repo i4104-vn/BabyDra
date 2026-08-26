@@ -33,10 +33,23 @@ pub fn draw_sudo_modal(f: &mut Frame, app: &App, area: Rect) {
         )),
         Line::from(""),
         Line::from(vec![
-            Span::styled("◆ Sudo Password: ", Style::default().fg(THEME.amber).add_modifier(Modifier::BOLD)),
             Span::styled(
-                if masked.is_empty() { "Enter password...".into() } else { masked },
-                Style::default().fg(if app.sudo_password.is_empty() { THEME.text_muted } else { THEME.cyan }),
+                "◆ Sudo Password: ",
+                Style::default()
+                    .fg(THEME.amber)
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::styled(
+                if masked.is_empty() {
+                    "Enter password...".into()
+                } else {
+                    masked
+                },
+                Style::default().fg(if app.sudo_password.is_empty() {
+                    THEME.text_muted
+                } else {
+                    THEME.cyan
+                }),
             ),
             Span::styled(" █", Style::default().fg(THEME.mint)),
         ]),
@@ -63,7 +76,10 @@ pub fn draw_sudo_modal(f: &mut Frame, app: &App, area: Rect) {
     lines.push(Line::from(""));
     lines.push(Line::from(vec![
         Span::styled(" Enter ", THEME.key_badge_green()),
-        Span::styled(" Authenticate & Begin   ", Style::default().fg(THEME.text_body)),
+        Span::styled(
+            " Authenticate & Begin   ",
+            Style::default().fg(THEME.text_body),
+        ),
         Span::styled(" Esc ", THEME.key_badge_red()),
         Span::styled(" Cancel", Style::default().fg(THEME.rose)),
     ]));

@@ -120,6 +120,10 @@ mod tests {
     #[test]
     fn test_find_workspace_root() {
         let root = find_workspace_root();
-        assert!(root.join(".git").exists(), "Workspace root {:?} must contain .git", root);
+        assert!(
+            root.join(".git").exists(),
+            "Workspace root {:?} must contain .git",
+            root
+        );
     }
 }

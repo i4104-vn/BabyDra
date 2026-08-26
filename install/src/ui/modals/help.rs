@@ -14,15 +14,24 @@ pub fn draw_help_modal(f: &mut Frame, area: Rect) {
     f.render_widget(Clear, popup_area);
 
     let shortcuts = vec![
-        ("1 - 9 / 0", "Jump directly to specific wizard step (0 = Summary)"),
+        (
+            "1 - 9 / 0",
+            "Jump directly to specific wizard step (0 = Summary)",
+        ),
         ("Tab / n", "Navigate to Next configuration step"),
         ("BackTab / p", "Navigate to Previous configuration step"),
         ("↑ / ↓ / j / k", "Navigate items in the current active step"),
         ("Space", "Toggle selection of the currently focused item"),
         ("a / A", "Select or Deselect all items in active step"),
         ("Enter / i", "Start installation or confirm current step"),
-        ("s", "Change binary source folder path (e.g. target/release)"),
-        ("r", "Rescan workspace and pre-built binary source directory"),
+        (
+            "s",
+            "Change binary source folder path (e.g. target/release)",
+        ),
+        (
+            "r",
+            "Rescan workspace and pre-built binary source directory",
+        ),
         ("c", "Clear installation log buffer"),
         ("g / G", "Jump to top / bottom of installation logs"),
         ("? / Esc", "Toggle or dismiss this help modal"),
@@ -39,10 +48,7 @@ pub fn draw_help_modal(f: &mut Frame, area: Rect) {
 
     for (key, desc) in shortcuts {
         lines.push(Line::from(vec![
-            Span::styled(
-                format!(" {:<14} ", key),
-                THEME.key_badge(),
-            ),
+            Span::styled(format!(" {:<14} ", key), THEME.key_badge()),
             Span::raw(" "),
             Span::styled(desc, Style::default().fg(THEME.text_body)),
         ]));
@@ -51,7 +57,10 @@ pub fn draw_help_modal(f: &mut Frame, area: Rect) {
     lines.push(Line::from(""));
     lines.push(Line::from(vec![
         Span::styled(" Esc / ? / Enter ", THEME.key_badge_green()),
-        Span::styled(" Close this help dialog", Style::default().fg(THEME.text_dim)),
+        Span::styled(
+            " Close this help dialog",
+            Style::default().fg(THEME.text_dim),
+        ),
     ]));
 
     let block = Paragraph::new(lines)

@@ -1,27 +1,19 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum WizardStep {
-    Welcome = 0,
-    SourceBranch = 1,
-    SystemPackages = 2,
-    Binaries = 3,
-    VarLibBundle = 4,
-    ConfigsThemes = 5,
-    VariantSelection = 6,
-    DisplayManager = 7,
-    ExecuteInstall = 8,
-    Summary = 9,
+    Welcome,
+    SourceBranch,
+    Binaries,
+    VariantSelection,
+    ExecuteInstall,
+    Summary,
 }
 
 impl WizardStep {
-    pub const ALL: [WizardStep; 10] = [
+    pub const ALL: [WizardStep; 6] = [
         WizardStep::Welcome,
         WizardStep::SourceBranch,
-        WizardStep::SystemPackages,
         WizardStep::Binaries,
-        WizardStep::VarLibBundle,
-        WizardStep::ConfigsThemes,
         WizardStep::VariantSelection,
-        WizardStep::DisplayManager,
         WizardStep::ExecuteInstall,
         WizardStep::Summary,
     ];
@@ -30,14 +22,10 @@ impl WizardStep {
         match self {
             WizardStep::Welcome => "1. Welcome & Overview",
             WizardStep::SourceBranch => "2. Source Branch & Build",
-            WizardStep::SystemPackages => "3. System Packages & Deps",
-            WizardStep::Binaries => "4. BabyDra Binaries",
-            WizardStep::VarLibBundle => "5. /var/lib Staging Bundle",
-            WizardStep::ConfigsThemes => "6. Configs, Themes & Icons",
-            WizardStep::VariantSelection => "7. Variant Selection",
-            WizardStep::DisplayManager => "8. Greetd Display Manager",
-            WizardStep::ExecuteInstall => "9. Execute Installation",
-            WizardStep::Summary => "10. Summary & Launch",
+            WizardStep::Binaries => "3. BabyDra Binaries",
+            WizardStep::VariantSelection => "4. Variant Selection",
+            WizardStep::ExecuteInstall => "5. Execute Installation",
+            WizardStep::Summary => "6. Summary & Launch",
         }
     }
 
@@ -45,12 +33,8 @@ impl WizardStep {
         match self {
             WizardStep::Welcome => "Welcome",
             WizardStep::SourceBranch => "Branch",
-            WizardStep::SystemPackages => "Packages",
             WizardStep::Binaries => "Binaries",
-            WizardStep::VarLibBundle => "VarLib Bundle",
-            WizardStep::ConfigsThemes => "Configs & Themes",
             WizardStep::VariantSelection => "Variant",
-            WizardStep::DisplayManager => "Display Manager",
             WizardStep::ExecuteInstall => "Install Progress",
             WizardStep::Summary => "Summary",
         }
