@@ -179,9 +179,13 @@
   "settings.pick_avatar": "Select Avatar",
   "settings.notif_avatar_title": "Avatar",
   "settings.notif_avatar_msg": "User avatar updated",
-  "settings.keybind_type": "TYPE",
-  "settings.keybind_modifier": "MODIFIER",
-  "settings.keybind_key": "KEY",
-  "settings.keybind_dispatch": "DISPATCHER",
-  "settings.keybind_args": "ARGS"
+  "settings.keybind_shortcut": "SHORTCUT",
+  "settings.keybind_record": "Click to set…",
+  "settings.keybind_press": "Press a key combination…",
+  "settings.keybind_cancel": "Cancel",
+  "settings.notif_keybinds_saved_title": "Keybindings",
+  "settings.notif_keybinds_saved_msg": "Saved {} shortcut(s) — applied instantly",
+  "settings.notif_keybinds_failed_title": "Keybindings",
+  "settings.notif_keybinds_failed_msg": "Failed to save keybindings",
+  "settings.keybind_command": "COMMAND"
 }

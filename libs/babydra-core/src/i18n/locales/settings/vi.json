@@ -179,9 +179,13 @@
   "settings.pick_avatar": "Chọn ảnh đại diện",
   "settings.notif_avatar_title": "Ảnh đại diện",
   "settings.notif_avatar_msg": "Đã cập nhật ảnh đại diện",
-  "settings.keybind_type": "LOẠI",
-  "settings.keybind_modifier": "PHÍM BỔ TRỢ",
-  "settings.keybind_key": "PHÍM",
-  "settings.keybind_dispatch": "BỘ ĐIỀU PHỐI",
-  "settings.keybind_args": "THAM SỐ"
+  "settings.keybind_shortcut": "PHÍM TẮT",
+  "settings.keybind_record": "Bấm để đặt…",
+  "settings.keybind_press": "Nhấn tổ hợp phím…",
+  "settings.keybind_cancel": "Hủy",
+  "settings.notif_keybinds_saved_title": "Phím tắt",
+  "settings.notif_keybinds_saved_msg": "Đã lưu {} phím tắt — áp dụng ngay lập tức",
+  "settings.notif_keybinds_failed_title": "Phím tắt",
+  "settings.notif_keybinds_failed_msg": "Không thể lưu phím tắt",
+  "settings.keybind_command": "LỆNH"
 }

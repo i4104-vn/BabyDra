@@ -7,6 +7,7 @@ pub mod clean;
 pub mod display;
 pub mod gpu;
 pub mod gsettings;
+pub mod keymap;
 pub mod monitor;
 pub mod network;
 pub mod power;

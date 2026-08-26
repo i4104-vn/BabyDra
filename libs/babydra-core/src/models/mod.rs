@@ -16,6 +16,7 @@ pub use settings::env_var;
 pub use settings::hosts;
 pub use settings::keybind;
 pub use settings::nav;
+pub use settings::shortcut;
 pub use settings::startup_command;
 pub use settings::system_info;
 pub use settings::system_update;
