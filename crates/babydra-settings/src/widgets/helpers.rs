@@ -16,7 +16,8 @@ where
     });
 
     let mut on_done_opt = Some(on_done);
-    gtk4::glib::timeout_add_local(std::time::Duration::from_millis(poll_ms), move || {
+    let interval = if poll_ms == 0 { 16 } else { poll_ms };
+    gtk4::glib::timeout_add_local(std::time::Duration::from_millis(interval), move || {
         if let Ok(res) = rx.try_recv() {
             if let Some(cb) = on_done_opt.take() {
                 cb(res);

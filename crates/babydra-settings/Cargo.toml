@@ -12,4 +12,3 @@ gio = { workspace = true }
 gdk4 = { workspace = true }
 sysinfo = "0.30"
 chrono = { workspace = true }
-tokio = { workspace = true }

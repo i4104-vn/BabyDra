@@ -204,20 +204,20 @@ pub fn setup_appearance(
     if let Some(ref p) = *desktop_wp_path.borrow() {
         let p_clone = p.clone();
         let pic_clone = preview_pic.clone();
-        gtk4::glib::spawn_future_local(async move {
-            let thumb = tokio::task::spawn_blocking(move || {
-                babydra_core::wallpaper::get_or_create_thumbnail(&p_clone)
-            }).await.unwrap_or_default();
-            
-            if !thumb.as_os_str().is_empty() {
-                let file = gtk4::gio::File::for_path(&thumb);
-                if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
-                    pic_clone.set_paintable(Some(&texture));
-                } else {
-                    pic_clone.set_filename(Some(&thumb));
+        crate::widgets::helpers::spawn_async_task(
+            move || babydra_core::wallpaper::get_or_create_thumbnail(&p_clone),
+            move |thumb| {
+                if !thumb.as_os_str().is_empty() {
+                    let file = gtk4::gio::File::for_path(&thumb);
+                    if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
+                        pic_clone.set_paintable(Some(&texture));
+                    } else {
+                        pic_clone.set_filename(Some(&thumb));
+                    }
                 }
-            }
-        });
+            },
+            16,
+        );
     }
 
     let preview_pic_target = preview_pic.clone();
@@ -232,19 +232,20 @@ pub fn setup_appearance(
             if let Some(ref p) = *desktop_wp_ref.borrow() {
                 let p_clone = p.clone();
                 let pic_clone = preview_pic_target.clone();
-                gtk4::glib::spawn_future_local(async move {
-                    let thumb = tokio::task::spawn_blocking(move || {
-                        babydra_core::wallpaper::get_or_create_thumbnail(&p_clone)
-                    }).await.unwrap_or_default();
-                    if !thumb.as_os_str().is_empty() {
-                        let file = gtk4::gio::File::for_path(&thumb);
-                        if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
-                            pic_clone.set_paintable(Some(&texture));
-                        } else {
-                            pic_clone.set_filename(Some(&thumb));
+                crate::widgets::helpers::spawn_async_task(
+                    move || babydra_core::wallpaper::get_or_create_thumbnail(&p_clone),
+                    move |thumb| {
+                        if !thumb.as_os_str().is_empty() {
+                            let file = gtk4::gio::File::for_path(&thumb);
+                            if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
+                                pic_clone.set_paintable(Some(&texture));
+                            } else {
+                                pic_clone.set_filename(Some(&thumb));
+                            }
                         }
-                    }
-                });
+                    },
+                    16,
+                );
             } else {
                 preview_pic_target.set_paintable(None::<&gtk4::gdk::Paintable>);
             }
@@ -353,22 +354,22 @@ pub fn setup_appearance(
                     let wp_path_clone = wp.clone();
                     let pic_clone = pic.clone();
                     
-                    gtk4::glib::spawn_future_local(async move {
-                        let thumb_path = tokio::task::spawn_blocking(move || {
-                            babydra_core::wallpaper::get_or_create_thumbnail(&wp_path_clone)
-                        }).await.unwrap_or_default();
-                        
-                        if !thumb_path.as_os_str().is_empty() {
-                            let file = gtk4::gio::File::for_path(&thumb_path);
-                            if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
-                                pic_clone.set_paintable(Some(&texture));
-                            } else {
-                                pic_clone.set_filename(Some(&thumb_path));
+                    crate::widgets::helpers::spawn_async_task(
+                        move || babydra_core::wallpaper::get_or_create_thumbnail(&wp_path_clone),
+                        move |thumb_path| {
+                            if !thumb_path.as_os_str().is_empty() {
+                                let file = gtk4::gio::File::for_path(&thumb_path);
+                                if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
+                                    pic_clone.set_paintable(Some(&texture));
+                                } else {
+                                    pic_clone.set_filename(Some(&thumb_path));
+                                }
                             }
-                        }
-                        spinner.stop();
-                        spinner.set_visible(false);
-                    });
+                            spinner.stop();
+                            spinner.set_visible(false);
+                        },
+                        16,
+                    );
 
                     let is_live_file = babydra_core::wallpaper::is_live_wallpaper_file(&wp);
                     let card_child = if is_live_file {

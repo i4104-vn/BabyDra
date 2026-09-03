@@ -82,24 +82,22 @@ pub fn build_appearance_ui(
         spinner.start();
         preview_overlay.add_overlay(&spinner);
         
-        gtk4::glib::spawn_future_local(async move {
-            let thumb = tokio::task::spawn_blocking(move || {
-                babydra_core::wallpaper::get_or_create_thumbnail(&p)
-            })
-            .await
-            .unwrap_or_default();
-            
-            if !thumb.as_os_str().is_empty() {
-                let file = gtk4::gio::File::for_path(&thumb);
-                if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
-                    pic_clone.set_paintable(Some(&texture));
-                } else {
-                    pic_clone.set_filename(Some(&thumb));
+        crate::widgets::helpers::spawn_async_task(
+            move || babydra_core::wallpaper::get_or_create_thumbnail(&p),
+            move |thumb| {
+                if !thumb.as_os_str().is_empty() {
+                    let file = gtk4::gio::File::for_path(&thumb);
+                    if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
+                        pic_clone.set_paintable(Some(&texture));
+                    } else {
+                        pic_clone.set_filename(Some(&thumb));
+                    }
                 }
-            }
-            spinner.stop();
-            spinner.set_visible(false);
-        });
+                spinner.stop();
+                spinner.set_visible(false);
+            },
+            16,
+        );
     }
     preview_overlay.set_child(Some(&preview_pic));
 
