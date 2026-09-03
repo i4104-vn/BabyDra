@@ -72,14 +72,34 @@ pub fn build_appearance_ui(
 
     let clean_path = current_wallpaper_path.replace("file://", "");
     if !clean_path.is_empty() && std::path::Path::new(&clean_path).exists() {
-        let p = std::path::Path::new(&clean_path);
-        let thumb = babydra_core::wallpaper::get_or_create_thumbnail(p);
-        let file = gtk4::gio::File::for_path(&thumb);
-        if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
-            preview_pic.set_paintable(Some(&texture));
-        } else {
-            preview_pic.set_filename(Some(&thumb));
-        }
+        let p = std::path::PathBuf::from(clean_path);
+        let pic_clone = preview_pic.clone();
+        
+        let spinner = gtk4::Spinner::new();
+        spinner.set_halign(gtk4::Align::Center);
+        spinner.set_valign(gtk4::Align::Center);
+        spinner.set_size_request(32, 32);
+        spinner.start();
+        preview_overlay.add_overlay(&spinner);
+        
+        gtk4::glib::spawn_future_local(async move {
+            let thumb = tokio::task::spawn_blocking(move || {
+                babydra_core::wallpaper::get_or_create_thumbnail(&p)
+            })
+            .await
+            .unwrap_or_default();
+            
+            if !thumb.as_os_str().is_empty() {
+                let file = gtk4::gio::File::for_path(&thumb);
+                if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
+                    pic_clone.set_paintable(Some(&texture));
+                } else {
+                    pic_clone.set_filename(Some(&thumb));
+                }
+            }
+            spinner.stop();
+            spinner.set_visible(false);
+        });
     }
     preview_overlay.set_child(Some(&preview_pic));
 

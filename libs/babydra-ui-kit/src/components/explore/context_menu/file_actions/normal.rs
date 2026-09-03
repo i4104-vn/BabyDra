@@ -82,9 +82,9 @@ pub fn show_for_file_normal(
                 "folder-pictures",
                 move || {
                     let mode = if babydra_core::wallpaper::is_live_wallpaper_file(&path_c) {
-                        "live"
+                        babydra_core::wallpaper::WallpaperMode::Live
                     } else {
-                        "static"
+                        babydra_core::wallpaper::WallpaperMode::Static
                     };
                     let _ = babydra_core::wallpaper::set_wallpaper_with_mode(&path_c, mode);
                 },

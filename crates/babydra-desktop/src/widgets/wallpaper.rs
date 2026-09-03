@@ -154,7 +154,7 @@ pub fn create_wallpaper_w() -> gtk4::Overlay {
     container.add_overlay(&live_picture);
 
     let current_wp_path: Rc<RefCell<Option<PathBuf>>> = Rc::new(RefCell::new(None));
-    let current_wp_mode: Rc<RefCell<String>> = Rc::new(RefCell::new(String::new()));
+    let current_wp_mode: Rc<RefCell<babydra_core::wallpaper::WallpaperMode>> = Rc::new(RefCell::new(babydra_core::wallpaper::WallpaperMode::Static));
     let active_media_file: Rc<RefCell<Option<gtk4::MediaFile>>> = Rc::new(RefCell::new(None));
     let gif_source_id: Rc<RefCell<Option<glib::SourceId>>> = Rc::new(RefCell::new(None));
 
@@ -173,7 +173,7 @@ pub fn create_wallpaper_w() -> gtk4::Overlay {
 
     if let Some(ref path) = init_path {
         *current_wp_path.borrow_mut() = Some(path.clone());
-        if init_mode == "live" {
+        if init_mode == babydra_core::wallpaper::WallpaperMode::Live {
             if babydra_core::wallpaper::is_video_file(path) {
                 if babydra_core::wallpaper::is_gstreamer_plugin_available() {
                     let mf = gtk4::MediaFile::for_filename(path);
@@ -366,7 +366,7 @@ pub fn create_wallpaper_w() -> gtk4::Overlay {
                 if let Some(ref path) = new_path {
                     *cur_path_c.borrow_mut() = Some(path.clone());
 
-                    if new_mode == "live" {
+                    if new_mode == babydra_core::wallpaper::WallpaperMode::Live {
                         // Live Wallpaper mode (GPU accelerated)
                         if babydra_core::wallpaper::is_video_file(path) {
                             if babydra_core::wallpaper::is_gstreamer_plugin_available() {

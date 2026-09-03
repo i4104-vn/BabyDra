@@ -85,7 +85,7 @@ pub fn get_avatar_bytes() -> Option<Vec<u8>> {
     if !conf.lockscreen.avatar.is_empty() {
         let path = PathBuf::from(&conf.lockscreen.avatar);
         if path.is_file() {
-            if let Some(bytes) = super::wallpaper::read_image_bytes(&path) {
+            if let Some(bytes) = super::greeter::read_image_bytes(&path) {
                 if !bytes.is_empty() {
                     return Some(bytes);
                 }
@@ -94,11 +94,11 @@ pub fn get_avatar_bytes() -> Option<Vec<u8>> {
     }
 
     // Otherwise use the freshest copy across the user home and shared store
-    if let Some(path) = super::wallpaper::newest_existing(vec![
+    if let Some(path) = super::greeter::newest_existing(vec![
         dirs::home_dir().map(|h| h.join(".babydra").join("avatar.bb")),
         Some(PathBuf::from("/var/lib/babydra/avatar_fallback.bb")),
     ]) {
-        if let Some(bytes) = super::wallpaper::read_image_bytes(&path) {
+        if let Some(bytes) = super::greeter::read_image_bytes(&path) {
             if !bytes.is_empty() {
                 return Some(bytes);
             }

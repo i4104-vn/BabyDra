@@ -6,6 +6,7 @@
 //! - [`components::explore`] — file-manager feature components (dialogs,
 //!   context menus, drag & drop, file items, rubberband selection)
 //! - [`ui`] — theme, icons, animations, window and battery helpers
+//! - [`wallpaper`] — wallpaper widgets (static + live, transitions, watching)
 //! - [`prelude`] — one-stop re-export of the most commonly used API
 //!
 //! # Quick start

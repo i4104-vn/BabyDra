@@ -67,12 +67,22 @@ fn get_ram_usage() -> Option<(f64, f64, f64)> {
 }
 
 /// Creates a system resource monitoring capsule.
-/// Displays basic stats on hover and draws CPU/RAM utilization graphs on a popup card.
+/// Creates a system resource monitoring capsule.
+/// Displays basic stats on hover and draws CPU/RAM/GPU utilization graphs on a popup card.
 pub fn create_sys_monitor_w() -> gtk4::Box {
     let capsule = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
 
-    let (sys_label, popover, cpu_chart, ram_chart, cpu_label, ram_label, ram_detail) =
-        render::build_sys_monitor(&capsule);
+    let (
+        sys_label,
+        popover,
+        cpu_chart,
+        ram_chart,
+        gpu_chart,
+        cpu_label,
+        ram_label,
+        ram_detail,
+        gpu_label,
+    ) = render::build_sys_monitor(&capsule);
 
     let cpu_history = Rc::new(RefCell::new(std::collections::VecDeque::from(vec![
         0.0;
@@ -82,9 +92,14 @@ pub fn create_sys_monitor_w() -> gtk4::Box {
         0.0;
         30
     ])));
+    let gpu_history = Rc::new(RefCell::new(std::collections::VecDeque::from(vec![
+        0.0;
+        30
+    ])));
 
     render::setup_chart_draw(&cpu_chart, cpu_history.clone(), "#3b82f6");
     render::setup_chart_draw(&ram_chart, ram_history.clone(), "#a855f7");
+    render::setup_chart_draw(&gpu_chart, gpu_history.clone(), "#10b981");
 
     let last_cpu: Rc<RefCell<Option<CpuTime>>> = Rc::new(RefCell::new(None));
     let last_cpu_clone = last_cpu.clone();
@@ -92,11 +107,14 @@ pub fn create_sys_monitor_w() -> gtk4::Box {
     let cpu_label_clone = cpu_label.clone();
     let ram_label_clone = ram_label.clone();
     let ram_detail_clone = ram_detail.clone();
+    let gpu_label_clone = gpu_label.clone();
 
     let cpu_history_loop = cpu_history.clone();
     let ram_history_loop = ram_history.clone();
+    let gpu_history_loop = gpu_history.clone();
     let cpu_chart_loop = cpu_chart.clone();
     let ram_chart_loop = ram_chart.clone();
+    let gpu_chart_loop = gpu_chart.clone();
 
     gtk4::glib::timeout_add_local(std::time::Duration::from_millis(2000), move || {
         if let Some(current_cpu) = get_cpu_raw() {
@@ -116,6 +134,8 @@ pub fn create_sys_monitor_w() -> gtk4::Box {
             *last_cpu_borrow = Some(current_cpu);
 
             let ram_info = get_ram_usage().unwrap_or((0.0, 0.0, 0.0));
+            let gpu_percent =
+                babydra_core::services::system::monitor::get_gpu_usage().unwrap_or(0.0);
 
             let sys_template = babydra_core::i18n::trans("sysmon.cpu_ram");
             sys_label_clone.set_text(
@@ -134,10 +154,11 @@ pub fn create_sys_monitor_w() -> gtk4::Box {
                 babydra_core::i18n::trans("panel.ram_usage"),
                 ram_info.2
             ));
-            ram_detail_clone.set_text(&format!(
-                "{:.} GB / {:.2} GB",
-                format!("{:.2}", ram_info.0),
-                ram_info.1
+            ram_detail_clone.set_text(&format!("{:.2} GB / {:.2} GB", ram_info.0, ram_info.1));
+            gpu_label_clone.set_text(&format!(
+                "{}: {:.1}%",
+                babydra_core::i18n::trans("panel.gpu_usage"),
+                gpu_percent
             ));
 
             {
@@ -153,6 +174,13 @@ pub fn create_sys_monitor_w() -> gtk4::Box {
                 hist.push_back(ram_info.2);
             }
             ram_chart_loop.queue_draw();
+
+            {
+                let mut hist = gpu_history_loop.borrow_mut();
+                hist.pop_front();
+                hist.push_back(gpu_percent);
+            }
+            gpu_chart_loop.queue_draw();
         }
 
         gtk4::glib::ControlFlow::Continue
@@ -165,10 +193,13 @@ pub fn create_sys_monitor_w() -> gtk4::Box {
     let cpu_label_hover = cpu_label.clone();
     let ram_label_hover = ram_label.clone();
     let ram_detail_hover = ram_detail.clone();
+    let gpu_label_hover = gpu_label.clone();
     let cpu_history_hover = cpu_history.clone();
     let ram_history_hover = ram_history.clone();
+    let gpu_history_hover = gpu_history.clone();
     let cpu_chart_hover = cpu_chart.clone();
     let ram_chart_hover = ram_chart.clone();
+    let gpu_chart_hover = gpu_chart.clone();
 
     motion_controller.connect_enter(move |_, _, _| {
         let mut cpu_percent = 0.0;
@@ -205,6 +236,13 @@ pub fn create_sys_monitor_w() -> gtk4::Box {
             ram_detail_hover.set_text(&format!("{:.2} GB / {:.2} GB", ram_info.0, ram_info.1));
         }
 
+        let gpu_percent = babydra_core::services::system::monitor::get_gpu_usage().unwrap_or(0.0);
+        gpu_label_hover.set_text(&format!(
+            "{}: {:.1}%",
+            babydra_core::i18n::trans("panel.gpu_usage"),
+            gpu_percent
+        ));
+
         {
             let mut hist = cpu_history_hover.borrow_mut();
             hist.pop_front();
@@ -218,6 +256,13 @@ pub fn create_sys_monitor_w() -> gtk4::Box {
             hist.push_back(ram_pct);
         }
         ram_chart_hover.queue_draw();
+
+        {
+            let mut hist = gpu_history_hover.borrow_mut();
+            hist.pop_front();
+            hist.push_back(gpu_percent);
+        }
+        gpu_chart_hover.queue_draw();
 
         popover_enter.popup();
     });

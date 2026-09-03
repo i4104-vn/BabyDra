@@ -83,6 +83,112 @@ pub fn get_formatted_uptime() -> String {
     "0m".to_string()
 }
 
+static LAST_INTEL_SAMPLE: std::sync::Mutex<Option<(std::time::Instant, u64)>> =
+    std::sync::Mutex::new(None);
+
+/// Reads GPU utilization percentage (0.0 - 100.0) across all vendors (Intel, AMD, NVIDIA).
+pub fn get_gpu_usage() -> Option<f64> {
+    // 1. AMD GPU: /sys/class/drm/card*/device/gpu_busy_percent
+    if let Ok(entries) = std::fs::read_dir("/sys/class/drm") {
+        for entry in entries.flatten() {
+            let name = entry.file_name();
+            let name_str = name.to_string_lossy();
+            if name_str.starts_with("card") && name_str[4..].chars().all(|c| c.is_ascii_digit()) {
+                let busy_file = entry.path().join("device/gpu_busy_percent");
+                if busy_file.exists() {
+                    if let Ok(content) = std::fs::read_to_string(&busy_file) {
+                        if let Ok(val) = content.trim().parse::<f64>() {
+                            return Some(val.clamp(0.0, 100.0));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // 2. Intel GPU: RC6 residency delta (gt/gt0/rc6_residency_ms or gt_rc6_ms)
+    if let Ok(entries) = std::fs::read_dir("/sys/class/drm") {
+        for entry in entries.flatten() {
+            let name = entry.file_name();
+            let name_str = name.to_string_lossy();
+            if name_str.starts_with("card") && name_str[4..].chars().all(|c| c.is_ascii_digit()) {
+                let card_dir = entry.path();
+                let rc6_paths = [
+                    card_dir.join("gt/gt0/rc6_residency_ms"),
+                    card_dir.join("gt_rc6_ms"),
+                ];
+
+                for rc6_path in &rc6_paths {
+                    if rc6_path.exists() {
+                        if let Ok(content) = std::fs::read_to_string(rc6_path) {
+                            if let Ok(current_rc6) = content.trim().parse::<u64>() {
+                                let now = std::time::Instant::now();
+                                let mut guard = LAST_INTEL_SAMPLE
+                                    .lock()
+                                    .unwrap_or_else(|e| e.into_inner());
+                                if let Some((last_time, last_rc6)) = *guard {
+                                    let dt_ms =
+                                        now.duration_since(last_time).as_secs_f64() * 1000.0;
+                                    *guard = Some((now, current_rc6));
+
+                                    if dt_ms >= 50.0 {
+                                        let d_rc6 = current_rc6.saturating_sub(last_rc6) as f64;
+                                        let idle_ratio = (d_rc6 / dt_ms).clamp(0.0, 1.0);
+                                        let busy_pct = (1.0 - idle_ratio) * 100.0;
+                                        return Some(busy_pct.clamp(0.0, 100.0));
+                                    }
+                                } else {
+                                    *guard = Some((now, current_rc6));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Intel Frequency ratio fallback
+                let act_path = card_dir.join("gt_act_freq_mhz");
+                let max_path = card_dir.join("gt_max_freq_mhz");
+                let min_path = card_dir.join("gt_min_freq_mhz");
+                if act_path.exists() && max_path.exists() {
+                    let act = std::fs::read_to_string(&act_path)
+                        .ok()
+                        .and_then(|s| s.trim().parse::<f64>().ok());
+                    let max = std::fs::read_to_string(&max_path)
+                        .ok()
+                        .and_then(|s| s.trim().parse::<f64>().ok());
+                    let min = std::fs::read_to_string(&min_path)
+                        .ok()
+                        .and_then(|s| s.trim().parse::<f64>().ok())
+                        .unwrap_or(0.0);
+                    if let (Some(act_val), Some(max_val)) = (act, max) {
+                        if max_val > min {
+                            let ratio = ((act_val - min) / (max_val - min)) * 100.0;
+                            return Some(ratio.clamp(0.0, 100.0));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // 3. NVIDIA GPU: nvidia-smi query
+    if let Ok(output) = std::process::Command::new("nvidia-smi")
+        .args(["--query-gpu=utilization.gpu", "--format=csv,noheader,nounits"])
+        .output()
+    {
+        if output.status.success() {
+            let s = String::from_utf8_lossy(&output.stdout);
+            if let Some(first_line) = s.lines().next() {
+                if let Ok(val) = first_line.trim().parse::<f64>() {
+                    return Some(val.clamp(0.0, 100.0));
+                }
+            }
+        }
+    }
+
+    None
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -97,4 +203,15 @@ mod tests {
             uptime
         );
     }
+
+    #[test]
+    fn test_get_gpu_usage() {
+        let _ = get_gpu_usage();
+        std::thread::sleep(std::time::Duration::from_millis(60));
+        let usage = get_gpu_usage();
+        if let Some(pct) = usage {
+            assert!(pct >= 0.0 && pct <= 100.0, "GPU percentage out of range: {}", pct);
+        }
+    }
 }
+
