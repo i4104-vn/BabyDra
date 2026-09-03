@@ -32,7 +32,15 @@ fn make_refresh_cb(
         let p = parent_win_c.clone();
         let r = rubberband_c.clone();
         glib::spawn_future_local(async move {
-            s.borrow_mut().config = babydra_core::config::load_desktop_config();
+            {
+                let mut s_ref = s.borrow_mut();
+                s_ref.config = babydra_core::config::load_desktop_config();
+                let pw = p.width();
+                let ph = p.height();
+                if pw > 0 && ph > 0 {
+                    s_ref.screen_size = (pw, ph);
+                }
+            }
             let sort_by = s.borrow().config.sort_by.clone();
             let new_entries =
                 babydra_core::models::shell::desktop_state::DesktopState::fetch_entries(&sort_by)
@@ -54,6 +62,11 @@ fn make_refresh_positions_cb(
     let parent_win_c = parent_window.clone();
     let rubberband_c = rubberband.clone();
     Rc::new(move || {
+        let pw = parent_win_c.width();
+        let ph = parent_win_c.height();
+        if pw > 0 && ph > 0 {
+            state_c.borrow_mut().screen_size = (pw, ph);
+        }
         render::rebuild_grid_icons(&fixed_c, &state_c, &parent_win_c, &rubberband_c);
     })
 }
@@ -124,6 +137,17 @@ pub fn create_desktop_grid(
         rubberband.clone(),
         refresh_fn.clone(),
     );
+
+    // Listen to window size changes
+    let refresh_on_resize_w = refresh_pos_fn.clone();
+    parent_window.connect_notify_local(Some("width"), move |_, _| {
+        refresh_on_resize_w();
+    });
+    
+    let refresh_on_resize_h = refresh_pos_fn.clone();
+    parent_window.connect_notify_local(Some("height"), move |_, _| {
+        refresh_on_resize_h();
+    });
 
     // Initial load + file watcher
     refresh_fn();

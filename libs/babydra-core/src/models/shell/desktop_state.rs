@@ -77,21 +77,50 @@ pub fn sort_entries(entries: &mut [FileEntry], sort_by: &str) {
                 match (a_is_dir, b_is_dir) {
                     (true, false) => std::cmp::Ordering::Less,
                     (false, true) => std::cmp::Ordering::Greater,
-                    _ => a
-                        .display_name
-                        .to_lowercase()
-                        .cmp(&b.display_name.to_lowercase()),
+                    _ => {
+                        let ext_a = a
+                            .path
+                            .extension()
+                            .map(|e| e.to_string_lossy().to_lowercase())
+                            .unwrap_or_default();
+                        let ext_b = b
+                            .path
+                            .extension()
+                            .map(|e| e.to_string_lossy().to_lowercase())
+                            .unwrap_or_default();
+                        ext_a.cmp(&ext_b)
+                    }
                 }
             });
         }
         "modified" => {
-            entries.sort_by(|a, b| b.modified.cmp(&a.modified));
+            entries.sort_by(|a, b| {
+                let a_is_dir = a.file_type == crate::models::explore::FileType::Directory;
+                let b_is_dir = b.file_type == crate::models::explore::FileType::Directory;
+                match (a_is_dir, b_is_dir) {
+                    (true, false) => std::cmp::Ordering::Less,
+                    (false, true) => std::cmp::Ordering::Greater,
+                    _ => match (a.modified, b.modified) {
+                        (Some(ma), Some(mb)) => mb.cmp(&ma),
+                        (Some(_), None) => std::cmp::Ordering::Less,
+                        (None, Some(_)) => std::cmp::Ordering::Greater,
+                        (None, None) => std::cmp::Ordering::Equal,
+                    },
+                }
+            });
         }
         "size" => {
-            entries.sort_by(|a, b| b.size.cmp(&a.size));
+            entries.sort_by(|a, b| {
+                let a_is_dir = a.file_type == crate::models::explore::FileType::Directory;
+                let b_is_dir = b.file_type == crate::models::explore::FileType::Directory;
+                match (a_is_dir, b_is_dir) {
+                    (true, false) => std::cmp::Ordering::Less,
+                    (false, true) => std::cmp::Ordering::Greater,
+                    _ => b.size.cmp(&a.size),
+                }
+            });
         }
-        _ => {
-            // Default "name": folders first, then alphabetical case-insensitive
+        "name" => {
             entries.sort_by(|a, b| {
                 let a_is_dir = a.file_type == crate::models::explore::FileType::Directory;
                 let b_is_dir = b.file_type == crate::models::explore::FileType::Directory;
@@ -104,6 +133,9 @@ pub fn sort_entries(entries: &mut [FileEntry], sort_by: &str) {
                         .cmp(&b.display_name.to_lowercase()),
                 }
             });
+        }
+        _ => {
+            // Do not force sorting when mode is "none" or unrecognized
         }
     }
 }
@@ -308,8 +340,11 @@ impl DesktopState {
             snap_to_grid(x, y, cell_w, cell_h, DEFAULT_MARGIN_X, DEFAULT_MARGIN_Y);
 
         desktop_layout::set_position(file_name, snapped_x, snapped_y);
-        if self.config.auto_arrange {
+        
+        let changed = self.config.auto_arrange || self.config.sort_by != "none";
+        if changed {
             self.config.auto_arrange = false;
+            self.config.sort_by = "none".to_string();
             save_desktop_config(&self.config);
         }
     }
@@ -317,6 +352,8 @@ impl DesktopState {
     /// Updates sort order and re-sorts entries.
     pub fn set_sort_by(&mut self, sort_by: String) {
         self.config.sort_by = sort_by;
+        self.config.auto_arrange = true;
+        desktop_layout::clear();
         sort_entries(&mut self.entries, &self.config.sort_by);
         save_desktop_config(&self.config);
     }
@@ -401,18 +438,33 @@ mod tests {
             mock_entry("zebra.txt", false, 10),
             mock_entry("alpha_folder", true, 0),
             mock_entry("beta.txt", false, 500),
+            mock_entry("gamma.doc", false, 20),
         ];
 
         // Sort by name (folders first)
         sort_entries(&mut entries, "name");
         assert_eq!(entries[0].display_name, "alpha_folder");
         assert_eq!(entries[1].display_name, "beta.txt");
-        assert_eq!(entries[2].display_name, "zebra.txt");
+        assert_eq!(entries[2].display_name, "gamma.doc");
+        assert_eq!(entries[3].display_name, "zebra.txt");
 
-        // Sort by size
+        // Sort by size (largest first, folders first)
         sort_entries(&mut entries, "size");
-        assert_eq!(entries[0].display_name, "beta.txt");
-        assert_eq!(entries[1].display_name, "zebra.txt");
-        assert_eq!(entries[2].display_name, "alpha_folder");
+        assert_eq!(entries[0].display_name, "alpha_folder");
+        assert_eq!(entries[1].display_name, "beta.txt");
+        assert_eq!(entries[2].display_name, "gamma.doc");
+        assert_eq!(entries[3].display_name, "zebra.txt");
+        
+        // Sort by type (by extension, folders first)
+        sort_entries(&mut entries, "type");
+        assert_eq!(entries[0].display_name, "alpha_folder");
+        assert_eq!(entries[1].display_name, "gamma.doc");
+        assert_eq!(entries[2].display_name, "beta.txt");
+        assert_eq!(entries[3].display_name, "zebra.txt");
+
+        // Sort by none (should not modify the existing order)
+        let before_none = entries.clone();
+        sort_entries(&mut entries, "none");
+        assert_eq!(entries, before_none);
     }
 }

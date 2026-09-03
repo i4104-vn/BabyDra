@@ -104,12 +104,6 @@ pub fn show_for_file_normal(
         },
     );
 
-    // 3. Refresh
-    let nav_refresh = nav_callback.clone();
-    let current_p_refresh = current_path.clone();
-    builder = builder.item(&trans("explore.menu_refresh"), "refresh", move || {
-        nav_refresh(current_p_refresh.clone());
-    });
 
     // 4. Copy location
     let target_paths_loc = target_paths.clone();

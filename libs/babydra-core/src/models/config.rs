@@ -270,7 +270,7 @@ pub struct BabyDraConfig {
     pub display: DisplayConfig,
     #[serde(default)]
     pub lockscreen: LockscreenConfig,
-    #[serde(default, skip_serializing)]
+    #[serde(default)]
     pub desktop: DesktopConfig,
     /// Theme package selection (id + dark preference).
     /// Empty `id` = engine default (`babydra-default`).

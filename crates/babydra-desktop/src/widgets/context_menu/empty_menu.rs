@@ -45,7 +45,13 @@ pub fn show_empty_menu(
         );
     });
 
-    // 3. Paste is moved to footer
+    // 3. Refresh
+    let ref_cb_r = refresh_cb.clone();
+    builder = builder.item(&trans("explore.menu_refresh"), "refresh", move || {
+        ref_cb_r();
+    });
+
+    // 4. Paste is moved to footer
     builder = builder.separator();
 
     // 4. Open in Terminal
@@ -85,15 +91,21 @@ pub fn show_empty_menu(
     builder = builder.separator();
 
     // 6. Sort Options
-    let current_sort = babydra_core::config::load_desktop_config().sort_by;
+    let cfg = babydra_core::config::load_desktop_config();
+    let current_sort = cfg.sort_by;
+    let is_auto_sort = cfg.auto_arrange && current_sort != "none" && !current_sort.is_empty();
     let ref_cb_submenu = refresh_cb.clone();
 
-    let sort_label = match current_sort.as_str() {
-        "name" => trans("desktop.sort_by_name"),
-        "modified" => trans("desktop.sort_by_date"),
-        "type" => trans("desktop.sort_by_type"),
-        "size" => trans("desktop.sort_by_size"),
-        _ => trans("desktop.sort_by"),
+    let sort_label = if is_auto_sort {
+        match current_sort.as_str() {
+            "name" => trans("desktop.sort_by_name"),
+            "modified" => trans("desktop.sort_by_date"),
+            "type" => trans("desktop.sort_by_type"),
+            "size" => trans("desktop.sort_by_size"),
+            _ => trans("desktop.sort_by"),
+        }
+    } else {
+        trans("desktop.sort_by")
     };
 
     builder = builder.submenu(
@@ -103,10 +115,13 @@ pub fn show_empty_menu(
             let ref_cb_1 = ref_cb_submenu.clone();
             sub_b = sub_b.checked_item(
                 &trans("desktop.sort_by_name"),
-                current_sort == "name",
+                is_auto_sort && current_sort == "name",
                 move || {
                     babydra_core::config::desktop_layout::clear();
-                    update_desktop_config(|conf| conf.sort_by = "name".to_string());
+                    update_desktop_config(|conf| {
+                        conf.sort_by = "name".to_string();
+                        conf.auto_arrange = true;
+                    });
                     ref_cb_1();
                 },
             );
@@ -114,10 +129,13 @@ pub fn show_empty_menu(
             let ref_cb_2 = ref_cb_submenu.clone();
             sub_b = sub_b.checked_item(
                 &trans("desktop.sort_by_date"),
-                current_sort == "modified",
+                is_auto_sort && current_sort == "modified",
                 move || {
                     babydra_core::config::desktop_layout::clear();
-                    update_desktop_config(|conf| conf.sort_by = "modified".to_string());
+                    update_desktop_config(|conf| {
+                        conf.sort_by = "modified".to_string();
+                        conf.auto_arrange = true;
+                    });
                     ref_cb_2();
                 },
             );
@@ -125,10 +143,13 @@ pub fn show_empty_menu(
             let ref_cb_3 = ref_cb_submenu.clone();
             sub_b = sub_b.checked_item(
                 &trans("desktop.sort_by_type"),
-                current_sort == "type",
+                is_auto_sort && current_sort == "type",
                 move || {
                     babydra_core::config::desktop_layout::clear();
-                    update_desktop_config(|conf| conf.sort_by = "type".to_string());
+                    update_desktop_config(|conf| {
+                        conf.sort_by = "type".to_string();
+                        conf.auto_arrange = true;
+                    });
                     ref_cb_3();
                 },
             );
@@ -136,10 +157,13 @@ pub fn show_empty_menu(
             let ref_cb_4 = ref_cb_submenu.clone();
             sub_b = sub_b.checked_item(
                 &trans("desktop.sort_by_size"),
-                current_sort == "size",
+                is_auto_sort && current_sort == "size",
                 move || {
                     babydra_core::config::desktop_layout::clear();
-                    update_desktop_config(|conf| conf.sort_by = "size".to_string());
+                    update_desktop_config(|conf| {
+                        conf.sort_by = "size".to_string();
+                        conf.auto_arrange = true;
+                    });
                     ref_cb_4();
                 },
             );

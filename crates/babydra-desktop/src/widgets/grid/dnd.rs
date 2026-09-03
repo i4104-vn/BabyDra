@@ -165,6 +165,7 @@ pub fn create_desktop_drop(
 
                 let state_ref = state_drop.borrow();
                 let current_positions = state_ref.compute_all_positions();
+                let was_auto = state_ref.config.auto_arrange || state_ref.config.sort_by != "none";
 
                 let anchor_src = &internal_sources[0];
                 let anchor_name = anchor_src
@@ -188,6 +189,14 @@ pub fn create_desktop_drop(
 
                 let offset_x = base_x - anchor_current_pos.0;
                 let offset_y = base_y - anchor_current_pos.1;
+
+                if was_auto {
+                    let mut batch = Vec::new();
+                    for (fname, pos) in &current_positions {
+                        batch.push((fname.clone(), pos.0, pos.1));
+                    }
+                    babydra_core::config::desktop_layout::set_positions(batch);
+                }
 
                 for src in internal_sources {
                     if let Some(file_name) = src.file_name().and_then(|n| n.to_str()) {
