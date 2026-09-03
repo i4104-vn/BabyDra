@@ -21,6 +21,7 @@ pub fn create_appearance() -> gtk4::Widget {
     let (
         main_box,
         preview_pic,
+        preview_type_badge,
         pick_btn,
         theme_toggle_btn,
         gtk_dropdown,
@@ -46,6 +47,7 @@ pub fn create_appearance() -> gtk4::Widget {
     handler::setup_appearance(
         &main_box,
         &preview_pic,
+        &preview_type_badge,
         &pick_btn,
         &theme_toggle_btn,
         &gtk_dropdown,

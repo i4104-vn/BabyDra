@@ -198,6 +198,7 @@
   "settings.live_filter": "Hình nền động (*.mp4, *.webm, *.mkv, *.gif)",
   "settings.badge_video": "VIDEO",
   "settings.badge_gif": "GIF",
+  "settings.badge_image": "ẢNH",
   "settings.no_live_wallpapers": "Không tìm thấy hình nền động nào trong ~/.babydra/wallpaper",
   "settings.no_live_wallpapers_sub": "Nhấn '+' ở trên để thêm video (< 20s) hoặc ảnh động GIF mới",
   "settings.notif_live_wallpaper_title": "Hình nền động",

@@ -1655,6 +1655,31 @@ button.wallpaper-thumb-card:hover picture {
     color: #ffffff;
 }
 
+.wallpaper-badge-video {
+    background-color: rgba(99, 102, 241, 0.88);
+    color: #ffffff;
+}
+
+.wallpaper-badge-gif {
+    background-color: rgba(236, 72, 153, 0.88);
+    color: #ffffff;
+}
+
+.wallpaper-badge-image {
+    background-color: rgba(15, 23, 42, 0.78);
+    color: #f1f5f9;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.wallpaper-preview-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 8px;
+    margin: 12px;
+    letter-spacing: 0.6px;
+}
+
 /* Missing GStreamer Plugin Warning Banner */
 .missing-plugin-banner {
     background-color: rgba(239, 68, 68, 0.12);

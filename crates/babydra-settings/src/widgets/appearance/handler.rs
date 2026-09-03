@@ -4,10 +4,13 @@ use gtk4::prelude::*;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
+use super::render::update_wallpaper_badge;
+
 /// Sets up `appearance handlers`.
 pub fn setup_appearance(
     main_box: &gtk4::Box,
     preview_pic: &gtk4::Picture,
+    preview_type_badge: &gtk4::Label,
     pick_btn: &gtk4::Button,
     theme_toggle_btn: &gtk4::Button,
     gtk_dropdown: &gtk4::DropDown,
@@ -201,6 +204,7 @@ pub fn setup_appearance(
     }
 
     // Initialize preview with current wallpaper thumbnail
+    update_wallpaper_badge(preview_type_badge, desktop_wp_path.borrow().as_deref());
     if let Some(ref p) = *desktop_wp_path.borrow() {
         let p_clone = p.clone();
         let pic_clone = preview_pic.clone();
@@ -221,6 +225,7 @@ pub fn setup_appearance(
     }
 
     let preview_pic_target = preview_pic.clone();
+    let preview_badge_target = preview_type_badge.clone();
     let desktop_wp_ref = desktop_wp_path.clone();
     let greeter_wp_ref = greeter_wp_path.clone();
     let target_mode_ref = target_mode.clone();
@@ -229,6 +234,7 @@ pub fn setup_appearance(
         let sel = dd.selected();
         target_mode_ref.set(sel);
         if sel == 0 {
+            update_wallpaper_badge(&preview_badge_target, desktop_wp_ref.borrow().as_deref());
             if let Some(ref p) = *desktop_wp_ref.borrow() {
                 let p_clone = p.clone();
                 let pic_clone = preview_pic_target.clone();
@@ -250,7 +256,9 @@ pub fn setup_appearance(
                 preview_pic_target.set_paintable(None::<&gtk4::gdk::Paintable>);
             }
         } else {
-            if let Some(bytes) = babydra_core::get_greeter_wp_bytes() {
+            if babydra_core::get_greeter_wp_bytes().is_some() {
+                update_wallpaper_badge(&preview_badge_target, Some(std::path::Path::new("lock.png")));
+                let bytes = babydra_core::get_greeter_wp_bytes().unwrap();
                 let stream =
                     gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(&bytes));
                 if let Ok(pixbuf) =
@@ -259,6 +267,7 @@ pub fn setup_appearance(
                     preview_pic_target.set_pixbuf(Some(&pixbuf));
                 }
             } else if let Some(ref p) = *greeter_wp_ref.borrow() {
+                update_wallpaper_badge(&preview_badge_target, Some(p));
                 if p.extension().and_then(|e| e.to_str()) != Some("bb") {
                     let file = gtk4::gio::File::for_path(p);
                     if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
@@ -277,6 +286,7 @@ pub fn setup_appearance(
     let render_wallpapers_grid = {
         let quick_select_box_clone = quick_select_box.clone();
         let preview_pic_clone = preview_pic.clone();
+        let preview_badge_clone = preview_type_badge.clone();
         let desktop_wp_path_clone = desktop_wp_path.clone();
         let greeter_wp_path_clone = greeter_wp_path.clone();
         let target_mode_clone = target_mode.clone();
@@ -393,11 +403,13 @@ pub fn setup_appearance(
 
                     let wp_clone = wp.clone();
                     let preview_cb = preview_pic_clone.clone();
+                    let preview_badge_cb = preview_badge_clone.clone();
                     let desktop_wp_cb = desktop_wp_path_clone.clone();
                     let greeter_wp_cb = greeter_wp_path_clone.clone();
                     let target_mode_cb = target_mode_clone.clone();
 
                     btn.connect_clicked(move |_| {
+                        update_wallpaper_badge(&preview_badge_cb, Some(&wp_clone));
                         let thumb_clone = babydra_core::wallpaper::get_or_create_thumbnail(&wp_clone);
                         let is_lock = target_mode_cb.get() == 1;
                         if is_lock {
@@ -492,6 +504,7 @@ pub fn setup_appearance(
     render_wallpapers_grid();
 
     let preview_clone = preview_pic.clone();
+    let preview_badge_pick = preview_type_badge.clone();
     let parent_box = main_box.clone();
     let render_grid_cb = render_wallpapers_grid.clone();
     let desktop_wp_pick = desktop_wp_path.clone();
@@ -547,6 +560,7 @@ pub fn setup_appearance(
             file_dialog.set_default_filter(Some(&filter));
 
             let preview_cb = preview_clone.clone();
+            let preview_badge_cb = preview_badge_pick.clone();
             let render_grid_after_pick = render_grid_cb.clone();
             let desktop_wp_file = desktop_wp_pick.clone();
             let greeter_wp_file = greeter_wp_pick.clone();
@@ -573,6 +587,7 @@ pub fn setup_appearance(
                             if path != dest_path {
                                 let _ = std::fs::copy(&path, &dest_path);
                             }
+                            update_wallpaper_badge(&preview_badge_cb, Some(&dest_path));
                             let thumb_path = babydra_core::wallpaper::get_or_create_thumbnail(&dest_path);
 
                             if is_lock {

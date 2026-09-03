@@ -14,6 +14,7 @@ pub fn build_appearance_ui(
 ) -> (
     gtk4::Box,
     gtk4::Picture,
+    gtk4::Label,
     gtk4::Button,
     gtk4::Button,
     gtk4::DropDown,
@@ -72,7 +73,7 @@ pub fn build_appearance_ui(
 
     let clean_path = current_wallpaper_path.replace("file://", "");
     if !clean_path.is_empty() && std::path::Path::new(&clean_path).exists() {
-        let p = std::path::PathBuf::from(clean_path);
+        let p = std::path::PathBuf::from(clean_path.clone());
         let pic_clone = preview_pic.clone();
         
         let spinner = gtk4::Spinner::new();
@@ -120,6 +121,23 @@ pub fn build_appearance_ui(
 
     top_left_box.append(&target_dropdown);
     preview_overlay.add_overlay(&top_left_box);
+
+    // Bottom-Left Badge for Type: VIDEO, GIF, or IMAGE
+    let preview_type_badge = gtk4::Label::new(None);
+    preview_type_badge.add_css_class("wallpaper-badge");
+    preview_type_badge.add_css_class("wallpaper-preview-badge");
+    preview_type_badge.set_halign(gtk4::Align::Start);
+    preview_type_badge.set_valign(gtk4::Align::End);
+    preview_type_badge.set_margin_start(10);
+    preview_type_badge.set_margin_bottom(10);
+
+    let initial_path_obj = if !clean_path.is_empty() {
+        Some(std::path::Path::new(&clean_path))
+    } else {
+        None
+    };
+    update_wallpaper_badge(&preview_type_badge, initial_path_obj);
+    preview_overlay.add_overlay(&preview_type_badge);
 
     // Vertical Overlay Actions Column on the Right Edge
     let actions_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
@@ -340,6 +358,7 @@ pub fn build_appearance_ui(
     (
         main_box,
         preview_pic,
+        preview_type_badge,
         pick_btn,
         theme_toggle_btn,
         gtk_dropdown,
@@ -353,5 +372,34 @@ pub fn build_appearance_ui(
         avatar_pic,
         avatar_btn,
     )
+}
+
+/// Updates the label text and CSS styling for the wallpaper type badge.
+pub fn update_wallpaper_badge(badge: &gtk4::Label, path_opt: Option<&std::path::Path>) {
+    badge.remove_css_class("wallpaper-badge-video");
+    badge.remove_css_class("wallpaper-badge-gif");
+    badge.remove_css_class("wallpaper-badge-image");
+
+    if let Some(path) = path_opt {
+        if !path.as_os_str().is_empty() {
+            if babydra_core::wallpaper::is_video_file(path) {
+                badge.set_text(&babydra_core::i18n::trans("settings.badge_video"));
+                badge.add_css_class("wallpaper-badge-video");
+                badge.set_visible(true);
+                return;
+            } else if babydra_core::wallpaper::is_gif_file(path) {
+                badge.set_text(&babydra_core::i18n::trans("settings.badge_gif"));
+                badge.add_css_class("wallpaper-badge-gif");
+                badge.set_visible(true);
+                return;
+            } else {
+                badge.set_text(&babydra_core::i18n::trans("settings.badge_image"));
+                badge.add_css_class("wallpaper-badge-image");
+                badge.set_visible(true);
+                return;
+            }
+        }
+    }
+    badge.set_visible(false);
 }
 

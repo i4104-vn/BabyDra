@@ -198,6 +198,7 @@
   "settings.live_filter": "Live Wallpapers (*.mp4, *.webm, *.mkv, *.gif)",
   "settings.badge_video": "VIDEO",
   "settings.badge_gif": "GIF",
+  "settings.badge_image": "IMAGE",
   "settings.no_live_wallpapers": "No live wallpapers found in ~/.babydra/wallpaper",
   "settings.no_live_wallpapers_sub": "Click '+' above to add a new video (< 20s) or animated GIF",
   "settings.notif_live_wallpaper_title": "Live Wallpaper",
