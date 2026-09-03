@@ -131,14 +131,33 @@ fn draw_surface_aspect_fill(
     let _ = cr.restore();
 }
 
-/// Creates a fullscreen wallpaper widget with a water-drop ripple transition opening from the corner.
-pub fn create_wallpaper_w() -> gtk4::DrawingArea {
+/// Creates a fullscreen wallpaper widget with GPU acceleration for live wallpaper (Video & GIF)
+/// and water-drop ripple transition for static wallpapers.
+pub fn create_wallpaper_w() -> gtk4::Overlay {
+    let container = gtk4::Overlay::new();
+    container.set_hexpand(true);
+    container.set_vexpand(true);
+    container.add_css_class("desktop-wallpaper-container");
+
     let drawing_area = gtk4::DrawingArea::new();
     drawing_area.set_hexpand(true);
     drawing_area.set_vexpand(true);
-    drawing_area.add_css_class("desktop-wallpaper-container");
+
+    let live_picture = gtk4::Picture::new();
+    live_picture.set_hexpand(true);
+    live_picture.set_vexpand(true);
+    live_picture.set_can_shrink(true);
+    live_picture.set_content_fit(gtk4::ContentFit::Cover);
+    live_picture.set_visible(false);
+
+    container.set_child(Some(&drawing_area));
+    container.add_overlay(&live_picture);
 
     let current_wp_path: Rc<RefCell<Option<PathBuf>>> = Rc::new(RefCell::new(None));
+    let current_wp_mode: Rc<RefCell<String>> = Rc::new(RefCell::new(String::new()));
+    let active_media_file: Rc<RefCell<Option<gtk4::MediaFile>>> = Rc::new(RefCell::new(None));
+    let gif_source_id: Rc<RefCell<Option<glib::SourceId>>> = Rc::new(RefCell::new(None));
+
     let old_surface: Rc<RefCell<Option<cairo::ImageSurface>>> = Rc::new(RefCell::new(None));
     let current_surface: Rc<RefCell<Option<cairo::ImageSurface>>> = Rc::new(RefCell::new(None));
     let transition_progress: Rc<Cell<f64>> = Rc::new(Cell::new(1.0));
@@ -148,10 +167,71 @@ pub fn create_wallpaper_w() -> gtk4::DrawingArea {
 
     // Initial wallpaper load with dynamic monitor resolution detection
     let (init_w, init_h) = get_monitor_res(&drawing_area);
-    if let Some(path) = babydra_core::wallpaper::get_wallpaper() {
-        if let Some(surf) = load_and_prescale(&path, init_w, init_h) {
+    let init_path = babydra_core::wallpaper::get_wallpaper();
+    let init_mode = babydra_core::wallpaper::get_wallpaper_mode();
+    *current_wp_mode.borrow_mut() = init_mode.clone();
+
+    if let Some(ref path) = init_path {
+        *current_wp_path.borrow_mut() = Some(path.clone());
+        if init_mode == "live" {
+            if babydra_core::wallpaper::is_video_file(path) {
+                if babydra_core::wallpaper::is_gstreamer_plugin_available() {
+                    let mf = gtk4::MediaFile::for_filename(path);
+                    mf.set_loop(true);
+                    mf.set_muted(true);
+                    let live_err = live_picture.clone();
+                    let da_err = drawing_area.clone();
+                    mf.connect_error_notify(move |f| {
+                        if let Some(err) = f.error() {
+                            tracing::warn!("Live wallpaper playback error: {}", err);
+                            live_err.set_paintable(None::<&gtk4::gdk::Paintable>);
+                            live_err.set_visible(false);
+                            da_err.set_visible(true);
+                        }
+                    });
+                    mf.play();
+                    live_picture.set_paintable(Some(&mf));
+                    live_picture.set_visible(true);
+                    drawing_area.set_visible(false);
+                    *active_media_file.borrow_mut() = Some(mf);
+
+                }
+            } else if babydra_core::wallpaper::is_gif_file(path) {
+                if let Ok(anim) = gdk_pixbuf::PixbufAnimation::from_file(path) {
+                    if anim.is_static_image() {
+                        let file = gtk4::gio::File::for_path(path);
+                        if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
+                            live_picture.set_paintable(Some(&texture));
+                            live_picture.set_visible(true);
+                            drawing_area.set_visible(false);
+                        }
+                    } else {
+                        let iter = anim.iter(None);
+                        let pixbuf = iter.pixbuf();
+                        let texture = gtk4::gdk::Texture::for_pixbuf(&pixbuf);
+                        live_picture.set_paintable(Some(&texture));
+                        live_picture.set_visible(true);
+                        drawing_area.set_visible(false);
+
+                        let pic_c = live_picture.clone();
+                        let delay = iter
+                            .delay_time()
+                            .unwrap_or(std::time::Duration::from_millis(100))
+                            .max(std::time::Duration::from_millis(20));
+                        let s_id = glib::timeout_add_local(delay, move || {
+                            iter.advance(std::time::SystemTime::now());
+                            let pb = iter.pixbuf();
+                            let tex = gtk4::gdk::Texture::for_pixbuf(&pb);
+                            pic_c.set_paintable(Some(&tex));
+                            glib::ControlFlow::Continue
+                        });
+                        *gif_source_id.borrow_mut() = Some(s_id);
+
+                    }
+                }
+            }
+        } else if let Some(surf) = load_and_prescale(path, init_w, init_h) {
             *current_surface.borrow_mut() = Some(surf);
-            *current_wp_path.borrow_mut() = Some(path);
         }
     }
 
@@ -249,93 +329,182 @@ pub fn create_wallpaper_w() -> gtk4::DrawingArea {
     // Helper closure to trigger smooth transition to a new wallpaper
     let trigger_transition = {
         let da_c = drawing_area.clone();
+        let live_pic_c = live_picture.clone();
         let cur_path_c = current_wp_path.clone();
+        let cur_mode_c = current_wp_mode.clone();
         let old_surf_c = old_surface.clone();
         let cur_surf_c = current_surface.clone();
         let prog_c = transition_progress.clone();
         let anim_c = is_animating.clone();
         let start_time_c = active_start_time.clone();
         let origin_c = ripple_origin.clone();
+        let active_media_c = active_media_file.clone();
+        let gif_source_c = gif_source_id.clone();
 
         Rc::new(move || {
             let new_path = babydra_core::wallpaper::get_wallpaper();
-            let changed = match (&new_path, &*cur_path_c.borrow()) {
+            let new_mode = babydra_core::wallpaper::get_wallpaper_mode();
+            let path_changed = match (&new_path, &*cur_path_c.borrow()) {
                 (Some(p1), Some(p2)) => p1 != p2,
                 (Some(_), None) => true,
                 (None, Some(_)) => true,
                 (None, None) => false,
             };
+            let mode_changed = new_mode != *cur_mode_c.borrow();
 
-            if changed {
+            if path_changed || mode_changed {
+                *cur_mode_c.borrow_mut() = new_mode.clone();
+
+                // 1. Clear any active live animations / timers
+                if let Some(id) = gif_source_c.borrow_mut().take() {
+                    id.remove();
+                }
+                if let Some(mf) = active_media_c.borrow_mut().take() {
+                    mf.pause();
+                }
+
                 if let Some(ref path) = new_path {
-                    // Pick a random origin corner/edge position for this transition
-                    let nanos = std::time::SystemTime::now()
-                        .duration_since(std::time::UNIX_EPOCH)
-                        .map(|d| d.subsec_nanos())
-                        .unwrap_or(123456);
+                    *cur_path_c.borrow_mut() = Some(path.clone());
 
-                    let choices = [
-                        (0.0, 0.0), // Top-Left
-                        (1.0, 0.0), // Top-Right
-                        (0.0, 1.0), // Bottom-Left
-                        (1.0, 1.0), // Bottom-Right
-                        (0.5, 0.0), // Top-Center
-                        (0.5, 1.0), // Bottom-Center
-                        (1.0, 0.5), // Right-Center
-                        (0.0, 0.5), // Left-Center
-                    ];
-                    let idx = (nanos as usize) % choices.len();
-                    origin_c.set(choices[idx]);
-
-                    let (mon_w, mon_h) = get_monitor_res(&da_c);
-                    if let Some(new_surf) = load_and_prescale(path, mon_w, mon_h) {
-                        let has_prev = cur_surf_c.borrow().is_some();
-                        if has_prev {
-                            let prev = cur_surf_c.borrow_mut().take();
-                            *old_surf_c.borrow_mut() = prev;
-                            *cur_surf_c.borrow_mut() = Some(new_surf);
-                            *cur_path_c.borrow_mut() = new_path.clone();
-                            prog_c.set(0.0);
-                            start_time_c.set(None);
-
-                            if !anim_c.get() {
-                                anim_c.set(true);
-                                let da_tick = da_c.clone();
-                                let prog_tick = prog_c.clone();
-                                let anim_tick = anim_c.clone();
-                                let old_surf_tick = old_surf_c.clone();
-                                let start_time_tick = start_time_c.clone();
-
-                                da_c.add_tick_callback(move |_, clock| {
-                                    let now = clock.frame_time();
-                                    if start_time_tick.get().is_none() {
-                                        start_time_tick.set(Some(now));
-                                    }
-
-                                    let start = start_time_tick.get().unwrap();
-                                    let elapsed = (now - start) as f64;
-                                    let progress =
-                                        (elapsed / TRANSITION_DURATION_US).clamp(0.0, 1.0);
-                                    prog_tick.set(progress);
-                                    da_tick.queue_draw();
-
-                                    if progress >= 1.0 {
-                                        *old_surf_tick.borrow_mut() = None;
-                                        anim_tick.set(false);
-                                        glib::ControlFlow::Break
-                                    } else {
-                                        glib::ControlFlow::Continue
+                    if new_mode == "live" {
+                        // Live Wallpaper mode (GPU accelerated)
+                        if babydra_core::wallpaper::is_video_file(path) {
+                            if babydra_core::wallpaper::is_gstreamer_plugin_available() {
+                                let mf = gtk4::MediaFile::for_filename(path);
+                                mf.set_loop(true);
+                                mf.set_muted(true);
+                                let live_err = live_pic_c.clone();
+                                let da_err = da_c.clone();
+                                mf.connect_error_notify(move |f| {
+                                    if let Some(err) = f.error() {
+                                        tracing::warn!("Live wallpaper playback error: {}", err);
+                                        live_err.set_paintable(None::<&gtk4::gdk::Paintable>);
+                                        live_err.set_visible(false);
+                                        da_err.set_visible(true);
                                     }
                                 });
+                                mf.play();
+                                live_pic_c.set_paintable(Some(&mf));
+                                live_pic_c.set_visible(true);
+                                da_c.set_visible(false);
+                                *active_media_c.borrow_mut() = Some(mf);
+                            } else {
+
+                                // Missing plugin: Do not fallback per requirement
+                                live_pic_c.set_paintable(None::<&gtk4::gdk::Paintable>);
+                                live_pic_c.set_visible(false);
+                                da_c.set_visible(true);
                             }
-                        } else {
-                            *cur_surf_c.borrow_mut() = Some(new_surf);
-                            *cur_path_c.borrow_mut() = new_path.clone();
-                            prog_c.set(1.0);
-                            da_c.queue_draw();
+                        } else if babydra_core::wallpaper::is_gif_file(path) {
+                            if let Ok(anim) = gdk_pixbuf::PixbufAnimation::from_file(path) {
+                                if anim.is_static_image() {
+                                    let file = gtk4::gio::File::for_path(path);
+                                    if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
+                                        live_pic_c.set_paintable(Some(&texture));
+                                        live_pic_c.set_visible(true);
+                                        da_c.set_visible(false);
+                                    }
+                                } else {
+                                    let iter = anim.iter(None);
+                                    let pixbuf = iter.pixbuf();
+                                    let texture = gtk4::gdk::Texture::for_pixbuf(&pixbuf);
+                                    live_pic_c.set_paintable(Some(&texture));
+                                    live_pic_c.set_visible(true);
+                                    da_c.set_visible(false);
+
+                                    let pic_inner = live_pic_c.clone();
+                                    let delay = iter
+                                        .delay_time()
+                                        .unwrap_or(std::time::Duration::from_millis(100))
+                                        .max(std::time::Duration::from_millis(20));
+                                    let s_id = glib::timeout_add_local(delay, move || {
+                                        iter.advance(std::time::SystemTime::now());
+                                        let pb = iter.pixbuf();
+                                        let tex = gtk4::gdk::Texture::for_pixbuf(&pb);
+                                        pic_inner.set_paintable(Some(&tex));
+                                        glib::ControlFlow::Continue
+                                    });
+                                    *gif_source_c.borrow_mut() = Some(s_id);
+
+                                }
+                            }
+                        }
+                    } else {
+                        // Static Wallpaper mode
+                        live_pic_c.set_paintable(None::<&gtk4::gdk::Paintable>);
+                        live_pic_c.set_visible(false);
+                        da_c.set_visible(true);
+
+                        // Pick a random origin corner/edge position for this transition
+                        let nanos = std::time::SystemTime::now()
+                            .duration_since(std::time::UNIX_EPOCH)
+                            .map(|d| d.subsec_nanos())
+                            .unwrap_or(123456);
+
+                        let choices = [
+                            (0.0, 0.0), // Top-Left
+                            (1.0, 0.0), // Top-Right
+                            (0.0, 1.0), // Bottom-Left
+                            (1.0, 1.0), // Bottom-Right
+                            (0.5, 0.0), // Top-Center
+                            (0.5, 1.0), // Bottom-Center
+                            (1.0, 0.5), // Right-Center
+                            (0.0, 0.5), // Left-Center
+                        ];
+                        let idx = (nanos as usize) % choices.len();
+                        origin_c.set(choices[idx]);
+
+                        let (mon_w, mon_h) = get_monitor_res(&da_c);
+                        if let Some(new_surf) = load_and_prescale(path, mon_w, mon_h) {
+                            let has_prev = cur_surf_c.borrow().is_some();
+                            if has_prev {
+                                let prev = cur_surf_c.borrow_mut().take();
+                                *old_surf_c.borrow_mut() = prev;
+                                *cur_surf_c.borrow_mut() = Some(new_surf);
+                                prog_c.set(0.0);
+                                start_time_c.set(None);
+
+                                if !anim_c.get() {
+                                    anim_c.set(true);
+                                    let da_tick = da_c.clone();
+                                    let prog_tick = prog_c.clone();
+                                    let anim_tick = anim_c.clone();
+                                    let old_surf_tick = old_surf_c.clone();
+                                    let start_time_tick = start_time_c.clone();
+
+                                    da_c.add_tick_callback(move |_, clock| {
+                                        let now = clock.frame_time();
+                                        if start_time_tick.get().is_none() {
+                                            start_time_tick.set(Some(now));
+                                        }
+
+                                        let start = start_time_tick.get().unwrap();
+                                        let elapsed = (now - start) as f64;
+                                        let progress =
+                                            (elapsed / TRANSITION_DURATION_US).clamp(0.0, 1.0);
+                                        prog_tick.set(progress);
+                                        da_tick.queue_draw();
+
+                                        if progress >= 1.0 {
+                                            *old_surf_tick.borrow_mut() = None;
+                                            anim_tick.set(false);
+                                            glib::ControlFlow::Break
+                                        } else {
+                                            glib::ControlFlow::Continue
+                                        }
+                                    });
+                                }
+                            } else {
+                                *cur_surf_c.borrow_mut() = Some(new_surf);
+                                prog_c.set(1.0);
+                                da_c.queue_draw();
+                            }
                         }
                     }
                 } else {
+                    live_pic_c.set_paintable(None::<&gtk4::gdk::Paintable>);
+                    live_pic_c.set_visible(false);
+                    da_c.set_visible(true);
                     *old_surf_c.borrow_mut() = None;
                     *cur_surf_c.borrow_mut() = None;
                     *cur_path_c.borrow_mut() = None;
@@ -380,5 +549,6 @@ pub fn create_wallpaper_w() -> gtk4::DrawingArea {
         glib::ControlFlow::Continue
     });
 
-    drawing_area
+    container
 }
+

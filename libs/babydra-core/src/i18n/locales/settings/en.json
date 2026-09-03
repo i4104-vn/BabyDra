@@ -187,5 +187,19 @@
   "settings.notif_keybinds_saved_msg": "Saved {} shortcut(s) — applied instantly",
   "settings.notif_keybinds_failed_title": "Keybindings",
   "settings.notif_keybinds_failed_msg": "Failed to save keybindings",
-  "settings.keybind_command": "COMMAND"
+  "settings.keybind_command": "COMMAND",
+  "settings.wallpaper_mode_static": "Static Wallpaper",
+  "settings.wallpaper_mode_live": "Live Wallpaper",
+  "settings.missing_gst_plugin_title": "Missing GStreamer Plugin",
+  "settings.missing_gst_plugin_desc": "GStreamer plugins are required to decode and play Live Wallpapers.",
+  "settings.missing_gst_plugin_cmd": "Command: sudo pacman -S --needed gst-plugins-good gst-libav gst-plugins-bad-libs gst-plugins-bad",
+  "settings.video_too_long_title": "Video Too Long",
+  "settings.video_too_long_msg": "Only videos under 20 seconds can be set as wallpaper ({duration}s)",
+  "settings.live_filter": "Live Wallpapers (*.mp4, *.webm, *.mkv, *.gif)",
+  "settings.badge_video": "VIDEO",
+  "settings.badge_gif": "GIF",
+  "settings.no_live_wallpapers": "No live wallpapers found in ~/.babydra/wallpaper",
+  "settings.no_live_wallpapers_sub": "Click '+' above to add a new video (< 20s) or animated GIF",
+  "settings.notif_live_wallpaper_title": "Live Wallpaper",
+  "settings.notif_live_wallpaper_msg": "Applied new live wallpaper"
 }

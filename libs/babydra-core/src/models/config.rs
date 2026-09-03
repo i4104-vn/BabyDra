@@ -44,7 +44,15 @@ impl Default for PowerConfig {
 pub struct WallpaperConfig {
     #[serde(default)]
     pub current: String,
+    /// Wallpaper mode: "static" or "live"
+    #[serde(default = "default_wallpaper_mode")]
+    pub mode: String,
 }
+
+fn default_wallpaper_mode() -> String {
+    "static".to_string()
+}
+
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct NotificationConfig {

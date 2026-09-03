@@ -28,6 +28,8 @@ pub fn create_appearance() -> gtk4::Widget {
         cursor_dropdown,
         size_dropdown,
         target_dropdown,
+        mode_dropdown,
+        plugin_warning_box,
         quick_select_box,
         avatar_pic,
         avatar_btn,
@@ -51,6 +53,8 @@ pub fn create_appearance() -> gtk4::Widget {
         &cursor_dropdown,
         &size_dropdown,
         &target_dropdown,
+        &mode_dropdown,
+        &plugin_warning_box,
         &quick_select_box,
         &avatar_pic,
         &avatar_btn,
@@ -62,3 +66,4 @@ pub fn create_appearance() -> gtk4::Widget {
 
     main_box.into()
 }
+

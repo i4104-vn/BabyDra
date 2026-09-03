@@ -64,24 +64,29 @@ pub fn show_for_file_normal(
         );
     }
 
-    // 1.2. Set as Wallpaper (for single image file)
+    // 1.2. Set as Wallpaper (for single image or video file)
     if target_paths.len() == 1 {
-        let ext = target_paths[0]
-            .extension()
-            .and_then(|e| e.to_str())
-            .unwrap_or("")
-            .to_lowercase();
-        let is_img = matches!(
-            ext.as_str(),
-            "jpg" | "jpeg" | "png" | "webp" | "gif" | "bmp" | "avif" | "svg"
-        );
-        if is_img {
+        let p = &target_paths[0];
+        let is_live = babydra_core::wallpaper::is_live_wallpaper_file(p);
+        let is_static = babydra_core::wallpaper::is_static_wallpaper_file(p);
+
+        if is_live || is_static {
             let path_c = target_paths[0].clone();
+            let label = if is_live {
+                trans("desktop.set_as_live_wallpaper")
+            } else {
+                trans("desktop.set_as_wallpaper")
+            };
             builder = builder.item(
-                &trans("desktop.set_as_wallpaper"),
+                &label,
                 "folder-pictures",
                 move || {
-                    let _ = babydra_core::wallpaper::set_wallpaper(&path_c);
+                    let mode = if babydra_core::wallpaper::is_live_wallpaper_file(&path_c) {
+                        "live"
+                    } else {
+                        "static"
+                    };
+                    let _ = babydra_core::wallpaper::set_wallpaper_with_mode(&path_c, mode);
                 },
             );
         }

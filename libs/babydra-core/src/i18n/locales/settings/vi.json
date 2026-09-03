@@ -187,5 +187,19 @@
   "settings.notif_keybinds_saved_msg": "Đã lưu {} phím tắt — áp dụng ngay lập tức",
   "settings.notif_keybinds_failed_title": "Phím tắt",
   "settings.notif_keybinds_failed_msg": "Không thể lưu phím tắt",
-  "settings.keybind_command": "LỆNH"
+  "settings.keybind_command": "LỆNH",
+  "settings.wallpaper_mode_static": "Hình nền tĩnh",
+  "settings.wallpaper_mode_live": "Hình nền động (Live)",
+  "settings.missing_gst_plugin_title": "Thiếu plugin GStreamer",
+  "settings.missing_gst_plugin_desc": "Hệ thống cần cài đặt plugin GStreamer để giải mã và phát Live Wallpaper.",
+  "settings.missing_gst_plugin_cmd": "Lệnh: sudo pacman -S --needed gst-plugins-good gst-libav gst-plugins-bad-libs gst-plugins-bad",
+  "settings.video_too_long_title": "Video quá dài",
+  "settings.video_too_long_msg": "Chỉ cho phép video dưới 20 giây làm hình nền (video: {duration}s)",
+  "settings.live_filter": "Hình nền động (*.mp4, *.webm, *.mkv, *.gif)",
+  "settings.badge_video": "VIDEO",
+  "settings.badge_gif": "GIF",
+  "settings.no_live_wallpapers": "Không tìm thấy hình nền động nào trong ~/.babydra/wallpaper",
+  "settings.no_live_wallpapers_sub": "Nhấn '+' ở trên để thêm video (< 20s) hoặc ảnh động GIF mới",
+  "settings.notif_live_wallpaper_title": "Hình nền động",
+  "settings.notif_live_wallpaper_msg": "Đã áp dụng hình nền động mới"
 }

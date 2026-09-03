@@ -21,6 +21,8 @@ pub fn build_appearance_ui(
     gtk4::DropDown,
     gtk4::DropDown,
     gtk4::DropDown,
+    gtk4::DropDown,
+    gtk4::Box,
     gtk4::Box,
     gtk4::Picture,
     gtk4::Button,
@@ -70,7 +72,14 @@ pub fn build_appearance_ui(
 
     let clean_path = current_wallpaper_path.replace("file://", "");
     if !clean_path.is_empty() && std::path::Path::new(&clean_path).exists() {
-        preview_pic.set_filename(Some(&clean_path));
+        let p = std::path::Path::new(&clean_path);
+        let thumb = babydra_core::wallpaper::get_or_create_thumbnail(p);
+        let file = gtk4::gio::File::for_path(&thumb);
+        if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
+            preview_pic.set_paintable(Some(&texture));
+        } else {
+            preview_pic.set_filename(Some(&thumb));
+        }
     }
     preview_overlay.set_child(Some(&preview_pic));
 
@@ -156,7 +165,6 @@ pub fn build_appearance_ui(
     preview_overlay.add_overlay(&top_right_box);
 
     top_grid.attach(&preview_overlay, 0, 0, 1, 1);
-
     // Column 1 (Right): System Themes Configuration Dropdowns (2x2 Grid)
     let theme_grid = gtk4::Grid::new();
     theme_grid.set_column_spacing(16);
@@ -164,59 +172,77 @@ pub fn build_appearance_ui(
     theme_grid.set_column_homogeneous(true);
     theme_grid.set_valign(gtk4::Align::Center);
 
-    // Field 1: GTK Theme
-    let gtk_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
+    theme_grid.attach(&preview_overlay, 0, 0, 1, 2);
+
+    // GTK Theme
+    let gtk_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
     let gtk_lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.gtk_theme")));
-    gtk_lbl.add_css_class("spec-label");
+    gtk_lbl.add_css_class("settings-field-title");
     gtk_lbl.set_halign(gtk4::Align::Start);
     gtk_box.append(&gtk_lbl);
 
-    let gtk_items: Vec<&str> = gtk_themes.iter().map(|s| s.as_str()).collect();
-    let gtk_model = gtk4::StringList::new(&gtk_items);
+    let gtk_model = gtk4::StringList::new(
+        &gtk_themes
+            .iter()
+            .map(|s| s.as_str())
+            .collect::<Vec<&str>>(),
+    );
     let gtk_dropdown = gtk4::DropDown::new(Some(gtk_model), Option::<gtk4::Expression>::None);
+    gtk_dropdown.add_css_class("settings-dropdown");
     gtk_dropdown.set_cursor_from_name(Some("pointer"));
     gtk_box.append(&gtk_dropdown);
-    theme_grid.attach(&gtk_box, 0, 0, 1, 1);
+    theme_grid.attach(&gtk_box, 1, 0, 1, 1);
 
-    // Field 2: Icon Theme
-    let icon_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
+    // Icon Theme
+    let icon_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
     let icon_lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.icon_theme")));
-    icon_lbl.add_css_class("spec-label");
+    icon_lbl.add_css_class("settings-field-title");
     icon_lbl.set_halign(gtk4::Align::Start);
     icon_box.append(&icon_lbl);
 
-    let icon_items: Vec<&str> = icon_themes.iter().map(|s| s.as_str()).collect();
-    let icon_model = gtk4::StringList::new(&icon_items);
+    let icon_model = gtk4::StringList::new(
+        &icon_themes
+            .iter()
+            .map(|s| s.as_str())
+            .collect::<Vec<&str>>(),
+    );
     let icon_dropdown = gtk4::DropDown::new(Some(icon_model), Option::<gtk4::Expression>::None);
+    icon_dropdown.add_css_class("settings-dropdown");
     icon_dropdown.set_cursor_from_name(Some("pointer"));
     icon_box.append(&icon_dropdown);
-    theme_grid.attach(&icon_box, 1, 0, 1, 1);
+    theme_grid.attach(&icon_box, 2, 0, 1, 1);
 
-    // Field 3: Cursor Theme
-    let cursor_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
+    // Cursor Theme
+    let cursor_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
     let cursor_lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.cursor_theme")));
-    cursor_lbl.add_css_class("spec-label");
+    cursor_lbl.add_css_class("settings-field-title");
     cursor_lbl.set_halign(gtk4::Align::Start);
     cursor_box.append(&cursor_lbl);
 
-    let cursor_items: Vec<&str> = cursor_themes.iter().map(|s| s.as_str()).collect();
-    let cursor_model = gtk4::StringList::new(&cursor_items);
+    let cursor_model = gtk4::StringList::new(
+        &cursor_themes
+            .iter()
+            .map(|s| s.as_str())
+            .collect::<Vec<&str>>(),
+    );
     let cursor_dropdown = gtk4::DropDown::new(Some(cursor_model), Option::<gtk4::Expression>::None);
+    cursor_dropdown.add_css_class("settings-dropdown");
     cursor_dropdown.set_cursor_from_name(Some("pointer"));
     cursor_box.append(&cursor_dropdown);
-    theme_grid.attach(&cursor_box, 0, 1, 1, 1);
+    theme_grid.attach(&cursor_box, 2, 1, 1, 1);
 
-    // Field 4: Cursor Size
-    let size_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
+    // Cursor Size
+    let size_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
     let size_lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.cursor_size")));
-    size_lbl.add_css_class("spec-label");
+    size_lbl.add_css_class("settings-field-title");
     size_lbl.set_halign(gtk4::Align::Start);
     size_box.append(&size_lbl);
 
-    let size_strs: Vec<String> = cursor_sizes.iter().map(|s| format!("{} px", s)).collect();
-    let size_items: Vec<&str> = size_strs.iter().map(|s| s.as_str()).collect();
-    let size_model = gtk4::StringList::new(&size_items);
+    let size_strings: Vec<String> = cursor_sizes.iter().map(|s| s.to_string()).collect();
+    let size_strs: Vec<&str> = size_strings.iter().map(|s| s.as_str()).collect();
+    let size_model = gtk4::StringList::new(&size_strs);
     let size_dropdown = gtk4::DropDown::new(Some(size_model), Option::<gtk4::Expression>::None);
+    size_dropdown.add_css_class("settings-dropdown");
     size_dropdown.set_cursor_from_name(Some("pointer"));
     size_box.append(&size_dropdown);
     theme_grid.attach(&size_box, 1, 1, 1, 1);
@@ -229,11 +255,55 @@ pub fn build_appearance_ui(
     sep1.add_css_class("profile-separator");
     dashboard_panel.append(&sep1);
 
-    // Quick Select Section Title
+    // Quick Select Header: Title and Mode Switcher (Wallpaper vs Live Wallpaper)
+    let quick_header = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+    quick_header.set_halign(gtk4::Align::Fill);
+    quick_header.set_valign(gtk4::Align::Center);
+
     let quick_lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.quick_select")));
     quick_lbl.add_css_class("settings-row-title");
     quick_lbl.set_halign(gtk4::Align::Start);
-    dashboard_panel.append(&quick_lbl);
+    quick_lbl.set_hexpand(true);
+    quick_header.append(&quick_lbl);
+
+    let mode_items = vec![
+        babydra_core::i18n::trans("settings.wallpaper_mode_static"),
+        babydra_core::i18n::trans("settings.wallpaper_mode_live"),
+    ];
+    let mode_item_strs: Vec<&str> = mode_items.iter().map(|s| s.as_str()).collect();
+    let mode_model = gtk4::StringList::new(&mode_item_strs);
+    let mode_dropdown = gtk4::DropDown::new(Some(mode_model), Option::<gtk4::Expression>::None);
+    mode_dropdown.add_css_class("wallpaper-target-dropdown");
+    mode_dropdown.set_cursor_from_name(Some("pointer"));
+    quick_header.append(&mode_dropdown);
+
+    dashboard_panel.append(&quick_header);
+
+    // Missing GStreamer plugin warning banner
+    let plugin_warning_box = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
+    plugin_warning_box.add_css_class("missing-plugin-banner");
+    plugin_warning_box.set_visible(false);
+    plugin_warning_box.set_margin_top(8);
+    plugin_warning_box.set_margin_bottom(8);
+
+    let warning_title = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.missing_gst_plugin_title")));
+    warning_title.add_css_class("plugin-warning-title");
+    warning_title.set_halign(gtk4::Align::Start);
+    plugin_warning_box.append(&warning_title);
+
+    let warning_desc = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.missing_gst_plugin_desc")));
+    warning_desc.add_css_class("plugin-warning-desc");
+    warning_desc.set_halign(gtk4::Align::Start);
+    warning_desc.set_wrap(true);
+    plugin_warning_box.append(&warning_desc);
+
+    let warning_cmd = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.missing_gst_plugin_cmd")));
+    warning_cmd.add_css_class("plugin-warning-cmd");
+    warning_cmd.set_halign(gtk4::Align::Start);
+    warning_cmd.set_selectable(true);
+    plugin_warning_box.append(&warning_cmd);
+
+    dashboard_panel.append(&plugin_warning_box);
 
     // Quick Select Box container for ~/.babydra/wallpaper grid
     let quick_select_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
@@ -259,8 +329,11 @@ pub fn build_appearance_ui(
         cursor_dropdown,
         size_dropdown,
         target_dropdown,
+        mode_dropdown,
+        plugin_warning_box,
         quick_select_box,
         avatar_pic,
         avatar_btn,
     )
 }
+

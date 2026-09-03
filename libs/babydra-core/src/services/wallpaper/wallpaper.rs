@@ -40,10 +40,195 @@ pub(crate) fn newest_existing(paths: Vec<Option<PathBuf>>) -> Option<PathBuf> {
     best.map(|(_, path)| path)
 }
 
-/// Sets the desktop wallpaper and persists the path in babydra.conf.
-pub fn set_wallpaper(path: &Path) -> CoreResult<()> {
+use std::process::Command;
+
+/// Checks whether GStreamer plugins required for video playback are available.
+/// Flexibly checks for MP4 (qtdemux) or WebM/MKV (matroskademux) demuxers.
+pub fn is_gstreamer_plugin_available() -> bool {
+    let check_plugin = |element: &str| {
+        Command::new("gst-inspect-1.0")
+            .arg(element)
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .status()
+            .map(|s| s.success())
+            .unwrap_or(false)
+    };
+
+    check_plugin("qtdemux") || check_plugin("matroskademux")
+}
+
+/// Returns `true` if the path has a supported video extension (mp4, webm, mkv).
+pub fn is_video_file(path: &Path) -> bool {
+    path.extension()
+        .and_then(|ext| ext.to_str())
+        .map(|ext| matches!(ext.to_lowercase().as_str(), "mp4" | "webm" | "mkv"))
+        .unwrap_or(false)
+}
+
+/// Returns `true` if the path has a supported GIF extension.
+pub fn is_gif_file(path: &Path) -> bool {
+    path.extension()
+        .and_then(|ext| ext.to_str())
+        .map(|ext| ext.to_lowercase() == "gif")
+        .unwrap_or(false)
+}
+
+/// Returns `true` if the path is a live wallpaper (video or animated gif).
+pub fn is_live_wallpaper_file(path: &Path) -> bool {
+    is_video_file(path) || is_gif_file(path)
+}
+
+/// Returns `true` if the path has a supported static image extension.
+pub fn is_static_wallpaper_file(path: &Path) -> bool {
+    path.extension()
+        .and_then(|ext| ext.to_str())
+        .map(|ext| matches!(ext.to_lowercase().as_str(), "png" | "jpg" | "jpeg" | "webp"))
+        .unwrap_or(false)
+}
+
+/// Extracts the video duration in seconds using ffprobe or gst-discoverer.
+pub fn get_video_duration(path: &Path) -> Option<f64> {
+    if !path.is_file() {
+        return None;
+    }
+
+    // 1. Try ffprobe first
+    if let Ok(output) = Command::new("ffprobe")
+        .args([
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "default=noprint_wrappers=1:nokey=1",
+        ])
+        .arg(path)
+        .output()
+    {
+        if output.status.success() {
+            let dur_str = String::from_utf8_lossy(&output.stdout);
+            if let Ok(dur) = dur_str.trim().parse::<f64>() {
+                return Some(dur);
+            }
+        }
+    }
+
+    // 2. Fallback: try gst-discoverer-1.0
+    if let Ok(output) = Command::new("gst-discoverer-1.0")
+        .arg(path)
+        .output()
+    {
+        if output.status.success() {
+            let text = String::from_utf8_lossy(&output.stdout);
+            for line in text.lines() {
+                let trimmed = line.trim();
+                if trimmed.starts_with("Duration:") {
+                    let parts: Vec<&str> = trimmed.split_whitespace().collect();
+                    if let Some(time_str) = parts.get(1) {
+                        let t_parts: Vec<&str> = time_str.split(':').collect();
+                        if t_parts.len() == 3 {
+                            let h: f64 = t_parts[0].parse().unwrap_or(0.0);
+                            let m: f64 = t_parts[1].parse().unwrap_or(0.0);
+                            let s: f64 = t_parts[2].parse().unwrap_or(0.0);
+                            return Some(h * 3600.0 + m * 60.0 + s);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    None
+}
+
+/// Returns an image thumbnail path for the given wallpaper.
+/// If it's a video, generates and caches a 1st frame JPEG thumbnail.
+pub fn get_or_create_thumbnail(path: &Path) -> PathBuf {
+    if !is_video_file(path) {
+        return path.to_path_buf();
+    }
+
+    let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".to_string());
+    let thumb_dir = PathBuf::from(home).join(".cache/babydra/thumbnails");
+    let _ = std::fs::create_dir_all(&thumb_dir);
+
+    let file_stem = path.file_stem().and_then(|s| s.to_str()).unwrap_or("thumb");
+    let meta_len = std::fs::metadata(path).map(|m| m.len()).unwrap_or(0);
+    let thumb_name = format!("{}_{}.jpg", file_stem, meta_len);
+    let thumb_path = thumb_dir.join(thumb_name);
+
+    if thumb_path.exists() {
+        return thumb_path;
+    }
+
+    let _ = Command::new("ffmpeg")
+        .args([
+            "-y",
+            "-ss",
+            "00:00:00.5",
+            "-i",
+        ])
+        .arg(path)
+        .args([
+            "-update",
+            "1",
+            "-vframes",
+            "1",
+            "-vf",
+            "scale=320:-1",
+        ])
+        .arg(&thumb_path)
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .status();
+
+    if thumb_path.exists() {
+        thumb_path
+    } else {
+        path.to_path_buf()
+    }
+}
+
+/// Retrieves the current wallpaper mode ("static" or "live").
+pub fn get_wallpaper_mode() -> String {
+    crate::config::invalidate_cache();
+    let conf = crate::config::load_babydra_config();
+    if !conf.wallpaper.mode.is_empty() {
+        conf.wallpaper.mode
+    } else if let Some(wp) = get_wallpaper() {
+        if is_live_wallpaper_file(&wp) {
+            "live".to_string()
+        } else {
+            "static".to_string()
+        }
+    } else {
+        "static".to_string()
+    }
+}
+
+/// Sets the desktop wallpaper with an explicit mode ("static" or "live") and persists it in babydra.conf.
+pub fn set_wallpaper_with_mode(path: &Path, mode: &str) -> CoreResult<()> {
     if !path.exists() {
         return Err(format!("Wallpaper file does not exist at: {:?}", path).into());
+    }
+
+    if mode == "live" {
+        if is_video_file(path) {
+            if !is_gstreamer_plugin_available() {
+                let err_msg = crate::i18n::trans("settings.missing_gst_plugin_desc");
+                return Err(err_msg.into());
+            }
+
+            if let Some(dur) = get_video_duration(path) {
+                if dur > 20.05 {
+                    let err_msg = crate::i18n::trans("settings.video_too_long_msg")
+                        .replace("{duration}", &format!("{:.1}", dur));
+                    return Err(err_msg.into());
+                }
+            }
+
+        }
     }
 
     let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".to_string());
@@ -69,15 +254,27 @@ pub fn set_wallpaper(path: &Path) -> CoreResult<()> {
 
     let mut conf = crate::config::load_babydra_config();
     conf.wallpaper.current = path_str.to_string();
+    conf.wallpaper.mode = mode.to_string();
     crate::config::save_babydra_config(&conf);
 
     Ok(())
 }
 
+/// Sets the desktop wallpaper and persists the path in babydra.conf.
+pub fn set_wallpaper(path: &Path) -> CoreResult<()> {
+    let mode = if is_live_wallpaper_file(path) {
+        "live"
+    } else {
+        "static"
+    };
+    set_wallpaper_with_mode(path, mode)
+}
+
 /// Applies the currently saved wallpaper from babydra.conf.
 pub fn apply_wallpaper() {
     if let Some(path) = get_wallpaper() {
-        let _ = set_wallpaper(&path);
+        let mode = get_wallpaper_mode();
+        let _ = set_wallpaper_with_mode(&path, &mode);
     }
 }
 
@@ -99,16 +296,7 @@ pub fn get_wallpaper() -> Option<PathBuf> {
                 .filter_map(Result::ok)
                 .map(|e| e.path())
                 .filter(|p| {
-                    p.is_file()
-                        && p.extension()
-                            .and_then(|ext| ext.to_str())
-                            .map(|ext| {
-                                matches!(
-                                    ext.to_lowercase().as_str(),
-                                    "png" | "jpg" | "jpeg" | "webp"
-                                )
-                            })
-                            .unwrap_or(false)
+                    p.is_file() && (is_static_wallpaper_file(p) || is_live_wallpaper_file(p))
                 })
                 .collect();
             files.sort();
@@ -129,20 +317,47 @@ pub fn get_wallpaper_dir() -> PathBuf {
     dir
 }
 
-/// Retrieves all local wallpaper image files from ~/.babydra/wallpaper.
+/// Retrieves all local static wallpaper image files from ~/.babydra/wallpaper.
+pub fn get_static_wallpapers() -> Vec<PathBuf> {
+    let dir = get_wallpaper_dir();
+    let mut files = Vec::new();
+    if let Ok(entries) = std::fs::read_dir(dir) {
+        for entry in entries.filter_map(Result::ok) {
+            let path = entry.path();
+            if path.is_file() && is_static_wallpaper_file(&path) {
+                files.push(path);
+            }
+        }
+    }
+    files.sort();
+    files
+}
+
+/// Retrieves all local live wallpaper files (video, gif) from ~/.babydra/wallpaper.
+pub fn get_live_wallpapers() -> Vec<PathBuf> {
+    let dir = get_wallpaper_dir();
+    let mut files = Vec::new();
+    if let Ok(entries) = std::fs::read_dir(dir) {
+        for entry in entries.filter_map(Result::ok) {
+            let path = entry.path();
+            if path.is_file() && is_live_wallpaper_file(&path) {
+                files.push(path);
+            }
+        }
+    }
+    files.sort();
+    files
+}
+
+/// Retrieves all local wallpaper files from ~/.babydra/wallpaper.
 pub fn get_local_wallpapers() -> Vec<PathBuf> {
     let dir = get_wallpaper_dir();
     let mut files = Vec::new();
     if let Ok(entries) = std::fs::read_dir(dir) {
         for entry in entries.filter_map(Result::ok) {
             let path = entry.path();
-            if path.is_file() {
-                if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
-                    let ext_lower = ext.to_lowercase();
-                    if matches!(ext_lower.as_str(), "png" | "jpg" | "jpeg" | "webp") {
-                        files.push(path);
-                    }
-                }
+            if path.is_file() && (is_static_wallpaper_file(&path) || is_live_wallpaper_file(&path)) {
+                files.push(path);
             }
         }
     }
@@ -352,3 +567,71 @@ pub fn sync_shared_assets() {
         shared_dir.join("avatar_fallback.bb"),
     );
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_wallpaper_file_classification() {
+        assert!(is_video_file(Path::new("video.mp4")));
+        assert!(is_video_file(Path::new("clip.webm")));
+        assert!(is_video_file(Path::new("movie.mkv")));
+        assert!(!is_video_file(Path::new("image.png")));
+
+        assert!(is_gif_file(Path::new("anim.gif")));
+        assert!(is_gif_file(Path::new("ANIM.GIF")));
+        assert!(!is_gif_file(Path::new("anim.png")));
+
+        assert!(is_live_wallpaper_file(Path::new("live.mp4")));
+        assert!(is_live_wallpaper_file(Path::new("live.gif")));
+        assert!(!is_live_wallpaper_file(Path::new("static.jpg")));
+
+        assert!(is_static_wallpaper_file(Path::new("bg.png")));
+        assert!(is_static_wallpaper_file(Path::new("bg.jpg")));
+        assert!(is_static_wallpaper_file(Path::new("bg.jpeg")));
+        assert!(is_static_wallpaper_file(Path::new("bg.webp")));
+        assert!(!is_static_wallpaper_file(Path::new("bg.mp4")));
+    }
+
+    #[test]
+    fn test_video_duration_and_limit() {
+        // Generate a 3-second test video with ffmpeg
+        let test_video_3s = PathBuf::from("/tmp/babydra_test_3s.mp4");
+        let status = Command::new("ffmpeg")
+            .args(["-y", "-f", "lavfi", "-i", "testsrc=duration=3:size=160x120:rate=10", "/tmp/babydra_test_3s.mp4"])
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .status();
+
+        if status.map(|s| s.success()).unwrap_or(false) {
+            let dur = get_video_duration(&test_video_3s);
+            assert!(dur.is_some());
+            let dur_val = dur.unwrap();
+            assert!((dur_val - 3.0).abs() < 0.5);
+            let _ = std::fs::remove_file(&test_video_3s);
+        }
+
+        // Generate a 22-second test video with ffmpeg
+        let test_video_22s = PathBuf::from("/tmp/babydra_test_22s.mp4");
+        let status2 = Command::new("ffmpeg")
+            .args(["-y", "-f", "lavfi", "-i", "testsrc=duration=22:size=160x120:rate=10", "/tmp/babydra_test_22s.mp4"])
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .status();
+
+        if status2.map(|s| s.success()).unwrap_or(false) {
+            let dur2 = get_video_duration(&test_video_22s);
+            assert!(dur2.is_some());
+            let dur_val2 = dur2.unwrap();
+            assert!((dur_val2 - 22.0).abs() < 0.5);
+
+            // set_wallpaper_with_mode in live mode must reject > 20s
+            let res = set_wallpaper_with_mode(&test_video_22s, "live");
+            assert!(res.is_err(), "Video > 20s must be rejected");
+            let _ = std::fs::remove_file(&test_video_22s);
+        }
+    }
+}
+
+

@@ -1,4 +1,5 @@
-use babydra_core::services::wallpaper::{get_local_wallpapers, get_wallpaper_dir};
+use babydra_core::services::wallpaper::get_wallpaper_dir;
+
 use gtk4::prelude::*;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -14,6 +15,8 @@ pub fn setup_appearance(
     cursor_dropdown: &gtk4::DropDown,
     size_dropdown: &gtk4::DropDown,
     target_dropdown: &gtk4::DropDown,
+    mode_dropdown: &gtk4::DropDown,
+    plugin_warning_box: &gtk4::Box,
     quick_select_box: &gtk4::Box,
     avatar_pic: &gtk4::Picture,
     avatar_btn: &gtk4::Button,
@@ -187,6 +190,26 @@ pub fn setup_appearance(
     let desktop_wp_path = Rc::new(RefCell::new(babydra_core::get_wallpaper()));
     let greeter_wp_path = Rc::new(RefCell::new(babydra_core::get_greeter_wp()));
     let target_mode = Rc::new(Cell::new(0u32)); // 0 = Desktop, 1 = Lock screen
+    let current_mode = Rc::new(RefCell::new(babydra_core::wallpaper::get_wallpaper_mode()));
+
+    // Initialize mode dropdown
+    let initial_is_live = *current_mode.borrow() == "live";
+    mode_dropdown.set_selected(if initial_is_live { 1 } else { 0 });
+    if initial_is_live && !babydra_core::wallpaper::is_gstreamer_plugin_available() {
+        plugin_warning_box.set_visible(true);
+        pick_btn.set_sensitive(false);
+    }
+
+    // Initialize preview with current wallpaper thumbnail
+    if let Some(ref p) = *desktop_wp_path.borrow() {
+        let thumb = babydra_core::wallpaper::get_or_create_thumbnail(p);
+        let file = gtk4::gio::File::for_path(&thumb);
+        if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
+            preview_pic.set_paintable(Some(&texture));
+        } else {
+            preview_pic.set_filename(Some(&thumb));
+        }
+    }
 
     let preview_pic_target = preview_pic.clone();
     let desktop_wp_ref = desktop_wp_path.clone();
@@ -198,9 +221,15 @@ pub fn setup_appearance(
         target_mode_ref.set(sel);
         if sel == 0 {
             if let Some(ref p) = *desktop_wp_ref.borrow() {
-                preview_pic_target.set_filename(Some(p));
+                let thumb = babydra_core::wallpaper::get_or_create_thumbnail(p);
+                let file = gtk4::gio::File::for_path(&thumb);
+                if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
+                    preview_pic_target.set_paintable(Some(&texture));
+                } else {
+                    preview_pic_target.set_filename(Some(&thumb));
+                }
             } else {
-                preview_pic_target.set_filename(None::<&str>);
+                preview_pic_target.set_paintable(None::<&gtk4::gdk::Paintable>);
             }
         } else {
             if let Some(bytes) = babydra_core::get_greeter_wp_bytes() {
@@ -213,13 +242,19 @@ pub fn setup_appearance(
                 }
             } else if let Some(ref p) = *greeter_wp_ref.borrow() {
                 if p.extension().and_then(|e| e.to_str()) != Some("bb") {
-                    preview_pic_target.set_filename(Some(p));
+                    let file = gtk4::gio::File::for_path(p);
+                    if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
+                        preview_pic_target.set_paintable(Some(&texture));
+                    } else {
+                        preview_pic_target.set_filename(Some(p));
+                    }
                 }
             } else {
-                preview_pic_target.set_filename(None::<&str>);
+                preview_pic_target.set_paintable(None::<&gtk4::gdk::Paintable>);
             }
         }
     });
+
 
     let render_wallpapers_grid = {
         let quick_select_box_clone = quick_select_box.clone();
@@ -227,13 +262,20 @@ pub fn setup_appearance(
         let desktop_wp_path_clone = desktop_wp_path.clone();
         let greeter_wp_path_clone = greeter_wp_path.clone();
         let target_mode_clone = target_mode.clone();
+        let current_mode_clone = current_mode.clone();
 
-        move || {
+        Rc::new(move || {
             while let Some(child) = quick_select_box_clone.first_child() {
                 quick_select_box_clone.remove(&child);
             }
 
-            let wallpapers = get_local_wallpapers();
+            let is_live_tab = *current_mode_clone.borrow() == "live";
+            let wallpapers = if is_live_tab {
+                babydra_core::wallpaper::get_live_wallpapers()
+            } else {
+                babydra_core::wallpaper::get_static_wallpapers()
+            };
+
             if wallpapers.is_empty() {
                 let empty_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
                 empty_box.set_halign(gtk4::Align::Center);
@@ -246,14 +288,19 @@ pub fn setup_appearance(
                 icon.set_halign(gtk4::Align::Center);
                 empty_box.append(&icon);
 
-                let title =
-                    gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.no_wallpapers")));
+                let title = if is_live_tab {
+                    gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.no_live_wallpapers")))
+                } else {
+                    gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.no_wallpapers")))
+                };
                 title.add_css_class("settings-row-title");
                 empty_box.append(&title);
 
-                let sub = gtk4::Label::new(Some(&babydra_core::i18n::trans(
-                    "settings.no_wallpapers_sub",
-                )));
+                let sub = if is_live_tab {
+                    gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.no_live_wallpapers_sub")))
+                } else {
+                    gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.no_wallpapers_sub")))
+                };
                 sub.add_css_class("settings-row-desc");
                 empty_box.append(&sub);
 
@@ -272,13 +319,36 @@ pub fn setup_appearance(
                     btn.add_css_class("wallpaper-thumb-card");
                     btn.set_cursor_from_name(Some("pointer"));
 
-                    let pic = gtk4::Picture::for_filename(&wp);
+                    let thumb_path = babydra_core::wallpaper::get_or_create_thumbnail(&wp);
+                    let pic = gtk4::Picture::for_filename(&thumb_path);
                     pic.set_size_request(130, 105);
                     pic.set_content_fit(gtk4::ContentFit::Cover);
 
-                    btn.set_child(Some(&pic));
+                    let is_live_file = babydra_core::wallpaper::is_live_wallpaper_file(&wp);
+                    let card_child = if is_live_file {
+                        let overlay = gtk4::Overlay::new();
+                        overlay.set_child(Some(&pic));
+
+                        let badge_text = if babydra_core::wallpaper::is_video_file(&wp) {
+                            babydra_core::i18n::trans("settings.badge_video")
+                        } else {
+                            babydra_core::i18n::trans("settings.badge_gif")
+                        };
+                        let badge = gtk4::Label::new(Some(&badge_text));
+                        badge.add_css_class("wallpaper-badge");
+                        badge.add_css_class("wallpaper-badge-live");
+                        badge.set_halign(gtk4::Align::End);
+                        badge.set_valign(gtk4::Align::Start);
+                        overlay.add_overlay(&badge);
+                        overlay.upcast::<gtk4::Widget>()
+                    } else {
+                        pic.upcast::<gtk4::Widget>()
+                    };
+
+                    btn.set_child(Some(&card_child));
 
                     let wp_clone = wp.clone();
+                    let thumb_clone = thumb_path.clone();
                     let preview_cb = preview_pic_clone.clone();
                     let desktop_wp_cb = desktop_wp_path_clone.clone();
                     let greeter_wp_cb = greeter_wp_path_clone.clone();
@@ -287,9 +357,14 @@ pub fn setup_appearance(
                     btn.connect_clicked(move |_| {
                         let is_lock = target_mode_cb.get() == 1;
                         if is_lock {
-                            let _ = babydra_core::set_greeter_wp(&wp_clone);
-                            *greeter_wp_cb.borrow_mut() = Some(wp_clone.clone());
-                            preview_cb.set_filename(Some(&wp_clone));
+                            let _ = babydra_core::set_greeter_wp(&thumb_clone);
+                            *greeter_wp_cb.borrow_mut() = Some(thumb_clone.clone());
+                            let file = gtk4::gio::File::for_path(&thumb_clone);
+                            if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
+                                preview_cb.set_paintable(Some(&texture));
+                            } else {
+                                preview_cb.set_filename(Some(&thumb_clone));
+                            }
                             babydra_core::send_settings_notif(
                                 &babydra_core::i18n::trans(
                                     "settings.notif_greeter_wallpaper_title",
@@ -297,38 +372,100 @@ pub fn setup_appearance(
                                 &babydra_core::i18n::trans("settings.notif_greeter_wallpaper_msg"),
                             );
                         } else {
-                            let _ = babydra_core::set_wallpaper(&wp_clone);
+                            let is_video = babydra_core::wallpaper::is_video_file(&wp_clone);
+                            if is_video && !babydra_core::wallpaper::is_gstreamer_plugin_available() {
+                                babydra_core::send_settings_notif(
+                                    &babydra_core::i18n::trans("settings.missing_gst_plugin_title"),
+                                    &babydra_core::i18n::trans("settings.missing_gst_plugin_desc"),
+                                );
+                                return;
+                            }
+                            let mode_to_set = if babydra_core::wallpaper::is_live_wallpaper_file(&wp_clone) {
+                                "live"
+                            } else {
+                                "static"
+                            };
+                            let _ = babydra_core::wallpaper::set_wallpaper_with_mode(&wp_clone, mode_to_set);
                             *desktop_wp_cb.borrow_mut() = Some(wp_clone.clone());
-                            preview_cb.set_filename(Some(&wp_clone));
+                            let file = gtk4::gio::File::for_path(&thumb_clone);
+                            if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
+                                preview_cb.set_paintable(Some(&texture));
+                            } else {
+                                preview_cb.set_filename(Some(&thumb_clone));
+                            }
                             if let Some(root) = preview_cb.root() {
                                 let _ = root.activate_action("win.refresh-sidebar", None);
                             }
-                            babydra_core::send_settings_notif(
-                                &babydra_core::i18n::trans("settings.notif_wallpaper_title"),
-                                &babydra_core::i18n::trans("settings.notif_wallpaper_msg"),
-                            );
+                            let notif_title = if mode_to_set == "live" {
+                                babydra_core::i18n::trans("settings.notif_live_wallpaper_title")
+                            } else {
+                                babydra_core::i18n::trans("settings.notif_wallpaper_title")
+                            };
+                            let notif_msg = if mode_to_set == "live" {
+                                babydra_core::i18n::trans("settings.notif_live_wallpaper_msg")
+                            } else {
+                                babydra_core::i18n::trans("settings.notif_wallpaper_msg")
+                            };
+                            babydra_core::send_settings_notif(&notif_title, &notif_msg);
                         }
                     });
+
 
                     flow.insert(&btn, -1);
                 }
 
                 quick_select_box_clone.append(&flow);
             }
-        }
+        })
     };
+
+    // Mode dropdown change listener
+    let current_mode_dd = current_mode.clone();
+    let warning_box_dd = plugin_warning_box.clone();
+    let pick_btn_dd = pick_btn.clone();
+    let render_grid_dd = render_wallpapers_grid.clone();
+
+    mode_dropdown.connect_selected_notify(move |dd| {
+        let sel = dd.selected();
+        if sel == 1 {
+            *current_mode_dd.borrow_mut() = "live".to_string();
+            let ok = babydra_core::wallpaper::is_gstreamer_plugin_available();
+            if !ok {
+                warning_box_dd.set_visible(true);
+                pick_btn_dd.set_sensitive(false);
+            } else {
+                warning_box_dd.set_visible(false);
+                pick_btn_dd.set_sensitive(true);
+            }
+        } else {
+            *current_mode_dd.borrow_mut() = "static".to_string();
+            warning_box_dd.set_visible(false);
+            pick_btn_dd.set_sensitive(true);
+        }
+        render_grid_dd();
+    });
 
     render_wallpapers_grid();
 
     let preview_clone = preview_pic.clone();
     let parent_box = main_box.clone();
-    let render_grid_cb = render_wallpapers_grid;
+    let render_grid_cb = render_wallpapers_grid.clone();
     let desktop_wp_pick = desktop_wp_path.clone();
     let greeter_wp_pick = greeter_wp_path.clone();
     let target_mode_pick = target_mode.clone();
+    let current_mode_pick = current_mode.clone();
 
     // Floating '+' Button Picker
     pick_btn.connect_clicked(move |_| {
+        let is_live_mode = *current_mode_pick.borrow() == "live";
+        if is_live_mode && !babydra_core::wallpaper::is_gstreamer_plugin_available() {
+            babydra_core::send_settings_notif(
+                &babydra_core::i18n::trans("settings.missing_gst_plugin_title"),
+                &babydra_core::i18n::trans("settings.missing_gst_plugin_desc"),
+            );
+            return;
+        }
+
         if let Some(win) = parent_box
             .root()
             .and_then(|r| r.downcast::<gtk4::Window>().ok())
@@ -343,10 +480,26 @@ pub fn setup_appearance(
             file_dialog.set_title(&title);
 
             let filter = gtk4::FileFilter::new();
-            filter.set_name(Some(&babydra_core::i18n::trans("settings.image_filter")));
-            filter.add_mime_type("image/png");
-            filter.add_mime_type("image/jpeg");
-            filter.add_mime_type("image/webp");
+            if is_live_mode {
+                filter.set_name(Some(&babydra_core::i18n::trans("settings.live_filter")));
+                filter.add_mime_type("image/gif");
+                filter.add_mime_type("video/mp4");
+                filter.add_mime_type("video/webm");
+                filter.add_mime_type("video/x-matroska");
+                filter.add_pattern("*.gif");
+                filter.add_pattern("*.mp4");
+                filter.add_pattern("*.webm");
+                filter.add_pattern("*.mkv");
+            } else {
+                filter.set_name(Some(&babydra_core::i18n::trans("settings.image_filter")));
+                filter.add_mime_type("image/png");
+                filter.add_mime_type("image/jpeg");
+                filter.add_mime_type("image/webp");
+                filter.add_pattern("*.png");
+                filter.add_pattern("*.jpg");
+                filter.add_pattern("*.jpeg");
+                filter.add_pattern("*.webp");
+            }
             file_dialog.set_default_filter(Some(&filter));
 
             let preview_cb = preview_clone.clone();
@@ -357,16 +510,36 @@ pub fn setup_appearance(
             file_dialog.open(Some(&win), None::<&gtk4::gio::Cancellable>, move |res| {
                 if let Ok(file) = res {
                     if let Some(path) = file.path() {
+                        // Enforce video duration limit (< 20 seconds)
+                        if babydra_core::wallpaper::is_video_file(&path) {
+                            if let Some(dur) = babydra_core::wallpaper::get_video_duration(&path) {
+                                if dur > 20.05 {
+                                    let title = babydra_core::i18n::trans("settings.video_too_long_title");
+                                    let msg = babydra_core::i18n::trans("settings.video_too_long_msg")
+                                        .replace("{duration}", &format!("{:.1}", dur));
+                                    babydra_core::send_settings_notif(&title, &msg);
+                                    return; // REJECT
+                                }
+                            }
+                        }
+
                         let target_dir = get_wallpaper_dir();
                         if let Some(filename) = path.file_name() {
                             let dest_path = target_dir.join(filename);
                             if path != dest_path {
                                 let _ = std::fs::copy(&path, &dest_path);
                             }
+                            let thumb_path = babydra_core::wallpaper::get_or_create_thumbnail(&dest_path);
+
                             if is_lock {
-                                let _ = babydra_core::set_greeter_wp(&dest_path);
-                                *greeter_wp_file.borrow_mut() = Some(dest_path.clone());
-                                preview_cb.set_filename(Some(&dest_path));
+                                let _ = babydra_core::set_greeter_wp(&thumb_path);
+                                *greeter_wp_file.borrow_mut() = Some(thumb_path.clone());
+                                let file = gtk4::gio::File::for_path(&thumb_path);
+                                if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
+                                    preview_cb.set_paintable(Some(&texture));
+                                } else {
+                                    preview_cb.set_filename(Some(&thumb_path));
+                                }
                                 render_grid_after_pick();
                                 babydra_core::send_settings_notif(
                                     &babydra_core::i18n::trans(
@@ -377,17 +550,32 @@ pub fn setup_appearance(
                                     ),
                                 );
                             } else {
-                                let _ = babydra_core::set_wallpaper(&dest_path);
+                                let mode_val = if is_live_mode { "live" } else { "static" };
+                                let _ = babydra_core::wallpaper::set_wallpaper_with_mode(&dest_path, mode_val);
                                 *desktop_wp_file.borrow_mut() = Some(dest_path.clone());
-                                preview_cb.set_filename(Some(&dest_path));
+                                let file = gtk4::gio::File::for_path(&thumb_path);
+                                if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
+                                    preview_cb.set_paintable(Some(&texture));
+                                } else {
+                                    preview_cb.set_filename(Some(&thumb_path));
+                                }
                                 render_grid_after_pick();
+
                                 if let Some(root) = preview_cb.root() {
                                     let _ = root.activate_action("win.refresh-sidebar", None);
                                 }
-                                babydra_core::send_settings_notif(
-                                    &babydra_core::i18n::trans("settings.notif_wallpaper_title"),
-                                    &babydra_core::i18n::trans("settings.notif_wallpaper_msg"),
-                                );
+                                let notif_title = if is_live_mode {
+                                    babydra_core::i18n::trans("settings.notif_live_wallpaper_title")
+                                } else {
+                                    babydra_core::i18n::trans("settings.notif_wallpaper_title")
+                                };
+                                let notif_msg = if is_live_mode {
+                                    babydra_core::i18n::trans("settings.notif_live_wallpaper_msg")
+                                } else {
+                                    babydra_core::i18n::trans("settings.notif_wallpaper_msg")
+                                };
+                                babydra_core::send_settings_notif(&notif_title, &notif_msg);
+
                             }
                         }
                     }
@@ -395,6 +583,7 @@ pub fn setup_appearance(
             });
         }
     });
+
 
     let avatar_preview_cb = avatar_pic.clone();
     let parent_box_av = main_box.clone();
