@@ -8,6 +8,16 @@ use std::cell::RefCell;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
+thread_local! {
+    static IS_DRAGGING: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+    static DRAGGED_ANCHOR: RefCell<Option<PathBuf>> = const { RefCell::new(None) };
+}
+
+/// Returns true if an icon drag operation is currently active or just ended.
+pub fn is_currently_dragging() -> bool {
+    IS_DRAGGING.with(|c| c.get())
+}
+
 /// Creates a DragSource on an icon widget for dragging files to other grid slots, folders, or external apps.
 pub fn create_icon_drag(
     path: &Path,
@@ -22,15 +32,20 @@ pub fn create_icon_drag(
     let state_clone = state.clone();
 
     let is_drag_begin = is_dragging.clone();
+    let path_for_begin = path_clone.clone();
     drag_source.connect_drag_begin(move |_, _| {
         is_drag_begin.set(true);
+        IS_DRAGGING.with(|c| c.set(true));
+        DRAGGED_ANCHOR.with(|a| *a.borrow_mut() = Some(path_for_begin.clone()));
     });
 
     let is_drag_end = is_dragging.clone();
     drag_source.connect_drag_end(move |_, _, _| {
         let drag_flag = is_drag_end.clone();
-        glib::timeout_add_local_once(std::time::Duration::from_millis(150), move || {
+        glib::timeout_add_local_once(std::time::Duration::from_millis(300), move || {
             drag_flag.set(false);
+            IS_DRAGGING.with(|c| c.set(false));
+            DRAGGED_ANCHOR.with(|a| *a.borrow_mut() = None);
         });
     });
 
@@ -170,7 +185,12 @@ pub fn create_desktop_drop(
                 let current_positions = state_ref.compute_all_positions();
                 let was_auto = state_ref.config.auto_arrange || state_ref.config.sort_by != "none";
 
-                let anchor_src = &internal_sources[0];
+                let dragged_anchor_opt = DRAGGED_ANCHOR.with(|a| a.borrow().clone());
+                let anchor_src = dragged_anchor_opt
+                    .as_ref()
+                    .filter(|p| internal_sources.contains(p))
+                    .unwrap_or(&internal_sources[0]);
+
                 let anchor_name = anchor_src
                     .file_name()
                     .and_then(|n| n.to_str())
@@ -178,7 +198,7 @@ pub fn create_desktop_drop(
                 let anchor_current_pos = current_positions
                     .get(anchor_name)
                     .copied()
-                    .unwrap_or((0, 0));
+                    .unwrap_or((16, 48));
                 drop(state_ref);
 
                 let (base_x, base_y) = snap_to_grid(
@@ -214,14 +234,14 @@ pub fn create_desktop_drop(
                     }
                 }
 
-                if was_auto {
-                    let mut batch = Vec::new();
-                    for (fname, pos) in &current_positions {
-                        batch.push((fname.clone(), pos.0, pos.1));
-                    }
-                    babydra_core::config::desktop_layout::set_positions(batch);
+                // 1. Snapshot all current positions into layout so unselected icons never shift
+                let mut batch = Vec::new();
+                for (fname, pos) in &current_positions {
+                    batch.push((fname.clone(), pos.0, pos.1));
                 }
+                babydra_core::config::desktop_layout::set_positions(batch);
 
+                // 2. Persist the new positions of all moved icons atomically
                 babydra_core::config::desktop_layout::set_positions(move_batch);
 
                 let mut s_mut = state_drop.borrow_mut();
@@ -232,7 +252,11 @@ pub fn create_desktop_drop(
                 }
                 drop(s_mut);
 
-                ref_pos_cb();
+                // 3. Defer position refresh via idle callback so GTK completes DND cleanly
+                let ref_pos_idle = ref_pos_cb.clone();
+                glib::idle_add_local_once(move || {
+                    ref_pos_idle();
+                });
             }
 
             // 2. External Files Ingestion (Copy files dropped from external apps to ~/Desktop)

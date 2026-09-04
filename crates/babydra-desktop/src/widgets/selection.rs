@@ -43,7 +43,8 @@ pub fn attach_rubberband(desktop_fixed: &Fixed, state: Rc<RefCell<DesktopState>>
     let state_begin = state.clone();
 
     drag_gesture.connect_drag_begin(move |gesture, x, y| {
-        let picked = fixed_begin.pick(x, y, PickFlags::empty());
+        // 1. Pick with INSENSITIVE | NON_TARGETABLE to hit Picture, Image, Overlay etc.
+        let picked = fixed_begin.pick(x, y, PickFlags::INSENSITIVE | PickFlags::NON_TARGETABLE);
         let mut is_icon = false;
         let mut curr = picked;
         while let Some(w) = curr {
@@ -57,7 +58,33 @@ pub fn attach_rubberband(desktop_fixed: &Fixed, state: Rc<RefCell<DesktopState>>
             curr = w.parent();
         }
 
+        // 2. Fallback: check bounding boxes of all icon widgets
         if !is_icon {
+            let mut child_opt = fixed_begin.first_child();
+            while let Some(child) = child_opt {
+                if child != rb_begin.clone().upcast::<gtk4::Widget>()
+                    && child.has_css_class("desktop-icon")
+                {
+                    if let Some((cx, cy)) = child.translate_coordinates(&fixed_begin, 0.0, 0.0) {
+                        let cw = child.width() as f64;
+                        let ch = child.height() as f64;
+                        if x >= cx && x <= cx + cw && y >= cy && y <= cy + ch {
+                            is_icon = true;
+                            break;
+                        }
+                    }
+                }
+                child_opt = child.next_sibling();
+            }
+        }
+
+        if is_icon {
+            // It's an icon press: yield completely to DragSource & click controllers on the icon
+            drag_active_begin.replace(false);
+            gesture.set_state(gtk4::EventSequenceState::Denied);
+        } else {
+            // Empty desktop space: clear selection unless Ctrl is held, and claim sequence for rubberband
+            fixed_begin.grab_focus();
             let is_ctrl = gesture
                 .current_event()
                 .map(|e| {
@@ -73,11 +100,7 @@ pub fn attach_rubberband(desktop_fixed: &Fixed, state: Rc<RefCell<DesktopState>>
 
             drag_active_begin.replace(true);
             start_pos_begin.replace(Some((x, y)));
-            // Don't show rubberband here — wait for actual drag movement in drag_update
-            // to avoid a 1-frame flash on plain clicks
             gesture.set_state(gtk4::EventSequenceState::Claimed);
-        } else {
-            drag_active_begin.replace(false);
         }
     });
 
@@ -92,68 +115,72 @@ pub fn attach_rubberband(desktop_fixed: &Fixed, state: Rc<RefCell<DesktopState>>
             return;
         }
 
-        if let Some((start_x, start_y)) = *start_pos_update.borrow() {
-            // Show on first meaningful move
-            if !rb_update.is_visible() {
-                fixed_update.move_(&rb_update, start_x, start_y);
-                rb_update.set_size_request(0, 0);
-                rb_update.set_visible(true);
-            }
+        let Some((start_x, start_y)) = *start_pos_update.borrow() else {
+            return;
+        };
 
-            let current_x = start_x + offset_x;
-            let current_y = start_y + offset_y;
-            let min_x = start_x.min(current_x);
-            let max_x = start_x.max(current_x);
-            let min_y = start_y.min(current_y);
-            let max_y = start_y.max(current_y);
-            let width = (max_x - min_x).max(0.0);
-            let height = (max_y - min_y).max(0.0);
+        let current_x = start_x + offset_x;
+        let current_y = start_y + offset_y;
+        let min_x = start_x.min(current_x);
+        let max_x = start_x.max(current_x);
+        let min_y = start_y.min(current_y);
+        let max_y = start_y.max(current_y);
+        let width = (max_x - min_x).max(0.0);
+        let height = (max_y - min_y).max(0.0);
 
-            fixed_update.move_(&rb_update, min_x, min_y);
-            rb_update.set_size_request(width as i32, height as i32);
+        // Only show rubberband rectangle once drag passes 4px threshold
+        if width < 4.0 && height < 4.0 {
+            return;
+        }
 
-            let is_ctrl = gesture
-                .current_event()
-                .map(|e| {
-                    e.modifier_state()
-                        .contains(gtk4::gdk::ModifierType::CONTROL_MASK)
-                })
-                .unwrap_or(false);
+        if !rb_update.is_visible() {
+            rb_update.set_visible(true);
+        }
 
-            let mut state_ref = state_update.borrow_mut();
-            if !is_ctrl {
-                state_ref.clear_selection();
-            }
+        fixed_update.move_(&rb_update, min_x, min_y);
+        rb_update.set_size_request(width as i32, height as i32);
 
-            let mut child_opt = fixed_update.first_child();
-            while let Some(child) = child_opt {
-                if child != rb_update.clone().upcast::<gtk4::Widget>()
-                    && child.has_css_class("desktop-icon")
-                {
-                    if let Some((cx, cy)) = child.translate_coordinates(&fixed_update, 0.0, 0.0) {
-                        let cw = child.width() as f64;
-                        let ch = child.height() as f64;
+        let is_ctrl = gesture
+            .current_event()
+            .map(|e| {
+                e.modifier_state()
+                    .contains(gtk4::gdk::ModifierType::CONTROL_MASK)
+            })
+            .unwrap_or(false);
 
-                        let intersects =
-                            !(cx > max_x || cx + cw < min_x || cy > max_y || cy + ch < min_y);
-                        if intersects {
-                            if let Some(file_path_str) = child.widget_name().as_str().into() {
-                                if !file_path_str.is_empty() {
-                                    state_ref.select(
-                                        std::path::PathBuf::from(file_path_str),
-                                        true,
-                                        false,
-                                    );
-                                }
+        let mut state_ref = state_update.borrow_mut();
+        if !is_ctrl {
+            state_ref.clear_selection();
+        }
+
+        let mut child_opt = fixed_update.first_child();
+        while let Some(child) = child_opt {
+            if child != rb_update.clone().upcast::<gtk4::Widget>()
+                && child.has_css_class("desktop-icon")
+            {
+                if let Some((cx, cy)) = child.translate_coordinates(&fixed_update, 0.0, 0.0) {
+                    let cw = child.width() as f64;
+                    let ch = child.height() as f64;
+
+                    let intersects =
+                        !(cx > max_x || cx + cw < min_x || cy > max_y || cy + ch < min_y);
+                    if intersects {
+                        if let Some(file_path_str) = child.widget_name().as_str().into() {
+                            if !file_path_str.is_empty() {
+                                state_ref.select(
+                                    std::path::PathBuf::from(file_path_str),
+                                    true,
+                                    false,
+                                );
                             }
                         }
                     }
                 }
-                child_opt = child.next_sibling();
             }
-            drop(state_ref);
-            update_icon_sel(&fixed_update, &state_update, &rb_update);
+            child_opt = child.next_sibling();
         }
+        drop(state_ref);
+        update_icon_sel(&fixed_update, &state_update, &rb_update);
     });
 
     let drag_active_end = drag_active.clone();
@@ -161,7 +188,18 @@ pub fn attach_rubberband(desktop_fixed: &Fixed, state: Rc<RefCell<DesktopState>>
     drag_gesture.connect_drag_end(move |_, _, _| {
         if *drag_active_end.borrow() {
             rb_end.set_visible(false);
+            rb_end.set_size_request(0, 0);
             *drag_active_end.borrow_mut() = false;
+        }
+    });
+
+    let drag_active_cancel = drag_active.clone();
+    let rb_cancel = rubberband.clone();
+    drag_gesture.connect_cancel(move |_, _| {
+        if *drag_active_cancel.borrow() {
+            rb_cancel.set_visible(false);
+            rb_cancel.set_size_request(0, 0);
+            *drag_active_cancel.borrow_mut() = false;
         }
     });
 

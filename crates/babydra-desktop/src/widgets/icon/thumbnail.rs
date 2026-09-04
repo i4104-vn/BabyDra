@@ -29,6 +29,7 @@ pub fn build_icon_frame(entry: &FileEntry, icon_px: i32) -> Box {
     icon_frame.set_halign(Align::Center);
     icon_frame.set_valign(Align::Center);
     icon_frame.add_css_class("desktop-icon-image");
+    icon_frame.set_can_target(true);
 
     if entry.file_type == FileType::Directory {
         let folder_icon = get_fallback_icon(&entry.icon_name, "folder");

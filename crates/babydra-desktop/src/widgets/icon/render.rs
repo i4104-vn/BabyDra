@@ -15,6 +15,7 @@ pub fn create_desktop_icon(entry: &FileEntry, icon_size: u32, is_selected: bool)
     if entry.is_hidden || entry.display_name.starts_with('.') {
         container.add_css_class("hidden-item");
     }
+    container.set_can_target(true);
 
     let icon_px = (icon_size as i32).clamp(32, 72);
     let card_w = (icon_px + 36).clamp(80, 110);

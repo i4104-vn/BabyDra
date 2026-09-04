@@ -103,7 +103,7 @@ pub fn rebuild_grid_icons(
                 })
                 .unwrap_or(false);
 
-            if n_press == 1 && !is_ctrl && !is_drag_rel.get() {
+            if n_press == 1 && !is_ctrl && !is_drag_rel.get() && !crate::widgets::grid::dnd::is_currently_dragging() {
                 let mut s = state_rel.borrow_mut();
                 if s.is_selected(&entry_rel.path) && s.selected_paths.len() > 1 {
                     s.select(entry_rel.path.clone(), false, false);
