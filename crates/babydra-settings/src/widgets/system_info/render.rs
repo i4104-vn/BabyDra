@@ -12,6 +12,7 @@ pub struct SystemInfoLabels {
     pub cpu_lbl: gtk4::Label,
     pub mem_lbl: gtk4::Label,
     pub gpu_lbl: gtk4::Label,
+    pub host_row_lbl: gtk4::Label,
 }
 
 pub struct SystemInfoWidgets {
@@ -47,13 +48,13 @@ pub fn build_system_ui(
     page_title.set_halign(gtk4::Align::Start);
     main_box.append(&page_title);
 
-    let content_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
+    let content_box = gtk4::Box::new(gtk4::Orientation::Vertical, 14);
 
     // ── Card 1: Top Hero Card (Avatar, OS Title, Uptime Badge) ──
     let hero_card = gtk4::Box::new(gtk4::Orientation::Horizontal, 20);
     hero_card.add_css_class("glass-panel");
-    hero_card.set_margin_top(4);
-    hero_card.set_margin_bottom(2);
+    hero_card.set_margin_top(2);
+    hero_card.set_margin_bottom(4);
     hero_card.set_margin_start(4);
     hero_card.set_margin_end(4);
 
@@ -62,6 +63,8 @@ pub fn build_system_ui(
     avatar_box.add_css_class("hero-avatar-box");
     avatar_box.set_size_request(80, 80);
     avatar_box.set_valign(gtk4::Align::Center);
+    avatar_box.set_hexpand(false);
+    avatar_box.set_vexpand(false);
 
     let avatar_img = babydra_ui_kit::ui::icon::get_icon("logo", 80);
     avatar_img.set_pixel_size(80);
@@ -86,22 +89,10 @@ pub fn build_system_ui(
         "BabyDra Linux"
     };
 
-    let host_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
-    host_box.set_valign(gtk4::Align::Center);
-
     let os_label = gtk4::Label::new(Some(display_host));
     os_label.add_css_class("hero-hostname");
     os_label.set_halign(gtk4::Align::Start);
-    host_box.append(&os_label);
-
-    let edit_host_btn = gtk4::Button::from_icon_name("document-edit-symbolic");
-    edit_host_btn.add_css_class("connect-pill-btn");
-    edit_host_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.change_hostname")));
-    edit_host_btn.set_cursor_from_name(Some("pointer"));
-    edit_host_btn.set_valign(gtk4::Align::Center);
-    host_box.append(&edit_host_btn);
-
-    text_column.append(&host_box);
+    text_column.append(&os_label);
 
     // Subtitle Row: OS Name (Architecture) • Kernel Version
     let sub_title = format!("{} ({}) • Kernel {}", os_name, cpu_arch, kernel_version);
@@ -187,69 +178,191 @@ pub fn build_system_ui(
     hero_card.append(&info_box);
     content_box.append(&hero_card);
 
-    // ── Card 2: User Account Card (Avatar, Name, Username, Change Name, Change Password) ──
+    // ── Section 1: Device & Account Settings Card ─────────────────────────────
+    let dev_acc_label = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.section_device_account")));
+    dev_acc_label.add_css_class("settings-row-desc");
+    dev_acc_label.set_halign(gtk4::Align::Start);
+    dev_acc_label.set_margin_start(8);
+    dev_acc_label.set_margin_top(8);
+    dev_acc_label.set_margin_bottom(2);
+    content_box.append(&dev_acc_label);
+
+    let dev_acc_list = gtk4::ListBox::new();
+    dev_acc_list.set_selection_mode(gtk4::SelectionMode::None);
+    dev_acc_list.add_css_class("settings-card");
+    dev_acc_list.set_margin_start(4);
+    dev_acc_list.set_margin_end(4);
+
+    // Row 1: Hostname
+    let host_row = gtk4::ListBoxRow::new();
+    host_row.add_css_class("settings-card-row");
+    let host_hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 14);
+    host_hbox.set_margin_top(6);
+    host_hbox.set_margin_bottom(6);
+    host_hbox.set_margin_start(6);
+    host_hbox.set_margin_end(6);
+
+    let host_icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    host_icon_badge.add_css_class("blue-icon-badge-sm");
+    host_icon_badge.set_valign(gtk4::Align::Center);
+    host_icon_badge.set_halign(gtk4::Align::Start);
+    host_icon_badge.set_hexpand(false);
+    host_icon_badge.set_vexpand(false);
+    host_icon_badge.set_size_request(36, 36);
+
+    let host_icon = babydra_ui_kit::ui::icon::get_icon("desktop", 18);
+    host_icon.set_pixel_size(18);
+    host_icon.set_valign(gtk4::Align::Center);
+    host_icon.set_halign(gtk4::Align::Center);
+    host_icon.set_vexpand(true);
+    host_icon_badge.append(&host_icon);
+    host_hbox.append(&host_icon_badge);
+
+    let host_text_col = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
+    host_text_col.set_valign(gtk4::Align::Center);
+    host_text_col.set_halign(gtk4::Align::Start);
+    host_text_col.set_hexpand(true);
+
+    let host_title = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.device_hostname")));
+    host_title.add_css_class("settings-row-title");
+    host_title.set_halign(gtk4::Align::Start);
+    host_text_col.append(&host_title);
+
+    let host_row_lbl = gtk4::Label::new(Some(display_host));
+    host_row_lbl.add_css_class("settings-row-desc");
+    host_row_lbl.set_halign(gtk4::Align::Start);
+    host_text_col.append(&host_row_lbl);
+    host_hbox.append(&host_text_col);
+
+    let edit_host_btn = gtk4::Button::with_label(&babydra_core::i18n::trans("settings.change_hostname"));
+    edit_host_btn.add_css_class("connect-pill-btn");
+    edit_host_btn.set_cursor_from_name(Some("pointer"));
+    edit_host_btn.set_valign(gtk4::Align::Center);
+    host_hbox.append(&edit_host_btn);
+
+    host_row.set_child(Some(&host_hbox));
+    dev_acc_list.append(&host_row);
+
+    // Row 2: User Account (Display Name & Username)
     let user_info = babydra_core::services::system::account::get_user_account_info();
 
-    let account_card = gtk4::Box::new(gtk4::Orientation::Horizontal, 16);
-    account_card.add_css_class("glass-panel");
-    account_card.set_margin_start(4);
-    account_card.set_margin_end(4);
+    let name_row = gtk4::ListBoxRow::new();
+    name_row.add_css_class("settings-card-row");
+    let name_hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 14);
+    name_hbox.set_margin_top(6);
+    name_hbox.set_margin_bottom(6);
+    name_hbox.set_margin_start(6);
+    name_hbox.set_margin_end(6);
 
-    let user_avatar_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
-    user_avatar_box.add_css_class("blue-icon-badge");
-    user_avatar_box.set_size_request(48, 48);
-    user_avatar_box.set_valign(gtk4::Align::Center);
+    let name_icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    name_icon_badge.add_css_class("blue-icon-badge-sm");
+    name_icon_badge.set_valign(gtk4::Align::Center);
+    name_icon_badge.set_halign(gtk4::Align::Start);
+    name_icon_badge.set_hexpand(false);
+    name_icon_badge.set_vexpand(false);
+    name_icon_badge.set_size_request(36, 36);
 
-    let user_icon_img = babydra_ui_kit::ui::icon::get_icon("user", 22);
-    user_icon_img.set_pixel_size(22);
-    user_icon_img.set_vexpand(true);
-    user_icon_img.set_hexpand(true);
-    user_icon_img.set_valign(gtk4::Align::Center);
-    user_icon_img.set_halign(gtk4::Align::Center);
-    user_avatar_box.append(&user_icon_img);
-    account_card.append(&user_avatar_box);
+    let name_icon = babydra_ui_kit::ui::icon::get_icon("user", 18);
+    name_icon.set_pixel_size(18);
+    name_icon.set_valign(gtk4::Align::Center);
+    name_icon.set_halign(gtk4::Align::Center);
+    name_icon.set_vexpand(true);
+    name_icon_badge.append(&name_icon);
+    name_hbox.append(&name_icon_badge);
 
-    let user_text_col = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-    user_text_col.set_hexpand(true);
-    user_text_col.set_valign(gtk4::Align::Center);
+    let name_text_col = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
+    name_text_col.set_valign(gtk4::Align::Center);
+    name_text_col.set_halign(gtk4::Align::Start);
+    name_text_col.set_hexpand(true);
 
     let display_name_lbl = gtk4::Label::new(Some(&user_info.display_name));
     display_name_lbl.add_css_class("settings-row-title");
     display_name_lbl.set_halign(gtk4::Align::Start);
-    user_text_col.append(&display_name_lbl);
+    name_text_col.append(&display_name_lbl);
 
     let username_sub = format!("@{}", user_info.username);
     let username_lbl = gtk4::Label::new(Some(&username_sub));
     username_lbl.add_css_class("settings-row-desc");
     username_lbl.set_halign(gtk4::Align::Start);
-    user_text_col.append(&username_lbl);
+    name_text_col.append(&username_lbl);
+    name_hbox.append(&name_text_col);
 
-    account_card.append(&user_text_col);
-
-    let acc_actions = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
-    acc_actions.set_valign(gtk4::Align::Center);
-    acc_actions.set_halign(gtk4::Align::End);
-
-    let change_name_btn =
-        gtk4::Button::with_label(&babydra_core::i18n::trans("settings.change_name"));
+    let change_name_btn = gtk4::Button::with_label(&babydra_core::i18n::trans("settings.change_name"));
     change_name_btn.add_css_class("connect-pill-btn");
     change_name_btn.set_cursor_from_name(Some("pointer"));
-    acc_actions.append(&change_name_btn);
+    change_name_btn.set_valign(gtk4::Align::Center);
+    name_hbox.append(&change_name_btn);
 
-    let change_pwd_btn =
-        gtk4::Button::with_label(&babydra_core::i18n::trans("settings.change_password"));
+    name_row.set_child(Some(&name_hbox));
+    dev_acc_list.append(&name_row);
+
+    // Row 3: Account Password
+    let pwd_row = gtk4::ListBoxRow::new();
+    pwd_row.add_css_class("settings-card-row");
+    let pwd_hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 14);
+    pwd_hbox.set_margin_top(6);
+    pwd_hbox.set_margin_bottom(6);
+    pwd_hbox.set_margin_start(6);
+    pwd_hbox.set_margin_end(6);
+
+    let pwd_icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    pwd_icon_badge.add_css_class("blue-icon-badge-sm");
+    pwd_icon_badge.set_valign(gtk4::Align::Center);
+    pwd_icon_badge.set_halign(gtk4::Align::Start);
+    pwd_icon_badge.set_hexpand(false);
+    pwd_icon_badge.set_vexpand(false);
+    pwd_icon_badge.set_size_request(36, 36);
+
+    let pwd_icon = babydra_ui_kit::ui::icon::get_icon("lock", 18);
+    pwd_icon.set_pixel_size(18);
+    pwd_icon.set_valign(gtk4::Align::Center);
+    pwd_icon.set_halign(gtk4::Align::Center);
+    pwd_icon.set_vexpand(true);
+    pwd_icon_badge.append(&pwd_icon);
+    pwd_hbox.append(&pwd_icon_badge);
+
+    let pwd_text_col = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
+    pwd_text_col.set_valign(gtk4::Align::Center);
+    pwd_text_col.set_halign(gtk4::Align::Start);
+    pwd_text_col.set_hexpand(true);
+
+    let pwd_title = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.account_password")));
+    pwd_title.add_css_class("settings-row-title");
+    pwd_title.set_halign(gtk4::Align::Start);
+    pwd_text_col.append(&pwd_title);
+
+    let pwd_sub = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.password_protected")));
+    pwd_sub.add_css_class("settings-row-desc");
+    pwd_sub.set_halign(gtk4::Align::Start);
+    pwd_text_col.append(&pwd_sub);
+    pwd_hbox.append(&pwd_text_col);
+
+    let change_pwd_btn = gtk4::Button::with_label(&babydra_core::i18n::trans("settings.change_password"));
     change_pwd_btn.add_css_class("connect-pill-btn");
     change_pwd_btn.set_cursor_from_name(Some("pointer"));
-    acc_actions.append(&change_pwd_btn);
+    change_pwd_btn.set_valign(gtk4::Align::Center);
+    pwd_hbox.append(&change_pwd_btn);
 
-    account_card.append(&acc_actions);
-    content_box.append(&account_card);
+    pwd_row.set_child(Some(&pwd_hbox));
+    dev_acc_list.append(&pwd_row);
 
-    // ── 2x2 Grid of Hardware Spec Cards ─────────────────────────
+    content_box.append(&dev_acc_list);
+
+    // ── Section 2: Hardware Specifications Grid ─────────────────────────────
+    let hw_label = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.section_hardware")));
+    hw_label.add_css_class("settings-row-desc");
+    hw_label.set_halign(gtk4::Align::Start);
+    hw_label.set_margin_start(8);
+    hw_label.set_margin_top(14);
+    hw_label.set_margin_bottom(2);
+    content_box.append(&hw_label);
+
     let grid = gtk4::Grid::new();
     grid.set_column_spacing(20);
     grid.set_row_spacing(20);
     grid.set_column_homogeneous(true);
+    grid.set_margin_start(4);
+    grid.set_margin_end(4);
 
     let kernel_lbl = gtk4::Label::new(Some(kernel_version));
     let cpu_lbl = gtk4::Label::new(Some(cpu_model));
@@ -348,6 +461,7 @@ pub fn build_system_ui(
         cpu_lbl,
         mem_lbl,
         gpu_lbl,
+        host_row_lbl,
     };
 
     SystemInfoWidgets {

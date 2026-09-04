@@ -68,6 +68,7 @@ pub fn create_system_widget() -> gtk4::Widget {
                 "BabyDra Linux"
             };
             labels.os_label.set_text(display_host);
+            labels.host_row_lbl.set_text(display_host);
 
             let sub_title = format!(
                 "{} ({}) • Kernel {}",
