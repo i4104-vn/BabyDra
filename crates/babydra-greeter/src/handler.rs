@@ -21,7 +21,7 @@ pub fn setup_handlers(g: &GreeterWidgets) {
 // Top bar clock
 // ---------------------------------------------------------------------------
 
-/// Sets up `clock`.
+/// Sets up clock and date labels with 1-second update timer.
 fn setup_clock(top_bar: &TopBarWidget) {
     tracing::info!(target: "babydra-greeter", "Setting up top bar clock timer (interval: 1 second)");
     let (time, date) = babydra_core::format_clock_date("greeter.date_format");
@@ -41,7 +41,7 @@ fn setup_clock(top_bar: &TopBarWidget) {
 // Splash screen transition
 // ---------------------------------------------------------------------------
 
-/// Sets up `splash transition`.
+/// Sets up splash screen transition (2 second delay, then fade to login).
 fn setup_splash_transition(g: &GreeterWidgets) {
     tracing::info!(target: "babydra-greeter", "Initializing splash screen transition (showing splash, hiding login panel)");
     g.login.container.set_opacity(0.0);
@@ -53,7 +53,6 @@ fn setup_splash_transition(g: &GreeterWidgets) {
     let login_container = g.login.container.clone();
     let pass_entry = g.login.pass_entry.clone();
 
-    // After 2 seconds, fade out splash screen and reveal floating login panel
     glib::timeout_add_seconds_local(2, move || {
         tracing::info!(target: "babydra-greeter", "Splash screen timer elapsed (2s): hiding splash and fading in login panel");
         splash_container.set_opacity(0.0);
@@ -71,7 +70,7 @@ fn setup_splash_transition(g: &GreeterWidgets) {
 // Power buttons (poweroff / reboot / suspend)
 // ---------------------------------------------------------------------------
 
-/// Sets up `power buttons`.
+/// Sets up power, reboot, and suspend button handlers.
 fn setup_power_buttons(top_bar: &TopBarWidget) {
     top_bar.power_btn.connect_clicked(|_| {
         tracing::info!(target: "babydra-greeter", "User clicked Power Off button -> babydra_core::power::poweroff()");
@@ -91,8 +90,22 @@ fn setup_power_buttons(top_bar: &TopBarWidget) {
 // Login flow
 // ---------------------------------------------------------------------------
 
-/// Sets up `login flow`.
+/// Sets up login flow: user dropdown, password entry, submit button, and Enter key.
 fn setup_login_flow(g: &GreeterWidgets) {
+    let login_action = create_login_action(g);
+    
+    let login_action_btn = login_action.clone();
+    g.login.login_btn.connect_clicked(move |_| {
+        login_action_btn();
+    });
+
+    g.login.pass_entry.connect_activate(move |_| {
+        login_action();
+    });
+}
+
+/// Creates the login action closure with all widget references.
+fn create_login_action(g: &GreeterWidgets) -> impl Fn() + Clone + 'static {
     let user_dropdown = g.login.user_dropdown.clone();
     let users = g.login.users.clone();
     let pass_entry = g.login.pass_entry.clone();
@@ -105,7 +118,7 @@ fn setup_login_flow(g: &GreeterWidgets) {
     let error_box = g.login.error_box.clone();
     let login_panel = g.login.login_panel.clone();
 
-    let do_login_action = move || {
+    move || {
         if !login_btn.is_sensitive() {
             return;
         }
@@ -188,14 +201,5 @@ fn setup_login_flow(g: &GreeterWidgets) {
                 }
             }
         });
-    };
-
-    let do_login_action_btn = do_login_action.clone();
-    g.login.login_btn.connect_clicked(move |_| {
-        do_login_action_btn();
-    });
-
-    g.login.pass_entry.connect_activate(move |_| {
-        do_login_action();
-    });
+    }
 }
