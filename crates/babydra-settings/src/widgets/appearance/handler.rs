@@ -180,7 +180,7 @@ pub fn setup_appearance(
             };
             babydra_core::send_settings_notif(&notif_title, &notif_msg);
 
-            let new_icon_name = if new_dark { "brightness" } else { "dark-mode" };
+            let new_icon_name = if new_dark { "dark-mode" } else { "brightness" };
             let new_icon = babydra_ui_kit::ui::icon::get_icon(new_icon_name, 18);
             new_icon.set_pixel_size(18);
             new_icon.set_valign(gtk4::Align::Center);

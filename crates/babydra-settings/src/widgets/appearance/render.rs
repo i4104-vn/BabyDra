@@ -135,7 +135,7 @@ pub fn build_appearance_ui(
     theme_toggle_btn.set_cursor_from_name(Some("pointer"));
     theme_toggle_btn.set_size_request(38, 38);
 
-    let initial_theme_icon = if is_dark { "brightness" } else { "dark-mode" };
+    let initial_theme_icon = if is_dark { "dark-mode" } else { "brightness" };
     let theme_icon = babydra_ui_kit::ui::icon::get_icon(initial_theme_icon, 18);
     theme_icon.set_pixel_size(18);
     theme_icon.set_valign(gtk4::Align::Center);
