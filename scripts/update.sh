@@ -125,10 +125,11 @@ echo "============================================="
 mkdir -p "$HOME/.babydra"
 [ -f "$HOME/.babydra/wallpaper.png" ] || cp "$REPO_DIR/wallpaper.png" "$HOME/.babydra/wallpaper.png" 2>/dev/null || true
 cp "$REPO_DIR/libs/babydra-core/src/services/logo.png" "$HOME/.babydra/logo.png" 2>/dev/null || true
-[ -f "$HOME/.babydra/lock_wallpaper.bb" ] || ([ -f "$REPO_DIR/wallpaper.png" ] && base64 -w 0 "$REPO_DIR/wallpaper.png" > "$HOME/.babydra/lock_wallpaper.bb" 2>/dev/null) || true
+[ -f "$REPO_DIR/wallpaper.png" ] && sudo cp "$REPO_DIR/wallpaper.png" /var/lib/babydra/lock_wallpaper.png 2>/dev/null && sudo chmod 666 /var/lib/babydra/lock_wallpaper.png 2>/dev/null || true
 
 sudo mkdir -p /usr/share/babydra /var/lib/babydra 2>/dev/null || true
 sudo chmod 777 /var/lib/babydra 2>/dev/null || true
+[ -f "$HOME/.babydra/avatar.png" ] && sudo cp "$HOME/.babydra/avatar.png" /var/lib/babydra/avatar.png 2>/dev/null && sudo chmod 666 /var/lib/babydra/avatar.png 2>/dev/null || true
 sudo cp "$REPO_DIR/libs/babydra-core/src/services/logo.png" /usr/share/babydra/babydra-preview.png 2>/dev/null || true
 sudo cp "$REPO_DIR/libs/babydra-core/src/services/logo.png" /usr/share/babydra/babydra-settings.png 2>/dev/null || true
 sudo cp "$REPO_DIR/libs/babydra-core/src/services/logo.png" /usr/share/babydra/logo.png 2>/dev/null || true

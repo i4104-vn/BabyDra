@@ -11,33 +11,13 @@ pub fn build_wallpaper_img(custom_path: Option<&str>) -> gtk4::Picture {
     bg_picture.set_vexpand(true);
 
     if let Some(path) = custom_path {
-        if let Some(bytes) = babydra_core::read_image_bytes(std::path::Path::new(path)) {
-            let stream =
-                gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(&bytes));
-            if let Ok(pixbuf) =
-                gtk4::gdk_pixbuf::Pixbuf::from_stream(&stream, gtk4::gio::Cancellable::NONE)
-            {
-                bg_picture.set_pixbuf(Some(&pixbuf));
-                return bg_picture;
-            }
-        }
-    }
-
-    if let Some(bytes) = babydra_core::get_greeter_wp_bytes() {
-        let stream = gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(&bytes));
-        if let Ok(pixbuf) =
-            gtk4::gdk_pixbuf::Pixbuf::from_stream(&stream, gtk4::gio::Cancellable::NONE)
-        {
-            bg_picture.set_pixbuf(Some(&pixbuf));
-            return bg_picture;
-        }
+        bg_picture.set_filename(Some(path));
+        return bg_picture;
     }
 
     if let Some(path) = babydra_core::get_greeter_wp() {
-        if path.extension().and_then(|e| e.to_str()) != Some("bb") {
-            bg_picture.set_filename(Some(&path));
-            return bg_picture;
-        }
+        bg_picture.set_filename(Some(&path));
+        return bg_picture;
     }
 
     bg_picture

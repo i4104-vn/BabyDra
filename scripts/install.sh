@@ -126,11 +126,13 @@ sudo chmod +x /usr/bin/babydra-greeter 2>/dev/null || true
 mkdir -p "$HOME/.babydra"
 cp "$REPO_ROOT/wallpaper.png" "$HOME/.babydra/wallpaper.png"
 cp "$REPO_ROOT/libs/babydra-core/src/services/logo.png" "$HOME/.babydra/logo.png"
-[ -f "$REPO_ROOT/wallpaper.png" ] && base64 -w 0 "$REPO_ROOT/wallpaper.png" > "$HOME/.babydra/lock_wallpaper.bb" 2>/dev/null || true
+[ -f "$REPO_ROOT/wallpaper.png" ] && cp "$REPO_ROOT/wallpaper.png" "$HOME/.babydra/lock_wallpaper.png" 2>/dev/null || true
 
 sudo mkdir -p /usr/share/babydra
 sudo mkdir -p /var/lib/babydra
 sudo chmod 777 /var/lib/babydra
+sudo cp "$REPO_ROOT/wallpaper.png" /var/lib/babydra/lock_wallpaper.png 2>/dev/null && sudo chmod 666 /var/lib/babydra/lock_wallpaper.png 2>/dev/null || true
+[ -f "$HOME/.babydra/avatar.png" ] && sudo cp "$HOME/.babydra/avatar.png" /var/lib/babydra/avatar.png 2>/dev/null && sudo chmod 666 /var/lib/babydra/avatar.png 2>/dev/null || true
 
 sudo cp "$REPO_ROOT/libs/babydra-core/src/services/logo.png" /usr/share/babydra/babydra-preview.png
 sudo cp "$REPO_ROOT/libs/babydra-core/src/services/logo.png" /usr/share/babydra/babydra-settings.png

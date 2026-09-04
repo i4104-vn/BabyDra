@@ -15,4 +15,3 @@ gio = { workspace = true }
 
 # Systems dependencies
 libc = "0.2"
-base64 = { workspace = true }

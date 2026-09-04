@@ -55,7 +55,6 @@ chrono = "0.4"
 thiserror = "2.0"
 trash = "3.0"
 dirs = "5.0"
-base64 = "0.23.1"
 rayon = "1.10"
 tracing = "0.1"
 evdev = { version = "0.12", features = ["tokio"] }

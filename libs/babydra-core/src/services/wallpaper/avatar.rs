@@ -2,7 +2,6 @@
 //! Handles avatar storage, retrieval, and circular pixbuf masking.
 
 use crate::error::CoreResult;
-use base64::prelude::*;
 use std::path::{Path, PathBuf};
 
 /// Default system logo bytes bundled in babydra-core
@@ -10,8 +9,9 @@ pub const DEFAULT_LOGO_BYTES: &[u8] = include_bytes!("../logo.png");
 
 /// Sets the avatar image.
 /// - Crops and normalizes the image to 256x256 square.
-/// - Encodes the image bytes to Base64 and persists in `~/.babydra/avatar.bb`.
+/// - Saves the image as a standard PNG in `~/.babydra/avatar.png`.
 /// - Persists the avatar path in `babydra.conf` under `[lockscreen] avatar`.
+/// - Copies a world-readable copy to `/var/lib/babydra/avatar.png` so greetd can display it.
 pub fn set_avatar(path: &Path) -> CoreResult<()> {
     if !path.exists() {
         return Err(format!("Avatar file does not exist at: {:?}", path).into());
@@ -28,88 +28,77 @@ pub fn set_avatar(path: &Path) -> CoreResult<()> {
         raw_bytes
     };
 
-    let encoded = BASE64_STANDARD.encode(&png_bytes);
-    let user_dest = babydra_dir.join("avatar.bb");
-    std::fs::write(&user_dest, &encoded)?;
-
-    // Clean up legacy avatar.png if present
-    let _ = std::fs::remove_file(babydra_dir.join("avatar.png"));
+    let user_dest = babydra_dir.join("avatar.png");
+    std::fs::write(&user_dest, &png_bytes)?;
 
     let mut conf = crate::config::load_babydra_config();
-    conf.lockscreen.avatar = user_dest.to_str().unwrap_or_default().to_string();
+    conf.lockscreen.avatar = user_dest.to_string_lossy().to_string();
     crate::config::save_babydra_config(&conf);
 
-    // Save fallback for greetd which runs as another user.
+    // Save copy for greetd which runs as another user (greeter).
     use std::os::unix::fs::PermissionsExt;
     let shared_dir = PathBuf::from("/var/lib/babydra");
     if std::fs::create_dir_all(&shared_dir).is_ok() {
         let _ = std::fs::set_permissions(&shared_dir, std::fs::Permissions::from_mode(0o777));
     }
-    let public_dest = shared_dir.join("avatar_fallback.bb");
-    if std::fs::write(&public_dest, &encoded).is_ok() {
+    let public_dest = shared_dir.join("avatar.png");
+    if std::fs::write(&public_dest, &png_bytes).is_ok() {
         let _ = std::fs::set_permissions(&public_dest, std::fs::Permissions::from_mode(0o666));
     }
 
     Ok(())
 }
 
-/// Retrieves the path to the currently active avatar file (.bb or logo).
+/// Retrieves the path to the currently active avatar file.
 pub fn get_avatar_path() -> Option<PathBuf> {
+    let is_readable = |p: &Path| -> bool {
+        std::fs::File::open(p).is_ok()
+    };
+
+    let conf = crate::config::load_babydra_config();
+    if !conf.lockscreen.avatar.is_empty() {
+        let path = PathBuf::from(&conf.lockscreen.avatar);
+        if is_readable(&path) {
+            return Some(path);
+        }
+    }
+
     if let Ok(home) = std::env::var("HOME") {
-        let user_bb = PathBuf::from(&home).join(".babydra/avatar.bb");
-        if user_bb.exists() && user_bb.is_file() {
-            return Some(user_bb);
+        let user_avatar = PathBuf::from(&home).join(".babydra/avatar.png");
+        if is_readable(&user_avatar) {
+            return Some(user_avatar);
         }
         let user_logo = PathBuf::from(&home).join(".babydra/logo.png");
-        if user_logo.exists() && user_logo.is_file() {
+        if is_readable(&user_logo) {
             return Some(user_logo);
         }
     }
 
-    let fallback = PathBuf::from("/var/lib/babydra/avatar_fallback.bb");
-    if fallback.exists() && fallback.is_file() {
-        return Some(fallback);
+    // Shared path readable by greetd (which runs as greeter user)
+    let shared_avatar = PathBuf::from("/var/lib/babydra/avatar.png");
+    if is_readable(&shared_avatar) {
+        return Some(shared_avatar);
+    }
+
+    let shared_logo = PathBuf::from("/var/lib/babydra/logo.png");
+    if is_readable(&shared_logo) {
+        return Some(shared_logo);
+    }
+
+    let sys_logo = PathBuf::from("/usr/share/babydra/logo.png");
+    if is_readable(&sys_logo) {
+        return Some(sys_logo);
     }
 
     None
 }
 
-/// Retrieves the active avatar as raw image bytes decoded from Base64 `.bb`.
-/// Falls back to the freshest copy across the user home and the shared
-/// `/var/lib/babydra` store, then the user's logo, then the embedded logo.
+/// Retrieves the active avatar as raw image bytes.
+/// Resolves path via get_avatar_path(), falls back to embedded logo bytes.
 pub fn get_avatar_bytes() -> Option<Vec<u8>> {
-    crate::config::invalidate_cache();
-    let conf = crate::config::load_babydra_config();
-
-    // Explicit user selection wins when it exists
-    if !conf.lockscreen.avatar.is_empty() {
-        let path = PathBuf::from(&conf.lockscreen.avatar);
-        if path.is_file() {
-            if let Some(bytes) = super::greeter::read_image_bytes(&path) {
-                if !bytes.is_empty() {
-                    return Some(bytes);
-                }
-            }
-        }
-    }
-
-    // Otherwise use the freshest copy across the user home and shared store
-    if let Some(path) = super::greeter::newest_existing(vec![
-        dirs::home_dir().map(|h| h.join(".babydra").join("avatar.bb")),
-        Some(PathBuf::from("/var/lib/babydra/avatar_fallback.bb")),
-    ]) {
-        if let Some(bytes) = super::greeter::read_image_bytes(&path) {
+    if let Some(path) = get_avatar_path() {
+        if let Ok(bytes) = std::fs::read(path) {
             if !bytes.is_empty() {
-                return Some(bytes);
-            }
-        }
-    }
-
-    // Fallback directly to logo if no avatar.bb is configured or found
-    if let Some(home) = dirs::home_dir() {
-        let logo_path = home.join(".babydra/logo.png");
-        if logo_path.exists() && logo_path.is_file() {
-            if let Ok(bytes) = std::fs::read(&logo_path) {
                 return Some(bytes);
             }
         }

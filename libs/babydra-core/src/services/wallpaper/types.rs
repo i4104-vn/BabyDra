@@ -1,6 +1,5 @@
 //! Shared wallpaper types and traits for all crates.
 
-use std::path::PathBuf;
 
 /// Wallpaper mode: static image or live (video/GIF).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
