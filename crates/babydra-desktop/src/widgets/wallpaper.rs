@@ -286,7 +286,7 @@ pub fn create_wallpaper_w() -> gtk4::Overlay {
     let (init_w, init_h) = get_monitor_res(&drawing_area);
     let init_path = babydra_core::wallpaper::get_wallpaper();
     let init_mode = babydra_core::wallpaper::get_wallpaper_mode();
-    *current_wp_mode.borrow_mut() = init_mode.clone();
+    *current_wp_mode.borrow_mut() = init_mode;
 
     if let Some(ref path) = init_path {
         *current_wp_path.borrow_mut() = Some(path.clone());
@@ -319,7 +319,7 @@ pub fn create_wallpaper_w() -> gtk4::Overlay {
         let p = progress_draw.get();
 
         // 1. Fallback dark background
-        let _ = cr.set_source_rgb(0.08, 0.09, 0.11);
+        cr.set_source_rgb(0.08, 0.09, 0.11);
         let _ = cr.paint();
 
         // 2. Base layer: previous wallpaper
@@ -427,8 +427,8 @@ pub fn create_wallpaper_w() -> gtk4::Overlay {
 
             if path_changed || mode_changed {
                 let prev_path = cur_path_c.borrow().clone();
-                let prev_mode = cur_mode_c.borrow().clone();
-                *cur_mode_c.borrow_mut() = new_mode.clone();
+                let prev_mode = *cur_mode_c.borrow();
+                *cur_mode_c.borrow_mut() = new_mode;
 
                 let (mon_w, mon_h) = get_monitor_res(&da_c);
 
@@ -480,38 +480,22 @@ pub fn create_wallpaper_w() -> gtk4::Overlay {
                     *cur_path_c.borrow_mut() = Some(path.clone());
 
                     // Helper to launch or restart the water-drop ripple animation
-                    let trigger_tick_animation = |da: &gtk4::DrawingArea,
-                                                  prog: &Rc<Cell<f64>>,
-                                                  anim: &Rc<Cell<bool>>,
-                                                  start_time: &Rc<Cell<Option<i64>>>,
-                                                  old_surf: &Rc<
-                        RefCell<Option<cairo::ImageSurface>>,
-                    >,
-                                                  pending_live: &Rc<
-                        RefCell<Option<(PathBuf, babydra_core::wallpaper::WallpaperMode)>>,
-                    >,
-                                                  live_pic: &gtk4::Picture,
-                                                  active_media: &Rc<
-                        RefCell<Option<gtk4::MediaFile>>,
-                    >,
-                                                  gif_src: &Rc<
-                        RefCell<Option<glib::SourceId>>,
-                    >| {
-                        prog.set(0.0);
-                        start_time.set(None);
-                        if !anim.get() {
-                            anim.set(true);
-                            let da_tick = da.clone();
-                            let prog_tick = prog.clone();
-                            let anim_tick = anim.clone();
-                            let old_surf_tick = old_surf.clone();
-                            let start_time_tick = start_time.clone();
-                            let pending_live_tick = pending_live.clone();
-                            let live_pic_tick = live_pic.clone();
-                            let active_media_tick = active_media.clone();
-                            let gif_source_tick = gif_src.clone();
+                    let trigger_tick_animation = || {
+                        prog_c.set(0.0);
+                        start_time_c.set(None);
+                        if !anim_c.get() {
+                            anim_c.set(true);
+                            let da_tick = da_c.clone();
+                            let prog_tick = prog_c.clone();
+                            let anim_tick = anim_c.clone();
+                            let old_surf_tick = old_surf_c.clone();
+                            let start_time_tick = start_time_c.clone();
+                            let pending_live_tick = pending_live_c.clone();
+                            let live_pic_tick = live_pic_c.clone();
+                            let active_media_tick = active_media_c.clone();
+                            let gif_source_tick = gif_source_c.clone();
 
-                            da.add_tick_callback(move |_, clock| {
+                            da_c.add_tick_callback(move |_, clock| {
                                 let now = clock.frame_time();
                                 if start_time_tick.get().is_none() {
                                     start_time_tick.set(Some(now));
@@ -556,21 +540,11 @@ pub fn create_wallpaper_w() -> gtk4::Overlay {
 
                         if let Some(new_surf) = target_surf {
                             *cur_surf_c.borrow_mut() = Some(new_surf);
-                            *pending_live_c.borrow_mut() = Some((path.clone(), new_mode.clone()));
+                            *pending_live_c.borrow_mut() = Some((path.clone(), new_mode));
 
                             if let Some(prev) = prev_surf {
                                 *old_surf_c.borrow_mut() = Some(prev);
-                                trigger_tick_animation(
-                                    &da_c,
-                                    &prog_c,
-                                    &anim_c,
-                                    &start_time_c,
-                                    &old_surf_c,
-                                    &pending_live_c,
-                                    &live_pic_c,
-                                    &active_media_c,
-                                    &gif_source_c,
-                                );
+                                trigger_tick_animation();
                             } else {
                                 // No previous surface: immediately start playing live wallpaper
                                 prog_c.set(1.0);
@@ -597,17 +571,7 @@ pub fn create_wallpaper_w() -> gtk4::Overlay {
 
                             if let Some(prev) = prev_surf {
                                 *old_surf_c.borrow_mut() = Some(prev);
-                                trigger_tick_animation(
-                                    &da_c,
-                                    &prog_c,
-                                    &anim_c,
-                                    &start_time_c,
-                                    &old_surf_c,
-                                    &pending_live_c,
-                                    &live_pic_c,
-                                    &active_media_c,
-                                    &gif_source_c,
-                                );
+                                trigger_tick_animation();
                             } else {
                                 prog_c.set(1.0);
                                 da_c.queue_draw();
