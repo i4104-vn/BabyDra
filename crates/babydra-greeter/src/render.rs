@@ -60,25 +60,23 @@ pub fn build_greeter_ui(app: &gtk4::Application) -> GreeterWidgets {
     info!(target: "babydra-greeter", "Triggering CSS theme loading");
     theme::load_css();
 
-    // Background wallpaper resolved via Base64/bytes with fallback
+    // Background wallpaper embedded directly from build
+    const GREETER_WALLPAPER_BYTES: &[u8] = include_bytes!("assets/wallpaper.jpg");
     let bg_picture = gtk4::Picture::new();
-    if let Some(bytes) = babydra_core::get_greeter_wp_bytes() {
-        let stream = gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(&bytes));
+    let gbytes = gtk4::glib::Bytes::from_static(GREETER_WALLPAPER_BYTES);
+    if let Ok(texture) = gtk4::gdk::Texture::from_bytes(&gbytes) {
+        bg_picture.set_paintable(Some(&texture));
+        info!(target: "babydra-greeter", "Asset loaded: embedded greeter wallpaper texture");
+    } else {
+        let stream = gtk4::gio::MemoryInputStream::from_bytes(&gbytes);
         if let Ok(pixbuf) =
             gtk4::gdk_pixbuf::Pixbuf::from_stream(&stream, gtk4::gio::Cancellable::NONE)
         {
             bg_picture.set_pixbuf(Some(&pixbuf));
-            info!(target: "babydra-greeter", "Asset loaded: greeter wallpaper decoded from Base64 .bb/bytes");
+            info!(target: "babydra-greeter", "Asset loaded: embedded greeter wallpaper pixbuf");
         } else {
-            info!(target: "babydra-greeter", "Asset warning: failed to decode pixbuf from greeter wallpaper bytes");
+            info!(target: "babydra-greeter", "Asset warning: failed to decode embedded greeter wallpaper");
         }
-    } else if let Some(path) = babydra_core::get_greeter_wp() {
-        if path.extension().and_then(|e| e.to_str()) != Some("bb") {
-            bg_picture.set_filename(Some(&path));
-            info!(target: "babydra-greeter", "Asset loaded: greeter wallpaper from {:?}", path);
-        }
-    } else {
-        info!(target: "babydra-greeter", "Asset warning: no greeter wallpaper resolved");
     }
 
     let overlay = Overlay::new();
