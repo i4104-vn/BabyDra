@@ -228,5 +228,10 @@
   "settings.hostname_empty": "Hostname cannot be empty",
   "settings.change_name_success": "Display name updated successfully",
   "settings.change_hostname_success": "Hostname updated successfully",
-  "settings.change_password_success": "Password changed successfully"
+  "settings.change_password_success": "Password changed successfully",
+  "settings.section_device_account": "DEVICE & ACCOUNT",
+  "settings.section_hardware": "HARDWARE SPECIFICATIONS",
+  "settings.device_hostname": "Computer Name (Hostname)",
+  "settings.account_password": "Account Password",
+  "settings.password_protected": "Password protected"
 }

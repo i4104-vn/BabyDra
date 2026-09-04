@@ -228,5 +228,10 @@
   "settings.hostname_empty": "Hostname không được để trống",
   "settings.change_name_success": "Đã cập nhật tên hiển thị thành công",
   "settings.change_hostname_success": "Đã cập nhật hostname thành công",
-  "settings.change_password_success": "Đã đổi mật khẩu thành công"
+  "settings.change_password_success": "Đã đổi mật khẩu thành công",
+  "settings.section_device_account": "THIẾT BỊ & TÀI KHOẢN",
+  "settings.section_hardware": "THÔNG SỐ PHẦN CỨNG",
+  "settings.device_hostname": "Tên máy tính (Hostname)",
+  "settings.account_password": "Mật khẩu tài khoản",
+  "settings.password_protected": "Được bảo vệ bằng mật khẩu"
 }
