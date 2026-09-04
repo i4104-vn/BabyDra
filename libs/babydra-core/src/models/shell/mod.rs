@@ -31,7 +31,7 @@ pub use desktop_state::{
 pub use exif::ExifData;
 pub use island_state::IslandState;
 pub use monitor::CpuTime;
-pub use network::{NetSpeed, NetStats};
+pub use network::{ActiveNetworkInfo, ActiveNetworkType, NetSpeed, NetStats};
 pub use notification::{ActiveNotification, NotificationMsg};
 pub use power::PerformanceProfile;
 pub use shell_config::ShellConfig;

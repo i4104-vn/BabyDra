@@ -20,6 +20,7 @@
   "panel.gpu_usage": "Sử dụng GPU",
   "panel.logo_tooltip": "Chuột trái: Mở Launcher\nChuột phải: Hiển thị Desktop",
   "control.network": "Mạng",
+  "control.ethernet": "Mạng có dây (Ethernet)",
   "control.connected": "Đã kết nối",
   "control.bluetooth": "Bluetooth",
   "control.not_connected": "Chưa kết nối",

@@ -20,6 +20,7 @@
   "panel.gpu_usage": "GPU Usage",
   "panel.logo_tooltip": "Left-click: Open Launcher\nRight-click: Show Desktop",
   "control.network": "Network",
+  "control.ethernet": "Wired (Ethernet)",
   "control.connected": "Connected",
   "control.bluetooth": "Bluetooth",
   "control.not_connected": "Not Connected",

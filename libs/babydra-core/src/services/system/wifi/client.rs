@@ -28,6 +28,37 @@ pub trait NetworkManager {
         device: &ObjectPath<'_>,
         specific_object: &ObjectPath<'_>,
     ) -> zbus::Result<(OwnedObjectPath, OwnedObjectPath)>;
+
+    #[zbus(property)]
+    fn primary_connection(&self) -> zbus::Result<OwnedObjectPath>;
+
+    #[zbus(property)]
+    fn primary_connection_type(&self) -> zbus::Result<String>;
+
+    #[zbus(property)]
+    fn active_connections(&self) -> zbus::Result<Vec<OwnedObjectPath>>;
+}
+
+#[zbus::proxy(
+    gen_blocking = true,
+    interface = "org.freedesktop.NetworkManager.Connection.Active",
+    default_service = "org.freedesktop.NetworkManager"
+)]
+pub trait ActiveConnection {
+    #[zbus(property)]
+    fn id(&self) -> zbus::Result<String>;
+
+    #[zbus(property)]
+    fn type_(&self) -> zbus::Result<String>;
+
+    #[zbus(property)]
+    fn state(&self) -> zbus::Result<u32>;
+
+    #[zbus(property)]
+    fn default(&self) -> zbus::Result<bool>;
+
+    #[zbus(property)]
+    fn devices(&self) -> zbus::Result<Vec<OwnedObjectPath>>;
 }
 
 #[zbus::proxy(
@@ -40,6 +71,8 @@ pub trait Device {
     fn device_type(&self) -> zbus::Result<u32>;
     #[zbus(property)]
     fn interface(&self) -> zbus::Result<String>;
+    #[zbus(property)]
+    fn state(&self) -> zbus::Result<u32>;
 }
 
 #[zbus::proxy(

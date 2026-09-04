@@ -41,6 +41,9 @@ pub use services::system::display::{
     apply_display_configs, apply_saved_displays, get_displays, save_displays,
 };
 pub use services::system::monitor::{self, get_formatted_uptime};
+pub use services::system::network::{
+    self, get_active_network_info, get_local_ip, get_network_speed,
+};
 pub use services::system::power::{
     self, apply_saved_profile, get_current_profile, poweroff, reboot, set_perf_profile,
     set_perf_profile_pw, suspend,
