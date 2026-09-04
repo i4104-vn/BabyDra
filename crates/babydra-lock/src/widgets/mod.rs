@@ -6,6 +6,8 @@ use babydra_core::verify_password;
 use gtk4::prelude::*;
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
 
+use crate::widgets::render::PrimaryCard;
+
 /// Spawns a lock window assigned to a specific monitor.
 pub fn create_lock_window(
     app: &gtk4::Application,
@@ -36,7 +38,6 @@ pub fn create_lock_window(
         0,
         None,
     );
-    // Ensure the window is fully opaque — prevents Wayland compositor from rendering it transparent
     window.set_opacity(1.0);
 
     if let Some(m) = monitor {
@@ -44,7 +45,6 @@ pub fn create_lock_window(
     }
 
     window.add_css_class("lock-window");
-
     window.connect_close_request(|_| glib::Propagation::Stop);
 
     let overlay = gtk4::Overlay::new();
@@ -65,7 +65,7 @@ pub fn create_lock_window(
     center_box.set_vexpand(true);
 
     if is_primary {
-        let (card_box, entry, status_label, clock_label, date_label) = render::build_primary_card();
+        let PrimaryCard { card_box, entry, status_label, clock_label, date_label } = render::build_primary_card();
 
         let update_clock = {
             let clock_label = clock_label.clone();
@@ -82,19 +82,19 @@ pub fn create_lock_window(
 
         center_box.append(&card_box);
 
+        let username = std::env::var("USER").unwrap_or_else(|_| "user".to_string());
         let entry_clone = entry.clone();
         let status_label_clone = status_label.clone();
         let card_clone = card_box.clone();
-        let username_clone = std::env::var("USER").unwrap_or_else(|_| "i4104".to_string());
+        let app_clone = app.clone();
 
         entry.connect_activate(move |_| {
             let password = entry_clone.text().to_string();
             entry_clone.set_text("");
 
-            if verify_password(&username_clone, &password) {
-                // Keep the greeter's preselected user fresh across reboots
-                babydra_core::save_last_user(&username_clone);
-                std::process::exit(0);
+            if verify_password(&username, &password) {
+                babydra_core::save_last_user(&username);
+                app_clone.quit();
             } else {
                 status_label_clone.set_text(&babydra_core::i18n::trans("lock.status_incorrect"));
                 status_label_clone.add_css_class("error");

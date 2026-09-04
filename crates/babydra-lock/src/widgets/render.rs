@@ -34,25 +34,25 @@ pub fn build_clock_labels() -> (gtk4::Label, gtk4::Label) {
     (clock_label, date_label)
 }
 
+/// Primary auth card components.
+pub struct PrimaryCard {
+    pub card_box: gtk4::Box,
+    pub entry: gtk4::PasswordEntry,
+    pub status_label: gtk4::Label,
+    pub clock_label: gtk4::Label,
+    pub date_label: gtk4::Label,
+}
+
 /// Builds the primary auth card: clock, avatar, username, password entry and status label.
-pub fn build_primary_card() -> (
-    gtk4::Box,
-    gtk4::Entry,
-    gtk4::Label,
-    gtk4::Label,
-    gtk4::Label,
-) {
-    let card_box =
-        babydra_ui_kit::components::create_css_card(gtk4::Orientation::Vertical, 10, "lock-card");
+pub fn build_primary_card() -> PrimaryCard {
+    let card_box = babydra_ui_kit::components::create_css_card(gtk4::Orientation::Vertical, 10, "lock-card");
     card_box.set_valign(gtk4::Align::Center);
     card_box.set_halign(gtk4::Align::Center);
 
     let (clock_label, date_label) = build_clock_labels();
 
     let avatar_widget: gtk4::Widget = if let Some(bytes) = babydra_core::get_avatar_bytes() {
-        if let Some(img) =
-            babydra_ui_kit::ui::image::create_circle_avatar(&bytes, 110, Some("lock-avatar"))
-        {
+        if let Some(img) = babydra_ui_kit::ui::image::create_circle_avatar(&bytes, 110, Some("lock-avatar")) {
             img
         } else {
             let icon = babydra_ui_kit::ui::icon::get_fallback_icon("user-info", "user-info");
@@ -70,17 +70,14 @@ pub fn build_primary_card() -> (
         avatar_icon.upcast()
     };
 
-    let username = std::env::var("USER").unwrap_or_else(|_| "i4104".to_string());
+    let username = std::env::var("USER").unwrap_or_else(|_| "user".to_string());
     let user_label = gtk4::Label::new(Some(&username));
     user_label.add_css_class("lock-username");
 
-    let entry = gtk4::Entry::new();
-    entry.set_property("im-module", "none");
-    entry.set_visibility(false);
+    let entry = gtk4::PasswordEntry::new();
     entry.set_placeholder_text(Some(&babydra_core::i18n::trans("lock.placeholder")));
     entry.add_css_class("lock-input");
     entry.set_halign(gtk4::Align::Center);
-    entry.set_max_length(100);
 
     let status_label = gtk4::Label::new(Some(&babydra_core::i18n::trans("lock.status")));
     status_label.add_css_class("lock-status");
@@ -92,5 +89,11 @@ pub fn build_primary_card() -> (
     card_box.append(&entry);
     card_box.append(&status_label);
 
-    (card_box, entry, status_label, clock_label, date_label)
+    PrimaryCard {
+        card_box,
+        entry,
+        status_label,
+        clock_label,
+        date_label,
+    }
 }
