@@ -82,10 +82,15 @@ pub fn get_or_create_first_frame(path: &Path) -> PathBuf {
         ])
         .arg(path)
         .args([
-            "-update",
-            "1",
+            "-an",
+            "-sn",
+            "-dn",
+            "-threads",
+            "2",
             "-vframes",
             "1",
+            "-q:v",
+            "2",
         ])
         .arg(&frame_path)
         .stdout(std::process::Stdio::null())
@@ -95,6 +100,12 @@ pub fn get_or_create_first_frame(path: &Path) -> PathBuf {
     if frame_path.exists() {
         frame_path
     } else {
-        path.to_path_buf()
+        let thumb_name = format!("{}_{}.jpg", file_stem, meta_len);
+        let thumb_path = thumb_dir.join(thumb_name);
+        if thumb_path.exists() {
+            thumb_path
+        } else {
+            path.to_path_buf()
+        }
     }
 }
