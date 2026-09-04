@@ -124,9 +124,21 @@ pub fn rebuild_grid_icons(
         let rubberband_rc = rubberband.clone();
 
         right_click.connect_pressed(move |_, _, x, y| {
-            state_rc
-                .borrow_mut()
-                .select(entry_rc.path.clone(), false, false);
+            let targets: Vec<std::path::PathBuf> = {
+                let mut s = state_rc.borrow_mut();
+                if !s.is_selected(&entry_rc.path) {
+                    s.select(entry_rc.path.clone(), false, false);
+                    vec![entry_rc.path.clone()]
+                } else {
+                    let mut list = vec![entry_rc.path.clone()];
+                    for p in &s.selected_paths {
+                        if p != &entry_rc.path {
+                            list.push(p.clone());
+                        }
+                    }
+                    list
+                }
+            };
             update_icon_sel(&fixed_rc, &state_rc, &rubberband_rc);
 
             let fixed_ref = fixed_rc.clone();
@@ -142,7 +154,7 @@ pub fn rebuild_grid_icons(
                 fixed_rc.upcast_ref::<gtk4::Widget>(),
                 pos_x as f64 + x,
                 pos_y as f64 + y,
-                vec![entry_rc.path.clone()],
+                targets,
                 desktop_dir,
                 Rc::new(move |_| refresh_cb()),
                 parent_win_rc.upcast_ref::<gtk4::Window>(),

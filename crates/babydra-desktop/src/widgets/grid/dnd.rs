@@ -5,12 +5,12 @@ use babydra_core::load_cropped_square;
 use gtk4::gdk::FileList;
 use gtk4::prelude::*;
 use std::cell::RefCell;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 /// Creates a DragSource on an icon widget for dragging files to other grid slots, folders, or external apps.
 pub fn create_icon_drag(
-    path: &PathBuf,
+    path: &Path,
     icon_name: &str,
     state: Rc<RefCell<DesktopState>>,
     is_dragging: Rc<std::cell::Cell<bool>>,
@@ -18,7 +18,7 @@ pub fn create_icon_drag(
     let drag_source = gtk4::DragSource::new();
     drag_source.set_actions(gtk4::gdk::DragAction::MOVE | gtk4::gdk::DragAction::COPY);
 
-    let path_clone = path.clone();
+    let path_clone = path.to_path_buf();
     let state_clone = state.clone();
 
     let is_drag_begin = is_dragging.clone();
@@ -28,7 +28,10 @@ pub fn create_icon_drag(
 
     let is_drag_end = is_dragging.clone();
     drag_source.connect_drag_end(move |_, _, _| {
-        is_drag_end.set(false);
+        let drag_flag = is_drag_end.clone();
+        glib::timeout_add_local_once(std::time::Duration::from_millis(150), move || {
+            drag_flag.set(false);
+        });
     });
 
     drag_source.connect_prepare(move |_, _, _| {
@@ -49,7 +52,7 @@ pub fn create_icon_drag(
 
         let gio_files: Vec<gtk4::gio::File> = targets
             .iter()
-            .map(|p| gtk4::gio::File::for_path(p))
+            .map(gtk4::gio::File::for_path)
             .collect();
 
         let file_list = FileList::from_array(&gio_files);
@@ -190,6 +193,27 @@ pub fn create_desktop_drop(
                 let offset_x = base_x - anchor_current_pos.0;
                 let offset_y = base_y - anchor_current_pos.1;
 
+                let mut move_batch = Vec::new();
+                for src in &internal_sources {
+                    if let Some(file_name) = src.file_name().and_then(|n| n.to_str()) {
+                        let cur_pos = current_positions
+                            .get(file_name)
+                            .copied()
+                            .unwrap_or(anchor_current_pos);
+                        let new_x = cur_pos.0 + offset_x;
+                        let new_y = cur_pos.1 + offset_y;
+                        let (snapped_x, snapped_y) = snap_to_grid(
+                            new_x,
+                            new_y,
+                            cell_w,
+                            cell_h,
+                            crate::state::DEFAULT_MARGIN_X,
+                            crate::state::DEFAULT_MARGIN_Y,
+                        );
+                        move_batch.push((file_name.to_string(), snapped_x, snapped_y));
+                    }
+                }
+
                 if was_auto {
                     let mut batch = Vec::new();
                     for (fname, pos) in &current_positions {
@@ -198,22 +222,16 @@ pub fn create_desktop_drop(
                     babydra_core::config::desktop_layout::set_positions(batch);
                 }
 
-                for src in internal_sources {
-                    if let Some(file_name) = src.file_name().and_then(|n| n.to_str()) {
-                        let cur_pos = current_positions
-                            .get(file_name)
-                            .copied()
-                            .unwrap_or(anchor_current_pos);
-                        let new_x = cur_pos.0 + offset_x;
-                        let new_y = cur_pos.1 + offset_y;
+                babydra_core::config::desktop_layout::set_positions(move_batch);
 
-                        state_drop.borrow_mut().set_icon_position(
-                            file_name.to_string(),
-                            new_x,
-                            new_y,
-                        );
-                    }
+                let mut s_mut = state_drop.borrow_mut();
+                if was_auto {
+                    s_mut.config.auto_arrange = false;
+                    s_mut.config.sort_by = "none".to_string();
+                    babydra_core::config::save_desktop_config(&s_mut.config);
                 }
+                drop(s_mut);
+
                 ref_pos_cb();
             }
 
@@ -239,27 +257,25 @@ pub fn create_desktop_drop(
                     for src in external_sources {
                         if let Some(filename) = src.file_name().map(|n| n.to_os_string()) {
                             let dest = desktop_dir.join(&filename);
-                            if src != dest {
-                                if babydra_core::copy_path(src, dest.clone()).await.is_ok() {
-                                    #[cfg(unix)]
-                                    {
-                                        if dest.extension().is_some_and(|e| e == "desktop") {
-                                            use std::os::unix::fs::PermissionsExt;
-                                            if let Ok(metadata) = std::fs::metadata(&dest) {
-                                                let mut perms = metadata.permissions();
-                                                perms.set_mode(perms.mode() | 0o755);
-                                                let _ = std::fs::set_permissions(&dest, perms);
-                                            }
+                            if src != dest && babydra_core::copy_path(src, dest.clone()).await.is_ok() {
+                                #[cfg(unix)]
+                                {
+                                    if dest.extension().is_some_and(|e| e == "desktop") {
+                                        use std::os::unix::fs::PermissionsExt;
+                                        if let Ok(metadata) = std::fs::metadata(&dest) {
+                                            let mut perms = metadata.permissions();
+                                            perms.set_mode(perms.mode() | 0o755);
+                                            let _ = std::fs::set_permissions(&dest, perms);
                                         }
                                     }
-                                    if let Some(name_str) = filename.to_str() {
-                                        state_inner.borrow_mut().set_icon_position(
-                                            name_str.to_string(),
-                                            base_x,
-                                            base_y,
-                                        );
-                                        base_y += cell_h;
-                                    }
+                                }
+                                if let Some(name_str) = filename.to_str() {
+                                    state_inner.borrow_mut().set_icon_position(
+                                        name_str.to_string(),
+                                        base_x,
+                                        base_y,
+                                    );
+                                    base_y += cell_h;
                                 }
                             }
                         }

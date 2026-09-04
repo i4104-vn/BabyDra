@@ -15,7 +15,7 @@ pub fn build_desktop_window(app: &gtk4::Application) -> gtk4::ApplicationWindow 
     init_layer_window(
         &window,
         Layer::Background,
-        KeyboardMode::None,
+        KeyboardMode::OnDemand,
         -1,
         &[
             (Edge::Top, true),

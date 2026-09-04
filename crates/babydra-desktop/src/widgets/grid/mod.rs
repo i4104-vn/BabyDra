@@ -132,6 +132,7 @@ pub fn create_desktop_grid(
 
     // Keyboard shortcuts
     keyboard::wire_keyboard(
+        parent_window,
         &fixed,
         state.clone(),
         rubberband.clone(),
