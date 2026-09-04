@@ -23,6 +23,90 @@ pub fn render_network_list(
         lb
     };
 
+    let active_net = babydra_core::services::system::network::get_active_network_info();
+    let is_ethernet_active = active_net.is_connected
+        && active_net.network_type == babydra_core::models::ActiveNetworkType::Ethernet;
+
+    if is_ethernet_active {
+        let header_lbl =
+            gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.ethernet_title")));
+        header_lbl.add_css_class("settings-row-desc");
+        header_lbl.set_halign(gtk4::Align::Start);
+        header_lbl.set_margin_start(12);
+        header_lbl.set_margin_top(12);
+        header_lbl.set_margin_bottom(4);
+        container.append(&header_lbl);
+
+        let lb = gtk4::ListBox::new();
+        lb.set_selection_mode(gtk4::SelectionMode::None);
+        lb.add_css_class("settings-card");
+
+        let row = gtk4::ListBoxRow::new();
+        row.add_css_class("settings-card-row");
+
+        let hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 14);
+        hbox.set_margin_top(4);
+        hbox.set_margin_bottom(4);
+        hbox.set_margin_start(8);
+        hbox.set_margin_end(8);
+
+        let icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+        icon_badge.add_css_class("blue-icon-badge-sm");
+        icon_badge.set_valign(gtk4::Align::Center);
+        icon_badge.set_halign(gtk4::Align::Start);
+        icon_badge.set_hexpand(false);
+
+        let eth_icon = babydra_ui_kit::ui::icon::get_icon_colored("ethernet", 18, "#3B82F6");
+        eth_icon.set_valign(gtk4::Align::Center);
+        eth_icon.set_halign(gtk4::Align::Center);
+        eth_icon.set_vexpand(true);
+        icon_badge.append(&eth_icon);
+
+        let name_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
+        name_box.set_valign(gtk4::Align::Center);
+        name_box.set_halign(gtk4::Align::Start);
+        name_box.set_hexpand(true);
+
+        let ssid_lbl = gtk4::Label::new(Some(&active_net.name));
+        ssid_lbl.add_css_class("settings-row-title");
+        ssid_lbl.set_halign(gtk4::Align::Start);
+        name_box.append(&ssid_lbl);
+
+        let sub_text = if !active_net.interface.is_empty() {
+            format!(
+                "{} • IP: {} ({})",
+                babydra_core::i18n::trans("settings.ethernet_connected"),
+                active_net.ip_address,
+                active_net.interface
+            )
+        } else {
+            format!(
+                "{} • IP: {}",
+                babydra_core::i18n::trans("settings.ethernet_connected"),
+                active_net.ip_address
+            )
+        };
+        let sub_lbl = gtk4::Label::new(Some(&sub_text));
+        sub_lbl.add_css_class("settings-row-desc");
+        sub_lbl.set_halign(gtk4::Align::Start);
+        name_box.append(&sub_lbl);
+
+        let check_icon = babydra_ui_kit::ui::icon::get_icon("check", 18);
+        check_icon.set_pixel_size(18);
+        check_icon.set_valign(gtk4::Align::Center);
+        check_icon.add_css_class("connected-text");
+        check_icon
+            .set_tooltip_text(Some(&babydra_core::i18n::trans("settings.ethernet_connected")));
+
+        hbox.append(&icon_badge);
+        hbox.append(&name_box);
+        hbox.append(&check_icon);
+
+        row.set_child(Some(&hbox));
+        lb.append(&row);
+        container.append(&lb);
+    }
+
     if !state_ref.enabled {
         container.append(&create_placeholder(
             crate::widgets::helpers::create_placeholder(
