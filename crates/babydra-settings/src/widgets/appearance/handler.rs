@@ -438,7 +438,13 @@ pub fn setup_appearance(
                     let pic_clone = pic.clone();
                     
                     crate::widgets::helpers::spawn_async_task(
-                        move || babydra_core::wallpaper::get_or_create_thumbnail(&wp_path_clone),
+                        move || {
+                            let thumb = babydra_core::wallpaper::get_or_create_thumbnail(&wp_path_clone);
+                            if babydra_core::wallpaper::is_video_file(&wp_path_clone) {
+                                let _ = babydra_core::wallpaper::get_or_create_first_frame(&wp_path_clone);
+                            }
+                            thumb
+                        },
                         move |thumb_path| {
                             if !thumb_path.as_os_str().is_empty() {
                                 let file = gtk4::gio::File::for_path(&thumb_path);
