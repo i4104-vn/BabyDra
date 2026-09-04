@@ -66,77 +66,13 @@ pub fn create_lock_window(
 
     if is_primary {
         let PrimaryCard { card_box, entry, status_label, clock_label, date_label } = render::build_primary_card();
-
-        let update_clock = {
-            let clock_label = clock_label.clone();
-            let date_label = date_label.clone();
-            move || {
-                let (time, date) = babydra_core::format_clock_date("lock.date_format");
-                clock_label.set_text(&time);
-                date_label.set_text(&date);
-                glib::ControlFlow::Continue
-            }
-        };
-        update_clock();
-        glib::timeout_add_local(std::time::Duration::from_secs(1), update_clock);
-
+        setup_clock_timer(&clock_label, &date_label);
+        setup_auth_handler(app, &entry, &status_label, &card_box);
+        setup_focus_management(&window, &entry);
         center_box.append(&card_box);
-
-        let username = std::env::var("USER").unwrap_or_else(|_| "user".to_string());
-        let entry_clone = entry.clone();
-        let status_label_clone = status_label.clone();
-        let card_clone = card_box.clone();
-        let app_clone = app.clone();
-
-        entry.connect_activate(move |_| {
-            let password = entry_clone.text().to_string();
-            entry_clone.set_text("");
-
-            if verify_password(&username, &password) {
-                babydra_core::save_last_user(&username);
-                app_clone.quit();
-            } else {
-                status_label_clone.set_text(&babydra_core::i18n::trans("lock.status_incorrect"));
-                status_label_clone.add_css_class("error");
-                card_clone.add_css_class("shake-error");
-
-                let status_lbl = status_label_clone.clone();
-                let card_box_ref = card_clone.clone();
-                glib::timeout_add_local_once(std::time::Duration::from_millis(1600), move || {
-                    status_lbl.set_text(&babydra_core::i18n::trans("lock.status"));
-                    status_lbl.remove_css_class("error");
-                    card_box_ref.remove_css_class("shake-error");
-                });
-            }
-        });
-
-        let entry_focus = entry.clone();
-        glib::timeout_add_local_once(std::time::Duration::from_millis(100), move || {
-            entry_focus.grab_focus();
-        });
-
-        let entry_click = entry.clone();
-        let click_gesture = gtk4::GestureClick::new();
-        click_gesture.connect_pressed(move |_, _, _, _| {
-            entry_click.grab_focus();
-        });
-        window.add_controller(click_gesture);
     } else {
         let (clock_label, date_label) = render::build_clock_labels();
-
-        let update_clock = {
-            let clock_label = clock_label.clone();
-            let date_label = date_label.clone();
-            move || {
-                let (time, date) = babydra_core::format_clock_date("lock.date_format");
-                clock_label.set_text(&time);
-                date_label.set_text(&date);
-                glib::ControlFlow::Continue
-            }
-        };
-        update_clock();
-        glib::timeout_add_local(std::time::Duration::from_secs(1), update_clock);
-
+        setup_clock_timer(&clock_label, &date_label);
         center_box.append(&clock_label);
         center_box.append(&date_label);
     }
@@ -144,4 +80,71 @@ pub fn create_lock_window(
     overlay.add_overlay(&center_box);
     window.set_child(Some(&overlay));
     window.present();
+}
+
+/// Sets up a 1-second interval timer to update clock and date labels.
+fn setup_clock_timer(clock_label: &gtk4::Label, date_label: &gtk4::Label) {
+    let (time, date) = babydra_core::format_clock_date("lock.date_format");
+    clock_label.set_text(&time);
+    date_label.set_text(&date);
+
+    let cl = clock_label.clone();
+    let dl = date_label.clone();
+    glib::timeout_add_seconds_local(1, move || {
+        let (time, date) = babydra_core::format_clock_date("lock.date_format");
+        cl.set_text(&time);
+        dl.set_text(&date);
+        glib::ControlFlow::Continue
+    });
+}
+
+/// Wires up password verification and shake animation on enter press.
+fn setup_auth_handler(
+    app: &gtk4::Application,
+    entry: &gtk4::PasswordEntry,
+    status_label: &gtk4::Label,
+    card_box: &gtk4::Box,
+) {
+    let username = std::env::var("USER").unwrap_or_else(|_| "user".to_string());
+    let entry_clone = entry.clone();
+    let status_label_clone = status_label.clone();
+    let card_clone = card_box.clone();
+    let app_clone = app.clone();
+
+    entry.connect_activate(move |_| {
+        let password = entry_clone.text().to_string();
+        entry_clone.set_text("");
+
+        if verify_password(&username, &password) {
+            babydra_core::save_last_user(&username);
+            app_clone.quit();
+        } else {
+            status_label_clone.set_text(&babydra_core::i18n::trans("lock.status_incorrect"));
+            status_label_clone.add_css_class("error");
+            card_clone.add_css_class("shake-error");
+
+            let status_lbl = status_label_clone.clone();
+            let card_box_ref = card_clone.clone();
+            glib::timeout_add_local_once(std::time::Duration::from_millis(1600), move || {
+                status_lbl.set_text(&babydra_core::i18n::trans("lock.status"));
+                status_lbl.remove_css_class("error");
+                card_box_ref.remove_css_class("shake-error");
+            });
+        }
+    });
+}
+
+/// Ensures the password entry grabs keyboard focus on spawn and on window click.
+fn setup_focus_management(window: &gtk4::ApplicationWindow, entry: &gtk4::PasswordEntry) {
+    let entry_focus = entry.clone();
+    glib::timeout_add_local_once(std::time::Duration::from_millis(100), move || {
+        entry_focus.grab_focus();
+    });
+
+    let entry_click = entry.clone();
+    let click_gesture = gtk4::GestureClick::new();
+    click_gesture.connect_pressed(move |_, _, _, _| {
+        entry_click.grab_focus();
+    });
+    window.add_controller(click_gesture);
 }

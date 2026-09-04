@@ -43,6 +43,21 @@ pub struct PrimaryCard {
     pub date_label: gtk4::Label,
 }
 
+/// Builds the avatar widget with circular masking or fallback icon.
+pub fn build_avatar_widget(size: i32) -> gtk4::Widget {
+    if let Some(bytes) = babydra_core::get_avatar_bytes() {
+        if let Some(img) = babydra_ui_kit::ui::image::create_circle_avatar(&bytes, size, Some("lock-avatar")) {
+            return img;
+        }
+    }
+
+    let avatar_icon = babydra_ui_kit::ui::icon::get_icon("avatar-default", size);
+    avatar_icon.add_css_class("lock-avatar");
+    avatar_icon.set_halign(gtk4::Align::Center);
+    avatar_icon.set_valign(gtk4::Align::Center);
+    avatar_icon.upcast()
+}
+
 /// Builds the primary auth card: clock, avatar, username, password entry and status label.
 pub fn build_primary_card() -> PrimaryCard {
     let card_box = babydra_ui_kit::components::create_css_card(gtk4::Orientation::Vertical, 10, "lock-card");
@@ -50,25 +65,7 @@ pub fn build_primary_card() -> PrimaryCard {
     card_box.set_halign(gtk4::Align::Center);
 
     let (clock_label, date_label) = build_clock_labels();
-
-    let avatar_widget: gtk4::Widget = if let Some(bytes) = babydra_core::get_avatar_bytes() {
-        if let Some(img) = babydra_ui_kit::ui::image::create_circle_avatar(&bytes, 110, Some("lock-avatar")) {
-            img
-        } else {
-            let icon = babydra_ui_kit::ui::icon::get_fallback_icon("user-info", "user-info");
-            icon.set_pixel_size(110);
-            icon.add_css_class("lock-avatar-fallback");
-            icon.set_halign(gtk4::Align::Center);
-            icon.set_valign(gtk4::Align::Center);
-            icon.upcast()
-        }
-    } else {
-        let avatar_icon = babydra_ui_kit::ui::icon::get_icon("avatar-default", 110);
-        avatar_icon.add_css_class("lock-avatar");
-        avatar_icon.set_halign(gtk4::Align::Center);
-        avatar_icon.set_valign(gtk4::Align::Center);
-        avatar_icon.upcast()
-    };
+    let avatar_widget = build_avatar_widget(110);
 
     let username = std::env::var("USER").unwrap_or_else(|_| "user".to_string());
     let user_label = gtk4::Label::new(Some(&username));
