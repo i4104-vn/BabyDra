@@ -46,10 +46,8 @@ fn circular_mask_makes_corners_transparent() {
 #[test]
 fn set_greeter_wp_and_avatar_persist_cleanly() {
     let home = std::env::var("HOME").unwrap_or_default();
-    let avatar_bb = std::path::PathBuf::from(&home).join(".babydra/avatar.bb");
-    let lock_wp_bb = std::path::PathBuf::from(&home).join(".babydra/lock_wallpaper.bb");
-    let orig_avatar = std::fs::read(&avatar_bb).ok();
-    let orig_lock_wp = std::fs::read(&lock_wp_bb).ok();
+    let avatar_png = std::path::PathBuf::from(&home).join(".babydra/avatar.png");
+    let orig_avatar = std::fs::read(&avatar_png).ok();
 
     let temp_img = std::env::temp_dir().join("babydra_test_wp_unit_test.png");
     let pix = gtk4::gdk_pixbuf::Pixbuf::new(gtk4::gdk_pixbuf::Colorspace::Rgb, true, 8, 100, 100).unwrap();
@@ -64,10 +62,8 @@ fn set_greeter_wp_and_avatar_persist_cleanly() {
     let wp_res = babydra_core::set_greeter_wp(&temp_img);
     assert!(wp_res.is_ok(), "Setting greeter wp should succeed");
 
-    // Check .bb files exist in ~/.babydra/
     if !home.is_empty() {
-        assert!(avatar_bb.exists(), "avatar.bb must exist");
-        assert!(lock_wp_bb.exists(), "lock_wallpaper.bb must exist");
+        assert!(avatar_png.exists(), "avatar.png must exist");
     }
 
     // Both avatar and greeter wp should be retrievable as decoded bytes
@@ -79,9 +75,12 @@ fn set_greeter_wp_and_avatar_persist_cleanly() {
 
     let wp_path = babydra_core::get_greeter_wp();
     assert!(wp_path.is_some(), "Greeter wp path must be retrievable after set_greeter_wp");
+    assert!(wp_path.as_ref().unwrap().is_file(), "Greeter wp path must be a valid file");
+    assert_eq!(wp_path.as_ref().unwrap().extension().and_then(|e| e.to_str()), Some("png"));
 
     let av_path = babydra_core::get_avatar_path();
     assert!(av_path.is_some(), "Avatar path must be retrievable after set_avatar");
+    assert_eq!(av_path.as_ref().unwrap().extension().and_then(|e| e.to_str()), Some("png"));
 
     let _ = std::fs::remove_file(&temp_img);
 
@@ -94,13 +93,45 @@ fn set_greeter_wp_and_avatar_persist_cleanly() {
     // Restore previous configuration and files
     babydra_core::config::save_babydra_config(&prev_conf);
     if let Some(content) = orig_avatar {
-        let _ = std::fs::write(&avatar_bb, content);
+        let _ = std::fs::write(&avatar_png, content);
     } else {
-        let _ = std::fs::remove_file(&avatar_bb);
-    }
-    if let Some(content) = orig_lock_wp {
-        let _ = std::fs::write(&lock_wp_bb, content);
-    } else {
-        let _ = std::fs::remove_file(&lock_wp_bb);
+        let _ = std::fs::remove_file(&avatar_png);
     }
 }
+
+#[test]
+fn set_greeter_wp_rejects_video_and_gif() {
+    let temp_mp4 = std::env::temp_dir().join("babydra_test_lock_wp.mp4");
+    std::fs::write(&temp_mp4, b"fake video").unwrap();
+    assert!(babydra_core::set_greeter_wp(&temp_mp4).is_err(), "MP4 must be rejected for lock/greeter");
+    let _ = std::fs::remove_file(&temp_mp4);
+
+    let temp_gif = std::env::temp_dir().join("babydra_test_lock_wp.gif");
+    std::fs::write(&temp_gif, b"fake gif").unwrap();
+    assert!(babydra_core::set_greeter_wp(&temp_gif).is_err(), "GIF must be rejected for lock/greeter");
+    let _ = std::fs::remove_file(&temp_gif);
+}
+
+#[test]
+fn read_image_metadata_extracts_dimensions_and_pixels() {
+    let wp_path = std::path::PathBuf::from("wallpaper.png");
+    if wp_path.exists() {
+        let meta = babydra_core::read_image_metadata(&wp_path).expect("Should parse wallpaper.png");
+        assert_eq!(meta.width, 3840);
+        assert_eq!(meta.height, 2159);
+        assert_eq!(meta.aspect_ratio, "16:9");
+        assert!(meta.total_pixels > 8_000_000);
+        assert_eq!(meta.format, "PNG");
+        assert!(meta.color_space.is_some());
+    }
+
+    let jpg_path = std::path::PathBuf::from("crates/babydra-greeter/src/assets/wallpaper.jpg");
+    if jpg_path.exists() {
+        let meta = babydra_core::read_image_metadata(&jpg_path).expect("Should parse wallpaper.jpg");
+        assert_eq!(meta.width, 1376);
+        assert_eq!(meta.height, 768);
+        assert_eq!(meta.aspect_ratio, "16:9");
+        assert_eq!(meta.format, "JPEG");
+    }
+}
+

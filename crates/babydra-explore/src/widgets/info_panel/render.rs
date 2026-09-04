@@ -58,6 +58,31 @@ pub fn build_info_panel_ui() -> InfoPanelWidgets {
 
     vbox.append(&details_frame);
 
+    // Image Details Section
+    let image_details_frame = Frame::new(Some(&babydra_core::i18n::trans("explore.prop_image_info")));
+    let img_box = Box::new(Orientation::Vertical, 8);
+    img_box.set_margin_top(6);
+    img_box.set_margin_bottom(6);
+    img_box.set_margin_start(6);
+    img_box.set_margin_end(6);
+    image_details_frame.set_child(Some(&img_box));
+
+    let (_, lbl_img_dimensions) =
+        create_detail_row_with_box(&img_box, &babydra_core::i18n::trans("explore.prop_dimensions"));
+    let (_, lbl_img_pixels) =
+        create_detail_row_with_box(&img_box, &babydra_core::i18n::trans("explore.prop_pixels"));
+    let (_, lbl_img_dpi) =
+        create_detail_row_with_box(&img_box, &babydra_core::i18n::trans("explore.prop_dpi"));
+    let (row_img_color, lbl_img_color) =
+        create_detail_row_with_box(&img_box, &babydra_core::i18n::trans("explore.prop_color_depth"));
+    let (row_img_camera, lbl_img_camera) =
+        create_detail_row_with_box(&img_box, &babydra_core::i18n::trans("explore.prop_camera"));
+    let (row_img_exposure, lbl_img_exposure) =
+        create_detail_row_with_box(&img_box, &babydra_core::i18n::trans("explore.prop_exposure"));
+
+    image_details_frame.set_visible(false);
+    vbox.append(&image_details_frame);
+
     InfoPanelWidgets {
         container,
         img_preview_icon,
@@ -71,11 +96,27 @@ pub fn build_info_panel_ui() -> InfoPanelWidgets {
         lbl_modified,
         lbl_owner,
         lbl_permissions,
+        image_details_frame,
+        lbl_img_dimensions,
+        lbl_img_pixels,
+        lbl_img_dpi,
+        row_img_color,
+        lbl_img_color,
+        row_img_camera,
+        lbl_img_camera,
+        row_img_exposure,
+        lbl_img_exposure,
     }
 }
 
 /// Creates a new `detail row`.
 fn create_detail_row(container: &Box, label: &str) -> Label {
+    let (_, lbl) = create_detail_row_with_box(container, label);
+    lbl
+}
+
+/// Creates a new `detail row` returning both the row container Box and value Label.
+fn create_detail_row_with_box(container: &Box, label: &str) -> (Box, Label) {
     let hbox = Box::new(Orientation::Horizontal, 6);
 
     let lbl_title = Label::builder().label(label).halign(Align::Start).build();
@@ -92,5 +133,5 @@ fn create_detail_row(container: &Box, label: &str) -> Label {
     hbox.append(&lbl_val);
     container.append(&hbox);
 
-    lbl_val
+    (hbox, lbl_val)
 }

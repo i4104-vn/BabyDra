@@ -1,6 +1,7 @@
 use crate::widgets::preview_panel;
 use babydra_core::FileEntry;
 use babydra_ui_kit::components::explore;
+use gtk4::prelude::*;
 use gtk4::ScrolledWindow;
 
 pub use crate::widgets::state::InfoPanelWidgets;
@@ -26,6 +27,7 @@ pub fn clear_info_panel(widgets: &InfoPanelWidgets) {
     widgets.lbl_modified.set_text("--");
     widgets.lbl_owner.set_text("--");
     widgets.lbl_permissions.set_text("--");
+    widgets.image_details_frame.set_visible(false);
 }
 
 /// Populates the info panel labels and triggers preview if selection contains a single text/markdown file.
@@ -50,6 +52,7 @@ pub fn update_info_panel(widgets: &InfoPanelWidgets, selection: &[FileEntry]) {
         widgets.lbl_modified.set_text("--");
         widgets.lbl_owner.set_text("--");
         widgets.lbl_permissions.set_text("--");
+        widgets.image_details_frame.set_visible(false);
         return;
     }
 
@@ -129,4 +132,40 @@ pub fn update_info_panel(widgets: &InfoPanelWidgets, selection: &[FileEntry]) {
     widgets
         .lbl_permissions
         .set_text(&format!("{:o}", entry.permissions & 0o777));
+
+    // Image Details Population
+    if is_image && !is_dir {
+        if let Some(meta) = babydra_core::read_image_metadata(&entry.path) {
+            widgets.lbl_img_dimensions.set_text(&meta.dimensions_str);
+            widgets.lbl_img_pixels.set_text(&meta.pixels_str);
+            widgets.lbl_img_dpi.set_text(&meta.dpi_str);
+
+            if let Some(ref cs) = meta.color_space {
+                widgets.lbl_img_color.set_text(cs);
+                widgets.row_img_color.set_visible(true);
+            } else {
+                widgets.row_img_color.set_visible(false);
+            }
+
+            if let Some(ref cam) = meta.camera_model {
+                widgets.lbl_img_camera.set_text(cam);
+                widgets.row_img_camera.set_visible(true);
+            } else {
+                widgets.row_img_camera.set_visible(false);
+            }
+
+            if let Some(ref exp) = meta.exposure {
+                widgets.lbl_img_exposure.set_text(exp);
+                widgets.row_img_exposure.set_visible(true);
+            } else {
+                widgets.row_img_exposure.set_visible(false);
+            }
+
+            widgets.image_details_frame.set_visible(true);
+        } else {
+            widgets.image_details_frame.set_visible(false);
+        }
+    } else {
+        widgets.image_details_frame.set_visible(false);
+    }
 }

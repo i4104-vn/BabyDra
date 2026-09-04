@@ -51,6 +51,9 @@ pub fn count_dialog_height(target_paths: &[PathBuf]) -> i32 {
                 return 530;
             }
         }
+        if babydra_core::read_image_metadata(&target_paths[0]).is_some() {
+            return 640;
+        }
         490
     } else {
         250

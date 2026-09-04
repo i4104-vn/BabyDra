@@ -84,8 +84,8 @@ pub use services::exif;
 pub use services::exif::{read_exif, ExifData};
 pub use services::explore::{
     calc_dir_size, copy_path, delete_path, filter_entries, get_icon_name, get_owner_group,
-    load_cropped_square, load_directory, move_path, rename_path, send_to_trash, sort_entries,
-    start_dbus_service, FileWatcher,
+    load_cropped_square, load_directory, move_path, read_image_metadata, rename_path,
+    send_to_trash, sort_entries, start_dbus_service, FileWatcher, ImageMetadata,
 };
 pub use services::mpris;
 pub use services::mpris::{decode_uri, run_playerctl};

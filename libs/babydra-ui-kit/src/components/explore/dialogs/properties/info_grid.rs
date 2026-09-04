@@ -166,6 +166,80 @@ pub fn build_info_grid(parent_vbox: &Box, target_paths: &[PathBuf]) {
         }
 
         parent_vbox.append(&general_card);
+
+        // 3. Image Details Card (if single static/vector image)
+        if !is_dir {
+            if let Some(img_meta) = babydra_core::read_image_metadata(path) {
+                let image_card = Box::new(Orientation::Vertical, 6);
+                image_card.set_css_classes(&["properties-card"]);
+
+                let lbl_img_title = Label::builder()
+                    .label(&trans("explore.prop_image_info"))
+                    .halign(Align::Start)
+                    .build();
+                lbl_img_title.set_css_classes(&["properties-section-title"]);
+                image_card.append(&lbl_img_title);
+
+                let _ = create_prop_row(
+                    &image_card,
+                    "display",
+                    &trans("explore.prop_dimensions"),
+                    &img_meta.dimensions_str,
+                );
+
+                let _ = create_prop_row(
+                    &image_card,
+                    "view-grid",
+                    &trans("explore.prop_pixels"),
+                    &img_meta.pixels_str,
+                );
+
+                let _ = create_prop_row(
+                    &image_card,
+                    "info",
+                    &trans("explore.prop_dpi"),
+                    &img_meta.dpi_str,
+                );
+
+                if let Some(ref cs) = img_meta.color_space {
+                    let _ = create_prop_row(
+                        &image_card,
+                        "palette",
+                        &trans("explore.prop_color_depth"),
+                        cs,
+                    );
+                }
+
+                if let Some(ref cam) = img_meta.camera_model {
+                    let _ = create_prop_row(
+                        &image_card,
+                        "camera",
+                        &trans("explore.prop_camera"),
+                        cam,
+                    );
+                }
+
+                if let Some(ref exp) = img_meta.exposure {
+                    let _ = create_prop_row(
+                        &image_card,
+                        "clock",
+                        &trans("explore.prop_exposure"),
+                        exp,
+                    );
+                }
+
+                if let Some(ref date) = img_meta.date_taken {
+                    let _ = create_prop_row(
+                        &image_card,
+                        "clock",
+                        &trans("explore.prop_date_taken"),
+                        date,
+                    );
+                }
+
+                parent_vbox.append(&image_card);
+            }
+        }
     } else {
         let count = target_paths.len();
         let location = target_paths[0]
