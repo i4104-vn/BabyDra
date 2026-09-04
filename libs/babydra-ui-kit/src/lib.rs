@@ -40,9 +40,10 @@ pub mod prelude {
         create_sidebar_wbtn, create_square_tile, create_submenu_item, create_subtitle,
         create_switch, create_switch_card, create_sys_wifi_icon, create_title, create_toggle_tile,
         create_vpn_icon, create_wifi_icon, create_wifi_net_icon, create_wp_thumb, render_wifi_svg,
-        set_tooltip, show_tray_menu, update_toggle_state, ContextMenuBuilder, CustomSlider,
-        CustomSwitch, HoverPopoverRow, PasswordDialog, PlaceholderState, ToggleRow,
-        VpnConfigDialog, VpnLogDialog, WifiConfigDialog, WifiInfoDialog, WifiPasswordDialog,
+        set_tooltip, show_tray_menu, update_toggle_state, ChangeHostnameDialog, ChangeNameDialog,
+        ChangePasswordDialog, ContextMenuBuilder, CustomSlider, CustomSwitch, HoverPopoverRow,
+        PasswordDialog, PlaceholderState, ToggleRow, VpnConfigDialog, VpnLogDialog,
+        WifiConfigDialog, WifiInfoDialog, WifiPasswordDialog,
     };
     pub use crate::ui::{
         animation::{

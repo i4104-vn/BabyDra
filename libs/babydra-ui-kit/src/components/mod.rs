@@ -32,8 +32,8 @@ pub use context_menu::{
 };
 pub use list_group::{clear_box, clear_list_box, create_list_row};
 pub use modals::{
-    PasswordDialog, VpnConfigDialog, VpnLogDialog, WifiConfigDialog, WifiInfoDialog,
-    WifiPasswordDialog,
+    ChangeHostnameDialog, ChangeNameDialog, ChangePasswordDialog, PasswordDialog, VpnConfigDialog,
+    VpnLogDialog, WifiConfigDialog, WifiInfoDialog, WifiPasswordDialog,
 };
 pub use placeholder::{create_placeholder, PlaceholderState};
 pub use popovers::{
