@@ -12,69 +12,7 @@ use gtk4::{EventControllerKey, Fixed};
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
-
-/// Parses a shortcut string like "Ctrl+Shift+T" or "Delete" into a (Key, ModifierType) pair.
-pub fn parse_shortcut(shortcut_str: &str) -> Option<(gtk4::gdk::Key, gtk4::gdk::ModifierType)> {
-    let parts: Vec<&str> = shortcut_str.split('+').map(|s| s.trim()).collect();
-    let mut modifiers = gtk4::gdk::ModifierType::empty();
-    let mut key = None;
-
-    for part in parts {
-        let part_lower = part.to_lowercase();
-        if part_lower == "ctrl" || part_lower == "control" {
-            modifiers |= gtk4::gdk::ModifierType::CONTROL_MASK;
-        } else if part_lower == "shift" {
-            modifiers |= gtk4::gdk::ModifierType::SHIFT_MASK;
-        } else if part_lower == "alt" {
-            modifiers |= gtk4::gdk::ModifierType::ALT_MASK;
-        } else {
-            let k = match part_lower.as_str() {
-                "f1" => Some(gtk4::gdk::Key::F1),
-                "f2" => Some(gtk4::gdk::Key::F2),
-                "f3" => Some(gtk4::gdk::Key::F3),
-                "f4" => Some(gtk4::gdk::Key::F4),
-                "f5" => Some(gtk4::gdk::Key::F5),
-                "f6" => Some(gtk4::gdk::Key::F6),
-                "f7" => Some(gtk4::gdk::Key::F7),
-                "f8" => Some(gtk4::gdk::Key::F8),
-                "f9" => Some(gtk4::gdk::Key::F9),
-                "f10" => Some(gtk4::gdk::Key::F10),
-                "f11" => Some(gtk4::gdk::Key::F11),
-                "f12" => Some(gtk4::gdk::Key::F12),
-                "enter" => Some(gtk4::gdk::Key::Return),
-                "space" => Some(gtk4::gdk::Key::space),
-                "escape" | "esc" => Some(gtk4::gdk::Key::Escape),
-                "delete" | "del" => Some(gtk4::gdk::Key::Delete),
-                "backspace" => Some(gtk4::gdk::Key::BackSpace),
-                s if s.len() == 1 => {
-                    let c = s.chars().next().unwrap();
-                    gtk4::gdk::Key::from_name(c.to_string())
-                }
-                s => gtk4::gdk::Key::from_name(s),
-            };
-            if let Some(keyval) = k {
-                key = Some(keyval);
-            }
-        }
-    }
-
-    key.map(|k| (k, modifiers))
-}
-
-fn matches_key(
-    keyval: gtk4::gdk::Key,
-    clean_mod: gtk4::gdk::ModifierType,
-    target: (gtk4::gdk::Key, gtk4::gdk::ModifierType),
-) -> bool {
-    let (target_key, target_mod) = target;
-    if clean_mod != target_mod {
-        return false;
-    }
-    keyval == target_key
-        || keyval.to_lower() == target_key.to_lower()
-        || (target_key == gtk4::gdk::Key::Delete && keyval == gtk4::gdk::Key::KP_Delete)
-        || (target_key == gtk4::gdk::Key::Return && keyval == gtk4::gdk::Key::KP_Enter)
-}
+use babydra_core::{clean_modifiers, matches_key, parse_shortcut};
 
 pub fn wire_keyboard(
     parent_window: &gtk4::ApplicationWindow,
@@ -92,10 +30,7 @@ pub fn wire_keyboard(
     let rubberband_key = rubberband.clone();
 
     key_controller.connect_key_pressed(move |_, keyval, _, mod_state| {
-        let clean_mod = mod_state
-            & (gtk4::gdk::ModifierType::CONTROL_MASK
-                | gtk4::gdk::ModifierType::SHIFT_MASK
-                | gtk4::gdk::ModifierType::ALT_MASK);
+        let clean_mod = clean_modifiers(mod_state);
 
         let cfg = babydra_core::load_explore_cfg();
 
