@@ -33,33 +33,51 @@ pub fn apply_circular_mask(pixbuf: &gdk_pixbuf::Pixbuf) -> gdk_pixbuf::Pixbuf {
     let n_channels = pixbuf.n_channels();
     let rowstride = pixbuf.rowstride();
 
-    let src: Vec<u8> = pixbuf
-        .pixel_bytes()
-        .map(|b| b.as_ref().to_vec())
-        .unwrap_or_default();
+    let src_bytes = pixbuf.pixel_bytes();
+    let src = src_bytes.as_ref().map(|b| b.as_ref()).unwrap_or(&[]);
 
     let Some(out) = gdk_pixbuf::Pixbuf::new(gdk_pixbuf::Colorspace::Rgb, true, 8, w, h) else {
         return pixbuf.clone();
     };
+
+    let out_stride = out.rowstride() as usize;
+    let out_n_channels = out.n_channels() as usize;
+    let out_pixels = unsafe { out.pixels() };
 
     let center_x = (w - 1) as f64 / 2.0;
     let center_y = (h - 1) as f64 / 2.0;
     let radius = (w.min(h) as f64 - 1.0) / 2.0;
     let feather = 1.5 / radius.max(1.0);
 
+    let src_stride = rowstride as usize;
+    let src_channels = n_channels as usize;
+
     for y in 0..h {
+        let y_f = y as f64;
+        let dy = (y_f - center_y) / radius.max(1.0);
+        let dy2 = dy * dy;
+        let src_row_pos = (y as usize) * src_stride;
+        let out_row_pos = (y as usize) * out_stride;
+
         for x in 0..w {
-            let dx = (x as f64 - center_x) / radius.max(1.0);
-            let dy = (y as f64 - center_y) / radius.max(1.0);
-            let dist = (dx * dx + dy * dy).sqrt();
+            let x_f = x as f64;
+            let dx = (x_f - center_x) / radius.max(1.0);
+            let dist = (dx * dx + dy2).sqrt();
             let alpha = (((1.0 - dist) / feather).clamp(0.0, 1.0) * 255.0).round() as u8;
 
-            let pos = (y as usize) * (rowstride as usize) + (x as usize) * (n_channels as usize);
+            let pos = src_row_pos + (x as usize) * src_channels;
             let (r, g, b) = match src.get(pos..pos + 3) {
                 Some(rgb) => (rgb[0], rgb[1], rgb[2]),
                 None => (0, 0, 0),
             };
-            out.put_pixel(x as u32, y as u32, r, g, b, alpha);
+
+            let out_pos = out_row_pos + (x as usize) * out_n_channels;
+            if out_pos + 4 <= out_pixels.len() {
+                out_pixels[out_pos] = r;
+                out_pixels[out_pos + 1] = g;
+                out_pixels[out_pos + 2] = b;
+                out_pixels[out_pos + 3] = alpha;
+            }
         }
     }
     out
@@ -72,31 +90,42 @@ pub fn apply_rounded_mask(pixbuf: &gdk_pixbuf::Pixbuf, radius: f64) -> gdk_pixbu
     let n_channels = pixbuf.n_channels();
     let rowstride = pixbuf.rowstride();
 
-    let src: Vec<u8> = pixbuf
-        .pixel_bytes()
-        .map(|b| b.as_ref().to_vec())
-        .unwrap_or_default();
+    let src_bytes = pixbuf.pixel_bytes();
+    let src = src_bytes.as_ref().map(|b| b.as_ref()).unwrap_or(&[]);
 
     let Some(out) = gdk_pixbuf::Pixbuf::new(gdk_pixbuf::Colorspace::Rgb, true, 8, w, h) else {
         return pixbuf.clone();
     };
 
+    let out_stride = out.rowstride() as usize;
+    let out_n_channels = out.n_channels() as usize;
+    let out_pixels = unsafe { out.pixels() };
+
     let r = radius.min(w as f64 / 2.0).min(h as f64 / 2.0);
     let feather = 1.0;
 
+    let src_stride = rowstride as usize;
+    let src_channels = n_channels as usize;
+
     for y in 0..h {
+        let py = y as f64 + 0.5;
+        let is_top = py < r;
+        let is_bottom = py > h as f64 - r;
+
+        let src_row_pos = (y as usize) * src_stride;
+        let out_row_pos = (y as usize) * out_stride;
+
         for x in 0..w {
             let px = x as f64 + 0.5;
-            let py = y as f64 + 0.5;
 
             // Determine if pixel is in one of the 4 corner boxes
-            let (cx, cy) = if px < r && py < r {
+            let (cx, cy) = if px < r && is_top {
                 (r, r)
-            } else if px > w as f64 - r && py < r {
+            } else if px > w as f64 - r && is_top {
                 (w as f64 - r, r)
-            } else if px < r && py > h as f64 - r {
+            } else if px < r && is_bottom {
                 (r, h as f64 - r)
-            } else if px > w as f64 - r && py > h as f64 - r {
+            } else if px > w as f64 - r && is_bottom {
                 (w as f64 - r, h as f64 - r)
             } else {
                 (-1.0, -1.0)
@@ -117,15 +146,21 @@ pub fn apply_rounded_mask(pixbuf: &gdk_pixbuf::Pixbuf, radius: f64) -> gdk_pixbu
                 1.0
             };
 
-            let pos = (y as usize) * (rowstride as usize) + (x as usize) * (n_channels as usize);
-            let (cr, cg, cb, orig_a) = match src.get(pos..pos + n_channels as usize) {
+            let pos = src_row_pos + (x as usize) * src_channels;
+            let (cr, cg, cb, orig_a) = match src.get(pos..pos + src_channels) {
                 Some(slice) if slice.len() >= 4 => (slice[0], slice[1], slice[2], slice[3]),
                 Some(slice) if slice.len() >= 3 => (slice[0], slice[1], slice[2], 255),
                 _ => (0, 0, 0, 0),
             };
 
             let final_a = ((orig_a as f64) * corner_alpha).round().clamp(0.0, 255.0) as u8;
-            out.put_pixel(x as u32, y as u32, cr, cg, cb, final_a);
+            let out_pos = out_row_pos + (x as usize) * out_n_channels;
+            if out_pos + 4 <= out_pixels.len() {
+                out_pixels[out_pos] = cr;
+                out_pixels[out_pos + 1] = cg;
+                out_pixels[out_pos + 2] = cb;
+                out_pixels[out_pos + 3] = final_a;
+            }
         }
     }
     out
@@ -179,4 +214,49 @@ pub fn create_rounded_picture(
     picture.set_halign(gtk4::Align::Center);
     picture.set_valign(gtk4::Align::Center);
     Some(picture.upcast())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_apply_circular_mask() {
+        let pb = gdk_pixbuf::Pixbuf::new(gdk_pixbuf::Colorspace::Rgb, false, 8, 20, 20).unwrap();
+        pb.fill(0xffffffff);
+        let masked = apply_circular_mask(&pb);
+        assert_eq!(masked.width(), 20);
+        assert_eq!(masked.height(), 20);
+        assert_eq!(masked.n_channels(), 4);
+
+        let pixels = unsafe { masked.pixels() };
+        let stride = masked.rowstride() as usize;
+
+        // Center pixel (10, 10) should have high alpha
+        let center_idx = 10 * stride + 10 * 4;
+        assert!(pixels[center_idx + 3] > 200);
+
+        // Corner pixel (0, 0) should be fully or mostly transparent
+        assert_eq!(pixels[3], 0);
+    }
+
+    #[test]
+    fn test_apply_rounded_mask() {
+        let pb = gdk_pixbuf::Pixbuf::new(gdk_pixbuf::Colorspace::Rgb, false, 8, 20, 20).unwrap();
+        pb.fill(0xffffffff);
+        let masked = apply_rounded_mask(&pb, 5.0);
+        assert_eq!(masked.width(), 20);
+        assert_eq!(masked.height(), 20);
+        assert_eq!(masked.n_channels(), 4);
+
+        let pixels = unsafe { masked.pixels() };
+        let stride = masked.rowstride() as usize;
+
+        // Center pixel should have alpha 255
+        let center_idx = 10 * stride + 10 * 4;
+        assert_eq!(pixels[center_idx + 3], 255);
+
+        // Corner pixel (0, 0) should have 0 alpha
+        assert_eq!(pixels[3], 0);
+    }
 }

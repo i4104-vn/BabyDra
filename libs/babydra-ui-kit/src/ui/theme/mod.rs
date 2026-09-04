@@ -81,15 +81,14 @@ use gio::prelude::*;
 ///
 /// Returns `(dark_css, light_css, extra_layer)` — the caller picks the
 /// dark/light side based on the current mode and appends the extra layer.
-fn resolve_theme_layers() -> (String, String, String) {
-    let selection = babydra_core::config::load_babydra_config().theme.selection;
-    let id = if selection.id.is_empty() {
-        "babydra-default".to_string()
+fn resolve_theme_layers(theme_id: &str) -> (String, String, String) {
+    let id = if theme_id.is_empty() {
+        "babydra-default"
     } else {
-        selection.id.clone()
+        theme_id
     };
 
-    let theme = match babydra_theme::resolve_theme(&id) {
+    let theme = match babydra_theme::resolve_theme(id) {
         Ok(t) => t,
         Err(err) => {
             tracing::warn!(
@@ -119,7 +118,7 @@ fn resolve_theme_layers() -> (String, String, String) {
 fn build_css() -> String {
     let selection = babydra_core::config::load_babydra_config().theme.selection;
     let is_dark = selection.dark.unwrap_or_else(is_dark_mode);
-    let (dark_css, light_css, extra_layer) = resolve_theme_layers();
+    let (dark_css, light_css, extra_layer) = resolve_theme_layers(&selection.id);
     let color_layer = if is_dark { dark_css } else { light_css };
     let css = format!("{SHARED_CSS}\n{color_layer}\n{extra_layer}");
     css.replace("\r", "")
@@ -169,7 +168,6 @@ pub fn init_theme() {
                     provider,
                     gtk4::STYLE_PROVIDER_PRIORITY_USER,
                 );
-                REGISTERED.with(|r| r.set(true));
             }
 
             let gsettings = gio::Settings::new("org.gnome.desktop.interface");
@@ -194,25 +192,25 @@ pub fn init_theme() {
                     settings.set_gtk_icon_theme_name(Some(user_icon_theme));
                 }
             });
+
+            if let Some(settings) = gtk4::Settings::default() {
+                let provider_clone = provider.clone();
+                settings.connect_gtk_application_prefer_dark_theme_notify(move |_s| {
+                    let css = build_css();
+                    provider_clone.load_from_data(&css);
+                });
+            }
+
+            REGISTERED.with(|r| r.set(true));
         }
 
-        if let Some(settings) = gtk4::Settings::default() {
-            let css = build_css();
-            provider.load_from_data(&css);
-
-            let provider_clone = provider.clone();
-            settings.connect_gtk_application_prefer_dark_theme_notify(move |_s| {
-                let css = build_css();
-                provider_clone.load_from_data(&css);
-            });
-        } else {
-            let css = build_css();
-            provider.load_from_data(&css);
-        }
+        let css = build_css();
+        provider.load_from_data(&css);
     });
 }
 
 /// Helper stub for backward compatibility.
+#[inline]
 pub fn apply_theme_class(_window: &gtk4::ApplicationWindow) {
     // stub — theme is applied globally via init_theme()
 }
