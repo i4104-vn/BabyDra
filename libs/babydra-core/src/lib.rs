@@ -26,6 +26,10 @@ pub use models::shell::power::PerformanceProfile;
 // --- System & Hardware Services ---
 pub use services::last_user::{get_last_user, save_last_user};
 pub use services::logger::{self, get_log_dir, get_log_path};
+pub use services::system::account::{
+    self, change_user_password, get_system_hostname, get_user_account_info, update_display_name,
+    update_system_hostname, validate_hostname, UserAccountInfo,
+};
 pub use services::system::auth::{self, verify_password};
 pub use services::system::backlight;
 pub use services::system::battery::{self, get_battery_info};

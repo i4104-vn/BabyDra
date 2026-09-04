@@ -1,3 +1,4 @@
+pub mod account;
 pub mod auth;
 pub mod backlight;
 pub mod battery;
@@ -19,4 +20,8 @@ pub mod volume;
 pub mod vpn;
 pub mod wifi;
 
+pub use account::{
+    change_user_password, get_system_hostname, get_user_account_info, update_display_name,
+    update_system_hostname, validate_hostname, UserAccountInfo,
+};
 pub use gsettings::set_color_scheme;
