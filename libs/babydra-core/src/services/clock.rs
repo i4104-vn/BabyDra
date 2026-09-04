@@ -4,7 +4,7 @@
 //! This module is GTK-free: it returns plain strings and lets the UI layer
 //! assign them to its own labels.
 
-use chrono::Local;
+use chrono::{Datelike, Local};
 
 /// Formats the current local time and date.
 ///
@@ -16,16 +16,29 @@ pub fn format_clock_date(date_format_key: &str) -> (String, String) {
     let now = Local::now();
     let time = now.format("%H:%M").to_string();
 
-    let weekday_key = format!("weekday.{}", now.format("%a").to_string().to_lowercase());
+    let weekday_code = match now.weekday() {
+        chrono::Weekday::Mon => "mon",
+        chrono::Weekday::Tue => "tue",
+        chrono::Weekday::Wed => "wed",
+        chrono::Weekday::Thu => "thu",
+        chrono::Weekday::Fri => "fri",
+        chrono::Weekday::Sat => "sat",
+        chrono::Weekday::Sun => "sun",
+    };
+    let weekday_key = format!("weekday.{weekday_code}");
     let weekday = crate::i18n::trans(&weekday_key);
-    let month_key = format!("month.{}", now.format("%m"));
+
+    let month_key = format!("month.{:02}", now.month());
     let month = crate::i18n::trans(&month_key);
+
+    let day_str = format!("{:02}", now.day());
+    let year_str = now.year().to_string();
 
     let date = crate::i18n::trans(date_format_key)
         .replace("{weekday}", &weekday)
-        .replace("{day}", &now.format("%d").to_string())
+        .replace("{day}", &day_str)
         .replace("{month}", &month)
-        .replace("{year}", &now.format("%Y").to_string());
+        .replace("{year}", &year_str);
 
     (time, date)
 }
