@@ -4,11 +4,12 @@ use babydra_core::models::SystemInfoData;
 use babydra_core::services::system::gpu::get_gpu_info;
 use sysinfo::System;
 
+mod handler;
 mod render;
 
 /// Creates a new `system widget`.
 pub fn create_system_widget() -> gtk4::Widget {
-    let (main_box, labels) = render::build_system_ui(
+    let widgets = render::build_system_ui(
         "BabyDra Linux",
         "Linux",
         "...",
@@ -19,13 +20,17 @@ pub fn create_system_widget() -> gtk4::Widget {
         "...",
     );
 
+    handler::wire_events(&widgets);
+
+    let labels = widgets.labels.clone();
+
     // Fetch heavy system info asynchronously off the main GTK GUI thread
     let (tx, rx) = std::sync::mpsc::channel::<SystemInfoData>();
     std::thread::spawn(move || {
         let mut sys = System::new_all();
         sys.refresh_all();
 
-        let hostname = System::host_name().unwrap_or_else(|| "localhost".to_string());
+        let hostname = babydra_core::services::system::account::get_system_hostname();
         let os_name = System::name().unwrap_or_else(|| "Arch Linux".to_string());
         let kernel_version = System::kernel_version().unwrap_or_else(|| "Unknown".to_string());
         let cpu_model = sys
@@ -85,5 +90,5 @@ pub fn create_system_widget() -> gtk4::Widget {
         }
     });
 
-    main_box.into()
+    widgets.root.into()
 }

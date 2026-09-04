@@ -1,5 +1,6 @@
 //! System specifications UI layout generator matching reference design Image 1.
 
+use babydra_ui_kit::components::{ChangeHostnameDialog, ChangeNameDialog, ChangePasswordDialog};
 use gtk4::prelude::*;
 
 #[derive(Clone)]
@@ -13,6 +14,18 @@ pub struct SystemInfoLabels {
     pub gpu_lbl: gtk4::Label,
 }
 
+pub struct SystemInfoWidgets {
+    pub root: gtk4::Overlay,
+    pub labels: SystemInfoLabels,
+    pub edit_host_btn: gtk4::Button,
+    pub display_name_lbl: gtk4::Label,
+    pub change_name_btn: gtk4::Button,
+    pub change_pwd_btn: gtk4::Button,
+    pub change_name_dialog: ChangeNameDialog,
+    pub change_hostname_dialog: ChangeHostnameDialog,
+    pub change_password_dialog: ChangePasswordDialog,
+}
+
 /// Builds the system information settings page UI.
 pub fn build_system_ui(
     hostname: &str,
@@ -23,7 +36,7 @@ pub fn build_system_ui(
     memory_text: &str,
     uptime_text: &str,
     cpu_arch: &str,
-) -> (gtk4::Box, SystemInfoLabels) {
+) -> SystemInfoWidgets {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
     main_box.set_vexpand(true);
     main_box.set_valign(gtk4::Align::Fill);
@@ -34,13 +47,13 @@ pub fn build_system_ui(
     page_title.set_halign(gtk4::Align::Start);
     main_box.append(&page_title);
 
-    let content_box = gtk4::Box::new(gtk4::Orientation::Vertical, 20);
+    let content_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
 
     // ── Card 1: Top Hero Card (Avatar, OS Title, Uptime Badge) ──
     let hero_card = gtk4::Box::new(gtk4::Orientation::Horizontal, 20);
     hero_card.add_css_class("glass-panel");
     hero_card.set_margin_top(4);
-    hero_card.set_margin_bottom(4);
+    hero_card.set_margin_bottom(2);
     hero_card.set_margin_start(4);
     hero_card.set_margin_end(4);
 
@@ -73,10 +86,22 @@ pub fn build_system_ui(
         "BabyDra Linux"
     };
 
+    let host_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+    host_box.set_valign(gtk4::Align::Center);
+
     let os_label = gtk4::Label::new(Some(display_host));
     os_label.add_css_class("hero-hostname");
     os_label.set_halign(gtk4::Align::Start);
-    text_column.append(&os_label);
+    host_box.append(&os_label);
+
+    let edit_host_btn = gtk4::Button::from_icon_name("document-edit-symbolic");
+    edit_host_btn.add_css_class("connect-pill-btn");
+    edit_host_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.change_hostname")));
+    edit_host_btn.set_cursor_from_name(Some("pointer"));
+    edit_host_btn.set_valign(gtk4::Align::Center);
+    host_box.append(&edit_host_btn);
+
+    text_column.append(&host_box);
 
     // Subtitle Row: OS Name (Architecture) • Kernel Version
     let sub_title = format!("{} ({}) • Kernel {}", os_name, cpu_arch, kernel_version);
@@ -162,6 +187,64 @@ pub fn build_system_ui(
     hero_card.append(&info_box);
     content_box.append(&hero_card);
 
+    // ── Card 2: User Account Card (Avatar, Name, Username, Change Name, Change Password) ──
+    let user_info = babydra_core::services::system::account::get_user_account_info();
+
+    let account_card = gtk4::Box::new(gtk4::Orientation::Horizontal, 16);
+    account_card.add_css_class("glass-panel");
+    account_card.set_margin_start(4);
+    account_card.set_margin_end(4);
+
+    let user_avatar_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    user_avatar_box.add_css_class("blue-icon-badge");
+    user_avatar_box.set_size_request(48, 48);
+    user_avatar_box.set_valign(gtk4::Align::Center);
+
+    let user_icon_img = babydra_ui_kit::ui::icon::get_icon("user", 22);
+    user_icon_img.set_pixel_size(22);
+    user_icon_img.set_vexpand(true);
+    user_icon_img.set_hexpand(true);
+    user_icon_img.set_valign(gtk4::Align::Center);
+    user_icon_img.set_halign(gtk4::Align::Center);
+    user_avatar_box.append(&user_icon_img);
+    account_card.append(&user_avatar_box);
+
+    let user_text_col = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
+    user_text_col.set_hexpand(true);
+    user_text_col.set_valign(gtk4::Align::Center);
+
+    let display_name_lbl = gtk4::Label::new(Some(&user_info.display_name));
+    display_name_lbl.add_css_class("settings-row-title");
+    display_name_lbl.set_halign(gtk4::Align::Start);
+    user_text_col.append(&display_name_lbl);
+
+    let username_sub = format!("@{}", user_info.username);
+    let username_lbl = gtk4::Label::new(Some(&username_sub));
+    username_lbl.add_css_class("settings-row-desc");
+    username_lbl.set_halign(gtk4::Align::Start);
+    user_text_col.append(&username_lbl);
+
+    account_card.append(&user_text_col);
+
+    let acc_actions = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+    acc_actions.set_valign(gtk4::Align::Center);
+    acc_actions.set_halign(gtk4::Align::End);
+
+    let change_name_btn =
+        gtk4::Button::with_label(&babydra_core::i18n::trans("settings.change_name"));
+    change_name_btn.add_css_class("connect-pill-btn");
+    change_name_btn.set_cursor_from_name(Some("pointer"));
+    acc_actions.append(&change_name_btn);
+
+    let change_pwd_btn =
+        gtk4::Button::with_label(&babydra_core::i18n::trans("settings.change_password"));
+    change_pwd_btn.add_css_class("connect-pill-btn");
+    change_pwd_btn.set_cursor_from_name(Some("pointer"));
+    acc_actions.append(&change_pwd_btn);
+
+    account_card.append(&acc_actions);
+    content_box.append(&account_card);
+
     // ── 2x2 Grid of Hardware Spec Cards ─────────────────────────
     let grid = gtk4::Grid::new();
     grid.set_column_spacing(20);
@@ -246,6 +329,17 @@ pub fn build_system_ui(
 
     main_box.append(&scroll);
 
+    // Modal dialogs
+    let change_name_dialog = ChangeNameDialog::new();
+    let change_hostname_dialog = ChangeHostnameDialog::new();
+    let change_password_dialog = ChangePasswordDialog::new();
+
+    let root = gtk4::Overlay::new();
+    root.set_child(Some(&main_box));
+    root.add_overlay(&change_name_dialog.container);
+    root.add_overlay(&change_hostname_dialog.container);
+    root.add_overlay(&change_password_dialog.container);
+
     let labels = SystemInfoLabels {
         os_label,
         sub_label,
@@ -256,5 +350,15 @@ pub fn build_system_ui(
         gpu_lbl,
     };
 
-    (main_box, labels)
+    SystemInfoWidgets {
+        root,
+        labels,
+        edit_host_btn,
+        display_name_lbl,
+        change_name_btn,
+        change_pwd_btn,
+        change_name_dialog,
+        change_hostname_dialog,
+        change_password_dialog,
+    }
 }
