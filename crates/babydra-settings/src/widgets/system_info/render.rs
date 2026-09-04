@@ -1,6 +1,6 @@
 //! System specifications UI layout generator matching reference design Image 1.
 
-use babydra_ui_kit::components::{ChangeHostnameDialog, ChangeNameDialog, ChangePasswordDialog};
+use babydra_ui_kit::components::{ChangeHostnameDialog, ChangePasswordDialog};
 use gtk4::prelude::*;
 
 #[derive(Clone)]
@@ -19,10 +19,7 @@ pub struct SystemInfoWidgets {
     pub root: gtk4::Overlay,
     pub labels: SystemInfoLabels,
     pub edit_host_btn: gtk4::Button,
-    pub display_name_lbl: gtk4::Label,
-    pub change_name_btn: gtk4::Button,
     pub change_pwd_btn: gtk4::Button,
-    pub change_name_dialog: ChangeNameDialog,
     pub change_hostname_dialog: ChangeHostnameDialog,
     pub change_password_dialog: ChangePasswordDialog,
 }
@@ -243,60 +240,7 @@ pub fn build_system_ui(
     host_row.set_child(Some(&host_hbox));
     dev_acc_list.append(&host_row);
 
-    // Row 2: User Account (Display Name & Username)
-    let user_info = babydra_core::services::system::account::get_user_account_info();
-
-    let name_row = gtk4::ListBoxRow::new();
-    name_row.add_css_class("settings-card-row");
-    let name_hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 14);
-    name_hbox.set_margin_top(6);
-    name_hbox.set_margin_bottom(6);
-    name_hbox.set_margin_start(6);
-    name_hbox.set_margin_end(6);
-
-    let name_icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
-    name_icon_badge.add_css_class("blue-icon-badge-sm");
-    name_icon_badge.set_valign(gtk4::Align::Center);
-    name_icon_badge.set_halign(gtk4::Align::Start);
-    name_icon_badge.set_hexpand(false);
-    name_icon_badge.set_vexpand(false);
-    name_icon_badge.set_size_request(36, 36);
-
-    let name_icon = babydra_ui_kit::ui::icon::get_icon("user", 18);
-    name_icon.set_pixel_size(18);
-    name_icon.set_valign(gtk4::Align::Center);
-    name_icon.set_halign(gtk4::Align::Center);
-    name_icon.set_vexpand(true);
-    name_icon_badge.append(&name_icon);
-    name_hbox.append(&name_icon_badge);
-
-    let name_text_col = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-    name_text_col.set_valign(gtk4::Align::Center);
-    name_text_col.set_halign(gtk4::Align::Start);
-    name_text_col.set_hexpand(true);
-
-    let display_name_lbl = gtk4::Label::new(Some(&user_info.display_name));
-    display_name_lbl.add_css_class("settings-row-title");
-    display_name_lbl.set_halign(gtk4::Align::Start);
-    name_text_col.append(&display_name_lbl);
-
-    let username_sub = format!("@{}", user_info.username);
-    let username_lbl = gtk4::Label::new(Some(&username_sub));
-    username_lbl.add_css_class("settings-row-desc");
-    username_lbl.set_halign(gtk4::Align::Start);
-    name_text_col.append(&username_lbl);
-    name_hbox.append(&name_text_col);
-
-    let change_name_btn = gtk4::Button::with_label(&babydra_core::i18n::trans("settings.change_name"));
-    change_name_btn.add_css_class("connect-pill-btn");
-    change_name_btn.set_cursor_from_name(Some("pointer"));
-    change_name_btn.set_valign(gtk4::Align::Center);
-    name_hbox.append(&change_name_btn);
-
-    name_row.set_child(Some(&name_hbox));
-    dev_acc_list.append(&name_row);
-
-    // Row 3: Account Password
+    // Row 2: Account Password
     let pwd_row = gtk4::ListBoxRow::new();
     pwd_row.add_css_class("settings-card-row");
     let pwd_hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 14);
@@ -443,13 +387,11 @@ pub fn build_system_ui(
     main_box.append(&scroll);
 
     // Modal dialogs
-    let change_name_dialog = ChangeNameDialog::new();
     let change_hostname_dialog = ChangeHostnameDialog::new();
     let change_password_dialog = ChangePasswordDialog::new();
 
     let root = gtk4::Overlay::new();
     root.set_child(Some(&main_box));
-    root.add_overlay(&change_name_dialog.container);
     root.add_overlay(&change_hostname_dialog.container);
     root.add_overlay(&change_password_dialog.container);
 
@@ -468,10 +410,7 @@ pub fn build_system_ui(
         root,
         labels,
         edit_host_btn,
-        display_name_lbl,
-        change_name_btn,
         change_pwd_btn,
-        change_name_dialog,
         change_hostname_dialog,
         change_password_dialog,
     }
