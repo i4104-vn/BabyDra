@@ -135,3 +135,29 @@ fn read_image_metadata_extracts_dimensions_and_pixels() {
     }
 }
 
+#[test]
+fn test_get_or_create_first_frame_static_and_video() {
+    // 1. Static image returns the same path
+    let png_path = std::path::PathBuf::from("wallpaper.png");
+    if png_path.exists() {
+        let frame = babydra_core::get_or_create_first_frame(&png_path);
+        assert_eq!(frame, png_path);
+    }
+
+    // 2. Video extracts full-resolution first frame
+    let home = std::env::var("HOME").unwrap_or_default();
+    let video_dir = std::path::Path::new(&home).join(".babydra/wallpaper");
+    if let Ok(entries) = std::fs::read_dir(video_dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if babydra_core::is_video_file(&path) {
+                let first_frame = babydra_core::get_or_create_first_frame(&path);
+                assert!(first_frame.exists(), "First frame file should exist");
+                assert!(first_frame.to_string_lossy().contains("frame0.jpg"));
+                break;
+            }
+        }
+    }
+}
+
+

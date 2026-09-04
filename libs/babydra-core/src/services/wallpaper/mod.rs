@@ -17,7 +17,7 @@ pub use greeter::{
     apply_greeter_wp, get_greeter_wp, get_greeter_wp_bytes, get_greeter_wp_css, read_image_bytes,
     set_greeter_wp, sync_shared_assets,
 };
-pub use thumbnail::get_or_create_thumbnail;
+pub use thumbnail::{get_or_create_first_frame, get_or_create_thumbnail};
 pub use types::{WallpaperKind, WallpaperMode};
 pub use utils::{
     get_video_duration, is_gif_file, is_gstreamer_plugin_available,
