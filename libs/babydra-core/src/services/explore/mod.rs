@@ -7,6 +7,7 @@ pub mod image_meta;
 pub mod launcher;
 pub mod path;
 pub mod preview;
+pub mod shortcuts;
 pub mod sort;
 pub mod watcher;
 
@@ -27,5 +28,6 @@ pub use launcher::{
 };
 pub use path::{resolve_target_from_path, resolve_target_from_uri, sanitize_path};
 pub use preview::load_cropped_square;
+pub use shortcuts::{clean_modifiers, matches_key, matches_shortcut, parse_shortcut};
 pub use sort::sort_entries;
 pub use watcher::FileWatcher;

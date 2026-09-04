@@ -62,9 +62,10 @@ pub use services::window::tracker::spawn_switcher;
 pub use services::clock::{self, format_clock_date};
 pub use services::exif::{self, read_exif, ExifData};
 pub use services::explore::{
-    calc_dir_size, copy_path, delete_path, filter_entries, get_icon_name, get_owner_group,
-    load_cropped_square, load_directory, move_path, read_image_metadata, rename_path,
-    send_to_trash, sort_entries, start_dbus_service, FileWatcher, ImageMetadata,
+    calc_dir_size, clean_modifiers, copy_path, delete_path, filter_entries, get_icon_name,
+    get_owner_group, load_cropped_square, load_directory, matches_key, matches_shortcut,
+    move_path, parse_shortcut, read_image_metadata, rename_path, send_to_trash, shortcuts,
+    sort_entries, start_dbus_service, FileWatcher, ImageMetadata,
 };
 pub use services::mpris::{self, decode_uri, run_playerctl};
 pub use services::notification::island::{
