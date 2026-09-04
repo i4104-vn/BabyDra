@@ -14,13 +14,38 @@ pub fn is_dark_mode() -> bool {
 /// Returns the current `icon colored`.
 pub fn get_icon_colored(name: &str, size: i32, color_hex: &str) -> gtk4::Image {
     let final_color = if !is_dark_mode() {
-        match color_hex {
-            "rgba(255, 255, 255, 0.8)" => "rgba(28, 28, 30, 0.85)".to_string(),
-            "rgba(255, 255, 255, 0.7)" => "rgba(28, 28, 30, 0.75)".to_string(),
-            "rgba(255, 255, 255, 0.6)" => "rgba(28, 28, 30, 0.65)".to_string(),
-            "rgba(255, 255, 255, 0.5)" => "rgba(28, 28, 30, 0.55)".to_string(),
-            "rgba(255, 255, 255, 0.4)" => "rgba(28, 28, 30, 0.45)".to_string(),
-            _ => color_hex.to_string(),
+        let normalized = color_hex.replace(' ', "");
+        match normalized.as_str() {
+            "rgba(255,255,255,0.8)" | "rgba(255,255,255,0.80)" => {
+                "rgba(28, 28, 30, 0.85)".to_string()
+            }
+            "rgba(255,255,255,0.7)" | "rgba(255,255,255,0.70)" => {
+                "rgba(28, 28, 30, 0.75)".to_string()
+            }
+            "rgba(255,255,255,0.6)" | "rgba(255,255,255,0.60)" => {
+                "rgba(28, 28, 30, 0.65)".to_string()
+            }
+            "rgba(255,255,255,0.5)" | "rgba(255,255,255,0.50)" => {
+                "rgba(28, 28, 30, 0.55)".to_string()
+            }
+            "rgba(255,255,255,0.4)" | "rgba(255,255,255,0.40)" => {
+                "rgba(28, 28, 30, 0.45)".to_string()
+            }
+            _ => {
+                if let Some(alpha_str) = normalized
+                    .strip_prefix("rgba(255,255,255,")
+                    .and_then(|s| s.strip_suffix(')'))
+                {
+                    if let Ok(alpha) = alpha_str.parse::<f32>() {
+                        let mapped_alpha = (alpha + 0.05).min(1.0);
+                        format!("rgba(28, 28, 30, {:.2})", mapped_alpha)
+                    } else {
+                        color_hex.to_string()
+                    }
+                } else {
+                    color_hex.to_string()
+                }
+            }
         }
     } else {
         color_hex.to_string()

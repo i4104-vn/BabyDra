@@ -37,6 +37,24 @@ fn zoom_icons_resolve_without_fallback() {
     assert_eq!(zoom_in_colored.pixel_size(), 16);
     assert!(zoom_in_colored.paintable().is_some());
 
+    // Verify theme toggle icons resolve properly
+    let brightness_icon = get_icon("brightness", 16);
+    assert_eq!(brightness_icon.pixel_size(), 16);
+    assert!(brightness_icon.paintable().is_some());
+
+    let dark_mode_icon = get_icon("dark-mode", 16);
+    assert_eq!(dark_mode_icon.pixel_size(), 16);
+    assert!(dark_mode_icon.paintable().is_some());
+
+    // Verify colored icon handles rgba with and without spaces
+    let brightness_colored_nospaces = get_icon_colored("brightness", 16, "rgba(255,255,255,0.8)");
+    assert_eq!(brightness_colored_nospaces.pixel_size(), 16);
+    assert!(brightness_colored_nospaces.paintable().is_some());
+
+    let brightness_colored_spaces = get_icon_colored("brightness", 16, "rgba(255, 255, 255, 0.8)");
+    assert_eq!(brightness_colored_spaces.pixel_size(), 16);
+    assert!(brightness_colored_spaces.paintable().is_some());
+
     // Verify create_wp_thumb resolves
     let wp_thumb = babydra_ui_kit::components::create_wp_thumb(18);
     assert!(wp_thumb.has_css_class("sidebar-wallpaper-thumb"));

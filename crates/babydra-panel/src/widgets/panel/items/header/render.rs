@@ -42,18 +42,12 @@ pub fn create_header_row(_on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>
 
     let is_dark = babydra_ui_kit::ui::theme::is_dark_mode();
     let theme_icon_name = if is_dark { "dark-mode" } else { "brightness" };
-    let icon_color = if is_dark {
-        "#ffffff"
-    } else {
-        "rgba(255,255,255,0.8)"
-    };
-    let theme_tooltip = babydra_core::i18n::trans("control.dark_mode");
+    let theme_tooltip = babydra_core::i18n::trans("control.dark_mode").replace('\n', " ");
 
     // Theme toggle button
-    let theme_btn = babydra_ui_kit::components::create_color_btn(
+    let theme_btn = babydra_ui_kit::components::create_icon_button(
         theme_icon_name,
         16,
-        icon_color,
         &["circle-btn"],
         Some(&theme_tooltip),
         || {},
@@ -75,12 +69,7 @@ pub fn create_header_row(_on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>
         settings.connect_gtk_application_prefer_dark_theme_notify(move |_| {
             let dark = babydra_ui_kit::ui::theme::is_dark_mode();
             let name = if dark { "dark-mode" } else { "brightness" };
-            let color = if dark {
-                "#ffffff"
-            } else {
-                "rgba(255,255,255,0.8)"
-            };
-            let new_theme_icon = babydra_ui_kit::ui::icon::get_icon_colored(name, 16, color);
+            let new_theme_icon = babydra_ui_kit::ui::icon::get_icon(name, 16);
             btn_clone.set_child(Some(&new_theme_icon));
         });
     }
