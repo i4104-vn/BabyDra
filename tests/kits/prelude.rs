@@ -6,7 +6,7 @@
 //! public item breaks this test, so the documented API surface cannot drift
 //! silently.
 
-use babydra_ui_kit::components::explore::prelude as explore_prelude;
+use babydra_ui_kit::components::explore as explore_prelude;
 use babydra_ui_kit::prelude as ui_prelude;
 
 /// Asserts the ui-kit prelude exposes the core builders & helpers.
@@ -54,7 +54,7 @@ fn ui_kit_prelude_exposes_components_and_helpers() {
     let _: fn(f64) -> f64 = ui_prelude::ease_out_cubic;
 }
 
-/// Asserts the `babydra-ui-kit` explore feature prelude exposes the API.
+/// Asserts the `babydra-ui-kit` explore feature exposes the API.
 #[test]
 fn explore_prelude_exposes_features() {
     // Dialogs — `impl IsA<gtk4::Window>` instantiates to ApplicationWindow.
@@ -65,7 +65,7 @@ fn explore_prelude_exposes_features() {
     ) = explore_prelude::show_folder_dialog;
     let _: fn(&str, &str, Option<&gtk4::ApplicationWindow>) = explore_prelude::show_alert_dialog;
     let _: fn(
-        &std::path::PathBuf,
+        &std::path::Path,
         std::path::PathBuf,
         std::rc::Rc<dyn Fn(std::path::PathBuf)>,
         Option<&gtk4::ApplicationWindow>,
@@ -75,13 +75,8 @@ fn explore_prelude_exposes_features() {
 
     // Drag & drop / selection / items.
     let _: fn(std::path::PathBuf) -> gtk4::DropTarget = explore_prelude::create_drop_target;
-    let _: fn(
-        &gtk4::Widget,
-        gtk4::Box,
-        gtk4::Fixed,
-        gtk4::Box,
-        std::rc::Rc<std::cell::RefCell<Vec<std::path::PathBuf>>>,
-    ) = explore_prelude::wire_rubberband_grid;
+    let _: fn(&gtk4::Widget, gtk4::Box, gtk4::Fixed, gtk4::Box) =
+        explore_prelude::wire_rubberband_grid;
     let _: fn(
         usize,
         &babydra_core::FileEntry,
@@ -93,6 +88,5 @@ fn explore_prelude_exposes_features() {
     let _: fn(u64) -> String = explore_prelude::format_size;
     let _: fn(std::time::SystemTime) -> String = explore_prelude::format_date;
     let _: fn(&std::path::Path) -> bool = explore_prelude::is_archive_file;
-    let _: fn(&std::path::Path) -> std::path::PathBuf = explore_prelude::sanitize_path;
     let _: fn(&std::path::Path) -> bool = explore_prelude::is_in_trash;
 }
