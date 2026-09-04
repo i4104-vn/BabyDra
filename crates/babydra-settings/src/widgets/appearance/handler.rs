@@ -519,6 +519,9 @@ pub fn setup_appearance(
                                 return;
                             }
                             let mode_to_set = if babydra_core::wallpaper::is_live_wallpaper_file(&wp_clone) {
+                                if is_video {
+                                    let _ = babydra_core::wallpaper::get_or_create_first_frame(&wp_clone);
+                                }
                                 babydra_core::wallpaper::WallpaperMode::Live
                             } else {
                                 babydra_core::wallpaper::WallpaperMode::Static
@@ -728,6 +731,9 @@ pub fn setup_appearance(
                                     ),
                                 );
                             } else {
+                                if is_live_mode && babydra_core::wallpaper::is_video_file(&dest_path) {
+                                    let _ = babydra_core::wallpaper::get_or_create_first_frame(&dest_path);
+                                }
                                 let mode_val = if is_live_mode { babydra_core::wallpaper::WallpaperMode::Live } else { babydra_core::wallpaper::WallpaperMode::Static };
                                 let _ = babydra_core::wallpaper::set_wallpaper_with_mode(&dest_path, mode_val);
                                 *desktop_wp_file.borrow_mut() = Some(dest_path.clone());
