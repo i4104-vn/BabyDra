@@ -145,6 +145,8 @@
   "settings.pick_greeter_wallpaper": "Select Lock Screen Background",
   "settings.notif_greeter_wallpaper_title": "Lock Screen Wallpaper",
   "settings.notif_greeter_wallpaper_msg": "Updated lock screen background",
+  "settings.lock_static_only_title": "Lock Screen Wallpaper",
+  "settings.lock_static_only_desc": "Lock screen and login only support static images (PNG, JPG, WEBP)",
   "settings.image_filter": "Images (*.png, *.jpg, *.jpeg, *.webp)",
   "settings.vpn_filter": "VPN Configurations (*.ovpn, *.conf)",
   "settings.open_vpn_profile": "Open VPN Profile",

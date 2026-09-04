@@ -198,6 +198,74 @@ button.perf-profile-row-btn {
     border-radius: 10px;
 }
 
+.wallpaper-preview-overlay {
+    border-radius: 14px;
+}
+
+picture.wallpaper-preview-picture,
+.wallpaper-preview-picture picture,
+.wallpaper-preview-picture {
+    border-radius: 14px;
+}
+
+button.wallpaper-pick-overlay-vertical-btn,
+button.wallpaper-pick-overlay-inside-btn,
+button.wallpaper-action-btn {
+    border-radius: 9999px;
+    min-width: 38px;
+    min-height: 38px;
+    padding: 0;
+    backdrop-filter: blur(14px);
+    transition: all 200ms ease;
+}
+
+dropdown.wallpaper-target-dropdown {
+    border-radius: 9999px;
+    backdrop-filter: blur(14px);
+}
+
+dropdown.wallpaper-target-dropdown button {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+}
+
+button.wallpaper-thumb-card {
+    background-color: transparent;
+    border: none;
+    border-radius: 10px;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+    transition: all 200ms ease;
+}
+
+button.wallpaper-thumb-card picture {
+    border-radius: 10px;
+    transition: all 200ms ease;
+}
+
+.wallpaper-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 9999px;
+    margin: 6px;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(14px);
+}
+
+.wallpaper-preview-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 9999px;
+    letter-spacing: 0.8px;
+}
+
 button.theme-option-card,
 button.theme-option-card:hover,
 button.theme-option-card:focus,

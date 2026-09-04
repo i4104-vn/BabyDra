@@ -1517,46 +1517,22 @@ button.theme-card-option.active-dark image {
 }
 
 .wallpaper-preview-overlay {
-    border-radius: 14px;
     border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-picture.wallpaper-preview-picture,
-.wallpaper-preview-picture picture,
-.wallpaper-preview-picture {
-    border-radius: 14px;
 }
 
 button.wallpaper-pick-overlay-vertical-btn,
 button.wallpaper-pick-overlay-inside-btn,
-button.wallpaper-action-btn {
+button.wallpaper-action-btn,
+dropdown.wallpaper-target-dropdown,
+.wallpaper-badge {
     background-color: rgba(0, 0, 0, 0.60);
-    backdrop-filter: blur(14px);
     border: 1px solid rgba(255, 255, 255, 0.22);
-    border-radius: 9999px;
-    min-width: 38px;
-    min-height: 38px;
-    padding: 0;
-    transition: all 200ms ease;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
-dropdown.wallpaper-target-dropdown {
-    background-color: rgba(0, 0, 0, 0.60);
-    backdrop-filter: blur(14px);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    border-radius: 9999px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
-}
-
-dropdown.wallpaper-target-dropdown button {
-    background: transparent;
-    border: none;
-    box-shadow: none;
+dropdown.wallpaper-target-dropdown button,
+.wallpaper-badge {
     color: #ffffff;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 4px 12px;
 }
 
 button.wallpaper-pick-overlay-vertical-btn:hover,
@@ -1618,20 +1594,8 @@ button.perf-profile-row-btn.active {
 }
 
 /* Wallpaper Thumbnail Card */
-button.wallpaper-thumb-card {
-    background-color: transparent;
-    border: none;
-    border-radius: 10px;
-    padding: 0;
-    margin: 0;
-    transition: all 200ms ease;
-    box-shadow: none;
-}
-
 button.wallpaper-thumb-card picture {
-    border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.12);
-    transition: all 200ms ease;
 }
 
 button.wallpaper-thumb-card:hover picture {
@@ -1639,46 +1603,6 @@ button.wallpaper-thumb-card:hover picture {
     box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
 }
 
-.wallpaper-badge {
-    background-color: rgba(15, 23, 42, 0.75);
-    color: #ffffff;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 3px 7px;
-    border-radius: 6px;
-    margin: 6px;
-    letter-spacing: 0.5px;
-}
-
-.wallpaper-badge-live {
-    background-color: rgba(59, 130, 246, 0.85);
-    color: #ffffff;
-}
-
-.wallpaper-badge-video {
-    background-color: rgba(99, 102, 241, 0.88);
-    color: #ffffff;
-}
-
-.wallpaper-badge-gif {
-    background-color: rgba(236, 72, 153, 0.88);
-    color: #ffffff;
-}
-
-.wallpaper-badge-image {
-    background-color: rgba(15, 23, 42, 0.78);
-    color: #f1f5f9;
-    border: 1px solid rgba(255, 255, 255, 0.16);
-}
-
-.wallpaper-preview-badge {
-    font-size: 11px;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 8px;
-    margin: 12px;
-    letter-spacing: 0.6px;
-}
 
 /* Missing GStreamer Plugin Warning Banner */
 .missing-plugin-banner {

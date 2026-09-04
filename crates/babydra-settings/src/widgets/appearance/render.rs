@@ -71,35 +71,6 @@ pub fn build_appearance_ui(
     preview_pic.set_content_fit(gtk4::ContentFit::Cover);
     preview_pic.add_css_class("wallpaper-preview-picture");
 
-    let clean_path = current_wallpaper_path.replace("file://", "");
-    if !clean_path.is_empty() && std::path::Path::new(&clean_path).exists() {
-        let p = std::path::PathBuf::from(clean_path.clone());
-        let pic_clone = preview_pic.clone();
-        
-        let spinner = gtk4::Spinner::new();
-        spinner.set_halign(gtk4::Align::Center);
-        spinner.set_valign(gtk4::Align::Center);
-        spinner.set_size_request(32, 32);
-        spinner.start();
-        preview_overlay.add_overlay(&spinner);
-        
-        crate::widgets::helpers::spawn_async_task(
-            move || babydra_core::wallpaper::get_or_create_thumbnail(&p),
-            move |thumb| {
-                if !thumb.as_os_str().is_empty() {
-                    let file = gtk4::gio::File::for_path(&thumb);
-                    if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
-                        pic_clone.set_paintable(Some(&texture));
-                    } else {
-                        pic_clone.set_filename(Some(&thumb));
-                    }
-                }
-                spinner.stop();
-                spinner.set_visible(false);
-            },
-            16,
-        );
-    }
     preview_overlay.set_child(Some(&preview_pic));
 
     // Top-Left Dropdown Container inside Preview Overlay
@@ -131,6 +102,7 @@ pub fn build_appearance_ui(
     preview_type_badge.set_margin_start(10);
     preview_type_badge.set_margin_bottom(10);
 
+    let clean_path = current_wallpaper_path.replace("file://", "");
     let initial_path_obj = if !clean_path.is_empty() {
         Some(std::path::Path::new(&clean_path))
     } else {

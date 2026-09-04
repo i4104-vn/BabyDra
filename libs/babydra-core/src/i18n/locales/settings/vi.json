@@ -145,6 +145,8 @@
   "settings.pick_greeter_wallpaper": "Chọn hình nền",
   "settings.notif_greeter_wallpaper_title": "Hình nền khóa",
   "settings.notif_greeter_wallpaper_msg": "Đã cập nhật hình nền màn hình đăng nhập",
+  "settings.lock_static_only_title": "Hình nền khóa",
+  "settings.lock_static_only_desc": "Màn hình khóa và đăng nhập chỉ hỗ trợ ảnh tĩnh (PNG, JPG, WEBP)",
   "settings.image_filter": "Hình ảnh (*.png, *.jpg, *.jpeg, *.webp)",
   "settings.vpn_filter": "Cấu hình VPN (*.ovpn, *.conf)",
   "settings.open_vpn_profile": "Mở tệp cấu hình VPN",
