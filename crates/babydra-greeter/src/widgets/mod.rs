@@ -6,28 +6,6 @@ pub mod login;
 pub mod splash;
 pub mod top_bar;
 
-pub fn create_logo_picture(size: i32) -> gtk4::Widget {
-    let logo_bytes = include_bytes!("../../../../libs/babydra-core/src/services/logo.png");
-    let stream = gtk4::gio::MemoryInputStream::from_bytes(&gtk4::glib::Bytes::from(logo_bytes));
-
-    if let Ok(pixbuf) = gtk4::gdk_pixbuf::Pixbuf::from_stream_at_scale(
-        &stream,
-        size,
-        size,
-        true,
-        gtk4::gio::Cancellable::NONE,
-    ) {
-        let texture = gtk4::gdk::Texture::for_pixbuf(&pixbuf);
-        let img = gtk4::Image::from_paintable(Some(&texture));
-        img.set_pixel_size(size);
-        img.upcast()
-    } else {
-        let img = gtk4::Image::new();
-        img.set_pixel_size(size);
-        img.upcast()
-    }
-}
-
 /// Builds a scaled-down avatar `Image` at the requested size.
 /// Shared by the splash screen and the login panel to avoid duplicated logic.
 pub fn create_avatar_img(size: i32) -> gtk4::Widget {
@@ -37,5 +15,5 @@ pub fn create_avatar_img(size: i32) -> gtk4::Widget {
         }
     }
 
-    create_logo_picture(size)
+    babydra_ui_kit::ui::icon::get_logo_png(size).upcast()
 }

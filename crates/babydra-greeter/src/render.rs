@@ -33,11 +33,7 @@ pub fn build_greeter_ui(app: &gtk4::Application) -> GreeterWidgets {
         .decorated(false)
         .build();
 
-    // Ensure window decorations are disabled completely
-    window.set_decorated(false);
-
     // Layer shell: fullscreen overlay with exclusive keyboard on Wayland compositors
-    info!(target: "babydra-greeter", "Configuring GTK Layer Shell (Overlay Layer, Exclusive Keyboard Mode)");
     babydra_ui_kit::ui::window::init_layer_window(
         &window,
         Layer::Overlay,
@@ -53,11 +49,7 @@ pub fn build_greeter_ui(app: &gtk4::Application) -> GreeterWidgets {
         None,
     );
 
-    // Fallback fullscreen
-    info!(target: "babydra-greeter", "Applying fullscreen layout mode");
     window.fullscreen();
-
-    info!(target: "babydra-greeter", "Triggering CSS theme loading");
     theme::load_css();
 
     // Background wallpaper embedded directly from build
@@ -66,17 +58,8 @@ pub fn build_greeter_ui(app: &gtk4::Application) -> GreeterWidgets {
     let gbytes = gtk4::glib::Bytes::from_static(GREETER_WALLPAPER_BYTES);
     if let Ok(texture) = gtk4::gdk::Texture::from_bytes(&gbytes) {
         bg_picture.set_paintable(Some(&texture));
-        info!(target: "babydra-greeter", "Asset loaded: embedded greeter wallpaper texture");
     } else {
-        let stream = gtk4::gio::MemoryInputStream::from_bytes(&gbytes);
-        if let Ok(pixbuf) =
-            gtk4::gdk_pixbuf::Pixbuf::from_stream(&stream, gtk4::gio::Cancellable::NONE)
-        {
-            bg_picture.set_pixbuf(Some(&pixbuf));
-            info!(target: "babydra-greeter", "Asset loaded: embedded greeter wallpaper pixbuf");
-        } else {
-            info!(target: "babydra-greeter", "Asset warning: failed to decode embedded greeter wallpaper");
-        }
+        tracing::warn!(target: "babydra-greeter", "Failed to decode embedded greeter wallpaper");
     }
 
     let overlay = Overlay::new();

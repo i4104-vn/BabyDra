@@ -3,6 +3,19 @@
 use gtk4::prelude::*;
 use gtk4::{Align, Box as GtkBox, Button, Label, Orientation};
 
+fn create_power_action_btn(icon_name: &str, extra_class: Option<&str>, tooltip_key: &str) -> Button {
+    let btn = Button::new();
+    btn.add_css_class("power-btn");
+    if let Some(cls) = extra_class {
+        btn.add_css_class(cls);
+    }
+    btn.set_tooltip_text(Some(&babydra_core::i18n::trans(tooltip_key)));
+    btn.set_cursor_from_name(Some("pointer"));
+    let icon = babydra_ui_kit::ui::icon::get_icon_colored(icon_name, 18, "#ffffff");
+    btn.set_child(Some(&icon));
+    btn
+}
+
 /// Builds the top bar with clock/date display and suspend/reboot/power buttons.
 pub fn build() -> super::TopBarWidget {
     tracing::info!(target: "babydra-greeter", "Building TopBar Widget (clock, date, power buttons)");
@@ -27,29 +40,9 @@ pub fn build() -> super::TopBarWidget {
     actions_box.set_hexpand(true);
     actions_box.set_valign(Align::Center);
 
-    tracing::info!(target: "babydra-greeter", "Asset loaded: rendering top bar icons (sleep, restart, power)");
-    let suspend_btn = Button::new();
-    suspend_btn.add_css_class("power-btn");
-    suspend_btn.add_css_class("action-btn-suspend");
-    suspend_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("greeter.suspend")));
-    suspend_btn.set_cursor_from_name(Some("pointer"));
-    let suspend_icon = babydra_ui_kit::ui::icon::get_icon_colored("sleep", 18, "#ffffff");
-    suspend_btn.set_child(Some(&suspend_icon));
-
-    let reboot_btn = Button::new();
-    reboot_btn.add_css_class("power-btn");
-    reboot_btn.add_css_class("action-btn-reboot");
-    reboot_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("greeter.reboot")));
-    reboot_btn.set_cursor_from_name(Some("pointer"));
-    let reboot_icon = babydra_ui_kit::ui::icon::get_icon_colored("restart", 18, "#ffffff");
-    reboot_btn.set_child(Some(&reboot_icon));
-
-    let power_btn = Button::new();
-    power_btn.add_css_class("power-btn");
-    power_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("greeter.power_off")));
-    power_btn.set_cursor_from_name(Some("pointer"));
-    let power_icon = babydra_ui_kit::ui::icon::get_icon_colored("power", 18, "#ffffff");
-    power_btn.set_child(Some(&power_icon));
+    let suspend_btn = create_power_action_btn("sleep", Some("action-btn-suspend"), "greeter.suspend");
+    let reboot_btn = create_power_action_btn("restart", Some("action-btn-reboot"), "greeter.reboot");
+    let power_btn = create_power_action_btn("power", None, "greeter.power_off");
 
     actions_box.append(&suspend_btn);
     actions_box.append(&reboot_btn);

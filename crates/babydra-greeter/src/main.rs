@@ -9,7 +9,7 @@ mod theme;
 mod widgets;
 
 use gtk4::prelude::*;
-use tracing::info;
+use tracing::{debug, info};
 
 /// Application entry point: `main`.
 fn main() {
@@ -22,7 +22,7 @@ fn main() {
         std::env::var("WAYLAND_DISPLAY").unwrap_or_else(|_| "<NOT SET>".to_string());
     let xdg_config = std::env::var("XDG_CONFIG_HOME").unwrap_or_else(|_| "<DEFAULT>".to_string());
 
-    info!(
+    debug!(
         target: "babydra-greeter",
         "Process environment: PID={}, GREETD_SOCK={}, WAYLAND_DISPLAY={}, XDG_CONFIG_HOME={}",
         pid, greetd_sock, wayland_display, xdg_config

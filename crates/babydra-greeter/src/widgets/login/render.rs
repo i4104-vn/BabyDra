@@ -49,7 +49,6 @@ pub fn build() -> super::LoginWidget {
     let user_capsule = GtkBox::new(Orientation::Horizontal, 8);
     user_capsule.add_css_class("input-capsule");
 
-    tracing::info!(target: "babydra-greeter", "Asset loaded: GTK icon 'avatar-default-symbolic'");
     let user_icon = Image::from_icon_name("avatar-default-symbolic");
     user_icon.set_pixel_size(18);
     user_icon.set_valign(Align::Center);
@@ -69,7 +68,6 @@ pub fn build() -> super::LoginWidget {
     let pass_capsule = GtkBox::new(Orientation::Horizontal, 8);
     pass_capsule.add_css_class("input-capsule");
 
-    tracing::info!(target: "babydra-greeter", "Asset loaded: GTK icon 'dialog-password-symbolic'");
     let pass_icon = Image::from_icon_name("dialog-password-symbolic");
     pass_icon.set_pixel_size(18);
     pass_icon.set_valign(Align::Center);
@@ -101,7 +99,6 @@ pub fn build() -> super::LoginWidget {
     error_box.set_halign(Align::Center);
     error_box.set_visible(false);
 
-    tracing::info!(target: "babydra-greeter", "Asset loaded: GTK icon 'dialog-error-symbolic'");
     let error_icon = Image::from_icon_name("dialog-error-symbolic");
     error_icon.set_pixel_size(16);
 

@@ -104,28 +104,60 @@ fn setup_login_flow(g: &GreeterWidgets) {
     });
 }
 
+#[derive(Clone)]
+struct LoginRefs {
+    user_dropdown: gtk4::DropDown,
+    users: Vec<String>,
+    pass_entry: gtk4::PasswordEntry,
+    login_btn: gtk4::Button,
+    btn_spinner: gtk4::Spinner,
+    power_btn: gtk4::Button,
+    reboot_btn: gtk4::Button,
+    suspend_btn: gtk4::Button,
+    error_label: gtk4::Label,
+    error_box: gtk4::Box,
+    login_panel: gtk4::Box,
+}
+
+impl LoginRefs {
+    fn from_greeter(g: &GreeterWidgets) -> Self {
+        Self {
+            user_dropdown: g.login.user_dropdown.clone(),
+            users: g.login.users.clone(),
+            pass_entry: g.login.pass_entry.clone(),
+            login_btn: g.login.login_btn.clone(),
+            btn_spinner: g.login.btn_spinner.clone(),
+            power_btn: g.top_bar.power_btn.clone(),
+            reboot_btn: g.top_bar.reboot_btn.clone(),
+            suspend_btn: g.top_bar.suspend_btn.clone(),
+            error_label: g.login.error_label.clone(),
+            error_box: g.login.error_box.clone(),
+            login_panel: g.login.login_panel.clone(),
+        }
+    }
+
+    fn set_controls_sensitive(&self, sensitive: bool) {
+        self.user_dropdown.set_sensitive(sensitive);
+        self.pass_entry.set_sensitive(sensitive);
+        self.login_btn.set_sensitive(sensitive);
+        self.power_btn.set_sensitive(sensitive);
+        self.reboot_btn.set_sensitive(sensitive);
+        self.suspend_btn.set_sensitive(sensitive);
+    }
+}
+
 /// Creates the login action closure with all widget references.
 fn create_login_action(g: &GreeterWidgets) -> impl Fn() + Clone + 'static {
-    let user_dropdown = g.login.user_dropdown.clone();
-    let users = g.login.users.clone();
-    let pass_entry = g.login.pass_entry.clone();
-    let login_btn = g.login.login_btn.clone();
-    let btn_spinner = g.login.btn_spinner.clone();
-    let power_btn = g.top_bar.power_btn.clone();
-    let reboot_btn = g.top_bar.reboot_btn.clone();
-    let suspend_btn = g.top_bar.suspend_btn.clone();
-    let error_label = g.login.error_label.clone();
-    let error_box = g.login.error_box.clone();
-    let login_panel = g.login.login_panel.clone();
+    let refs = LoginRefs::from_greeter(g);
 
     move || {
-        if !login_btn.is_sensitive() {
+        if !refs.login_btn.is_sensitive() {
             return;
         }
 
-        let selected_idx = user_dropdown.selected() as usize;
-        let user = users.get(selected_idx).cloned().unwrap_or_default();
-        let pass = pass_entry.text().to_string();
+        let selected_idx = refs.user_dropdown.selected() as usize;
+        let user = refs.users.get(selected_idx).cloned().unwrap_or_default();
+        let pass = refs.pass_entry.text().to_string();
         if user.is_empty() || pass.is_empty() {
             tracing::warn!(target: "babydra-greeter", "Login submit ignored: username or password is empty");
             return;
@@ -134,15 +166,9 @@ fn create_login_action(g: &GreeterWidgets) -> impl Fn() + Clone + 'static {
         tracing::info!(target: "babydra-greeter", "Login action triggered for user: {:?}", user);
 
         // Disable controls and show the spinner while authentication runs
-        user_dropdown.set_sensitive(false);
-        pass_entry.set_sensitive(false);
-        login_btn.set_sensitive(false);
-        power_btn.set_sensitive(false);
-        reboot_btn.set_sensitive(false);
-        suspend_btn.set_sensitive(false);
-
-        btn_spinner.start();
-        login_btn.set_child(Some(&btn_spinner));
+        refs.set_controls_sensitive(false);
+        refs.btn_spinner.start();
+        refs.login_btn.set_child(Some(&refs.btn_spinner));
 
         babydra_core::save_last_user(&user);
         tracing::info!(target: "babydra-greeter", "Saved last user {:?} to {:?}", user, babydra_core::services::last_user::get_last_user_path());
@@ -154,47 +180,31 @@ fn create_login_action(g: &GreeterWidgets) -> impl Fn() + Clone + 'static {
             let _ = tx.send(result);
         });
 
-        let user_dropdown_c = user_dropdown.clone();
-        let pass_entry_c = pass_entry.clone();
-        let login_btn_c = login_btn.clone();
-        let btn_spinner_c = btn_spinner.clone();
-        let power_btn_c = power_btn.clone();
-        let reboot_btn_c = reboot_btn.clone();
-        let suspend_btn_c = suspend_btn.clone();
-        let error_label_c = error_label.clone();
-        let error_box_c = error_box.clone();
-        let login_panel_c = login_panel.clone();
-
+        let r = refs.clone();
         glib::MainContext::default().spawn_local(async move {
             if let Ok(result) = rx.await {
                 match result {
                     Ok(_) => {
                         tracing::info!(target: "babydra-greeter", "Login authentication completed successfully!");
-                        error_box_c.set_visible(false);
+                        r.error_box.set_visible(false);
                     }
                     Err(err) => {
                         tracing::error!(target: "babydra-greeter", "Login authentication failed: {}", err);
                         // Re-enable controls and restore submit button label on failure
-                        btn_spinner_c.stop();
-                        login_btn_c.set_child(Option::<&gtk4::Widget>::None);
-                        login_btn_c.set_label("➔");
+                        r.btn_spinner.stop();
+                        r.login_btn.set_child(Option::<&gtk4::Widget>::None);
+                        r.login_btn.set_label("➔");
+                        r.set_controls_sensitive(true);
 
-                        user_dropdown_c.set_sensitive(true);
-                        pass_entry_c.set_sensitive(true);
-                        login_btn_c.set_sensitive(true);
-                        power_btn_c.set_sensitive(true);
-                        reboot_btn_c.set_sensitive(true);
-                        suspend_btn_c.set_sensitive(true);
+                        r.error_label.set_text(&err);
+                        r.error_box.set_visible(true);
+                        r.pass_entry.set_text("");
+                        r.pass_entry.grab_focus();
 
-                        error_label_c.set_text(&err);
-                        error_box_c.set_visible(true);
-                        pass_entry_c.set_text("");
-                        pass_entry_c.grab_focus();
-
-                        login_panel_c.add_css_class("shake-error");
-                        let login_panel_cb = login_panel_c.clone();
+                        r.login_panel.add_css_class("shake-error");
+                        let panel = r.login_panel.clone();
                         glib::timeout_add_local(std::time::Duration::from_millis(400), move || {
-                            login_panel_cb.remove_css_class("shake-error");
+                            panel.remove_css_class("shake-error");
                             glib::ControlFlow::Break
                         });
                     }
