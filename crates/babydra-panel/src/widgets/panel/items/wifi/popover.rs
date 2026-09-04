@@ -3,6 +3,7 @@
 
 use super::{connect_wifi_async, scan_networks};
 use babydra_core::i18n::trans;
+use babydra_core::models::{ActiveNetworkInfo, ActiveNetworkType};
 use gtk4::prelude::*;
 use tokio::sync::mpsc;
 
@@ -76,19 +77,23 @@ pub(crate) fn refresh_wifi_popover_list(
     let icon_widget_clone = icon_widget.clone();
     let popover_clone = popover.clone();
 
-    let (tx, mut rx) =
-        mpsc::unbounded_channel::<Option<Vec<babydra_core::models::wifi::WifiNetwork>>>();
+    let (tx, mut rx) = mpsc::unbounded_channel::<(
+        ActiveNetworkInfo,
+        Vec<babydra_core::models::wifi::WifiNetwork>,
+    )>();
 
     std::thread::spawn(move || {
+        let active_net = babydra_core::services::system::network::get_active_network_info();
         let nets = scan_networks();
 
-        let _ = tx.send(Some(nets));
+        let _ = tx.send((active_net, nets));
     });
 
     glib::spawn_future_local(async move {
-        if let Some(Some(nets)) = rx.recv().await {
+        if let Some((active_net, nets)) = rx.recv().await {
             build_wifi_list_ui(
                 &main_box_clone,
+                active_net,
                 nets,
                 sub_label_clone.clone(),
                 left_btn_clone.clone(),
@@ -103,6 +108,7 @@ pub(crate) fn refresh_wifi_popover_list(
 /// Builds the Wi-Fi network list UI.
 fn build_wifi_list_ui(
     main_box: &gtk4::Box,
+    active_net: ActiveNetworkInfo,
     networks: Vec<babydra_core::models::wifi::WifiNetwork>,
 
     sub_label: gtk4::Label,
@@ -117,6 +123,48 @@ fn build_wifi_list_ui(
 
     main_box.set_size_request(260, -1);
     main_box.add_css_class("audio-menu-popover");
+
+    if active_net.is_connected && active_net.network_type == ActiveNetworkType::Ethernet {
+        let eth_title = gtk4::Label::new(Some(&trans("control.ethernet")));
+        eth_title.add_css_class("audio-menu-section-title");
+        eth_title.set_xalign(0.0);
+        main_box.append(&eth_title);
+
+        let eth_btn = gtk4::Button::new();
+        eth_btn.add_css_class("audio-menu-item-btn");
+        eth_btn.add_css_class("active");
+
+        let eth_item = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+        eth_item.set_valign(gtk4::Align::Center);
+
+        let eth_icon = babydra_ui_kit::ui::icon::get_icon_colored("ethernet", 14, "#ffffff");
+        eth_item.append(&eth_icon);
+
+        let eth_labels = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
+        eth_labels.set_hexpand(true);
+
+        let eth_name = gtk4::Label::new(Some(&active_net.name));
+        eth_name.set_halign(gtk4::Align::Start);
+        eth_labels.append(&eth_name);
+
+        let eth_sub = gtk4::Label::new(Some(&format!(
+            "{} • {}",
+            trans("control.connected"),
+            active_net.ip_address
+        )));
+        eth_sub.set_halign(gtk4::Align::Start);
+        eth_sub.add_css_class("settings-row-desc");
+        eth_labels.append(&eth_sub);
+
+        eth_item.append(&eth_labels);
+
+        let check_label = gtk4::Label::new(Some("✓"));
+        check_label.add_css_class("audio-menu-item-check");
+        eth_item.append(&check_label);
+
+        eth_btn.set_child(Some(&eth_item));
+        main_box.append(&eth_btn);
+    }
 
     let title = gtk4::Label::new(Some(&trans("wifi.networks")));
     title.add_css_class("audio-menu-section-title");

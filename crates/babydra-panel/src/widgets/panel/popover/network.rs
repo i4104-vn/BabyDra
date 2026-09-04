@@ -1,3 +1,4 @@
+use babydra_core::models::ActiveNetworkType;
 use babydra_ui_kit::components::popovers::hover::{
     build_hover_card as build_popover_card, HoverPopoverRow as PopoverRow,
 };
@@ -20,21 +21,29 @@ pub fn build_network_update(net_popover: &gtk4::Popover) -> Rc<dyn Fn()> {
     let net_popover_c = net_popover.clone();
 
     Rc::new(move || {
-        let (enabled, ssid) = babydra_core::services::system::wifi::get_wifi_state();
+        let active_net = babydra_core::services::system::network::get_active_network_info();
         let speed = babydra_core::services::system::network::get_network_speed();
-        let local_ip = babydra_core::services::system::network::get_local_ip();
 
         let rx_cls = get_speed_color_class(speed.rx_speed);
         let tx_cls = get_speed_color_class(speed.tx_speed);
 
-        let rows = if !enabled {
-            vec![PopoverRow::new("Status", "Disabled", None)]
-        } else if ssid == "Disconnected" || ssid == "Off" {
+        let rows = if !active_net.is_connected {
             vec![PopoverRow::new("Status", "Disconnected", None)]
         } else {
+            let type_label = match active_net.network_type {
+                ActiveNetworkType::Ethernet => "Ethernet",
+                ActiveNetworkType::Wifi => "Wi-Fi",
+                ActiveNetworkType::Disconnected => "Network",
+            };
+            let name_key = match active_net.network_type {
+                ActiveNetworkType::Wifi => "SSID",
+                _ => "Connection",
+            };
+
             vec![
-                PopoverRow::new("SSID", &ssid, None),
-                PopoverRow::new("IP Address", &local_ip, None),
+                PopoverRow::new("Type", type_label, None),
+                PopoverRow::new(name_key, &active_net.name, None),
+                PopoverRow::new("IP Address", &active_net.ip_address, None),
                 PopoverRow::new(
                     "Download",
                     &format!(

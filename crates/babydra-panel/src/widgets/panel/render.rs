@@ -55,7 +55,8 @@ pub fn build_status_row() -> (
     vpn_icon.add_css_class("status-icon");
     vpn_icon.set_visible(false);
 
-    let net_icon = babydra_ui_kit::ui::icon::get_icon("wifi", 14);
+    let initial_net = babydra_core::services::system::network::get_active_network_info();
+    let net_icon = babydra_ui_kit::ui::icon::get_icon(&initial_net.icon_name, 14);
     net_icon.add_css_class("status-icon");
 
     let vol_icon = if super::items::volume::is_muted() {

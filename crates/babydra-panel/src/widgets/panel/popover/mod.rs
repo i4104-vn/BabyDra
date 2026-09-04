@@ -84,6 +84,8 @@ pub fn setup_status_popover(
 
     let bat_widget_timer = bat_widget.clone();
     let vpn_icon_timer = vpn_icon.clone();
+    let net_icon_timer = net_icon.clone();
+    let last_net_icon = std::rc::Rc::new(std::cell::RefCell::new(String::new()));
 
     gtk4::glib::timeout_add_local(std::time::Duration::from_millis(2000), move || {
         if vpn_pop_t.is_visible() {
@@ -104,6 +106,16 @@ pub fn setup_status_popover(
         let vpn_active = babydra_core::services::system::vpn::get_active_vpn_fast().is_some();
         if vpn_icon_timer.is_visible() != vpn_active {
             vpn_icon_timer.set_visible(vpn_active);
+        }
+
+        let active_net = babydra_core::services::system::network::get_active_network_info();
+        if *last_net_icon.borrow() != active_net.icon_name {
+            *last_net_icon.borrow_mut() = active_net.icon_name.clone();
+            babydra_ui_kit::ui::icon::set_image_from_icon(
+                &net_icon_timer,
+                &active_net.icon_name,
+                14,
+            );
         }
 
         if let Some(ref bat_area) = bat_widget_timer {

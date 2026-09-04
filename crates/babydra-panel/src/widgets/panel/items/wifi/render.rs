@@ -1,6 +1,5 @@
-use super::get_wifi_state;
 use super::popover::setup_wifi_popover;
-use babydra_core::i18n::trans;
+use babydra_core::models::{ActiveNetworkInfo, ActiveNetworkType};
 use gtk4::prelude::*;
 use std::rc::Rc;
 use tokio::sync::mpsc;
@@ -21,19 +20,22 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
     );
     left_btn.set_hexpand(false);
 
-    let (tx, mut rx) = mpsc::unbounded_channel::<(bool, String)>();
+    let (tx, mut rx) = mpsc::unbounded_channel::<ActiveNetworkInfo>();
     std::thread::spawn(move || {
-        let state = get_wifi_state();
-        let _ = tx.send(state);
+        let info = babydra_core::services::system::network::get_active_network_info();
+        let _ = tx.send(info);
     });
 
     let left_btn_init = left_btn.clone();
     let sub_label_init = sub_label.clone();
     glib::spawn_future_local(async move {
-        if let Some((is_act, ssid_str)) = rx.recv().await {
-            sub_label_init.set_text(&ssid_str);
-            let is_connected = is_act && ssid_str != "Off" && ssid_str != "Disconnected";
-            babydra_ui_kit::components::update_toggle_state(&left_btn_init, is_connected, "wifi");
+        if let Some(info) = rx.recv().await {
+            sub_label_init.set_text(&info.name);
+            babydra_ui_kit::components::update_toggle_state(
+                &left_btn_init,
+                info.is_connected,
+                &info.icon_name,
+            );
         }
     });
 
@@ -104,15 +106,39 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
     });
 
     let sub_label_c = sub_label.clone();
+    let left_btn_c = left_btn.clone();
     left_btn.connect_clicked(move |b| {
         let is_now_active = b.has_css_class("active");
-        if is_now_active {
-            babydra_core::services::system::wifi::set_wifi_enabled(true);
-            sub_label_c.set_text(&trans("control.scanning"));
-        } else {
-            babydra_core::services::system::wifi::set_wifi_enabled(false);
-            sub_label_c.set_text(&trans("control.off"));
-        }
+        let sub_label_t = sub_label_c.clone();
+        let left_btn_t = left_btn_c.clone();
+
+        let (tx_refresh, mut rx_refresh) = mpsc::unbounded_channel::<ActiveNetworkInfo>();
+        std::thread::spawn(move || {
+            let active_net = babydra_core::services::system::network::get_active_network_info();
+            if active_net.network_type == ActiveNetworkType::Ethernet {
+                let _ = tx_refresh.send(active_net);
+            } else {
+                if is_now_active {
+                    babydra_core::services::system::wifi::set_wifi_enabled(true);
+                } else {
+                    babydra_core::services::system::wifi::set_wifi_enabled(false);
+                }
+                std::thread::sleep(std::time::Duration::from_millis(300));
+                let new_info = babydra_core::services::system::network::get_active_network_info();
+                let _ = tx_refresh.send(new_info);
+            }
+        });
+
+        glib::spawn_future_local(async move {
+            if let Some(info) = rx_refresh.recv().await {
+                sub_label_t.set_text(&info.name);
+                babydra_ui_kit::components::update_toggle_state(
+                    &left_btn_t,
+                    info.is_connected,
+                    &info.icon_name,
+                );
+            }
+        });
     });
 
     container.append(&left_btn);
