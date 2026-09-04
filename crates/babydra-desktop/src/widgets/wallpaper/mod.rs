@@ -51,8 +51,9 @@ pub fn create_wallpaper_w() -> gtk4::Overlay {
     let is_animating: Rc<Cell<bool>> = Rc::new(Cell::new(false));
     let active_start_time: Rc<Cell<Option<i64>>> = Rc::new(Cell::new(None));
     let ripple_origin: Rc<Cell<(f64, f64)>> = Rc::new(Cell::new((1.0, 0.0)));
-    let pending_live_play: Rc<RefCell<Option<(PathBuf, babydra_core::wallpaper::WallpaperMode)>>> =
-        Rc::new(RefCell::new(None));
+    let pending_live_play: Rc<
+        RefCell<Option<(PathBuf, babydra_core::wallpaper::WallpaperMode, Option<gtk4::MediaFile>)>>,
+    > = Rc::new(RefCell::new(None));
 
     // Initial wallpaper load with dynamic monitor resolution detection
     let (init_w, init_h) = get_monitor_res(&drawing_area);
@@ -75,6 +76,7 @@ pub fn create_wallpaper_w() -> gtk4::Overlay {
                 &drawing_area,
                 &active_media_file,
                 &gif_source_id,
+                None,
             );
         }
     }
@@ -153,6 +155,9 @@ pub fn create_wallpaper_w() -> gtk4::Overlay {
                 if let Some(mf) = active_media_c.borrow_mut().take() {
                     mf.pause();
                 }
+                if let Some((_, _, Some(mf))) = pending_live_c.borrow_mut().take() {
+                    mf.pause();
+                }
                 live_pic_c.set_paintable(None::<&gtk4::gdk::Paintable>);
                 live_pic_c.set_visible(false);
                 da_c.set_visible(true);
@@ -196,7 +201,7 @@ pub fn create_wallpaper_w() -> gtk4::Overlay {
                                     anim_tick.set(false);
 
                                     // After transition completes: start live playback seamlessly
-                                    if let Some((live_path, live_mode)) =
+                                    if let Some((live_path, live_mode, pre_rolled_mf)) =
                                         pending_live_tick.borrow_mut().take()
                                     {
                                         start_live_media(
@@ -206,6 +211,7 @@ pub fn create_wallpaper_w() -> gtk4::Overlay {
                                             &da_tick,
                                             &active_media_tick,
                                             &gif_source_tick,
+                                            pre_rolled_mf,
                                         );
                                     }
 
@@ -219,12 +225,15 @@ pub fn create_wallpaper_w() -> gtk4::Overlay {
 
                     if new_mode == babydra_core::wallpaper::WallpaperMode::Live {
                         // LIVE WALLPAPER TARGET:
-                        // Extract first frame of video or load frame 0 of GIF
+                        // 1. Pre-warm / pre-roll video asynchronously in background right now!
+                        let pre_rolled = prepare_live_video(path);
+
+                        // 2. Extract first frame of video or load frame 0 of GIF
                         let target_surf = load_first_frame_surface(path, mon_w, mon_h);
 
                         if let Some(new_surf) = target_surf {
                             *cur_surf_c.borrow_mut() = Some(new_surf);
-                            *pending_live_c.borrow_mut() = Some((path.clone(), new_mode));
+                            *pending_live_c.borrow_mut() = Some((path.clone(), new_mode, pre_rolled));
 
                             if let Some(prev) = prev_surf {
                                 *old_surf_c.borrow_mut() = Some(prev);
@@ -233,7 +242,7 @@ pub fn create_wallpaper_w() -> gtk4::Overlay {
                                 // No previous surface: immediately start playing live wallpaper
                                 prog_c.set(1.0);
                                 da_c.queue_draw();
-                                if let Some((live_path, live_mode)) =
+                                if let Some((live_path, live_mode, pre_rolled_mf)) =
                                     pending_live_c.borrow_mut().take()
                                 {
                                     start_live_media(
@@ -243,6 +252,7 @@ pub fn create_wallpaper_w() -> gtk4::Overlay {
                                         &da_c,
                                         &active_media_c,
                                         &gif_source_c,
+                                        pre_rolled_mf,
                                     );
                                 }
                             }
