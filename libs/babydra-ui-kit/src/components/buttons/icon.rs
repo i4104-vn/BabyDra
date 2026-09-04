@@ -193,49 +193,15 @@ pub fn create_vpn_icon(size: i32) -> gtk4::Widget {
 pub fn create_wp_thumb(size: i32) -> gtk4::Widget {
     if let Some(wp_path) = babydra_core::services::wallpaper::get_wallpaper() {
         if wp_path.exists() {
-            if let Ok(orig) = gdk_pixbuf::Pixbuf::from_file(&wp_path) {
-                let w = orig.width();
-                let h = orig.height();
-                let square_size = w.min(h);
-                let x = (w - square_size) / 2;
-                let y = (h - square_size) / 2;
-
-                let cropped = orig.new_subpixbuf(x, y, square_size, square_size);
-                if let Some(scaled) =
-                    cropped.scale_simple(size, size, gdk_pixbuf::InterpType::Bilinear)
-                {
-                    if let Ok(circle_pb) = scaled.add_alpha(false, 0, 0, 0) {
-                        let width = circle_pb.width();
-                        let height = circle_pb.height();
-                        let rowstride = circle_pb.rowstride() as usize;
-                        let n_channels = circle_pb.n_channels() as usize;
-
-                        let center = (width as f64 - 1.0) / 2.0;
-                        let radius_sq = (width as f64 / 2.0) * (width as f64 / 2.0);
-
-                        unsafe {
-                            let pixels = circle_pb.pixels();
-                            for py in 0..height {
-                                let dy = py as f64 - center;
-                                for px in 0..width {
-                                    let dx = px as f64 - center;
-                                    if dx * dx + dy * dy > radius_sq {
-                                        let idx =
-                                            (py as usize) * rowstride + (px as usize) * n_channels;
-                                        if idx + 3 < pixels.len() {
-                                            pixels[idx + 3] = 0;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        let texture = gdk4::Texture::for_pixbuf(&circle_pb);
-                        let img = gtk4::Image::from_paintable(Some(&texture));
-                        img.set_pixel_size(size);
-                        img.add_css_class("sidebar-wallpaper-thumb");
-                        return img.upcast();
-                    }
+            let thumb_path = babydra_core::services::wallpaper::get_or_create_thumbnail(&wp_path);
+            if let Ok(orig) = gdk_pixbuf::Pixbuf::from_file(&thumb_path) {
+                if let Some(square) = crate::ui::image::crop_square_pixbuf(&orig, size) {
+                    let circle_pb = crate::ui::image::apply_circular_mask(&square);
+                    let texture = gdk4::Texture::for_pixbuf(&circle_pb);
+                    let img = gtk4::Image::from_paintable(Some(&texture));
+                    img.set_pixel_size(size);
+                    img.add_css_class("sidebar-wallpaper-thumb");
+                    return img.upcast();
                 }
             }
         }

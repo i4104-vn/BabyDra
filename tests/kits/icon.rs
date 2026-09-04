@@ -1,6 +1,7 @@
 //! Integration tests: icon resolving and zoom icon assets.
 
 use babydra_ui_kit::ui::icon::{get_icon, get_icon_colored};
+use gtk4::prelude::*;
 
 #[test]
 fn zoom_icons_resolve_without_fallback() {
@@ -35,6 +36,10 @@ fn zoom_icons_resolve_without_fallback() {
     let zoom_in_colored = get_icon_colored("zoom-in", 16, "#3b82f6");
     assert_eq!(zoom_in_colored.pixel_size(), 16);
     assert!(zoom_in_colored.paintable().is_some());
+
+    // Verify create_wp_thumb resolves
+    let wp_thumb = babydra_ui_kit::components::create_wp_thumb(18);
+    assert!(wp_thumb.has_css_class("sidebar-wallpaper-thumb"));
 }
 
 #[test]
