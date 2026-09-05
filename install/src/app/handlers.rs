@@ -119,15 +119,22 @@ pub fn handle_key_event(app: &mut App, key: KeyEvent) {
             }
         }
 
-        // Direct Number Jumping (1-5, 0 = summary)
+        // Direct Number Jumping (1-6, 0 = summary)
         KeyCode::Char('1') => app.current_step = WizardStep::Welcome,
         KeyCode::Char('2') => app.current_step = WizardStep::SourceBranch,
         KeyCode::Char('3') => app.current_step = WizardStep::Binaries,
         KeyCode::Char('4') => app.current_step = WizardStep::VariantSelection,
         KeyCode::Char('5') => app.current_step = WizardStep::ExecuteInstall,
-        KeyCode::Char('0') => app.current_step = WizardStep::Summary,
+        KeyCode::Char('6') | KeyCode::Char('0') => app.current_step = WizardStep::Summary,
 
-        // Step Navigation
+        // Step Navigation (Tab / n / Right arrow = Next, BackTab / p / Left arrow = Prev)
+        KeyCode::Right => {
+            if app.current_step == WizardStep::SourceBranch && app.is_build_from_source() {
+                app.start_branch_switch();
+            } else {
+                app.next_step();
+            }
+        }
         KeyCode::Tab | KeyCode::Char('n') => {
             if app.current_step == WizardStep::SourceBranch && app.is_build_from_source() {
                 app.start_branch_switch();
@@ -135,7 +142,13 @@ pub fn handle_key_event(app: &mut App, key: KeyEvent) {
                 app.next_step();
             }
         }
-        KeyCode::BackTab | KeyCode::Char('p') => app.prev_step(),
+        KeyCode::Left | KeyCode::BackTab | KeyCode::Char('p') => {
+            if app.current_step != WizardStep::ExecuteInstall
+                || app.install_state != InstallState::Installing
+            {
+                app.prev_step();
+            }
+        }
 
         // Step-Specific Interaction
         _ => handle_step_interaction(app, key),
@@ -168,6 +181,26 @@ fn list_action(key: KeyEvent, len: usize, cursor: &mut usize) -> ListAction {
             }
             ListAction::None
         }
+        KeyCode::PageUp => {
+            *cursor = cursor.saturating_sub(5);
+            ListAction::None
+        }
+        KeyCode::PageDown => {
+            if len > 0 {
+                *cursor = (*cursor + 5).min(len - 1);
+            }
+            ListAction::None
+        }
+        KeyCode::Home => {
+            *cursor = 0;
+            ListAction::None
+        }
+        KeyCode::End => {
+            if len > 0 {
+                *cursor = len - 1;
+            }
+            ListAction::None
+        }
         KeyCode::Char(' ') => ListAction::Toggle,
         KeyCode::Char('a') | KeyCode::Char('A') => ListAction::ToggleAll,
         KeyCode::Enter => ListAction::Enter,
@@ -178,7 +211,10 @@ fn list_action(key: KeyEvent, len: usize, cursor: &mut usize) -> ListAction {
 fn handle_step_interaction(app: &mut App, key: KeyEvent) {
     match app.current_step {
         WizardStep::Welcome => {
-            if key.code == KeyCode::Enter {
+            if key.code == KeyCode::Enter
+                || key.code == KeyCode::Char(' ')
+                || key.code == KeyCode::Right
+            {
                 app.next_step();
             }
         }
@@ -190,16 +226,27 @@ fn handle_step_interaction(app: &mut App, key: KeyEvent) {
                 }
             }
             KeyCode::Down | KeyCode::Char('j') => {
-                // Row 0 = pre-built only; rows 1..=N map to branches, so the
-                // cursor max is branches.len() (not len - 1).
                 if app.branch_cursor < app.branches.len() {
                     app.branch_cursor += 1;
                 }
+            }
+            KeyCode::PageUp => {
+                app.branch_cursor = app.branch_cursor.saturating_sub(5);
+            }
+            KeyCode::PageDown => {
+                app.branch_cursor = (app.branch_cursor + 5).min(app.branches.len());
+            }
+            KeyCode::Home => {
+                app.branch_cursor = 0;
+            }
+            KeyCode::End => {
+                app.branch_cursor = app.branches.len();
             }
             KeyCode::Char(' ') => {
                 select_branch_at_cursor(app);
             }
             KeyCode::Enter => {
+                select_branch_at_cursor(app);
                 if app.is_build_from_source() {
                     app.start_branch_switch();
                 } else {
@@ -232,17 +279,12 @@ fn handle_step_interaction(app: &mut App, key: KeyEvent) {
             let len = app.variant_options.len();
             match list_action(key, len, &mut app.variant_cursor) {
                 ListAction::Toggle => {
-                    if app.variant_cursor < app.variant_options.len() {
-                        for v in &mut app.variant_options {
-                            v.selected = false;
-                        }
-                        if let Some(selected) = app.variant_options.get_mut(app.variant_cursor) {
-                            selected.selected = true;
-                            app.selected_variant = selected.name.clone();
-                        }
-                    }
+                    select_variant_at_cursor(app);
                 }
-                ListAction::Enter => app.next_step(),
+                ListAction::Enter => {
+                    select_variant_at_cursor(app);
+                    app.next_step();
+                }
                 _ => {}
             }
         }
@@ -259,19 +301,33 @@ fn handle_step_interaction(app: &mut App, key: KeyEvent) {
                     app.log_scroll += 1;
                 }
             }
+            KeyCode::PageUp => {
+                app.auto_scroll_logs = false;
+                app.log_scroll = app.log_scroll.saturating_sub(10);
+            }
+            KeyCode::PageDown => {
+                if app.log_scroll + 10 < app.logs.len() {
+                    app.log_scroll += 10;
+                } else {
+                    app.auto_scroll_logs = true;
+                    app.log_scroll = app.logs.len().saturating_sub(12);
+                }
+            }
             KeyCode::Char('c') => {
                 app.logs.clear();
                 app.log_scroll = 0;
             }
-            KeyCode::Char('g') => {
+            KeyCode::Home | KeyCode::Char('g') => {
                 app.log_scroll = 0;
                 app.auto_scroll_logs = false;
             }
-            KeyCode::Char('G') => {
+            KeyCode::End | KeyCode::Char('G') => {
                 app.auto_scroll_logs = true;
                 app.log_scroll = app.logs.len().saturating_sub(12);
             }
-            KeyCode::Enter if app.install_state != InstallState::Installing => {
+            KeyCode::Enter | KeyCode::Char('i') | KeyCode::Char('I')
+                if app.install_state != InstallState::Installing =>
+            {
                 app.show_confirm_dialog = true;
             }
             _ => {}
@@ -283,6 +339,18 @@ fn handle_step_interaction(app: &mut App, key: KeyEvent) {
             }
             _ => {}
         },
+    }
+}
+
+fn select_variant_at_cursor(app: &mut App) {
+    if app.variant_cursor < app.variant_options.len() {
+        for v in &mut app.variant_options {
+            v.selected = false;
+        }
+        if let Some(selected) = app.variant_options.get_mut(app.variant_cursor) {
+            selected.selected = true;
+            app.selected_variant = selected.name.clone();
+        }
     }
 }
 

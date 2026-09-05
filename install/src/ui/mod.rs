@@ -16,10 +16,14 @@ use crate::models::WizardStep;
 pub fn draw(f: &mut Frame, app: &App) {
     let size = f.area();
 
-    // Main layout: Header -> Body (No footer)
+    // Main layout: Header (3) -> Body (Min 10) -> Footer Shortcuts (3)
     let main_chunks = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([Constraint::Length(3), Constraint::Min(10)])
+        .constraints([
+            Constraint::Length(3),
+            Constraint::Min(10),
+            Constraint::Length(3),
+        ])
         .split(size);
 
     layout::draw_header(f, app, main_chunks[0]);
@@ -41,10 +45,10 @@ pub fn draw(f: &mut Frame, app: &App) {
 
         layout::draw_sidebar(f, app, body_chunks[0]);
         draw_content(f, app, body_chunks[1]);
-
-        // Floating shortcuts docked in the bottom-right corner!
-        layout::draw_floating_shortcuts(f, body_chunks[1]);
     }
+
+    // Full-width modern footer shortcuts bar
+    layout::draw_footer_shortcuts(f, app, main_chunks[2]);
 
     // Modals
     if app.show_branch_switching_modal {
