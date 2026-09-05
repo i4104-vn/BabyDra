@@ -89,4 +89,11 @@ impl Theme {
             .bg(self.bg_badge)
             .add_modifier(Modifier::BOLD)
     }
+
+    pub fn key_badge_amber(&self) -> Style {
+        Style::default()
+            .fg(self.amber)
+            .bg(self.bg_badge)
+            .add_modifier(Modifier::BOLD)
+    }
 }

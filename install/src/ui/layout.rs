@@ -7,7 +7,7 @@ use ratatui::{
 };
 
 use crate::app::App;
-use crate::models::WizardStep;
+use crate::models::{InstallState, WizardStep};
 use crate::system::is_root;
 use crate::ui::THEME;
 
@@ -264,14 +264,22 @@ pub fn draw_footer_shortcuts(f: &mut Frame, app: &App, area: Rect) {
             " 󰌌 Shortcuts (Themes) ",
         ),
         WizardStep::ExecuteInstall => (
-            vec![
-                ("Enter / i", "Start Install", THEME.mint),
-                ("↑ / ↓", "Scroll", THEME.blue),
-                ("PgUp/Dn", "Fast", THEME.blue),
-                ("c", "Clear", THEME.amber),
-                ("g / G", "Top/End", THEME.purple),
-                ("←", "Back", THEME.rose),
-            ],
+            if app.install_state == InstallState::Installing {
+                vec![
+                    ("↑ / ↓", "Scroll", THEME.blue),
+                    ("PgUp/Dn", "Fast", THEME.blue),
+                    ("c", "Clear", THEME.amber),
+                    ("g / G", "Top/End", THEME.purple),
+                ]
+            } else {
+                vec![
+                    ("Enter / i", "Start Install", THEME.mint),
+                    ("↑ / ↓", "Scroll", THEME.blue),
+                    ("← / p", "Back to Setup", THEME.amber),
+                    ("c", "Clear", THEME.amber),
+                    ("g / G", "Top/End", THEME.purple),
+                ]
+            },
             " 󰌌 Shortcuts (Install) ",
         ),
         WizardStep::Summary => (
@@ -411,4 +419,14 @@ pub fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
             Constraint::Percentage((100 - percent_x) / 2),
         ])
         .split(popup_layout[1])[1]
+}
+
+/// Computes a centered rectangle with exact character dimensions, clamped
+/// within the parent area so it never overflows small terminals.
+pub fn centered_rect_exact(width: u16, height: u16, r: Rect) -> Rect {
+    let w = width.min(r.width.saturating_sub(2));
+    let h = height.min(r.height.saturating_sub(2));
+    let x = r.x + (r.width.saturating_sub(w)) / 2;
+    let y = r.y + (r.height.saturating_sub(h)) / 2;
+    Rect::new(x, y, w, h)
 }

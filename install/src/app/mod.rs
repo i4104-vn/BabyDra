@@ -325,15 +325,22 @@ impl App {
         }
     }
 
+    pub fn set_step(&mut self, step: WizardStep) {
+        self.current_step = step;
+        if self.current_step == WizardStep::ExecuteInstall && self.install_state == InstallState::Idle {
+            self.show_confirm_dialog = true;
+        }
+    }
+
     pub fn next_step(&mut self) {
         if let Some(next) = self.current_step.next() {
-            self.current_step = next;
+            self.set_step(next);
         }
     }
 
     pub fn prev_step(&mut self) {
         if let Some(prev) = self.current_step.prev() {
-            self.current_step = prev;
+            self.set_step(prev);
         }
     }
 
@@ -456,5 +463,49 @@ impl App {
 
     pub fn handle_key(&mut self, key: KeyEvent) {
         handlers::handle_key_event(self, key);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+
+    #[test]
+    fn test_execute_install_auto_confirm_modal() {
+        let mut app = App::new();
+
+        assert_eq!(app.current_step, WizardStep::Welcome);
+        assert!(!app.show_confirm_dialog);
+
+        // Jump or navigate to Step 5
+        app.set_step(WizardStep::ExecuteInstall);
+        assert_eq!(app.current_step, WizardStep::ExecuteInstall);
+        assert!(
+            app.show_confirm_dialog,
+            "Modal should auto-open on ExecuteInstall step"
+        );
+
+        // Cancel modal with 'n'
+        app.handle_key(KeyEvent::new(KeyCode::Char('n'), KeyModifiers::NONE));
+        assert!(!app.show_confirm_dialog, "Modal should dismiss on 'n'");
+        assert_eq!(app.current_step, WizardStep::ExecuteInstall);
+
+        // Re-open modal with 'i'
+        app.handle_key(KeyEvent::new(KeyCode::Char('i'), KeyModifiers::NONE));
+        assert!(app.show_confirm_dialog, "Modal should reopen on 'i'");
+
+        // Go back to previous step with 'b'
+        app.handle_key(KeyEvent::new(KeyCode::Char('b'), KeyModifiers::NONE));
+        assert!(!app.show_confirm_dialog);
+        assert_eq!(app.current_step, WizardStep::VariantSelection);
+
+        // Navigate forward from VariantSelection to ExecuteInstall
+        app.next_step();
+        assert_eq!(app.current_step, WizardStep::ExecuteInstall);
+        assert!(
+            app.show_confirm_dialog,
+            "Modal should auto-open when navigating forward into ExecuteInstall"
+        );
     }
 }

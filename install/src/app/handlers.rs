@@ -60,6 +60,10 @@ pub fn handle_key_event(app: &mut App, key: KeyEvent) {
 
     // 3. Modal Confirm Dialog
     if app.show_confirm_dialog {
+        if key.code == KeyCode::Char('c') && key.modifiers.contains(KeyModifiers::CONTROL) {
+            app.should_quit = true;
+            return;
+        }
         match key.code {
             KeyCode::Char('y') | KeyCode::Char('Y') | KeyCode::Enter => {
                 app.show_confirm_dialog = false;
@@ -67,6 +71,10 @@ pub fn handle_key_event(app: &mut App, key: KeyEvent) {
             }
             KeyCode::Char('n') | KeyCode::Char('N') | KeyCode::Esc | KeyCode::Char('q') => {
                 app.show_confirm_dialog = false;
+            }
+            KeyCode::Left | KeyCode::BackTab | KeyCode::Char('p') | KeyCode::Char('b') => {
+                app.show_confirm_dialog = false;
+                app.prev_step();
             }
             _ => {}
         }
@@ -120,12 +128,12 @@ pub fn handle_key_event(app: &mut App, key: KeyEvent) {
         }
 
         // Direct Number Jumping (1-6, 0 = summary)
-        KeyCode::Char('1') => app.current_step = WizardStep::Welcome,
-        KeyCode::Char('2') => app.current_step = WizardStep::SourceBranch,
-        KeyCode::Char('3') => app.current_step = WizardStep::Binaries,
-        KeyCode::Char('4') => app.current_step = WizardStep::VariantSelection,
-        KeyCode::Char('5') => app.current_step = WizardStep::ExecuteInstall,
-        KeyCode::Char('6') | KeyCode::Char('0') => app.current_step = WizardStep::Summary,
+        KeyCode::Char('1') => app.set_step(WizardStep::Welcome),
+        KeyCode::Char('2') => app.set_step(WizardStep::SourceBranch),
+        KeyCode::Char('3') => app.set_step(WizardStep::Binaries),
+        KeyCode::Char('4') => app.set_step(WizardStep::VariantSelection),
+        KeyCode::Char('5') => app.set_step(WizardStep::ExecuteInstall),
+        KeyCode::Char('6') | KeyCode::Char('0') => app.set_step(WizardStep::Summary),
 
         // Step Navigation (Tab / n / Right arrow = Next, BackTab / p / Left arrow = Prev)
         KeyCode::Right => {
