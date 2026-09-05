@@ -25,15 +25,6 @@ pub fn checkout_and_pull(repo: &Path, branch: &str) -> Result<PathBuf> {
     std::fs::create_dir_all(&branches_dir)
         .with_context(|| format!("failed to create directory: {:?}", branches_dir))?;
 
-    // Create a symlink `branchs -> branches` at the repo root so both folder names work
-    #[cfg(unix)]
-    {
-        let branchs_symlink = repo.join("branchs");
-        if !branchs_symlink.exists() && !branchs_symlink.is_symlink() {
-            let _ = std::os::unix::fs::symlink("branches", &branchs_symlink);
-        }
-    }
-
     let target_dir = branches_dir.join(branch);
 
     // 1. Fetch the remote branch in the root repo
