@@ -264,7 +264,12 @@ pub fn draw_footer_shortcuts(f: &mut Frame, app: &App, area: Rect) {
             " 󰌌 Shortcuts (Themes) ",
         ),
         WizardStep::ExecuteInstall => (
-            if app.install_state == InstallState::Installing {
+            if app.show_confirm_dialog {
+                vec![
+                    ("Enter", "Start Installation", THEME.mint),
+                    ("Esc / ←", "Back", THEME.amber),
+                ]
+            } else if app.install_state == InstallState::Installing {
                 vec![
                     ("↑ / ↓", "Scroll", THEME.blue),
                     ("PgUp/Dn", "Fast", THEME.blue),
@@ -274,10 +279,7 @@ pub fn draw_footer_shortcuts(f: &mut Frame, app: &App, area: Rect) {
             } else {
                 vec![
                     ("Enter / i", "Start Install", THEME.mint),
-                    ("↑ / ↓", "Scroll", THEME.blue),
                     ("← / p", "Back to Setup", THEME.amber),
-                    ("c", "Clear", THEME.amber),
-                    ("g / G", "Top/End", THEME.purple),
                 ]
             },
             " 󰌌 Shortcuts (Install) ",

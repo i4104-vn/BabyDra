@@ -486,18 +486,9 @@ mod tests {
             "Modal should auto-open on ExecuteInstall step"
         );
 
-        // Cancel modal with 'n'
-        app.handle_key(KeyEvent::new(KeyCode::Char('n'), KeyModifiers::NONE));
-        assert!(!app.show_confirm_dialog, "Modal should dismiss on 'n'");
-        assert_eq!(app.current_step, WizardStep::ExecuteInstall);
-
-        // Re-open modal with 'i'
-        app.handle_key(KeyEvent::new(KeyCode::Char('i'), KeyModifiers::NONE));
-        assert!(app.show_confirm_dialog, "Modal should reopen on 'i'");
-
-        // Go back to previous step with 'b'
-        app.handle_key(KeyEvent::new(KeyCode::Char('b'), KeyModifiers::NONE));
-        assert!(!app.show_confirm_dialog);
+        // Cancel modal with 'Esc' -> returns to VariantSelection
+        app.handle_key(KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE));
+        assert!(!app.show_confirm_dialog, "Modal should dismiss on Esc");
         assert_eq!(app.current_step, WizardStep::VariantSelection);
 
         // Navigate forward from VariantSelection to ExecuteInstall
@@ -507,5 +498,10 @@ mod tests {
             app.show_confirm_dialog,
             "Modal should auto-open when navigating forward into ExecuteInstall"
         );
+
+        // Cancel modal with 'Left' / 'b' -> also returns to VariantSelection
+        app.handle_key(KeyEvent::new(KeyCode::Left, KeyModifiers::NONE));
+        assert!(!app.show_confirm_dialog);
+        assert_eq!(app.current_step, WizardStep::VariantSelection);
     }
 }

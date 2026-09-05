@@ -69,10 +69,14 @@ pub fn handle_key_event(app: &mut App, key: KeyEvent) {
                 app.show_confirm_dialog = false;
                 app.begin_install();
             }
-            KeyCode::Char('n') | KeyCode::Char('N') | KeyCode::Esc | KeyCode::Char('q') => {
-                app.show_confirm_dialog = false;
-            }
-            KeyCode::Left | KeyCode::BackTab | KeyCode::Char('p') | KeyCode::Char('b') => {
+            KeyCode::Esc
+            | KeyCode::Left
+            | KeyCode::BackTab
+            | KeyCode::Char('p')
+            | KeyCode::Char('b')
+            | KeyCode::Char('n')
+            | KeyCode::Char('N')
+            | KeyCode::Char('q') => {
                 app.show_confirm_dialog = false;
                 app.prev_step();
             }
