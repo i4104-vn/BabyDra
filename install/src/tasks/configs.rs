@@ -375,6 +375,19 @@ where
                     "babydra-desktop started in background.".into(),
                 );
             }
+
+            let keymap_bin = user_bin_dir.join("babydra-keymap");
+            if keymap_bin.exists() {
+                let _ = Command::new(&keymap_bin)
+                    .stdin(std::process::Stdio::null())
+                    .stdout(std::process::Stdio::null())
+                    .stderr(std::process::Stdio::null())
+                    .spawn();
+                log(
+                    LogLevel::Success,
+                    "babydra-keymap daemon started in background.".into(),
+                );
+            }
             copied += 1;
         }
 

@@ -319,7 +319,7 @@ pub fn initial_package_options() -> Vec<GenericOptionItem> {
             id: "aur_packages".to_string(),
             title: "3. Install AUR Packages via yay".to_string(),
             description: "Installs kitty, neovim, fastfetch, wlrctl, Segoe UI & Cascadia Code fonts.".to_string(),
-            detail: "yay -S --noconfirm github-desktop fastfetch neovim awww kitty ttf-segoe-ui-variable wlrctl ...".to_string(),
+            detail: "yay -S --noconfirm github-desktop fastfetch neovim kitty ttf-segoe-ui-variable wlrctl ...".to_string(),
             selected: true,
             requires_root: false,
         },

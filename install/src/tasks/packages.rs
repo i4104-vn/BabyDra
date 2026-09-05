@@ -62,6 +62,17 @@ where
                 "cage",
                 "chafa",
                 "imagemagick",
+                "gst-plugins-good",
+                "gst-plugins-bad",
+                "gst-plugin-va",
+                "gst-libav",
+                "ffmpeg",
+                "fcitx5",
+                "fcitx5-gtk",
+                "fcitx5-qt",
+                "fcitx5-configtool",
+                "fcitx5-unikey",
+                "fcitx5-bamboo",
             ];
 
             // Root: run pacman directly. Non-root: `sudo -S pacman` with the
@@ -194,7 +205,6 @@ where
                 "github-desktop",
                 "fastfetch",
                 "neovim",
-                "awww",
                 "ddcutil-service",
                 "kitty",
                 "ttf-segoe-ui-variable",
