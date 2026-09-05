@@ -78,10 +78,10 @@ pub fn list_branches(repo: &Path) -> Vec<BranchItem> {
     }
     names.retain(|n| n != "main");
     names.sort_by(|a, b| {
-        let a_current = *a == current;
-        let b_current = *b == current;
-        b_current
-            .cmp(&a_current)
+        let a_rel = a == "release";
+        let b_rel = b == "release";
+        b_rel
+            .cmp(&a_rel)
             .then_with(|| a.to_lowercase().cmp(&b.to_lowercase()))
     });
 

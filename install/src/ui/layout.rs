@@ -144,7 +144,7 @@ pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
 
     let steps_list = List::new(items).block(
         Block::default()
-            .title(" 󰇊 Navigation [1-6] ")
+            .title(" Navigation [1-6] ")
             .title_style(THEME.title_cyan())
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
@@ -232,7 +232,7 @@ pub fn draw_footer_shortcuts(f: &mut Frame, app: &App, area: Rect) {
                 ("Tab / n", "Next Step", THEME.cyan),
                 ("1-6", "Jump Step", THEME.purple),
             ],
-            " 󰌌 Shortcuts (Welcome) ",
+            " Shortcuts (Welcome) ",
         ),
         WizardStep::SourceBranch => (
             vec![
@@ -241,7 +241,7 @@ pub fn draw_footer_shortcuts(f: &mut Frame, app: &App, area: Rect) {
                 ("↑ / ↓", "Move", THEME.blue),
                 ("← / →", "Step", THEME.amber),
             ],
-            " 󰌌 Shortcuts (Branch) ",
+            " Shortcuts (Branch) ",
         ),
         WizardStep::Binaries => (
             vec![
@@ -252,7 +252,7 @@ pub fn draw_footer_shortcuts(f: &mut Frame, app: &App, area: Rect) {
                 ("s", "Binary Path", THEME.purple),
                 ("r", "Rescan", THEME.purple),
             ],
-            " 󰌌 Shortcuts (Binaries) ",
+            " Shortcuts (Binaries) ",
         ),
         WizardStep::VariantSelection => (
             vec![
@@ -261,7 +261,7 @@ pub fn draw_footer_shortcuts(f: &mut Frame, app: &App, area: Rect) {
                 ("↑ / ↓", "Move", THEME.blue),
                 ("←", "Back", THEME.amber),
             ],
-            " 󰌌 Shortcuts (Themes) ",
+            " Shortcuts (Themes) ",
         ),
         WizardStep::ExecuteInstall => (
             if app.show_confirm_dialog {
@@ -282,7 +282,7 @@ pub fn draw_footer_shortcuts(f: &mut Frame, app: &App, area: Rect) {
                     ("← / p", "Back to Setup", THEME.amber),
                 ]
             },
-            " 󰌌 Shortcuts (Install) ",
+            " Shortcuts (Install) ",
         ),
         WizardStep::Summary => (
             vec![
@@ -290,7 +290,7 @@ pub fn draw_footer_shortcuts(f: &mut Frame, app: &App, area: Rect) {
                 ("←", "Back", THEME.amber),
                 ("1-5", "Review Step", THEME.purple),
             ],
-            " 󰌌 Shortcuts (Summary) ",
+            " Shortcuts (Summary) ",
         ),
     };
 

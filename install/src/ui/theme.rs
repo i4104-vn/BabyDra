@@ -96,4 +96,15 @@ impl Theme {
             .bg(self.bg_badge)
             .add_modifier(Modifier::BOLD)
     }
+
+    pub fn title_rose(&self) -> Style {
+        Style::default().fg(self.rose).add_modifier(Modifier::BOLD)
+    }
+
+    pub fn key_badge_cyan(&self) -> Style {
+        Style::default()
+            .fg(self.cyan)
+            .bg(self.bg_badge)
+            .add_modifier(Modifier::BOLD)
+    }
 }

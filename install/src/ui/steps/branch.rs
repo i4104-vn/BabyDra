@@ -2,7 +2,7 @@ use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Modifier, Style},
     text::{Line, Span},
-    widgets::{Block, BorderType, Borders, List, ListItem, Paragraph},
+    widgets::{Block, BorderType, Borders, List, ListItem, Paragraph, Wrap},
     Frame,
 };
 
@@ -16,41 +16,90 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
         .constraints([Constraint::Min(8), Constraint::Length(8)])
         .split(area);
 
-    let build_from_source = app.is_build_from_source();
+    if app.branches.is_empty() {
+        // Empty state when no branches exist
+        let empty_lines = vec![
+            Line::from(""),
+            Line::from(Span::styled(
+                "  Không có bản cài đặt nào khả dụng trong kho mã nguồn!  ",
+                THEME.title_rose(),
+            )),
+            Line::from(""),
+            Line::from(Span::styled(
+                "Không tìm thấy nhánh cài đặt nào (nhánh 'release' hoặc các nhánh khác).",
+                Style::default().fg(THEME.text_bright),
+            )),
+            Line::from(Span::styled(
+                "Nhánh 'main' chỉ lưu trữ bộ cài và tài liệu, không chứa mã nguồn môi trường desktop.",
+                Style::default().fg(THEME.text_dim),
+            )),
+            Line::from(""),
+            Line::from(Span::styled(
+                "Gợi ý: Kiểm tra kết nối git remote hoặc thực hiện git fetch origin release.",
+                Style::default().fg(THEME.amber),
+            )),
+        ];
 
-    // Row 0: pre-built only.
-    let mut items: Vec<ListItem> = Vec::with_capacity(app.branches.len() + 1);
-    items.push(branch_row(
-        0,
-        &app.branch_cursor,
-        "(none) — use pre-built binaries only",
-        &[],
-        build_from_source,
-        app.selected_branch.is_empty(),
-    ));
+        let empty_widget = Paragraph::new(empty_lines)
+            .wrap(Wrap { trim: true })
+            .block(
+                Block::default()
+                    .title(" 2. Source Branch — Không Có Bản Cài Đặt Khả Dụng ")
+                    .title_style(THEME.title_rose())
+                    .borders(Borders::ALL)
+                    .border_type(BorderType::Rounded)
+                    .border_style(Style::default().fg(THEME.rose)),
+            );
+        f.render_widget(empty_widget, chunks[0]);
+
+        let prompt_box = Paragraph::new(vec![
+            Line::from(Span::styled(
+                "Trạng thái: Không thể tiếp tục vì không tìm thấy bản cài đặt nào.",
+                Style::default().fg(THEME.rose).add_modifier(Modifier::BOLD),
+            )),
+            Line::from(Span::styled(
+                format!("Repository: {}", app.workspace_root.display()),
+                Style::default().fg(THEME.text_dim),
+            )),
+            Line::from(""),
+            Line::from(vec![
+                Span::styled(" [q] ", THEME.key_badge_red()),
+                Span::styled(" Thoát installer    ", Style::default().fg(THEME.text_dim)),
+                Span::styled(" [← / p] ", THEME.key_badge_amber()),
+                Span::styled(" Quay lại trang tổng quan", Style::default().fg(THEME.text_dim)),
+            ]),
+        ])
+        .block(
+            Block::default()
+                .title(" Thông Báo Cài Đặt ")
+                .title_style(THEME.title_rose())
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(THEME.rose)),
+        );
+        f.render_widget(prompt_box, chunks[1]);
+        return;
+    }
+
+    let mut items: Vec<ListItem> = Vec::with_capacity(app.branches.len());
 
     for (i, b) in app.branches.iter().enumerate() {
-        let row_idx = i + 1;
-        let mut tags = Vec::new();
-        if b.is_current {
-            tags.push("current");
-        }
-        if b.has_remote {
-            tags.push("remote");
-        }
+        let is_recommended = b.name == "release";
+        let is_selected = app.selected_branch == b.name;
         items.push(branch_row(
-            row_idx,
+            i,
             &app.branch_cursor,
             &b.name,
-            &tags,
-            build_from_source,
-            app.selected_branch == b.name,
+            b.is_current,
+            b.has_remote,
+            is_recommended,
+            is_selected,
         ));
     }
 
     let list = List::new(items).block(
         Block::default()
-            .title(" 2. Install Source — Pick a Git Branch [↑/↓: Move | Space: Select | Enter: Switch Branch] ")
+            .title(" 2. Source Branch Selection [↑/↓: Move | Space: Select | Enter: Switch Branch] ")
             .title_style(THEME.title_cyan())
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
@@ -58,50 +107,50 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
     );
     f.render_widget(list, chunks[0]);
 
-    let (mode_color, mode_text) = if build_from_source {
-        (
-            THEME.amber,
-            format!(
-                "★ Target branch: '{}' (Will checkout, pull, and rescan workspace components on Enter).",
-                app.selected_branch
-            ),
-        )
-    } else {
-        (
-            THEME.mint,
-            "● Target mode: Pre-built binaries only (No git checkout or cargo rebuild)."
-                .to_string(),
-        )
-    };
-
     let prompt_box = Paragraph::new(vec![
-        Line::from(Span::styled(
-            mode_text,
-            Style::default()
-                .fg(mode_color)
-                .add_modifier(Modifier::BOLD),
-        )),
-        Line::from(Span::styled(
-            format!(
-                "Repository: {} ({} branches available)",
-                app.workspace_root.display(),
-                app.branches.len()
+        Line::from(vec![
+            Span::styled("Target Branch : ", Style::default().fg(THEME.text_dim)),
+            Span::styled(
+                format!("'{}'", app.selected_branch),
+                Style::default()
+                    .fg(THEME.cyan)
+                    .add_modifier(Modifier::BOLD),
             ),
-            Style::default().fg(THEME.text_dim),
-        )),
-        Line::from("Pressing [Enter] pulls the branch into branches/<name>, keeping your main repo untouched."),
-        Line::from(Span::styled(
-            "Controls: [Space] Select Branch | [Enter / →] Confirm & Pull | [←] Previous Step",
-            Style::default().fg(THEME.text_muted),
-        )),
+            Span::styled(
+                " — Tải vào branches/ để giữ nguyên nhánh main.",
+                Style::default().fg(THEME.mint),
+            ),
+        ]),
+        Line::from(vec![
+            Span::styled("Repository    : ", Style::default().fg(THEME.text_dim)),
+            Span::styled(
+                format!("{} ({} nhánh khả dụng)", app.workspace_root.display(), app.branches.len()),
+                Style::default().fg(THEME.text_bright),
+            ),
+        ]),
+        Line::from(vec![
+            Span::styled("Khuyến nghị   : ", Style::default().fg(THEME.text_dim)),
+            Span::styled(
+                "Nhánh 'release' là phiên bản hoàn thiện, ổn định và đầy đủ nhất.",
+                Style::default().fg(THEME.amber),
+            ),
+        ]),
+        Line::from(vec![
+            Span::styled(" [Space] ", THEME.key_badge_green()),
+            Span::styled(" Chọn nhánh    ", Style::default().fg(THEME.text_dim)),
+            Span::styled(" [Enter] ", THEME.key_badge_cyan()),
+            Span::styled(" Xác nhận & Tải nhánh    ", Style::default().fg(THEME.text_dim)),
+            Span::styled(" [←] ", THEME.key_badge_amber()),
+            Span::styled(" Quay lại", Style::default().fg(THEME.text_dim)),
+        ]),
     ])
     .block(
         Block::default()
-            .title(" Target Branch Selection Info ")
-            .title_style(Style::default().fg(mode_color).add_modifier(Modifier::BOLD))
+            .title(" Target Branch Information ")
+            .title_style(THEME.title_cyan())
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
-            .border_style(Style::default().fg(mode_color)),
+            .border_style(Style::default().fg(THEME.border_normal)),
     );
     f.render_widget(prompt_box, chunks[1]);
 }
@@ -110,8 +159,9 @@ fn branch_row<'a>(
     row_idx: usize,
     cursor: &usize,
     name: &'a str,
-    tags: &[&str],
-    build_from_source: bool,
+    is_current: bool,
+    has_remote: bool,
+    is_recommended: bool,
     is_selected: bool,
 ) -> ListItem<'a> {
     let is_cursor = row_idx == *cursor;
@@ -131,57 +181,54 @@ fn branch_row<'a>(
         Style::default()
             .fg(THEME.text_bright)
             .add_modifier(Modifier::BOLD)
-    } else if row_idx == 0 {
-        Style::default().fg(THEME.text_bright)
     } else {
-        Style::default().fg(THEME.text_dim)
+        Style::default().fg(THEME.text_body)
     };
 
     let mut spans = vec![radio, Span::styled(name, title_style)];
-    for t in tags {
-        let tag_style = match *t {
-            "current" => Style::default()
-                .fg(THEME.mint)
+
+    if is_recommended {
+        spans.push(Span::raw(" "));
+        spans.push(Span::styled(
+            " [Khuyến nghị] ",
+            Style::default()
+                .fg(THEME.amber)
                 .bg(THEME.bg_badge)
                 .add_modifier(Modifier::BOLD),
-            _ => Style::default().fg(THEME.text_dim).bg(THEME.bg_badge),
-        };
+        ));
+    }
+
+    if is_current {
         spans.push(Span::raw(" "));
-        spans.push(Span::styled(format!(" {t} "), tag_style));
+        spans.push(Span::styled(
+            " [local] ",
+            Style::default().fg(THEME.purple).bg(THEME.bg_badge),
+        ));
+    }
+
+    if has_remote {
+        spans.push(Span::raw(" "));
+        spans.push(Span::styled(
+            " [remote] ",
+            Style::default().fg(THEME.text_dim).bg(THEME.bg_badge),
+        ));
     }
 
     if is_selected {
-        if row_idx == 0 {
-            spans.push(Span::raw(" "));
-            spans.push(Span::styled(
-                " [SELECTED: PRE-BUILT ONLY] ",
-                Style::default()
-                    .fg(THEME.mint)
-                    .bg(THEME.bg_badge)
-                    .add_modifier(Modifier::BOLD),
-            ));
-        } else {
-            spans.push(Span::raw(" "));
-            spans.push(Span::styled(
-                " [★ TARGET BRANCH] ",
-                Style::default()
-                    .fg(THEME.amber)
-                    .bg(THEME.bg_badge)
-                    .add_modifier(Modifier::BOLD),
-            ));
-            if build_from_source {
-                spans.push(Span::styled(
-                    " (will checkout & rebuild)",
-                    Style::default().fg(THEME.cyan),
-                ));
-            }
-        }
+        spans.push(Span::raw(" "));
+        spans.push(Span::styled(
+            " [ĐÃ CHỌN] ",
+            Style::default()
+                .fg(THEME.mint)
+                .bg(THEME.bg_badge)
+                .add_modifier(Modifier::BOLD),
+        ));
     } else if is_cursor {
         spans.push(Span::raw(" "));
         spans.push(Span::styled(
-            " [Space: Select Branch] ",
+            " [Space: Chọn] ",
             Style::default()
-                .fg(THEME.mint)
+                .fg(THEME.cyan)
                 .bg(THEME.bg_badge)
                 .add_modifier(Modifier::BOLD),
         ));

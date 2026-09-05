@@ -95,7 +95,7 @@ pub fn draw_variant_step(f: &mut Frame, app: &App, area: Rect) {
 
     let list = List::new(items).block(
         Block::default()
-            .title(" 7. Variant Selection (Theme + Apps + Keybinds) [↑/↓: Move | Space: Select | Enter: Next] ")
+            .title(" 4. Theme & Variant Selection [↑/↓: Move | Space: Select | Enter: Next] ")
             .title_style(THEME.title_purple())
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
@@ -112,19 +112,24 @@ pub fn draw_variant_step(f: &mut Frame, app: &App, area: Rect) {
 
     let prompt_box = Paragraph::new(vec![
         Line::from(vec![
-            Span::styled("◆ Active Selected Variant: ", Style::default().fg(THEME.text_dim)),
+            Span::styled("◆ Active Variant: ", Style::default().fg(THEME.text_dim)),
             Span::styled(selected, Style::default().fg(THEME.pink).add_modifier(Modifier::BOLD)),
+            Span::styled(" — Cấu hình theme GTK, icons, và phím tắt compositor.", Style::default().fg(THEME.text_muted)),
         ]),
-        Line::from("A variant bundles a curated theme package, pre-installed app launcher shortcuts, and compositor keybinds."),
-        Line::from(Span::styled(
-            "Controls: [Space] Select Variant | [Enter / n] Next Step | [p] Previous Step",
-            Style::default().fg(THEME.text_muted),
-        )),
+        Line::from("Mỗi biến thể định nghĩa bộ cấu hình hoàn chỉnh cho desktop shell labwc và các ứng dụng đi kèm."),
+        Line::from(vec![
+            Span::styled(" [Space] ", THEME.key_badge_green()),
+            Span::styled(" Chọn biến thể    ", Style::default().fg(THEME.text_dim)),
+            Span::styled(" [Enter] ", THEME.key_badge_cyan()),
+            Span::styled(" Xác nhận & Tiếp tục    ", Style::default().fg(THEME.text_dim)),
+            Span::styled(" [←] ", THEME.key_badge_amber()),
+            Span::styled(" Quay lại", Style::default().fg(THEME.text_dim)),
+        ]),
     ])
     .block(
         Block::default()
             .title(" Variant System Description ")
-            .title_style(THEME.title_amber())
+            .title_style(THEME.title_purple())
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
             .border_style(Style::default().fg(THEME.border_normal)),

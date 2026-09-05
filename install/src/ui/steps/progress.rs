@@ -30,19 +30,19 @@ pub fn draw_execute_install_step(f: &mut Frame, app: &App, area: Rect) {
 
     let gauge_title = match app.install_state {
         InstallState::Idle => {
-            " 󰐥 Ready to Install ── Press Enter or 'i' to begin installation plan ".to_string()
+            " Ready to Install ── Press Enter to begin installation plan ".to_string()
         }
         InstallState::Installing => {
             format!(
-                " 󰐥 Progress: {}% ── {} ",
+                " 5. Installation Progress: {}% ── {} ",
                 app.progress_percent, app.current_step_desc
             )
         }
         InstallState::Completed { success, .. } => {
             if success {
-                format!(" 󰐥 Success ── {} ", app.current_step_desc)
+                format!(" 5. Installation Completed ── {} ", app.current_step_desc)
             } else {
-                format!(" 󰐥 Completed with warnings ── {} ", app.current_step_desc)
+                format!(" 5. Completed with warnings ── {} ", app.current_step_desc)
             }
         }
     };
@@ -147,7 +147,7 @@ pub fn draw_execute_install_step(f: &mut Frame, app: &App, area: Rect) {
 
     let logs_block = Block::default()
         .title(format!(
-            " 󰐥 Live Installation Logs ({total_logs} entries | {scroll_status}) [j/k: Scroll | c: Clear | g/G: Top/Bottom] "
+            " Live Installation Logs ({total_logs} entries | {scroll_status}) [j/k: Scroll | c: Clear | g/G: Top/Bottom] "
         ))
         .title_style(THEME.title_cyan())
         .borders(Borders::ALL)

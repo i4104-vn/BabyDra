@@ -19,7 +19,7 @@ pub fn draw_sudo_modal(f: &mut Frame, app: &App, area: Rect) {
 
     let mut lines = vec![
         Line::from(Span::styled(
-            "🔒 Sudo Authentication Required",
+            " Sudo Authentication Required ",
             THEME.title_amber(),
         )),
         Line::from(""),

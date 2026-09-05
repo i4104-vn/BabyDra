@@ -80,8 +80,31 @@ impl App {
         let (tx, rx) = channel();
         let workspace_root = find_workspace_root();
         let source_binary_dir = default_binary_source_dir(&workspace_root);
-        let binaries = initial_binaries_list(&workspace_root, &source_binary_dir);
         let branches = list_branches(&workspace_root);
+
+        // Default to "release" branch if available, otherwise first available branch
+        let mut selected_branch = String::new();
+        let mut branch_cursor = 0;
+        if let Some(pos) = branches.iter().position(|b| b.name == "release") {
+            branch_cursor = pos;
+            selected_branch = "release".to_string();
+        } else if let Some(first) = branches.first() {
+            selected_branch = first.name.clone();
+        }
+
+        let mut branches = branches;
+        for (idx, b) in branches.iter_mut().enumerate() {
+            b.selected = idx == branch_cursor && !selected_branch.is_empty();
+        }
+
+        let source_root = if !selected_branch.is_empty() {
+            branch_worktree_dir(&workspace_root, &selected_branch)
+        } else {
+            workspace_root.clone()
+        };
+
+        let binaries = initial_binaries_list(&source_root, &source_binary_dir);
+        let variant_options = initial_variant_options(&source_root);
 
         let mut app = Self {
             current_step: WizardStep::Welcome,
@@ -90,10 +113,10 @@ impl App {
             binary_cursor: 0,
 
             branches,
-            branch_cursor: 0,
-            selected_branch: String::new(),
+            branch_cursor,
+            selected_branch,
 
-            variant_options: initial_variant_options(&workspace_root),
+            variant_options,
             variant_cursor: 0,
             selected_variant: "default".to_string(),
 
@@ -526,11 +549,32 @@ mod tests {
     #[test]
     fn test_active_source_dir() {
         let mut app = App::new();
+        if !app.branches.is_empty() {
+            assert_eq!(
+                app.active_source_dir(),
+                app.workspace_root.join("branches").join(&app.selected_branch)
+            );
+        } else {
+            assert_eq!(app.active_source_dir(), app.workspace_root);
+        }
+
+        app.selected_branch.clear();
         assert_eq!(app.active_source_dir(), app.workspace_root);
-        app.selected_branch = "release".to_string();
+
+        app.selected_branch = "feature-test".to_string();
         assert_eq!(
             app.active_source_dir(),
-            app.workspace_root.join("branches").join("release")
+            app.workspace_root.join("branches").join("feature-test")
         );
+    }
+
+    #[test]
+    fn test_default_branch_release_selection() {
+        let app = App::new();
+        if app.branches.iter().any(|b| b.name == "release") {
+            assert_eq!(app.selected_branch, "release");
+            assert!(app.branches[app.branch_cursor].selected);
+            assert_eq!(app.branches[app.branch_cursor].name, "release");
+        }
     }
 }

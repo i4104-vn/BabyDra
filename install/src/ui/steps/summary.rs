@@ -97,7 +97,7 @@ pub fn draw_summary_step(f: &mut Frame, app: &App, area: Rect) {
         ]),
         Line::from(""),
         Line::from(Span::styled(
-            "🚀 Next Steps & Commands:",
+            "Next Steps & Launch Commands:",
             THEME.title_cyan(),
         )),
         Line::from(vec![
@@ -144,7 +144,7 @@ pub fn draw_summary_step(f: &mut Frame, app: &App, area: Rect) {
 
     let summary_widget = Paragraph::new(summary_lines).block(
         Block::default()
-            .title(" 10. Summary & Launch Instructions ")
+            .title(" 6. Summary & Launch Instructions ")
             .title_style(
                 Style::default()
                     .fg(status_color)

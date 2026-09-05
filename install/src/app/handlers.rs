@@ -2,7 +2,7 @@ use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use std::path::PathBuf;
 
 use super::App;
-use crate::models::{InstallState, WizardStep};
+use crate::models::{InstallState, LogLevel, WizardStep};
 
 pub fn handle_key_event(app: &mut App, key: KeyEvent) {
     // 0. Branch Switching Modal
@@ -140,16 +140,18 @@ pub fn handle_key_event(app: &mut App, key: KeyEvent) {
         KeyCode::Char('6') | KeyCode::Char('0') => app.set_step(WizardStep::Summary),
 
         // Step Navigation (Tab / n / Right arrow = Next, BackTab / p / Left arrow = Prev)
-        KeyCode::Right => {
-            if app.current_step == WizardStep::SourceBranch && app.is_build_from_source() {
-                app.start_branch_switch();
-            } else {
-                app.next_step();
-            }
-        }
-        KeyCode::Tab | KeyCode::Char('n') => {
-            if app.current_step == WizardStep::SourceBranch && app.is_build_from_source() {
-                app.start_branch_switch();
+        KeyCode::Right | KeyCode::Tab | KeyCode::Char('n') => {
+            if app.current_step == WizardStep::SourceBranch {
+                if app.branches.is_empty() {
+                    app.add_log(
+                        LogLevel::Error,
+                        "Không có bản cài đặt nào khả dụng để tiếp tục.",
+                    );
+                } else if app.is_build_from_source() {
+                    app.start_branch_switch();
+                } else {
+                    app.next_step();
+                }
             } else {
                 app.next_step();
             }
@@ -231,42 +233,55 @@ fn handle_step_interaction(app: &mut App, key: KeyEvent) {
             }
         }
 
-        WizardStep::SourceBranch => match key.code {
-            KeyCode::Up | KeyCode::Char('k') => {
-                if app.branch_cursor > 0 {
-                    app.branch_cursor -= 1;
+        WizardStep::SourceBranch => {
+            if app.branches.is_empty() {
+                return;
+            }
+            let max_idx = app.branches.len().saturating_sub(1);
+            match key.code {
+                KeyCode::Up | KeyCode::Char('k') => {
+                    if app.branch_cursor > 0 {
+                        app.branch_cursor -= 1;
+                    }
                 }
-            }
-            KeyCode::Down | KeyCode::Char('j') => {
-                if app.branch_cursor < app.branches.len() {
-                    app.branch_cursor += 1;
+                KeyCode::Down | KeyCode::Char('j') => {
+                    if app.branch_cursor < max_idx {
+                        app.branch_cursor += 1;
+                    }
                 }
-            }
-            KeyCode::PageUp => {
-                app.branch_cursor = app.branch_cursor.saturating_sub(5);
-            }
-            KeyCode::PageDown => {
-                app.branch_cursor = (app.branch_cursor + 5).min(app.branches.len());
-            }
-            KeyCode::Home => {
-                app.branch_cursor = 0;
-            }
-            KeyCode::End => {
-                app.branch_cursor = app.branches.len();
-            }
-            KeyCode::Char(' ') => {
-                select_branch_at_cursor(app);
-            }
-            KeyCode::Enter => {
-                select_branch_at_cursor(app);
-                if app.is_build_from_source() {
-                    app.start_branch_switch();
-                } else {
-                    app.next_step();
+                KeyCode::PageUp => {
+                    app.branch_cursor = app.branch_cursor.saturating_sub(5);
                 }
+                KeyCode::PageDown => {
+                    app.branch_cursor = (app.branch_cursor + 5).min(max_idx);
+                }
+                KeyCode::Home => {
+                    app.branch_cursor = 0;
+                }
+                KeyCode::End => {
+                    app.branch_cursor = max_idx;
+                }
+                KeyCode::Char(' ') => {
+                    select_branch_at_cursor(app);
+                }
+                KeyCode::Enter => {
+                    if app.branches.is_empty() {
+                        app.add_log(
+                            LogLevel::Error,
+                            "Không có bản cài đặt nào khả dụng để tiếp tục.",
+                        );
+                        return;
+                    }
+                    select_branch_at_cursor(app);
+                    if app.is_build_from_source() {
+                        app.start_branch_switch();
+                    } else {
+                        app.next_step();
+                    }
+                }
+                _ => {}
             }
-            _ => {}
-        },
+        }
 
         WizardStep::Binaries => {
             let len = app.binaries.len();
@@ -366,15 +381,16 @@ fn select_variant_at_cursor(app: &mut App) {
     }
 }
 
-/// Row 0 = pre-built only; rows 1..=N map to `app.branches[cursor - 1]`.
 fn select_branch_at_cursor(app: &mut App) {
+    if app.branches.is_empty() {
+        app.selected_branch.clear();
+        return;
+    }
     for b in &mut app.branches {
         b.selected = false;
     }
-    if app.branch_cursor == 0 {
-        app.selected_branch.clear();
-    } else if let Some(branch) = app.branches.get(app.branch_cursor - 1) {
+    if let Some(branch) = app.branches.get_mut(app.branch_cursor) {
+        branch.selected = true;
         app.selected_branch = branch.name.clone();
-        app.branches[app.branch_cursor - 1].selected = true;
     }
 }
