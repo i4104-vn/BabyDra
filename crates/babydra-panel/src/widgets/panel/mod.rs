@@ -19,14 +19,14 @@ pub fn create_status_icons(
     calendar_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
     launcher_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
 ) -> gtk4::Box {
-    let (status_box, status_button, separator, vol_icon, net_icon, vpn_icon, bat_widget) =
+    let (status_box, status_button, separator, vol_icon, net_widgets, vpn_icon, bat_widget) =
         render::build_status_row();
 
     // Initial update of volume icon on load
     items::volume::update_topbar_volume(&vol_icon);
 
     // Setup status popovers (VPN, Network, Volume, Battery)
-    let popovers = popover::setup_status_popover(&vol_icon, &net_icon, &vpn_icon, &bat_widget);
+    let popovers = popover::setup_status_popover(&vol_icon, &net_widgets, &vpn_icon, &bat_widget);
 
     // Scroll controller for volume on status button
     let scroll_controller =

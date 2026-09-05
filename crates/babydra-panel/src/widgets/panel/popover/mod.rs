@@ -19,7 +19,7 @@ pub struct StatusPopovers {
 /// Sets up `status popovers`.
 pub fn setup_status_popover(
     vol_icon: &gtk4::Image,
-    net_icon: &gtk4::Image,
+    net_widgets: &super::render::NetworkWidgets,
     vpn_icon: &gtk4::Image,
     bat_widget: &Option<gtk4::DrawingArea>,
 ) -> StatusPopovers {
@@ -29,7 +29,7 @@ pub fn setup_status_popover(
         "status-popover",
     );
     let net_popover = babydra_ui_kit::components::create_popover(
-        net_icon,
+        &net_widgets.container,
         gtk4::PositionType::Bottom,
         "status-popover",
     );
@@ -62,7 +62,7 @@ pub fn setup_status_popover(
     }
 
     attach_hover_popover(vpn_icon, &vpn_popover, update_vpn_tooltip.clone());
-    attach_hover_popover(net_icon, &net_popover, update_network_tooltip.clone());
+    attach_hover_popover(&net_widgets.container, &net_popover, update_network_tooltip.clone());
     attach_hover_popover(vol_icon, &vol_popover, update_volume_popover.clone());
 
     if let Some(ref bat_area) = bat_widget {
@@ -84,7 +84,8 @@ pub fn setup_status_popover(
 
     let bat_widget_timer = bat_widget.clone();
     let vpn_icon_timer = vpn_icon.clone();
-    let net_icon_timer = net_icon.clone();
+    let wifi_icon_timer = net_widgets.wifi_icon.clone();
+    let eth_area_timer = net_widgets.eth_area.clone();
     let last_net_icon = std::rc::Rc::new(std::cell::RefCell::new(String::new()));
 
     gtk4::glib::timeout_add_local(std::time::Duration::from_millis(2000), move || {
@@ -109,13 +110,25 @@ pub fn setup_status_popover(
         }
 
         let active_net = babydra_core::services::system::network::get_active_network_info();
-        if *last_net_icon.borrow() != active_net.icon_name {
-            *last_net_icon.borrow_mut() = active_net.icon_name.clone();
-            babydra_ui_kit::ui::icon::set_image_from_icon(
-                &net_icon_timer,
-                &active_net.icon_name,
-                14,
-            );
+        if active_net.network_type == babydra_core::models::ActiveNetworkType::Ethernet {
+            if !eth_area_timer.is_visible() {
+                wifi_icon_timer.set_visible(false);
+                eth_area_timer.set_visible(true);
+                eth_area_timer.queue_draw();
+            }
+        } else {
+            if !wifi_icon_timer.is_visible() {
+                eth_area_timer.set_visible(false);
+                wifi_icon_timer.set_visible(true);
+            }
+            if *last_net_icon.borrow() != active_net.icon_name {
+                *last_net_icon.borrow_mut() = active_net.icon_name.clone();
+                babydra_ui_kit::ui::icon::set_image_from_icon(
+                    &wifi_icon_timer,
+                    &active_net.icon_name,
+                    14,
+                );
+            }
         }
 
         if let Some(ref bat_area) = bat_widget_timer {

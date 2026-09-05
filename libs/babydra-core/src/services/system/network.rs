@@ -190,7 +190,7 @@ pub fn get_active_network_info() -> ActiveNetworkInfo {
                                 is_connected: true,
                                 name: display_name,
                                 ip_address,
-                                icon_name: "ethernet".to_string(),
+                                icon_name: "desktop".to_string(),
                                 interface: iface_name,
                             };
                         }
@@ -251,7 +251,7 @@ pub fn get_active_network_info() -> ActiveNetworkInfo {
                         is_connected: true,
                         name: "Ethernet".to_string(),
                         ip_address,
-                        icon_name: "ethernet".to_string(),
+                        icon_name: "desktop".to_string(),
                         interface: dev,
                     };
                 }

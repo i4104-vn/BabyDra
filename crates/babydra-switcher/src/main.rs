@@ -98,7 +98,7 @@ fn run_daemon() {
         );
     });
 
-    application.run();
+    application.run_with_args(&["babydra-switcher"]);
     let _ = std::fs::remove_file(SOCKET_PATH);
 }
 

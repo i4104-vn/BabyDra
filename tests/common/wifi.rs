@@ -74,6 +74,6 @@ fn test_get_active_network_info() {
     if info.is_connected {
         assert!(!info.name.is_empty());
         assert!(!info.ip_address.is_empty());
-        assert!(info.icon_name == "ethernet" || info.icon_name == "wifi");
+        assert!(info.icon_name == "ethernet" || info.icon_name == "desktop" || info.icon_name == "wifi");
     }
 }

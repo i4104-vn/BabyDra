@@ -137,7 +137,7 @@ fn build_wifi_list_ui(
         let eth_item = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
         eth_item.set_valign(gtk4::Align::Center);
 
-        let eth_icon = babydra_ui_kit::ui::icon::get_icon_colored("ethernet", 14, "#ffffff");
+        let eth_icon = babydra_ui_kit::ui::icon::get_icon_colored("desktop", 14, "#ffffff");
         eth_item.append(&eth_icon);
 
         let eth_labels = gtk4::Box::new(gtk4::Orientation::Vertical, 2);

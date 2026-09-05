@@ -172,6 +172,5 @@ pub fn wire_keyboard(
         glib::Propagation::Proceed
     });
 
-    parent_window.add_controller(key_controller.clone());
-    fixed.add_controller(key_controller);
+    parent_window.add_controller(key_controller);
 }
