@@ -36,7 +36,7 @@ pub fn draw_branch_switching_modal(f: &mut Frame, app: &App, area: Rect) {
                             .add_modifier(Modifier::BOLD),
                     ),
                     Span::styled(
-                        format!("Switching to branch '{}'...", branch),
+                        format!("Pulling branch '{}' into branches/{}...", branch, branch),
                         Style::default()
                             .fg(THEME.text_bright)
                             .add_modifier(Modifier::BOLD),
@@ -44,20 +44,20 @@ pub fn draw_branch_switching_modal(f: &mut Frame, app: &App, area: Rect) {
                 ]),
                 Line::from(""),
                 Line::from(Span::styled(
-                    "◆ Running: git fetch --prune origin",
+                    format!("Running: git fetch origin {branch}"),
                     Style::default().fg(THEME.text_dim),
                 )),
                 Line::from(Span::styled(
-                    format!("◆ Running: git checkout {branch} && git pull origin {branch}"),
+                    format!("Running: git worktree add branches/{branch}"),
                     Style::default().fg(THEME.cyan).add_modifier(Modifier::BOLD),
                 )),
                 Line::from(Span::styled(
-                    "◆ Rescanning variants, theme assets, and crate binaries...",
-                    Style::default().fg(THEME.text_dim),
+                    "Main repository remains untouched on current branch.",
+                    Style::default().fg(THEME.mint),
                 )),
                 Line::from(""),
                 Line::from(Span::styled(
-                    "Please wait while repository components are synchronized.",
+                    "Please wait while branch code is synchronized...",
                     Style::default().fg(THEME.amber),
                 )),
             ],
@@ -71,13 +71,13 @@ pub fn draw_branch_switching_modal(f: &mut Frame, app: &App, area: Rect) {
                         Style::default().fg(THEME.mint).add_modifier(Modifier::BOLD),
                     ),
                     Span::styled(
-                        format!("Successfully switched to branch '{}'!", branch),
+                        format!("Branch '{}' ready in branches/{}!", branch, branch),
                         Style::default().fg(THEME.mint).add_modifier(Modifier::BOLD),
                     ),
                 ]),
                 Line::from(""),
                 Line::from(Span::styled(
-                    "Workspace components and variants have been updated.",
+                    "Branch components and variants have been loaded.",
                     Style::default().fg(THEME.text_bright),
                 )),
                 Line::from(Span::styled(

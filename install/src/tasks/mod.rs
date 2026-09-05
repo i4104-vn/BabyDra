@@ -37,6 +37,7 @@ pub enum InstallEvent {
 
 pub struct InstallPlan {
     pub workspace_root: PathBuf,
+    pub source_root: PathBuf,
     pub source_binary_dir: PathBuf,
     pub selected_binaries: Vec<BinaryItem>,
     /// Variant selected in step 4 (theme + app list + keybinds source).
@@ -120,28 +121,28 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             );
         }
 
-        // Phase 1: checkout branch + pull + build source (branch-based installs).
+        // Phase 1: pull branch into branches/<branch> + build source (branch-based installs).
         if !plan.branch.is_empty() {
             current_step += 1;
             let _ = tx.send(InstallEvent::Progress {
                 current: current_step,
                 total: total_steps,
-                current_step_name: format!("Checkout & pull branch '{}'", plan.branch),
+                current_step_name: format!("Pull latest code for branch '{}'", plan.branch),
             });
             send_log(
                 LogLevel::Info,
                 format!(
-                    "Checking out branch '{}' and pulling latest code...",
-                    plan.branch
+                    "Syncing branch '{}' in branches/{}...",
+                    plan.branch, plan.branch
                 ),
             );
             match checkout_and_pull(&plan.workspace_root, &plan.branch) {
-                Ok(()) => send_log(
+                Ok(branch_dir) => send_log(
                     LogLevel::Success,
-                    format!("Checked out '{}' and pulled latest.", plan.branch),
+                    format!("Branch '{}' ready at {}.", plan.branch, branch_dir.display()),
                 ),
                 Err(e) => {
-                    send_log(LogLevel::Error, format!("Git checkout/pull failed: {e}"));
+                    send_log(LogLevel::Error, format!("Git worktree pull failed: {e}"));
                     total_errors += 1;
                 }
             }
@@ -154,9 +155,12 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             });
             send_log(
                 LogLevel::Info,
-                "Building workspace in release mode (this can take a while)...".into(),
+                format!(
+                    "Building branch '{}' in release mode (cargo build --release in {})...",
+                    plan.branch, plan.source_root.display()
+                ),
             );
-            let (ok, tail) = build_workspace(&plan.workspace_root);
+            let (ok, tail) = build_workspace(&plan.source_root);
             for line in tail {
                 send_log(LogLevel::Info, line);
             }
@@ -244,7 +248,7 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
                 current_step_name: "Deploy theme packages".to_string(),
             });
             configs::deploy_theme_packages(
-                &plan.workspace_root,
+                &plan.source_root,
                 &plan.variant.theme,
                 &sudo,
                 &send_log,
@@ -264,7 +268,7 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
                 total: total_steps,
                 current_step_name: opt.title.clone(),
             });
-            let (c, e) = configs::execute_configs_task(opt, &plan.workspace_root, &sudo, &send_log);
+            let (c, e) = configs::execute_configs_task(opt, &plan.source_root, &sudo, &send_log);
             total_copied += c;
             total_errors += e;
         }

@@ -9,8 +9,9 @@ use crate::models::{
 };
 use crate::system::sudo::MAX_PASSWORD_ATTEMPTS;
 use crate::system::{
-    checkout_and_pull, default_binary_source_dir, find_workspace_root, initial_binaries_list,
-    initial_variant_options, list_branches, update_binaries_status, SudoSession,
+    branch_worktree_dir, checkout_and_pull, default_binary_source_dir, find_workspace_root,
+    initial_binaries_list, initial_variant_options, list_branches, update_binaries_status,
+    SudoSession,
 };
 use crate::tasks::{spawn_installation_worker, InstallEvent, InstallPlan};
 
@@ -166,8 +167,19 @@ impl App {
         }
     }
 
+    /// Returns the active source directory: either `branches/<branch>` when
+    /// building from a branch, or `workspace_root` for pre-built binaries.
+    pub fn active_source_dir(&self) -> PathBuf {
+        if self.is_build_from_source() {
+            branch_worktree_dir(&self.workspace_root, &self.selected_branch)
+        } else {
+            self.workspace_root.clone()
+        }
+    }
+
     pub fn rescan_binaries(&mut self) {
-        let fresh_binaries = initial_binaries_list(&self.workspace_root, &self.source_binary_dir);
+        let source_root = self.active_source_dir();
+        let fresh_binaries = initial_binaries_list(&source_root, &self.source_binary_dir);
         let old_selections: std::collections::HashMap<String, bool> = self
             .binaries
             .iter()
@@ -208,8 +220,8 @@ impl App {
         self.add_log(
             LogLevel::Info,
             format!(
-                "Switching to branch '{}' in background...",
-                self.selected_branch
+                "Pulling branch '{}' into branches/{}...",
+                self.selected_branch, self.selected_branch
             ),
         );
 
@@ -218,7 +230,7 @@ impl App {
         let tx = self.tx.clone();
 
         std::thread::spawn(move || match checkout_and_pull(&workspace_root, &branch) {
-            Ok(()) => {
+            Ok(_branch_dir) => {
                 let _ = tx.send(InstallEvent::BranchSwitched {
                     success: true,
                     error_msg: None,
@@ -234,7 +246,8 @@ impl App {
     }
 
     pub fn rescan_after_branch_switch(&mut self) {
-        self.variant_options = initial_variant_options(&self.workspace_root);
+        let source_root = self.active_source_dir();
+        self.variant_options = initial_variant_options(&source_root);
         self.rescan_binaries();
     }
 
@@ -269,8 +282,8 @@ impl App {
                         self.add_log(
                             LogLevel::Success,
                             format!(
-                                "Switched to branch '{}' and loaded variants & components.",
-                                self.selected_branch
+                                "Synchronized branch '{}' in branches/{} and loaded components.",
+                                self.selected_branch, self.selected_branch
                             ),
                         );
                         self.show_branch_switching_modal = false;
@@ -393,6 +406,7 @@ impl App {
         }
 
         let build_from_source = self.is_build_from_source();
+        let source_root = self.active_source_dir();
 
         let selected_binaries: Vec<BinaryItem> = if build_from_source {
             // A fresh `cargo build --release` produces every binary, so the
@@ -418,11 +432,13 @@ impl App {
                 selected: true,
             });
         self.selected_variant = selected_variant.name.clone();
+
         self.add_log(
             LogLevel::Config,
             format!(
-                "Selected variant '{}' (theme: {})",
-                selected_variant.name, selected_variant.theme
+                "Preparing installation plan: {} binaries, theme variant '{}'.",
+                selected_binaries.len(),
+                selected_variant.name
             ),
         );
 
@@ -430,8 +446,9 @@ impl App {
             self.add_log(
                 LogLevel::Config,
                 format!(
-                    "Install mode: build from branch '{}' (checkout -> pull -> cargo build --release).",
-                    self.selected_branch
+                    "Install mode: build branch '{}' in {} (cargo build --release).",
+                    self.selected_branch,
+                    source_root.display()
                 ),
             );
         }
@@ -443,8 +460,9 @@ impl App {
 
         let plan = InstallPlan {
             workspace_root: self.workspace_root.clone(),
+            source_root: source_root.clone(),
             source_binary_dir: if build_from_source {
-                default_binary_source_dir(&self.workspace_root)
+                default_binary_source_dir(&source_root)
             } else {
                 self.source_binary_dir.clone()
             },
@@ -503,5 +521,16 @@ mod tests {
         app.handle_key(KeyEvent::new(KeyCode::Left, KeyModifiers::NONE));
         assert!(!app.show_confirm_dialog);
         assert_eq!(app.current_step, WizardStep::VariantSelection);
+    }
+
+    #[test]
+    fn test_active_source_dir() {
+        let mut app = App::new();
+        assert_eq!(app.active_source_dir(), app.workspace_root);
+        app.selected_branch = "release".to_string();
+        assert_eq!(
+            app.active_source_dir(),
+            app.workspace_root.join("branches").join("release")
+        );
     }
 }

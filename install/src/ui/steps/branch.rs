@@ -89,9 +89,9 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
             ),
             Style::default().fg(THEME.text_dim),
         )),
-        Line::from("Pressing [Enter] on a branch will display a loading modal, run git checkout & pull, then rescan variants and binaries."),
+        Line::from("Pressing [Enter] pulls the branch into branches/<name>, keeping your main repo untouched."),
         Line::from(Span::styled(
-            "Controls: [Space] Select Branch | [Enter / n] Confirm & Switch | [p] Previous Step",
+            "Controls: [Space] Select Branch | [Enter / →] Confirm & Pull | [←] Previous Step",
             Style::default().fg(THEME.text_muted),
         )),
     ])
