@@ -1,21 +1,22 @@
+pub mod discovery;
 pub mod fs_ops;
 pub mod git;
-pub mod initializers;
 pub mod process;
 pub mod sudo;
 
-use std::path::{Path, PathBuf};
-use std::process::Command;
-
+pub use discovery as initializers;
+pub use discovery::{
+    default_crate_description, initial_binaries_list, initial_configs_themes_options,
+    initial_display_manager_options, initial_package_options, initial_variant_options,
+    initial_varlib_options, update_binaries_status,
+};
 pub use fs_ops::{copy_recursive, format_size, safe_copy_binary};
 pub use git::{branch_worktree_dir, checkout_and_pull, list_branches};
-pub use initializers::{
-    initial_binaries_list, initial_configs_themes_options, initial_display_manager_options,
-    initial_package_options, initial_variant_options, initial_varlib_options,
-    update_binaries_status,
-};
 pub use process::{is_root, stop_process};
 pub use sudo::{tail_lines, CmdOutput, SudoSession};
+
+use std::path::{Path, PathBuf};
+use std::process::Command;
 
 pub fn find_workspace_root() -> PathBuf {
     // 1. Try git rev-parse --show-toplevel

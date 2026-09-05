@@ -21,21 +21,21 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
         let empty_lines = vec![
             Line::from(""),
             Line::from(Span::styled(
-                "  Không có bản cài đặt nào khả dụng trong kho mã nguồn!  ",
+                "  No installation releases available in repository!  ",
                 THEME.title_rose(),
             )),
             Line::from(""),
             Line::from(Span::styled(
-                "Không tìm thấy nhánh cài đặt nào (nhánh 'release' hoặc các nhánh khác).",
+                "Could not find any installable git branches (e.g. 'release' or other branches).",
                 Style::default().fg(THEME.text_bright),
             )),
             Line::from(Span::styled(
-                "Nhánh 'main' chỉ lưu trữ bộ cài và tài liệu, không chứa mã nguồn môi trường desktop.",
+                "Branch 'main' only hosts installer tools and documentation, with no desktop source code.",
                 Style::default().fg(THEME.text_dim),
             )),
             Line::from(""),
             Line::from(Span::styled(
-                "Gợi ý: Kiểm tra kết nối git remote hoặc thực hiện git fetch origin release.",
+                "Hint: Check git remote connection or run `git fetch origin release`.",
                 Style::default().fg(THEME.amber),
             )),
         ];
@@ -44,7 +44,7 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
             .wrap(Wrap { trim: true })
             .block(
                 Block::default()
-                    .title(" 2. Source Branch — Không Có Bản Cài Đặt Khả Dụng ")
+                    .title(" 2. Source Branch — No Installable Releases Found ")
                     .title_style(THEME.title_rose())
                     .borders(Borders::ALL)
                     .border_type(BorderType::Rounded)
@@ -54,7 +54,7 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
 
         let prompt_box = Paragraph::new(vec![
             Line::from(Span::styled(
-                "Trạng thái: Không thể tiếp tục vì không tìm thấy bản cài đặt nào.",
+                "Status: Cannot proceed without an installable source branch.",
                 Style::default().fg(THEME.rose).add_modifier(Modifier::BOLD),
             )),
             Line::from(Span::styled(
@@ -64,14 +64,14 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
             Line::from(""),
             Line::from(vec![
                 Span::styled(" [q] ", THEME.key_badge_red()),
-                Span::styled(" Thoát installer    ", Style::default().fg(THEME.text_dim)),
+                Span::styled(" Quit installer    ", Style::default().fg(THEME.text_dim)),
                 Span::styled(" [← / p] ", THEME.key_badge_amber()),
-                Span::styled(" Quay lại trang tổng quan", Style::default().fg(THEME.text_dim)),
+                Span::styled(" Back to overview", Style::default().fg(THEME.text_dim)),
             ]),
         ])
         .block(
             Block::default()
-                .title(" Thông Báo Cài Đặt ")
+                .title(" Installation Notice ")
                 .title_style(THEME.title_rose())
                 .borders(Borders::ALL)
                 .border_type(BorderType::Rounded)
@@ -117,31 +117,31 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
                     .add_modifier(Modifier::BOLD),
             ),
             Span::styled(
-                " — Tải vào branches/ để giữ nguyên nhánh main.",
+                " — Pulled into branches/ to keep main branch clean.",
                 Style::default().fg(THEME.mint),
             ),
         ]),
         Line::from(vec![
             Span::styled("Repository    : ", Style::default().fg(THEME.text_dim)),
             Span::styled(
-                format!("{} ({} nhánh khả dụng)", app.workspace_root.display(), app.branches.len()),
+                format!("{} ({} branches available)", app.workspace_root.display(), app.branches.len()),
                 Style::default().fg(THEME.text_bright),
             ),
         ]),
         Line::from(vec![
-            Span::styled("Khuyến nghị   : ", Style::default().fg(THEME.text_dim)),
+            Span::styled("Recommended   : ", Style::default().fg(THEME.text_dim)),
             Span::styled(
-                "Nhánh 'release' là phiên bản hoàn thiện, ổn định và đầy đủ nhất.",
+                "The 'release' branch is the complete, tested, and verified environment.",
                 Style::default().fg(THEME.amber),
             ),
         ]),
         Line::from(vec![
             Span::styled(" [Space] ", THEME.key_badge_green()),
-            Span::styled(" Chọn nhánh    ", Style::default().fg(THEME.text_dim)),
+            Span::styled(" Select Branch    ", Style::default().fg(THEME.text_dim)),
             Span::styled(" [Enter] ", THEME.key_badge_cyan()),
-            Span::styled(" Xác nhận & Tải nhánh    ", Style::default().fg(THEME.text_dim)),
+            Span::styled(" Confirm & Switch Branch    ", Style::default().fg(THEME.text_dim)),
             Span::styled(" [←] ", THEME.key_badge_amber()),
-            Span::styled(" Quay lại", Style::default().fg(THEME.text_dim)),
+            Span::styled(" Back", Style::default().fg(THEME.text_dim)),
         ]),
     ])
     .block(
@@ -190,7 +190,7 @@ fn branch_row<'a>(
     if is_recommended {
         spans.push(Span::raw(" "));
         spans.push(Span::styled(
-            " [Khuyến nghị] ",
+            " [Recommended] ",
             Style::default()
                 .fg(THEME.amber)
                 .bg(THEME.bg_badge)
@@ -217,7 +217,7 @@ fn branch_row<'a>(
     if is_selected {
         spans.push(Span::raw(" "));
         spans.push(Span::styled(
-            " [ĐÃ CHỌN] ",
+            " [SELECTED] ",
             Style::default()
                 .fg(THEME.mint)
                 .bg(THEME.bg_badge)
@@ -226,7 +226,7 @@ fn branch_row<'a>(
     } else if is_cursor {
         spans.push(Span::raw(" "));
         spans.push(Span::styled(
-            " [Space: Chọn] ",
+            " [Space: Select] ",
             Style::default()
                 .fg(THEME.cyan)
                 .bg(THEME.bg_badge)

@@ -114,16 +114,16 @@ pub fn draw_variant_step(f: &mut Frame, app: &App, area: Rect) {
         Line::from(vec![
             Span::styled("◆ Active Variant: ", Style::default().fg(THEME.text_dim)),
             Span::styled(selected, Style::default().fg(THEME.pink).add_modifier(Modifier::BOLD)),
-            Span::styled(" — Cấu hình theme GTK, icons, và phím tắt compositor.", Style::default().fg(THEME.text_muted)),
+            Span::styled(" — Configures GTK theme, icons, and compositor shortcuts.", Style::default().fg(THEME.text_muted)),
         ]),
-        Line::from("Mỗi biến thể định nghĩa bộ cấu hình hoàn chỉnh cho desktop shell labwc và các ứng dụng đi kèm."),
+        Line::from("Each variant defines a complete configuration bundle for the labwc desktop shell and accompanying applications."),
         Line::from(vec![
             Span::styled(" [Space] ", THEME.key_badge_green()),
-            Span::styled(" Chọn biến thể    ", Style::default().fg(THEME.text_dim)),
+            Span::styled(" Select Variant    ", Style::default().fg(THEME.text_dim)),
             Span::styled(" [Enter] ", THEME.key_badge_cyan()),
-            Span::styled(" Xác nhận & Tiếp tục    ", Style::default().fg(THEME.text_dim)),
+            Span::styled(" Confirm & Next    ", Style::default().fg(THEME.text_dim)),
             Span::styled(" [←] ", THEME.key_badge_amber()),
-            Span::styled(" Quay lại", Style::default().fg(THEME.text_dim)),
+            Span::styled(" Back", Style::default().fg(THEME.text_dim)),
         ]),
     ])
     .block(

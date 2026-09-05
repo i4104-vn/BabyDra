@@ -1,176 +1,11 @@
-use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
-use std::path::PathBuf;
+use crossterm::event::{KeyCode, KeyEvent};
 
-use super::App;
 use crate::models::{InstallState, LogLevel, WizardStep};
 
-pub fn handle_key_event(app: &mut App, key: KeyEvent) {
-    // 0. Branch Switching Modal
-    if app.show_branch_switching_modal {
-        match app.branch_switch_status {
-            crate::app::BranchSwitchStatus::Done(Err(_)) => {
-                if key.code == KeyCode::Esc
-                    || key.code == KeyCode::Enter
-                    || key.code == KeyCode::Char('q')
-                {
-                    app.show_branch_switching_modal = false;
-                }
-            }
-            _ => {
-                if key.code == KeyCode::Char('c') && key.modifiers.contains(KeyModifiers::CONTROL) {
-                    app.should_quit = true;
-                }
-            }
-        }
-        return;
-    }
-
-    // 1. Modal Help Popup
-    if app.show_help {
-        if key.code == KeyCode::Esc
-            || key.code == KeyCode::Char('q')
-            || key.code == KeyCode::Char('?')
-            || key.code == KeyCode::Enter
-        {
-            app.show_help = false;
-        }
-        return;
-    }
-
-    // 2. Sudo Password Modal (masked input). Ctrl+C still quits — it must
-    // not be captured as a password character.
-    if app.show_sudo_modal {
-        match key.code {
-            KeyCode::Enter => app.submit_sudo(),
-            KeyCode::Esc => app.cancel_sudo(),
-            KeyCode::Backspace => {
-                app.sudo_password.pop();
-            }
-            KeyCode::Char(_c) if key.modifiers.contains(KeyModifiers::CONTROL) => {
-                app.should_quit = true;
-            }
-            KeyCode::Char(c) => {
-                app.sudo_password.push(c);
-                app.sudo_error = None;
-            }
-            _ => {}
-        }
-        return;
-    }
-
-    // 3. Modal Confirm Dialog
-    if app.show_confirm_dialog {
-        if key.code == KeyCode::Char('c') && key.modifiers.contains(KeyModifiers::CONTROL) {
-            app.should_quit = true;
-            return;
-        }
-        match key.code {
-            KeyCode::Char('y') | KeyCode::Char('Y') | KeyCode::Enter => {
-                app.show_confirm_dialog = false;
-                app.begin_install();
-            }
-            KeyCode::Esc
-            | KeyCode::Left
-            | KeyCode::BackTab
-            | KeyCode::Char('p')
-            | KeyCode::Char('b')
-            | KeyCode::Char('n')
-            | KeyCode::Char('N')
-            | KeyCode::Char('q') => {
-                app.show_confirm_dialog = false;
-                app.prev_step();
-            }
-            _ => {}
-        }
-        return;
-    }
-
-    // 4. Path Editing Mode
-    if app.is_editing_path {
-        match key.code {
-            KeyCode::Enter => {
-                app.source_binary_dir = PathBuf::from(&app.custom_path_input);
-                app.is_editing_path = false;
-                app.rescan_binaries();
-            }
-            KeyCode::Esc => {
-                app.custom_path_input = app.source_binary_dir.to_string_lossy().to_string();
-                app.is_editing_path = false;
-            }
-            KeyCode::Backspace => {
-                app.custom_path_input.pop();
-            }
-            KeyCode::Char(c) => {
-                app.custom_path_input.push(c);
-            }
-            _ => {}
-        }
-        return;
-    }
-
-    // 5. Global Navigation Keys
-    match key.code {
-        KeyCode::Char('q') => {
-            app.should_quit = true;
-        }
-        KeyCode::Char('c') if key.modifiers.contains(KeyModifiers::CONTROL) => {
-            app.should_quit = true;
-        }
-        KeyCode::Char('?') => {
-            app.show_help = true;
-        }
-        KeyCode::Char('s') | KeyCode::Char('S') => {
-            app.is_editing_path = true;
-        }
-        KeyCode::Char('r') | KeyCode::Char('R') => {
-            app.rescan_binaries();
-        }
-        KeyCode::Char('i') | KeyCode::Char('I') => {
-            if app.install_state != InstallState::Installing {
-                app.show_confirm_dialog = true;
-            }
-        }
-
-        // Direct Number Jumping (1-6, 0 = summary)
-        KeyCode::Char('1') => app.set_step(WizardStep::Welcome),
-        KeyCode::Char('2') => app.set_step(WizardStep::SourceBranch),
-        KeyCode::Char('3') => app.set_step(WizardStep::Binaries),
-        KeyCode::Char('4') => app.set_step(WizardStep::VariantSelection),
-        KeyCode::Char('5') => app.set_step(WizardStep::ExecuteInstall),
-        KeyCode::Char('6') | KeyCode::Char('0') => app.set_step(WizardStep::Summary),
-
-        // Step Navigation (Tab / n / Right arrow = Next, BackTab / p / Left arrow = Prev)
-        KeyCode::Right | KeyCode::Tab | KeyCode::Char('n') => {
-            if app.current_step == WizardStep::SourceBranch {
-                if app.branches.is_empty() {
-                    app.add_log(
-                        LogLevel::Error,
-                        "Không có bản cài đặt nào khả dụng để tiếp tục.",
-                    );
-                } else if app.is_build_from_source() {
-                    app.start_branch_switch();
-                } else {
-                    app.next_step();
-                }
-            } else {
-                app.next_step();
-            }
-        }
-        KeyCode::Left | KeyCode::BackTab | KeyCode::Char('p') => {
-            if app.current_step != WizardStep::ExecuteInstall
-                || app.install_state != InstallState::Installing
-            {
-                app.prev_step();
-            }
-        }
-
-        // Step-Specific Interaction
-        _ => handle_step_interaction(app, key),
-    }
-}
+use super::super::state::App;
 
 /// Action derived from a key press on a checkbox-list step.
-enum ListAction {
+pub enum ListAction {
     None,
     /// Space on the cursor row.
     Toggle,
@@ -180,10 +15,7 @@ enum ListAction {
 }
 
 /// Shared Up/Down/Space/'a'/Enter handling for the checkbox-list steps.
-///
-/// Moves `cursor` within `len` and classifies the key; the caller applies
-/// the action to its own item list.
-fn list_action(key: KeyEvent, len: usize, cursor: &mut usize) -> ListAction {
+pub fn list_action(key: KeyEvent, len: usize, cursor: &mut usize) -> ListAction {
     match key.code {
         KeyCode::Up | KeyCode::Char('k') => {
             *cursor = cursor.saturating_sub(1);
@@ -222,7 +54,7 @@ fn list_action(key: KeyEvent, len: usize, cursor: &mut usize) -> ListAction {
     }
 }
 
-fn handle_step_interaction(app: &mut App, key: KeyEvent) {
+pub fn handle_step_interaction(app: &mut App, key: KeyEvent) {
     match app.current_step {
         WizardStep::Welcome => {
             if key.code == KeyCode::Enter
@@ -268,7 +100,7 @@ fn handle_step_interaction(app: &mut App, key: KeyEvent) {
                     if app.branches.is_empty() {
                         app.add_log(
                             LogLevel::Error,
-                            "Không có bản cài đặt nào khả dụng để tiếp tục.",
+                            "No installation releases available to continue.",
                         );
                         return;
                     }
@@ -369,7 +201,7 @@ fn handle_step_interaction(app: &mut App, key: KeyEvent) {
     }
 }
 
-fn select_variant_at_cursor(app: &mut App) {
+pub fn select_variant_at_cursor(app: &mut App) {
     if app.variant_cursor < app.variant_options.len() {
         for v in &mut app.variant_options {
             v.selected = false;
@@ -381,7 +213,7 @@ fn select_variant_at_cursor(app: &mut App) {
     }
 }
 
-fn select_branch_at_cursor(app: &mut App) {
+pub fn select_branch_at_cursor(app: &mut App) {
     if app.branches.is_empty() {
         app.selected_branch.clear();
         return;
