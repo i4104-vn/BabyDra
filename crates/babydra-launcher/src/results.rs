@@ -55,6 +55,7 @@ pub fn repopulate_results(
     expanded: bool,
     toggle_btn: &gtk4::Button,
     selected_index: Rc<RefCell<Option<usize>>>,
+    popover_active: Rc<std::cell::Cell<bool>>,
 ) {
     // 1. Remove all children from list_box
     while let Some(child) = list_box.first_child() {
@@ -73,7 +74,7 @@ pub fn repopulate_results(
         let mut dep_count = 0;
         for app in apps {
             if !app.is_dependency {
-                let btn = create_list_app(app, window);
+                let btn = create_list_app(app, window, popover_active.clone());
                 list_box.append(&btn);
             } else {
                 dep_count += 1;
@@ -87,7 +88,7 @@ pub fn repopulate_results(
             // Add dependency apps (visible only if expanded)
             for app in apps {
                 if app.is_dependency {
-                    let btn = create_list_app(app, window);
+                    let btn = create_list_app(app, window, popover_active.clone());
                     btn.set_visible(expanded);
                     list_box.append(&btn);
                 }
@@ -109,7 +110,7 @@ pub fn repopulate_results(
             list_box.append(&app_title);
 
             for app in &matched_apps {
-                let btn = create_list_app(app, window);
+                let btn = create_list_app(app, window, popover_active.clone());
                 list_box.append(&btn);
             }
         }

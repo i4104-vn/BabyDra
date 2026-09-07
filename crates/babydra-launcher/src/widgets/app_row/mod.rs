@@ -214,21 +214,33 @@ fn attach_app_drag_source(btn: &gtk4::Button, app: &DesktopApp, window: &gtk4::A
 }
 
 /// Attaches a right-click context menu to an application button.
-fn attach_app_right_click(btn: &gtk4::Button, app: &DesktopApp, window: &gtk4::ApplicationWindow) {
+fn attach_app_right_click(
+    btn: &gtk4::Button,
+    app: &DesktopApp,
+    window: &gtk4::ApplicationWindow,
+    popover_active: std::rc::Rc<std::cell::Cell<bool>>,
+) {
     let right_click = gtk4::GestureClick::new();
     right_click.set_button(3); // Right click
 
     let app_c = app.clone();
     let win_c = window.clone();
     let btn_c = btn.clone();
+    let popover_active_c = popover_active.clone();
 
-    right_click.connect_pressed(move |_, _, x, y| {
+    right_click.connect_pressed(move |gesture, _, x, y| {
+        gesture.set_state(gtk4::EventSequenceState::Claimed);
+
         let app_launch = app_c.clone();
         let win_launch = win_c.clone();
         let app_pin = app_c.clone();
         let win_pin = win_c.clone();
 
-        babydra_ui_kit::components::context_menu::ContextMenuBuilder::new(&btn_c)
+        popover_active_c.set(true);
+        let popover_active_close = popover_active_c.clone();
+        let win_weak = win_c.downgrade();
+
+        let popover = babydra_ui_kit::components::context_menu::ContextMenuBuilder::new(&btn_c)
             .at_coords(x, y)
             .item("Mở ứng dụng", "media-playback-start", move || {
                 let parts: Vec<&str> = app_launch.exec.split_whitespace().collect();
@@ -244,13 +256,29 @@ fn attach_app_right_click(btn: &gtk4::Button, app: &DesktopApp, window: &gtk4::A
                 win_pin.close();
             })
             .popup();
+
+        popover.connect_closed(move |_| {
+            popover_active_close.set(false);
+            let win_w = win_weak.clone();
+            gtk4::glib::idle_add_local_once(move || {
+                if let Some(win) = win_w.upgrade() {
+                    if !win.is_active() {
+                        win.close();
+                    }
+                }
+            });
+        });
     });
 
     btn.add_controller(right_click);
 }
 
 /// Creates a grid layout application button widget, binding its click event to launch the app.
-pub fn create_grid_app(app: &DesktopApp, window: &gtk4::ApplicationWindow) -> gtk4::Button {
+pub fn create_grid_app(
+    app: &DesktopApp,
+    window: &gtk4::ApplicationWindow,
+    popover_active: std::rc::Rc<std::cell::Cell<bool>>,
+) -> gtk4::Button {
     let (btn, _, _) = render::build_grid_app_ui(app);
 
     let exec_cmd = app.exec.clone();
@@ -274,13 +302,17 @@ pub fn create_grid_app(app: &DesktopApp, window: &gtk4::ApplicationWindow) -> gt
     btn.add_controller(motion);
 
     attach_app_drag_source(&btn, app, window);
-    attach_app_right_click(&btn, app, window);
+    attach_app_right_click(&btn, app, window, popover_active);
 
     btn
 }
 
 /// Creates a list row application button widget, binding its click event to launch the app.
-pub fn create_list_app(app: &DesktopApp, window: &gtk4::ApplicationWindow) -> gtk4::Button {
+pub fn create_list_app(
+    app: &DesktopApp,
+    window: &gtk4::ApplicationWindow,
+    popover_active: std::rc::Rc<std::cell::Cell<bool>>,
+) -> gtk4::Button {
     let (btn, _, _) = render::build_list_app_ui(app);
 
     let exec_cmd = app.exec.clone();
@@ -304,7 +336,7 @@ pub fn create_list_app(app: &DesktopApp, window: &gtk4::ApplicationWindow) -> gt
     btn.add_controller(motion);
 
     attach_app_drag_source(&btn, app, window);
-    attach_app_right_click(&btn, app, window);
+    attach_app_right_click(&btn, app, window, popover_active);
 
     btn
 }

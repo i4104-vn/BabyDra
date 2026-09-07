@@ -109,6 +109,7 @@ pub fn build_launcher_ui(
     let current_query = Rc::new(RefCell::new(String::new()));
     let selected_index = Rc::new(RefCell::new(Some(0usize)));
     let expanded = Rc::new(RefCell::new(false));
+    let popover_active = Rc::new(std::cell::Cell::new(false));
 
     // Toggle button for other apps
     let toggle_btn = gtk4::Button::new();
@@ -125,6 +126,7 @@ pub fn build_launcher_ui(
     let apps_clone = apps_rc.clone();
     let window_clone = window.clone();
     let selected_index_clone = selected_index.clone();
+    let popover_active_toggle = popover_active.clone();
 
     toggle_btn.connect_clicked(move |_| {
         let mut exp = expanded_clone.borrow_mut();
@@ -145,6 +147,7 @@ pub fn build_launcher_ui(
             *exp,
             &toggle_btn_clone,
             selected_index_clone.clone(),
+            popover_active_toggle.clone(),
         );
     });
 
@@ -157,6 +160,7 @@ pub fn build_launcher_ui(
         *expanded.borrow(),
         &toggle_btn,
         selected_index.clone(),
+        popover_active.clone(),
     );
 
     // Search entry connect
@@ -169,6 +173,7 @@ pub fn build_launcher_ui(
     let expanded_search = expanded.clone();
     let toggle_btn_search = toggle_btn.clone();
     let selected_index_search = selected_index.clone();
+    let popover_active_search = popover_active.clone();
 
     search_entry.connect_changed(move |entry| {
         let text = entry.text().to_string();
@@ -186,6 +191,7 @@ pub fn build_launcher_ui(
         let expanded = expanded_search.clone();
         let toggle_btn = toggle_btn_search.clone();
         let selected_index = selected_index_search.clone();
+        let popover_active = popover_active_search.clone();
 
         let new_source_id =
             gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(200), move || {
@@ -199,6 +205,7 @@ pub fn build_launcher_ui(
                     *expanded.borrow(),
                     &toggle_btn,
                     selected_index.clone(),
+                    popover_active.clone(),
                 );
             });
         *d_source_id.borrow_mut() = Some(new_source_id);
@@ -233,10 +240,29 @@ pub fn build_launcher_ui(
         gtk4::glib::Propagation::Stop
     });
 
-    babydra_ui_kit::ui::window::setup_click_outside_dismiss(&window, &box_layout);
+    // Click outside dismiss with popover awareness
+    let popover_active_for_dismiss = popover_active.clone();
+    let box_layout_c = box_layout.clone();
+    let win_c = window.clone();
+    let click_gesture = gtk4::GestureClick::new();
+    click_gesture.set_button(1); // Only dismiss on Primary (Left) click outside
+    click_gesture.connect_pressed(move |_, _, x, y| {
+        if popover_active_for_dismiss.get() {
+            return;
+        }
+        let picked = win_c.pick(x, y, gtk4::PickFlags::DEFAULT);
+        let inside = picked
+            .map(|w| w.is_ancestor(&box_layout_c) || w == box_layout_c)
+            .unwrap_or(false);
+        if !inside {
+            win_c.close();
+        }
+    });
+    window.add_controller(click_gesture);
 
-    window.connect_is_active_notify(|win| {
-        if !win.is_active() {
+    let popover_active_for_notify = popover_active.clone();
+    window.connect_is_active_notify(move |win| {
+        if !win.is_active() && !popover_active_for_notify.get() {
             win.close();
         }
     });
@@ -248,13 +274,20 @@ pub fn build_launcher_ui(
     let list_box_key = list_box.clone();
     let selected_index_key = selected_index.clone();
     let search_entry_key = search_entry.clone();
+    let popover_active_for_key = popover_active.clone();
 
     key_controller.connect_key_pressed(move |_, key, _, _| match key {
         gtk4::gdk::Key::Escape => {
+            if popover_active_for_key.get() {
+                return gtk4::glib::Propagation::Proceed;
+            }
             win_clone.close();
             gtk4::glib::Propagation::Stop
         }
         gtk4::gdk::Key::Down => {
+            if popover_active_for_key.get() {
+                return gtk4::glib::Propagation::Proceed;
+            }
             let buttons = get_visible_buttons(&list_box_key);
             if !buttons.is_empty() {
                 let current = selected_index_key.borrow().unwrap_or(0);
@@ -266,6 +299,9 @@ pub fn build_launcher_ui(
             gtk4::glib::Propagation::Stop
         }
         gtk4::gdk::Key::Up => {
+            if popover_active_for_key.get() {
+                return gtk4::glib::Propagation::Proceed;
+            }
             let buttons = get_visible_buttons(&list_box_key);
             if !buttons.is_empty() {
                 let current = selected_index_key.borrow().unwrap_or(0);
