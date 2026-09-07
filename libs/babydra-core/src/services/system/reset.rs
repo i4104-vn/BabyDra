@@ -254,9 +254,40 @@ fn clean_user_files(sender: &Sender<String>) {
     }
 }
 
+const PROTECTED_PACKAGES: &[&str] = &[
+    "base",
+    "base-devel",
+    "linux",
+    "linux-lts",
+    "linux-zen",
+    "linux-hardened",
+    "linux-firmware",
+    "intel-ucode",
+    "amd-ucode",
+    "btrfs-progs",
+    "e2fsprogs",
+    "dosfstools",
+    "efibootmgr",
+    "grub",
+    "systemd",
+    "systemd-sysvcompat",
+    "sudo",
+    "networkmanager",
+    "iwd",
+    "dhcpcd",
+    "iproute2",
+    "git",
+    "bash",
+    "zsh",
+    "coreutils",
+    "util-linux",
+    "pacman",
+    "archlinux-keyring",
+];
+
 /// Uninstalls BabyDra shell packages via pacman if requested.
 fn remove_shell_packages(password: &str, sender: &Sender<String>) {
-    let _ = sender.send("[5/6] Cleaning packages...".into());
+    let _ = sender.send("[5/6] Cleaning BabyDra shell packages...".into());
     let candidate_pkgs = [
         "labwc",
         "greetd",
@@ -290,7 +321,67 @@ fn remove_shell_packages(password: &str, sender: &Sender<String>) {
         let _ = sender.send("  No BabyDra-specific packages needed removal.".into());
     }
 
-    // Clean orphan packages
+    clean_orphan_packages(password, sender);
+}
+
+/// Uninstalls ALL user-installed applications, keeping only Arch Linux base system packages.
+fn remove_all_user_applications(password: &str, sender: &Sender<String>) {
+    let _ = sender.send(
+        "[5/6] Scanning and removing ALL user-installed applications (keeping Arch Linux base)..."
+            .into(),
+    );
+
+    let output = match Command::new("pacman").args(["-Qeq"]).output() {
+        Ok(out) => out,
+        Err(e) => {
+            let _ = sender.send(format!("  Failed to query installed packages: {}", e));
+            return;
+        }
+    };
+
+    let installed_str = String::from_utf8_lossy(&output.stdout);
+    let mut pkgs_to_remove: Vec<String> = Vec::new();
+
+    for line in installed_str.lines() {
+        let pkg = line.trim();
+        if pkg.is_empty() {
+            continue;
+        }
+        if !PROTECTED_PACKAGES.contains(&pkg) {
+            pkgs_to_remove.push(pkg.to_string());
+        }
+    }
+
+    if pkgs_to_remove.is_empty() {
+        let _ = sender.send("  No user packages to remove; system already at baseline.".into());
+        return;
+    }
+
+    let _ = sender.send(format!(
+        "  Found {} user-installed packages to uninstall: {}",
+        pkgs_to_remove.len(),
+        pkgs_to_remove.join(", ")
+    ));
+
+    let slice_refs: Vec<&str> = pkgs_to_remove.iter().map(|s| s.as_str()).collect();
+    let mut pacman_args = vec!["-Rns", "--noconfirm"];
+    pacman_args.extend_from_slice(&slice_refs);
+
+    if let Err(e) = run_sudo_cmd(password, "pacman", &pacman_args, sender) {
+        let _ = sender.send(format!(
+            "  Batch removal returned notice ({}). Retrying individual packages...",
+            e
+        ));
+        for pkg in &slice_refs {
+            let _ = run_sudo_cmd(password, "pacman", &["-R", "--noconfirm", pkg], sender);
+        }
+    }
+
+    clean_orphan_packages(password, sender);
+}
+
+/// Cleans orphaned dependencies left behind by uninstalled packages.
+fn clean_orphan_packages(password: &str, sender: &Sender<String>) {
     if let Ok(output) = Command::new("pacman").args(["-Qtdq"]).output() {
         if output.status.success() {
             let orphans_str = String::from_utf8_lossy(&output.stdout);
@@ -318,7 +409,8 @@ fn finalize_system(sender: &Sender<String>) {
 /// Executes the full native Arch Linux factory reset sequence.
 pub fn run_factory_reset_stream(
     password: &str,
-    remove_packages: bool,
+    remove_shell_pkgs: bool,
+    remove_all_apps: bool,
     sender: Sender<String>,
 ) -> CoreResult<()> {
     let _ = sender.send("=== Starting Native Arch Linux Factory Reset ===".into());
@@ -328,7 +420,9 @@ pub fn run_factory_reset_stream(
     clean_system_files(password, &sender);
     clean_user_files(&sender);
 
-    if remove_packages {
+    if remove_all_apps {
+        remove_all_user_applications(password, &sender);
+    } else if remove_shell_pkgs {
         remove_shell_packages(password, &sender);
     } else {
         let _ = sender.send("[5/6] Skipping package removal as requested.".into());
@@ -337,7 +431,7 @@ pub fn run_factory_reset_stream(
     finalize_system(&sender);
 
     let _ = sender.send("========================================================".into());
-    let _ = sender.send("✔ Factory Reset Complete!".into());
+    let _ = sender.send("Factory Reset Complete!".into());
     let _ = sender.send("The system has been restored to clean Arch Linux baseline.".into());
     let _ = sender.send("Login prompt will be available via standard TTY console.".into());
     let _ = sender.send("========================================================".into());
@@ -378,11 +472,11 @@ mod tests {
     fn test_reset_channel_streaming() {
         let (tx, rx) = std::sync::mpsc::channel::<String>();
         let _ = tx.send("[1/6] Stopping active BabyDra and compositor processes...".into());
-        let _ = tx.send("✔ Factory Reset Complete!".into());
+        let _ = tx.send("Factory Reset Complete!".into());
         assert_eq!(
             rx.recv().unwrap(),
             "[1/6] Stopping active BabyDra and compositor processes..."
         );
-        assert_eq!(rx.recv().unwrap(), "✔ Factory Reset Complete!");
+        assert_eq!(rx.recv().unwrap(), "Factory Reset Complete!");
     }
 }

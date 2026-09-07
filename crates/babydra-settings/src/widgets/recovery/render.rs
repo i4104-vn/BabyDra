@@ -10,9 +10,11 @@ use gtk4::{
 pub struct RecoveryWidgets {
     pub root: Overlay,
     pub remove_pkgs_check: CheckButton,
+    pub remove_all_apps_check: CheckButton,
     pub start_btn: Button,
     // Auth modal
     pub auth_card: Box,
+    pub warn_all_apps_lbl: Label,
     pub understand_check: CheckButton,
     pub pwd_entry: PasswordEntry,
     pub error_lbl: Label,
@@ -175,6 +177,20 @@ pub fn build_recovery_ui() -> RecoveryWidgets {
     remove_pkgs_check.set_cursor_from_name(Some("pointer"));
     danger_card.append(&remove_pkgs_check);
 
+    // Checkbox for removing all user-installed applications
+    let remove_all_apps_check =
+        CheckButton::with_label(&trans("settings.recovery_remove_all_apps_opt"));
+    remove_all_apps_check.set_active(false);
+    remove_all_apps_check.set_cursor_from_name(Some("pointer"));
+    danger_card.append(&remove_all_apps_check);
+
+    let all_apps_desc = Label::new(Some(&trans("settings.recovery_remove_all_apps_desc")));
+    all_apps_desc.add_css_class("settings-row-desc");
+    all_apps_desc.set_halign(Align::Start);
+    all_apps_desc.set_wrap(true);
+    all_apps_desc.set_margin_start(24);
+    danger_card.append(&all_apps_desc);
+
     // Trigger action row
     let action_row = Box::new(Orientation::Horizontal, 12);
     action_row.set_halign(Align::End);
@@ -222,6 +238,14 @@ pub fn build_recovery_ui() -> RecoveryWidgets {
     auth_title_box.append(&auth_sub);
     auth_header.append(&auth_title_box);
     auth_card.append(&auth_header);
+
+    // Warning when all apps removal is enabled
+    let warn_all_apps_lbl = Label::new(Some(&trans("settings.recovery_warn_all_apps")));
+    warn_all_apps_lbl.add_css_class("dialog-error-text");
+    warn_all_apps_lbl.set_halign(Align::Start);
+    warn_all_apps_lbl.set_wrap(true);
+    warn_all_apps_lbl.set_visible(false);
+    auth_card.append(&warn_all_apps_lbl);
 
     // Error Label
     let error_lbl = Label::new(None);
@@ -333,8 +357,10 @@ pub fn build_recovery_ui() -> RecoveryWidgets {
     RecoveryWidgets {
         root,
         remove_pkgs_check,
+        remove_all_apps_check,
         start_btn,
         auth_card,
+        warn_all_apps_lbl,
         understand_check,
         pwd_entry,
         error_lbl,

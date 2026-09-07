@@ -14,14 +14,31 @@ pub fn wire_events(widgets: &RecoveryWidgets) {
     let understand_check_show = widgets.understand_check.clone();
     let confirm_btn_show = widgets.confirm_btn.clone();
     let error_lbl_show = widgets.error_lbl.clone();
+    let warn_all_apps_show = widgets.warn_all_apps_lbl.clone();
+    let remove_all_apps_show = widgets.remove_all_apps_check.clone();
 
     widgets.start_btn.connect_clicked(move |_| {
         pwd_entry_show.set_text("");
         understand_check_show.set_active(false);
         confirm_btn_show.set_sensitive(false);
         error_lbl_show.set_visible(false);
+        warn_all_apps_show.set_visible(remove_all_apps_show.is_active());
         auth_card_show.set_visible(true);
         pwd_entry_show.grab_focus();
+    });
+
+    // 1.1 Toggle "Remove all apps" checkbox -> sync warning and shell packages checkbox
+    let warn_all_apps_toggle = widgets.warn_all_apps_lbl.clone();
+    let remove_pkgs_toggle = widgets.remove_pkgs_check.clone();
+    widgets.remove_all_apps_check.connect_toggled(move |btn| {
+        let is_all = btn.is_active();
+        warn_all_apps_toggle.set_visible(is_all);
+        if is_all {
+            remove_pkgs_toggle.set_active(true);
+            remove_pkgs_toggle.set_sensitive(false);
+        } else {
+            remove_pkgs_toggle.set_sensitive(true);
+        }
     });
 
     // 2. Validate input conditions to enable "Confirm Reset" button
@@ -64,6 +81,7 @@ pub fn wire_events(widgets: &RecoveryWidgets) {
     let close_btn_confirm = widgets.close_btn.clone();
     let reboot_btn_confirm = widgets.reboot_btn.clone();
     let remove_pkgs_check = widgets.remove_pkgs_check.clone();
+    let remove_all_apps_check = widgets.remove_all_apps_check.clone();
 
     widgets.confirm_btn.connect_clicked(move |_| {
         let password = pwd_entry_confirm.text().trim().to_string();
@@ -94,11 +112,12 @@ pub fn wire_events(widgets: &RecoveryWidgets) {
         buffer.set_text("");
 
         let remove_pkgs = remove_pkgs_check.is_active();
+        let remove_all_apps = remove_all_apps_check.is_active();
         let (tx, rx) = mpsc::channel::<String>();
 
         let pwd_thread = password.clone();
         std::thread::spawn(move || {
-            let _ = run_factory_reset_stream(&pwd_thread, remove_pkgs, tx);
+            let _ = run_factory_reset_stream(&pwd_thread, remove_pkgs, remove_all_apps, tx);
         });
 
         let status_lbl_poller = status_lbl_confirm.clone();

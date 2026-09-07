@@ -7,6 +7,7 @@
 set -euo pipefail
 
 REMOVE_PACKAGES=true
+REMOVE_ALL_APPS=false
 AUTO_REBOOT=false
 DRY_RUN=false
 
@@ -14,8 +15,13 @@ for arg in "$@"; do
     case "$arg" in
         --keep-packages)
             REMOVE_PACKAGES=false
+            REMOVE_ALL_APPS=false
             ;;
         --remove-packages)
+            REMOVE_PACKAGES=true
+            ;;
+        --remove-all-apps)
+            REMOVE_ALL_APPS=true
             REMOVE_PACKAGES=true
             ;;
         --reboot)
@@ -29,6 +35,7 @@ for arg in "$@"; do
             echo ""
             echo "Options:"
             echo "  --remove-packages   Uninstall BabyDra shell packages (default: true)"
+            echo "  --remove-all-apps   Uninstall ALL user-installed apps (keep vanilla Arch Linux base only)"
             echo "  --keep-packages     Keep installed pacman/AUR packages"
             echo "  --reboot            Automatically reboot after reset completes"
             echo "  --dry-run           Print actions without modifying files"
@@ -129,33 +136,73 @@ if [ -d "$TARGET_HOME" ]; then
     fi
 fi
 
-# 5. Uninstall BabyDra shell packages if requested
+# 5. Uninstall packages if requested
 echo ""
 echo "[Step 5/6] Cleaning packages..."
-if [ "$REMOVE_PACKAGES" = true ] && [ "$DRY_RUN" = false ]; then
-    # Packages specific to the BabyDra graphical shell
-    SHELL_PACKAGES="labwc greetd cage gtk4-layer-shell wlrctl ddcutil-service gammastep wlsunset kvantum-qt5"
-    INSTALLED_TO_REMOVE=""
-    for pkg in $SHELL_PACKAGES; do
-        if pacman -Q "$pkg" &>/dev/null; then
-            INSTALLED_TO_REMOVE="$INSTALLED_TO_REMOVE $pkg"
+if [ "$DRY_RUN" = false ]; then
+    if [ "$REMOVE_ALL_APPS" = true ]; then
+        echo "Scanning and removing ALL user-installed applications (keeping Arch Linux base)..."
+        PROTECTED=(
+            "base" "base-devel" "linux" "linux-lts" "linux-zen" "linux-hardened"
+            "linux-firmware" "intel-ucode" "amd-ucode" "btrfs-progs" "e2fsprogs"
+            "dosfstools" "efibootmgr" "grub" "systemd" "systemd-sysvcompat"
+            "sudo" "networkmanager" "iwd" "dhcpcd" "iproute2" "git" "bash"
+            "zsh" "coreutils" "util-linux" "pacman" "archlinux-keyring"
+        )
+        ALL_EXPLICIT=$(pacman -Qeq 2>/dev/null || true)
+        PKGS_TO_REMOVE=()
+        for p in $ALL_EXPLICIT; do
+            is_protected=false
+            for prot in "${PROTECTED[@]}"; do
+                if [ "$p" = "$prot" ]; then
+                    is_protected=true
+                    break
+                fi
+            done
+            if [ "$is_protected" = false ]; then
+                PKGS_TO_REMOVE+=("$p")
+            fi
+        done
+
+        if [ ${#PKGS_TO_REMOVE[@]} -gt 0 ]; then
+            echo "Uninstalling user packages: ${PKGS_TO_REMOVE[*]}"
+            pacman -Rns --noconfirm "${PKGS_TO_REMOVE[@]}" 2>/dev/null || pacman -R --noconfirm "${PKGS_TO_REMOVE[@]}" 2>/dev/null || true
+        else
+            echo "No user packages to remove; system already at baseline."
         fi
-    done
 
-    if [ -n "$INSTALLED_TO_REMOVE" ]; then
-        echo "Uninstalling shell packages: $INSTALLED_TO_REMOVE"
-        pacman -Rns --noconfirm $INSTALLED_TO_REMOVE 2>/dev/null || pacman -R --noconfirm $INSTALLED_TO_REMOVE 2>/dev/null || true
+        echo "Cleaning orphan packages..."
+        ORPHANS=$(pacman -Qtdq 2>/dev/null || true)
+        if [ -n "$ORPHANS" ]; then
+            pacman -Rns --noconfirm $ORPHANS 2>/dev/null || true
+        fi
+    elif [ "$REMOVE_PACKAGES" = true ]; then
+        # Packages specific to the BabyDra graphical shell
+        SHELL_PACKAGES="labwc greetd cage gtk4-layer-shell wlrctl ddcutil-service gammastep wlsunset kvantum-qt5"
+        INSTALLED_TO_REMOVE=""
+        for pkg in $SHELL_PACKAGES; do
+            if pacman -Q "$pkg" &>/dev/null; then
+                INSTALLED_TO_REMOVE="$INSTALLED_TO_REMOVE $pkg"
+            fi
+        done
+
+        if [ -n "$INSTALLED_TO_REMOVE" ]; then
+            echo "Uninstalling shell packages: $INSTALLED_TO_REMOVE"
+            pacman -Rns --noconfirm $INSTALLED_TO_REMOVE 2>/dev/null || pacman -R --noconfirm $INSTALLED_TO_REMOVE 2>/dev/null || true
+        else
+            echo "No BabyDra-specific packages needed removal."
+        fi
+
+        echo "Cleaning orphan packages..."
+        ORPHANS=$(pacman -Qtdq 2>/dev/null || true)
+        if [ -n "$ORPHANS" ]; then
+            pacman -Rns --noconfirm $ORPHANS 2>/dev/null || true
+        fi
     else
-        echo "No BabyDra-specific packages needed removal."
-    fi
-
-    echo "Cleaning orphan packages..."
-    ORPHANS=$(pacman -Qtdq 2>/dev/null || true)
-    if [ -n "$ORPHANS" ]; then
-        pacman -Rns --noconfirm $ORPHANS 2>/dev/null || true
+        echo "Skipping package removal as requested."
     fi
 else
-    echo "Skipping package removal as requested."
+    echo "Dry run: Skipping package removal."
 fi
 
 # 6. Rebuild font cache & finalize
@@ -164,7 +211,7 @@ echo "[Step 6/6] Finalizing system state..."
 run_cmd "Rebuilding font cache" fc-cache -r || true
 
 echo "========================================================"
-echo "✔ Factory Reset Complete!"
+echo "Factory Reset Complete!"
 echo "The system has been restored to clean Arch Linux baseline."
 echo "Login prompt will be available via standard TTY console."
 echo "========================================================"
