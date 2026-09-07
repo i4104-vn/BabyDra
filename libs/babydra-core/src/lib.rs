@@ -48,27 +48,26 @@ pub use services::system::power::{
     self, apply_saved_profile, get_current_profile, poweroff, reboot, set_perf_profile,
     set_perf_profile_pw, suspend,
 };
+pub use services::system::reset;
 pub use services::system::storage::{self, DiskInfo};
-pub use services::system::volume::{
-    self, get_audio_backend, AudioBackendType, AudioDevice,
-};
+pub use services::system::volume::{self, get_audio_backend, AudioBackendType, AudioDevice};
 pub use services::system::vpn::{self, get_vpn_connections, VpnConn};
 pub use services::system::wifi;
 
 // --- Window & App Management ---
 pub use services::apps::{find_desktop_apps, refresh_desktop_apps, DesktopApp};
-pub use services::window::{self, close_window, focus_window};
 pub use services::window::mru::{activate_app, get_history, get_running_apps, save_history};
 pub use services::window::tracker::spawn_switcher;
+pub use services::window::{self, close_window, focus_window};
 
 // --- Shell, Media & Utilities ---
 pub use services::clock::{self, format_clock_date};
 pub use services::exif::{self, read_exif, ExifData};
 pub use services::explore::{
     calc_dir_size, clean_modifiers, copy_path, delete_path, filter_entries, get_icon_name,
-    get_owner_group, load_cropped_square, load_directory, matches_key, matches_shortcut,
-    move_path, parse_shortcut, read_image_metadata, rename_path, send_to_trash, shortcuts,
-    sort_entries, start_dbus_service, FileWatcher, ImageMetadata,
+    get_owner_group, load_cropped_square, load_directory, matches_key, matches_shortcut, move_path,
+    parse_shortcut, read_image_metadata, rename_path, send_to_trash, shortcuts, sort_entries,
+    start_dbus_service, FileWatcher, ImageMetadata,
 };
 pub use services::mpris::{self, decode_uri, run_playerctl};
 pub use services::notification::island::{
@@ -86,10 +85,11 @@ pub use services::tray;
 pub use services::wallpaper::{
     self, apply_greeter_wp, apply_wallpaper, get_avatar_bytes, get_avatar_path, get_greeter_wp,
     get_greeter_wp_bytes, get_greeter_wp_css, get_live_wallpapers, get_local_wallpapers,
-    get_or_create_first_frame, get_or_create_thumbnail, get_static_wallpapers, get_video_duration, get_wallpaper,
-    get_wallpaper_dir, get_wallpaper_mode, is_gif_file, is_gstreamer_plugin_available,
-    is_live_wallpaper_file, is_static_wallpaper_file, is_video_file, read_image_bytes,
-    set_avatar, set_greeter_wp, set_wallpaper, set_wallpaper_with_mode, sync_shared_assets,
+    get_or_create_first_frame, get_or_create_thumbnail, get_static_wallpapers, get_video_duration,
+    get_wallpaper, get_wallpaper_dir, get_wallpaper_mode, is_gif_file,
+    is_gstreamer_plugin_available, is_live_wallpaper_file, is_static_wallpaper_file, is_video_file,
+    read_image_bytes, set_avatar, set_greeter_wp, set_wallpaper, set_wallpaper_with_mode,
+    sync_shared_assets,
 };
 
 /// Applies all saved user settings from unified babydra.conf (CPU performance profile, Display monitors resolution/refresh rates, Wallpaper, Auto Battery Saver).

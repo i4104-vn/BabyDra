@@ -102,6 +102,7 @@ fn handle_cli_args() -> (bool, Option<String>) {
             println!("  --displays, --display         Open Display Configuration tab");
             println!("  --wifi, --bluetooth, --vpn    Open Network configuration tabs");
             println!("  --power, --keybinds, --apps   Open System configuration tabs");
+            println!("  --recovery, --reset           Open Factory Reset / Recovery tab");
             println!("  --apply-all-settings          Apply all saved system settings");
             println!("  --sync-greeter-wallpaper      Sync lock screen wallpaper");
             println!("  --apply-battery-saver         Switch to battery saver profile");
@@ -159,6 +160,9 @@ fn normalize_page_name(name: &str) -> String {
         "cert" | "certs" | "certificates" | "ssl" => "certificates".to_string(),
         "host" | "hosts" => "hosts".to_string(),
         "system_update" | "update" | "updates" => "system_update".to_string(),
+        "recovery" | "reset" | "factory-reset" | "factory_reset" | "restore" => {
+            "recovery".to_string()
+        }
         "system" | "about" | "info" => "system".to_string(),
         other => other.to_string(),
     }
@@ -181,6 +185,7 @@ fn is_valid_page(name: &str) -> bool {
             | "env"
             | "keybinds"
             | "system_update"
+            | "recovery"
             | "system"
     )
 }

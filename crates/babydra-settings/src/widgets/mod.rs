@@ -8,6 +8,7 @@ pub mod helpers;
 pub mod hosts;
 pub mod keybinds;
 pub mod power;
+pub mod recovery;
 pub mod startup;
 pub mod state;
 pub mod system_info;

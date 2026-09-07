@@ -23,6 +23,7 @@ pub(crate) fn create_sidebar_icon(id: &str, default_icon: &str) -> gtk4::Widget 
         "system_update" => {
             babydra_ui_kit::components::create_colored_icon("system_update", 18, "#10B981")
         }
+        "recovery" => babydra_ui_kit::components::create_colored_icon("history", 18, "#EF4444"),
         "system" => babydra_ui_kit::components::create_colored_icon("system", 18, "#3B82F6"),
         _ => babydra_ui_kit::components::create_colored_icon(default_icon, 18, "#3B82F6"),
     }

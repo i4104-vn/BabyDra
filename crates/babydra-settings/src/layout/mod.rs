@@ -87,6 +87,11 @@ const NAV_CATEGORIES: &[NavCategory] = &[
                 icon: "history",
                 i18n_key: "settings.nav_system_update",
             },
+            NavItem {
+                id: "recovery",
+                icon: "history",
+                i18n_key: "settings.nav_recovery",
+            },
         ],
     },
 ];
@@ -113,6 +118,7 @@ fn create_widget_page(name: &str) -> gtk4::Widget {
         "startup" => widgets::startup::create_startup(),
         "certificates" => widgets::certificates::create_cert_widget(),
         "system_update" => widgets::system_update::create_update_widget(),
+        "recovery" => widgets::recovery::create_recovery_widget(),
         "system" => widgets::system_info::create_system_widget(),
         _ => gtk4::Box::new(gtk4::Orientation::Vertical, 0).upcast(),
     }

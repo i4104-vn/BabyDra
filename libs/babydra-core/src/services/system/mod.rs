@@ -12,6 +12,7 @@ pub mod keymap;
 pub mod monitor;
 pub mod network;
 pub mod power;
+pub mod reset;
 pub mod startup;
 pub mod storage;
 pub mod theme;
