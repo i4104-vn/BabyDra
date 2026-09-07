@@ -52,25 +52,52 @@ pub fn build_open_with_dialog(
         .to_string_lossy()
         .to_string();
 
-    let header_box = Box::new(Orientation::Vertical, 2);
-    let lbl_title = Label::builder()
-        .label(trans("explore.dialog_open_with_title"))
-        .halign(Align::Start)
-        .css_classes(vec!["dialog-title".to_string()])
-        .build();
+    // Header with squircle badge
+    let header_box = Box::new(Orientation::Horizontal, 14);
+    header_box.set_halign(Align::Start);
+    header_box.set_hexpand(true);
+    header_box.set_valign(Align::Center);
+    header_box.set_margin_bottom(6);
+
+    let badge = Box::new(Orientation::Vertical, 0);
+    badge.add_css_class("modern-dialog-badge");
+    badge.add_css_class("badge-primary");
+    badge.set_size_request(42, 42);
+    badge.set_halign(Align::Start);
+    badge.set_valign(Align::Center);
+
+    let icon = crate::ui::icon::get_icon("logo", 22);
+    icon.set_pixel_size(22);
+    icon.set_vexpand(true);
+    icon.set_hexpand(true);
+    icon.set_valign(Align::Center);
+    icon.set_halign(Align::Center);
+    badge.append(&icon);
+    header_box.append(&badge);
+
+    let title_box = Box::new(Orientation::Vertical, 3);
+    title_box.set_valign(Align::Center);
+    title_box.set_hexpand(true);
+
+    let lbl_title = Label::new(Some(&trans("explore.dialog_open_with_title")));
+    lbl_title.add_css_class("modern-dialog-title");
+    lbl_title.set_halign(Align::Start);
+    title_box.append(&lbl_title);
+
     let lbl_subtitle = Label::builder()
         .label(&filename)
         .halign(Align::Start)
-        .css_classes(vec!["dim-label".to_string()])
+        .css_classes(vec!["modern-dialog-subtitle".to_string()])
         .ellipsize(gtk4::pango::EllipsizeMode::Middle)
         .max_width_chars(40)
         .build();
-    header_box.append(&lbl_title);
-    header_box.append(&lbl_subtitle);
+    title_box.append(&lbl_subtitle);
+    header_box.append(&title_box);
     vbox.append(&header_box);
 
     // Search bar
     let search_entry = SearchEntry::new();
+    search_entry.add_css_class("modern-dialog-entry");
     search_entry.set_placeholder_text(Some(&trans("explore.dialog_open_with_search")));
     search_entry.set_hexpand(true);
     vbox.append(&search_entry);
@@ -79,7 +106,7 @@ pub fn build_open_with_dialog(
     let scrolled = ScrolledWindow::builder()
         .hscrollbar_policy(gtk4::PolicyType::Never)
         .vscrollbar_policy(gtk4::PolicyType::Automatic)
-        .min_content_height(280)
+        .min_content_height(240)
         .hexpand(true)
         .vexpand(true)
         .css_classes(vec!["open-with-scrolled".to_string()])
@@ -156,6 +183,19 @@ pub fn build_open_with_dialog(
     let check_always = CheckButton::with_label(&always_label);
     check_always.set_active(false);
     vbox.append(&check_always);
+
+    // Action button row
+    let btn_cancel = gtk4::Button::with_label(&trans("explore.settings_cancel"));
+    btn_cancel.add_css_class("modern-dialog-cancel-btn");
+    btn_cancel.set_cursor_from_name(Some("pointer"));
+    let win_cancel = window.clone();
+    btn_cancel.connect_clicked(move |_| {
+        win_cancel.close();
+    });
+    let bbox = Box::new(Orientation::Horizontal, 10);
+    bbox.set_halign(Align::End);
+    bbox.append(&btn_cancel);
+    vbox.append(&bbox);
 
     OpenWithDialogWidgets {
         window,

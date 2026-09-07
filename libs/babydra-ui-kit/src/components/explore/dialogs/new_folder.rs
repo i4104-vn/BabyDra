@@ -13,12 +13,17 @@ pub fn show_folder_dialog(
 ) {
     let shell = DialogShell::new(
         &trans("explore.dialog_new_folder_title"),
-        320,
-        150,
-        10,
+        380,
+        185,
+        12,
         parent,
     );
-    shell.add_label(&trans("explore.dialog_new_folder_label"));
+    shell.add_header(
+        "folder",
+        super::shell::BadgeStyle::Primary,
+        &trans("explore.dialog_new_folder_title"),
+        Some(&trans("explore.dialog_new_folder_label")),
+    );
     let entry = shell.add_entry(Some(&trans("explore.menu_new_folder")), false);
     let lbl_error = shell.add_error_label();
     let bbox = shell.add_button_row();

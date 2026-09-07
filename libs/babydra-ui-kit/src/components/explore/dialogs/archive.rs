@@ -18,8 +18,13 @@ pub fn show_compress_dialog(
         return;
     }
 
-    let shell = DialogShell::new(&trans("explore.dialog_archive_title"), 320, 180, 12, parent);
-    shell.add_label(&trans("explore.dialog_archive_label"));
+    let shell = DialogShell::new(&trans("explore.dialog_archive_title"), 420, 240, 14, parent);
+    shell.add_header(
+        "download",
+        super::shell::BadgeStyle::Primary,
+        &trans("explore.dialog_archive_title"),
+        Some(&trans("explore.dialog_archive_label")),
+    );
 
     let default_name = if target_paths.len() == 1 {
         target_paths[0]

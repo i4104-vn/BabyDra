@@ -13,17 +13,28 @@ pub fn show_new_file_dialog(
 ) {
     let shell = DialogShell::new(
         &trans("explore.dialog_new_file_title"),
-        320,
-        150,
-        10,
+        380,
+        185,
+        12,
         parent,
     );
-    shell.add_label(&trans("explore.dialog_new_file_label"));
+    let icon_img = shell.add_header(
+        "text-x-generic",
+        super::shell::BadgeStyle::Primary,
+        &trans("explore.dialog_new_file_title"),
+        Some(&trans("explore.dialog_new_file_label")),
+    );
     let entry = shell.add_entry(Some(&trans("explore.menu_new_file")), false);
     let lbl_error = shell.add_error_label();
     let bbox = shell.add_button_row();
     shell.cancel_button(&bbox);
     let btn_create = shell.action_button(&bbox, &trans("explore.settings_add"));
+
+    let icon_img_c = icon_img.clone();
+    entry.connect_changed(move |e| {
+        let text = e.text().to_string();
+        crate::ui::icon::set_file_icon(&icon_img_c, &text, false);
+    });
 
     let win = shell.window.clone();
     DialogShell::wire_error_clear(&lbl_error, &entry);

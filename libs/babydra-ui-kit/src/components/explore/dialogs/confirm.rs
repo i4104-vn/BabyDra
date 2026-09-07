@@ -9,18 +9,16 @@ pub fn show_delete_confirm(
     on_confirm: impl Fn() + 'static,
     parent: Option<&impl IsA<gtk4::Window>>,
 ) {
-    let shell = DialogShell::new(title, 360, 120, 12, parent);
-    shell.add_label(message);
+    let shell = DialogShell::new(title, 380, 160, 12, parent);
+    shell.add_header(
+        "trash",
+        super::shell::BadgeStyle::Danger,
+        title,
+        Some(message),
+    );
     let bbox = shell.add_button_row();
     shell.cancel_button(&bbox);
-    let btn_confirm = {
-        let btn = gtk4::Button::builder()
-            .label(babydra_core::i18n::trans("explore.settings_delete"))
-            .css_classes(vec!["destructive-action".to_string()])
-            .build();
-        bbox.append(&btn);
-        btn
-    };
+    let btn_confirm = shell.danger_button(&bbox, &babydra_core::i18n::trans("explore.settings_delete"));
 
     let confirm_cb = std::rc::Rc::new(on_confirm);
     let win = shell.window.clone();

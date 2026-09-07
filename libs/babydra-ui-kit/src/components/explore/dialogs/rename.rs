@@ -12,16 +12,35 @@ pub fn show_rename_dialog(
     nav_callback: Rc<dyn Fn(PathBuf)>,
     parent: Option<&impl IsA<gtk4::Window>>,
 ) {
-    let shell = DialogShell::new(&trans("explore.dialog_rename_title"), 320, 150, 10, parent);
-    shell.add_label(&trans("explore.dialog_rename_label"));
+    let is_dir = path.is_dir();
+    let initial_name = path.file_name().unwrap_or_default().to_string_lossy().into_owned();
+    let initial_icon = if is_dir {
+        "folder".to_string()
+    } else {
+        crate::ui::icon::get_icon_name_for_file(&initial_name, false)
+    };
+
+    let shell = DialogShell::new(&trans("explore.dialog_rename_title"), 380, 185, 12, parent);
+    let icon_img = shell.add_header(
+        &initial_icon,
+        super::shell::BadgeStyle::Primary,
+        &trans("explore.dialog_rename_title"),
+        Some(&trans("explore.dialog_rename_label")),
+    );
     let entry = shell.add_entry(
-        Some(&path.file_name().unwrap_or_default().to_string_lossy()),
+        Some(&initial_name),
         false,
     );
     let lbl_error = shell.add_error_label();
     let bbox = shell.add_button_row();
     shell.cancel_button(&bbox);
     let btn_rename = shell.action_button(&bbox, &trans("explore.menu_rename"));
+
+    let icon_img_c = icon_img.clone();
+    entry.connect_changed(move |e| {
+        let text = e.text().to_string();
+        crate::ui::icon::set_file_icon(&icon_img_c, &text, is_dir);
+    });
 
     let win = shell.window.clone();
     let path_owned = path.to_path_buf();

@@ -58,6 +58,22 @@ fn zoom_icons_resolve_without_fallback() {
     // Verify create_wp_thumb resolves
     let wp_thumb = babydra_ui_kit::components::create_wp_thumb(18);
     assert!(wp_thumb.has_css_class("sidebar-wallpaper-thumb"));
+
+    // Verify resolve file icon from theme
+    let folder_icon = babydra_ui_kit::ui::icon::get_icon_name_for_file("anything", true);
+    assert_eq!(folder_icon, "folder");
+
+    let py_icon = babydra_ui_kit::ui::icon::get_icon_name_for_file("main.py", false);
+    assert!(py_icon.contains("python") || py_icon.contains("text"));
+
+    let png_icon = babydra_ui_kit::ui::icon::get_icon_name_for_file("photo.png", false);
+    assert!(png_icon.contains("image"));
+
+    let pdf_icon = babydra_ui_kit::ui::icon::get_icon_name_for_file("doc.pdf", false);
+    assert!(pdf_icon.contains("pdf") || pdf_icon.contains("document"));
+
+    let img = babydra_ui_kit::ui::icon::get_file_icon("main.py", false);
+    assert!(img.icon_name().is_some() || img.paintable().is_some() || img.file().is_some());
 }
 
 #[test]
@@ -89,3 +105,4 @@ fn test_ui_kit_image_cropping_and_rounding() {
     assert_eq!(c_pix.height(), 40);
     assert!(c_pix.has_alpha());
 }
+

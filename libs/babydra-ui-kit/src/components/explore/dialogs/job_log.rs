@@ -95,7 +95,9 @@ pub fn show_job_log(
         .label(trans("explore.settings_close"))
         .sensitive(false)
         .halign(Align::End)
+        .css_classes(vec!["modern-dialog-cancel-btn".to_string()])
         .build();
+    btn_close.set_cursor_from_name(Some("pointer"));
     vbox.append(&btn_close);
 
     let win_c = window.clone();

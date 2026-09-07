@@ -80,12 +80,17 @@ fn show_password_dialog(
 
     let shell = DialogShell::new(
         &trans("explore.dialog_password_title"),
-        360,
-        180,
-        10,
+        380,
+        185,
+        12,
         parent,
     );
-    shell.add_label(&trans("explore.dialog_password_label"));
+    shell.add_header(
+        "lock",
+        super::shell::BadgeStyle::Primary,
+        &trans("explore.dialog_password_title"),
+        Some(&trans("explore.dialog_password_label")),
+    );
     let entry = shell.add_entry(None, true);
     let lbl_error = shell.add_markup_label();
     let bbox = shell.add_button_row();

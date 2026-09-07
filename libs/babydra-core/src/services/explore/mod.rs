@@ -20,7 +20,8 @@ pub use dir_size::calc_dir_size;
 pub use filter::filter_entries;
 pub use fs_ops::{
     copy_path, create_dir, create_empty_file, delete_path, get_icon_name, get_owner_group,
-    load_directory, move_path, rename_path, restore_from_trash, send_to_trash, set_unix_mode,
+    load_directory, move_path, rename_path, restore_from_trash,
+    send_to_trash, set_unix_mode,
 };
 pub use image_meta::{read_image_metadata, ImageMetadata};
 pub use launcher::{

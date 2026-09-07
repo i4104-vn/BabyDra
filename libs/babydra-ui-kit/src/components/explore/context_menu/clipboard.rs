@@ -118,35 +118,65 @@ fn perform_execute_paste(
         trans("explore.copying_title")
     };
 
+    let icon_name = if is_cut { "external-link" } else { "download" };
+
     let dialog = Window::builder()
         .title(&title_str)
         .modal(false)
         .resizable(false)
-        .default_width(400)
-        .default_height(120)
+        .default_width(420)
+        .default_height(130)
         .css_classes(vec!["explore-dialog".to_string()])
         .build();
 
-    let vbox = Box::new(Orientation::Vertical, 10);
-    vbox.set_margin_top(16);
-    vbox.set_margin_bottom(16);
-    vbox.set_margin_start(16);
-    vbox.set_margin_end(16);
+    let vbox = Box::new(Orientation::Vertical, 12);
+    vbox.set_margin_top(18);
+    vbox.set_margin_bottom(18);
+    vbox.set_margin_start(20);
+    vbox.set_margin_end(20);
+    vbox.add_css_class("explore-dialog-box");
     dialog.set_child(Some(&vbox));
+
+    let header_box = Box::new(Orientation::Horizontal, 14);
+    header_box.set_halign(Align::Start);
+    header_box.set_hexpand(true);
+    header_box.set_valign(Align::Center);
+
+    let badge = Box::builder()
+        .width_request(42)
+        .height_request(42)
+        .halign(Align::Start)
+        .valign(Align::Center)
+        .css_classes(vec!["modern-dialog-badge".to_string(), "badge-primary".to_string()])
+        .build();
+    let icon_img = crate::ui::icon::get_icon(icon_name, 22);
+    icon_img.set_pixel_size(22);
+    icon_img.set_vexpand(true);
+    icon_img.set_hexpand(true);
+    icon_img.set_valign(Align::Center);
+    icon_img.set_halign(Align::Center);
+    badge.append(&icon_img);
+    header_box.append(&badge);
+
+    let text_box = Box::new(Orientation::Vertical, 3);
+    text_box.set_hexpand(true);
 
     let lbl_status = Label::builder()
         .label(&title_str)
         .halign(Align::Start)
-        .css_classes(vec!["settings-row-title".to_string()])
+        .css_classes(vec!["modern-dialog-title".to_string()])
         .build();
-    vbox.append(&lbl_status);
+    text_box.append(&lbl_status);
 
     let lbl_detail = Label::builder()
         .label("")
         .halign(Align::Start)
-        .css_classes(vec!["settings-row-desc".to_string()])
+        .css_classes(vec!["modern-dialog-subtitle".to_string()])
         .build();
-    vbox.append(&lbl_detail);
+    text_box.append(&lbl_detail);
+
+    header_box.append(&text_box);
+    vbox.append(&header_box);
 
     let progress_bar = ProgressBar::builder()
         .hexpand(true)

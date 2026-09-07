@@ -4,7 +4,10 @@ pub mod assets;
 pub mod resolver;
 
 pub use assets::*;
-pub use resolver::{get_fallback_icon, get_icon_from_svg, get_logo_png, set_fallback_icon};
+pub use resolver::{
+    get_fallback_icon, get_file_icon, get_icon_from_svg, get_icon_name_for_file, get_logo_png,
+    set_fallback_icon, set_file_icon,
+};
 
 /// Whether dark mode is currently active.
 pub fn is_dark_mode() -> bool {

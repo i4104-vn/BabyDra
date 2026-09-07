@@ -293,3 +293,59 @@ pub fn get_fallback_icon(icon_path_or_name: &str, default_fallback: &str) -> gtk
     set_fallback_icon(&img, icon_path_or_name, default_fallback);
     img
 }
+
+/// Resolves an icon name from the system icon theme for a given file name or path using the system MIME database.
+pub fn get_icon_name_for_file(filename: &str, is_dir: bool) -> String {
+    if is_dir {
+        return "folder".to_string();
+    }
+    let trimmed = filename.trim();
+    if trimmed.is_empty() {
+        return "text-x-generic".to_string();
+    }
+
+    let c_filename = match std::ffi::CString::new(trimmed) {
+        Ok(c) => c,
+        Err(_) => return "text-x-generic".to_string(),
+    };
+
+    let ct: glib::GString = unsafe {
+        let mut uncertain = 0;
+        let ptr = gio::ffi::g_content_type_guess(
+            c_filename.as_ptr(),
+            std::ptr::null(),
+            0,
+            &mut uncertain,
+        );
+        glib::translate::from_glib_full(ptr)
+    };
+
+    let icon = gio::content_type_get_icon(&ct);
+    if let Ok(themed) = icon.downcast::<gio::ThemedIcon>() {
+        for name in themed.names() {
+            let name_str = name.as_str();
+            if get_resolved_icon(name_str).is_some() {
+                return name_str.to_string();
+            }
+        }
+        if let Some(first) = themed.names().first() {
+            return first.to_string();
+        }
+    }
+    "text-x-generic".to_string()
+}
+
+/// Resolves and updates an Image widget for a given file name or path using the system MIME database and icon theme.
+pub fn set_file_icon(img: &gtk4::Image, filename: &str, is_dir: bool) {
+    let icon_name = get_icon_name_for_file(filename, is_dir);
+    let fallback = if is_dir { "folder" } else { "text-x-generic" };
+    set_fallback_icon(img, &icon_name, fallback);
+}
+
+/// Creates a new Image widget with the resolved icon for a given file name or path.
+pub fn get_file_icon(filename: &str, is_dir: bool) -> gtk4::Image {
+    let img = gtk4::Image::new();
+    set_file_icon(&img, filename, is_dir);
+    img
+}
+

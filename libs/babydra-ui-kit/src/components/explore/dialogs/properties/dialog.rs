@@ -60,7 +60,8 @@ pub fn show_properties(target_paths: Vec<PathBuf>, parent: Option<&impl IsA<gtk4
     vbox.append(&bbox);
 
     let btn_cancel = Button::with_label(&trans("explore.settings_cancel"));
-    btn_cancel.add_css_class("properties-btn-cancel");
+    btn_cancel.add_css_class("modern-dialog-cancel-btn");
+    btn_cancel.set_cursor_from_name(Some("pointer"));
     bbox.append(&btn_cancel);
 
     let win_cancel_btn = window.clone();
@@ -71,8 +72,12 @@ pub fn show_properties(target_paths: Vec<PathBuf>, parent: Option<&impl IsA<gtk4
     if target_paths.len() == 1 {
         let btn_save = Button::builder()
             .label(&trans("explore.settings_save"))
-            .css_classes(vec!["suggested-action".to_string()])
+            .css_classes(vec![
+                "suggested-action".to_string(),
+                "modern-dialog-primary-btn".to_string(),
+            ])
             .build();
+        btn_save.set_cursor_from_name(Some("pointer"));
         bbox.append(&btn_save);
 
         let path = target_paths[0].clone();

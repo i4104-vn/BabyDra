@@ -20,7 +20,6 @@ pub fn build_info_grid(parent_vbox: &Box, target_paths: &[PathBuf]) {
             .unwrap_or_default();
 
         let is_dir = path.is_dir();
-        let icon_name = if is_dir { "folder" } else { "text" };
 
         // 1. Header Card
         let header_card = Box::new(Orientation::Horizontal, 12);
@@ -28,7 +27,8 @@ pub fn build_info_grid(parent_vbox: &Box, target_paths: &[PathBuf]) {
 
         let icon_box = Box::new(Orientation::Vertical, 0);
         icon_box.set_css_classes(&["properties-icon-wrap"]);
-        let icon = crate::ui::icon::get_icon(icon_name, 36);
+        let icon = crate::ui::icon::get_file_icon(&name, is_dir);
+        icon.set_pixel_size(36);
         icon.set_halign(Align::Center);
         icon.set_valign(Align::Center);
         icon_box.append(&icon);
