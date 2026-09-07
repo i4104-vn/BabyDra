@@ -1,7 +1,14 @@
+//! WiFi Info Dialog
+
 use babydra_core::i18n::trans;
 use babydra_core::models::wifi::{WifiConfig, WifiNetwork};
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Label, Orientation, ScrolledWindow};
+use std::boxed::Box as StdBox;
+
+use crate::components::modals::dialog_builder::{
+    ActionButton, BadgeVariant, ButtonVariant, ModernDialogBuilder,
+};
 
 pub struct WifiInfoDialog {
     pub container: Box,
@@ -16,19 +23,17 @@ pub struct WifiInfoDialog {
 
 impl WifiInfoDialog {
     pub fn new() -> Self {
-        let container = Box::new(Orientation::Vertical, 16);
-        container.add_css_class("auth-dialog-card");
-        container.set_halign(gtk4::Align::Center);
-        container.set_valign(gtk4::Align::Center);
-        container.set_visible(false);
-        container.set_width_request(420);
+        let builder = ModernDialogBuilder::new(440)
+            .with_badge("wifi", BadgeVariant::Primary)
+            .with_title(&trans("wifi.details"))
+            .with_card_spacing(16);
 
-        // Header: SSID title + status badge
+        // Custom header with status badge
         let header_box = Box::new(Orientation::Horizontal, 12);
         header_box.set_hexpand(true);
 
         let ssid_lbl = Label::new(Some(&trans("wifi.details")));
-        ssid_lbl.add_css_class("settings-row-title");
+        ssid_lbl.add_css_class("modern-dialog-title");
         ssid_lbl.set_halign(gtk4::Align::Start);
         ssid_lbl.set_hexpand(true);
         header_box.append(&ssid_lbl);
@@ -46,7 +51,8 @@ impl WifiInfoDialog {
         status_badge.append(&status_lbl);
 
         header_box.append(&status_badge);
-        container.append(&header_box);
+
+        let dialog = builder.build_with_header(header_box);
 
         // Body: Scrolled container
         let scroll = ScrolledWindow::new();
@@ -56,46 +62,43 @@ impl WifiInfoDialog {
 
         let body_box = Box::new(Orientation::Vertical, 16);
         scroll.set_child(Some(&body_box));
-        container.append(&scroll);
+        dialog.add_child(&scroll);
 
         // Footer Actions
-        let actions_box = Box::new(Orientation::Horizontal, 8);
-        actions_box.set_hexpand(true);
-
         let forget_btn = Button::new();
         forget_btn.add_css_class("icon-btn");
         forget_btn.add_css_class("circular");
         forget_btn.add_css_class("delete-btn");
-        forget_btn.set_size_request(36, 36);
+        forget_btn.set_size_request(38, 38);
         forget_btn.set_valign(gtk4::Align::Center);
         forget_btn.set_cursor_from_name(Some("pointer"));
         forget_btn.set_tooltip_text(Some(&trans("wifi.forget_network")));
 
-        let trash_icon = crate::ui::icon::get_icon("edit-delete", 16);
+        let trash_icon = crate::ui::icon::get_icon("trash", 16);
         trash_icon.set_pixel_size(16);
         forget_btn.set_child(Some(&trash_icon));
 
-        let actions_right = Box::new(Orientation::Horizontal, 8);
-        actions_right.set_hexpand(true);
-        actions_right.set_halign(gtk4::Align::End);
-
         let close_btn = Button::with_label(&trans("common.close"));
-        close_btn.add_css_class("connect-pill-btn");
-        close_btn.set_cursor_from_name(Some("pointer"));
-
         let configure_btn = Button::with_label(&trans("wifi.configure_ip"));
-        configure_btn.add_css_class("suggested-action");
-        configure_btn.set_cursor_from_name(Some("pointer"));
 
-        actions_right.append(&close_btn);
-        actions_right.append(&configure_btn);
+        dialog.add_actions(vec![
+            ActionButton {
+                label: trans("common.close"),
+                variant: ButtonVariant::Cancel,
+                callback: StdBox::new({
+                    let container = dialog.container().clone();
+                    move || container.set_visible(false)
+                }),
+            },
+            ActionButton {
+                label: trans("wifi.configure_ip"),
+                variant: ButtonVariant::Primary,
+                callback: StdBox::new(|| {}),
+            },
+        ]);
 
-        actions_box.append(&forget_btn);
-        actions_box.append(&actions_right);
-        container.append(&actions_box);
-
-        let dialog = Self {
-            container,
+        let s = Self {
+            container: dialog.container().clone(),
             ssid_lbl,
             status_dot,
             status_lbl,
@@ -105,12 +108,12 @@ impl WifiInfoDialog {
             forget_btn,
         };
 
-        let box_c = dialog.container.clone();
-        dialog.close_btn.connect_clicked(move |_| {
+        let box_c = s.container.clone();
+        s.close_btn.connect_clicked(move |_| {
             box_c.set_visible(false);
         });
 
-        dialog
+        s
     }
 
     pub fn show_for(&self, net: &WifiNetwork, config: Option<&WifiConfig>) {

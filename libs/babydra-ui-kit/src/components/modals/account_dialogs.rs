@@ -2,8 +2,14 @@
 
 use babydra_core::i18n::trans;
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Entry, Label, Orientation, PasswordEntry};
+use gtk4::{Box, Button, Entry, Label, PasswordEntry};
+use std::boxed::Box as StdBox;
 use std::rc::Rc;
+
+use crate::components::modals::dialog_builder::{
+    ActionButton, BadgeVariant, ButtonVariant, ModernDialogBuilder, create_error_label,
+    create_form_label, create_modern_entry, create_modern_password_entry,
+};
 
 /// Dialog for updating the user's full / display name.
 #[derive(Clone)]
@@ -18,83 +24,57 @@ pub struct ChangeNameDialog {
 
 impl ChangeNameDialog {
     pub fn new() -> Self {
-        let container = Box::new(Orientation::Vertical, 14);
-        container.add_css_class("auth-dialog-card");
-        container.set_halign(gtk4::Align::Center);
-        container.set_valign(gtk4::Align::Center);
-        container.set_visible(false);
-        container.set_width_request(380);
+        let builder = ModernDialogBuilder::new(420)
+            .with_badge("user", BadgeVariant::Primary)
+            .with_title(&trans("settings.dialog_change_name_title"))
+            .with_subtitle(&trans("settings.dialog_change_name_sub"));
 
-        // Header
-        let header_box = Box::new(Orientation::Horizontal, 12);
-        let user_icon = crate::ui::icon::get_icon("user", 24);
-        user_icon.set_pixel_size(24);
-        user_icon.set_valign(gtk4::Align::Center);
-        header_box.append(&user_icon);
+        let dialog = builder.build();
 
-        let title_box = Box::new(Orientation::Vertical, 2);
-        let title_lbl = Label::new(Some(&trans("settings.dialog_change_name_title")));
-        title_lbl.add_css_class("settings-row-title");
-        title_lbl.set_halign(gtk4::Align::Start);
+        let error_lbl = create_error_label();
+        dialog.add_child(&error_lbl);
 
-        let sub_lbl = Label::new(Some(&trans("settings.dialog_change_name_sub")));
-        sub_lbl.add_css_class("settings-row-desc");
-        sub_lbl.set_halign(gtk4::Align::Start);
-        sub_lbl.set_wrap(true);
+        let name_lbl = create_form_label(&trans("settings.new_name_placeholder"));
+        dialog.add_child(&name_lbl);
 
-        title_box.append(&title_lbl);
-        title_box.append(&sub_lbl);
-        header_box.append(&title_box);
-        container.append(&header_box);
+        let name_entry = create_modern_entry(&trans("settings.new_name_placeholder"));
+        dialog.add_child(&name_entry);
 
-        // Error message
-        let error_lbl = Label::new(None);
-        error_lbl.add_css_class("dialog-error-text");
-        error_lbl.set_halign(gtk4::Align::Start);
-        error_lbl.set_visible(false);
-        container.append(&error_lbl);
+        let pwd_lbl = create_form_label(&trans("settings.sudo_password_placeholder"));
+        dialog.add_child(&pwd_lbl);
 
-        // New name field
-        let name_lbl = Label::new(Some(&trans("settings.new_name_placeholder")));
-        name_lbl.add_css_class("settings-row-desc");
-        name_lbl.set_halign(gtk4::Align::Start);
-        container.append(&name_lbl);
-
-        let name_entry = Entry::new();
-        name_entry.add_css_class("sidebar-search-entry");
-        name_entry.set_placeholder_text(Some(&trans("settings.new_name_placeholder")));
-        container.append(&name_entry);
-
-        // Sudo password field
-        let pwd_lbl = Label::new(Some(&trans("settings.sudo_password_placeholder")));
-        pwd_lbl.add_css_class("settings-row-desc");
-        pwd_lbl.set_halign(gtk4::Align::Start);
-        container.append(&pwd_lbl);
-
-        let pwd_entry = PasswordEntry::new();
-        pwd_entry.add_css_class("sidebar-search-entry");
-        pwd_entry.set_placeholder_text(Some(&trans("settings.sudo_password_placeholder")));
-        container.append(&pwd_entry);
-
-        // Action buttons
-        let actions_box = Box::new(Orientation::Horizontal, 8);
-        actions_box.set_halign(gtk4::Align::End);
-        actions_box.set_margin_top(6);
+        let pwd_entry = create_modern_password_entry(&trans("settings.sudo_password_placeholder"));
+        dialog.add_child(&pwd_entry);
 
         let cancel_btn = Button::with_label(&trans("common.cancel"));
-        cancel_btn.add_css_class("connect-pill-btn");
-        cancel_btn.set_cursor_from_name(Some("pointer"));
-
         let confirm_btn = Button::with_label(&trans("settings.save"));
-        confirm_btn.add_css_class("suggested-action");
-        confirm_btn.set_cursor_from_name(Some("pointer"));
 
-        actions_box.append(&cancel_btn);
-        actions_box.append(&confirm_btn);
-        container.append(&actions_box);
+        dialog.add_actions(vec![
+ActionButton {
+                label: trans("common.cancel"),
+                variant: ButtonVariant::Cancel,
+                callback: StdBox::new({
+                    let c = dialog.container().clone();
+                    let n = name_entry.clone();
+                    let p = pwd_entry.clone();
+                    let e = error_lbl.clone();
+                    move || {
+                        n.set_text("");
+                        p.set_text("");
+                        e.set_visible(false);
+                        c.set_visible(false);
+                    }
+                }),
+            },
+            ActionButton {
+                label: trans("settings.save"),
+                variant: ButtonVariant::Primary,
+                callback: StdBox::new(|| {}),
+            },
+        ]);
 
-        let dialog = Self {
-            container,
+        let s = Self {
+            container: dialog.container().clone(),
             name_entry,
             pwd_entry,
             error_lbl,
@@ -102,19 +82,7 @@ impl ChangeNameDialog {
             confirm_btn,
         };
 
-        // Wire cancel
-        let box_c = dialog.container.clone();
-        let name_c = dialog.name_entry.clone();
-        let pwd_c = dialog.pwd_entry.clone();
-        let err_c = dialog.error_lbl.clone();
-        dialog.cancel_btn.connect_clicked(move |_| {
-            name_c.set_text("");
-            pwd_c.set_text("");
-            err_c.set_visible(false);
-            box_c.set_visible(false);
-        });
-
-        dialog
+        s
     }
 
     pub fn show_for(&self, current_name: &str) {
@@ -173,83 +141,57 @@ pub struct ChangeHostnameDialog {
 
 impl ChangeHostnameDialog {
     pub fn new() -> Self {
-        let container = Box::new(Orientation::Vertical, 14);
-        container.add_css_class("auth-dialog-card");
-        container.set_halign(gtk4::Align::Center);
-        container.set_valign(gtk4::Align::Center);
-        container.set_visible(false);
-        container.set_width_request(380);
+        let builder = ModernDialogBuilder::new(420)
+            .with_badge("desktop", BadgeVariant::Primary)
+            .with_title(&trans("settings.dialog_change_hostname_title"))
+            .with_subtitle(&trans("settings.dialog_change_hostname_sub"));
 
-        // Header
-        let header_box = Box::new(Orientation::Horizontal, 12);
-        let host_icon = crate::ui::icon::get_icon("desktop", 24);
-        host_icon.set_pixel_size(24);
-        host_icon.set_valign(gtk4::Align::Center);
-        header_box.append(&host_icon);
+        let dialog = builder.build();
 
-        let title_box = Box::new(Orientation::Vertical, 2);
-        let title_lbl = Label::new(Some(&trans("settings.dialog_change_hostname_title")));
-        title_lbl.add_css_class("settings-row-title");
-        title_lbl.set_halign(gtk4::Align::Start);
+        let error_lbl = create_error_label();
+        dialog.add_child(&error_lbl);
 
-        let sub_lbl = Label::new(Some(&trans("settings.dialog_change_hostname_sub")));
-        sub_lbl.add_css_class("settings-row-desc");
-        sub_lbl.set_halign(gtk4::Align::Start);
-        sub_lbl.set_wrap(true);
+        let host_lbl = create_form_label(&trans("settings.new_hostname_placeholder"));
+        dialog.add_child(&host_lbl);
 
-        title_box.append(&title_lbl);
-        title_box.append(&sub_lbl);
-        header_box.append(&title_box);
-        container.append(&header_box);
+        let hostname_entry = create_modern_entry(&trans("settings.new_hostname_placeholder"));
+        dialog.add_child(&hostname_entry);
 
-        // Error message
-        let error_lbl = Label::new(None);
-        error_lbl.add_css_class("dialog-error-text");
-        error_lbl.set_halign(gtk4::Align::Start);
-        error_lbl.set_visible(false);
-        container.append(&error_lbl);
+        let pwd_lbl = create_form_label(&trans("settings.sudo_password_placeholder"));
+        dialog.add_child(&pwd_lbl);
 
-        // New hostname field
-        let host_lbl = Label::new(Some(&trans("settings.new_hostname_placeholder")));
-        host_lbl.add_css_class("settings-row-desc");
-        host_lbl.set_halign(gtk4::Align::Start);
-        container.append(&host_lbl);
-
-        let hostname_entry = Entry::new();
-        hostname_entry.add_css_class("sidebar-search-entry");
-        hostname_entry.set_placeholder_text(Some(&trans("settings.new_hostname_placeholder")));
-        container.append(&hostname_entry);
-
-        // Sudo password field
-        let pwd_lbl = Label::new(Some(&trans("settings.sudo_password_placeholder")));
-        pwd_lbl.add_css_class("settings-row-desc");
-        pwd_lbl.set_halign(gtk4::Align::Start);
-        container.append(&pwd_lbl);
-
-        let pwd_entry = PasswordEntry::new();
-        pwd_entry.add_css_class("sidebar-search-entry");
-        pwd_entry.set_placeholder_text(Some(&trans("settings.sudo_password_placeholder")));
-        container.append(&pwd_entry);
-
-        // Action buttons
-        let actions_box = Box::new(Orientation::Horizontal, 8);
-        actions_box.set_halign(gtk4::Align::End);
-        actions_box.set_margin_top(6);
+        let pwd_entry = create_modern_password_entry(&trans("settings.sudo_password_placeholder"));
+        dialog.add_child(&pwd_entry);
 
         let cancel_btn = Button::with_label(&trans("common.cancel"));
-        cancel_btn.add_css_class("connect-pill-btn");
-        cancel_btn.set_cursor_from_name(Some("pointer"));
-
         let confirm_btn = Button::with_label(&trans("settings.save"));
-        confirm_btn.add_css_class("suggested-action");
-        confirm_btn.set_cursor_from_name(Some("pointer"));
 
-        actions_box.append(&cancel_btn);
-        actions_box.append(&confirm_btn);
-        container.append(&actions_box);
+        dialog.add_actions(vec![
+            ActionButton {
+                label: trans("common.cancel"),
+                variant: ButtonVariant::Cancel,
+                callback: StdBox::new({
+                    let c = dialog.container().clone();
+                    let h = hostname_entry.clone();
+                    let p = pwd_entry.clone();
+                    let e = error_lbl.clone();
+                    move || {
+                        h.set_text("");
+                        p.set_text("");
+                        e.set_visible(false);
+                        c.set_visible(false);
+                    }
+                }),
+            },
+            ActionButton {
+                label: trans("settings.save"),
+                variant: ButtonVariant::Primary,
+                callback: StdBox::new(|| {}),
+            },
+        ]);
 
-        let dialog = Self {
-            container,
+        let s = Self {
+            container: dialog.container().clone(),
             hostname_entry,
             pwd_entry,
             error_lbl,
@@ -257,19 +199,7 @@ impl ChangeHostnameDialog {
             confirm_btn,
         };
 
-        // Wire cancel
-        let box_c = dialog.container.clone();
-        let host_c = dialog.hostname_entry.clone();
-        let pwd_c = dialog.pwd_entry.clone();
-        let err_c = dialog.error_lbl.clone();
-        dialog.cancel_btn.connect_clicked(move |_| {
-            host_c.set_text("");
-            pwd_c.set_text("");
-            err_c.set_visible(false);
-            box_c.set_visible(false);
-        });
-
-        dialog
+        s
     }
 
     pub fn show_for(&self, current_hostname: &str) {
@@ -329,117 +259,71 @@ pub struct ChangePasswordDialog {
 
 impl ChangePasswordDialog {
     pub fn new() -> Self {
-        let container = Box::new(Orientation::Vertical, 14);
-        container.add_css_class("auth-dialog-card");
-        container.set_halign(gtk4::Align::Center);
-        container.set_valign(gtk4::Align::Center);
-        container.set_visible(false);
-        container.set_width_request(380);
+        let builder = ModernDialogBuilder::new(420)
+            .with_badge("lock", BadgeVariant::Primary)
+            .with_title(&trans("settings.dialog_change_password_title"))
+            .with_subtitle(&trans("settings.dialog_change_password_sub"));
 
-        // Header
-        let header_box = Box::new(Orientation::Horizontal, 12);
-        let lock_icon = crate::ui::icon::get_icon("lock", 24);
-        lock_icon.set_pixel_size(24);
-        lock_icon.set_valign(gtk4::Align::Center);
-        header_box.append(&lock_icon);
+        let dialog = builder.build();
 
-        let title_box = Box::new(Orientation::Vertical, 2);
-        let title_lbl = Label::new(Some(&trans("settings.dialog_change_password_title")));
-        title_lbl.add_css_class("settings-row-title");
-        title_lbl.set_halign(gtk4::Align::Start);
+        let error_lbl = create_error_label();
+        dialog.add_child(&error_lbl);
 
-        let sub_lbl = Label::new(Some(&trans("settings.dialog_change_password_sub")));
-        sub_lbl.add_css_class("settings-row-desc");
-        sub_lbl.set_halign(gtk4::Align::Start);
-        sub_lbl.set_wrap(true);
+        let cur_lbl = create_form_label(&trans("settings.current_password"));
+        dialog.add_child(&cur_lbl);
 
-        title_box.append(&title_lbl);
-        title_box.append(&sub_lbl);
-        header_box.append(&title_box);
-        container.append(&header_box);
+        let current_pwd_entry = create_modern_password_entry(&trans("settings.current_password"));
+        dialog.add_child(&current_pwd_entry);
 
-        // Error message
-        let error_lbl = Label::new(None);
-        error_lbl.add_css_class("dialog-error-text");
-        error_lbl.set_halign(gtk4::Align::Start);
-        error_lbl.set_visible(false);
-        container.append(&error_lbl);
+        let new_lbl = create_form_label(&trans("settings.new_password"));
+        dialog.add_child(&new_lbl);
 
-        // Current password field
-        let cur_lbl = Label::new(Some(&trans("settings.current_password")));
-        cur_lbl.add_css_class("settings-row-desc");
-        cur_lbl.set_halign(gtk4::Align::Start);
-        container.append(&cur_lbl);
+        let new_pwd_entry = create_modern_password_entry(&trans("settings.new_password"));
+        dialog.add_child(&new_pwd_entry);
 
-        let current_pwd_entry = PasswordEntry::new();
-        current_pwd_entry.add_css_class("sidebar-search-entry");
-        current_pwd_entry.set_placeholder_text(Some(&trans("settings.current_password")));
-        container.append(&current_pwd_entry);
+        let conf_lbl = create_form_label(&trans("settings.confirm_password"));
+        dialog.add_child(&conf_lbl);
 
-        // New password field
-        let new_lbl = Label::new(Some(&trans("settings.new_password")));
-        new_lbl.add_css_class("settings-row-desc");
-        new_lbl.set_halign(gtk4::Align::Start);
-        container.append(&new_lbl);
+        let confirm_pwd_entry = create_modern_password_entry(&trans("settings.confirm_password"));
+        dialog.add_child(&confirm_pwd_entry);
 
-        let new_pwd_entry = PasswordEntry::new();
-        new_pwd_entry.add_css_class("sidebar-search-entry");
-        new_pwd_entry.set_placeholder_text(Some(&trans("settings.new_password")));
-        container.append(&new_pwd_entry);
+        dialog.add_actions(vec![
+            ActionButton {
+                label: trans("common.cancel"),
+                variant: ButtonVariant::Cancel,
+                callback: StdBox::new({
+                    let c = dialog.container().clone();
+                    let cur = current_pwd_entry.clone();
+                    let new = new_pwd_entry.clone();
+                    let conf = confirm_pwd_entry.clone();
+                    let e = error_lbl.clone();
+                    move || {
+                        cur.set_text("");
+                        new.set_text("");
+                        conf.set_text("");
+                        e.set_visible(false);
+                        c.set_visible(false);
+                    }
+                }),
+            },
+ActionButton {
+                label: trans("settings.save"),
+                variant: ButtonVariant::Primary,
+                callback: StdBox::new(|| {}),
+            },
+        ]);
 
-        // Confirm new password field
-        let conf_lbl = Label::new(Some(&trans("settings.confirm_password")));
-        conf_lbl.add_css_class("settings-row-desc");
-        conf_lbl.set_halign(gtk4::Align::Start);
-        container.append(&conf_lbl);
-
-        let confirm_pwd_entry = PasswordEntry::new();
-        confirm_pwd_entry.add_css_class("sidebar-search-entry");
-        confirm_pwd_entry.set_placeholder_text(Some(&trans("settings.confirm_password")));
-        container.append(&confirm_pwd_entry);
-
-        // Action buttons
-        let actions_box = Box::new(Orientation::Horizontal, 8);
-        actions_box.set_halign(gtk4::Align::End);
-        actions_box.set_margin_top(6);
-
-        let cancel_btn = Button::with_label(&trans("common.cancel"));
-        cancel_btn.add_css_class("connect-pill-btn");
-        cancel_btn.set_cursor_from_name(Some("pointer"));
-
-        let confirm_btn = Button::with_label(&trans("settings.change_password"));
-        confirm_btn.add_css_class("suggested-action");
-        confirm_btn.set_cursor_from_name(Some("pointer"));
-
-        actions_box.append(&cancel_btn);
-        actions_box.append(&confirm_btn);
-        container.append(&actions_box);
-
-        let dialog = Self {
-            container,
+        let s = Self {
+            container: dialog.container().clone(),
             current_pwd_entry,
             new_pwd_entry,
             confirm_pwd_entry,
             error_lbl,
-            cancel_btn,
-            confirm_btn,
+            cancel_btn: Button::new(),
+            confirm_btn: Button::new(),
         };
 
-        // Wire cancel
-        let box_c = dialog.container.clone();
-        let cur_c = dialog.current_pwd_entry.clone();
-        let new_c = dialog.new_pwd_entry.clone();
-        let conf_c = dialog.confirm_pwd_entry.clone();
-        let err_c = dialog.error_lbl.clone();
-        dialog.cancel_btn.connect_clicked(move |_| {
-            cur_c.set_text("");
-            new_c.set_text("");
-            conf_c.set_text("");
-            err_c.set_visible(false);
-            box_c.set_visible(false);
-        });
-
-        dialog
+        s
     }
 
     pub fn show(&self) {

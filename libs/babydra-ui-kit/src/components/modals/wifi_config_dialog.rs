@@ -1,9 +1,17 @@
+//! WiFi Configuration Dialog
+
 use babydra_core::i18n::trans;
 use babydra_core::models::wifi::WifiConfig;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Entry, Label, Orientation};
+use std::boxed::Box as StdBox;
 use std::cell::RefCell;
 use std::rc::Rc;
+
+use crate::components::modals::dialog_builder::{
+    ActionButton, BadgeVariant, ButtonVariant, ModernDialogBuilder, create_form_label,
+    create_modern_entry,
+};
 
 pub struct WifiConfigDialog {
     pub container: Box,
@@ -23,25 +31,13 @@ pub struct WifiConfigDialog {
 
 impl WifiConfigDialog {
     pub fn new() -> Self {
-        let container = Box::new(Orientation::Vertical, 16);
-        container.add_css_class("auth-dialog-card");
-        container.set_halign(gtk4::Align::Center);
-        container.set_valign(gtk4::Align::Center);
-        container.set_visible(false);
-        container.set_width_request(400);
+        let builder = ModernDialogBuilder::new(420)
+            .with_badge("wifi", BadgeVariant::Primary)
+            .with_title(&trans("wifi.configure_title"))
+            .with_subtitle(&trans("wifi.network_settings"))
+            .with_card_spacing(16);
 
-        let header_box = Box::new(Orientation::Vertical, 2);
-        let ssid_lbl = Label::new(Some(&trans("wifi.configure_title")));
-        ssid_lbl.add_css_class("settings-row-title");
-        ssid_lbl.set_halign(gtk4::Align::Start);
-
-        let sub_lbl = Label::new(Some(&trans("wifi.network_settings")));
-        sub_lbl.add_css_class("settings-row-desc");
-        sub_lbl.set_halign(gtk4::Align::Start);
-
-        header_box.append(&ssid_lbl);
-        header_box.append(&sub_lbl);
-        container.append(&header_box);
+        let dialog = builder.build();
 
         // Segmented Control (DHCP vs Manual)
         let seg_box = Box::new(Orientation::Horizontal, 0);
@@ -59,7 +55,7 @@ impl WifiConfigDialog {
 
         seg_box.append(&dhcp_btn);
         seg_box.append(&static_btn);
-        container.append(&seg_box);
+        dialog.add_child(&seg_box);
 
         // Manual Settings Container
         let manual_box = Box::new(Orientation::Vertical, 12);
@@ -69,24 +65,16 @@ impl WifiConfigDialog {
 
         let ip_grp = Box::new(Orientation::Vertical, 4);
         ip_grp.set_hexpand(true);
-        let ip_lbl = Label::new(Some(&trans("wifi.ip_address")));
-        ip_lbl.add_css_class("wifi-info-label");
-        ip_lbl.set_halign(gtk4::Align::Start);
-        let ip_entry = Entry::new();
-        ip_entry.add_css_class("sidebar-search-entry");
-        ip_entry.set_placeholder_text(Some("192.168.1.50"));
+        let ip_lbl = create_form_label(&trans("wifi.ip_address"));
+        let ip_entry = create_modern_entry("192.168.1.50");
         ip_grp.append(&ip_lbl);
         ip_grp.append(&ip_entry);
         ip_row.append(&ip_grp);
 
         let prefix_grp = Box::new(Orientation::Vertical, 4);
         prefix_grp.set_width_request(80);
-        let pfx_lbl = Label::new(Some(&trans("wifi.prefix")));
-        pfx_lbl.add_css_class("wifi-info-label");
-        pfx_lbl.set_halign(gtk4::Align::Start);
-        let prefix_entry = Entry::new();
-        prefix_entry.add_css_class("sidebar-search-entry");
-        prefix_entry.set_placeholder_text(Some("24"));
+        let pfx_lbl = create_form_label(&trans("wifi.prefix"));
+        let prefix_entry = create_modern_entry("24");
         prefix_grp.append(&pfx_lbl);
         prefix_grp.append(&prefix_entry);
         ip_row.append(&prefix_grp);
@@ -94,26 +82,18 @@ impl WifiConfigDialog {
         manual_box.append(&ip_row);
 
         let gw_grp = Box::new(Orientation::Vertical, 4);
-        let gw_lbl = Label::new(Some(&trans("wifi.gateway")));
-        gw_lbl.add_css_class("wifi-info-label");
-        gw_lbl.set_halign(gtk4::Align::Start);
-        let gateway_entry = Entry::new();
-        gateway_entry.add_css_class("sidebar-search-entry");
-        gateway_entry.set_placeholder_text(Some("192.168.1.1"));
+        let gw_lbl = create_form_label(&trans("wifi.gateway"));
+        let gateway_entry = create_modern_entry("192.168.1.1");
         gw_grp.append(&gw_lbl);
         gw_grp.append(&gateway_entry);
         manual_box.append(&gw_grp);
 
-        container.append(&manual_box);
+        dialog.add_child(&manual_box);
 
         // DNS Section (Always visible)
         let dns_grp = Box::new(Orientation::Vertical, 4);
-        let dns_lbl = Label::new(Some(&trans("wifi.dns_servers")));
-        dns_lbl.add_css_class("wifi-info-label");
-        dns_lbl.set_halign(gtk4::Align::Start);
-        let dns_entry = Entry::new();
-        dns_entry.add_css_class("sidebar-search-entry");
-        dns_entry.set_placeholder_text(Some("8.8.8.8, 1.1.1.1"));
+        let dns_lbl = create_form_label(&trans("wifi.dns_servers"));
+        let dns_entry = create_modern_entry("8.8.8.8, 1.1.1.1");
         let dns_hint = Label::new(Some(&trans("wifi.dns_hint")));
         dns_hint.add_css_class("input-hint-lbl");
         dns_hint.set_halign(gtk4::Align::Start);
@@ -121,30 +101,33 @@ impl WifiConfigDialog {
         dns_grp.append(&dns_lbl);
         dns_grp.append(&dns_entry);
         dns_grp.append(&dns_hint);
-        container.append(&dns_grp);
-
-        // Footer Actions
-        let actions_box = Box::new(Orientation::Horizontal, 8);
-        actions_box.set_halign(gtk4::Align::End);
+        dialog.add_child(&dns_grp);
 
         let cancel_btn = Button::with_label(&trans("common.cancel"));
-        cancel_btn.add_css_class("connect-pill-btn");
-        cancel_btn.set_cursor_from_name(Some("pointer"));
-
         let save_btn = Button::with_label(&trans("wifi.apply_changes"));
-        save_btn.add_css_class("suggested-action");
-        save_btn.set_cursor_from_name(Some("pointer"));
 
-        actions_box.append(&cancel_btn);
-        actions_box.append(&save_btn);
-        container.append(&actions_box);
+        dialog.add_actions(vec![
+            ActionButton {
+                label: trans("common.cancel"),
+                variant: ButtonVariant::Cancel,
+                callback: StdBox::new({
+                    let container = dialog.container().clone();
+                    move || container.set_visible(false)
+                }),
+            },
+            ActionButton {
+                label: trans("wifi.apply_changes"),
+                variant: ButtonVariant::Primary,
+                callback: StdBox::new(|| {}),
+            },
+        ]);
 
         let method_state = Rc::new(RefCell::new("auto".to_string()));
         let current_ssid = Rc::new(RefCell::new(String::new()));
 
-        let dialog = Self {
-            container,
-            ssid_lbl,
+        let s = Self {
+            container: dialog.container().clone(),
+            ssid_lbl: Label::new(None),
             dhcp_btn,
             static_btn,
             manual_box,
@@ -159,11 +142,11 @@ impl WifiConfigDialog {
         };
 
         // Wire segmented control
-        let dhcp_c = dialog.dhcp_btn.clone();
-        let static_c = dialog.static_btn.clone();
-        let m_box_c = dialog.manual_box.clone();
-        let st1 = dialog.method_state.clone();
-        dialog.dhcp_btn.connect_clicked(move |_| {
+        let dhcp_c = s.dhcp_btn.clone();
+        let static_c = s.static_btn.clone();
+        let m_box_c = s.manual_box.clone();
+        let st1 = s.method_state.clone();
+        s.dhcp_btn.connect_clicked(move |_| {
             dhcp_c.remove_css_class("seg-btn");
             dhcp_c.add_css_class("seg-btn-active");
             static_c.remove_css_class("seg-btn-active");
@@ -172,11 +155,11 @@ impl WifiConfigDialog {
             *st1.borrow_mut() = "auto".to_string();
         });
 
-        let dhcp_c2 = dialog.dhcp_btn.clone();
-        let static_c2 = dialog.static_btn.clone();
-        let m_box_c2 = dialog.manual_box.clone();
-        let st2 = dialog.method_state.clone();
-        dialog.static_btn.connect_clicked(move |_| {
+        let dhcp_c2 = s.dhcp_btn.clone();
+        let static_c2 = s.static_btn.clone();
+        let m_box_c2 = s.manual_box.clone();
+        let st2 = s.method_state.clone();
+        s.static_btn.connect_clicked(move |_| {
             static_c2.remove_css_class("seg-btn");
             static_c2.add_css_class("seg-btn-active");
             dhcp_c2.remove_css_class("seg-btn-active");
@@ -185,12 +168,12 @@ impl WifiConfigDialog {
             *st2.borrow_mut() = "manual".to_string();
         });
 
-        let box_c = dialog.container.clone();
-        dialog.cancel_btn.connect_clicked(move |_| {
+        let box_c = s.container.clone();
+        s.cancel_btn.connect_clicked(move |_| {
             box_c.set_visible(false);
         });
 
-        dialog
+        s
     }
 
     pub fn show_for(&self, ssid: &str, cfg: &WifiConfig) {

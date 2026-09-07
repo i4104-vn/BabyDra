@@ -261,5 +261,10 @@
   "settings.recovery_status_done": "Factory reset complete! The system has been restored to vanilla Arch Linux.",
   "settings.recovery_status_failed": "Factory reset failed. Please inspect the log output below.",
   "settings.recovery_reboot_btn": "Reboot Now",
-  "settings.recovery_close_btn": "Close"
+  "settings.recovery_close_btn": "Close",
+  "settings.recovery_badge_running": "RUNNING",
+  "settings.recovery_badge_done": "COMPLETED",
+  "settings.recovery_badge_failed": "FAILED",
+  "settings.recovery_warning_callout": "System Warning: All graphical desktop components and personal settings will be permanently uninstalled.",
+  "settings.recovery_step_init": "Initializing recovery sequence..."
 }

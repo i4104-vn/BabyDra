@@ -1,8 +1,15 @@
+//! VPN Log Dialog
+
 use babydra_core::i18n::trans;
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Label, Orientation, ScrolledWindow, TextView};
+use gtk4::{Box, Button, Label, ScrolledWindow, TextView};
+use std::boxed::Box as StdBox;
 use std::cell::RefCell;
 use std::rc::Rc;
+
+use crate::components::modals::dialog_builder::{
+    ActionButton, BadgeVariant, ButtonVariant, ModernDialogBuilder,
+};
 
 #[derive(Clone)]
 pub struct VpnLogDialog {
@@ -11,30 +18,19 @@ pub struct VpnLogDialog {
     pub log_view: TextView,
     pub close_btn: Button,
     pub refresh_btn: Button,
+    pub clear_btn: Button,
     current_vpn: Rc<RefCell<String>>,
     cleared_at: Rc<RefCell<Option<String>>>,
 }
 
 impl VpnLogDialog {
     pub fn new() -> Self {
-        let container = Box::new(Orientation::Vertical, 16);
-        container.add_css_class("auth-dialog-card");
-        container.set_halign(gtk4::Align::Center);
-        container.set_valign(gtk4::Align::Center);
-        container.set_visible(false);
-        container.set_width_request(540);
+        let builder = ModernDialogBuilder::new(560)
+            .with_badge("terminal", BadgeVariant::Primary)
+            .with_title(&trans("vpn.logs_title"))
+            .with_card_spacing(16);
 
-        // Header: Title
-        let header_box = Box::new(Orientation::Horizontal, 12);
-        header_box.set_hexpand(true);
-
-        let title_lbl = Label::new(Some(&trans("vpn.logs_title")));
-        title_lbl.add_css_class("settings-row-title");
-        title_lbl.set_halign(gtk4::Align::Start);
-        title_lbl.set_hexpand(true);
-        header_box.append(&title_lbl);
-
-        container.append(&header_box);
+        let dialog = builder.build();
 
         // Body: Monospace Scrolled TextView for Logs
         let scroll = ScrolledWindow::new();
@@ -51,62 +47,64 @@ impl VpnLogDialog {
         log_view.add_css_class("console-log-text");
 
         scroll.set_child(Some(&log_view));
-        container.append(&scroll);
+        dialog.add_child(&scroll);
 
         // Footer Actions: Clear + Refresh + Close
-        let actions_box = Box::new(Orientation::Horizontal, 8);
-        actions_box.set_halign(gtk4::Align::End);
-
         let clear_btn = Button::with_label(&trans("common.clear"));
-        clear_btn.add_css_class("connect-pill-btn");
-        clear_btn.set_cursor_from_name(Some("pointer"));
-
         let refresh_btn = Button::with_label(&trans("common.refresh"));
-        refresh_btn.add_css_class("connect-pill-btn");
-        refresh_btn.set_cursor_from_name(Some("pointer"));
-
         let close_btn = Button::with_label(&trans("common.close"));
-        close_btn.add_css_class("suggested-action");
-        close_btn.set_cursor_from_name(Some("pointer"));
+
+        dialog.add_actions(vec![
+            ActionButton {
+                label: trans("common.clear"),
+                variant: ButtonVariant::Cancel,
+                callback: StdBox::new({
+                    let log_view_clear = log_view.clone();
+                    let cleared_at_clear = Rc::new(RefCell::new(None));
+                    move || {
+                        if let Ok(now) = glib::DateTime::now_local() {
+                            if let Ok(ts) = now.format("%Y-%m-%d %H:%M:%S") {
+                                *cleared_at_clear.borrow_mut() = Some(ts.to_string());
+                            }
+                        }
+                        log_view_clear.buffer().set_text("");
+                    }
+                }),
+            },
+            ActionButton {
+                label: trans("common.refresh"),
+                variant: ButtonVariant::Cancel,
+                callback: StdBox::new(|| {}),
+            },
+            ActionButton {
+                label: trans("common.close"),
+                variant: ButtonVariant::Primary,
+                callback: StdBox::new({
+                    let container = dialog.container().clone();
+                    move || container.set_visible(false)
+                }),
+            },
+        ]);
 
         let current_vpn = Rc::new(RefCell::new(String::new()));
         let cleared_at = Rc::new(RefCell::new(None));
 
-        let log_view_clear = log_view.clone();
-        let cleared_at_clear = cleared_at.clone();
-        clear_btn.connect_clicked(move |_| {
-            if let Ok(now) = glib::DateTime::now_local() {
-                if let Ok(ts) = now.format("%Y-%m-%d %H:%M:%S") {
-                    *cleared_at_clear.borrow_mut() = Some(ts.to_string());
-                }
-            }
-            log_view_clear.buffer().set_text("");
-        });
-
-        actions_box.append(&clear_btn);
-        actions_box.append(&refresh_btn);
-        actions_box.append(&close_btn);
-        container.append(&actions_box);
-
-        let dialog = Self {
-            container,
-            title_lbl,
+        let s = Self {
+            container: dialog.container().clone(),
+            title_lbl: Label::new(None),
             log_view,
             close_btn,
             refresh_btn,
+            clear_btn,
             current_vpn,
             cleared_at,
         };
 
-        let container_c = dialog.container.clone();
-        dialog.close_btn.connect_clicked(move |_| {
-            container_c.set_visible(false);
-        });
-
-        let current_vpn_c = dialog.current_vpn.clone();
-        let cleared_at_c = dialog.cleared_at.clone();
-        let log_view_c = dialog.log_view.clone();
-        dialog.refresh_btn.connect_clicked(move |_| {
+        // Wire refresh button
+        let current_vpn_c = s.current_vpn.clone();
+        let cleared_at_c = s.cleared_at.clone();
+        let log_view_c = s.log_view.clone();
+        s.refresh_btn.connect_clicked(move |_| {
             let vpn_name = current_vpn_c.borrow().clone();
             let since = cleared_at_c.borrow().clone();
             if !vpn_name.is_empty() {
@@ -114,7 +112,7 @@ impl VpnLogDialog {
             }
         });
 
-        dialog
+        s
     }
 
     pub fn show_for_vpn(&self, vpn_name: &str) {

@@ -1,6 +1,15 @@
+//! WiFi Password Dialog
+
 use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Entry, Label, Orientation, PasswordEntry};
+use std::boxed::Box as StdBox;
+use std::rc::Rc;
+
+use crate::components::modals::dialog_builder::{
+    ActionButton, BadgeVariant, ButtonVariant, ModernDialogBuilder, create_error_label,
+    create_form_label, create_modern_entry, create_modern_password_entry,
+};
 
 pub struct WifiPasswordDialog {
     pub container: Box,
@@ -16,87 +25,66 @@ pub struct WifiPasswordDialog {
 
 impl WifiPasswordDialog {
     pub fn new() -> Self {
-        let container = Box::new(Orientation::Vertical, 16);
-        container.add_css_class("auth-dialog-card");
-        container.set_halign(gtk4::Align::Center);
-        container.set_valign(gtk4::Align::Center);
-        container.set_visible(false);
-        container.set_width_request(380);
+        let builder = ModernDialogBuilder::new(420)
+            .with_badge("wifi", BadgeVariant::Primary)
+            .with_title(&trans("wifi.connect_to").replace("{}", "Wi-Fi"))
+            .with_subtitle(&trans("wifi.requires_password"))
+            .with_card_spacing(16);
 
-        let header_box = Box::new(Orientation::Horizontal, 12);
-        let wifi_icon = crate::ui::icon::get_icon("wifi", 24);
-        wifi_icon.set_pixel_size(24);
-        header_box.append(&wifi_icon);
-
-        let title_box = Box::new(Orientation::Vertical, 2);
-        let ssid_lbl = Label::new(Some(&trans("wifi.connect_to").replace("{}", "Wi-Fi")));
-        ssid_lbl.add_css_class("settings-row-title");
-        ssid_lbl.set_halign(gtk4::Align::Start);
-
-        let sub_lbl = Label::new(Some(&trans("wifi.requires_password")));
-        sub_lbl.add_css_class("settings-row-desc");
-        sub_lbl.set_halign(gtk4::Align::Start);
-
-        title_box.append(&ssid_lbl);
-        title_box.append(&sub_lbl);
-        header_box.append(&title_box);
-        container.append(&header_box);
+        let dialog = builder.build();
 
         // Username Entry (hidden unless 802.1X Enterprise)
         let username_box = Box::new(Orientation::Vertical, 4);
         username_box.set_visible(false);
 
-        let user_lbl = Label::new(Some(&trans("wifi.username_identity")));
-        user_lbl.add_css_class("wifi-info-label");
-        user_lbl.set_halign(gtk4::Align::Start);
-
-        let username_entry = Entry::new();
-        username_entry.add_css_class("sidebar-search-entry");
-        username_entry.set_placeholder_text(Some(&trans("wifi.enter_username")));
+        let user_lbl = create_form_label(&trans("wifi.username_identity"));
+        let username_entry = create_modern_entry(&trans("wifi.enter_username"));
 
         username_box.append(&user_lbl);
         username_box.append(&username_entry);
-        container.append(&username_box);
+        dialog.add_child(&username_box);
 
         // Password Entry
-        let pwd_box = Box::new(Orientation::Vertical, 4);
-        let pwd_lbl = Label::new(Some(&trans("common.password")));
-        pwd_lbl.add_css_class("wifi-info-label");
-        pwd_lbl.set_halign(gtk4::Align::Start);
+        let pwd_lbl = create_form_label(&trans("common.password"));
+        let password_entry = create_modern_password_entry(&trans("wifi.enter_password"));
 
-        let password_entry = PasswordEntry::new();
-        password_entry.add_css_class("sidebar-search-entry");
-        password_entry.set_placeholder_text(Some(&trans("wifi.enter_password")));
-
-        pwd_box.append(&pwd_lbl);
-        pwd_box.append(&password_entry);
-        container.append(&pwd_box);
+        dialog.add_child(&pwd_lbl);
+        dialog.add_child(&password_entry);
 
         // Error message label
-        let error_lbl = Label::new(None);
+        let error_lbl = create_error_label();
         error_lbl.add_css_class("wifi-error-hint");
-        error_lbl.set_halign(gtk4::Align::Start);
-        error_lbl.set_visible(false);
-        container.append(&error_lbl);
+        dialog.add_child(&error_lbl);
 
-        // Actions
-        let actions_box = Box::new(Orientation::Horizontal, 8);
-        actions_box.set_halign(gtk4::Align::End);
+        // Get title/subtitle labels for dynamic updates
+        let ssid_lbl = dialog.title_label().clone();
+        let sub_lbl = dialog.subtitle_label().cloned().unwrap_or_else(|| Label::new(None));
 
         let cancel_btn = Button::with_label(&trans("common.cancel"));
-        cancel_btn.add_css_class("connect-pill-btn");
-        cancel_btn.set_cursor_from_name(Some("pointer"));
-
         let connect_btn = Button::with_label(&trans("common.connect"));
-        connect_btn.add_css_class("suggested-action");
-        connect_btn.set_cursor_from_name(Some("pointer"));
 
-        actions_box.append(&cancel_btn);
-        actions_box.append(&connect_btn);
-        container.append(&actions_box);
+        dialog.add_actions(vec![
+            ActionButton {
+                label: trans("common.cancel"),
+                variant: ButtonVariant::Cancel,
+                callback: StdBox::new({
+                    let entry = password_entry.clone();
+                    let container = dialog.container().clone();
+                    move || {
+                        entry.set_text("");
+                        container.set_visible(false);
+                    }
+                }),
+            },
+            ActionButton {
+                label: trans("common.connect"),
+                variant: ButtonVariant::Primary,
+                callback: StdBox::new(|| {}),
+            },
+        ]);
 
-        let dialog = Self {
-            container,
+        let s = Self {
+            container: dialog.container().clone(),
             ssid_lbl,
             sub_lbl,
             username_box,
@@ -107,14 +95,14 @@ impl WifiPasswordDialog {
             connect_btn,
         };
 
-        let entry_c = dialog.password_entry.clone();
-        let box_c = dialog.container.clone();
-        dialog.cancel_btn.connect_clicked(move |_| {
+        let entry_c = s.password_entry.clone();
+        let box_c = s.container.clone();
+        s.cancel_btn.connect_clicked(move |_| {
             entry_c.set_text("");
             box_c.set_visible(false);
         });
 
-        dialog
+        s
     }
 
     pub fn show_for(&self, ssid: &str, security: &str) {
@@ -158,7 +146,7 @@ impl WifiPasswordDialog {
         let user_entry = self.username_entry.clone();
         let is_user_vis = self.username_box.clone();
         let container = self.container.clone();
-        let cb_rc = std::rc::Rc::new(callback);
+        let cb_rc = Rc::new(callback);
 
         let cb1 = cb_rc.clone();
         let p1 = pwd_entry.clone();

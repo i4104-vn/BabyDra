@@ -261,5 +261,10 @@
   "settings.recovery_status_done": "Khôi phục thành công! Hệ thống đã được đưa về Arch Linux nguyên bản.",
   "settings.recovery_status_failed": "Khôi phục thất bại. Vui lòng kiểm tra lại log chi tiết bên dưới.",
   "settings.recovery_reboot_btn": "Khởi động lại ngay",
-  "settings.recovery_close_btn": "Đóng"
+  "settings.recovery_close_btn": "Đóng",
+  "settings.recovery_badge_running": "ĐANG XỬ LÝ",
+  "settings.recovery_badge_done": "HOÀN TẤT",
+  "settings.recovery_badge_failed": "THẤT BẠI",
+  "settings.recovery_warning_callout": "Cảnh báo hệ thống: Toàn bộ môi trường desktop và cấu hình cá nhân sẽ bị gỡ bỏ vĩnh viễn không thể hoàn tác.",
+  "settings.recovery_step_init": "Đang khởi tạo tiến trình khôi phục..."
 }

@@ -147,26 +147,42 @@ fn show_capture_dialog(parent: &Window, combo_btn: &Button) {
         .transient_for(parent)
         .modal(true)
         .resizable(false)
-        .default_width(360)
-        .default_height(200)
+        .default_width(380)
+        .default_height(230)
         .css_classes(vec!["explore-dialog".to_string()])
         .build();
 
-    let vbox = Box::new(Orientation::Vertical, 16);
-    vbox.set_margin_top(24);
-    vbox.set_margin_bottom(24);
+    let vbox = Box::new(Orientation::Vertical, 14);
+    vbox.set_margin_top(22);
+    vbox.set_margin_bottom(22);
     vbox.set_margin_start(24);
     vbox.set_margin_end(24);
     vbox.set_valign(gtk4::Align::Center);
     vbox.add_css_class("explore-dialog-box");
     window.set_child(Some(&vbox));
 
+    let badge = Box::builder()
+        .width_request(46)
+        .height_request(46)
+        .halign(gtk4::Align::Center)
+        .valign(gtk4::Align::Center)
+        .css_classes(vec!["modern-dialog-badge".to_string(), "badge-primary".to_string()])
+        .build();
+    let icon_badge = babydra_ui_kit::ui::icon::get_icon("terminal", 22);
+    icon_badge.set_pixel_size(22);
+    icon_badge.set_vexpand(true);
+    icon_badge.set_hexpand(true);
+    icon_badge.set_valign(gtk4::Align::Center);
+    icon_badge.set_halign(gtk4::Align::Center);
+    badge.append(&icon_badge);
+    vbox.append(&badge);
+
     let lbl_desc = Label::builder()
         .label(&babydra_core::i18n::trans("settings.keybind_press"))
         .halign(gtk4::Align::Center)
         .justify(gtk4::Justification::Center)
         .build();
-    lbl_desc.add_css_class("settings-row-title");
+    lbl_desc.add_css_class("modern-dialog-title");
     vbox.append(&lbl_desc);
 
     let lbl_shortcut = Label::new(Some("…"));
@@ -227,14 +243,16 @@ fn show_capture_dialog(parent: &Window, combo_btn: &Button) {
     bbox.set_halign(gtk4::Align::Center);
     vbox.append(&bbox);
 
-    let btn_save = Button::with_label(&babydra_core::i18n::trans("settings.save"));
-    btn_save.add_css_class("baby-button");
-
     let btn_cancel = Button::with_label(&babydra_core::i18n::trans("settings.keybind_cancel"));
-    btn_cancel.add_css_class("baby-button");
+    btn_cancel.add_css_class("modern-dialog-cancel-btn");
+    btn_cancel.set_cursor_from_name(Some("pointer"));
 
-    bbox.append(&btn_save);
+    let btn_save = Button::with_label(&babydra_core::i18n::trans("settings.save"));
+    btn_save.add_css_class("modern-dialog-primary-btn");
+    btn_save.set_cursor_from_name(Some("pointer"));
+
     bbox.append(&btn_cancel);
+    bbox.append(&btn_save);
 
     let window_cancel = window.clone();
     btn_cancel.connect_clicked(move |_| {

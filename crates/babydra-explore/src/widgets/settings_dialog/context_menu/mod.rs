@@ -97,7 +97,11 @@ fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
     let entry_name = Entry::builder()
         .placeholder_text(&trans("explore.settings_placeholder_name"))
         .hexpand(true)
-        .css_classes(vec!["small-entry".to_string(), "inline-entry".to_string()])
+        .css_classes(vec![
+            "small-entry".to_string(),
+            "inline-entry".to_string(),
+            "modern-dialog-entry".to_string(),
+        ])
         .build();
 
     let selected_icon = Rc::new(RefCell::new("settings".to_string()));
@@ -171,22 +175,23 @@ fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
     let entry_cmd = Entry::builder()
         .placeholder_text(&trans("explore.settings_placeholder_command"))
         .hexpand(true)
-        .css_classes(vec!["small-entry".to_string(), "inline-entry".to_string()])
+        .css_classes(vec![
+            "small-entry".to_string(),
+            "inline-entry".to_string(),
+            "modern-dialog-entry".to_string(),
+        ])
         .build();
     entry_cmd_vbox.append(&entry_cmd);
 
     let placeholders_box = Box::new(Orientation::Horizontal, 6);
     placeholders_box.set_margin_top(2);
     let placeholders = [
-        ("{path}", "explore.placeholder_path_desc"),
-        ("{dir}", "explore.placeholder_dir_desc"),
-        ("{name}", "explore.placeholder_name_desc"),
-        ("{stem}", "explore.placeholder_stem_desc"),
-        ("{ext}", "explore.placeholder_ext_desc"),
+        ("%f", "explore.settings_tooltip_f"),
+        ("%d", "explore.settings_tooltip_d"),
+        ("%n", "explore.settings_tooltip_n"),
     ];
     for (p, desc_key) in placeholders {
         let btn_p = babydra_ui_kit::components::create_button(p);
-        btn_p.remove_css_class("baby-button");
         btn_p.add_css_class("flat");
         btn_p.add_css_class("placeholder-btn");
         btn_p.set_tooltip_text(Some(&trans(desc_key)));
@@ -205,13 +210,17 @@ fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
     grid.attach(&entry_cmd_vbox, 1, 1, 1, 1);
 
     // Action buttons (Cancel & Add)
-    let bbox = Box::new(Orientation::Horizontal, 8);
+    let bbox = Box::new(Orientation::Horizontal, 10);
     bbox.set_halign(Align::End);
-    bbox.set_margin_top(8);
+    bbox.set_margin_top(10);
     vbox.append(&bbox);
 
     let btn_cancel = babydra_ui_kit::components::create_button(&trans("explore.settings_cancel"));
+    btn_cancel.add_css_class("modern-dialog-cancel-btn");
+    btn_cancel.set_cursor_from_name(Some("pointer"));
+
     let btn_add = babydra_ui_kit::components::create_accent_button(&trans("explore.settings_add"));
+    btn_add.add_css_class("modern-dialog-primary-btn");
     btn_add.set_cursor_from_name(Some("pointer"));
 
     bbox.append(&btn_cancel);

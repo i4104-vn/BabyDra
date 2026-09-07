@@ -29,12 +29,28 @@ pub fn show_capture_dialog(
     vbox.add_css_class("explore-dialog-box");
     window.set_child(Some(&vbox));
 
+    let badge = Box::new(Orientation::Vertical, 0);
+    badge.add_css_class("modern-dialog-badge");
+    badge.add_css_class("badge-primary");
+    badge.set_size_request(46, 46);
+    badge.set_halign(Align::Center);
+    badge.set_valign(Align::Center);
+
+    let icon = babydra_ui_kit::ui::icon::get_icon("terminal", 22);
+    icon.set_pixel_size(22);
+    icon.set_vexpand(true);
+    icon.set_hexpand(true);
+    icon.set_valign(Align::Center);
+    icon.set_halign(Align::Center);
+    badge.append(&icon);
+    vbox.append(&badge);
+
     let lbl_desc = Label::builder()
         .label(&trans("explore.settings_press_for").replace("{}", action_desc))
         .halign(Align::Center)
         .justify(gtk4::Justification::Center)
         .build();
-    lbl_desc.add_css_class("settings-row-title");
+    lbl_desc.add_css_class("modern-dialog-title");
     vbox.append(&lbl_desc);
 
     let lbl_shortcut = Label::builder()
@@ -63,11 +79,14 @@ pub fn show_capture_dialog(
             || keyval == gtk4::gdk::Key::Alt_L
             || keyval == gtk4::gdk::Key::Alt_R;
 
-        if !is_modifier_only {
-            let shortcut_str = keyval_to_string(&keyval, clean_state);
-            lbl_shortcut_c.set_text(&shortcut_str);
-            captured_c.replace(Some(shortcut_str));
+        if is_modifier_only {
+            return glib::Propagation::Stop;
         }
+
+        let combo_str = keyval_to_string(&keyval, clean_state);
+        lbl_shortcut_c.set_text(&combo_str);
+        captured_c.replace(Some(combo_str));
+
         glib::Propagation::Stop
     });
     window.add_controller(key_controller);
@@ -76,20 +95,20 @@ pub fn show_capture_dialog(
     bbox.set_halign(Align::Center);
     vbox.append(&bbox);
 
-    let btn_save = Button::builder()
-        .label(&trans("explore.settings_save"))
-        .build();
-    btn_save.add_css_class("baby-button");
-    btn_save.set_cursor_from_name(Some("pointer"));
-
     let btn_cancel = Button::builder()
         .label(&trans("explore.settings_cancel"))
         .build();
-    btn_cancel.add_css_class("baby-button");
+    btn_cancel.add_css_class("modern-dialog-cancel-btn");
     btn_cancel.set_cursor_from_name(Some("pointer"));
 
-    bbox.append(&btn_save);
+    let btn_save = Button::builder()
+        .label(&trans("explore.settings_save"))
+        .build();
+    btn_save.add_css_class("modern-dialog-primary-btn");
+    btn_save.set_cursor_from_name(Some("pointer"));
+
     bbox.append(&btn_cancel);
+    bbox.append(&btn_save);
 
     let win_c = window.clone();
     btn_cancel.connect_clicked(move |_| {
