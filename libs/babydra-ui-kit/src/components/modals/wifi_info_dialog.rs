@@ -4,10 +4,9 @@ use babydra_core::i18n::trans;
 use babydra_core::models::wifi::{WifiConfig, WifiNetwork};
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Label, Orientation, ScrolledWindow};
-use std::boxed::Box as StdBox;
 
 use crate::components::modals::dialog_builder::{
-    ActionButton, BadgeVariant, ButtonVariant, ModernDialogBuilder,
+    BadgeVariant, ButtonVariant, ModernDialogBuilder,
 };
 
 pub struct WifiInfoDialog {
@@ -81,21 +80,13 @@ impl WifiInfoDialog {
         let close_btn = Button::with_label(&trans("common.close"));
         let configure_btn = Button::with_label(&trans("wifi.configure_ip"));
 
-        dialog.add_actions(vec![
-            ActionButton {
-                label: trans("common.close"),
-                variant: ButtonVariant::Cancel,
-                callback: StdBox::new({
-                    let container = dialog.container().clone();
-                    move || container.set_visible(false)
-                }),
-            },
-            ActionButton {
-                label: trans("wifi.configure_ip"),
-                variant: ButtonVariant::Primary,
-                callback: StdBox::new(|| {}),
-            },
-        ]);
+        dialog.add_action_buttons_with_start(
+            &forget_btn,
+            &[
+                (&close_btn, ButtonVariant::Cancel),
+                (&configure_btn, ButtonVariant::Primary),
+            ],
+        );
 
         let s = Self {
             container: dialog.container().clone(),

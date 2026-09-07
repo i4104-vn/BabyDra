@@ -3,12 +3,11 @@
 use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Label, ScrolledWindow, TextView};
-use std::boxed::Box as StdBox;
 use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::components::modals::dialog_builder::{
-    ActionButton, BadgeVariant, ButtonVariant, ModernDialogBuilder,
+    BadgeVariant, ButtonVariant, ModernDialogBuilder,
 };
 
 #[derive(Clone)]
@@ -54,44 +53,19 @@ impl VpnLogDialog {
         let refresh_btn = Button::with_label(&trans("common.refresh"));
         let close_btn = Button::with_label(&trans("common.close"));
 
-        dialog.add_actions(vec![
-            ActionButton {
-                label: trans("common.clear"),
-                variant: ButtonVariant::Cancel,
-                callback: StdBox::new({
-                    let log_view_clear = log_view.clone();
-                    let cleared_at_clear = Rc::new(RefCell::new(None));
-                    move || {
-                        if let Ok(now) = glib::DateTime::now_local() {
-                            if let Ok(ts) = now.format("%Y-%m-%d %H:%M:%S") {
-                                *cleared_at_clear.borrow_mut() = Some(ts.to_string());
-                            }
-                        }
-                        log_view_clear.buffer().set_text("");
-                    }
-                }),
-            },
-            ActionButton {
-                label: trans("common.refresh"),
-                variant: ButtonVariant::Cancel,
-                callback: StdBox::new(|| {}),
-            },
-            ActionButton {
-                label: trans("common.close"),
-                variant: ButtonVariant::Primary,
-                callback: StdBox::new({
-                    let container = dialog.container().clone();
-                    move || container.set_visible(false)
-                }),
-            },
+        dialog.add_action_buttons(&[
+            (&clear_btn, ButtonVariant::Cancel),
+            (&refresh_btn, ButtonVariant::Cancel),
+            (&close_btn, ButtonVariant::Primary),
         ]);
 
         let current_vpn = Rc::new(RefCell::new(String::new()));
         let cleared_at = Rc::new(RefCell::new(None));
+        let title_lbl = dialog.title_label().clone();
 
         let s = Self {
             container: dialog.container().clone(),
-            title_lbl: Label::new(None),
+            title_lbl,
             log_view,
             close_btn,
             refresh_btn,
@@ -99,6 +73,24 @@ impl VpnLogDialog {
             current_vpn,
             cleared_at,
         };
+
+        // Wire close button
+        let box_close = s.container.clone();
+        s.close_btn.connect_clicked(move |_| {
+            box_close.set_visible(false);
+        });
+
+        // Wire clear button
+        let log_view_clear = s.log_view.clone();
+        let cleared_at_clear = s.cleared_at.clone();
+        s.clear_btn.connect_clicked(move |_| {
+            if let Ok(now) = glib::DateTime::now_local() {
+                if let Ok(ts) = now.format("%Y-%m-%d %H:%M:%S") {
+                    *cleared_at_clear.borrow_mut() = Some(ts.to_string());
+                }
+            }
+            log_view_clear.buffer().set_text("");
+        });
 
         // Wire refresh button
         let current_vpn_c = s.current_vpn.clone();

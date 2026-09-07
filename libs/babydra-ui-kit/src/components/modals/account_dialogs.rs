@@ -3,12 +3,11 @@
 use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Entry, Label, PasswordEntry};
-use std::boxed::Box as StdBox;
 use std::rc::Rc;
 
 use crate::components::modals::dialog_builder::{
-    ActionButton, BadgeVariant, ButtonVariant, ModernDialogBuilder, create_error_label,
-    create_form_label, create_modern_entry, create_modern_password_entry,
+    BadgeVariant, ButtonVariant, ModernDialogBuilder, create_error_label, create_form_label,
+    create_modern_entry, create_modern_password_entry,
 };
 
 /// Dialog for updating the user's full / display name.
@@ -49,28 +48,9 @@ impl ChangeNameDialog {
         let cancel_btn = Button::with_label(&trans("common.cancel"));
         let confirm_btn = Button::with_label(&trans("settings.save"));
 
-        dialog.add_actions(vec![
-ActionButton {
-                label: trans("common.cancel"),
-                variant: ButtonVariant::Cancel,
-                callback: StdBox::new({
-                    let c = dialog.container().clone();
-                    let n = name_entry.clone();
-                    let p = pwd_entry.clone();
-                    let e = error_lbl.clone();
-                    move || {
-                        n.set_text("");
-                        p.set_text("");
-                        e.set_visible(false);
-                        c.set_visible(false);
-                    }
-                }),
-            },
-            ActionButton {
-                label: trans("settings.save"),
-                variant: ButtonVariant::Primary,
-                callback: StdBox::new(|| {}),
-            },
+        dialog.add_action_buttons(&[
+            (&cancel_btn, ButtonVariant::Cancel),
+            (&confirm_btn, ButtonVariant::Primary),
         ]);
 
         let s = Self {
@@ -81,6 +61,18 @@ ActionButton {
             cancel_btn,
             confirm_btn,
         };
+
+        // Wire cancel button
+        let c = s.container.clone();
+        let n = s.name_entry.clone();
+        let p = s.pwd_entry.clone();
+        let e = s.error_lbl.clone();
+        s.cancel_btn.connect_clicked(move |_| {
+            n.set_text("");
+            p.set_text("");
+            e.set_visible(false);
+            c.set_visible(false);
+        });
 
         s
     }
@@ -166,28 +158,9 @@ impl ChangeHostnameDialog {
         let cancel_btn = Button::with_label(&trans("common.cancel"));
         let confirm_btn = Button::with_label(&trans("settings.save"));
 
-        dialog.add_actions(vec![
-            ActionButton {
-                label: trans("common.cancel"),
-                variant: ButtonVariant::Cancel,
-                callback: StdBox::new({
-                    let c = dialog.container().clone();
-                    let h = hostname_entry.clone();
-                    let p = pwd_entry.clone();
-                    let e = error_lbl.clone();
-                    move || {
-                        h.set_text("");
-                        p.set_text("");
-                        e.set_visible(false);
-                        c.set_visible(false);
-                    }
-                }),
-            },
-            ActionButton {
-                label: trans("settings.save"),
-                variant: ButtonVariant::Primary,
-                callback: StdBox::new(|| {}),
-            },
+        dialog.add_action_buttons(&[
+            (&cancel_btn, ButtonVariant::Cancel),
+            (&confirm_btn, ButtonVariant::Primary),
         ]);
 
         let s = Self {
@@ -198,6 +171,18 @@ impl ChangeHostnameDialog {
             cancel_btn,
             confirm_btn,
         };
+
+        // Wire cancel button
+        let c = s.container.clone();
+        let h = s.hostname_entry.clone();
+        let p = s.pwd_entry.clone();
+        let e = s.error_lbl.clone();
+        s.cancel_btn.connect_clicked(move |_| {
+            h.set_text("");
+            p.set_text("");
+            e.set_visible(false);
+            c.set_visible(false);
+        });
 
         s
     }
@@ -287,30 +272,12 @@ impl ChangePasswordDialog {
         let confirm_pwd_entry = create_modern_password_entry(&trans("settings.confirm_password"));
         dialog.add_child(&confirm_pwd_entry);
 
-        dialog.add_actions(vec![
-            ActionButton {
-                label: trans("common.cancel"),
-                variant: ButtonVariant::Cancel,
-                callback: StdBox::new({
-                    let c = dialog.container().clone();
-                    let cur = current_pwd_entry.clone();
-                    let new = new_pwd_entry.clone();
-                    let conf = confirm_pwd_entry.clone();
-                    let e = error_lbl.clone();
-                    move || {
-                        cur.set_text("");
-                        new.set_text("");
-                        conf.set_text("");
-                        e.set_visible(false);
-                        c.set_visible(false);
-                    }
-                }),
-            },
-ActionButton {
-                label: trans("settings.save"),
-                variant: ButtonVariant::Primary,
-                callback: StdBox::new(|| {}),
-            },
+        let cancel_btn = Button::with_label(&trans("common.cancel"));
+        let confirm_btn = Button::with_label(&trans("settings.save"));
+
+        dialog.add_action_buttons(&[
+            (&cancel_btn, ButtonVariant::Cancel),
+            (&confirm_btn, ButtonVariant::Primary),
         ]);
 
         let s = Self {
@@ -319,9 +286,23 @@ ActionButton {
             new_pwd_entry,
             confirm_pwd_entry,
             error_lbl,
-            cancel_btn: Button::new(),
-            confirm_btn: Button::new(),
+            cancel_btn,
+            confirm_btn,
         };
+
+        // Wire cancel button
+        let c = s.container.clone();
+        let cur = s.current_pwd_entry.clone();
+        let new = s.new_pwd_entry.clone();
+        let conf = s.confirm_pwd_entry.clone();
+        let e = s.error_lbl.clone();
+        s.cancel_btn.connect_clicked(move |_| {
+            cur.set_text("");
+            new.set_text("");
+            conf.set_text("");
+            e.set_visible(false);
+            c.set_visible(false);
+        });
 
         s
     }

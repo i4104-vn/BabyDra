@@ -2,12 +2,11 @@
 
 use babydra_core::i18n::trans;
 use gtk4::prelude::*;
-use gtk4::{Box, Button, PasswordEntry};
-use std::boxed::Box as StdBox;
+use gtk4::{Box, Button, Label, PasswordEntry};
 use std::rc::Rc;
 
 use crate::components::modals::dialog_builder::{
-    ActionButton, BadgeVariant, ButtonVariant, ModernDialogBuilder, create_modern_password_entry,
+    BadgeVariant, ButtonVariant, ModernDialogBuilder, create_modern_password_entry,
 };
 
 #[derive(Clone)]
@@ -16,6 +15,8 @@ pub struct PasswordDialog {
     pub password_entry: PasswordEntry,
     pub confirm_btn: Button,
     pub cancel_btn: Button,
+    pub title_lbl: Label,
+    pub sub_lbl: Option<Label>,
 }
 
 impl PasswordDialog {
@@ -33,31 +34,21 @@ impl PasswordDialog {
         let cancel_btn = Button::with_label(&trans("common.cancel"));
         let confirm_btn = Button::with_label(&trans("common.confirm"));
 
-        dialog.add_actions(vec![
-            ActionButton {
-                label: trans("common.cancel"),
-                variant: ButtonVariant::Cancel,
-                callback: StdBox::new({
-                    let entry = password_entry.clone();
-                    let container = dialog.container().clone();
-                    move || {
-                        entry.set_text("");
-                        container.set_visible(false);
-                    }
-                }),
-            },
-            ActionButton {
-                label: trans("common.confirm"),
-                variant: ButtonVariant::Primary,
-                callback: StdBox::new(|| {}),
-            },
+        dialog.add_action_buttons(&[
+            (&cancel_btn, ButtonVariant::Cancel),
+            (&confirm_btn, ButtonVariant::Primary),
         ]);
+
+        let title_lbl = dialog.title_label().clone();
+        let sub_lbl = dialog.subtitle_label().cloned();
 
         let s = Self {
             container: dialog.container().clone(),
             password_entry,
             confirm_btn,
             cancel_btn,
+            title_lbl,
+            sub_lbl,
         };
 
         // Wire cancel button
@@ -71,10 +62,12 @@ impl PasswordDialog {
         s
     }
 
-    pub fn show_for(&self, _prompt_title: &str, _prompt_sub: &str) {
-        // Note: Title/subtitle are set at build time in new implementation.
-        // For dynamic titles, we'd need to expose them from the dialog.
-        // For now, just show the dialog.
+    pub fn show_for(&self, prompt_title: &str, prompt_sub: &str) {
+        self.title_lbl.set_text(prompt_title);
+        if let Some(sub) = &self.sub_lbl {
+            sub.set_text(prompt_sub);
+            sub.set_visible(!prompt_sub.is_empty());
+        }
         self.password_entry.set_text("");
         self.container.set_visible(true);
         self.password_entry.grab_focus();

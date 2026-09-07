@@ -95,4 +95,9 @@ path = "kits/prelude.rs"
 name = "kits_icon"
 path = "kits/icon.rs"
 
+[[test]]
+name = "kits_dialog"
+path = "kits/dialog.rs"
+
+
 

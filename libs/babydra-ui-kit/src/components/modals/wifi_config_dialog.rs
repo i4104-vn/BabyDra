@@ -4,12 +4,11 @@ use babydra_core::i18n::trans;
 use babydra_core::models::wifi::WifiConfig;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Entry, Label, Orientation};
-use std::boxed::Box as StdBox;
 use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::components::modals::dialog_builder::{
-    ActionButton, BadgeVariant, ButtonVariant, ModernDialogBuilder, create_form_label,
+    BadgeVariant, ButtonVariant, ModernDialogBuilder, create_form_label,
     create_modern_entry,
 };
 
@@ -106,20 +105,9 @@ impl WifiConfigDialog {
         let cancel_btn = Button::with_label(&trans("common.cancel"));
         let save_btn = Button::with_label(&trans("wifi.apply_changes"));
 
-        dialog.add_actions(vec![
-            ActionButton {
-                label: trans("common.cancel"),
-                variant: ButtonVariant::Cancel,
-                callback: StdBox::new({
-                    let container = dialog.container().clone();
-                    move || container.set_visible(false)
-                }),
-            },
-            ActionButton {
-                label: trans("wifi.apply_changes"),
-                variant: ButtonVariant::Primary,
-                callback: StdBox::new(|| {}),
-            },
+        dialog.add_action_buttons(&[
+            (&cancel_btn, ButtonVariant::Cancel),
+            (&save_btn, ButtonVariant::Primary),
         ]);
 
         let method_state = Rc::new(RefCell::new("auto".to_string()));
@@ -140,6 +128,12 @@ impl WifiConfigDialog {
             method_state,
             current_ssid,
         };
+
+        // Wire cancel button
+        let container_cancel = s.container.clone();
+        s.cancel_btn.connect_clicked(move |_| {
+            container_cancel.set_visible(false);
+        });
 
         // Wire segmented control
         let dhcp_c = s.dhcp_btn.clone();

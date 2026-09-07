@@ -3,11 +3,10 @@
 use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Entry, Label, Orientation, PasswordEntry};
-use std::boxed::Box as StdBox;
 use std::rc::Rc;
 
 use crate::components::modals::dialog_builder::{
-    ActionButton, BadgeVariant, ButtonVariant, ModernDialogBuilder, create_error_label,
+    BadgeVariant, ButtonVariant, ModernDialogBuilder, create_error_label,
     create_form_label, create_modern_entry, create_modern_password_entry,
 };
 
@@ -63,24 +62,9 @@ impl WifiPasswordDialog {
         let cancel_btn = Button::with_label(&trans("common.cancel"));
         let connect_btn = Button::with_label(&trans("common.connect"));
 
-        dialog.add_actions(vec![
-            ActionButton {
-                label: trans("common.cancel"),
-                variant: ButtonVariant::Cancel,
-                callback: StdBox::new({
-                    let entry = password_entry.clone();
-                    let container = dialog.container().clone();
-                    move || {
-                        entry.set_text("");
-                        container.set_visible(false);
-                    }
-                }),
-            },
-            ActionButton {
-                label: trans("common.connect"),
-                variant: ButtonVariant::Primary,
-                callback: StdBox::new(|| {}),
-            },
+        dialog.add_action_buttons(&[
+            (&cancel_btn, ButtonVariant::Cancel),
+            (&connect_btn, ButtonVariant::Primary),
         ]);
 
         let s = Self {

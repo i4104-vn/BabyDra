@@ -1,15 +1,16 @@
 //! VPN Configuration Dialog
 
 use babydra_core::i18n::trans;
-use babydra_core::services::system::vpn::{parse_vpn_config, VpnConnDetails};
+use babydra_core::models::vpn::VpnConnDetails;
+use babydra_core::services::system::vpn::parse_vpn_config;
+use gtk4::gio;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, DropDown, Entry, Label, Orientation, PasswordEntry, StringList};
-use std::boxed::Box as StdBox;
 use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::components::modals::dialog_builder::{
-    ActionButton, BadgeVariant, ButtonVariant, ModernDialogBuilder, create_form_label,
+    BadgeVariant, ButtonVariant, ModernDialogBuilder, create_form_label,
     create_modern_entry, create_modern_password_entry,
 };
 
@@ -150,21 +151,13 @@ impl VpnConfigDialog {
         let cancel_btn = Button::with_label(&trans("common.cancel"));
         let save_btn = Button::with_label(&trans("common.save"));
 
-        dialog.add_actions(vec![
-            ActionButton {
-                label: trans("common.cancel"),
-                variant: ButtonVariant::Cancel,
-                callback: StdBox::new({
-                    let container = dialog.container().clone();
-                    move || container.set_visible(false)
-                }),
-            },
-            ActionButton {
-                label: trans("common.save"),
-                variant: ButtonVariant::Primary,
-                callback: StdBox::new(|| {}),
-            },
-        ]);
+        dialog.add_action_buttons_with_start(
+            &delete_btn,
+            &[
+                (&cancel_btn, ButtonVariant::Cancel),
+                (&save_btn, ButtonVariant::Primary),
+            ],
+        );
 
         let original_name = Rc::new(RefCell::new(None));
         let selected_config_path = Rc::new(RefCell::new(None));

@@ -89,6 +89,8 @@ impl ModernDialogBuilder {
         card.add_css_class("modern-modal-card");
         card.set_halign(Align::Center);
         card.set_valign(Align::Center);
+        card.set_hexpand(true);
+        card.set_vexpand(true);
         card.set_width_request(width);
         card.set_margin_start(16);
         card.set_margin_end(16);
@@ -224,6 +226,7 @@ impl ModernDialogBuilder {
         // Build and add header, capturing title/subtitle labels
         let (header, title_lbl, subtitle_lbl) = self.build_header();
         self.card.append(&header);
+        self.container.append(&self.card);
 
         ModernDialog {
             container: self.container,
@@ -236,6 +239,7 @@ impl ModernDialogBuilder {
     /// Build with custom header widget (for terminals, etc.)
     pub fn build_with_header(self, header: Box) -> ModernDialog {
         self.card.append(&header);
+        self.container.append(&self.card);
         ModernDialog {
             container: self.container,
             card: self.card,
@@ -275,6 +279,47 @@ impl ModernDialog {
     /// Add a widget to the card
     pub fn add_child(&self, child: &impl IsA<Widget>) {
         self.card.append(child);
+    }
+
+    /// Add existing action buttons with styled variants at the bottom
+    pub fn add_action_buttons(&self, buttons: &[(&Button, ButtonVariant)]) {
+        let actions = Box::new(Orientation::Horizontal, 10);
+        actions.set_halign(Align::End);
+        actions.set_margin_top(6);
+
+        for (btn, variant) in buttons {
+            btn.add_css_class(variant.css_class());
+            btn.set_cursor_from_name(Some("pointer"));
+            actions.append(*btn);
+        }
+
+        self.card.append(&actions);
+    }
+
+    /// Add action buttons with a start widget (e.g. delete button on the left)
+    pub fn add_action_buttons_with_start(
+        &self,
+        start_widget: &impl IsA<Widget>,
+        buttons: &[(&Button, ButtonVariant)],
+    ) {
+        let actions = Box::new(Orientation::Horizontal, 10);
+        actions.set_margin_top(6);
+        actions.set_hexpand(true);
+
+        actions.append(start_widget);
+
+        let right_box = Box::new(Orientation::Horizontal, 10);
+        right_box.set_hexpand(true);
+        right_box.set_halign(Align::End);
+
+        for (btn, variant) in buttons {
+            btn.add_css_class(variant.css_class());
+            btn.set_cursor_from_name(Some("pointer"));
+            right_box.append(*btn);
+        }
+
+        actions.append(&right_box);
+        self.card.append(&actions);
     }
 
     /// Add action buttons at the bottom
