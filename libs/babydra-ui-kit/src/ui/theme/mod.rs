@@ -68,6 +68,8 @@ const SHARED_CSS: &str = concat!(
     "\n",
     include_str!("../../styles/shared/explore/dialogs.css"),
     "\n",
+    include_str!("../../styles/shared/shared/dialog.css"),
+    "\n",
     include_str!("../../styles/shared/shared/scrollbar.css")
 );
 
@@ -132,6 +134,7 @@ pub fn init_theme() {
         let value = gsettings.string("color-scheme");
         let is_dark = value != "prefer-light";
         settings.set_gtk_application_prefer_dark_theme(is_dark);
+        let _ = babydra_core::sync_labwc_titlebar_theme(is_dark);
 
         let user_icon_theme = gsettings.string("icon-theme");
         let user_icon_theme = user_icon_theme.trim();
@@ -175,13 +178,11 @@ pub fn init_theme() {
             let gsettings_c = gsettings.clone();
             gsettings.connect_changed(Some("color-scheme"), move |_, _| {
                 let value = gsettings_c.string("color-scheme");
+                let dark = value != "prefer-light";
                 if let Some(settings) = gtk4::Settings::default() {
-                    if value == "prefer-dark" {
-                        settings.set_gtk_application_prefer_dark_theme(true);
-                    } else {
-                        settings.set_gtk_application_prefer_dark_theme(false);
-                    }
+                    settings.set_gtk_application_prefer_dark_theme(dark);
                 }
+                let _ = babydra_core::sync_labwc_titlebar_theme(dark);
             });
 
             let gsettings_c2 = gsettings.clone();

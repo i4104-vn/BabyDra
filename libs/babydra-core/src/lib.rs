@@ -66,8 +66,8 @@ pub use services::exif::{self, read_exif, ExifData};
 pub use services::explore::{
     calc_dir_size, clean_modifiers, copy_path, delete_path, filter_entries, get_icon_name,
     get_owner_group, load_cropped_square, load_directory, matches_key, matches_shortcut, move_path,
-    parse_shortcut, read_image_metadata, rename_path, send_to_trash, shortcuts, sort_entries,
-    start_dbus_service, FileWatcher, ImageMetadata,
+    parse_shortcut, read_image_metadata, rename_path, send_to_trash,
+    shortcuts, sort_entries, start_dbus_service, FileWatcher, ImageMetadata,
 };
 pub use services::mpris::{self, decode_uri, run_playerctl};
 pub use services::notification::island::{
@@ -91,8 +91,9 @@ pub use services::wallpaper::{
     read_image_bytes, set_avatar, set_greeter_wp, set_wallpaper, set_wallpaper_with_mode,
     sync_shared_assets,
 };
+pub use services::system::theme::sync_labwc_titlebar_theme;
 
-/// Applies all saved user settings from unified babydra.conf (CPU performance profile, Display monitors resolution/refresh rates, Wallpaper, Auto Battery Saver).
+/// Applies all saved user settings from unified babydra.conf (CPU performance profile, Display monitors resolution/refresh rates, Wallpaper, Auto Battery Saver, Labwc Titlebar).
 pub fn apply_saved_settings() {
     // 1. CPU Performance Profile
     services::system::power::apply_saved_profile();
@@ -110,4 +111,21 @@ pub fn apply_saved_settings() {
     if let Some(info) = get_battery_info() {
         battery::apply_battery_saver(&info);
     }
+
+    // 5. Labwc Window Titlebar Theme (dark / light)
+    let is_dark = config::load_babydra_config()
+        .theme
+        .selection
+        .dark
+        .unwrap_or_else(|| {
+            services::utils::run_cmd(&[
+                "gsettings",
+                "get",
+                "org.gnome.desktop.interface",
+                "color-scheme",
+            ])
+            .map(|out| !out.contains("prefer-light"))
+            .unwrap_or(true)
+        });
+    let _ = sync_labwc_titlebar_theme(is_dark);
 }

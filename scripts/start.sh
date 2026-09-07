@@ -37,10 +37,6 @@ echo "Configured labwc autostart at $AUTOSTART_FILE"
 cp "$REPO_ROOT/configs/labwc/rc.xml" "$RC_FILE"
 echo "Configured labwc rc.xml at $RC_FILE"
 
-cp "$REPO_ROOT/configs/labwc/themerc-override" "$HOME/.config/labwc/themerc-override"
-echo "Configured labwc themerc-override at $HOME/.config/labwc/themerc-override"
-mkdir -p "$HOME/.config/labwc/themes"
-cp -r "$REPO_ROOT/configs/labwc/themes/"* "$HOME/.config/labwc/themes/"
 mkdir -p "$HOME/.config/labwc/scripts"
 cp -r "$REPO_ROOT/configs/labwc/scripts/"* "$HOME/.config/labwc/scripts/"
 chmod +x "$HOME/.config/labwc/scripts/"*

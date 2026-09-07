@@ -11,7 +11,6 @@ mkdir -p "$HOME/.cache/babydra"
 ~/.local/bin/babydra-panel &
 ~/.local/bin/babydra-desktop &
 ~/.local/bin/babydra-settings --apply-all-settings &
-$HOME/.config/labwc/scripts/switcher.sh &
 $HOME/.config/labwc/scripts/bat_saver.sh &
 
 
