@@ -1,0 +1,413 @@
+/* ══════════════════════════════════════════════════════════════════
+ * BabyDra Unified Dialog & Modal Design System
+ * Modern acrylic cards, squircle icon badges, pill action buttons,
+ * and high-contrast OLED dark styling across Settings, Explore, and Desktop.
+ * ══════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Scrim Backdrop Layer ── */
+.modal-scrim-layer {
+    background-color: rgba(0, 0, 0, 0.65);
+}
+
+/* ── 2. Modern Elevated Modal Cards ── */
+.modern-modal-card,
+.auth-dialog-card {
+    border-radius: 20px;
+    padding: 24px;
+    min-width: 380px;
+    background-color: rgba(20, 22, 34, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.24);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+}
+
+/* Explore & Desktop Window Dialogs */
+window.explore-dialog,
+.explore-dialog {
+    border-top: none;
+    border-radius: 0 0 16px 16px;
+    box-shadow: none;
+}
+
+.explore-dialog-box {
+    padding: 0;
+}
+
+/* ── 3. Squircle Icon Badges ── */
+.modern-dialog-badge,
+.recovery-danger-badge {
+    min-width: 42px;
+    min-height: 42px;
+    border-radius: 12px;
+    padding: 0;
+    margin: 0;
+}
+
+.modern-dialog-badge.badge-primary,
+.modern-dialog-badge.badge-blue {
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.30);
+    box-shadow: 0 3px 12px rgba(59, 130, 246, 0.18);
+}
+
+.modern-dialog-badge.badge-danger,
+.recovery-danger-badge {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.30);
+    box-shadow: 0 3px 12px rgba(239, 68, 68, 0.18);
+}
+
+.modern-dialog-badge.badge-success {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.30);
+    box-shadow: 0 3px 12px rgba(16, 185, 129, 0.18);
+}
+
+.modern-dialog-badge.badge-warning {
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.30);
+    box-shadow: 0 3px 12px rgba(245, 158, 11, 0.18);
+}
+
+/* ── 4. Dialog Typography ── */
+.modern-dialog-title,
+.recovery-modal-title {
+    font-size: 15.5px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    color: #ffffff;
+}
+
+.modern-dialog-subtitle,
+.recovery-modal-subtitle {
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.dialog-error-text {
+    font-size: 12px;
+    font-weight: 500;
+    color: #f87171;
+    margin-top: 4px;
+}
+
+/* ── 5. Callouts & Banners ── */
+.modern-dialog-warning,
+.recovery-warning-banner {
+    border-radius: 12px;
+    padding: 10px 14px;
+    background: rgba(239, 68, 68, 0.10);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.modern-dialog-warning-text,
+.recovery-warning-text {
+    font-size: 12px;
+    font-weight: 500;
+    color: #fca5a5;
+    line-height: 1.4;
+}
+
+.modern-dialog-info {
+    border-radius: 12px;
+    padding: 10px 14px;
+    background: rgba(59, 130, 246, 0.10);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.modern-dialog-info-text {
+    font-size: 12px;
+    font-weight: 500;
+    color: #93c5fd;
+    line-height: 1.4;
+}
+
+/* Safety Acknowledgment Checkbox Card */
+.modern-dialog-ack-card,
+.recovery-ack-card {
+    border-radius: 12px;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 150ms ease;
+}
+
+.modern-dialog-ack-card:hover,
+.recovery-ack-card:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.14);
+}
+
+.modern-dialog-ack-label,
+.recovery-ack-label {
+    font-size: 12.5px;
+    color: #cbd5e1;
+    font-weight: 500;
+    line-height: 1.35;
+}
+
+/* ── 6. Form Inputs & Text Fields ── */
+.modern-dialog-entry,
+.explore-dialog entry {
+    min-height: 42px;
+    border-radius: 12px;
+    padding: 0 14px;
+    font-size: 13.5px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    caret-color: #3b82f6;
+    outline: none;
+    box-shadow: none;
+    transition: all 180ms ease;
+}
+
+.modern-dialog-entry:focus,
+.explore-dialog entry:focus {
+    border-color: #3b82f6;
+    background-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+.modern-dialog-entry.error-entry,
+.explore-dialog entry.error-entry {
+    border-color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.08);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.20);
+}
+
+/* ── 7. Unified Action Buttons (Synchronized with BabyDra Design System) ── */
+button.modern-dialog-cancel-btn,
+.explore-dialog button.connect-pill-btn,
+.explore-dialog button.properties-btn-cancel {
+    min-height: 28px;
+    min-width: 64px;
+    padding: 5px 14px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 500;
+    background-color: rgba(255, 255, 255, 0.08);
+    background-image: none;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.26);
+    color: rgba(255, 255, 255, 0.90);
+    box-shadow: none;
+    outline: none;
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+button.modern-dialog-cancel-btn:hover,
+.explore-dialog button.connect-pill-btn:hover,
+.explore-dialog button.properties-btn-cancel:hover {
+    background-color: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+    box-shadow: none;
+}
+
+button.modern-dialog-cancel-btn:active,
+.explore-dialog button.connect-pill-btn:active,
+.explore-dialog button.properties-btn-cancel:active {
+    background-color: rgba(255, 255, 255, 0.18);
+    box-shadow: none;
+}
+
+button.modern-dialog-primary-btn,
+.explore-dialog button.suggested-action {
+    min-height: 28px;
+    min-width: 64px;
+    padding: 5px 14px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+    background-color: #3b82f6;
+    background-image: none;
+    border: none;
+    color: #ffffff;
+    box-shadow: none;
+    outline: none;
+    transition: background-color 150ms ease;
+}
+
+button.modern-dialog-primary-btn:hover,
+.explore-dialog button.suggested-action:hover {
+    background-color: #2563eb;
+    background-image: none;
+    box-shadow: none;
+}
+
+button.modern-dialog-primary-btn:active,
+.explore-dialog button.suggested-action:active {
+    background-color: #1d4ed8;
+    background-image: none;
+    box-shadow: none;
+}
+
+button.modern-dialog-primary-btn:disabled,
+.explore-dialog button.suggested-action:disabled {
+    background-color: rgba(59, 130, 246, 0.30);
+    color: rgba(255, 255, 255, 0.40);
+    opacity: 0.5;
+    box-shadow: none;
+}
+
+button.modern-dialog-danger-btn,
+.explore-dialog button.destructive-action {
+    min-height: 28px;
+    min-width: 64px;
+    padding: 5px 14px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+    background-color: #ef4444;
+    background-image: none;
+    border: none;
+    color: #ffffff;
+    box-shadow: none;
+    outline: none;
+    transition: background-color 150ms ease;
+}
+
+button.modern-dialog-danger-btn:hover,
+.explore-dialog button.destructive-action:hover {
+    background-color: #dc2626;
+    background-image: none;
+    box-shadow: none;
+}
+
+button.modern-dialog-danger-btn:active,
+.explore-dialog button.destructive-action:active {
+    background-color: #b91c1c;
+    background-image: none;
+    box-shadow: none;
+}
+
+button.modern-dialog-danger-btn:disabled,
+.explore-dialog button.destructive-action:disabled {
+    background-color: rgba(239, 68, 68, 0.30);
+    color: rgba(255, 255, 255, 0.40);
+    opacity: 0.5;
+    box-shadow: none;
+}
+
+/* ── 8. Modern Terminal Progress & Console Dialog ── */
+.modern-terminal-dialog {
+    border-radius: 20px;
+    padding: 20px 22px;
+    min-width: 460px;
+    min-height: 440px;
+    background-color: rgba(14, 16, 26, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.24);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
+}
+
+.terminal-title-bar {
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.traffic-dot-close {
+    min-width: 12px;
+    min-height: 12px;
+    border-radius: 9999px;
+    background-color: #ff5f56;
+}
+
+.traffic-dot-minimize {
+    min-width: 12px;
+    min-height: 12px;
+    border-radius: 9999px;
+    background-color: #ffbd2e;
+}
+
+.traffic-dot-maximize {
+    min-width: 12px;
+    min-height: 12px;
+    border-radius: 9999px;
+    background-color: #27c93f;
+}
+
+.terminal-window-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    opacity: 0.9;
+}
+
+.terminal-badge-running {
+    background-color: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    color: #60a5fa;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 9999px;
+    padding: 4px 10px;
+    letter-spacing: 0.5px;
+}
+
+.terminal-badge-success {
+    background-color: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    color: #4ade80;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 9999px;
+    padding: 4px 10px;
+    letter-spacing: 0.5px;
+}
+
+.terminal-badge-failed {
+    background-color: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: #f87171;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 9999px;
+    padding: 4px 10px;
+    letter-spacing: 0.5px;
+}
+
+.terminal-step-text {
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0.85;
+}
+
+.modern-terminal-progress trough {
+    min-height: 6px;
+    border-radius: 9999px;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.modern-terminal-progress progress {
+    min-height: 6px;
+    border-radius: 9999px;
+    background-color: #3b82f6;
+}
+
+.terminal-console-window {
+    background-color: #080a10;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 10px 12px;
+}
+
+.modern-reboot-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 13px;
+    border-radius: 9999px;
+    padding: 9px 24px;
+    border: none;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.38);
+    transition: all 150ms ease;
+}
+
+.modern-reboot-btn:hover {
+    background: linear-gradient(135deg, #34d399, #10b981);
+    box-shadow: 0 6px 22px rgba(16, 185, 129, 0.55);
+}

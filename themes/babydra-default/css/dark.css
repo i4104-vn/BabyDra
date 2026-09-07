@@ -2384,33 +2384,39 @@ button.suggested-action:active {
     background-color: #1d4ed8;
 }
 
+window.explore-dialog,
 .explore-dialog {
-    background-color: rgba(22, 22, 26, 0.97);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45),
-        0 2px 8px rgba(0, 0, 0, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    background-color: #151722;
+    box-shadow: none;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-top: none;
+    border-radius: 0 0 16px 16px;
 }
 
 .explore-dialog-box {
-    color: #e8e8e8;
+    color: #e2e8f0;
 }
 
 .explore-dialog entry {
     background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    color: #e4e4e7;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    color: #ffffff;
     caret-color: #3b82f6;
+    min-height: 42px;
+    padding: 0 14px;
 }
 
 .explore-dialog entry:focus {
-    border-color: rgba(59, 130, 246, 0.6);
-    background-color: rgba(59, 130, 246, 0.04);
+    border-color: #3b82f6;
+    background-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
 }
 
 .explore-dialog entry.error-entry {
-    border-color: rgba(239, 68, 68, 0.7);
-    background-color: rgba(239, 68, 68, 0.06);
+    border-color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.08);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.20);
 }
 
 .dialog-error-text {

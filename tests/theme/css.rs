@@ -43,6 +43,7 @@ fn test_gtk_css_parsing() {
         "libs/babydra-ui-kit/src/styles/shared/explore/status_bar.css",
         "libs/babydra-ui-kit/src/styles/shared/explore/context_menu.css",
         "libs/babydra-ui-kit/src/styles/shared/explore/dialogs.css",
+        "libs/babydra-ui-kit/src/styles/shared/shared/dialog.css",
         "libs/babydra-ui-kit/src/styles/shared/shared/scrollbar.css",
         "themes/babydra-default/css/dark.css",
         "themes/babydra-default/css/light.css",

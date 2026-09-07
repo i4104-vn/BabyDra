@@ -16,31 +16,7 @@ button.suggested-action:hover {
 
 .explore-dialog {
     background-image: none;
-    border-radius: 0 0 14px 14px;
-}
-
-.explore-dialog entry {
-    border-radius: 8px;
-    padding: 7px 10px;
-    transition: border-color 150ms ease, background-color 150ms ease;
-}
-
-.explore-dialog button,
-.explore-dialog button:hover,
-.explore-dialog button:focus,
-.explore-dialog button:active {
-    border: none;
-    border-image: none;
-    outline: none;
-    box-shadow: none;
-    background-image: none;
-}
-
-.explore-dialog button.suggested-action {
-    padding: 6px 14px;
-    font-size: 12px;
-    border: none;
-    box-shadow: none;
+    border-radius: 0 0 16px 16px;
 }
 
 .explore-dialog .edit-btn image,

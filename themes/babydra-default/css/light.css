@@ -2460,12 +2460,13 @@ button.suggested-action:active {
     background-color: #1d4ed8;
 }
 
+window.explore-dialog,
 .explore-dialog {
-    background-color: #f7f7f9;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15),
-        0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-top: 1px solid rgba(0, 0, 0, 0.04);
+    background-color: #ffffff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+    border-top: none;
+    border-radius: 0 0 16px 16px;
 }
 
 .explore-dialog-box {
@@ -2475,13 +2476,17 @@ button.suggested-action:active {
 .explore-dialog entry {
     background-color: #ffffff;
     border: 1px solid #d1d5db;
+    border-radius: 12px;
     color: #111827;
     caret-color: #0066cc;
+    min-height: 42px;
+    padding: 0 14px;
 }
 
 .explore-dialog entry:focus {
-    border-color: rgba(0, 102, 204, 0.6);
+    border-color: #0066cc;
     background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.20);
 }
 
 button.empty-trash-btn {
@@ -2781,5 +2786,227 @@ scrollbar slider {
 scrollbar slider:hover,
 scrollbar slider:hover:active {
     background-color: rgba(0, 0, 0, 0.35);
+}
+
+/* === shared/dialog.css (Light Mode Overrides) === */
+.modern-modal-card,
+.auth-dialog-card,
+window.explore-dialog,
+.explore-dialog {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-top: 1px solid #d1d5db;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+}
+
+window.explore-dialog,
+.explore-dialog {
+    border-top: none;
+    border-radius: 0 0 16px 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.modern-dialog-badge.badge-primary,
+.modern-dialog-badge.badge-blue {
+    background: rgba(59, 130, 246, 0.10);
+    border: 1px solid rgba(59, 130, 246, 0.20);
+    box-shadow: 0 3px 12px rgba(59, 130, 246, 0.10);
+}
+
+.modern-dialog-badge.badge-danger,
+.recovery-danger-badge {
+    background: rgba(239, 68, 68, 0.10);
+    border: 1px solid rgba(239, 68, 68, 0.20);
+    box-shadow: 0 3px 12px rgba(239, 68, 68, 0.10);
+}
+
+.modern-dialog-badge.badge-success {
+    background: rgba(16, 185, 129, 0.10);
+    border: 1px solid rgba(16, 185, 129, 0.20);
+    box-shadow: 0 3px 12px rgba(16, 185, 129, 0.10);
+}
+
+.modern-dialog-badge.badge-warning {
+    background: rgba(245, 158, 11, 0.10);
+    border: 1px solid rgba(245, 158, 11, 0.20);
+    box-shadow: 0 3px 12px rgba(245, 158, 11, 0.10);
+}
+
+.modern-dialog-title,
+.recovery-modal-title {
+    color: #111827;
+}
+
+.modern-dialog-subtitle,
+.recovery-modal-subtitle {
+    color: #6b7280;
+}
+
+.dialog-error-text {
+    color: #dc2626;
+}
+
+.modern-dialog-warning,
+.recovery-warning-banner {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.modern-dialog-warning-text,
+.recovery-warning-text {
+    color: #b91c1c;
+}
+
+.modern-dialog-info {
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.15);
+}
+
+.modern-dialog-info-text {
+    color: #1d4ed8;
+}
+
+.modern-dialog-ack-card,
+.recovery-ack-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+}
+
+.modern-dialog-ack-card:hover,
+.recovery-ack-card:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+.modern-dialog-ack-label,
+.recovery-ack-label {
+    color: #374151;
+}
+
+.modern-dialog-entry,
+.explore-dialog entry {
+    background-color: #ffffff;
+    border: 1px solid #d1d5db;
+    color: #111827;
+    caret-color: #2563eb;
+}
+
+.modern-dialog-entry:focus,
+.explore-dialog entry:focus {
+    border-color: #2563eb;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.20);
+}
+
+.modern-dialog-entry.error-entry,
+.explore-dialog entry.error-entry {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+button.modern-dialog-cancel-btn,
+.explore-dialog button.connect-pill-btn,
+.explore-dialog button.properties-btn-cancel {
+    background-color: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-top: 1px solid #9ca3af;
+    color: #374151;
+}
+
+button.modern-dialog-cancel-btn:hover,
+.explore-dialog button.connect-pill-btn:hover,
+.explore-dialog button.properties-btn-cancel:hover {
+    background-color: #e5e7eb;
+    border-color: #9ca3af;
+    color: #111827;
+}
+
+button.modern-dialog-cancel-btn:active,
+.explore-dialog button.connect-pill-btn:active,
+.explore-dialog button.properties-btn-cancel:active {
+    background-color: #d1d5db;
+}
+
+button.modern-dialog-primary-btn,
+.explore-dialog button.suggested-action {
+    background-color: #2563eb;
+}
+
+button.modern-dialog-primary-btn:hover,
+.explore-dialog button.suggested-action:hover {
+    background-color: #1d4ed8;
+}
+
+button.modern-dialog-primary-btn:active,
+.explore-dialog button.suggested-action:active {
+    background-color: #1e40af;
+}
+
+button.modern-dialog-primary-btn:disabled,
+.explore-dialog button.suggested-action:disabled {
+    background-color: rgba(37, 99, 235, 0.30);
+    color: rgba(17, 24, 39, 0.40);
+}
+
+button.modern-dialog-danger-btn,
+.explore-dialog button.destructive-action {
+    background-color: #dc2626;
+}
+
+button.modern-dialog-danger-btn:hover,
+.explore-dialog button.destructive-action:hover {
+    background-color: #b91c1c;
+}
+
+button.modern-dialog-danger-btn:active,
+.explore-dialog button.destructive-action:active {
+    background-color: #991b1b;
+}
+
+button.modern-dialog-danger-btn:disabled,
+.explore-dialog button.destructive-action:disabled {
+    background-color: rgba(220, 38, 38, 0.30);
+    color: rgba(17, 24, 39, 0.40);
+}
+
+.modern-terminal-dialog {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-top: 1px solid #d1d5db;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.12);
+}
+
+.terminal-console-window {
+    background-color: #111827;
+    border: 1px solid #374151;
+}
+
+.terminal-title-bar {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.terminal-window-title {
+    color: #111827;
+}
+
+.terminal-step-text {
+    color: #374151;
+}
+
+.modern-terminal-progress trough {
+    background-color: #e5e7eb;
+}
+
+.modern-terminal-progress progress {
+    background-color: #2563eb;
+}
+
+.modern-reboot-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.modern-reboot-btn:hover {
+    background: linear-gradient(135deg, #34d399, #10b981);
 }
 
