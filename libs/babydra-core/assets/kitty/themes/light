@@ -1,57 +1,57 @@
-# BabyDra Kitty Theme Override (Catppuccin Latte - Light)
+# BabyDra Kitty Theme Override (Light)
 
 # Basic colors
-foreground              #4C4F69
-background              #EFF1F5
-selection_foreground    #EFF1F5
-selection_background    #DC8A78
+foreground              #1a1a28
+background              #f2f2f8
+selection_foreground    #ffffff
+selection_background    #3b82f6
 
 # Cursor colors
-cursor                  #DC8A78
-cursor_text_color       #EFF1F5
-url_color               #DC8A78
+cursor                  #3b82f6
+cursor_text_color       #ffffff
+url_color               #3b82f6
 
 # Window borders
-active_border_color     #7287FD
-inactive_border_color   #9CA0B0
-bell_border_color       #DF8E1D
+active_border_color     #3b82f6
+inactive_border_color   #c0c0cc
+bell_border_color       #ffbd2e
 
 # Tab bar
-active_tab_foreground   #EFF1F5
-active_tab_background   #8839EF
-inactive_tab_foreground #4C4F69
-inactive_tab_background #9CA0B0
-tab_bar_background      #BCC0CC
+active_tab_foreground   #ffffff
+active_tab_background   #3b82f6
+inactive_tab_foreground #70707e
+inactive_tab_background #e0e0e8
+tab_bar_background      #e8e8ee
 
 # Terminal colors (16 colors)
 # black
-color0 #5C5F77
-color8 #6C6F85
+color0 #1a1a28
+color8 #70707e
 
 # red
-color1 #D20F39
-color9 #D20F39
+color1 #dc2626
+color9 #ef4444
 
 # green
-color2  #40A02B
-color10 #40A02B
+color2  #16a34a
+color10 #22c55e
 
 # yellow
-color3  #DF8E1D
-color11 #DF8E1D
+color3  #d97706
+color11 #f59e0b
 
 # blue
-color4  #1E66F5
-color12 #1E66F5
+color4  #2563eb
+color12 #3b82f6
 
 # magenta
-color5  #EA76CB
-color13 #EA76CB
+color5  #9333ea
+color13 #a855f7
 
 # cyan
-color6  #179299
-color14 #179299
+color6  #0891b2
+color14 #06b6d4
 
 # white
-color7  #ACB0BE
-color15 #BCC0CC
+color7  #e8e8ee
+color15 #ffffff

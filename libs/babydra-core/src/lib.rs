@@ -131,6 +131,6 @@ pub fn apply_saved_settings() {
         });
     let _ = sync_labwc_titlebar_theme(is_dark);
 
-    // 6. Kitty Terminal Theme (Catppuccin Mocha / Latte)
+    // 6. Kitty Terminal Theme (BabyDra Dark / Light)
     let _ = sync_kitty_theme(is_dark);
 }

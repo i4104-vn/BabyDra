@@ -1,4 +1,4 @@
-//! Integration tests: Kitty Catppuccin theme synchronization.
+//! Integration tests: Kitty theme synchronization.
 
 use babydra_core::services::system::theme::{is_kitty_available, sync_kitty_theme};
 use std::fs;
@@ -19,12 +19,14 @@ fn test_sync_kitty_theme_switch() {
 
     if is_kitty_available() && theme_file.exists() {
         let dark_content = fs::read_to_string(&theme_file).unwrap();
-        assert!(dark_content.contains("Catppuccin Mocha"));
+        assert!(dark_content.contains("BabyDra Kitty Theme Override (Dark)"));
+        assert!(dark_content.contains("#14141c"));
 
         // Test light mode switch
         assert!(sync_kitty_theme(false).is_ok());
         let light_content = fs::read_to_string(&theme_file).unwrap();
-        assert!(light_content.contains("Catppuccin Latte"));
+        assert!(light_content.contains("BabyDra Kitty Theme Override (Light)"));
+        assert!(light_content.contains("#f2f2f8"));
 
         // Restore dark theme
         let _ = sync_kitty_theme(true);

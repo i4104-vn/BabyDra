@@ -1,4 +1,4 @@
-//! Kitty terminal theme synchronization service (Catppuccin).
+//! Kitty terminal theme synchronization service.
 
 use crate::error::CoreResult;
 use crate::services::utils::{get_home_dir, run_cmd, run_cmd_bool};
