@@ -13,6 +13,17 @@
     <policy>center</policy>
   </placement>
 
+  <!-- Workspaces configuration -->
+  <desktops number="4">
+    <names>
+      <name>Workspace 1</name>
+      <name>Workspace 2</name>
+      <name>Workspace 3</name>
+      <name>Workspace 4</name>
+    </names>
+    <popupTime>0</popupTime>
+  </desktops>
+
   <keyboard>
     <default />
     <!-- Global shortcuts are handled by babydra-keymap; labwc only swallows
@@ -33,6 +44,26 @@
     <!-- Lock screen with Win+L -->
     <keybind key="W-l">
       <action name="None" />
+    </keybind>
+
+    <!-- Workspace switching keybinds -->
+    <keybind key="W-1">
+      <action name="GoToDesktop" to="1" />
+    </keybind>
+    <keybind key="W-2">
+      <action name="GoToDesktop" to="2" />
+    </keybind>
+    <keybind key="W-3">
+      <action name="GoToDesktop" to="3" />
+    </keybind>
+    <keybind key="W-4">
+      <action name="GoToDesktop" to="4" />
+    </keybind>
+    <keybind key="W-Left">
+      <action name="GoToDesktop" to="left" wrap="yes" />
+    </keybind>
+    <keybind key="W-Right">
+      <action name="GoToDesktop" to="right" wrap="yes" />
     </keybind>
   </keyboard>
 
