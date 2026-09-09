@@ -132,67 +132,95 @@ pub fn focus_app(name: &str, exec: &str, app_id: Option<&str>, window_title: Opt
     }
 }
 
-/// Closes a single window instance using wlrctl.
+/// Closes a single window instance using wlrctl safely.
 pub fn close_window(app_id: &str, title: &str) {
     let running = get_running_windows();
-    let same_title_count = if !title.is_empty() {
-        running.iter().filter(|(_, t)| t == title).count()
+
+    // 1. Resolve the actual window title currently reported by Wayland.
+    // If the window title was slightly modified (e.g. dirty indicator '●' added/removed),
+    // find the closest match for this app_id.
+    let actual_title = if !title.is_empty() {
+        if running
+            .iter()
+            .any(|(id, t)| (id == app_id || id.is_empty()) && t == title)
+        {
+            title.to_string()
+        } else {
+            running
+                .iter()
+                .find(|(id, t)| {
+                    (id == app_id || id.is_empty() || app_id.is_empty())
+                        && (t.contains(title) || title.contains(t.as_str()))
+                })
+                .map(|(_, t)| t.clone())
+                .unwrap_or_else(|| title.to_string())
+        }
+    } else {
+        String::new()
+    };
+
+    let target_title = if !actual_title.is_empty() {
+        &actual_title
+    } else {
+        title
+    };
+
+    let same_title_count = if !target_title.is_empty() {
+        running.iter().filter(|(_, t)| t == target_title).count()
     } else {
         running.iter().filter(|(id, _)| id == app_id).count()
     };
 
-    if same_title_count > 1 {
-        // When multiple windows share the identical title or app_id, running `wlrctl window close`
-        // without state filtering will close all instances at once.
+    if same_title_count > 1 && !target_title.is_empty() {
+        // When multiple windows share the exact same title, running `wlrctl window close title:<title>`
+        // without state filtering would match ALL of them and close every instance at once.
         // To safely close only ONE instance:
         // 1. Focus one instance (wlrctl activate only activates the first matching window and stops).
-        if !title.is_empty() {
-            let _ = std::process::Command::new("wlrctl")
-                .args(&["window", "focus", &format!("title:{}", title)])
-                .status();
-        } else {
-            let _ = std::process::Command::new("wlrctl")
-                .args(&["window", "focus", app_id])
-                .status();
-        }
-        std::thread::sleep(std::time::Duration::from_millis(60));
+        let _ = std::process::Command::new("wlrctl")
+            .args(&["window", "focus", &format!("title:{}", target_title)])
+            .status();
 
-        // 2. Close ONLY the active window. On Wayland, exactly one window is active,
-        // so this guarantees that only one instance is closed.
-        let status = if !title.is_empty() {
-            std::process::Command::new("wlrctl")
-                .args(&["window", "close", &format!("title:{}", title), "state:active"])
+        // 2. Wait up to 300ms for the target window to become active in the compositor.
+        let mut confirmed_active = false;
+        for _ in 0..12 {
+            std::thread::sleep(std::time::Duration::from_millis(25));
+            let is_active = std::process::Command::new("wlrctl")
+                .args(&[
+                    "window",
+                    "find",
+                    &format!("title:{}", target_title),
+                    "state:active",
+                ])
                 .status()
-        } else {
-            std::process::Command::new("wlrctl")
-                .args(&["window", "close", app_id, "state:active"])
-                .status()
-        };
-
-        if let Ok(s) = status {
-            if s.success() {
-                return;
+                .map(|s| s.success())
+                .unwrap_or(false);
+            if is_active {
+                confirmed_active = true;
+                break;
             }
         }
-        let _ = std::process::Command::new("wlrctl")
-            .args(&["window", "close", "state:active"])
-            .status();
+
+        // 3. Only close if and only if the active window is verified to be the target title!
+        // This strictly prevents closing any other window (such as the user's project window).
+        if confirmed_active {
+            let _ = std::process::Command::new("wlrctl")
+                .args(&[
+                    "window",
+                    "close",
+                    &format!("title:{}", target_title),
+                    "state:active",
+                ])
+                .status();
+        }
         return;
     }
 
-    if !title.is_empty() {
-        let status = std::process::Command::new("wlrctl")
-            .args(&["window", "close", &format!("title:{}", title)])
+    // Standard case: unique title or single instance
+    if !target_title.is_empty() {
+        let _ = std::process::Command::new("wlrctl")
+            .args(&["window", "close", &format!("title:{}", target_title)])
             .status();
-        if let Ok(s) = status {
-            if s.success() {
-                return;
-            }
-        }
     }
-    let _ = std::process::Command::new("wlrctl")
-        .args(&["window", "close", app_id])
-        .status();
 }
 
 /// Closes all windows matching an application ID.
@@ -204,12 +232,41 @@ pub fn close_all_windows(app_id: &str) {
 
 /// Focuses a window using wlrctl.
 pub fn focus_window(app_id: &str, title: &str) {
-    let status = std::process::Command::new("wlrctl")
-        .args(&["window", "focus", &format!("title:{}", title)])
-        .status();
-    if let Ok(s) = status {
-        if s.success() {
-            return;
+    let running = get_running_windows();
+    let actual_title = if !title.is_empty() {
+        if running
+            .iter()
+            .any(|(id, t)| (id == app_id || id.is_empty()) && t == title)
+        {
+            title.to_string()
+        } else {
+            running
+                .iter()
+                .find(|(id, t)| {
+                    (id == app_id || id.is_empty() || app_id.is_empty())
+                        && (t.contains(title) || title.contains(t.as_str()))
+                })
+                .map(|(_, t)| t.clone())
+                .unwrap_or_else(|| title.to_string())
+        }
+    } else {
+        String::new()
+    };
+
+    let target_title = if !actual_title.is_empty() {
+        &actual_title
+    } else {
+        title
+    };
+
+    if !target_title.is_empty() {
+        let status = std::process::Command::new("wlrctl")
+            .args(&["window", "focus", &format!("title:{}", target_title)])
+            .status();
+        if let Ok(s) = status {
+            if s.success() {
+                return;
+            }
         }
     }
     let _ = std::process::Command::new("wlrctl")
