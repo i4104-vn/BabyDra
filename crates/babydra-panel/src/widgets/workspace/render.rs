@@ -1,9 +1,6 @@
-//! Layout structure and widget builders for the desktop taskbar buttons and window previews.
-
 use babydra_core::DesktopApp;
 use gtk4::prelude::*;
 
-/// Builds the base container box for the taskbar.
 pub fn build_workspace_box() -> (gtk4::Box, gtk4::Box) {
     let parent_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 4);
     parent_box.add_css_class("taskbar-parent-box");
@@ -18,7 +15,6 @@ pub fn build_workspace_box() -> (gtk4::Box, gtk4::Box) {
     (parent_box, apps_box)
 }
 
-/// Creates a Popover widget anchored to the parent taskbar button.
 pub fn build_popover_box(parent: &gtk4::Button) -> gtk4::Popover {
     let popover = babydra_ui_kit::components::create_popover(
         parent,
@@ -29,7 +25,6 @@ pub fn build_popover_box(parent: &gtk4::Button) -> gtk4::Popover {
     popover
 }
 
-/// Constructs a taskbar item button with application icon, dot indicators for window count, and tooltip.
 pub fn build_taskbar_btn(app: &DesktopApp, is_active: bool, window_count: usize) -> gtk4::Button {
     let btn = gtk4::Button::new();
     btn.add_css_class("taskbar-app-btn");
@@ -74,8 +69,6 @@ pub fn build_taskbar_btn(app: &DesktopApp, is_active: bool, window_count: usize)
     btn
 }
 
-/// Renders the list of active window previews inside the Popover dropdown.
-/// Includes buttons to open a new app instance and to close all windows of this app.
 pub fn render_previews(
     popover: &gtk4::Popover,
     windows: &[DesktopApp],

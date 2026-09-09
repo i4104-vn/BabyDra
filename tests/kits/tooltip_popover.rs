@@ -23,7 +23,7 @@ fn test_parse_tooltip_rows() {
 }
 
 #[test]
-fn test_build_card_widget() {
+fn test_gtk_tooltip_popover_suite() {
     if gtk4::init().is_err() {
         return;
     }
@@ -35,13 +35,6 @@ fn test_build_card_widget() {
     let card = TooltipPopover::build_card("Network Status", &rows);
     assert!(card.has_css_class("status-popover-card"));
     assert!(card.has_css_class("tooltip-popover-card"));
-}
-
-#[test]
-fn test_tooltip_popover_lifecycle_and_deref() {
-    if gtk4::init().is_err() {
-        return;
-    }
 
     let btn = gtk4::Button::new();
     let tooltip = TooltipPopover::attach_card_text(
@@ -50,12 +43,23 @@ fn test_tooltip_popover_lifecycle_and_deref() {
         "Left-click: Open Launcher\nRight-click: Show Desktop",
     );
 
-    // Tests Deref to gtk4::Popover
     assert_eq!(tooltip.position(), gtk4::PositionType::Bottom);
     assert!(tooltip.has_css_class("status-popover"));
     assert!(tooltip.has_css_class("tooltip-popover"));
     assert_eq!(tooltip.is_autohide(), false);
-
-    // Test direct popover field access
     assert_eq!(tooltip.popover.has_css_class("status-popover"), true);
+
+    let btn2 = gtk4::Button::new();
+    let tooltip2 = TooltipPopover::attach_card_text(&btn2, "Title", "Text");
+    assert!(!tooltip2.is_suppressed());
+
+    let is_open = std::rc::Rc::new(std::cell::Cell::new(false));
+    let is_open_c = is_open.clone();
+    tooltip2.set_suppress_fn(move || is_open_c.get());
+
+    assert!(!tooltip2.is_suppressed());
+    is_open.set(true);
+    assert!(tooltip2.is_suppressed());
+    is_open.set(false);
+    assert!(!tooltip2.is_suppressed());
 }

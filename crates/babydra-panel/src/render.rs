@@ -44,9 +44,23 @@ pub fn rebuild_panel_window(
     let cw_clone = calendar_window.clone();
     let app_clone = app.clone();
     let logo_pop_click = logo_popover.clone();
+    let ws_popover = babydra_workspace::build_workspace_popover(&logo_btn);
+    let ws_pop_click = ws_popover.clone();
+    let ws_pop_scroll = ws_popover.clone();
+
+    let ws_pop_suppress = ws_popover.clone();
+    let lw_suppress = launcher_window.clone();
+    let ccw_suppress = control_center_window.clone();
+    let cw_suppress = calendar_window.clone();
+    logo_popover.set_suppress_fn(move || {
+        ws_pop_suppress.is_visible()
+            || lw_suppress.borrow().is_some()
+            || ccw_suppress.borrow().is_some()
+            || cw_suppress.borrow().is_some()
+    });
 
     let click_gesture = gtk4::GestureClick::new();
-    click_gesture.set_button(0); // Listen to both left (1) and right (3) click
+    click_gesture.set_button(0); // Listen to left (1), middle (2), and right (3) click
     click_gesture.connect_pressed(move |gesture, _, _, _| {
         logo_pop_click.popdown();
         let button = gesture.current_button();
@@ -61,6 +75,7 @@ pub fn rebuild_panel_window(
         }
 
         if button == 1 {
+            ws_pop_click.popdown();
             // Left-click: Toggle Launcher
             let existing = { lw_clone.borrow().clone() };
             if let Some(win) = existing {
@@ -73,9 +88,14 @@ pub fn rebuild_panel_window(
                 }
             }
         } else if button == 2 {
-            // Middle-click (con lăn chuột): Toggle Workspace Switcher
-            babydra_workspace::toggle_switcher();
+            // Middle-click (con lăn chuột): Toggle Workspace Popover
+            if ws_pop_click.is_visible() {
+                ws_pop_click.popdown();
+            } else {
+                ws_pop_click.popup();
+            }
         } else if button == 3 {
+            ws_pop_click.popdown();
             // Right-click: Minimize all application windows to show desktop
             let existing = { lw_clone.borrow().clone() };
             if let Some(win) = existing {
@@ -86,22 +106,21 @@ pub fn rebuild_panel_window(
     });
     logo_btn.add_controller(click_gesture);
 
-    // Con lăn chuột lên / xuống: Chuyển nhanh giữa các workspace
     let logo_scroll =
         gtk4::EventControllerScroll::new(gtk4::EventControllerScrollFlags::VERTICAL);
     let logo_pop_scroll = logo_popover.clone();
     logo_scroll.connect_scroll(move |_, _, dy| {
         logo_pop_scroll.popdown();
+        ws_pop_scroll.popdown();
         if dy > 0.0 {
-            babydra_workspace::next_workspace();
+            babydra_core::next_workspace();
         } else if dy < 0.0 {
-            babydra_workspace::prev_workspace();
+            babydra_core::prev_workspace();
         }
         gtk4::glib::Propagation::Stop
     });
     logo_btn.add_controller(logo_scroll);
 
-    // 4. Workspace Switcher
     let workspace_box = create_workspace_sw();
     let separator = gtk4::Label::new(Some("│"));
     separator.add_css_class("capsule-separator");
@@ -115,6 +134,7 @@ pub fn rebuild_panel_window(
         control_center_window.clone(),
         calendar_window.clone(),
         launcher_window.clone(),
+        ws_popover.clone(),
     );
 
     let system_monitor = create_sys_monitor_w();

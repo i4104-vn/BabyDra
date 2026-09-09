@@ -2002,13 +2002,14 @@ scale.settings-scale:disabled mark label {
 
 /* === apps/switcher.css === */
 .switcher-window {
-    background-color: rgba(0, 0, 0, 0.25);
+    background-color: rgba(0, 0, 0, 0.30);
 }
 
 .switcher-deck-container {
-    background-color: rgba(255, 255, 255, 0.94);
-    border: 1px solid rgba(0, 0, 0, 0.10);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+    background-color: rgba(248, 249, 252, 0.92);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.80);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.20), 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .switcher-deck-header {
@@ -2016,82 +2017,94 @@ scale.settings-scale:disabled mark label {
 }
 
 .switcher-meta-bar {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: transparent;
+    border: none;
 }
 
 .switcher-meta-title {
-    color: #111827;
+    color: #0f172a;
 }
 
 .switcher-meta-subtitle {
-    color: rgba(0, 0, 0, 0.60);
+    color: rgba(15, 23, 42, 0.60);
 }
 
 button.switcher-card {
-    background-color: rgba(0, 0, 0, 0.02);
-    border: 2px solid rgba(0, 0, 0, 0.08);
+    background-color: transparent;
+    border: 1.5px solid transparent;
 }
 
 button.switcher-card:hover {
     background-color: rgba(0, 0, 0, 0.05);
-    border-color: rgba(0, 0, 0, 0.16);
+    border-color: rgba(0, 0, 0, 0.10);
 }
 
 button.switcher-card.selected {
+    background-color: rgba(99, 102, 241, 0.08);
+    border: 1.5px solid #6366f1;
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25), inset 0 0 12px rgba(99, 102, 241, 0.08);
+}
+
+
+/* === Workspace Switcher Popover & Flyout === */
+popover.workspace-switcher-popover > contents,
+popover.workspace-apps-flyout > contents {
+    background-color: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+    color: rgba(15, 23, 42, 0.95);
+}
+
+.workspace-popover-header-title,
+.workspace-flyout-header-title {
+    color: rgba(15, 23, 42, 0.45);
+}
+
+.workspace-popover-header-icon {
+    color: rgba(15, 23, 42, 0.60);
+}
+
+.workspace-popover-num {
     background-color: rgba(0, 0, 0, 0.06);
-    border-color: #3b82f6;
-    box-shadow: 0 10px 24px rgba(59, 130, 246, 0.30);
+    color: rgba(15, 23, 42, 0.85);
 }
 
-.switcher-card-name {
-    color: rgba(0, 0, 0, 0.85);
+button.workspace-popover-row.active .workspace-popover-num {
+    background-color: #6366f1;
+    color: #ffffff;
 }
 
-button.switcher-card.selected .switcher-card-name {
+.workspace-popover-name {
+    color: rgba(15, 23, 42, 0.90);
+}
+
+button.workspace-popover-row:hover .workspace-popover-name {
     color: #000000;
 }
 
-button.workspace-card {
-    background-color: rgba(0, 0, 0, 0.02);
-    border: 2px solid rgba(0, 0, 0, 0.08);
-}
-
-button.workspace-card:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-    border-color: rgba(0, 0, 0, 0.16);
-}
-
-button.workspace-card.selected {
+.workspace-popover-count {
     background-color: rgba(0, 0, 0, 0.06);
-    border-color: #3b82f6;
-    box-shadow: 0 10px 24px rgba(59, 130, 246, 0.30);
+    color: rgba(15, 23, 42, 0.60);
 }
 
-button.workspace-card.active {
-    background-color: rgba(59, 130, 246, 0.10);
+.workspace-popover-chevron {
+    color: rgba(15, 23, 42, 0.35);
 }
 
-.workspace-card-number {
-    color: #3b82f6;
+.workspace-app-flyout-name {
+    color: rgba(15, 23, 42, 0.85);
 }
 
-.workspace-card-title {
-    color: rgba(28, 28, 30, 0.90);
+button.workspace-app-flyout-item:hover .workspace-app-flyout-name {
+    color: #000000;
 }
 
-.workspace-card-dot {
-    background-color: rgba(0, 0, 0, 0.25);
-}
-
-.workspace-card-dot.active {
-    background-color: #3b82f6;
-}
-
-.switcher-deck-hint {
-    color: rgba(0, 0, 0, 0.50);
+.workspace-flyout-empty {
+    color: rgba(15, 23, 42, 0.40);
 }
 
 /* === explore/window.css === */
+
 .explore-window {
     background-color: #f5f5f7;
     border: 1px solid rgba(0, 0, 0, 0.12);

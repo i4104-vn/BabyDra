@@ -7,7 +7,7 @@ use babydra_ui_kit::components::popovers::TooltipPopover;
 use gtk4::prelude::*;
 use std::rc::Rc;
 
-#[allow(dead_code)]
+#[derive(Clone)]
 pub struct StatusPopovers {
     pub vpn_popover: gtk4::Popover,
     pub net_popover: gtk4::Popover,
@@ -16,12 +16,26 @@ pub struct StatusPopovers {
     pub update_volume_popover: Rc<dyn Fn()>,
 }
 
-/// Sets up status popovers using the unified `TooltipPopover` component.
+impl StatusPopovers {
+    pub fn popdown_all(&self) {
+        self.vpn_popover.popdown();
+        self.net_popover.popdown();
+        self.vol_popover.popdown();
+        if let Some(ref bp) = self.bat_popover_opt {
+            bp.popdown();
+        }
+    }
+}
+
 pub fn setup_status_popover(
     vol_icon: &gtk4::Image,
     net_widgets: &super::render::NetworkWidgets,
     vpn_icon: &gtk4::Image,
     bat_widget: &Option<gtk4::DrawingArea>,
+    control_center_window: Rc<std::cell::RefCell<Option<gtk4::ApplicationWindow>>>,
+    calendar_window: Rc<std::cell::RefCell<Option<gtk4::ApplicationWindow>>>,
+    launcher_window: Rc<std::cell::RefCell<Option<gtk4::ApplicationWindow>>>,
+    ws_popover: gtk4::Popover,
 ) -> StatusPopovers {
     let vpn_tooltip = TooltipPopover::new(vpn_icon, gtk4::PositionType::Bottom);
     let net_tooltip = TooltipPopover::new(&net_widgets.container, gtk4::PositionType::Bottom);
@@ -34,6 +48,31 @@ pub fn setup_status_popover(
     } else {
         (None, None)
     };
+
+    let ccw_c = control_center_window.clone();
+    let cw_c = calendar_window.clone();
+    let lw_c = launcher_window.clone();
+    let ws_pop_c = ws_popover.clone();
+    let is_suppressed = Rc::new(move || {
+        ccw_c.borrow().is_some()
+            || cw_c.borrow().is_some()
+            || lw_c.borrow().is_some()
+            || ws_pop_c.is_visible()
+    });
+
+    let sup_vpn = is_suppressed.clone();
+    vpn_tooltip.set_suppress_fn(move || sup_vpn());
+
+    let sup_net = is_suppressed.clone();
+    net_tooltip.set_suppress_fn(move || sup_net());
+
+    let sup_vol = is_suppressed.clone();
+    vol_tooltip.set_suppress_fn(move || sup_vol());
+
+    if let Some(ref bat_tt) = bat_tooltip_opt {
+        let sup_bat = is_suppressed.clone();
+        bat_tt.set_suppress_fn(move || sup_bat());
+    }
 
     let update_vpn_tooltip = vpn::build_vpn_update_fn(vpn_icon, &vpn_tooltip.popover);
     let update_network_tooltip = network::build_network_update(&net_tooltip.popover);
@@ -72,20 +111,38 @@ pub fn setup_status_popover(
     let wifi_icon_timer = net_widgets.wifi_icon.clone();
     let eth_area_timer = net_widgets.eth_area.clone();
     let last_net_icon = std::rc::Rc::new(std::cell::RefCell::new(String::new()));
+    let sup_timer = is_suppressed.clone();
 
     gtk4::glib::timeout_add_local(std::time::Duration::from_millis(2000), move || {
-        if vpn_pop_t.is_visible() {
-            update_vpn_t();
-        }
-        if net_pop_t.is_visible() {
-            update_net_t();
-        }
-        if vol_pop_t.is_visible() {
-            update_vol_t();
-        }
-        if let Some(ref bp) = bat_pop_t {
-            if bp.is_visible() {
-                update_bat_t();
+        if sup_timer() {
+            if vpn_pop_t.is_visible() {
+                vpn_pop_t.popdown();
+            }
+            if net_pop_t.is_visible() {
+                net_pop_t.popdown();
+            }
+            if vol_pop_t.is_visible() {
+                vol_pop_t.popdown();
+            }
+            if let Some(ref bp) = bat_pop_t {
+                if bp.is_visible() {
+                    bp.popdown();
+                }
+            }
+        } else {
+            if vpn_pop_t.is_visible() {
+                update_vpn_t();
+            }
+            if net_pop_t.is_visible() {
+                update_net_t();
+            }
+            if vol_pop_t.is_visible() {
+                update_vol_t();
+            }
+            if let Some(ref bp) = bat_pop_t {
+                if bp.is_visible() {
+                    update_bat_t();
+                }
             }
         }
 

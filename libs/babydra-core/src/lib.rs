@@ -60,6 +60,15 @@ pub use services::window::mru::{activate_app, get_history, get_running_apps, sav
 pub use services::window::tracker::spawn_switcher;
 pub use services::window::{self, close_window, focus_window};
 
+// --- Workspace Management ---
+pub use models::shell::workspace::Workspace;
+pub use services::workspace::{
+    self, filter_apps_for_workspace, get_app_workspace, get_current_workspace, get_workspaces,
+    next_workspace, next_workspace_sync_only, prev_workspace, prev_workspace_sync_only,
+    reset_cached_workspace, set_cached_workspace, set_workspace_sync_only, switch_workspace,
+    sync_workspace_apps, DEFAULT_WORKSPACE_COUNT,
+};
+
 // --- Shell, Media & Utilities ---
 pub use services::clock::{self, format_clock_date};
 pub use services::exif::{self, read_exif, ExifData};

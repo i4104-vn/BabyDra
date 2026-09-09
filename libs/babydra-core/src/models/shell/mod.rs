@@ -18,6 +18,7 @@ pub mod theme_config;
 pub mod tray_item;
 pub mod tray_snapshot;
 pub mod volume;
+pub mod workspace;
 
 pub use app::{DesktopApp, DesktopCache};
 pub use appearance::CurrentAppearance;
@@ -40,3 +41,4 @@ pub use theme_config::{ThemeConfig, ThemeSelection};
 pub use tray_item::TrayItem;
 pub use tray_snapshot::TraySnapshot;
 pub use volume::{AudioBackendType, AudioDevice};
+pub use workspace::Workspace;

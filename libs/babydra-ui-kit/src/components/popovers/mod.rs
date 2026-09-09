@@ -36,13 +36,10 @@ impl TooltipRow {
     }
 }
 
-/// A unified, reusable popover tooltip component.
-///
-/// Anchors to any GTK4 widget, displays on hover, and dismisses smoothly
-/// with debounced motion tracking.
 #[derive(Clone)]
 pub struct TooltipPopover {
     pub popover: gtk4::Popover,
+    suppress_fn: Rc<RefCell<Option<Rc<dyn Fn() -> bool>>>>,
 }
 
 impl Deref for TooltipPopover {
@@ -62,7 +59,22 @@ impl TooltipPopover {
         popover.add_css_class("status-popover");
         popover.add_css_class("tooltip-popover");
         popover.set_autohide(false);
-        Self { popover }
+        Self {
+            popover,
+            suppress_fn: Rc::new(RefCell::new(None)),
+        }
+    }
+
+    pub fn set_suppress_fn(&self, f: impl Fn() -> bool + 'static) {
+        *self.suppress_fn.borrow_mut() = Some(Rc::new(f));
+    }
+
+    pub fn is_suppressed(&self) -> bool {
+        if let Some(ref f) = *self.suppress_fn.borrow() {
+            f()
+        } else {
+            false
+        }
     }
 
     /// Builds a structured card widget with an optional title, separator, and key-value rows.
@@ -148,18 +160,43 @@ impl TooltipPopover {
         update_fn: Option<Rc<dyn Fn()>>,
     ) {
         let is_hovered = Rc::new(RefCell::new(false));
+        let suppress_fn = self.suppress_fn.clone();
 
         // 1. Motion controller on anchor widget
         let motion_anchor = gtk4::EventControllerMotion::new();
         let is_h_enter = is_hovered.clone();
         let pop_enter = self.popover.clone();
         let update_c = update_fn.clone();
+        let sup_enter = suppress_fn.clone();
         motion_anchor.connect_enter(move |_, _, _| {
             *is_h_enter.borrow_mut() = true;
+            if let Some(ref f) = *sup_enter.borrow() {
+                if f() {
+                    *is_h_enter.borrow_mut() = false;
+                    if pop_enter.is_visible() {
+                        pop_enter.popdown();
+                    }
+                    return;
+                }
+            }
             if let Some(ref update) = update_c {
                 update();
             }
             pop_enter.popup();
+        });
+
+        let is_h_motion = is_hovered.clone();
+        let pop_motion = self.popover.clone();
+        let sup_motion = suppress_fn.clone();
+        motion_anchor.connect_motion(move |_, _, _| {
+            if let Some(ref f) = *sup_motion.borrow() {
+                if f() {
+                    *is_h_motion.borrow_mut() = false;
+                    if pop_motion.is_visible() {
+                        pop_motion.popdown();
+                    }
+                }
+            }
         });
 
         let is_h_leave = is_hovered.clone();
@@ -180,8 +217,29 @@ impl TooltipPopover {
         // 2. Motion controller on popover card
         let motion_pop = gtk4::EventControllerMotion::new();
         let is_h_pop_enter = is_hovered.clone();
+        let pop_pop = self.popover.clone();
+        let sup_pop = suppress_fn.clone();
         motion_pop.connect_enter(move |_, _, _| {
+            if let Some(ref f) = *sup_pop.borrow() {
+                if f() {
+                    *is_h_pop_enter.borrow_mut() = false;
+                    if pop_pop.is_visible() {
+                        pop_pop.popdown();
+                    }
+                    return;
+                }
+            }
             *is_h_pop_enter.borrow_mut() = true;
+        });
+
+        let pop_pop_motion = self.popover.clone();
+        let sup_pop_motion = suppress_fn.clone();
+        motion_pop.connect_motion(move |_, _, _| {
+            if let Some(ref f) = *sup_pop_motion.borrow() {
+                if f() && pop_pop_motion.is_visible() {
+                    pop_pop_motion.popdown();
+                }
+            }
         });
 
         let is_h_pop_leave = is_hovered.clone();

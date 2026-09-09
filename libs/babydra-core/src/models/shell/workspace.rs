@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-/// Represents a workspace / virtual desktop in BabyDra.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Workspace {
     pub id: u32,

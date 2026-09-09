@@ -1,6 +1,6 @@
-use babydra_workspace::manager::{
-    get_current_workspace, get_workspaces, next_workspace, prev_workspace, switch_workspace,
-    DEFAULT_WORKSPACE_COUNT,
+use babydra_core::services::workspace::{
+    get_current_workspace, get_workspaces, next_workspace, prev_workspace, reset_cached_workspace,
+    set_workspace_sync_only, switch_workspace, DEFAULT_WORKSPACE_COUNT,
 };
 
 pub fn handle_list() {
@@ -36,6 +36,25 @@ pub fn handle_switch(target_str: Option<&str>) {
     }
 }
 
+pub fn handle_set(target_str: Option<&str>) {
+    if let Some(target) = target_str.and_then(|s| s.parse::<u32>().ok()) {
+        if set_workspace_sync_only(target) {
+            println!("Cached workspace set to {}", target);
+            return;
+        }
+    }
+    eprintln!(
+        "Usage: babydra-workspace set <1..={}>",
+        DEFAULT_WORKSPACE_COUNT
+    );
+    std::process::exit(1);
+}
+
+pub fn handle_reset() {
+    reset_cached_workspace();
+    println!("Workspace cache reset to 1");
+}
+
 pub fn handle_next() {
     let new_id = next_workspace();
     println!("Switched to workspace {}", new_id);
@@ -54,8 +73,8 @@ pub fn print_help() {
     println!("  list, ls          List all workspaces and active state");
     println!("  current           Print the active workspace ID");
     println!("  switch <id>       Switch to workspace by ID (1..=4)");
+    println!("  set <id>          Set cached workspace without key dispatch");
+    println!("  reset             Reset workspace cache to 1");
     println!("  next              Switch to the next workspace");
     println!("  prev              Switch to the previous workspace");
-    println!("  show, toggle      Open/toggle the workspace switcher UI");
-    println!("  --daemon, -d      Run background daemon for instant overlay");
 }

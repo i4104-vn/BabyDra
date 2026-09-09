@@ -49,21 +49,27 @@
     <!-- Workspace switching keybinds -->
     <keybind key="W-1">
       <action name="GoToDesktop" to="1" />
+      <action name="Execute" command="~/.local/bin/babydra-workspace set 1" />
     </keybind>
     <keybind key="W-2">
       <action name="GoToDesktop" to="2" />
+      <action name="Execute" command="~/.local/bin/babydra-workspace set 2" />
     </keybind>
     <keybind key="W-3">
       <action name="GoToDesktop" to="3" />
+      <action name="Execute" command="~/.local/bin/babydra-workspace set 3" />
     </keybind>
     <keybind key="W-4">
       <action name="GoToDesktop" to="4" />
+      <action name="Execute" command="~/.local/bin/babydra-workspace set 4" />
     </keybind>
     <keybind key="W-Left">
       <action name="GoToDesktop" to="left" wrap="yes" />
+      <action name="Execute" command="~/.local/bin/babydra-workspace prev-sync" />
     </keybind>
     <keybind key="W-Right">
       <action name="GoToDesktop" to="right" wrap="yes" />
+      <action name="Execute" command="~/.local/bin/babydra-workspace next-sync" />
     </keybind>
   </keyboard>
 
@@ -73,6 +79,14 @@
     <context name="Root">
       <mousebind button="Right" action="Press">
         <action name="Execute" command="~/.local/bin/babydra-menu" />
+      </mousebind>
+      <mousebind button="Up" action="Press">
+        <action name="GoToDesktop" to="left" wrap="yes" />
+        <action name="Execute" command="~/.local/bin/babydra-workspace prev-sync" />
+      </mousebind>
+      <mousebind button="Down" action="Press">
+        <action name="GoToDesktop" to="right" wrap="yes" />
+        <action name="Execute" command="~/.local/bin/babydra-workspace next-sync" />
       </mousebind>
     </context>
   </mouse>

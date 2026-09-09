@@ -32,6 +32,7 @@ echo "Stopping active processes..."
 killall babydra-panel || true
 killall babydra-desktop || true
 killall babydra-switcher || true
+killall babydra-workspace || true
 killall babydra-screenshot || true
 killall babydra-lock || true
 killall babydra-launcher || true
@@ -46,7 +47,9 @@ echo "Installing new binaries..."
 cp target/release/babydra-panel "$LOCAL_BIN/babydra-panel"
 cp target/release/babydra-desktop "$LOCAL_BIN/babydra-desktop"
 cp target/release/babydra-switcher "$LOCAL_BIN/babydra-switcher"
+cp target/release/babydra-workspace "$LOCAL_BIN/babydra-workspace"
 cp target/release/babydra-screenshot "$LOCAL_BIN/babydra-screenshot"
+
 cp target/release/babydra-lock "$LOCAL_BIN/babydra-lock"
 cp target/release/babydra-launcher "$LOCAL_BIN/babydra-launcher"
 cp target/release/babydra-preview "$LOCAL_BIN/babydra-preview"

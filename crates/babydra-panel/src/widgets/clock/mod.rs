@@ -14,6 +14,7 @@ pub fn create_clock_widget(
     control_center_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
     calendar_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
     launcher_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
+    popdown_tooltips: Option<Rc<dyn Fn()>>,
 ) -> gtk4::Button {
     let (clock_button, clock_label, red_dot) = render::build_clock_ui();
 
@@ -36,22 +37,25 @@ pub fn create_clock_widget(
             glib::ControlFlow::Continue
         }
     };
-    update_clock(); // Run initially
+    update_clock();
     glib::timeout_add_local(std::time::Duration::from_secs(1), update_clock);
 
     let cw_clone = calendar_window.clone();
     let ccw_clone = control_center_window.clone();
     let lw_clone = launcher_window.clone();
     let app_clone = app.clone();
+    let popdown_c = popdown_tooltips.clone();
 
     clock_button.connect_clicked(move |_| {
-        // Close Control Center window if open
+        if let Some(ref popdown) = popdown_c {
+            popdown();
+        }
+
         let cc_win = ccw_clone.borrow().clone();
         if let Some(win) = cc_win {
             win.close();
         }
 
-        // Close Launcher if open
         let launch_win = lw_clone.borrow().clone();
         if let Some(win) = launch_win {
             win.close();

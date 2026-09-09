@@ -18,6 +18,7 @@ pub fn create_status_icons(
     control_center_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
     calendar_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
     launcher_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
+    ws_popover: gtk4::Popover,
 ) -> gtk4::Box {
     let (status_box, status_button, separator, vol_icon, net_widgets, vpn_icon, bat_widget) =
         render::build_status_row();
@@ -26,7 +27,16 @@ pub fn create_status_icons(
     items::volume::update_topbar_volume(&vol_icon);
 
     // Setup status popovers (VPN, Network, Volume, Battery)
-    let popovers = popover::setup_status_popover(&vol_icon, &net_widgets, &vpn_icon, &bat_widget);
+    let popovers = popover::setup_status_popover(
+        &vol_icon,
+        &net_widgets,
+        &vpn_icon,
+        &bat_widget,
+        control_center_window.clone(),
+        calendar_window.clone(),
+        launcher_window.clone(),
+        ws_popover,
+    );
 
     // Scroll controller for volume on status button
     let scroll_controller =
@@ -61,7 +71,10 @@ pub fn create_status_icons(
     let cw_clone = calendar_window.clone();
     let lw_clone = launcher_window.clone();
     let vol_icon_clone = vol_icon.clone();
+    let popovers_click = popovers.clone();
     status_button.connect_clicked(move |_| {
+        popovers_click.popdown_all();
+
         let launcher_active = { lw_clone.borrow().clone() };
         if let Some(win) = launcher_active {
             win.close();
@@ -87,11 +100,13 @@ pub fn create_status_icons(
         }
     });
 
+    let popovers_clock = popovers.clone();
     let clock_button = crate::widgets::clock::create_clock_widget(
         app,
         control_center_window.clone(),
         calendar_window.clone(),
         launcher_window.clone(),
+        Some(Rc::new(move || popovers_clock.popdown_all())),
     );
 
     status_box.append(&status_button);

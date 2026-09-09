@@ -2,7 +2,9 @@ mod preview;
 mod render;
 
 use babydra_core::DesktopApp;
-use babydra_core::{focus_window, get_running_apps};
+use babydra_core::{
+    filter_apps_for_workspace, focus_window, get_current_workspace, get_running_apps,
+};
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -21,7 +23,7 @@ fn get_active_app_id() -> Option<String> {
 }
 
 /// Helper to generate a signature representing current taskbar state (apps only, not active).
-fn get_apps_signature(running_apps: &[DesktopApp]) -> String {
+fn get_apps_signature(ws_id: u32, running_apps: &[DesktopApp]) -> String {
     let mut counts = HashMap::new();
     for app in running_apps {
         let app_id = app.app_id.clone().unwrap_or_else(|| app.name.clone());
@@ -29,10 +31,9 @@ fn get_apps_signature(running_apps: &[DesktopApp]) -> String {
     }
     let mut sigs: Vec<String> = counts.iter().map(|(k, v)| format!("{}:{}", k, v)).collect();
     sigs.sort();
-    sigs.join("||")
+    format!("ws:{}||{}", ws_id, sigs.join("||"))
 }
 
-/// Dynamic rebuild of the taskbar buttons (only called when app list changes)
 fn rebuild_taskbar(
     apps_box: &gtk4::Box,
     running_apps: Vec<DesktopApp>,
@@ -40,12 +41,10 @@ fn rebuild_taskbar(
     popovers: &Rc<RefCell<Vec<PopoverState>>>,
     running_apps_shared: Arc<Mutex<Vec<DesktopApp>>>,
 ) {
-    // 1. Unparent all previous popovers first to prevent crashes
     for state in popovers.borrow_mut().drain(..) {
         state.popover.unparent();
     }
 
-    // 2. Clear all existing children from the apps box container
     while let Some(child) = apps_box.first_child() {
         apps_box.remove(&child);
     }
@@ -54,18 +53,15 @@ fn rebuild_taskbar(
         return;
     }
 
-    // 3. Group running apps by app_id
     let mut groups: HashMap<String, Vec<DesktopApp>> = HashMap::new();
     for app in running_apps {
         let app_id = app.app_id.clone().unwrap_or_else(|| app.name.clone());
         groups.entry(app_id).or_default().push(app);
     }
 
-    // 4. Sort groups alphabetically by app_id
     let mut group_keys: Vec<String> = groups.keys().cloned().collect();
     group_keys.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
 
-    // 5. Build buttons for each application group
     for app_id in group_keys {
         let windows = groups.get(&app_id).unwrap();
         let first_app = &windows[0];
@@ -83,12 +79,9 @@ fn rebuild_taskbar(
         }
 
         let window_count = windows.len();
-        // Delegate button layout rendering
         let btn = render::build_taskbar_btn(first_app, is_active, window_count);
-
         let popover = render::build_popover_box(&btn);
 
-        // Setup click action
         let pop_clone = popover.clone();
         let app_id_clone = app_id.clone();
         let apps_shared = running_apps_shared.clone();
@@ -121,14 +114,11 @@ fn rebuild_taskbar(
     }
 }
 
-/// Update the active CSS class on existing buttons without a full rebuild.
-/// Returns true if the active app changed.
 fn update_active_highlight(apps_box: &gtk4::Box, active_app_id: Option<&str>) -> bool {
     let mut changed = false;
     let mut child = apps_box.first_child();
     while let Some(widget) = child {
         if let Some(btn) = widget.downcast_ref::<gtk4::Button>() {
-            // Retrieve the stored app_id from the widget name
             let btn_app_id = btn.widget_name().to_string();
             if !btn_app_id.is_empty() {
                 let should_be_active = active_app_id
@@ -150,30 +140,28 @@ fn update_active_highlight(apps_box: &gtk4::Box, active_app_id: Option<&str>) ->
     changed
 }
 
-/// Creates and returns a taskbar container showing running windows grouped by app class.
 pub fn create_workspace_sw() -> gtk4::Box {
     let (parent_box, apps_box) = render::build_workspace_box();
 
     let popovers = Rc::new(RefCell::new(Vec::new()));
     let last_apps_sig = Rc::new(RefCell::new(String::new()));
     let last_active_id: Rc<RefCell<Option<String>>> = Rc::new(RefCell::new(None));
+    let last_ws = Rc::new(RefCell::new(0u32));
 
-    // Shared: running apps list (updated slowly, 1s)
-    let running_apps_shared: Arc<Mutex<Vec<DesktopApp>>> = Arc::new(Mutex::new(Vec::new()));
-    // Shared: active app_id (updated fast, 100ms)
+    let initial_apps = get_running_apps();
+    let running_apps_shared: Arc<Mutex<Vec<DesktopApp>>> =
+        Arc::new(Mutex::new(initial_apps));
     let active_shared: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
 
-    // Thread 1: Poll running windows list every 1s (slow — expensive wlrctl call)
     let apps_shared_clone = running_apps_shared.clone();
     thread::spawn(move || loop {
         let apps = get_running_apps();
         if let Ok(mut lock) = apps_shared_clone.lock() {
             *lock = apps;
         }
-        thread::sleep(Duration::from_millis(1000));
+        thread::sleep(Duration::from_millis(300));
     });
 
-    // Thread 2: Poll active window every 100ms (fast — lightweight wlrctl call)
     let active_shared_clone = active_shared.clone();
     thread::spawn(move || loop {
         let active = get_active_app_id();
@@ -191,7 +179,7 @@ pub fn create_workspace_sw() -> gtk4::Box {
     let active_for_timer = active_shared.clone();
     let apps_for_rebuild = running_apps_shared.clone();
 
-    // Initial delay load
+    let last_ws_init = last_ws.clone();
     glib::timeout_add_local_once(Duration::from_millis(300), {
         let apps_box = apps_box_clone.clone();
         let popovers = popovers_clone.clone();
@@ -201,7 +189,7 @@ pub fn create_workspace_sw() -> gtk4::Box {
         let active_shared = active_shared.clone();
         let apps_rebuild = apps_for_rebuild.clone();
         move || {
-            let apps = if let Ok(lock) = apps_shared.lock() {
+            let all_apps = if let Ok(lock) = apps_shared.lock() {
                 lock.clone()
             } else {
                 Vec::new()
@@ -211,41 +199,47 @@ pub fn create_workspace_sw() -> gtk4::Box {
             } else {
                 None
             };
-            *sig.borrow_mut() = get_apps_signature(&apps);
+            let current_ws = get_current_workspace();
+            *last_ws_init.borrow_mut() = current_ws;
+            let ws_apps = filter_apps_for_workspace(current_ws, &all_apps, current_ws);
+            *sig.borrow_mut() = get_apps_signature(current_ws, &ws_apps);
             *last_active.borrow_mut() = active.clone();
-            rebuild_taskbar(&apps_box, apps, active, &popovers, apps_rebuild);
+            rebuild_taskbar(&apps_box, ws_apps, active, &popovers, apps_rebuild);
         }
     });
 
-    // GTK timer: 100ms — check active window first (cheap CSS update), then check apps list
+    let last_ws_timer = last_ws.clone();
     glib::timeout_add_local(Duration::from_millis(100), move || {
         let active = if let Ok(lock) = active_for_timer.lock() {
             lock.clone()
         } else {
             None
         };
-        let apps = if let Ok(lock) = apps_for_timer.lock() {
+        let all_apps = if let Ok(lock) = apps_for_timer.lock() {
             lock.clone()
         } else {
             Vec::new()
         };
 
-        let new_apps_sig = get_apps_signature(&apps);
+        let current_ws = get_current_workspace();
+        let ws_changed = *last_ws_timer.borrow() != current_ws;
+        let ws_apps = filter_apps_for_workspace(current_ws, &all_apps, current_ws);
+
+        let new_apps_sig = get_apps_signature(current_ws, &ws_apps);
         let active_changed = *last_active_clone.borrow() != active;
 
-        if new_apps_sig != *sig_clone.borrow() {
-            // Apps list changed → full rebuild
+        if ws_changed || new_apps_sig != *sig_clone.borrow() {
+            *last_ws_timer.borrow_mut() = current_ws;
             *sig_clone.borrow_mut() = new_apps_sig;
             *last_active_clone.borrow_mut() = active.clone();
             rebuild_taskbar(
                 &apps_box_clone,
-                apps,
+                ws_apps,
                 active,
                 &popovers_clone,
                 apps_for_rebuild.clone(),
             );
         } else if active_changed {
-            // Only active window changed → fast CSS-only update (no rebuild)
             *last_active_clone.borrow_mut() = active.clone();
             update_active_highlight(&apps_box_clone, active.as_deref());
         }

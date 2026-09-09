@@ -1928,14 +1928,14 @@ scale.settings-scale:disabled mark label {
 }
 /* === apps/switcher.css === */
 .switcher-window {
-    background-color: rgba(0, 0, 0, 0.45);
+    background-color: rgba(0, 0, 0, 0.50);
 }
 
 .switcher-deck-container {
-    background-color: rgba(18, 20, 29, 0.90);
+    background-color: rgba(14, 16, 24, 0.88);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-top: 1px solid rgba(255, 255, 255, 0.22);
-    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.40);
+    border-top: 1px solid rgba(255, 255, 255, 0.24);
+    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.70), 0 2px 10px rgba(0, 0, 0, 0.50);
 }
 
 .switcher-deck-header {
@@ -1943,8 +1943,8 @@ scale.settings-scale:disabled mark label {
 }
 
 .switcher-meta-bar {
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background-color: transparent;
+    border: none;
 }
 
 .switcher-meta-title {
@@ -1952,74 +1952,86 @@ scale.settings-scale:disabled mark label {
 }
 
 .switcher-meta-subtitle {
-    color: rgba(255, 255, 255, 0.60);
+    color: rgba(255, 255, 255, 0.55);
 }
 
 button.switcher-card {
-    background-color: rgba(255, 255, 255, 0.045);
-    border: 1.5px solid rgba(255, 255, 255, 0.08);
+    background-color: transparent;
+    border: 1.5px solid transparent;
 }
 
 button.switcher-card:hover {
-    background-color: rgba(255, 255, 255, 0.09);
-    border-color: rgba(255, 255, 255, 0.20);
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.14);
 }
 
 button.switcher-card.selected {
-    background: linear-gradient(145deg, rgba(59, 130, 246, 0.22) 0%, rgba(37, 99, 235, 0.10) 100%);
-    border: 2px solid #3b82f6;
-    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.45), inset 0 0 16px rgba(59, 130, 246, 0.20);
+    background-color: rgba(99, 102, 241, 0.12);
+    border: 1.5px solid #6366f1;
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35), inset 0 0 12px rgba(99, 102, 241, 0.15);
 }
 
-.switcher-card-name {
-    color: rgba(255, 255, 255, 0.75);
+
+/* === Workspace Switcher Popover & Flyout === */
+popover.workspace-switcher-popover > contents,
+popover.workspace-apps-flyout > contents {
+    background-color: rgba(14, 14, 18, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.60);
+    color: rgba(255, 255, 255, 0.95);
 }
 
-button.switcher-card.selected .switcher-card-name {
+.workspace-popover-header-title,
+.workspace-flyout-header-title {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.workspace-popover-header-icon {
+    color: rgba(255, 255, 255, 0.60);
+}
+
+.workspace-popover-num {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.85);
+}
+
+button.workspace-popover-row.active .workspace-popover-num {
+    background-color: #6366f1;
     color: #ffffff;
 }
 
-button.workspace-card {
-    background-color: rgba(255, 255, 255, 0.04);
-    border: 2px solid rgba(255, 255, 255, 0.08);
-}
-
-button.workspace-card:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.18);
-}
-
-button.workspace-card.selected {
-    background-color: rgba(255, 255, 255, 0.10);
-    border-color: #60a5fa;
-    box-shadow: 0 10px 28px rgba(96, 165, 250, 0.35);
-}
-
-button.workspace-card.active {
-    background-color: rgba(96, 165, 250, 0.12);
-}
-
-.workspace-card-number {
-    color: #60a5fa;
-}
-
-.workspace-card-title {
+.workspace-popover-name {
     color: rgba(255, 255, 255, 0.90);
 }
 
-.workspace-card-dot {
-    background-color: rgba(255, 255, 255, 0.3);
+button.workspace-popover-row:hover .workspace-popover-name {
+    color: #ffffff;
 }
 
-.workspace-card-dot.active {
-    background-color: #60a5fa;
+.workspace-popover-count {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.60);
 }
 
-.switcher-deck-hint {
-    color: rgba(255, 255, 255, 0.50);
+.workspace-popover-chevron {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.workspace-app-flyout-name {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+button.workspace-app-flyout-item:hover .workspace-app-flyout-name {
+    color: #ffffff;
+}
+
+.workspace-flyout-empty {
+    color: rgba(255, 255, 255, 0.40);
 }
 
 /* === explore/window.css === */
+
 .explore-window {
     background-color: #141416f2;
     border: 1px solid rgba(255, 255, 255, 0.12);

@@ -14,3 +14,4 @@ pub mod tray;
 pub mod utils;
 pub mod wallpaper;
 pub mod window;
+pub mod workspace;

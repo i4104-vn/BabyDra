@@ -1,8 +1,8 @@
 use crate::widgets::render::build_apps_list;
 use babydra_core::DesktopApp;
 use babydra_core::{activate_app, save_history};
+use babydra_ui_kit::ui::overlay::OverlayWindowComponents;
 use gtk4::prelude::*;
-use gtk4_layer_shell::{Edge, KeyboardMode, Layer};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -14,81 +14,14 @@ pub struct SwitcherController {
 }
 
 pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
-    babydra_ui_kit::ui::theme::init_theme();
-
-    let window = gtk4::ApplicationWindow::new(app);
-    babydra_ui_kit::ui::theme::apply_theme_class(&window);
-    babydra_ui_kit::ui::window::init_layer_window(
-        &window,
-        Layer::Overlay,
-        KeyboardMode::Exclusive,
-        -1,
-        &[
-            (Edge::Top, true),
-            (Edge::Bottom, true),
-            (Edge::Left, true),
-            (Edge::Right, true),
-        ],
-        0,
-        None,
-    );
-    window.add_css_class("switcher-window");
-
-    let overlay_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
-    overlay_box.set_valign(gtk4::Align::Center);
-    overlay_box.set_halign(gtk4::Align::Center);
-
-    let deck_container = gtk4::Box::new(gtk4::Orientation::Vertical, 14);
-    deck_container.add_css_class("switcher-deck-container");
-    deck_container.set_valign(gtk4::Align::Center);
-    deck_container.set_halign(gtk4::Align::Center);
-
-    let scrolled = gtk4::ScrolledWindow::new();
-    scrolled.set_policy(gtk4::PolicyType::Automatic, gtk4::PolicyType::Never);
-    scrolled.set_kinetic_scrolling(true);
-    scrolled.set_vexpand(false);
-    scrolled.set_hexpand(true);
-
-    let list_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    list_container.set_halign(gtk4::Align::Center);
-    scrolled.set_child(Some(&list_container));
-    deck_container.append(&scrolled);
-
-    let meta_bar = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-    meta_bar.add_css_class("switcher-meta-bar");
-    meta_bar.set_halign(gtk4::Align::Center);
-    meta_bar.set_valign(gtk4::Align::Center);
-
-    let meta_title = gtk4::Label::new(None);
-    meta_title.add_css_class("switcher-meta-title");
-    meta_title.set_halign(gtk4::Align::Center);
-
-    let meta_subtitle = gtk4::Label::new(None);
-    meta_subtitle.add_css_class("switcher-meta-subtitle");
-    meta_subtitle.set_halign(gtk4::Align::Center);
-    meta_subtitle.set_ellipsize(gtk4::pango::EllipsizeMode::End);
-    meta_subtitle.set_max_width_chars(45);
-
-    meta_bar.append(&meta_title);
-    meta_bar.append(&meta_subtitle);
-    deck_container.append(&meta_bar);
-
-    overlay_box.append(&deck_container);
-    window.set_child(Some(&overlay_box));
-
-    let click_gesture = gtk4::GestureClick::new();
-    let window_hide_click = window.clone();
-    let deck_ref = deck_container.clone();
-    click_gesture.connect_pressed(move |gesture, _, x, y| {
-        let (deck_w, deck_h) = (deck_ref.allocated_width(), deck_ref.allocated_height());
-        let (alloc_x, alloc_y) = (deck_ref.allocation().x() as f64, deck_ref.allocation().y() as f64);
-        let inside = x >= alloc_x && x <= alloc_x + deck_w as f64 && y >= alloc_y && y <= alloc_y + deck_h as f64;
-        if !inside {
-            gesture.set_state(gtk4::EventSequenceState::Claimed);
-            window_hide_click.set_visible(false);
-        }
-    });
-    overlay_box.add_controller(click_gesture);
+    let OverlayWindowComponents {
+        window,
+        deck_container,
+        cards_row: list_container,
+        meta_title,
+        meta_subtitle,
+        ..
+    } = babydra_ui_kit::ui::overlay::create_overlay_window(app);
 
     let apps_state: Rc<RefCell<Vec<DesktopApp>>> = Rc::new(RefCell::new(Vec::new()));
     let buttons_state: Rc<RefCell<Vec<gtk4::Button>>> = Rc::new(RefCell::new(Vec::new()));
@@ -125,8 +58,16 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
             if idx < apps.len() {
                 let app = &apps[idx];
                 meta_title_c.set_text(&app.name);
-                let sub = app.window_title.as_deref().unwrap_or(&app.name);
-                meta_subtitle_c.set_text(sub);
+                match app.window_title.as_deref() {
+                    Some(title) if title != app.name && !title.is_empty() => {
+                        meta_subtitle_c.set_text(title);
+                        meta_subtitle_c.set_visible(true);
+                    }
+                    _ => {
+                        meta_subtitle_c.set_text("");
+                        meta_subtitle_c.set_visible(false);
+                    }
+                }
             }
         })
     };

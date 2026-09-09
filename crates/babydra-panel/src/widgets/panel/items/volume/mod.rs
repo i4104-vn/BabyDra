@@ -54,16 +54,5 @@ pub fn update_topbar_volume(vol_icon: &gtk4::Image) {
         vol_icon.set_paintable(Some(&paintable));
     }
 
-    let dev_name = get_active_output();
-    let dev_suffix = dev_name
-        .as_deref()
-        .map(|d| format!(" • {}", d))
-        .unwrap_or_default();
-
-    let tooltip = if is_m {
-        format!("Volume: Muted ({:.0}%){}", vol_pct, dev_suffix)
-    } else {
-        format!("Volume: {:.0}%{}", vol_pct, dev_suffix)
-    };
-    vol_icon.set_tooltip_text(Some(&tooltip));
+    vol_icon.set_tooltip_text(None);
 }

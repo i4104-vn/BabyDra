@@ -1,11 +1,11 @@
 pub mod commands;
-pub mod oneshot;
 
-use babydra_workspace::daemon::{run_daemon, try_signal_daemon};
-use commands::{handle_current, handle_list, handle_next, handle_prev, handle_switch, print_help};
-use oneshot::run_oneshot_ui;
+use babydra_core::services::workspace::{next_workspace_sync_only, prev_workspace_sync_only};
+use commands::{
+    handle_current, handle_list, handle_next, handle_prev, handle_reset, handle_set,
+    handle_switch, print_help,
+};
 
-/// Main CLI entry point.
 pub fn run_cli() {
     let args: Vec<String> = std::env::args().collect();
     let cmd = args.get(1).map(|s| s.as_str()).unwrap_or("help");
@@ -14,15 +14,17 @@ pub fn run_cli() {
         "list" | "ls" => handle_list(),
         "current" => handle_current(),
         "switch" | "goto" => handle_switch(args.get(2).map(|s| s.as_str())),
+        "set" | "sync" => handle_set(args.get(2).map(|s| s.as_str())),
+        "reset" => handle_reset(),
         "next" => handle_next(),
         "prev" => handle_prev(),
-        "show" | "toggle" => {
-            if !try_signal_daemon(b"toggle") {
-                run_oneshot_ui();
-            }
+        "next-sync" => {
+            let id = next_workspace_sync_only();
+            println!("Cached workspace set to {}", id);
         }
-        "--daemon" | "-d" => {
-            run_daemon();
+        "prev-sync" => {
+            let id = prev_workspace_sync_only();
+            println!("Cached workspace set to {}", id);
         }
         _ => print_help(),
     }
