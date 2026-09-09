@@ -14,10 +14,15 @@ description = "Integration test suite for the BabyDra workspace (TDD safety net)
 babydra-core = { workspace = true }
 babydra-theme = { workspace = true }
 babydra-ui-kit = { workspace = true }
+babydra-workspace = { workspace = true }
 chrono = "0.4"
 gtk4 = { version = "0.9", features = ["v4_10"] }
 serde_json = "1.0"
 toml = "0.8"
+
+[[test]]
+name = "services_workspace"
+path = "services/workspace.rs"
 
 [[test]]
 name = "common_config"
