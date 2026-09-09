@@ -24,33 +24,33 @@ inactive_tab_background #1a1a24
 tab_bar_background      #0f0f15
 
 # Terminal colors (16 colors)
-# black
-color0 #14141c
-color8 #4a4a4a
+# black (color0: distinct dark charcoal surface; color8: clear medium gray for comments/suggestions)
+color0 #22222e
+color8 #787c99
 
 # red
 color1 #ff5f56
 color9 #ff7b72
 
-# green
-color2  #27c93f
+# green (bright pastel green from Material palette for high contrast with black text)
+color2  #c3e88d
 color10 #3dd68c
 
 # yellow
 color3  #ffbd2e
 color11 #ffd166
 
-# blue
-color4  #3b82f6
+# blue (bright pastel blue from Material palette for high contrast with black text)
+color4  #82aaff
 color12 #60a5fa
 
 # magenta
-color5  #c084fc
+color5  #c792ea
 color13 #d8b4fe
 
 # cyan
-color6  #38bdf8
-color14 #7dd3fc
+color6  #89ddff
+color14 #b2ccd6
 
 # white
 color7  #e8e8f0

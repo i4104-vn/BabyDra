@@ -9,7 +9,7 @@ selection_background    #3b82f6
 # Cursor colors
 cursor                  #3b82f6
 cursor_text_color       #ffffff
-url_color               #3b82f6
+url_color               #2563eb
 
 # Window borders
 active_border_color     #3b82f6
@@ -24,23 +24,23 @@ inactive_tab_background #e0e0e8
 tab_bar_background      #e8e8ee
 
 # Terminal colors (16 colors)
-# black
-color0 #1a1a28
-color8 #70707e
+# black (color0: light surface for powerline prompt context blocks; color8: neutral slate for comments)
+color0 #ffffff
+color8 #8a8a9c
 
 # red
 color1 #dc2626
 color9 #ef4444
 
 # green
-color2  #16a34a
+color2  #15803d
 color10 #22c55e
 
 # yellow
 color3  #d97706
 color11 #f59e0b
 
-# blue
+# blue (color4: vibrant royal blue with white text contrast; color12: bright sky blue)
 color4  #2563eb
 color12 #3b82f6
 
@@ -52,6 +52,6 @@ color13 #a855f7
 color6  #0891b2
 color14 #06b6d4
 
-# white
-color7  #e8e8ee
-color15 #ffffff
+# white (color7: dark slate, color15: primary dark; guarantees syntax/code is crisp and never white-on-white)
+color7  #5c5c6e
+color15 #1a1a28
