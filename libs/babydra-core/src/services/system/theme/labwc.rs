@@ -5,8 +5,8 @@ use crate::services::utils::{get_home_dir, run_cmd};
 use std::fs;
 use std::path::Path;
 
-const LABWC_THEME_DARK: &str = include_str!("../../../../assets/labwc/themes/dark");
-const LABWC_THEME_LIGHT: &str = include_str!("../../../../assets/labwc/themes/light");
+const LABWC_THEME_DARK: &str = include_asset!("labwc/themes/dark");
+const LABWC_THEME_LIGHT: &str = include_asset!("labwc/themes/light");
 
 /// Synchronizes the labwc window titlebar themerc-override with the active dark/light mode.
 ///

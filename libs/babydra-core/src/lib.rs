@@ -91,9 +91,11 @@ pub use services::wallpaper::{
     read_image_bytes, set_avatar, set_greeter_wp, set_wallpaper, set_wallpaper_with_mode,
     sync_shared_assets,
 };
-pub use services::system::theme::sync_labwc_titlebar_theme;
+pub use services::system::theme::{
+    is_kitty_available, sync_kitty_theme, sync_labwc_titlebar_theme,
+};
 
-/// Applies all saved user settings from unified babydra.conf (CPU performance profile, Display monitors resolution/refresh rates, Wallpaper, Auto Battery Saver, Labwc Titlebar).
+/// Applies all saved user settings from unified babydra.conf (CPU performance profile, Display monitors resolution/refresh rates, Wallpaper, Auto Battery Saver, Labwc Titlebar, Kitty Theme).
 pub fn apply_saved_settings() {
     // 1. CPU Performance Profile
     services::system::power::apply_saved_profile();
@@ -128,4 +130,7 @@ pub fn apply_saved_settings() {
             .unwrap_or(true)
         });
     let _ = sync_labwc_titlebar_theme(is_dark);
+
+    // 6. Kitty Terminal Theme (Catppuccin Mocha / Latte)
+    let _ = sync_kitty_theme(is_dark);
 }
