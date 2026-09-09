@@ -60,7 +60,9 @@ pub use services::system::wifi;
 pub use services::apps::{find_desktop_apps, refresh_desktop_apps, DesktopApp};
 pub use services::window::mru::{activate_app, get_history, get_running_apps, save_history};
 pub use services::window::tracker::spawn_switcher;
-pub use services::window::{self, close_all_windows, close_window, focus_window};
+pub use services::window::{
+    self, close_all_windows, close_window, focus_window, get_active_window,
+};
 
 // --- Workspace Management ---
 pub use models::shell::workspace::Workspace;

@@ -172,32 +172,67 @@ button.taskbar-app-btn.active .taskbar-dot {
     background-color: rgba(0, 0, 0, 0.35);
 }
 
+popover.taskbar-popover>contents {
+    background-color: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-top: 1px solid rgba(0, 0, 0, 0.18);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
+    color: rgba(28, 28, 30, 0.95);
+}
+
+.taskbar-previews-header-icon-box {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
 .taskbar-previews-header-label {
-    color: rgba(28, 28, 30, 0.95);
+    color: #1c1c1e;
 }
 
-button.taskbar-preview-list-btn:hover {
-    background-color: rgba(0, 0, 0, 0.08);
-}
-
-.taskbar-preview-title {
-    color: rgba(28, 28, 30, 0.95);
-}
-
-.taskbar-popover-header-title {
-    color: rgba(28, 28, 30, 0.5);
-}
-
-button.taskbar-popover-close-btn {
-    color: rgba(28, 28, 30, 0.5);
-}
-
-button.taskbar-preview-list-kill-btn {
-    color: rgba(28, 28, 30, 0.4);
+.taskbar-previews-header-count {
+    background-color: rgba(0, 0, 0, 0.06);
+    color: rgba(0, 0, 0, 0.60);
 }
 
 .taskbar-preview-separator {
     background-color: rgba(0, 0, 0, 0.08);
+}
+
+.taskbar-preview-row:hover {
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+.taskbar-preview-row.active-window {
+    background-color: rgba(37, 99, 235, 0.08);
+}
+
+.taskbar-preview-row.active-window:hover {
+    background-color: rgba(37, 99, 235, 0.14);
+}
+
+.taskbar-preview-index-badge {
+    background-color: rgba(0, 0, 0, 0.06);
+    color: rgba(0, 0, 0, 0.75);
+}
+
+.taskbar-preview-title {
+    color: rgba(28, 28, 30, 0.92);
+}
+
+.taskbar-preview-item-icon {
+    color: rgba(0, 0, 0, 0.55);
+}
+
+button.taskbar-preview-list-kill-btn {
+    color: rgba(0, 0, 0, 0.35);
+}
+
+button.taskbar-preview-list-kill-btn:hover {
+    background-color: rgba(239, 68, 68, 0.16);
+    color: #ef4444;
+}
+
+button.taskbar-preview-action-btn:hover {
+    background-color: rgba(0, 0, 0, 0.06);
 }
 
 .taskbar-preview-action-label {
@@ -205,7 +240,7 @@ button.taskbar-preview-list-kill-btn {
 }
 
 button.taskbar-preview-action-btn:hover .taskbar-preview-action-label {
-    color: #1c1c1e;
+    color: #000000;
 }
 
 /* === control_center/control_center.css === */

@@ -163,32 +163,67 @@ button.taskbar-app-btn.active:hover {
     background-color: rgba(255, 255, 255, 0.24);
 }
 
+popover.taskbar-popover>contents {
+    background-color: rgba(14, 14, 18, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.60);
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.taskbar-previews-header-icon-box {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
 .taskbar-previews-header-label {
-    color: rgba(255, 255, 255, 0.95);
+    color: #ffffff;
 }
 
-button.taskbar-preview-list-btn:hover {
-    background-color: rgba(255, 255, 255, 0.10);
-}
-
-.taskbar-preview-title {
-    color: rgba(255, 255, 255, 0.95);
-}
-
-.taskbar-popover-header-title {
-    color: rgba(255, 255, 255, 0.5);
-}
-
-button.taskbar-popover-close-btn {
-    color: rgba(255, 255, 255, 0.5);
-}
-
-button.taskbar-preview-list-kill-btn {
-    color: rgba(255, 255, 255, 0.4);
+.taskbar-previews-header-count {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.65);
 }
 
 .taskbar-preview-separator {
-    background-color: rgba(255, 255, 255, 0.12);
+    background-color: rgba(255, 255, 255, 0.10);
+}
+
+.taskbar-preview-row:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.taskbar-preview-row.active-window {
+    background-color: rgba(99, 102, 241, 0.08);
+}
+
+.taskbar-preview-row.active-window:hover {
+    background-color: rgba(99, 102, 241, 0.14);
+}
+
+.taskbar-preview-index-badge {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.80);
+}
+
+.taskbar-preview-title {
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.taskbar-preview-item-icon {
+    color: rgba(255, 255, 255, 0.60);
+}
+
+button.taskbar-preview-list-kill-btn {
+    color: rgba(255, 255, 255, 0.40);
+}
+
+button.taskbar-preview-list-kill-btn:hover {
+    background-color: rgba(239, 68, 68, 0.22);
+    color: #f87171;
+}
+
+button.taskbar-preview-action-btn:hover {
+    background-color: rgba(255, 255, 255, 0.08);
 }
 
 .taskbar-preview-action-label {
