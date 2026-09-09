@@ -18,6 +18,7 @@ members = [
     "crates/babydra-launcher",
     "crates/babydra-keymap",
     "crates/babydra-desktop",
+    "crates/babydra-workspace",
     "tests",
 ]
 exclude = [
@@ -39,6 +40,7 @@ babydra-theme = { path = "libs/babydra-theme" }
 babydra-ui-kit = { path = "libs/babydra-ui-kit" }
 # crates/
 babydra-launcher = { path = "crates/babydra-launcher" }
+babydra-workspace = { path = "crates/babydra-workspace" }
 
 # --- External dependencies (single source of truth) ---
 gtk4 = { version = "0.9", features = ["v4_10"] }
