@@ -1,6 +1,3 @@
-//! UI renderer and event handlers for the switcher overlay window.
-//! Centered stacked card deck design with glassmorphism aesthetics.
-
 use crate::widgets::render::build_apps_list;
 use babydra_core::DesktopApp;
 use babydra_core::{activate_app, save_history};
@@ -9,7 +6,6 @@ use gtk4_layer_shell::{Edge, KeyboardMode, Layer};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-/// Shared state for the daemon window controller.
 pub struct SwitcherController {
     pub window: gtk4::ApplicationWindow,
     pub show_fn: Box<dyn Fn()>,
@@ -17,8 +13,6 @@ pub struct SwitcherController {
     pub next_fn: Box<dyn Fn()>,
 }
 
-/// Builds the switcher overlay window once and returns a controller that can
-/// show, hide, or cycle selection without rebuilding the entire widget tree.
 pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
     babydra_ui_kit::ui::theme::init_theme();
 
@@ -40,49 +34,15 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
     );
     window.add_css_class("switcher-window");
 
-    // Fullscreen centered backdrop box
     let overlay_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     overlay_box.set_valign(gtk4::Align::Center);
     overlay_box.set_halign(gtk4::Align::Center);
 
-    // Centered floating deck container
-    let deck_container = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
+    let deck_container = gtk4::Box::new(gtk4::Orientation::Vertical, 14);
     deck_container.add_css_class("switcher-deck-container");
     deck_container.set_valign(gtk4::Align::Center);
     deck_container.set_halign(gtk4::Align::Center);
 
-    // Meta bar displaying selected application info
-    let meta_bar = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    meta_bar.add_css_class("switcher-meta-bar");
-    meta_bar.set_halign(gtk4::Align::Center);
-    meta_bar.set_valign(gtk4::Align::Center);
-
-    let meta_icon = gtk4::Image::new();
-    meta_icon.add_css_class("switcher-meta-icon");
-    meta_icon.set_pixel_size(24);
-
-    let meta_text_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-    meta_text_box.set_valign(gtk4::Align::Center);
-
-    let meta_title = gtk4::Label::new(None);
-    meta_title.add_css_class("switcher-meta-title");
-    meta_title.set_halign(gtk4::Align::Start);
-
-    let meta_subtitle = gtk4::Label::new(None);
-    meta_subtitle.add_css_class("switcher-meta-subtitle");
-    meta_subtitle.set_halign(gtk4::Align::Start);
-    meta_subtitle.set_ellipsize(gtk4::pango::EllipsizeMode::End);
-    meta_subtitle.set_max_width_chars(45);
-
-    meta_text_box.append(&meta_title);
-    meta_text_box.append(&meta_subtitle);
-
-    meta_bar.append(&meta_icon);
-    meta_bar.append(&meta_text_box);
-
-    deck_container.append(&meta_bar);
-
-    // Scrolled window for horizontal cards list
     let scrolled = gtk4::ScrolledWindow::new();
     scrolled.set_policy(gtk4::PolicyType::Automatic, gtk4::PolicyType::Never);
     scrolled.set_kinetic_scrolling(true);
@@ -92,18 +52,30 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
     let list_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     list_container.set_halign(gtk4::Align::Center);
     scrolled.set_child(Some(&list_container));
-
     deck_container.append(&scrolled);
 
-    // Hint footer
-    let hint_lbl = gtk4::Label::new(Some("Alt+Tab or Arrow keys to navigate • Release Alt to switch"));
-    hint_lbl.add_css_class("switcher-deck-hint");
-    deck_container.append(&hint_lbl);
+    let meta_bar = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
+    meta_bar.add_css_class("switcher-meta-bar");
+    meta_bar.set_halign(gtk4::Align::Center);
+    meta_bar.set_valign(gtk4::Align::Center);
+
+    let meta_title = gtk4::Label::new(None);
+    meta_title.add_css_class("switcher-meta-title");
+    meta_title.set_halign(gtk4::Align::Center);
+
+    let meta_subtitle = gtk4::Label::new(None);
+    meta_subtitle.add_css_class("switcher-meta-subtitle");
+    meta_subtitle.set_halign(gtk4::Align::Center);
+    meta_subtitle.set_ellipsize(gtk4::pango::EllipsizeMode::End);
+    meta_subtitle.set_max_width_chars(45);
+
+    meta_bar.append(&meta_title);
+    meta_bar.append(&meta_subtitle);
+    deck_container.append(&meta_bar);
 
     overlay_box.append(&deck_container);
     window.set_child(Some(&overlay_box));
 
-    // Dismiss on click outside the centered deck
     let click_gesture = gtk4::GestureClick::new();
     let window_hide_click = window.clone();
     let deck_ref = deck_container.clone();
@@ -118,7 +90,6 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
     });
     overlay_box.add_controller(click_gesture);
 
-    // --- Shared mutable state ---
     let apps_state: Rc<RefCell<Vec<DesktopApp>>> = Rc::new(RefCell::new(Vec::new()));
     let buttons_state: Rc<RefCell<Vec<gtk4::Button>>> = Rc::new(RefCell::new(Vec::new()));
     let current_index: Rc<RefCell<usize>> = Rc::new(RefCell::new(0));
@@ -127,12 +98,10 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
     let last_cycle_time: Rc<RefCell<std::time::Instant>> =
         Rc::new(RefCell::new(std::time::Instant::now()));
 
-    // --- update_selection closure ---
     let update_selection = {
         let current_index = current_index.clone();
         let buttons_state = buttons_state.clone();
         let apps_state = apps_state.clone();
-        let meta_icon_c = meta_icon.clone();
         let meta_title_c = meta_title.clone();
         let meta_subtitle_c = meta_subtitle.clone();
         Rc::new(move |new_idx: usize| {
@@ -155,8 +124,6 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
 
             if idx < apps.len() {
                 let app = &apps[idx];
-                let icon_name = app.icon.as_deref().unwrap_or("application-x-executable");
-                babydra_ui_kit::ui::icon::set_image_from_icon(&meta_icon_c, icon_name, 24);
                 meta_title_c.set_text(&app.name);
                 let sub = app.window_title.as_deref().unwrap_or(&app.name);
                 meta_subtitle_c.set_text(sub);
@@ -164,7 +131,6 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
         })
     };
 
-    // --- do_activate closure ---
     let do_activate = {
         let current_index = current_index.clone();
         let apps_state = apps_state.clone();
@@ -187,7 +153,6 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
         })
     };
 
-    // --- Keyboard controller ---
     let key_controller = gtk4::EventControllerKey::new();
     key_controller.set_propagation_phase(gtk4::PropagationPhase::Capture);
 
@@ -209,21 +174,23 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
             match key {
                 gtk4::gdk::Key::Tab | gtk4::gdk::Key::Right | gtk4::gdk::Key::Down => {
                     if now.duration_since(*last_cycle_key.borrow())
-                        > std::time::Duration::from_millis(80)
+                        < std::time::Duration::from_millis(150)
                     {
-                        *last_cycle_key.borrow_mut() = now;
-                        update_sel_key((idx + 1) % apps_len);
+                        return gtk4::glib::Propagation::Stop;
                     }
+                    *last_cycle_key.borrow_mut() = now;
+                    update_sel_key((idx + 1) % apps_len);
                     gtk4::glib::Propagation::Stop
                 }
                 gtk4::gdk::Key::ISO_Left_Tab | gtk4::gdk::Key::Left | gtk4::gdk::Key::Up => {
                     if now.duration_since(*last_cycle_key.borrow())
-                        > std::time::Duration::from_millis(80)
+                        < std::time::Duration::from_millis(150)
                     {
-                        *last_cycle_key.borrow_mut() = now;
-                        let prev = if idx == 0 { apps_len - 1 } else { idx - 1 };
-                        update_sel_key(prev);
+                        return gtk4::glib::Propagation::Stop;
                     }
+                    *last_cycle_key.borrow_mut() = now;
+                    let prev = if idx == 0 { apps_len - 1 } else { idx - 1 };
+                    update_sel_key(prev);
                     gtk4::glib::Propagation::Stop
                 }
                 gtk4::gdk::Key::Return | gtk4::gdk::Key::space => {
@@ -264,16 +231,22 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
 
     window.add_controller(key_controller);
 
-    // Scroll controller on deck
     let scroll_controller = gtk4::EventControllerScroll::new(gtk4::EventControllerScrollFlags::VERTICAL);
     let sel_for_scroll = update_selection.clone();
     let curr_for_scroll = current_index.clone();
     let apps_for_scroll = apps_state.clone();
+    let last_cycle_scroll = last_cycle_time.clone();
     scroll_controller.connect_scroll(move |_, _, dy| {
         let apps_len = apps_for_scroll.borrow().len();
         if apps_len == 0 {
             return gtk4::glib::Propagation::Proceed;
         }
+        let now = std::time::Instant::now();
+        if now.duration_since(*last_cycle_scroll.borrow()) < std::time::Duration::from_millis(100) {
+            return gtk4::glib::Propagation::Stop;
+        }
+        *last_cycle_scroll.borrow_mut() = now;
+
         let idx = *curr_for_scroll.borrow();
         if dy > 0.0 {
             sel_for_scroll((idx + 1) % apps_len);
@@ -285,7 +258,6 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
     });
     deck_container.add_controller(scroll_controller);
 
-    // Fallback: poll modifier state every 50ms
     {
         let do_activate_poll = do_activate.clone();
         let alt_check_poll = alt_check_enabled.clone();
@@ -301,15 +273,14 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
             if !*alt_check_poll.borrow() {
                 return gtk4::glib::ControlFlow::Continue;
             }
-            if let Some(display) = gtk4::gdk::Display::default() {
-                if let Some(seat) = display.default_seat() {
-                    if let Some(keyboard) = seat.keyboard() {
-                        let modifiers = keyboard.modifier_state();
-                        let alt_held = modifiers.contains(gtk4::gdk::ModifierType::ALT_MASK);
-                        if !alt_held {
-                            *closed_poll.borrow_mut() = true;
-                            do_activate_poll();
-                        }
+
+            let display = gtk4::gdk::Display::default();
+            if let Some(seat) = display.as_ref().and_then(|d| d.default_seat()) {
+                if let Some(device) = seat.keyboard() {
+                    let modifier_type = device.modifier_state();
+                    if !modifier_type.contains(gtk4::gdk::ModifierType::ALT_MASK) {
+                        *closed_poll.borrow_mut() = true;
+                        do_activate_poll();
                     }
                 }
             }
@@ -317,7 +288,6 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
         });
     }
 
-    // --- show_fn ---
     let show_fn = {
         let window = window.clone();
         let list_container = list_container.clone();
@@ -334,88 +304,61 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
             *alt_check_enabled.borrow_mut() = false;
             *last_cycle_show.borrow_mut() = std::time::Instant::now();
 
+            let apps = babydra_core::get_running_apps();
+            if apps.is_empty() {
+                window.set_visible(false);
+                return;
+            }
+
+            while let Some(child) = list_container.first_child() {
+                list_container.remove(&child);
+            }
+
+            let (cards_row, item_buttons) = build_apps_list(&apps);
+
+            for (i, btn) in item_buttons.iter().enumerate() {
+                let update_sel = update_selection.clone();
+                let window_close = window.clone();
+                let apps_click = apps.clone();
+                let closed_click = closed.clone();
+                btn.connect_clicked(move |_| {
+                    update_sel(i);
+                    let app_item = apps_click[i].clone();
+                    save_history(app_item.window_title.as_deref().unwrap_or(&app_item.name));
+                    activate_app(&app_item);
+                    *closed_click.borrow_mut() = true;
+                    let win = window_close.clone();
+                    gtk4::glib::timeout_add_local_once(
+                        std::time::Duration::from_millis(50),
+                        move || {
+                            win.set_visible(false);
+                        },
+                    );
+                });
+            }
+
+            list_container.append(&cards_row);
+
+            *apps_state.borrow_mut() = apps.clone();
+            *buttons_state.borrow_mut() = item_buttons;
+
+            let initial_idx = if apps.len() > 1 { 1 } else { 0 };
+            *current_index.borrow_mut() = initial_idx;
+            update_selection(initial_idx);
+
             window.set_visible(true);
             window.present();
 
-            // Spawn background thread to query running apps
-            let (tx, rx) = std::sync::mpsc::channel();
-            std::thread::spawn(move || {
-                let apps = babydra_core::get_running_apps();
-                let _ = tx.send(apps);
-            });
-
-            let list_container = list_container.clone();
-            let apps_state = apps_state.clone();
-            let buttons_state = buttons_state.clone();
-            let update_selection = update_selection.clone();
-            let current_index = current_index.clone();
-            let window = window.clone();
-            let closed = closed.clone();
-            let alt_check_enabled = alt_check_enabled.clone();
-
-            gtk4::glib::timeout_add_local(std::time::Duration::from_millis(2), move || {
-                if let Ok(apps) = rx.try_recv() {
-                    if apps.is_empty() {
-                        window.set_visible(false);
-                        return gtk4::glib::ControlFlow::Break;
-                    }
-
-                    while let Some(child) = list_container.first_child() {
-                        list_container.remove(&child);
-                    }
-
-                    let (cards_row, item_buttons) = build_apps_list(&apps);
-
-                    // Wire up click handlers
-                    for (i, btn) in item_buttons.iter().enumerate() {
-                        let update_sel = update_selection.clone();
-                        let window_close = window.clone();
-                        let apps_click = apps.clone();
-                        let closed_click = closed.clone();
-                        btn.connect_clicked(move |_| {
-                            update_sel(i);
-                            let app_item = apps_click[i].clone();
-                            save_history(
-                                app_item.window_title.as_deref().unwrap_or(&app_item.name),
-                            );
-                            activate_app(&app_item);
-                            *closed_click.borrow_mut() = true;
-                            let win = window_close.clone();
-                            gtk4::glib::timeout_add_local_once(
-                                std::time::Duration::from_millis(50),
-                                move || {
-                                    win.set_visible(false);
-                                },
-                            );
-                        });
-                    }
-
-                    list_container.append(&cards_row);
-
-                    *apps_state.borrow_mut() = apps.clone();
-                    *buttons_state.borrow_mut() = item_buttons;
-
-                    let initial_idx = if apps.len() > 1 { 1 } else { 0 };
-                    *current_index.borrow_mut() = initial_idx;
-                    update_selection(initial_idx);
-
-                    let alt_check = alt_check_enabled.clone();
-                    gtk4::glib::timeout_add_local_once(
-                        std::time::Duration::from_millis(30),
-                        move || {
-                            *alt_check.borrow_mut() = true;
-                        },
-                    );
-
-                    gtk4::glib::ControlFlow::Break
-                } else {
-                    gtk4::glib::ControlFlow::Continue
-                }
-            });
+            let alt_check = alt_check_enabled.clone();
+            gtk4::glib::timeout_add_local_once(
+                std::time::Duration::from_millis(60),
+                move || {
+                    *alt_check.borrow_mut() = true;
+                },
+            );
         })
     };
 
-    // --- hide_fn ---
     let hide_fn = {
         let window = window.clone();
         Box::new(move || {
@@ -423,7 +366,6 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
         })
     };
 
-    // --- next_fn: cycle selection if window is already visible ---
     let next_fn = {
         let update_selection = update_selection.clone();
         let current_index = current_index.clone();
@@ -431,7 +373,7 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
         let last_cycle_next = last_cycle_time.clone();
         Box::new(move || {
             let now = std::time::Instant::now();
-            if now.duration_since(*last_cycle_next.borrow()) < std::time::Duration::from_millis(80)
+            if now.duration_since(*last_cycle_next.borrow()) < std::time::Duration::from_millis(150)
             {
                 return;
             }

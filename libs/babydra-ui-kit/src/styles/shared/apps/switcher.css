@@ -4,14 +4,14 @@
     }
 
     to {
-        background-color: rgba(0, 0, 0, 0.45);
+        background-color: rgba(0, 0, 0, 0.40);
     }
 }
 
 @keyframes switcher-deck-pop {
     from {
         opacity: 0;
-        transform: scale(0.92);
+        transform: scale(0.94);
     }
 
     to {
@@ -21,30 +21,58 @@
 }
 
 .switcher-window {
-    animation: switcher-window-fade 180ms ease-out forwards;
+    animation: switcher-window-fade 150ms ease-out forwards;
 }
 
 .switcher-deck-container {
-    padding: 22px 28px;
-    border-radius: 22px;
-    min-width: 480px;
-    animation: switcher-deck-pop 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    padding: 18px 22px 14px 22px;
+    border-radius: 24px;
+    min-width: 320px;
+    animation: switcher-deck-pop 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.switcher-deck-header {
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: -0.2px;
+.switcher-card-deck {
+    padding: 6px 4px;
+}
+
+button.switcher-card {
+    padding: 10px 8px;
+    margin: 0 4px;
+    border-radius: 18px;
+    min-width: 100px;
+    min-height: 104px;
+    opacity: 0.50;
+    transition: transform 140ms cubic-bezier(0.2, 0.9, 0.3, 1),
+        opacity 140ms ease-out,
+        box-shadow 140ms ease-out,
+        border-color 140ms ease-out,
+        background-color 140ms ease-out;
+}
+
+button.switcher-card:hover {
+    opacity: 0.85;
+    transform: scale(1.03);
+}
+
+button.switcher-card.selected {
+    opacity: 1.0;
+    transform: scale(1.08);
+}
+
+.switcher-card-icon {
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.switcher-card-name {
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 4px;
 }
 
 .switcher-meta-bar {
-    padding: 6px 16px;
-    border-radius: 12px;
-    margin-bottom: 4px;
-}
-
-.switcher-meta-icon {
-    margin-right: 4px;
+    padding: 2px 16px;
+    border-radius: 10px;
 }
 
 .switcher-meta-title {
@@ -55,74 +83,25 @@
 
 .switcher-meta-subtitle {
     font-size: 11px;
-    opacity: 0.7;
-    line-height: 1.2;
-}
-
-.switcher-card-deck {
-    padding: 10px 6px;
-}
-
-button.switcher-card {
-    padding: 0px;
-    margin: 0 8px;
-    border-radius: 14px;
     opacity: 0.65;
-    transition: transform 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
-        opacity 140ms ease-out,
-        box-shadow 160ms ease-out,
-        border-color 140ms ease-out,
-        background-color 140ms ease-out;
-}
-
-button.switcher-card:hover {
-    opacity: 0.85;
-    transform: scale(1.02);
-}
-
-button.switcher-card.selected {
-    opacity: 1.0;
-    transform: scale(1.06);
-}
-
-.switcher-preview-image {
-    border-radius: 12px;
-}
-
-.switcher-item-placeholder {
-    border-radius: 12px;
-}
-
-.switcher-item-icon-container {
-    border-radius: 10px;
-    padding: 4px 6px;
-}
-
-.switcher-item-title-container {
-    border-radius: 0 0 12px 12px;
-    padding: 5px 10px;
-}
-
-.switcher-app-title {
-    font-size: 11px;
-    font-weight: 600;
-}
-
-.switcher-deck-hint {
-    font-size: 11px;
-    opacity: 0.55;
-    margin-top: 4px;
+    line-height: 1.2;
 }
 
 /* === Workspace Switcher Cards === */
 .workspace-deck-container {
-    min-width: 520px;
+    min-width: 480px;
+}
+
+.switcher-deck-header {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
 }
 
 button.workspace-card {
     border-radius: 16px;
     padding: 12px;
-    min-width: 140px;
+    min-width: 130px;
 }
 
 .workspace-card-number {

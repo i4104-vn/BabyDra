@@ -130,6 +130,8 @@ pub fn get_running_apps() -> Vec<DesktopApp> {
         }
     }
 
+    let active_window = super::get_active_window();
+
     let history = get_history();
     running.sort_by(|a, b| {
         let get_pos = |app: &DesktopApp| {
@@ -146,6 +148,17 @@ pub fn get_running_apps() -> Vec<DesktopApp> {
         };
         get_pos(a).cmp(&get_pos(b))
     });
+
+    if let Some((ref act_id, ref act_title)) = active_window {
+        if let Some(pos) = running.iter().position(|a| {
+            a.app_id.as_deref() == Some(act_id)
+                || a.window_title.as_deref() == Some(act_title)
+                || a.name.eq_ignore_ascii_case(act_id)
+        }) {
+            let active_app = running.remove(pos);
+            running.insert(0, active_app);
+        }
+    }
 
     running
 }

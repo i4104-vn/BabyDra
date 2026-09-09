@@ -2043,19 +2043,11 @@ button.switcher-card.selected {
     box-shadow: 0 10px 24px rgba(59, 130, 246, 0.30);
 }
 
-.switcher-item-placeholder {
-    background-color: rgba(0, 0, 0, 0.03);
-}
-
-.switcher-item-title-container {
-    background-color: rgba(255, 255, 255, 0.85);
-}
-
-.switcher-app-title {
+.switcher-card-name {
     color: rgba(0, 0, 0, 0.85);
 }
 
-button.switcher-card.selected .switcher-app-title {
+button.switcher-card.selected .switcher-card-name {
     color: #000000;
 }
 

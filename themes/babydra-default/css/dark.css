@@ -1969,19 +1969,11 @@ button.switcher-card.selected {
     box-shadow: 0 10px 28px rgba(96, 165, 250, 0.35);
 }
 
-.switcher-item-placeholder {
-    background-color: rgba(255, 255, 255, 0.02);
-}
-
-.switcher-item-title-container {
-    background-color: rgba(0, 0, 0, 0.65);
-}
-
-.switcher-app-title {
+.switcher-card-name {
     color: rgba(255, 255, 255, 0.85);
 }
 
-button.switcher-card.selected .switcher-app-title {
+button.switcher-card.selected .switcher-card-name {
     color: #ffffff;
 }
 
