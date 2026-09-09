@@ -43,19 +43,10 @@ pub fn populate_previews(popover: &gtk4::Popover, windows: &[DesktopApp], app_id
 
     if let Some(close_all_btn) = close_all_btn_opt {
         let pop_close_all = popover.clone();
-        let windows_clone: Vec<(String, String)> = windows
-            .iter()
-            .map(|app| {
-                let app_id_str = app.app_id.as_deref().unwrap_or(app_id).to_string();
-                let title_str = app.window_title.as_deref().unwrap_or("").to_string();
-                (app_id_str, title_str)
-            })
-            .collect();
+        let app_id_str = app_id.to_string();
 
         close_all_btn.connect_clicked(move |_| {
-            for (app_id_str, title_str) in &windows_clone {
-                close_window(app_id_str, title_str);
-            }
+            babydra_core::close_all_windows(&app_id_str);
             pop_close_all.popdown();
         });
     }

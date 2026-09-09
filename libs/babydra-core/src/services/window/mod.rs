@@ -132,16 +132,71 @@ pub fn focus_app(name: &str, exec: &str, app_id: Option<&str>, window_title: Opt
     }
 }
 
-/// Closes a window using wlrctl.
+/// Closes a single window instance using wlrctl.
 pub fn close_window(app_id: &str, title: &str) {
-    let status = std::process::Command::new("wlrctl")
-        .args(&["window", "close", &format!("title:{}", title)])
-        .status();
-    if let Ok(s) = status {
-        if s.success() {
-            return;
+    let running = get_running_windows();
+    let same_title_count = if !title.is_empty() {
+        running.iter().filter(|(_, t)| t == title).count()
+    } else {
+        running.iter().filter(|(id, _)| id == app_id).count()
+    };
+
+    if same_title_count > 1 {
+        // When multiple windows share the identical title or app_id, running `wlrctl window close`
+        // without state filtering will close all instances at once.
+        // To safely close only ONE instance:
+        // 1. Focus one instance (wlrctl activate only activates the first matching window and stops).
+        if !title.is_empty() {
+            let _ = std::process::Command::new("wlrctl")
+                .args(&["window", "focus", &format!("title:{}", title)])
+                .status();
+        } else {
+            let _ = std::process::Command::new("wlrctl")
+                .args(&["window", "focus", app_id])
+                .status();
+        }
+        std::thread::sleep(std::time::Duration::from_millis(60));
+
+        // 2. Close ONLY the active window. On Wayland, exactly one window is active,
+        // so this guarantees that only one instance is closed.
+        let status = if !title.is_empty() {
+            std::process::Command::new("wlrctl")
+                .args(&["window", "close", &format!("title:{}", title), "state:active"])
+                .status()
+        } else {
+            std::process::Command::new("wlrctl")
+                .args(&["window", "close", app_id, "state:active"])
+                .status()
+        };
+
+        if let Ok(s) = status {
+            if s.success() {
+                return;
+            }
+        }
+        let _ = std::process::Command::new("wlrctl")
+            .args(&["window", "close", "state:active"])
+            .status();
+        return;
+    }
+
+    if !title.is_empty() {
+        let status = std::process::Command::new("wlrctl")
+            .args(&["window", "close", &format!("title:{}", title)])
+            .status();
+        if let Ok(s) = status {
+            if s.success() {
+                return;
+            }
         }
     }
+    let _ = std::process::Command::new("wlrctl")
+        .args(&["window", "close", app_id])
+        .status();
+}
+
+/// Closes all windows matching an application ID.
+pub fn close_all_windows(app_id: &str) {
     let _ = std::process::Command::new("wlrctl")
         .args(&["window", "close", app_id])
         .status();

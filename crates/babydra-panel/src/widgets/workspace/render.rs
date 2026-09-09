@@ -108,6 +108,19 @@ pub fn render_previews(
 
     let mut action_triggers = Vec::new();
 
+    let mut title_counts: std::collections::HashMap<String, usize> = std::collections::HashMap::new();
+    for app in windows {
+        let title_str = app.window_title.as_deref().unwrap_or("");
+        let raw_text = if title_str.is_empty() {
+            app.name.clone()
+        } else {
+            title_str.to_string()
+        };
+        *title_counts.entry(raw_text).or_insert(0) += 1;
+    }
+
+    let mut title_indices: std::collections::HashMap<String, usize> = std::collections::HashMap::new();
+
     for app in windows {
         let item_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 4);
         item_box.add_css_class("taskbar-preview-list-item-box");
@@ -133,10 +146,18 @@ pub fn render_previews(
         title_lbl.set_halign(gtk4::Align::Start);
 
         let title_str = app.window_title.as_deref().unwrap_or("");
-        let label_text = if title_str.is_empty() {
+        let raw_text = if title_str.is_empty() {
             app.name.clone()
         } else {
             title_str.to_string()
+        };
+        let is_dup = title_counts.get(&raw_text).copied().unwrap_or(0) > 1;
+        let label_text = if is_dup {
+            let idx = title_indices.entry(raw_text.clone()).or_insert(0);
+            *idx += 1;
+            format!("{} ({})", raw_text, *idx)
+        } else {
+            raw_text
         };
         title_lbl.set_text(&label_text);
         item_content.append(&title_lbl);
