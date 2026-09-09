@@ -44,18 +44,11 @@ pub fn get_running_apps() -> Vec<DesktopApp> {
     });
 
     let mut running = Vec::new();
-    let mut detected_windows = std::collections::HashSet::new();
 
     for (app_id, title) in running_windows {
         let app_id_lower = app_id.to_lowercase();
         let title_lower = title.to_lowercase();
         let mut matched_app = None;
-
-        let window_key = format!("{}::{}", app_id, title);
-        if detected_windows.contains(&window_key) {
-            continue;
-        }
-        detected_windows.insert(window_key);
 
         for app in &desktop_apps {
             let exec_parts: Vec<&str> = app.exec.split_whitespace().collect();
