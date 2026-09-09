@@ -30,7 +30,6 @@ pub fn build_taskbar_btn(app: &DesktopApp, is_active: bool, window_count: usize)
     btn.add_css_class("taskbar-app-btn");
     btn.set_cursor_from_name(Some("pointer"));
     btn.set_widget_name(&app.app_id.clone().unwrap_or_else(|| app.name.clone()));
-    btn.set_tooltip_text(Some(&app.name));
     btn.set_valign(gtk4::Align::Center);
     btn.set_halign(gtk4::Align::Center);
 
@@ -211,8 +210,12 @@ pub fn render_previews(
         close_all_icon.set_pixel_size(14);
         close_all_icon.add_css_class("taskbar-preview-action-icon");
 
-        let close_all_label =
-            gtk4::Label::new(Some(&babydra_core::i18n::trans("taskbar.close_all")));
+        let close_key = if windows.len() == 1 {
+            "taskbar.close"
+        } else {
+            "taskbar.close_all"
+        };
+        let close_all_label = gtk4::Label::new(Some(&babydra_core::i18n::trans(close_key)));
         close_all_label.add_css_class("taskbar-preview-action-label");
         close_all_label.add_css_class("close-all-text");
         close_all_content.append(&close_all_icon);

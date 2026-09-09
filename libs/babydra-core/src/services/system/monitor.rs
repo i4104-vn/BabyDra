@@ -189,6 +189,111 @@ pub fn get_gpu_usage() -> Option<f64> {
     None
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct AppResourceUsage {
+    pub cpu_percent: f64,
+    pub ram_mb: f64,
+    pub ram_formatted: String,
+    pub cpu_formatted: String,
+    pub is_running: bool,
+}
+
+pub fn get_app_resource_usage(app_id: &str, exec: &str, name: &str) -> AppResourceUsage {
+    let mut tokens: Vec<String> = Vec::new();
+
+    let id_clean = app_id.strip_suffix(".desktop").unwrap_or(app_id).to_lowercase();
+    if !id_clean.is_empty() {
+        tokens.push(id_clean.clone());
+        if let Some(last) = id_clean.split('.').last() {
+            if last.len() >= 3 && last != id_clean {
+                tokens.push(last.to_string());
+            }
+        }
+    }
+
+    let exec_bin = exec.split_whitespace().next().unwrap_or("");
+    let exec_clean = std::path::Path::new(exec_bin)
+        .file_name()
+        .and_then(|f| f.to_str())
+        .unwrap_or("")
+        .to_lowercase();
+    if !exec_clean.is_empty() && !tokens.contains(&exec_clean) {
+        tokens.push(exec_clean);
+    }
+
+    let name_clean = name.to_lowercase();
+    if tokens.is_empty() && !name_clean.is_empty() {
+        tokens.push(name_clean);
+    }
+
+    let mut total_cpu = 0.0;
+    let mut total_rss_kb = 0u64;
+    let mut is_running = false;
+
+    if let Ok(output) = std::process::Command::new("ps")
+        .args(["-eo", "state,%cpu,rss,comm,args"])
+        .output()
+    {
+        if output.status.success() {
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            for line in stdout.lines().skip(1) {
+                let parts: Vec<&str> = line.split_whitespace().collect();
+                if parts.len() < 5 {
+                    continue;
+                }
+                let state_char = parts[0].chars().next().unwrap_or('S');
+                let cpu: f64 = parts[1].parse().unwrap_or(0.0);
+                let rss: u64 = parts[2].parse().unwrap_or(0);
+                let comm_lower = parts[3].to_lowercase();
+                let args_lower = parts[4..].join(" ").to_lowercase();
+
+                let mut matched = false;
+                for t in &tokens {
+                    let short_t = if t.len() > 15 { &t[..15] } else { t.as_str() };
+                    if comm_lower == *t
+                        || comm_lower.starts_with(short_t)
+                        || args_lower.starts_with(t)
+                        || args_lower.contains(&format!("/{}", t))
+                    {
+                        matched = true;
+                        break;
+                    }
+                }
+
+                if matched {
+                    total_cpu += cpu;
+                    total_rss_kb += rss;
+                    if state_char == 'R' {
+                        is_running = true;
+                    }
+                }
+            }
+        }
+    }
+
+    let ram_mb = total_rss_kb as f64 / 1024.0;
+    let ram_formatted = if ram_mb >= 1024.0 {
+        format!("{:.1} GB", ram_mb / 1024.0)
+    } else {
+        format!("{:.1} MB", ram_mb)
+    };
+    let num_cpus = std::thread::available_parallelism()
+        .map(|n| n.get())
+        .unwrap_or(1)
+        .max(1) as f64;
+    let normalized_cpu = (total_cpu / num_cpus).clamp(0.0, 100.0);
+    let cpu_formatted = format!("{:.1}%", normalized_cpu);
+    let is_running = is_running || total_cpu > 0.0;
+
+    AppResourceUsage {
+        cpu_percent: normalized_cpu,
+        ram_mb,
+        ram_formatted,
+        cpu_formatted,
+        is_running,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -212,6 +317,15 @@ mod tests {
         if let Some(pct) = usage {
             assert!(pct >= 0.0 && pct <= 100.0, "GPU percentage out of range: {}", pct);
         }
+    }
+
+    #[test]
+    fn test_get_app_resource_usage() {
+        let usage = get_app_resource_usage("cargo", "cargo", "Cargo");
+        assert!(usage.cpu_percent >= 0.0);
+        assert!(usage.ram_mb >= 0.0);
+        assert!(!usage.cpu_formatted.is_empty());
+        assert!(!usage.ram_formatted.is_empty());
     }
 }
 

@@ -40,7 +40,9 @@ pub use services::system::clean::{self, get_trash_size, remove_trash};
 pub use services::system::display::{
     apply_display_configs, apply_saved_displays, get_displays, save_displays,
 };
-pub use services::system::monitor::{self, get_formatted_uptime};
+pub use services::system::monitor::{
+    self, get_app_resource_usage, get_formatted_uptime, AppResourceUsage,
+};
 pub use services::system::network::{
     self, get_active_network_info, get_local_ip, get_network_speed,
 };

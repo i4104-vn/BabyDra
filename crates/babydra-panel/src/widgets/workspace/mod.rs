@@ -3,8 +3,10 @@ mod render;
 
 use babydra_core::DesktopApp;
 use babydra_core::{
-    filter_apps_for_workspace, focus_window, get_current_workspace, get_running_apps,
+    filter_apps_for_workspace, focus_window, get_app_resource_usage, get_current_workspace,
+    get_running_apps,
 };
+use babydra_ui_kit::components::popovers::{TooltipPopover, TooltipRow};
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -14,7 +16,9 @@ use std::thread;
 use std::time::Duration;
 
 pub struct PopoverState {
-    popover: gtk4::Popover,
+    preview_popover: gtk4::Popover,
+    tooltip_popover: gtk4::Popover,
+    update_tooltip: Rc<dyn Fn()>,
 }
 
 /// Returns the current `active app id`.
@@ -34,6 +38,35 @@ fn get_apps_signature(ws_id: u32, running_apps: &[DesktopApp]) -> String {
     format!("ws:{}||{}", ws_id, sigs.join("||"))
 }
 
+fn get_windows_for_app(
+    apps_shared: &Arc<Mutex<Vec<DesktopApp>>>,
+    app_id: &str,
+) -> Vec<DesktopApp> {
+    let windows_list = apps_shared.lock().map(|l| l.clone()).unwrap_or_default();
+    windows_list
+        .into_iter()
+        .filter(|w| {
+            let w_id = w.app_id.as_deref().unwrap_or(&w.name);
+            w_id == app_id
+        })
+        .collect()
+}
+
+fn show_preview_menu(
+    popover: &gtk4::Popover,
+    popovers: &Rc<RefCell<Vec<PopoverState>>>,
+    windows: &[DesktopApp],
+    app_id: &str,
+) {
+    for s in popovers.borrow().iter() {
+        if s.tooltip_popover.is_visible() {
+            s.tooltip_popover.popdown();
+        }
+    }
+    preview::populate_previews(popover, windows, app_id);
+    popover.popup();
+}
+
 fn rebuild_taskbar(
     apps_box: &gtk4::Box,
     running_apps: Vec<DesktopApp>,
@@ -42,7 +75,8 @@ fn rebuild_taskbar(
     running_apps_shared: Arc<Mutex<Vec<DesktopApp>>>,
 ) {
     for state in popovers.borrow_mut().drain(..) {
-        state.popover.unparent();
+        state.preview_popover.unparent();
+        state.tooltip_popover.unparent();
     }
 
     while let Some(child) = apps_box.first_child() {
@@ -80,36 +114,76 @@ fn rebuild_taskbar(
 
         let window_count = windows.len();
         let btn = render::build_taskbar_btn(first_app, is_active, window_count);
-        let popover = render::build_popover_box(&btn);
+        let preview_popover = render::build_popover_box(&btn);
 
-        let pop_clone = popover.clone();
-        let app_id_clone = app_id.clone();
-        let apps_shared = running_apps_shared.clone();
-        btn.connect_clicked(move |_| {
-            let windows_list = if let Ok(lock) = apps_shared.lock() {
-                lock.clone()
+        let tooltip_popover = TooltipPopover::new(&btn, gtk4::PositionType::Bottom);
+        let popovers_sup = popovers.clone();
+        tooltip_popover.set_suppress_fn(move || {
+            popovers_sup
+                .borrow()
+                .iter()
+                .any(|state| state.preview_popover.is_visible())
+        });
+
+        let app_name = first_app.name.clone();
+        let app_exec = first_app.exec.clone();
+        let app_id_str = app_id.clone();
+        let tt_pop = tooltip_popover.clone();
+        let update_fn: Rc<dyn Fn()> = Rc::new(move || {
+            let usage = get_app_resource_usage(&app_id_str, &app_exec, &app_name);
+            let state_str = if usage.is_running {
+                babydra_core::i18n::trans("taskbar.state_running")
             } else {
-                Vec::new()
+                babydra_core::i18n::trans("taskbar.state_sleeping")
             };
-            let app_windows: Vec<DesktopApp> = windows_list
-                .into_iter()
-                .filter(|w| {
-                    let w_id = w.app_id.as_deref().unwrap_or(&w.name);
-                    w_id == app_id_clone
-                })
-                .collect();
+            let rows = [
+                TooltipRow::new(&babydra_core::i18n::trans("taskbar.cpu"), &usage.cpu_formatted, None),
+                TooltipRow::new(&babydra_core::i18n::trans("taskbar.ram"), &usage.ram_formatted, None),
+                TooltipRow::new(
+                    &babydra_core::i18n::trans("taskbar.state"),
+                    &state_str,
+                    if usage.is_running { Some("text-success") } else { None },
+                ),
+            ];
+            let card = TooltipPopover::build_card(&app_name, &rows);
+            tt_pop.set_child(Some(&card));
+        });
+        tooltip_popover.attach_hover(&btn, Some(update_fn.clone()));
 
+        let pop_left = preview_popover.clone();
+        let app_id_left = app_id.clone();
+        let apps_left = running_apps_shared.clone();
+        let popovers_left = popovers.clone();
+        btn.connect_clicked(move |_| {
+            let app_windows = get_windows_for_app(&apps_left, &app_id_left);
             if app_windows.len() > 1 {
-                preview::populate_previews(&pop_clone, &app_windows, &app_id_clone);
-                pop_clone.popup();
+                show_preview_menu(&pop_left, &popovers_left, &app_windows, &app_id_left);
             } else if let Some(single_window) = app_windows.first() {
-                let target_app_id = single_window.app_id.as_deref().unwrap_or(&app_id_clone);
+                let target_app_id = single_window.app_id.as_deref().unwrap_or(&app_id_left);
                 let target_title = single_window.window_title.as_deref().unwrap_or("");
                 focus_window(target_app_id, target_title);
             }
         });
 
-        popovers.borrow_mut().push(PopoverState { popover });
+        let right_click = gtk4::GestureClick::new();
+        right_click.set_button(3);
+        let pop_right = preview_popover.clone();
+        let app_id_right = app_id.clone();
+        let apps_right = running_apps_shared.clone();
+        let popovers_right = popovers.clone();
+        right_click.connect_pressed(move |_, _, _, _| {
+            let app_windows = get_windows_for_app(&apps_right, &app_id_right);
+            if !app_windows.is_empty() {
+                show_preview_menu(&pop_right, &popovers_right, &app_windows, &app_id_right);
+            }
+        });
+        btn.add_controller(right_click);
+
+        popovers.borrow_mut().push(PopoverState {
+            preview_popover,
+            tooltip_popover: tooltip_popover.popover,
+            update_tooltip: update_fn,
+        });
         apps_box.append(&btn);
     }
 }
@@ -244,6 +318,16 @@ pub fn create_workspace_sw() -> gtk4::Box {
             update_active_highlight(&apps_box_clone, active.as_deref());
         }
 
+        glib::ControlFlow::Continue
+    });
+
+    let popovers_timer = popovers.clone();
+    glib::timeout_add_local(Duration::from_secs(5), move || {
+        for state in popovers_timer.borrow().iter() {
+            if state.tooltip_popover.is_visible() {
+                (state.update_tooltip)();
+            }
+        }
         glib::ControlFlow::Continue
     });
 
