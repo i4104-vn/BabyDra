@@ -1932,9 +1932,10 @@ scale.settings-scale:disabled mark label {
 }
 
 .switcher-deck-container {
-    background-color: rgba(18, 18, 24, 0.92);
+    background-color: rgba(18, 20, 29, 0.90);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+    border-top: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.40);
 }
 
 .switcher-deck-header {
@@ -1943,6 +1944,7 @@ scale.settings-scale:disabled mark label {
 
 .switcher-meta-bar {
     background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .switcher-meta-title {
@@ -1950,27 +1952,27 @@ scale.settings-scale:disabled mark label {
 }
 
 .switcher-meta-subtitle {
-    color: rgba(255, 255, 255, 0.65);
+    color: rgba(255, 255, 255, 0.60);
 }
 
 button.switcher-card {
-    background-color: rgba(255, 255, 255, 0.04);
-    border: 2px solid rgba(255, 255, 255, 0.08);
+    background-color: rgba(255, 255, 255, 0.045);
+    border: 1.5px solid rgba(255, 255, 255, 0.08);
 }
 
 button.switcher-card:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.18);
+    background-color: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 255, 255, 0.20);
 }
 
 button.switcher-card.selected {
-    background-color: rgba(255, 255, 255, 0.10);
-    border-color: #60a5fa;
-    box-shadow: 0 10px 28px rgba(96, 165, 250, 0.35);
+    background: linear-gradient(145deg, rgba(59, 130, 246, 0.22) 0%, rgba(37, 99, 235, 0.10) 100%);
+    border: 2px solid #3b82f6;
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.45), inset 0 0 16px rgba(59, 130, 246, 0.20);
 }
 
 .switcher-card-name {
-    color: rgba(255, 255, 255, 0.85);
+    color: rgba(255, 255, 255, 0.75);
 }
 
 button.switcher-card.selected .switcher-card-name {
