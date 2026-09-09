@@ -27,7 +27,8 @@ pub fn get_icon_from_svg(svg_content: &str, size: i32) -> gtk4::Image {
 }
 
 /// Embedded bytes of the BabyDra logo.
-pub const LOGO_BYTES: &[u8] = include_bytes!("../logo.png");
+pub const LOGO_BYTES: &[u8] =
+    include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/src/ui/logo.png"));
 
 /// Returns the embedded logo paintable at the requested size.
 pub fn get_logo_paintable(size: i32) -> Option<Texture> {

@@ -106,7 +106,10 @@ fn get_icon_svg_pair(name: &str) -> Option<(&'static str, &'static str)> {
     static ALIASES: std::sync::OnceLock<std::collections::HashMap<String, String>> =
         std::sync::OnceLock::new();
     let aliases = ALIASES.get_or_init(|| {
-        let json_str = include_str!("../../assets/icon_aliases.json");
+        let json_str = include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/src/assets/icon_aliases.json"
+        ));
         serde_json::from_str(json_str).unwrap_or_default()
     });
 
