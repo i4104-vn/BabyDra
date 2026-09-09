@@ -2002,26 +2002,45 @@ scale.settings-scale:disabled mark label {
 
 /* === apps/switcher.css === */
 .switcher-window {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0.25);
 }
 
-.stage-manager-panel {
-    background-image: linear-gradient(to right, rgba(240, 240, 245, 0.95), rgba(240, 240, 245, 0.6) 75%, rgba(240, 240, 245, 0) 100%);
+.switcher-deck-container {
+    background-color: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
 }
 
-.stage-manager-item-btn {
+.switcher-deck-header {
+    color: rgba(28, 28, 30, 0.95);
+}
+
+.switcher-meta-bar {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+.switcher-meta-title {
+    color: #111827;
+}
+
+.switcher-meta-subtitle {
+    color: rgba(0, 0, 0, 0.60);
+}
+
+button.switcher-card {
     background-color: rgba(0, 0, 0, 0.02);
     border: 2px solid rgba(0, 0, 0, 0.08);
 }
 
-.stage-manager-item-btn:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-    border-color: rgba(0, 0, 0, 0.15);
+button.switcher-card:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.16);
 }
 
-.stage-manager-item-btn.selected {
+button.switcher-card.selected {
     background-color: rgba(0, 0, 0, 0.06);
     border-color: #3b82f6;
+    box-shadow: 0 10px 24px rgba(59, 130, 246, 0.30);
 }
 
 .switcher-item-placeholder {
@@ -2029,15 +2048,55 @@ scale.settings-scale:disabled mark label {
 }
 
 .switcher-item-title-container {
-    background-color: rgba(255, 255, 255, 0.75);
+    background-color: rgba(255, 255, 255, 0.85);
 }
 
 .switcher-app-title {
     color: rgba(0, 0, 0, 0.85);
 }
 
-.stage-manager-item-btn.selected .switcher-app-title {
+button.switcher-card.selected .switcher-app-title {
     color: #000000;
+}
+
+button.workspace-card {
+    background-color: rgba(0, 0, 0, 0.02);
+    border: 2px solid rgba(0, 0, 0, 0.08);
+}
+
+button.workspace-card:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.16);
+}
+
+button.workspace-card.selected {
+    background-color: rgba(0, 0, 0, 0.06);
+    border-color: #3b82f6;
+    box-shadow: 0 10px 24px rgba(59, 130, 246, 0.30);
+}
+
+button.workspace-card.active {
+    background-color: rgba(59, 130, 246, 0.10);
+}
+
+.workspace-card-number {
+    color: #3b82f6;
+}
+
+.workspace-card-title {
+    color: rgba(28, 28, 30, 0.90);
+}
+
+.workspace-card-dot {
+    background-color: rgba(0, 0, 0, 0.25);
+}
+
+.workspace-card-dot.active {
+    background-color: #3b82f6;
+}
+
+.switcher-deck-hint {
+    color: rgba(0, 0, 0, 0.50);
 }
 
 /* === explore/window.css === */

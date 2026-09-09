@@ -1,31 +1,31 @@
 //! Switcher card and list rendering.
-//! Renders active application thumbnail previews or falls back to system application icons.
+//! Renders centered horizontal cards with application thumbnail previews or system icons.
 
 use babydra_core::DesktopApp;
 use gtk4::prelude::*;
 
-/// Populates a horizontal list of window switcher preview buttons from the list of running apps.
+/// Populates a horizontal list of window switcher preview cards from the list of running apps.
 pub fn build_apps_list(apps: &[DesktopApp]) -> (gtk4::Box, Vec<gtk4::Button>) {
-    let icons_column = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
-    icons_column.add_css_class("stage-manager-list");
-    icons_column.set_halign(gtk4::Align::Start);
-    icons_column.set_valign(gtk4::Align::Start);
+    let cards_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 16);
+    cards_row.add_css_class("switcher-card-deck");
+    cards_row.set_halign(gtk4::Align::Center);
+    cards_row.set_valign(gtk4::Align::Center);
 
     let mut item_buttons = Vec::new();
 
     for app_item in apps.iter() {
         let btn = create_app_button(app_item);
-        icons_column.append(&btn);
+        cards_row.append(&btn);
         item_buttons.push(btn);
     }
 
-    (icons_column, item_buttons)
+    (cards_row, item_buttons)
 }
 
 /// Creates a card button displaying a window preview screenshot or a placeholder icon.
 pub fn create_app_button(app_item: &DesktopApp) -> gtk4::Button {
     let btn = gtk4::Button::new();
-    btn.add_css_class("stage-manager-item-btn");
+    btn.add_css_class("switcher-card");
 
     let app_icon_str = app_item
         .icon
@@ -54,8 +54,8 @@ pub fn create_app_button(app_item: &DesktopApp) -> gtk4::Button {
         }
     }
 
-    let preview_width = 200;
-    let preview_height = 130;
+    let preview_width = 220;
+    let preview_height = 140;
 
     let overlay = gtk4::Overlay::new();
 
@@ -71,6 +71,7 @@ pub fn create_app_button(app_item: &DesktopApp) -> gtk4::Button {
     };
     overlay.set_child(Some(&base_widget));
 
+    // Top-left icon badge
     let icon_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     icon_container.add_css_class("switcher-item-icon-container");
     icon_container.set_valign(gtk4::Align::Start);
@@ -80,11 +81,12 @@ pub fn create_app_button(app_item: &DesktopApp) -> gtk4::Button {
 
     let icon_widget =
         babydra_ui_kit::ui::icon::get_fallback_icon(app_icon_str, "application-x-executable");
-    icon_widget.set_pixel_size(20);
+    icon_widget.set_pixel_size(22);
     icon_widget.add_css_class("switcher-item-icon");
     icon_container.append(&icon_widget);
     overlay.add_overlay(&icon_container);
 
+    // Bottom title pill
     let title_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     title_container.add_css_class("switcher-item-title-container");
     title_container.set_valign(gtk4::Align::End);
@@ -96,7 +98,7 @@ pub fn create_app_button(app_item: &DesktopApp) -> gtk4::Button {
     title_label.set_halign(gtk4::Align::Center);
     title_label.set_hexpand(true);
     title_label.set_ellipsize(gtk4::pango::EllipsizeMode::End);
-    title_label.set_max_width_chars(18);
+    title_label.set_max_width_chars(20);
 
     title_container.append(&title_label);
     overlay.add_overlay(&title_container);
@@ -105,7 +107,6 @@ pub fn create_app_button(app_item: &DesktopApp) -> gtk4::Button {
     btn.set_size_request(preview_width, preview_height);
     btn.set_hexpand(false);
     btn.set_vexpand(false);
-    btn.set_halign(gtk4::Align::Start);
 
     btn
 }
@@ -120,7 +121,7 @@ fn create_placeholder_img(app_icon_str: &str, width: i32, height: i32) -> gtk4::
 
     let icon_widget =
         babydra_ui_kit::ui::icon::get_fallback_icon(app_icon_str, "application-x-executable");
-    icon_widget.set_pixel_size(48);
+    icon_widget.set_pixel_size(52);
     icon_widget.add_css_class("switcher-item-icon");
     icon_widget.set_valign(gtk4::Align::Center);
     icon_widget.set_halign(gtk4::Align::Center);

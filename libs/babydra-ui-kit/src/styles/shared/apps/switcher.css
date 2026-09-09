@@ -4,89 +4,147 @@
     }
 
     to {
-        background-color: rgba(0, 0, 0, 0.35);
+        background-color: rgba(0, 0, 0, 0.45);
     }
 }
 
-@keyframes panel-slide-in {
+@keyframes switcher-deck-pop {
     from {
-        margin-left: -280px;
         opacity: 0;
+        transform: scale(0.92);
     }
 
     to {
-        margin-left: 0px;
         opacity: 1;
+        transform: scale(1.0);
     }
 }
 
 .switcher-window {
-    animation: switcher-window-fade 200ms ease-out;
+    animation: switcher-window-fade 180ms ease-out forwards;
 }
 
-.stage-manager-container {
-    background: transparent;
+.switcher-deck-container {
+    padding: 22px 28px;
+    border-radius: 22px;
+    min-width: 480px;
+    animation: switcher-deck-pop 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.stage-manager-panel {
-    padding: 16px;
-    min-width: 250px;
-    animation: panel-slide-in 250ms cubic-bezier(0.16, 1, 0.3, 1);
+.switcher-deck-header {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
 }
 
-button.stage-manager-item-btn {
-    padding: 0px;
-    min-width: 0px;
-    min-height: 0px;
-}
-
-.stage-manager-item-btn {
+.switcher-meta-bar {
+    padding: 6px 16px;
     border-radius: 12px;
+    margin-bottom: 4px;
+}
+
+.switcher-meta-icon {
+    margin-right: 4px;
+}
+
+.switcher-meta-title {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.switcher-meta-subtitle {
+    font-size: 11px;
+    opacity: 0.7;
+    line-height: 1.2;
+}
+
+.switcher-card-deck {
+    padding: 10px 6px;
+}
+
+button.switcher-card {
     padding: 0px;
-    margin-top: 6px;
-    margin-bottom: 6px;
-    margin-right: 24px;
-    margin-left: 0;
-    opacity: 0.6;
-    transition: margin-left 150ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
-        margin-right 150ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
-        opacity 120ms ease-out,
-        border-color 120ms ease-out,
-        background-color 120ms ease-out;
+    margin: 0 8px;
+    border-radius: 14px;
+    opacity: 0.65;
+    transition: transform 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        opacity 140ms ease-out,
+        box-shadow 160ms ease-out,
+        border-color 140ms ease-out,
+        background-color 140ms ease-out;
 }
 
-.stage-manager-item-btn:hover {
-    opacity: 0.8;
+button.switcher-card:hover {
+    opacity: 0.85;
+    transform: scale(1.02);
 }
 
-.stage-manager-item-btn.selected {
-    margin-left: 24px;
-    margin-right: 0;
+button.switcher-card.selected {
     opacity: 1.0;
+    transform: scale(1.06);
 }
 
 .switcher-preview-image {
-    border-radius: 10px;
+    border-radius: 12px;
 }
 
 .switcher-item-placeholder {
-    border-radius: 10px;
+    border-radius: 12px;
 }
 
-.switcher-item-icon {
-    opacity: 0.9;
+.switcher-item-icon-container {
+    border-radius: 10px;
+    padding: 4px 6px;
 }
 
 .switcher-item-title-container {
-    border-radius: 0 0 10px 10px;
-    padding: 4px 8px;
+    border-radius: 0 0 12px 12px;
+    padding: 5px 10px;
 }
 
 .switcher-app-title {
     font-size: 11px;
-    font-weight: 500;
+    font-weight: 600;
 }
 
-.stage-manager-item-btn.selected .switcher-app-title {
-    font-weight: bold;
+.switcher-deck-hint {
+    font-size: 11px;
+    opacity: 0.55;
+    margin-top: 4px;
+}
+
+/* === Workspace Switcher Cards === */
+.workspace-deck-container {
+    min-width: 520px;
+}
+
+button.workspace-card {
+    border-radius: 16px;
+    padding: 12px;
+    min-width: 140px;
+}
+
+.workspace-card-number {
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.workspace-card-title {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.workspace-card-dot {
+    min-width: 6px;
+    min-height: 6px;
+    border-radius: 3px;
+    margin-top: 4px;
+    opacity: 0.2;
+}
+
+.workspace-card-dot.active {
+    min-width: 18px;
+    opacity: 1.0;
 }

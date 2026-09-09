@@ -1928,26 +1928,45 @@ scale.settings-scale:disabled mark label {
 }
 /* === apps/switcher.css === */
 .switcher-window {
-    background-color: rgba(0, 0, 0, 0.35);
+    background-color: rgba(0, 0, 0, 0.45);
 }
 
-.stage-manager-panel {
-    background-image: linear-gradient(to right, rgba(10, 10, 15, 0.92), rgba(10, 10, 15, 0.6) 75%, rgba(10, 10, 15, 0) 100%);
+.switcher-deck-container {
+    background-color: rgba(18, 18, 24, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
 }
 
-.stage-manager-item-btn {
-    background-color: rgba(255, 255, 255, 0.03);
+.switcher-deck-header {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.switcher-meta-bar {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.switcher-meta-title {
+    color: #ffffff;
+}
+
+.switcher-meta-subtitle {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+button.switcher-card {
+    background-color: rgba(255, 255, 255, 0.04);
     border: 2px solid rgba(255, 255, 255, 0.08);
 }
 
-.stage-manager-item-btn:hover {
-    background-color: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.15);
+button.switcher-card:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.18);
 }
 
-.stage-manager-item-btn.selected {
-    background-color: rgba(255, 255, 255, 0.08);
+button.switcher-card.selected {
+    background-color: rgba(255, 255, 255, 0.10);
     border-color: #60a5fa;
+    box-shadow: 0 10px 28px rgba(96, 165, 250, 0.35);
 }
 
 .switcher-item-placeholder {
@@ -1955,15 +1974,55 @@ scale.settings-scale:disabled mark label {
 }
 
 .switcher-item-title-container {
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.65);
 }
 
 .switcher-app-title {
     color: rgba(255, 255, 255, 0.85);
 }
 
-.stage-manager-item-btn.selected .switcher-app-title {
+button.switcher-card.selected .switcher-app-title {
     color: #ffffff;
+}
+
+button.workspace-card {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+}
+
+button.workspace-card:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.18);
+}
+
+button.workspace-card.selected {
+    background-color: rgba(255, 255, 255, 0.10);
+    border-color: #60a5fa;
+    box-shadow: 0 10px 28px rgba(96, 165, 250, 0.35);
+}
+
+button.workspace-card.active {
+    background-color: rgba(96, 165, 250, 0.12);
+}
+
+.workspace-card-number {
+    color: #60a5fa;
+}
+
+.workspace-card-title {
+    color: rgba(255, 255, 255, 0.90);
+}
+
+.workspace-card-dot {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.workspace-card-dot.active {
+    background-color: #60a5fa;
+}
+
+.switcher-deck-hint {
+    color: rgba(255, 255, 255, 0.50);
 }
 
 /* === explore/window.css === */
