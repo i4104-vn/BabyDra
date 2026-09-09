@@ -26,18 +26,23 @@ button.panel-logo-btn:hover {
     color: rgba(28, 28, 30, 0.14);
 }
 
-popover.status-popover>contents {
+popover.status-popover>contents,
+popover.tooltip-popover>contents {
     background-color: rgba(255, 255, 255, 0.96);
     border: 1px solid rgba(0, 0, 0, 0.10);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
 .status-popover-header,
-.status-popover-val {
+.tooltip-popover-header,
+.status-popover-val,
+.tooltip-popover-val,
+.tooltip-popover-label {
     color: rgba(28, 28, 30, 0.95);
 }
 
-.status-popover-key {
+.status-popover-key,
+.tooltip-popover-key {
     color: rgba(28, 28, 30, 0.60);
 }
 

@@ -74,31 +74,43 @@ button.panel-logo-btn:hover {
     margin: 0 2px;
 }
 
-popover.status-popover>contents {
+popover.status-popover>contents,
+popover.tooltip-popover>contents {
     border-radius: 14px;
     padding: 10px 14px;
 }
 
-.status-popover-card {
-    min-width: 220px;
+.status-popover-card,
+.tooltip-popover-card {
+    min-width: 200px;
 }
 
-.status-popover-header {
+.status-popover-card.tooltip-popover-simple,
+.tooltip-popover-card.tooltip-popover-simple {
+    min-width: unset;
+    padding: 2px 4px;
+}
+
+.status-popover-header,
+.tooltip-popover-header {
     font-weight: 700;
     font-size: 13px;
     margin-bottom: 4px;
 }
 
-.status-popover-sep {
+.status-popover-sep,
+.tooltip-popover-sep {
     opacity: 0.15;
     margin-bottom: 6px;
 }
 
-.status-popover-key {
+.status-popover-key,
+.tooltip-popover-key {
     font-size: 12px;
 }
 
-.status-popover-val {
+.status-popover-val,
+.tooltip-popover-val {
     font-size: 12px;
     font-weight: 600;
 }

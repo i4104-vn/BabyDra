@@ -30,18 +30,25 @@ pub fn rebuild_panel_window(
     logo_btn.set_cursor_from_name(Some("pointer"));
     logo_btn.set_valign(gtk4::Align::Center);
     logo_btn.set_halign(gtk4::Align::Center);
-    logo_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("panel.logo_tooltip")));
     let logo_icon = babydra_ui_kit::ui::icon::get_icon("logo", 16);
     logo_btn.set_child(Some(&logo_icon));
+
+    let logo_popover = babydra_ui_kit::components::popovers::TooltipPopover::attach_card_text(
+        &logo_btn,
+        "BabyDra",
+        &babydra_core::i18n::trans("panel.logo_tooltip"),
+    );
 
     let lw_clone = launcher_window.clone();
     let ccw_clone = control_center_window.clone();
     let cw_clone = calendar_window.clone();
     let app_clone = app.clone();
+    let logo_pop_click = logo_popover.clone();
 
     let click_gesture = gtk4::GestureClick::new();
     click_gesture.set_button(0); // Listen to both left (1) and right (3) click
     click_gesture.connect_pressed(move |gesture, _, _, _| {
+        logo_pop_click.popdown();
         let button = gesture.current_button();
 
         let cc_win = { ccw_clone.borrow().clone() };

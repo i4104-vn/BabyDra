@@ -9,10 +9,9 @@ pub mod placeholder;
 pub mod popovers;
 pub mod slider;
 pub mod switch;
-pub mod tooltips;
 pub mod wifi;
 
-// Re-export all builders under components namespace to maintain compatibility
+// Re-export all builders under components namespace
 pub use badge::create_icon_badge;
 pub use buttons::{
     create_accent_button, create_battery_icon, create_button, create_color_btn,
@@ -36,10 +35,7 @@ pub use modals::{
     VpnLogDialog, WifiConfigDialog, WifiInfoDialog, WifiPasswordDialog,
 };
 pub use placeholder::{create_placeholder, PlaceholderState};
-pub use popovers::{
-    attach_hover_popover, build_hover_card, create_popover, create_popover_box, HoverPopoverRow,
-};
+pub use popovers::{create_popover, TooltipPopover, TooltipRow};
 pub use slider::CustomSlider;
 pub use switch::{create_switch, CustomSwitch, ToggleRow};
-pub use tooltips::set_tooltip;
 pub use wifi::{create_rssi_icon, create_sys_wifi_icon, create_wifi_net_icon, render_wifi_svg};

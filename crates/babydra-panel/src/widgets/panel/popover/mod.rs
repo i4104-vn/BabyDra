@@ -3,7 +3,7 @@ pub mod network;
 pub mod volume;
 pub mod vpn;
 
-use babydra_ui_kit::components::popovers::hover::attach_hover_popover;
+use babydra_ui_kit::components::popovers::TooltipPopover;
 use gtk4::prelude::*;
 use std::rc::Rc;
 
@@ -16,43 +16,28 @@ pub struct StatusPopovers {
     pub update_volume_popover: Rc<dyn Fn()>,
 }
 
-/// Sets up `status popovers`.
+/// Sets up status popovers using the unified `TooltipPopover` component.
 pub fn setup_status_popover(
     vol_icon: &gtk4::Image,
     net_widgets: &super::render::NetworkWidgets,
     vpn_icon: &gtk4::Image,
     bat_widget: &Option<gtk4::DrawingArea>,
 ) -> StatusPopovers {
-    let vpn_popover = babydra_ui_kit::components::create_popover(
-        vpn_icon,
-        gtk4::PositionType::Bottom,
-        "status-popover",
-    );
-    let net_popover = babydra_ui_kit::components::create_popover(
-        &net_widgets.container,
-        gtk4::PositionType::Bottom,
-        "status-popover",
-    );
-    let vol_popover = babydra_ui_kit::components::create_popover(
-        vol_icon,
-        gtk4::PositionType::Bottom,
-        "status-popover",
-    );
+    let vpn_tooltip = TooltipPopover::new(vpn_icon, gtk4::PositionType::Bottom);
+    let net_tooltip = TooltipPopover::new(&net_widgets.container, gtk4::PositionType::Bottom);
+    let vol_tooltip = TooltipPopover::new(vol_icon, gtk4::PositionType::Bottom);
 
-    let bat_popover_opt = if let Some(ref bat_area) = bat_widget {
-        let bat_pop = babydra_ui_kit::components::create_popover(
-            bat_area,
-            gtk4::PositionType::Bottom,
-            "status-popover",
-        );
-        Some(bat_pop)
+    let (bat_tooltip_opt, bat_popover_opt) = if let Some(ref bat_area) = bat_widget {
+        let bat_pop = TooltipPopover::new(bat_area, gtk4::PositionType::Bottom);
+        let pop = bat_pop.popover.clone();
+        (Some(bat_pop), Some(pop))
     } else {
-        None
+        (None, None)
     };
 
-    let update_vpn_tooltip = vpn::build_vpn_update_fn(vpn_icon, &vpn_popover);
-    let update_network_tooltip = network::build_network_update(&net_popover);
-    let update_volume_popover = volume::build_volume_update(vol_icon, &vol_popover);
+    let update_vpn_tooltip = vpn::build_vpn_update_fn(vpn_icon, &vpn_tooltip.popover);
+    let update_network_tooltip = network::build_network_update(&net_tooltip.popover);
+    let update_volume_popover = volume::build_volume_update(vol_icon, &vol_tooltip.popover);
     let update_battery_popover = battery::build_battery_update(&bat_popover_opt);
 
     if babydra_core::services::system::vpn::get_active_vpn_fast().is_some() {
@@ -61,20 +46,20 @@ pub fn setup_status_popover(
         vpn_icon.set_visible(false);
     }
 
-    attach_hover_popover(vpn_icon, &vpn_popover, update_vpn_tooltip.clone());
-    attach_hover_popover(&net_widgets.container, &net_popover, update_network_tooltip.clone());
-    attach_hover_popover(vol_icon, &vol_popover, update_volume_popover.clone());
+    vpn_tooltip.attach_hover(vpn_icon, Some(update_vpn_tooltip.clone()));
+    net_tooltip.attach_hover(&net_widgets.container, Some(update_network_tooltip.clone()));
+    vol_tooltip.attach_hover(vol_icon, Some(update_volume_popover.clone()));
 
     if let Some(ref bat_area) = bat_widget {
-        if let Some(ref bat_pop) = bat_popover_opt {
-            attach_hover_popover(bat_area, bat_pop, update_battery_popover.clone());
+        if let Some(ref bat_tt) = bat_tooltip_opt {
+            bat_tt.attach_hover(bat_area, Some(update_battery_popover.clone()));
         }
     }
 
     // Timer loop for updates
-    let vpn_pop_t = vpn_popover.clone();
-    let net_pop_t = net_popover.clone();
-    let vol_pop_t = vol_popover.clone();
+    let vpn_pop_t = vpn_tooltip.popover.clone();
+    let net_pop_t = net_tooltip.popover.clone();
+    let vol_pop_t = vol_tooltip.popover.clone();
     let bat_pop_t = bat_popover_opt.clone();
 
     let update_vpn_t = update_vpn_tooltip.clone();
@@ -138,9 +123,9 @@ pub fn setup_status_popover(
     });
 
     StatusPopovers {
-        vpn_popover,
-        net_popover,
-        vol_popover,
+        vpn_popover: vpn_tooltip.popover,
+        net_popover: net_tooltip.popover,
+        vol_popover: vol_tooltip.popover,
         bat_popover_opt,
         update_volume_popover,
     }

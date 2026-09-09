@@ -103,5 +103,9 @@ path = "kits/icon.rs"
 name = "kits_dialog"
 path = "kits/dialog.rs"
 
+[[test]]
+name = "kits_tooltip_popover"
+path = "kits/tooltip_popover.rs"
+
 
 

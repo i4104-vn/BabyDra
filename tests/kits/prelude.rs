@@ -25,7 +25,8 @@ fn ui_kit_prelude_exposes_components_and_helpers() {
     // impl-Trait builders — instantiated with concrete callable types.
     let _: fn(&str, i32, &[&str], Option<&str>, fn()) -> gtk4::Button =
         ui_prelude::create_icon_button;
-    let _: fn(&gtk4::Box, &str) = ui_prelude::set_tooltip;
+    let _: fn(&gtk4::Box, &str, &str) -> ui_prelude::TooltipPopover =
+        ui_prelude::TooltipPopover::attach_card_text;
     let _: fn(&str, &str) -> (gtk4::Box, ui_prelude::CustomSwitch) = ui_prelude::create_switch_card;
     let _: fn(ui_prelude::PlaceholderState) -> gtk4::ListBoxRow = ui_prelude::create_placeholder;
     let _: fn(bool, fn(bool)) -> ui_prelude::CustomSwitch = ui_prelude::create_switch;

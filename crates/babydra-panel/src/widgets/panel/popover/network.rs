@@ -1,7 +1,5 @@
 use babydra_core::models::ActiveNetworkType;
-use babydra_ui_kit::components::popovers::hover::{
-    build_hover_card as build_popover_card, HoverPopoverRow as PopoverRow,
-};
+use babydra_ui_kit::components::popovers::{TooltipPopover, TooltipRow};
 use gtk4::prelude::*;
 use std::rc::Rc;
 
@@ -28,7 +26,7 @@ pub fn build_network_update(net_popover: &gtk4::Popover) -> Rc<dyn Fn()> {
         let tx_cls = get_speed_color_class(speed.tx_speed);
 
         let rows = if !active_net.is_connected {
-            vec![PopoverRow::new("Status", "Disconnected", None)]
+            vec![TooltipRow::new("Status", "Disconnected", None)]
         } else {
             let type_label = match active_net.network_type {
                 ActiveNetworkType::Ethernet => "Ethernet",
@@ -41,10 +39,10 @@ pub fn build_network_update(net_popover: &gtk4::Popover) -> Rc<dyn Fn()> {
             };
 
             vec![
-                PopoverRow::new("Type", type_label, None),
-                PopoverRow::new(name_key, &active_net.name, None),
-                PopoverRow::new("IP Address", &active_net.ip_address, None),
-                PopoverRow::new(
+                TooltipRow::new("Type", type_label, None),
+                TooltipRow::new(name_key, &active_net.name, None),
+                TooltipRow::new("IP Address", &active_net.ip_address, None),
+                TooltipRow::new(
                     "Download",
                     &format!(
                         "↓ {}",
@@ -52,7 +50,7 @@ pub fn build_network_update(net_popover: &gtk4::Popover) -> Rc<dyn Fn()> {
                     ),
                     Some(rx_cls),
                 ),
-                PopoverRow::new(
+                TooltipRow::new(
                     "Upload",
                     &format!(
                         "↑ {}",
@@ -63,7 +61,7 @@ pub fn build_network_update(net_popover: &gtk4::Popover) -> Rc<dyn Fn()> {
             ]
         };
 
-        let card = build_popover_card("Network Connection", rows);
+        let card = TooltipPopover::build_card("Network Connection", &rows);
         net_popover_c.set_child(Some(&card));
     })
 }
