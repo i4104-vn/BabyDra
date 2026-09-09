@@ -9,68 +9,78 @@
 
 pub mod colors;
 
+macro_rules! include_style {
+    ($path:expr) => {
+        include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/src/styles/shared/",
+            $path
+        ))
+    };
+}
+
 /// Shared structural stylesheet — layout, spacing, component structure.
 /// Color values live in theme packages (`themes/<id>/`), not here.
 const SHARED_CSS: &str = concat!(
-    include_str!("../../styles/shared/panel/panel.css"),
+    include_style!("panel/panel.css"),
     "\n",
-    include_str!("../../styles/shared/panel/workspaces.css"),
+    include_style!("panel/workspaces.css"),
     "\n",
-    include_str!("../../styles/shared/panel/clock.css"),
+    include_style!("panel/clock.css"),
     "\n",
-    include_str!("../../styles/shared/panel/status.css"),
+    include_style!("panel/status.css"),
     "\n",
-    include_str!("../../styles/shared/panel/system_monitor.css"),
+    include_style!("panel/system_monitor.css"),
     "\n",
-    include_str!("../../styles/shared/panel/tray.css"),
+    include_style!("panel/tray.css"),
     "\n",
-    include_str!("../../styles/shared/panel/taskbar.css"),
+    include_style!("panel/taskbar.css"),
     "\n",
-    include_str!("../../styles/shared/control_center/control_center.css"),
+    include_style!("control_center/control_center.css"),
     "\n",
-    include_str!("../../styles/shared/control_center/power.css"),
+    include_style!("control_center/power.css"),
     "\n",
-    include_str!("../../styles/shared/island/system_island.css"),
+    include_style!("island/system_island.css"),
     "\n",
-    include_str!("../../styles/shared/island/notification.css"),
+    include_style!("island/notification.css"),
     "\n",
-    include_str!("../../styles/shared/launcher/launcher.css"),
+    include_style!("launcher/launcher.css"),
     "\n",
-    include_str!("../../styles/shared/calendar/calendar.css"),
+    include_style!("calendar/calendar.css"),
     "\n",
-    include_str!("../../styles/shared/shared/button.css"),
+    include_style!("shared/button.css"),
     "\n",
-    include_str!("../../styles/shared/shared/sidebar.css"),
+    include_style!("shared/sidebar.css"),
     "\n",
-    include_str!("../../styles/shared/apps/screenshot.css"),
+    include_style!("apps/screenshot.css"),
     "\n",
-    include_str!("../../styles/shared/apps/lock.css"),
+    include_style!("apps/lock.css"),
     "\n",
-    include_str!("../../styles/shared/apps/preview.css"),
+    include_style!("apps/preview.css"),
     "\n",
-    include_str!("../../styles/shared/apps/settings.css"),
+    include_style!("apps/settings.css"),
     "\n",
-    include_str!("../../styles/shared/apps/switcher.css"),
+    include_style!("apps/switcher.css"),
     "\n",
-    include_str!("../../styles/shared/apps/desktop.css"),
+    include_style!("apps/desktop.css"),
     "\n",
-    include_str!("../../styles/shared/explore/window.css"),
+    include_style!("explore/window.css"),
     "\n",
-    include_str!("../../styles/shared/explore/header_bar.css"),
+    include_style!("explore/header_bar.css"),
     "\n",
-    include_str!("../../styles/shared/explore/content_view.css"),
+    include_style!("explore/content_view.css"),
     "\n",
-    include_str!("../../styles/shared/explore/info_panel.css"),
+    include_style!("explore/info_panel.css"),
     "\n",
-    include_str!("../../styles/shared/explore/status_bar.css"),
+    include_style!("explore/status_bar.css"),
     "\n",
-    include_str!("../../styles/shared/explore/context_menu.css"),
+    include_style!("explore/context_menu.css"),
     "\n",
-    include_str!("../../styles/shared/explore/dialogs.css"),
+    include_style!("explore/dialogs.css"),
     "\n",
-    include_str!("../../styles/shared/shared/dialog.css"),
+    include_style!("shared/dialog.css"),
     "\n",
-    include_str!("../../styles/shared/shared/scrollbar.css")
+    include_style!("shared/scrollbar.css")
 );
 
 thread_local! {
@@ -135,6 +145,7 @@ pub fn init_theme() {
         let is_dark = value != "prefer-light";
         settings.set_gtk_application_prefer_dark_theme(is_dark);
         let _ = babydra_core::sync_labwc_titlebar_theme(is_dark);
+        let _ = babydra_core::sync_kitty_theme(is_dark);
 
         let user_icon_theme = gsettings.string("icon-theme");
         let user_icon_theme = user_icon_theme.trim();
@@ -183,6 +194,7 @@ pub fn init_theme() {
                     settings.set_gtk_application_prefer_dark_theme(dark);
                 }
                 let _ = babydra_core::sync_labwc_titlebar_theme(dark);
+                let _ = babydra_core::sync_kitty_theme(dark);
             });
 
             let gsettings_c2 = gsettings.clone();
