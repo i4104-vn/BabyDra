@@ -72,6 +72,9 @@ pub fn rebuild_panel_window(
                     *borrow = Some(l_win);
                 }
             }
+        } else if button == 2 {
+            // Middle-click (con lăn chuột): Toggle Workspace Switcher
+            babydra_workspace::toggle_switcher();
         } else if button == 3 {
             // Right-click: Minimize all application windows to show desktop
             let existing = { lw_clone.borrow().clone() };
@@ -82,6 +85,21 @@ pub fn rebuild_panel_window(
         }
     });
     logo_btn.add_controller(click_gesture);
+
+    // Con lăn chuột lên / xuống: Chuyển nhanh giữa các workspace
+    let logo_scroll =
+        gtk4::EventControllerScroll::new(gtk4::EventControllerScrollFlags::VERTICAL);
+    let logo_pop_scroll = logo_popover.clone();
+    logo_scroll.connect_scroll(move |_, _, dy| {
+        logo_pop_scroll.popdown();
+        if dy > 0.0 {
+            babydra_workspace::next_workspace();
+        } else if dy < 0.0 {
+            babydra_workspace::prev_workspace();
+        }
+        gtk4::glib::Propagation::Stop
+    });
+    logo_btn.add_controller(logo_scroll);
 
     // 4. Workspace Switcher
     let workspace_box = create_workspace_sw();
