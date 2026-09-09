@@ -163,75 +163,195 @@ button.taskbar-app-btn.active:hover {
     background-color: rgba(255, 255, 255, 0.24);
 }
 
+popover.taskbar-popover,
 popover.taskbar-popover>contents {
-    background-color: rgba(14, 14, 18, 0.96);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-top: 1px solid rgba(255, 255, 255, 0.28);
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.60);
-    color: rgba(255, 255, 255, 0.95);
+    background: transparent;
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
 }
 
-.taskbar-previews-header-icon-box {
-    background-color: rgba(255, 255, 255, 0.06);
+popover.taskbar-popover>arrow {
+    background: none;
+    border: none;
 }
 
-.taskbar-previews-header-label {
+.taskbar-popover-box {
+    background-color: rgb(20, 20, 24);
+    color: #e8e8e8;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 4px 12px rgba(0, 0, 0, 0.45);
+}
+
+.taskbar-popover-header {
+    padding: 4px 8px 6px 8px;
+}
+
+.taskbar-popover-title {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.1px;
+}
+
+.taskbar-popover-count {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.50);
+}
+
+.taskbar-popover-separator {
+    background-color: rgba(255, 255, 255, 0.10);
+    margin: 3px 2px 4px 2px;
+    min-height: 1px;
+}
+
+.taskbar-popover-row {
+    border-radius: 8px;
+    margin: 1px 0;
+    padding: 2px 4px 2px 6px;
+    transition: background-color 120ms ease;
+}
+
+.taskbar-popover-row:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.taskbar-popover-row.active {
+    background-color: rgba(59, 130, 246, 0.14);
+    box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.30);
+}
+
+.taskbar-popover-row.active:hover {
+    background-color: rgba(59, 130, 246, 0.20);
+}
+
+button.taskbar-popover-item-btn,
+button.taskbar-popover-item-btn:hover,
+button.taskbar-popover-item-btn:focus,
+button.taskbar-popover-item-btn:active {
+    background-image: none;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    padding: 4px 0;
+    margin: 0;
+}
+
+.taskbar-popover-badge {
+    background-color: rgba(255, 255, 255, 0.10);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 10.5px;
+    font-weight: 700;
+    min-width: 18px;
+    min-height: 18px;
+    border-radius: 4px;
+    padding: 0 3px;
+}
+
+.taskbar-popover-item-icon {
+    opacity: 0.75;
+}
+
+.taskbar-popover-item-label {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.90);
+    margin: 0;
+    padding: 0;
+}
+
+.taskbar-popover-row:hover .taskbar-popover-item-label {
     color: #ffffff;
 }
 
-.taskbar-previews-header-count {
+.taskbar-popover-row.active .taskbar-popover-item-label {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.taskbar-popover-active-dot {
+    min-width: 6px;
+    min-height: 6px;
+    border-radius: 3px;
+    background-color: #3b82f6;
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.8);
+}
+
+button.taskbar-popover-close-btn {
+    background-image: none;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    border-radius: 6px;
+    padding: 4px;
+    min-width: 24px;
+    min-height: 24px;
+    opacity: 0.45;
+    color: rgba(255, 255, 255, 0.70);
+    transition: background-color 120ms ease, opacity 120ms ease, color 120ms ease;
+}
+
+button.taskbar-popover-close-btn:hover {
+    background-color: rgba(239, 68, 68, 0.20);
+    color: #ef4444;
+    opacity: 1.0;
+}
+
+.taskbar-popover-actions {
+    padding-top: 1px;
+}
+
+button.taskbar-popover-action-btn {
+    background-image: none;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    border-radius: 6px;
+    padding: 6px 8px;
+    transition: background-color 120ms ease, color 120ms ease;
+    margin: 1px 0;
+}
+
+button.taskbar-popover-action-btn:hover {
     background-color: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.65);
 }
 
-.taskbar-preview-separator {
-    background-color: rgba(255, 255, 255, 0.10);
+.taskbar-popover-action-icon {
+    opacity: 0.75;
 }
 
-.taskbar-preview-row:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-}
-
-.taskbar-preview-row.active-window {
-    background-color: rgba(99, 102, 241, 0.08);
-}
-
-.taskbar-preview-row.active-window:hover {
-    background-color: rgba(99, 102, 241, 0.14);
-}
-
-.taskbar-preview-index-badge {
-    background-color: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.80);
-}
-
-.taskbar-preview-title {
-    color: rgba(255, 255, 255, 0.92);
-}
-
-.taskbar-preview-item-icon {
-    color: rgba(255, 255, 255, 0.60);
-}
-
-button.taskbar-preview-list-kill-btn {
-    color: rgba(255, 255, 255, 0.40);
-}
-
-button.taskbar-preview-list-kill-btn:hover {
-    background-color: rgba(239, 68, 68, 0.22);
-    color: #f87171;
-}
-
-button.taskbar-preview-action-btn:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-}
-
-.taskbar-preview-action-label {
+.taskbar-popover-action-label {
+    font-size: 12.5px;
+    font-weight: 500;
     color: rgba(255, 255, 255, 0.85);
 }
 
-button.taskbar-preview-action-btn:hover .taskbar-preview-action-label {
+button.taskbar-popover-action-btn:hover .taskbar-popover-action-label {
     color: #ffffff;
+}
+
+button.taskbar-popover-action-btn.destructive .taskbar-popover-action-icon,
+button.taskbar-popover-action-btn.destructive .taskbar-popover-action-label {
+    color: #ef4444;
+}
+
+button.taskbar-popover-action-btn.destructive:hover {
+    background-color: rgba(239, 68, 68, 0.15);
+}
+
+button.taskbar-popover-action-btn.destructive:hover .taskbar-popover-action-label {
+    color: #f87171;
 }
 
 /* === control_center/control_center.css === */

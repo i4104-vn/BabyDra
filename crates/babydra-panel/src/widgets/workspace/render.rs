@@ -78,13 +78,13 @@ pub fn render_previews(
     Option<(gtk4::Button, String)>,
     Option<gtk4::Button>,
 ) {
-    let previews_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
-    previews_box.add_css_class("taskbar-previews-container");
-    previews_box.set_size_request(270, -1);
+    let previews_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
+    previews_box.add_css_class("taskbar-popover-box");
+    previews_box.set_width_request(280);
 
     // 1. Header Card
     let header = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
-    header.add_css_class("taskbar-previews-header");
+    header.add_css_class("taskbar-popover-header");
     header.set_valign(gtk4::Align::Center);
 
     let first_app_opt = windows.first();
@@ -95,39 +95,43 @@ pub fn render_previews(
         .and_then(|a| a.icon.clone())
         .unwrap_or_else(|| app_id.to_string());
 
-    let header_icon_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    header_icon_box.add_css_class("taskbar-previews-header-icon-box");
-    header_icon_box.set_valign(gtk4::Align::Center);
-    header_icon_box.set_halign(gtk4::Align::Center);
-
     let header_icon =
         babydra_ui_kit::ui::icon::get_fallback_icon(&icon_name, "application-x-executable");
     header_icon.set_pixel_size(16);
-    header_icon_box.append(&header_icon);
-    header.append(&header_icon_box);
+    header_icon.set_valign(gtk4::Align::Center);
+    header.append(&header_icon);
 
     let header_label = gtk4::Label::new(Some(&app_name));
-    header_label.add_css_class("taskbar-previews-header-label");
+    header_label.add_css_class("taskbar-popover-title");
     header_label.set_hexpand(true);
     header_label.set_halign(gtk4::Align::Start);
+    header_label.set_xalign(0.0);
     header_label.set_ellipsize(gtk4::pango::EllipsizeMode::End);
+    header_label.set_single_line_mode(true);
+    header_label.set_wrap(false);
     header.append(&header_label);
 
-    let count_pill = gtk4::Label::new(Some(&windows.len().to_string()));
-    count_pill.add_css_class("taskbar-previews-header-count");
-    count_pill.set_valign(gtk4::Align::Center);
-    header.append(&count_pill);
+    let count_unit = if windows.len() == 1 {
+        babydra_core::i18n::trans("taskbar.window")
+    } else {
+        babydra_core::i18n::trans("taskbar.windows")
+    };
+    let count_text = format!("{} {}", windows.len(), count_unit);
+    let count_lbl = gtk4::Label::new(Some(&count_text));
+    count_lbl.add_css_class("taskbar-popover-count");
+    count_lbl.set_valign(gtk4::Align::Center);
+    header.append(&count_lbl);
 
     previews_box.append(&header);
 
     // Separator below header
     let header_sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
-    header_sep.add_css_class("taskbar-preview-separator");
+    header_sep.add_css_class("taskbar-popover-separator");
     previews_box.append(&header_sep);
 
     // 2. Window Items List
     let items_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-    items_box.add_css_class("taskbar-preview-items-list");
+    items_box.add_css_class("taskbar-popover-items");
 
     let active_win = babydra_core::get_active_window();
     let active_title_opt = active_win.as_ref().map(|(_, t)| t.as_str());
@@ -150,19 +154,10 @@ pub fn render_previews(
         std::collections::HashMap::new();
 
     for app in windows {
-        let item_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 4);
-        item_row.add_css_class("taskbar-preview-row");
+        let item_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 2);
+        item_row.add_css_class("taskbar-popover-row");
         item_row.set_hexpand(true);
         item_row.set_valign(gtk4::Align::Center);
-
-        let preview_btn = gtk4::Button::new();
-        preview_btn.add_css_class("taskbar-preview-list-btn");
-        preview_btn.set_hexpand(true);
-        preview_btn.set_cursor_from_name(Some("pointer"));
-
-        let item_content = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
-        item_content.set_valign(gtk4::Align::Center);
-        item_content.set_hexpand(true);
 
         let title_str = app.window_title.as_deref().unwrap_or("");
         let raw_text = if title_str.is_empty() {
@@ -172,55 +167,76 @@ pub fn render_previews(
         };
         let is_dup = title_counts.get(&raw_text).copied().unwrap_or(0) > 1;
 
-        if is_dup {
-            let idx = title_indices.entry(raw_text.clone()).or_insert(0);
-            *idx += 1;
-            let badge = gtk4::Label::new(Some(&format!("{}", *idx)));
-            badge.add_css_class("taskbar-preview-index-badge");
-            badge.set_valign(gtk4::Align::Center);
-            item_content.append(&badge);
-        } else {
-            let win_icon = babydra_ui_kit::ui::icon::get_icon("window-new-symbolic", 13);
-            win_icon.add_css_class("taskbar-preview-item-icon");
-            win_icon.set_valign(gtk4::Align::Center);
-            item_content.append(&win_icon);
-        }
-
-        let title_lbl = gtk4::Label::new(Some(&raw_text));
-        title_lbl.add_css_class("taskbar-preview-title");
-        title_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
-        title_lbl.set_max_width_chars(28);
-        title_lbl.set_hexpand(true);
-        title_lbl.set_halign(gtk4::Align::Start);
-        item_content.append(&title_lbl);
-
-        let is_active = if let Some(ref act) = active_title_opt {
-            !title_str.is_empty()
-                && (title_str == *act || act.contains(title_str) || title_str.contains(*act))
+        // Check exact match for active window (strip any unsaved dot)
+        let is_active = if let Some(act) = active_title_opt {
+            if !title_str.is_empty() {
+                let clean_act = act.trim_end_matches('●').trim();
+                let clean_title = title_str.trim_end_matches('●').trim();
+                clean_title == clean_act
+            } else {
+                false
+            }
         } else {
             false
         };
 
         if is_active {
-            item_row.add_css_class("active-window");
+            item_row.add_css_class("active");
+        }
+
+        let preview_btn = gtk4::Button::new();
+        preview_btn.add_css_class("taskbar-popover-item-btn");
+        preview_btn.set_hexpand(true);
+        preview_btn.set_cursor_from_name(Some("pointer"));
+
+        let item_content = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+        item_content.set_valign(gtk4::Align::Center);
+        item_content.set_hexpand(true);
+
+        if is_dup {
+            let idx = title_indices.entry(raw_text.clone()).or_insert(0);
+            *idx += 1;
+            let badge = gtk4::Label::new(Some(&format!("{}", *idx)));
+            badge.add_css_class("taskbar-popover-badge");
+            badge.set_valign(gtk4::Align::Center);
+            item_content.append(&badge);
+        } else {
+            let item_icon =
+                babydra_ui_kit::ui::icon::get_fallback_icon(&icon_name, "application-x-executable");
+            item_icon.set_pixel_size(14);
+            item_icon.add_css_class("taskbar-popover-item-icon");
+            item_icon.set_valign(gtk4::Align::Center);
+            item_content.append(&item_icon);
+        }
+
+        let title_lbl = gtk4::Label::new(Some(&raw_text));
+        title_lbl.add_css_class("taskbar-popover-item-label");
+        title_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
+        title_lbl.set_single_line_mode(true);
+        title_lbl.set_wrap(false);
+        title_lbl.set_hexpand(true);
+        title_lbl.set_halign(gtk4::Align::Start);
+        title_lbl.set_xalign(0.0);
+        item_content.append(&title_lbl);
+
+        if is_active {
             let active_dot = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-            active_dot.add_css_class("taskbar-preview-active-dot");
+            active_dot.add_css_class("taskbar-popover-active-dot");
             active_dot.set_valign(gtk4::Align::Center);
-            active_dot.set_tooltip_text(Some(&babydra_core::i18n::trans("taskbar.active")));
             item_content.append(&active_dot);
         }
 
         preview_btn.set_child(Some(&item_content));
 
+        let kill_icon = babydra_ui_kit::ui::icon::get_icon("window-close-symbolic", 12);
+        kill_icon.set_pixel_size(12);
         let kill_btn = gtk4::Button::builder()
-            .child(&babydra_ui_kit::ui::icon::get_icon(
-                "window-close-symbolic",
-                12,
-            ))
+            .child(&kill_icon)
             .tooltip_text(&babydra_core::i18n::trans("taskbar.close"))
             .build();
-        kill_btn.add_css_class("taskbar-preview-list-kill-btn");
+        kill_btn.add_css_class("taskbar-popover-close-btn");
         kill_btn.set_valign(gtk4::Align::Center);
+        kill_btn.set_halign(gtk4::Align::End);
         kill_btn.set_cursor_from_name(Some("pointer"));
 
         item_row.append(&preview_btn);
@@ -233,7 +249,7 @@ pub fn render_previews(
     if windows.len() > 6 {
         let scroll = gtk4::ScrolledWindow::new();
         scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
-        scroll.set_max_content_height(280);
+        scroll.set_max_content_height(260);
         scroll.set_propagate_natural_height(true);
         scroll.set_child(Some(&items_box));
         previews_box.append(&scroll);
@@ -246,25 +262,21 @@ pub fn render_previews(
     let mut close_all_btn_opt = None;
 
     if !windows.is_empty() {
-        let (app_name, exec_cmd, _icon_name) = if let Some(first_app) = windows.first() {
-            (
-                first_app.name.clone(),
-                first_app.exec.clone(),
-                first_app.icon.clone().unwrap_or_else(|| app_id.to_string()),
-            )
+        let (_app_name, exec_cmd) = if let Some(first_app) = windows.first() {
+            (first_app.name.clone(), first_app.exec.clone())
         } else {
-            (app_id.to_string(), app_id.to_string(), app_id.to_string())
+            (app_id.to_string(), app_id.to_string())
         };
 
-        let separator = gtk4::Separator::new(gtk4::Orientation::Horizontal);
-        separator.add_css_class("taskbar-preview-separator");
-        previews_box.append(&separator);
+        let footer_sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
+        footer_sep.add_css_class("taskbar-popover-separator");
+        previews_box.append(&footer_sep);
 
         let actions_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-        actions_box.add_css_class("taskbar-preview-actions-box");
+        actions_box.add_css_class("taskbar-popover-actions");
 
         let open_new_btn = gtk4::Button::new();
-        open_new_btn.add_css_class("taskbar-preview-action-btn");
+        open_new_btn.add_css_class("taskbar-popover-action-btn");
         open_new_btn.set_hexpand(true);
         open_new_btn.set_cursor_from_name(Some("pointer"));
 
@@ -272,19 +284,17 @@ pub fn render_previews(
         open_new_content.set_halign(gtk4::Align::Start);
         open_new_content.set_valign(gtk4::Align::Center);
 
-        let open_new_icon = babydra_ui_kit::ui::icon::get_icon("list-add-symbolic", 13);
-        open_new_icon.add_css_class("taskbar-preview-add-icon");
-        let open_label_text = format!(
-            "{} {}",
-            babydra_core::i18n::trans("taskbar.open_new"),
-            app_name
-        );
-        let open_new_label = gtk4::Label::new(Some(&open_label_text));
-        open_new_label.add_css_class("taskbar-preview-action-label");
-        open_new_label.set_ellipsize(gtk4::pango::EllipsizeMode::End);
-        open_new_label.set_max_width_chars(26);
-        open_new_label.set_hexpand(true);
+        let open_new_icon = babydra_ui_kit::ui::icon::get_icon("plus", 14);
+        open_new_icon.set_pixel_size(14);
+        open_new_icon.add_css_class("taskbar-popover-action-icon");
+
+        let open_new_label =
+            gtk4::Label::new(Some(&babydra_core::i18n::trans("taskbar.open_new")));
+        open_new_label.add_css_class("taskbar-popover-action-label");
         open_new_label.set_halign(gtk4::Align::Start);
+        open_new_label.set_xalign(0.0);
+        open_new_label.set_single_line_mode(true);
+
         open_new_content.append(&open_new_icon);
         open_new_content.append(&open_new_label);
         open_new_btn.set_child(Some(&open_new_content));
@@ -293,8 +303,8 @@ pub fn render_previews(
 
         if windows.len() > 1 {
             let close_all_btn = gtk4::Button::new();
-            close_all_btn.add_css_class("taskbar-preview-action-btn");
-            close_all_btn.add_css_class("taskbar-preview-close-all");
+            close_all_btn.add_css_class("taskbar-popover-action-btn");
+            close_all_btn.add_css_class("destructive");
             close_all_btn.set_hexpand(true);
             close_all_btn.set_cursor_from_name(Some("pointer"));
 
@@ -302,13 +312,19 @@ pub fn render_previews(
             close_all_content.set_halign(gtk4::Align::Start);
             close_all_content.set_valign(gtk4::Align::Center);
 
-            let close_all_icon = babydra_ui_kit::ui::icon::get_icon("window-close-symbolic", 13);
-            close_all_icon.add_css_class("taskbar-preview-action-icon");
+            let close_all_icon = babydra_ui_kit::ui::icon::get_icon("window-close-symbolic", 14);
+            close_all_icon.set_pixel_size(14);
+            close_all_icon.add_css_class("taskbar-popover-action-icon");
+            close_all_icon.add_css_class("destructive");
 
             let close_all_label =
                 gtk4::Label::new(Some(&babydra_core::i18n::trans("taskbar.close_all")));
-            close_all_label.add_css_class("taskbar-preview-action-label");
-            close_all_label.add_css_class("close-all-text");
+            close_all_label.add_css_class("taskbar-popover-action-label");
+            close_all_label.add_css_class("destructive");
+            close_all_label.set_halign(gtk4::Align::Start);
+            close_all_label.set_xalign(0.0);
+            close_all_label.set_single_line_mode(true);
+
             close_all_content.append(&close_all_icon);
             close_all_content.append(&close_all_label);
             close_all_btn.set_child(Some(&close_all_content));
