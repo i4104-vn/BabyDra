@@ -80,7 +80,7 @@ pub fn render_previews(
 ) {
     let previews_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
     previews_box.add_css_class("taskbar-popover-box");
-    previews_box.set_width_request(280);
+    previews_box.set_width_request(250);
 
     // 1. Header Card
     let header = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
@@ -109,6 +109,7 @@ pub fn render_previews(
     header_label.set_ellipsize(gtk4::pango::EllipsizeMode::End);
     header_label.set_single_line_mode(true);
     header_label.set_wrap(false);
+    header_label.set_max_width_chars(18);
     header.append(&header_label);
 
     let count_unit = if windows.len() == 1 {
@@ -214,9 +215,12 @@ pub fn render_previews(
         title_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
         title_lbl.set_single_line_mode(true);
         title_lbl.set_wrap(false);
+        title_lbl.set_max_width_chars(25);
         title_lbl.set_hexpand(true);
         title_lbl.set_halign(gtk4::Align::Start);
         title_lbl.set_xalign(0.0);
+        title_lbl.set_margin_start(2);
+        title_lbl.set_margin_end(4);
         item_content.append(&title_lbl);
 
         if is_active {
@@ -294,6 +298,8 @@ pub fn render_previews(
         open_new_label.set_halign(gtk4::Align::Start);
         open_new_label.set_xalign(0.0);
         open_new_label.set_single_line_mode(true);
+        open_new_label.set_ellipsize(gtk4::pango::EllipsizeMode::End);
+        open_new_label.set_max_width_chars(25);
 
         open_new_content.append(&open_new_icon);
         open_new_content.append(&open_new_label);
@@ -324,6 +330,8 @@ pub fn render_previews(
             close_all_label.set_halign(gtk4::Align::Start);
             close_all_label.set_xalign(0.0);
             close_all_label.set_single_line_mode(true);
+            close_all_label.set_ellipsize(gtk4::pango::EllipsizeMode::End);
+            close_all_label.set_max_width_chars(25);
 
             close_all_content.append(&close_all_icon);
             close_all_content.append(&close_all_label);

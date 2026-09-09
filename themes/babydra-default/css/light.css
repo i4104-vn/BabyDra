@@ -195,7 +195,9 @@ popover.taskbar-popover>arrow {
     border: 1px solid rgba(0, 0, 0, 0.10);
     border-top: 1px solid rgba(0, 0, 0, 0.14);
     border-radius: 12px;
-    padding: 6px;
+    padding: 8px;
+    min-width: 300px;
+    max-width: 300px;
     box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16), 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
@@ -218,14 +220,15 @@ popover.taskbar-popover>arrow {
 
 .taskbar-popover-separator {
     background-color: rgba(0, 0, 0, 0.08);
-    margin: 3px 2px 4px 2px;
+    margin: 4px 2px;
     min-height: 1px;
 }
 
 .taskbar-popover-row {
     border-radius: 8px;
     margin: 1px 0;
-    padding: 2px 4px 2px 6px;
+    padding: 4px 8px;
+    min-height: 32px;
     transition: background-color 120ms ease;
 }
 
@@ -251,7 +254,7 @@ button.taskbar-popover-item-btn:active {
     border: none;
     outline: none;
     box-shadow: none;
-    padding: 4px 0;
+    padding: 0;
     margin: 0;
 }
 
@@ -275,7 +278,7 @@ button.taskbar-popover-item-btn:active {
     font-weight: 500;
     color: rgba(0, 0, 0, 0.85);
     margin: 0;
-    padding: 0;
+    padding: 0 4px;
 }
 
 .taskbar-popover-row:hover .taskbar-popover-item-label {
@@ -293,6 +296,7 @@ button.taskbar-popover-item-btn:active {
     border-radius: 3px;
     background-color: #2563eb;
     box-shadow: 0 0 5px rgba(37, 99, 235, 0.8);
+    margin: 0 4px;
 }
 
 button.taskbar-popover-close-btn {
@@ -317,7 +321,7 @@ button.taskbar-popover-close-btn:hover {
 }
 
 .taskbar-popover-actions {
-    padding-top: 1px;
+    padding-top: 2px;
 }
 
 button.taskbar-popover-action-btn {
@@ -326,8 +330,9 @@ button.taskbar-popover-action-btn {
     border: none;
     outline: none;
     box-shadow: none;
-    border-radius: 6px;
-    padding: 6px 8px;
+    border-radius: 8px;
+    padding: 6px 10px;
+    min-height: 32px;
     transition: background-color 120ms ease, color 120ms ease;
     margin: 1px 0;
 }
@@ -344,6 +349,7 @@ button.taskbar-popover-action-btn:hover {
     font-size: 12.5px;
     font-weight: 500;
     color: rgba(0, 0, 0, 0.80);
+    padding: 0 2px;
 }
 
 button.taskbar-popover-action-btn:hover .taskbar-popover-action-label {

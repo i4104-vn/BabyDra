@@ -26,8 +26,8 @@ button.panel-logo-btn:hover {
     color: rgba(255, 255, 255, 0.14);
 }
 
-popover.status-popover > contents,
-popover.tooltip-popover > contents {
+popover.status-popover>contents,
+popover.tooltip-popover>contents {
     background-color: rgba(18, 18, 24, 0.94);
     border: 1px solid rgba(255, 255, 255, 0.14);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -130,7 +130,7 @@ button.panel-tray-item-btn:hover {
 }
 
 popover.tray-context-menu,
-popover.tray-context-menu > contents {
+popover.tray-context-menu>contents {
     background: transparent;
     background-color: transparent;
     border: none;
@@ -186,7 +186,9 @@ popover.taskbar-popover>arrow {
     border: 1px solid rgba(255, 255, 255, 0.10);
     border-top: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 12px;
-    padding: 6px;
+    padding: 8px;
+    min-width: 250px;
+    max-width: 250px;
     box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 4px 12px rgba(0, 0, 0, 0.45);
 }
 
@@ -209,14 +211,15 @@ popover.taskbar-popover>arrow {
 
 .taskbar-popover-separator {
     background-color: rgba(255, 255, 255, 0.10);
-    margin: 3px 2px 4px 2px;
+    margin: 4px 2px;
     min-height: 1px;
 }
 
 .taskbar-popover-row {
     border-radius: 8px;
     margin: 1px 0;
-    padding: 2px 4px 2px 6px;
+    padding: 4px 8px;
+    min-height: 32px;
     transition: background-color 120ms ease;
 }
 
@@ -242,7 +245,7 @@ button.taskbar-popover-item-btn:active {
     border: none;
     outline: none;
     box-shadow: none;
-    padding: 4px 0;
+    padding: 0;
     margin: 0;
 }
 
@@ -266,7 +269,7 @@ button.taskbar-popover-item-btn:active {
     font-weight: 500;
     color: rgba(255, 255, 255, 0.90);
     margin: 0;
-    padding: 0;
+    padding: 0 4px;
 }
 
 .taskbar-popover-row:hover .taskbar-popover-item-label {
@@ -284,6 +287,7 @@ button.taskbar-popover-item-btn:active {
     border-radius: 3px;
     background-color: #3b82f6;
     box-shadow: 0 0 5px rgba(59, 130, 246, 0.8);
+    margin: 0 4px;
 }
 
 button.taskbar-popover-close-btn {
@@ -308,7 +312,7 @@ button.taskbar-popover-close-btn:hover {
 }
 
 .taskbar-popover-actions {
-    padding-top: 1px;
+    padding-top: 2px;
 }
 
 button.taskbar-popover-action-btn {
@@ -317,8 +321,9 @@ button.taskbar-popover-action-btn {
     border: none;
     outline: none;
     box-shadow: none;
-    border-radius: 6px;
-    padding: 6px 8px;
+    border-radius: 8px;
+    padding: 6px 10px;
+    min-height: 32px;
     transition: background-color 120ms ease, color 120ms ease;
     margin: 1px 0;
 }
@@ -335,6 +340,7 @@ button.taskbar-popover-action-btn:hover {
     font-size: 12.5px;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.85);
+    padding: 0 2px;
 }
 
 button.taskbar-popover-action-btn:hover .taskbar-popover-action-label {
@@ -879,8 +885,7 @@ entry.launcher-search>text>placeholder {
     color: rgba(255, 255, 255, 0.50);
 }
 
-.launcher-power-btn {
-}
+.launcher-power-btn {}
 
 .launcher-power-btn:hover {
     background-color: rgba(239, 68, 68, 0.3);
@@ -1795,8 +1800,7 @@ button.wallpaper-thumb-card:hover picture {
 
 
 /* Dropdown Select Controls (Matching Search Input Style) */
-dropdown {
-}
+dropdown {}
 
 dropdown>button {
     background-color: rgba(255, 255, 255, 0.04);
@@ -1889,14 +1893,11 @@ textview.hosts-editor-text text {
     color: rgba(255, 255, 255, 0.85);
 }
 
-progressbar.console-progress {
-}
+progressbar.console-progress {}
 
-progressbar.console-progress trough {
-}
+progressbar.console-progress trough {}
 
-progressbar.console-progress progress {
-}
+progressbar.console-progress progress {}
 
 /* Dark Theme Auth Dialog Overlay */
 .auth-dialog-card {
@@ -2037,20 +2038,20 @@ progressbar.battery-level-bar trough {
 
 /* Settings Scale Slider Colors (Dark) */
 scale.settings-scale trough,
-scale.settings-scale > trough,
-scale.settings-scale contents > trough {
+scale.settings-scale>trough,
+scale.settings-scale contents>trough {
     background-color: rgba(255, 255, 255, 0.20);
 }
 
 scale.settings-scale trough highlight,
-scale.settings-scale > trough > highlight,
-scale.settings-scale contents > trough > highlight {
+scale.settings-scale>trough>highlight,
+scale.settings-scale contents>trough>highlight {
     background-color: #3b82f6;
 }
 
 scale.settings-scale slider,
-scale.settings-scale > slider,
-scale.settings-scale contents > slider {
+scale.settings-scale>slider,
+scale.settings-scale contents>slider {
     background-color: #ffffff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
 }
@@ -2060,20 +2061,20 @@ scale.settings-scale mark label {
 }
 
 scale.settings-scale:disabled trough,
-scale.settings-scale:disabled > trough,
-scale.settings-scale:disabled contents > trough {
+scale.settings-scale:disabled>trough,
+scale.settings-scale:disabled contents>trough {
     background-color: rgba(255, 255, 255, 0.08);
 }
 
 scale.settings-scale:disabled trough highlight,
-scale.settings-scale:disabled > trough > highlight,
-scale.settings-scale:disabled contents > trough > highlight {
+scale.settings-scale:disabled>trough>highlight,
+scale.settings-scale:disabled contents>trough>highlight {
     background-color: rgba(255, 255, 255, 0.25);
 }
 
 scale.settings-scale:disabled slider,
-scale.settings-scale:disabled > slider,
-scale.settings-scale:disabled contents > slider {
+scale.settings-scale:disabled>slider,
+scale.settings-scale:disabled contents>slider {
     background-color: rgba(255, 255, 255, 0.45);
     box-shadow: none;
 }
@@ -2081,6 +2082,7 @@ scale.settings-scale:disabled contents > slider {
 scale.settings-scale:disabled mark label {
     color: rgba(255, 255, 255, 0.25);
 }
+
 /* === apps/switcher.css === */
 .switcher-window {
     background-color: rgba(0, 0, 0, 0.50);
@@ -2128,8 +2130,8 @@ button.switcher-card.selected {
 
 
 /* === Workspace Switcher Popover & Flyout === */
-popover.workspace-switcher-popover > contents,
-popover.workspace-apps-flyout > contents {
+popover.workspace-switcher-popover>contents,
+popover.workspace-apps-flyout>contents {
     background-color: rgba(14, 14, 18, 0.96);
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-top: 1px solid rgba(255, 255, 255, 0.28);
@@ -2521,10 +2523,10 @@ popover.context-menu-popover,
 popover.explore-popover,
 popover.tray-context-menu,
 popover.desktop-context-menu,
-popover.context-menu-popover > contents,
-popover.explore-popover > contents,
-popover.tray-context-menu > contents,
-popover.desktop-context-menu > contents {
+popover.context-menu-popover>contents,
+popover.explore-popover>contents,
+popover.tray-context-menu>contents,
+popover.desktop-context-menu>contents {
     background: transparent;
     background-color: transparent;
     background-image: none;
@@ -2535,10 +2537,10 @@ popover.desktop-context-menu > contents {
     margin: 0;
 }
 
-popover.context-menu-popover > arrow,
-popover.explore-popover > arrow,
-popover.tray-context-menu > arrow,
-popover.desktop-context-menu > arrow {
+popover.context-menu-popover>arrow,
+popover.explore-popover>arrow,
+popover.tray-context-menu>arrow,
+popover.desktop-context-menu>arrow {
     background: none;
     border: none;
 }
@@ -2939,4 +2941,3 @@ scrollbar slider:hover,
 scrollbar slider:hover:active {
     background-color: rgba(255, 255, 255, 0.35);
 }
-
