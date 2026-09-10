@@ -41,6 +41,7 @@ killall babydra-preview || true
 killall babydra-settings || true
 killall babydra-explore || true
 killall babydra-greeter || true
+killall babydra-keymap || true
 
 # 5. Overwrite binaries in ~/.local/bin and /usr/bin
 echo "Installing new binaries..."
@@ -55,6 +56,7 @@ cp target/release/babydra-launcher "$LOCAL_BIN/babydra-launcher"
 cp target/release/babydra-preview "$LOCAL_BIN/babydra-preview"
 cp target/release/babydra-settings "$LOCAL_BIN/babydra-settings"
 cp target/release/babydra-explore "$LOCAL_BIN/babydra-explore"
+cp target/release/babydra-keymap "$LOCAL_BIN/babydra-keymap"
 chmod +x "$LOCAL_BIN"/babydra-* 2>/dev/null || true
 sudo cp target/release/babydra-greeter /usr/bin/babydra-greeter 2>/dev/null || true
 
@@ -219,3 +221,4 @@ rm -f /tmp/babydra-switcher.socket
 ~/.local/bin/babydra-switcher --daemon &
 ~/.local/bin/babydra-panel &
 ~/.local/bin/babydra-desktop &
+~/.local/bin/babydra-keymap &

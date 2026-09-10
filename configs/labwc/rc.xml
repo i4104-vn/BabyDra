@@ -26,25 +26,27 @@
 
   <keyboard>
     <default />
+    <!-- BABYDRA_SWALLOW_START -->
     <!-- Global shortcuts are handled by babydra-keymap; labwc only swallows
-         the combos here so the default bindings do not fire. -->
+         the combos here so client windows do not receive the keystrokes. -->
     <keybind key="A-Tab">
-      <action name="None" />
+      <action name="Execute" command="true" />
     </keybind>
     <keybind key="W-q">
-      <action name="None" />
+      <action name="Execute" command="true" />
     </keybind>
     <!-- Take screenshot with Win+F12 or Print key -->
     <keybind key="W-F12">
-      <action name="None" />
+      <action name="Execute" command="true" />
     </keybind>
     <keybind key="Print">
-      <action name="None" />
+      <action name="Execute" command="true" />
     </keybind>
     <!-- Lock screen with Win+L -->
     <keybind key="W-l">
-      <action name="None" />
+      <action name="Execute" command="true" />
     </keybind>
+    <!-- BABYDRA_SWALLOW_END -->
 
     <!-- Workspace switching keybinds -->
     <keybind key="W-1">
