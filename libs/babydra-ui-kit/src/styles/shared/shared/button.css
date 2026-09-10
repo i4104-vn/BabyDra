@@ -22,12 +22,14 @@ button.baby-button:focus {
 
 button.circle-btn,
 button.icon-btn-circle,
+button.icon-btn,
+.icon-btn,
 button.circular,
 .circular {
     background-image: none;
     border-radius: 50%;
-    min-width: 36px;
-    min-height: 36px;
+    min-width: 32px;
+    min-height: 32px;
     padding: 0;
     font-size: 14px;
     font-weight: 500;
@@ -37,6 +39,8 @@ button.circular,
 
 button.circle-btn:hover,
 button.icon-btn-circle:hover,
+button.icon-btn:hover,
+.icon-btn:hover,
 button.circular:hover,
 .circular:hover {
     box-shadow: none;

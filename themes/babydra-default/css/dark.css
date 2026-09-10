@@ -1046,6 +1046,8 @@ button.baby-button:hover {
 
 button.circle-btn,
 button.icon-btn-circle,
+button.icon-btn,
+.icon-btn,
 button.circular,
 .circular {
     background-color: rgba(255, 255, 255, 0.08);
@@ -1056,6 +1058,8 @@ button.circular,
 
 button.circle-btn:hover,
 button.icon-btn-circle:hover,
+button.icon-btn:hover,
+.icon-btn:hover,
 button.circular:hover,
 .circular:hover {
     background-color: rgba(255, 255, 255, 0.14);

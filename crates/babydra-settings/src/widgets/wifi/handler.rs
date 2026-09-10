@@ -302,7 +302,10 @@ pub fn render_network_list(
 
         let info_btn = gtk4::Button::new();
         info_btn.add_css_class("icon-btn");
+        info_btn.add_css_class("circular");
         info_btn.set_valign(gtk4::Align::Center);
+        info_btn.set_cursor_from_name(Some("pointer"));
+        info_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.wifi_details")));
 
         let info_icon = babydra_ui_kit::ui::icon::get_icon("info", 16);
         info_icon.set_pixel_size(16);

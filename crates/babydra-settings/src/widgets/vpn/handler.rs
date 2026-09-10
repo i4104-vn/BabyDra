@@ -106,6 +106,7 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
         // View Logs Button
         let log_btn = gtk4::Button::new();
         log_btn.add_css_class("icon-btn");
+        log_btn.add_css_class("circular");
         log_btn.set_valign(gtk4::Align::Center);
         log_btn.set_cursor_from_name(Some("pointer"));
         log_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.vpn_view_logs")));
@@ -124,8 +125,10 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
         // Edit / Customize Button
         let edit_btn = gtk4::Button::new();
         edit_btn.add_css_class("icon-btn");
+        edit_btn.add_css_class("circular");
         edit_btn.set_valign(gtk4::Align::Center);
         edit_btn.set_cursor_from_name(Some("pointer"));
+        edit_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.vpn_edit")));
 
         let cog_icon = babydra_ui_kit::ui::icon::get_icon("cog", 14);
         cog_icon.set_pixel_size(14);
