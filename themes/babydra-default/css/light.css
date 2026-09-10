@@ -698,10 +698,6 @@ popover>arrow {
     border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-.panel-notch.active-music.notification-mode {
-    background-color: rgba(250, 250, 250, 0.98);
-}
-
 .notch-player-text {
     color: rgba(28, 28, 30, 0.90);
 }
@@ -732,7 +728,8 @@ popover>arrow {
 
 popover.media-popover>contents,
 popover.clipboard-popover>contents,
-popover.power-popover>contents {
+popover.power-popover>contents,
+popover.notification-popover>contents {
     background-color: rgba(248, 249, 251, 0.98);
     border: 1px solid rgba(0, 0, 0, 0.10);
     border-top: 1px solid rgba(255, 255, 255, 0.90);

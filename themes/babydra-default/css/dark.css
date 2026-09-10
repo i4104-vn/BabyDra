@@ -677,12 +677,6 @@ popover>arrow {
     border-top: 1px solid rgba(255, 255, 255, 0.20);
 }
 
-.panel-notch.active-music.notification-mode {
-    background-color: rgba(30, 30, 38, 0.98);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-top: 1px solid rgba(255, 255, 255, 0.35);
-}
-
 .notch-player-text {
     color: rgba(255, 255, 255, 0.90);
 }
@@ -712,13 +706,9 @@ popover>arrow {
 }
 
 popover.media-popover>contents,
-popover.clipboard-popover>contents {
-    background-color: rgba(14, 14, 18, 0.96);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-top: 1px solid rgba(255, 255, 255, 0.28);
-}
-
-popover.power-popover>contents {
+popover.clipboard-popover>contents,
+popover.power-popover>contents,
+popover.notification-popover>contents {
     background-color: rgba(14, 14, 18, 0.96);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-top: 1px solid rgba(255, 255, 255, 0.24);
