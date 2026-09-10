@@ -460,17 +460,26 @@ fn island_tick(core_rc: &Rc<RefCell<IslandCore>>) {
 
     // 1. Auto-hide / auto-release timers.
     for v in core.views.iter() {
-        if let Some(deadline) = v.state.auto_hide_at.borrow().as_ref() {
-            if now >= *deadline {
-                v.state.requested.set(false);
-                v.state.auto_hide_at.borrow_mut().take();
-            }
+        let should_hide = v
+            .state
+            .auto_hide_at
+            .borrow()
+            .map(|deadline| now >= deadline)
+            .unwrap_or(false);
+        if should_hide {
+            v.state.requested.set(false);
+            v.state.auto_hide_at.borrow_mut().take();
         }
-        if let Some(deadline) = v.state.release_at.borrow().as_ref() {
-            if now >= *deadline {
-                v.state.override_active.set(false);
-                v.state.release_at.borrow_mut().take();
-            }
+
+        let should_release = v
+            .state
+            .release_at
+            .borrow()
+            .map(|deadline| now >= deadline)
+            .unwrap_or(false);
+        if should_release {
+            v.state.override_active.set(false);
+            v.state.release_at.borrow_mut().take();
         }
     }
 
