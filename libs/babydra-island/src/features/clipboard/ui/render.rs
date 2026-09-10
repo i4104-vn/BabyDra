@@ -12,6 +12,15 @@ fn load_thumbnail(bytes: &[u8], size: i32) -> Option<gdk_pixbuf::Pixbuf> {
     pixbuf.scale_simple(size, size, gdk_pixbuf::InterpType::Bilinear)
 }
 
+fn format_more_lines(count: usize) -> String {
+    if count == 1 {
+        babydra_core::i18n::trans("island.clipboard_more_lines_one")
+    } else {
+        let tmpl = babydra_core::i18n::trans("island.clipboard_more_lines_many");
+        tmpl.replace("{count}", &count.to_string())
+    }
+}
+
 /// Renders the current clipboard entries into the popover and updates highlight.
 pub fn render_popover(
     popover: &ClipboardPopover,
@@ -54,7 +63,6 @@ pub fn render_popover(
 
             row.container.set_visible(true);
             row.num_label.set_text(&format!("{}.", actual_idx + 1));
-            row.text_label.set_text(&entry.preview_text());
 
             while let Some(child) = row.icon_holder.first_child() {
                 row.icon_holder.remove(&child);
@@ -62,11 +70,29 @@ pub fn render_popover(
 
             match entry {
                 ClipboardEntry::Text { .. } => {
+                    let (preview, more_count) = entry.preview_lines();
+                    let display_text = if preview.is_empty() {
+                        babydra_core::i18n::trans("island.clipboard_empty_item")
+                    } else {
+                        preview
+                    };
+                    row.text_label.set_text(&display_text);
+
+                    if more_count > 0 {
+                        row.more_label.set_text(&format_more_lines(more_count));
+                        row.more_label.set_visible(true);
+                    } else {
+                        row.more_label.set_visible(false);
+                    }
+
                     let icon = babydra_ui_kit::ui::icon::get_icon("text", 13);
                     icon.set_valign(gtk4::Align::Center);
                     row.icon_holder.append(&icon);
                 }
                 ClipboardEntry::Image { png_bytes, .. } => {
+                    row.text_label.set_text(&babydra_core::i18n::trans("island.clipboard_image"));
+                    row.more_label.set_visible(false);
+
                     if let Some(pixbuf) = load_thumbnail(png_bytes, 18) {
                         let img = gtk4::Image::from_pixbuf(Some(&pixbuf));
                         img.add_css_class("clipboard-popover-thumb");

@@ -753,6 +753,14 @@ popover.clipboard-popover>contents {
     color: rgba(255, 255, 255, 0.90);
 }
 
+.clipboard-popover-more {
+    color: #60a5fa;
+}
+
+.clipboard-popover-item.selected .clipboard-popover-more {
+    color: #93c5fd;
+}
+
 .clipboard-popover-empty {
     color: rgba(255, 255, 255, 0.45);
 }

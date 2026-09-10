@@ -43,26 +43,52 @@ impl ClipboardEntry {
         }
     }
 
-    pub fn preview_text(&self) -> String {
+    /// Formats up to 3 lines of preview text and returns `(text, excess_lines_count)`.
+    ///
+    /// If text contains multiple lines, line breaks are preserved up to 3 lines.
+    /// If total lines exceed 3, returns the first 3 lines and `excess_lines_count = total - 3`.
+    pub fn preview_lines(&self) -> (String, usize) {
         match self {
             Self::Text { content, .. } => {
-                let first_non_empty = content
-                    .lines()
-                    .map(|l| l.trim())
-                    .find(|l| !l.is_empty())
-                    .unwrap_or("");
-                if first_non_empty.chars().count() > 42 {
-                    let mut s: String = first_non_empty.chars().take(39).collect();
-                    s.push_str("...");
-                    s
-                } else if first_non_empty.is_empty() {
-                    "(Empty)".to_string()
+                let trimmed = content
+                    .trim_start_matches(|c| c == '\r' || c == '\n')
+                    .trim_end();
+                if trimmed.trim().is_empty() {
+                    return (String::new(), 0);
+                }
+                let raw_lines: Vec<&str> = trimmed.lines().collect();
+                let total = raw_lines.len();
+                if total <= 3 {
+                    let cleaned: Vec<String> = raw_lines.into_iter().map(clean_line).collect();
+                    (cleaned.join("\n"), 0)
                 } else {
-                    first_non_empty.to_string()
+                    let cleaned: Vec<String> = raw_lines[..3]
+                        .iter()
+                        .copied()
+                        .map(clean_line)
+                        .collect();
+                    let excess = total - 3;
+                    (cleaned.join("\n"), excess)
                 }
             }
-            Self::Image { .. } => "[Image / Hình ảnh]".to_string(),
+            Self::Image { .. } => (String::new(), 0),
         }
+    }
+
+    pub fn preview_text(&self) -> String {
+        let (lines, _) = self.preview_lines();
+        lines
+    }
+}
+
+fn clean_line(line: &str) -> String {
+    let expanded = line.replace('\t', "    ");
+    if expanded.chars().count() > 80 {
+        let mut s: String = expanded.chars().take(77).collect();
+        s.push_str("...");
+        s
+    } else {
+        expanded
     }
 }
 
@@ -369,5 +395,48 @@ mod tests {
             timestamp: Instant::now(),
         });
         assert_eq!(get_entries().len(), 3);
+    }
+
+    #[test]
+    fn test_clipboard_preview_lines() {
+        let single = ClipboardEntry::Text {
+            content: "Single line text".to_string(),
+            timestamp: Instant::now(),
+        };
+        let (text, excess) = single.preview_lines();
+        assert_eq!(text, "Single line text");
+        assert_eq!(excess, 0);
+
+        let three_lines = ClipboardEntry::Text {
+            content: "line 1\nline 2\nline 3\n".to_string(),
+            timestamp: Instant::now(),
+        };
+        let (text, excess) = three_lines.preview_lines();
+        assert_eq!(text, "line 1\nline 2\nline 3");
+        assert_eq!(excess, 0);
+
+        let five_lines = ClipboardEntry::Text {
+            content: "l1\nl2\nl3\nl4\nl5".to_string(),
+            timestamp: Instant::now(),
+        };
+        let (text, excess) = five_lines.preview_lines();
+        assert_eq!(text, "l1\nl2\nl3");
+        assert_eq!(excess, 2);
+
+        let with_tabs = ClipboardEntry::Text {
+            content: "\tfn main() {\n\t\tprintln!();\n\t}".to_string(),
+            timestamp: Instant::now(),
+        };
+        let (text, excess) = with_tabs.preview_lines();
+        assert_eq!(text, "    fn main() {\n        println!();\n    }");
+        assert_eq!(excess, 0);
+
+        let empty = ClipboardEntry::Text {
+            content: "   \n\n  ".to_string(),
+            timestamp: Instant::now(),
+        };
+        let (text, excess) = empty.preview_lines();
+        assert_eq!(text, "");
+        assert_eq!(excess, 0);
     }
 }
