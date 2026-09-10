@@ -5,6 +5,7 @@ pub mod battery;
 pub mod bluetooth;
 pub mod certificates;
 pub mod clean;
+pub mod default_apps;
 pub mod display;
 pub mod gpu;
 pub mod gsettings;

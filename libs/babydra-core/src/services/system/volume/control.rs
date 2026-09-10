@@ -143,3 +143,87 @@ pub fn select_audio_device(name: &str) {
         }
     }
 }
+
+/// Sets `microphone volume` to the given percentage value using the active audio backend.
+pub fn set_microphone_volume(val: f64) {
+    let percent = val.clamp(0.0, 150.0) as i32;
+
+    match get_audio_backend() {
+        AudioBackendType::Wpctl => {
+            let _ = Command::new("wpctl")
+                .args([
+                    "set-volume",
+                    "@DEFAULT_AUDIO_SOURCE@",
+                    &format!("{}%", percent),
+                ])
+                .spawn();
+            if percent > 0 {
+                let _ = Command::new("wpctl")
+                    .args(["set-mute", "@DEFAULT_AUDIO_SOURCE@", "0"])
+                    .spawn();
+            }
+        }
+        AudioBackendType::Pactl => {
+            let _ = Command::new("pactl")
+                .args([
+                    "set-source-volume",
+                    "@DEFAULT_SOURCE@",
+                    &format!("{}%", percent),
+                ])
+                .spawn();
+            if percent > 0 {
+                let _ = Command::new("pactl")
+                    .args(["set-source-mute", "@DEFAULT_SOURCE@", "0"])
+                    .spawn();
+            }
+        }
+        AudioBackendType::Amixer => {
+            let _ = Command::new("amixer")
+                .args(["set", "Capture", &format!("{}%", percent)])
+                .spawn();
+            if percent > 0 {
+                let _ = Command::new("amixer")
+                    .args(["set", "Capture", "cap"])
+                    .spawn();
+            }
+        }
+    }
+}
+
+/// Sets the microphone mute status using the active audio backend.
+pub fn set_microphone_muted(muted: bool) {
+    let mute_val = if muted { "1" } else { "0" };
+
+    match get_audio_backend() {
+        AudioBackendType::Wpctl => {
+            let _ = Command::new("wpctl")
+                .args(["set-mute", "@DEFAULT_AUDIO_SOURCE@", mute_val])
+                .spawn();
+        }
+        AudioBackendType::Pactl => {
+            let _ = Command::new("pactl")
+                .args(["set-source-mute", "@DEFAULT_SOURCE@", mute_val])
+                .spawn();
+        }
+        AudioBackendType::Amixer => {
+            let _ = Command::new("amixer")
+                .args(["set", "Capture", if muted { "nocap" } else { "cap" }])
+                .spawn();
+        }
+    }
+}
+
+/// Commands the audio subsystem to activate a specific audio source (microphone).
+pub fn select_audio_source(name: &str) {
+    match get_audio_backend() {
+        AudioBackendType::Wpctl => {
+            let _ = Command::new("wpctl").args(["set-default", name]).status();
+        }
+        AudioBackendType::Pactl => {
+            let _ = Command::new("pactl")
+                .args(["set-default-source", name])
+                .status();
+        }
+        AudioBackendType::Amixer => {}
+    }
+}
