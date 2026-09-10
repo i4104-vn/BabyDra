@@ -52,10 +52,10 @@ impl PowerPopover {
         // Buttons container: 4 power cards in a spacious horizontal row
         let buttons_box = GtkBox::new(Orientation::Horizontal, 8);
         buttons_box.add_css_class("power-popover-buttons");
-        buttons_box.set_halign(Align::Fill);
-        buttons_box.set_valign(Align::Fill);
+        buttons_box.set_halign(Align::Center);
+        buttons_box.set_valign(Align::Center);
         buttons_box.set_hexpand(true);
-        buttons_box.set_vexpand(true);
+        buttons_box.set_vexpand(false);
         buttons_box.set_homogeneous(true);
 
         let btn_shutdown = PowerButtonWidget::new(

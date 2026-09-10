@@ -24,22 +24,21 @@ impl PowerButtonWidget {
         let container = GtkBox::new(Orientation::Vertical, 0);
         container.add_css_class("power-popover-btn");
         container.add_css_class(css_action_class);
-        container.set_halign(Align::Fill);
-        container.set_valign(Align::Fill);
-        container.set_hexpand(true);
-        container.set_vexpand(true);
+        container.set_halign(Align::Center);
+        container.set_valign(Align::Center);
+        container.set_size_request(100, 100);
         container.set_focusable(false);
         container.set_cursor_from_name(Some("pointer"));
 
         // 1. Dead-centered circular icon holder via CenterBox
         let icon_holder = CenterBox::new();
         icon_holder.add_css_class("power-btn-icon");
-        icon_holder.set_size_request(42, 42);
+        icon_holder.set_size_request(40, 40);
         icon_holder.set_halign(Align::Center);
         icon_holder.set_valign(Align::Center);
-        icon_holder.set_margin_bottom(6);
+        icon_holder.set_margin_bottom(5);
 
-        let icon = babydra_ui_kit::ui::icon::get_icon_colored(icon_name, 22, icon_color);
+        let icon = babydra_ui_kit::ui::icon::get_icon_colored(icon_name, 20, icon_color);
         icon.set_halign(Align::Center);
         icon.set_valign(Align::Center);
         icon_holder.set_center_widget(Some(&icon));
@@ -51,7 +50,7 @@ impl PowerButtonWidget {
         title_label.set_halign(Align::Center);
         title_label.set_valign(Align::Center);
         title_label.set_wrap(false);
-        title_label.set_margin_bottom(6);
+        title_label.set_margin_bottom(5);
         container.append(&title_label);
 
         // 3. Hotkey keycap badge e.g. "1"
