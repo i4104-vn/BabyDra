@@ -1,36 +1,43 @@
 //! D-Bus IPC server hosting `org.babydra.Island` over the user session bus.
 
+use tokio::sync::mpsc::UnboundedSender;
 use zbus::interface;
 
-pub struct IslandDbusService;
+pub struct IslandDbusService {
+    tx: UnboundedSender<()>,
+}
 
 #[interface(name = "org.babydra.Island")]
 impl IslandDbusService {
     /// Shows or focuses the clipboard history view.
     async fn show_clipboard(&self) {
-        gtk4::glib::idle_add_local_once(|| {
-            super::fire_trigger();
-        });
+        let _ = self.tx.send(());
     }
 
     /// Toggles the clipboard history view.
     async fn toggle_clipboard(&self) {
-        gtk4::glib::idle_add_local_once(|| {
-            super::fire_trigger();
-        });
+        let _ = self.tx.send(());
     }
 }
 
 pub fn spawn_island_dbus() {
+    let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<()>();
+
+    glib::MainContext::default().spawn_local(async move {
+        while let Some(()) = rx.recv().await {
+            super::fire_trigger();
+        }
+    });
+
     std::thread::Builder::new()
         .name("babydra-island-dbus".into())
-        .spawn(|| {
+        .spawn(move || {
             let rt = tokio::runtime::Builder::new_current_thread()
                 .enable_all()
                 .build();
             if let Ok(rt) = rt {
-                rt.block_on(async {
-                    let service = IslandDbusService;
+                rt.block_on(async move {
+                    let service = IslandDbusService { tx };
                     let conn_builder = zbus::connection::Builder::session();
                     if let Ok(builder) = conn_builder {
                         if let Ok(builder) = builder.name("org.babydra.Island") {
