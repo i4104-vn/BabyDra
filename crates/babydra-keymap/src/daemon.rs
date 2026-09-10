@@ -21,34 +21,31 @@ pub async fn run() {
     keyboard::run(shortcuts).await;
 }
 
-/// Loads shortcuts via the core keymap service and logs invalid entries.
+/// Loads all valid global shortcuts, merging custom keymap with active feature shortcuts.
 fn load() -> Vec<Shortcut> {
-    let all = babydra_core::services::system::keymap::get_shortcuts();
-    let mut valid = Vec::new();
-
-    for sc in all {
-        if sc.key.is_empty() || sc.command.trim().is_empty() {
-            tracing::warn!("skipping shortcut #{}: empty key or command", sc.id);
-            continue;
-        }
-        valid.push(sc);
+    let mut shortcuts = babydra_core::services::system::keymap::get_shortcuts();
+    if let Some(clipboard_sc) = babydra_core::get_shortcut() {
+        shortcuts.push(clipboard_sc);
     }
-
-    tracing::info!("loaded {} shortcut(s)", valid.len());
-    valid
+    shortcuts.retain(|s| !s.key.is_empty() && !s.command.trim().is_empty());
+    tracing::info!("loaded {} shortcut(s)", shortcuts.len());
+    shortcuts
 }
 
-/// Watches the config file and hot-reloads it into `shared` on change.
+/// Watches configuration files (keymap.toml and babydra.conf), hot-reloading on change.
 async fn watch(shared: SharedShortcuts) {
-    let path = babydra_core::services::system::keymap::get_config_path();
-    let mut last_modified = file_mtime(&path);
+    let paths = [
+        babydra_core::services::system::keymap::get_config_path(),
+        babydra_core::config::get_conf_path(),
+    ];
+    let mut last_mtimes = paths.each_ref().map(|p| file_mtime(p));
 
     loop {
         tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-        let mtime = file_mtime(&path);
-        if mtime != last_modified && mtime.is_some() {
-            last_modified = mtime;
-            tracing::info!("config changed, reloading");
+        let cur_mtimes = paths.each_ref().map(|p| file_mtime(p));
+        if cur_mtimes != last_mtimes && cur_mtimes.iter().any(Option::is_some) {
+            last_mtimes = cur_mtimes;
+            tracing::info!("config changed, reloading shortcuts");
             *shared.write().unwrap() = load();
         }
     }
