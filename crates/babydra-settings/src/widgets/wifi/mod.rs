@@ -11,7 +11,7 @@ mod render;
 
 /// Creates a new `wifi widget`.
 pub fn create_wifi_widget() -> gtk4::Widget {
-    let (overlay, toggle_row, list_box, info_dialog, password_dialog, config_dialog) =
+    let (main_box, toggle_row, list_box, info_dialog, password_dialog, config_dialog) =
         render::build_wifi_ui();
 
     let info_dialog = Rc::new(info_dialog);
@@ -257,5 +257,5 @@ pub fn create_wifi_widget() -> gtk4::Widget {
         }
     });
 
-    overlay.into()
+    main_box.into()
 }

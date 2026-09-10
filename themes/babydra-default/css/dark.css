@@ -30,7 +30,7 @@ popover.status-popover>contents,
 popover.tooltip-popover>contents {
     background-color: rgba(18, 18, 24, 0.94);
     border: 1px solid rgba(255, 255, 255, 0.14);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: none;
 }
 
 .status-popover-header,
@@ -599,7 +599,7 @@ popover.volume-popover>contents,
 popover.audio-popover>contents {
     background-color: rgba(18, 18, 24, 0.94);
     border: 1px solid rgba(255, 255, 255, 0.14);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: none;
 }
 
 .wifi-popover-box,
