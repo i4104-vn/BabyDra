@@ -27,6 +27,13 @@ fn load() -> Vec<Shortcut> {
     if let Some(clipboard_sc) = babydra_core::get_shortcut() {
         shortcuts.push(clipboard_sc);
     }
+    // Fixed non-customizable power shortcut: Win + F4
+    shortcuts.push(Shortcut {
+        id: 9998,
+        modifiers: "W".to_string(),
+        key: "F4".to_string(),
+        command: "busctl --user call org.babydra.Island /org/babydra/Island org.babydra.Island TogglePower".to_string(),
+    });
     shortcuts.retain(|s| !s.key.is_empty() && !s.command.trim().is_empty());
     tracing::info!("loaded {} shortcut(s)", shortcuts.len());
     shortcuts
