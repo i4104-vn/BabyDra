@@ -5,8 +5,9 @@
 //! new struct definitions to this file.
 
 pub use crate::models::config::{
-    BabyDraConfig, CustomContextItem, DesktopConfig, DisplayConfig, DisplayMonitorSetting,
-    ExploreSettings, LockscreenConfig, NotificationConfig, PowerConfig, WallpaperConfig,
+    BabyDraConfig, ClipboardConfig, CustomContextItem, DesktopConfig, DisplayConfig,
+    DisplayMonitorSetting, ExploreSettings, LockscreenConfig, NotificationConfig, PowerConfig,
+    WallpaperConfig,
 };
 use std::path::PathBuf;
 

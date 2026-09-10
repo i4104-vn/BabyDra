@@ -293,5 +293,11 @@
   "settings.general_default_apps_desc": "Choose default web browser, file manager, and terminal",
   "settings.general_default_browser": "Web Browser",
   "settings.general_default_file_manager": "File Manager",
-  "settings.general_default_terminal": "Terminal Emulator"
+  "settings.general_default_terminal": "Terminal Emulator",
+  "settings.general_clipboard": "Clipboard History",
+  "settings.general_clipboard_desc": "Manage clipboard history and quick access shortcut",
+  "settings.general_clipboard_enable": "Enable Clipboard History",
+  "settings.general_clipboard_enable_desc": "Automatically record copied text and images",
+  "settings.general_clipboard_shortcut": "Open Shortcut",
+  "settings.general_clipboard_shortcut_desc": "Key combination to show history on Dynamic Island"
 }

@@ -284,6 +284,52 @@ pub struct BabyDraConfig {
     /// Empty `id` = engine default (`babydra-default`).
     #[serde(default)]
     pub theme: ThemeConfig,
+    /// Clipboard history configuration.
+    #[serde(default)]
+    pub clipboard: ClipboardConfig,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct ClipboardConfig {
+    /// Whether clipboard history feature is enabled (default: true).
+    #[serde(default = "default_clipboard_enabled")]
+    pub enabled: bool,
+    /// Maximum items stored in history ring buffer (default: 20).
+    #[serde(default = "default_clipboard_max_items")]
+    pub max_items: usize,
+    /// Modifier keys for global shortcut (e.g. "W" for Super, "C" for Ctrl, etc.)
+    #[serde(default = "default_clipboard_modifiers")]
+    pub shortcut_modifiers: String,
+    /// Trigger key for global shortcut (e.g. "v")
+    #[serde(default = "default_clipboard_key")]
+    pub shortcut_key: String,
+}
+
+fn default_clipboard_enabled() -> bool {
+    true
+}
+
+fn default_clipboard_max_items() -> usize {
+    20
+}
+
+fn default_clipboard_modifiers() -> String {
+    "W".to_string()
+}
+
+fn default_clipboard_key() -> String {
+    "v".to_string()
+}
+
+impl Default for ClipboardConfig {
+    fn default() -> Self {
+        Self {
+            enabled: default_clipboard_enabled(),
+            max_items: default_clipboard_max_items(),
+            shortcut_modifiers: default_clipboard_modifiers(),
+            shortcut_key: default_clipboard_key(),
+        }
+    }
 }
 
 /// Parsed `variant.toml`.

@@ -293,5 +293,11 @@
   "settings.general_default_apps_desc": "Chọn trình duyệt web, trình quản lý tệp và terminal mặc định",
   "settings.general_default_browser": "Trình duyệt web",
   "settings.general_default_file_manager": "Trình quản lý tệp tin",
-  "settings.general_default_terminal": "Ứng dụng dòng lệnh"
+  "settings.general_default_terminal": "Ứng dụng dòng lệnh",
+  "settings.general_clipboard": "Lịch sử Clipboard",
+  "settings.general_clipboard_desc": "Quản lý lịch sử sao chép và phím tắt gọi nhanh",
+  "settings.general_clipboard_enable": "Bật lịch sử Clipboard",
+  "settings.general_clipboard_enable_desc": "Tự động ghi nhớ văn bản và hình ảnh đã sao chép",
+  "settings.general_clipboard_shortcut": "Phím tắt mở danh sách",
+  "settings.general_clipboard_shortcut_desc": "Tổ hợp phím để hiển thị nhanh trên Dynamic Island"
 }

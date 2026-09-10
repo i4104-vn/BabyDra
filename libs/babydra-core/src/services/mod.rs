@@ -1,5 +1,6 @@
 pub mod actions;
 pub mod apps;
+pub mod clipboard;
 pub mod clock;
 pub mod exif;
 pub mod explore;

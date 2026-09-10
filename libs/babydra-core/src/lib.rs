@@ -12,8 +12,15 @@ pub use error::{CoreError, CoreResult};
 // --- Config ---
 pub use config::{
     get_conf_path, get_config_dir, load_babydra_config, load_desktop_config, load_explore_cfg,
-    save_babydra_config, save_desktop_config, save_explore_cfg, BabyDraConfig, DesktopConfig,
-    ExploreSettings, NotificationConfig, PowerConfig, ShellConfig, ThemeConfig, WallpaperConfig,
+    save_babydra_config, save_desktop_config, save_explore_cfg, BabyDraConfig, ClipboardConfig,
+    DesktopConfig, ExploreSettings, NotificationConfig, PowerConfig, ShellConfig, ThemeConfig,
+    WallpaperConfig,
+};
+
+// --- Clipboard ---
+pub use services::clipboard::{
+    copy_to_system_clipboard, get_entries, get_shortcut, is_clipboard_enabled, push_entry,
+    spawn_clipboard_watcher, trigger_clipboard, ClipboardEntry,
 };
 
 // --- Models ---
