@@ -41,7 +41,7 @@ pub mod prelude {
         create_sys_wifi_icon, create_title, create_toggle_tile, create_vpn_icon, create_wifi_icon,
         create_wifi_net_icon, create_wp_thumb, render_wifi_svg, show_tray_menu, update_toggle_state,
         ChangeHostnameDialog, ChangeNameDialog, ChangePasswordDialog, ContextMenuBuilder,
-        CustomSlider, CustomSwitch, PasswordDialog, PlaceholderState, ToggleRow, TooltipPopover,
+        CustomSlider, CustomSwitch, PasswordDialog, PlaceholderState, PillSlider, ToggleRow, TooltipPopover,
         TooltipRow, VpnConfigDialog, VpnLogDialog, WifiConfigDialog, WifiInfoDialog,
         WifiPasswordDialog,
     };

@@ -245,6 +245,18 @@ fn load_icon_image_data(img: &gtk4::Image, name: &str, size: i32) {
 /// Sets the image content from local SVG or system icon theme.
 pub fn set_image_from_icon(img: &gtk4::Image, name: &str, size: i32) {
     load_icon_image_data(img, name, size);
+    ICON_WATCHERS.with(|watchers| {
+        let mut list = watchers.borrow_mut();
+        for (weak_img, watch_name, watch_size) in list.iter_mut() {
+            if let Some(target) = weak_img.upgrade() {
+                if target == *img {
+                    *watch_name = name.to_string();
+                    *watch_size = size;
+                    return;
+                }
+            }
+        }
+    });
 }
 
 /// Helper function to retrieve an SVG icon widget by name. Defaults to white in dark mode and dark gray in light mode.

@@ -433,8 +433,17 @@ button.quick-tile.active .tile-chevron {
     color: rgba(28, 28, 30, 0.65);
 }
 
-scale trough {
-    background-color: rgba(0, 0, 0, 0.06);
+scale trough,
+scale.control-slider trough,
+scale.control-slider > trough,
+scale.control-slider contents > trough {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+scale.control-slider trough highlight,
+scale.control-slider > trough > highlight,
+scale.control-slider contents > trough > highlight {
+    background-color: #3b82f6;
 }
 
 .control-left-toggles-box {
@@ -1554,6 +1563,18 @@ button.sidebar-item.active-nav:hover label {
     border-radius: 16px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
     padding: 16px 20px;
+}
+
+button.sidebar-header-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+button.sidebar-header-btn.active-nav {
+    background-color: rgba(0, 0, 0, 0.09);
+}
+
+button.card-collapse-header:hover {
+    background-color: rgba(0, 0, 0, 0.04);
 }
 
 /* Component token colors (light) */

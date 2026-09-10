@@ -21,6 +21,26 @@ window.settings-window>overlay>box {
     margin: 4px 8px 8px 8px;
 }
 
+/* Sidebar Header Navigation Button */
+button.sidebar-header-btn {
+    background: transparent;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 12px;
+    padding: 6px;
+    margin: 4px 6px 2px 6px;
+    transition: background-color 150ms ease;
+}
+
+button.sidebar-header-btn:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+button.sidebar-header-btn.active-nav {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
 entry.sidebar-search-entry {
     border-radius: 10px;
     font-size: 12px;
@@ -139,6 +159,40 @@ button.shortcut-combo-btn {
 .settings-card {
     border-radius: 14px;
     padding: 12px;
+}
+
+/* Collapsible Settings Cards */
+.collapsible-card {
+    border-radius: 14px;
+    padding: 4px;
+    margin-bottom: 8px;
+}
+
+button.card-collapse-header {
+    background: transparent;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 10px;
+    padding: 8px 12px;
+    transition: background-color 150ms ease;
+}
+
+button.card-collapse-header:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.card-collapse-content {
+    padding: 6px 12px 14px 12px;
+}
+
+.card-collapse-arrow {
+    opacity: 0.65;
+    transition: opacity 150ms ease;
+}
+
+button.card-collapse-header:hover .card-collapse-arrow {
+    opacity: 1.0;
 }
 
 .settings-card list {
@@ -563,6 +617,54 @@ button.app-tab-btn.active {
 
 .global-loading-blocker {
     background: rgba(0, 0, 0, 0.5);
+}
+
+/* Control Slider Styling (matching Panel Control Center) */
+scale.control-slider {
+    margin: 0;
+    padding: 0;
+}
+
+scale.control-slider trough,
+scale.control-slider > trough,
+scale.control-slider contents > trough {
+    margin: 0;
+    padding: 0;
+    min-height: 24px;
+    border-radius: 12px;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+}
+
+scale.control-slider trough highlight,
+scale.control-slider > trough > highlight,
+scale.control-slider contents > trough > highlight {
+    border-radius: 12px;
+    background-color: #3b82f6;
+    min-height: 24px;
+    box-shadow: none;
+}
+
+scale.control-slider slider,
+scale.control-slider > slider,
+scale.control-slider contents > slider {
+    min-width: 12px;
+    min-height: 12px;
+    margin: 6px 0;
+    border-radius: 9999px;
+    background-color: #ffffff;
+    background-image: none;
+    box-shadow: none;
+    border: none;
+    transition: background-color 200ms ease;
+}
+
+scale.control-slider slider:hover,
+scale.control-slider > slider:hover,
+scale.control-slider contents > slider:hover {
+    background-color: #ffffff;
+    box-shadow: none;
 }
 
 /* Settings Scale Slider Styling (Common Layout & Sizing) */

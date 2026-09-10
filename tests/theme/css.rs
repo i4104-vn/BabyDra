@@ -1,9 +1,100 @@
+use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
 
 fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..")
+}
+
+#[test]
+fn test_scale_allocation() {
+    if gtk4::init().is_err() {
+        return;
+    }
+    std::env::set_var("BABYDRA_THEMES_DIR", repo_root().join("themes"));
+    babydra_ui_kit::ui::theme::init_theme();
+
+    let card = babydra_ui_kit::components::create_collapsible_card("Audio Output", None, None, true);
+    let (vol_hdr, _val_label) = babydra_ui_kit::components::create_slider_header("Volume", 45.0);
+
+    let row_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+
+    let mute_icon_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    mute_icon_box.set_valign(gtk4::Align::Center);
+    let icon_widget = babydra_ui_kit::ui::icon::get_icon_colored("volume", 16, "#ffffff");
+    icon_widget.add_css_class("slider-icon");
+    mute_icon_box.append(&icon_widget);
+
+    let mute_btn = gtk4::Button::new();
+    mute_btn.add_css_class("slider-overlay-mute-btn");
+    mute_btn.set_child(Some(&mute_icon_box));
+    mute_btn.set_halign(gtk4::Align::Start);
+    mute_btn.set_valign(gtk4::Align::Center);
+    mute_btn.set_margin_start(10);
+    mute_btn.set_can_focus(false);
+
+    let scale = gtk4::Scale::with_range(gtk4::Orientation::Horizontal, 0.0, 100.0, 1.0);
+    scale.set_value(45.0);
+    scale.set_hexpand(true);
+    scale.set_draw_value(false);
+    scale.add_css_class("control-slider");
+
+    let overlay = gtk4::Overlay::new();
+    overlay.set_hexpand(true);
+    overlay.set_valign(gtk4::Align::Center);
+    overlay.set_child(Some(&scale));
+    overlay.add_overlay(&mute_btn);
+
+    row_box.append(&overlay);
+
+    let vol_box = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
+    vol_box.append(&vol_hdr);
+    vol_box.append(&row_box);
+
+    card.content.append(&vol_box);
+
+    let window = gtk4::Window::new();
+    window.add_css_class("settings-window");
+    let prov = gtk4::CssProvider::new();
+    prov.load_from_data("window.settings-window { background-color: #12121c; } .settings-card { background-color: #1e1e2a; }");
+    window.style_context().add_provider(&prov, gtk4::STYLE_PROVIDER_PRIORITY_APPLICATION + 10);
+    window.set_default_size(500, 300);
+    window.set_child(Some(&card.container));
+    window.present();
+
+    let (w_min, w_nat, _, _) = scale.measure(gtk4::Orientation::Horizontal, -1);
+    let (ov_w_min, ov_w_nat, _, _) = overlay.measure(gtk4::Orientation::Horizontal, -1);
+    let (row_w_min, row_w_nat, _, _) = row_box.measure(gtk4::Orientation::Horizontal, -1);
+    let (card_w_min, card_w_nat, _, _) = card.content.measure(gtk4::Orientation::Horizontal, -1);
+
+    println!("SCALE MEASURE H: min={}, nat={}", w_min, w_nat);
+    println!("OVERLAY MEASURE H: min={}, nat={}", ov_w_min, ov_w_nat);
+    println!("ROW_BOX MEASURE H: min={}, nat={}", row_w_min, row_w_nat);
+    println!("CARD MEASURE H: min={}, nat={}", card_w_min, card_w_nat);
+    let ctx = gtk4::glib::MainContext::default();
+    for _ in 0..10 {
+        ctx.iteration(false);
+    }
+
+    println!("AFTER ITERATION scale width: {}, height: {}", scale.width(), scale.height());
+    println!("AFTER ITERATION overlay width: {}, height: {}", overlay.width(), overlay.height());
+    println!("AFTER ITERATION row_box width: {}, height: {}", row_box.width(), row_box.height());
+
+    let snapshot = gtk4::Snapshot::new();
+    let child = window.child().unwrap();
+    window.snapshot_child(&child, &snapshot);
+    if let Some(node) = snapshot.to_node() {
+        let renderer = window.renderer().or_else(|| {
+            window.surface().and_then(|surface| gtk4::gsk::Renderer::for_surface(&surface))
+        });
+        println!("Renderer: {:?}", renderer.is_some());
+        if let Some(r) = renderer {
+            let texture = r.render_texture(&node, None);
+            let _ = texture.save_to_png("/tmp/rendered_card.png");
+            println!("Saved snapshot to /tmp/rendered_card.png");
+        }
+    }
 }
 
 #[test]

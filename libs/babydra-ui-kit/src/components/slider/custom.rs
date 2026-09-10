@@ -1,55 +1,10 @@
+use super::helpers::snap_to_step;
 use gtk4::prelude::*;
 use gtk4::{DrawingArea, GestureClick, GestureDrag};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 type Callback = Box<dyn Fn(u32) + 'static>;
-
-/// Pure helper: snap a raw position value to the nearest step, clamped to [min, max].
-pub(crate) fn snap_to_step(raw: f64, min: u32, max: u32, step: u32) -> u32 {
-    let min_f = min as f64;
-    let max_f = max as f64;
-    let step_f = step.max(1) as f64;
-    let frac = ((raw - min_f) / (max_f - min_f)).clamp(0.0, 1.0);
-    let raw_val = min_f + frac * (max_f - min_f);
-    let steps = ((raw_val - min_f) / step_f).round();
-    let rounded = (min_f + steps * step_f) as u32;
-    rounded.clamp(min, max)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn snap_to_step_clamps_below_min() {
-        assert_eq!(snap_to_step(-50.0, 10, 90, 10), 10);
-    }
-
-    #[test]
-    fn snap_to_step_clamps_above_max() {
-        assert_eq!(snap_to_step(500.0, 10, 90, 10), 90);
-    }
-
-    #[test]
-    fn snap_to_step_rounds_to_nearest_step() {
-        // 45 -> nearest step of 10 from 10..90 is 50
-        assert_eq!(snap_to_step(45.0, 10, 90, 10), 50);
-        // 44 -> nearest is 40
-        assert_eq!(snap_to_step(44.0, 10, 90, 10), 40);
-    }
-
-    #[test]
-    fn snap_to_step_handles_custom_range_and_step() {
-        assert_eq!(snap_to_step(25.0, 0, 100, 25), 25);
-        assert_eq!(snap_to_step(12.0, 0, 100, 25), 0);
-    }
-
-    #[test]
-    fn snap_to_step_returns_initial_when_already_aligned() {
-        assert_eq!(snap_to_step(30.0, 10, 90, 10), 30);
-    }
-}
 
 /// CustomSlider: An interactive custom Cairo slider replacing GTK Scale with customizable range.
 #[derive(Clone)]
@@ -290,42 +245,3 @@ impl CustomSlider {
         self.listeners.borrow_mut().push(Box::new(f));
     }
 }
-
-/// Binds a `gtk4::Scale` to update a percentage value label immediately while dragging,
-/// and debounces the callback invocation by `delay_ms` to avoid flooding hardware/services.
-pub fn bind_debounced_slider<F>(
-    scale: &gtk4::Scale,
-    value_label: &gtk4::Label,
-    delay_ms: u64,
-    on_change: F,
-) where
-    F: Fn(f64) + 'static,
-{
-    let last_source: Rc<Cell<Option<gtk4::glib::SourceId>>> = Rc::new(Cell::new(None));
-    let on_change = Rc::new(on_change);
-
-    let val_label_c = value_label.clone();
-    let last_source_c = last_source.clone();
-    let on_change_c = on_change.clone();
-
-    scale.connect_value_changed(move |s| {
-        let val = s.value();
-        val_label_c.set_text(&format!("{:.0}%", val));
-
-        if let Some(id) = last_source_c.take() {
-            id.remove();
-        }
-
-        let last_source_inner = last_source_c.clone();
-        let on_change_inner = on_change_c.clone();
-        let new_id = gtk4::glib::timeout_add_local_once(
-            std::time::Duration::from_millis(delay_ms),
-            move || {
-                last_source_inner.set(None);
-                on_change_inner(val);
-            },
-        );
-        last_source_c.set(Some(new_id));
-    });
-}
-
