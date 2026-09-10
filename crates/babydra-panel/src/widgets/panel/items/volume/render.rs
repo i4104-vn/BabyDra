@@ -77,6 +77,7 @@ pub fn create_volume_row(
     scale.set_value(initial_val);
     scale.set_hexpand(true);
     scale.set_draw_value(false);
+    scale.add_css_class("control-slider");
 
     let last_source: Rc<Cell<Option<gtk4::glib::SourceId>>> = Rc::new(Cell::new(None));
     let last_source_clone = last_source.clone();
