@@ -3,29 +3,54 @@
 use tokio::sync::mpsc::UnboundedSender;
 use zbus::interface;
 
+#[derive(Debug, Clone, Copy)]
+pub enum IslandDbusCommand {
+    ShowClipboard,
+    ToggleClipboard,
+    ShowPower,
+    TogglePower,
+}
+
 pub struct IslandDbusService {
-    tx: UnboundedSender<()>,
+    tx: UnboundedSender<IslandDbusCommand>,
 }
 
 #[interface(name = "org.babydra.Island")]
 impl IslandDbusService {
     /// Shows or focuses the clipboard history view.
     async fn show_clipboard(&self) {
-        let _ = self.tx.send(());
+        let _ = self.tx.send(IslandDbusCommand::ShowClipboard);
     }
 
     /// Toggles the clipboard history view.
     async fn toggle_clipboard(&self) {
-        let _ = self.tx.send(());
+        let _ = self.tx.send(IslandDbusCommand::ToggleClipboard);
+    }
+
+    /// Shows or focuses the power options view.
+    async fn show_power(&self) {
+        let _ = self.tx.send(IslandDbusCommand::ShowPower);
+    }
+
+    /// Toggles the power options view.
+    async fn toggle_power(&self) {
+        let _ = self.tx.send(IslandDbusCommand::TogglePower);
     }
 }
 
 pub fn spawn_island_dbus() {
-    let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<()>();
+    let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<IslandDbusCommand>();
 
     glib::MainContext::default().spawn_local(async move {
-        while let Some(()) = rx.recv().await {
-            super::fire_trigger();
+        while let Some(cmd) = rx.recv().await {
+            match cmd {
+                IslandDbusCommand::ShowClipboard | IslandDbusCommand::ToggleClipboard => {
+                    super::fire_trigger();
+                }
+                IslandDbusCommand::ShowPower | IslandDbusCommand::TogglePower => {
+                    crate::features::power::service::fire_trigger();
+                }
+            }
         }
     });
 

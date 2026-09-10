@@ -22,6 +22,7 @@ pub fn create_system_island() -> gtk4::Box {
 /// register their own features later.
 pub fn build_default_island() -> Island {
     Island::builder()
+        .feature(Box::new(features::power::PowerFeature::new()))
         .feature(Box::new(features::clipboard::ClipboardFeature::new()))
         .feature(Box::new(features::notification::NotificationFeature::new()))
         .feature(Box::new(features::media_player::MediaPlayerFeature::new()))

@@ -4,3 +4,4 @@ pub mod clipboard;
 pub mod default;
 pub mod media_player;
 pub mod notification;
+pub mod power;
