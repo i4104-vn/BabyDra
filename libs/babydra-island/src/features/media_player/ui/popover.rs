@@ -12,8 +12,8 @@ use gtk4::prelude::*;
 /// Widget references of the media control popover.
 #[derive(Clone)]
 pub struct MediaPopover {
-    popover: gtk4::Popover,
-    popover_box: gtk4::Box,
+    pub popover: gtk4::Popover,
+    pub popover_box: gtk4::Box,
     is_animating: Rc<Cell<bool>>,
     /// Popover header label (track title).
     pub title: gtk4::Label,
@@ -185,6 +185,11 @@ impl MediaPopover {
             position_lbl,
             length_lbl,
         }
+    }
+
+    /// Whether the popover is currently visible.
+    pub fn is_visible(&self) -> bool {
+        self.popover.is_visible()
     }
 
     /// Closes the popover.
