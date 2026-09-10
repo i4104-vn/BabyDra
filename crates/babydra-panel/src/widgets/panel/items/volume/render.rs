@@ -1,5 +1,6 @@
 use super::{get_audio_devices, get_current_volume, is_muted, set_volume, update_topbar_volume};
 use babydra_core::i18n::trans;
+use babydra_ui_kit::components::PillSlider;
 use gtk4::prelude::*;
 use std::cell::Cell;
 use std::rc::Rc;
@@ -8,7 +9,7 @@ use std::rc::Rc;
 pub fn create_volume_row(
     on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>,
     vol_icon: gtk4::Image,
-) -> (gtk4::Box, gtk4::Scale) {
+) -> (gtk4::Box, PillSlider) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
     main_box.add_css_class("control-slider-card");
 
@@ -61,17 +62,15 @@ pub fn create_volume_row(
     }
     update_mute_icon(muted_state.get());
 
-    let scale = gtk4::Scale::with_range(gtk4::Orientation::Horizontal, 0.0, 100.0, 1.0);
-    scale.adjustment().set_page_increment(5.0);
-    scale.set_value(initial_val);
-    scale.set_hexpand(true);
-    scale.set_draw_value(false);
-    scale.add_css_class("control-slider");
+    let slider = PillSlider::new(initial_val, |_| {});
+    slider.bind_label(&value_label);
+    slider.add_scroll_to(&row_box);
+    slider.add_scroll_to(&main_box);
 
     let vol_icon_c2 = vol_icon.clone();
     let update_mute_icon_c = update_mute_icon.clone();
     let muted_state_c = muted_state.clone();
-    babydra_ui_kit::components::bind_debounced_slider(&scale, &value_label, 80, move |val| {
+    slider.connect_debounced(80, move |val| {
         set_volume(val);
         if val > 0.0 {
             muted_state_c.set(false);
@@ -89,7 +88,7 @@ pub fn create_volume_row(
     let overlay = gtk4::Overlay::new();
     overlay.set_hexpand(true);
     overlay.set_valign(gtk4::Align::Center);
-    overlay.set_child(Some(&scale));
+    overlay.set_child(Some(&slider.container));
     overlay.add_overlay(&mute_btn);
 
     row_box.append(&overlay);
@@ -136,7 +135,7 @@ pub fn create_volume_row(
 
     main_box.append(&header_box);
     main_box.append(&row_box);
-    (main_box, scale)
+    (main_box, slider)
 }
 
 /// Populate audio menu.

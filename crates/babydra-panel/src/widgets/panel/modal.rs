@@ -62,12 +62,12 @@ pub fn rebuild_cc_contents(
     main_box.append(&create_cc_grid(on_popover_toggled.clone()));
 
     // 4. Append volume slider
-    let (volume_row, _volume_scale) =
+    let (volume_row, _volume_slider) =
         items::volume::render::create_volume_row(on_popover_toggled.clone(), vol_icon.clone());
     main_box.append(&volume_row);
 
     // 5. Append brightness slider
-    let (brightness_row, _brightness_scale) = items::backlight::render::create_brightness();
+    let (brightness_row, _brightness_slider) = items::backlight::render::create_brightness();
     main_box.append(&brightness_row);
 
     // 6. Append disk monitor box

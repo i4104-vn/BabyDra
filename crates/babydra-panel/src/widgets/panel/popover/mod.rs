@@ -113,6 +113,13 @@ pub fn setup_status_popover(
     let last_net_icon = std::rc::Rc::new(std::cell::RefCell::new(String::new()));
     let sup_timer = is_suppressed.clone();
 
+    // Track last known volume/mute for external change detection
+    let last_vol = std::rc::Rc::new(std::cell::Cell::new(super::items::volume::get_current_volume()));
+    let last_muted = std::rc::Rc::new(std::cell::Cell::new(super::items::volume::is_muted()));
+    let vol_icon_sync = vol_icon.clone();
+    let update_vol_sync = update_volume_popover.clone();
+    let vol_pop_sync = vol_tooltip.popover.clone();
+
     gtk4::glib::timeout_add_local(std::time::Duration::from_millis(2000), move || {
         if sup_timer() {
             if vpn_pop_t.is_visible() {
@@ -176,6 +183,20 @@ pub fn setup_status_popover(
         if let Some(ref bat_area) = bat_widget_timer {
             bat_area.queue_draw();
         }
+
+        // Sync topbar volume icon when external source changes volume/mute
+        let cur_vol = super::items::volume::get_current_volume();
+        let cur_muted = super::items::volume::is_muted();
+        let changed = (cur_vol - last_vol.get()).abs() > 0.5 || cur_muted != last_muted.get();
+        if changed {
+            last_vol.set(cur_vol);
+            last_muted.set(cur_muted);
+            super::items::volume::update_topbar_volume(&vol_icon_sync);
+            if vol_pop_sync.is_visible() {
+                update_vol_sync();
+            }
+        }
+
         gtk4::glib::ControlFlow::Continue
     });
 

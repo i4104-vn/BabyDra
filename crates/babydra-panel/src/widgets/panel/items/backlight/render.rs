@@ -3,10 +3,11 @@ use super::{
     BRIGHTNESS_SYNCED,
 };
 use babydra_core::i18n::trans;
+use babydra_ui_kit::components::PillSlider;
 use gtk4::prelude::*;
 
 /// Creates a new `brightness row`.
-pub fn create_brightness() -> (gtk4::Box, gtk4::Scale) {
+pub fn create_brightness() -> (gtk4::Box, PillSlider) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
     main_box.add_css_class("control-slider-card");
 
@@ -16,21 +17,19 @@ pub fn create_brightness() -> (gtk4::Box, gtk4::Scale) {
 
     let row_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
 
-    let scale = gtk4::Scale::with_range(gtk4::Orientation::Horizontal, 0.0, 100.0, 1.0);
-    scale.adjustment().set_page_increment(5.0);
-    scale.set_value(initial_val);
-    scale.set_hexpand(true);
-    scale.set_draw_value(false);
-    scale.add_css_class("control-slider");
+    let slider = PillSlider::new_range(1.0, 100.0, 1.0, initial_val, |_| {});
+    slider.bind_label(&value_label);
+    slider.add_scroll_to(&row_box);
+    slider.add_scroll_to(&main_box);
 
-    babydra_ui_kit::components::bind_debounced_slider(&scale, &value_label, 80, move |val| {
+    slider.connect_debounced(80, move |val| {
         set_brightness(val);
     });
 
     let overlay = gtk4::Overlay::new();
     overlay.set_hexpand(true);
     overlay.set_valign(gtk4::Align::Center);
-    overlay.set_child(Some(&scale));
+    overlay.set_child(Some(&slider.container));
 
     let icon_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     icon_container.set_valign(gtk4::Align::Center);
@@ -47,13 +46,13 @@ pub fn create_brightness() -> (gtk4::Box, gtk4::Scale) {
     main_box.append(&header_box);
     main_box.append(&row_box);
 
-    sync_ddc_brightness_async(&scale);
+    sync_ddc_brightness_async(&slider);
 
-    (main_box, scale)
+    (main_box, slider)
 }
 
 /// Sync DDC brightness async.
-fn sync_ddc_brightness_async(brightness_scale: &gtk4::Scale) {
+fn sync_ddc_brightness_async(brightness_slider: &PillSlider) {
     if !has_backlight() {
         let mut need_sync = false;
         if let Ok(mut guard) = BRIGHTNESS_SYNCED.lock() {
@@ -65,7 +64,7 @@ fn sync_ddc_brightness_async(brightness_scale: &gtk4::Scale) {
 
         if need_sync {
             let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<f64>();
-            let scale_clone = brightness_scale.clone();
+            let slider_clone = brightness_slider.clone();
             glib::MainContext::default().spawn_local(async move {
                 if let Some(val) = rx.recv().await {
                     let current_val = if let Ok(guard) = BRIGHTNESS_STATE.lock() {
@@ -74,7 +73,7 @@ fn sync_ddc_brightness_async(brightness_scale: &gtk4::Scale) {
                         60.0
                     };
                     if current_val == 60.0 {
-                        scale_clone.set_value(val);
+                        slider_clone.set_value(val);
                         if let Ok(mut guard) = BRIGHTNESS_STATE.lock() {
                             *guard = val;
                         }
