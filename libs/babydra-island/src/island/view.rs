@@ -159,6 +159,7 @@ pub struct IslandView {
     pub(crate) content: IslandContent,
     pub(crate) hover_keep: bool,
     pub(crate) capsule_class: Option<String>,
+    pub(crate) focus: bool,
     pub(crate) on_show: Option<Box<dyn Fn()>>,
     pub(crate) on_hide: Option<Box<dyn Fn()>>,
     pub(crate) on_click: Option<Box<dyn Fn()>>,
@@ -174,6 +175,7 @@ impl IslandView {
             content: IslandContent::Widget(content),
             hover_keep: false,
             capsule_class: None,
+            focus: false,
             on_show: None,
             on_hide: None,
             on_click: None,
@@ -192,6 +194,7 @@ impl IslandView {
             content: IslandContent::Builder(Box::new(build)),
             hover_keep: false,
             capsule_class: None,
+            focus: false,
             on_show: None,
             on_hide: None,
             on_click: None,
@@ -219,6 +222,12 @@ impl IslandView {
     /// Extra CSS class applied to the capsule while this view is displayed.
     pub fn capsule_class(mut self, c: impl Into<String>) -> Self {
         self.capsule_class = Some(c.into());
+        self
+    }
+
+    /// Whether this view demands keyboard focus when active.
+    pub fn focus(mut self, focus: bool) -> Self {
+        self.focus = focus;
         self
     }
 
@@ -289,6 +298,17 @@ pub trait IslandFeature {
     /// Extra CSS class applied to the capsule while this view is displayed.
     fn capsule_class(&self) -> Option<String> {
         None
+    }
+
+    /// Whether this feature demands keyboard focus (Exclusive keyboard mode) when active.
+    ///
+    /// If `true`, the island manager automatically sets the layer window keyboard mode
+    /// to `KeyboardMode::Exclusive` so the feature can capture keystrokes without
+    /// individual features having to manually manipulate window layer-shell modes.
+    /// If `false` (default), the island sets keyboard mode to `KeyboardMode::None` so background
+    /// apps and typing remain completely uninterrupted.
+    fn focus(&self) -> bool {
+        false
     }
 
     /// Builds the content widget for this feature's view.

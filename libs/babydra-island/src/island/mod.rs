@@ -19,6 +19,7 @@ use std::rc::Rc;
 use std::time::{Duration, Instant};
 
 use gtk4::prelude::*;
+use gtk4_layer_shell::{KeyboardMode, LayerShell};
 
 pub use view::{IslandCtx, IslandFeature, IslandView, IslandViewHandle};
 
@@ -69,6 +70,7 @@ struct ViewRecord {
     state: Rc<view::ViewState>,
     hover_keep: bool,
     capsule_class: Option<String>,
+    focus: bool,
     feature: Option<Rc<RefCell<Box<dyn IslandFeature>>>>,
     on_show: Option<Rc<dyn Fn()>>,
     on_hide: Option<Rc<dyn Fn()>>,
@@ -83,6 +85,7 @@ struct ViewSpec {
     content: gtk4::Widget,
     hover_keep: bool,
     capsule_class: Option<String>,
+    focus: bool,
     feature: Option<Rc<RefCell<Box<dyn IslandFeature>>>>,
     on_show: Option<Rc<dyn Fn()>>,
     on_hide: Option<Rc<dyn Fn()>>,
@@ -132,6 +135,7 @@ impl Island {
             content,
             hover_keep,
             capsule_class,
+            focus,
             on_show,
             on_hide,
             on_click,
@@ -147,6 +151,7 @@ impl Island {
             content: widget,
             hover_keep,
             capsule_class,
+            focus,
             feature: None,
             on_show: on_show.map(Rc::from),
             on_hide: on_hide.map(Rc::from),
@@ -161,6 +166,7 @@ impl Island {
         let size = feature.size();
         let hover_keep = feature.hover_keep();
         let capsule_class = feature.capsule_class();
+        let focus = feature.focus();
         let content = feature.build_view();
         let feature_rc = Rc::new(RefCell::new(feature));
         let handle = self.register_view_inner(ViewSpec {
@@ -170,6 +176,7 @@ impl Island {
             content,
             hover_keep,
             capsule_class,
+            focus,
             feature: Some(feature_rc.clone()),
             on_show: None,
             on_hide: None,
@@ -196,6 +203,7 @@ impl Island {
             content,
             hover_keep,
             capsule_class,
+            focus,
             feature,
             on_show,
             on_hide,
@@ -220,6 +228,7 @@ impl Island {
             state: state.clone(),
             hover_keep,
             capsule_class,
+            focus,
             feature,
             on_show,
             on_hide,
@@ -564,6 +573,17 @@ fn select_winner(core: &IslandCore) -> Option<usize> {
     best.map(|(_, _, i)| i)
 }
 
+/// Sets the keyboard interactivity mode on the layer shell window hosting the capsule.
+fn set_layer_keyboard_mode(widget: &impl IsA<gtk4::Widget>, mode: KeyboardMode) {
+    if let Some(root) = widget.root() {
+        if let Some(win) = root.downcast_ref::<gtk4::Window>() {
+            if win.is_layer_window() {
+                win.set_keyboard_mode(mode);
+            }
+        }
+    }
+}
+
 /// Applies a transition to the new display state, animating the capsule.
 fn apply_transition(
     core: &mut IslandCore,
@@ -611,15 +631,30 @@ fn apply_transition(
                 .as_ref()
                 .map(|f| f.borrow().size())
                 .unwrap_or_else(|| v.size.get());
+
+            let demands_focus = v
+                .feature
+                .as_ref()
+                .map(|f| f.borrow().focus())
+                .unwrap_or(v.focus);
+
+            if demands_focus {
+                set_layer_keyboard_mode(&core.capsule, KeyboardMode::Exclusive);
+            } else {
+                set_layer_keyboard_mode(&core.capsule, KeyboardMode::None);
+            }
+
             animate_expand(core, size, true, core_rc);
         }
         IslandDisplay::Idle => {
+            set_layer_keyboard_mode(&core.capsule, KeyboardMode::OnDemand);
             if let Some(idle) = &core.idle {
                 idle.set_visible(true);
             }
             animate_expand(core, IDLE_SIZE, false, core_rc);
         }
         IslandDisplay::Hidden => {
+            set_layer_keyboard_mode(&core.capsule, KeyboardMode::OnDemand);
             animate_collapse(core, core_rc);
         }
     }

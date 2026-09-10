@@ -92,6 +92,10 @@ impl IslandFeature for ClipboardFeature {
         true
     }
 
+    fn focus(&self) -> bool {
+        true
+    }
+
     fn build_view(&mut self) -> gtk4::Widget {
         self.widgets.notch_view.clone().upcast()
     }
