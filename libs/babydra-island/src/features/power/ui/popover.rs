@@ -53,12 +53,14 @@ impl PowerPopover {
         let buttons_box = GtkBox::new(Orientation::Horizontal, 8);
         buttons_box.add_css_class("power-popover-buttons");
         buttons_box.set_halign(Align::Fill);
-        buttons_box.set_valign(Align::Center);
+        buttons_box.set_valign(Align::Fill);
         buttons_box.set_hexpand(true);
+        buttons_box.set_vexpand(true);
+        buttons_box.set_homogeneous(true);
 
         let btn_shutdown = PowerButtonWidget::new(
             "power",
-            "#ef4444",
+            "#ff5c5c",
             "1",
             &babydra_core::i18n::trans("island.power_shutdown"),
             "power-shutdown",
@@ -66,7 +68,7 @@ impl PowerPopover {
 
         let btn_reboot = PowerButtonWidget::new(
             "restart",
-            "#f97316",
+            "#ff9f43",
             "2",
             &babydra_core::i18n::trans("island.power_restart"),
             "power-reboot",
@@ -74,7 +76,7 @@ impl PowerPopover {
 
         let btn_suspend = PowerButtonWidget::new(
             "sleep",
-            "#3b82f6",
+            "#54a0ff",
             "3",
             &babydra_core::i18n::trans("island.power_suspend"),
             "power-suspend",
@@ -82,7 +84,7 @@ impl PowerPopover {
 
         let btn_logout = PowerButtonWidget::new(
             "logout",
-            "#a855f7",
+            "#c56cf0",
             "4",
             &babydra_core::i18n::trans("island.power_logout"),
             "power-logout",
