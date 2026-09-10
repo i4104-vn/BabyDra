@@ -712,66 +712,134 @@ popover>arrow {
 }
 
 popover.media-popover>contents,
-popover.clipboard-popover>contents,
-popover.power-popover>contents {
+popover.clipboard-popover>contents {
     background-color: rgba(14, 14, 18, 0.96);
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-top: 1px solid rgba(255, 255, 255, 0.28);
 }
 
+popover.power-popover>contents {
+    background-color: rgba(14, 14, 18, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 20px;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65), 0 0 1px 1px rgba(255, 255, 255, 0.05);
+}
+
 .power-popover-header {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.power-header-title {
+    color: rgba(255, 255, 255, 0.70);
+}
+
+.power-header-shortcut {
+    color: rgba(255, 255, 255, 0.50);
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .power-popover-btn {
     color: rgba(255, 255, 255, 0.85);
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .power-popover-btn:hover {
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.12);
     color: #ffffff;
 }
 
+/* Base icon badge tints */
+.power-shutdown .power-btn-icon {
+    background-color: rgba(239, 68, 68, 0.12);
+}
+.power-reboot .power-btn-icon {
+    background-color: rgba(249, 115, 22, 0.12);
+}
+.power-suspend .power-btn-icon {
+    background-color: rgba(59, 130, 246, 0.12);
+}
+.power-logout .power-btn-icon {
+    background-color: rgba(168, 85, 247, 0.12);
+}
+
+/* Shutdown active/selected */
 .power-shutdown.selected {
-    background-color: rgba(239, 68, 68, 0.22);
-    border: 1px solid rgba(239, 68, 68, 0.50);
+    background-color: rgba(239, 68, 68, 0.16);
+    border: 1px solid rgba(239, 68, 68, 0.55);
+    box-shadow: 0 4px 18px rgba(239, 68, 68, 0.28);
     color: #ffffff;
 }
 .power-shutdown.selected .power-btn-icon {
-    background-color: rgba(239, 68, 68, 0.35);
+    background-color: rgba(239, 68, 68, 0.32);
+}
+.power-shutdown.selected .power-btn-key {
+    background-color: #ef4444;
+    border-color: #ef4444;
+    color: #ffffff;
+    opacity: 1.0;
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.40);
 }
 
+/* Reboot active/selected */
 .power-reboot.selected {
-    background-color: rgba(249, 115, 22, 0.22);
-    border: 1px solid rgba(249, 115, 22, 0.50);
+    background-color: rgba(249, 115, 22, 0.16);
+    border: 1px solid rgba(249, 115, 22, 0.55);
+    box-shadow: 0 4px 18px rgba(249, 115, 22, 0.28);
     color: #ffffff;
 }
 .power-reboot.selected .power-btn-icon {
-    background-color: rgba(249, 115, 22, 0.35);
+    background-color: rgba(249, 115, 22, 0.32);
+}
+.power-reboot.selected .power-btn-key {
+    background-color: #f97316;
+    border-color: #f97316;
+    color: #ffffff;
+    opacity: 1.0;
+    box-shadow: 0 2px 6px rgba(249, 115, 22, 0.40);
 }
 
+/* Suspend active/selected */
 .power-suspend.selected {
-    background-color: rgba(59, 130, 246, 0.22);
-    border: 1px solid rgba(59, 130, 246, 0.50);
+    background-color: rgba(59, 130, 246, 0.16);
+    border: 1px solid rgba(59, 130, 246, 0.55);
+    box-shadow: 0 4px 18px rgba(59, 130, 246, 0.28);
     color: #ffffff;
 }
 .power-suspend.selected .power-btn-icon {
-    background-color: rgba(59, 130, 246, 0.35);
+    background-color: rgba(59, 130, 246, 0.32);
+}
+.power-suspend.selected .power-btn-key {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    color: #ffffff;
+    opacity: 1.0;
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.40);
 }
 
+/* Logout active/selected */
 .power-logout.selected {
-    background-color: rgba(168, 85, 247, 0.22);
-    border: 1px solid rgba(168, 85, 247, 0.50);
+    background-color: rgba(168, 85, 247, 0.16);
+    border: 1px solid rgba(168, 85, 247, 0.55);
+    box-shadow: 0 4px 18px rgba(168, 85, 247, 0.28);
     color: #ffffff;
 }
 .power-logout.selected .power-btn-icon {
-    background-color: rgba(168, 85, 247, 0.35);
+    background-color: rgba(168, 85, 247, 0.32);
+}
+.power-logout.selected .power-btn-key {
+    background-color: #a855f7;
+    border-color: #a855f7;
+    color: #ffffff;
+    opacity: 1.0;
+    box-shadow: 0 2px 6px rgba(168, 85, 247, 0.40);
 }
 
-.power-popover-btn.selected .power-btn-key {
-    background-color: rgba(255, 255, 255, 0.20);
-    opacity: 0.95;
-    color: #ffffff;
+.power-popover-hint {
+    color: rgba(255, 255, 255, 0.40);
 }
 
 .clipboard-popover-header {

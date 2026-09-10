@@ -125,74 +125,80 @@ popover.clipboard-popover>contents {
 
 /* === Power Popover === */
 .power-popover-box {
-    padding: 10px 14px;
-    min-width: 290px;
+    padding: 14px 16px 12px 16px;
+    min-width: 350px;
 }
 
 .power-popover-header {
-    padding-bottom: 6px;
+    padding-bottom: 10px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.power-header-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    opacity: 0.70;
 }
 
 .power-header-shortcut {
     font-size: 10px;
+    font-weight: 600;
     font-family: monospace, sans-serif;
-    opacity: 0.55;
-    padding: 1px 6px;
+    opacity: 0.50;
+    padding: 2px 7px;
     border-radius: 6px;
     background-color: rgba(255, 255, 255, 0.06);
-}
-
-.power-notch-shortcut {
-    font-size: 9px;
-    font-family: monospace, sans-serif;
-    opacity: 0.60;
-    margin-left: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .power-popover-buttons {
-    margin: 10px 0;
+    margin: 12px 0 10px 0;
 }
 
 .power-popover-btn {
-    min-width: 66px;
-    padding: 10px 6px;
-    border-radius: 12px;
-    border: 1px solid transparent;
-    transition: all 150ms cubic-bezier(0.16, 1, 0.3, 1);
+    min-width: 74px;
+    padding: 12px 6px 10px 6px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background-color: rgba(255, 255, 255, 0.03);
+    transition: all 160ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .power-btn-icon {
-    min-width: 40px;
-    min-height: 40px;
+    min-width: 44px;
+    min-height: 44px;
     border-radius: 9999px;
     background-color: rgba(255, 255, 255, 0.06);
-    margin-bottom: 4px;
-    transition: all 150ms ease;
-}
-
-.power-btn-key {
-    font-size: 9px;
-    font-weight: 700;
-    font-family: monospace, sans-serif;
-    opacity: 0.50;
-    padding: 0 4px;
-    border-radius: 4px;
-    background-color: rgba(255, 255, 255, 0.08);
-    margin-bottom: 3px;
+    margin-bottom: 8px;
+    transition: all 160ms ease;
 }
 
 .power-btn-title {
     font-size: 11px;
     font-weight: 600;
-    opacity: 0.85;
+    opacity: 0.88;
+    margin-bottom: 6px;
+}
+
+.power-btn-key {
+    font-size: 9.5px;
+    font-weight: 700;
+    font-family: monospace, sans-serif;
+    opacity: 0.45;
+    padding: 1px 7px;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 160ms ease;
 }
 
 .power-popover-hint {
     font-size: 10px;
     font-weight: 500;
-    opacity: 0.45;
-    margin-top: 6px;
+    opacity: 0.40;
+    margin-top: 4px;
     padding-top: 8px;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
 }

@@ -7,7 +7,6 @@ use gtk4::{Align, Box as GtkBox, GestureClick, Label, Orientation};
 pub struct PowerNotchWidgets {
     pub container: GtkBox,
     pub title_label: Label,
-    pub shortcut_badge: Label,
     pub click_gesture: GestureClick,
 }
 
@@ -22,15 +21,10 @@ impl PowerNotchWidgets {
         icon.set_valign(Align::Center);
         container.append(&icon);
 
-        let title_label = Label::new(Some(&babydra_core::i18n::trans("island.power")));
+        let title_label = Label::new(Some(&babydra_core::i18n::trans("island.power_notch")));
         title_label.add_css_class("notch-player-text");
         title_label.set_valign(Align::Center);
         container.append(&title_label);
-
-        let shortcut_badge = Label::new(Some("Win+F4"));
-        shortcut_badge.add_css_class("power-notch-shortcut");
-        shortcut_badge.set_valign(Align::Center);
-        container.append(&shortcut_badge);
 
         let click_gesture = GestureClick::new();
         container.add_controller(click_gesture.clone());
@@ -38,7 +32,6 @@ impl PowerNotchWidgets {
         Self {
             container,
             title_label,
-            shortcut_badge,
             click_gesture,
         }
     }

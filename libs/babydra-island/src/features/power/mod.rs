@@ -28,7 +28,7 @@ use controller::keyboard::create_keyboard_controller;
 use ui::{execute_power_action, highlight_selection, PowerNotchWidgets, PowerPopover};
 
 pub const PRIORITY: u8 = 100;
-const NOTCH_WIDTH: i32 = 140;
+const NOTCH_WIDTH: i32 = 110;
 const NOTCH_HEIGHT: i32 = 28;
 const POPUP_DURATION: Duration = Duration::from_secs(30);
 
@@ -101,13 +101,20 @@ impl IslandFeature for PowerFeature {
     fn attach(&mut self, ctx: &IslandCtx) {
         let popover = PowerPopover::new(&ctx.capsule());
 
-        // Connect click handlers on the 4 buttons
+        // Connect click and hover motion handlers on the 4 buttons
         for (i, btn) in popover.buttons.iter().enumerate() {
             let p_c = popover.clone();
             let h_rc = self.handle_rc.clone();
             btn.click_gesture.connect_pressed(move |_, _, _, _| {
                 let h = h_rc.borrow();
                 execute_power_action(i, &p_c, h.as_ref());
+            });
+
+            let p_hover = popover.clone();
+            let sel_hover = self.selected_index.clone();
+            btn.motion_controller.connect_enter(move |_, _, _| {
+                sel_hover.set(i);
+                highlight_selection(&p_hover, i);
             });
         }
 

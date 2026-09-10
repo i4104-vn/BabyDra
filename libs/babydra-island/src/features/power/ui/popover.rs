@@ -22,27 +22,21 @@ impl PowerPopover {
         let popover = babydra_ui_kit::components::create_popover(
             capsule,
             gtk4::PositionType::Bottom,
-            "power-popover media-popover control-popover",
+            "power-popover control-popover",
         );
         popover.set_has_arrow(false);
         popover.set_offset(0, 10);
 
         let popover_box = GtkBox::new(Orientation::Vertical, 0);
-        popover_box.add_css_class("media-popover-box");
         popover_box.add_css_class("power-popover-box");
 
-        // Header: [Power Icon] Tùy chọn Nguồn          Win+F4
+        // Header: NGUỒN HỆ THỐNG                     Win+F4
         let header = GtkBox::new(Orientation::Horizontal, 8);
-        header.add_css_class("media-popover-header");
         header.add_css_class("power-popover-header");
         header.set_valign(Align::Center);
 
-        let icon = babydra_ui_kit::ui::icon::get_icon_colored("power", 14, "#ef4444");
-        icon.set_valign(Align::Center);
-        header.append(&icon);
-
         let title_lbl = Label::new(Some(&babydra_core::i18n::trans("island.power")));
-        title_lbl.add_css_class("media-popover-app-name");
+        title_lbl.add_css_class("power-header-title");
         title_lbl.set_valign(Align::Center);
         header.append(&title_lbl);
 
@@ -55,13 +49,12 @@ impl PowerPopover {
 
         popover_box.append(&header);
 
-        // Buttons container: 4 power buttons in horizontal layout
+        // Buttons container: 4 power cards in a spacious horizontal row
         let buttons_box = GtkBox::new(Orientation::Horizontal, 8);
         buttons_box.add_css_class("power-popover-buttons");
-        buttons_box.set_halign(Align::Center);
+        buttons_box.set_halign(Align::Fill);
         buttons_box.set_valign(Align::Center);
-        buttons_box.set_margin_top(8);
-        buttons_box.set_margin_bottom(8);
+        buttons_box.set_hexpand(true);
 
         let btn_shutdown = PowerButtonWidget::new(
             "power",
@@ -102,7 +95,7 @@ impl PowerPopover {
 
         popover_box.append(&buttons_box);
 
-        // Footer hint: 1-4 / ← → Chọn • Enter Thực hiện • Esc Đóng
+        // Footer hint: 1-4 Chọn nhanh • ← → Duyệt • Enter Chọn • Esc Đóng
         let hint_lbl = Label::new(Some(&babydra_core::i18n::trans("island.power_hint")));
         hint_lbl.add_css_class("power-popover-hint");
         hint_lbl.set_halign(Align::Center);
