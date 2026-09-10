@@ -120,6 +120,7 @@ fn create_widget_page(name: &str) -> gtk4::Widget {
         "system_update" => widgets::system_update::create_update_widget(),
         "recovery" => widgets::recovery::create_recovery_widget(),
         "system" => widgets::system_info::create_system_widget(),
+        "general" => widgets::general::create_general_widget(),
         _ => gtk4::Box::new(gtk4::Orientation::Vertical, 0).upcast(),
     }
 }
@@ -157,12 +158,19 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     sidebar_box.set_margin_bottom(8);
     sidebar_box.set_margin_start(8);
 
-    // App Header Box
+    // App Header Button (navigates to Generic Settings)
+    let profile_btn = gtk4::Button::new();
+    profile_btn.add_css_class("sidebar-header-btn");
+    profile_btn.set_cursor_from_name(Some("pointer"));
+    if target_page_id == "general" {
+        profile_btn.add_css_class("active-nav");
+    }
+
     let profile_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
-    profile_box.set_margin_top(12);
-    profile_box.set_margin_bottom(8);
-    profile_box.set_margin_start(12);
-    profile_box.set_margin_end(12);
+    profile_box.set_margin_top(6);
+    profile_box.set_margin_bottom(6);
+    profile_box.set_margin_start(8);
+    profile_box.set_margin_end(8);
 
     let logo_img = babydra_ui_kit::ui::icon::get_icon("logo", 28);
     logo_img.set_pixel_size(28);
@@ -171,6 +179,7 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
 
     let title_info_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     title_info_box.set_valign(gtk4::Align::Center);
+    title_info_box.set_hexpand(true);
 
     let app_title_lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.title")));
     app_title_lbl.add_css_class("profile-user-name");
@@ -183,7 +192,8 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     title_info_box.append(&app_title_lbl);
     title_info_box.append(&app_sub_lbl);
     profile_box.append(&title_info_box);
-    sidebar_box.append(&profile_box);
+    profile_btn.set_child(Some(&profile_box));
+    sidebar_box.append(&profile_btn);
 
     let profile_sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
     profile_sep.add_css_class("profile-separator");
@@ -316,13 +326,30 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     overlay.add_overlay(&overlay_blocker);
 
     // Wire navigation button clicks
+    {
+        let stack_c = content_stack.clone();
+        let nav_buttons_c = nav_buttons.clone();
+        let profile_btn_c = profile_btn.clone();
+        profile_btn.connect_clicked(move |_| {
+            for (_, b, _, _) in nav_buttons_c.borrow().iter() {
+                b.remove_css_class("active-nav");
+            }
+            profile_btn_c.add_css_class("active-nav");
+
+            ensure_page_loaded(&stack_c, "general");
+            stack_c.set_visible_child_name("general");
+        });
+    }
+
     for (id, button, _, _) in nav_buttons.borrow().iter() {
         let name_str = id.to_string();
         let stack_c = content_stack.clone();
         let nav_buttons_c = nav_buttons.clone();
         let button_c = button.clone();
+        let profile_btn_c = profile_btn.clone();
 
         button.connect_clicked(move |_| {
+            profile_btn_c.remove_css_class("active-nav");
             for (_, b, _, _) in nav_buttons_c.borrow().iter() {
                 b.remove_css_class("active-nav");
             }

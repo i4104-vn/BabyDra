@@ -4,6 +4,7 @@ pub mod bluetooth;
 pub mod certificates;
 pub mod displays;
 pub mod env;
+pub mod general;
 pub mod helpers;
 pub mod hosts;
 pub mod keybinds;
