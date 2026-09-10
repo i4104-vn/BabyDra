@@ -1,5 +1,6 @@
 //! Generic Settings (Cài đặt chung) widget assembling modular cards.
 
+pub mod clipboard;
 pub mod default_apps;
 pub mod input;
 pub mod output;
@@ -39,6 +40,7 @@ pub fn create_general_widget() -> Widget {
     container.append(&header_box);
 
     // Modular Collapsible Cards
+    container.append(&clipboard::build_clipboard_card());
     container.append(&output::build_output_card());
     container.append(&input::build_input_card());
     container.append(&sound_effects::build_sound_effects_card());

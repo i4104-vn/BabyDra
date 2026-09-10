@@ -299,7 +299,7 @@ fn combo_string(modifiers: &str, key: &str) -> String {
 }
 
 /// Formats a combo for display, e.g. `"Super + Tab"`.
-fn pretty_combo(modifiers: &str, key: &str) -> String {
+pub(crate) fn pretty_combo(modifiers: &str, key: &str) -> String {
     let mut parts: Vec<String> = modifiers
         .split('-')
         .filter(|m| !m.is_empty())
@@ -315,7 +315,7 @@ fn pretty_combo(modifiers: &str, key: &str) -> String {
 }
 
 /// Human friendly key name: single letters upper-cased, common aliases.
-fn pretty_key(key: &str) -> String {
+pub(crate) fn pretty_key(key: &str) -> String {
     match key {
         "Return" => "Enter".to_string(),
         "space" => "Space".to_string(),
@@ -370,7 +370,7 @@ pub fn read_command(row: &Box) -> Option<String> {
 }
 
 /// Reads held modifiers from the event state into canonical `W-C-A-S` order.
-fn state_modifiers(state: &gtk4::gdk::ModifierType) -> String {
+pub(crate) fn state_modifiers(state: &gtk4::gdk::ModifierType) -> String {
     let checks = [
         (gtk4::gdk::ModifierType::SUPER_MASK, "W"),
         (gtk4::gdk::ModifierType::CONTROL_MASK, "C"),
