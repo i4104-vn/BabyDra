@@ -123,6 +123,80 @@ popover.clipboard-popover>contents {
     border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+/* === Power Popover === */
+.power-popover-box {
+    padding: 10px 14px;
+    min-width: 290px;
+}
+
+.power-popover-header {
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.power-header-shortcut {
+    font-size: 10px;
+    font-family: monospace, sans-serif;
+    opacity: 0.55;
+    padding: 1px 6px;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.power-notch-shortcut {
+    font-size: 9px;
+    font-family: monospace, sans-serif;
+    opacity: 0.60;
+    margin-left: 2px;
+}
+
+.power-popover-buttons {
+    margin: 10px 0;
+}
+
+.power-popover-btn {
+    min-width: 66px;
+    padding: 10px 6px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    transition: all 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.power-btn-icon {
+    min-width: 40px;
+    min-height: 40px;
+    border-radius: 9999px;
+    background-color: rgba(255, 255, 255, 0.06);
+    margin-bottom: 4px;
+    transition: all 150ms ease;
+}
+
+.power-btn-key {
+    font-size: 9px;
+    font-weight: 700;
+    font-family: monospace, sans-serif;
+    opacity: 0.50;
+    padding: 0 4px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.08);
+    margin-bottom: 3px;
+}
+
+.power-btn-title {
+    font-size: 11px;
+    font-weight: 600;
+    opacity: 0.85;
+}
+
+.power-popover-hint {
+    font-size: 10px;
+    font-weight: 500;
+    opacity: 0.45;
+    margin-top: 6px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
 .notch-content {
     opacity: 1.0;
     min-width: 0;
