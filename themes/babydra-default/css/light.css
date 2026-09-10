@@ -197,7 +197,6 @@ popover.taskbar-popover>arrow {
     border-radius: 12px;
     padding: 8px;
     min-width: 300px;
-    max-width: 300px;
     box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16), 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
@@ -594,6 +593,20 @@ button.control-tile-right-btn:hover,
 button.control-tile-right-btn:focus,
 button.control-tile-right-btn:active {
     background-color: rgba(0, 0, 0, 0.08);
+}
+
+popover.control-popover>contents,
+popover.wifi-popover>contents,
+popover.volume-popover>contents,
+popover.audio-popover>contents {
+    background-color: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.wifi-popover-box,
+.audio-menu-popover {
+    background-color: transparent;
 }
 
 .wifi-popover-title {

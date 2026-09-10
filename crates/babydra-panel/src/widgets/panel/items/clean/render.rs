@@ -21,7 +21,7 @@ pub fn create_clean_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>)
     let popover = babydra_ui_kit::components::create_popover(
         &btn,
         gtk4::PositionType::Bottom,
-        "media-popover",
+        "clean-popover media-popover control-popover",
     );
     popover.set_has_arrow(false);
 

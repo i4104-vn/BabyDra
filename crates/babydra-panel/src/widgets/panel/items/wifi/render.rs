@@ -63,7 +63,7 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
     let popover = babydra_ui_kit::components::create_popover(
         &container,
         gtk4::PositionType::Right,
-        "taskbar-popover",
+        "wifi-popover control-popover",
     );
     popover.set_has_arrow(false);
 

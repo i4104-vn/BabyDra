@@ -129,7 +129,7 @@ pub fn create_volume_row(
     let popover = babydra_ui_kit::components::create_popover(
         &menu_btn,
         gtk4::PositionType::Bottom,
-        "taskbar-popover",
+        "volume-popover audio-popover control-popover",
     );
     popover.set_has_arrow(true);
 

@@ -585,12 +585,24 @@ row:selected {
     outline-color: transparent;
 }
 
-popover,
-popover.taskbar-popover {
+popover.control-popover,
+popover.wifi-popover,
+popover.volume-popover,
+popover.audio-popover {
     background-color: transparent;
     background-image: none;
+    padding: 0;
+    margin: 0;
     border: none;
     box-shadow: none;
+}
+
+popover.control-popover>contents,
+popover.wifi-popover>contents,
+popover.volume-popover>contents,
+popover.audio-popover>contents {
+    padding: 8px;
+    border-radius: 16px;
 }
 
 .clean-popover-percent {

@@ -13,7 +13,9 @@ pub fn create_popover(
     popover.set_parent(parent);
     popover.set_position(position);
     if !css_class.is_empty() {
-        popover.add_css_class(css_class);
+        for cls in css_class.split_whitespace() {
+            popover.add_css_class(cls);
+        }
     }
     popover
 }
