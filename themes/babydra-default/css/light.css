@@ -130,7 +130,7 @@ button.panel-tray-item-btn:hover {
 }
 
 popover.tray-context-menu,
-popover.tray-context-menu > contents {
+popover.tray-context-menu>contents {
     background: transparent;
     background-color: transparent;
     border: none;
@@ -435,14 +435,14 @@ button.quick-tile.active .tile-chevron {
 
 scale trough,
 scale.control-slider trough,
-scale.control-slider > trough,
-scale.control-slider contents > trough {
+scale.control-slider>trough,
+scale.control-slider contents>trough {
     background-color: rgba(0, 0, 0, 0.08);
 }
 
 scale.control-slider trough highlight,
-scale.control-slider > trough > highlight,
-scale.control-slider contents > trough > highlight {
+scale.control-slider>trough>highlight,
+scale.control-slider contents>trough>highlight {
     background-color: #3b82f6;
 }
 
@@ -730,10 +730,55 @@ popover>arrow {
     background-color: rgba(255, 255, 255, 1.0);
 }
 
-popover.media-popover>contents {
+popover.media-popover>contents,
+popover.clipboard-popover>contents {
     background-color: rgba(255, 255, 255, 0.98);
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.clipboard-popover-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.clipboard-popover-item {
+    color: rgba(28, 28, 30, 0.85);
+}
+
+.clipboard-popover-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #1c1c1e;
+}
+
+.clipboard-popover-item.selected {
+    background-color: rgba(59, 130, 246, 0.16);
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    color: #1c1c1e;
+}
+
+.clipboard-popover-num {
+    color: rgba(28, 28, 30, 0.45);
+}
+
+.clipboard-popover-item.selected .clipboard-popover-num {
+    color: #2563eb;
+}
+
+.clipboard-popover-thumb {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.clipboard-popover-preview {
+    color: rgba(28, 28, 30, 0.90);
+}
+
+.clipboard-popover-empty {
+    color: rgba(28, 28, 30, 0.45);
+}
+
+.clipboard-popover-hint {
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    color: rgba(28, 28, 30, 0.45);
 }
 
 .media-popover-app-name {
@@ -1237,7 +1282,8 @@ button.color-dot-btn.color-dot-white {
     background-color: #1c1c1e;
 }
 
-button.screenshot-toolbar-btn.selected, button.screenshot-toolbar-btn.selected image {
+button.screenshot-toolbar-btn.selected,
+button.screenshot-toolbar-btn.selected image {
     color: #ffffff;
 }
 
@@ -1763,8 +1809,7 @@ button.app-tab-btn.active {
 }
 
 /* Dropdown Select Controls (Matching Search Input Style) */
-dropdown {
-}
+dropdown {}
 
 dropdown>button {
     background-color: rgba(0, 0, 0, 0.03);
@@ -2153,20 +2198,20 @@ entry.sidebar-search-entry>text {
 
 /* Settings Scale Slider Colors (Light) */
 scale.settings-scale trough,
-scale.settings-scale > trough,
-scale.settings-scale contents > trough {
+scale.settings-scale>trough,
+scale.settings-scale contents>trough {
     background-color: rgba(0, 0, 0, 0.15);
 }
 
 scale.settings-scale trough highlight,
-scale.settings-scale > trough > highlight,
-scale.settings-scale contents > trough > highlight {
+scale.settings-scale>trough>highlight,
+scale.settings-scale contents>trough>highlight {
     background-color: #2563eb;
 }
 
 scale.settings-scale slider,
-scale.settings-scale > slider,
-scale.settings-scale contents > slider {
+scale.settings-scale>slider,
+scale.settings-scale contents>slider {
     background-color: #ffffff;
     border: 1px solid rgba(0, 0, 0, 0.15);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.20);
@@ -2177,20 +2222,20 @@ scale.settings-scale mark label {
 }
 
 scale.settings-scale:disabled trough,
-scale.settings-scale:disabled > trough,
-scale.settings-scale:disabled contents > trough {
+scale.settings-scale:disabled>trough,
+scale.settings-scale:disabled contents>trough {
     background-color: rgba(0, 0, 0, 0.06);
 }
 
 scale.settings-scale:disabled trough highlight,
-scale.settings-scale:disabled > trough > highlight,
-scale.settings-scale:disabled contents > trough > highlight {
+scale.settings-scale:disabled>trough>highlight,
+scale.settings-scale:disabled contents>trough>highlight {
     background-color: rgba(0, 0, 0, 0.18);
 }
 
 scale.settings-scale:disabled slider,
-scale.settings-scale:disabled > slider,
-scale.settings-scale:disabled contents > slider {
+scale.settings-scale:disabled>slider,
+scale.settings-scale:disabled contents>slider {
     background-color: rgba(0, 0, 0, 0.25);
     box-shadow: none;
 }
@@ -2246,8 +2291,8 @@ button.switcher-card.selected {
 
 
 /* === Workspace Switcher Popover & Flyout === */
-popover.workspace-switcher-popover > contents,
-popover.workspace-apps-flyout > contents {
+popover.workspace-switcher-popover>contents,
+popover.workspace-apps-flyout>contents {
     background-color: rgba(255, 255, 255, 0.96);
     border: 1px solid rgba(0, 0, 0, 0.10);
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
@@ -2640,10 +2685,10 @@ popover.context-menu-popover,
 popover.explore-popover,
 popover.tray-context-menu,
 popover.desktop-context-menu,
-popover.context-menu-popover > contents,
-popover.explore-popover > contents,
-popover.tray-context-menu > contents,
-popover.desktop-context-menu > contents {
+popover.context-menu-popover>contents,
+popover.explore-popover>contents,
+popover.tray-context-menu>contents,
+popover.desktop-context-menu>contents {
     background: transparent;
     background-color: transparent;
     background-image: none;
@@ -2654,10 +2699,10 @@ popover.desktop-context-menu > contents {
     margin: 0;
 }
 
-popover.context-menu-popover > arrow,
-popover.explore-popover > arrow,
-popover.tray-context-menu > arrow,
-popover.desktop-context-menu > arrow {
+popover.context-menu-popover>arrow,
+popover.explore-popover>arrow,
+popover.tray-context-menu>arrow,
+popover.desktop-context-menu>arrow {
     background: none;
     border: none;
 }
@@ -3277,4 +3322,3 @@ button.modern-dialog-danger-btn:disabled,
 .modern-reboot-btn:hover {
     background: linear-gradient(135deg, #34d399, #10b981);
 }
-

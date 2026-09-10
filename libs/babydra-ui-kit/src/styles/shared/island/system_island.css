@@ -26,6 +26,96 @@
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
+popover.clipboard-popover {
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+    border: none;
+}
+
+popover.clipboard-popover>contents {
+    background-image: none;
+    border-radius: 20px;
+    padding: 14px 16px;
+    box-shadow: none;
+}
+
+.clipboard-popover-box {
+    padding: 0;
+    min-width: 290px;
+}
+
+.clipboard-popover-header {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.clipboard-popover-list {
+    margin-top: 2px;
+}
+
+.clipboard-popover-item {
+    padding: 6px 10px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    transition: all 140ms ease;
+    margin: 1px 0;
+}
+
+.clipboard-popover-item:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.clipboard-popover-item.selected {
+    background-color: rgba(59, 130, 246, 0.20);
+    border: 1px solid rgba(59, 130, 246, 0.40);
+}
+
+.clipboard-popover-num {
+    font-size: 11px;
+    font-weight: 700;
+    font-family: monospace, sans-serif;
+    opacity: 0.5;
+    min-width: 18px;
+}
+
+.clipboard-popover-item.selected .clipboard-popover-num {
+    opacity: 0.95;
+    color: #60a5fa;
+}
+
+.clipboard-popover-icon {
+    min-width: 20px;
+    margin-right: 4px;
+}
+
+.clipboard-popover-thumb {
+    border-radius: 4px;
+}
+
+.clipboard-popover-preview {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.clipboard-popover-empty {
+    font-size: 12px;
+    font-style: italic;
+    opacity: 0.6;
+    padding: 14px 0;
+}
+
+.clipboard-popover-hint {
+    font-size: 10px;
+    font-weight: 500;
+    opacity: 0.45;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
 .notch-content {
     opacity: 1.0;
     min-width: 0;
