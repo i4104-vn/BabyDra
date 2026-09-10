@@ -5,22 +5,19 @@
 //!
 //! ## Cấu trúc module (chuẩn feature)
 //!
-//! | File | Trách nhiệm |
+//! | Thư mục / File | Trách nhiệm |
 //! | :--- | :--- |
 //! | `mod.rs` | Struct + constructor + `IslandFeature` impl (vòng đời + tick) |
-//! | `view.rs` | Xây dựng cây widget (`PlayerWidgets::build`) |
-//! | `render.rs` | Đẩy dữ liệu metadata vào widget (`update_player_view`) |
-//! | `poll.rs` | Service nền: polling playerctl + cache |
-//! | `art.rs` | Tải artwork, retry + fallback |
-//! | `popover.rs`, `visualizer.rs`, `format.rs` | Helper riêng của feature |
+//! | `ui/view.rs` | Xây dựng cây widget (`PlayerWidgets::build`) |
+//! | `ui/visualizer.rs` | Thanh hiệu ứng sóng nhạc chuyển động |
+//! | `ui/popover.rs` | Popover điều khiển media player |
+//! | `ui/render.rs` | Đẩy dữ liệu metadata vào widget (`update_player_view`) |
+//! | `service/poll.rs` | Service nền: polling playerctl + cache |
+//! | `service/art.rs` | Tải artwork, retry + fallback |
+//! | `service/format.rs` | Helper định dạng thời gian và icon app |
 
-mod art;
-mod format;
-mod poll;
-mod popover;
-mod render;
-mod view;
-mod visualizer;
+pub mod service;
+pub mod ui;
 
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -28,7 +25,8 @@ use std::rc::Rc;
 use gtk4::prelude::*;
 
 use crate::island::{IslandCtx, IslandFeature, IslandViewHandle};
-use view::PlayerWidgets;
+use service::{art, poll};
+use ui::{render, MediaPopover, PlayerWidgets};
 
 pub const PRIORITY: u8 = 50;
 const TARGET_WIDTH: i32 = 200;
@@ -39,7 +37,7 @@ const TARGET_HEIGHT: i32 = 28;
 pub struct MediaPlayerFeature {
     handle: Option<IslandViewHandle>,
     widgets: PlayerWidgets,
-    popover: RefCell<Option<popover::MediaPopover>>,
+    popover: RefCell<Option<MediaPopover>>,
     latest_metadata: Rc<RefCell<Option<String>>>,
     poll_counter: Cell<u32>,
     last_meta_key: RefCell<String>,
@@ -128,7 +126,7 @@ impl IslandFeature for MediaPlayerFeature {
     fn attach(&mut self, ctx: &IslandCtx) {
         // Build the media control popover (needs the capsule) and start the
         // artwork receiver now that the art containers exist.
-        let popover = popover::MediaPopover::new(&ctx.capsule());
+        let popover = MediaPopover::new(&ctx.capsule());
         let art_container = self.widgets.art_container.clone();
         let popover_art = popover.art_container.clone();
         let last_attempted_url = self.last_attempted_url.clone();

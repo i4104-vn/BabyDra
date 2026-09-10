@@ -12,7 +12,7 @@ use babydra_core::run_playerctl;
 const METADATA_FORMAT: &str = "{{ status }}|//|{{ title }}|//|{{ artist }}|//|{{ playerName }}|//|{{ mpris:artUrl }}|//|{{ position }}|//|{{ mpris:length }}";
 
 /// Spawns the polling thread + main-thread cache and returns the shared cache.
-pub(crate) fn spawn_playerctl_polling() -> Rc<RefCell<Option<String>>> {
+pub fn spawn_playerctl_polling() -> Rc<RefCell<Option<String>>> {
     let latest_metadata = Rc::new(RefCell::new(None));
 
     let (sender, mut receiver) = tokio::sync::mpsc::unbounded_channel::<Option<String>>();

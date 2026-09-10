@@ -3,7 +3,7 @@
 use gtk4::prelude::*;
 
 /// Widget references of the notification overlay view.
-pub(crate) struct NotificationView {
+pub struct NotificationView {
     pub root: gtk4::Box,
     pub art_container: gtk4::Box,
     pub title_lbl: gtk4::Label,
@@ -13,7 +13,7 @@ pub(crate) struct NotificationView {
 impl NotificationView {
     /// Builds the notification view hierarchy (visibility is managed by the
     /// island controller through the view container).
-    pub(crate) fn build() -> Self {
+    pub fn build() -> Self {
         let root = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
         root.add_css_class("island-notification-view");
         root.set_valign(gtk4::Align::Center);

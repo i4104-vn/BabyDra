@@ -2,13 +2,12 @@
 
 use gtk4::prelude::*;
 
-use super::art;
-use super::format::{format_time, get_player_icon_name};
-use super::MediaPlayerFeature;
+use crate::features::media_player::service::{art, format_time, get_player_icon_name};
+use crate::features::media_player::MediaPlayerFeature;
 
 /// Parsed playerctl metadata for one refresh cycle.
 #[derive(Default)]
-pub(crate) struct PlayerMeta {
+pub struct PlayerMeta {
     pub playing: bool,
     pub title: String,
     pub artist: String,
@@ -20,7 +19,7 @@ pub(crate) struct PlayerMeta {
 
 /// Parses one raw `playerctl metadata --format` line.
 /// Returns `(meta, player_active)` — active when status is Playing/Paused.
-pub(crate) fn parse_metadata(line: &str) -> (PlayerMeta, bool) {
+pub fn parse_metadata(line: &str) -> (PlayerMeta, bool) {
     let mut meta = PlayerMeta::default();
     let parts: Vec<&str> = line.split("|//|").collect();
     if parts.len() < 5 {

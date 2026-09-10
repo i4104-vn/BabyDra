@@ -11,7 +11,7 @@ use gtk4::prelude::*;
 
 /// Widget references of the media control popover.
 #[derive(Clone)]
-pub(crate) struct MediaPopover {
+pub struct MediaPopover {
     popover: gtk4::Popover,
     popover_box: gtk4::Box,
     is_animating: Rc<Cell<bool>>,
@@ -37,7 +37,7 @@ pub(crate) struct MediaPopover {
 
 impl MediaPopover {
     /// Builds and registers the popover anchored to the notch capsule.
-    pub(crate) fn new(capsule: &gtk4::Box) -> Self {
+    pub fn new(capsule: &gtk4::Box) -> Self {
         let popover = babydra_ui_kit::components::create_popover(
             capsule,
             gtk4::PositionType::Bottom,
@@ -188,12 +188,12 @@ impl MediaPopover {
     }
 
     /// Closes the popover.
-    pub(crate) fn popdown(&self) {
+    pub fn popdown(&self) {
         self.popover.popdown();
     }
 
     /// Toggles the popover with a slide animation.
-    pub(crate) fn toggle(&self) {
+    pub fn toggle(&self) {
         if self.is_animating.get() {
             return;
         }

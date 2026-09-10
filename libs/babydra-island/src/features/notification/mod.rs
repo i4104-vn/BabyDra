@@ -2,23 +2,23 @@
 //!
 //! ## Cấu trúc module (chuẩn feature)
 //!
-//! | File | Trách nhiệm |
+//! | Thư mục / File | Trách nhiệm |
 //! | :--- | :--- |
 //! | `mod.rs` | Struct + constructor + `IslandFeature` impl (vòng đời + tick) |
-//! | `view.rs` | Xây dựng cây widget (`NotificationView::build`) |
-//! | `render.rs` | Đẩy dữ liệu notification vào widget (`render`) |
-//! | `service.rs` | Service nền: hosting D-Bus notification daemon |
+//! | `ui/view.rs` | Xây dựng cây widget (`NotificationView::build`) |
+//! | `ui/render.rs` | Đẩy dữ liệu notification vào widget (`render_notification`) |
+//! | `service/dbus.rs` | Service nền: hosting D-Bus notification daemon |
 
-mod render;
-mod service;
-mod view;
+pub mod service;
+pub mod ui;
 
 use std::time::{Duration, Instant};
 
 use gtk4::prelude::*;
 
 use crate::island::{IslandCtx, IslandFeature, IslandViewHandle};
-use view::NotificationView;
+use service::spawn_notif_dbus;
+use ui::{render_notification, NotificationView};
 
 pub const PRIORITY: u8 = 90;
 const POPUP_LIFETIME: Duration = Duration::from_secs(5);
@@ -35,7 +35,7 @@ pub struct NotificationFeature {
 
 impl NotificationFeature {
     pub fn new() -> Self {
-        service::spawn_notif_dbus();
+        spawn_notif_dbus();
         Self {
             handle: None,
             view: NotificationView::build(),
@@ -96,7 +96,7 @@ impl IslandFeature for NotificationFeature {
         let key = format!("{}|{}|{}", n.title, n.body, n.icon);
         if key != self.last_key {
             self.last_key = key;
-            self.render(&n);
+            self.desired = render_notification(&self.view, &n);
         }
 
         if ctx.is_hovered() {

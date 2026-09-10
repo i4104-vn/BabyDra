@@ -11,7 +11,7 @@ use gtk4::prelude::*;
 use super::visualizer::{create_visualizer, start_visualizer};
 
 /// Widget references of the compact notch player view.
-pub(crate) struct PlayerWidgets {
+pub struct PlayerWidgets {
     pub music_view: gtk4::Box,
     pub track_label: gtk4::Label,
     pub art_container: gtk4::Box,
@@ -20,7 +20,7 @@ pub(crate) struct PlayerWidgets {
 impl PlayerWidgets {
     /// Builds the view hierarchy and starts the visualizer animation.
     /// Returns the widgets plus the shared play-state flag.
-    pub(crate) fn build() -> (Self, Rc<Cell<bool>>) {
+    pub fn build() -> (Self, Rc<Cell<bool>>) {
         let (visualizer_box, bars) = create_visualizer();
         let is_playing = Rc::new(Cell::new(false));
 

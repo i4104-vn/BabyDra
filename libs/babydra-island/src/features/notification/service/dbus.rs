@@ -1,13 +1,9 @@
 //! Notification D-Bus service hosting.
-//!
-//! Spawns the `org.freedesktop.Notifications` daemon (from `babydra-core`)
-//! and bridges its messages onto the main thread, where they land in the
-//! shared `SHARED_NOTIFICATION` state consumed by the feature's tick.
 
 use crate::models::NotificationMsg;
 
 /// Hosts the D-Bus notification daemon and the main-thread message bridge.
-pub(crate) fn spawn_notif_dbus() {
+pub fn spawn_notif_dbus() {
     let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<NotificationMsg>();
     crate::widgets::notification::spawn_dbus_listener(tx);
     glib::MainContext::default().spawn_local(async move {

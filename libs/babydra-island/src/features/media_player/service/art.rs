@@ -9,11 +9,11 @@ use gdk_pixbuf::prelude::*;
 use gtk4::prelude::*;
 
 /// (art_url, fallback_icon_name, load_result)
-pub(crate) type ArtPayload = (String, String, Result<Vec<u8>, ()>);
+pub type ArtPayload = (String, String, Result<Vec<u8>, ()>);
 
 /// Parses and scales raw image data from memory buffers to build cover art.
 /// If `crop_square` is true, delegates to `babydra_ui_kit::ui::image::create_rounded_picture`.
-pub(crate) fn load_album_art_from_bytes(
+pub fn load_album_art_from_bytes(
     bytes: &[u8],
     size: i32,
     crop_square: bool,
@@ -53,7 +53,7 @@ pub(crate) fn load_album_art_from_bytes(
 
 /// Spawns the main-thread task that applies fetched artwork to the notch and
 /// popover art containers (with the retry/fallback logic).
-pub(crate) fn spawn_art_receiver(
+pub fn spawn_art_receiver(
     mut rx: tokio::sync::mpsc::UnboundedReceiver<ArtPayload>,
     art_container: gtk4::Box,
     popover_art: gtk4::Box,
