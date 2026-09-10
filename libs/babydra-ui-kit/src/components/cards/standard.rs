@@ -31,3 +31,21 @@ pub fn create_subtitle(text: &str) -> gtk4::Label {
     label.set_halign(gtk4::Align::Start);
     label
 }
+
+/// Creates a standard slider card header with a title and percentage value label.
+pub fn create_slider_header(title: &str, initial_percent: f64) -> (gtk4::Box, gtk4::Label) {
+    let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    let title_label = gtk4::Label::new(Some(title));
+    title_label.add_css_class("control-slider-title");
+    title_label.set_xalign(0.0);
+    title_label.set_hexpand(true);
+
+    let value_label = gtk4::Label::new(Some(&format!("{:.0}%", initial_percent)));
+    value_label.add_css_class("control-slider-value");
+    value_label.set_xalign(1.0);
+
+    header_box.append(&title_label);
+    header_box.append(&value_label);
+    (header_box, value_label)
+}
+

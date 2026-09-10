@@ -24,7 +24,8 @@ pub fn build_workspace_popover(parent: &impl IsA<gtk4::Widget>) -> gtk4::Popover
     header_icon.add_css_class("workspace-popover-header-icon");
     header_box.append(&header_icon);
 
-    let header_lbl = gtk4::Label::new(Some("Workspaces"));
+    let header_text = babydra_core::i18n::trans("common.workspaces");
+    let header_lbl = gtk4::Label::new(Some(&header_text));
     header_lbl.add_css_class("workspace-popover-header-title");
     header_lbl.set_hexpand(true);
     header_lbl.set_halign(gtk4::Align::Start);
@@ -82,7 +83,8 @@ pub fn build_workspace_popover(parent: &impl IsA<gtk4::Widget>) -> gtk4::Popover
                 num_badge.add_css_class("workspace-popover-num");
                 row_box.append(&num_badge);
 
-                let name_lbl = gtk4::Label::new(Some(&format!("Workspace {}", id)));
+                let ws_name = format!("{} {}", babydra_core::i18n::trans("common.workspace"), id);
+                let name_lbl = gtk4::Label::new(Some(&ws_name));
                 name_lbl.add_css_class("workspace-popover-name");
                 name_lbl.set_hexpand(true);
                 name_lbl.set_halign(gtk4::Align::Start);

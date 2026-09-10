@@ -94,11 +94,9 @@ pub fn create_cc_window(
 
     let on_popover_toggled = Rc::new(move |is_open: bool| {
         popover_active_clone.set(is_open);
-        if !is_open {
-            if !motion_c.contains_pointer() {
-                if let Some(win) = q_win_weak.upgrade() {
-                    win.close();
-                }
+        if !is_open && !motion_c.contains_pointer() {
+            if let Some(win) = q_win_weak.upgrade() {
+                win.close();
             }
         }
     }) as Rc<dyn Fn(bool)>;

@@ -11,8 +11,6 @@ pub(crate) fn setup_wifi_popover(
     popover: &gtk4::Popover,
     sub_label: gtk4::Label,
     left_btn: gtk4::Button,
-    circle: gtk4::Box,
-    icon_widget: gtk4::Image,
 ) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
     main_box.add_css_class("wifi-popover-box");
@@ -21,16 +19,12 @@ pub(crate) fn setup_wifi_popover(
     let popover_clone = popover.clone();
     let sub_label_clone = sub_label.clone();
     let left_btn_clone = left_btn.clone();
-    let circle_clone = circle.clone();
-    let icon_widget_clone = icon_widget.clone();
 
     popover.connect_map(move |_| {
         refresh_wifi_popover_list(
             &main_box,
             sub_label_clone.clone(),
             left_btn_clone.clone(),
-            circle_clone.clone(),
-            icon_widget_clone.clone(),
             popover_clone.clone(),
         );
     });
@@ -41,8 +35,6 @@ pub(crate) fn refresh_wifi_popover_list(
     main_box: &gtk4::Box,
     sub_label: gtk4::Label,
     left_btn: gtk4::Button,
-    circle: gtk4::Box,
-    icon_widget: gtk4::Image,
     popover: gtk4::Popover,
 ) {
     while let Some(child) = main_box.first_child() {
@@ -50,7 +42,6 @@ pub(crate) fn refresh_wifi_popover_list(
     }
 
     main_box.set_size_request(260, -1);
-    main_box.add_css_class("audio-menu-popover");
 
     let title = gtk4::Label::new(Some(&trans("wifi.networks")));
     title.add_css_class("audio-menu-section-title");
@@ -73,8 +64,6 @@ pub(crate) fn refresh_wifi_popover_list(
     let main_box_clone = main_box.clone();
     let sub_label_clone = sub_label.clone();
     let left_btn_clone = left_btn.clone();
-    let circle_clone = circle.clone();
-    let icon_widget_clone = icon_widget.clone();
     let popover_clone = popover.clone();
 
     let (tx, mut rx) = mpsc::unbounded_channel::<(
@@ -97,8 +86,6 @@ pub(crate) fn refresh_wifi_popover_list(
                 nets,
                 sub_label_clone.clone(),
                 left_btn_clone.clone(),
-                circle_clone.clone(),
-                icon_widget_clone.clone(),
                 popover_clone.clone(),
             );
         }
@@ -113,8 +100,6 @@ fn build_wifi_list_ui(
 
     sub_label: gtk4::Label,
     left_btn: gtk4::Button,
-    circle: gtk4::Box,
-    icon_widget: gtk4::Image,
     popover: gtk4::Popover,
 ) {
     while let Some(child) = main_box.first_child() {
@@ -122,7 +107,6 @@ fn build_wifi_list_ui(
     }
 
     main_box.set_size_request(260, -1);
-    main_box.add_css_class("audio-menu-popover");
 
     if active_net.is_connected && active_net.network_type == ActiveNetworkType::Ethernet {
         let eth_title = gtk4::Label::new(Some(&trans("control.ethernet")));
@@ -231,8 +215,6 @@ fn build_wifi_list_ui(
         let main_box_c = main_box.clone();
         let sub_label_c = sub_label.clone();
         let left_btn_c = left_btn.clone();
-        let circle_c = circle.clone();
-        let icon_widget_c = icon_widget.clone();
         let popover_c = popover.clone();
 
         row_btn.connect_clicked(move |_| {
@@ -248,8 +230,6 @@ fn build_wifi_list_ui(
                     None,
                     sub_label_c.clone(),
                     left_btn_c.clone(),
-                    circle_c.clone(),
-                    icon_widget_c.clone(),
                     popover_c.clone(),
                 );
             } else {
@@ -259,8 +239,6 @@ fn build_wifi_list_ui(
                     &security_clone,
                     sub_label_c.clone(),
                     left_btn_c.clone(),
-                    circle_c.clone(),
-                    icon_widget_c.clone(),
                     popover_c.clone(),
                 );
             }
@@ -305,8 +283,6 @@ fn show_credentials_form(
     security: &str,
     sub_label: gtk4::Label,
     left_btn: gtk4::Button,
-    circle: gtk4::Box,
-    icon_widget: gtk4::Image,
     popover: gtk4::Popover,
 ) {
     while let Some(child) = main_box.first_child() {
@@ -314,7 +290,6 @@ fn show_credentials_form(
     }
 
     main_box.set_size_request(260, -1);
-    main_box.add_css_class("audio-menu-popover");
 
     let title = gtk4::Label::new(Some(&trans("wifi.connect_to").replace("{}", ssid)));
     title.add_css_class("audio-menu-section-title");
@@ -360,8 +335,6 @@ fn show_credentials_form(
 
     let sub_label_c = sub_label.clone();
     let left_btn_c = left_btn.clone();
-    let circle_c = circle.clone();
-    let icon_widget_c = icon_widget.clone();
     let popover_c = popover.clone();
     let main_box_c = main_box.clone();
 
@@ -370,8 +343,6 @@ fn show_credentials_form(
             &main_box_c,
             sub_label_c.clone(),
             left_btn_c.clone(),
-            circle_c.clone(),
-            icon_widget_c.clone(),
             popover_c.clone(),
         );
     });
@@ -389,8 +360,6 @@ fn show_credentials_form(
             pass,
             sub_label.clone(),
             left_btn.clone(),
-            circle.clone(),
-            icon_widget.clone(),
             popover.clone(),
         );
     });

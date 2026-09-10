@@ -171,7 +171,7 @@ pub(crate) fn setup_clean_popover(popover: &gtk4::Popover) -> gtk4::Box {
 
         // Draw background track circle
         cr.arc(cx, cy, radius, 0.0, 2.0 * std::f64::consts::PI);
-        cr.set_source_rgba(255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 0.06);
+        cr.set_source_rgba(1.0, 1.0, 1.0, 0.06);
         cr.set_line_width(6.0);
         let _ = cr.stroke();
 

@@ -69,15 +69,17 @@ pub fn build_taskbar_btn(app: &DesktopApp, is_active: bool, window_count: usize)
     btn
 }
 
+pub struct TaskbarPreviewActions {
+    pub action_triggers: Vec<(gtk4::Button, gtk4::Button, DesktopApp)>,
+    pub open_new_info: Option<(gtk4::Button, String)>,
+    pub close_all_btn_opt: Option<gtk4::Button>,
+}
+
 pub fn render_previews(
     popover: &gtk4::Popover,
     windows: &[DesktopApp],
     app_id: &str,
-) -> (
-    Vec<(gtk4::Button, gtk4::Button, DesktopApp)>,
-    Option<(gtk4::Button, String)>,
-    Option<gtk4::Button>,
-) {
+) -> TaskbarPreviewActions {
     let previews_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
     previews_box.add_css_class("taskbar-popover-box");
     previews_box.set_width_request(250);
@@ -236,7 +238,7 @@ pub fn render_previews(
         kill_icon.set_pixel_size(12);
         let kill_btn = gtk4::Button::builder()
             .child(&kill_icon)
-            .tooltip_text(&babydra_core::i18n::trans("taskbar.close"))
+            .tooltip_text(babydra_core::i18n::trans("taskbar.close"))
             .build();
         kill_btn.add_css_class("taskbar-popover-close-btn");
         kill_btn.set_valign(gtk4::Align::Center);
@@ -345,5 +347,9 @@ pub fn render_previews(
 
     popover.set_child(Some(&previews_box));
 
-    (action_triggers, open_new_info, close_all_btn_opt)
+    TaskbarPreviewActions {
+        action_triggers,
+        open_new_info,
+        close_all_btn_opt,
+    }
 }

@@ -3,9 +3,7 @@ use gtk4::prelude::*;
 
 /// Creates a new `battery widget`.
 pub fn create_battery_w() -> Option<gtk4::DrawingArea> {
-    if get_battery_info().is_none() {
-        return None;
-    }
+    get_battery_info()?;
 
     let drawing_area = gtk4::DrawingArea::new();
     drawing_area.set_content_width(24);
@@ -126,14 +124,14 @@ pub fn create_network_widget() -> NetworkWidgets {
         // Packet threshold (> 64 bytes)
         if tx_diff > 64 {
             tx_burst = 2; // Keep blinking for at least 2 ticks
-        } else if tx_burst > 0 {
-            tx_burst -= 1;
+        } else {
+            tx_burst = tx_burst.saturating_sub(1);
         }
 
         if rx_diff > 64 {
             rx_burst = 2;
-        } else if rx_burst > 0 {
-            rx_burst -= 1;
+        } else {
+            rx_burst = rx_burst.saturating_sub(1);
         }
 
         let tx_active = tx_burst > 0;

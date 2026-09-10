@@ -4,27 +4,15 @@ use super::{
 };
 use babydra_core::i18n::trans;
 use gtk4::prelude::*;
-use std::cell::Cell;
-use std::rc::Rc;
 
 /// Creates a new `brightness row`.
 pub fn create_brightness() -> (gtk4::Box, gtk4::Scale) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
     main_box.add_css_class("control-slider-card");
 
-    let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    let title_label = gtk4::Label::new(Some(&trans("common.brightness")));
-    title_label.add_css_class("control-slider-title");
-    title_label.set_xalign(0.0);
-    title_label.set_hexpand(true);
-
     let initial_val = get_brightness();
-    let value_label = gtk4::Label::new(Some(&format!("{:.0}%", initial_val)));
-    value_label.add_css_class("control-slider-value");
-    value_label.set_xalign(1.0);
-
-    header_box.append(&title_label);
-    header_box.append(&value_label);
+    let (header_box, value_label) =
+        babydra_ui_kit::components::create_slider_header(&trans("common.brightness"), initial_val);
 
     let row_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
 
@@ -35,25 +23,8 @@ pub fn create_brightness() -> (gtk4::Box, gtk4::Scale) {
     scale.set_draw_value(false);
     scale.add_css_class("control-slider");
 
-    let last_source: Rc<Cell<Option<gtk4::glib::SourceId>>> = Rc::new(Cell::new(None));
-    let last_source_clone = last_source.clone();
-
-    let value_label_clone = value_label.clone();
-    scale.connect_value_changed(move |s| {
-        let val = s.value();
-        value_label_clone.set_text(&format!("{:.0}%", val));
-
-        if let Some(id) = last_source_clone.take() {
-            id.remove();
-        }
-
-        let last_source_inner = last_source_clone.clone();
-        let new_id =
-            gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(80), move || {
-                last_source_inner.set(None);
-                set_brightness(val);
-            });
-        last_source_clone.set(Some(new_id));
+    babydra_ui_kit::components::bind_debounced_slider(&scale, &value_label, 80, move |val| {
+        set_brightness(val);
     });
 
     let overlay = gtk4::Overlay::new();

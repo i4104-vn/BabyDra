@@ -12,20 +12,9 @@ pub fn create_volume_row(
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
     main_box.add_css_class("control-slider-card");
 
-    let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    let title_label = gtk4::Label::new(Some(&trans("volume.title")));
-    title_label.add_css_class("control-slider-title");
-    title_label.set_xalign(0.0);
-    title_label.set_hexpand(true);
-
-    // Sync the topbar volume icon to the current hardware state on load
     let initial_val = get_current_volume();
-    let value_label = gtk4::Label::new(Some(&format!("{:.0}%", initial_val)));
-    value_label.add_css_class("control-slider-value");
-    value_label.set_xalign(1.0);
-
-    header_box.append(&title_label);
-    header_box.append(&value_label);
+    let (header_box, value_label) =
+        babydra_ui_kit::components::create_slider_header(&trans("volume.title"), initial_val);
 
     let row_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
 
@@ -79,37 +68,16 @@ pub fn create_volume_row(
     scale.set_draw_value(false);
     scale.add_css_class("control-slider");
 
-    let last_source: Rc<Cell<Option<gtk4::glib::SourceId>>> = Rc::new(Cell::new(None));
-    let last_source_clone = last_source.clone();
     let vol_icon_c2 = vol_icon.clone();
     let update_mute_icon_c = update_mute_icon.clone();
     let muted_state_c = muted_state.clone();
-
-    let value_label_changed = value_label.clone();
-    scale.connect_value_changed(move |s| {
-        let val = s.value();
-        value_label_changed.set_text(&format!("{:.0}%", val));
-
-        if let Some(id) = last_source_clone.take() {
-            id.remove();
+    babydra_ui_kit::components::bind_debounced_slider(&scale, &value_label, 80, move |val| {
+        set_volume(val);
+        if val > 0.0 {
+            muted_state_c.set(false);
+            update_mute_icon_c(false);
         }
-
-        let last_source_inner = last_source_clone.clone();
-        let vol_icon_inner = vol_icon_c2.clone();
-        let update_mute_icon_inner = update_mute_icon_c.clone();
-        let muted_state_inner = muted_state_c.clone();
-
-        let new_id =
-            gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(80), move || {
-                last_source_inner.set(None);
-                set_volume(val);
-                if val > 0.0 {
-                    muted_state_inner.set(false);
-                    update_mute_icon_inner(false);
-                }
-                update_topbar_volume(&vol_icon_inner);
-            });
-        last_source_clone.set(Some(new_id));
+        update_topbar_volume(&vol_icon_c2);
     });
 
     let menu_btn = gtk4::Button::new();

@@ -189,7 +189,7 @@ pub fn create_wifi_widget() -> gtk4::Widget {
     let trigger_done = trigger_wifi_scan.clone();
     let render_done = render_networks.clone();
     glib::timeout_add_local(std::time::Duration::from_millis(150), move || {
-        while let Ok(_) = rx_connect.try_recv() {
+        while rx_connect.try_recv().is_ok() {
             state_done.borrow_mut().connecting_ssid = None;
             render_done();
             trigger_done();

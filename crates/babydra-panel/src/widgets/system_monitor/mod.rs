@@ -44,7 +44,7 @@ fn get_ram_usage() -> Option<(f64, f64, f64)> {
     let mut mem_total = 0.0;
     let mut mem_avail = 0.0;
 
-    for line in std::io::BufRead::lines(reader).flatten() {
+    for line in std::io::BufRead::lines(reader).map_while(Result::ok) {
         let parts: Vec<&str> = line.split_whitespace().collect();
         if parts.len() >= 2 {
             if parts[0] == "MemTotal:" {

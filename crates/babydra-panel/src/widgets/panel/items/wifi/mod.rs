@@ -13,8 +13,6 @@ pub fn connect_wifi_async(
     password: Option<String>,
     sub_label: gtk4::Label,
     left_btn: gtk4::Button,
-    circle: gtk4::Box,
-    icon_widget: gtk4::Image,
     popover: gtk4::Popover,
 ) {
     let (tx, mut rx) = mpsc::unbounded_channel::<bool>();
@@ -27,8 +25,6 @@ pub fn connect_wifi_async(
 
     let sub_label_c = sub_label.clone();
     let left_btn_c = left_btn.clone();
-    let circle_c = circle.clone();
-    let icon_widget_c = icon_widget.clone();
     let popover_c = popover.clone();
     let ssid_str2 = ssid.to_string();
 
@@ -36,12 +32,7 @@ pub fn connect_wifi_async(
         if let Some(success) = rx.recv().await {
             if success {
                 sub_label_c.set_text(&ssid_str2);
-                left_btn_c.add_css_class("active");
-                circle_c.add_css_class("active");
-                let new_img = babydra_ui_kit::ui::icon::get_icon_colored("wifi", 14, "#ffffff");
-                if let Some(paintable) = new_img.paintable() {
-                    icon_widget_c.set_paintable(Some(&paintable));
-                }
+                babydra_ui_kit::components::update_toggle_state(&left_btn_c, true, "wifi");
                 popover_c.popdown();
             } else {
                 sub_label_c.set_text("Failed");
@@ -50,3 +41,4 @@ pub fn connect_wifi_async(
         }
     });
 }
+

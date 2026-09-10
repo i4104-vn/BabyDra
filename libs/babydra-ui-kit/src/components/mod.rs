@@ -20,8 +20,8 @@ pub use buttons::{
     create_wp_thumb, update_toggle_state,
 };
 pub use cards::{
-    create_card, create_css_card, create_scroll_list, create_subtitle, create_switch_card,
-    create_title,
+    create_card, create_css_card, create_scroll_list, create_slider_header, create_subtitle,
+    create_switch_card, create_title,
 };
 pub use context_menu::{
     build_tray_gio_menu, close_tray_menu, create_danger_btn, create_danger_item, create_footer_box,
@@ -36,6 +36,6 @@ pub use modals::{
 };
 pub use placeholder::{create_placeholder, PlaceholderState};
 pub use popovers::{create_popover, TooltipPopover, TooltipRow};
-pub use slider::CustomSlider;
+pub use slider::{bind_debounced_slider, CustomSlider};
 pub use switch::{create_switch, CustomSwitch, ToggleRow};
 pub use wifi::{create_rssi_icon, create_sys_wifi_icon, create_wifi_net_icon, render_wifi_svg};

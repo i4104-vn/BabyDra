@@ -80,7 +80,7 @@ pub fn build_appearance_ui(
     top_left_box.set_margin_start(10);
     top_left_box.set_margin_top(10);
 
-    let target_items = vec![
+    let target_items = [
         babydra_core::i18n::trans("settings.target_desktop"),
         babydra_core::i18n::trans("settings.target_lock"),
     ];
@@ -274,7 +274,7 @@ pub fn build_appearance_ui(
     quick_lbl.set_hexpand(true);
     quick_header.append(&quick_lbl);
 
-    let mode_items = vec![
+    let mode_items = [
         babydra_core::i18n::trans("settings.wallpaper_mode_static"),
         babydra_core::i18n::trans("settings.wallpaper_mode_live"),
     ];

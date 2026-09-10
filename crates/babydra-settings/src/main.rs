@@ -24,23 +24,21 @@ fn handle_cli_args() -> (bool, Option<String>) {
 
         if arg == "--apply-battery-saver" {
             let conf = load_babydra_config();
-            if conf.power.auto_saver_enabled {
-                let cur_profile = get_current_profile();
-                if cur_profile != PerformanceProfile::Normal {
-                    if set_perf_profile(PerformanceProfile::Normal).is_ok() {
-                        let mut updated_conf = load_babydra_config();
-                        updated_conf.power.profile = PerformanceProfile::Normal.key().to_string();
-                        save_babydra_config(&updated_conf);
+            if conf.power.auto_saver_enabled
+                && get_current_profile() != PerformanceProfile::Normal
+                && set_perf_profile(PerformanceProfile::Normal).is_ok()
+            {
+                let mut updated_conf = load_babydra_config();
+                updated_conf.power.profile = PerformanceProfile::Normal.key().to_string();
+                save_babydra_config(&updated_conf);
 
-                        let bat_pct = get_battery_info()
-                            .map(|b| b.percentage)
-                            .unwrap_or(conf.power.saver_threshold);
-                        let title = babydra_core::i18n::trans("settings.notif_auto_saver_title");
-                        let msg = babydra_core::i18n::trans("settings.notif_auto_saver_msg")
-                            .replace("{level}", &bat_pct.to_string());
-                        babydra_core::send_settings_notif(&title, &msg);
-                    }
-                }
+                let bat_pct = get_battery_info()
+                    .map(|b| b.percentage)
+                    .unwrap_or(conf.power.saver_threshold);
+                let title = babydra_core::i18n::trans("settings.notif_auto_saver_title");
+                let msg = babydra_core::i18n::trans("settings.notif_auto_saver_msg")
+                    .replace("{level}", &bat_pct.to_string());
+                babydra_core::send_settings_notif(&title, &msg);
             }
             return (true, None);
         } else if arg == "--check-battery-saver" {
@@ -117,14 +115,11 @@ fn handle_cli_args() -> (bool, Option<String>) {
                 target_page = Some(normalize_page_name(val));
                 i += 1;
             }
-        } else if arg.starts_with("--page=") {
-            let val = &arg["--page=".len()..];
+        } else if let Some(val) = arg.strip_prefix("--page=") {
             target_page = Some(normalize_page_name(val));
-        } else if arg.starts_with("--tab=") {
-            let val = &arg["--tab=".len()..];
+        } else if let Some(val) = arg.strip_prefix("--tab=") {
             target_page = Some(normalize_page_name(val));
-        } else if arg.starts_with("--") {
-            let flag = &arg[2..];
+        } else if let Some(flag) = arg.strip_prefix("--") {
             let normalized = normalize_page_name(flag);
             if normalized != flag || is_valid_page(&normalized) {
                 target_page = Some(normalized);

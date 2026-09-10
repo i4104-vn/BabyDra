@@ -19,6 +19,8 @@
   "panel.ram_usage": "RAM Usage",
   "panel.gpu_usage": "GPU Usage",
   "panel.logo_tooltip": "Left-click: Open Launcher\nRight-click: Show Desktop\nMiddle-click: Workspace Switcher\nScroll wheel: Switch Workspace",
+  "common.workspaces": "Workspaces",
+  "common.workspace": "Workspace",
   "control.network": "Network",
   "control.ethernet": "Wired (Ethernet)",
   "control.connected": "Connected",

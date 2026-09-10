@@ -78,25 +78,15 @@ pub fn create_dnd_tile() -> gtk4::Button {
 
 /// Returns `true` when `night light active` holds, `false` otherwise.
 fn is_night_light_active() -> bool {
-    if let Ok(output) = std::process::Command::new("pgrep")
-        .arg("-x")
-        .arg("gammastep")
-        .output()
-    {
-        if output.status.success() {
-            return true;
-        }
-    }
-    if let Ok(output) = std::process::Command::new("pgrep")
-        .arg("-x")
-        .arg("wl-gammarelay")
-        .output()
-    {
-        if output.status.success() {
-            return true;
-        }
-    }
-    false
+    let check_proc = |name: &str| {
+        std::process::Command::new("pgrep")
+            .arg("-x")
+            .arg(name)
+            .status()
+            .map(|s| s.success())
+            .unwrap_or(false)
+    };
+    check_proc("gammastep") || check_proc("wl-gammarelay")
 }
 
 /// Creates a new `night light tile`.
@@ -105,7 +95,7 @@ pub fn create_night_tile() -> gtk4::Button {
     babydra_ui_kit::components::create_square_tile("night-light", "", active, |new_active| {
         if new_active {
             let _ = std::process::Command::new("gammastep")
-                .args(&["-O", "4500", "-b", "1.0:1.0"])
+                .args(["-O", "4500", "-b", "1.0:1.0"])
                 .spawn();
         } else {
             let _ = std::process::Command::new("pkill")

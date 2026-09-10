@@ -39,18 +39,6 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
         }
     });
 
-    let circle = left_btn
-        .child()
-        .and_then(|w| w.downcast::<gtk4::Box>().ok())
-        .and_then(|main_box| main_box.first_child())
-        .and_then(|c| c.downcast::<gtk4::Box>().ok())
-        .unwrap();
-
-    let icon_widget = circle
-        .first_child()
-        .and_then(|img| img.downcast::<gtk4::Image>().ok())
-        .unwrap();
-
     let right_btn = babydra_ui_kit::components::create_color_btn(
         "go-next-symbolic",
         12,
@@ -67,13 +55,7 @@ pub fn create_wifi_tile(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) 
     );
     popover.set_has_arrow(false);
 
-    setup_wifi_popover(
-        &popover,
-        sub_label.clone(),
-        left_btn.clone(),
-        circle.clone(),
-        icon_widget.clone(),
-    );
+    setup_wifi_popover(&popover, sub_label.clone(), left_btn.clone());
 
     let on_popover_toggled_c = on_popover_toggled.clone();
     let popover_c1 = popover.clone();

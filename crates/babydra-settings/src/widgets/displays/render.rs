@@ -90,7 +90,7 @@ fn build_monitor_card(mon: &MonitorConfig) -> DisplayCardRow {
     card.append(&rate_dropdown);
 
     // 4. Orientation Dropdown
-    let orient_items_owned = vec![
+    let orient_items_owned = [
         babydra_core::i18n::trans("settings.orientation_normal"),
         babydra_core::i18n::trans("settings.orientation_left"),
         babydra_core::i18n::trans("settings.orientation_inverted"),

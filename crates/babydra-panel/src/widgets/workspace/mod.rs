@@ -94,7 +94,7 @@ fn rebuild_taskbar(
     }
 
     let mut group_keys: Vec<String> = groups.keys().cloned().collect();
-    group_keys.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
+    group_keys.sort_by_key(|a| a.to_lowercase());
 
     for app_id in group_keys {
         let windows = groups.get(&app_id).unwrap();

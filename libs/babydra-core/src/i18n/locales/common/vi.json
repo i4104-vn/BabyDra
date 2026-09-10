@@ -19,6 +19,8 @@
   "panel.ram_usage": "Sử dụng RAM",
   "panel.gpu_usage": "Sử dụng GPU",
   "panel.logo_tooltip": "Chuột trái: Mở Launcher\nChuột phải: Hiển thị Desktop\nNhấn con lăn: Danh sách Workspace\nCuộn con lăn: Chuyển Workspace",
+  "common.workspaces": "Không gian làm việc",
+  "common.workspace": "Không gian làm việc",
   "control.network": "Mạng",
   "control.ethernet": "Mạng có dây (Ethernet)",
   "control.connected": "Đã kết nối",

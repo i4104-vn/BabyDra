@@ -207,7 +207,7 @@ pub fn render_network_list(
         icon_badge.set_hexpand(false);
 
         let wifi_icon = babydra_ui_kit::components::create_wifi_net_icon(
-            net.signal as u32,
+            net.signal,
             net.is_connected,
             18,
             Some("#3B82F6"),
