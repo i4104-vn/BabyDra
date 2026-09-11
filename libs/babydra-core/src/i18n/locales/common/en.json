@@ -222,6 +222,7 @@
   "island.unknown_title": "Unknown Title",
   "island.unknown_artist": "Unknown Artist",
   "island.clipboard": "Clipboard History",
+  "island.clipboard_notch": "Clipboard",
   "island.clipboard_empty": "No clipboard items yet",
   "island.clipboard_hint": "↑↓ Navigate • Enter Select • Esc Close",
   "island.clipboard_more_lines_one": "+1 more line",

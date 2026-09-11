@@ -30,9 +30,7 @@ impl IslandCore {
     pub fn get_active_indices(&self) -> Vec<usize> {
         let mut active = Vec::new();
         for (i, v) in self.views.iter().enumerate() {
-            let is_active = v.state.override_active.get()
-                || v.state.requested.get()
-                || (v.hover_keep && v.state.active.get() && self.hovered.get());
+            let is_active = v.state.override_active.get() || v.state.requested.get();
             if is_active {
                 active.push(i);
             }

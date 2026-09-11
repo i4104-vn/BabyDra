@@ -42,7 +42,6 @@ impl PowerNotchWidgets {
         container.append(&center_box);
 
         let click_gesture = GestureClick::new();
-        container.add_controller(click_gesture.clone());
 
         Self {
             container,

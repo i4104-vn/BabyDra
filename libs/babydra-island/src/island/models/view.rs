@@ -267,6 +267,7 @@ pub(crate) struct ViewRecord {
     pub size: Cell<(i32, i32)>,
     pub container: gtk4::Box,
     pub state: Rc<ViewState>,
+    #[allow(dead_code)]
     pub hover_keep: bool,
     pub capsule_class: Option<String>,
     #[allow(dead_code)]

@@ -12,30 +12,27 @@ use crate::island::view::next_request_seq;
 
 /// Handles mouse scroll events on the island assembly to cycle through active views.
 pub(crate) fn handle_island_scroll(core_rc: &Rc<RefCell<IslandCore>>, dx: f64, dy: f64) {
+    let delta = if dy.abs() >= dx.abs() { dy } else { dx };
+    // Require a minimum threshold of 0.5 to filter out sub-pixel touchpad kinetic drift
+    if delta.abs() < 0.5 {
+        return;
+    }
+
     let now = Instant::now();
     {
         let Ok(core) = core_rc.try_borrow() else {
             return;
         };
         if let Some(last) = core.last_scroll.get() {
-            if now.duration_since(last) < Duration::from_millis(150) {
+            if now.duration_since(last) < Duration::from_millis(200) {
                 return;
             }
         }
     }
 
-    let delta = if dy.abs() >= dx.abs() { dy } else { dx };
-    if delta.abs() < 0.01 {
-        return;
-    }
-
-    // Dismiss any open popovers on the capsule
-    dismiss_all_popovers();
-
     let Ok(mut core) = core_rc.try_borrow_mut() else {
         return;
     };
-    core.last_scroll.set(Some(now));
 
     let active_indices = core.get_active_indices();
     if active_indices.len() <= 1 {
@@ -55,9 +52,14 @@ pub(crate) fn handle_island_scroll(core_rc: &Rc<RefCell<IslandCore>>, dx: f64, d
     };
 
     let target_idx = active_indices[next_pos];
-    if target_idx == curr_idx && core.displayed == IslandDisplay::View(target_idx) {
+    if target_idx == curr_idx {
         return;
     }
+
+    // Only dismiss open popovers when ACTUALLY switching to a different view
+    dismiss_all_popovers();
+
+    core.last_scroll.set(Some(now));
 
     let next_seq = next_request_seq();
     core.user_selected = Some((target_idx, next_seq));

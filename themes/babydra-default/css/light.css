@@ -116,6 +116,7 @@ popover.sys-monitor-popover progressbar trough {
 
 popover.sys-monitor-popover .sys-chart {
     background-color: rgba(0, 0, 0, 0.03);
+    border: none;
 }
 
 /* === panel/tray.css === */
@@ -694,8 +695,19 @@ popover>arrow {
 /* === island/system_island.css === */
 .panel-notch.active-music {
     background-color: rgba(255, 255, 255, 0.98);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-top: 1px solid rgba(255, 255, 255, 1.0);
+    border-left: 1px solid rgba(255, 255, 255, 1.0);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.island-bracket {
+    color: rgba(0, 0, 0, 0.35);
+}
+
+.panel-notch:hover .island-bracket {
+    color: #2563eb;
+    text-shadow: 0 0 8px rgba(37, 99, 235, 0.5);
 }
 
 .notch-player-text {
@@ -704,14 +716,16 @@ popover>arrow {
 
 .notch-album-art {
     border-radius: 9999px;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    background-color: rgba(0, 0, 0, 0.03);
+    border: none;
+    background-color: transparent;
 }
 
 .island-badge {
     background-color: rgba(255, 255, 255, 0.98);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-top: 1px solid rgba(255, 255, 255, 1.0);
+    border-left: 1px solid rgba(255, 255, 255, 1.0);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .badge-title {
@@ -723,22 +737,29 @@ popover>arrow {
 }
 
 .panel-notch.active-music:not(.popover-open):hover {
-    background-color: rgba(255, 255, 255, 1.0);
+    background-color: #f3f4f6;
 }
 
 popover.media-popover>contents,
 popover.clipboard-popover>contents,
-popover.power-popover>contents,
-popover.notification-popover>contents {
-    background-color: rgba(248, 249, 251, 0.98);
-    border: 1px solid rgba(0, 0, 0, 0.10);
-    border-top: 1px solid rgba(255, 255, 255, 0.90);
-    border-radius: 20px;
-    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.16), 0 0 1px 1px rgba(0, 0, 0, 0.04);
+popover.power-popover>contents {
+    background-color: #ffffff;
+    border-top: 1px solid rgba(255, 255, 255, 1.0);
+    border-left: 1px solid rgba(255, 255, 255, 0.90);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.10);
+    border-right: 1px solid rgba(0, 0, 0, 0.10);
+    border-radius: 24px;
+    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.12), 0 0 1px 1px rgba(0, 0, 0, 0.04);
 }
 
-.power-popover-header {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+popover.notification-popover>contents {
+    background-color: #ffffff;
+    border-top: 1px solid rgba(255, 255, 255, 1.0);
+    border-left: 1px solid rgba(255, 255, 255, 0.90);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.10);
+    border-right: 1px solid rgba(0, 0, 0, 0.10);
+    border-radius: 9999px;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .power-header-title {
@@ -748,46 +769,47 @@ popover.notification-popover>contents {
 .power-header-shortcut {
     color: rgba(0, 0, 0, 0.50);
     background-color: rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    border: none;
 }
 
 .power-popover-btn {
     color: rgba(0, 0, 0, 0.85);
     background-color: rgba(0, 0, 0, 0.03);
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: none;
 }
 
 .power-popover-btn:hover {
     background-color: rgba(0, 0, 0, 0.06);
-    border-color: rgba(0, 0, 0, 0.12);
     color: #000000;
 }
 
 .power-btn-icon {
     background-color: rgba(0, 0, 0, 0.04);
-    border: 1px solid rgba(0, 0, 0, 0.06);
+    border: none;
 }
 
 .power-btn-key {
     background-color: rgba(0, 0, 0, 0.06);
-    border: 1px solid rgba(0, 0, 0, 0.10);
+    border: none;
     color: rgba(0, 0, 0, 0.65);
 }
 
 /* Shutdown active/selected */
 .power-shutdown.selected {
     background-color: rgba(239, 68, 68, 0.12);
-    border: 1px solid rgba(239, 68, 68, 0.55);
+    border: none;
     box-shadow: 0 4px 18px rgba(239, 68, 68, 0.20);
     color: #b91c1c;
 }
+
 .power-shutdown.selected .power-btn-icon {
     background-color: rgba(239, 68, 68, 0.20);
-    border-color: rgba(239, 68, 68, 0.50);
+    border: none;
 }
+
 .power-shutdown.selected .power-btn-key {
     background-color: #ef4444;
-    border-color: #ef4444;
+    border: none;
     color: #ffffff;
     opacity: 1.0;
     box-shadow: 0 2px 6px rgba(239, 68, 68, 0.35);
@@ -796,17 +818,19 @@ popover.notification-popover>contents {
 /* Reboot active/selected */
 .power-reboot.selected {
     background-color: rgba(249, 115, 22, 0.12);
-    border: 1px solid rgba(249, 115, 22, 0.55);
+    border: none;
     box-shadow: 0 4px 18px rgba(249, 115, 22, 0.20);
     color: #c2410c;
 }
+
 .power-reboot.selected .power-btn-icon {
     background-color: rgba(249, 115, 22, 0.20);
-    border-color: rgba(249, 115, 22, 0.50);
+    border: none;
 }
+
 .power-reboot.selected .power-btn-key {
     background-color: #f97316;
-    border-color: #f97316;
+    border: none;
     color: #ffffff;
     opacity: 1.0;
     box-shadow: 0 2px 6px rgba(249, 115, 22, 0.35);
@@ -815,17 +839,19 @@ popover.notification-popover>contents {
 /* Suspend active/selected */
 .power-suspend.selected {
     background-color: rgba(59, 130, 246, 0.12);
-    border: 1px solid rgba(59, 130, 246, 0.55);
+    border: none;
     box-shadow: 0 4px 18px rgba(59, 130, 246, 0.20);
     color: #1d4ed8;
 }
+
 .power-suspend.selected .power-btn-icon {
     background-color: rgba(59, 130, 246, 0.20);
-    border-color: rgba(59, 130, 246, 0.50);
+    border: none;
 }
+
 .power-suspend.selected .power-btn-key {
     background-color: #3b82f6;
-    border-color: #3b82f6;
+    border: none;
     color: #ffffff;
     opacity: 1.0;
     box-shadow: 0 2px 6px rgba(59, 130, 246, 0.35);
@@ -834,17 +860,19 @@ popover.notification-popover>contents {
 /* Logout active/selected */
 .power-logout.selected {
     background-color: rgba(168, 85, 247, 0.12);
-    border: 1px solid rgba(168, 85, 247, 0.55);
+    border: none;
     box-shadow: 0 4px 18px rgba(168, 85, 247, 0.20);
     color: #7e22ce;
 }
+
 .power-logout.selected .power-btn-icon {
     background-color: rgba(168, 85, 247, 0.20);
-    border-color: rgba(168, 85, 247, 0.50);
+    border: none;
 }
+
 .power-logout.selected .power-btn-key {
     background-color: #a855f7;
-    border-color: #a855f7;
+    border: none;
     color: #ffffff;
     opacity: 1.0;
     box-shadow: 0 2px 6px rgba(168, 85, 247, 0.35);
@@ -854,9 +882,7 @@ popover.notification-popover>contents {
     color: rgba(0, 0, 0, 0.45);
 }
 
-.clipboard-popover-header {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-}
+.clipboard-popover-header {}
 
 .clipboard-popover-item {
     color: rgba(28, 28, 30, 0.85);
@@ -869,7 +895,7 @@ popover.notification-popover>contents {
 
 .clipboard-popover-item.selected {
     background-color: rgba(59, 130, 246, 0.16);
-    border: 1px solid rgba(59, 130, 246, 0.35);
+    border: none;
     color: #1c1c1e;
 }
 
@@ -882,7 +908,7 @@ popover.notification-popover>contents {
 }
 
 .clipboard-popover-thumb {
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    border: none;
 }
 
 .clipboard-popover-preview {
@@ -902,7 +928,6 @@ popover.notification-popover>contents {
 }
 
 .clipboard-popover-hint {
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
     color: rgba(28, 28, 30, 0.45);
 }
 
@@ -911,7 +936,7 @@ popover.notification-popover>contents {
 }
 
 .media-popover-art {
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    border: none;
 }
 
 .media-popover-title {
@@ -924,13 +949,12 @@ popover.notification-popover>contents {
 
 .media-control-btn {
     background-color: rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: none;
     color: #1c1c1e;
 }
 
 .media-control-btn:hover {
     background-color: rgba(0, 0, 0, 0.08);
-    border-color: rgba(0, 0, 0, 0.10);
 }
 
 scale.media-timeline-scale trough {
@@ -955,8 +979,7 @@ window.notification-popup-card {
 }
 
 .notification-popup-box {
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border: none;
     color: rgba(28, 28, 30, 0.95);
 }
 
@@ -973,7 +996,7 @@ window.notification-popup-card {
 }
 
 .popup-avatar-box {
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    border: none;
 }
 
 button.popup-action-btn {
@@ -982,7 +1005,7 @@ button.popup-action-btn {
 
 button.popup-action-btn:hover {
     background-color: rgba(0, 0, 0, 0.08);
-    border-color: rgba(0, 0, 0, 0.08);
+    border: none;
 }
 
 /* Island Notification Badge Popover */
@@ -992,9 +1015,8 @@ button.popup-action-btn:hover {
 
 .notification-icon-box {
     background-color: rgba(0, 0, 0, 0.04);
-    border: 1px solid rgba(0, 0, 0, 0.07);
-    border-top: 1px solid rgba(255, 255, 255, 0.80);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: none;
+    box-shadow: none;
 }
 
 .notification-title {
@@ -3477,4 +3499,174 @@ button.modern-dialog-danger-btn:disabled,
 
 .modern-reboot-btn:hover {
     background: linear-gradient(135deg, #34d399, #10b981);
+}
+
+/* ==========================================================================
+ * Flat Container Styling (Light Mode - Containers & Boxes Only)
+ * Flat background matching sys-monitor-box.
+ * Subtle 1px corner borders: brighter top-left, dimmer bottom-right.
+ * NO gradients, NO inset shadows, NO borders on items/icons/buttons.
+ * ========================================================================== */
+
+/* 1. Dynamic Island notch capsule & floating badge */
+.panel-notch.active-music,
+.island-badge {
+    border-radius: 9999px;
+    background-color: rgba(255, 255, 255, 0.98);
+    background-image: none;
+    border-top: 1px solid rgba(255, 255, 255, 1.0);
+    border-left: 1px solid rgba(255, 255, 255, 1.0);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: none;
+}
+
+.panel-notch.active-music:not(.popover-open):hover {
+    background-color: #f3f4f6;
+}
+
+/* 2. Notification Popover & Floating Capsule */
+popover.notification-popover>contents,
+.notification-popup-box {
+    border-radius: 9999px;
+    background-color: rgba(255, 255, 255, 0.98);
+    background-image: none;
+    border-top: 1px solid rgba(255, 255, 255, 1.0);
+    border-left: 1px solid rgba(255, 255, 255, 1.0);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
+}
+
+/* 3. Popovers & floating control surface containers */
+popover>contents,
+popover.media-popover>contents,
+popover.clipboard-popover>contents,
+popover.power-popover>contents,
+popover.status-popover>contents,
+popover.tooltip-popover>contents,
+popover.calendar-popover>contents,
+popover.launcher-popover>contents,
+popover.control-center-popover>contents,
+popover.context-menu>contents,
+.calendar-box,
+.launcher-box,
+.control-center-box {
+    border-radius: 24px;
+    background-color: rgba(255, 255, 255, 0.98);
+    background-image: none;
+    border-top: 1px solid rgba(255, 255, 255, 1.0);
+    border-left: 1px solid rgba(255, 255, 255, 1.0);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.14);
+}
+
+/* 3.1. Popover inner containers - NO BORDERS, transparent background, no shadow */
+.media-popover-box,
+.power-popover-box,
+.clipboard-popover-box,
+.notification-popover-box,
+.status-popover-card,
+.tooltip-popover-card,
+.wifi-popover-box,
+.audio-menu-popover,
+.media-popover-header,
+.media-popover-art,
+.fallback-art-box,
+.media-popover-progress-container,
+.media-popover-time-box,
+.media-popover-controls,
+.power-popover-header,
+.clipboard-popover-header,
+.notification-icon-box,
+.popup-avatar-box,
+popover>contents .media-popover-box,
+popover>contents .power-popover-box,
+popover>contents .clipboard-popover-box,
+popover>contents .notification-popover-box,
+popover>contents .status-popover-card,
+popover>contents .tooltip-popover-card {
+    border: none;
+    border-top: none;
+    border-left: none;
+    border-bottom: none;
+    border-right: none;
+    background-color: transparent;
+    background-image: none;
+    box-shadow: none;
+}
+
+/* 4. Panel capsule containers */
+.workspace-box,
+.status-indicators-box,
+.taskbar-box,
+.tray-box,
+.clock-box {
+    border-radius: 9999px;
+    background-color: rgba(255, 255, 255, 0.98);
+    background-image: none;
+    border-top: 1px solid rgba(255, 255, 255, 1.0);
+    border-left: 1px solid rgba(255, 255, 255, 1.0);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: none;
+}
+
+/* Clock button must stay flat and transparent - no container border */
+button.panel-clock-btn {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+}
+
+/* 5. Cards & containers in apps */
+.settings-card,
+.collapsible-card,
+.settings-group,
+.settings-section,
+.standard-card,
+.card,
+.info-panel-card,
+.preview-card,
+.screenshot-card,
+.switcher-card,
+.battery-card {
+    border-radius: 16px;
+    background-image: none;
+    border-top: 1px solid rgba(255, 255, 255, 1.0);
+    border-left: 1px solid rgba(255, 255, 255, 1.0);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    border-right: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: none;
+}
+
+.settings-card:hover,
+.collapsible-card:hover,
+.standard-card:hover {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.10);
+    border-right: 1px solid rgba(0, 0, 0, 0.10);
+}
+
+/* 6. Dialogs & modal window containers */
+.dialog-box,
+.dialog-content,
+.modal-dialog,
+.alert-dialog,
+.confirm-dialog,
+.conflict-dialog,
+.rename-dialog,
+.wifi-dialog,
+.vpn-dialog,
+.password-dialog,
+.account-dialog,
+.explore-dialog {
+    border-radius: 24px;
+    background-image: none;
+    border-top: 1px solid rgba(255, 255, 255, 1.0);
+    border-left: 1px solid rgba(255, 255, 255, 1.0);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.16);
 }

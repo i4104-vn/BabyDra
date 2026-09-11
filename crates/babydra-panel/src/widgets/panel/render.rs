@@ -51,6 +51,7 @@ pub fn create_network_widget() -> NetworkWidgets {
     eth_area.set_content_height(14);
     eth_area.set_valign(gtk4::Align::Center);
     eth_area.set_halign(gtk4::Align::Center);
+    eth_area.set_visible(false);
 
     container.append(&wifi_icon);
     container.append(&eth_area);
@@ -147,13 +148,14 @@ pub fn build_status_row() -> (
     let status_button = gtk4::Button::new();
     status_button.add_css_class("panel-status-btn");
 
-    let inner_layout = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+    let inner_layout = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
 
     let vpn_icon = babydra_ui_kit::ui::icon::get_icon("shield", 14);
     vpn_icon.add_css_class("status-icon");
     vpn_icon.set_visible(false);
 
     let net_widgets = create_network_widget();
+    net_widgets.container.add_css_class("status-icon");
 
     let vol_icon = if super::items::volume::is_muted() {
         babydra_ui_kit::ui::icon::get_icon("volume-mute", 14)

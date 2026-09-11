@@ -23,7 +23,7 @@ popover.sys-monitor-popover progressbar progress {
 }
 
 popover.sys-monitor-popover .sys-chart {
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     border-radius: 10px;
     margin-top: 6px;
     margin-bottom: 10px;

@@ -45,7 +45,6 @@ impl ClipboardNotchWidgets {
         notch_view.append(&center_box);
 
         let click_gesture = GestureClick::new();
-        notch_view.add_controller(click_gesture.clone());
 
         Self {
             notch_view,

@@ -87,8 +87,9 @@ impl MediaPlayerFeature {
             .map(|p| p.is_visible())
             .unwrap_or(false);
 
+        let should_show = is_playing || popover_open || (player_active && ctx.is_current());
         if let Some(h) = &self.handle {
-            if is_playing || popover_open {
+            if should_show {
                 h.show();
             } else {
                 h.hide();
@@ -97,7 +98,7 @@ impl MediaPlayerFeature {
 
         self.is_playing.set(is_playing);
 
-        if (is_playing || popover_open) && ctx.is_current() {
+        if should_show && ctx.is_current() {
             self.update_player_view(&meta);
         }
     }
@@ -149,16 +150,6 @@ impl IslandFeature for MediaPlayerFeature {
                 fail_count,
             );
         }
-
-        let handle_c = self.handle.clone();
-        let is_playing_c = self.is_playing.clone();
-        popover.popover.connect_unmap(move |_| {
-            if !is_playing_c.get() {
-                if let Some(h) = &handle_c {
-                    h.hide();
-                }
-            }
-        });
 
         self.popover.replace(Some(popover));
     }

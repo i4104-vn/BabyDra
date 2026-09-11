@@ -71,7 +71,7 @@ impl IslandFeature for PowerFeature {
     }
 
     fn hover_keep(&self) -> bool {
-        true
+        false
     }
 
     fn focus(&self) -> bool {
@@ -143,34 +143,15 @@ impl IslandFeature for PowerFeature {
             }
         }
 
-        // Notch capsule click toggles the popover
-        let pop_c = popover.clone();
-        let handle_rc = self.handle_rc.clone();
-        let sel_index = self.selected_index.clone();
-        self.widgets
-            .click_gesture
-            .connect_pressed(move |_, _, _, _| {
-                if pop_c.is_visible() {
-                    pop_c.popdown();
-                    if let Some(h) = handle_rc.borrow().as_ref() {
-                        h.release_override();
-                        h.hide();
-                    }
-                } else {
-                    sel_index.set(0);
-                    highlight_selection(&pop_c, 0);
-                    if let Some(h) = handle_rc.borrow().as_ref() {
-                        h.override_show_for(POPUP_DURATION);
-                    }
-                    pop_c.popup();
-                }
-            });
-
         self.popover.replace(Some(popover));
     }
 
     fn on_click(&mut self) {
         if let Some(popover) = self.popover.borrow().as_ref() {
+            if !popover.is_visible() {
+                self.selected_index.set(0);
+                highlight_selection(popover, 0);
+            }
             popover.toggle();
         }
     }

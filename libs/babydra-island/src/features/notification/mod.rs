@@ -18,7 +18,7 @@ pub mod ui;
 
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use gtk4::prelude::*;
 
@@ -129,7 +129,7 @@ impl IslandFeature for NotificationFeature {
     }
 
     fn hover_keep(&self) -> bool {
-        true
+        false
     }
 
     fn focus(&self) -> bool {
@@ -159,15 +159,7 @@ impl IslandFeature for NotificationFeature {
         }
 
 
-        {
-            let handle_rc = self.handle_rc.clone();
-            let pop_c = popover.clone();
-            self.widgets
-                .click_gesture
-                .connect_pressed(move |_, _, _, _| {
-                    dismiss_notification(Some(&pop_c), handle_rc.borrow().as_ref());
-                });
-        }
+
 
         self.popover.replace(Some(popover));
     }
@@ -244,25 +236,7 @@ impl IslandFeature for NotificationFeature {
             }
         }
 
-        let is_popover_hovered = self
-            .popover
-            .borrow()
-            .as_ref()
-            .map(|p| p.is_hovered.get())
-            .unwrap_or(false);
-
-        let hovered = ctx.is_hovered() || is_popover_hovered;
-
-        if hovered {
-            // Hovering keeps the popup alive (refreshes the expiry timestamp).
-            crate::widgets::notification::SHARED_NOTIFICATION.with(|sn| {
-                if let Some(cur) = sn.borrow_mut().as_mut() {
-                    cur.timestamp = Instant::now();
-                }
-            });
-        }
-
-        let expired = !hovered && n.timestamp.elapsed() >= POPUP_LIFETIME;
+        let expired = n.timestamp.elapsed() >= POPUP_LIFETIME;
         if expired {
             self.last_key.clear();
             dismiss_notification(

@@ -88,7 +88,7 @@ impl IslandFeature for ClipboardFeature {
     }
 
     fn hover_keep(&self) -> bool {
-        true
+        false
     }
 
     fn focus(&self) -> bool {
@@ -158,29 +158,7 @@ impl IslandFeature for ClipboardFeature {
             });
         }
 
-        // Notch capsule click toggles the popover
-        let pop_c = popover.clone();
-        let handle_c = self.handle_rc.clone();
-        let sel_c = self.selected_index.clone();
-        self.widgets
-            .click_gesture
-            .connect_pressed(move |_, _, _, _| {
-                if pop_c.is_visible() {
-                    pop_c.popdown();
-                    if let Some(h) = handle_c.borrow().as_ref() {
-                        h.release_override();
-                        h.hide();
-                    }
-                } else {
-                    sel_c.set(0);
-                    let entries = babydra_core::get_entries();
-                    render_popover(&pop_c, &entries, 0);
-                    if let Some(h) = handle_c.borrow().as_ref() {
-                        h.override_show_for(POPUP_DURATION);
-                    }
-                    pop_c.popup();
-                }
-            });
+
 
 
         // Attach distinct keyboard controllers
@@ -207,6 +185,11 @@ impl IslandFeature for ClipboardFeature {
 
     fn on_click(&mut self) {
         if let Some(popover) = self.popover.borrow().as_ref() {
+            if !popover.is_visible() {
+                self.selected_index.set(0);
+                let entries = babydra_core::get_entries();
+                render_popover(popover, &entries, 0);
+            }
             popover.toggle();
         }
     }

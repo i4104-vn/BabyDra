@@ -47,9 +47,7 @@ pub(crate) fn island_tick(core_rc: &Rc<RefCell<IslandCore>>) {
         let mut clear = true;
         if sel_idx < core.views.len() {
             let v = &core.views[sel_idx];
-            let is_active = v.state.override_active.get()
-                || v.state.requested.get()
-                || (v.hover_keep && v.state.active.get() && core.hovered.get());
+            let is_active = v.state.override_active.get() || v.state.requested.get();
             let newer_request = core.views.iter().enumerate().any(|(i, other)| {
                 i != sel_idx
                     && (other.state.override_active.get() || other.state.requested.get())
@@ -125,9 +123,7 @@ pub(crate) fn select_winner(core: &IslandCore) -> Option<usize> {
     if let Some((sel_idx, sel_seq)) = core.user_selected {
         if sel_idx < core.views.len() {
             let v = &core.views[sel_idx];
-            let is_active = v.state.override_active.get()
-                || v.state.requested.get()
-                || (v.hover_keep && v.state.active.get() && core.hovered.get());
+            let is_active = v.state.override_active.get() || v.state.requested.get();
             if is_active {
                 let newer_request = core.views.iter().enumerate().any(|(i, other)| {
                     i != sel_idx
@@ -157,8 +153,7 @@ pub(crate) fn select_winner(core: &IslandCore) -> Option<usize> {
 
     let mut best: Option<(u8, u64, usize)> = None;
     for (i, v) in core.views.iter().enumerate() {
-        let wanted =
-            v.state.requested.get() || (v.hover_keep && v.state.active.get() && core.hovered.get());
+        let wanted = v.state.requested.get();
         if !wanted {
             continue;
         }

@@ -116,6 +116,7 @@ popover.sys-monitor-popover progressbar trough {
 
 popover.sys-monitor-popover .sys-chart {
     background-color: rgba(255, 255, 255, 0.03);
+    border: none;
 }
 
 /* === panel/tray.css === */
@@ -426,14 +427,14 @@ button.quick-tile.active .tile-chevron {
 
 scale trough,
 scale.control-slider trough,
-scale.control-slider > trough,
-scale.control-slider contents > trough {
+scale.control-slider>trough,
+scale.control-slider contents>trough {
     background-color: rgba(255, 255, 255, 0.10);
 }
 
 scale.control-slider trough highlight,
-scale.control-slider > trough > highlight,
-scale.control-slider contents > trough > highlight {
+scale.control-slider>trough>highlight,
+scale.control-slider contents>trough>highlight {
     background-color: #3b82f6;
 }
 
@@ -673,8 +674,19 @@ popover>arrow {
 /* === island/system_island.css === */
 .panel-notch.active-music {
     background-color: rgba(14, 14, 18, 0.96);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    border-top: 1px solid rgba(255, 255, 255, 0.20);
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    border-left: 1px solid rgba(255, 255, 255, 0.25);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.island-bracket {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.panel-notch:hover .island-bracket {
+    color: #60a5fa;
+    text-shadow: 0 0 8px rgba(96, 165, 250, 0.6);
 }
 
 .notch-player-text {
@@ -683,14 +695,16 @@ popover>arrow {
 
 .notch-album-art {
     border-radius: 9999px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background-color: rgba(255, 255, 255, 0.05);
+    border: none;
+    background-color: transparent;
 }
 
 .island-badge {
-    background-color: rgb(14, 14, 18);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-top: 1px solid rgba(255, 255, 255, 0.20);
+    background-color: rgba(14, 14, 18, 0.96);
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    border-left: 1px solid rgba(255, 255, 255, 0.25);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .badge-title {
@@ -702,23 +716,32 @@ popover>arrow {
 }
 
 .panel-notch.active-music:not(.popover-open):hover {
-    background-color: rgba(24, 24, 30, 0.96);
+    background-color: rgba(28, 28, 36, 0.96);
 }
 
 popover.media-popover>contents,
 popover.clipboard-popover>contents,
-popover.power-popover>contents,
-popover.notification-popover>contents {
+popover.power-popover>contents {
     background-color: rgba(14, 14, 18, 0.96);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-top: 1px solid rgba(255, 255, 255, 0.24);
-    border-radius: 20px;
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65), 0 0 1px 1px rgba(255, 255, 255, 0.05);
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    border-left: 1px solid rgba(255, 255, 255, 0.25);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 24px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.50);
 }
 
-.power-popover-header {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+popover.notification-popover>contents {
+    background-color: rgba(14, 14, 18, 0.96);
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    border-left: 1px solid rgba(255, 255, 255, 0.25);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 9999px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
 }
+
+.power-popover-header {}
 
 .power-header-title {
     color: rgba(255, 255, 255, 0.70);
@@ -727,47 +750,48 @@ popover.notification-popover>contents {
 .power-header-shortcut {
     color: rgba(255, 255, 255, 0.50);
     background-color: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
 }
 
 .power-popover-btn {
     color: rgba(255, 255, 255, 0.88);
     background-color: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: none;
 }
 
 .power-popover-btn:hover {
     background-color: rgba(255, 255, 255, 0.07);
-    border-color: rgba(255, 255, 255, 0.14);
     color: #ffffff;
 }
 
 .power-btn-icon {
     background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
 }
 
 .power-btn-key {
     background-color: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: none;
     color: rgba(255, 255, 255, 0.65);
 }
 
 /* Shutdown active/selected */
 .power-shutdown.selected {
     background-color: rgba(239, 68, 68, 0.14);
-    border: 1px solid rgba(239, 68, 68, 0.55);
+    border: none;
     box-shadow: 0 4px 22px rgba(239, 68, 68, 0.28);
     color: #ffffff;
 }
+
 .power-shutdown.selected .power-btn-icon {
     background-color: rgba(239, 68, 68, 0.28);
-    border-color: rgba(239, 68, 68, 0.65);
+    border: none;
     box-shadow: 0 0 16px rgba(239, 68, 68, 0.35);
 }
+
 .power-shutdown.selected .power-btn-key {
     background-color: #ef4444;
-    border-color: #ef4444;
+    border: none;
     color: #ffffff;
     opacity: 1.0;
     box-shadow: 0 2px 8px rgba(239, 68, 68, 0.45);
@@ -776,18 +800,20 @@ popover.notification-popover>contents {
 /* Reboot active/selected */
 .power-reboot.selected {
     background-color: rgba(249, 115, 22, 0.14);
-    border: 1px solid rgba(249, 115, 22, 0.55);
+    border: none;
     box-shadow: 0 4px 22px rgba(249, 115, 22, 0.28);
     color: #ffffff;
 }
+
 .power-reboot.selected .power-btn-icon {
     background-color: rgba(249, 115, 22, 0.28);
-    border-color: rgba(249, 115, 22, 0.65);
+    border: none;
     box-shadow: 0 0 16px rgba(249, 115, 22, 0.35);
 }
+
 .power-reboot.selected .power-btn-key {
     background-color: #f97316;
-    border-color: #f97316;
+    border: none;
     color: #ffffff;
     opacity: 1.0;
     box-shadow: 0 2px 8px rgba(249, 115, 22, 0.45);
@@ -796,18 +822,20 @@ popover.notification-popover>contents {
 /* Suspend active/selected */
 .power-suspend.selected {
     background-color: rgba(59, 130, 246, 0.14);
-    border: 1px solid rgba(59, 130, 246, 0.55);
+    border: none;
     box-shadow: 0 4px 22px rgba(59, 130, 246, 0.28);
     color: #ffffff;
 }
+
 .power-suspend.selected .power-btn-icon {
     background-color: rgba(59, 130, 246, 0.28);
-    border-color: rgba(59, 130, 246, 0.65);
+    border: none;
     box-shadow: 0 0 16px rgba(59, 130, 246, 0.35);
 }
+
 .power-suspend.selected .power-btn-key {
     background-color: #3b82f6;
-    border-color: #3b82f6;
+    border: none;
     color: #ffffff;
     opacity: 1.0;
     box-shadow: 0 2px 8px rgba(59, 130, 246, 0.45);
@@ -816,18 +844,20 @@ popover.notification-popover>contents {
 /* Logout active/selected */
 .power-logout.selected {
     background-color: rgba(168, 85, 247, 0.14);
-    border: 1px solid rgba(168, 85, 247, 0.55);
+    border: none;
     box-shadow: 0 4px 22px rgba(168, 85, 247, 0.28);
     color: #ffffff;
 }
+
 .power-logout.selected .power-btn-icon {
     background-color: rgba(168, 85, 247, 0.28);
-    border-color: rgba(168, 85, 247, 0.65);
+    border: none;
     box-shadow: 0 0 16px rgba(168, 85, 247, 0.35);
 }
+
 .power-logout.selected .power-btn-key {
     background-color: #a855f7;
-    border-color: #a855f7;
+    border: none;
     color: #ffffff;
     opacity: 1.0;
     box-shadow: 0 2px 8px rgba(168, 85, 247, 0.45);
@@ -835,10 +865,6 @@ popover.notification-popover>contents {
 
 .power-popover-hint {
     color: rgba(255, 255, 255, 0.40);
-}
-
-.clipboard-popover-header {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .clipboard-popover-item {
@@ -852,7 +878,7 @@ popover.notification-popover>contents {
 
 .clipboard-popover-item.selected {
     background-color: rgba(59, 130, 246, 0.25);
-    border: 1px solid rgba(59, 130, 246, 0.45);
+    border: none;
     color: #ffffff;
 }
 
@@ -865,7 +891,7 @@ popover.notification-popover>contents {
 }
 
 .clipboard-popover-thumb {
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: none;
 }
 
 .clipboard-popover-preview {
@@ -885,8 +911,7 @@ popover.notification-popover>contents {
 }
 
 .clipboard-popover-hint {
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    color: rgba(255, 255, 255, 0.40);
+    color: rgba(255, 255, 255, 0.35);
 }
 
 .media-popover-app-name {
@@ -894,7 +919,7 @@ popover.notification-popover>contents {
 }
 
 .media-popover-art {
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    border: none;
 }
 
 .media-popover-title {
@@ -911,13 +936,12 @@ popover.notification-popover>contents {
 
 .media-control-btn {
     background-color: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     color: #ffffff;
 }
 
 .media-control-btn:hover {
     background-color: rgba(255, 255, 255, 0.14);
-    border-color: rgba(255, 255, 255, 0.18);
 }
 
 scale.media-timeline-scale trough {
@@ -942,8 +966,7 @@ window.notification-popup-card {
 }
 
 .notification-popup-box {
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-top: 1px solid rgba(255, 255, 255, 0.28);
+    border: none;
     color: rgba(255, 255, 255, 0.95);
 }
 
@@ -960,7 +983,7 @@ window.notification-popup-card {
 }
 
 .popup-avatar-box {
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    border: none;
 }
 
 button.popup-action-btn {
@@ -969,7 +992,7 @@ button.popup-action-btn {
 
 button.popup-action-btn:hover {
     background-color: rgba(255, 255, 255, 0.14);
-    border-color: rgba(255, 255, 255, 0.14);
+    border: none;
 }
 
 /* Island Notification Badge Popover */
@@ -979,9 +1002,8 @@ button.popup-action-btn:hover {
 
 .notification-icon-box {
     background-color: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    border-top: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    border: none;
+    box-shadow: none;
 }
 
 .notification-title {
@@ -1094,8 +1116,6 @@ entry.launcher-search>text>placeholder {
 .launcher-profile-uptime {
     color: rgba(255, 255, 255, 0.50);
 }
-
-.launcher-power-btn {}
 
 .launcher-power-btn:hover {
     background-color: rgba(239, 68, 68, 0.3);
@@ -3177,4 +3197,177 @@ scrollbar slider {
 scrollbar slider:hover,
 scrollbar slider:hover:active {
     background-color: rgba(255, 255, 255, 0.35);
+}
+
+
+/* ==========================================================================
+ * Flat Container Styling (Containers & Boxes Only)
+ * Flat background matching sys-monitor-box: rgba(14, 14, 18, 0.96).
+ * Subtle 1px corner borders: brighter top-left, dimmer bottom-right.
+ * NO gradients, NO inset shadows, NO borders on items/icons/buttons.
+ * ========================================================================== */
+
+/* 1. Dynamic Island notch capsule & floating badge */
+.panel-notch.active-music,
+.island-badge {
+    border-radius: 9999px;
+    background-color: rgba(14, 14, 18, 0.96);
+    background-image: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    border-left: 1px solid rgba(255, 255, 255, 0.25);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: none;
+}
+
+.panel-notch.active-music:not(.popover-open):hover {
+    background-color: rgba(28, 28, 36, 0.96);
+}
+
+/* 2. Notification Popover & Floating Capsule */
+popover.notification-popover>contents,
+.notification-popup-box {
+    border-radius: 9999px;
+    background-color: rgba(14, 14, 18, 0.96);
+    background-image: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    border-left: 1px solid rgba(255, 255, 255, 0.25);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+}
+
+/* 3. Popovers & floating control surface containers */
+popover>contents,
+popover.media-popover>contents,
+popover.clipboard-popover>contents,
+popover.power-popover>contents,
+popover.status-popover>contents,
+popover.tooltip-popover>contents,
+popover.calendar-popover>contents,
+popover.launcher-popover>contents,
+popover.control-center-popover>contents,
+popover.context-menu>contents,
+.calendar-box,
+.launcher-box,
+.control-center-box {
+    border-radius: 24px;
+    background-color: rgba(14, 14, 18, 0.96);
+    background-image: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    border-left: 1px solid rgba(255, 255, 255, 0.25);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.50);
+}
+
+/* 3.1. Popover inner containers - NO BORDERS, transparent background, no shadow */
+.media-popover-box,
+.power-popover-box,
+.clipboard-popover-box,
+.notification-popover-box,
+.status-popover-card,
+.tooltip-popover-card,
+.wifi-popover-box,
+.audio-menu-popover,
+.media-popover-header,
+.media-popover-art,
+.fallback-art-box,
+.media-popover-progress-container,
+.media-popover-time-box,
+.media-popover-controls,
+.power-popover-header,
+.clipboard-popover-header,
+.notification-icon-box,
+.popup-avatar-box,
+popover>contents .media-popover-box,
+popover>contents .power-popover-box,
+popover>contents .clipboard-popover-box,
+popover>contents .notification-popover-box,
+popover>contents .status-popover-card,
+popover>contents .tooltip-popover-card {
+    border: none;
+    border-top: none;
+    border-left: none;
+    border-bottom: none;
+    border-right: none;
+    background-color: transparent;
+    background-image: none;
+    box-shadow: none;
+}
+
+/* 4. Panel capsule containers */
+.workspace-box,
+.status-indicators-box,
+.taskbar-box,
+.tray-box,
+.clock-box {
+    border-radius: 9999px;
+    background-color: rgba(14, 14, 18, 0.96);
+    background-image: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    border-left: 1px solid rgba(255, 255, 255, 0.25);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: none;
+}
+
+/* Clock button must stay flat and transparent - no container border */
+button.panel-clock-btn {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+}
+
+/* 5. Cards & containers in apps */
+.settings-card,
+.collapsible-card,
+.settings-group,
+.settings-section,
+.standard-card,
+.card,
+.info-panel-card,
+.preview-card,
+.screenshot-card,
+.switcher-card,
+.battery-card {
+    border-radius: 16px;
+    background-image: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.20);
+    border-left: 1px solid rgba(255, 255, 255, 0.20);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+}
+
+.settings-card:hover,
+.collapsible-card:hover,
+.standard-card:hover {
+    border-top: 1px solid rgba(255, 255, 255, 0.28);
+    border-left: 1px solid rgba(255, 255, 255, 0.28);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* 6. Dialogs & modal window containers */
+.dialog-box,
+.dialog-content,
+.modal-dialog,
+.alert-dialog,
+.confirm-dialog,
+.conflict-dialog,
+.rename-dialog,
+.wifi-dialog,
+.vpn-dialog,
+.password-dialog,
+.account-dialog,
+.explore-dialog {
+    border-radius: 24px;
+    background-image: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    border-left: 1px solid rgba(255, 255, 255, 0.25);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.60);
 }

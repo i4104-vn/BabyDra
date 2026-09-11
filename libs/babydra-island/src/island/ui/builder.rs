@@ -148,32 +148,34 @@ pub(crate) fn build_island(builder: IslandBuilder) -> Island {
     root.add_controller(motion);
 
     // Scroll wheel cycle navigation among active island views.
-    // Handles discrete mouse wheel turns as well as smooth touchpad scrolls.
-    let make_scroll = || {
-        let scroll_core = core.clone();
-        let scroll = gtk4::EventControllerScroll::new(
-            gtk4::EventControllerScrollFlags::VERTICAL
-                | gtk4::EventControllerScrollFlags::HORIZONTAL
-                | gtk4::EventControllerScrollFlags::DISCRETE,
-        );
-        scroll.set_propagation_phase(gtk4::PropagationPhase::Capture);
-        scroll.connect_scroll(move |_, dx, dy| {
-            handle_island_scroll(&scroll_core, dx, dy);
-            gtk4::glib::Propagation::Stop
-        });
-        scroll
-    };
-    root.add_controller(make_scroll());
-    capsule.add_controller(make_scroll());
+    // Captured on root so it covers both outside brackets and inside capsule without duplication.
+    let scroll_core = core.clone();
+    let scroll = gtk4::EventControllerScroll::new(
+        gtk4::EventControllerScrollFlags::VERTICAL
+            | gtk4::EventControllerScrollFlags::HORIZONTAL
+            | gtk4::EventControllerScrollFlags::DISCRETE,
+    );
+    scroll.set_propagation_phase(gtk4::PropagationPhase::Capture);
+    scroll.connect_scroll(move |_, dx, dy| {
+        handle_island_scroll(&scroll_core, dx, dy);
+        gtk4::glib::Propagation::Stop
+    });
+    root.add_controller(scroll);
 
     // Click dispatch to the currently displayed view.
     let click_core = core.clone();
     let click = gtk4::GestureClick::new();
-    click.set_button(0);
-    click.connect_pressed(move |_, _, _, _| {
+    click.set_button(gtk4::gdk::BUTTON_PRIMARY);
+    click.connect_pressed(move |_, n_press, _, _| {
+        if n_press > 1 {
+            return;
+        }
         let Ok(core) = click_core.try_borrow() else {
             return;
         };
+        // Reset last_scroll to suppress any trailing scroll/kinetic events right after a click
+        core.last_scroll.set(Some(std::time::Instant::now()));
+
         let idx = match core.displayed {
             IslandDisplay::View(i) => Some(i),
             _ => None,
@@ -181,6 +183,15 @@ pub(crate) fn build_island(builder: IslandBuilder) -> Island {
         let feature = idx.and_then(|i| core.views[i].feature.clone());
         let on_click = idx.and_then(|i| core.views[i].on_click.clone());
         drop(core);
+
+        if let Some(i) = idx {
+            if let Ok(mut c) = click_core.try_borrow_mut() {
+                let next_seq = crate::island::view::next_request_seq();
+                c.user_selected = Some((i, next_seq));
+                c.views[i].state.request_seq.set(next_seq);
+            }
+        }
+
         if let Some(f) = feature {
             if let Ok(mut feat) = f.try_borrow_mut() {
                 feat.on_click();

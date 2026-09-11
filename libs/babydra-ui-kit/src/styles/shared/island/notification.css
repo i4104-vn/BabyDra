@@ -5,10 +5,10 @@ window.notification-popup-card {
 }
 
 .notification-popup-box {
-    background-color: rgb(14, 14, 18);
+    background-color: transparent;
     background-image: none;
-    border-radius: 20px;
-    padding: 16px 20px;
+    border-radius: 9999px;
+    padding: 6px 22px 6px 6px;
     box-shadow: none;
 }
 
@@ -43,7 +43,7 @@ window.notification-popup-card {
 button.popup-action-btn {
     background-color: rgba(255, 255, 255, 0.08);
     background-image: none;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     border-radius: 9999px;
     font-size: 11px;
     font-weight: 600;
