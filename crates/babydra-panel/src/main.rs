@@ -10,20 +10,10 @@ use std::rc::Rc;
 
 /// Application entry point: `main`.
 fn main() {
-    babydra_core::services::logger::init_logger("babydra-panel", "babydra-panel.log");
-
-    // Initialize D-Bus StatusNotifierWatcher system tray listener daemon
-    babydra_core::tray::spawn_watcher();
+    let _lifecycle = babydra_core::services::app_lifecycle::init_app("babydra-panel");
 
     // Detect DDC/CI bus for desktop monitors on startup
     widgets::panel::detect_ddc_bus();
-
-    // Spawn a background thread to refresh desktop apps cache asynchronously on startup
-    std::thread::spawn(|| {
-        babydra_core::refresh_desktop_apps();
-    });
-
-    babydra_core::spawn_switcher();
 
     let app = Application::builder()
         .application_id("org.babydra.panel")
@@ -31,14 +21,8 @@ fn main() {
         .build();
 
     app.connect_activate(|app| {
-        // Initialize style provider
+        // Initialize style provider (already done in init_app, but safe to call again)
         babydra_ui_kit::ui::theme::init_theme();
-
-        // Sync system color-scheme changes (GSettings) to GTK settings in real-time
-        let gsettings = gtk4::gio::Settings::new("org.gnome.desktop.interface");
-        gsettings.connect_changed(Some("color-scheme"), |_, _| {
-            babydra_ui_kit::ui::theme::init_theme();
-        });
 
         // Define shared window states for mutual exclusivity
         let control_center_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>> =

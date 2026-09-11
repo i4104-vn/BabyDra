@@ -1,30 +1,18 @@
 mod preview;
 mod render;
+pub mod state;
+
+pub use state::*;
 
 use babydra_core::DesktopApp;
-use babydra_core::{
-    filter_apps_for_workspace, focus_window, get_app_resource_usage, get_current_workspace,
-    get_running_apps,
-};
+use babydra_core::{focus_window, get_app_resource_usage};
 use babydra_ui_kit::components::popovers::{TooltipPopover, TooltipRow};
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
-use std::thread;
 use std::time::Duration;
-
-pub struct PopoverState {
-    preview_popover: gtk4::Popover,
-    tooltip_popover: gtk4::Popover,
-    update_tooltip: Rc<dyn Fn()>,
-}
-
-/// Returns the current `active app id`.
-fn get_active_app_id() -> Option<String> {
-    babydra_core::services::window::get_active_window().map(|(app_id, _)| app_id)
-}
 
 /// Helper to generate a signature representing current taskbar state (apps only, not active).
 fn get_apps_signature(ws_id: u32, running_apps: &[DesktopApp]) -> String {
@@ -222,88 +210,31 @@ pub fn create_workspace_sw() -> gtk4::Box {
     let last_active_id: Rc<RefCell<Option<String>>> = Rc::new(RefCell::new(None));
     let last_ws = Rc::new(RefCell::new(0u32));
 
-    let initial_apps = get_running_apps();
-    let running_apps_shared: Arc<Mutex<Vec<DesktopApp>>> =
-        Arc::new(Mutex::new(initial_apps));
-    let active_shared: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
-
-    let apps_shared_clone = running_apps_shared.clone();
-    thread::spawn(move || loop {
-        let apps = get_running_apps();
-        if let Ok(mut lock) = apps_shared_clone.lock() {
-            *lock = apps;
-        }
-        thread::sleep(Duration::from_millis(300));
-    });
-
-    let active_shared_clone = active_shared.clone();
-    thread::spawn(move || loop {
-        let active = get_active_app_id();
-        if let Ok(mut lock) = active_shared_clone.lock() {
-            *lock = active;
-        }
-        thread::sleep(Duration::from_millis(100));
-    });
+    let running_apps_shared: Arc<Mutex<Vec<DesktopApp>>> = Arc::new(Mutex::new(Vec::new()));
 
     let apps_box_clone = apps_box.clone();
     let popovers_clone = popovers.clone();
     let sig_clone = last_apps_sig.clone();
     let last_active_clone = last_active_id.clone();
-    let apps_for_timer = running_apps_shared.clone();
-    let active_for_timer = active_shared.clone();
-    let apps_for_rebuild = running_apps_shared.clone();
+    let last_ws_clone = last_ws.clone();
+    let apps_shared_clone = running_apps_shared.clone();
 
-    let last_ws_init = last_ws.clone();
-    glib::timeout_add_local_once(Duration::from_millis(300), {
-        let apps_box = apps_box_clone.clone();
-        let popovers = popovers_clone.clone();
-        let sig = sig_clone.clone();
-        let last_active = last_active_clone.clone();
-        let apps_shared = running_apps_shared.clone();
-        let active_shared = active_shared.clone();
-        let apps_rebuild = apps_for_rebuild.clone();
-        move || {
-            let all_apps = if let Ok(lock) = apps_shared.lock() {
-                lock.clone()
-            } else {
-                Vec::new()
-            };
-            let active = if let Ok(lock) = active_shared.lock() {
-                lock.clone()
-            } else {
-                None
-            };
-            let current_ws = get_current_workspace();
-            *last_ws_init.borrow_mut() = current_ws;
-            let ws_apps = filter_apps_for_workspace(current_ws, &all_apps, current_ws);
-            *sig.borrow_mut() = get_apps_signature(current_ws, &ws_apps);
-            *last_active.borrow_mut() = active.clone();
-            rebuild_taskbar(&apps_box, ws_apps, active, &popovers, apps_rebuild);
+    let ws_rx = babydra_core::services::workspace::subscribe();
+    ws_rx.attach(None, move |snapshot| {
+        let current_ws = snapshot.current_workspace;
+        let ws_apps = snapshot.apps;
+        let active = snapshot.active_app_id;
+
+        if let Ok(mut lock) = apps_shared_clone.lock() {
+            *lock = ws_apps.clone();
         }
-    });
-
-    let last_ws_timer = last_ws.clone();
-    glib::timeout_add_local(Duration::from_millis(100), move || {
-        let active = if let Ok(lock) = active_for_timer.lock() {
-            lock.clone()
-        } else {
-            None
-        };
-        let all_apps = if let Ok(lock) = apps_for_timer.lock() {
-            lock.clone()
-        } else {
-            Vec::new()
-        };
-
-        let current_ws = get_current_workspace();
-        let ws_changed = *last_ws_timer.borrow() != current_ws;
-        let ws_apps = filter_apps_for_workspace(current_ws, &all_apps, current_ws);
 
         let new_apps_sig = get_apps_signature(current_ws, &ws_apps);
+        let ws_changed = *last_ws_clone.borrow() != current_ws;
         let active_changed = *last_active_clone.borrow() != active;
 
         if ws_changed || new_apps_sig != *sig_clone.borrow() {
-            *last_ws_timer.borrow_mut() = current_ws;
+            *last_ws_clone.borrow_mut() = current_ws;
             *sig_clone.borrow_mut() = new_apps_sig;
             *last_active_clone.borrow_mut() = active.clone();
             rebuild_taskbar(
@@ -311,7 +242,7 @@ pub fn create_workspace_sw() -> gtk4::Box {
                 ws_apps,
                 active,
                 &popovers_clone,
-                apps_for_rebuild.clone(),
+                apps_shared_clone.clone(),
             );
         } else if active_changed {
             *last_active_clone.borrow_mut() = active.clone();

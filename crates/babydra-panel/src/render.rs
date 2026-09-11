@@ -88,20 +88,20 @@ pub fn rebuild_panel_window(
                 }
             }
         } else if button == 2 {
-            // Middle-click (con lăn chuột): Toggle Workspace Popover
-            if ws_pop_click.is_visible() {
-                ws_pop_click.popdown();
-            } else {
-                ws_pop_click.popup();
-            }
-        } else if button == 3 {
             ws_pop_click.popdown();
-            // Right-click: Minimize all application windows to show desktop
+            // Middle-click: Minimize all application windows to show desktop
             let existing = { lw_clone.borrow().clone() };
             if let Some(win) = existing {
                 win.close();
             }
             babydra_core::services::window::minimize_all_windows();
+        } else if button == 3 {
+            // Right-click: Toggle Workspace Popover
+            if ws_pop_click.is_visible() {
+                ws_pop_click.popdown();
+            } else {
+                ws_pop_click.popup();
+            }
         }
     });
     logo_btn.add_controller(click_gesture);

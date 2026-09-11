@@ -1,4 +1,4 @@
-use babydra_core::models::shell::TraySnapshot;
+use babydra_core::models::tray::TraySnapshot;
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;

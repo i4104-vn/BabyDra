@@ -1,5 +1,10 @@
-pub use babydra_core::get_battery_info;
+use super::state::NetworkWidgets;
+use babydra_core::models::{ActiveNetworkType, EthernetActivityState};
+pub use babydra_core::services::system::battery::get_battery_info;
+use babydra_core::services::system::network::{subscribe as subscribe_network, NetworkSnapshot};
 use gtk4::prelude::*;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 /// Creates a new `battery widget`.
 pub fn create_battery_w() -> Option<gtk4::DrawingArea> {
@@ -31,63 +36,35 @@ pub fn create_battery_w() -> Option<gtk4::DrawingArea> {
     Some(drawing_area)
 }
 
-use std::cell::RefCell;
-use std::rc::Rc;
-
-#[derive(Clone)]
-pub struct NetworkWidgets {
-    pub container: gtk4::Box,
-    pub wifi_icon: gtk4::Image,
-    pub eth_area: gtk4::DrawingArea,
-}
-
-struct EthernetActivityState {
-    pub is_connected: bool,
-    pub tx_lit: bool,
-    pub rx_lit: bool,
-}
-
 /// Creates a unified network status widget that dynamically switches between Wi-Fi and Desktop Ethernet with TX/RX blinking dots.
 pub fn create_network_widget() -> NetworkWidgets {
     let container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    container.add_css_class("status-icon");
     container.set_valign(gtk4::Align::Center);
     container.set_halign(gtk4::Align::Center);
 
-    let initial_net = babydra_core::services::system::network::get_active_network_info();
-
-    let wifi_icon = babydra_ui_kit::ui::icon::get_icon(&initial_net.icon_name, 14);
+    let wifi_icon = babydra_ui_kit::ui::icon::get_icon("wifi", 14);
     wifi_icon.set_valign(gtk4::Align::Center);
     wifi_icon.set_halign(gtk4::Align::Center);
 
     let eth_area = gtk4::DrawingArea::new();
-    eth_area.set_content_width(17);
+    eth_area.set_content_width(16);
     eth_area.set_content_height(14);
     eth_area.set_valign(gtk4::Align::Center);
     eth_area.set_halign(gtk4::Align::Center);
-
-    let is_ethernet = initial_net.network_type == babydra_core::models::ActiveNetworkType::Ethernet;
-    if is_ethernet {
-        wifi_icon.set_visible(false);
-        eth_area.set_visible(true);
-    } else {
-        wifi_icon.set_visible(true);
-        eth_area.set_visible(false);
-    }
 
     container.append(&wifi_icon);
     container.append(&eth_area);
 
     let state = Rc::new(RefCell::new(EthernetActivityState {
-        is_connected: initial_net.is_connected,
+        is_connected: false,
         tx_lit: true,
         rx_lit: true,
     }));
 
     let state_draw = state.clone();
-    eth_area.set_draw_func(move |_area, cr, width, height| {
-        let is_dark = babydra_ui_kit::ui::theme::is_dark_mode();
+    eth_area.set_draw_func(move |_, cr, width, height| {
         let s = state_draw.borrow();
+        let is_dark = babydra_ui_kit::ui::theme::is_dark_mode();
         babydra_ui_kit::ui::ethernet::draw_cairo_ethernet_desktop(
             cr,
             width as f64,
@@ -99,55 +76,43 @@ pub fn create_network_widget() -> NetworkWidgets {
         );
     });
 
+    // Subscribe to the unified network service
+    let net_rx = subscribe_network();
     let eth_area_timer = eth_area.clone();
     let state_timer = state.clone();
-    let mut last_stats = babydra_core::services::system::network::get_net_bytes();
-    let mut blink_toggle = false;
-    let mut tx_burst: u8 = 0;
-    let mut rx_burst: u8 = 0;
+    let wifi_icon_clone = wifi_icon.clone();
 
-    // Fast polling timer (~200ms) for responsive upload/download LED blinking
-    gtk4::glib::timeout_add_local(std::time::Duration::from_millis(200), move || {
-        if eth_area_timer.root().is_none() {
-            return gtk4::glib::ControlFlow::Break;
-        }
+    net_rx.attach(None, move |snapshot: NetworkSnapshot| {
+        let active_info = snapshot.active_info;
+        let is_ethernet = active_info.network_type == ActiveNetworkType::Ethernet;
 
-        if !eth_area_timer.is_visible() {
-            return gtk4::glib::ControlFlow::Continue;
-        }
-
-        let cur_stats = babydra_core::services::system::network::get_net_bytes();
-        let rx_diff = cur_stats.rx_bytes.saturating_sub(last_stats.rx_bytes);
-        let tx_diff = cur_stats.tx_bytes.saturating_sub(last_stats.tx_bytes);
-        last_stats = cur_stats;
-
-        // Packet threshold (> 64 bytes)
-        if tx_diff > 64 {
-            tx_burst = 2; // Keep blinking for at least 2 ticks
+        if is_ethernet {
+            wifi_icon_clone.set_visible(false);
+            eth_area_timer.set_visible(true);
         } else {
-            tx_burst = tx_burst.saturating_sub(1);
+            wifi_icon_clone.set_visible(true);
+            eth_area_timer.set_visible(false);
+            wifi_icon_clone.set_icon_name(Some(&active_info.icon_name));
         }
-
-        if rx_diff > 64 {
-            rx_burst = 2;
-        } else {
-            rx_burst = rx_burst.saturating_sub(1);
-        }
-
-        let tx_active = tx_burst > 0;
-        let rx_active = rx_burst > 0;
-
-        blink_toggle = !blink_toggle;
 
         let mut s = state_timer.borrow_mut();
-        s.is_connected = true;
-        // When active: alternate solid/dim. When idle: both solid.
-        s.tx_lit = if tx_active { blink_toggle } else { true };
-        s.rx_lit = if rx_active { blink_toggle } else { true };
+        s.is_connected = active_info.is_connected;
+
+        // Blink TX/RX based on network speed
+        let tx_active = snapshot.tx_speed > 1024.0; // > 1 KB/s
+        let rx_active = snapshot.rx_speed > 1024.0;
+
+        // Simple blink toggle
+        static mut BLINK_TOGGLE: bool = false;
+        unsafe { BLINK_TOGGLE = !BLINK_TOGGLE };
+        let blink = unsafe { BLINK_TOGGLE };
+
+        s.tx_lit = if tx_active { blink } else { true };
+        s.rx_lit = if rx_active { blink } else { true };
 
         eth_area_timer.queue_draw();
 
-        gtk4::glib::ControlFlow::Continue
+        glib::ControlFlow::Continue
     });
 
     NetworkWidgets {
@@ -213,4 +178,3 @@ pub fn build_status_row() -> (
         bat_widget,
     )
 }
-

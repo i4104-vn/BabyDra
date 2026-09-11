@@ -6,30 +6,11 @@ pub mod vpn;
 use babydra_ui_kit::components::popovers::TooltipPopover;
 use gtk4::prelude::*;
 use std::rc::Rc;
-
-#[derive(Clone)]
-pub struct StatusPopovers {
-    pub vpn_popover: gtk4::Popover,
-    pub net_popover: gtk4::Popover,
-    pub vol_popover: gtk4::Popover,
-    pub bat_popover_opt: Option<gtk4::Popover>,
-    pub update_volume_popover: Rc<dyn Fn()>,
-}
-
-impl StatusPopovers {
-    pub fn popdown_all(&self) {
-        self.vpn_popover.popdown();
-        self.net_popover.popdown();
-        self.vol_popover.popdown();
-        if let Some(ref bp) = self.bat_popover_opt {
-            bp.popdown();
-        }
-    }
-}
+pub use super::state::StatusPopovers;
 
 pub fn setup_status_popover(
     vol_icon: &gtk4::Image,
-    net_widgets: &super::render::NetworkWidgets,
+    net_widgets: &super::state::NetworkWidgets,
     vpn_icon: &gtk4::Image,
     bat_widget: &Option<gtk4::DrawingArea>,
     control_center_window: Rc<std::cell::RefCell<Option<gtk4::ApplicationWindow>>>,

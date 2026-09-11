@@ -2,6 +2,7 @@ pub mod items;
 pub mod modal;
 pub mod popover;
 mod render;
+pub mod state;
 pub mod toggle_grid;
 
 use gtk4::prelude::*;

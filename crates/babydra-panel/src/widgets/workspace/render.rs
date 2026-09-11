@@ -69,11 +69,7 @@ pub fn build_taskbar_btn(app: &DesktopApp, is_active: bool, window_count: usize)
     btn
 }
 
-pub struct TaskbarPreviewActions {
-    pub action_triggers: Vec<(gtk4::Button, gtk4::Button, DesktopApp)>,
-    pub open_new_info: Option<(gtk4::Button, String)>,
-    pub close_all_btn_opt: Option<gtk4::Button>,
-}
+pub use super::state::TaskbarPreviewActions;
 
 pub fn render_previews(
     popover: &gtk4::Popover,
