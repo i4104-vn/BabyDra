@@ -162,15 +162,6 @@ impl IslandFeature for NotificationFeature {
             });
         }
 
-        // 2. Clicking close button [✕]: dismiss notification
-        {
-            let handle_rc = self.handle_rc.clone();
-            let pop_c = popover.clone();
-            popover.close_gesture.connect_pressed(move |_, _, _, _| {
-                dismiss_notification(Some(&pop_c), handle_rc.borrow().as_ref());
-            });
-        }
-
         // 3. Clean up on popover unmap: clear active notification & hide island
         {
             let handle_rc = self.handle_rc.clone();

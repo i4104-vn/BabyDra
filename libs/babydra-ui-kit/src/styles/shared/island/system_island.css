@@ -227,33 +227,11 @@ popover.notification-popover>contents {
 .notification-content-click {
     transition: all 160ms ease;
     border-radius: 12px;
-    padding: 4px;
+    padding: 4px 10px;
 }
 
 .notification-content-click:hover {
     background-color: rgba(255, 255, 255, 0.05);
-}
-
-.notification-close-btn {
-    min-width: 22px;
-    min-height: 22px;
-    border-radius: 9999px;
-    background-color: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    transition: all 160ms cubic-bezier(0.16, 1, 0.3, 1);
-    margin-left: 6px;
-    padding: 0;
-}
-
-.notification-close-btn:hover {
-    background-color: rgba(255, 255, 255, 0.16);
-    border-color: rgba(255, 255, 255, 0.24);
-}
-
-.notification-close-icon {
-    font-size: 10px;
-    font-weight: 700;
-    opacity: 0.70;
 }
 
 .notification-icon-box {

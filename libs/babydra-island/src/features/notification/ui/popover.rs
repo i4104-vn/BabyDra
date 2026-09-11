@@ -13,13 +13,11 @@ use gtk4::{
 pub struct NotificationPopover {
     pub popover: Popover,
     pub popover_box: GtkBox,
-    pub close_btn: GtkBox,
     pub icon_container: CenterBox,
     pub title_lbl: Label,
     pub body_lbl: Label,
     pub click_box: GtkBox,
     pub click_gesture: GestureClick,
-    pub close_gesture: GestureClick,
     pub motion_controller: EventControllerMotion,
     pub is_hovered: Rc<Cell<bool>>,
     pub is_animating: Rc<Cell<bool>>,
@@ -43,7 +41,7 @@ impl NotificationPopover {
         popover_box.set_focusable(false);
         popover_box.set_can_focus(false);
 
-        // Content row (compact card with icon, text, and close button)
+        // Content row (compact card with icon and text)
         let content_box = GtkBox::new(Orientation::Horizontal, 10);
         content_box.add_css_class("notification-popover-content");
         content_box.set_valign(Align::Center);
@@ -90,28 +88,11 @@ impl NotificationPopover {
         click_box.append(&text_box);
         content_box.append(&click_box);
 
-        // Compact close button on the right
-        let close_btn = GtkBox::new(Orientation::Horizontal, 0);
-        close_btn.add_css_class("notification-close-btn");
-        close_btn.set_valign(Align::Center);
-        close_btn.set_cursor_from_name(Some("pointer"));
-        close_btn.set_focusable(false);
-        close_btn.set_can_focus(false);
-        let close_lbl = Label::new(Some("✕"));
-        close_lbl.add_css_class("notification-close-icon");
-        close_lbl.set_valign(Align::Center);
-        close_lbl.set_halign(Align::Center);
-        close_btn.append(&close_lbl);
-        content_box.append(&close_btn);
-
         popover_box.append(&content_box);
         popover.set_child(Some(&popover_box));
 
         let click_gesture = GestureClick::new();
         click_box.add_controller(click_gesture.clone());
-
-        let close_gesture = GestureClick::new();
-        close_btn.add_controller(close_gesture.clone());
 
         let motion_controller = EventControllerMotion::new();
         popover_box.add_controller(motion_controller.clone());
@@ -150,13 +131,11 @@ impl NotificationPopover {
         Self {
             popover,
             popover_box,
-            close_btn,
             icon_container,
             title_lbl,
             body_lbl,
             click_box,
             click_gesture,
-            close_gesture,
             motion_controller,
             is_hovered,
             is_animating,

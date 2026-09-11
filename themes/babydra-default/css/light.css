@@ -990,24 +990,6 @@ button.popup-action-btn:hover {
     background-color: rgba(0, 0, 0, 0.04);
 }
 
-.notification-close-btn {
-    background-color: rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.notification-close-btn:hover {
-    background-color: rgba(0, 0, 0, 0.10);
-    border-color: rgba(0, 0, 0, 0.16);
-}
-
-.notification-close-icon {
-    color: rgba(0, 0, 0, 0.60);
-}
-
-.notification-close-btn:hover .notification-close-icon {
-    color: #000000;
-}
-
 .notification-icon-box {
     background-color: rgba(0, 0, 0, 0.04);
     border: 1px solid rgba(0, 0, 0, 0.07);
