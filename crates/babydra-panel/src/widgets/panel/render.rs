@@ -81,6 +81,7 @@ pub fn create_network_widget() -> NetworkWidgets {
     let eth_area_timer = eth_area.clone();
     let state_timer = state.clone();
     let wifi_icon_clone = wifi_icon.clone();
+    let mut last_icon_name = String::new();
 
     net_rx.attach(None, move |snapshot: NetworkSnapshot| {
         let active_info = snapshot.active_info;
@@ -92,7 +93,15 @@ pub fn create_network_widget() -> NetworkWidgets {
         } else {
             wifi_icon_clone.set_visible(true);
             eth_area_timer.set_visible(false);
-            wifi_icon_clone.set_icon_name(Some(&active_info.icon_name));
+            if last_icon_name != active_info.icon_name {
+                babydra_ui_kit::ui::icon::set_image_from_icon(
+                    &wifi_icon_clone,
+                    &active_info.icon_name,
+                    14,
+                );
+                last_icon_name = active_info.icon_name.clone();
+            }
+            wifi_icon_clone.set_opacity(if active_info.is_connected { 1.0 } else { 0.5 });
         }
 
         let mut s = state_timer.borrow_mut();
