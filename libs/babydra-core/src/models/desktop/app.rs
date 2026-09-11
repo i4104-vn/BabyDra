@@ -46,3 +46,11 @@ pub struct DesktopCache {
     pub local_mtime_secs: u64,
     pub apps: Vec<DesktopApp>,
 }
+
+/// Represents a selectable default application choice.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct AppChoice {
+    pub desktop_id: String,
+    pub name: String,
+}
+

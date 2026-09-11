@@ -1,44 +1,71 @@
-//! Core Shell, Island, Theme & Desktop State Models
+//! Core Shell, Island, Theme & Desktop State Models (Re-exports from topic submodules).
 
-pub mod app;
-pub mod appearance;
-pub mod battery;
-pub mod daemon;
-pub mod dbus_menu;
-pub mod desktop_state;
-pub mod exif;
-pub mod island_state;
-pub mod monitor;
-pub mod network;
-pub mod notification;
-pub mod power;
-pub mod shell_config;
-pub mod storage;
-pub mod theme_config;
-pub mod tray_item;
-pub mod tray_snapshot;
-pub mod volume;
-pub mod workspace;
+pub use crate::models::cli::*;
+pub use crate::models::desktop::*;
+pub use crate::models::island::*;
+pub use crate::models::network::*;
+pub use crate::models::system::*;
+pub use crate::models::theme::*;
+pub use crate::models::tray::*;
 
-pub use app::{DesktopApp, DesktopCache};
-pub use appearance::CurrentAppearance;
-pub use battery::BatteryInfo;
-pub use daemon::DaemonMessage;
-pub use dbus_menu::{LayoutItem, MenuItem};
-pub use desktop_state::{
-    calc_auto_arrange, snap_to_grid, sort_entries, DesktopState, DEFAULT_CELL_HEIGHT,
-    DEFAULT_CELL_WIDTH, DEFAULT_MARGIN_X, DEFAULT_MARGIN_Y,
-};
-pub use exif::ExifData;
-pub use island_state::IslandState;
-pub use monitor::CpuTime;
-pub use network::{ActiveNetworkInfo, ActiveNetworkType, NetSpeed, NetStats};
-pub use notification::{ActiveNotification, NotificationMsg};
-pub use power::PerformanceProfile;
-pub use shell_config::ShellConfig;
-pub use storage::DiskInfo;
-pub use theme_config::{ThemeConfig, ThemeSelection};
-pub use tray_item::TrayItem;
-pub use tray_snapshot::TraySnapshot;
-pub use volume::{AudioBackendType, AudioDevice};
-pub use workspace::Workspace;
+// Module aliases for backward compatibility with `crate::models::shell::<module>::...`
+pub mod app {
+    pub use crate::models::desktop::app::*;
+}
+pub mod appearance {
+    pub use crate::models::theme::appearance::*;
+}
+pub mod battery {
+    pub use crate::models::system::battery::*;
+}
+pub mod cli {
+    pub use crate::models::cli::*;
+}
+pub mod daemon {
+    pub use crate::models::system::daemon::*;
+}
+pub mod dbus_menu {
+    pub use crate::models::tray::dbus_menu::*;
+}
+pub mod desktop_state {
+    pub use crate::models::desktop::desktop_state::*;
+}
+pub mod exif {
+    pub use crate::models::desktop::exif::*;
+}
+pub mod island_state {
+    pub use crate::models::island::island_state::*;
+}
+pub mod monitor {
+    pub use crate::models::system::monitor::*;
+}
+pub mod network {
+    pub use crate::models::network::*;
+}
+pub mod notification {
+    pub use crate::models::island::notification::*;
+}
+pub mod power {
+    pub use crate::models::system::power::*;
+}
+pub mod shell_config {
+    pub use crate::models::theme::shell_config::*;
+}
+pub mod storage {
+    pub use crate::models::system::storage::*;
+}
+pub mod theme_config {
+    pub use crate::models::theme::theme_config::*;
+}
+pub mod tray_item {
+    pub use crate::models::tray::tray_item::*;
+}
+pub mod tray_snapshot {
+    pub use crate::models::tray::tray_snapshot::*;
+}
+pub mod volume {
+    pub use crate::models::system::volume::*;
+}
+pub mod workspace {
+    pub use crate::models::desktop::workspace::*;
+}

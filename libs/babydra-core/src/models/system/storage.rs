@@ -1,6 +1,6 @@
 //! Storage disk information model.
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct DiskInfo {
     pub filesystem: String,
     pub size: String,
