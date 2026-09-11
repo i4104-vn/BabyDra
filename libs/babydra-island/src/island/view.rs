@@ -171,7 +171,7 @@ impl IslandView {
         Self {
             id: id.into(),
             priority: 50,
-            size: (200, 30),
+            size: (CAPSULE_WIDTH, CAPSULE_HEIGHT),
             content: IslandContent::Widget(content),
             hover_keep: false,
             capsule_class: None,
@@ -190,7 +190,7 @@ impl IslandView {
         Self {
             id: id.into(),
             priority: 50,
-            size: (200, 30),
+            size: (CAPSULE_WIDTH, CAPSULE_HEIGHT),
             content: IslandContent::Builder(Box::new(build)),
             hover_keep: false,
             capsule_class: None,
@@ -276,9 +276,9 @@ impl IslandCtx {
 }
 
 /// Compact capsule width for standard features (notification, clipboard, power).
-pub const CAPSULE_WIDTH: i32 = 160;
+pub const CAPSULE_WIDTH: i32 = 140;
 /// Expanded capsule width for features requiring more room (media player).
-pub const PLAYER_CAPSULE_WIDTH: i32 = 220;
+pub const PLAYER_CAPSULE_WIDTH: i32 = 200;
 /// Standard unified height for active island features in the notch capsule.
 pub const CAPSULE_HEIGHT: i32 = 28;
 
