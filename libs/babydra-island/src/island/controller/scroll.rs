@@ -30,12 +30,56 @@ pub(crate) fn handle_island_scroll(core_rc: &Rc<RefCell<IslandCore>>, dx: f64, d
         }
     }
 
+    // Always dismiss all open popovers and notification badge on scroll!
+    dismiss_all_popovers();
+
+    // If notification was active, dismiss it so scrolling switches away from it
+    let had_notification =
+        crate::widgets::notification::SHARED_NOTIFICATION.with(|sn| sn.borrow().is_some());
+    if had_notification {
+        crate::widgets::notification::SHARED_NOTIFICATION.with(|sn| *sn.borrow_mut() = None);
+        if let Ok(core) = core_rc.try_borrow() {
+            for v in &core.views {
+                if v.id == "notification" {
+                    v.state.override_active.set(false);
+                    v.state.requested.set(false);
+                }
+            }
+        }
+    }
+
     let Ok(mut core) = core_rc.try_borrow_mut() else {
         return;
     };
 
     let active_indices = core.get_active_indices();
-    if active_indices.len() <= 1 {
+    if active_indices.is_empty() {
+        // No views active anymore, collapse to idle or hidden
+        let desired = if core.cfg.idle_visible && core.idle.is_some() {
+            IslandDisplay::Idle
+        } else {
+            IslandDisplay::Hidden
+        };
+        core.last_scroll.set(Some(now));
+        core.animating.set(false);
+        apply_transition(&mut core, desired, core_rc);
+        return;
+    }
+
+    if active_indices.len() == 1 {
+        let only_idx = active_indices[0];
+        let curr_idx = match core.displayed {
+            IslandDisplay::View(i) => Some(i),
+            _ => None,
+        };
+        if curr_idx != Some(only_idx) {
+            core.last_scroll.set(Some(now));
+            let next_seq = next_request_seq();
+            core.user_selected = Some((only_idx, next_seq));
+            core.views[only_idx].state.request_seq.set(next_seq);
+            core.animating.set(false);
+            apply_transition(&mut core, IslandDisplay::View(only_idx), core_rc);
+        }
         return;
     }
 
@@ -55,9 +99,6 @@ pub(crate) fn handle_island_scroll(core_rc: &Rc<RefCell<IslandCore>>, dx: f64, d
     if target_idx == curr_idx {
         return;
     }
-
-    // Only dismiss open popovers when ACTUALLY switching to a different view
-    dismiss_all_popovers();
 
     core.last_scroll.set(Some(now));
 

@@ -126,13 +126,14 @@ scale slider,
 scale.control-slider slider,
 scale.control-slider > slider,
 scale.control-slider contents > slider {
-    min-width: 12px;
-    min-height: 12px;
-    margin: 6px 0;
+    min-width: 18px;
+    min-height: 18px;
+    margin: 3px 0;
     border-radius: 9999px;
     background-color: #ffffff;
     background-image: none;
     box-shadow: none;
+    -gtk-icon-shadow: none;
     border: none;
     transition: background-color 200ms ease;
 }
@@ -143,6 +144,7 @@ scale.control-slider > slider:hover,
 scale.control-slider contents > slider:hover {
     background-color: #ffffff;
     box-shadow: none;
+    -gtk-icon-shadow: none;
 }
 
 .control-left-toggles-box {

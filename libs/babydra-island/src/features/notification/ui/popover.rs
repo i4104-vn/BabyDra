@@ -32,7 +32,7 @@ impl NotificationPopover {
         );
         popover.set_has_arrow(false);
         popover.set_offset(0, 10);
-        popover.set_autohide(false);
+        popover.set_autohide(true);
         popover.set_focusable(false);
         popover.set_can_focus(false);
 
@@ -96,6 +96,19 @@ impl NotificationPopover {
 
         let motion_controller = EventControllerMotion::new();
         popover_box.add_controller(motion_controller.clone());
+
+        let scroll_controller = gtk4::EventControllerScroll::new(
+            gtk4::EventControllerScrollFlags::VERTICAL
+                | gtk4::EventControllerScrollFlags::HORIZONTAL
+                | gtk4::EventControllerScrollFlags::DISCRETE,
+        );
+        scroll_controller.connect_scroll(move |_, dx, dy| {
+            if let Some(island) = crate::island::default_island() {
+                crate::island::controller::scroll::handle_island_scroll(&island.core, dx, dy);
+            }
+            gtk4::glib::Propagation::Stop
+        });
+        popover_box.add_controller(scroll_controller);
 
         let is_hovered = Rc::new(Cell::new(false));
         let h_enter = is_hovered.clone();

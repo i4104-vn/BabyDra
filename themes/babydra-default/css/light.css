@@ -447,6 +447,19 @@ scale.control-slider contents>trough>highlight {
     background-color: #3b82f6;
 }
 
+scale slider,
+scale.control-slider slider,
+scale.control-slider>slider,
+scale.control-slider contents>slider {
+    background-color: #ffffff;
+    box-shadow: none;
+    -gtk-icon-shadow: none;
+    border: none;
+    min-width: 18px;
+    min-height: 18px;
+    margin: 3px 0;
+}
+
 .control-left-toggles-box {
     background-color: rgba(0, 0, 0, 0.03);
     border: 1px solid rgba(0, 0, 0, 0.05);
@@ -2391,8 +2404,9 @@ scale.settings-scale slider,
 scale.settings-scale>slider,
 scale.settings-scale contents>slider {
     background-color: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.20);
+    border: none;
+    box-shadow: none;
+    -gtk-icon-shadow: none;
 }
 
 scale.settings-scale mark label {

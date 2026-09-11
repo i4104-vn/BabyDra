@@ -31,7 +31,7 @@ impl ClipboardPopover {
         );
         popover.set_has_arrow(false);
         popover.set_offset(0, 10);
-        popover.set_autohide(false);
+        popover.set_autohide(true);
 
         let popover_box = GtkBox::new(Orientation::Vertical, 0);
         popover_box.add_css_class("clipboard-popover-box");
@@ -88,6 +88,19 @@ impl ClipboardPopover {
         hint_lbl.add_css_class("clipboard-popover-hint");
         hint_lbl.set_halign(Align::Center);
         popover_box.append(&hint_lbl);
+
+        let scroll_controller = gtk4::EventControllerScroll::new(
+            gtk4::EventControllerScrollFlags::VERTICAL
+                | gtk4::EventControllerScrollFlags::HORIZONTAL
+                | gtk4::EventControllerScrollFlags::DISCRETE,
+        );
+        scroll_controller.connect_scroll(move |_, dx, dy| {
+            if let Some(island) = crate::island::default_island() {
+                crate::island::controller::scroll::handle_island_scroll(&island.core, dx, dy);
+            }
+            gtk4::glib::Propagation::Stop
+        });
+        popover_box.add_controller(scroll_controller);
 
         popover_box.set_focusable(true);
         popover.set_child(Some(&popover_box));

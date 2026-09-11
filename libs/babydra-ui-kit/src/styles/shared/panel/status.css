@@ -16,7 +16,7 @@
 
 .status-icon {
     text-shadow: none;
-    margin: 0;
+    margin: 0 4px;
 }
 
 button.panel-status-btn {

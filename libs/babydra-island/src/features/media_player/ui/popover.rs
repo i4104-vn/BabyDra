@@ -45,7 +45,7 @@ impl MediaPopover {
         );
         popover.set_has_arrow(false);
         popover.set_offset(0, 10);
-        popover.set_autohide(false);
+        popover.set_autohide(true);
 
         let popover_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
         popover_box.add_css_class("media-popover-box");
@@ -152,6 +152,19 @@ impl MediaPopover {
         controls_box.append(&play_btn);
         controls_box.append(&next_btn);
         popover_box.append(&controls_box);
+
+        let scroll_controller = gtk4::EventControllerScroll::new(
+            gtk4::EventControllerScrollFlags::VERTICAL
+                | gtk4::EventControllerScrollFlags::HORIZONTAL
+                | gtk4::EventControllerScrollFlags::DISCRETE,
+        );
+        scroll_controller.connect_scroll(move |_, dx, dy| {
+            if let Some(island) = crate::island::default_island() {
+                crate::island::controller::scroll::handle_island_scroll(&island.core, dx, dy);
+            }
+            gtk4::glib::Propagation::Stop
+        });
+        popover_box.add_controller(scroll_controller);
 
         popover.set_child(Some(&popover_box));
 
