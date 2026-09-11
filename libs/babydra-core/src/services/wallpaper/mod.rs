@@ -4,7 +4,6 @@ pub mod avatar;
 pub mod config;
 pub mod greeter;
 pub mod thumbnail;
-pub mod types;
 pub mod utils;
 
 // Re-exports for backward compatibility
@@ -18,7 +17,7 @@ pub use greeter::{
     set_greeter_wp, sync_shared_assets,
 };
 pub use thumbnail::{get_or_create_first_frame, get_or_create_thumbnail};
-pub use types::{WallpaperKind, WallpaperMode};
+pub use crate::models::theme::wallpaper::{MonitorResolution, WallpaperKind, WallpaperMode};
 pub use utils::{
     get_video_duration, is_gif_file, is_gstreamer_plugin_available,
     is_live_wallpaper_file, is_static_wallpaper_file, is_video_file,

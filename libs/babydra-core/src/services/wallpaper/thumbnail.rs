@@ -1,7 +1,7 @@
 //! Thumbnail generation and caching for wallpapers.
 
+use crate::models::theme::wallpaper::WallpaperKind;
 use std::path::{Path, PathBuf};
-use crate::services::wallpaper::types::WallpaperKind;
 use std::process::Command;
 
 /// Returns an image thumbnail path for the given wallpaper.

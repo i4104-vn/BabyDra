@@ -1,5 +1,5 @@
 pub mod account;
-pub mod auth;
+pub use account::auth;
 pub mod backlight;
 pub mod battery;
 pub mod bluetooth;

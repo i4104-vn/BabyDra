@@ -5,6 +5,7 @@
 //! `/var/lib/babydra` store. `/tmp` is volatile and wiped on every reboot,
 //! which used to reset the preselected greeter user after each restart.
 
+use crate::services::utils::set_unix_mode;
 use std::io::Write;
 use std::path::PathBuf;
 
@@ -37,19 +38,11 @@ pub fn save_last_user(user: &str) {
     // greeter user and regular users (same convention as the wallpaper store).
     if let Some(parent) = path.parent() {
         let _ = std::fs::create_dir_all(parent);
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::PermissionsExt;
-            let _ = std::fs::set_permissions(parent, std::fs::Permissions::from_mode(0o777));
-        }
+        let _ = set_unix_mode(parent, 0o777);
     }
 
     if let Ok(mut file) = std::fs::File::create(&path) {
         let _ = writeln!(file, "{}", user);
     }
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::PermissionsExt;
-        let _ = std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o666));
-    }
+    let _ = set_unix_mode(&path, 0o666);
 }

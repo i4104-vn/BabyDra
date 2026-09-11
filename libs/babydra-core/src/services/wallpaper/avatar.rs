@@ -2,6 +2,7 @@
 //! Handles avatar storage, retrieval, and circular pixbuf masking.
 
 use crate::error::CoreResult;
+use crate::services::utils::set_unix_mode;
 use std::path::{Path, PathBuf};
 
 /// Default system logo bytes bundled in babydra-core
@@ -36,14 +37,13 @@ pub fn set_avatar(path: &Path) -> CoreResult<()> {
     crate::config::save_babydra_config(&conf);
 
     // Save copy for greetd which runs as another user (greeter).
-    use std::os::unix::fs::PermissionsExt;
     let shared_dir = PathBuf::from("/var/lib/babydra");
     if std::fs::create_dir_all(&shared_dir).is_ok() {
-        let _ = std::fs::set_permissions(&shared_dir, std::fs::Permissions::from_mode(0o777));
+        let _ = set_unix_mode(&shared_dir, 0o777);
     }
     let public_dest = shared_dir.join("avatar.png");
     if std::fs::write(&public_dest, &png_bytes).is_ok() {
-        let _ = std::fs::set_permissions(&public_dest, std::fs::Permissions::from_mode(0o666));
+        let _ = set_unix_mode(&public_dest, 0o666);
     }
 
     Ok(())

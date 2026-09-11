@@ -341,17 +341,6 @@ pub async fn create_dir(path: PathBuf) -> Result<(), std::io::Error> {
         })
 }
 
-/// Applies `mode` to `path`, preserving special bits outside the rwx mask.
-pub fn set_unix_mode(path: &Path, mode: u32) -> Result<(), std::io::Error> {
-    use std::os::unix::fs::PermissionsExt;
-
-    let metadata = fs::metadata(path)?;
-    let final_mode = (metadata.mode() & !0o777) | mode;
-    let mut perms = metadata.permissions();
-    perms.set_mode(final_mode);
-    fs::set_permissions(path, perms)
-}
-
 /// Restores a trashed file to its original location using its `.trashinfo`
 /// metadata, removing the info entry afterwards.
 pub async fn restore_from_trash(trash_file_path: PathBuf) -> CoreResult<()> {

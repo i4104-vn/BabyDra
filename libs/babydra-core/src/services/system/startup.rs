@@ -2,15 +2,9 @@
 
 use crate::error::CoreResult;
 use crate::models::startup_command::StartupCommand;
+use crate::services::utils::{get_home_dir, set_unix_mode};
 use std::fs;
 use std::path::{Path, PathBuf};
-
-#[cfg(unix)]
-use std::os::unix::fs::PermissionsExt;
-
-fn get_home_dir() -> String {
-    std::env::var("HOME").unwrap_or_else(|_| "/home/i4104".to_string())
-}
 
 /// Gets the path to the labwc autostart configuration file.
 fn get_autostart_path() -> PathBuf {
@@ -80,11 +74,7 @@ pub fn save_startup_cmds(commands: &[StartupCommand]) -> CoreResult<()> {
     }
 
     fs::write(&user_config, &content).map_err(|e| e.to_string())?;
-
-    #[cfg(unix)]
-    {
-        let _ = fs::set_permissions(&user_config, fs::Permissions::from_mode(0o755));
-    }
+    let _ = set_unix_mode(&user_config, 0o755);
 
     Ok(())
 }

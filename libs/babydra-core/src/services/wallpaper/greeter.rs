@@ -2,6 +2,7 @@
 
 use crate::config::{load_babydra_config, save_babydra_config};
 use crate::error::CoreResult;
+use crate::services::utils::set_unix_mode;
 use std::path::{Path, PathBuf};
 
 /// Reads raw image bytes from a path directly.
@@ -116,15 +117,14 @@ pub fn set_greeter_wp(path: &Path) -> CoreResult<()> {
     save_babydra_config(&conf);
 
     // Save fallback for greetd which runs as another user (greeter)
-    use std::os::unix::fs::PermissionsExt;
     let shared_dir = PathBuf::from("/var/lib/babydra");
     if std::fs::create_dir_all(&shared_dir).is_ok() {
-        let _ = std::fs::set_permissions(&shared_dir, std::fs::Permissions::from_mode(0o777));
+        let _ = set_unix_mode(&shared_dir, 0o777);
     }
     let ext = target_image_path.extension().and_then(|e| e.to_str()).unwrap_or("png");
     let public_dest = shared_dir.join(format!("lock_wallpaper.{}", ext));
     if std::fs::copy(&target_image_path, &public_dest).is_ok() {
-        let _ = std::fs::set_permissions(&public_dest, std::fs::Permissions::from_mode(0o666));
+        let _ = set_unix_mode(&public_dest, 0o666);
     }
 
     Ok(())
@@ -158,11 +158,7 @@ pub fn sync_shared_assets() {
     if std::fs::create_dir_all(&shared_dir).is_err() {
         return;
     }
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::PermissionsExt;
-        let _ = std::fs::set_permissions(&shared_dir, std::fs::Permissions::from_mode(0o777));
-    }
+    let _ = set_unix_mode(&shared_dir, 0o777);
 
     let sync = |src: Option<PathBuf>, dest: PathBuf| {
         let Some(src) = src else { return };
@@ -177,11 +173,7 @@ pub fn sync_shared_assets() {
             }
         }
         if std::fs::copy(&src, &dest).is_ok() {
-            #[cfg(unix)]
-            {
-                use std::os::unix::fs::PermissionsExt;
-                let _ = std::fs::set_permissions(&dest, std::fs::Permissions::from_mode(0o666));
-            }
+            let _ = set_unix_mode(&dest, 0o666);
         }
     };
 

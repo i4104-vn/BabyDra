@@ -2,7 +2,7 @@
 
 use crate::config::{load_babydra_config, save_babydra_config};
 use crate::error::CoreResult;
-use crate::services::wallpaper::types::{WallpaperKind, WallpaperMode};
+use crate::models::theme::wallpaper::{WallpaperKind, WallpaperMode};
 use crate::services::wallpaper::utils::{get_video_duration, is_gstreamer_plugin_available};
 use std::path::{Path, PathBuf};
 

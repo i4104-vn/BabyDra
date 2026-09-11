@@ -1,7 +1,9 @@
 //! Kitty terminal theme synchronization service.
 
 use crate::error::CoreResult;
-use crate::services::utils::{get_home_dir, run_cmd, run_cmd_bool};
+use crate::services::utils::{
+    append_line_if_missing, ensure_dir_exists, get_home_dir, pkill_signal, run_cmd_bool,
+};
 use std::fs;
 use std::path::Path;
 
@@ -25,9 +27,7 @@ pub fn sync_kitty_theme(dark: bool) -> CoreResult<()> {
 
     let home = get_home_dir();
     let config_dir = Path::new(&home).join(".config/kitty");
-    if !config_dir.exists() {
-        let _ = fs::create_dir_all(&config_dir);
-    }
+    let _ = ensure_dir_exists(&config_dir);
 
     // 1. Write theme override
     let theme_path = config_dir.join("theme.conf");
@@ -39,25 +39,10 @@ pub fn sync_kitty_theme(dark: bool) -> CoreResult<()> {
     fs::write(&theme_path, content)?;
 
     // 2. Ensure kitty.conf includes theme.conf
-    append_if_missing(&config_dir.join("kitty.conf"), "include theme.conf");
+    let _ = append_line_if_missing(&config_dir.join("kitty.conf"), "include theme.conf");
 
     // 3. Reload running Kitty instances if any
-    let _ = run_cmd(&["pkill", "-SIGUSR1", "-x", "kitty"]);
+    pkill_signal("-SIGUSR1", "kitty", true);
 
     Ok(())
-}
-
-/// Appends a configuration line to a file if not already present.
-fn append_if_missing(file: &Path, line: &str) {
-    if file.exists() {
-        if let Ok(content) = fs::read_to_string(file) {
-            if content.contains(line) {
-                return;
-            }
-            let prefix = if content.ends_with('\n') { "" } else { "\n" };
-            let _ = fs::write(file, format!("{content}{prefix}{line}\n"));
-        }
-    } else {
-        let _ = fs::write(file, format!("{line}\n"));
-    }
 }

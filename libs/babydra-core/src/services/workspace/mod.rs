@@ -1,5 +1,7 @@
 pub mod cache;
+pub mod cli;
 pub mod compositor;
+pub mod service;
 pub mod windows;
 
 use crate::models::Workspace;
@@ -7,7 +9,9 @@ pub use cache::{
     get_workspace_cache_dir, get_workspace_cache_path, read_cached_workspace,
     reset_cached_workspace, write_cached_workspace, DEFAULT_WORKSPACE_COUNT,
 };
+pub use cli::run_cli;
 pub use compositor::dispatch_compositor_switch;
+pub use service::{init_workspace_service, subscribe, WorkspaceSnapshot};
 pub use windows::{filter_apps_for_workspace, get_app_workspace, sync_workspace_apps};
 
 pub fn get_current_workspace() -> u32 {

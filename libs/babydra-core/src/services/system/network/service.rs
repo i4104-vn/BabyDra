@@ -1,16 +1,16 @@
-//! Network traffic monitoring and speed formatting.
-
-pub use crate::models::{ActiveNetworkInfo, ActiveNetworkType, NetSpeed, NetStats};
+pub use crate::models::network::{ActiveNetworkInfo, ActiveNetworkType, NetSpeed, NetStats, NetworkSnapshot};
 use crate::services::system::wifi::client::{
     ActiveConnectionProxyBlocking, DeviceProxyBlocking, NetworkManagerProxyBlocking,
 };
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 use zbus::blocking::Connection;
 
+static NETWORK_SENDERS: Mutex<Vec<std::sync::mpsc::Sender<NetworkSnapshot>>> = Mutex::new(Vec::new());
+static NETWORK_STARTED: AtomicBool = AtomicBool::new(false);
 static LAST_NET_STATS: Mutex<Option<(Instant, NetStats)>> = Mutex::new(None);
 
-/// Reads total RX and TX bytes from `/proc/net/dev` across active network interfaces.
 pub fn get_net_bytes() -> NetStats {
     let mut total_rx = 0u64;
     let mut total_tx = 0u64;
@@ -41,8 +41,7 @@ pub fn get_net_bytes() -> NetStats {
     }
 }
 
-/// Calculates current network download (RX) and upload (TX) speed per second.
-pub fn get_network_speed() -> NetSpeed {
+pub fn calculate_network_speed() -> NetSpeed {
     let current_bytes = get_net_bytes();
     let now = Instant::now();
 
@@ -68,33 +67,6 @@ pub fn get_network_speed() -> NetSpeed {
     }
 }
 
-/// Formats speed value into human-readable string (e.g. `1.2 MB/s`, `450 KB/s`, `12 B/s`).
-pub fn format_speed(bytes_per_sec: f64) -> String {
-    if bytes_per_sec < 1024.0 {
-        format!("{:.0} B/s", bytes_per_sec)
-    } else if bytes_per_sec < 1024.0 * 1024.0 {
-        format!("{:.1} KB/s", bytes_per_sec / 1024.0)
-    } else {
-        format!("{:.1} MB/s", bytes_per_sec / (1024.0 * 1024.0))
-    }
-}
-
-/// Retrieves local IPv4 address of the active default network route interface.
-pub fn get_local_ip() -> String {
-    if let Ok(output) = std::process::Command::new("sh")
-        .arg("-c")
-        .arg("ip route get 1.1.1.1 2>/dev/null | grep -oP 'src \\K[0-9.]+' | head -n 1")
-        .output()
-    {
-        let ip = String::from_utf8_lossy(&output.stdout).trim().to_string();
-        if !ip.is_empty() {
-            return ip;
-        }
-    }
-    "127.0.0.1".to_string()
-}
-
-/// Retrieves information about the current active primary network connection (Ethernet, Wi-Fi, or Disconnected).
 pub fn get_active_network_info() -> ActiveNetworkInfo {
     // 1. Try NetworkManager D-Bus
     if let Ok(conn) = Connection::system() {
@@ -261,4 +233,77 @@ pub fn get_active_network_info() -> ActiveNetworkInfo {
 
     // 3. Disconnected fallback
     ActiveNetworkInfo::default()
+}
+
+fn collect_network_snapshot() -> NetworkSnapshot {
+    let active_info = get_active_network_info();
+    let net_speed = calculate_network_speed();
+    let net_bytes = get_net_bytes();
+
+    NetworkSnapshot {
+        active_info,
+        rx_speed: net_speed.rx_speed,
+        tx_speed: net_speed.tx_speed,
+        rx_bytes: net_bytes.rx_bytes,
+        tx_bytes: net_bytes.tx_bytes,
+    }
+}
+
+pub fn get_local_ip() -> String {
+    if let Ok(output) = std::process::Command::new("sh")
+        .arg("-c")
+        .arg("ip route get 1.1.1.1 2>/dev/null | grep -oP 'src \\K[0-9.]+' | head -n 1")
+        .output()
+    {
+        let ip = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        if !ip.is_empty() {
+            return ip;
+        }
+    }
+    "127.0.0.1".to_string()
+}
+
+pub fn format_speed(bytes_per_sec: f64) -> String {
+    if bytes_per_sec < 1024.0 {
+        format!("{:.0} B/s", bytes_per_sec)
+    } else if bytes_per_sec < 1024.0 * 1024.0 {
+        format!("{:.1} KB/s", bytes_per_sec / 1024.0)
+    } else {
+        format!("{:.1} MB/s", bytes_per_sec / (1024.0 * 1024.0))
+    }
+}
+
+pub use crate::models::network::NetworkReceiver;
+
+pub fn subscribe() -> NetworkReceiver {
+    init_network_monitor_service();
+    let (tx, rx) = std::sync::mpsc::channel();
+    NETWORK_SENDERS.lock().unwrap().push(tx);
+    NetworkReceiver::new(rx)
+}
+
+pub fn init_network_monitor_service() {
+    if NETWORK_STARTED.swap(true, Ordering::SeqCst) {
+        return;
+    }
+    std::thread::spawn(move || loop {
+        let has_subscribers = {
+            let senders = NETWORK_SENDERS.lock().unwrap();
+            !senders.is_empty()
+        };
+
+        if !has_subscribers {
+            std::thread::sleep(Duration::from_millis(1000));
+            continue;
+        }
+
+        std::thread::sleep(Duration::from_millis(200));
+        let snapshot = collect_network_snapshot();
+        let mut senders = NETWORK_SENDERS.lock().unwrap();
+        senders.retain(|tx| tx.send(snapshot.clone()).is_ok());
+    });
+}
+
+pub fn get_network_speed() -> NetSpeed {
+    calculate_network_speed()
 }

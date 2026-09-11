@@ -39,7 +39,7 @@ pub use services::system::account::{
 };
 pub use services::system::auth::{self, verify_password};
 pub use services::system::backlight;
-pub use services::system::battery::{self, get_battery_info};
+pub use services::system::battery::{self, get_battery_info, init_battery_service, subscribe as subscribe_battery};
 pub use services::system::bluetooth::{
     self, get_bt_devices, is_bluetooth_enabled, set_bt_enabled, BtDevice,
 };
@@ -48,10 +48,10 @@ pub use services::system::display::{
     apply_display_configs, apply_saved_displays, get_displays, save_displays,
 };
 pub use services::system::monitor::{
-    self, get_app_resource_usage, get_formatted_uptime, AppResourceUsage,
+    self, get_app_resource_usage, get_formatted_uptime, init_monitor_service, subscribe as subscribe_monitor, AppResourceUsage, MonitorSnapshot,
 };
 pub use services::system::network::{
-    self, get_active_network_info, get_local_ip, get_network_speed,
+    self, get_active_network_info, get_local_ip, get_network_speed, get_net_bytes, init_network_monitor_service, subscribe as subscribe_network, format_speed, NetworkSnapshot,
 };
 pub use services::system::power::{
     self, apply_saved_profile, get_current_profile, poweroff, reboot, set_perf_profile,
@@ -64,7 +64,10 @@ pub use services::system::vpn::{self, get_vpn_connections, VpnConn};
 pub use services::system::wifi;
 
 // --- Window & App Management ---
+pub use services::app_lifecycle::{init_app, AppLifecycle};
 pub use services::apps::{find_desktop_apps, refresh_desktop_apps, DesktopApp};
+pub use services::cli::{parse_cli_args, execute_cli_action, CliOptions, CliAction, PageId};
+pub use services::config::pages::{normalize_page_name, is_valid_page, PageId as ConfigPageId};
 pub use services::window::mru::{activate_app, get_history, get_running_apps, save_history};
 pub use services::window::tracker::spawn_switcher;
 pub use services::window::{
@@ -78,6 +81,8 @@ pub use services::workspace::{
     next_workspace, next_workspace_sync_only, prev_workspace, prev_workspace_sync_only,
     reset_cached_workspace, set_cached_workspace, set_workspace_sync_only, switch_workspace,
     sync_workspace_apps, DEFAULT_WORKSPACE_COUNT,
+    init_workspace_service, subscribe as subscribe_workspace, WorkspaceSnapshot,
+    run_cli as run_workspace_cli,
 };
 
 // --- Shell, Media & Utilities ---

@@ -1,7 +1,10 @@
 pub mod actions;
+pub mod app_lifecycle;
 pub mod apps;
+pub mod cli;
 pub mod clipboard;
 pub mod clock;
+pub mod config;
 pub mod exif;
 pub mod explore;
 pub mod last_user;

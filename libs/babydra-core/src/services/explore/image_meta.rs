@@ -7,25 +7,7 @@ use std::fs::File;
 use std::io::{BufReader, Read};
 use std::path::Path;
 
-/// Comprehensive image metadata.
-#[derive(Debug, Clone, PartialEq, Default, serde::Serialize, serde::Deserialize)]
-pub struct ImageMetadata {
-    pub width: u32,
-    pub height: u32,
-    pub dimensions_str: String,
-    pub aspect_ratio: String,
-    pub total_pixels: u64,
-    pub pixels_str: String,
-    pub dpi: Option<u32>,
-    pub dpi_str: String,
-    pub format: String,
-    pub color_space: Option<String>,
-    pub bit_depth: Option<u32>,
-    pub camera_model: Option<String>,
-    pub lens_model: Option<String>,
-    pub exposure: Option<String>,
-    pub date_taken: Option<String>,
-}
+pub use crate::models::desktop::image_meta::ImageMetadata;
 
 /// Formats an integer with commas as thousands separators (e.g. 2073600 -> "2,073,600").
 pub fn format_commas(n: u64) -> String {

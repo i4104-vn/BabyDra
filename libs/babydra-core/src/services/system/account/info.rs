@@ -1,18 +1,7 @@
 //! User account, display name, hostname, and password management services.
 
-use std::io::Write;
-use std::process::{Command, Stdio};
-
-/// Information about a user account.
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq)]
-pub struct UserAccountInfo {
-    pub username: String,
-    pub display_name: String,
-    pub uid: u32,
-    pub gid: u32,
-    pub home_dir: String,
-    pub shell: String,
-}
+use crate::models::system::account::UserAccountInfo;
+use std::process::Command;
 
 /// Parses the user's full name / display name from the GECOS field in `/etc/passwd`.
 pub fn parse_gecos_name(gecos: &str) -> String {
@@ -63,48 +52,6 @@ pub fn get_user_account_info() -> UserAccountInfo {
     }
 }
 
-/// Executes a command with elevated privileges using `sudo -S`.
-fn run_sudo_command(
-    password: &str,
-    cmd: &str,
-    args: &[&str],
-    input_after_pwd: Option<&[u8]>,
-) -> Result<(), String> {
-    let mut child = Command::new("sudo")
-        .arg("-S")
-        .arg(cmd)
-        .args(args)
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .map_err(|e| format!("Failed to spawn sudo {}: {}", cmd, e))?;
-
-    if let Some(mut stdin) = child.stdin.take() {
-        let _ = writeln!(stdin, "{}", password);
-        if let Some(extra) = input_after_pwd {
-            let _ = stdin.write_all(extra);
-        }
-        let _ = stdin.flush();
-    }
-
-    let output = child
-        .wait_with_output()
-        .map_err(|e| format!("Failed to wait for process: {}", e))?;
-
-    if output.status.success() {
-        Ok(())
-    } else {
-        let err_msg = String::from_utf8_lossy(&output.stderr);
-        let trimmed = err_msg.trim();
-        if trimmed.is_empty() {
-            Err("Authentication failed or permission denied".to_string())
-        } else {
-            Err(trimmed.to_string())
-        }
-    }
-}
-
 /// Updates the user's real / display name (GECOS field) via `usermod -c`.
 pub fn update_display_name(
     username: &str,
@@ -119,7 +66,7 @@ pub fn update_display_name(
         return Err("Name contains invalid characters".to_string());
     }
 
-    run_sudo_command(
+    crate::services::utils::run_sudo(
         sudo_password,
         "usermod",
         &["-c", trimmed_name, username],
@@ -138,13 +85,13 @@ pub fn change_user_password(
     }
 
     // Step 1: Verify current password via PAM
-    if !crate::services::system::auth::verify_password(username, current_pwd) {
+    if !super::auth::verify_password(username, current_pwd) {
         return Err("Current password is incorrect".to_string());
     }
 
     // Step 2: Update password via `sudo chpasswd`
     let chpasswd_line = format!("{}:{}\n", username, new_pwd);
-    run_sudo_command(
+    crate::services::utils::run_sudo(
         current_pwd,
         "chpasswd",
         &[],
@@ -205,7 +152,7 @@ pub fn update_system_hostname(new_hostname: &str, sudo_password: &str) -> Result
     let trimmed = new_hostname.trim();
     validate_hostname(trimmed)?;
 
-    run_sudo_command(
+    crate::services::utils::run_sudo(
         sudo_password,
         "hostnamectl",
         &["hostname", trimmed],
