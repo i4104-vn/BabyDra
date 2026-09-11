@@ -22,7 +22,7 @@ Cargo.lock
 screenshot-baseline/
 
 # --- Phần riêng của nhánh `main` — không tồn tại trên release/develop ---
-/docs/
 /install/
-/*.md
+/planning.md
+/report.md
 /logo.png
