@@ -1,4 +1,4 @@
-//! Island view descriptors, handles, and the feature trait.
+//! Island view descriptors, handles, records, and the feature trait.
 //!
 //! Two complementary ways of adding a view to the island:
 //!
@@ -17,6 +17,18 @@ use gtk4::prelude::*;
 
 /// Monotonic counter used to break priority ties ("most recently requested wins").
 static REQUEST_SEQ: AtomicU64 = AtomicU64::new(0);
+
+/// Compact capsule width for standard features
+pub const CAPSULE_WIDTH: i32 = 180;
+/// Expanded capsule width for features requiring more room (media player).
+pub const PLAYER_CAPSULE_WIDTH: i32 = 200;
+/// Standard unified height for active island features in the notch capsule.
+pub const CAPSULE_HEIGHT: i32 = 30;
+
+/// Generates the next monotonic request sequence number.
+pub(crate) fn next_request_seq() -> u64 {
+    REQUEST_SEQ.fetch_add(1, Ordering::Relaxed)
+}
 
 /// Per-view state shared between the manager and the handle.
 pub(crate) struct ViewState {
@@ -73,9 +85,7 @@ impl IslandViewHandle {
     /// `show_for` / `override_show_for` auto-hide deadline is preserved.
     pub fn show(&self) {
         if !self.state.requested.get() {
-            self.state
-                .request_seq
-                .set(REQUEST_SEQ.fetch_add(1, Ordering::Relaxed));
+            self.state.request_seq.set(next_request_seq());
             self.state.requested.set(true);
             self.state.auto_hide_at.borrow_mut().take();
         }
@@ -250,6 +260,38 @@ impl IslandView {
     }
 }
 
+/// Internal record of a registered view managed by IslandCore.
+pub(crate) struct ViewRecord {
+    pub id: String,
+    pub priority: u8,
+    pub size: Cell<(i32, i32)>,
+    pub container: gtk4::Box,
+    pub state: Rc<ViewState>,
+    pub hover_keep: bool,
+    pub capsule_class: Option<String>,
+    #[allow(dead_code)]
+    pub focus: bool,
+    pub feature: Option<Rc<RefCell<Box<dyn IslandFeature>>>>,
+    pub on_show: Option<Rc<dyn Fn()>>,
+    pub on_hide: Option<Rc<dyn Fn()>>,
+    pub on_click: Option<Rc<dyn Fn()>>,
+}
+
+/// Everything needed to register a new view (built by public view APIs).
+pub(crate) struct ViewSpec {
+    pub id: String,
+    pub priority: u8,
+    pub size: (i32, i32),
+    pub content: gtk4::Widget,
+    pub hover_keep: bool,
+    pub capsule_class: Option<String>,
+    pub focus: bool,
+    pub feature: Option<Rc<RefCell<Box<dyn IslandFeature>>>>,
+    pub on_show: Option<Rc<dyn Fn()>>,
+    pub on_hide: Option<Rc<dyn Fn()>>,
+    pub on_click: Option<Rc<dyn Fn()>>,
+}
+
 /// Context handed to feature callbacks.
 #[derive(Clone)]
 pub struct IslandCtx {
@@ -274,13 +316,6 @@ impl IslandCtx {
         self.hovered
     }
 }
-
-/// Compact capsule width for standard features (notification, clipboard, power).
-pub const CAPSULE_WIDTH: i32 = 140;
-/// Expanded capsule width for features requiring more room (media player).
-pub const PLAYER_CAPSULE_WIDTH: i32 = 200;
-/// Standard unified height for active island features in the notch capsule.
-pub const CAPSULE_HEIGHT: i32 = 28;
 
 /// Trait for complex, stateful island features (e.g. the media player).
 pub trait IslandFeature {

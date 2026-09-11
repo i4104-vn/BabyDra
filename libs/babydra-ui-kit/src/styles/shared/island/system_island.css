@@ -19,6 +19,36 @@
     box-shadow: none;
 }
 
+/* Dynamic Island multi-feature bracket indicators () */
+.island-bracket {
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace, sans-serif;
+    color: rgba(255, 255, 255, 0.40);
+    padding: 0;
+    margin: 0;
+    min-width: 8px;
+    min-height: 16px;
+    transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.island-bracket.left {
+    margin-right: 2px;
+    margin-left: -2px;
+}
+
+.island-bracket.right {
+    margin-left: 2px;
+    margin-right: -2px;
+}
+
+.island-wrapper:hover .island-bracket,
+.panel-notch:hover .island-bracket {
+    color: #60a5fa;
+    text-shadow: 0 0 8px rgba(96, 165, 250, 0.6);
+}
+
 popover.clipboard-popover {
     background-color: transparent;
     padding: 0;
@@ -43,6 +73,18 @@ popover.clipboard-popover>contents {
     margin-bottom: 8px;
     padding-bottom: 8px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.clipboard-popover-title {
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.clipboard-popover-counter {
+    font-size: 10px;
+    font-weight: 600;
+    font-family: monospace, sans-serif;
+    opacity: 0.55;
 }
 
 .clipboard-popover-list {
@@ -272,7 +314,7 @@ popover.notification-popover>contents {
 .notch-player-text {
     font-size: 10px;
     font-weight: 700;
-    margin: 0 4px;
+    margin: 0;
     padding: 0;
 }
 

@@ -16,11 +16,7 @@ pub fn highlight_selection(popover: &PowerPopover, selected_idx: usize) {
 }
 
 /// Executes the power action corresponding to `idx` (0: shutdown, 1: reboot, 2: suspend, 3: logout).
-pub fn execute_power_action(
-    idx: usize,
-    popover: &PowerPopover,
-    handle: Option<&IslandViewHandle>,
-) {
+pub fn execute_power_action(idx: usize, popover: &PowerPopover, handle: Option<&IslandViewHandle>) {
     popover.popdown();
     if let Some(h) = handle {
         h.release_override();

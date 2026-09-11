@@ -1,7 +1,9 @@
 //! Power action button widget.
 
 use gtk4::prelude::*;
-use gtk4::{Align, Box as GtkBox, CenterBox, EventControllerMotion, GestureClick, Label, Orientation};
+use gtk4::{
+    Align, Box as GtkBox, CenterBox, EventControllerMotion, GestureClick, Label, Orientation,
+};
 
 #[derive(Clone)]
 pub struct PowerButtonWidget {

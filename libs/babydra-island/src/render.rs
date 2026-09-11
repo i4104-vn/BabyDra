@@ -11,7 +11,7 @@ use crate::island::{Island, IslandBuilder};
 /// Creates the default Dynamic Island (media player + notifications) and
 /// returns the notch capsule widget, ready to be appended to the panel.
 pub fn create_system_island() -> gtk4::Box {
-    build_default_island().capsule()
+    build_default_island().widget()
 }
 
 /// Builds the default Dynamic Island (media player + notifications) and

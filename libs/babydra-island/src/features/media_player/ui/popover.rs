@@ -45,6 +45,7 @@ impl MediaPopover {
         );
         popover.set_has_arrow(false);
         popover.set_offset(0, 10);
+        popover.set_autohide(false);
 
         let popover_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
         popover_box.add_css_class("media-popover-box");

@@ -18,6 +18,18 @@ pub fn create_keyboard_controller(
     let key_ctrl = gtk4::EventControllerKey::new();
 
     key_ctrl.connect_key_pressed(move |_, keyval, _, _| {
+        if keyval == Key::Escape {
+            if let Some(p) = popover_rc.borrow().as_ref() {
+                p.popdown();
+            }
+            if let Some(h) = handle_rc.borrow().as_ref() {
+                h.release_override();
+                h.hide();
+            }
+            crate::island::dismiss_all_popovers();
+            return glib::Propagation::Stop;
+        }
+
         let is_open = popover_rc
             .borrow()
             .as_ref()

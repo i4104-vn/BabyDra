@@ -91,9 +91,11 @@ impl IslandFeature for PowerFeature {
 
         service::set_trigger_callback(move || {
             selected_index.set(0);
+            crate::island::dismiss_all_popovers();
             if let Some(h) = handle_rc.borrow().as_ref() {
                 h.override_show_for(POPUP_DURATION);
             }
+            crate::island::tick_default_island();
             if let Some(popover) = popover_rc.borrow().as_ref() {
                 highlight_selection(popover, 0);
                 popover.popup();
@@ -121,16 +123,6 @@ impl IslandFeature for PowerFeature {
             });
         }
 
-        // Clean up on popover unmap
-        {
-            let handle_rc = self.handle_rc.clone();
-            popover.popover.connect_unmap(move |_| {
-                if let Some(h) = handle_rc.borrow().as_ref() {
-                    h.release_override();
-                    h.hide();
-                }
-            });
-        }
 
         // Attach distinct keyboard controllers
         let make_key_ctrl = || {
@@ -155,22 +147,24 @@ impl IslandFeature for PowerFeature {
         let pop_c = popover.clone();
         let handle_rc = self.handle_rc.clone();
         let sel_index = self.selected_index.clone();
-        self.widgets.click_gesture.connect_pressed(move |_, _, _, _| {
-            if pop_c.is_visible() {
-                pop_c.popdown();
-                if let Some(h) = handle_rc.borrow().as_ref() {
-                    h.release_override();
-                    h.hide();
+        self.widgets
+            .click_gesture
+            .connect_pressed(move |_, _, _, _| {
+                if pop_c.is_visible() {
+                    pop_c.popdown();
+                    if let Some(h) = handle_rc.borrow().as_ref() {
+                        h.release_override();
+                        h.hide();
+                    }
+                } else {
+                    sel_index.set(0);
+                    highlight_selection(&pop_c, 0);
+                    if let Some(h) = handle_rc.borrow().as_ref() {
+                        h.override_show_for(POPUP_DURATION);
+                    }
+                    pop_c.popup();
                 }
-            } else {
-                sel_index.set(0);
-                highlight_selection(&pop_c, 0);
-                if let Some(h) = handle_rc.borrow().as_ref() {
-                    h.override_show_for(POPUP_DURATION);
-                }
-                pop_c.popup();
-            }
-        });
+            });
 
         self.popover.replace(Some(popover));
     }

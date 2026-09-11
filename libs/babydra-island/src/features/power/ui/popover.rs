@@ -26,6 +26,7 @@ impl PowerPopover {
         );
         popover.set_has_arrow(false);
         popover.set_offset(0, 10);
+        popover.set_autohide(false);
 
         let popover_box = GtkBox::new(Orientation::Vertical, 0);
         popover_box.add_css_class("power-popover-box");
@@ -134,7 +135,22 @@ impl PowerPopover {
 
         let capsule_unmap = capsule.clone();
         popover.connect_unmap(move |p| {
-            capsule_unmap.remove_css_class("popover-open");
+            let mut other_open = false;
+            let mut next = capsule_unmap.first_child();
+            while let Some(child) = next {
+                next = child.next_sibling();
+                if let Some(pop) = child.downcast_ref::<gtk4::Popover>() {
+                    if pop.is_visible()
+                        && pop.upcast_ref::<gtk4::Widget>() != p.upcast_ref::<gtk4::Widget>()
+                    {
+                        other_open = true;
+                        break;
+                    }
+                }
+            }
+            if !other_open {
+                capsule_unmap.remove_css_class("popover-open");
+            }
             crate::features::power::controller::focus::release_layer_keyboard_focus(p);
         });
 

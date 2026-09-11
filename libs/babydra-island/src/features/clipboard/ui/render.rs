@@ -90,7 +90,8 @@ pub fn render_popover(
                     row.icon_holder.append(&icon);
                 }
                 ClipboardEntry::Image { png_bytes, .. } => {
-                    row.text_label.set_text(&babydra_core::i18n::trans("island.clipboard_image"));
+                    row.text_label
+                        .set_text(&babydra_core::i18n::trans("island.clipboard_image"));
                     row.more_label.set_visible(false);
 
                     if let Some(pixbuf) = load_thumbnail(png_bytes, 18) {

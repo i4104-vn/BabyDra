@@ -14,6 +14,12 @@ pub struct ClipboardItemRow {
     pub click_gesture: GestureClick,
 }
 
+impl Default for ClipboardItemRow {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ClipboardItemRow {
     pub fn new() -> Self {
         let container = GtkBox::new(Orientation::Horizontal, 8);

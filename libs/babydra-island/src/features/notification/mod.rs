@@ -96,10 +96,7 @@ fn activate_sender_app(app_name: Option<String>) {
 }
 
 /// Dismisses the notification, closes the popover with slide-up animation, and hides the island.
-fn dismiss_notification(
-    popover: Option<&NotificationPopover>,
-    handle: Option<&IslandViewHandle>,
-) {
+fn dismiss_notification(popover: Option<&NotificationPopover>, handle: Option<&IslandViewHandle>) {
     let handle_cloned = handle.cloned();
     if let Some(p) = popover {
         p.popdown_animated(move || {
@@ -150,7 +147,6 @@ impl IslandFeature for NotificationFeature {
     fn attach(&mut self, ctx: &IslandCtx) {
         let popover = NotificationPopover::new(&ctx.capsule());
 
-        // 1. Clicking notification content: activate app and dismiss
         {
             let handle_rc = self.handle_rc.clone();
             let pop_c = popover.clone();
@@ -162,25 +158,15 @@ impl IslandFeature for NotificationFeature {
             });
         }
 
-        // 3. Clean up on popover unmap: clear active notification & hide island
-        {
-            let handle_rc = self.handle_rc.clone();
-            popover.popover.connect_unmap(move |_| {
-                crate::widgets::notification::SHARED_NOTIFICATION.with(|sn| *sn.borrow_mut() = None);
-                if let Some(h) = handle_rc.borrow().as_ref() {
-                    h.release_override();
-                    h.hide();
-                }
-            });
-        }
 
-        // 4. Clicking the island notch capsule: dismiss notification immediately
         {
             let handle_rc = self.handle_rc.clone();
             let pop_c = popover.clone();
-            self.widgets.click_gesture.connect_pressed(move |_, _, _, _| {
-                dismiss_notification(Some(&pop_c), handle_rc.borrow().as_ref());
-            });
+            self.widgets
+                .click_gesture
+                .connect_pressed(move |_, _, _, _| {
+                    dismiss_notification(Some(&pop_c), handle_rc.borrow().as_ref());
+                });
         }
 
         self.popover.replace(Some(popover));
@@ -246,12 +232,15 @@ impl IslandFeature for NotificationFeature {
             };
             self.widgets.title_label.set_text(&app_name);
 
+            crate::island::dismiss_all_popovers();
+            if let Some(h) = self.handle_rc.borrow().as_ref() {
+                h.override_show_for(POPUP_LIFETIME);
+            }
+            crate::island::tick_default_island();
+
             if let Some(popover) = self.popover.borrow().as_ref() {
                 render_popover_notification(popover, &n);
                 popover.popup();
-            }
-            if let Some(h) = self.handle_rc.borrow().as_ref() {
-                h.override_show_for(POPUP_LIFETIME);
             }
         }
 
@@ -281,7 +270,9 @@ impl IslandFeature for NotificationFeature {
                 self.handle_rc.borrow().as_ref(),
             );
         } else if let Some(h) = self.handle_rc.borrow().as_ref() {
-            h.show();
+            if ctx.is_current() {
+                h.show();
+            }
         }
     }
 }

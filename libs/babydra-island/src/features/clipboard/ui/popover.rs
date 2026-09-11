@@ -8,7 +8,7 @@ use gtk4::{Align, Box as GtkBox, Label, Orientation, Popover};
 
 use super::row::ClipboardItemRow;
 
-pub const MAX_VISIBLE_ITEMS: usize = 5;
+pub const MAX_VISIBLE_ITEMS: usize = 10;
 
 #[derive(Clone)]
 pub struct ClipboardPopover {
@@ -27,18 +27,17 @@ impl ClipboardPopover {
         let popover = babydra_ui_kit::components::create_popover(
             capsule,
             gtk4::PositionType::Bottom,
-            "clipboard-popover media-popover control-popover",
+            "clipboard-popover control-popover",
         );
         popover.set_has_arrow(false);
         popover.set_offset(0, 10);
+        popover.set_autohide(false);
 
         let popover_box = GtkBox::new(Orientation::Vertical, 0);
-        popover_box.add_css_class("media-popover-box");
         popover_box.add_css_class("clipboard-popover-box");
 
         // Header: [Paste Icon] Lịch sử Clipboard          0/20
         let header = GtkBox::new(Orientation::Horizontal, 8);
-        header.add_css_class("media-popover-header");
         header.add_css_class("clipboard-popover-header");
         header.set_valign(Align::Center);
 
@@ -47,12 +46,12 @@ impl ClipboardPopover {
         header.append(&icon);
 
         let title_lbl = Label::new(Some(&babydra_core::i18n::trans("island.clipboard")));
-        title_lbl.add_css_class("media-popover-app-name");
+        title_lbl.add_css_class("clipboard-popover-title");
         title_lbl.set_valign(Align::Center);
         header.append(&title_lbl);
 
         let counter_label = Label::new(Some("0/20"));
-        counter_label.add_css_class("media-popover-time-label");
+        counter_label.add_css_class("clipboard-popover-counter");
         counter_label.set_halign(Align::End);
         counter_label.set_hexpand(true);
         counter_label.set_valign(Align::Center);
@@ -121,7 +120,22 @@ impl ClipboardPopover {
 
         let capsule_unmap = capsule.clone();
         popover.connect_unmap(move |p| {
-            capsule_unmap.remove_css_class("popover-open");
+            let mut other_open = false;
+            let mut next = capsule_unmap.first_child();
+            while let Some(child) = next {
+                next = child.next_sibling();
+                if let Some(pop) = child.downcast_ref::<gtk4::Popover>() {
+                    if pop.is_visible()
+                        && pop.upcast_ref::<gtk4::Widget>() != p.upcast_ref::<gtk4::Widget>()
+                    {
+                        other_open = true;
+                        break;
+                    }
+                }
+            }
+            if !other_open {
+                capsule_unmap.remove_css_class("popover-open");
+            }
             crate::features::clipboard::controller::focus::release_layer_keyboard_focus(p);
         });
 

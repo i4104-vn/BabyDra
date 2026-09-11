@@ -111,10 +111,12 @@ impl IslandFeature for ClipboardFeature {
                 return;
             }
             selected_index.set(0);
-            let entries = babydra_core::get_entries();
+            crate::island::dismiss_all_popovers();
             if let Some(h) = handle_rc.borrow().as_ref() {
                 h.override_show_for(POPUP_DURATION);
             }
+            crate::island::tick_default_island();
+            let entries = babydra_core::get_entries();
             if let Some(popover) = popover_rc.borrow().as_ref() {
                 render_popover(popover, &entries, 0);
                 popover.popup();
@@ -156,16 +158,30 @@ impl IslandFeature for ClipboardFeature {
             });
         }
 
-        // Clean up on popover unmap
-        {
-            let handle_rc = self.handle_rc.clone();
-            popover.popover.connect_unmap(move |_| {
-                if let Some(h) = handle_rc.borrow().as_ref() {
-                    h.release_override();
-                    h.hide();
+        // Notch capsule click toggles the popover
+        let pop_c = popover.clone();
+        let handle_c = self.handle_rc.clone();
+        let sel_c = self.selected_index.clone();
+        self.widgets
+            .click_gesture
+            .connect_pressed(move |_, _, _, _| {
+                if pop_c.is_visible() {
+                    pop_c.popdown();
+                    if let Some(h) = handle_c.borrow().as_ref() {
+                        h.release_override();
+                        h.hide();
+                    }
+                } else {
+                    sel_c.set(0);
+                    let entries = babydra_core::get_entries();
+                    render_popover(&pop_c, &entries, 0);
+                    if let Some(h) = handle_c.borrow().as_ref() {
+                        h.override_show_for(POPUP_DURATION);
+                    }
+                    pop_c.popup();
                 }
             });
-        }
+
 
         // Attach distinct keyboard controllers
         let make_key_ctrl = || {

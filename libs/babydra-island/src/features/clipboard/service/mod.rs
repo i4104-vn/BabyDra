@@ -20,8 +20,10 @@ where
 
 pub(crate) fn fire_trigger() {
     TRIGGER_CALLBACK.with(|tc| {
-        if let Some(cb) = tc.borrow().as_ref() {
-            cb();
+        if let Ok(guard) = tc.try_borrow() {
+            if let Some(cb) = guard.as_ref() {
+                cb();
+            }
         }
     });
 }

@@ -40,6 +40,10 @@ impl PlayerWidgets {
         track_label.set_vexpand(true);
         track_label.set_halign(gtk4::Align::Center);
         track_label.set_valign(gtk4::Align::Center);
+        track_label.set_xalign(0.5);
+        track_label.set_justify(gtk4::Justification::Center);
+        track_label.set_ellipsize(gtk4::pango::EllipsizeMode::End);
+        track_label.set_single_line_mode(true);
 
         music_view.append(&art_container);
         music_view.append(&track_label);
