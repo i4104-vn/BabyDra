@@ -275,6 +275,13 @@ impl IslandCtx {
     }
 }
 
+/// Compact capsule width for standard features (notification, clipboard, power).
+pub const CAPSULE_WIDTH: i32 = 160;
+/// Expanded capsule width for features requiring more room (media player).
+pub const PLAYER_CAPSULE_WIDTH: i32 = 220;
+/// Standard unified height for active island features in the notch capsule.
+pub const CAPSULE_HEIGHT: i32 = 28;
+
 /// Trait for complex, stateful island features (e.g. the media player).
 pub trait IslandFeature {
     /// Unique view identifier.
@@ -287,7 +294,7 @@ pub trait IslandFeature {
 
     /// Target capsule size while this feature's view is displayed.
     fn size(&self) -> (i32, i32) {
-        (200, 30)
+        (CAPSULE_WIDTH, CAPSULE_HEIGHT)
     }
 
     /// Keep the view displayed while the pointer hovers the capsule.

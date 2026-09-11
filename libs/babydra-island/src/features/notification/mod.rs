@@ -22,13 +22,12 @@ use std::time::{Duration, Instant};
 
 use gtk4::prelude::*;
 
+use crate::island::view::{CAPSULE_HEIGHT, CAPSULE_WIDTH};
 use crate::island::{IslandCtx, IslandFeature, IslandViewHandle};
 use service::spawn_notif_dbus;
 use ui::{render_popover_notification, NotificationNotchWidgets, NotificationPopover};
 
 pub const PRIORITY: u8 = 90;
-const NOTCH_WIDTH: i32 = 110;
-const NOTCH_HEIGHT: i32 = 28;
 const POPUP_LIFETIME: Duration = Duration::from_secs(5);
 
 /// Notification overlay feature: displays a compact notification indicator
@@ -96,18 +95,26 @@ fn activate_sender_app(app_name: Option<String>) {
     }
 }
 
-/// Dismisses the notification, closes the popover, and hides the island.
+/// Dismisses the notification, closes the popover with slide-up animation, and hides the island.
 fn dismiss_notification(
     popover: Option<&NotificationPopover>,
     handle: Option<&IslandViewHandle>,
 ) {
+    let handle_cloned = handle.cloned();
     if let Some(p) = popover {
-        p.popdown();
-    }
-    crate::widgets::notification::SHARED_NOTIFICATION.with(|sn| *sn.borrow_mut() = None);
-    if let Some(h) = handle {
-        h.release_override();
-        h.hide();
+        p.popdown_animated(move || {
+            crate::widgets::notification::SHARED_NOTIFICATION.with(|sn| *sn.borrow_mut() = None);
+            if let Some(h) = handle_cloned {
+                h.release_override();
+                h.hide();
+            }
+        });
+    } else {
+        crate::widgets::notification::SHARED_NOTIFICATION.with(|sn| *sn.borrow_mut() = None);
+        if let Some(h) = handle {
+            h.release_override();
+            h.hide();
+        }
     }
 }
 
@@ -121,7 +128,7 @@ impl IslandFeature for NotificationFeature {
     }
 
     fn size(&self) -> (i32, i32) {
-        (NOTCH_WIDTH, NOTCH_HEIGHT)
+        (CAPSULE_WIDTH, CAPSULE_HEIGHT)
     }
 
     fn hover_keep(&self) -> bool {
@@ -195,6 +202,9 @@ impl IslandFeature for NotificationFeature {
             self.handle_rc.borrow().as_ref(),
         );
         self.last_key.clear();
+        self.widgets
+            .title_label
+            .set_text(&babydra_core::i18n::trans("island.notification"));
     }
 
     fn on_hide(&mut self) {
@@ -210,6 +220,9 @@ impl IslandFeature for NotificationFeature {
             Some(n) => n,
             None => {
                 self.last_key.clear();
+                self.widgets
+                    .title_label
+                    .set_text(&babydra_core::i18n::trans("island.notification"));
                 if let Some(popover) = self.popover.borrow().as_ref() {
                     if popover.is_visible() {
                         popover.popdown();
@@ -222,9 +235,26 @@ impl IslandFeature for NotificationFeature {
             }
         };
 
+        let is_animating = self
+            .popover
+            .borrow()
+            .as_ref()
+            .map(|p| p.is_animating())
+            .unwrap_or(false);
+        if is_animating {
+            return;
+        }
+
         let key = format!("{}|{}|{}", n.title, n.body, n.icon);
         if key != self.last_key {
             self.last_key = key;
+            let app_name = if n.app_name.is_empty() {
+                babydra_core::i18n::trans("island.notification")
+            } else {
+                n.app_name.clone()
+            };
+            self.widgets.title_label.set_text(&app_name);
+
             if let Some(popover) = self.popover.borrow().as_ref() {
                 render_popover_notification(popover, &n);
                 popover.popup();

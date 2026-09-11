@@ -12,6 +12,7 @@ button.panel-clock-btn {
     box-shadow: none;
     min-height: 20px;
     border-radius: 9999px;
+    transition: all 150ms ease;
 }
 
 .clock-bell-icon {
@@ -19,10 +20,14 @@ button.panel-clock-btn {
 }
 
 .clock-bell-dot {
-    background-color: #dc2626;
+    background-color: #f43f5e;
+    background-image: linear-gradient(135deg, #f43f5e, #e11d48);
     border-radius: 9999px;
-    min-width: 6px;
-    min-height: 6px;
-    margin-top: -3px;
-    margin-right: -3px;
+    min-width: 7px;
+    min-height: 7px;
+    border: 1.5px solid rgba(14, 14, 18, 0.95);
+    box-shadow: 0 0 6px rgba(244, 63, 94, 0.60);
+    margin-top: -2px;
+    margin-right: -2px;
+    transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }

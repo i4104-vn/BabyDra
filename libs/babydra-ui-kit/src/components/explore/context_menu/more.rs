@@ -81,7 +81,7 @@ pub fn launch_app(app: &gtk4::gio::AppInfo, path: &Path) {
                 .filter(|w| !w.starts_with('%'))
                 .collect::<Vec<&str>>()
                 .join(" ");
-            babydra_core::services::explore::spawn_sh_background(format!(
+            babydra_core::services::utils::spawn_sh(&format!(
                 "{} \"{}\" &",
                 clean_cmd,
                 path.to_string_lossy()

@@ -12,13 +12,6 @@ pub fn render_popover_notification(
     popover: &NotificationPopover,
     notif: &crate::models::ActiveNotification,
 ) {
-    let app_title = if notif.app_name.is_empty() {
-        babydra_core::i18n::trans("island.notification")
-    } else {
-        notif.app_name.clone()
-    };
-    popover.app_name_lbl.set_text(&app_title);
-
     let truncated_title = if notif.title.chars().count() > 40 {
         let t: String = notif.title.chars().take(40).collect();
         t + "..."
@@ -34,8 +27,6 @@ pub fn render_popover_notification(
         notif.body.clone()
     };
     popover.body_lbl.set_text(&truncated_body);
-
-    popover.time_lbl.set_text(&babydra_core::i18n::trans("island.notification_now"));
 
     let mut use_logo = notif.icon.is_empty();
     if !use_logo {
@@ -63,17 +54,17 @@ pub fn render_popover_notification(
     }
 
     let notif_icon = if use_logo {
-        babydra_ui_kit::ui::icon::get_icon("logo", 30)
+        babydra_ui_kit::ui::icon::get_icon("logo", 32)
     } else {
         babydra_ui_kit::ui::icon::get_fallback_icon(
             &notif.icon,
             "preferences-system-notifications-symbolic",
         )
     };
-    notif_icon.set_pixel_size(30);
+    notif_icon.set_pixel_size(32);
     notif_icon.set_valign(gtk4::Align::Center);
     notif_icon.set_halign(gtk4::Align::Center);
-    notif_icon.add_css_class("notch-album-art");
+    notif_icon.add_css_class("notification-icon-img");
     popover.icon_container.set_center_widget(Some(&notif_icon));
 }
 

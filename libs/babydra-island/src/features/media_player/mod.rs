@@ -24,13 +24,12 @@ use std::rc::Rc;
 
 use gtk4::prelude::*;
 
+use crate::island::view::{CAPSULE_HEIGHT, PLAYER_CAPSULE_WIDTH};
 use crate::island::{IslandCtx, IslandFeature, IslandViewHandle};
 use service::{art, poll};
 use ui::{render, MediaPopover, PlayerWidgets};
 
 pub const PRIORITY: u8 = 50;
-const TARGET_WIDTH: i32 = 200;
-const TARGET_HEIGHT: i32 = 28;
 
 /// Media player island feature: requests the compact player view while an
 /// MPRIS player is active and keeps the popover in sync.
@@ -120,7 +119,7 @@ impl IslandFeature for MediaPlayerFeature {
     }
 
     fn size(&self) -> (i32, i32) {
-        (TARGET_WIDTH, TARGET_HEIGHT)
+        (PLAYER_CAPSULE_WIDTH, CAPSULE_HEIGHT)
     }
 
     fn build_view(&mut self) -> gtk4::Widget {

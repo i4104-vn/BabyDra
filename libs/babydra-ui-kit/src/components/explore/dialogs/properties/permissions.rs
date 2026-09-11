@@ -193,7 +193,7 @@ pub fn apply_permissions(path: &Path, checkboxes: &PermissionCheckboxes) {
         new_mode |= 0o001;
     }
 
-    if let Err(e) = babydra_core::services::explore::set_unix_mode(path, new_mode) {
+    if let Err(e) = babydra_core::services::utils::set_unix_mode(path, new_mode) {
         eprintln!("Failed to set permissions: {}", e);
     }
 }

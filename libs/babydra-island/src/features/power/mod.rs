@@ -23,13 +23,12 @@ use std::time::Duration;
 
 use gtk4::prelude::*;
 
+use crate::island::view::{CAPSULE_HEIGHT, CAPSULE_WIDTH};
 use crate::island::{IslandCtx, IslandFeature, IslandViewHandle};
 use controller::keyboard::create_keyboard_controller;
 use ui::{execute_power_action, highlight_selection, PowerNotchWidgets, PowerPopover};
 
 pub const PRIORITY: u8 = 100;
-const NOTCH_WIDTH: i32 = 110;
-const NOTCH_HEIGHT: i32 = 28;
 const POPUP_DURATION: Duration = Duration::from_secs(30);
 
 /// Power menu island feature: provides quick access to shutdown, restart, sleep, and logout.
@@ -68,7 +67,7 @@ impl IslandFeature for PowerFeature {
     }
 
     fn size(&self) -> (i32, i32) {
-        (NOTCH_WIDTH, NOTCH_HEIGHT)
+        (CAPSULE_WIDTH, CAPSULE_HEIGHT)
     }
 
     fn hover_keep(&self) -> bool {

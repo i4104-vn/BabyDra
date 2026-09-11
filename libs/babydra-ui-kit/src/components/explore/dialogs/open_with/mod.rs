@@ -26,7 +26,7 @@ pub fn launch_app_with_file(app: &DesktopApp, path: &Path) {
         .collect::<Vec<&str>>()
         .join(" ");
 
-    babydra_core::services::explore::spawn_sh_background(format!(
+    babydra_core::services::utils::spawn_sh(&format!(
         "{} \"{}\" &",
         clean_exec,
         path.to_string_lossy()
@@ -50,7 +50,7 @@ pub fn set_default_app_for_file(app: &DesktopApp, path: &Path) {
             let _ = app_info.set_as_default_for_type(&mime_type);
         }
 
-        babydra_core::services::explore::set_default_mime_handler(&desktop_name, &mime_type);
+        babydra_core::services::utils::xdg_set_default(&desktop_name, &[&mime_type]);
     }
 }
 
@@ -169,7 +169,7 @@ pub fn launch_file_or_open_with(path: &Path, parent: Option<&impl IsA<gtk4::Wind
         return;
     }
 
-    babydra_core::services::explore::open_with_system(path);
+    babydra_core::services::utils::xdg_open(path);
 
     show_open_with_dialog(path, parent);
 }

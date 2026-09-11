@@ -13,18 +13,16 @@ use gtk4::{
 pub struct NotificationPopover {
     pub popover: Popover,
     pub popover_box: GtkBox,
-    pub header_app_icon: GtkBox,
-    pub app_name_lbl: Label,
-    pub time_lbl: Label,
     pub close_btn: GtkBox,
     pub icon_container: CenterBox,
     pub title_lbl: Label,
     pub body_lbl: Label,
-    pub content_box: GtkBox,
+    pub click_box: GtkBox,
     pub click_gesture: GestureClick,
     pub close_gesture: GestureClick,
     pub motion_controller: EventControllerMotion,
     pub is_hovered: Rc<Cell<bool>>,
+    pub is_animating: Rc<Cell<bool>>,
 }
 
 impl NotificationPopover {
@@ -32,7 +30,7 @@ impl NotificationPopover {
         let popover = babydra_ui_kit::components::create_popover(
             capsule,
             gtk4::PositionType::Bottom,
-            "notification-popover media-popover control-popover",
+            "notification-popover control-popover",
         );
         popover.set_has_arrow(false);
         popover.set_offset(0, 10);
@@ -45,62 +43,30 @@ impl NotificationPopover {
         popover_box.set_focusable(false);
         popover_box.set_can_focus(false);
 
-        // 1. Header: [Bell] App Name                   Just now  [✕]
-        let header = GtkBox::new(Orientation::Horizontal, 6);
-        header.add_css_class("notification-popover-header");
-        header.set_valign(Align::Center);
-
-        let header_app_icon = GtkBox::new(Orientation::Horizontal, 0);
-        header_app_icon.set_valign(Align::Center);
-        let default_bell = babydra_ui_kit::ui::icon::get_icon_colored("bell", 13, "#f59e0b");
-        default_bell.set_valign(Align::Center);
-        header_app_icon.append(&default_bell);
-        header.append(&header_app_icon);
-
-        let app_name_lbl = Label::new(Some(&babydra_core::i18n::trans("island.notification")));
-        app_name_lbl.add_css_class("notification-header-app");
-        app_name_lbl.set_valign(Align::Center);
-        header.append(&app_name_lbl);
-
-        let time_lbl = Label::new(Some(&babydra_core::i18n::trans("island.notification_now")));
-        time_lbl.add_css_class("notification-time-label");
-        time_lbl.set_halign(Align::End);
-        time_lbl.set_hexpand(true);
-        time_lbl.set_valign(Align::Center);
-        header.append(&time_lbl);
-
-        let close_btn = GtkBox::new(Orientation::Horizontal, 0);
-        close_btn.add_css_class("notification-close-btn");
-        close_btn.set_valign(Align::Center);
-        close_btn.set_cursor_from_name(Some("pointer"));
-        close_btn.set_focusable(false);
-        close_btn.set_can_focus(false);
-        let close_lbl = Label::new(Some("✕"));
-        close_lbl.add_css_class("notification-close-icon");
-        close_lbl.set_valign(Align::Center);
-        close_btn.append(&close_lbl);
-        header.append(&close_btn);
-
-        popover_box.append(&header);
-
-        // 2. Notification content row (clickable to activate sender app)
-        let content_box = GtkBox::new(Orientation::Horizontal, 12);
+        // Content row (compact card with icon, text, and close button)
+        let content_box = GtkBox::new(Orientation::Horizontal, 10);
         content_box.add_css_class("notification-popover-content");
         content_box.set_valign(Align::Center);
-        content_box.set_cursor_from_name(Some("pointer"));
         content_box.set_focusable(false);
         content_box.set_can_focus(false);
 
-        // Large artwork / icon box
+        // Clickable area (icon + text) to activate sender app
+        let click_box = GtkBox::new(Orientation::Horizontal, 12);
+        click_box.add_css_class("notification-content-click");
+        click_box.set_valign(Align::Center);
+        click_box.set_hexpand(true);
+        click_box.set_cursor_from_name(Some("pointer"));
+
+        // Large artwork / icon box (dead-centered squircle)
         let icon_container = CenterBox::new();
         icon_container.add_css_class("notification-icon-box");
-        icon_container.set_size_request(44, 44);
+        icon_container.set_size_request(48, 48);
         icon_container.set_valign(Align::Center);
         icon_container.set_halign(Align::Center);
-        content_box.append(&icon_container);
+        click_box.append(&icon_container);
 
         // Text content
-        let text_box = GtkBox::new(Orientation::Vertical, 2);
+        let text_box = GtkBox::new(Orientation::Vertical, 3);
         text_box.set_valign(Align::Center);
         text_box.set_hexpand(true);
 
@@ -121,13 +87,28 @@ impl NotificationPopover {
         body_lbl.set_lines(3);
         text_box.append(&body_lbl);
 
-        content_box.append(&text_box);
-        popover_box.append(&content_box);
+        click_box.append(&text_box);
+        content_box.append(&click_box);
 
+        // Compact close button on the right
+        let close_btn = GtkBox::new(Orientation::Horizontal, 0);
+        close_btn.add_css_class("notification-close-btn");
+        close_btn.set_valign(Align::Center);
+        close_btn.set_cursor_from_name(Some("pointer"));
+        close_btn.set_focusable(false);
+        close_btn.set_can_focus(false);
+        let close_lbl = Label::new(Some("✕"));
+        close_lbl.add_css_class("notification-close-icon");
+        close_lbl.set_valign(Align::Center);
+        close_lbl.set_halign(Align::Center);
+        close_btn.append(&close_lbl);
+        content_box.append(&close_btn);
+
+        popover_box.append(&content_box);
         popover.set_child(Some(&popover_box));
 
         let click_gesture = GestureClick::new();
-        content_box.add_controller(click_gesture.clone());
+        click_box.add_controller(click_gesture.clone());
 
         let close_gesture = GestureClick::new();
         close_btn.add_controller(close_gesture.clone());
@@ -145,6 +126,8 @@ impl NotificationPopover {
             h_leave.set(false);
         });
 
+        let is_animating = Rc::new(Cell::new(false));
+
         // Slide animation on open
         let popover_box_slide = popover_box.clone();
         let capsule_map = capsule.clone();
@@ -155,7 +138,7 @@ impl NotificationPopover {
                 popover_box_slide.upcast_ref(),
                 babydra_ui_kit::ui::animation::SlideDirection::Down,
                 15,
-                300,
+                320,
             );
         });
 
@@ -167,18 +150,16 @@ impl NotificationPopover {
         Self {
             popover,
             popover_box,
-            header_app_icon,
-            app_name_lbl,
-            time_lbl,
             close_btn,
             icon_container,
             title_lbl,
             body_lbl,
-            content_box,
+            click_box,
             click_gesture,
             close_gesture,
             motion_controller,
             is_hovered,
+            is_animating,
         }
     }
 
@@ -188,6 +169,34 @@ impl NotificationPopover {
 
     pub fn popdown(&self) {
         self.popover.popdown();
+    }
+
+    pub fn popdown_animated<F: FnOnce() + 'static>(&self, on_finish: F) {
+        if self.is_animating.get() || !self.popover.is_visible() {
+            self.popover.popdown();
+            on_finish();
+            return;
+        }
+        self.is_animating.set(true);
+        let popover_c = self.popover.clone();
+        let box_c = self.popover_box.clone();
+        let is_anim_c = self.is_animating.clone();
+        babydra_ui_kit::ui::animation::slide_out_cb(
+            box_c.upcast_ref(),
+            babydra_ui_kit::ui::animation::SlideDirection::Up,
+            15,
+            240,
+            false,
+            move || {
+                popover_c.popdown();
+                is_anim_c.set(false);
+                on_finish();
+            },
+        );
+    }
+
+    pub fn is_animating(&self) -> bool {
+        self.is_animating.get()
     }
 
     pub fn is_visible(&self) -> bool {

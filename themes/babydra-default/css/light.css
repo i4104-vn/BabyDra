@@ -985,6 +985,44 @@ button.popup-action-btn:hover {
     border-color: rgba(0, 0, 0, 0.08);
 }
 
+/* Island Notification Badge Popover */
+.notification-content-click:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+.notification-close-btn {
+    background-color: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.notification-close-btn:hover {
+    background-color: rgba(0, 0, 0, 0.10);
+    border-color: rgba(0, 0, 0, 0.16);
+}
+
+.notification-close-icon {
+    color: rgba(0, 0, 0, 0.60);
+}
+
+.notification-close-btn:hover .notification-close-icon {
+    color: #000000;
+}
+
+.notification-icon-box {
+    background-color: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    border-top: 1px solid rgba(255, 255, 255, 0.80);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.notification-title {
+    color: rgba(0, 0, 0, 0.90);
+}
+
+.notification-body {
+    color: rgba(0, 0, 0, 0.65);
+}
+
 /* === launcher/launcher.css === */
 .launcher-box {
     background-color: rgba(242, 244, 248, 0.95);
@@ -1219,7 +1257,18 @@ button.clear-all-btn {
 }
 
 .notif-count-badge {
-    color: #1c1c1e;
+    color: #ffffff;
+    background-color: #f43f5e;
+    background-image: linear-gradient(135deg, #f43f5e, #e11d48);
+    border: 1px solid rgba(255, 255, 255, 0.60);
+    box-shadow: 0 2px 6px rgba(225, 29, 72, 0.30);
+}
+
+.clock-bell-dot {
+    background-color: #f43f5e;
+    background-image: linear-gradient(135deg, #f43f5e, #e11d48);
+    border: 1.5px solid rgba(248, 249, 251, 0.98);
+    box-shadow: 0 0 6px rgba(244, 63, 94, 0.45);
 }
 
 .notif-item-sub-time {
