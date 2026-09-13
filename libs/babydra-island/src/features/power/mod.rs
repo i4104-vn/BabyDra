@@ -130,25 +130,19 @@ impl IslandFeature for PowerFeature {
             });
         }
 
-
         // Attach distinct keyboard controllers
-        let make_key_ctrl = || {
-            create_keyboard_controller(
-                self.selected_index.clone(),
-                self.handle_rc.clone(),
-                self.popover.clone(),
-            )
-        };
-
-        popover.popover.add_controller(make_key_ctrl());
-        popover.popover_box.add_controller(make_key_ctrl());
-        ctx.capsule().add_controller(make_key_ctrl());
-
-        if let Some(root) = ctx.capsule().root() {
-            if let Some(win) = root.downcast_ref::<gtk4::Window>() {
-                win.add_controller(make_key_ctrl());
-            }
-        }
+        crate::island::attach_keyboard_controllers(
+            &ctx.capsule(),
+            &popover.popover,
+            &popover.popover_box,
+            || {
+                create_keyboard_controller(
+                    self.selected_index.clone(),
+                    self.handle_rc.clone(),
+                    self.popover.clone(),
+                )
+            },
+        );
 
         self.popover.replace(Some(popover));
     }

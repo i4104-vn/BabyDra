@@ -41,3 +41,23 @@ pub fn release_layer_keyboard_focus(widget: &impl IsA<gtk4::Widget>) {
         set_layer_keyboard_mode(widget, KeyboardMode::OnDemand);
     }
 }
+
+/// Attaches keyboard controllers produced by `factory` to all targets required for island popover navigation:
+/// the popover, its content box, the capsule, and the root layer shell window.
+pub fn attach_keyboard_controllers<F>(
+    capsule: &gtk4::Box,
+    popover: &gtk4::Popover,
+    popover_box: &gtk4::Box,
+    mut factory: F,
+) where
+    F: FnMut() -> gtk4::EventControllerKey,
+{
+    popover.add_controller(factory());
+    popover_box.add_controller(factory());
+    capsule.add_controller(factory());
+    if let Some(root) = capsule.root() {
+        if let Some(win) = root.downcast_ref::<gtk4::Window>() {
+            win.add_controller(factory());
+        }
+    }
+}
