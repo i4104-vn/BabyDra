@@ -3,18 +3,17 @@
 //! Owned by the media player feature; the island manager dispatches capsule
 //! clicks to the active view, which calls [`MediaPopover::toggle`].
 
-use std::cell::Cell;
-use std::rc::Rc;
+use std::ops::Deref;
 
 use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 
+use crate::island::ui::IslandPopover;
+
 /// Widget references of the media control popover.
 #[derive(Clone)]
 pub struct MediaPopover {
-    pub popover: gtk4::Popover,
-    pub popover_box: gtk4::Box,
-    is_animating: Rc<Cell<bool>>,
+    pub base: IslandPopover,
     /// Popover header label (track title).
     pub title: gtk4::Label,
     /// Popover subtitle label (artist).
@@ -35,20 +34,23 @@ pub struct MediaPopover {
     pub length_lbl: gtk4::Label,
 }
 
+impl Deref for MediaPopover {
+    type Target = IslandPopover;
+
+    fn deref(&self) -> &Self::Target {
+        &self.base
+    }
+}
+
 impl MediaPopover {
     /// Builds and registers the popover anchored to the notch capsule.
     pub fn new(capsule: &gtk4::Box) -> Self {
-        let popover = babydra_ui_kit::components::create_popover(
+        let base = IslandPopover::new_slide(
             capsule,
-            gtk4::PositionType::Bottom,
             "media-popover",
+            "media-popover-box",
+            450,
         );
-        popover.set_has_arrow(false);
-        popover.set_offset(0, 10);
-        popover.set_autohide(true);
-
-        let popover_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
-        popover_box.add_css_class("media-popover-box");
 
         let popover_header = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
         popover_header.add_css_class("media-popover-header");
@@ -58,12 +60,12 @@ impl MediaPopover {
         app_name.add_css_class("media-popover-app-name");
         popover_header.append(&popover_app_icon);
         popover_header.append(&app_name);
-        popover_box.append(&popover_header);
+        base.popover_box.append(&popover_header);
 
         let art_container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
         art_container.set_valign(gtk4::Align::Fill);
         art_container.set_halign(gtk4::Align::Fill);
-        popover_box.append(&art_container);
+        base.popover_box.append(&art_container);
 
         let title = gtk4::Label::new(Some(&trans("island.unknown_title")));
         title.add_css_class("media-popover-title");
@@ -79,8 +81,8 @@ impl MediaPopover {
         artist.set_wrap(true);
         artist.set_max_width_chars(30);
 
-        popover_box.append(&title);
-        popover_box.append(&artist);
+        base.popover_box.append(&title);
+        base.popover_box.append(&artist);
 
         // Progress bar container.
         let progress_container = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
@@ -114,7 +116,7 @@ impl MediaPopover {
 
         progress_container.append(&progress_bar);
         progress_container.append(&time_box);
-        popover_box.append(&progress_container);
+        base.popover_box.append(&progress_container);
 
         let controls_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 18);
         controls_box.add_css_class("media-popover-controls");
@@ -151,18 +153,10 @@ impl MediaPopover {
         controls_box.append(&prev_btn);
         controls_box.append(&play_btn);
         controls_box.append(&next_btn);
-        popover_box.append(&controls_box);
-
-        crate::island::controller::scroll::attach_popover_scroll(&popover, &popover_box);
-
-        popover.set_child(Some(&popover_box));
-
-        crate::island::ui::setup_popover_slide_lifecycle(&popover, capsule, &popover_box, 450);
+        base.popover_box.append(&controls_box);
 
         Self {
-            popover,
-            popover_box,
-            is_animating: Rc::new(Cell::new(false)),
+            base,
             title,
             artist,
             art_container,
@@ -173,30 +167,5 @@ impl MediaPopover {
             position_lbl,
             length_lbl,
         }
-    }
-
-    /// Whether the popover is currently visible.
-    pub fn is_visible(&self) -> bool {
-        self.popover.is_visible()
-    }
-
-    /// Shows the popover.
-    pub fn popup(&self) {
-        self.popover.popup();
-    }
-
-    /// Closes the popover.
-    pub fn popdown(&self) {
-        self.popover.popdown();
-    }
-
-    /// Toggles the popover with a slide animation.
-    pub fn toggle(&self) {
-        crate::island::ui::toggle_popover_animated(
-            &self.popover,
-            &self.popover_box,
-            &self.is_animating,
-            450,
-        );
     }
 }

@@ -9,5 +9,5 @@ pub use builder::IslandBuilder;
 pub use notch::NotchWidget;
 pub use popover::{
     popdown_animated_cb, setup_modal_popover_lifecycle, setup_popover_slide_lifecycle,
-    toggle_popover_animated,
+    toggle_popover_animated, IslandPopover,
 };

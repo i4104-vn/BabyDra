@@ -1,40 +1,41 @@
 //! Glassmorphic clipboard history popover anchored down below the Dynamic Island capsule.
 
-use std::cell::Cell;
-use std::rc::Rc;
+use std::ops::Deref;
 
 use gtk4::prelude::*;
-use gtk4::{Align, Box as GtkBox, Label, Orientation, Popover};
+use gtk4::{Align, Box as GtkBox, Label, Orientation};
 
 use super::row::ClipboardItemRow;
+use crate::island::ui::IslandPopover;
 
 pub const MAX_VISIBLE_ITEMS: usize = 10;
 
 #[derive(Clone)]
 pub struct ClipboardPopover {
-    pub popover: Popover,
-    pub popover_box: GtkBox,
+    pub base: IslandPopover,
     pub counter_label: Label,
     pub empty_label: Label,
     pub list_box: GtkBox,
     pub rows: Vec<ClipboardItemRow>,
-    is_animating: Rc<Cell<bool>>,
+}
+
+impl Deref for ClipboardPopover {
+    type Target = IslandPopover;
+
+    fn deref(&self) -> &Self::Target {
+        &self.base
+    }
 }
 
 impl ClipboardPopover {
     /// Builds the popover anchored down below the notch capsule.
     pub fn new(capsule: &GtkBox) -> Self {
-        let popover = babydra_ui_kit::components::create_popover(
+        let base = IslandPopover::new_modal(
             capsule,
-            gtk4::PositionType::Bottom,
             "clipboard-popover control-popover",
+            "clipboard-popover-box",
+            400,
         );
-        popover.set_has_arrow(false);
-        popover.set_offset(0, 10);
-        popover.set_autohide(true);
-
-        let popover_box = GtkBox::new(Orientation::Vertical, 0);
-        popover_box.add_css_class("clipboard-popover-box");
 
         // Header: [Paste Icon] Lịch sử Clipboard          0/20
         let header = GtkBox::new(Orientation::Horizontal, 8);
@@ -57,7 +58,7 @@ impl ClipboardPopover {
         counter_label.set_valign(Align::Center);
         header.append(&counter_label);
 
-        popover_box.append(&header);
+        base.popover_box.append(&header);
 
         // Empty state label
         let empty_label = Label::new(Some(&babydra_core::i18n::trans("island.clipboard_empty")));
@@ -66,7 +67,7 @@ impl ClipboardPopover {
         empty_label.set_valign(Align::Center);
         empty_label.set_margin_top(14);
         empty_label.set_margin_bottom(14);
-        popover_box.append(&empty_label);
+        base.popover_box.append(&empty_label);
 
         // List box
         let list_box = GtkBox::new(Orientation::Vertical, 4);
@@ -81,49 +82,20 @@ impl ClipboardPopover {
             rows.push(row);
         }
 
-        popover_box.append(&list_box);
+        base.popover_box.append(&list_box);
 
         // Footer hint: ↑↓ Duyệt • Enter Chọn • Esc Đóng
         let hint_lbl = Label::new(Some(&babydra_core::i18n::trans("island.clipboard_hint")));
         hint_lbl.add_css_class("clipboard-popover-hint");
         hint_lbl.set_halign(Align::Center);
-        popover_box.append(&hint_lbl);
-
-        popover_box.set_focusable(true);
-        popover.set_child(Some(&popover_box));
-        popover.set_focusable(true);
-
-        crate::island::ui::setup_modal_popover_lifecycle(&popover, capsule, &popover_box, 400);
+        base.popover_box.append(&hint_lbl);
 
         Self {
-            popover,
-            popover_box,
+            base,
             counter_label,
             empty_label,
             list_box,
             rows,
-            is_animating: Rc::new(Cell::new(false)),
         }
-    }
-
-    pub fn is_visible(&self) -> bool {
-        self.popover.is_visible()
-    }
-
-    pub fn popup(&self) {
-        self.popover.popup();
-    }
-
-    pub fn popdown(&self) {
-        self.popover.popdown();
-    }
-
-    pub fn toggle(&self) {
-        crate::island::ui::toggle_popover_animated(
-            &self.popover,
-            &self.popover_box,
-            &self.is_animating,
-            400,
-        );
     }
 }

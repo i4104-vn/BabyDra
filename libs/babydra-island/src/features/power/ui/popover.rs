@@ -1,35 +1,36 @@
 //! Glassmorphic power menu popover anchored down below the Dynamic Island capsule.
 
-use std::cell::Cell;
-use std::rc::Rc;
+use std::ops::Deref;
 
 use gtk4::prelude::*;
-use gtk4::{Align, Box as GtkBox, Label, Orientation, Popover};
+use gtk4::{Align, Box as GtkBox, Label, Orientation};
 
 use super::button::PowerButtonWidget;
+use crate::island::ui::IslandPopover;
 
 #[derive(Clone)]
 pub struct PowerPopover {
-    pub popover: Popover,
-    pub popover_box: GtkBox,
+    pub base: IslandPopover,
     pub buttons: [PowerButtonWidget; 4],
-    is_animating: Rc<Cell<bool>>,
+}
+
+impl Deref for PowerPopover {
+    type Target = IslandPopover;
+
+    fn deref(&self) -> &Self::Target {
+        &self.base
+    }
 }
 
 impl PowerPopover {
     /// Builds the power popover anchored down below the notch capsule.
     pub fn new(capsule: &GtkBox) -> Self {
-        let popover = babydra_ui_kit::components::create_popover(
+        let base = IslandPopover::new_modal(
             capsule,
-            gtk4::PositionType::Bottom,
             "power-popover control-popover",
+            "power-popover-box",
+            400,
         );
-        popover.set_has_arrow(false);
-        popover.set_offset(0, 10);
-        popover.set_autohide(true);
-
-        let popover_box = GtkBox::new(Orientation::Vertical, 0);
-        popover_box.add_css_class("power-popover-box");
 
         // Header: NGUỒN HỆ THỐNG                     Win+F4
         let header = GtkBox::new(Orientation::Horizontal, 8);
@@ -48,7 +49,7 @@ impl PowerPopover {
         shortcut_hint.set_valign(Align::Center);
         header.append(&shortcut_hint);
 
-        popover_box.append(&header);
+        base.popover_box.append(&header);
 
         // Buttons container: 4 power cards in a spacious horizontal row
         let buttons_box = GtkBox::new(Orientation::Horizontal, 8);
@@ -96,48 +97,17 @@ impl PowerPopover {
         buttons_box.append(&btn_suspend.container);
         buttons_box.append(&btn_logout.container);
 
-        popover_box.append(&buttons_box);
+        base.popover_box.append(&buttons_box);
 
         // Footer hint: 1-4 Chọn nhanh • ← → Duyệt • Enter Chọn • Esc Đóng
         let hint_lbl = Label::new(Some(&babydra_core::i18n::trans("island.power_hint")));
         hint_lbl.add_css_class("power-popover-hint");
         hint_lbl.set_halign(Align::Center);
-        popover_box.append(&hint_lbl);
-
-        crate::island::controller::scroll::attach_popover_scroll(&popover, &popover_box);
-
-        popover_box.set_focusable(true);
-        popover.set_child(Some(&popover_box));
-        popover.set_focusable(true);
-
-        crate::island::ui::setup_modal_popover_lifecycle(&popover, capsule, &popover_box, 400);
+        base.popover_box.append(&hint_lbl);
 
         Self {
-            popover,
-            popover_box,
+            base,
             buttons: [btn_shutdown, btn_reboot, btn_suspend, btn_logout],
-            is_animating: Rc::new(Cell::new(false)),
         }
-    }
-
-    pub fn is_visible(&self) -> bool {
-        self.popover.is_visible()
-    }
-
-    pub fn popup(&self) {
-        self.popover.popup();
-    }
-
-    pub fn popdown(&self) {
-        self.popover.popdown();
-    }
-
-    pub fn toggle(&self) {
-        crate::island::ui::toggle_popover_animated(
-            &self.popover,
-            &self.popover_box,
-            &self.is_animating,
-            400,
-        );
     }
 }

@@ -5,6 +5,127 @@ use std::rc::Rc;
 
 use gtk4::prelude::*;
 
+/// Standard base wrapper for Dynamic Island popovers.
+///
+/// Encapsulates common configuration (position, autohide, offset, scroll attachment, animation state)
+/// and lifecycle wiring (modal focus vs slide animation).
+#[derive(Clone)]
+pub struct IslandPopover {
+    pub popover: gtk4::Popover,
+    pub popover_box: gtk4::Box,
+    pub is_animating: Rc<Cell<bool>>,
+    duration_ms: u64,
+}
+
+impl IslandPopover {
+    /// Creates a base popover configured for slide lifecycle (e.g. notification, media player).
+    pub fn new_slide(
+        capsule: &gtk4::Box,
+        css_class: &str,
+        box_css_class: &str,
+        duration_ms: u64,
+    ) -> Self {
+        Self::create(capsule, css_class, box_css_class, duration_ms, false)
+    }
+
+    /// Creates a base popover configured for modal keyboard focus lifecycle (e.g. power, clipboard).
+    pub fn new_modal(
+        capsule: &gtk4::Box,
+        css_class: &str,
+        box_css_class: &str,
+        duration_ms: u64,
+    ) -> Self {
+        Self::create(capsule, css_class, box_css_class, duration_ms, true)
+    }
+
+    fn create(
+        capsule: &gtk4::Box,
+        css_class: &str,
+        box_css_class: &str,
+        duration_ms: u64,
+        modal: bool,
+    ) -> Self {
+        let popover = babydra_ui_kit::components::create_popover(
+            capsule,
+            gtk4::PositionType::Bottom,
+            css_class,
+        );
+        popover.set_has_arrow(false);
+        popover.set_offset(0, 10);
+        popover.set_autohide(true);
+
+        let popover_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+        popover_box.add_css_class(box_css_class);
+
+        if modal {
+            popover_box.set_focusable(true);
+            popover.set_focusable(true);
+        } else {
+            popover.set_focusable(false);
+            popover.set_can_focus(false);
+            popover_box.set_focusable(false);
+            popover_box.set_can_focus(false);
+        }
+
+        popover.set_child(Some(&popover_box));
+        crate::island::controller::scroll::attach_popover_scroll(&popover, &popover_box);
+
+        if modal {
+            setup_modal_popover_lifecycle(&popover, capsule, &popover_box, duration_ms);
+        } else {
+            setup_popover_slide_lifecycle(&popover, capsule, &popover_box, duration_ms);
+        }
+
+        Self {
+            popover,
+            popover_box,
+            is_animating: Rc::new(Cell::new(false)),
+            duration_ms,
+        }
+    }
+
+    /// Whether the popover is currently visible.
+    pub fn is_visible(&self) -> bool {
+        self.popover.is_visible()
+    }
+
+    /// Shows the popover.
+    pub fn popup(&self) {
+        self.popover.popup();
+    }
+
+    /// Closes the popover immediately.
+    pub fn popdown(&self) {
+        self.popover.popdown();
+    }
+
+    /// Toggles the popover with standard slide animation.
+    pub fn toggle(&self) {
+        toggle_popover_animated(
+            &self.popover,
+            &self.popover_box,
+            &self.is_animating,
+            self.duration_ms,
+        );
+    }
+
+    /// Closes the popover with a smooth slide-up animation and fires `on_finish`.
+    pub fn popdown_animated<F: FnOnce() + 'static>(&self, on_finish: F) {
+        popdown_animated_cb(
+            &self.popover,
+            &self.popover_box,
+            &self.is_animating,
+            240,
+            on_finish,
+        );
+    }
+
+    /// Returns whether a slide animation is currently running.
+    pub fn is_animating(&self) -> bool {
+        self.is_animating.get()
+    }
+}
+
 /// Toggles an island popover with a smooth slide-out animation when closing, or popup when opening.
 pub fn toggle_popover_animated(
     popover: &gtk4::Popover,

@@ -21,4 +21,4 @@ pub use manager::{
 pub use models::{
     IslandConfig, IslandCtx, IslandDisplay, IslandFeature, IslandView, IslandViewHandle,
 };
-pub use ui::{IslandBuilder, NotchWidget};
+pub use ui::{IslandBuilder, IslandPopover, NotchWidget};
