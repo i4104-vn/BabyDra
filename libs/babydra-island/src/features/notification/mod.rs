@@ -45,11 +45,10 @@ impl NotificationFeature {
         spawn_notif_dbus();
         Self {
             handle_rc: Rc::new(RefCell::new(None)),
-            widgets: NotchWidget::with_value(
+            widgets: NotchWidget::new(
                 "bell",
                 "#f59e0b",
                 &babydra_core::i18n::trans("island.notification"),
-                "",
             ),
             popover: Rc::new(RefCell::new(None)),
             last_key: String::new(),
@@ -182,33 +181,41 @@ impl IslandFeature for NotificationFeature {
     }
 
     fn on_show(&mut self) {
-        if self.needs_popup {
+        let pop_rc = self.popover.clone();
+        gtk4::glib::timeout_add_local_once(Duration::from_millis(80), move || {
             let notif = crate::widgets::notification::SHARED_NOTIFICATION
                 .with(|sn| sn.borrow().clone());
             if let Some(n) = notif {
-                if let Some(popover) = self.popover.borrow().as_ref() {
+                if let Some(popover) = pop_rc.borrow().as_ref() {
                     render_popover_notification(popover, &n);
-                    popover.popup();
-                    self.needs_popup = false;
+                    if !popover.is_visible() {
+                        popover.popup();
+                    }
                 }
             }
-        }
+        });
     }
 
     fn on_click(&mut self) {
-        // Dismiss notification on island capsule click
-        dismiss_notification(
-            self.popover.borrow().as_ref(),
-            self.handle_rc.borrow().as_ref(),
-        );
-        self.last_key.clear();
-        self.needs_popup = false;
-        self.widgets.update_all(
-            "bell",
-            "#f59e0b",
-            &babydra_core::i18n::trans("island.notification"),
-            "",
-        );
+        let is_visible = self
+            .popover
+            .borrow()
+            .as_ref()
+            .map(|p| p.is_visible())
+            .unwrap_or(false);
+
+        if is_visible {
+            dismiss_notification(
+                self.popover.borrow().as_ref(),
+                self.handle_rc.borrow().as_ref(),
+            );
+            self.last_key.clear();
+            self.needs_popup = false;
+            self.widgets.set_icon("bell", "#f59e0b");
+            self.widgets.set_title(&babydra_core::i18n::trans("island.notification"));
+        } else {
+            self.open_badge();
+        }
     }
 
     fn open_badge(&mut self) {
@@ -217,7 +224,9 @@ impl IslandFeature for NotificationFeature {
         if let Some(n) = notif {
             if let Some(popover) = self.popover.borrow().as_ref() {
                 render_popover_notification(popover, &n);
-                popover.popup();
+                if !popover.is_visible() {
+                    popover.popup();
+                }
                 self.needs_popup = false;
             }
         }
@@ -240,12 +249,8 @@ impl IslandFeature for NotificationFeature {
             None => {
                 self.last_key.clear();
                 self.needs_popup = false;
-                self.widgets.update_all(
-                    "bell",
-                    "#f59e0b",
-                    &babydra_core::i18n::trans("island.notification"),
-                    "",
-                );
+                self.widgets.set_icon("bell", "#f59e0b");
+                self.widgets.set_title(&babydra_core::i18n::trans("island.notification"));
                 if let Some(popover) = self.popover.borrow().as_ref() {
                     if popover.is_visible() {
                         popover.popdown();
@@ -278,12 +283,8 @@ impl IslandFeature for NotificationFeature {
             } else {
                 n.app_name.clone()
             };
-            self.widgets.update_all(
-                "bell",
-                "#f59e0b",
-                &app_name,
-                &babydra_core::i18n::trans("island.notification_now"),
-            );
+            self.widgets.set_icon("bell", "#f59e0b");
+            self.widgets.set_title(&app_name);
 
             // Dismiss other popovers on capsule except self.popover
             if let Some(island) = crate::island::default_island() {
@@ -312,6 +313,21 @@ impl IslandFeature for NotificationFeature {
             if let Some(popover) = self.popover.borrow().as_ref() {
                 render_popover_notification(popover, &n);
             }
+
+            // Automatically open badge popover after capsule is mapped
+            let pop_rc = self.popover.clone();
+            gtk4::glib::timeout_add_local_once(Duration::from_millis(80), move || {
+                let notif = crate::widgets::notification::SHARED_NOTIFICATION
+                    .with(|sn| sn.borrow().clone());
+                if let Some(n) = notif {
+                    if let Some(popover) = pop_rc.borrow().as_ref() {
+                        render_popover_notification(popover, &n);
+                        if !popover.is_visible() {
+                            popover.popup();
+                        }
+                    }
+                }
+            });
         }
 
         let is_hovered = self
@@ -337,16 +353,16 @@ impl IslandFeature for NotificationFeature {
             );
         } else {
             // Present popover badge once the notification view is current
-            if self.needs_popup && ctx.is_current() {
+            if ctx.is_current() {
                 if let Some(popover) = self.popover.borrow().as_ref() {
-                    render_popover_notification(popover, &n);
-                    popover.popup();
-                    self.needs_popup = false;
+                    if self.needs_popup && !popover.is_visible() && !popover.is_animating() {
+                        render_popover_notification(popover, &n);
+                        popover.popup();
+                        self.needs_popup = false;
+                    }
                 }
             } else if let Some(h) = self.handle_rc.borrow().as_ref() {
-                if ctx.is_current() {
-                    h.show();
-                }
+                h.show();
             }
         }
     }

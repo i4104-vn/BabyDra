@@ -58,7 +58,6 @@ impl NotificationPopover {
         // Large artwork / icon box (dead-centered squircle)
         let icon_container = CenterBox::new();
         icon_container.add_css_class("notification-icon-box");
-        icon_container.set_size_request(48, 48);
         icon_container.set_valign(Align::Center);
         icon_container.set_halign(Align::Center);
         click_box.append(&icon_container);
