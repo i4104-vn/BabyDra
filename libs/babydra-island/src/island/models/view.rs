@@ -113,6 +113,7 @@ impl IslandViewHandle {
     /// can take over the capsule regardless of priority.
     pub fn override_show(&self) {
         self.show();
+        self.state.request_seq.set(next_request_seq());
         self.state.override_active.set(true);
     }
 
@@ -371,6 +372,11 @@ pub trait IslandFeature {
 
     /// Called when the capsule is clicked while this view is displayed.
     fn on_click(&mut self) {}
+
+    /// Opens the popover / badge for this feature (e.g. on scroll navigation with open badge).
+    fn open_badge(&mut self) {
+        self.on_click();
+    }
 
     /// Periodic callback invoked for every registered feature at each poll tick.
     fn tick(&mut self, _ctx: &IslandCtx) {}
