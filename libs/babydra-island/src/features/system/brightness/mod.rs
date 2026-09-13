@@ -8,7 +8,7 @@ use std::time::Duration;
 
 use gtk4::prelude::*;
 
-use super::ui::SystemIndicatorWidget;
+use crate::island::ui::NotchWidget;
 use crate::island::view::{CAPSULE_HEIGHT, CAPSULE_WIDTH};
 use crate::island::{IslandCtx, IslandFeature, IslandViewHandle};
 use service::spawn_brightness_listener;
@@ -37,7 +37,7 @@ fn label_for_brightness(val: f64) -> String {
 /// Brightness indicator island feature: pops up a capsule view when display brightness changes.
 pub struct BrightnessFeature {
     handle_rc: Rc<RefCell<Option<IslandViewHandle>>>,
-    widgets: SystemIndicatorWidget,
+    widgets: NotchWidget,
     last_brightness: Rc<Cell<f64>>,
     initialized: Rc<Cell<bool>>,
 }
@@ -50,7 +50,7 @@ impl BrightnessFeature {
         let (icon, color) = icon_for_brightness(initial_brightness);
 
         let widgets =
-            SystemIndicatorWidget::build(icon, color, &title, &initial_val);
+            NotchWidget::with_value(icon, color, &title, &initial_val);
 
         Self {
             handle_rc: Rc::new(RefCell::new(None)),

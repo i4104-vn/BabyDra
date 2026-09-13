@@ -8,7 +8,7 @@ use std::time::Duration;
 
 use gtk4::prelude::*;
 
-use super::ui::SystemIndicatorWidget;
+use crate::island::ui::NotchWidget;
 use crate::island::view::{CAPSULE_HEIGHT, CAPSULE_WIDTH};
 use crate::island::{IslandCtx, IslandFeature, IslandViewHandle};
 use service::{spawn_volume_listener, VolumeState};
@@ -39,7 +39,7 @@ fn label_for_state(volume: f64, muted: bool) -> String {
 /// Volume indicator island feature: pops up a capsule view when audio volume or mute state changes.
 pub struct VolumeFeature {
     handle_rc: Rc<RefCell<Option<IslandViewHandle>>>,
-    widgets: SystemIndicatorWidget,
+    widgets: NotchWidget,
     last_volume: Rc<Cell<f64>>,
     last_muted: Rc<Cell<bool>>,
     initialized: Rc<Cell<bool>>,
@@ -54,7 +54,7 @@ impl VolumeFeature {
         let title = babydra_core::i18n::trans("volume.title");
         let initial_val = label_for_state(initial_vol, initial_muted);
 
-        let widgets = SystemIndicatorWidget::build(icon, color, &title, &initial_val);
+        let widgets = NotchWidget::with_value(icon, color, &title, &initial_val);
 
         Self {
             handle_rc: Rc::new(RefCell::new(None)),
