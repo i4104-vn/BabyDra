@@ -15,11 +15,15 @@
 //! 3. Expose the new feature in this file (`pub mod <name>; pub use <name>::...`).
 //! 4. Register it in [`crate::render::build_default_island`].
 
+pub mod bluetooth;
 pub mod brightness;
 pub mod volume;
+pub mod wifi;
 
+pub use bluetooth::BluetoothFeature;
 pub use brightness::BrightnessFeature;
 pub use volume::VolumeFeature;
+pub use wifi::WifiFeature;
 
 /// Registers all default system indicator features onto the given [`crate::island::IslandBuilder`].
 pub fn register_system_features(
@@ -28,4 +32,6 @@ pub fn register_system_features(
     builder
         .feature(Box::new(VolumeFeature::new()))
         .feature(Box::new(BrightnessFeature::new()))
+        .feature(Box::new(WifiFeature::new()))
+        .feature(Box::new(BluetoothFeature::new()))
 }

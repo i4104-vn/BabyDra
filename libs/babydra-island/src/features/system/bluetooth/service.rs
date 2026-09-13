@@ -60,7 +60,6 @@ where
 
                 // 2. Check for disconnected devices
                 let had_devices = !last_devices.is_empty();
-                let now_empty = current_devices.is_empty();
                 let device_removed = had_devices
                     && last_devices
                         .iter()
@@ -74,28 +73,29 @@ where
                     continue;
                 }
 
-                // 3. Check for battery or device change on existing connected device
+                // 3. Check for battery change on existing connected device
                 if !current_devices.is_empty() && current_devices != last_devices {
-                    if let Some(dev) = current_devices.first() {
-                        let battery_changed = last_devices
+                    let dev_opt = current_devices.first().cloned();
+                    let battery_changed = dev_opt.as_ref().map(|d| {
+                        last_devices
                             .first()
-                            .map(|prev| prev.battery != dev.battery)
-                            .unwrap_or(false);
+                            .map(|prev| prev.battery != d.battery)
+                            .unwrap_or(false)
+                    }).unwrap_or(false);
 
-                        last_devices = current_devices;
-                        if battery_changed {
+                    last_devices = current_devices;
+                    if battery_changed {
+                        if let Some(d) = dev_opt {
                             if sender
                                 .send(BluetoothEvent::Connected {
-                                    name: dev.name.clone(),
-                                    battery: dev.battery,
+                                    name: d.name,
+                                    battery: d.battery,
                                 })
                                 .is_err()
                             {
                                 break;
                             }
                         }
-                    } else {
-                        last_devices = current_devices;
                     }
                 }
             }
