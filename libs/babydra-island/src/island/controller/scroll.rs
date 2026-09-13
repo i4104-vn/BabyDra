@@ -62,28 +62,6 @@ pub(crate) fn is_capsule_popover_open(capsule: &gtk4::Box) -> bool {
     false
 }
 
-/// Collects views that can display a badge/popover when in badge navigation mode.
-fn get_badge_scrollable_indices(core: &IslandCore) -> Vec<usize> {
-    let mut indices = Vec::new();
-    for (i, v) in core.views.iter().enumerate() {
-        if v.id == "notification" {
-            let has_notif = crate::widgets::notification::SHARED_NOTIFICATION
-                .with(|sn| sn.borrow().is_some());
-            if has_notif || v.state.override_active.get() || v.state.requested.get() {
-                indices.push(i);
-            }
-        } else if v.id == "media_player" {
-            let is_active = v.state.override_active.get() || v.state.requested.get();
-            if is_active {
-                indices.push(i);
-            }
-        } else {
-            indices.push(i);
-        }
-    }
-    indices
-}
-
 /// Schedules opening the badge/popover for a target view after a short transition delay.
 fn schedule_open_badge(core_rc: &Rc<RefCell<IslandCore>>, target_idx: usize) {
     let rc_open = core_rc.clone();
@@ -128,61 +106,30 @@ pub(crate) fn handle_island_scroll(core_rc: &Rc<RefCell<IslandCore>>, dx: f64, d
         return;
     };
 
+    // Determine target views list strictly from ACTUALLY active views
+    let mut scroll_indices = core.get_active_indices();
+    for (i, v) in core.views.iter().enumerate() {
+        if v.id == "notification" {
+            let has_notif = crate::widgets::notification::SHARED_NOTIFICATION
+                .with(|sn| sn.borrow().is_some());
+            if has_notif && !scroll_indices.contains(&i) {
+                scroll_indices.push(i);
+            }
+        }
+    }
+    scroll_indices.sort();
+
+    // If no views or only 1 view is active, there is no other island to cycle to
+    if scroll_indices.len() <= 1 {
+        return;
+    }
+
     // Check if any badge/popover was open before dismissing
     let had_badge_open = is_capsule_popover_open(&core.capsule);
 
     // Set flag so connect_closed handlers do not wipe active state during scroll switch
     set_switching_island(true);
     dismiss_all_popovers();
-
-    // Determine target views list
-    let mut scroll_indices = core.get_active_indices();
-
-    // If a badge was open and active_indices <= 1, allow cycling to other badge-capable features
-    if had_badge_open && scroll_indices.len() <= 1 {
-        let badge_indices = get_badge_scrollable_indices(&core);
-        if badge_indices.len() > 1 {
-            scroll_indices = badge_indices;
-        }
-    }
-
-    if scroll_indices.is_empty() {
-        set_switching_island(false);
-        let desired = if core.cfg.idle_visible && core.idle.is_some() {
-            IslandDisplay::Idle
-        } else {
-            IslandDisplay::Hidden
-        };
-        core.last_scroll.set(Some(now));
-        core.animating.set(false);
-        apply_transition(&mut core, desired, core_rc);
-        return;
-    }
-
-    if scroll_indices.len() == 1 {
-        let only_idx = scroll_indices[0];
-        let curr_idx = match core.displayed {
-            IslandDisplay::View(i) => Some(i),
-            _ => None,
-        };
-        if curr_idx != Some(only_idx) {
-            core.last_scroll.set(Some(now));
-            let next_seq = next_request_seq();
-            core.user_selected = Some((only_idx, next_seq));
-            core.views[only_idx].state.request_seq.set(next_seq);
-            core.views[only_idx].state.requested.set(true);
-            core.animating.set(false);
-            apply_transition(&mut core, IslandDisplay::View(only_idx), core_rc);
-
-            if had_badge_open {
-                schedule_open_badge(core_rc, only_idx);
-            }
-        }
-        gtk4::glib::timeout_add_local_once(Duration::from_millis(150), move || {
-            set_switching_island(false);
-        });
-        return;
-    }
 
     let curr_idx = match core.displayed {
         IslandDisplay::View(i) => i,

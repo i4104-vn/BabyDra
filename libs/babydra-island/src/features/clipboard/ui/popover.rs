@@ -89,8 +89,6 @@ impl ClipboardPopover {
         hint_lbl.set_halign(Align::Center);
         popover_box.append(&hint_lbl);
 
-        crate::island::controller::scroll::attach_popover_scroll(&popover, &popover_box);
-
         popover_box.set_focusable(true);
         popover.set_child(Some(&popover_box));
         popover.set_focusable(true);

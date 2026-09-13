@@ -16,7 +16,7 @@ use service::spawn_brightness_listener;
 pub const PRIORITY: u8 = 95;
 pub const SHOW_DURATION: Duration = Duration::from_millis(1500);
 
-const BRIGHTNESS_COLOR: &str = "#fbbf24";
+const BRIGHTNESS_COLOR: &str = "#ffffff";
 
 /// Returns the icon name and color based on brightness percentage.
 fn icon_for_brightness(val: f64) -> (&'static str, &'static str) {

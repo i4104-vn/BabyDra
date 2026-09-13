@@ -180,6 +180,43 @@ impl IslandFeature for ClipboardFeature {
             }
         }
 
+        // Attach scroll controller to navigate clipboard items with mouse wheel / touchpad
+        let make_scroll_ctrl = || {
+            let sc = gtk4::EventControllerScroll::new(
+                gtk4::EventControllerScrollFlags::VERTICAL
+                    | gtk4::EventControllerScrollFlags::DISCRETE,
+            );
+            let selected = self.selected_index.clone();
+            let pop_rc = self.popover.clone();
+            sc.connect_scroll(move |_, _dx, dy| {
+                let entries = babydra_core::get_entries();
+                let total = entries.len();
+                if total > 0 {
+                    let cur = selected.get();
+                    let next = if dy > 0.0 {
+                        (cur + 1) % total
+                    } else if dy < 0.0 {
+                        if cur == 0 {
+                            total - 1
+                        } else {
+                            cur - 1
+                        }
+                    } else {
+                        cur
+                    };
+                    selected.set(next);
+                    if let Some(popover) = pop_rc.borrow().as_ref() {
+                        render_popover(popover, &entries, next);
+                    }
+                }
+                gtk4::glib::Propagation::Stop
+            });
+            sc
+        };
+
+        popover.popover.add_controller(make_scroll_ctrl());
+        popover.popover_box.add_controller(make_scroll_ctrl());
+
         self.popover.replace(Some(popover));
     }
 
