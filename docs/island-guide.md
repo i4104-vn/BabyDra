@@ -1,412 +1,394 @@
-# Hướng dẫn sử dụng Dynamic Island (babydra-island)
+# Tài liệu Kiến trúc và Hướng dẫn Phát triển Dynamic Island (babydra-island)
 
-## Tổng quan
-
-Dynamic Island là một **notch capsule** hiển thị **một view tại một thời điểm**. Hệ thống quản lý arbitration (quyết định hiển thị view nào) dựa trên:
-
-1. **Override** (ưu tiên cao nhất) - `override_show_for()`: volume, brightness, clipboard popup
-2. **Priority** - Feature có priority cao hơn thắng
-3. **Request sequence** - Yêu cầu mới hơn thắng (tie-breaker)
-4. **Hover keep** - Giữ view khi hover capsule
-
-## Kiến trúc Island
-
-```
-Island (manager)
-├── IslandBuilder          # Xây dựng island với config, idle, views, features
-├── IslandConfig           # Cấu hình: idle_visible, poll_interval, expand/collapse ms
-├── IslandView             # Descriptor-based view (widget + metadata)
-├── IslandViewHandle       # Handle để show/hide/override view
-├── IslandFeature (trait)  # Stateful feature (media player, notifications)
-├── IslandCtx              # Context passed to feature callbacks
-└── IslandDisplay (enum)   # Hidden | Idle | View(index)
-```
-
-## Cách 1: Descriptor + Handle (Lightweight Views)
-
-Dùng cho views đơn giản, stateless: volume overlay, brightness, timer, clipboard popup.
-
-### Tạo IslandView
-```rust
-use babydra_island::{IslandView, IslandViewHandle};
-
-let view = IslandView::new("volume_overlay", build_volume_widget())
-    .priority(80)                    // Cao hơn media player (50)
-    .size(180, 32)                   // Target capsule size
-    .hover_keep(true)                // Giữ khi hover
-    .capsule_class("volume-mode")    // CSS class cho capsule
-    .focus(false)                    // Không chiếm keyboard focus (mặc định: false)
-    .on_show(|| log::info!("Volume shown"))
-    .on_hide(|| log::info!("Volume hidden"))
-    .on_click(|| toggle_mute());
-
-// Hoặc lazy builder
-let view = IslandView::with_builder("clipboard", || build_clipboard_popup())
-    .priority(90)
-    .size(300, 200);
-```
-
-### Đăng ký và sử dụng Handle
-```rust
-// Lấy island instance (từ panel/main)
-let island = babydra_island::default_island().expect("Island not initialized");
-
-// Đăng ký view, nhận handle
-let handle: IslandViewHandle = island.register_view(view);
-
-// Sử dụng handle
-handle.show();                           // Request hiển thị
-handle.show_for(Duration::from_secs(3)); // Auto-hide sau 3s
-handle.override_show_for(Duration::from_millis(1500)); // Override tạm thời
-handle.hide();                           // Withdraw request
-handle.release_override();               // Kết thúc override
-
-// Kiểm tra state
-if handle.is_active() { ... }
-if handle.is_requested() { ... }
-
-// Thay đổi content runtime
-handle.set_content(new_widget);
-```
-
-### Priority Guidelines
-
-| View Type | Priority | Reason |
-|-----------|----------|--------|
-| Volume/Brightness overlay | 90-100 | System critical, short-lived |
-| Clipboard popup | 85 | User-initiated, temporary |
-| Timer/Stopwatch | 80 | User-initiated, may persist |
-| Notifications | 70 | Important but not critical |
-| Media Player | 50 | Default "always on" khi playing |
-| Idle logo | 0 (special) | Chỉ khi idle_visible=true |
+Tài liệu này đặc tả kiến trúc kỹ thuật, quy chuẩn phân rã mã nguồn, cách thức tái sử dụng các thành phần cốt lõi và quy trình mở rộng tính năng cho hệ thống Dynamic Island (`babydra-island`) trong giao diện hệ điều hành BabyDra.
 
 ---
 
-## Cách 2: IslandFeature Trait (Stateful Features)
+## 1. Tổng quan Kiến trúc Hệ thống
 
-Dùng cho features phức tạp, stateful, tự quản lý lifecycle: Media Player, Notifications, Clipboard history.
+Dynamic Island là hệ thống hiển thị thông tin dạng notch capsule tích hợp trên panel điều khiển. Hệ thống hoạt động theo cơ chế **điều phối tập trung (Centralized Arbitration)** nhằm quản lý việc chuyển đổi, hiển thị và tự động thu gọn các view dựa trên mức độ ưu tiên và sự kiện thời gian thực.
 
-### Implement IslandFeature
+### 1.1. Luồng dữ liệu và Điều phối (Arbitration Mechanism)
+
+Tại một thời điểm xác định, hệ thống capsule chỉ hiển thị một view chủ đạo hoặc hiển thị trạng thái chờ (Idle view). Việc xác định view chiến thắng (Winner view) tuân thủ theo 4 tầng ưu tiên:
+
+1. **Override Deadline (`override_show_for`)**:
+   Khi một sự kiện hệ thống khẩn cấp hoặc mang tính tức thời phát sinh (thay đổi âm lượng, độ sáng, cắm sạc, ngắt kết nối mạng), view gửi yêu cầu override trong một khoảng thời gian xác định (`Duration`). Trong thời gian này, view được giữ quyền hiển thị tuyệt đối, bỏ qua độ ưu tiên tĩnh.
+2. **Arbitration Priority (`priority`)**:
+   Khi có nhiều view cùng yêu cầu hiển thị mà không có override, view có chỉ số `priority` (từ 0 đến 255) cao hơn sẽ chiếm quyền hiển thị.
+3. **Request Sequence (`request_seq`)**:
+   Nếu hai view có cùng độ ưu tiên, hệ thống sử dụng bộ đếm đơn điệu nguyên tử (`AtomicU64`) để ưu tiên view phát sinh yêu cầu gần nhất.
+4. **Active State / Liveness (`is_alive`)**:
+   Nếu thời hạn override đã kết thúc, hệ thống kiểm tra trạng thái sống của feature thông qua phương thức `is_alive()`. Các feature có trạng thái duy trì (ví dụ popover đang mở, media đang phát) sẽ tiếp tục giữ capsule mà không bị thu hồi về trạng thái idle.
+
+### 1.2. Chỉ báo Đa tác vụ (Bracket Indicators)
+
+Khi có từ hai view trở lên cùng ở trạng thái hoạt động đồng thời (ví dụ: trình phát nhạc đang chạy nền và âm lượng được điều chỉnh), hệ thống tự động kích hoạt hiển thị cặp dấu ngoặc bao quanh capsule `( [Capsule Content] )` thông qua phương thức `update_brackets()`. Khi chỉ còn một view duy nhất, các chỉ báo này tự động ẩn để tối ưu diện tích thị giác.
+
+---
+
+## 2. Phân loại Tính năng (Feature Categorization)
+
+Mã nguồn trong thư mục `src/features/` được phân tách thành hai nhóm kiến trúc rõ rệt dựa trên bản chất tương tác và vòng đời:
+
+### 2.1. Nhóm Chỉ báo Hệ thống Ngắn hạn (Ephemeral Status Indicators - `features/system/*`)
+
+* **Bao gồm**:
+  * `volume`: Chỉ báo âm lượng và trạng thái tắt tiếng.
+  * `brightness`: Chỉ báo độ sáng màn hình vật lý và DDC/CI.
+  * `network`: Trạng thái kết nối Ethernet, Wi-Fi (kèm % tín hiệu), trạng thái ngắt kết nối.
+  * `bluetooth`: Trạng thái kết nối thiết bị ngoại vi, % pin phụ kiện, trạng thái ngắt kết nối.
+  * `battery`: Trạng thái cắm nguồn sạc AC (hiển thị 5 giây), cảnh báo pin yếu khi chạm ngưỡng `<= 20%` và không cắm sạc.
+* **Đặc tính kỹ thuật**:
+  * Thời gian tồn tại ngắn hạn (1.5 giây đến 5 giây).
+  * Không có giao diện phụ (Popover/Dropdown).
+  * Không chiếm quyền điều khiển bàn phím (`focus() = false`).
+  * Chỉ sử dụng giao diện capsule chuẩn (`NotchWidget`).
+
+### 2.2. Nhóm Tính năng Tương tác Phức hợp (Interactive Stateful Features)
+
+* **Bao gồm**:
+  * `media_player`: Điều khiển phát nhạc MPRIS, thanh tiến trình, artwork, popover chi tiết.
+  * `clipboard`: Lịch sử bộ nhớ tạm, tìm kiếm, xem trước ảnh, popover phân trang.
+  * `power`: Bảng điều khiển tắt máy, khởi động lại, ngủ, đăng xuất.
+  * `notification`: Quản lý thông báo desktop, nội dung đa dòng, hành động tương tác.
+* **Đặc tính kỹ thuật**:
+  * Tồn tại lâu dài hoặc do người dùng trực tiếp kích hoạt.
+  * Có Popover riêng thả xuống từ capsule (`attach(ctx)`).
+  * Có bộ điều khiển bàn phím riêng biệt (`focus() = true`, chiếm `KeyboardMode::Exclusive` trên Wayland Layer Shell để điều hướng phím mũi tên, phím số, Enter, Escape).
+
+---
+
+## 3. Quy chuẩn Cấu trúc Thư mục và Chia File
+
+Để đảm bảo nguyên tắc Clean Code và ngăn chặn hiện tượng phát sinh mã trung gian không cần thiết, quy chuẩn cấu trúc thư mục được thiết lập như sau:
+
+### 3.1. Cấu trúc một System Feature chuẩn (`features/system/<feature_name>/`)
+
+Mỗi tính năng trong nhóm `system` chỉ bao gồm đúng **2 file**:
+
+```
+libs/babydra-island/src/features/system/<feature_name>/
+├── mod.rs        # Định nghĩa struct, triển khai trait IslandFeature, liên kết NotchWidget
+└── service.rs    # Luồng chạy ngầm giám sát sự kiện, dispatch dữ liệu sang GTK Context
+```
+
+* **Lý do tối giản số lượng file**:
+  1. **Không tạo lớp giao diện riêng**: Toàn bộ bố cục hiển thị capsule đã được chuẩn hóa bởi `NotchWidget`. Không tạo thêm thư mục `ui/` hay file CSS riêng.
+  2. **Tận dụng dịch vụ lõi**: Toàn bộ thao tác truy xuất D-Bus, ALSA, Sysfs đã nằm sẵn trong `libs/babydra-core`. `service.rs` chỉ làm nhiệm vụ lắng nghe và đóng gói sự kiện.
+  3. **Không tạo module re-export trung gian**: Khai báo trực tiếp trong `features/system/mod.rs` và đăng ký thẳng vào `IslandBuilder`.
+
+### 3.2. Cấu trúc một Interactive Feature chuẩn (`features/<feature_name>/`)
+
+Đối với các tính năng có giao diện popover và tương tác bàn phím, phân rã theo mô hình 3 lớp:
+
+```
+libs/babydra-island/src/features/<feature_name>/
+├── mod.rs                  # Điểm nhập, triển khai IslandFeature, quản lý trạng thái
+├── controller/             # Xử lý sự kiện người dùng
+│   ├── keyboard.rs         # Bắt phím tắt, điều hướng mũi tên, phím số
+│   └── mod.rs
+├── service/                # Giao tiếp dịch vụ nền, polling, cache dữ liệu
+│   └── mod.rs
+└── ui/                     # Giao diện đồ họa
+    ├── popover.rs          # Layout popover mở rộng
+    └── mod.rs
+```
+
+---
+
+## 4. Khai thác Các Thành phần Có sẵn
+
+Khi xây dựng hoặc mở rộng tính năng, lập trình viên bắt buộc phải sử dụng lại các thành phần cốt lõi sẵn có thay vì triển khai lặp lại.
+
+### 4.1. Capsule Layout Chuẩn hóa: `NotchWidget`
+
+Module: `crate::island::ui::NotchWidget`
+
+`NotchWidget` cung cấp bố cục capsule chuẩn gồm 3 vùng:
+* Vùng bắt đầu (Start - trái): Icon vector kích thước 14px, hỗ trợ gán màu tùy biến.
+* Vùng trung tâm (Center - giữa): Tiêu đề văn bản (tự động cắt ngắn với dấu `...` khi tràn chuỗi, căn giữa tuyệt đối).
+* Vùng kết thúc (End - phải, tùy chọn): Giá trị trạng thái hoặc tỷ lệ phần trăm (ví dụ: `80%`, `Mute`, `20%`).
 
 ```rust
-use babydra_island::{IslandFeature, IslandViewHandle, IslandCtx};
+use crate::island::ui::NotchWidget;
+
+// 1. Khởi tạo widget có giá trị bên phải
+let widgets = NotchWidget::with_value(
+    "battery",                          // Tên định danh icon
+    "#30d158",                          // Mã màu hex hoặc rgba
+    &babydra_core::i18n::trans("island.charging"), // Tiêu đề i18n
+    "85%"                               // Giá trị hiển thị
+);
+
+// 2. Cập nhật đồng thời icon, màu sắc, tiêu đề và giá trị khi có sự kiện
+widgets.update_all("battery", "#ff453a", "Low Battery", "20%");
+
+// 3. Cập nhật chỉ icon và giá trị (giữ nguyên tiêu đề)
+widgets.update("volume", "#ffffff", "65%");
+```
+
+### 4.2. Hằng số Kích thước Tiêu chuẩn: `view.rs`
+
+Module: `crate::island::view`
+
+Mọi feature khi cài đặt phương thức `size(&self)` phải sử dụng các hằng số kích thước đã định nghĩa:
+
+| Hằng số | Giá trị | Phạm vi áp dụng |
+|:---|:---:|:---|
+| `CAPSULE_WIDTH` | `180` px | Chiều rộng chuẩn cho toàn bộ System Features, Clipboard, Notification. |
+| `PLAYER_CAPSULE_WIDTH` | `200` px | Chiều rộng mở rộng dành riêng cho Media Player nhằm chứa tiêu đề bài hát. |
+| `CAPSULE_HEIGHT` | `30` px | Chiều cao cố định đồng nhất cho toàn bộ capsule trên notch. |
+
+### 4.3. Hệ thống Icon Vector: `babydra-ui-kit`
+
+Tất cả icon được nhúng dưới dạng SVG và biên dịch trực tiếp vào nhị phân thông qua `babydra_ui_kit::ui::icon`. Không sử dụng icon ngoài danh mục hoặc load file từ ổ cứng runtime.
+
+* Lấy icon có màu mặc định theo theme: `babydra_ui_kit::ui::icon::get_icon(name, size)`
+* Lấy icon có màu sắc chỉ định: `babydra_ui_kit::ui::icon::get_icon_colored(name, size, color_css)`
+* Các định danh icon chuẩn cho System: `"volume"`, `"volume-low"`, `"volume-mute"`, `"brightness"`, `"brightness-low"`, `"brightness-medium"`, `"ethernet"`, `"wifi"`, `"bluetooth"`, `"battery"`, `"power"`, `"shield"`.
+
+### 4.4. Hệ thống Đa ngôn ngữ (i18n)
+
+Mọi chuỗi văn bản hiển thị trên capsule bắt buộc phải đi qua hàm dịch `babydra_core::i18n::trans`. Tuyệt đối không hardcode chuỗi ký tự cố định vào giao diện.
+
+* Tệp cấu hình tiếng Anh: `libs/babydra-core/src/i18n/locales/common/en.json`
+* Tệp cấu hình tiếng Việt: `libs/babydra-core/src/i18n/locales/common/vi.json`
+
+Quy ước tiền tố: Tất cả khóa dịch thuộc Dynamic Island phải bắt đầu bằng `island.` (ví dụ: `island.disconnected`, `island.charging`, `island.low_battery`).
+
+---
+
+## 5. Hướng dẫn Từng bước Mở rộng Tính năng Mới
+
+Dưới đây là quy trình chuẩn hóa để xây dựng một tính năng mới trong nhóm `features/system/`. Ví dụ triển khai tính năng chỉ báo trạng thái khóa phím hoa (`caps_lock`).
+
+### Bước 1: Khai báo khóa bản địa hóa (i18n)
+
+Bổ sung khóa vào `en.json` và `vi.json`:
+
+```json
+// en.json
+"island.caps_lock_on": "Caps Lock On",
+"island.caps_lock_off": "Caps Lock Off"
+
+// vi.json
+"island.caps_lock_on": "Bật Caps Lock",
+"island.caps_lock_off": "Tắt Caps Lock"
+```
+
+### Bước 2: Xây dựng luồng lắng nghe sự kiện (`service.rs`)
+
+Nguyên tắc bắt buộc:
+* Lắng nghe trong một thread riêng có đặt tên (`std::thread::Builder::new().name(...)`).
+* Không thực hiện tính toán nặng hay gọi lệnh shell bên ngoài (`Command::new`) trong vòng lặp chính. Sử dụng D-Bus hoặc đọc Sysfs.
+* Sử dụng kênh truyền tin bất đồng bộ `tokio::sync::mpsc::unbounded_channel` để chuyển sự kiện về GTK Main Context thông qua `glib::MainContext::default().spawn_local`.
+
+```rust
+//! libs/babydra-island/src/features/system/caps_lock/service.rs
+
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
+use std::time::Duration;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CapsLockEvent {
+    Enabled,
+    Disabled,
+}
+
+pub fn spawn_caps_lock_listener<F>(on_change: F)
+where
+    F: Fn(CapsLockEvent) + 'static,
+{
+    let (sender, mut receiver) = tokio::sync::mpsc::unbounded_channel::<CapsLockEvent>();
+
+    // Chuyển tiếp sự kiện sang GTK main thread an toàn
+    glib::MainContext::default().spawn_local(async move {
+        while let Some(event) = receiver.recv().await {
+            on_change(event);
+        }
+    });
+
+    let running = Arc::new(AtomicBool::new(true));
+
+    std::thread::Builder::new()
+        .name("babydra-island-capslock-listener".into())
+        .spawn(move || {
+            let mut last_state = false;
+
+            while running.load(Ordering::Relaxed) {
+                std::thread::sleep(Duration::from_millis(200));
+
+                let current_state = read_caps_lock_state(); // Hàm đọc trạng thái từ core/sysfs
+                if current_state != last_state {
+                    last_state = current_state;
+                    let event = if current_state {
+                        CapsLockEvent::Enabled
+                    } else {
+                        CapsLockEvent::Disabled
+                    };
+                    if sender.send(event).is_err() {
+                        break;
+                    }
+                }
+            }
+        })
+        .ok();
+}
+```
+
+### Bước 3: Cài đặt Trait `IslandFeature` (`mod.rs`)
+
+Triển khai cấu trúc dữ liệu chính, khởi tạo `NotchWidget` và liên kết với `IslandViewHandle`.
+
+```rust
+//! libs/babydra-island/src/features/system/caps_lock/mod.rs
+
+pub mod service;
+
+use std::cell::RefCell;
+use std::rc::Rc;
+use std::time::Duration;
+
 use gtk4::prelude::*;
 
-struct MyFeature {
-    handle: Option<IslandViewHandle>,
-    widgets: MyWidgets,
-    state: Rc<RefCell<FeatureState>>,
-    // Service receivers, timers, etc.
+use crate::island::ui::NotchWidget;
+use crate::island::view::{CAPSULE_HEIGHT, CAPSULE_WIDTH};
+use crate::island::{IslandCtx, IslandFeature, IslandViewHandle};
+use service::{spawn_caps_lock_listener, CapsLockEvent};
+
+pub const PRIORITY: u8 = 93;
+pub const SHOW_DURATION: Duration = Duration::from_millis(1500);
+
+pub struct CapsLockFeature {
+    handle_rc: Rc<RefCell<Option<IslandViewHandle>>>,
+    widgets: NotchWidget,
 }
 
-impl MyFeature {
+impl CapsLockFeature {
     pub fn new() -> Self {
-        let widgets = MyWidgets::build();
-        let (tx, rx) = mpsc::unbounded_channel();
-        tokio::spawn(background_service(rx));
-        
+        let title = babydra_core::i18n::trans("island.caps_lock_off");
+        let widgets = NotchWidget::new("lock", "#ffffff", &title);
+
         Self {
-            handle: None,
+            handle_rc: Rc::new(RefCell::new(None)),
             widgets,
-            state: Rc::new(RefCell::new(FeatureState::default())),
-            // ...
         }
     }
 }
 
-impl IslandFeature for MyFeature {
-    fn id(&self) -> &str { "my_feature" }
-    
-    fn priority(&self) -> u8 { 60 }
-    
-    fn size(&self) -> (i32, i32) { (220, 36) }
-    
-    fn hover_keep(&self) -> bool { true }
-    
-    fn capsule_class(&self) -> Option<String> { 
-        Some("my-feature-mode".into()) 
+impl IslandFeature for CapsLockFeature {
+    fn id(&self) -> &str {
+        "system_caps_lock"
     }
-    
-    fn focus(&self) -> bool { false } // true nếu cần chiếm keyboard (Exclusive), false để không ảnh hưởng app khác
-    
+
+    fn priority(&self) -> u8 {
+        PRIORITY
+    }
+
+    fn size(&self) -> (i32, i32) {
+        (CAPSULE_WIDTH, CAPSULE_HEIGHT)
+    }
+
     fn build_view(&mut self) -> gtk4::Widget {
-        self.widgets.main_view.clone().upcast()
+        self.widgets.container.clone().upcast()
     }
-    
+
     fn init(&mut self, handle: &IslandViewHandle) {
-        self.handle = Some(handle.clone());
+        *self.handle_rc.borrow_mut() = Some(handle.clone());
+
+        let handle_rc = self.handle_rc.clone();
+        let widgets = self.widgets.clone();
+
+        spawn_caps_lock_listener(move |event: CapsLockEvent| {
+            let (title_key, color) = match event {
+                CapsLockEvent::Enabled => ("island.caps_lock_on", "#ffffff"),
+                CapsLockEvent::Disabled => ("island.caps_lock_off", "rgba(255, 255, 255, 0.60)"),
+            };
+
+            widgets.set_title(&babydra_core::i18n::trans(title_key));
+            widgets.set_icon("lock", color);
+
+            // Kích hoạt hiển thị override trong 1.5s
+            if let Some(h) = handle_rc.borrow().as_ref() {
+                h.override_show_for(SHOW_DURATION);
+            }
+            crate::island::tick_default_island();
+        });
     }
-    
-    fn attach(&mut self, ctx: &IslandCtx) {
-        // Setup popovers, start receivers, cần capsule widget
-        let popover = MyPopover::new(&ctx.capsule());
-        self.popover = Some(popover);
-        self.start_receiver();
-    }
-    
-    fn on_show(&mut self) {
-        // View vừa trở thành active
-        self.refresh_ui();
-    }
-    
-    fn on_hide(&mut self) {
-        // View không còn active
-        self.popover.as_ref().map(|p| p.popdown());
-    }
-    
-    fn on_click(&mut self) {
-        // Click vào capsule khi feature này active
-        self.popover.as_ref().map(|p| p.toggle());
-    }
-    
-    fn tick(&mut self, ctx: &IslandCtx) {
-        // Được gọi mỗi poll_interval (mặc định 150ms)
-        // - Poll service data
-        // - Update handle.show()/hide() dựa trên state
-        // - Refresh UI nếu is_current()
-        self.refresh(ctx);
+
+    fn tick(&mut self, _ctx: &IslandCtx) {
+        // Tối ưu: Sự kiện kích hoạt hoàn toàn hướng sự kiện (Event-driven), tick để trống
     }
 }
 ```
 
-### Feature Lifecycle
+### Bước 4: Đăng ký Feature vào Module Quản lý
 
-```
-register_feature()
-    │
-    ├─► build_view()          # Tạo widget content
-    │
-    ├─► init(handle)          # Nhận IslandViewHandle
-    │
-    ├─► attach(ctx)           # Capsule ready, setup popovers, spawn receivers
-    │
-    ├─► [Controller Loop - mỗi 150ms]
-    │       │
-    │       ├─► tick(ctx)     # Poll data, update handle.show/hide, refresh UI
-    │       │
-    │       ├─► Arbitration   # Priority + override + hover → winner
-    │       │
-    │       └─► Transition    # Animate capsule size, swap views
-    │
-    ├─► on_show()             # Khi trở thành winner
-    │
-    ├─► on_hide()             # Khi không còn winner
-    │
-    └─► on_click()            # Click capsule khi active
-```
-
-### Ví dụ thực tế: Media Player Feature
-
-Xem `libs/babydra-island/src/features/media_player/mod.rs`
-
-Key points:
-- `service/poll.rs`: Background thread polling `playerctl` metadata
-- `service/art.rs`: Async artwork loading với retry/fallback
-- `ui/view.rs`: `PlayerWidgets::build()` tạo compact view + popover
-- `ui/render.rs`: `update_player_view()` binding metadata → widgets
-- `tick()`: Parse metadata, `handle.show()/hide()`, update UI nếu current
-
----
-
-## Cách 3: Mở rộng Island (Extending)
-
-### Thêm Feature mới vào System Island
-
-Chỉnh sửa `libs/babydra-island/src/render.rs`:
+Thêm module mới vào `libs/babydra-island/src/features/system/mod.rs`:
 
 ```rust
-use crate::features::my_feature::MyFeature;
+pub mod battery;
+pub mod bluetooth;
+pub mod brightness;
+pub mod caps_lock; // Module mới
+pub mod network;
+pub mod volume;
 
-pub fn create_system_island() -> Island {
-    Island::builder()
-        .config(IslandConfig {
-            idle_visible: true,
-            poll_interval_ms: 150,
-            expand_ms: 350,
-            collapse_ms: 500,
-        })
-        .idle(build_idle_logo())  // Optional idle widget
-        .feature(Box::new(MediaPlayerFeature::new()))
-        .feature(Box::new(NotificationFeature::new()))
-        .feature(Box::new(ClipboardFeature::new()))
-        .feature(Box::new(MyFeature::new()))  // ← Thêm feature mới
-        .build()
+pub use battery::BatteryFeature;
+pub use bluetooth::BluetoothFeature;
+pub use brightness::BrightnessFeature;
+pub use caps_lock::CapsLockFeature;
+pub use network::NetworkFeature;
+pub use volume::VolumeFeature;
+
+pub fn register_system_features(
+    builder: crate::island::IslandBuilder,
+) -> crate::island::IslandBuilder {
+    builder
+        .feature(Box::new(VolumeFeature::new()))
+        .feature(Box::new(BrightnessFeature::new()))
+        .feature(Box::new(BatteryFeature::new()))
+        .feature(Box::new(NetworkFeature::new()))
+        .feature(Box::new(BluetoothFeature::new()))
+        .feature(Box::new(CapsLockFeature::new())) // Đăng ký builder
 }
 ```
 
-### Override tạm thời từ bất kỳ đâu
-
-```rust
-// Trong volume/brightness controller
-fn on_volume_change(&self, level: u8) {
-    if let Some(island) = babydra_island::default_island() {
-        let handle = island.get_handle("volume_overlay")
-            .or_else(|| {
-                // Lazy register nếu chưa có
-                let view = IslandView::new("volume_overlay", build_volume_widget(level))
-                    .priority(95)
-                    .size(180, 32);
-                Some(island.register_view(view))
-            });
-        
-        if let Some(h) = handle {
-            h.override_show_for(Duration::from_millis(1500));
-            // Update widget content nếu cần
-            h.set_content(build_volume_widget(level));
-        }
-    }
-}
-```
-
-### Tự build Island tùy chỉnh (cho testing/app riêng)
-
-```rust
-use babydra_island::{Island, IslandBuilder, IslandConfig, IslandView};
-
-let island = Island::builder()
-    .config(IslandConfig {
-        idle_visible: false,
-        poll_interval_ms: 100,
-        expand_ms: 200,
-        collapse_ms: 300,
-    })
-    .view(IslandView::new("custom", build_custom_widget())
-        .priority(60)
-        .size(250, 40))
-    .feature(Box::new(MyFeature::new()))
-    .build();
-
-// Lấy capsule widget để add vào layout
-let capsule = island.capsule();
-panel_layout.append(&capsule);
-
-// Cleanup khi rebuild panel
-island.dispose();
-```
+Đồng thời đăng ký trong `libs/babydra-island/src/render.rs` (`build_default_island`).
 
 ---
 
-## Animation & Styling
+## 6. Bảng Quy chuẩn Tham số Tính năng Hiện hành
 
-### CSS Classes
+Dưới đây là bảng thông số cấu hình chính thức của toàn bộ các tính năng đang vận hành trên Dynamic Island:
 
-Capsule nhận các class động:
-- `.panel-notch` - Base class
-- `.active-music` - Khi media player active
-- `.notification-mode` - Khi notification active
-- `.volume-mode`, `.my-feature-mode` - Tuỳ `capsule_class()`
-
-### Animation Helpers (từ `babydra_ui_kit`)
-
-```rust
-use babydra_ui_kit::ui::animation::island::*;
-
-// Tự động dùng bởi island internal, nhưng có thể dùng cho custom:
-island_zoom_in(capsule.upcast_ref(), target_w, target_h, duration_ms);
-island_zoom_out(capsule.upcast_ref(), current_w, duration_ms, remove_after);
-island_animate_size(capsule.upcast_ref(), cur_w, target_w, cur_h, target_h, duration_ms, on_complete);
-island_animate_width(capsule.upcast_ref(), cur_w, target_w, duration_ms, on_complete);
-```
+| Feature ID | Nhóm phân loại | Priority | Show Duration | Kích thước Capsule (W x H) | Ghi chú tương tác |
+|:---|:---|:---:|:---:|:---:|:---|
+| `system_volume` | System Ephemeral | 95 | 1500 ms | 180 x 30 px | Lăn chuột / phím âm lượng |
+| `system_brightness` | System Ephemeral | 95 | 1500 ms | 180 x 30 px | Phím chức năng màn hình |
+| `system_battery` | System Ephemeral | 94 | 5000 ms | 180 x 30 px | Cắm sạc AC / Cảnh báo pin <= 20% |
+| `system_network` | System Ephemeral | 92 | 2000 ms | 180 x 30 px | Ethernet / Wi-Fi % / Ngắt kết nối |
+| `system_bluetooth` | System Ephemeral | 92 | 2000 ms | 180 x 30 px | Kết nối thiết bị, % pin tai nghe |
+| `clipboard` | Interactive | 80 | - | 180 x 30 px | Popover danh sách, bắt phím `↑↓` |
+| `notification` | Interactive | 70 | 5000 ms | 180 x 30 px | Popover chi tiết thông báo |
+| `media_player` | Interactive | 50 | - | 200 x 30 px | Trạng thái phát nhạc nền MPRIS |
+| `idle_logo` | System Idle | 0 | - | 44 x 30 px | Hiển thị khi không có tác vụ active |
 
 ---
 
-## Best Practices
+## 7. Nguyên tắc Kiểm thử và Đảm bảo Chất lượng
 
-### 1. Priority Design
-- Luôn set priority rõ ràng, không dựa vào default (50)
-- System overlays (volume, brightness) > User popups > Notifications > Media player
-- Test arbitration với multiple features active
+Trước khi hoàn tất tích hợp bất kỳ tính năng Dynamic Island nào, lập trình viên phải đảm bảo thỏa mãn các tiêu chí sau:
 
-### 2. Handle Management
-- Clone handle freely (cheap, Rc-based)
-- Store handle trong feature struct để dùng ở tick/click
-- `get_handle(id)` để tìm handle đã đăng ký
-
-### 3. State Synchronization
-- `tick()` là nơi duy nhất quyết định `show()/hide()` dựa trên service state
-- Không gọi `show()` từ UI callbacks trực tiếp (trừ user action như click)
-- Dùng `override_show_for()` cho temporary system overlays
-
-### 4. Resource Cleanup
-- `attach()`: Start receivers, build popovers
-- `on_hide()`: Popdown popovers, pause heavy operations
-- `dispose()`: Island tự dọn dẹp controller loop, nhưng feature nên tự cleanup ở `on_hide()`
-
-### 5. Testing Features
-```rust
-#[cfg(test)]
-mod tests {
-    use super::*;
-    
-    #[test]
-    fn test_feature_priority() {
-        let feature = MyFeature::new();
-        assert_eq!(feature.priority(), 60);
-    }
-    
-    #[test]
-    fn test_tick_updates_handle() {
-        // Mock service, verify handle.show()/hide() calls
-    }
-}
-```
-
----
-
-## Troubleshooting
-
-| Issue | Nguyên nhân | Fix |
-|-------|-------------|-----|
-| View không hiển thị | Priority quá thấp, bị override | Kiểm tra priority, dùng `override_show_for` |
-| Capsule không animate | `animating` flag không clear | Check `animate_collapse/expand` callback |
-| Feature tick không chạy | Chưa đăng ký qua `register_feature` | Đảm bảo add vào `IslandBuilder::feature()` |
-| Popover không hiện | `attach()` chưa gọi hoặc capsule chưa ready | Đảm bảo `attach` dùng `ctx.capsule()` |
-| Memory leak | Receiver không drop, popover không popdown | Cleanup ở `on_hide()`, drop receiver khi feature drop |
-
----
-
-## API Reference (Quick)
-
-```rust
-// Island
-Island::builder() → IslandBuilder
-IslandBuilder::config(cfg) → Self
-IslandBuilder::idle_visible(bool) → Self
-IslandBuilder::idle(widget) → Self
-IslandBuilder::view(IslandView) → Self
-IslandBuilder::feature(Box<dyn IslandFeature>) → Self
-IslandBuilder::build() → Island
-
-Island::capsule() → gtk4::Box
-Island::register_view(IslandView) → IslandViewHandle
-Island::register_feature(Box<dyn IslandFeature>) → IslandViewHandle
-Island::get_handle(&str) → Option<IslandViewHandle>
-Island::show(&str), hide(&str), override_view(&str, Option<Duration>)
-Island::dispose()
-
-// IslandView
-IslandView::new(id, widget) → Self
-IslandView::with_builder(id, closure) → Self
-.priority(u8), .size(w,h), .hover_keep(bool), .capsule_class(str)
-.on_show(fn), .on_hide(fn), .on_click(fn)
-
-// IslandViewHandle
-.show(), .show_for(Duration), .hide()
-.override_show(), .override_show_for(Duration), .release_override()
-.is_active(), .is_requested(), .id()
-.set_content(Widget)
-
-// IslandFeature (trait)
-fn id(&self) -> &str
-fn priority(&self) -> u8 { 50 }
-fn size(&self) -> (i32, i32) { (200, 30) }
-fn hover_keep(&self) -> bool { false }
-fn capsule_class(&self) -> Option<String> { None }
-fn build_view(&mut self) -> gtk4::Widget
-fn init(&mut self, handle: &IslandViewHandle) {}
-fn attach(&mut self, ctx: &IslandCtx) {}
-fn on_show(&mut self) {}
-fn on_hide(&mut self) {}
-fn on_click(&mut self) {}
-fn tick(&mut self, ctx: &IslandCtx) {}
-```
+1. **Kiểm tra biên dịch và chuẩn mã tĩnh**:
+   ```bash
+   cargo check --workspace
+   cargo clippy -p babydra-core -p babydra-island
+   ```
+   Mã nguồn phát triển mới phải đạt tuyệt đối **0 cảnh báo (warnings)** từ Clippy.
+2. **Không khóa luồng chính (Zero Main Thread Blocking)**:
+   Mọi I/O đọc sysfs, truy vấn D-Bus hay socket phải được cô lập hoàn toàn trong background thread. Main thread GTK chỉ nhận struct sự kiện thông qua channel để cập nhật widget.
+3. **Giải phóng tài nguyên (Resource Cleanliness)**:
+   Khi feature bị hủy hoặc ứng dụng reload (`update.sh`), các thread nền phải có cờ kiểm soát (`AtomicBool`) hoặc thoát tự nhiên khi receiver bị drop, tránh tạo tiến trình rác hay rò rỉ bộ nhớ.
