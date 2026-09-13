@@ -1,6 +1,91 @@
 pub use crate::models::settings::bluetooth::BtDevice;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
+use std::ops::Deref;
 use std::process::Command;
+use zbus::blocking::Connection;
+use zbus::zvariant::{OwnedObjectPath, OwnedValue, Value};
+
+#[zbus::proxy(
+    gen_blocking = true,
+    default_service = "org.bluez",
+    default_path = "/",
+    interface = "org.freedesktop.DBus.ObjectManager"
+)]
+trait BluezObjectManager {
+    fn get_managed_objects(
+        &self,
+    ) -> zbus::Result<HashMap<OwnedObjectPath, HashMap<String, HashMap<String, OwnedValue>>>>;
+}
+
+/// Represents a connected Bluetooth device with optional battery percentage.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BtConnectedDevice {
+    pub mac: String,
+    pub name: String,
+    pub battery: Option<u8>,
+}
+
+/// Returns all currently connected Bluetooth devices with their battery percentage if available.
+/// Queries BlueZ D-Bus ObjectManager directly (0 subprocesses spawned).
+pub fn get_connected_bt_devices() -> Vec<BtConnectedDevice> {
+    if let Ok(conn) = Connection::system() {
+        if let Ok(manager) = BluezObjectManagerProxyBlocking::new(&conn) {
+            if let Ok(objects) = manager.get_managed_objects() {
+                let mut connected_devs = Vec::new();
+                for (_path, interfaces) in objects {
+                    if let Some(dev_props) = interfaces.get("org.bluez.Device1") {
+                        let is_connected = dev_props
+                            .get("Connected")
+                            .map(|v| match v.deref() {
+                                Value::Bool(b) => *b,
+                                _ => false,
+                            })
+                            .unwrap_or(false);
+
+                        if is_connected {
+                            let mac = dev_props
+                                .get("Address")
+                                .and_then(|v| match v.deref() {
+                                    Value::Str(s) => Some(s.as_str().to_string()),
+                                    _ => None,
+                                })
+                                .unwrap_or_default();
+
+                            let name = dev_props
+                                .get("Alias")
+                                .or_else(|| dev_props.get("Name"))
+                                .and_then(|v| match v.deref() {
+                                    Value::Str(s) => Some(s.as_str().to_string()),
+                                    _ => None,
+                                })
+                                .unwrap_or_else(|| mac.clone());
+
+                            let battery = interfaces.get("org.bluez.Battery1").and_then(|bat_props| {
+                                bat_props.get("Percentage").and_then(|v| match v.deref() {
+                                    Value::U8(b) => Some(*b),
+                                    Value::I16(n) => Some(*n as u8),
+                                    Value::U16(n) => Some(*n as u8),
+                                    Value::I32(n) => Some(*n as u8),
+                                    Value::U32(n) => Some(*n as u8),
+                                    _ => None,
+                                })
+                            });
+
+                            connected_devs.push(BtConnectedDevice {
+                                mac,
+                                name,
+                                battery,
+                            });
+                        }
+                    }
+                }
+                return connected_devs;
+            }
+        }
+    }
+
+    Vec::new()
+}
 
 /// Returns `true` when `bluetooth enabled` holds, `false` otherwise.
 pub fn is_bluetooth_enabled() -> bool {

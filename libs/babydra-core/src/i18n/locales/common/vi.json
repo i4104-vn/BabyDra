@@ -236,6 +236,7 @@
   "island.power_suspend": "Ngủ",
   "island.power_logout": "Đăng xuất",
   "island.power_hint": "1-4 Chọn nhanh • ← → Duyệt • Enter Chọn • Esc Đóng",
+  "island.disconnected": "Đã ngắt kết nối",
   "volume.title": "Âm lượng",
   "volume.output_devices": "Thiết bị đầu ra",
   "volume.no_output": "Không tìm thấy thiết bị đầu ra",

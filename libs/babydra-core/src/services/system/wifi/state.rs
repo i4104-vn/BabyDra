@@ -128,3 +128,64 @@ pub fn get_wifi_signal() -> (bool, bool, u8) {
     let strength = ap.strength().unwrap_or(0);
     (true, true, strength)
 }
+
+/// Returns the full Wi-Fi connection info: (is_enabled, is_connected, ssid, strength_pct).
+/// Queries NetworkManager via D-Bus with 0 shell command execution.
+pub fn get_wifi_connection_info() -> (bool, bool, String, u8) {
+    let conn = match Connection::system() {
+        Ok(c) => c,
+        Err(_) => return (false, false, String::new(), 0),
+    };
+
+    let nm = match NetworkManagerProxyBlocking::new(&conn) {
+        Ok(m) => m,
+        Err(_) => return (false, false, String::new(), 0),
+    };
+
+    let is_enabled = nm.wireless_enabled().unwrap_or(false);
+    if !is_enabled {
+        return (false, false, String::new(), 0);
+    }
+
+    let dev_path = match get_wifi_device(&conn) {
+        Some(p) => p,
+        None => return (true, false, String::new(), 0),
+    };
+
+    let wifi_dev = match DeviceWifiProxyBlocking::builder(&conn)
+        .path(dev_path)
+        .ok()
+        .and_then(|b| b.build().ok())
+    {
+        Some(d) => d,
+        None => return (true, false, String::new(), 0),
+    };
+
+    let ap_path = match wifi_dev.active_access_point() {
+        Ok(path) => path,
+        Err(_) => return (true, false, String::new(), 0),
+    };
+
+    if ap_path.as_str() == "/" {
+        return (true, false, String::new(), 0);
+    }
+
+    let ap = match AccessPointProxyBlocking::builder(&conn)
+        .path(ap_path)
+        .ok()
+        .and_then(|b| b.build().ok())
+    {
+        Some(a) => a,
+        None => return (true, false, String::new(), 0),
+    };
+
+    let ssid_bytes = ap.ssid().unwrap_or_default();
+    let ssid = String::from_utf8_lossy(&ssid_bytes).to_string();
+    let strength = ap.strength().unwrap_or(0);
+
+    if ssid.is_empty() {
+        (true, false, String::new(), 0)
+    } else {
+        (true, true, ssid, strength)
+    }
+}

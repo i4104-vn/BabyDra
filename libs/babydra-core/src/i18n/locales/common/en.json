@@ -236,6 +236,7 @@
   "island.power_suspend": "Sleep",
   "island.power_logout": "Log Out",
   "island.power_hint": "1-4 Quick Select • ← → Navigate • Enter Select • Esc Close",
+  "island.disconnected": "Disconnected",
   "volume.title": "Volume",
   "volume.output_devices": "Output Devices",
   "volume.no_output": "No output devices found",
