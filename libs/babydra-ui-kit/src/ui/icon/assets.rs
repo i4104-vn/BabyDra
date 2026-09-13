@@ -22,6 +22,8 @@ icon_asset!(DARK_BELL_SVG, LIGHT_BELL_SVG, "bell.svg");
 icon_asset!(DARK_BELL_OFF_SVG, LIGHT_BELL_OFF_SVG, "bell-off.svg");
 icon_asset!(DARK_BLUETOOTH_SVG, LIGHT_BLUETOOTH_SVG, "bluetooth.svg");
 icon_asset!(DARK_BRIGHTNESS_SVG, LIGHT_BRIGHTNESS_SVG, "brightness.svg");
+icon_asset!(DARK_BRIGHTNESS_LOW_SVG, LIGHT_BRIGHTNESS_LOW_SVG, "brightness-low.svg");
+icon_asset!(DARK_BRIGHTNESS_MEDIUM_SVG, LIGHT_BRIGHTNESS_MEDIUM_SVG, "brightness-medium.svg");
 icon_asset!(DARK_CAFFEINE_SVG, LIGHT_CAFFEINE_SVG, "caffeine.svg");
 icon_asset!(DARK_CAMERA_SVG, LIGHT_CAMERA_SVG, "camera.svg");
 icon_asset!(DARK_BROOM_SVG, LIGHT_BROOM_SVG, "broom.svg");

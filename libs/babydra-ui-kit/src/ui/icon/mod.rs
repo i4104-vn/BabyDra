@@ -126,6 +126,14 @@ fn get_icon_svg_pair(name: &str) -> Option<(&'static str, &'static str)> {
         m.insert("bell-off", (DARK_BELL_OFF_SVG, LIGHT_BELL_OFF_SVG));
         m.insert("bluetooth", (DARK_BLUETOOTH_SVG, LIGHT_BLUETOOTH_SVG));
         m.insert("brightness", (DARK_BRIGHTNESS_SVG, LIGHT_BRIGHTNESS_SVG));
+        m.insert(
+            "brightness-low",
+            (DARK_BRIGHTNESS_LOW_SVG, LIGHT_BRIGHTNESS_LOW_SVG),
+        );
+        m.insert(
+            "brightness-medium",
+            (DARK_BRIGHTNESS_MEDIUM_SVG, LIGHT_BRIGHTNESS_MEDIUM_SVG),
+        );
         m.insert("caffeine", (DARK_CAFFEINE_SVG, LIGHT_CAFFEINE_SVG));
         m.insert("camera", (DARK_CAMERA_SVG, LIGHT_CAMERA_SVG));
         m.insert("clock", (DARK_CLOCK_SVG, LIGHT_CLOCK_SVG));
