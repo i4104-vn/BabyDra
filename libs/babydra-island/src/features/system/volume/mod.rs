@@ -47,8 +47,8 @@ pub struct VolumeFeature {
 
 impl VolumeFeature {
     pub fn new() -> Self {
-        let initial_vol = babydra_core::services::system::volume::get_current_volume();
-        let initial_muted = babydra_core::services::system::volume::is_muted();
+        let (initial_vol, initial_muted) =
+            babydra_core::services::system::volume::get_volume_state();
 
         let (icon, color) = icon_for_state(initial_vol, initial_muted);
         let title = babydra_core::i18n::trans("volume.title");

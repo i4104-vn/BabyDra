@@ -31,10 +31,8 @@ where
     std::thread::Builder::new()
         .name("babydra-island-volume-listener".into())
         .spawn(move || {
-            let mut last_state = VolumeState {
-                volume: babydra_core::services::system::volume::get_current_volume(),
-                muted: babydra_core::services::system::volume::is_muted(),
-            };
+            let (volume, muted) = babydra_core::services::system::volume::get_volume_state();
+            let mut last_state = VolumeState { volume, muted };
 
             while running.load(Ordering::Relaxed) {
                 let Ok(mut child) = Command::new("pactl")
@@ -45,10 +43,9 @@ where
                 else {
                     // pactl is not available, fall back to sleep loop
                     std::thread::sleep(Duration::from_millis(200));
-                    let current = VolumeState {
-                        volume: babydra_core::services::system::volume::get_current_volume(),
-                        muted: babydra_core::services::system::volume::is_muted(),
-                    };
+                    let (volume, muted) =
+                        babydra_core::services::system::volume::get_volume_state();
+                    let current = VolumeState { volume, muted };
                     if current != last_state {
                         last_state = current;
                         if sender.send(current).is_err() {
@@ -66,13 +63,14 @@ where
                         };
                         // pactl emits lines like: Event 'change' on sink #...
                         if line.contains("sink") {
-                            let current = VolumeState {
-                                volume: babydra_core::services::system::volume::get_current_volume(),
-                                muted: babydra_core::services::system::volume::is_muted(),
-                            };
+                            let (volume, muted) =
+                                babydra_core::services::system::volume::get_volume_state();
+                            let current = VolumeState { volume, muted };
                             if current != last_state {
                                 last_state = current;
                                 if sender.send(current).is_err() {
+                                    let _ = child.kill();
+                                    let _ = child.wait();
                                     return;
                                 }
                             }
@@ -80,6 +78,7 @@ where
                     }
                 }
 
+                let _ = child.kill();
                 let _ = child.wait();
                 std::thread::sleep(Duration::from_millis(500));
             }
