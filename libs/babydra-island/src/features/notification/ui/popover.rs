@@ -39,6 +39,7 @@ impl NotificationPopover {
             "notification-popover-box",
             320,
         );
+        base.popover.set_autohide(false);
 
         // Content row (compact card with icon and text)
         let content_box = GtkBox::new(Orientation::Horizontal, 10);

@@ -45,7 +45,12 @@ impl NotificationFeature {
         spawn_notif_dbus();
         Self {
             handle_rc: Rc::new(RefCell::new(None)),
-            widgets: NotchWidget::new("bell", "#f59e0b", &babydra_core::i18n::trans("island.notification")),
+            widgets: NotchWidget::with_value(
+                "bell",
+                "#f59e0b",
+                &babydra_core::i18n::trans("island.notification"),
+                "",
+            ),
             popover: Rc::new(RefCell::new(None)),
             last_key: String::new(),
             needs_popup: false,
@@ -161,7 +166,7 @@ impl IslandFeature for NotificationFeature {
     fn attach(&mut self, ctx: &IslandCtx) {
         let popover = NotificationPopover::new(&ctx.capsule());
 
-        // 1. Clicking notification content: activate app and dismiss
+        // Clicking notification content: activate app and dismiss
         {
             let handle_rc = self.handle_rc.clone();
             let pop_c = popover.clone();
@@ -170,22 +175,6 @@ impl IslandFeature for NotificationFeature {
                     .with(|sn| sn.borrow().as_ref().map(|n| n.app_name.clone()));
                 activate_sender_app(app_to_activate);
                 dismiss_notification(Some(&pop_c), handle_rc.borrow().as_ref());
-            });
-        }
-
-        // 2. Clean up on popover close (outside click, Escape, or dismissal)
-        {
-            let handle_rc = self.handle_rc.clone();
-            popover.popover.connect_closed(move |_| {
-                if crate::island::controller::scroll::is_switching_island() {
-                    return;
-                }
-                crate::widgets::notification::SHARED_NOTIFICATION
-                    .with(|sn| *sn.borrow_mut() = None);
-                if let Some(h) = handle_rc.borrow().as_ref() {
-                    h.release_override();
-                    h.hide();
-                }
             });
         }
 
@@ -214,9 +203,12 @@ impl IslandFeature for NotificationFeature {
         );
         self.last_key.clear();
         self.needs_popup = false;
-        self.widgets
-            .title_label
-            .set_text(&babydra_core::i18n::trans("island.notification"));
+        self.widgets.update_all(
+            "bell",
+            "#f59e0b",
+            &babydra_core::i18n::trans("island.notification"),
+            "",
+        );
     }
 
     fn open_badge(&mut self) {
@@ -233,7 +225,9 @@ impl IslandFeature for NotificationFeature {
 
     fn on_hide(&mut self) {
         if let Some(popover) = self.popover.borrow().as_ref() {
-            popover.popdown();
+            if popover.is_visible() {
+                popover.popdown();
+            }
         }
         self.needs_popup = false;
     }
@@ -246,15 +240,19 @@ impl IslandFeature for NotificationFeature {
             None => {
                 self.last_key.clear();
                 self.needs_popup = false;
-                self.widgets
-                    .title_label
-                    .set_text(&babydra_core::i18n::trans("island.notification"));
+                self.widgets.update_all(
+                    "bell",
+                    "#f59e0b",
+                    &babydra_core::i18n::trans("island.notification"),
+                    "",
+                );
                 if let Some(popover) = self.popover.borrow().as_ref() {
                     if popover.is_visible() {
                         popover.popdown();
                     }
                 }
                 if let Some(h) = self.handle_rc.borrow().as_ref() {
+                    h.release_override();
                     h.hide();
                 }
                 return;
@@ -280,11 +278,35 @@ impl IslandFeature for NotificationFeature {
             } else {
                 n.app_name.clone()
             };
-            self.widgets.title_label.set_text(&app_name);
+            self.widgets.update_all(
+                "bell",
+                "#f59e0b",
+                &app_name,
+                &babydra_core::i18n::trans("island.notification_now"),
+            );
 
-            crate::island::dismiss_all_popovers();
+            // Dismiss other popovers on capsule except self.popover
+            if let Some(island) = crate::island::default_island() {
+                let capsule = island.capsule();
+                let mut next = capsule.first_child();
+                let my_pop = self.popover.borrow().as_ref().map(|p| p.popover.clone());
+                while let Some(child) = next {
+                    next = child.next_sibling();
+                    if let Some(popover) = child.downcast_ref::<gtk4::Popover>() {
+                        if let Some(my_pop) = &my_pop {
+                            if popover.upcast_ref::<gtk4::Widget>() == my_pop.upcast_ref::<gtk4::Widget>() {
+                                continue;
+                            }
+                        }
+                        if popover.is_visible() {
+                            popover.popdown();
+                        }
+                    }
+                }
+            }
+
             if let Some(h) = self.handle_rc.borrow().as_ref() {
-                h.override_show_for(POPUP_LIFETIME);
+                h.override_show_for(POPUP_LIFETIME + Duration::from_millis(500));
             }
 
             if let Some(popover) = self.popover.borrow().as_ref() {
@@ -298,6 +320,13 @@ impl IslandFeature for NotificationFeature {
             .as_ref()
             .map(|p| p.is_hovered.get())
             .unwrap_or(false);
+
+        if is_hovered {
+            if let Some(h) = self.handle_rc.borrow().as_ref() {
+                h.override_show_for(POPUP_LIFETIME + Duration::from_millis(500));
+            }
+        }
+
         let expired = !is_hovered && n.timestamp.elapsed() >= POPUP_LIFETIME;
         if expired {
             self.last_key.clear();

@@ -19,9 +19,11 @@ pub fn spawn_notif_dbus() {
                     crate::widgets::notification::show_notif_popup(
                         &summary, &body, &icon, &app_name, timeout,
                     );
+                    crate::island::tick_default_island();
                 }
                 NotificationMsg::Close => {
                     crate::widgets::notification::close_notif_popup();
+                    crate::island::tick_default_island();
                 }
             }
         }
