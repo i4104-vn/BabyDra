@@ -1,3 +1,6 @@
+//! Dynamic Island capsule size / zoom transition animations
+//! and animation generation counter for safe cancellation.
+
 use std::cell::Cell;
 
 use super::easing;
