@@ -166,6 +166,14 @@ impl IslandFeature for MediaPlayerFeature {
         }
     }
 
+    fn open_badge(&mut self) {
+        if let Some(popover) = self.popover.borrow().as_ref() {
+            if !popover.is_visible() {
+                popover.popup();
+            }
+        }
+    }
+
     fn tick(&mut self, ctx: &IslandCtx) {
         self.refresh(ctx);
     }

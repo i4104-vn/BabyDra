@@ -165,6 +165,9 @@ impl IslandFeature for NotificationFeature {
         {
             let handle_rc = self.handle_rc.clone();
             popover.popover.connect_closed(move |_| {
+                if crate::island::controller::scroll::is_switching_island() {
+                    return;
+                }
                 crate::widgets::notification::SHARED_NOTIFICATION
                     .with(|sn| *sn.borrow_mut() = None);
                 if let Some(h) = handle_rc.borrow().as_ref() {
@@ -202,6 +205,18 @@ impl IslandFeature for NotificationFeature {
         self.widgets
             .title_label
             .set_text(&babydra_core::i18n::trans("island.notification"));
+    }
+
+    fn open_badge(&mut self) {
+        let notif = crate::widgets::notification::SHARED_NOTIFICATION
+            .with(|sn| sn.borrow().clone());
+        if let Some(n) = notif {
+            if let Some(popover) = self.popover.borrow().as_ref() {
+                render_popover_notification(popover, &n);
+                popover.popup();
+                self.needs_popup = false;
+            }
+        }
     }
 
     fn on_hide(&mut self) {

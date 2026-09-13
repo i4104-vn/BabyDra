@@ -156,6 +156,16 @@ impl IslandFeature for PowerFeature {
         }
     }
 
+    fn open_badge(&mut self) {
+        if let Some(popover) = self.popover.borrow().as_ref() {
+            if !popover.is_visible() {
+                self.selected_index.set(0);
+                highlight_selection(popover, 0);
+                popover.popup();
+            }
+        }
+    }
+
     fn on_hide(&mut self) {
         if let Some(popover) = self.popover.borrow().as_ref() {
             popover.popdown();

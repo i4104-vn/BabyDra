@@ -7,7 +7,7 @@ use std::time::Duration;
 use gtk4::prelude::*;
 
 use crate::island::controller::arbitration::island_tick;
-use crate::island::controller::scroll::handle_island_scroll;
+use crate::island::controller::scroll::attach_island_scroll;
 use crate::island::manager::core::IslandCore;
 use crate::island::manager::{set_default_island, Island};
 use crate::island::models::{IslandConfig, IslandDisplay};
@@ -148,19 +148,9 @@ pub(crate) fn build_island(builder: IslandBuilder) -> Island {
     root.add_controller(motion);
 
     // Scroll wheel cycle navigation among active island views.
-    // Captured on root so it covers both outside brackets and inside capsule without duplication.
-    let scroll_core = core.clone();
-    let scroll = gtk4::EventControllerScroll::new(
-        gtk4::EventControllerScrollFlags::VERTICAL
-            | gtk4::EventControllerScrollFlags::HORIZONTAL
-            | gtk4::EventControllerScrollFlags::DISCRETE,
-    );
-    scroll.set_propagation_phase(gtk4::PropagationPhase::Capture);
-    scroll.connect_scroll(move |_, dx, dy| {
-        handle_island_scroll(&scroll_core, dx, dy);
-        gtk4::glib::Propagation::Stop
-    });
-    root.add_controller(scroll);
+    // Captured on root and capsule so it covers outside brackets, capsule, and popover anchor.
+    attach_island_scroll(&root);
+    attach_island_scroll(&capsule);
 
     // Click dispatch to the currently displayed view.
     let click_core = core.clone();

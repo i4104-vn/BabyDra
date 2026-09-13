@@ -1,14 +1,108 @@
 //! Mouse scroll-wheel navigation among active island views.
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::time::{Duration, Instant};
+
+use gtk4::prelude::*;
 
 use crate::island::manager::core::IslandCore;
 use crate::island::manager::dismiss_all_popovers;
 use crate::island::models::IslandDisplay;
 use crate::island::ui::transition::apply_transition;
 use crate::island::view::next_request_seq;
+
+thread_local! {
+    static IS_SWITCHING_ISLAND: Cell<bool> = const { Cell::new(false) };
+}
+
+/// Returns true if an island scroll transition is currently in progress.
+pub fn is_switching_island() -> bool {
+    IS_SWITCHING_ISLAND.with(|f| f.get())
+}
+
+pub(crate) fn set_switching_island(val: bool) {
+    IS_SWITCHING_ISLAND.with(|f| f.set(val));
+}
+
+/// Attaches an EventControllerScroll with Capture phase targeting island navigation.
+pub fn attach_island_scroll(widget: &impl IsA<gtk4::Widget>) {
+    let sc = gtk4::EventControllerScroll::new(
+        gtk4::EventControllerScrollFlags::VERTICAL
+            | gtk4::EventControllerScrollFlags::HORIZONTAL
+            | gtk4::EventControllerScrollFlags::DISCRETE,
+    );
+    sc.set_propagation_phase(gtk4::PropagationPhase::Capture);
+    sc.connect_scroll(move |_, dx, dy| {
+        if let Some(island) = crate::island::default_island() {
+            handle_island_scroll(&island.core, dx, dy);
+        }
+        gtk4::glib::Propagation::Stop
+    });
+    widget.add_controller(sc);
+}
+
+/// Attaches island scroll controllers to both a popover and its child container.
+pub fn attach_popover_scroll(popover: &gtk4::Popover, content: &impl IsA<gtk4::Widget>) {
+    attach_island_scroll(popover);
+    attach_island_scroll(content);
+}
+
+/// Checks if any popover anchored to the capsule is currently visible.
+pub(crate) fn is_capsule_popover_open(capsule: &gtk4::Box) -> bool {
+    let mut next = capsule.first_child();
+    while let Some(child) = next {
+        next = child.next_sibling();
+        if let Some(popover) = child.downcast_ref::<gtk4::Popover>() {
+            if popover.is_visible() {
+                return true;
+            }
+        }
+    }
+    false
+}
+
+/// Collects views that can display a badge/popover when in badge navigation mode.
+fn get_badge_scrollable_indices(core: &IslandCore) -> Vec<usize> {
+    let mut indices = Vec::new();
+    for (i, v) in core.views.iter().enumerate() {
+        if v.id == "notification" {
+            let has_notif = crate::widgets::notification::SHARED_NOTIFICATION
+                .with(|sn| sn.borrow().is_some());
+            if has_notif || v.state.override_active.get() || v.state.requested.get() {
+                indices.push(i);
+            }
+        } else if v.id == "media_player" {
+            let is_active = v.state.override_active.get() || v.state.requested.get();
+            if is_active {
+                indices.push(i);
+            }
+        } else {
+            indices.push(i);
+        }
+    }
+    indices
+}
+
+/// Schedules opening the badge/popover for a target view after a short transition delay.
+fn schedule_open_badge(core_rc: &Rc<RefCell<IslandCore>>, target_idx: usize) {
+    let rc_open = core_rc.clone();
+    gtk4::glib::timeout_add_local_once(Duration::from_millis(80), move || {
+        if let Ok(core) = rc_open.try_borrow() {
+            if let IslandDisplay::View(curr) = core.displayed {
+                if curr == target_idx {
+                    if let Some(f) = &core.views[target_idx].feature {
+                        if let Ok(mut feat) = f.try_borrow_mut() {
+                            feat.open_badge();
+                        }
+                    } else if let Some(cb) = &core.views[target_idx].on_click {
+                        cb();
+                    }
+                }
+            }
+        }
+    });
+}
 
 /// Handles mouse scroll events on the island assembly to cycle through active views.
 pub(crate) fn handle_island_scroll(core_rc: &Rc<RefCell<IslandCore>>, dx: f64, dy: f64) {
@@ -30,31 +124,30 @@ pub(crate) fn handle_island_scroll(core_rc: &Rc<RefCell<IslandCore>>, dx: f64, d
         }
     }
 
-    // Always dismiss all open popovers and notification badge on scroll!
-    dismiss_all_popovers();
-
-    // If notification was active, dismiss it so scrolling switches away from it
-    let had_notification =
-        crate::widgets::notification::SHARED_NOTIFICATION.with(|sn| sn.borrow().is_some());
-    if had_notification {
-        crate::widgets::notification::SHARED_NOTIFICATION.with(|sn| *sn.borrow_mut() = None);
-        if let Ok(core) = core_rc.try_borrow() {
-            for v in &core.views {
-                if v.id == "notification" {
-                    v.state.override_active.set(false);
-                    v.state.requested.set(false);
-                }
-            }
-        }
-    }
-
     let Ok(mut core) = core_rc.try_borrow_mut() else {
         return;
     };
 
-    let active_indices = core.get_active_indices();
-    if active_indices.is_empty() {
-        // No views active anymore, collapse to idle or hidden
+    // Check if any badge/popover was open before dismissing
+    let had_badge_open = is_capsule_popover_open(&core.capsule);
+
+    // Set flag so connect_closed handlers do not wipe active state during scroll switch
+    set_switching_island(true);
+    dismiss_all_popovers();
+
+    // Determine target views list
+    let mut scroll_indices = core.get_active_indices();
+
+    // If a badge was open and active_indices <= 1, allow cycling to other badge-capable features
+    if had_badge_open && scroll_indices.len() <= 1 {
+        let badge_indices = get_badge_scrollable_indices(&core);
+        if badge_indices.len() > 1 {
+            scroll_indices = badge_indices;
+        }
+    }
+
+    if scroll_indices.is_empty() {
+        set_switching_island(false);
         let desired = if core.cfg.idle_visible && core.idle.is_some() {
             IslandDisplay::Idle
         } else {
@@ -66,8 +159,8 @@ pub(crate) fn handle_island_scroll(core_rc: &Rc<RefCell<IslandCore>>, dx: f64, d
         return;
     }
 
-    if active_indices.len() == 1 {
-        let only_idx = active_indices[0];
+    if scroll_indices.len() == 1 {
+        let only_idx = scroll_indices[0];
         let curr_idx = match core.displayed {
             IslandDisplay::View(i) => Some(i),
             _ => None,
@@ -77,26 +170,37 @@ pub(crate) fn handle_island_scroll(core_rc: &Rc<RefCell<IslandCore>>, dx: f64, d
             let next_seq = next_request_seq();
             core.user_selected = Some((only_idx, next_seq));
             core.views[only_idx].state.request_seq.set(next_seq);
+            core.views[only_idx].state.requested.set(true);
             core.animating.set(false);
             apply_transition(&mut core, IslandDisplay::View(only_idx), core_rc);
+
+            if had_badge_open {
+                schedule_open_badge(core_rc, only_idx);
+            }
         }
+        gtk4::glib::timeout_add_local_once(Duration::from_millis(150), move || {
+            set_switching_island(false);
+        });
         return;
     }
 
     let curr_idx = match core.displayed {
         IslandDisplay::View(i) => i,
-        _ => active_indices[0],
+        _ => scroll_indices[0],
     };
 
-    let pos = active_indices.iter().position(|&i| i == curr_idx).unwrap_or(0);
+    let pos = scroll_indices.iter().position(|&i| i == curr_idx).unwrap_or(0);
     let next_pos = if delta > 0.0 {
-        (pos + 1) % active_indices.len()
+        (pos + 1) % scroll_indices.len()
     } else {
-        (pos + active_indices.len() - 1) % active_indices.len()
+        (pos + scroll_indices.len() - 1) % scroll_indices.len()
     };
 
-    let target_idx = active_indices[next_pos];
+    let target_idx = scroll_indices[next_pos];
     if target_idx == curr_idx {
+        gtk4::glib::timeout_add_local_once(Duration::from_millis(150), move || {
+            set_switching_island(false);
+        });
         return;
     }
 
@@ -105,7 +209,16 @@ pub(crate) fn handle_island_scroll(core_rc: &Rc<RefCell<IslandCore>>, dx: f64, d
     let next_seq = next_request_seq();
     core.user_selected = Some((target_idx, next_seq));
     core.views[target_idx].state.request_seq.set(next_seq);
+    core.views[target_idx].state.requested.set(true);
 
     core.animating.set(false);
     apply_transition(&mut core, IslandDisplay::View(target_idx), core_rc);
+
+    gtk4::glib::timeout_add_local_once(Duration::from_millis(150), move || {
+        set_switching_island(false);
+    });
+
+    if had_badge_open {
+        schedule_open_badge(core_rc, target_idx);
+    }
 }

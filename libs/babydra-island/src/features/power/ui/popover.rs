@@ -104,68 +104,13 @@ impl PowerPopover {
         hint_lbl.set_halign(Align::Center);
         popover_box.append(&hint_lbl);
 
-        let scroll_controller = gtk4::EventControllerScroll::new(
-            gtk4::EventControllerScrollFlags::VERTICAL
-                | gtk4::EventControllerScrollFlags::HORIZONTAL
-                | gtk4::EventControllerScrollFlags::DISCRETE,
-        );
-        scroll_controller.connect_scroll(move |_, dx, dy| {
-            if let Some(island) = crate::island::default_island() {
-                crate::island::controller::scroll::handle_island_scroll(&island.core, dx, dy);
-            }
-            gtk4::glib::Propagation::Stop
-        });
-        popover_box.add_controller(scroll_controller);
+        crate::island::controller::scroll::attach_popover_scroll(&popover, &popover_box);
 
         popover_box.set_focusable(true);
         popover.set_child(Some(&popover_box));
         popover.set_focusable(true);
 
-        // Slide animation on open / close + keyboard focus grab
-        let popover_box_slide = popover_box.clone();
-        let capsule_map = capsule.clone();
-        let popover_map = popover.clone();
-        let popover_box_focus = popover_box.clone();
-
-        popover.connect_map(move |p| {
-            capsule_map.add_css_class("popover-open");
-            crate::features::power::controller::focus::acquire_layer_keyboard_focus(p);
-
-            let box_c = popover_box_focus.clone();
-            let pop_c = popover_map.clone();
-            gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(40), move || {
-                pop_c.grab_focus();
-                box_c.grab_focus();
-            });
-
-            babydra_ui_kit::ui::animation::slide_in(
-                popover_box_slide.upcast_ref(),
-                babydra_ui_kit::ui::animation::SlideDirection::Down,
-                15,
-                400,
-            );
-        });
-
-        let capsule_unmap = capsule.clone();
-        popover.connect_unmap(move |p| {
-            let mut other_open = false;
-            let mut next = capsule_unmap.first_child();
-            while let Some(child) = next {
-                next = child.next_sibling();
-                if let Some(pop) = child.downcast_ref::<gtk4::Popover>() {
-                    if pop.is_visible()
-                        && pop.upcast_ref::<gtk4::Widget>() != p.upcast_ref::<gtk4::Widget>()
-                    {
-                        other_open = true;
-                        break;
-                    }
-                }
-            }
-            if !other_open {
-                capsule_unmap.remove_css_class("popover-open");
-            }
-            crate::features::power::controller::focus::release_layer_keyboard_focus(p);
-        });
+        crate::island::ui::setup_modal_popover_lifecycle(&popover, capsule, &popover_box, 400);
 
         Self {
             popover,
@@ -188,27 +133,11 @@ impl PowerPopover {
     }
 
     pub fn toggle(&self) {
-        if self.is_animating.get() {
-            return;
-        }
-        if self.popover.is_visible() {
-            self.is_animating.set(true);
-            let box_c = self.popover_box.clone();
-            let popover_c = self.popover.clone();
-            let anim_c = self.is_animating.clone();
-            babydra_ui_kit::ui::animation::slide_out_cb(
-                box_c.upcast_ref(),
-                babydra_ui_kit::ui::animation::SlideDirection::Up,
-                15,
-                400,
-                false,
-                move || {
-                    popover_c.popdown();
-                    anim_c.set(false);
-                },
-            );
-        } else {
-            self.popover.popup();
-        }
+        crate::island::ui::toggle_popover_animated(
+            &self.popover,
+            &self.popover_box,
+            &self.is_animating,
+            400,
+        );
     }
 }

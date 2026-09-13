@@ -6,3 +6,4 @@ pub mod scroll;
 
 pub(crate) use arbitration::island_tick;
 pub use focus::set_layer_keyboard_mode;
+pub use scroll::{attach_island_scroll, attach_popover_scroll, is_switching_island};

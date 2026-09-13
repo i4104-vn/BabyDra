@@ -153,37 +153,11 @@ impl MediaPopover {
         controls_box.append(&next_btn);
         popover_box.append(&controls_box);
 
-        let scroll_controller = gtk4::EventControllerScroll::new(
-            gtk4::EventControllerScrollFlags::VERTICAL
-                | gtk4::EventControllerScrollFlags::HORIZONTAL
-                | gtk4::EventControllerScrollFlags::DISCRETE,
-        );
-        scroll_controller.connect_scroll(move |_, dx, dy| {
-            if let Some(island) = crate::island::default_island() {
-                crate::island::controller::scroll::handle_island_scroll(&island.core, dx, dy);
-            }
-            gtk4::glib::Propagation::Stop
-        });
-        popover_box.add_controller(scroll_controller);
+        crate::island::controller::scroll::attach_popover_scroll(&popover, &popover_box);
 
         popover.set_child(Some(&popover_box));
 
-        let popover_box_slide = popover_box.clone();
-        let capsule_map = capsule.clone();
-        popover.connect_map(move |_| {
-            capsule_map.add_css_class("popover-open");
-            babydra_ui_kit::ui::animation::slide_in(
-                popover_box_slide.upcast_ref(),
-                babydra_ui_kit::ui::animation::SlideDirection::Down,
-                15,
-                450,
-            );
-        });
-
-        let capsule_unmap = capsule.clone();
-        popover.connect_unmap(move |_| {
-            capsule_unmap.remove_css_class("popover-open");
-        });
+        crate::island::ui::setup_popover_slide_lifecycle(&popover, capsule, &popover_box, 450);
 
         Self {
             popover,
@@ -206,6 +180,11 @@ impl MediaPopover {
         self.popover.is_visible()
     }
 
+    /// Shows the popover.
+    pub fn popup(&self) {
+        self.popover.popup();
+    }
+
     /// Closes the popover.
     pub fn popdown(&self) {
         self.popover.popdown();
@@ -213,27 +192,11 @@ impl MediaPopover {
 
     /// Toggles the popover with a slide animation.
     pub fn toggle(&self) {
-        if self.is_animating.get() {
-            return;
-        }
-        if self.popover.is_visible() {
-            self.is_animating.set(true);
-            let box_c = self.popover_box.clone();
-            let popover_c = self.popover.clone();
-            let anim_c = self.is_animating.clone();
-            babydra_ui_kit::ui::animation::slide_out_cb(
-                box_c.upcast_ref(),
-                babydra_ui_kit::ui::animation::SlideDirection::Up,
-                15,
-                450,
-                false,
-                move || {
-                    popover_c.popdown();
-                    anim_c.set(false);
-                },
-            );
-        } else {
-            self.popover.popup();
-        }
+        crate::island::ui::toggle_popover_animated(
+            &self.popover,
+            &self.popover_box,
+            &self.is_animating,
+            450,
+        );
     }
 }

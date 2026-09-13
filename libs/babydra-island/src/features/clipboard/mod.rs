@@ -194,6 +194,17 @@ impl IslandFeature for ClipboardFeature {
         }
     }
 
+    fn open_badge(&mut self) {
+        if let Some(popover) = self.popover.borrow().as_ref() {
+            if !popover.is_visible() {
+                self.selected_index.set(0);
+                let entries = babydra_core::get_entries();
+                render_popover(popover, &entries, 0);
+                popover.popup();
+            }
+        }
+    }
+
     fn on_hide(&mut self) {
         if let Some(popover) = self.popover.borrow().as_ref() {
             popover.popdown();
