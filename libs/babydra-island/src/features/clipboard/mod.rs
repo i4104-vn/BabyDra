@@ -24,9 +24,9 @@ use std::time::Duration;
 use gtk4::prelude::*;
 
 use crate::island::view::{CAPSULE_HEIGHT, CAPSULE_WIDTH};
-use crate::island::{IslandCtx, IslandFeature, IslandViewHandle};
+use crate::island::{IslandCtx, IslandFeature, IslandViewHandle, NotchWidget};
 use controller::keyboard::create_keyboard_controller;
-use ui::{render_popover, ClipboardNotchWidgets, ClipboardPopover, MAX_VISIBLE_ITEMS};
+use ui::{render_popover, ClipboardPopover, MAX_VISIBLE_ITEMS};
 
 pub const PRIORITY: u8 = 95;
 const POPUP_DURATION: Duration = Duration::from_secs(15);
@@ -34,7 +34,7 @@ const POPUP_DURATION: Duration = Duration::from_secs(15);
 /// Dynamic Island clipboard feature.
 pub struct ClipboardFeature {
     handle_rc: Rc<RefCell<Option<IslandViewHandle>>>,
-    widgets: ClipboardNotchWidgets,
+    widgets: NotchWidget,
     popover: Rc<RefCell<Option<ClipboardPopover>>>,
     selected_index: Rc<Cell<usize>>,
     last_entries_len: usize,
@@ -43,7 +43,8 @@ pub struct ClipboardFeature {
 impl ClipboardFeature {
     pub fn new() -> Self {
         service::init_clipboard_services();
-        let widgets = ClipboardNotchWidgets::build();
+        let widgets =
+            NotchWidget::new("paste", "#3b82f6", &babydra_core::i18n::trans("island.clipboard_notch"));
         Self {
             handle_rc: Rc::new(RefCell::new(None)),
             widgets,
@@ -104,7 +105,7 @@ impl IslandFeature for ClipboardFeature {
     }
 
     fn build_view(&mut self) -> gtk4::Widget {
-        self.widgets.notch_view.clone().upcast()
+        self.widgets.container.clone().upcast()
     }
 
     fn init(&mut self, handle: &IslandViewHandle) {

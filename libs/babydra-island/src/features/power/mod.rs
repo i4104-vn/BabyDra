@@ -24,9 +24,9 @@ use std::time::Duration;
 use gtk4::prelude::*;
 
 use crate::island::view::{CAPSULE_HEIGHT, CAPSULE_WIDTH};
-use crate::island::{IslandCtx, IslandFeature, IslandViewHandle};
+use crate::island::{IslandCtx, IslandFeature, IslandViewHandle, NotchWidget};
 use controller::keyboard::create_keyboard_controller;
-use ui::{execute_power_action, highlight_selection, PowerNotchWidgets, PowerPopover};
+use ui::{execute_power_action, highlight_selection, PowerPopover};
 
 pub const PRIORITY: u8 = 100;
 const POPUP_DURATION: Duration = Duration::from_secs(30);
@@ -34,14 +34,15 @@ const POPUP_DURATION: Duration = Duration::from_secs(30);
 /// Power menu island feature: provides quick access to shutdown, restart, sleep, and logout.
 pub struct PowerFeature {
     handle_rc: Rc<RefCell<Option<IslandViewHandle>>>,
-    widgets: PowerNotchWidgets,
+    widgets: NotchWidget,
     popover: Rc<RefCell<Option<PowerPopover>>>,
     selected_index: Rc<Cell<usize>>,
 }
 
 impl PowerFeature {
     pub fn new() -> Self {
-        let widgets = PowerNotchWidgets::build();
+        let widgets =
+            NotchWidget::new("power", "#ff5555", &babydra_core::i18n::trans("island.power_notch"));
         Self {
             handle_rc: Rc::new(RefCell::new(None)),
             widgets,

@@ -23,9 +23,9 @@ use std::time::Duration;
 use gtk4::prelude::*;
 
 use crate::island::view::{CAPSULE_HEIGHT, CAPSULE_WIDTH};
-use crate::island::{IslandCtx, IslandFeature, IslandViewHandle};
+use crate::island::{IslandCtx, IslandFeature, IslandViewHandle, NotchWidget};
 use service::spawn_notif_dbus;
-use ui::{render_popover_notification, NotificationNotchWidgets, NotificationPopover};
+use ui::{render_popover_notification, NotificationPopover};
 
 pub const PRIORITY: u8 = 90;
 const POPUP_LIFETIME: Duration = Duration::from_secs(5);
@@ -34,7 +34,7 @@ const POPUP_LIFETIME: Duration = Duration::from_secs(5);
 /// in the notch capsule and a glassmorphic badge popover below.
 pub struct NotificationFeature {
     handle_rc: Rc<RefCell<Option<IslandViewHandle>>>,
-    widgets: NotificationNotchWidgets,
+    widgets: NotchWidget,
     popover: Rc<RefCell<Option<NotificationPopover>>>,
     last_key: String,
     needs_popup: bool,
@@ -45,7 +45,7 @@ impl NotificationFeature {
         spawn_notif_dbus();
         Self {
             handle_rc: Rc::new(RefCell::new(None)),
-            widgets: NotificationNotchWidgets::build(),
+            widgets: NotchWidget::new("bell", "#f59e0b", &babydra_core::i18n::trans("island.notification")),
             popover: Rc::new(RefCell::new(None)),
             last_key: String::new(),
             needs_popup: false,
