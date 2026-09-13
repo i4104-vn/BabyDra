@@ -141,4 +141,11 @@ impl NotchWidget {
         self.set_icon(icon_name, icon_color);
         self.set_value(value_text);
     }
+
+    /// Updates icon (if changed), title text, and value label simultaneously.
+    pub fn update_all(&self, icon_name: &str, icon_color: &str, title_text: &str, value_text: &str) {
+        self.set_icon(icon_name, icon_color);
+        self.set_title(title_text);
+        self.set_value(value_text);
+    }
 }
