@@ -98,16 +98,6 @@ pub fn create_keyboard_controller(
                 }
                 glib::Propagation::Stop
             }
-            Key::Escape => {
-                if let Some(p) = popover_rc.borrow().as_ref() {
-                    p.popdown();
-                }
-                if let Some(h) = handle_rc.borrow().as_ref() {
-                    h.release_override();
-                    h.hide();
-                }
-                glib::Propagation::Stop
-            }
             _ => glib::Propagation::Proceed,
         }
     });
