@@ -1,7 +1,23 @@
-//! Dynamic Island capsule size / zoom transition animations.
+use std::cell::Cell;
 
 use super::easing;
 use gtk4::prelude::*;
+
+thread_local! {
+    static CURRENT_ANIM_GEN: Cell<u64> = const { Cell::new(0) };
+}
+
+pub fn next_anim_gen() -> u64 {
+    CURRENT_ANIM_GEN.with(|g| {
+        let next = g.get() + 1;
+        g.set(next);
+        next
+    })
+}
+
+pub fn current_anim_gen() -> u64 {
+    CURRENT_ANIM_GEN.with(|g| g.get())
+}
 
 /// Animates the Dynamic Island capsule expanding from a small pill to full width. Uses FrameClock timing.
 pub fn island_zoom_in(
@@ -10,6 +26,7 @@ pub fn island_zoom_in(
     target_height: i32,
     duration_ms: u64,
 ) {
+    let anim_gen = next_anim_gen();
     widget.set_opacity(1.0);
     widget.set_visible(true);
     widget.set_size_request(target_height, target_height);
@@ -22,6 +39,11 @@ pub fn island_zoom_in(
     let dur_us = duration_ms as i64 * 1000;
 
     widget.add_tick_callback(move |w, clock| {
+        // Cancel if a newer animation was started
+        if current_anim_gen() != anim_gen {
+            return glib::ControlFlow::Break;
+        }
+
         let now = clock.frame_time();
         if start_time.get() == 0 {
             start_time.set(now);
@@ -60,6 +82,7 @@ pub fn island_zoom_out(
     duration_ms: u64,
     hide_after: bool,
 ) {
+    let anim_gen = next_anim_gen();
     let start_h = widget.height().max(22);
 
     if let Some(ref child) = widget.first_child() {
@@ -70,6 +93,11 @@ pub fn island_zoom_out(
     let dur_us = duration_ms as i64 * 1000;
 
     widget.add_tick_callback(move |w, clock| {
+        // Cancel if a newer animation was started
+        if current_anim_gen() != anim_gen {
+            return glib::ControlFlow::Break;
+        }
+
         let now = clock.frame_time();
         if start_time.get() == 0 {
             start_time.set(now);
@@ -114,11 +142,17 @@ pub fn island_animate_width<F>(
 ) where
     F: FnOnce() + 'static,
 {
+    let anim_gen = next_anim_gen();
     let start_time = std::cell::Cell::new(0i64);
     let dur_us = duration_ms as i64 * 1000;
     let on_complete_opt = std::cell::RefCell::new(Some(on_complete));
 
     widget.add_tick_callback(move |w, clock| {
+        // Cancel if a newer animation was started
+        if current_anim_gen() != anim_gen {
+            return glib::ControlFlow::Break;
+        }
+
         let now = clock.frame_time();
         if start_time.get() == 0 {
             start_time.set(now);
@@ -153,14 +187,23 @@ pub fn island_animate_size<F>(
 ) where
     F: FnOnce() + 'static,
 {
+    let anim_gen = next_anim_gen();
     widget.set_opacity(1.0);
     widget.set_visible(true);
+    if let Some(ref child) = widget.first_child() {
+        child.set_opacity(1.0);
+    }
 
     let start_time = std::cell::Cell::new(0i64);
     let dur_us = duration_ms as i64 * 1000;
     let on_complete_opt = std::cell::RefCell::new(Some(on_complete));
 
     widget.add_tick_callback(move |w, clock| {
+        // Cancel if a newer animation was started
+        if current_anim_gen() != anim_gen {
+            return glib::ControlFlow::Break;
+        }
+
         let now = clock.frame_time();
         if start_time.get() == 0 {
             start_time.set(now);
@@ -168,11 +211,15 @@ pub fn island_animate_size<F>(
         let elapsed_us = now - start_time.get();
         if elapsed_us >= dur_us {
             w.set_size_request(target_width, target_height);
-            w.set_opacity(if target_width == 0 || target_height == 0 {
+            let target_op = if target_width == 0 || target_height == 0 {
                 0.0
             } else {
                 1.0
-            });
+            };
+            w.set_opacity(target_op);
+            if let Some(ref child) = w.first_child() {
+                child.set_opacity(target_op);
+            }
             if let Some(cb) = on_complete_opt.borrow_mut().take() {
                 cb();
             }

@@ -57,6 +57,9 @@ pub(crate) fn apply_transition(
             let v = &core.views[w];
             v.state.active.set(true);
             v.container.set_visible(true);
+            v.container.set_opacity(1.0);
+            core.capsule.set_visible(true);
+            core.capsule.set_opacity(1.0);
             if let Some(cls) = &v.capsule_class {
                 core.capsule.add_css_class(cls);
             }
@@ -115,12 +118,22 @@ pub(crate) fn animate_expand(
     let rc2 = core_rc.clone();
 
     capsule.set_visible(true);
+    capsule.set_opacity(1.0);
+    let mut next = capsule.first_child();
+    while let Some(child) = next {
+        next = child.next_sibling();
+        child.set_opacity(1.0);
+    }
     if active_music {
         capsule.add_css_class("active-music");
     }
     if cur_w <= 0 || cur_h <= 0 {
         babydra_ui_kit::ui::animation::island_zoom_in(capsule.upcast_ref(), tw, th, ms);
+        let anim_gen = babydra_ui_kit::ui::animation::current_anim_gen();
         glib::timeout_add_local_once(Duration::from_millis(ms + 60), move || {
+            if babydra_ui_kit::ui::animation::current_anim_gen() != anim_gen {
+                return;
+            }
             if let Ok(core) = rc2.try_borrow_mut() {
                 core.animating.set(false);
             }
@@ -139,10 +152,14 @@ pub(crate) fn animate_expand(
                 }
             },
         );
+        let anim_gen = babydra_ui_kit::ui::animation::current_anim_gen();
         // Belt-and-braces: guarantee `animating` clears even if the capsule's
         // frame clock stalls mid-animation (e.g. during a panel rebuild).
         let rc3 = core_rc.clone();
         glib::timeout_add_local_once(Duration::from_millis(ms + 120), move || {
+            if babydra_ui_kit::ui::animation::current_anim_gen() != anim_gen {
+                return;
+            }
             if let Ok(core) = rc3.try_borrow_mut() {
                 core.animating.set(false);
             }
@@ -159,12 +176,20 @@ pub(crate) fn animate_collapse(core: &mut IslandCore, core_rc: &Rc<RefCell<Islan
     let rc2 = core_rc.clone();
 
     babydra_ui_kit::ui::animation::island_zoom_out(capsule.upcast_ref(), cur_w, ms, true);
+    let anim_gen = babydra_ui_kit::ui::animation::current_anim_gen();
     glib::timeout_add_local_once(Duration::from_millis(ms + 60), move || {
+        if babydra_ui_kit::ui::animation::current_anim_gen() != anim_gen {
+            return;
+        }
         if let Ok(core) = rc2.try_borrow_mut() {
-            core.animating.set(false);
-            core.capsule.remove_css_class("active-music");
-            core.capsule.remove_css_class("notification-mode");
-            core.capsule.set_visible(false);
+            // ONLY hide if the island state is STILL Hidden!
+            // If another view was called while collapsing, do not hide the capsule!
+            if matches!(core.displayed, IslandDisplay::Hidden) {
+                core.animating.set(false);
+                core.capsule.remove_css_class("active-music");
+                core.capsule.remove_css_class("notification-mode");
+                core.capsule.set_visible(false);
+            }
         }
     });
 }
