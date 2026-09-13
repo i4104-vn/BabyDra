@@ -123,33 +123,9 @@ impl IslandFeature for VolumeFeature {
                 crate::island::tick_default_island();
             }
         });
-
-        self.initialized.set(true);
     }
 
     fn tick(&mut self, _ctx: &IslandCtx) {
-        // Fallback polling check in case pactl event stream is delayed or missed
-        if !self.initialized.get() {
-            return;
-        }
-
-        let current_vol = babydra_core::services::system::volume::get_current_volume();
-        let current_muted = babydra_core::services::system::volume::is_muted();
-        let prev_vol = self.last_volume.get();
-        let prev_mut = self.last_muted.get();
-
-        if (current_vol - prev_vol).abs() >= 1.0 || current_muted != prev_mut {
-            self.last_volume.set(current_vol);
-            self.last_muted.set(current_muted);
-
-            let (icon, color) = icon_for_state(current_vol, current_muted);
-            let label_text = label_for_state(current_vol, current_muted);
-            self.widgets.update(icon, color, &label_text);
-
-            if let Some(h) = self.handle_rc.borrow().as_ref() {
-                h.override_show_for(SHOW_DURATION);
-            }
-            crate::island::tick_default_island();
-        }
+        // Event-driven via spawn_volume_listener
     }
 }

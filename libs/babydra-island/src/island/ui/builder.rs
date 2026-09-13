@@ -131,7 +131,7 @@ pub(crate) fn build_island(builder: IslandBuilder) -> Island {
         pending: None,
         animating: Cell::new(false),
         hovered: Cell::new(false),
-        user_selected: None,
+        user_selected: Cell::new(None),
         last_scroll: Cell::new(None),
     }));
 
@@ -175,9 +175,9 @@ pub(crate) fn build_island(builder: IslandBuilder) -> Island {
         drop(core);
 
         if let Some(i) = idx {
-            if let Ok(mut c) = click_core.try_borrow_mut() {
+            if let Ok(c) = click_core.try_borrow() {
                 let next_seq = crate::island::view::next_request_seq();
-                c.user_selected = Some((i, next_seq));
+                c.user_selected.set(Some((i, next_seq)));
                 c.views[i].state.request_seq.set(next_seq);
             }
         }

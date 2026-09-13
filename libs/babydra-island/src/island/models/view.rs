@@ -60,6 +60,50 @@ impl ViewState {
             container,
         }
     }
+
+    /// Checks deadlines against `now` and purges expired ones.
+    /// Returns true if the view still has any active flag remaining.
+    pub fn purge_if_expired(&self, now: Instant) -> bool {
+        let mut expired_hide = false;
+        if let Some(deadline) = *self.auto_hide_at.borrow() {
+            if now >= deadline {
+                expired_hide = true;
+            }
+        }
+        if expired_hide {
+            self.requested.set(false);
+            self.auto_hide_at.borrow_mut().take();
+        }
+
+        let mut expired_release = false;
+        if let Some(deadline) = *self.release_at.borrow() {
+            if now >= deadline {
+                expired_release = true;
+            }
+        }
+        if expired_release {
+            self.override_active.set(false);
+            self.release_at.borrow_mut().take();
+        }
+
+        self.override_active.get() || self.requested.get()
+    }
+
+    /// Returns true if this view currently has an unexpired active timeout.
+    pub fn has_active_timeout(&self, now: Instant) -> bool {
+        let hide_valid = self.auto_hide_at.borrow().map(|d| now < d).unwrap_or(false);
+        let release_valid = self.release_at.borrow().map(|d| now < d).unwrap_or(false);
+        hide_valid || release_valid
+    }
+
+    /// Completely wipes all requested / override flags and deadlines.
+    pub fn deactivate(&self) {
+        self.requested.set(false);
+        self.override_active.set(false);
+        self.active.set(false);
+        self.auto_hide_at.borrow_mut().take();
+        self.release_at.borrow_mut().take();
+    }
 }
 
 /// Programmatic handle to a registered island view.
@@ -100,10 +144,9 @@ impl IslandViewHandle {
             .replace(Instant::now() + duration);
     }
 
-    /// Withdraws the display request.
+    /// Withdraws the display request and completely clears active state.
     pub fn hide(&self) {
-        self.state.requested.set(false);
-        self.state.auto_hide_at.borrow_mut().take();
+        self.state.deactivate();
     }
 
     /// Forces the view to be displayed immediately, ignoring priority, until
@@ -127,11 +170,14 @@ impl IslandViewHandle {
         self.state.auto_hide_at.borrow_mut().replace(deadline);
     }
 
-    /// Ends an active override. The request flag is left untouched, so the
-    /// view keeps participating in normal priority arbitration afterwards.
+    /// Ends an active override. If no active auto_hide deadline remains,
+    /// also clears requested so the view does not stay active unintentionally.
     pub fn release_override(&self) {
         self.state.override_active.set(false);
         self.state.release_at.borrow_mut().take();
+        if self.state.auto_hide_at.borrow().is_none() {
+            self.state.requested.set(false);
+        }
     }
 
     /// Whether the view currently has a pending display request.
@@ -352,6 +398,13 @@ pub trait IslandFeature {
     /// If `false` (default), the island sets keyboard mode to `KeyboardMode::None` so background
     /// apps and typing remain completely uninterrupted.
     fn focus(&self) -> bool {
+        false
+    }
+
+    /// Whether this feature is currently alive and wishes to remain active without a timeout.
+    /// Ephemeral indicators return false by default (they are only alive while their timeout is unexpired).
+    /// Stateful features (e.g. popover open or media playback) override this to return true when active.
+    fn is_alive(&self) -> bool {
         false
     }
 

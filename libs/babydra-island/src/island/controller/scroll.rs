@@ -106,17 +106,8 @@ pub(crate) fn handle_island_scroll(core_rc: &Rc<RefCell<IslandCore>>, dx: f64, d
         return;
     };
 
-    // Determine target views list strictly from ACTUALLY active views
+    // Determine target views list strictly from ACTUALLY active and unexpired views
     let mut scroll_indices = core.get_active_indices();
-    for (i, v) in core.views.iter().enumerate() {
-        if v.id == "notification" {
-            let has_notif = crate::widgets::notification::SHARED_NOTIFICATION
-                .with(|sn| sn.borrow().is_some());
-            if has_notif && !scroll_indices.contains(&i) {
-                scroll_indices.push(i);
-            }
-        }
-    }
     scroll_indices.sort();
 
     // If no views or only 1 view is active, there is no other island to cycle to
@@ -154,9 +145,21 @@ pub(crate) fn handle_island_scroll(core_rc: &Rc<RefCell<IslandCore>>, dx: f64, d
     core.last_scroll.set(Some(now));
 
     let next_seq = next_request_seq();
-    core.user_selected = Some((target_idx, next_seq));
+    core.user_selected.set(Some((target_idx, next_seq)));
     core.views[target_idx].state.request_seq.set(next_seq);
-    core.views[target_idx].state.requested.set(true);
+
+    // If the view has an active timeout, extend it slightly so user has time to view it
+    let min_deadline = now + Duration::from_secs(3);
+    if let Some(d) = core.views[target_idx].state.auto_hide_at.borrow_mut().as_mut() {
+        if *d < min_deadline {
+            *d = min_deadline;
+        }
+    }
+    if let Some(d) = core.views[target_idx].state.release_at.borrow_mut().as_mut() {
+        if *d < min_deadline {
+            *d = min_deadline;
+        }
+    }
 
     core.animating.set(false);
     apply_transition(&mut core, IslandDisplay::View(target_idx), core_rc);

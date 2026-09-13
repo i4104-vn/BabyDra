@@ -123,6 +123,16 @@ impl IslandFeature for MediaPlayerFeature {
         (PLAYER_CAPSULE_WIDTH, CAPSULE_HEIGHT)
     }
 
+    fn is_alive(&self) -> bool {
+        self.is_playing.get()
+            || self
+                .popover
+                .borrow()
+                .as_ref()
+                .map(|p| p.is_visible())
+                .unwrap_or(false)
+    }
+
     fn build_view(&mut self) -> gtk4::Widget {
         self.widgets.music_view.clone().upcast()
     }

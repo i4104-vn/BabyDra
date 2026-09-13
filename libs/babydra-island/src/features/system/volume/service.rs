@@ -65,7 +65,7 @@ where
                             break;
                         };
                         // pactl emits lines like: Event 'change' on sink #...
-                        if line.contains("sink") || line.contains("server") {
+                        if line.contains("sink") {
                             let current = VolumeState {
                                 volume: babydra_core::services::system::volume::get_current_volume(),
                                 muted: babydra_core::services::system::volume::is_muted(),

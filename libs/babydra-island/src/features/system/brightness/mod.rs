@@ -113,30 +113,9 @@ impl IslandFeature for BrightnessFeature {
                 crate::island::tick_default_island();
             }
         });
-
-        self.initialized.set(true);
     }
 
     fn tick(&mut self, _ctx: &IslandCtx) {
-        if !self.initialized.get() {
-            return;
-        }
-
-        let current = babydra_core::services::system::backlight::get_brightness();
-        let prev = self.last_brightness.get();
-
-        if (current - prev).abs() >= 1.0 {
-            self.last_brightness.set(current);
-
-            let (icon, color) = icon_for_brightness(current);
-            let label_text = label_for_brightness(current);
-            self.widgets
-                .update(icon, color, &label_text);
-
-            if let Some(h) = self.handle_rc.borrow().as_ref() {
-                h.override_show_for(SHOW_DURATION);
-            }
-            crate::island::tick_default_island();
-        }
+        // Event-driven via spawn_brightness_listener
     }
 }

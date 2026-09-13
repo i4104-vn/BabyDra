@@ -138,6 +138,18 @@ impl IslandFeature for NotificationFeature {
         false
     }
 
+    fn is_alive(&self) -> bool {
+        let has_notif = crate::widgets::notification::SHARED_NOTIFICATION
+            .with(|sn| sn.borrow().is_some());
+        let popover_open = self
+            .popover
+            .borrow()
+            .as_ref()
+            .map(|p| p.is_visible())
+            .unwrap_or(false);
+        has_notif || popover_open
+    }
+
     fn build_view(&mut self) -> gtk4::Widget {
         self.widgets.container.clone().upcast()
     }

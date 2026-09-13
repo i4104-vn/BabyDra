@@ -17,48 +17,24 @@ pub(crate) fn island_tick(core_rc: &Rc<RefCell<IslandCore>>) {
     };
     let now = Instant::now();
 
-    // 1. Auto-hide / auto-release timers.
-    for v in core.views.iter() {
-        let should_hide = v
-            .state
-            .auto_hide_at
-            .borrow()
-            .map(|deadline| now >= deadline)
-            .unwrap_or(false);
-        if should_hide {
-            v.state.requested.set(false);
-            v.state.auto_hide_at.borrow_mut().take();
-        }
+    // 1. Auto-hide / auto-release timers and purge dead/expired views from queue.
+    core.purge_expired(now);
 
-        let should_release = v
-            .state
-            .release_at
-            .borrow()
-            .map(|deadline| now >= deadline)
-            .unwrap_or(false);
-        if should_release {
-            v.state.override_active.set(false);
-            v.state.release_at.borrow_mut().take();
-        }
-    }
-
-    // Clean up user_selected if no longer active or superseded by a newer request
-    if let Some((sel_idx, sel_seq)) = core.user_selected {
+    // Clean up user_selected if no longer alive or superseded by a newer request
+    if let Some((sel_idx, sel_seq)) = core.user_selected.get() {
         let mut clear = true;
-        if sel_idx < core.views.len() {
-            let v = &core.views[sel_idx];
-            let is_active = v.state.override_active.get() || v.state.requested.get();
+        if core.is_view_alive(sel_idx, now) {
             let newer_request = core.views.iter().enumerate().any(|(i, other)| {
                 i != sel_idx
-                    && (other.state.override_active.get() || other.state.requested.get())
+                    && core.is_view_alive(i, now)
                     && other.state.request_seq.get() > sel_seq
             });
-            if is_active && !newer_request {
+            if !newer_request {
                 clear = false;
             }
         }
         if clear {
-            core.user_selected = None;
+            core.user_selected.set(None);
         }
     }
 
@@ -119,27 +95,25 @@ pub(crate) fn island_tick(core_rc: &Rc<RefCell<IslandCore>>) {
 /// wins ties), then highest priority (ties broken by most recent request;
 /// equal-priority ties also fall back to registration order).
 pub(crate) fn select_winner(core: &IslandCore) -> Option<usize> {
-    // Honor explicit user scroll selection as long as the view is still active and un-superseded
-    if let Some((sel_idx, sel_seq)) = core.user_selected {
-        if sel_idx < core.views.len() {
-            let v = &core.views[sel_idx];
-            let is_active = v.state.override_active.get() || v.state.requested.get();
-            if is_active {
-                let newer_request = core.views.iter().enumerate().any(|(i, other)| {
-                    i != sel_idx
-                        && (other.state.override_active.get() || other.state.requested.get())
-                        && other.state.request_seq.get() > sel_seq
-                });
-                if !newer_request {
-                    return Some(sel_idx);
-                }
+    let now = Instant::now();
+
+    // Honor explicit user scroll selection as long as the view is still alive and un-superseded
+    if let Some((sel_idx, sel_seq)) = core.user_selected.get() {
+        if core.is_view_alive(sel_idx, now) {
+            let newer_request = core.views.iter().enumerate().any(|(i, other)| {
+                i != sel_idx
+                    && core.is_view_alive(i, now)
+                    && other.state.request_seq.get() > sel_seq
+            });
+            if !newer_request {
+                return Some(sel_idx);
             }
         }
     }
 
     let mut override_best: Option<(u64, usize)> = None;
     for (i, v) in core.views.iter().enumerate() {
-        if !v.state.override_active.get() {
+        if !core.is_view_alive(i, now) || !v.state.override_active.get() {
             continue;
         }
         let seq = v.state.request_seq.get();
@@ -153,8 +127,7 @@ pub(crate) fn select_winner(core: &IslandCore) -> Option<usize> {
 
     let mut best: Option<(u8, u64, usize)> = None;
     for (i, v) in core.views.iter().enumerate() {
-        let wanted = v.state.requested.get();
-        if !wanted {
+        if !core.is_view_alive(i, now) || !v.state.requested.get() {
             continue;
         }
         let key = (v.priority, v.state.request_seq.get(), i);

@@ -78,6 +78,14 @@ impl IslandFeature for PowerFeature {
         true
     }
 
+    fn is_alive(&self) -> bool {
+        self.popover
+            .borrow()
+            .as_ref()
+            .map(|p| p.is_visible())
+            .unwrap_or(false)
+    }
+
     fn build_view(&mut self) -> gtk4::Widget {
         self.widgets.container.clone().upcast()
     }
