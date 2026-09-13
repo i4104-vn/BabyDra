@@ -95,11 +95,15 @@ pub fn setup_status_popover(
     let sup_timer = is_suppressed.clone();
 
     // Track last known volume/mute for external change detection
-    let last_vol = std::rc::Rc::new(std::cell::Cell::new(super::items::volume::get_current_volume()));
-    let last_muted = std::rc::Rc::new(std::cell::Cell::new(super::items::volume::is_muted()));
+    let (init_vol, init_muted) = babydra_core::services::system::volume::get_volume_state();
+    let last_vol = std::rc::Rc::new(std::cell::Cell::new(init_vol));
+    let last_muted = std::rc::Rc::new(std::cell::Cell::new(init_muted));
     let vol_icon_sync = vol_icon.clone();
     let update_vol_sync = update_volume_popover.clone();
     let vol_pop_sync = vol_tooltip.popover.clone();
+
+    let last_vol_timer = last_vol.clone();
+    let last_muted_timer = last_muted.clone();
 
     gtk4::glib::timeout_add_local(std::time::Duration::from_millis(2000), move || {
         if sup_timer() {
@@ -166,13 +170,12 @@ pub fn setup_status_popover(
         }
 
         // Sync topbar volume icon when external source changes volume/mute
-        let cur_vol = super::items::volume::get_current_volume();
-        let cur_muted = super::items::volume::is_muted();
-        let changed = (cur_vol - last_vol.get()).abs() > 0.5 || cur_muted != last_muted.get();
+        let (cur_vol, cur_muted) = babydra_core::services::system::volume::get_volume_state();
+        let changed = (cur_vol - last_vol_timer.get()).abs() > 0.5 || cur_muted != last_muted_timer.get();
         if changed {
-            last_vol.set(cur_vol);
-            last_muted.set(cur_muted);
-            super::items::volume::update_topbar_volume(&vol_icon_sync);
+            last_vol_timer.set(cur_vol);
+            last_muted_timer.set(cur_muted);
+            super::items::volume::update_topbar_volume_state(&vol_icon_sync, cur_vol, cur_muted);
             if vol_pop_sync.is_visible() {
                 update_vol_sync();
             }
@@ -187,5 +190,7 @@ pub fn setup_status_popover(
         vol_popover: vol_tooltip.popover,
         bat_popover_opt,
         update_volume_popover,
+        current_volume: last_vol,
+        current_muted: last_muted,
     }
 }

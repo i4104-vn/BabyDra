@@ -1,4 +1,6 @@
-use super::{get_audio_devices, get_current_volume, is_muted, set_volume, update_topbar_volume};
+use super::{
+    get_audio_devices, get_current_volume, is_muted, set_volume, update_topbar_volume_state,
+};
 use babydra_core::i18n::trans;
 use babydra_ui_kit::components::PillSlider;
 use gtk4::prelude::*;
@@ -14,6 +16,7 @@ pub fn create_volume_row(
     main_box.add_css_class("control-slider-card");
 
     let initial_val = get_current_volume();
+    let current_val = Rc::new(Cell::new(initial_val));
     let (header_box, value_label) =
         babydra_ui_kit::components::create_slider_header(&trans("volume.title"), initial_val);
 
@@ -52,12 +55,13 @@ pub fn create_volume_row(
         let update_mute_icon_clone = update_mute_icon.clone();
         let muted_state_clone = muted_state.clone();
         let vol_icon_c = vol_icon.clone();
+        let current_val_c = current_val.clone();
         mute_btn.connect_clicked(move |_| {
             let new_mute = !muted_state_clone.get();
             muted_state_clone.set(new_mute);
             babydra_core::volume::set_muted(new_mute);
             update_mute_icon_clone(new_mute);
-            update_topbar_volume(&vol_icon_c);
+            update_topbar_volume_state(&vol_icon_c, current_val_c.get(), new_mute);
         });
     }
     update_mute_icon(muted_state.get());
@@ -70,13 +74,15 @@ pub fn create_volume_row(
     let vol_icon_c2 = vol_icon.clone();
     let update_mute_icon_c = update_mute_icon.clone();
     let muted_state_c = muted_state.clone();
+    let current_val_c2 = current_val.clone();
     slider.connect_debounced(80, move |val| {
+        current_val_c2.set(val);
         set_volume(val);
         if val > 0.0 {
             muted_state_c.set(false);
             update_mute_icon_c(false);
         }
-        update_topbar_volume(&vol_icon_c2);
+        update_topbar_volume_state(&vol_icon_c2, val, muted_state_c.get());
     });
 
     let menu_btn = gtk4::Button::new();

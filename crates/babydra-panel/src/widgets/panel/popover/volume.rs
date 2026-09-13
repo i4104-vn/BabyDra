@@ -9,9 +9,8 @@ pub fn build_volume_update(vol_icon: &gtk4::Image, vol_popover: &gtk4::Popover) 
     let vol_popover_c = vol_popover.clone();
 
     Rc::new(move || {
-        items::volume::update_topbar_volume(&vol_icon_c);
-        let is_m = items::volume::is_muted();
-        let vol_pct = items::volume::get_current_volume();
+        let (vol_pct, is_m) = items::volume::get_volume_state();
+        items::volume::update_topbar_volume_state(&vol_icon_c, vol_pct, is_m);
         let dev_name = items::volume::get_active_output();
 
         let vol_str = if is_m {

@@ -40,13 +40,16 @@ pub fn create_status_icons(
     );
 
     // Scroll controller for volume on status button
-    let scroll_controller =
-        gtk4::EventControllerScroll::new(gtk4::EventControllerScrollFlags::VERTICAL);
+    let scroll_controller = gtk4::EventControllerScroll::new(
+        gtk4::EventControllerScrollFlags::VERTICAL | gtk4::EventControllerScrollFlags::DISCRETE,
+    );
     let vol_icon_scroll = vol_icon.clone();
     let update_vol_scroll = popovers.update_volume_popover.clone();
     let pop_vol_scroll = popovers.vol_popover.clone();
+    let cached_vol = popovers.current_volume.clone();
+    let cached_muted = popovers.current_muted.clone();
     scroll_controller.connect_scroll(move |_, _dx, dy| {
-        let current_vol = items::volume::get_current_volume();
+        let current_vol = cached_vol.get();
         let step = 5.0;
         let new_vol = if dy < 0.0 {
             (current_vol + step).min(100.0)
@@ -57,8 +60,14 @@ pub fn create_status_icons(
         };
 
         if (new_vol - current_vol).abs() > 0.1 {
+            cached_vol.set(new_vol);
+            let was_muted = cached_muted.get();
+            if was_muted && new_vol > 0.0 {
+                cached_muted.set(false);
+                babydra_core::services::system::volume::set_muted(false);
+            }
             items::volume::set_volume(new_vol);
-            items::volume::update_topbar_volume(&vol_icon_scroll);
+            items::volume::update_topbar_volume_state(&vol_icon_scroll, new_vol, new_vol == 0.0);
             if pop_vol_scroll.is_visible() {
                 update_vol_scroll();
             }

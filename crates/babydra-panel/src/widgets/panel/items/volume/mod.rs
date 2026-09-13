@@ -2,7 +2,7 @@ pub mod render;
 use gtk4::prelude::*;
 
 pub use babydra_core::services::system::volume::{
-    get_audio_devices, get_current_volume, is_muted, set_volume,
+    get_audio_devices, get_current_volume, get_volume_state, is_muted, set_volume,
 };
 
 /// Returns the current `active output device name`.
@@ -24,10 +24,8 @@ pub fn get_active_output() -> Option<String> {
     None
 }
 
-/// Update topbar volume icon.
-pub fn update_topbar_volume(vol_icon: &gtk4::Image) {
-    let is_m = is_muted();
-    let vol_pct = get_current_volume();
+/// Updates topbar volume icon using known volume percentage and mute status (0 subprocess calls).
+pub fn update_topbar_volume_state(vol_icon: &gtk4::Image, vol_pct: f64, is_m: bool) {
     let is_dark = babydra_ui_kit::ui::icon::is_dark_mode();
     let svg_content = if is_m || vol_pct == 0.0 {
         if is_dark {
@@ -55,4 +53,10 @@ pub fn update_topbar_volume(vol_icon: &gtk4::Image) {
     }
 
     vol_icon.set_tooltip_text(None);
+}
+
+/// Update topbar volume icon by querying current system state in a single call.
+pub fn update_topbar_volume(vol_icon: &gtk4::Image) {
+    let (vol_pct, is_m) = get_volume_state();
+    update_topbar_volume_state(vol_icon, vol_pct, is_m);
 }

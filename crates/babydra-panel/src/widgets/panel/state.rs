@@ -16,6 +16,8 @@ pub struct StatusPopovers {
     pub vol_popover: gtk4::Popover,
     pub bat_popover_opt: Option<gtk4::Popover>,
     pub update_volume_popover: Rc<dyn Fn()>,
+    pub current_volume: Rc<std::cell::Cell<f64>>,
+    pub current_muted: Rc<std::cell::Cell<bool>>,
 }
 
 impl StatusPopovers {
