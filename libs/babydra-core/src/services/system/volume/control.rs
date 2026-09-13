@@ -47,11 +47,6 @@ pub fn set_volume(val: f64) {
                     &format!("{}%", percent),
                 ])
                 .spawn();
-            if percent > 0 {
-                let _ = Command::new("wpctl")
-                    .args(["set-mute", "@DEFAULT_AUDIO_SINK@", "0"])
-                    .spawn();
-            }
         }
         AudioBackendType::Pactl => {
             let _ = Command::new("pactl")
@@ -61,21 +56,11 @@ pub fn set_volume(val: f64) {
                     &format!("{}%", percent),
                 ])
                 .spawn();
-            if percent > 0 {
-                let _ = Command::new("pactl")
-                    .args(["set-sink-mute", "@DEFAULT_SINK@", "0"])
-                    .spawn();
-            }
         }
         AudioBackendType::Amixer => {
             let _ = Command::new("amixer")
                 .args(["set", "Master", &format!("{}%", percent)])
                 .spawn();
-            if percent > 0 {
-                let _ = Command::new("amixer")
-                    .args(["set", "Master", "unmute"])
-                    .spawn();
-            }
         }
     }
 }
@@ -157,11 +142,6 @@ pub fn set_microphone_volume(val: f64) {
                     &format!("{}%", percent),
                 ])
                 .spawn();
-            if percent > 0 {
-                let _ = Command::new("wpctl")
-                    .args(["set-mute", "@DEFAULT_AUDIO_SOURCE@", "0"])
-                    .spawn();
-            }
         }
         AudioBackendType::Pactl => {
             let _ = Command::new("pactl")
@@ -171,21 +151,11 @@ pub fn set_microphone_volume(val: f64) {
                     &format!("{}%", percent),
                 ])
                 .spawn();
-            if percent > 0 {
-                let _ = Command::new("pactl")
-                    .args(["set-source-mute", "@DEFAULT_SOURCE@", "0"])
-                    .spawn();
-            }
         }
         AudioBackendType::Amixer => {
             let _ = Command::new("amixer")
                 .args(["set", "Capture", &format!("{}%", percent)])
                 .spawn();
-            if percent > 0 {
-                let _ = Command::new("amixer")
-                    .args(["set", "Capture", "cap"])
-                    .spawn();
-            }
         }
     }
 }

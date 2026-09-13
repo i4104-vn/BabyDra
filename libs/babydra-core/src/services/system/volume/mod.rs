@@ -11,4 +11,7 @@ pub use control::{
     set_microphone_volume, set_muted, set_volume,
 };
 pub use device::{get_audio_devices, AudioDevice};
-pub use state::{get_current_microphone_volume, get_current_volume, is_microphone_muted, is_muted};
+pub use state::{
+    get_current_microphone_volume, get_current_volume, get_microphone_volume_state,
+    get_volume_state, is_microphone_muted, is_muted,
+};
