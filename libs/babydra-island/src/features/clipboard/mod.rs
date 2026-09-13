@@ -5,12 +5,10 @@
 //! | Thư mục / File | Trách nhiệm |
 //! | :--- | :--- |
 //! | `mod.rs` | Struct `ClipboardFeature` + `IslandFeature` impl (vòng đời + tick) |
-//! | `ui/notch.rs` | Widget hiển thị trên notch capsule (`ClipboardNotchWidgets`) |
 //! | `ui/popover.rs` | Popover thả xuống bên dưới island (`ClipboardPopover`) |
 //! | `ui/row.rs` | Từng hàng phần tử trong danh sách popover (`ClipboardItemRow`) |
 //! | `ui/render.rs` | Render dữ liệu entries & thumbnail hình ảnh (`render_popover`) |
 //! | `controller/keyboard.rs` | Bộ điều hướng bàn phím (Arrows, Enter, Esc, 1-5) |
-//! | `controller/focus.rs` | Quản lý focus & layer shell keyboard mode (`Exclusive`) |
 //! | `service/` | D-Bus IPC server & watcher khởi chạy |
 
 pub mod controller;

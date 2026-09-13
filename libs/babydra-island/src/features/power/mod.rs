@@ -5,12 +5,10 @@
 //! | Thư mục / File | Trách nhiệm |
 //! | :--- | :--- |
 //! | `mod.rs` | Struct `PowerFeature` + `IslandFeature` impl (vòng đời + tick) |
-//! | `ui/notch.rs` | Widget hiển thị trên notch capsule (`PowerNotchWidgets`) |
 //! | `ui/popover.rs` | Popover 4 nút thả xuống bên dưới island (`PowerPopover`) |
 //! | `ui/button.rs` | Từng nút bấm trong 4 options (`PowerButtonWidget`) |
 //! | `ui/render.rs` | Render highlight và thực thi power action |
 //! | `controller/keyboard.rs` | Điều hướng bàn phím (Arrows, 1-4, Enter, Esc) |
-//! | `controller/focus.rs` | Quản lý focus & layer shell keyboard mode (`Exclusive`) |
 //! | `service/` | D-Bus IPC callback registration |
 
 pub mod controller;
