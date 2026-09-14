@@ -2,7 +2,6 @@
 
 pub mod bell_popover;
 pub mod group;
-pub mod icon;
 pub mod list;
 pub mod popup;
 
