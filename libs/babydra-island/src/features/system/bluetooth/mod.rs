@@ -30,7 +30,10 @@ impl BluetoothFeature {
             let bat_str = dev.battery.map(|b| format!("{}%", b)).unwrap_or_default();
             (dev.name.clone(), bat_str)
         } else {
-            (babydra_core::i18n::trans("island.disconnected"), String::new())
+            (
+                babydra_core::i18n::trans("island.disconnected"),
+                String::new(),
+            )
         };
 
         let widgets = NotchWidget::with_value("bluetooth", "#ffffff", &title, &val);

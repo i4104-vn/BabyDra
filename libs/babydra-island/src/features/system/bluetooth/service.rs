@@ -76,12 +76,15 @@ where
                 // 3. Check for battery change on existing connected device
                 if !current_devices.is_empty() && current_devices != last_devices {
                     let dev_opt = current_devices.first().cloned();
-                    let battery_changed = dev_opt.as_ref().map(|d| {
-                        last_devices
-                            .first()
-                            .map(|prev| prev.battery != d.battery)
-                            .unwrap_or(false)
-                    }).unwrap_or(false);
+                    let battery_changed = dev_opt
+                        .as_ref()
+                        .map(|d| {
+                            last_devices
+                                .first()
+                                .map(|prev| prev.battery != d.battery)
+                                .unwrap_or(false)
+                        })
+                        .unwrap_or(false);
 
                     last_devices = current_devices;
                     if battery_changed {

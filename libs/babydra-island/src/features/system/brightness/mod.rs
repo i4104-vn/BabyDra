@@ -49,8 +49,7 @@ impl BrightnessFeature {
         let initial_val = label_for_brightness(initial_brightness);
         let (icon, color) = icon_for_brightness(initial_brightness);
 
-        let widgets =
-            NotchWidget::with_value(icon, color, &title, &initial_val);
+        let widgets = NotchWidget::with_value(icon, color, &title, &initial_val);
 
         Self {
             handle_rc: Rc::new(RefCell::new(None)),
