@@ -18,6 +18,7 @@ pub struct PillSlider {
     max: f64,
     step: f64,
     listeners: Rc<RefCell<Vec<FloatCallback>>>,
+    bound_label: Rc<RefCell<Option<gtk4::Label>>>,
 }
 
 impl PillSlider {
@@ -165,6 +166,7 @@ impl PillSlider {
             max,
             step,
             listeners,
+            bound_label: Rc::new(RefCell::new(None)),
         };
 
         // Internal scroll controller
@@ -256,7 +258,22 @@ impl PillSlider {
         });
     }
 
+    /// Updates the slider value and visual state (and bound label, if any)
+    /// without triggering registered change listeners.
+    /// This prevents recursive feedback loops when syncing from background events.
+    pub fn set_value_silent(&self, val: f64) {
+        let clamped = val.clamp(self.min, self.max);
+        if (clamped - self.value.get()).abs() > 0.001 {
+            self.value.set(clamped);
+            self.container.queue_draw();
+            if let Some(lbl) = self.bound_label.borrow().as_ref() {
+                lbl.set_text(&format!("{:.0}%", clamped));
+            }
+        }
+    }
+
     pub fn bind_label(&self, label: &gtk4::Label) {
+        *self.bound_label.borrow_mut() = Some(label.clone());
         let lbl = label.clone();
         self.connect_change(move |val| {
             lbl.set_text(&format!("{:.0}%", val));
