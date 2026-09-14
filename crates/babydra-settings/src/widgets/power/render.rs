@@ -267,6 +267,9 @@ pub fn build() -> (PowerWidget, PasswordDialog) {
             if cpu_freq_lbl_clone.parent().is_none() {
                 return gtk4::glib::ControlFlow::Break;
             }
+            if !cpu_freq_lbl_clone.is_mapped() {
+                return gtk4::glib::ControlFlow::Continue;
+            }
             if let Some((new_ghz, new_freq)) = super::battery_card::get_cpu_frequency() {
                 cpu_freq_lbl_clone.set_text(&new_freq);
 

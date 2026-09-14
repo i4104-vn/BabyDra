@@ -46,6 +46,9 @@ pub fn create_vpn_widget() -> gtk4::Widget {
     let tx_action_c = tx_action.clone();
 
     glib::timeout_add_local(std::time::Duration::from_millis(150), move || {
+        if !list_box_c.is_mapped() {
+            return glib::ControlFlow::Continue;
+        }
         let mut updated = false;
         while let Ok((name, is_connecting)) = rx_action.try_recv() {
             if is_connecting {
@@ -82,16 +85,6 @@ pub fn create_vpn_widget() -> gtk4::Widget {
     let trigger_map = trigger_refresh.clone();
     list_box.connect_map(move |_| {
         trigger_map();
-    });
-
-    // Initial fetch ONLY if mapped
-    let list_box_init = list_box.clone();
-    let trigger_init = trigger_refresh.clone();
-    glib::timeout_add_local(std::time::Duration::from_millis(200), move || {
-        if list_box_init.is_mapped() {
-            trigger_init();
-        }
-        glib::ControlFlow::Break
     });
 
     // Periodic refresh (every 4s) ONLY when tab is mapped

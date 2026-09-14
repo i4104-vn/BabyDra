@@ -68,6 +68,7 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
         let update_all_btn = update_all_btn.clone();
         let refresh_btn = refresh_btn.clone();
         let is_updating = is_updating.clone();
+        let update_root = widget.root.clone();
 
         move || {
             let current_updates_poller = current_updates.clone();
@@ -78,8 +79,12 @@ pub fn wire_events(widget: &SystemUpdateWidget, auth_dialog: PasswordDialog) {
             let update_all_btn_poller = update_all_btn.clone();
             let refresh_btn_poller = refresh_btn.clone();
             let is_updating_poller = is_updating.clone();
+            let update_root_poller = update_root.clone();
 
             glib::timeout_add_local(std::time::Duration::from_millis(200), move || {
+                if !update_root_poller.is_mapped() {
+                    return glib::ControlFlow::Continue;
+                }
                 if let Some(state) = load_update_state() {
                     let packages_changed = {
                         let current = current_updates_poller.borrow();
