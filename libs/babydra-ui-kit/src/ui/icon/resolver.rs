@@ -209,8 +209,10 @@ pub fn set_fallback_icon(img: &gtk4::Image, icon_path_or_name: &str, default_fal
     }
 
     if icon_path_or_name.starts_with('/') {
-        img.set_from_file(Some(icon_path_or_name));
-        return;
+        if std::path::Path::new(icon_path_or_name).is_file() {
+            img.set_from_file(Some(icon_path_or_name));
+            return;
+        }
     }
 
     let mut clean_name = icon_path_or_name.to_string();
@@ -349,4 +351,3 @@ pub fn get_file_icon(filename: &str, is_dir: bool) -> gtk4::Image {
     set_file_icon(&img, filename, is_dir);
     img
 }
-
