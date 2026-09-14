@@ -2,6 +2,8 @@
 
 use super::easing;
 use gtk4::prelude::*;
+use std::cell::Cell;
+use std::rc::Rc;
 
 /// Direction axis for a slide transition.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -158,6 +160,52 @@ pub fn slide_out_cb<F>(
 ) where
     F: FnOnce() + 'static,
 {
+    slide_out_cb_inner(
+        widget,
+        direction,
+        distance_px,
+        duration_ms,
+        hide_after,
+        None,
+        on_complete,
+    );
+}
+
+/// Slides out a widget and stops cleanly when a newer animation generation is started.
+pub fn slide_out_cb_cancelable<F>(
+    widget: &gtk4::Widget,
+    direction: SlideDirection,
+    distance_px: i32,
+    duration_ms: u64,
+    hide_after: bool,
+    generation: Rc<Cell<u64>>,
+    expected_generation: u64,
+    on_complete: F,
+) where
+    F: FnOnce() + 'static,
+{
+    slide_out_cb_inner(
+        widget,
+        direction,
+        distance_px,
+        duration_ms,
+        hide_after,
+        Some((generation, expected_generation)),
+        on_complete,
+    );
+}
+
+fn slide_out_cb_inner<F>(
+    widget: &gtk4::Widget,
+    direction: SlideDirection,
+    distance_px: i32,
+    duration_ms: u64,
+    hide_after: bool,
+    cancellation: Option<(Rc<Cell<u64>>, u64)>,
+    on_complete: F,
+) where
+    F: FnOnce() + 'static,
+{
     let start_opacity = widget.opacity();
     let original_margin_top = widget.margin_top();
     let original_margin_bottom = widget.margin_bottom();
@@ -170,6 +218,11 @@ pub fn slide_out_cb<F>(
     let on_complete_opt = std::cell::RefCell::new(Some(on_complete));
 
     widget.add_tick_callback(move |w, clock| {
+        if let Some((ref generation, expected)) = cancellation {
+            if generation.get() != expected {
+                return glib::ControlFlow::Break;
+            }
+        }
         let now = clock.frame_time();
         if start_time.get() == 0 {
             start_time.set(now);
