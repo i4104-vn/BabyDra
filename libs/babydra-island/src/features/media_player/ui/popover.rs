@@ -45,12 +45,7 @@ impl Deref for MediaPopover {
 impl MediaPopover {
     /// Builds and registers the popover anchored to the notch capsule.
     pub fn new(capsule: &gtk4::Box) -> Self {
-        let base = IslandPopover::new_slide(
-            capsule,
-            "media-popover",
-            "media-popover-box",
-            450,
-        );
+        let base = IslandPopover::new_slide(capsule, "media-popover", "media-popover-box", 450);
 
         let popover_header = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
         popover_header.add_css_class("media-popover-header");

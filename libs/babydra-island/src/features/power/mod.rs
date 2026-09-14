@@ -39,8 +39,11 @@ pub struct PowerFeature {
 
 impl PowerFeature {
     pub fn new() -> Self {
-        let widgets =
-            NotchWidget::new("power", "#ff5555", &babydra_core::i18n::trans("island.power_notch"));
+        let widgets = NotchWidget::new(
+            "power",
+            "#ff5555",
+            &babydra_core::i18n::trans("island.power_notch"),
+        );
         Self {
             handle_rc: Rc::new(RefCell::new(None)),
             widgets,
