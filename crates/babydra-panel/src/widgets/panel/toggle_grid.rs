@@ -65,14 +65,14 @@ fn create_left_box_toggles(on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>
 
 /// Returns `true` when `dnd active` holds, `false` otherwise.
 fn is_dnd_active() -> bool {
-    babydra_island::widgets::notification::is_dnd_active()
+    babydra_core::services::notification::service::is_dnd_active()
 }
 
 /// Creates a new `dnd tile`.
 pub fn create_dnd_tile() -> gtk4::Button {
     let active = is_dnd_active();
     babydra_ui_kit::components::create_square_tile("bell-off", "", active, |new_active| {
-        babydra_island::widgets::notification::set_dnd_active(new_active);
+        babydra_core::services::notification::service::set_dnd_active(new_active);
     })
 }
 

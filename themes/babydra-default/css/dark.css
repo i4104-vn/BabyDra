@@ -744,16 +744,6 @@ popover.power-popover>contents {
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.50);
 }
 
-popover.notification-popover>contents {
-    background-color: rgba(14, 14, 18, 0.96);
-    border-top: 1px solid rgba(255, 255, 255, 0.25);
-    border-left: 1px solid rgba(255, 255, 255, 0.25);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    border-right: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 9999px;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
-}
-
 .power-popover-header {}
 
 .power-header-title {
@@ -973,60 +963,6 @@ scale.media-timeline-scale slider {
     color: rgba(255, 255, 255, 0.40);
 }
 
-/* === island/notification.css === */
-window.notification-popup-card {
-    background-color: rgba(14, 14, 18, 0.96);
-}
-
-.notification-popup-box {
-    border: none;
-    color: rgba(255, 255, 255, 0.95);
-}
-
-.popup-title {
-    color: #ffffff;
-}
-
-.popup-time {
-    color: rgba(255, 255, 255, 0.45);
-}
-
-.popup-body {
-    color: rgba(255, 255, 255, 0.80);
-}
-
-.popup-avatar-box {
-    border: none;
-}
-
-button.popup-action-btn {
-    color: #ffffff;
-}
-
-button.popup-action-btn:hover {
-    background-color: rgba(255, 255, 255, 0.14);
-    border: none;
-}
-
-/* Island Notification Badge Popover */
-.notification-content-click:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-}
-
-.notification-icon-box {
-    background-color: rgba(255, 255, 255, 0.06);
-    border: none;
-    box-shadow: none;
-}
-
-.notification-title {
-    color: rgba(255, 255, 255, 0.95);
-}
-
-.notification-body {
-    color: rgba(255, 255, 255, 0.70);
-}
-
 /* === launcher/launcher.css === */
 .launcher-box {
     background-color: rgba(24, 24, 28, 0.95);
@@ -1233,6 +1169,44 @@ button.clear-all-btn {
 
 .notif-stack-item:hover {
     border-color: rgba(255, 255, 255, 0.10);
+}
+
+.panel-notification-card {
+    background-color: rgba(20, 21, 28, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-top-color: rgba(255, 255, 255, 0.16);
+}
+
+.panel-notification-card:hover {
+    background-color: rgba(24, 25, 33, 0.98);
+    border-color: rgba(255, 255, 255, 0.14);
+}
+
+.panel-notification-tail {
+    background-color: rgba(20, 21, 28, 0.96);
+    border-left: 1px solid rgba(255, 255, 255, 0.10);
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.panel-notification-icon {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.panel-notification-app {
+    color: rgba(255, 255, 255, 0.58);
+}
+
+.panel-notification-title {
+    color: #ffffff;
+}
+
+.panel-notification-body {
+    color: rgba(255, 255, 255, 0.60);
+}
+
+.panel-notification-more {
+    color: rgba(255, 255, 255, 0.45);
 }
 
 .notif-item-icon {
@@ -3239,19 +3213,6 @@ scrollbar slider:hover:active {
     background-color: rgba(28, 28, 36, 0.96);
 }
 
-/* 2. Notification Popover & Floating Capsule */
-popover.notification-popover>contents,
-.notification-popup-box {
-    border-radius: 9999px;
-    background-color: rgba(14, 14, 18, 0.96);
-    background-image: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.25);
-    border-left: 1px solid rgba(255, 255, 255, 0.25);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    border-right: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
-}
-
 /* 3. Popovers & floating control surface containers */
 popover>contents,
 popover.media-popover>contents,
@@ -3280,7 +3241,6 @@ popover.context-menu>contents,
 .media-popover-box,
 .power-popover-box,
 .clipboard-popover-box,
-.notification-popover-box,
 .status-popover-card,
 .tooltip-popover-card,
 .wifi-popover-box,
@@ -3293,12 +3253,9 @@ popover.context-menu>contents,
 .media-popover-controls,
 .power-popover-header,
 .clipboard-popover-header,
-.notification-icon-box,
-.popup-avatar-box,
 popover>contents .media-popover-box,
 popover>contents .power-popover-box,
 popover>contents .clipboard-popover-box,
-popover>contents .notification-popover-box,
 popover>contents .status-popover-card,
 popover>contents .tooltip-popover-card {
     border: none;

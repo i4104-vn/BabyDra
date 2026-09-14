@@ -765,16 +765,6 @@ popover.power-popover>contents {
     box-shadow: 0 16px 42px rgba(0, 0, 0, 0.12), 0 0 1px 1px rgba(0, 0, 0, 0.04);
 }
 
-popover.notification-popover>contents {
-    background-color: #ffffff;
-    border-top: 1px solid rgba(255, 255, 255, 1.0);
-    border-left: 1px solid rgba(255, 255, 255, 0.90);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.10);
-    border-right: 1px solid rgba(0, 0, 0, 0.10);
-    border-radius: 9999px;
-    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
 .power-header-title {
     color: rgba(0, 0, 0, 0.65);
 }
@@ -986,60 +976,6 @@ scale.media-timeline-scale slider {
     color: rgba(28, 28, 30, 0.40);
 }
 
-/* === island/notification.css === */
-window.notification-popup-card {
-    background-color: rgba(255, 255, 255, 0.98);
-}
-
-.notification-popup-box {
-    border: none;
-    color: rgba(28, 28, 30, 0.95);
-}
-
-.popup-title {
-    color: #1c1c1e;
-}
-
-.popup-time {
-    color: rgba(28, 28, 30, 0.45);
-}
-
-.popup-body {
-    color: rgba(28, 28, 30, 0.80);
-}
-
-.popup-avatar-box {
-    border: none;
-}
-
-button.popup-action-btn {
-    color: #1c1c1e;
-}
-
-button.popup-action-btn:hover {
-    background-color: rgba(0, 0, 0, 0.08);
-    border: none;
-}
-
-/* Island Notification Badge Popover */
-.notification-content-click:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-}
-
-.notification-icon-box {
-    background-color: rgba(0, 0, 0, 0.04);
-    border: none;
-    box-shadow: none;
-}
-
-.notification-title {
-    color: rgba(0, 0, 0, 0.90);
-}
-
-.notification-body {
-    color: rgba(0, 0, 0, 0.65);
-}
-
 /* === launcher/launcher.css === */
 .launcher-box {
     background-color: rgba(242, 244, 248, 0.95);
@@ -1249,6 +1185,44 @@ button.clear-all-btn {
 
 .notif-stack-item:hover {
     border-color: rgba(0, 0, 0, 0.08);
+}
+
+.panel-notification-card {
+    background-color: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-top-color: rgba(0, 0, 0, 0.10);
+}
+
+.panel-notification-card:hover {
+    background-color: rgba(255, 255, 255, 0.99);
+    border-color: rgba(0, 0, 0, 0.10);
+}
+
+.panel-notification-tail {
+    background-color: rgba(255, 255, 255, 0.96);
+    border-left: 1px solid rgba(0, 0, 0, 0.06);
+    border-top: 1px solid rgba(0, 0, 0, 0.10);
+}
+
+.panel-notification-icon {
+    background-color: rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.panel-notification-app {
+    color: rgba(28, 28, 30, 0.58);
+}
+
+.panel-notification-title {
+    color: #1c1c1e;
+}
+
+.panel-notification-body {
+    color: rgba(28, 28, 30, 0.60);
+}
+
+.panel-notification-more {
+    color: rgba(28, 28, 30, 0.45);
 }
 
 .notif-item-icon {
@@ -3539,19 +3513,6 @@ button.modern-dialog-danger-btn:disabled,
     background-color: #f3f4f6;
 }
 
-/* 2. Notification Popover & Floating Capsule */
-popover.notification-popover>contents,
-.notification-popup-box {
-    border-radius: 9999px;
-    background-color: rgba(255, 255, 255, 0.98);
-    background-image: none;
-    border-top: 1px solid rgba(255, 255, 255, 1.0);
-    border-left: 1px solid rgba(255, 255, 255, 1.0);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    border-right: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
-}
-
 /* 3. Popovers & floating control surface containers */
 popover>contents,
 popover.media-popover>contents,
@@ -3580,7 +3541,6 @@ popover.context-menu>contents,
 .media-popover-box,
 .power-popover-box,
 .clipboard-popover-box,
-.notification-popover-box,
 .status-popover-card,
 .tooltip-popover-card,
 .wifi-popover-box,
@@ -3593,12 +3553,9 @@ popover.context-menu>contents,
 .media-popover-controls,
 .power-popover-header,
 .clipboard-popover-header,
-.notification-icon-box,
-.popup-avatar-box,
 popover>contents .media-popover-box,
 popover>contents .power-popover-box,
 popover>contents .clipboard-popover-box,
-popover>contents .notification-popover-box,
 popover>contents .status-popover-card,
 popover>contents .tooltip-popover-card {
     border: none;

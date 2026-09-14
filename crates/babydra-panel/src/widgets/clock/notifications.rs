@@ -38,7 +38,7 @@ pub fn setup_notifs_list(
             }
 
             let notifications: Vec<_> =
-                babydra_island::widgets::notification::HISTORICAL_NOTIFICATIONS
+                babydra_core::services::notification::service::HISTORICAL_NOTIFICATIONS
                     .with(|list| list.borrow().iter().cloned().collect());
 
             if notifications.is_empty() {
@@ -100,10 +100,10 @@ pub fn setup_notifs_list(
     let notif_stack_clear_clone = notif_stack.clone();
     clear_btn.connect_clicked(move |_| {
         let callback = clear_btn_render_clone.clone();
-        babydra_island::widgets::notification::SHARED_NOTIFICATION.with(|sn| {
+        babydra_core::services::notification::service::SHARED_NOTIFICATION.with(|sn| {
             *sn.borrow_mut() = None;
         });
-        babydra_island::widgets::notification::HISTORICAL_NOTIFICATIONS.with(|list| {
+        babydra_core::services::notification::service::HISTORICAL_NOTIFICATIONS.with(|list| {
             list.borrow_mut().clear();
         });
         babydra_ui_kit::ui::animation::slide_out_cb(
@@ -119,7 +119,7 @@ pub fn setup_notifs_list(
     });
 
     let last_notif_count = Rc::new(std::cell::Cell::new(
-        babydra_island::widgets::notification::HISTORICAL_NOTIFICATIONS
+        babydra_core::services::notification::service::HISTORICAL_NOTIFICATIONS
             .with(|list| list.borrow().len()),
     ));
 
@@ -145,7 +145,7 @@ pub fn setup_notifs_list(
             .replace("{month}", &month_str);
         bd_clone.set_text(&date_str);
 
-        let current_count = babydra_island::widgets::notification::HISTORICAL_NOTIFICATIONS
+        let current_count = babydra_core::services::notification::service::HISTORICAL_NOTIFICATIONS
             .with(|list| list.borrow().len());
         if current_count != last_count_clone.get() {
             last_count_clone.set(current_count);
