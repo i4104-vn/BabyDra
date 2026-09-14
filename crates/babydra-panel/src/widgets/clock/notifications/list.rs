@@ -243,6 +243,22 @@ fn render_expanded_group(
 
         item_box.append(&icon_widget);
         item_box.append(&text_box);
+
+        item_box.set_cursor_from_name(Some("pointer"));
+        let item_click = gtk4::GestureClick::new();
+        let app_name_c = notif.app_name.clone();
+        let title_c = notif.title.clone();
+        let item_box_c = item_box.clone();
+        item_click.connect_pressed(move |_, _, _, _| {
+            babydra_core::jump_to_app(&app_name_c, Some(&title_c));
+            if let Some(root) = item_box_c.root() {
+                if let Some(win) = root.downcast_ref::<gtk4::Window>() {
+                    win.close();
+                }
+            }
+        });
+        item_box.add_controller(item_click);
+
         sub_box.append(&item_box);
     }
 
@@ -320,7 +336,8 @@ fn render_collapsed_group(
     let right_widget = if list.len() > 1 {
         let badge = gtk4::Label::new(Some(&format!("{}", list.len())));
         badge.add_css_class("notif-count-badge");
-        badge.add_css_class("notif-item-sub-time");
+        badge.set_xalign(0.5);
+        badge.set_yalign(0.5);
         badge.set_halign(gtk4::Align::End);
         badge.set_valign(gtk4::Align::Center);
         badge.upcast::<gtk4::Widget>()
@@ -360,14 +377,29 @@ fn render_collapsed_group(
     }
 
     let click_gesture = gtk4::GestureClick::new();
-    let ea_c = expanded_apps.clone();
-    let ak_c = app_key.to_string();
-    let render_c = render_notifications_rc.clone();
-    click_gesture.connect_pressed(move |_, _, _, _| {
-        ea_c.borrow_mut().insert(ak_c.clone());
-        render_c();
-    });
+    if list.len() > 1 {
+        let ea_c = expanded_apps.clone();
+        let ak_c = app_key.to_string();
+        let render_c = render_notifications_rc.clone();
+        click_gesture.connect_pressed(move |_, _, _, _| {
+            ea_c.borrow_mut().insert(ak_c.clone());
+            render_c();
+        });
+    } else {
+        let app_name_c = latest_notif.app_name.clone();
+        let title_c = latest_notif.title.clone();
+        let gc_clone = group_container.clone();
+        click_gesture.connect_pressed(move |_, _, _, _| {
+            babydra_core::jump_to_app(&app_name_c, Some(&title_c));
+            if let Some(root) = gc_clone.root() {
+                if let Some(win) = root.downcast_ref::<gtk4::Window>() {
+                    win.close();
+                }
+            }
+        });
+    }
     group_container.add_controller(click_gesture);
+    group_container.set_cursor_from_name(Some("pointer"));
 
     group_container
 }

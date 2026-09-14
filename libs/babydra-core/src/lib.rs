@@ -71,7 +71,7 @@ pub use services::config::pages::{normalize_page_name, is_valid_page, PageId as 
 pub use services::window::mru::{activate_app, get_history, get_running_apps, save_history};
 pub use services::window::tracker::spawn_switcher;
 pub use services::window::{
-    self, close_all_windows, close_window, focus_window, get_active_window,
+    self, close_all_windows, close_window, focus_window, get_active_window, jump_to_app,
 };
 
 // --- Workspace Management ---

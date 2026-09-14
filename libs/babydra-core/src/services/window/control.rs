@@ -130,6 +130,38 @@ pub fn focus_app(name: &str, exec: &str, app_id: Option<&str>, window_title: Opt
     }
 }
 
+/// Activates and focuses an application by its name or window title,
+/// switching to its workspace if already running, or launching it if not.
+pub fn jump_to_app(app_name: &str, title: Option<&str>) {
+    let query = app_name.trim();
+    if query.is_empty() {
+        return;
+    }
+
+    let running_apps = super::mru::get_running_apps();
+    let current_ws = crate::services::workspace::get_current_workspace();
+    let ws_map = crate::services::workspace::windows::sync_workspace_apps(current_ws, &running_apps);
+
+    let query_lower = query.to_lowercase();
+    let title_lower = title.unwrap_or("").trim().to_lowercase();
+
+    if let Some(app) = running_apps.iter().find(|app| {
+        app.name.to_lowercase().contains(&query_lower)
+            || app.app_id.as_deref().map_or(false, |id| id.to_lowercase().contains(&query_lower))
+            || (!title_lower.is_empty()
+                && app.window_title.as_deref().map_or(false, |t| t.to_lowercase().contains(&title_lower)))
+    }) {
+        let ws = crate::services::workspace::windows::get_app_workspace(app, &ws_map, current_ws);
+        crate::services::workspace::switch_workspace(ws);
+        super::mru::activate_app(app);
+    } else if let Some(app) = crate::services::apps::find_desktop_apps()
+        .iter()
+        .find(|a| a.name.to_lowercase().contains(&query_lower))
+    {
+        focus_app(&app.name, &app.exec, app.app_id.as_deref(), None);
+    }
+}
+
 /// Closes a single window instance using wlrctl safely.
 pub fn close_window(app_id: &str, title: &str) {
     let running = get_running_windows();

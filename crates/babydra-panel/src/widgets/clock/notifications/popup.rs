@@ -26,7 +26,8 @@ pub struct NotificationPopup {
     title_label: Label,
     body_label: Label,
     more_label: Label,
-    card: GtkBox,
+    overlay: Overlay,
+    app_target: Rc<std::cell::RefCell<(String, String)>>,
     generation: Rc<Cell<u64>>,
     hovered: Rc<Cell<bool>>,
 }
@@ -42,10 +43,12 @@ impl NotificationPopup {
         popover.set_parent(anchor);
         let generation = Rc::new(Cell::new(0_u64));
         let hovered = Rc::new(Cell::new(false));
+        let app_target = Rc::new(std::cell::RefCell::new((String::new(), String::new())));
 
         let overlay = Overlay::new();
         let card = GtkBox::new(Orientation::Vertical, 6);
         card.add_css_class("panel-notification-card");
+        card.set_cursor_from_name(Some("pointer"));
         card.set_width_request(POPUP_WIDTH);
         card.set_size_request(POPUP_WIDTH, -1);
         card.set_hexpand(false);
@@ -105,6 +108,18 @@ impl NotificationPopup {
         header.append(&text_box);
         card.append(&header);
 
+        let click = gtk4::GestureClick::new();
+        let app_target_c = app_target.clone();
+        let overlay_click = overlay.clone();
+        let popover_click = popover.clone();
+        let generation_click = generation.clone();
+        click.connect_pressed(move |_, _, _, _| {
+            let (app, title) = app_target_c.borrow().clone();
+            babydra_core::jump_to_app(&app, Some(&title));
+            dismiss_notification(&overlay_click, &popover_click, &generation_click);
+        });
+        card.add_controller(click);
+
         let motion = gtk4::EventControllerMotion::new();
         let hovered_enter = hovered.clone();
         motion.connect_enter(move |_, _, _| {
@@ -112,11 +127,11 @@ impl NotificationPopup {
         });
         let hovered_leave = hovered.clone();
         let generation_leave = generation.clone();
-        let card_leave = card.clone();
+        let overlay_leave = overlay.clone();
         let popover_leave = popover.clone();
         motion.connect_leave(move |_| {
             if hovered_leave.replace(false) {
-                dismiss_notification(&card_leave, &popover_leave, &generation_leave);
+                dismiss_notification(&overlay_leave, &popover_leave, &generation_leave);
             }
         });
         card.add_controller(motion);
@@ -140,7 +155,8 @@ impl NotificationPopup {
             title_label,
             body_label,
             more_label,
-            card,
+            overlay,
+            app_target,
             generation,
             hovered,
         }
@@ -152,6 +168,8 @@ impl NotificationPopup {
         } else {
             notification.app_name.clone()
         };
+        *self.app_target.borrow_mut() = (notification.app_name.clone(), notification.title.clone());
+
         self.app_label.set_text(&truncate(&app_name, MAX_APP_CHARS));
         self.title_label
             .set_text(&truncate(&notification.title, MAX_TITLE_CHARS));
@@ -192,7 +210,7 @@ impl NotificationPopup {
         });
         self.popover.popup();
         babydra_ui_kit::ui::animation::slide_in(
-            self.card.upcast_ref(),
+            self.overlay.upcast_ref(),
             babydra_ui_kit::ui::animation::SlideDirection::Down,
             14,
             SHOW_ANIMATION_MS,
@@ -205,17 +223,17 @@ impl NotificationPopup {
 
     pub fn close(&self) {
         self.hovered.set(false);
-        dismiss_notification(&self.card, &self.popover, &self.generation);
+        dismiss_notification(&self.overlay, &self.popover, &self.generation);
     }
 }
 
-fn dismiss_notification(card: &GtkBox, popover: &Popover, generation: &Rc<Cell<u64>>) {
+fn dismiss_notification(overlay: &Overlay, popover: &Popover, generation: &Rc<Cell<u64>>) {
     let next_generation = generation.get().wrapping_add(1);
     generation.set(next_generation);
 
     let popover_c = popover.clone();
     let generation_c = generation.clone();
-    let card_widget = card.clone();
+    let overlay_widget = overlay.clone();
     let finish = move || {
         if generation_c.get() == next_generation {
             popover_c.popdown();
@@ -229,7 +247,7 @@ fn dismiss_notification(card: &GtkBox, popover: &Popover, generation: &Rc<Cell<u
     }
 
     babydra_ui_kit::ui::animation::slide_out_cb_cancelable(
-        card_widget.upcast_ref(),
+        overlay_widget.upcast_ref(),
         babydra_ui_kit::ui::animation::SlideDirection::Up,
         10,
         HIDE_ANIMATION_MS,

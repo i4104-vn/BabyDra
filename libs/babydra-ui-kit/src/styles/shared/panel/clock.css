@@ -21,6 +21,9 @@ button.panel-clock-btn {
 
 .clock-bell-dot {
     background-color: #f43f5e;
+    background-image: none;
+    border: none;
+    box-shadow: none;
     border-radius: 9999px;
     min-width: 7px;
     min-height: 7px;

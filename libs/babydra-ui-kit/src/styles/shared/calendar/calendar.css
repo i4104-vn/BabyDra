@@ -248,18 +248,17 @@ scrolledwindow.notif-scroll viewport {
 
 .notif-count-badge {
     background-color: #f43f5e;
-    background-image: linear-gradient(135deg, #f43f5e, #e11d48);
+    background-image: none;
     color: #ffffff;
+    border: none;
+    box-shadow: none;
     border-radius: 9999px;
     font-size: 10px;
     font-weight: 700;
-    padding: 1px 7px;
+    padding: 0;
     min-width: 18px;
-    min-height: 16px;
+    min-height: 18px;
     margin-left: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    box-shadow: 0 2px 8px rgba(225, 29, 72, 0.35);
-    letter-spacing: 0.2px;
 }
 
 .notif-item-sub-time {
