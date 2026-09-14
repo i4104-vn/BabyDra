@@ -14,6 +14,7 @@ pub struct IslandPopover {
     pub popover: gtk4::Popover,
     pub popover_box: gtk4::Box,
     pub is_animating: Rc<Cell<bool>>,
+    animation_generation: Rc<Cell<u64>>,
     duration_ms: u64,
 }
 
@@ -80,6 +81,7 @@ impl IslandPopover {
             popover,
             popover_box,
             is_animating: Rc::new(Cell::new(false)),
+            animation_generation: Rc::new(Cell::new(0)),
             duration_ms,
         }
     }
@@ -91,11 +93,13 @@ impl IslandPopover {
 
     /// Shows the popover.
     pub fn popup(&self) {
+        self.cancel_animation();
         self.popover.popup();
     }
 
     /// Closes the popover immediately.
     pub fn popdown(&self) {
+        self.cancel_animation();
         self.popover.popdown();
     }
 
@@ -105,6 +109,7 @@ impl IslandPopover {
             &self.popover,
             &self.popover_box,
             &self.is_animating,
+            &self.animation_generation,
             self.duration_ms,
         );
     }
@@ -115,9 +120,21 @@ impl IslandPopover {
             &self.popover,
             &self.popover_box,
             &self.is_animating,
+            &self.animation_generation,
             240,
             on_finish,
         );
+    }
+
+    /// Cancels a running close animation so a newer notification can be shown
+    /// in the same badge immediately.
+    pub fn cancel_animation(&self) {
+        self.animation_generation
+            .set(self.animation_generation.get().wrapping_add(1));
+        self.is_animating.set(false);
+        self.popover_box.set_opacity(1.0);
+        self.popover_box.set_margin_top(0);
+        self.popover_box.set_margin_bottom(0);
     }
 
     /// Returns whether a slide animation is currently running.
@@ -131,13 +148,21 @@ pub fn toggle_popover_animated(
     popover: &gtk4::Popover,
     content_box: &gtk4::Box,
     is_animating: &Rc<Cell<bool>>,
+    animation_generation: &Rc<Cell<u64>>,
     duration_ms: u64,
 ) {
     if is_animating.get() {
         return;
     }
     if popover.is_visible() {
-        popdown_animated_cb(popover, content_box, is_animating, duration_ms, || {});
+        popdown_animated_cb(
+            popover,
+            content_box,
+            is_animating,
+            animation_generation,
+            duration_ms,
+            || {},
+        );
     } else {
         popover.popup();
     }
@@ -148,25 +173,38 @@ pub fn popdown_animated_cb<F: FnOnce() + 'static>(
     popover: &gtk4::Popover,
     content_box: &gtk4::Box,
     is_animating: &Rc<Cell<bool>>,
+    animation_generation: &Rc<Cell<u64>>,
     duration_ms: u64,
     on_finish: F,
 ) {
-    if is_animating.get() || !popover.is_visible() {
+    if is_animating.get() {
+        animation_generation.set(animation_generation.get().wrapping_add(1));
+        is_animating.set(false);
+    }
+    if !popover.is_visible() {
         popover.popdown();
         on_finish();
         return;
     }
     is_animating.set(true);
+    let generation = animation_generation.get().wrapping_add(1);
+    animation_generation.set(generation);
     let pop_c = popover.clone();
     let box_c = content_box.clone();
     let anim_c = is_animating.clone();
-    babydra_ui_kit::ui::animation::slide_out_cb(
+    let generation_c = animation_generation.clone();
+    babydra_ui_kit::ui::animation::slide_out_cb_cancelable(
         box_c.upcast_ref(),
         babydra_ui_kit::ui::animation::SlideDirection::Up,
         15,
         duration_ms,
         false,
+        generation_c.clone(),
+        generation,
         move || {
+            if generation_c.get() != generation {
+                return;
+            }
             pop_c.popdown();
             anim_c.set(false);
             on_finish();

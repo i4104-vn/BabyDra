@@ -2,8 +2,6 @@
 
 pub mod popover;
 pub mod render;
-pub mod view;
 
 pub use popover::NotificationPopover;
-pub use render::{render_notification, render_popover_notification};
-pub use view::NotificationView;
+pub use render::render_popover_notification;

@@ -6,7 +6,7 @@ use std::rc::Rc;
 
 use gtk4::prelude::*;
 use gtk4::{
-    Align, Box as GtkBox, CenterBox, EventControllerMotion, GestureClick, Label, Orientation,
+    Align, Box as GtkBox, CenterBox, EventControllerMotion, GestureClick, Image, Label, Orientation,
 };
 
 use crate::island::ui::IslandPopover;
@@ -14,12 +14,10 @@ use crate::island::ui::IslandPopover;
 #[derive(Clone)]
 pub struct NotificationPopover {
     pub base: IslandPopover,
-    pub icon_container: CenterBox,
+    pub icon: Image,
     pub title_lbl: Label,
     pub body_lbl: Label,
-    pub click_box: GtkBox,
     pub click_gesture: GestureClick,
-    pub motion_controller: EventControllerMotion,
     pub is_hovered: Rc<Cell<bool>>,
 }
 
@@ -60,6 +58,12 @@ impl NotificationPopover {
         icon_container.add_css_class("notification-icon-box");
         icon_container.set_valign(Align::Center);
         icon_container.set_halign(Align::Center);
+        let icon = Image::new();
+        icon.set_pixel_size(32);
+        icon.set_valign(Align::Center);
+        icon.set_halign(Align::Center);
+        icon.add_css_class("notification-icon-img");
+        icon_container.set_center_widget(Some(&icon));
         click_box.append(&icon_container);
 
         // Text content
@@ -107,12 +111,10 @@ impl NotificationPopover {
 
         Self {
             base,
-            icon_container,
+            icon,
             title_lbl,
             body_lbl,
-            click_box,
             click_gesture,
-            motion_controller,
             is_hovered,
         }
     }
