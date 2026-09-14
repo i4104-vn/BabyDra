@@ -15,9 +15,7 @@ pub mod ui;
 pub use models::view;
 
 pub use controller::{attach_keyboard_controllers, set_layer_keyboard_mode};
-pub use manager::{
-    default_island, dismiss_all_popovers, tick_default_island, Island,
-};
+pub use manager::{default_island, dismiss_all_popovers, tick_default_island, Island};
 pub use models::{
     IslandConfig, IslandCtx, IslandDisplay, IslandFeature, IslandView, IslandViewHandle,
 };

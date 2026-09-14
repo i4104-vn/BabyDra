@@ -127,7 +127,10 @@ pub(crate) fn handle_island_scroll(core_rc: &Rc<RefCell<IslandCore>>, dx: f64, d
         _ => scroll_indices[0],
     };
 
-    let pos = scroll_indices.iter().position(|&i| i == curr_idx).unwrap_or(0);
+    let pos = scroll_indices
+        .iter()
+        .position(|&i| i == curr_idx)
+        .unwrap_or(0);
     let next_pos = if delta > 0.0 {
         (pos + 1) % scroll_indices.len()
     } else {
@@ -150,12 +153,22 @@ pub(crate) fn handle_island_scroll(core_rc: &Rc<RefCell<IslandCore>>, dx: f64, d
 
     // If the view has an active timeout, extend it slightly so user has time to view it
     let min_deadline = now + Duration::from_secs(3);
-    if let Some(d) = core.views[target_idx].state.auto_hide_at.borrow_mut().as_mut() {
+    if let Some(d) = core.views[target_idx]
+        .state
+        .auto_hide_at
+        .borrow_mut()
+        .as_mut()
+    {
         if *d < min_deadline {
             *d = min_deadline;
         }
     }
-    if let Some(d) = core.views[target_idx].state.release_at.borrow_mut().as_mut() {
+    if let Some(d) = core.views[target_idx]
+        .state
+        .release_at
+        .borrow_mut()
+        .as_mut()
+    {
         if *d < min_deadline {
             *d = min_deadline;
         }
