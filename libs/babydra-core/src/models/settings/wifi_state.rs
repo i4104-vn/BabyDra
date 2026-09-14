@@ -1,5 +1,6 @@
 //! Wi-Fi settings panel state model.
 
+use crate::models::network::ActiveNetworkInfo;
 use crate::models::settings::wifi::WifiNetwork;
 
 /// Runtime state for the Wi-Fi settings panel.
@@ -9,4 +10,5 @@ pub struct WifiState {
     pub networks: Vec<WifiNetwork>,
     pub is_loading: bool,
     pub connecting_ssid: Option<String>,
+    pub active_network: ActiveNetworkInfo,
 }

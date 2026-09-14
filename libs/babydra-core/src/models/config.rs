@@ -53,7 +53,6 @@ fn default_wallpaper_mode() -> String {
     "static".to_string()
 }
 
-
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct NotificationConfig {
     #[serde(default)]
@@ -266,6 +265,10 @@ impl Default for DesktopConfig {
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct BabyDraConfig {
+    /// Marks that the first-login settings page has already been shown.
+    /// Serialized as the requested top-level TOML key: `"1st" = true`.
+    #[serde(rename = "1st", default)]
+    pub first_login: bool,
     #[serde(default)]
     pub power: PowerConfig,
     #[serde(default, skip_serializing)]
