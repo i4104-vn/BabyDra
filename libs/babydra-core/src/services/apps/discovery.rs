@@ -71,7 +71,10 @@ pub fn parse_desktop_file(path: &Path) -> Option<DesktopApp> {
     let file = File::open(path).ok()?;
     let reader = BufReader::new(file);
 
-    let mut name = None;
+    let mut default_name = None;
+    let mut localized_name = None;
+    let current_locale = crate::i18n::get_locale();
+    let localized_key = format!("Name[{}]", current_locale);
     let mut exec = None;
     let mut icon = None;
     let mut no_display = false;
@@ -96,23 +99,21 @@ pub fn parse_desktop_file(path: &Path) -> Option<DesktopApp> {
             let key = line[..pos].trim();
             let value = line[pos + 1..].trim();
 
-            match key {
-                "Name" if name.is_none() => name = Some(value.to_string()),
-                "Exec" if exec.is_none() => {
-                    let clean_exec = value
-                        .split_whitespace()
-                        .filter(|word| !word.starts_with('%'))
-                        .collect::<Vec<&str>>()
-                        .join(" ");
-                    exec = Some(clean_exec);
-                }
-                "Icon" if icon.is_none() => icon = Some(value.to_string()),
-                "NoDisplay" => {
-                    if value.to_lowercase() == "true" {
-                        no_display = true;
-                    }
-                }
-                _ => {}
+            if key == localized_key {
+                localized_name = Some(value.to_string());
+            } else if key == "Name" && default_name.is_none() {
+                default_name = Some(value.to_string());
+            } else if key == "Exec" && exec.is_none() {
+                let clean_exec = value
+                    .split_whitespace()
+                    .filter(|word| !word.starts_with('%'))
+                    .collect::<Vec<&str>>()
+                    .join(" ");
+                exec = Some(clean_exec);
+            } else if key == "Icon" && icon.is_none() {
+                icon = Some(value.to_string());
+            } else if key == "NoDisplay" && value.to_lowercase() == "true" {
+                no_display = true;
             }
         }
     }
@@ -120,6 +121,8 @@ pub fn parse_desktop_file(path: &Path) -> Option<DesktopApp> {
     if no_display {
         return None;
     }
+
+    let name = localized_name.or(default_name);
 
     match (name, exec) {
         (Some(n), Some(e)) => Some(DesktopApp {
