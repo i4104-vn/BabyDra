@@ -1,7 +1,9 @@
 //! Generic Settings (Cài đặt chung) widget assembling modular cards.
 
 pub mod clipboard;
+pub mod datetime;
 pub mod default_apps;
+pub mod device_account;
 pub mod input;
 pub mod output;
 pub mod sound_effects;
@@ -9,6 +11,25 @@ pub mod sound_effects;
 use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Align, Box as GtkBox, Label, Orientation, ScrolledWindow, Widget};
+
+fn category(title_key: &str, cards: Vec<GtkBox>) -> GtkBox {
+    let section = GtkBox::new(Orientation::Vertical, 8);
+    section.set_hexpand(true);
+
+    let title = Label::new(Some(&trans(title_key)));
+    title.add_css_class("settings-section-title");
+    title.set_halign(Align::Start);
+    title.set_margin_start(4);
+    title.set_margin_top(4);
+    title.set_margin_bottom(2);
+    section.append(&title);
+
+    for card in cards {
+        section.append(&card);
+    }
+
+    section
+}
 
 /// Creates the Generic Settings (Cài đặt chung) widget page.
 pub fn create_general_widget() -> Widget {
@@ -39,12 +60,29 @@ pub fn create_general_widget() -> Widget {
     header_box.append(&desc_lbl);
     container.append(&header_box);
 
-    // Modular Collapsible Cards
-    container.append(&clipboard::build_clipboard_card());
-    container.append(&output::build_output_card());
-    container.append(&input::build_input_card());
-    container.append(&sound_effects::build_sound_effects_card());
-    container.append(&default_apps::build_default_apps_card());
+    // Keep every category and card collapsed until the user opens it.
+    container.append(&category(
+        "settings.general_category_devices",
+        vec![
+            device_account::build_device_account_card(),
+            default_apps::build_default_apps_card(),
+        ],
+    ));
+    container.append(&category(
+        "settings.general_category_audio",
+        vec![
+            output::build_output_card(),
+            input::build_input_card(),
+            sound_effects::build_sound_effects_card(),
+        ],
+    ));
+    container.append(&category(
+        "settings.general_category_system",
+        vec![
+            clipboard::build_clipboard_card(),
+            datetime::build_datetime_card(),
+        ],
+    ));
 
     scrolled.set_child(Some(&container));
     scrolled.into()
