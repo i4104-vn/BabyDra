@@ -286,7 +286,7 @@ button.taskbar-popover-item-btn:active {
     min-height: 6px;
     border-radius: 3px;
     background-color: #3b82f6;
-    box-shadow: 0 0 5px rgba(59, 130, 246, 0.8);
+    box-shadow: none;
     margin: 0 4px;
 }
 
@@ -699,10 +699,11 @@ popover>arrow {
 
 .panel-notch:hover .island-bracket {
     color: #60a5fa;
-    text-shadow: 0 0 8px rgba(96, 165, 250, 0.6);
+    text-shadow: none;
 }
 
-.notch-player-text {
+.notch-player-text,
+.notch-system-value {
     color: rgba(255, 255, 255, 0.90);
 }
 
@@ -782,14 +783,14 @@ popover.power-popover>contents {
 .power-shutdown.selected {
     background-color: rgba(239, 68, 68, 0.14);
     border: none;
-    box-shadow: 0 4px 22px rgba(239, 68, 68, 0.28);
+    box-shadow: none;
     color: #ffffff;
 }
 
 .power-shutdown.selected .power-btn-icon {
     background-color: rgba(239, 68, 68, 0.28);
     border: none;
-    box-shadow: 0 0 16px rgba(239, 68, 68, 0.35);
+    box-shadow: none;
 }
 
 .power-shutdown.selected .power-btn-key {
@@ -797,21 +798,21 @@ popover.power-popover>contents {
     border: none;
     color: #ffffff;
     opacity: 1.0;
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.45);
+    box-shadow: none;
 }
 
 /* Reboot active/selected */
 .power-reboot.selected {
     background-color: rgba(249, 115, 22, 0.14);
     border: none;
-    box-shadow: 0 4px 22px rgba(249, 115, 22, 0.28);
+    box-shadow: none;
     color: #ffffff;
 }
 
 .power-reboot.selected .power-btn-icon {
     background-color: rgba(249, 115, 22, 0.28);
     border: none;
-    box-shadow: 0 0 16px rgba(249, 115, 22, 0.35);
+    box-shadow: none;
 }
 
 .power-reboot.selected .power-btn-key {
@@ -819,21 +820,21 @@ popover.power-popover>contents {
     border: none;
     color: #ffffff;
     opacity: 1.0;
-    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.45);
+    box-shadow: none;
 }
 
 /* Suspend active/selected */
 .power-suspend.selected {
     background-color: rgba(59, 130, 246, 0.14);
     border: none;
-    box-shadow: 0 4px 22px rgba(59, 130, 246, 0.28);
+    box-shadow: none;
     color: #ffffff;
 }
 
 .power-suspend.selected .power-btn-icon {
     background-color: rgba(59, 130, 246, 0.28);
     border: none;
-    box-shadow: 0 0 16px rgba(59, 130, 246, 0.35);
+    box-shadow: none;
 }
 
 .power-suspend.selected .power-btn-key {
@@ -841,21 +842,21 @@ popover.power-popover>contents {
     border: none;
     color: #ffffff;
     opacity: 1.0;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.45);
+    box-shadow: none;
 }
 
 /* Logout active/selected */
 .power-logout.selected {
     background-color: rgba(168, 85, 247, 0.14);
     border: none;
-    box-shadow: 0 4px 22px rgba(168, 85, 247, 0.28);
+    box-shadow: none;
     color: #ffffff;
 }
 
 .power-logout.selected .power-btn-icon {
     background-color: rgba(168, 85, 247, 0.28);
     border: none;
-    box-shadow: 0 0 16px rgba(168, 85, 247, 0.35);
+    box-shadow: none;
 }
 
 .power-logout.selected .power-btn-key {
@@ -863,7 +864,7 @@ popover.power-popover>contents {
     border: none;
     color: #ffffff;
     opacity: 1.0;
-    box-shadow: 0 2px 8px rgba(168, 85, 247, 0.45);
+    box-shadow: none;
 }
 
 .power-popover-hint {
@@ -1340,28 +1341,28 @@ button.btn-upgrade-secondary:hover {
 }
 
 .floating-icon-badge {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    box-shadow: none;
 }
 
 /* Floating Action Button (FAB) Component */
 button.baby-fab,
 button.baby-fab.circular {
     background-color: #3b82f6;
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.45);
+    box-shadow: none;
 }
 
 button.baby-fab:hover,
 button.baby-fab.circular:hover {
     background-image: linear-gradient(135deg, #60a5fa, #3b82f6);
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.60);
+    box-shadow: none;
 }
 
 button.baby-fab:active,
 button.baby-fab.circular:active {
     background-image: linear-gradient(135deg, #1d4ed8, #1e40af);
     transform: translateY(0);
-    box-shadow: 0 3px 10px rgba(59, 130, 246, 0.30);
+    box-shadow: none;
 }
 
 /* === shared/sidebar.css === */
@@ -1594,6 +1595,7 @@ button.screenshot-toolbar-btn.selected image {
     background-color: rgba(14, 14, 18, 0.90);
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-top: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: none;
 }
 
 button.control-btn {
@@ -1717,7 +1719,7 @@ button.sidebar-item.active-nav:hover label {
 .sidebar-wallpaper-thumb {
     border-radius: 9999px;
     border: 1px solid rgba(255, 255, 255, 0.25);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    box-shadow: none;
 }
 
 
@@ -1871,6 +1873,17 @@ button.card-collapse-header:hover {
     color: #60a5fa;
 }
 
+.about-donate-card {
+    padding: 16px 20px;
+}
+
+.qr-code-box {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.30);
+}
+
 .lang-segmented-control {
     background-color: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -1879,7 +1892,7 @@ button.card-collapse-header:hover {
 button.lang-seg-active {
     background-color: #3b82f6;
     color: #ffffff;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+    box-shadow: none;
 }
 
 button.lang-seg-inactive {
@@ -1917,7 +1930,7 @@ button.theme-card-option.active-dark {
     color: #60a5fa;
     border-color: #3b82f6;
     font-weight: 700;
-    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
+    box-shadow: none;
 }
 
 button.theme-card-option.active-dark label,
@@ -1936,7 +1949,7 @@ dropdown.wallpaper-target-dropdown,
 .wallpaper-badge {
     background-color: rgba(0, 0, 0, 0.60);
     border: 1px solid rgba(255, 255, 255, 0.22);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    box-shadow: none;
 }
 
 dropdown.wallpaper-target-dropdown button,
@@ -1950,7 +1963,7 @@ button.wallpaper-action-btn:hover {
     background-color: rgba(59, 130, 246, 0.85);
     border-color: #3b82f6;
     color: #ffffff;
-    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.40);
+    box-shadow: none;
 }
 
 /* Warning alert container */
@@ -2009,7 +2022,7 @@ button.wallpaper-thumb-card picture {
 
 button.wallpaper-thumb-card:hover picture {
     border-color: #3b82f6;
-    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+    box-shadow: none;
 }
 
 
@@ -2371,7 +2384,7 @@ button.switcher-card:hover {
 button.switcher-card.selected {
     background-color: rgba(99, 102, 241, 0.12);
     border: 1.5px solid #6366f1;
-    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35), inset 0 0 12px rgba(99, 102, 241, 0.15);
+    box-shadow: none;
 }
 
 

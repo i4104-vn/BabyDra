@@ -44,7 +44,7 @@
 .island-wrapper:hover .island-bracket,
 .panel-notch:hover .island-bracket {
     color: #60a5fa;
-    text-shadow: 0 0 8px rgba(96, 165, 250, 0.6);
+    text-shadow: none;
 }
 
 popover.clipboard-popover {
@@ -259,7 +259,7 @@ popover.clipboard-popover>contents {
     font-size: 11px;
     font-weight: 700;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace, sans-serif;
-    color: rgba(255, 255, 255, 0.95);
+    color: currentColor;
     margin: 0 4px 0 0;
     padding: 0;
 }
@@ -340,7 +340,7 @@ popover.media-popover>contents {
 .media-popover-art {
     border-radius: 14px;
     margin-bottom: 14px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    box-shadow: none;
 }
 
 .fallback-art-box {

@@ -169,7 +169,6 @@
 }
 
 .explore-window dropdown>popover>contents {
-    backdrop-filter: blur(20px);
     border-radius: 12px;
     padding: 6px;
     box-shadow: none;

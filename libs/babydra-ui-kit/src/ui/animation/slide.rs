@@ -40,6 +40,9 @@ pub fn slide_in(
     let dur_us = duration_ms as i64 * 1000;
 
     widget.add_tick_callback(move |w, clock| {
+        if w.root().is_none() {
+            return glib::ControlFlow::Break;
+        }
         let now = clock.frame_time();
         if start_time.get() == 0 {
             start_time.set(now);
@@ -104,6 +107,9 @@ pub fn slide_out(
     let dur_us = duration_ms as i64 * 1000;
 
     widget.add_tick_callback(move |w, clock| {
+        if w.root().is_none() {
+            return glib::ControlFlow::Break;
+        }
         let now = clock.frame_time();
         if start_time.get() == 0 {
             start_time.set(now);
@@ -218,6 +224,9 @@ fn slide_out_cb_inner<F>(
     let on_complete_opt = std::cell::RefCell::new(Some(on_complete));
 
     widget.add_tick_callback(move |w, clock| {
+        if w.root().is_none() {
+            return glib::ControlFlow::Break;
+        }
         if let Some((ref generation, expected)) = cancellation {
             if generation.get() != expected {
                 return glib::ControlFlow::Break;

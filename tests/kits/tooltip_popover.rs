@@ -62,4 +62,60 @@ fn test_gtk_tooltip_popover_suite() {
     assert!(tooltip2.is_suppressed());
     is_open.set(false);
     assert!(!tooltip2.is_suppressed());
+
+    // Clean up popovers so no Finalizing warnings occur
+    let mut c = btn.first_child();
+    while let Some(w) = c {
+        let next = w.next_sibling();
+        if w.is::<gtk4::Popover>() {
+            w.unparent();
+        }
+        c = next;
+    }
+    let mut c2 = btn2.first_child();
+    while let Some(w) = c2 {
+        let next = w.next_sibling();
+        if w.is::<gtk4::Popover>() {
+            w.unparent();
+        }
+        c2 = next;
+    }
+}
+
+#[test]
+fn test_button_popover_unparent_lifecycle() {
+    if gtk4::init().is_err() {
+        return;
+    }
+
+    let apps_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    let btn = gtk4::Button::new();
+    let preview_popover = gtk4::Popover::new();
+    preview_popover.set_parent(&btn);
+
+    let tooltip_popover = TooltipPopover::new(&btn, gtk4::PositionType::Bottom);
+    apps_box.append(&btn);
+
+    // Verify children of btn
+    let mut count = 0;
+    let mut c = btn.first_child();
+    while let Some(widget) = c {
+        count += 1;
+        c = widget.next_sibling();
+    }
+    // preview_popover + tooltip_popover
+    assert_eq!(count, 2);
+
+    preview_popover.unparent();
+    tooltip_popover.unparent();
+
+    let mut remaining = 0;
+    let mut c2 = btn.first_child();
+    while let Some(widget) = c2 {
+        remaining += 1;
+        c2 = widget.next_sibling();
+    }
+    assert_eq!(remaining, 0);
+
+    apps_box.remove(&btn);
 }

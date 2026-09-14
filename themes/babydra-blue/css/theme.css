@@ -15,19 +15,19 @@
 button.baby-fab,
 button.baby-fab.circular {
     background-color: #38bdf8;
-    box-shadow: 0 6px 20px rgba(56, 189, 248, 0.45);
+    box-shadow: none;
 }
 
 button.baby-fab:hover,
 button.baby-fab.circular:hover {
     background-image: linear-gradient(135deg, #7dd3fc, #38bdf8);
-    box-shadow: 0 8px 24px rgba(56, 189, 248, 0.60);
+    box-shadow: none;
 }
 
 button.baby-fab:active,
 button.baby-fab.circular:active {
     background-image: linear-gradient(135deg, #0284c7, #0369a1);
-    box-shadow: 0 3px 10px rgba(56, 189, 248, 0.30);
+    box-shadow: none;
 }
 
 /* Suggested / primary action buttons (dialogs) */
@@ -44,7 +44,7 @@ button.suggested-action:active {
 /* Segment control active state */
 button.lang-seg-active {
     background-color: #38bdf8;
-    box-shadow: 0 2px 8px rgba(56, 189, 248, 0.35);
+    box-shadow: none;
 }
 
 /* Keyword chips */
@@ -144,7 +144,7 @@ button.theme-card-option.active-dark {
     background-color: rgba(56, 189, 248, 0.20);
     color: #7dd3fc;
     border-color: #38bdf8;
-    box-shadow: 0 4px 16px rgba(56, 189, 248, 0.25);
+    box-shadow: none;
 }
 button.theme-card-option.active-dark label,
 button.theme-card-option.active-dark image {

@@ -167,6 +167,9 @@ impl TooltipPopover {
         let update_c = update_fn.clone();
         let sup_enter = suppress_fn.clone();
         motion_anchor.connect_enter(move |_, _, _| {
+            if pop_enter.parent().is_none() || pop_enter.root().is_none() {
+                return;
+            }
             *is_h_enter.borrow_mut() = true;
             if let Some(ref f) = *sup_enter.borrow() {
                 if f() {
@@ -204,7 +207,7 @@ impl TooltipPopover {
             let is_h = is_h_leave.clone();
             let pop = pop_leave.clone();
             gtk4::glib::timeout_add_local(std::time::Duration::from_millis(150), move || {
-                if !*is_h.borrow() {
+                if !*is_h.borrow() && pop.parent().is_some() && pop.root().is_some() {
                     pop.popdown();
                 }
                 gtk4::glib::ControlFlow::Break
@@ -247,7 +250,7 @@ impl TooltipPopover {
             let is_h = is_h_pop_leave.clone();
             let pop = pop_pop_leave.clone();
             gtk4::glib::timeout_add_local(std::time::Duration::from_millis(150), move || {
-                if !*is_h.borrow() {
+                if !*is_h.borrow() && pop.parent().is_some() && pop.root().is_some() {
                     pop.popdown();
                 }
                 gtk4::glib::ControlFlow::Break

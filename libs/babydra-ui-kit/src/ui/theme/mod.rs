@@ -239,7 +239,7 @@ pub fn set_dark_mode(dark: bool) {
     std::thread::spawn(move || {
         let _ = babydra_core::services::system::set_color_scheme(dark);
 
-        gtk4::glib::idle_add_local_once(move || {
+        gtk4::glib::idle_add_once(move || {
             if let Some(settings) = gtk4::Settings::default() {
                 settings.set_gtk_application_prefer_dark_theme(dark);
             }

@@ -40,7 +40,7 @@
 .desktop-icon.drop-target-hover {
     background-color: rgba(96, 165, 250, 0.35);
     border-color: rgba(96, 165, 250, 0.9);
-    box-shadow: 0 0 12px rgba(96, 165, 250, 0.5);
+    box-shadow: none;
     transform: scale(1.05);
 }
 

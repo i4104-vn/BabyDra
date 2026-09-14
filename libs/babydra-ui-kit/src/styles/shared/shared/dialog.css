@@ -47,26 +47,26 @@ window.explore-dialog,
 .modern-dialog-badge.badge-blue {
     background: rgba(59, 130, 246, 0.15);
     border: 1px solid rgba(59, 130, 246, 0.30);
-    box-shadow: 0 3px 12px rgba(59, 130, 246, 0.18);
+    box-shadow: none;
 }
 
 .modern-dialog-badge.badge-danger,
 .recovery-danger-badge {
     background: rgba(239, 68, 68, 0.15);
     border: 1px solid rgba(239, 68, 68, 0.30);
-    box-shadow: 0 3px 12px rgba(239, 68, 68, 0.18);
+    box-shadow: none;
 }
 
 .modern-dialog-badge.badge-success {
     background: rgba(16, 185, 129, 0.15);
     border: 1px solid rgba(16, 185, 129, 0.30);
-    box-shadow: 0 3px 12px rgba(16, 185, 129, 0.18);
+    box-shadow: none;
 }
 
 .modern-dialog-badge.badge-warning {
     background: rgba(245, 158, 11, 0.15);
     border: 1px solid rgba(245, 158, 11, 0.30);
-    box-shadow: 0 3px 12px rgba(245, 158, 11, 0.18);
+    box-shadow: none;
 }
 
 /* ── 4. Dialog Typography ── */
@@ -403,11 +403,11 @@ button.modern-dialog-danger-btn:disabled,
     border-radius: 9999px;
     padding: 9px 24px;
     border: none;
-    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.38);
+    box-shadow: none;
     transition: all 150ms ease;
 }
 
 .modern-reboot-btn:hover {
     background: linear-gradient(135deg, #34d399, #10b981);
-    box-shadow: 0 6px 22px rgba(16, 185, 129, 0.55);
+    box-shadow: none;
 }
