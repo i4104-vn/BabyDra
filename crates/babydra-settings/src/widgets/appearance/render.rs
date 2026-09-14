@@ -180,8 +180,6 @@ pub fn build_appearance_ui(
     theme_grid.set_column_homogeneous(true);
     theme_grid.set_valign(gtk4::Align::Center);
 
-    theme_grid.attach(&preview_overlay, 0, 0, 1, 2);
-
     // GTK Theme
     let gtk_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
     let gtk_lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.gtk_theme")));

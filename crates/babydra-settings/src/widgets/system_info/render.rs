@@ -32,17 +32,14 @@ pub fn build_about_ui() -> AboutWidgets {
     page_title.set_halign(Align::Start);
     main_box.append(&page_title);
 
-    let subtitle_lbl = Label::new(Some(&babydra_core::i18n::trans("settings.about_subtitle")));
-    subtitle_lbl.add_css_class("settings-row-desc");
-    subtitle_lbl.set_halign(Align::Start);
-    main_box.append(&subtitle_lbl);
-
     let content_box = GtkBox::new(Orientation::Vertical, 20);
+    content_box.set_valign(Align::Start);
     content_box.set_margin_top(8);
 
     // ── Hero Card: BabyDra Logo + Version + OS Info ──
     let hero_card = create_card(Orientation::Horizontal, 24);
     hero_card.add_css_class("glass-panel");
+    hero_card.set_valign(Align::Start);
     hero_card.set_margin_start(4);
     hero_card.set_margin_end(4);
 
@@ -69,11 +66,8 @@ pub fn build_about_ui() -> AboutWidgets {
     version_box.append(&version_title);
 
     let version_info = Label::new(Some(&format!(
-        "{} {} • {} {}",
-        babydra_core::i18n::trans("settings.about_version"),
+        "BabyDra v{} • Arch Linux",
         env!("CARGO_PKG_VERSION"),
-        babydra_core::i18n::trans("settings.about_build"),
-        "Arch Linux"
     )));
     version_info.add_css_class("hero-subtitle");
     version_info.set_halign(Align::Start);
@@ -127,16 +121,19 @@ pub fn build_about_ui() -> AboutWidgets {
 
     let donate_card = create_card(Orientation::Horizontal, 24);
     donate_card.add_css_class("glass-panel");
+    donate_card.add_css_class("about-donate-card");
+    donate_card.set_valign(Align::Start);
     donate_card.set_margin_start(4);
     donate_card.set_margin_end(4);
 
-    let qr_box = GtkBox::new(Orientation::Vertical, 8);
+    let qr_box = GtkBox::new(Orientation::Vertical, 0);
     qr_box.set_valign(Align::Center);
-    qr_box.set_size_request(120, 120);
+    qr_box.set_halign(Align::Center);
     qr_box.add_css_class("qr-code-box");
 
-    let qr_img = babydra_ui_kit::ui::icon::get_icon_from_svg(include_str!("qr.svg"), 100);
-    qr_img.set_pixel_size(100);
+    let qr_size = 140;
+    let qr_img = babydra_ui_kit::ui::icon::get_icon_from_svg(include_str!("qr.svg"), qr_size);
+    qr_img.set_pixel_size(qr_size);
     qr_img.set_valign(Align::Center);
     qr_img.set_halign(Align::Center);
     qr_img.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.about_qr_alt")));
@@ -177,6 +174,7 @@ pub fn build_about_ui() -> AboutWidgets {
     grid.set_column_spacing(20);
     grid.set_row_spacing(20);
     grid.set_column_homogeneous(true);
+    grid.set_valign(Align::Start);
     grid.set_margin_start(4);
     grid.set_margin_end(4);
 

@@ -48,7 +48,7 @@ entry.sidebar-search-entry {
     min-height: 32px;
 }
 
-entry.sidebar-search-entry > text {
+entry.sidebar-search-entry>text {
     background-color: transparent;
     border: none;
     box-shadow: none;
@@ -269,13 +269,13 @@ button.wallpaper-action-btn {
     min-width: 38px;
     min-height: 38px;
     padding: 0;
-    backdrop-filter: blur(14px);
+    box-shadow: none;
     transition: all 200ms ease;
 }
 
 dropdown.wallpaper-target-dropdown {
     border-radius: 9999px;
-    backdrop-filter: blur(14px);
+    box-shadow: none;
 }
 
 dropdown.wallpaper-target-dropdown button {
@@ -309,7 +309,7 @@ button.wallpaper-thumb-card picture {
     border-radius: 9999px;
     margin: 6px;
     letter-spacing: 0.5px;
-    backdrop-filter: blur(14px);
+    box-shadow: none;
 }
 
 .wallpaper-preview-badge {
@@ -318,6 +318,7 @@ button.wallpaper-thumb-card picture {
     padding: 5px 12px;
     border-radius: 9999px;
     letter-spacing: 0.8px;
+    box-shadow: none;
 }
 
 button.theme-option-card,
@@ -346,7 +347,7 @@ dropdown {
     box-shadow: none;
 }
 
-dropdown > button {
+dropdown>button {
     background-image: none;
     border-radius: 10px;
     padding: 6px 14px;
@@ -390,6 +391,16 @@ button.lang-seg-inactive {
 .hero-hostname {
     font-size: 19px;
     font-weight: 700;
+}
+
+.about-donate-card {
+    padding: 16px 20px;
+}
+
+.qr-code-box {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 6px;
 }
 
 progressbar.disk-progress {
@@ -626,8 +637,8 @@ scale.control-slider {
 }
 
 scale.control-slider trough,
-scale.control-slider > trough,
-scale.control-slider contents > trough {
+scale.control-slider>trough,
+scale.control-slider contents>trough {
     margin: 0;
     padding: 0;
     min-height: 24px;
@@ -638,8 +649,8 @@ scale.control-slider contents > trough {
 }
 
 scale.control-slider trough highlight,
-scale.control-slider > trough > highlight,
-scale.control-slider contents > trough > highlight {
+scale.control-slider>trough>highlight,
+scale.control-slider contents>trough>highlight {
     border-radius: 12px;
     background-color: #3b82f6;
     min-height: 24px;
@@ -647,8 +658,8 @@ scale.control-slider contents > trough > highlight {
 }
 
 scale.control-slider slider,
-scale.control-slider > slider,
-scale.control-slider contents > slider {
+scale.control-slider>slider,
+scale.control-slider contents>slider {
     min-width: 18px;
     min-height: 18px;
     margin: 3px 0;
@@ -662,8 +673,8 @@ scale.control-slider contents > slider {
 }
 
 scale.control-slider slider:hover,
-scale.control-slider > slider:hover,
-scale.control-slider contents > slider:hover {
+scale.control-slider>slider:hover,
+scale.control-slider contents>slider:hover {
     background-color: #ffffff;
     box-shadow: none;
     -gtk-icon-shadow: none;
@@ -677,8 +688,8 @@ scale.settings-scale {
 }
 
 scale.settings-scale trough,
-scale.settings-scale > trough,
-scale.settings-scale contents > trough {
+scale.settings-scale>trough,
+scale.settings-scale contents>trough {
     min-height: 8px;
     border-radius: 9999px;
     background-image: none;
@@ -687,8 +698,8 @@ scale.settings-scale contents > trough {
 }
 
 scale.settings-scale trough highlight,
-scale.settings-scale > trough > highlight,
-scale.settings-scale contents > trough > highlight {
+scale.settings-scale>trough>highlight,
+scale.settings-scale contents>trough>highlight {
     min-height: 8px;
     border-radius: 9999px;
     background-image: none;
@@ -697,8 +708,8 @@ scale.settings-scale contents > trough > highlight {
 }
 
 scale.settings-scale slider,
-scale.settings-scale > slider,
-scale.settings-scale contents > slider {
+scale.settings-scale>slider,
+scale.settings-scale contents>slider {
     min-width: 20px;
     min-height: 20px;
     border-radius: 9999px;
@@ -711,8 +722,8 @@ scale.settings-scale contents > slider {
 }
 
 scale.settings-scale slider:hover,
-scale.settings-scale > slider:hover,
-scale.settings-scale contents > slider:hover {
+scale.settings-scale>slider:hover,
+scale.settings-scale contents>slider:hover {
     transform: scale(1.15);
 }
 
@@ -726,7 +737,7 @@ scale.settings-scale mark label {
 .avatar-preview-picture {
     border-radius: 50%;
     border: 2px solid rgba(255, 255, 255, 0.7);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    box-shadow: none;
 }
 
 .avatar-action-btn {
@@ -736,8 +747,8 @@ scale.settings-scale mark label {
     background: transparent;
     border-radius: 50%;
 }
+
 .avatar-action-btn:hover .avatar-preview-picture {
     border-color: rgba(255, 255, 255, 1.0);
     opacity: 0.9;
 }
-
