@@ -1,6 +1,6 @@
 //! Bluetooth devices management panel.
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::sync::mpsc::channel;
 
@@ -53,14 +53,18 @@ pub fn create_bt_widget() -> gtk4::Widget {
         }
     };
 
+    render_devices();
+
     // Async thread scanning channel
     let (tx_devs, rx_devs) = channel::<Vec<BtDevice>>();
+    let device_scan_in_flight = Rc::new(Cell::new(false));
 
     let trigger_refresh = {
         let tx_c = tx_devs.clone();
         let state_c = state.clone();
         let list_box_c = list_box.clone();
         let render_c = render_devices.clone();
+        let device_scan_in_flight_c = device_scan_in_flight.clone();
         move || {
             // ONLY fetch when tab is active/mapped!
             if !list_box_c.is_mapped() {
@@ -73,6 +77,10 @@ pub fn create_bt_widget() -> gtk4::Widget {
             };
 
             if enabled {
+                if device_scan_in_flight_c.get() {
+                    return;
+                }
+                device_scan_in_flight_c.set(true);
                 if is_empty {
                     state_c.borrow_mut().is_loading = true;
                     render_c();
@@ -88,15 +96,19 @@ pub fn create_bt_widget() -> gtk4::Widget {
 
     let state_c_rx = state.clone();
     let render_c_rx = render_devices.clone();
+    let list_box_rx = list_box.clone();
+    let device_scan_in_flight_rx = device_scan_in_flight.clone();
     glib::timeout_add_local(std::time::Duration::from_millis(150), move || {
         let mut updated = false;
         while let Ok(devs) = rx_devs.try_recv() {
+            device_scan_in_flight_rx.set(false);
             let mut state_ref = state_c_rx.borrow_mut();
+            let changed = state_ref.devices != devs || state_ref.is_loading;
             state_ref.devices = devs;
             state_ref.is_loading = false;
-            updated = true;
+            updated |= changed;
         }
-        if updated {
+        if updated && list_box_rx.is_mapped() {
             render_c_rx();
         }
         glib::ControlFlow::Continue
@@ -108,17 +120,67 @@ pub fn create_bt_widget() -> gtk4::Widget {
         trigger_map();
     });
 
-    // Trigger initial fetch if mapped
-    let trigger_init = trigger_refresh.clone();
-    glib::timeout_add_local(std::time::Duration::from_millis(200), move || {
-        trigger_init();
-        glib::ControlFlow::Break
-    });
-
     // Refresh periodically (every 5s) ONLY when tab is mapped
     let trigger_periodic = trigger_refresh.clone();
     glib::timeout_add_local(std::time::Duration::from_secs(5), move || {
         trigger_periodic();
+        glib::ControlFlow::Continue
+    });
+
+    let trigger_initial = trigger_refresh.clone();
+    glib::timeout_add_local(std::time::Duration::from_millis(300), move || {
+        trigger_initial();
+        glib::ControlFlow::Break
+    });
+
+    // Poll adapter power state off the GTK thread so changes made outside
+    // Settings are reflected without blocking the window.
+    let (tx_status_poll, rx_status_poll) = channel::<bool>();
+    let status_in_flight = Rc::new(Cell::new(false));
+    let trigger_status_refresh = trigger_refresh.clone();
+    let state_status = state.clone();
+    let render_status = render_devices.clone();
+    let toggle_status = toggle_row.clone();
+    let list_box_status = list_box.clone();
+    let status_in_flight_rx = status_in_flight.clone();
+    glib::timeout_add_local(std::time::Duration::from_millis(100), move || {
+        while let Ok(enabled) = rx_status_poll.try_recv() {
+            status_in_flight_rx.set(false);
+            let changed = state_status.borrow().enabled != enabled;
+            if !changed {
+                continue;
+            }
+            toggle_status.switch.set_active(enabled);
+            toggle_status.set_active(enabled);
+            let mut state_ref = state_status.borrow_mut();
+            state_ref.enabled = enabled;
+            if !enabled {
+                state_ref.devices.clear();
+                state_ref.is_loading = false;
+            }
+            drop(state_ref);
+            if list_box_status.is_mapped() {
+                if enabled {
+                    trigger_status_refresh();
+                } else {
+                    render_status();
+                }
+            }
+        }
+        glib::ControlFlow::Continue
+    });
+
+    let tx_status_trigger = tx_status_poll.clone();
+    let status_in_flight_trigger = status_in_flight.clone();
+    let list_box_status_trigger = list_box.clone();
+    glib::timeout_add_local(std::time::Duration::from_secs(2), move || {
+        if list_box_status_trigger.is_mapped() && !status_in_flight_trigger.get() {
+            status_in_flight_trigger.set(true);
+            let tx = tx_status_trigger.clone();
+            std::thread::spawn(move || {
+                let _ = tx.send(is_bluetooth_enabled());
+            });
+        }
         glib::ControlFlow::Continue
     });
 

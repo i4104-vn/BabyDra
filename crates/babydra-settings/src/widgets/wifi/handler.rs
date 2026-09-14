@@ -23,7 +23,7 @@ pub fn render_network_list(
         lb
     };
 
-    let active_net = babydra_core::services::system::network::get_active_network_info();
+    let active_net = state_ref.active_network.clone();
     let is_ethernet_active = active_net.is_connected
         && active_net.network_type == babydra_core::models::ActiveNetworkType::Ethernet;
 
@@ -95,8 +95,9 @@ pub fn render_network_list(
         check_icon.set_pixel_size(18);
         check_icon.set_valign(gtk4::Align::Center);
         check_icon.add_css_class("connected-text");
-        check_icon
-            .set_tooltip_text(Some(&babydra_core::i18n::trans("settings.ethernet_connected")));
+        check_icon.set_tooltip_text(Some(&babydra_core::i18n::trans(
+            "settings.ethernet_connected",
+        )));
 
         hbox.append(&icon_badge);
         hbox.append(&name_box);
