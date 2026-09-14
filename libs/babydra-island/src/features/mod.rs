@@ -4,4 +4,5 @@ pub mod clipboard;
 pub mod default;
 pub mod media_player;
 pub mod power;
+pub mod recording;
 pub mod system;

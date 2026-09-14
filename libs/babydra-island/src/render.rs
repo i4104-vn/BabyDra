@@ -39,6 +39,7 @@ pub fn build_default_island() -> Island {
         .feature(Box::new(features::system::BluetoothFeature::new()))
         .feature(Box::new(features::system::BatteryFeature::new()))
         .feature(Box::new(features::clipboard::ClipboardFeature::new()))
+        .feature(Box::new(features::recording::RecordingFeature::new()))
         .feature(Box::new(features::media_player::MediaPlayerFeature::new()))
         .idle(features::default::idle_logo_view())
         .build()
