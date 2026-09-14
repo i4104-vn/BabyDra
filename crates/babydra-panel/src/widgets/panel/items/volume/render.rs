@@ -11,7 +11,7 @@ use std::rc::Rc;
 pub fn create_volume_row(
     on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>,
     vol_icon: gtk4::Image,
-) -> (gtk4::Box, PillSlider) {
+) -> (gtk4::Box, PillSlider, Rc<dyn Fn(f64, bool)>) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
     main_box.add_css_class("control-slider-card");
 
@@ -141,7 +141,21 @@ pub fn create_volume_row(
 
     main_box.append(&header_box);
     main_box.append(&row_box);
-    (main_box, slider)
+
+    let slider_sync = slider.clone();
+    let update_mute_icon_sync = update_mute_icon.clone();
+    let muted_state_sync = muted_state.clone();
+    let current_val_sync = current_val.clone();
+    let vol_icon_sync = vol_icon.clone();
+    let sync_callback: Rc<dyn Fn(f64, bool)> = Rc::new(move |vol: f64, is_m: bool| {
+        current_val_sync.set(vol);
+        muted_state_sync.set(is_m);
+        slider_sync.set_value_silent(vol);
+        update_mute_icon_sync(is_m);
+        update_topbar_volume_state(&vol_icon_sync, vol, is_m);
+    });
+
+    (main_box, slider, sync_callback)
 }
 
 /// Populate audio menu.

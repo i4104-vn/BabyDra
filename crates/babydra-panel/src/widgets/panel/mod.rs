@@ -39,6 +39,32 @@ pub fn create_status_icons(
         ws_popover,
     );
 
+    // Real-time event listener for system volume & mute changes
+    {
+        let vol_icon_l = vol_icon.clone();
+        let cached_vol_l = popovers.current_volume.clone();
+        let cached_muted_l = popovers.current_muted.clone();
+        let update_vol_pop_l = popovers.update_volume_popover.clone();
+        let vol_pop_l = popovers.vol_popover.clone();
+
+        babydra_core::services::system::volume::spawn_volume_listener(move |state| {
+            cached_vol_l.set(state.volume);
+            cached_muted_l.set(state.muted);
+            items::volume::update_topbar_volume_state(&vol_icon_l, state.volume, state.muted);
+            if vol_pop_l.is_visible() {
+                update_vol_pop_l();
+            }
+            modal::sync_cc_volume(state.volume, state.muted);
+        });
+    }
+
+    // Real-time event listener for system brightness changes
+    {
+        babydra_core::services::system::backlight::spawn_brightness_listener(move |val| {
+            modal::sync_cc_brightness(val);
+        });
+    }
+
     // Scroll controller for volume on status button
     let scroll_controller = gtk4::EventControllerScroll::new(
         gtk4::EventControllerScrollFlags::VERTICAL | gtk4::EventControllerScrollFlags::DISCRETE,

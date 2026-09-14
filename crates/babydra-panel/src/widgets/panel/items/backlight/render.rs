@@ -18,7 +18,7 @@ fn get_brightness_icon_name(val: f64) -> &'static str {
 }
 
 /// Creates a new `brightness row`.
-pub fn create_brightness() -> (gtk4::Box, PillSlider) {
+pub fn create_brightness() -> (gtk4::Box, PillSlider, std::rc::Rc<dyn Fn(f64)>) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
     main_box.add_css_class("control-slider-card");
 
@@ -82,9 +82,16 @@ pub fn create_brightness() -> (gtk4::Box, PillSlider) {
     main_box.append(&header_box);
     main_box.append(&row_box);
 
-    sync_ddc_brightness_async(&slider, update_icon);
+    sync_ddc_brightness_async(&slider, update_icon.clone());
 
-    (main_box, slider)
+    let slider_sync = slider.clone();
+    let update_icon_sync = update_icon.clone();
+    let sync_callback: std::rc::Rc<dyn Fn(f64)> = std::rc::Rc::new(move |val: f64| {
+        slider_sync.set_value_silent(val);
+        update_icon_sync(val);
+    });
+
+    (main_box, slider, sync_callback)
 }
 
 /// Sync DDC brightness async.
@@ -112,7 +119,7 @@ fn sync_ddc_brightness_async(
                         60.0
                     };
                     if current_val == 60.0 {
-                        slider_clone.set_value(val);
+                        slider_clone.set_value_silent(val);
                         update_icon(val);
                         if let Ok(mut guard) = BRIGHTNESS_STATE.lock() {
                             *guard = val;

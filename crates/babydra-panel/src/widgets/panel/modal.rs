@@ -9,6 +9,46 @@ use super::items;
 use super::items::header::render::create_header_row;
 use super::toggle_grid::create_cc_grid;
 
+thread_local! {
+    static ACTIVE_CC_SYNC: RefCell<Option<ActiveCcSync>> = const { RefCell::new(None) };
+}
+
+pub struct ActiveCcSync {
+    pub update_volume: Rc<dyn Fn(f64, bool)>,
+    pub update_brightness: Rc<dyn Fn(f64)>,
+}
+
+pub fn register_cc_sync(update_vol: Rc<dyn Fn(f64, bool)>, update_bright: Rc<dyn Fn(f64)>) {
+    ACTIVE_CC_SYNC.with(|s| {
+        *s.borrow_mut() = Some(ActiveCcSync {
+            update_volume: update_vol,
+            update_brightness: update_bright,
+        });
+    });
+}
+
+pub fn clear_cc_sync() {
+    ACTIVE_CC_SYNC.with(|s| {
+        *s.borrow_mut() = None;
+    });
+}
+
+pub fn sync_cc_volume(vol: f64, muted: bool) {
+    ACTIVE_CC_SYNC.with(|s| {
+        if let Some(ref sync) = *s.borrow() {
+            (sync.update_volume)(vol, muted);
+        }
+    });
+}
+
+pub fn sync_cc_brightness(val: f64) {
+    ACTIVE_CC_SYNC.with(|s| {
+        if let Some(ref sync) = *s.borrow() {
+            (sync.update_brightness)(val);
+        }
+    });
+}
+
 /// Builds the control center window UI.
 pub fn build_control_center(app: &gtk4::Application) -> (gtk4::ApplicationWindow, gtk4::Box) {
     let q_win = gtk4::ApplicationWindow::new(app);
@@ -62,13 +102,15 @@ pub fn rebuild_cc_contents(
     main_box.append(&create_cc_grid(on_popover_toggled.clone()));
 
     // 4. Append volume slider
-    let (volume_row, _volume_slider) =
+    let (volume_row, _volume_slider, vol_sync) =
         items::volume::render::create_volume_row(on_popover_toggled.clone(), vol_icon.clone());
     main_box.append(&volume_row);
 
     // 5. Append brightness slider
-    let (brightness_row, _brightness_slider) = items::backlight::render::create_brightness();
+    let (brightness_row, _brightness_slider, bright_sync) = items::backlight::render::create_brightness();
     main_box.append(&brightness_row);
+
+    register_cc_sync(vol_sync, bright_sync);
 
     // 6. Append disk monitor box
     main_box.append(&items::storage::render::create_disk_list_box());
@@ -137,6 +179,7 @@ pub fn create_cc_window(
             return glib::Propagation::Stop;
         }
         is_animating_clone.set(true);
+        clear_cc_sync();
         if let Ok(mut borrow) = ccw_inner.try_borrow_mut() {
             *borrow = None;
         }
@@ -151,6 +194,10 @@ pub fn create_cc_window(
             },
         );
         glib::Propagation::Stop
+    });
+
+    q_win.connect_destroy(|_| {
+        clear_cc_sync();
     });
 
     q_win.present();
