@@ -17,7 +17,7 @@ pub mod ui;
 
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use gtk4::prelude::*;
 
@@ -35,27 +35,34 @@ pub struct ClipboardFeature {
     widgets: NotchWidget,
     popover: Rc<RefCell<Option<ClipboardPopover>>>,
     selected_index: Rc<Cell<usize>>,
-    last_entries_len: usize,
+    last_entries_revision: u64,
+    enabled: bool,
+    enabled_checked_at: Instant,
 }
 
 impl ClipboardFeature {
     pub fn new() -> Self {
         service::init_clipboard_services();
-        let widgets =
-            NotchWidget::new("paste", "#3b82f6", &babydra_core::i18n::trans("island.clipboard_notch"));
+        let widgets = NotchWidget::new(
+            "paste",
+            "#3b82f6",
+            &babydra_core::i18n::trans("island.clipboard_notch"),
+        );
         Self {
             handle_rc: Rc::new(RefCell::new(None)),
             widgets,
             popover: Rc::new(RefCell::new(None)),
             selected_index: Rc::new(Cell::new(0)),
-            last_entries_len: 0,
+            last_entries_revision: babydra_core::get_entries_revision(),
+            enabled: babydra_core::is_clipboard_enabled(),
+            enabled_checked_at: Instant::now(),
         }
     }
 
     fn render_current_list(&mut self) {
         let entries = babydra_core::get_entries();
         let total = entries.len();
-        self.last_entries_len = total;
+        self.last_entries_revision = babydra_core::get_entries_revision();
         if total == 0 {
             self.selected_index.set(0);
         } else if self.selected_index.get() >= total {
@@ -247,13 +254,17 @@ impl IslandFeature for ClipboardFeature {
     }
 
     fn tick(&mut self, ctx: &IslandCtx) {
-        if !babydra_core::is_clipboard_enabled() {
+        if self.enabled_checked_at.elapsed() >= Duration::from_secs(2) {
+            self.enabled = babydra_core::is_clipboard_enabled();
+            self.enabled_checked_at = Instant::now();
+        }
+
+        if !self.enabled {
             return;
         }
 
         if ctx.is_current() {
-            let entries = babydra_core::get_entries();
-            if entries.len() != self.last_entries_len {
+            if babydra_core::get_entries_revision() != self.last_entries_revision {
                 self.render_current_list();
             }
         }
