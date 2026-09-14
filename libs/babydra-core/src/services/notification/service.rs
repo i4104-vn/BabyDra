@@ -140,8 +140,9 @@ pub fn spawn_dbus_listener(tx: tokio::sync::mpsc::UnboundedSender<NotificationMs
 
 /// Dismisses popup display window.
 pub fn close_notif_popup() {
-    // Managed inside the island notification feature, no-op here.
-    // The island controller handles the state machine for visibility.
+    SHARED_NOTIFICATION.with(|sn| {
+        let _ = sn.borrow_mut().take();
+    });
 }
 
 /// Registers the incoming desktop notification, caching it to the rolling historical notifications log.

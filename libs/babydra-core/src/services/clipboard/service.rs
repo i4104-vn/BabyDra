@@ -8,7 +8,7 @@ use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 use std::time::Instant;
 
@@ -18,6 +18,7 @@ pub use crate::models::system::clipboard::ClipboardEntry;
 
 static CLIPBOARD_STORE: OnceLock<Arc<Mutex<VecDeque<ClipboardEntry>>>> = OnceLock::new();
 static WATCHER_SPAWNED: AtomicBool = AtomicBool::new(false);
+static CLIPBOARD_REVISION: AtomicU64 = AtomicU64::new(0);
 
 /// Returns the shared global history store.
 pub fn get_clipboard_store() -> Arc<Mutex<VecDeque<ClipboardEntry>>> {
@@ -33,6 +34,11 @@ pub fn get_entries() -> Vec<ClipboardEntry> {
     lock.iter().cloned().collect()
 }
 
+/// Returns a cheap monotonic revision for change detection without cloning entries.
+pub fn get_entries_revision() -> u64 {
+    CLIPBOARD_REVISION.load(Ordering::Relaxed)
+}
+
 /// Checks whether clipboard history feature is enabled in config.
 pub fn is_clipboard_enabled() -> bool {
     crate::config::load_babydra_config().clipboard.enabled
@@ -44,7 +50,10 @@ pub fn push_entry(entry: ClipboardEntry) {
         return;
     }
 
-    let max_items = crate::config::load_babydra_config().clipboard.max_items.max(1);
+    let max_items = crate::config::load_babydra_config()
+        .clipboard
+        .max_items
+        .max(1);
     let store = get_clipboard_store();
     let mut lock = store.lock().unwrap();
 
@@ -75,13 +84,17 @@ pub fn push_entry(entry: ClipboardEntry) {
     while lock.len() > max_items {
         lock.pop_back();
     }
+    CLIPBOARD_REVISION.fetch_add(1, Ordering::Relaxed);
 }
 
 /// Clears all entries from the history buffer.
 pub fn clear_history() {
     let store = get_clipboard_store();
     let mut lock = store.lock().unwrap();
-    lock.clear();
+    if !lock.is_empty() {
+        lock.clear();
+        CLIPBOARD_REVISION.fetch_add(1, Ordering::Relaxed);
+    }
 }
 
 /// Shell command invoking the D-Bus method to display Dynamic Island clipboard history.
