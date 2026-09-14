@@ -42,7 +42,6 @@ const SHARED_CSS: &str = concat!(
     "\n",
     include_style!("island/system_island.css"),
     "\n",
-    include_style!("island/notification.css"),
     "\n",
     include_style!("launcher/launcher.css"),
     "\n",

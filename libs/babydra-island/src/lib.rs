@@ -6,14 +6,13 @@
 //! [`island::IslandViewHandle`] API, and control them with `show` / `hide` /
 //! `override_show_for`.
 //!
-//! Built-in features: media player (playerctl + visualizer + control popover),
-//! desktop notifications, and an optional idle logo pill.
+//! Built-in features: media player (playerctl + visualizer + control popover)
+//! and an optional idle logo pill.
 
 pub mod features;
 pub mod island;
 pub mod models;
 pub mod render;
-pub mod widgets;
 
 pub use island::{
     default_island, Island, IslandBuilder, IslandConfig, IslandFeature, IslandView,

@@ -132,7 +132,6 @@ fn run_gtk_css_parsing() {
         "libs/babydra-ui-kit/src/styles/shared/control_center/control_center.css",
         "libs/babydra-ui-kit/src/styles/shared/control_center/power.css",
         "libs/babydra-ui-kit/src/styles/shared/island/system_island.css",
-        "libs/babydra-ui-kit/src/styles/shared/island/notification.css",
         "libs/babydra-ui-kit/src/styles/shared/launcher/launcher.css",
         "libs/babydra-ui-kit/src/styles/shared/calendar/calendar.css",
         "libs/babydra-ui-kit/src/styles/shared/shared/button.css",
@@ -261,102 +260,8 @@ fn run_gtk_css_parsing() {
     );
 }
 
-fn run_render_fluid_cloud_capsule() {
-    if gtk4::init().is_err() {
-        return;
-    }
-    std::env::set_var("BABYDRA_THEMES_DIR", repo_root().join("themes"));
-    babydra_ui_kit::ui::theme::init_theme();
-
-    // Window with warm wallpaper background matching user's reference image
-    let window = gtk4::Window::new();
-    window.set_default_size(520, 200);
-
-    let disp = gtk4::gdk::Display::default().unwrap();
-    let theme_dark = std::fs::read_to_string(repo_root().join("themes/babydra-default/css/dark.css")).unwrap();
-    let island_css = std::fs::read_to_string(repo_root().join("libs/babydra-ui-kit/src/styles/shared/island/system_island.css")).unwrap();
-    let custom_css = "
-        .wallpaper-mock {
-            background: linear-gradient(135deg, #7c2d12 0%, #451a03 50%, #1c1917 100%);
-            padding: 36px 40px;
-        }
-    ";
-    let prov = gtk4::CssProvider::new();
-    prov.load_from_data(&format!("{}\n{}\n{}", island_css, theme_dark, custom_css));
-    gtk4::style_context_add_provider_for_display(&disp, &prov, gtk4::STYLE_PROVIDER_PRIORITY_APPLICATION + 100);
-
-    let outer_center = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
-    outer_center.add_css_class("wallpaper-mock");
-    outer_center.set_valign(gtk4::Align::Center);
-    outer_center.set_halign(gtk4::Align::Center);
-
-    // Pill Capsule matching NotificationPopover
-    let capsule = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    capsule.add_css_class("notification-popup-box");
-    capsule.set_valign(gtk4::Align::Center);
-    capsule.set_halign(gtk4::Align::Center);
-
-    let content_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    content_row.set_valign(gtk4::Align::Center);
-
-    // Squircle Icon container
-    let icon_box = gtk4::CenterBox::new();
-    icon_box.add_css_class("notification-icon-box");
-    icon_box.set_size_request(42, 42);
-    icon_box.set_valign(gtk4::Align::Center);
-    icon_box.set_halign(gtk4::Align::Center);
-
-    let icon_inner = babydra_ui_kit::ui::icon::get_icon_colored("calendar", 22, "#fbbf24");
-    icon_inner.add_css_class("notification-icon-img");
-    icon_box.set_center_widget(Some(&icon_inner));
-    content_row.append(&icon_box);
-
-    // Text stack
-    let text_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-    text_box.set_valign(gtk4::Align::Center);
-
-    let title_lbl = gtk4::Label::new(Some("日程已添加"));
-    title_lbl.add_css_class("notification-title");
-    title_lbl.set_halign(gtk4::Align::Start);
-    text_box.append(&title_lbl);
-
-    let body_lbl = gtk4::Label::new(Some("4月16日，不见不散"));
-    body_lbl.add_css_class("notification-body");
-    body_lbl.set_halign(gtk4::Align::Start);
-    text_box.append(&body_lbl);
-
-    content_row.append(&text_box);
-    capsule.append(&content_row);
-    outer_center.append(&capsule);
-
-    window.set_child(Some(&outer_center));
-    window.present();
-
-    let ctx = gtk4::glib::MainContext::default();
-    for _ in 0..15 {
-        ctx.iteration(false);
-    }
-
-    let snapshot = gtk4::Snapshot::new();
-    let child = window.child().unwrap();
-    window.snapshot_child(&child, &snapshot);
-    if let Some(node) = snapshot.to_node() {
-        let renderer = window.renderer().or_else(|| {
-            window
-                .surface()
-                .and_then(|surface| gtk4::gsk::Renderer::for_surface(&surface))
-        });
-        if let Some(r) = renderer {
-            let texture = r.render_texture(&node, None);
-            let _ = texture.save_to_png("/tmp/rendered_fluid_cloud.png");
-            println!("Saved Fluid Cloud snapshot to /tmp/rendered_fluid_cloud.png");
-        }
-    }
-}
-
 #[test]
 fn test_theme_and_css() {
     run_gtk_css_parsing();
     run_scale_allocation();
-    run_render_fluid_cloud_capsule();
 }

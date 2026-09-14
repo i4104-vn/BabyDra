@@ -8,7 +8,7 @@
 use crate::features;
 use crate::island::{Island, IslandBuilder};
 
-/// Creates the default Dynamic Island (media player + notifications) and
+/// Creates the default Dynamic Island (media player and system controls) and
 /// returns the notch capsule widget, ready to be appended to the panel.
 pub fn create_system_island() -> gtk4::Box {
     build_default_island().widget()
@@ -29,7 +29,6 @@ pub fn build_default_island() -> Island {
         .feature(Box::new(features::system::BluetoothFeature::new()))
         .feature(Box::new(features::system::BatteryFeature::new()))
         .feature(Box::new(features::clipboard::ClipboardFeature::new()))
-        .feature(Box::new(features::notification::NotificationFeature::new()))
         .feature(Box::new(features::media_player::MediaPlayerFeature::new()))
         .idle(features::default::idle_logo_view())
         .build()
