@@ -8,6 +8,20 @@ use std::rc::Rc;
 use crate::widgets;
 use babydra_core::models::settings::nav::{NavCategory, NavItem};
 
+/// Returns whether the first-login page still needs to be shown.
+fn is_first_login() -> bool {
+    !babydra_core::load_babydra_config().first_login
+}
+
+/// Persists the first-login marker in `~/.babydra/babydra.conf`.
+fn mark_first_login_complete() {
+    let mut config = babydra_core::load_babydra_config();
+    if !config.first_login {
+        config.first_login = true;
+        babydra_core::save_babydra_config(&config);
+    }
+}
+
 const NAV_CATEGORIES: &[NavCategory] = &[
     NavCategory {
         title_key: "settings.cat_network",
@@ -143,7 +157,13 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     window.set_default_size(1000, 750);
     window.add_css_class("settings-window");
 
-    let target_page_id = initial_page.unwrap_or("system");
+    // The first login after installation opens the About page once.
+    let is_first = is_first_login();
+    let target_page_id = if is_first {
+        "system".to_string() // About page
+    } else {
+        initial_page.unwrap_or("system").to_string()
+    };
 
     let overlay = gtk4::Overlay::new();
     let main_layout = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
@@ -210,6 +230,7 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
         Rc::new(RefCell::new(Vec::new()));
     let nav_buttons: Rc<RefCell<Vec<(&'static str, gtk4::Button, &'static str, &'static str)>>> =
         Rc::new(RefCell::new(Vec::new()));
+    let sidebar_status = Rc::new(RefCell::new(sidebar::SidebarStatus::default()));
 
     for cat in NAV_CATEGORIES {
         let hdr = sidebar::create_sidebar_cat(cat.title_key);
@@ -278,8 +299,8 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     content_stack.add_css_class("settings-content");
 
     // Eagerly load target initial page
-    ensure_page_loaded(&content_stack, target_page_id);
-    content_stack.set_visible_child_name(target_page_id);
+    ensure_page_loaded(&content_stack, &target_page_id);
+    content_stack.set_visible_child_name(&target_page_id);
 
     let right_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     right_box.set_hexpand(true);
@@ -357,9 +378,6 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
 
             ensure_page_loaded(&stack_c, &name_str);
             stack_c.set_visible_child_name(&name_str);
-
-            // Refresh dynamic icons and state when switching navigation tabs
-            refresh_sidebar(&nav_buttons_c);
         });
     }
 
@@ -440,5 +458,10 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     window.add_action(&show_loading_action);
 
     window.set_child(Some(&overlay));
+    sidebar::start_status_updates(nav_buttons.clone(), sidebar_status);
     window.present();
+
+    if is_first {
+        mark_first_login_complete();
+    }
 }
