@@ -136,6 +136,7 @@ sudo cp "$REPO_ROOT/wallpaper.png" /var/lib/babydra/lock_wallpaper.png 2>/dev/nu
 
 sudo cp "$REPO_ROOT/libs/babydra-core/src/services/logo.png" /usr/share/babydra/babydra-preview.png
 sudo cp "$REPO_ROOT/libs/babydra-core/src/services/logo.png" /usr/share/babydra/babydra-settings.png
+sudo cp "$REPO_ROOT/libs/babydra-core/src/services/logo.png" /usr/share/babydra/babydra-recorder.png
 sudo cp "$REPO_ROOT/libs/babydra-core/src/services/logo.png" /usr/share/babydra/logo.png
 sudo cp "$REPO_ROOT/libs/babydra-core/src/services/logo.png" /var/lib/babydra/logo.png
 
@@ -292,6 +293,7 @@ cat << EOF > "$HOME/.local/share/dbus-1/services/org.freedesktop.FileManager1.se
 Name=org.freedesktop.FileManager1
 Exec=$LOCAL_BIN/babydra-explore
 EOF
+
 
 echo "============================================="
 echo "Installation & Setup complete!"

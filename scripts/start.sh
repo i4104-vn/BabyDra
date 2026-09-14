@@ -79,6 +79,7 @@ EOF
 chmod +x "$HOME/.local/share/applications/babydra-settings.desktop"
 update-desktop-database "$HOME/.local/share/applications" || true
 
+
 # Commented out software rendering to allow GPU hardware acceleration for 120 FPS.
 # Uncomment these if running in a VM without 3D acceleration.
 # export WLR_RENDERER=pixman

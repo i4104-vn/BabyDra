@@ -34,6 +34,7 @@ killall babydra-desktop || true
 killall babydra-switcher || true
 killall babydra-workspace || true
 killall babydra-screenshot || true
+killall babydra-recorder || true
 killall babydra-lock || true
 killall babydra-launcher || true
 killall babydra-image-preview || true
@@ -50,6 +51,7 @@ cp target/release/babydra-desktop "$LOCAL_BIN/babydra-desktop"
 cp target/release/babydra-switcher "$LOCAL_BIN/babydra-switcher"
 cp target/release/babydra-workspace "$LOCAL_BIN/babydra-workspace"
 cp target/release/babydra-screenshot "$LOCAL_BIN/babydra-screenshot"
+cp target/release/babydra-recorder "$LOCAL_BIN/babydra-recorder"
 
 cp target/release/babydra-lock "$LOCAL_BIN/babydra-lock"
 cp target/release/babydra-launcher "$LOCAL_BIN/babydra-launcher"
@@ -137,6 +139,7 @@ sudo chmod 777 /var/lib/babydra 2>/dev/null || true
 [ -f "$HOME/.babydra/avatar.png" ] && sudo cp "$HOME/.babydra/avatar.png" /var/lib/babydra/avatar.png 2>/dev/null && sudo chmod 666 /var/lib/babydra/avatar.png 2>/dev/null || true
 sudo cp "$REPO_DIR/libs/babydra-core/src/services/logo.png" /usr/share/babydra/babydra-preview.png 2>/dev/null || true
 sudo cp "$REPO_DIR/libs/babydra-core/src/services/logo.png" /usr/share/babydra/babydra-settings.png 2>/dev/null || true
+sudo cp "$REPO_DIR/libs/babydra-core/src/services/logo.png" /usr/share/babydra/babydra-recorder.png 2>/dev/null || true
 sudo cp "$REPO_DIR/libs/babydra-core/src/services/logo.png" /usr/share/babydra/logo.png 2>/dev/null || true
 sudo cp "$REPO_DIR/libs/babydra-core/src/services/logo.png" /var/lib/babydra/logo.png 2>/dev/null || true
 sudo cp "$REPO_DIR/wallpaper.png" /usr/share/babydra/wallpaper.png 2>/dev/null || true
