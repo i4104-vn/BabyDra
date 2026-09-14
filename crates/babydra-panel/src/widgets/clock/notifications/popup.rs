@@ -208,6 +208,11 @@ impl NotificationPopup {
                 popup_c.close();
             }
         });
+
+        if self.popover.parent().is_none() || self.popover.root().is_none() {
+            return;
+        }
+
         self.popover.popup();
         babydra_ui_kit::ui::animation::slide_in(
             self.overlay.upcast_ref(),
@@ -236,12 +241,14 @@ fn dismiss_notification(overlay: &Overlay, popover: &Popover, generation: &Rc<Ce
     let overlay_widget = overlay.clone();
     let finish = move || {
         if generation_c.get() == next_generation {
-            popover_c.popdown();
+            if popover_c.parent().is_some() && popover_c.root().is_some() {
+                popover_c.popdown();
+            }
             babydra_core::services::notification::service::close_notif_popup();
         }
     };
 
-    if !popover.is_visible() {
+    if popover.parent().is_none() || popover.root().is_none() || !popover.is_visible() {
         finish();
         return;
     }

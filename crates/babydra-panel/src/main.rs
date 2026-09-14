@@ -15,6 +15,9 @@ fn main() {
     // Detect DDC/CI bus for desktop monitors on startup
     widgets::panel::detect_ddc_bus();
 
+    // Spawn org.freedesktop.Notifications DBus daemon immediately on startup
+    babydra_core::services::notification::spawn_notif_dbus();
+
     let app = Application::builder()
         .application_id("org.babydra.panel")
         .flags(gtk4::gio::ApplicationFlags::NON_UNIQUE)

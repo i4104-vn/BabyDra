@@ -8,6 +8,18 @@ use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+fn unparent_all_popovers_recursive(widget: &gtk4::Widget) {
+    let mut child = widget.first_child();
+    while let Some(c) = child {
+        let next = c.next_sibling();
+        unparent_all_popovers_recursive(&c);
+        if c.is::<gtk4::Popover>() {
+            c.unparent();
+        }
+        child = next;
+    }
+}
+
 /// Rebuild panel window.
 pub fn rebuild_panel_window(
     window: &gtk4::ApplicationWindow,
@@ -15,10 +27,14 @@ pub fn rebuild_panel_window(
     control_center_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
     calendar_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
     launcher_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
+    active_notch: &Rc<RefCell<Option<gtk4::Box>>>,
     is_startup: bool,
 ) {
-    // 1. Remove child
-    window.set_child(None::<&gtk4::Widget>);
+    // 1. Cleanly unparent all popovers in existing widget tree before removing
+    if let Some(child) = window.child() {
+        unparent_all_popovers_recursive(&child);
+        window.set_child(None::<&gtk4::Widget>);
+    }
 
     // 2. Layout container
     let box_layout = gtk4::CenterBox::new();
@@ -195,34 +211,8 @@ pub fn rebuild_panel_window(
         );
     }
 
-    // Input region handler: Ensure transparent areas outside top bar and notch capsule pass mouse clicks to underlying windows
-    let notch_clone = notch_capsule.clone();
-    window.add_tick_callback(move |win, _| {
-        if let Some(surface) = win.surface() {
-            let win_w = win.width();
-            let region = gtk4::cairo::Region::create();
-
-            // Top bar panel rect (height 36px)
-            let top_rect = gtk4::cairo::RectangleInt::new(0, 0, win_w, 36);
-            let _ = region.union_rectangle(&top_rect);
-
-            // Notch capsule rect when expanded
-            if notch_clone.is_visible() {
-                if let Some((nx, ny)) = notch_clone.translate_coordinates(win, 0.0, 0.0) {
-                    let nw = notch_clone.width();
-                    let nh = notch_clone.height();
-                    if nh > 36 && nw > 0 {
-                        let notch_rect =
-                            gtk4::cairo::RectangleInt::new(nx as i32, ny as i32, nw, nh);
-                        let _ = region.union_rectangle(&notch_rect);
-                    }
-                }
-            }
-
-            surface.set_input_region(&region);
-        }
-        glib::ControlFlow::Continue
-    });
+    // Input region handler slot update
+    *active_notch.borrow_mut() = Some(notch_capsule.clone());
 }
 
 /// Builds the top panel window UI.
@@ -255,32 +245,57 @@ pub fn build_panel_ui(
 
     window.add_css_class("panel-window");
 
-    let window_c = window.clone();
-    let app_c = app.clone();
-    let ccw_c = control_center_window.clone();
-    let cw_c = calendar_window.clone();
-    let lw_c = launcher_window.clone();
+    let active_notch = Rc::new(RefCell::new(None::<gtk4::Box>));
+    let notch_slot = active_notch.clone();
 
+    // Input region handler: Ensure transparent areas outside top bar and notch capsule pass mouse clicks to underlying windows
+    window.add_tick_callback(move |win, _| {
+        if let Some(surface) = win.surface() {
+            let win_w = win.width();
+            let region = gtk4::cairo::Region::create();
+
+            // Top bar panel rect (height 36px)
+            let top_rect = gtk4::cairo::RectangleInt::new(0, 0, win_w, 36);
+            let _ = region.union_rectangle(&top_rect);
+
+            // Notch capsule rect when expanded
+            if let Some(ref notch) = *notch_slot.borrow() {
+                if notch.is_visible() && notch.root().is_some() {
+                    if let Some((nx, ny)) = notch.translate_coordinates(win, 0.0, 0.0) {
+                        let nw = notch.width();
+                        let nh = notch.height();
+                        if nh > 36 && nw > 0 {
+                            let notch_rect =
+                                gtk4::cairo::RectangleInt::new(nx as i32, ny as i32, nw, nh);
+                            let _ = region.union_rectangle(&notch_rect);
+                        }
+                    }
+                }
+            }
+
+            surface.set_input_region(&region);
+        }
+        glib::ControlFlow::Continue
+    });
+
+    let notch_c1 = active_notch.clone();
     rebuild_panel_window(
         &window,
         app,
         control_center_window.clone(),
         calendar_window.clone(),
         launcher_window.clone(),
+        &notch_c1,
         true,
     );
 
-    if let Some(settings) = gtk4::Settings::default() {
-        settings.connect_gtk_application_prefer_dark_theme_notify(move |_| {
-            rebuild_panel_window(&window_c, &app_c, ccw_c.clone(), cw_c.clone(), lw_c.clone(), false);
-        });
-    }
 
     let window_c2 = window.clone();
     let app_c2 = app.clone();
     let ccw_c2 = control_center_window.clone();
     let cw_c2 = calendar_window.clone();
     let lw_c2 = launcher_window.clone();
+    let notch_c3 = active_notch.clone();
     babydra_core::i18n::watch_locale_change(move |_| {
         rebuild_panel_window(
             &window_c2,
@@ -288,6 +303,7 @@ pub fn build_panel_ui(
             ccw_c2.clone(),
             cw_c2.clone(),
             lw_c2.clone(),
+            &notch_c3,
             false,
         );
     });

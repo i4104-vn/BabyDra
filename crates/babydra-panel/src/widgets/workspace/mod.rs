@@ -63,11 +63,18 @@ fn rebuild_taskbar(
     running_apps_shared: Arc<Mutex<Vec<DesktopApp>>>,
 ) {
     for state in popovers.borrow_mut().drain(..) {
-        state.preview_popover.unparent();
-        state.tooltip_popover.unparent();
+        if state.preview_popover.parent().is_some() {
+            state.preview_popover.unparent();
+        }
+        if state.tooltip_popover.parent().is_some() {
+            state.tooltip_popover.unparent();
+        }
     }
 
     while let Some(child) = apps_box.first_child() {
+        while let Some(pop) = child.first_child() {
+            pop.unparent();
+        }
         apps_box.remove(&child);
     }
 
@@ -255,7 +262,10 @@ pub fn create_workspace_sw() -> gtk4::Box {
     let popovers_timer = popovers.clone();
     glib::timeout_add_local(Duration::from_secs(5), move || {
         for state in popovers_timer.borrow().iter() {
-            if state.tooltip_popover.is_visible() {
+            if state.tooltip_popover.parent().is_some()
+                && state.tooltip_popover.root().is_some()
+                && state.tooltip_popover.is_visible()
+            {
                 (state.update_tooltip)();
             }
         }

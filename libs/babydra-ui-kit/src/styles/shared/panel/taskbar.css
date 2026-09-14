@@ -44,7 +44,7 @@ button.taskbar-app-btn:hover image {
 
 button.taskbar-app-btn.active .taskbar-dot {
     background-color: #3b82f6;
-    box-shadow: 0 0 4px #3b82f6;
+    box-shadow: none;
 }
 
 popover.taskbar-popover,
@@ -175,7 +175,7 @@ button.taskbar-popover-item-btn:active {
     min-height: 6px;
     border-radius: 3px;
     background-color: #3b82f6;
-    box-shadow: 0 0 5px rgba(59, 130, 246, 0.8);
+    box-shadow: none;
     margin: 0 4px;
 }
 
