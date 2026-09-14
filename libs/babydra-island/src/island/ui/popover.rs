@@ -91,8 +91,22 @@ impl IslandPopover {
         self.popover.is_visible()
     }
 
+    /// Returns the root window if the popover is currently attached to one.
+    /// Returns the root window if the popover is currently attached to one.
+    pub fn root(&self) -> Option<gtk4::Root> {
+        self.popover.root()
+    }
+
+    /// Returns the parent widget if the popover is currently attached to one.
+    pub fn parent(&self) -> Option<gtk4::Widget> {
+        self.popover.parent()
+    }
+
     /// Shows the popover.
     pub fn popup(&self) {
+        if self.popover.parent().is_none() || self.popover.root().is_none() {
+            return;
+        }
         self.cancel_animation();
         self.popover.popup();
     }
@@ -100,7 +114,9 @@ impl IslandPopover {
     /// Closes the popover immediately.
     pub fn popdown(&self) {
         self.cancel_animation();
-        self.popover.popdown();
+        if self.popover.parent().is_some() && self.popover.root().is_some() {
+            self.popover.popdown();
+        }
     }
 
     /// Toggles the popover with standard slide animation.
@@ -151,7 +167,7 @@ pub fn toggle_popover_animated(
     animation_generation: &Rc<Cell<u64>>,
     duration_ms: u64,
 ) {
-    if is_animating.get() {
+    if is_animating.get() || popover.parent().is_none() || popover.root().is_none() {
         return;
     }
     if popover.is_visible() {
@@ -181,8 +197,10 @@ pub fn popdown_animated_cb<F: FnOnce() + 'static>(
         animation_generation.set(animation_generation.get().wrapping_add(1));
         is_animating.set(false);
     }
-    if !popover.is_visible() {
-        popover.popdown();
+    if popover.parent().is_none() || popover.root().is_none() || !popover.is_visible() {
+        if popover.parent().is_some() && popover.root().is_some() {
+            popover.popdown();
+        }
         on_finish();
         return;
     }
@@ -205,7 +223,9 @@ pub fn popdown_animated_cb<F: FnOnce() + 'static>(
             if generation_c.get() != generation {
                 return;
             }
-            pop_c.popdown();
+            if pop_c.parent().is_some() && pop_c.root().is_some() {
+                pop_c.popdown();
+            }
             anim_c.set(false);
             on_finish();
         },

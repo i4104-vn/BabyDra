@@ -240,7 +240,7 @@ impl IslandFeature for MediaPlayerFeature {
 
     fn open_badge(&mut self) {
         if let Some(popover) = self.popover.borrow().as_ref() {
-            if !popover.is_visible() {
+            if !popover.is_visible() && popover.root().is_some() {
                 popover.popup();
             }
         }

@@ -5,13 +5,23 @@
 //! [`Island`] manager so callers can register extra views/features or reach
 //! the handles via [`crate::island::default_island`].
 
+use gtk4::prelude::*;
+
 use crate::features;
 use crate::island::{Island, IslandBuilder};
 
 /// Creates the default Dynamic Island (media player and system controls) and
 /// returns the notch capsule widget, ready to be appended to the panel.
 pub fn create_system_island() -> gtk4::Box {
-    build_default_island().widget()
+    if let Some(island) = crate::island::default_island() {
+        let widget = island.widget();
+        if widget.parent().is_some() {
+            widget.unparent();
+        }
+        widget
+    } else {
+        build_default_island().widget()
+    }
 }
 
 /// Builds the default Dynamic Island (media player + notifications) and

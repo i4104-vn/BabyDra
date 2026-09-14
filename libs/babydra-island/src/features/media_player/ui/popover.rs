@@ -50,7 +50,7 @@ impl MediaPopover {
         let popover_header = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
         popover_header.add_css_class("media-popover-header");
         popover_header.set_valign(gtk4::Align::Center);
-        let popover_app_icon = babydra_ui_kit::ui::icon::get_icon_colored("logo", 14, "#3b82f6");
+        let popover_app_icon = babydra_ui_kit::ui::icon::get_icon("logo", 14);
         let app_name = gtk4::Label::new(Some(&trans("island.music_player")));
         app_name.add_css_class("media-popover-app-name");
         popover_header.append(&popover_app_icon);

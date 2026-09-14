@@ -16,14 +16,14 @@ use service::{spawn_volume_listener, VolumeState};
 pub const PRIORITY: u8 = 95;
 pub const SHOW_DURATION: Duration = Duration::from_millis(1500);
 
-/// Returns the icon name and color based on volume and mute state.
-fn icon_for_state(volume: f64, muted: bool) -> (&'static str, &'static str) {
+/// Returns the icon name based on volume and mute state.
+fn icon_for_state(volume: f64, muted: bool) -> &'static str {
     if muted || volume == 0.0 {
-        ("volume-mute", "rgba(255, 255, 255, 0.70)")
+        "volume-mute"
     } else if volume <= 45.0 {
-        ("volume-low", "#ffffff")
+        "volume-low"
     } else {
-        ("volume", "#ffffff")
+        "volume"
     }
 }
 
@@ -50,11 +50,11 @@ impl VolumeFeature {
         let (initial_vol, initial_muted) =
             babydra_core::services::system::volume::get_volume_state();
 
-        let (icon, color) = icon_for_state(initial_vol, initial_muted);
+        let icon = icon_for_state(initial_vol, initial_muted);
         let title = babydra_core::i18n::trans("volume.title");
         let initial_val = label_for_state(initial_vol, initial_muted);
 
-        let widgets = NotchWidget::with_value(icon, color, &title, &initial_val);
+        let widgets = NotchWidget::with_value(icon, &title, &initial_val);
 
         Self {
             handle_rc: Rc::new(RefCell::new(None)),
@@ -113,9 +113,9 @@ impl IslandFeature for VolumeFeature {
                 last_vol.set(state.volume);
                 last_mut.set(state.muted);
 
-                let (icon, color) = icon_for_state(state.volume, state.muted);
+                let icon = icon_for_state(state.volume, state.muted);
                 let label_text = label_for_state(state.volume, state.muted);
-                widgets.update(icon, color, &label_text);
+                widgets.update(icon, &label_text);
 
                 if let Some(h) = handle_rc.borrow().as_ref() {
                     h.override_show_for(SHOW_DURATION);

@@ -20,9 +20,6 @@ use service::{spawn_battery_listener, BatteryEvent};
 pub const PRIORITY: u8 = 94;
 pub const SHOW_DURATION: Duration = Duration::from_secs(5);
 
-const CHARGING_COLOR: &str = "#30d158";
-const LOW_BATTERY_COLOR: &str = "#ff453a";
-
 /// Battery status island feature: pops up a capsule view when the charger is plugged in (for 5s)
 /// or when the battery reaches <= 20% on battery power.
 pub struct BatteryFeature {
@@ -34,34 +31,31 @@ impl BatteryFeature {
     pub fn new() -> Self {
         let info = babydra_core::services::system::battery::get_battery_info();
 
-        let (icon, color, title, val) = if let Some(info) = info {
+        let (icon, title, val) = if let Some(info) = info {
             if info.is_charging {
                 (
                     "battery",
-                    CHARGING_COLOR,
                     babydra_core::i18n::trans("island.charging"),
                     format!("{}%", info.percentage),
                 )
             } else if info.percentage <= 20 {
                 (
                     "battery",
-                    LOW_BATTERY_COLOR,
                     babydra_core::i18n::trans("island.low_battery"),
                     format!("{}%", info.percentage),
                 )
             } else {
                 (
                     "battery",
-                    "#ffffff",
                     babydra_core::i18n::trans("panel.system"),
                     format!("{}%", info.percentage),
                 )
             }
         } else {
-            ("battery", "#ffffff", String::new(), String::new())
+            ("battery", String::new(), String::new())
         };
 
-        let widgets = NotchWidget::with_value(icon, color, &title, &val);
+        let widgets = NotchWidget::with_value(icon, &title, &val);
 
         Self {
             handle_rc: Rc::new(RefCell::new(None)),
@@ -104,12 +98,12 @@ impl IslandFeature for BatteryFeature {
                 BatteryEvent::Charging { percentage } => {
                     let title = babydra_core::i18n::trans("island.charging");
                     let val = format!("{}%", percentage);
-                    widgets.update_all("battery", CHARGING_COLOR, &title, &val);
+                    widgets.update_all("battery", &title, &val);
                 }
                 BatteryEvent::LowBattery { percentage } => {
                     let title = babydra_core::i18n::trans("island.low_battery");
                     let val = format!("{}%", percentage);
-                    widgets.update_all("battery", LOW_BATTERY_COLOR, &title, &val);
+                    widgets.update_all("battery", &title, &val);
                 }
             }
 

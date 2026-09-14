@@ -62,7 +62,6 @@ impl PowerPopover {
 
         let btn_shutdown = PowerButtonWidget::new(
             "power",
-            "#ff5c5c",
             "1",
             &babydra_core::i18n::trans("island.power_shutdown"),
             "power-shutdown",
@@ -70,7 +69,6 @@ impl PowerPopover {
 
         let btn_reboot = PowerButtonWidget::new(
             "restart",
-            "#ff9f43",
             "2",
             &babydra_core::i18n::trans("island.power_restart"),
             "power-reboot",
@@ -78,7 +76,6 @@ impl PowerPopover {
 
         let btn_suspend = PowerButtonWidget::new(
             "sleep",
-            "#54a0ff",
             "3",
             &babydra_core::i18n::trans("island.power_suspend"),
             "power-suspend",
@@ -86,7 +83,6 @@ impl PowerPopover {
 
         let btn_logout = PowerButtonWidget::new(
             "logout",
-            "#c56cf0",
             "4",
             &babydra_core::i18n::trans("island.power_logout"),
             "power-logout",

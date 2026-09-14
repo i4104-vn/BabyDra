@@ -39,11 +39,7 @@ pub struct PowerFeature {
 
 impl PowerFeature {
     pub fn new() -> Self {
-        let widgets = NotchWidget::new(
-            "power",
-            "#ff5555",
-            &babydra_core::i18n::trans("island.power_notch"),
-        );
+        let widgets = NotchWidget::new("power", &babydra_core::i18n::trans("island.power_notch"));
         Self {
             handle_rc: Rc::new(RefCell::new(None)),
             widgets,
@@ -107,8 +103,10 @@ impl IslandFeature for PowerFeature {
             }
             crate::island::tick_default_island();
             if let Some(popover) = popover_rc.borrow().as_ref() {
-                highlight_selection(popover, 0);
-                popover.popup();
+                if popover.root().is_some() {
+                    highlight_selection(popover, 0);
+                    popover.popup();
+                }
             }
         });
     }
@@ -162,7 +160,7 @@ impl IslandFeature for PowerFeature {
 
     fn open_badge(&mut self) {
         if let Some(popover) = self.popover.borrow().as_ref() {
-            if !popover.is_visible() {
+            if !popover.is_visible() && popover.root().is_some() {
                 self.selected_index.set(0);
                 highlight_selection(popover, 0);
                 popover.popup();

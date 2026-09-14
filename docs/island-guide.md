@@ -106,7 +106,7 @@ Khi xây dựng hoặc mở rộng tính năng, lập trình viên bắt buộc 
 Module: `crate::island::ui::NotchWidget`
 
 `NotchWidget` cung cấp bố cục capsule chuẩn gồm 3 vùng:
-* Vùng bắt đầu (Start - trái): Icon vector kích thước 14px, hỗ trợ gán màu tùy biến.
+* Vùng bắt đầu (Start - trái): Icon vector kích thước 14px (sử dụng icon core tự động theo theme).
 * Vùng trung tâm (Center - giữa): Tiêu đề văn bản (tự động cắt ngắn với dấu `...` khi tràn chuỗi, căn giữa tuyệt đối).
 * Vùng kết thúc (End - phải, tùy chọn): Giá trị trạng thái hoặc tỷ lệ phần trăm (ví dụ: `80%`, `Mute`, `20%`).
 
@@ -115,17 +115,16 @@ use crate::island::ui::NotchWidget;
 
 // 1. Khởi tạo widget có giá trị bên phải
 let widgets = NotchWidget::with_value(
-    "battery",                          // Tên định danh icon
-    "#30d158",                          // Mã màu hex hoặc rgba
+    "battery",                          // Tên định danh icon core
     &babydra_core::i18n::trans("island.charging"), // Tiêu đề i18n
     "85%"                               // Giá trị hiển thị
 );
 
-// 2. Cập nhật đồng thời icon, màu sắc, tiêu đề và giá trị khi có sự kiện
-widgets.update_all("battery", "#ff453a", "Low Battery", "20%");
+// 2. Cập nhật đồng thời icon, tiêu đề và giá trị khi có sự kiện
+widgets.update_all("battery", "Low Battery", "20%");
 
 // 3. Cập nhật chỉ icon và giá trị (giữ nguyên tiêu đề)
-widgets.update("volume", "#ffffff", "65%");
+widgets.update("volume", "65%");
 ```
 
 ### 4.2. Hằng số Kích thước Tiêu chuẩn: `view.rs`
@@ -269,7 +268,7 @@ pub struct CapsLockFeature {
 impl CapsLockFeature {
     pub fn new() -> Self {
         let title = babydra_core::i18n::trans("island.caps_lock_off");
-        let widgets = NotchWidget::new("lock", "#ffffff", &title);
+        let widgets = NotchWidget::new("lock", &title);
 
         Self {
             handle_rc: Rc::new(RefCell::new(None)),

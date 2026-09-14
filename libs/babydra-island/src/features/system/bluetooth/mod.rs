@@ -36,7 +36,7 @@ impl BluetoothFeature {
             )
         };
 
-        let widgets = NotchWidget::with_value("bluetooth", "#ffffff", &title, &val);
+        let widgets = NotchWidget::with_value("bluetooth", &title, &val);
 
         Self {
             handle_rc: Rc::new(RefCell::new(None)),
@@ -78,11 +78,11 @@ impl IslandFeature for BluetoothFeature {
             match event {
                 BluetoothEvent::Connected { name, battery } => {
                     let val = battery.map(|b| format!("{}%", b)).unwrap_or_default();
-                    widgets.update_all("bluetooth", "#ffffff", &name, &val);
+                    widgets.update_all("bluetooth", &name, &val);
                 }
                 BluetoothEvent::Disconnected => {
                     let title = babydra_core::i18n::trans("island.disconnected");
-                    widgets.update_all("bluetooth", "rgba(255, 255, 255, 0.70)", &title, "");
+                    widgets.update_all("bluetooth", &title, "");
                 }
             }
 

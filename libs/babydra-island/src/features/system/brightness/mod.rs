@@ -16,16 +16,14 @@ use service::spawn_brightness_listener;
 pub const PRIORITY: u8 = 95;
 pub const SHOW_DURATION: Duration = Duration::from_millis(1500);
 
-const BRIGHTNESS_COLOR: &str = "#ffffff";
-
-/// Returns the icon name and color based on brightness percentage.
-fn icon_for_brightness(val: f64) -> (&'static str, &'static str) {
+/// Returns the icon name based on brightness percentage.
+fn icon_for_brightness(val: f64) -> &'static str {
     if val <= 20.0 {
-        ("brightness-low", BRIGHTNESS_COLOR)
+        "brightness-low"
     } else if val <= 70.0 {
-        ("brightness-medium", BRIGHTNESS_COLOR)
+        "brightness-medium"
     } else {
-        ("brightness", BRIGHTNESS_COLOR)
+        "brightness"
     }
 }
 
@@ -47,9 +45,9 @@ impl BrightnessFeature {
         let initial_brightness = babydra_core::services::system::backlight::get_brightness();
         let title = babydra_core::i18n::trans("common.brightness");
         let initial_val = label_for_brightness(initial_brightness);
-        let (icon, color) = icon_for_brightness(initial_brightness);
+        let icon = icon_for_brightness(initial_brightness);
 
-        let widgets = NotchWidget::with_value(icon, color, &title, &initial_val);
+        let widgets = NotchWidget::with_value(icon, &title, &initial_val);
 
         Self {
             handle_rc: Rc::new(RefCell::new(None)),
@@ -102,9 +100,9 @@ impl IslandFeature for BrightnessFeature {
             if (val - prev).abs() >= 0.5 {
                 last_bright.set(val);
 
-                let (icon, color) = icon_for_brightness(val);
+                let icon = icon_for_brightness(val);
                 let label_text = label_for_brightness(val);
-                widgets.update(icon, color, &label_text);
+                widgets.update(icon, &label_text);
 
                 if let Some(h) = handle_rc.borrow().as_ref() {
                     h.override_show_for(SHOW_DURATION);

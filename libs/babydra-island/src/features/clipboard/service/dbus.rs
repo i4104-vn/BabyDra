@@ -38,7 +38,14 @@ impl IslandDbusService {
     }
 }
 
+use std::sync::atomic::{AtomicBool, Ordering};
+
+static DBUS_SPAWNED: AtomicBool = AtomicBool::new(false);
+
 pub fn spawn_island_dbus() {
+    if DBUS_SPAWNED.swap(true, Ordering::SeqCst) {
+        return;
+    }
     let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<IslandDbusCommand>();
 
     glib::MainContext::default().spawn_local(async move {

@@ -24,21 +24,21 @@ pub struct NotchWidget {
 
 impl NotchWidget {
     /// Builds a basic notch widget: icon on the left, title in the center.
-    pub fn new(icon_name: &str, icon_color: &str, title: &str) -> Self {
-        Self::create(icon_name, icon_color, title, None)
+    pub fn new(icon_name: &str, title: &str) -> Self {
+        Self::create(icon_name, title, None)
     }
 
     /// Builds an extended notch widget with an indicator value on the right (e.g. volume/brightness).
-    pub fn with_value(icon_name: &str, icon_color: &str, title: &str, initial_value: &str) -> Self {
-        Self::create(icon_name, icon_color, title, Some(initial_value))
+    pub fn with_value(icon_name: &str, title: &str, initial_value: &str) -> Self {
+        Self::create(icon_name, title, Some(initial_value))
     }
 
     /// Backwards-compatible alias for `with_value`.
-    pub fn build(icon_name: &str, icon_color: &str, title: &str, initial_value: &str) -> Self {
-        Self::with_value(icon_name, icon_color, title, initial_value)
+    pub fn build(icon_name: &str, title: &str, initial_value: &str) -> Self {
+        Self::with_value(icon_name, title, initial_value)
     }
 
-    fn create(icon_name: &str, icon_color: &str, title: &str, initial_value: Option<&str>) -> Self {
+    fn create(icon_name: &str, title: &str, initial_value: Option<&str>) -> Self {
         let container = GtkBox::new(Orientation::Horizontal, 0);
         container.add_css_class("notch-content");
         container.set_valign(Align::Center);
@@ -58,7 +58,7 @@ impl NotchWidget {
         icon_container.set_halign(Align::Start);
         icon_container.set_margin_start(4);
 
-        let icon_widget = babydra_ui_kit::ui::icon::get_icon_colored(icon_name, 14, icon_color);
+        let icon_widget = babydra_ui_kit::ui::icon::get_icon(icon_name, 14);
         icon_widget.set_valign(Align::Center);
         icon_widget.set_halign(Align::Start);
         icon_container.append(&icon_widget);
@@ -99,14 +99,14 @@ impl NotchWidget {
     }
 
     /// Updates the displayed icon if it changed.
-    pub fn set_icon(&self, icon_name: &str, icon_color: &str) {
+    pub fn set_icon(&self, icon_name: &str) {
         let mut curr = self.current_icon_name.borrow_mut();
         if *curr != icon_name {
             *curr = icon_name.to_string();
             while let Some(child) = self.icon_container.first_child() {
                 self.icon_container.remove(&child);
             }
-            let icon_widget = babydra_ui_kit::ui::icon::get_icon_colored(icon_name, 14, icon_color);
+            let icon_widget = babydra_ui_kit::ui::icon::get_icon(icon_name, 14);
             icon_widget.set_valign(Align::Center);
             icon_widget.set_halign(Align::Start);
             self.icon_container.append(&icon_widget);
@@ -126,8 +126,8 @@ impl NotchWidget {
     }
 
     /// Updates both icon (if changed) and value label simultaneously.
-    pub fn update(&self, icon_name: &str, icon_color: &str, value_text: &str) {
-        self.set_icon(icon_name, icon_color);
+    pub fn update(&self, icon_name: &str, value_text: &str) {
+        self.set_icon(icon_name);
         self.set_value(value_text);
     }
 
@@ -135,11 +135,10 @@ impl NotchWidget {
     pub fn update_all(
         &self,
         icon_name: &str,
-        icon_color: &str,
         title_text: &str,
         value_text: &str,
     ) {
-        self.set_icon(icon_name, icon_color);
+        self.set_icon(icon_name);
         self.set_title(title_text);
         self.set_value(value_text);
     }

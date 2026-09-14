@@ -18,7 +18,6 @@ pub struct PowerButtonWidget {
 impl PowerButtonWidget {
     pub fn new(
         icon_name: &str,
-        icon_color: &str,
         key_char: &str,
         title: &str,
         css_action_class: &str,
@@ -40,7 +39,7 @@ impl PowerButtonWidget {
         icon_holder.set_valign(Align::Center);
         icon_holder.set_margin_bottom(5);
 
-        let icon = babydra_ui_kit::ui::icon::get_icon_colored(icon_name, 20, icon_color);
+        let icon = babydra_ui_kit::ui::icon::get_icon(icon_name, 20);
         icon.set_halign(Align::Center);
         icon.set_valign(Align::Center);
         icon_holder.set_center_widget(Some(&icon));

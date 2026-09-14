@@ -45,7 +45,6 @@ impl ClipboardFeature {
         service::init_clipboard_services();
         let widgets = NotchWidget::new(
             "paste",
-            "#3b82f6",
             &babydra_core::i18n::trans("island.clipboard_notch"),
         );
         Self {
@@ -132,8 +131,10 @@ impl IslandFeature for ClipboardFeature {
             crate::island::tick_default_island();
             let entries = babydra_core::get_entries();
             if let Some(popover) = popover_rc.borrow().as_ref() {
-                render_popover(popover, &entries, 0);
-                popover.popup();
+                if popover.root().is_some() {
+                    render_popover(popover, &entries, 0);
+                    popover.popup();
+                }
             }
         });
     }
@@ -238,7 +239,7 @@ impl IslandFeature for ClipboardFeature {
 
     fn open_badge(&mut self) {
         if let Some(popover) = self.popover.borrow().as_ref() {
-            if !popover.is_visible() {
+            if !popover.is_visible() && popover.root().is_some() {
                 self.selected_index.set(0);
                 let entries = babydra_core::get_entries();
                 render_popover(popover, &entries, 0);

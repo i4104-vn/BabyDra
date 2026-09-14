@@ -162,7 +162,7 @@ pub(crate) fn set_art_fallback_icon(
     if let Some(child) = art_container.first_child() {
         art_container.remove(&child);
     }
-    let music_icon_s = babydra_ui_kit::ui::icon::get_icon_colored(icon_name, 16, "#3b82f6");
+    let music_icon_s = babydra_ui_kit::ui::icon::get_icon(icon_name, 16);
     music_icon_s.add_css_class("notch-album-art");
     music_icon_s.set_size_request(18, 18);
     music_icon_s.set_halign(gtk4::Align::Center);
@@ -180,7 +180,7 @@ pub(crate) fn set_art_fallback_icon(
         fallback_card.set_halign(gtk4::Align::Center);
         fallback_card.set_valign(gtk4::Align::Center);
 
-        let music_icon_l = babydra_ui_kit::ui::icon::get_icon_colored(icon_name, 56, "#3b82f6");
+        let music_icon_l = babydra_ui_kit::ui::icon::get_icon(icon_name, 56);
         music_icon_l.set_halign(gtk4::Align::Center);
         music_icon_l.set_valign(gtk4::Align::Center);
         music_icon_l.set_hexpand(true);

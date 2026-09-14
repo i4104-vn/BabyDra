@@ -42,7 +42,7 @@ impl ClipboardPopover {
         header.add_css_class("clipboard-popover-header");
         header.set_valign(Align::Center);
 
-        let icon = babydra_ui_kit::ui::icon::get_icon_colored("paste", 14, "#3b82f6");
+        let icon = babydra_ui_kit::ui::icon::get_icon("paste", 14);
         icon.set_valign(Align::Center);
         header.append(&icon);
 

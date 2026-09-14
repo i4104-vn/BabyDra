@@ -46,7 +46,7 @@ impl NetworkFeature {
             )
         };
 
-        let widgets = NotchWidget::with_value(icon, "#ffffff", &title, &val);
+        let widgets = NotchWidget::with_value(icon, &title, &val);
 
         Self {
             handle_rc: Rc::new(RefCell::new(None)),
@@ -88,15 +88,15 @@ impl IslandFeature for NetworkFeature {
             match event {
                 NetworkEvent::WifiConnected { ssid, strength } => {
                     let val = format!("{}%", strength);
-                    widgets.update_all("wifi", "#ffffff", &ssid, &val);
+                    widgets.update_all("wifi", &ssid, &val);
                 }
                 NetworkEvent::EthernetConnected { name } => {
-                    widgets.update_all("ethernet", "#ffffff", &name, "");
+                    widgets.update_all("ethernet", &name, "");
                 }
                 NetworkEvent::Disconnected { was_wifi } => {
                     let icon = if was_wifi { "wifi" } else { "ethernet" };
                     let title = babydra_core::i18n::trans("island.disconnected");
-                    widgets.update_all(icon, "rgba(255, 255, 255, 0.70)", &title, "");
+                    widgets.update_all(icon, &title, "");
                 }
             }
 
