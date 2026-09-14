@@ -110,6 +110,7 @@ pub fn get_shortcut() -> Option<crate::models::shortcut::Shortcut> {
             modifiers: conf.clipboard.shortcut_modifiers,
             key: conf.clipboard.shortcut_key,
             command: DBUS_TRIGGER_CMD.to_string(),
+            enabled: true,
         })
     } else {
         None

@@ -75,6 +75,27 @@ button.shortcut-combo-btn {
     border-bottom: none;
 }
 
+.keybind-crate-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background-color: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    letter-spacing: 0.2px;
+}
+
+.keybind-disabled {
+    opacity: 0.55;
+}
+
+.settings-section-title {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+
 .settings-content {
     background-color: transparent;
     padding: 28px 36px;

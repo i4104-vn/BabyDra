@@ -25,15 +25,19 @@ pub async fn run() {
 fn load() -> Vec<Shortcut> {
     let mut shortcuts = babydra_core::services::system::keymap::get_shortcuts();
     if let Some(clipboard_sc) = babydra_core::get_shortcut() {
-        shortcuts.push(clipboard_sc);
+        if !shortcuts.iter().any(|s| s.command.contains("ShowClipboard") || s.command.contains("toggle-clipboard")) {
+            shortcuts.push(clipboard_sc);
+        }
     }
-    // Fixed non-customizable power shortcut: Win + F4
-    shortcuts.push(Shortcut {
-        id: 9998,
-        modifiers: "W".to_string(),
-        key: "F4".to_string(),
-        command: "busctl --user call org.babydra.Island /org/babydra/Island org.babydra.Island TogglePower".to_string(),
-    });
+    if !shortcuts.iter().any(|s| s.command.contains("TogglePower")) {
+        shortcuts.push(Shortcut {
+            id: 9998,
+            modifiers: "W".to_string(),
+            key: "F4".to_string(),
+            command: "busctl --user call org.babydra.Island /org/babydra/Island org.babydra.Island TogglePower".to_string(),
+            enabled: true,
+        });
+    }
     shortcuts.retain(|s| !s.key.is_empty() && !s.command.trim().is_empty());
     tracing::info!("loaded {} shortcut(s)", shortcuts.len());
     shortcuts

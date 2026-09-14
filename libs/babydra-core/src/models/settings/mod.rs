@@ -27,7 +27,7 @@ pub use display::MonitorConfig;
 pub use env_var::EnvVar;
 pub use keybind::Keybind;
 pub use nav::{NavCategory, NavItem};
-pub use shortcut::Shortcut;
+pub use shortcut::{Shortcut, SystemShortcut};
 pub use startup_command::StartupCommand;
 pub use system_info::SystemInfoData;
 pub use system_update::{PackageUpdate, SystemUpdateState};

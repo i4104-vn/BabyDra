@@ -77,7 +77,8 @@ pub struct HostsWidget {
 #[derive(Clone)]
 pub struct KeybindsWidget {
     pub container: Box,
-    pub table_box: Box,
+    pub system_table_box: Box,
+    pub custom_table_box: Box,
     pub add_btn: Button,
     pub refresh_btn: Button,
     pub save_btn: Button,
