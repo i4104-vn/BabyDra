@@ -62,10 +62,8 @@ pub fn setup_bell_popover(
             }
         }
 
-        let card = TooltipPopover::build_card(
-            &babydra_core::i18n::trans("panel.notifications"),
-            &rows,
-        );
+        let card =
+            TooltipPopover::build_card(&babydra_core::i18n::trans("panel.notifications"), &rows);
         tt_c.popover.set_child(Some(&card));
     });
 

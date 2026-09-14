@@ -3,21 +3,19 @@
 use gtk4::prelude::*;
 use std::rc::Rc;
 
-pub struct NetworkWidgets {
-    pub container: gtk4::Box,
-    pub wifi_icon: gtk4::Image,
-    pub eth_area: gtk4::DrawingArea,
+pub(crate) struct NetworkWidgets {
+    pub(crate) container: gtk4::Box,
 }
 
 #[derive(Clone)]
-pub struct StatusPopovers {
-    pub vpn_popover: gtk4::Popover,
-    pub net_popover: gtk4::Popover,
-    pub vol_popover: gtk4::Popover,
-    pub bat_popover_opt: Option<gtk4::Popover>,
-    pub update_volume_popover: Rc<dyn Fn()>,
-    pub current_volume: Rc<std::cell::Cell<f64>>,
-    pub current_muted: Rc<std::cell::Cell<bool>>,
+pub(crate) struct StatusPopovers {
+    pub(crate) vpn_popover: gtk4::Popover,
+    pub(crate) net_popover: gtk4::Popover,
+    pub(crate) vol_popover: gtk4::Popover,
+    pub(crate) bat_popover_opt: Option<gtk4::Popover>,
+    pub(crate) update_volume_popover: Rc<dyn Fn()>,
+    pub(crate) current_volume: Rc<std::cell::Cell<f64>>,
+    pub(crate) current_muted: Rc<std::cell::Cell<bool>>,
 }
 
 impl StatusPopovers {

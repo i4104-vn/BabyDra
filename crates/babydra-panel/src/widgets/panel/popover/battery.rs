@@ -1,4 +1,3 @@
-use super::super::render;
 use babydra_ui_kit::components::popovers::{TooltipPopover, TooltipRow};
 use gtk4::prelude::*;
 use std::rc::Rc;
@@ -9,7 +8,7 @@ pub fn build_battery_update(bat_popover_opt: &Option<gtk4::Popover>) -> Rc<dyn F
 
     Rc::new(move || {
         if let Some(ref bat_pop) = bat_popover_c {
-            if let Some(info) = render::get_battery_info() {
+            if let Some(info) = babydra_core::services::system::battery::get_battery_info() {
                 let mut rows = Vec::new();
 
                 if info.is_ac_only {

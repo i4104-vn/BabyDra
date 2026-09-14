@@ -66,7 +66,10 @@ pub fn create_sys_monitor_w() -> gtk4::Box {
             babydra_core::i18n::trans("panel.ram_usage"),
             snapshot.ram_percent
         ));
-        ram_detail_clone.set_text(&format!("{:.2} GB / {:.2} GB", snapshot.ram_used_gb, snapshot.ram_total_gb));
+        ram_detail_clone.set_text(&format!(
+            "{:.2} GB / {:.2} GB",
+            snapshot.ram_used_gb, snapshot.ram_total_gb
+        ));
         gpu_label_clone.set_text(&format!(
             "{}: {:.1}%",
             babydra_core::i18n::trans("panel.gpu_usage"),

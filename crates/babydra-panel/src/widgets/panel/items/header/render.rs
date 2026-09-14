@@ -1,5 +1,4 @@
 use gtk4::prelude::*;
-use std::rc::Rc;
 
 /// Launch settings app.
 fn launch_settings_app() {
@@ -28,7 +27,7 @@ fn launch_settings_app() {
 }
 
 /// Creates a new `header row`.
-pub fn create_header_row(_on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>) -> gtk4::Box {
+pub(crate) fn create_header_row() -> gtk4::Box {
     let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     header_box.set_hexpand(true);
 

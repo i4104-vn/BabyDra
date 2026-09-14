@@ -3,26 +3,28 @@ pub mod network;
 pub mod volume;
 pub mod vpn;
 
+use super::state::StatusPopovers;
 use babydra_ui_kit::components::popovers::TooltipPopover;
 use gtk4::prelude::*;
 use std::rc::Rc;
-pub use super::state::StatusPopovers;
 
-pub fn setup_status_popover(
-    vol_icon: &gtk4::Image,
-    net_widgets: &super::state::NetworkWidgets,
-    vpn_icon: &gtk4::Image,
-    bat_widget: &Option<gtk4::DrawingArea>,
-    control_center_window: Rc<std::cell::RefCell<Option<gtk4::ApplicationWindow>>>,
-    calendar_window: Rc<std::cell::RefCell<Option<gtk4::ApplicationWindow>>>,
-    launcher_window: Rc<std::cell::RefCell<Option<gtk4::ApplicationWindow>>>,
-    ws_popover: gtk4::Popover,
-) -> StatusPopovers {
-    let vpn_tooltip = TooltipPopover::new(vpn_icon, gtk4::PositionType::Bottom);
-    let net_tooltip = TooltipPopover::new(&net_widgets.container, gtk4::PositionType::Bottom);
-    let vol_tooltip = TooltipPopover::new(vol_icon, gtk4::PositionType::Bottom);
+pub(super) struct StatusPopoverContext<'a> {
+    pub volume_icon: &'a gtk4::Image,
+    pub network: &'a super::state::NetworkWidgets,
+    pub vpn_icon: &'a gtk4::Image,
+    pub battery: &'a Option<gtk4::DrawingArea>,
+    pub control_center_window: Rc<std::cell::RefCell<Option<gtk4::ApplicationWindow>>>,
+    pub calendar_window: Rc<std::cell::RefCell<Option<gtk4::ApplicationWindow>>>,
+    pub launcher_window: Rc<std::cell::RefCell<Option<gtk4::ApplicationWindow>>>,
+    pub workspace_popover: gtk4::Popover,
+}
 
-    let (bat_tooltip_opt, bat_popover_opt) = if let Some(ref bat_area) = bat_widget {
+pub(super) fn setup_status_popover(context: StatusPopoverContext<'_>) -> StatusPopovers {
+    let vpn_tooltip = TooltipPopover::new(context.vpn_icon, gtk4::PositionType::Bottom);
+    let net_tooltip = TooltipPopover::new(&context.network.container, gtk4::PositionType::Bottom);
+    let vol_tooltip = TooltipPopover::new(context.volume_icon, gtk4::PositionType::Bottom);
+
+    let (bat_tooltip_opt, bat_popover_opt) = if let Some(bat_area) = context.battery {
         let bat_pop = TooltipPopover::new(bat_area, gtk4::PositionType::Bottom);
         let pop = bat_pop.popover.clone();
         (Some(bat_pop), Some(pop))
@@ -30,10 +32,10 @@ pub fn setup_status_popover(
         (None, None)
     };
 
-    let ccw_c = control_center_window.clone();
-    let cw_c = calendar_window.clone();
-    let lw_c = launcher_window.clone();
-    let ws_pop_c = ws_popover.clone();
+    let ccw_c = context.control_center_window.clone();
+    let cw_c = context.calendar_window.clone();
+    let lw_c = context.launcher_window.clone();
+    let ws_pop_c = context.workspace_popover.clone();
     let is_suppressed = Rc::new(move || {
         ccw_c.borrow().is_some()
             || cw_c.borrow().is_some()
@@ -55,23 +57,27 @@ pub fn setup_status_popover(
         bat_tt.set_suppress_fn(move || sup_bat());
     }
 
-    let update_vpn_tooltip = vpn::build_vpn_update_fn(vpn_icon, &vpn_tooltip.popover);
+    let update_vpn_tooltip = vpn::build_vpn_update_fn(context.vpn_icon, &vpn_tooltip.popover);
     let update_network_tooltip = network::build_network_update(&net_tooltip.popover);
-    let update_volume_popover = volume::build_volume_update(vol_icon, &vol_tooltip.popover);
+    let update_volume_popover =
+        volume::build_volume_update(context.volume_icon, &vol_tooltip.popover);
     let update_battery_popover = battery::build_battery_update(&bat_popover_opt);
 
     if babydra_core::services::system::vpn::get_active_vpn_fast().is_some() {
-        vpn_icon.set_visible(true);
+        context.vpn_icon.set_visible(true);
     } else {
-        vpn_icon.set_visible(false);
+        context.vpn_icon.set_visible(false);
     }
 
-    vpn_tooltip.attach_hover(vpn_icon, Some(update_vpn_tooltip.clone()));
-    net_tooltip.attach_hover(&net_widgets.container, Some(update_network_tooltip.clone()));
-    vol_tooltip.attach_hover(vol_icon, Some(update_volume_popover.clone()));
+    vpn_tooltip.attach_hover(context.vpn_icon, Some(update_vpn_tooltip.clone()));
+    net_tooltip.attach_hover(
+        &context.network.container,
+        Some(update_network_tooltip.clone()),
+    );
+    vol_tooltip.attach_hover(context.volume_icon, Some(update_volume_popover.clone()));
 
-    if let Some(ref bat_area) = bat_widget {
-        if let Some(ref bat_tt) = bat_tooltip_opt {
+    if let Some(bat_area) = context.battery {
+        if let Some(bat_tt) = &bat_tooltip_opt {
             bat_tt.attach_hover(bat_area, Some(update_battery_popover.clone()));
         }
     }
@@ -87,11 +93,8 @@ pub fn setup_status_popover(
     let update_vol_t = update_volume_popover.clone();
     let update_bat_t = update_battery_popover.clone();
 
-    let bat_widget_timer = bat_widget.clone();
-    let vpn_icon_timer = vpn_icon.clone();
-    let wifi_icon_timer = net_widgets.wifi_icon.clone();
-    let eth_area_timer = net_widgets.eth_area.clone();
-    let last_net_icon = std::rc::Rc::new(std::cell::RefCell::new(String::new()));
+    let bat_widget_timer = context.battery.clone();
+    let vpn_icon_timer = context.vpn_icon.clone();
     let sup_timer = is_suppressed.clone();
 
     // Track last known volume/mute
@@ -137,29 +140,7 @@ pub fn setup_status_popover(
             vpn_icon_timer.set_visible(vpn_active);
         }
 
-        let active_net = babydra_core::services::system::network::get_active_network_info();
-        if active_net.network_type == babydra_core::models::ActiveNetworkType::Ethernet {
-            if !eth_area_timer.is_visible() {
-                wifi_icon_timer.set_visible(false);
-                eth_area_timer.set_visible(true);
-                eth_area_timer.queue_draw();
-            }
-        } else {
-            if !wifi_icon_timer.is_visible() {
-                eth_area_timer.set_visible(false);
-                wifi_icon_timer.set_visible(true);
-            }
-            if *last_net_icon.borrow() != active_net.icon_name {
-                *last_net_icon.borrow_mut() = active_net.icon_name.clone();
-                babydra_ui_kit::ui::icon::set_image_from_icon(
-                    &wifi_icon_timer,
-                    &active_net.icon_name,
-                    14,
-                );
-            }
-        }
-
-        if let Some(ref bat_area) = bat_widget_timer {
+        if let Some(bat_area) = &bat_widget_timer {
             bat_area.queue_draw();
         }
 

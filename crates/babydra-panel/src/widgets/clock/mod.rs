@@ -2,6 +2,8 @@ use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use crate::widgets::window_state::{close_window, toggle_window};
+
 mod calendar;
 mod notifications;
 mod render;
@@ -39,7 +41,7 @@ pub fn create_clock_widget(
             let now = chrono::Local::now();
             let time_str = format!(
                 "{}   {}",
-                now.format("%d/%m").to_string(),
+                now.format("%d/%m"),
                 now.format("%I:%M %p").to_string().to_uppercase()
             );
             clock_label.set_text(&time_str);
@@ -86,25 +88,11 @@ pub fn create_clock_widget(
             popdown();
         }
 
-        let cc_win = ccw_clone.borrow().clone();
-        if let Some(win) = cc_win {
-            win.close();
-        }
-
-        let launch_win = lw_clone.borrow().clone();
-        if let Some(win) = launch_win {
-            win.close();
-        }
-
-        let existing = cw_clone.borrow().clone();
-        if let Some(existing_window) = existing {
-            existing_window.close();
-        } else {
-            let window = calendar::show_calendar_window(&app_clone, cw_clone.clone());
-            if let Ok(mut borrow) = cw_clone.try_borrow_mut() {
-                *borrow = Some(window);
-            }
-        }
+        close_window(&ccw_clone);
+        close_window(&lw_clone);
+        toggle_window(&cw_clone, || {
+            calendar::show_calendar_window(&app_clone, cw_clone.clone())
+        });
     });
 
     clock_button

@@ -26,10 +26,7 @@ fn get_apps_signature(ws_id: u32, running_apps: &[DesktopApp]) -> String {
     format!("ws:{}||{}", ws_id, sigs.join("||"))
 }
 
-fn get_windows_for_app(
-    apps_shared: &Arc<Mutex<Vec<DesktopApp>>>,
-    app_id: &str,
-) -> Vec<DesktopApp> {
+fn get_windows_for_app(apps_shared: &Arc<Mutex<Vec<DesktopApp>>>, app_id: &str) -> Vec<DesktopApp> {
     let windows_list = apps_shared.lock().map(|l| l.clone()).unwrap_or_default();
     windows_list
         .into_iter()
@@ -132,12 +129,24 @@ fn rebuild_taskbar(
                 babydra_core::i18n::trans("taskbar.state_sleeping")
             };
             let rows = [
-                TooltipRow::new(&babydra_core::i18n::trans("taskbar.cpu"), &usage.cpu_formatted, None),
-                TooltipRow::new(&babydra_core::i18n::trans("taskbar.ram"), &usage.ram_formatted, None),
+                TooltipRow::new(
+                    &babydra_core::i18n::trans("taskbar.cpu"),
+                    &usage.cpu_formatted,
+                    None,
+                ),
+                TooltipRow::new(
+                    &babydra_core::i18n::trans("taskbar.ram"),
+                    &usage.ram_formatted,
+                    None,
+                ),
                 TooltipRow::new(
                     &babydra_core::i18n::trans("taskbar.state"),
                     &state_str,
-                    if usage.is_running { Some("text-success") } else { None },
+                    if usage.is_running {
+                        Some("text-success")
+                    } else {
+                        None
+                    },
                 ),
             ];
             let card = TooltipPopover::build_card(&app_name, &rows);

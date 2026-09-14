@@ -13,12 +13,12 @@ thread_local! {
     static ACTIVE_CC_SYNC: RefCell<Option<ActiveCcSync>> = const { RefCell::new(None) };
 }
 
-pub struct ActiveCcSync {
-    pub update_volume: Rc<dyn Fn(f64, bool)>,
-    pub update_brightness: Rc<dyn Fn(f64)>,
+struct ActiveCcSync {
+    update_volume: Rc<dyn Fn(f64, bool)>,
+    update_brightness: Rc<dyn Fn(f64)>,
 }
 
-pub fn register_cc_sync(update_vol: Rc<dyn Fn(f64, bool)>, update_bright: Rc<dyn Fn(f64)>) {
+fn register_cc_sync(update_vol: Rc<dyn Fn(f64, bool)>, update_bright: Rc<dyn Fn(f64)>) {
     ACTIVE_CC_SYNC.with(|s| {
         *s.borrow_mut() = Some(ActiveCcSync {
             update_volume: update_vol,
@@ -27,13 +27,13 @@ pub fn register_cc_sync(update_vol: Rc<dyn Fn(f64, bool)>, update_bright: Rc<dyn
     });
 }
 
-pub fn clear_cc_sync() {
+fn clear_cc_sync() {
     ACTIVE_CC_SYNC.with(|s| {
         *s.borrow_mut() = None;
     });
 }
 
-pub fn sync_cc_volume(vol: f64, muted: bool) {
+pub(super) fn sync_cc_volume(vol: f64, muted: bool) {
     ACTIVE_CC_SYNC.with(|s| {
         if let Some(ref sync) = *s.borrow() {
             (sync.update_volume)(vol, muted);
@@ -41,7 +41,7 @@ pub fn sync_cc_volume(vol: f64, muted: bool) {
     });
 }
 
-pub fn sync_cc_brightness(val: f64) {
+pub(super) fn sync_cc_brightness(val: f64) {
     ACTIVE_CC_SYNC.with(|s| {
         if let Some(ref sync) = *s.borrow() {
             (sync.update_brightness)(val);
@@ -50,7 +50,7 @@ pub fn sync_cc_brightness(val: f64) {
 }
 
 /// Builds the control center window UI.
-pub fn build_control_center(app: &gtk4::Application) -> (gtk4::ApplicationWindow, gtk4::Box) {
+fn build_control_center(app: &gtk4::Application) -> (gtk4::ApplicationWindow, gtk4::Box) {
     let q_win = gtk4::ApplicationWindow::new(app);
     babydra_ui_kit::ui::theme::apply_theme_class(&q_win);
     babydra_ui_kit::ui::window::init_layer_window(
@@ -83,7 +83,7 @@ pub fn build_control_center(app: &gtk4::Application) -> (gtk4::ApplicationWindow
 }
 
 /// Rebuild control center contents.
-pub fn rebuild_cc_contents(
+fn rebuild_cc_contents(
     main_box: &gtk4::Box,
     on_popover_toggled: Option<Rc<dyn Fn(bool) + 'static>>,
     vol_icon: gtk4::Image,
@@ -96,18 +96,18 @@ pub fn rebuild_cc_contents(
     }
 
     // 2. Append header
-    main_box.append(&create_header_row(on_popover_toggled.clone()));
+    main_box.append(&create_header_row());
 
     // 3. Append grid
     main_box.append(&create_cc_grid(on_popover_toggled.clone()));
 
     // 4. Append volume slider
-    let (volume_row, _volume_slider, vol_sync) =
+    let (volume_row, vol_sync) =
         items::volume::render::create_volume_row(on_popover_toggled.clone(), vol_icon.clone());
     main_box.append(&volume_row);
 
     // 5. Append brightness slider
-    let (brightness_row, _brightness_slider, bright_sync) = items::backlight::render::create_brightness();
+    let (brightness_row, bright_sync) = items::backlight::render::create_brightness();
     main_box.append(&brightness_row);
 
     register_cc_sync(vol_sync, bright_sync);
@@ -119,7 +119,7 @@ pub fn rebuild_cc_contents(
 /// Builds and maps a glassmorphic Control Center popup ApplicationWindow anchored
 /// to the top-right corner. It binds volume and brightness sliders, grid toggles,
 /// and registers Genie animations on close and map events.
-pub fn create_cc_window(
+pub(super) fn create_cc_window(
     app: &gtk4::Application,
     control_center_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
     vol_icon: gtk4::Image,

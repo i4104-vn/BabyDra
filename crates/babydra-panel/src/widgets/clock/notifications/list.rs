@@ -9,6 +9,9 @@ use std::cell::RefCell;
 use std::collections::HashSet;
 use std::rc::Rc;
 
+type RenderNotifications = Rc<dyn Fn()>;
+type RenderNotificationsHolder = Rc<RefCell<Option<RenderNotifications>>>;
+
 /// Configures and manages the interactive historical notifications list stack.
 /// Sets up periodic timers to update clock time, date, and detects when new notifications arrive.
 pub fn setup_notifs_list(
@@ -18,8 +21,7 @@ pub fn setup_notifs_list(
     big_date: &gtk4::Label,
 ) {
     let expanded_apps = Rc::new(RefCell::new(HashSet::<String>::new()));
-    let render_notifications_holder: Rc<RefCell<Option<Rc<dyn Fn()>>>> =
-        Rc::new(RefCell::new(None));
+    let render_notifications_holder: RenderNotificationsHolder = Rc::new(RefCell::new(None));
 
     let render_notifications = {
         let notif_stack = notif_stack.clone();
@@ -136,7 +138,7 @@ pub fn setup_notifs_list(
             current_now.format("%a").to_string().to_lowercase()
         );
         let weekday = babydra_core::i18n::trans(&weekday_key);
-        let month_key = format!("month.{}", current_now.format("%m").to_string());
+        let month_key = format!("month.{}", current_now.format("%m"));
         let month_str = babydra_core::i18n::trans(&month_key);
 
         let date_str = babydra_core::i18n::trans("panel.date_format")
@@ -420,7 +422,7 @@ fn make_notif_icon(icon: &str) -> gtk4::Image {
             let theme = gtk4::IconTheme::for_display(&display);
             // Strip extension if present
             let clean = icon
-                .trim_end_matches(|c| c == '.')
+                .trim_end_matches('.')
                 .rsplitn(2, '.')
                 .last()
                 .unwrap_or(icon);

@@ -1,14 +1,13 @@
 use super::state::NetworkWidgets;
 use babydra_core::models::{ActiveNetworkType, EthernetActivityState};
-pub use babydra_core::services::system::battery::get_battery_info;
 use babydra_core::services::system::network::{subscribe as subscribe_network, NetworkSnapshot};
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
 /// Creates a new `battery widget`.
-pub fn create_battery_w() -> Option<gtk4::DrawingArea> {
-    get_battery_info()?;
+pub(super) fn create_battery_w() -> Option<gtk4::DrawingArea> {
+    babydra_core::services::system::battery::get_battery_info()?;
 
     let drawing_area = gtk4::DrawingArea::new();
     drawing_area.set_content_width(24);
@@ -17,7 +16,7 @@ pub fn create_battery_w() -> Option<gtk4::DrawingArea> {
     drawing_area.set_halign(gtk4::Align::Center);
 
     drawing_area.set_draw_func(move |_area, cr, width, height| {
-        let bat_info = match get_battery_info() {
+        let bat_info = match babydra_core::services::system::battery::get_battery_info() {
             Some(info) => info,
             None => return,
         };
@@ -37,7 +36,7 @@ pub fn create_battery_w() -> Option<gtk4::DrawingArea> {
 }
 
 /// Creates a unified network status widget that dynamically switches between Wi-Fi and Desktop Ethernet with TX/RX blinking dots.
-pub fn create_network_widget() -> NetworkWidgets {
+pub(super) fn create_network_widget() -> NetworkWidgets {
     let container = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     container.set_valign(gtk4::Align::Center);
     container.set_halign(gtk4::Align::Center);
@@ -82,6 +81,7 @@ pub fn create_network_widget() -> NetworkWidgets {
     let eth_area_timer = eth_area.clone();
     let state_timer = state.clone();
     let wifi_icon_clone = wifi_icon.clone();
+    let blink_toggle = Rc::new(std::cell::Cell::new(false));
     let mut last_icon_name = String::new();
 
     net_rx.attach(None, move |snapshot: NetworkSnapshot| {
@@ -112,10 +112,8 @@ pub fn create_network_widget() -> NetworkWidgets {
         let tx_active = snapshot.tx_speed > 1024.0; // > 1 KB/s
         let rx_active = snapshot.rx_speed > 1024.0;
 
-        // Simple blink toggle
-        static mut BLINK_TOGGLE: bool = false;
-        unsafe { BLINK_TOGGLE = !BLINK_TOGGLE };
-        let blink = unsafe { BLINK_TOGGLE };
+        let blink = !blink_toggle.get();
+        blink_toggle.set(blink);
 
         s.tx_lit = if tx_active { blink } else { true };
         s.rx_lit = if rx_active { blink } else { true };
@@ -125,15 +123,11 @@ pub fn create_network_widget() -> NetworkWidgets {
         glib::ControlFlow::Continue
     });
 
-    NetworkWidgets {
-        container,
-        wifi_icon,
-        eth_area,
-    }
+    NetworkWidgets { container }
 }
 
 /// Builds the panel status indicators row.
-pub fn build_status_row() -> (
+pub(super) fn build_status_row() -> (
     gtk4::Box,
     gtk4::Button,
     gtk4::Label,

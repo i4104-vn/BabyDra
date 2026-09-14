@@ -18,7 +18,7 @@ fn get_brightness_icon_name(val: f64) -> &'static str {
 }
 
 /// Creates a new `brightness row`.
-pub fn create_brightness() -> (gtk4::Box, PillSlider, std::rc::Rc<dyn Fn(f64)>) {
+pub(crate) fn create_brightness() -> (gtk4::Box, std::rc::Rc<dyn Fn(f64)>) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
     main_box.add_css_class("control-slider-card");
 
@@ -33,7 +33,9 @@ pub fn create_brightness() -> (gtk4::Box, PillSlider, std::rc::Rc<dyn Fn(f64)>) 
     icon_container.set_halign(gtk4::Align::Start);
     icon_container.set_margin_start(10);
 
-    let current_icon_name = std::rc::Rc::new(std::cell::RefCell::new(get_brightness_icon_name(initial_val)));
+    let current_icon_name = std::rc::Rc::new(std::cell::RefCell::new(get_brightness_icon_name(
+        initial_val,
+    )));
     let update_icon = {
         let icon_container = icon_container.clone();
         let current_icon_name = current_icon_name.clone();
@@ -52,8 +54,11 @@ pub fn create_brightness() -> (gtk4::Box, PillSlider, std::rc::Rc<dyn Fn(f64)>) 
         })
     };
 
-    let initial_icon =
-        babydra_ui_kit::ui::icon::get_icon_colored(get_brightness_icon_name(initial_val), 16, "#ffffff");
+    let initial_icon = babydra_ui_kit::ui::icon::get_icon_colored(
+        get_brightness_icon_name(initial_val),
+        16,
+        "#ffffff",
+    );
     initial_icon.add_css_class("slider-overlay-icon");
     icon_container.append(&initial_icon);
 
@@ -91,7 +96,7 @@ pub fn create_brightness() -> (gtk4::Box, PillSlider, std::rc::Rc<dyn Fn(f64)>) 
         update_icon_sync(val);
     });
 
-    (main_box, slider, sync_callback)
+    (main_box, sync_callback)
 }
 
 /// Sync DDC brightness async.

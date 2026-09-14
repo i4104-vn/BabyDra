@@ -41,4 +41,3 @@ pub fn connect_wifi_async(
         }
     });
 }
-

@@ -290,8 +290,7 @@ pub fn render_previews(
         open_new_icon.set_pixel_size(14);
         open_new_icon.add_css_class("taskbar-popover-action-icon");
 
-        let open_new_label =
-            gtk4::Label::new(Some(&babydra_core::i18n::trans("taskbar.open_new")));
+        let open_new_label = gtk4::Label::new(Some(&babydra_core::i18n::trans("taskbar.open_new")));
         open_new_label.add_css_class("taskbar-popover-action-label");
         open_new_label.set_halign(gtk4::Align::Start);
         open_new_label.set_xalign(0.0);

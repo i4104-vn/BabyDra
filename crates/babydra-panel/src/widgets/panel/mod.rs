@@ -5,16 +5,17 @@ mod render;
 pub mod state;
 pub mod toggle_grid;
 
+use crate::widgets::window_state::{close_window, toggle_window};
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-pub use items::backlight::detect_ddc_bus;
+pub(crate) use items::backlight::detect_ddc_bus;
 
 /// Creates a unified status indicators capsule containing (1) status details button and (2) clock button.
 /// Clicking the status button toggles Control Center; clicking the clock button toggles Calendar.
 /// The two panels are mutually exclusive.
-pub fn create_status_icons(
+pub(crate) fn create_status_icons(
     app: &gtk4::Application,
     control_center_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
     calendar_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
@@ -28,16 +29,16 @@ pub fn create_status_icons(
     items::volume::update_topbar_volume(&vol_icon);
 
     // Setup status popovers (VPN, Network, Volume, Battery)
-    let popovers = popover::setup_status_popover(
-        &vol_icon,
-        &net_widgets,
-        &vpn_icon,
-        &bat_widget,
-        control_center_window.clone(),
-        calendar_window.clone(),
-        launcher_window.clone(),
-        ws_popover,
-    );
+    let popovers = popover::setup_status_popover(popover::StatusPopoverContext {
+        volume_icon: &vol_icon,
+        network: &net_widgets,
+        vpn_icon: &vpn_icon,
+        battery: &bat_widget,
+        control_center_window: control_center_window.clone(),
+        calendar_window: calendar_window.clone(),
+        launcher_window: launcher_window.clone(),
+        workspace_popover: ws_popover,
+    });
 
     // Real-time event listener for system volume & mute changes
     {
@@ -111,29 +112,11 @@ pub fn create_status_icons(
     status_button.connect_clicked(move |_| {
         popovers_click.popdown_all();
 
-        let launcher_active = { lw_clone.borrow().clone() };
-        if let Some(win) = launcher_active {
-            win.close();
-        }
-
-        let cal_active = { cw_clone.borrow().clone() };
-        if let Some(win) = cal_active {
-            win.close();
-        }
-
-        let existing = {
-            let borrow = ccw_clone.borrow();
-            borrow.clone()
-        };
-        if let Some(existing_window) = existing {
-            existing_window.close();
-        } else {
-            let q_win =
-                modal::create_cc_window(&app_clone, ccw_clone.clone(), vol_icon_clone.clone());
-            if let Ok(mut borrow) = ccw_clone.try_borrow_mut() {
-                *borrow = Some(q_win);
-            }
-        }
+        close_window(&lw_clone);
+        close_window(&cw_clone);
+        toggle_window(&ccw_clone, || {
+            modal::create_cc_window(&app_clone, ccw_clone.clone(), vol_icon_clone.clone())
+        });
     });
 
     let popovers_clock = popovers.clone();

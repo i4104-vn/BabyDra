@@ -1,6 +1,7 @@
 use crate::widgets::panel::create_status_icons;
 use crate::widgets::system_monitor::create_sys_monitor_w;
 use crate::widgets::tray::create_tray_widget;
+use crate::widgets::window_state::{close_window, toggle_window};
 use crate::widgets::workspace::create_workspace_sw;
 use babydra_island::create_system_island;
 use gtk4::prelude::*;
@@ -81,35 +82,21 @@ pub fn rebuild_panel_window(
         logo_pop_click.popdown();
         let button = gesture.current_button();
 
-        let cc_win = { ccw_clone.borrow().clone() };
-        if let Some(win) = cc_win {
-            win.close();
-        }
-        let cal_win = { cw_clone.borrow().clone() };
-        if let Some(win) = cal_win {
-            win.close();
-        }
+        close_window(&ccw_clone);
+        close_window(&cw_clone);
 
         if button == 1 {
             ws_pop_click.popdown();
             // Left-click: Toggle Launcher
-            let existing = { lw_clone.borrow().clone() };
-            if let Some(win) = existing {
-                win.close();
-            } else {
+            toggle_window(&lw_clone, || {
                 let l_win = babydra_launcher::build_launcher_ui(&app_clone, lw_clone.clone());
                 l_win.present();
-                if let Ok(mut borrow) = lw_clone.try_borrow_mut() {
-                    *borrow = Some(l_win);
-                }
-            }
+                l_win
+            });
         } else if button == 2 {
             ws_pop_click.popdown();
             // Middle-click: Minimize all application windows to show desktop
-            let existing = { lw_clone.borrow().clone() };
-            if let Some(win) = existing {
-                win.close();
-            }
+            close_window(&lw_clone);
             babydra_core::services::window::minimize_all_windows();
         } else if button == 3 {
             // Right-click: Toggle Workspace Popover
@@ -122,8 +109,7 @@ pub fn rebuild_panel_window(
     });
     logo_btn.add_controller(click_gesture);
 
-    let logo_scroll =
-        gtk4::EventControllerScroll::new(gtk4::EventControllerScrollFlags::VERTICAL);
+    let logo_scroll = gtk4::EventControllerScroll::new(gtk4::EventControllerScrollFlags::VERTICAL);
     let logo_pop_scroll = logo_popover.clone();
     logo_scroll.connect_scroll(move |_, _, dy| {
         logo_pop_scroll.popdown();
@@ -288,7 +274,6 @@ pub fn build_panel_ui(
         &notch_c1,
         true,
     );
-
 
     let window_c2 = window.clone();
     let app_c2 = app.clone();
