@@ -14,6 +14,6 @@ rm -f "$HOME/.cache/babydra/workspace_windows.json"
 ~/.local/bin/babydra-panel &
 ~/.local/bin/babydra-desktop &
 ~/.local/bin/babydra-settings --apply-all-settings &
+~/.local/bin/babydra-settings &
 $HOME/.config/labwc/scripts/bat_saver.sh &
-
 
