@@ -30,8 +30,7 @@ impl NetworkFeature {
         let (icon, title, val) = if info.is_connected {
             match info.network_type {
                 babydra_core::models::ActiveNetworkType::Wifi => {
-                    let (_, _, strength) =
-                        babydra_core::services::system::wifi::get_wifi_signal();
+                    let (_, _, strength) = babydra_core::services::system::wifi::get_wifi_signal();
                     ("wifi", info.name, format!("{}%", strength))
                 }
                 babydra_core::models::ActiveNetworkType::Ethernet => {
@@ -40,7 +39,11 @@ impl NetworkFeature {
                 _ => ("wifi", info.name, String::new()),
             }
         } else {
-            ("wifi", babydra_core::i18n::trans("island.disconnected"), String::new())
+            (
+                "wifi",
+                babydra_core::i18n::trans("island.disconnected"),
+                String::new(),
+            )
         };
 
         let widgets = NotchWidget::with_value(icon, "#ffffff", &title, &val);

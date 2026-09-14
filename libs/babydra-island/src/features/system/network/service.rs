@@ -79,7 +79,10 @@ where
                     last_type = babydra_core::models::ActiveNetworkType::Disconnected;
                     last_name.clear();
 
-                    if sender.send(NetworkEvent::Disconnected { was_wifi }).is_err() {
+                    if sender
+                        .send(NetworkEvent::Disconnected { was_wifi })
+                        .is_err()
+                    {
                         break;
                     }
                 } else if !last_connected && info.is_connected {
