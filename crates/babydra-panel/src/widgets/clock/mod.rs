@@ -2,9 +2,7 @@ use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-mod calendar_window;
-mod notification_group;
-mod notification_popup;
+mod calendar;
 mod notifications;
 mod render;
 
@@ -17,17 +15,26 @@ pub fn create_clock_widget(
     launcher_window: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
     popdown_tooltips: Option<Rc<dyn Fn()>>,
 ) -> gtk4::Button {
-    let (clock_button, clock_label, red_dot) = render::build_clock_ui();
+    let (clock_button, clock_label, red_dot, bell_box) = render::build_clock_ui();
     babydra_core::services::notification::spawn_notif_dbus();
 
-    let notification_popup = Rc::new(notification_popup::NotificationPopup::new(&clock_button));
+    let notification_popup = Rc::new(notifications::NotificationPopup::new(&clock_button));
     let last_notification = Rc::new(std::cell::Cell::new(None));
+
+    let bell_popover = notifications::setup_bell_popover(
+        &bell_box,
+        calendar_window.clone(),
+        control_center_window.clone(),
+        launcher_window.clone(),
+        notification_popup.clone(),
+    );
 
     let update_clock = {
         let clock_label = clock_label.clone();
         let red_dot = red_dot.clone();
         let notification_popup = notification_popup.clone();
         let last_notification = last_notification.clone();
+        let bell_popover = bell_popover.clone();
         move || {
             let now = chrono::Local::now();
             let time_str = format!(
@@ -48,6 +55,7 @@ pub fn create_clock_widget(
             match active_notification {
                 Some(notification) if last_notification.get() != Some(notification.timestamp) => {
                     last_notification.set(Some(notification.timestamp));
+                    bell_popover.popdown();
                     notification_popup.show(&notification);
                 }
                 None => {
@@ -69,9 +77,11 @@ pub fn create_clock_widget(
     let app_clone = app.clone();
     let popdown_c = popdown_tooltips.clone();
     let notification_popup_c = notification_popup.clone();
+    let bell_popover_c = bell_popover.clone();
 
     clock_button.connect_clicked(move |_| {
         notification_popup_c.close();
+        bell_popover_c.popdown();
         if let Some(ref popdown) = popdown_c {
             popdown();
         }
@@ -90,7 +100,7 @@ pub fn create_clock_widget(
         if let Some(existing_window) = existing {
             existing_window.close();
         } else {
-            let window = calendar_window::show_calendar_window(&app_clone, cw_clone.clone());
+            let window = calendar::show_calendar_window(&app_clone, cw_clone.clone());
             if let Ok(mut borrow) = cw_clone.try_borrow_mut() {
                 *borrow = Some(window);
             }

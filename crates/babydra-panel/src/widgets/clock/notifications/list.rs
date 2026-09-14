@@ -2,7 +2,9 @@
 //! Manages loading, grouped rendering (by app), and expanding/collapsing of notifications,
 //! as well as formatting timestamps and clearing history.
 
-use super::notification_group::format_elapsed_time;
+use super::group::{format_elapsed_time, group_notifs_by_app};
+use super::icon::resolve_notification_icon;
+use babydra_core::models::ActiveNotification;
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::collections::HashSet;
@@ -50,8 +52,7 @@ pub fn setup_notifs_list(
                 empty_label.set_vexpand(true);
                 notif_stack.append(&empty_label);
             } else {
-                let (grouped, app_order) =
-                    super::notification_group::group_notifs_by_app(&notifications);
+                let (grouped, app_order) = group_notifs_by_app(&notifications);
 
                 for app_key in app_order {
                     let list = &grouped[&app_key];
@@ -162,7 +163,7 @@ pub fn setup_notifs_list(
 fn render_expanded_group(
     app_key: &str,
     display_app_name: &str,
-    list: &[babydra_island::models::ActiveNotification],
+    list: &[ActiveNotification],
     expanded_apps: Rc<RefCell<HashSet<String>>>,
     render_notifications_rc: Rc<dyn Fn()>,
 ) -> gtk4::Box {
@@ -173,8 +174,7 @@ fn render_expanded_group(
     group_header.add_css_class("notif-group-header");
 
     let latest_notif = list.last().unwrap();
-    let icon_widget = make_notif_icon(&latest_notif.icon);
-    icon_widget.set_pixel_size(18);
+    let icon_widget = resolve_notification_icon(&latest_notif.icon, app_key, 18);
     icon_widget.set_valign(gtk4::Align::Center);
     icon_widget.set_halign(gtk4::Align::Center);
     icon_widget.add_css_class("notif-item-icon");
@@ -201,8 +201,7 @@ fn render_expanded_group(
         let item_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
         item_box.add_css_class("notif-stack-item");
 
-        let icon_widget = make_notif_icon(&notif.icon);
-        icon_widget.set_pixel_size(18);
+        let icon_widget = resolve_notification_icon(&notif.icon, app_key, 18);
         icon_widget.set_valign(gtk4::Align::Center);
         icon_widget.set_halign(gtk4::Align::Center);
         icon_widget.add_css_class("notif-item-icon");
@@ -286,7 +285,7 @@ fn render_expanded_group(
 fn render_collapsed_group(
     app_key: &str,
     display_app_name: &str,
-    list: &[babydra_island::models::ActiveNotification],
+    list: &[ActiveNotification],
     expanded_apps: Rc<RefCell<HashSet<String>>>,
     render_notifications_rc: Rc<dyn Fn()>,
 ) -> gtk4::Box {
@@ -298,8 +297,7 @@ fn render_collapsed_group(
     let main_item = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
     main_item.add_css_class("notif-stack-item");
 
-    let icon_widget = make_notif_icon(&latest_notif.icon);
-    icon_widget.set_pixel_size(18);
+    let icon_widget = resolve_notification_icon(&latest_notif.icon, app_key, 18);
     icon_widget.set_valign(gtk4::Align::Center);
     icon_widget.set_halign(gtk4::Align::Center);
     icon_widget.add_css_class("notif-item-icon");
@@ -370,35 +368,4 @@ fn render_collapsed_group(
     group_container.add_controller(click_gesture);
 
     group_container
-}
-
-/// Make notif icon.
-fn make_notif_icon(icon: &str) -> gtk4::Image {
-    let size = 18;
-    // Absolute path – use directly if file exists
-    if icon.starts_with('/') && std::path::Path::new(icon).exists() {
-        let img = gtk4::Image::new();
-        img.set_from_file(Some(icon));
-        img.set_pixel_size(size);
-        return img;
-    }
-    // Named icon – check if it exists in the current icon theme
-    if !icon.is_empty() && icon != "babydra" {
-        if let Some(display) = gdk4::Display::default() {
-            let theme = gtk4::IconTheme::for_display(&display);
-            // Strip extension if present
-            let clean = icon
-                .trim_end_matches(|c| c == '.')
-                .rsplitn(2, '.')
-                .last()
-                .unwrap_or(icon);
-            if theme.has_icon(clean) {
-                let img = gtk4::Image::from_icon_name(clean);
-                img.set_pixel_size(size);
-                return img;
-            }
-        }
-    }
-    // Fallback: embedded logo
-    babydra_ui_kit::ui::icon::get_logo_png(size)
 }

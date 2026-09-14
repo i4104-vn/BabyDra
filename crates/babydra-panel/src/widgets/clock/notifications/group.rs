@@ -1,3 +1,6 @@
+//! Notification grouping by application and timestamp formatting.
+
+use babydra_core::models::ActiveNotification;
 use std::collections::HashMap;
 use std::time::Instant;
 
@@ -17,12 +20,9 @@ pub fn format_elapsed_time(instant: Instant) -> String {
 
 /// Groups active notifications by application key and returns the app order.
 pub fn group_notifs_by_app(
-    notifications: &[babydra_island::models::ActiveNotification],
-) -> (
-    HashMap<String, Vec<babydra_island::models::ActiveNotification>>,
-    Vec<String>,
-) {
-    let mut grouped = HashMap::<String, Vec<babydra_island::models::ActiveNotification>>::new();
+    notifications: &[ActiveNotification],
+) -> (HashMap<String, Vec<ActiveNotification>>, Vec<String>) {
+    let mut grouped = HashMap::<String, Vec<ActiveNotification>>::new();
     let mut app_order = Vec::new();
 
     for notif in notifications.iter() {

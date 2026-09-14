@@ -199,6 +199,10 @@ impl NotificationPopup {
         );
     }
 
+    pub fn is_visible(&self) -> bool {
+        self.popover.is_visible()
+    }
+
     pub fn close(&self) {
         self.hovered.set(false);
         dismiss_notification(&self.card, &self.popover, &self.generation);

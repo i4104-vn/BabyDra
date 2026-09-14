@@ -1,10 +1,12 @@
-use super::notifications;
-use super::render;
+//! Calendar dropdown window controller and setup.
+
+pub mod render;
+
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-/// Shows the `calendar window`.
+/// Shows the calendar popup window with historical notifications and genie animations.
 pub fn show_calendar_window(
     app: &gtk4::Application,
     cw_clone: Rc<RefCell<Option<gtk4::ApplicationWindow>>>,
@@ -12,8 +14,8 @@ pub fn show_calendar_window(
     let (c_win, main_box, date_label, dummy_time, _calendar, clear_btn, notif_stack) =
         render::build_calendar(app);
 
-    // 7. Setup and Render Notifications list
-    notifications::setup_notifs_list(&notif_stack, &clear_btn, &dummy_time, &date_label);
+    // Setup and render notifications list inside the calendar drawer
+    super::notifications::setup_notifs_list(&notif_stack, &clear_btn, &dummy_time, &date_label);
 
     // Dismiss when clicking outside the calendar box area using common helper
     babydra_ui_kit::ui::window::setup_click_outside_dismiss(&c_win, &main_box);
