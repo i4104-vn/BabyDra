@@ -1699,11 +1699,12 @@ button.sidebar-item.active-nav {
     background-color: rgba(59, 130, 246, 0.12);
     color: #3b82f6;
     border-radius: 10px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 button.sidebar-item.active-nav label {
     color: #3b82f6;
+    font-weight: 700;
 }
 
 button.sidebar-item.active-nav:hover {
@@ -1713,6 +1714,7 @@ button.sidebar-item.active-nav:hover {
 
 button.sidebar-item.active-nav:hover label {
     color: #2563eb;
+    font-weight: 700;
 }
 
 .sidebar-wallpaper-thumb {

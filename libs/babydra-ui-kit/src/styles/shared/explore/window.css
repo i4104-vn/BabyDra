@@ -1,12 +1,15 @@
 .explore-window {
     background-image: none;
+    background-color: transparent;
     box-shadow: none;
+    border-radius: 12px;
+    font-family: 'Quicksand', 'Segoe UI Variable Static Text', 'Segoe UI', 'Inter', system-ui, sans-serif;
 }
 
 .explore-window-box {
     border: none;
     border-radius: 0 0 12px 12px;
     box-shadow: none;
-    font-family: 'Segoe UI Variable Static Text', 'Segoe UI', 'Inter', system-ui, sans-serif;
+    font-family: 'Quicksand', 'Segoe UI Variable Static Text', 'Segoe UI', 'Inter', system-ui, sans-serif;
     font-size: 13px;
 }

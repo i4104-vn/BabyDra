@@ -1700,11 +1700,12 @@ button.sidebar-item.active-nav {
     background-color: rgba(59, 130, 246, 0.15);
     color: #60a5fa;
     border-radius: 10px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 button.sidebar-item.active-nav label {
     color: #60a5fa;
+    font-weight: 700;
 }
 
 button.sidebar-item.active-nav:hover {
@@ -1714,6 +1715,7 @@ button.sidebar-item.active-nav:hover {
 
 button.sidebar-item.active-nav:hover label {
     color: #93c5fd;
+    font-weight: 700;
 }
 
 .sidebar-wallpaper-thumb {

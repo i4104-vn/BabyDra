@@ -47,8 +47,8 @@ fi
 
 # Install AUR packages using yay
 yay -S --noconfirm github-desktop fastfetch neovim ddcutil-service kitty
-# Core UI and Coding fonts (Windows 11 Segoe UI Variable, VS Code Cascadia Code, JetBrains Mono, Inter)
-yay -S --noconfirm ttf-segoe-ui-variable ttf-cascadia-code-nerd inter-font ttf-ubuntu-font-family ttf-jetbrains-mono-nerd
+# Core UI and Coding fonts (Quicksand, Windows 11 Segoe UI Variable, VS Code Cascadia Code, JetBrains Mono, Inter)
+yay -S --noconfirm ttf-quicksand-variable ttf-segoe-ui-variable ttf-cascadia-code-nerd inter-font ttf-ubuntu-font-family ttf-jetbrains-mono-nerd
 
 # Nerd Font symbols (icons in terminal and panel)
 yay -S --noconfirm ttf-nerd-fonts-symbols ttf-nerd-fonts-symbols-mono
@@ -189,8 +189,8 @@ cp -r "$REPO_ROOT/configs/kitty/"* "$HOME/.config/kitty/" 2>/dev/null || true
 cp -r "$REPO_ROOT/configs/nvim/"* "$HOME/.config/nvim/" 2>/dev/null || true
 
 # Apply font, icon theme, and cursor theme to GNOME/GTK desktop interface via gsettings
-gsettings set org.gnome.desktop.interface font-name 'Segoe UI Variable Static Text 13' 2>/dev/null || true
-gsettings set org.gnome.desktop.interface document-font-name 'Segoe UI Variable Static Text 13' 2>/dev/null || true
+gsettings set org.gnome.desktop.interface font-name 'Quicksand 12' 2>/dev/null || true
+gsettings set org.gnome.desktop.interface document-font-name 'Quicksand 12' 2>/dev/null || true
 gsettings set org.gnome.desktop.interface monospace-font-name 'CaskaydiaCove Nerd Font 11' 2>/dev/null || true
 gsettings set org.gnome.desktop.interface icon-theme 'We10X' 2>/dev/null || true
 gsettings set org.gnome.desktop.interface cursor-theme 'Twilight-cursors' 2>/dev/null || true

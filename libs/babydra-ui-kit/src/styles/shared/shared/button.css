@@ -1,6 +1,8 @@
 button,
-.btn {
-    font-family: 'Segoe UI Variable Static Text', 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+.btn,
+.button {
+    font-family: 'Quicksand', 'Segoe UI Variable Static Text', 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+    outline: none;
     transition: all 200ms ease;
 }
 

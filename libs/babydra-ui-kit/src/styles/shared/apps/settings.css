@@ -1,6 +1,5 @@
 window.settings-window {
     background-image: none;
-    font-family: 'Segoe UI Variable Static Text', 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
     border-radius: 0 0 16px 16px;
 }
 
@@ -31,6 +30,10 @@ button.sidebar-header-btn {
     padding: 6px;
     margin: 4px 6px 2px 6px;
     transition: background-color 150ms ease;
+}
+
+button.sidebar-header-btn label {
+    font-weight: 700;
 }
 
 button.sidebar-header-btn:hover {

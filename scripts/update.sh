@@ -193,8 +193,13 @@ if [ -d "$REPO_DIR/configs/themes/icons" ]; then
 fi
 
 # 6.8 Apply GNOME/GTK desktop interface via gsettings
-gsettings set org.gnome.desktop.interface font-name 'Segoe UI Variable Static Text 13' 2>/dev/null || true
-gsettings set org.gnome.desktop.interface document-font-name 'Segoe UI Variable Static Text 13' 2>/dev/null || true
+if ! fc-list : family | grep -qi "Quicksand"; then
+    mkdir -p "$HOME/.local/share/fonts"
+    curl -sL -o "$HOME/.local/share/fonts/Quicksand[wght].ttf" "https://github.com/google/fonts/raw/main/ofl/quicksand/Quicksand%5Bwght%5D.ttf" 2>/dev/null || true
+    fc-cache -f "$HOME/.local/share/fonts" 2>/dev/null || true
+fi
+gsettings set org.gnome.desktop.interface font-name 'Quicksand 12' 2>/dev/null || true
+gsettings set org.gnome.desktop.interface document-font-name 'Quicksand 12' 2>/dev/null || true
 gsettings set org.gnome.desktop.interface monospace-font-name 'CaskaydiaCove Nerd Font 11' 2>/dev/null || true
 gsettings set org.gnome.desktop.interface icon-theme 'We10X' 2>/dev/null || true
 gsettings set org.gnome.desktop.interface cursor-theme 'Twilight-cursors' 2>/dev/null || true
