@@ -30,9 +30,11 @@ pub(crate) fn start_visualizer(bars: Vec<gtk4::Box>, is_playing: Rc<Cell<bool>>)
         return;
     }
     let start_time = std::cell::Cell::new(0i64);
+    let was_playing = std::cell::Cell::new(false);
     let first_bar = bars[0].clone();
     first_bar.add_tick_callback(move |_w, clock| {
         if is_playing.get() {
+            was_playing.set(true);
             let now = clock.frame_time();
             if start_time.get() == 0 {
                 start_time.set(now);
@@ -47,7 +49,7 @@ pub(crate) fn start_visualizer(bars: Vec<gtk4::Box>, is_playing: Rc<Cell<bool>>)
                 let val = (mixed * 4.0 + 6.0) as i32;
                 bar.set_size_request(2, val.clamp(2, 10));
             }
-        } else {
+        } else if was_playing.replace(false) {
             start_time.set(0);
             for bar in &bars {
                 bar.set_size_request(2, 2);

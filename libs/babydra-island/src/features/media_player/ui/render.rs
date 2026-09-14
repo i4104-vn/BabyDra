@@ -1,8 +1,10 @@
 //! Data → widgets: parses playerctl metadata and pushes it into the view.
 
+use std::time::Instant;
+
 use gtk4::prelude::*;
 
-use crate::features::media_player::service::{art, format_time, get_player_icon_name};
+use crate::features::media_player::service::{art, format_time};
 use crate::features::media_player::MediaPlayerFeature;
 
 /// Parsed playerctl metadata for one refresh cycle.
@@ -43,10 +45,7 @@ pub fn parse_metadata(line: &str) -> (PlayerMeta, bool) {
 
 impl MediaPlayerFeature {
     /// Updates labels, progress and artwork (throttled where cheap wins).
-    pub(crate) fn update_player_view(&self, meta: &PlayerMeta) {
-        let count = self.poll_counter.get() + 1;
-        self.poll_counter.set(count);
-
+    pub(crate) fn update_player_view(&self, meta: &PlayerMeta, song_changed: bool) {
         let popover = self.popover.borrow();
         let popover = popover.as_ref();
 
@@ -62,27 +61,7 @@ impl MediaPlayerFeature {
             }
         }
 
-        let meta_key = format!(
-            "{}|{}|{}|{}",
-            meta.title, meta.artist, meta.player_name_raw, meta.art_url
-        );
-        let song_changed = {
-            let mut last = self.last_meta_key.borrow_mut();
-            if meta_key != *last {
-                *last = meta_key;
-                true
-            } else {
-                false
-            }
-        };
-
         if song_changed {
-            self.art_loaded_for_current_song.set(false);
-            self.fail_count.set(0);
-            *self.last_attempted_url.borrow_mut() = String::new();
-        }
-
-        if song_changed || count.is_multiple_of(7) {
             let label_text = if meta.title.is_empty() {
                 if !meta.player_name_raw.is_empty() {
                     meta.player_name_raw.clone()
@@ -136,25 +115,31 @@ impl MediaPlayerFeature {
 
         // Artwork loading & retry logic.
         if !self.art_loaded_for_current_song.get() {
-            let app_icon_name = get_player_icon_name(&meta.player_name_raw);
+            let app_icon_name = &self.player_icon_name;
             let popover_art = popover.map(|p| p.art_container.clone());
 
             if meta.art_url.is_empty() {
                 art::set_art_fallback_icon(
                     &self.widgets.art_container,
                     popover_art.as_ref(),
-                    &app_icon_name,
+                    app_icon_name,
                 );
-                if count > 5 {
-                    self.art_loaded_for_current_song.set(true);
-                }
+                self.art_loaded_for_current_song.set(true);
             } else {
                 let last_attempt = self.last_attempted_url.borrow().clone();
                 let retries = self.fail_count.get();
+                let retry_ready = self
+                    .next_art_retry_at
+                    .get()
+                    .map(|deadline| Instant::now() >= deadline)
+                    .unwrap_or(true);
 
-                // Refetch if URL changed, or if previous attempt failed but retries < 3.
-                if meta.art_url != last_attempt || retries < 3 {
+                if !self.art_request_pending.get()
+                    && (meta.art_url != last_attempt || (retries < 3 && retry_ready))
+                {
                     *self.last_attempted_url.borrow_mut() = meta.art_url.clone();
+                    self.art_request_pending.set(true);
+                    self.next_art_retry_at.set(None);
 
                     let art_url_clone = meta.art_url.clone();
                     let app_icon_name_clone = app_icon_name.clone();
@@ -186,8 +171,11 @@ impl MediaPlayerFeature {
         }
 
         if let Some(popover) = popover {
-            let icon = if meta.playing { "pause" } else { "play" };
-            babydra_ui_kit::ui::icon::set_image_from_icon(&popover.play_btn_icon, icon, 22);
+            if self.play_icon_state.get() != Some(meta.playing) {
+                let icon = if meta.playing { "pause" } else { "play" };
+                babydra_ui_kit::ui::icon::set_image_from_icon(&popover.play_btn_icon, icon, 22);
+                self.play_icon_state.set(Some(meta.playing));
+            }
         }
     }
 }

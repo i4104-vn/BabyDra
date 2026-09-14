@@ -3,6 +3,7 @@
 
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use std::time::{Duration, Instant};
 
 use babydra_ui_kit::ui::image::create_rounded_picture;
 use gdk_pixbuf::prelude::*;
@@ -60,12 +61,15 @@ pub fn spawn_art_receiver(
     last_attempted_url: Rc<RefCell<String>>,
     art_loaded: Rc<Cell<bool>>,
     fail_count: Rc<Cell<u32>>,
+    request_pending: Rc<Cell<bool>>,
+    next_retry_at: Rc<Cell<Option<Instant>>>,
 ) {
     glib::MainContext::default().spawn_local(async move {
         while let Some((url, app_icon_name, result)) = rx.recv().await {
             if url != *last_attempted_url.borrow() {
                 continue;
             }
+            request_pending.set(false);
             match result {
                 Ok(bytes) => {
                     let small_art = load_album_art_from_bytes(&bytes, 18, true, 9.0);
@@ -73,26 +77,30 @@ pub fn spawn_art_receiver(
                     match (small_art, large_art) {
                         (Some(s_art), Some(l_art)) => {
                             art_loaded.set(true);
+                            fail_count.set(0);
+                            next_retry_at.set(None);
                             set_art(&art_container, &s_art, "notch-album-art");
                             set_art_expanded(&popover_art, &l_art);
                         }
                         _ => art_fail(
-                            &last_attempted_url,
                             &art_loaded,
                             &fail_count,
                             &art_container,
                             &popover_art,
                             &app_icon_name,
+                            &request_pending,
+                            &next_retry_at,
                         ),
                     }
                 }
                 Err(_) => art_fail(
-                    &last_attempted_url,
                     &art_loaded,
                     &fail_count,
                     &art_container,
                     &popover_art,
                     &app_icon_name,
+                    &request_pending,
+                    &next_retry_at,
                 ),
             }
         }
@@ -123,20 +131,25 @@ fn set_art_expanded(container: &gtk4::Box, widget: &gtk4::Widget) {
 
 /// Artwork failure path: retries up to 3 times, then falls back to an icon.
 fn art_fail(
-    last_attempted_url: &Rc<RefCell<String>>,
     art_loaded: &Rc<Cell<bool>>,
     fail_count: &Rc<Cell<u32>>,
     art_container: &gtk4::Box,
     popover_art: &gtk4::Box,
     app_icon_name: &str,
+    request_pending: &Rc<Cell<bool>>,
+    next_retry_at: &Rc<Cell<Option<Instant>>>,
 ) {
+    request_pending.set(false);
     let fails = fail_count.get() + 1;
     fail_count.set(fails);
     if fails >= 3 {
         art_loaded.set(true);
+        next_retry_at.set(None);
         set_art_fallback_icon(art_container, Some(popover_art), app_icon_name);
     } else {
-        *last_attempted_url.borrow_mut() = String::new();
+        next_retry_at.set(Some(
+            Instant::now() + Duration::from_millis(500 * u64::from(fails)),
+        ));
     }
 }
 

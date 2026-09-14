@@ -21,12 +21,13 @@ pub mod ui;
 
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use std::time::Instant;
 
 use gtk4::prelude::*;
 
 use crate::island::view::{CAPSULE_HEIGHT, PLAYER_CAPSULE_WIDTH};
 use crate::island::{IslandCtx, IslandFeature, IslandViewHandle};
-use service::{art, poll};
+use service::{art, get_player_icon_name, poll};
 use ui::{render, MediaPopover, PlayerWidgets};
 
 pub const PRIORITY: u8 = 50;
@@ -38,11 +39,18 @@ pub struct MediaPlayerFeature {
     widgets: PlayerWidgets,
     popover: RefCell<Option<MediaPopover>>,
     latest_metadata: Rc<RefCell<Option<String>>>,
-    poll_counter: Cell<u32>,
-    last_meta_key: RefCell<String>,
+    last_metadata: Option<String>,
+    cached_meta: render::PlayerMeta,
+    cached_player_active: bool,
+    last_song_key: String,
+    player_icon_name: String,
+    view_ready: Cell<bool>,
     art_loaded_for_current_song: Rc<Cell<bool>>,
     last_attempted_url: Rc<RefCell<String>>,
     fail_count: Rc<Cell<u32>>,
+    art_request_pending: Rc<Cell<bool>>,
+    next_art_retry_at: Rc<Cell<Option<Instant>>>,
+    play_icon_state: Cell<Option<bool>>,
     art_sender: tokio::sync::mpsc::UnboundedSender<art::ArtPayload>,
     art_receiver: Option<tokio::sync::mpsc::UnboundedReceiver<art::ArtPayload>>,
     is_playing: Rc<Cell<bool>>,
@@ -59,11 +67,18 @@ impl MediaPlayerFeature {
             widgets,
             popover: RefCell::new(None),
             latest_metadata,
-            poll_counter: Cell::new(0),
-            last_meta_key: RefCell::new(String::new()),
+            last_metadata: None,
+            cached_meta: render::PlayerMeta::default(),
+            cached_player_active: false,
+            last_song_key: String::new(),
+            player_icon_name: "music".to_string(),
+            view_ready: Cell::new(false),
             art_loaded_for_current_song: Rc::new(Cell::new(false)),
             last_attempted_url: Rc::new(RefCell::new(String::new())),
             fail_count: Rc::new(Cell::new(0)),
+            art_request_pending: Rc::new(Cell::new(false)),
+            next_art_retry_at: Rc::new(Cell::new(None)),
+            play_icon_state: Cell::new(None),
             art_sender,
             art_receiver: Some(art_receiver),
             is_playing,
@@ -72,12 +87,43 @@ impl MediaPlayerFeature {
 
     /// One tick: parse the cached metadata, request show/hide and refresh UI.
     fn refresh(&mut self, ctx: &IslandCtx) {
-        let metadata = self.latest_metadata.borrow().clone();
+        let metadata_changed = {
+            let latest = self.latest_metadata.borrow();
+            latest.as_deref() != self.last_metadata.as_deref()
+        };
+        let mut song_changed = false;
 
-        let (meta, player_active) = metadata
-            .as_deref()
-            .map(render::parse_metadata)
-            .unwrap_or_default();
+        if metadata_changed {
+            self.last_metadata = self.latest_metadata.borrow().clone();
+            let (meta, player_active) = self
+                .last_metadata
+                .as_deref()
+                .map(render::parse_metadata)
+                .unwrap_or_default();
+            self.cached_meta = meta;
+            self.cached_player_active = player_active;
+
+            let song_key = format!(
+                "{}|{}|{}|{}",
+                self.cached_meta.title,
+                self.cached_meta.artist,
+                self.cached_meta.player_name_raw,
+                self.cached_meta.art_url
+            );
+            song_changed = song_key != self.last_song_key;
+            if song_changed {
+                self.last_song_key = song_key;
+                self.player_icon_name = get_player_icon_name(&self.cached_meta.player_name_raw);
+                self.art_loaded_for_current_song.set(false);
+                self.art_request_pending.set(false);
+                self.next_art_retry_at.set(None);
+                self.fail_count.set(0);
+                self.last_attempted_url.borrow_mut().clear();
+            }
+        }
+
+        let meta = &self.cached_meta;
+        let player_active = self.cached_player_active;
 
         let is_playing = player_active && meta.playing;
         let popover_open = self
@@ -98,8 +144,19 @@ impl MediaPlayerFeature {
 
         self.is_playing.set(is_playing);
 
-        if should_show && ctx.is_current() {
-            self.update_player_view(&meta);
+        let art_retry_due = !self.art_loaded_for_current_song.get()
+            && !self.art_request_pending.get()
+            && self
+                .next_art_retry_at
+                .get()
+                .map(|deadline| Instant::now() >= deadline)
+                .unwrap_or(false);
+        if should_show
+            && ctx.is_current()
+            && (metadata_changed || !self.view_ready.get() || art_retry_due)
+        {
+            self.update_player_view(meta, song_changed);
+            self.view_ready.set(true);
         }
     }
 }
@@ -150,6 +207,8 @@ impl IslandFeature for MediaPlayerFeature {
         let last_attempted_url = self.last_attempted_url.clone();
         let art_loaded = self.art_loaded_for_current_song.clone();
         let fail_count = self.fail_count.clone();
+        let request_pending = self.art_request_pending.clone();
+        let next_retry_at = self.next_art_retry_at.clone();
         if let Some(rx) = self.art_receiver.take() {
             art::spawn_art_receiver(
                 rx,
@@ -158,6 +217,8 @@ impl IslandFeature for MediaPlayerFeature {
                 last_attempted_url,
                 art_loaded,
                 fail_count,
+                request_pending,
+                next_retry_at,
             );
         }
 
@@ -165,6 +226,7 @@ impl IslandFeature for MediaPlayerFeature {
     }
 
     fn on_hide(&mut self) {
+        self.view_ready.set(false);
         if let Some(popover) = self.popover.borrow().as_ref() {
             popover.popdown();
         }
