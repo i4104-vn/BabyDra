@@ -61,12 +61,30 @@ impl MediaPlayerFeature {
             }
         }
 
-        if song_changed {
+        // A view can be created after metadata has already been cached. In that
+        // case `song_changed` is false, but the widgets still contain their
+        // default placeholder text. Refresh labels whenever the view is first
+        // rendered as well as when the track changes.
+        if song_changed || !self.view_ready.get() {
+            let fallback_title = babydra_core::i18n::trans("island.unknown_title");
+            let fallback_artist = babydra_core::i18n::trans("island.unknown_artist");
+            let display_title = if meta.title.is_empty() {
+                if meta.artist.is_empty() {
+                    fallback_title.clone()
+                } else {
+                    meta.artist.clone()
+                }
+            } else {
+                meta.title.clone()
+            };
+
             let label_text = if meta.title.is_empty() {
-                if !meta.player_name_raw.is_empty() {
+                if !meta.artist.is_empty() {
+                    meta.artist.clone()
+                } else if !meta.player_name_raw.is_empty() {
                     meta.player_name_raw.clone()
                 } else {
-                    "Media Player".to_string()
+                    babydra_core::i18n::trans("island.music_player")
                 }
             } else if meta.artist.is_empty() {
                 meta.title.clone()
@@ -83,22 +101,12 @@ impl MediaPlayerFeature {
             self.widgets.track_label.set_text(&display_text);
 
             if let Some(popover) = popover {
-                let pop_title = if meta.title.is_empty() {
-                    if !meta.player_name_raw.is_empty() {
-                        meta.player_name_raw.clone()
-                    } else {
-                        "Media Player".to_string()
-                    }
-                } else {
-                    meta.title.clone()
-                };
-                let pop_artist = if meta.artist.is_empty() {
-                    "Playing Media"
+                popover.title.set_text(&display_title);
+                popover.artist.set_text(if meta.artist.is_empty() {
+                    &fallback_artist
                 } else {
                     &meta.artist
-                };
-                popover.title.set_text(&pop_title);
-                popover.artist.set_text(pop_artist);
+                });
 
                 let player_name = if !meta.player_name_raw.is_empty() {
                     let mut chars = meta.player_name_raw.chars();
