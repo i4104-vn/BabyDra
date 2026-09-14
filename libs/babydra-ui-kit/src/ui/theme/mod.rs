@@ -53,6 +53,8 @@ const SHARED_CSS: &str = concat!(
     "\n",
     include_style!("apps/screenshot.css"),
     "\n",
+    include_style!("apps/recorder.css"),
+    "\n",
     include_style!("apps/lock.css"),
     "\n",
     include_style!("apps/preview.css"),

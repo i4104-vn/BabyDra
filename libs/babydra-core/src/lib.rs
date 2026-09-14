@@ -102,6 +102,7 @@ pub use services::notification::service::{
     send_app_notif, send_notif_icon, send_notification, send_settings_notif, ActiveNotification,
     NotificationMsg,
 };
+pub use services::recording;
 pub use services::screenshot::{
     capture_fullscreen, capture_screen, get_screenshot_path, trigger_save,
 };

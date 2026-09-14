@@ -112,5 +112,9 @@ path = "kits/dialog.rs"
 name = "kits_tooltip_popover"
 path = "kits/tooltip_popover.rs"
 
+[[test]]
+name = "services_recording"
+path = "services/recording.rs"
+
 
 

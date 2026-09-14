@@ -7,6 +7,7 @@ pub mod desktop;
 pub mod explore;
 pub mod island;
 pub mod network;
+pub mod recording;
 pub mod screenshot;
 pub mod settings;
 pub mod shell;
@@ -60,6 +61,7 @@ pub use network::{
     ActiveNetworkInfo, ActiveNetworkType, EthernetActivityState, NetSpeed, NetStats,
     NetworkReceiver, NetworkSnapshot,
 };
+pub use recording::{RecordingConfig, RecordingMode, RecordingStatus};
 pub use screenshot::{Drawing, EditorState, Tool, STROKE_WIDTHS};
 pub use settings::*;
 pub use system::{
