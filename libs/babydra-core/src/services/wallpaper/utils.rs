@@ -76,10 +76,7 @@ pub fn get_video_duration(path: &Path) -> Option<f64> {
     }
 
     // 2. Fallback: try gst-discoverer-1.0
-    if let Ok(output) = Command::new("gst-discoverer-1.0")
-        .arg(path)
-        .output()
-    {
+    if let Ok(output) = Command::new("gst-discoverer-1.0").arg(path).output() {
         if output.status.success() {
             let text = String::from_utf8_lossy(&output.stdout);
             for line in text.lines() {

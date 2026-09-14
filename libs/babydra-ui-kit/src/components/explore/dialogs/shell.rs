@@ -244,4 +244,3 @@ impl DialogShell {
         entry.grab_focus();
     }
 }
-

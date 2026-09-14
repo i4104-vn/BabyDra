@@ -220,6 +220,18 @@ pub fn create_wp_thumb(size: i32) -> gtk4::Widget {
     icon_w.upcast()
 }
 
+/// Builds a wallpaper thumbnail widget from already loaded image bytes.
+/// File access and video thumbnail generation should happen outside GTK.
+pub fn create_wp_thumb_from_bytes(bytes: &[u8], size: i32) -> Option<gtk4::Widget> {
+    let square = crate::ui::image::crop_square(bytes, size)?;
+    let circle_pb = crate::ui::image::apply_circular_mask(&square);
+    let texture = gdk4::Texture::for_pixbuf(&circle_pb);
+    let img = gtk4::Image::from_paintable(Some(&texture));
+    img.set_pixel_size(size);
+    img.add_css_class("sidebar-wallpaper-thumb");
+    Some(img.upcast())
+}
+
 /// Generic colored SVG icon builder for standard icons using embedded theme assets.
 pub fn create_colored_icon(icon_name: &str, size: i32, color_hex: &str) -> gtk4::Widget {
     crate::ui::icon::get_icon_colored(icon_name, size, color_hex).upcast()

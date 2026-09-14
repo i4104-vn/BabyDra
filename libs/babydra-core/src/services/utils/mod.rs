@@ -9,8 +9,8 @@ pub use command::{
     get_home_dir, pkill, pkill_signal, run_cmd, run_cmd_bool, run_cmd_output, run_sudo, spawn_sh,
 };
 pub use fs::{
-    append_line_if_missing, ensure_dir_exists, format_bytes, get_babydra_config_dir,
-    get_home_path, read_sysfs_f64, read_sysfs_u32, read_trimmed_string, set_unix_mode,
+    append_line_if_missing, ensure_dir_exists, format_bytes, get_babydra_config_dir, get_home_path,
+    read_sysfs_f64, read_sysfs_u32, read_trimmed_string, set_unix_mode,
 };
 pub use gsettings::{
     get as gsettings_get, get_bool as gsettings_get_bool, set as gsettings_set,

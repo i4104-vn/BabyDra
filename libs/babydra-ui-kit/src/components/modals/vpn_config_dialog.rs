@@ -10,8 +10,8 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::components::modals::dialog_builder::{
-    BadgeVariant, ButtonVariant, ModernDialogBuilder, create_form_label,
-    create_modern_entry, create_modern_password_entry,
+    create_form_label, create_modern_entry, create_modern_password_entry, BadgeVariant,
+    ButtonVariant, ModernDialogBuilder,
 };
 
 #[derive(Clone)]

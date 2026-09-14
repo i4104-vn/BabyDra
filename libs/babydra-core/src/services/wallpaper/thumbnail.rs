@@ -25,21 +25,9 @@ pub fn get_or_create_thumbnail(path: &Path) -> PathBuf {
     }
 
     let _ = Command::new("ffmpeg")
-        .args([
-            "-y",
-            "-ss",
-            "00:00:00.5",
-            "-i",
-        ])
+        .args(["-y", "-ss", "00:00:00.5", "-i"])
         .arg(path)
-        .args([
-            "-update",
-            "1",
-            "-vframes",
-            "1",
-            "-vf",
-            "scale=320:-1",
-        ])
+        .args(["-update", "1", "-vframes", "1", "-vf", "scale=320:-1"])
         .arg(&thumb_path)
         .stdout(std::process::Stdio::null())
         .stderr(std::process::Stdio::null())
@@ -74,23 +62,10 @@ pub fn get_or_create_first_frame(path: &Path) -> PathBuf {
     }
 
     let _ = Command::new("ffmpeg")
-        .args([
-            "-y",
-            "-ss",
-            "00:00:00",
-            "-i",
-        ])
+        .args(["-y", "-ss", "00:00:00", "-i"])
         .arg(path)
         .args([
-            "-an",
-            "-sn",
-            "-dn",
-            "-threads",
-            "2",
-            "-vframes",
-            "1",
-            "-q:v",
-            "2",
+            "-an", "-sn", "-dn", "-threads", "2", "-vframes", "1", "-q:v", "2",
         ])
         .arg(&frame_path)
         .stdout(std::process::Stdio::null())

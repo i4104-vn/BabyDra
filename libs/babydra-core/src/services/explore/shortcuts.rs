@@ -56,11 +56,7 @@ pub fn parse_shortcut(shortcut_str: &str) -> Option<(Key, ModifierType)> {
 }
 
 /// Checks if an event's `keyval` and cleaned `modifiers` match the given target shortcut.
-pub fn matches_key(
-    keyval: Key,
-    clean_mod: ModifierType,
-    target: (Key, ModifierType),
-) -> bool {
+pub fn matches_key(keyval: Key, clean_mod: ModifierType, target: (Key, ModifierType)) -> bool {
     let (target_key, target_mod) = target;
     if clean_mod != target_mod {
         return false;
@@ -72,11 +68,7 @@ pub fn matches_key(
 }
 
 /// Checks if an event's `keyval` and raw modifier `state` match the given target shortcut.
-pub fn matches_shortcut(
-    keyval: Key,
-    state: ModifierType,
-    target: (Key, ModifierType),
-) -> bool {
+pub fn matches_shortcut(keyval: Key, state: ModifierType, target: (Key, ModifierType)) -> bool {
     let clean_mod = clean_modifiers(state);
     matches_key(keyval, clean_mod, target)
 }
@@ -119,12 +111,28 @@ mod tests {
     fn test_matches_key_and_keypad_aliases() {
         let del_target = (Key::Delete, ModifierType::empty());
         assert!(matches_key(Key::Delete, ModifierType::empty(), del_target));
-        assert!(matches_key(Key::KP_Delete, ModifierType::empty(), del_target));
-        assert!(!matches_key(Key::Delete, ModifierType::SHIFT_MASK, del_target));
+        assert!(matches_key(
+            Key::KP_Delete,
+            ModifierType::empty(),
+            del_target
+        ));
+        assert!(!matches_key(
+            Key::Delete,
+            ModifierType::SHIFT_MASK,
+            del_target
+        ));
 
         let enter_target = (Key::Return, ModifierType::empty());
-        assert!(matches_key(Key::Return, ModifierType::empty(), enter_target));
-        assert!(matches_key(Key::KP_Enter, ModifierType::empty(), enter_target));
+        assert!(matches_key(
+            Key::Return,
+            ModifierType::empty(),
+            enter_target
+        ));
+        assert!(matches_key(
+            Key::KP_Enter,
+            ModifierType::empty(),
+            enter_target
+        ));
     }
 
     #[test]

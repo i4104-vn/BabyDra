@@ -6,9 +6,7 @@ use gtk4::{Box, Button, Label, ScrolledWindow, TextView};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::components::modals::dialog_builder::{
-    BadgeVariant, ButtonVariant, ModernDialogBuilder,
-};
+use crate::components::modals::dialog_builder::{BadgeVariant, ButtonVariant, ModernDialogBuilder};
 
 #[derive(Clone)]
 pub struct VpnLogDialog {

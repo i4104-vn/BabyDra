@@ -21,7 +21,8 @@ pub fn show_conflict_dialog(
 
     let bbox = shell.add_button_row();
     shell.cancel_button(&bbox);
-    let btn_override = shell.danger_button(&bbox, &babydra_core::i18n::trans("explore.dialog_override"));
+    let btn_override =
+        shell.danger_button(&bbox, &babydra_core::i18n::trans("explore.dialog_override"));
 
     let override_cb = std::rc::Rc::new(std::cell::RefCell::new(Some(on_override)));
     let win = shell.window.clone();

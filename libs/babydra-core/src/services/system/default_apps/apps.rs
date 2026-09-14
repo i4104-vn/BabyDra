@@ -51,7 +51,8 @@ pub fn set_default_file_manager(desktop_id: &str) -> bool {
 
 /// Returns the current default terminal command/desktop ID.
 pub fn get_default_terminal() -> String {
-    if let Some(cleaned) = gsettings::get("org.gnome.desktop.default-applications.terminal", "exec") {
+    if let Some(cleaned) = gsettings::get("org.gnome.desktop.default-applications.terminal", "exec")
+    {
         if !cleaned.is_empty() {
             return format!("{}.desktop", cleaned);
         }
@@ -62,7 +63,13 @@ pub fn get_default_terminal() -> String {
 /// Returns list of detected installed terminals.
 pub fn get_available_terminals() -> Vec<AppChoice> {
     const KEYWORDS: &[&str] = &[
-        "term", "kitty", "alacritty", "foot", "ghostty", "konsole", "wezterm",
+        "term",
+        "kitty",
+        "alacritty",
+        "foot",
+        "ghostty",
+        "konsole",
+        "wezterm",
     ];
     xdg::find_matching_apps(KEYWORDS, &get_default_terminal())
 }

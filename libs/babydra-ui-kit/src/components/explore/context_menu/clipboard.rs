@@ -147,7 +147,10 @@ fn perform_execute_paste(
         .height_request(42)
         .halign(Align::Start)
         .valign(Align::Center)
-        .css_classes(vec!["modern-dialog-badge".to_string(), "badge-primary".to_string()])
+        .css_classes(vec![
+            "modern-dialog-badge".to_string(),
+            "badge-primary".to_string(),
+        ])
         .build();
     let icon_img = crate::ui::icon::get_icon(icon_name, 22);
     icon_img.set_pixel_size(22);

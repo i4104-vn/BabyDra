@@ -1,7 +1,7 @@
 use crate::models::shell::battery::BatteryInfo;
 use crate::services::system::battery::{apply_battery_saver, get_battery_info};
-use std::sync::Mutex;
 use std::sync::mpsc;
+use std::sync::Mutex;
 use std::time::Duration;
 
 static BATTERY_SENDER: Mutex<Option<mpsc::Sender<BatteryInfo>>> = Mutex::new(None);

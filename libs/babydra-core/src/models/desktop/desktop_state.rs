@@ -340,7 +340,7 @@ impl DesktopState {
             snap_to_grid(x, y, cell_w, cell_h, DEFAULT_MARGIN_X, DEFAULT_MARGIN_Y);
 
         desktop_layout::set_position(file_name, snapped_x, snapped_y);
-        
+
         let changed = self.config.auto_arrange || self.config.sort_by != "none";
         if changed {
             self.config.auto_arrange = false;
@@ -454,7 +454,7 @@ mod tests {
         assert_eq!(entries[1].display_name, "beta.txt");
         assert_eq!(entries[2].display_name, "gamma.doc");
         assert_eq!(entries[3].display_name, "zebra.txt");
-        
+
         // Sort by type (by extension, folders first)
         sort_entries(&mut entries, "type");
         assert_eq!(entries[0].display_name, "alpha_folder");

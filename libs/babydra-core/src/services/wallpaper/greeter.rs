@@ -32,17 +32,14 @@ pub fn newest_existing(paths: Vec<Option<PathBuf>>) -> Option<PathBuf> {
 
 /// Retrieves the path to the currently active lock/greeter wallpaper image.
 pub fn get_greeter_wp() -> Option<PathBuf> {
-    let is_readable = |p: &Path| -> bool {
-        std::fs::File::open(p).is_ok()
-    };
+    let is_readable = |p: &Path| -> bool { std::fs::File::open(p).is_ok() };
 
     crate::config::invalidate_cache();
     let conf = load_babydra_config();
     let bg = conf.lockscreen.background.trim_start_matches("file://");
     if !bg.is_empty() {
         let path = PathBuf::from(bg);
-        if is_readable(&path)
-            && crate::services::wallpaper::utils::is_static_wallpaper_file(&path)
+        if is_readable(&path) && crate::services::wallpaper::utils::is_static_wallpaper_file(&path)
         {
             return Some(path);
         }
@@ -59,14 +56,18 @@ pub fn get_greeter_wp() -> Option<PathBuf> {
 
     // Fallback to desktop wallpaper if it is a static image
     if let Some(wp_path) = get_wallpaper() {
-        if is_readable(&wp_path) && crate::services::wallpaper::utils::is_static_wallpaper_file(&wp_path) {
+        if is_readable(&wp_path)
+            && crate::services::wallpaper::utils::is_static_wallpaper_file(&wp_path)
+        {
             return Some(wp_path);
         }
     }
 
     let default_paths = [
         PathBuf::from("/usr/share/babydra/wallpaper.png"),
-        dirs::home_dir().unwrap_or_default().join(".babydra/wallpaper.png"),
+        dirs::home_dir()
+            .unwrap_or_default()
+            .join(".babydra/wallpaper.png"),
     ];
     for def in &default_paths {
         if is_readable(def) {
@@ -88,7 +89,9 @@ pub fn set_greeter_wp(path: &Path) -> CoreResult<()> {
     }
 
     if !crate::services::wallpaper::utils::is_static_wallpaper_file(path) {
-        return Err("Lockscreen and greeter only support static image files (PNG, JPG, JPEG, WEBP)".into());
+        return Err(
+            "Lockscreen and greeter only support static image files (PNG, JPG, JPEG, WEBP)".into(),
+        );
     }
 
     let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".to_string());
@@ -121,7 +124,10 @@ pub fn set_greeter_wp(path: &Path) -> CoreResult<()> {
     if std::fs::create_dir_all(&shared_dir).is_ok() {
         let _ = set_unix_mode(&shared_dir, 0o777);
     }
-    let ext = target_image_path.extension().and_then(|e| e.to_str()).unwrap_or("png");
+    let ext = target_image_path
+        .extension()
+        .and_then(|e| e.to_str())
+        .unwrap_or("png");
     let public_dest = shared_dir.join(format!("lock_wallpaper.{}", ext));
     if std::fs::copy(&target_image_path, &public_dest).is_ok() {
         let _ = set_unix_mode(&public_dest, 0o666);
@@ -178,7 +184,11 @@ pub fn sync_shared_assets() {
     };
 
     if let Some(wp) = get_greeter_wp() {
-        let ext = wp.extension().and_then(|e| e.to_str()).unwrap_or("png").to_string();
+        let ext = wp
+            .extension()
+            .and_then(|e| e.to_str())
+            .unwrap_or("png")
+            .to_string();
         sync(Some(wp), shared_dir.join(format!("lock_wallpaper.{}", ext)));
     }
 

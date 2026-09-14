@@ -3,13 +3,17 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
 use std::time::Duration;
 
-static MONITOR_SENDERS: Mutex<Vec<std::sync::mpsc::Sender<MonitorSnapshot>>> = Mutex::new(Vec::new());
+static MONITOR_SENDERS: Mutex<Vec<std::sync::mpsc::Sender<MonitorSnapshot>>> =
+    Mutex::new(Vec::new());
 static MONITOR_STARTED: AtomicBool = AtomicBool::new(false);
 
 pub fn get_app_resource_usage(app_id: &str, exec: &str, name: &str) -> AppResourceUsage {
     let mut tokens: Vec<String> = Vec::new();
 
-    let id_clean = app_id.strip_suffix(".desktop").unwrap_or(app_id).to_lowercase();
+    let id_clean = app_id
+        .strip_suffix(".desktop")
+        .unwrap_or(app_id)
+        .to_lowercase();
     if !id_clean.is_empty() {
         tokens.push(id_clean.clone());
         if let Some(last) = id_clean.split('.').last() {
@@ -198,7 +202,8 @@ pub fn get_gpu_usage() -> Option<f64> {
                                 let now = std::time::Instant::now();
                                 let mut guard = LAST_INTEL_SAMPLE.lock().unwrap();
                                 if let Some((last_time, last_rc6)) = *guard {
-                                    let dt_ms = now.duration_since(last_time).as_secs_f64() * 1000.0;
+                                    let dt_ms =
+                                        now.duration_since(last_time).as_secs_f64() * 1000.0;
                                     *guard = Some((now, current_rc6));
 
                                     if dt_ms >= 50.0 {
@@ -243,7 +248,10 @@ pub fn get_gpu_usage() -> Option<f64> {
 
     // NVIDIA GPU
     if let Ok(output) = std::process::Command::new("nvidia-smi")
-        .args(["--query-gpu=utilization.gpu", "--format=csv,noheader,nounits"])
+        .args([
+            "--query-gpu=utilization.gpu",
+            "--format=csv,noheader,nounits",
+        ])
         .output()
     {
         if output.status.success() {

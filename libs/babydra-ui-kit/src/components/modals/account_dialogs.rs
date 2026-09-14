@@ -6,8 +6,8 @@ use gtk4::{Box, Button, Entry, Label, PasswordEntry};
 use std::rc::Rc;
 
 use crate::components::modals::dialog_builder::{
-    BadgeVariant, ButtonVariant, ModernDialogBuilder, create_error_label, create_form_label,
-    create_modern_entry, create_modern_password_entry,
+    create_error_label, create_form_label, create_modern_entry, create_modern_password_entry,
+    BadgeVariant, ButtonVariant, ModernDialogBuilder,
 };
 
 /// Dialog for updating the user's full / display name.

@@ -18,7 +18,8 @@ pub fn show_delete_confirm(
     );
     let bbox = shell.add_button_row();
     shell.cancel_button(&bbox);
-    let btn_confirm = shell.danger_button(&bbox, &babydra_core::i18n::trans("explore.settings_delete"));
+    let btn_confirm =
+        shell.danger_button(&bbox, &babydra_core::i18n::trans("explore.settings_delete"));
 
     let confirm_cb = std::rc::Rc::new(on_confirm);
     let win = shell.window.clone();

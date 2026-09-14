@@ -50,10 +50,7 @@ pub fn set_setting(property: &str, value: &str) -> bool {
 
 /// Opens a file or URL with the platform default handler via `xdg-open`.
 pub fn open_path(path: impl AsRef<Path>) -> bool {
-    Command::new("xdg-open")
-        .arg(path.as_ref())
-        .spawn()
-        .is_ok()
+    Command::new("xdg-open").arg(path.as_ref()).spawn().is_ok()
 }
 
 /// Generic helper to search installed desktop applications matching category keywords.
@@ -73,9 +70,10 @@ pub fn find_matching_apps(keywords: &[&str], current_default: &str) -> Vec<AppCh
         let exec = app.exec.to_lowercase();
         let name_lower = app.name.to_lowercase();
 
-        let is_match = keywords.iter().any(|k| {
-            filename.contains(k) || exec.contains(k) || name_lower.contains(k)
-        }) || (!current_default.is_empty() && filename == current_default.to_lowercase());
+        let is_match = keywords
+            .iter()
+            .any(|k| filename.contains(k) || exec.contains(k) || name_lower.contains(k))
+            || (!current_default.is_empty() && filename == current_default.to_lowercase());
 
         if is_match {
             let desktop_id = app

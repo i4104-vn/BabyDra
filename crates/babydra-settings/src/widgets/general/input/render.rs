@@ -45,7 +45,12 @@ pub fn render_input_card() -> (InputWidgets, Vec<AudioDevice>) {
     if let Some(pos) = devices.iter().position(|d| d.is_default) {
         dropdown.set_selected(pos as u32);
     }
-    let dev_row = create_list_row("", &trans("settings.general_input_device"), "", Some(&dropdown));
+    let dev_row = create_list_row(
+        "",
+        &trans("settings.general_input_device"),
+        "",
+        Some(&dropdown),
+    );
     card.content.append(&dev_row);
 
     // 2. Microphone Level Slider (Panel control-slider style)
@@ -56,7 +61,8 @@ pub fn render_input_card() -> (InputWidgets, Vec<AudioDevice>) {
     vol_box.set_margin_top(4);
     vol_box.set_margin_bottom(4);
 
-    let (vol_hdr, val_label) = create_slider_header(&trans("settings.general_input_volume"), cur_vol);
+    let (vol_hdr, val_label) =
+        create_slider_header(&trans("settings.general_input_volume"), cur_vol);
     vol_box.append(&vol_hdr);
 
     let row_box = GtkBox::new(Orientation::Horizontal, 8);

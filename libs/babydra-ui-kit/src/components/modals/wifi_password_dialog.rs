@@ -6,8 +6,8 @@ use gtk4::{Box, Button, Entry, Label, Orientation, PasswordEntry};
 use std::rc::Rc;
 
 use crate::components::modals::dialog_builder::{
-    BadgeVariant, ButtonVariant, ModernDialogBuilder, create_error_label,
-    create_form_label, create_modern_entry, create_modern_password_entry,
+    create_error_label, create_form_label, create_modern_entry, create_modern_password_entry,
+    BadgeVariant, ButtonVariant, ModernDialogBuilder,
 };
 
 pub struct WifiPasswordDialog {
@@ -57,7 +57,10 @@ impl WifiPasswordDialog {
 
         // Get title/subtitle labels for dynamic updates
         let ssid_lbl = dialog.title_label().clone();
-        let sub_lbl = dialog.subtitle_label().cloned().unwrap_or_else(|| Label::new(None));
+        let sub_lbl = dialog
+            .subtitle_label()
+            .cloned()
+            .unwrap_or_else(|| Label::new(None));
 
         let cancel_btn = Button::with_label(&trans("common.cancel"));
         let connect_btn = Button::with_label(&trans("common.connect"));

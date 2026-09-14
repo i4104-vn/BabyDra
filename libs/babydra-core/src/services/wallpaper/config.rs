@@ -102,7 +102,9 @@ pub fn get_wallpaper() -> Option<PathBuf> {
                     p.is_file()
                         && matches!(
                             WallpaperKind::from_path(p),
-                            WallpaperKind::StaticImage | WallpaperKind::Video | WallpaperKind::AnimatedGif
+                            WallpaperKind::StaticImage
+                                | WallpaperKind::Video
+                                | WallpaperKind::AnimatedGif
                         )
                 })
                 .collect();
@@ -163,7 +165,10 @@ pub fn get_local_wallpapers() -> Vec<PathBuf> {
             let path = entry.path();
             if path.is_file() {
                 let kind = WallpaperKind::from_path(&path);
-                if matches!(kind, WallpaperKind::StaticImage | WallpaperKind::Video | WallpaperKind::AnimatedGif) {
+                if matches!(
+                    kind,
+                    WallpaperKind::StaticImage | WallpaperKind::Video | WallpaperKind::AnimatedGif
+                ) {
                     files.push(path);
                 }
             }

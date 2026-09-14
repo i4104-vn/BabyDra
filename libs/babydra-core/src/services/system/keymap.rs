@@ -168,7 +168,10 @@ pub fn save_shortcuts(shortcuts: &[Shortcut]) -> CoreResult<()> {
 /// letting `babydra-keymap` execute the configured commands.
 fn sync_labwc_swallow(shortcuts: &[Shortcut]) {
     let home = std::env::var("HOME").unwrap_or_default();
-    let rc_path = PathBuf::from(home).join(".config").join("labwc").join("rc.xml");
+    let rc_path = PathBuf::from(home)
+        .join(".config")
+        .join("labwc")
+        .join("rc.xml");
     let Ok(content) = fs::read_to_string(&rc_path) else {
         return;
     };
@@ -210,4 +213,3 @@ fn sync_labwc_swallow(shortcuts: &[Shortcut]) {
             .status();
     }
 }
-

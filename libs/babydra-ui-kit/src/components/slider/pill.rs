@@ -91,7 +91,13 @@ impl PillSlider {
 
                 // Knob drop shadow
                 cr.set_source_rgba(0.0, 0.0, 0.0, 0.25);
-                cr.arc(knob_x, knob_y + 1.0, knob_r + 1.0, 0.0, std::f64::consts::TAU);
+                cr.arc(
+                    knob_x,
+                    knob_y + 1.0,
+                    knob_r + 1.0,
+                    0.0,
+                    std::f64::consts::TAU,
+                );
                 let _ = cr.fill();
 
                 // White circle knob
@@ -103,7 +109,11 @@ impl PillSlider {
 
         // Gesture calculation helper: maps cursor x coordinate to value
         let calc_val = move |x: f64, width: f64, height: f64| -> f64 {
-            let radius = if height > 0.0 { (height / 2.0).min(width / 2.0) } else { 12.0 };
+            let radius = if height > 0.0 {
+                (height / 2.0).min(width / 2.0)
+            } else {
+                12.0
+            };
             let usable_w = width - 2.0 * radius;
             if usable_w <= 0.0 {
                 return min;
@@ -158,7 +168,9 @@ impl PillSlider {
         };
 
         // Internal scroll controller
-        slider.container.add_controller(slider.create_scroll_controller());
+        slider
+            .container
+            .add_controller(slider.create_scroll_controller());
 
         slider
     }
@@ -192,7 +204,11 @@ impl PillSlider {
         scroll.connect_scroll(move |_, _dx, dy| {
             let cur = value.get();
             let delta = if dy.abs() < 0.2 {
-                if dy < 0.0 { step } else { -step }
+                if dy < 0.0 {
+                    step
+                } else {
+                    -step
+                }
             } else {
                 (-dy * step).round()
             };

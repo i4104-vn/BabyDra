@@ -44,7 +44,11 @@ impl WorkspaceReceiver {
         Self { rx }
     }
 
-    pub fn attach<F: FnMut(WorkspaceSnapshot) -> glib::ControlFlow + 'static>(self, _context: Option<&()>, mut func: F) {
+    pub fn attach<F: FnMut(WorkspaceSnapshot) -> glib::ControlFlow + 'static>(
+        self,
+        _context: Option<&()>,
+        mut func: F,
+    ) {
         glib::timeout_add_local(std::time::Duration::from_millis(150), move || {
             let mut latest = None;
             while let Ok(snap) = self.rx.try_recv() {
@@ -58,4 +62,3 @@ impl WorkspaceReceiver {
         });
     }
 }
-

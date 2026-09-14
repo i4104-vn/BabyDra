@@ -1,4 +1,6 @@
-pub use crate::models::network::{ActiveNetworkInfo, ActiveNetworkType, NetSpeed, NetStats, NetworkSnapshot};
+pub use crate::models::network::{
+    ActiveNetworkInfo, ActiveNetworkType, NetSpeed, NetStats, NetworkSnapshot,
+};
 use crate::services::system::wifi::client::{
     ActiveConnectionProxyBlocking, DeviceProxyBlocking, NetworkManagerProxyBlocking,
 };
@@ -7,7 +9,8 @@ use std::sync::Mutex;
 use std::time::{Duration, Instant};
 use zbus::blocking::Connection;
 
-static NETWORK_SENDERS: Mutex<Vec<std::sync::mpsc::Sender<NetworkSnapshot>>> = Mutex::new(Vec::new());
+static NETWORK_SENDERS: Mutex<Vec<std::sync::mpsc::Sender<NetworkSnapshot>>> =
+    Mutex::new(Vec::new());
 static NETWORK_STARTED: AtomicBool = AtomicBool::new(false);
 static LAST_NET_STATS: Mutex<Option<(Instant, NetStats)>> = Mutex::new(None);
 
@@ -193,11 +196,7 @@ pub fn get_active_network_info() -> ActiveNetworkInfo {
             }
 
             if !dev.is_empty() && dev != "lo" {
-                let ip_address = if src.is_empty() {
-                    get_local_ip()
-                } else {
-                    src
-                };
+                let ip_address = if src.is_empty() { get_local_ip() } else { src };
                 if dev.starts_with("wl") {
                     let (_, wifi_ssid) = crate::services::system::wifi::get_wifi_state();
                     let name = if !wifi_ssid.is_empty()

@@ -51,9 +51,7 @@ pub fn set_avatar(path: &Path) -> CoreResult<()> {
 
 /// Retrieves the path to the currently active avatar file.
 pub fn get_avatar_path() -> Option<PathBuf> {
-    let is_readable = |p: &Path| -> bool {
-        std::fs::File::open(p).is_ok()
-    };
+    let is_readable = |p: &Path| -> bool { std::fs::File::open(p).is_ok() };
 
     let conf = crate::config::load_babydra_config();
     if !conf.lockscreen.avatar.is_empty() {

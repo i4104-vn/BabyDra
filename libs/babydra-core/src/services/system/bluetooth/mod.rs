@@ -60,22 +60,19 @@ pub fn get_connected_bt_devices() -> Vec<BtConnectedDevice> {
                                 })
                                 .unwrap_or_else(|| mac.clone());
 
-                            let battery = interfaces.get("org.bluez.Battery1").and_then(|bat_props| {
-                                bat_props.get("Percentage").and_then(|v| match v.deref() {
-                                    Value::U8(b) => Some(*b),
-                                    Value::I16(n) => Some(*n as u8),
-                                    Value::U16(n) => Some(*n as u8),
-                                    Value::I32(n) => Some(*n as u8),
-                                    Value::U32(n) => Some(*n as u8),
-                                    _ => None,
-                                })
-                            });
+                            let battery =
+                                interfaces.get("org.bluez.Battery1").and_then(|bat_props| {
+                                    bat_props.get("Percentage").and_then(|v| match v.deref() {
+                                        Value::U8(b) => Some(*b),
+                                        Value::I16(n) => Some(*n as u8),
+                                        Value::U16(n) => Some(*n as u8),
+                                        Value::I32(n) => Some(*n as u8),
+                                        Value::U32(n) => Some(*n as u8),
+                                        _ => None,
+                                    })
+                                });
 
-                            connected_devs.push(BtConnectedDevice {
-                                mac,
-                                name,
-                                battery,
-                            });
+                            connected_devs.push(BtConnectedDevice { mac, name, battery });
                         }
                     }
                 }

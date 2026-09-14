@@ -8,7 +8,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
 use std::time::Duration;
 
-static WORKSPACE_SENDERS: Mutex<Vec<std::sync::mpsc::Sender<WorkspaceSnapshot>>> = Mutex::new(Vec::new());
+static WORKSPACE_SENDERS: Mutex<Vec<std::sync::mpsc::Sender<WorkspaceSnapshot>>> =
+    Mutex::new(Vec::new());
 static WORKSPACE_STARTED: AtomicBool = AtomicBool::new(false);
 static LAST_SIGNATURE: Mutex<String> = Mutex::new(String::new());
 

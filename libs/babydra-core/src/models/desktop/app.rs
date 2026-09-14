@@ -53,4 +53,3 @@ pub struct AppChoice {
     pub desktop_id: String,
     pub name: String,
 }
-

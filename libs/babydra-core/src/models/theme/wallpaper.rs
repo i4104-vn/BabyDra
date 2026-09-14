@@ -46,7 +46,10 @@ pub enum WallpaperKind {
 
 impl WallpaperKind {
     pub fn from_path(path: &std::path::Path) -> Self {
-        let ext = path.extension().and_then(|e| e.to_str()).map(|s| s.to_lowercase());
+        let ext = path
+            .extension()
+            .and_then(|e| e.to_str())
+            .map(|s| s.to_lowercase());
         match ext.as_deref() {
             Some("mp4" | "webm" | "mkv") => WallpaperKind::Video,
             Some("gif") => WallpaperKind::AnimatedGif,

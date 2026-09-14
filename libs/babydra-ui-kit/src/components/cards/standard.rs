@@ -107,7 +107,11 @@ pub fn create_collapsible_card(
     header_box.append(&text_box);
 
     let arrow_icon = crate::ui::icon::get_icon(
-        if initially_expanded { "down" } else { "forward" },
+        if initially_expanded {
+            "down"
+        } else {
+            "forward"
+        },
         14,
     );
     arrow_icon.add_css_class("card-collapse-arrow");
@@ -149,5 +153,3 @@ pub fn create_collapsible_card(
         header_button,
     }
 }
-
-

@@ -50,11 +50,8 @@ impl ClipboardEntry {
                     let cleaned: Vec<String> = raw_lines.into_iter().map(clean_line).collect();
                     (cleaned.join("\n"), 0)
                 } else {
-                    let cleaned: Vec<String> = raw_lines[..3]
-                        .iter()
-                        .copied()
-                        .map(clean_line)
-                        .collect();
+                    let cleaned: Vec<String> =
+                        raw_lines[..3].iter().copied().map(clean_line).collect();
                     let excess = total - 3;
                     (cleaned.join("\n"), excess)
                 }

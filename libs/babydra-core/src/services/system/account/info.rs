@@ -91,12 +91,7 @@ pub fn change_user_password(
 
     // Step 2: Update password via `sudo chpasswd`
     let chpasswd_line = format!("{}:{}\n", username, new_pwd);
-    crate::services::utils::run_sudo(
-        current_pwd,
-        "chpasswd",
-        &[],
-        Some(chpasswd_line.as_bytes()),
-    )
+    crate::services::utils::run_sudo(current_pwd, "chpasswd", &[], Some(chpasswd_line.as_bytes()))
 }
 
 /// Validates that a hostname conforms to RFC 1123 standards.
@@ -152,12 +147,7 @@ pub fn update_system_hostname(new_hostname: &str, sudo_password: &str) -> Result
     let trimmed = new_hostname.trim();
     validate_hostname(trimmed)?;
 
-    crate::services::utils::run_sudo(
-        sudo_password,
-        "hostnamectl",
-        &["hostname", trimmed],
-        None,
-    )
+    crate::services::utils::run_sudo(sudo_password, "hostnamectl", &["hostname", trimmed], None)
 }
 
 #[cfg(test)]

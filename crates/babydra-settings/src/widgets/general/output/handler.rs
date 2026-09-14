@@ -2,7 +2,9 @@
 
 use super::render::OutputWidgets;
 use babydra_core::models::volume::AudioDevice;
-use babydra_core::services::system::volume::{is_muted, select_audio_device, set_muted, set_volume};
+use babydra_core::services::system::volume::{
+    is_muted, select_audio_device, set_muted, set_volume,
+};
 use gtk4::prelude::*;
 use std::cell::Cell;
 use std::rc::Rc;

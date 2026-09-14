@@ -5,5 +5,11 @@ pub fn set_color_scheme(dark: bool) -> std::io::Result<std::process::Output> {
     let _ = crate::services::system::theme::sync_labwc_titlebar_theme(dark);
     let _ = crate::services::system::theme::sync_kitty_theme(dark);
     let scheme = if dark { "prefer-dark" } else { "prefer-light" };
-    run_cmd_output(&["gsettings", "set", "org.gnome.desktop.interface", "color-scheme", scheme])
+    run_cmd_output(&[
+        "gsettings",
+        "set",
+        "org.gnome.desktop.interface",
+        "color-scheme",
+        scheme,
+    ])
 }

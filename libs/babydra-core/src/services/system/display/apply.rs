@@ -57,12 +57,21 @@ pub fn apply_display_configs(monitors: &[MonitorConfig]) -> CoreResult<()> {
                         if let Some(modes) = mon_val.get("modes").and_then(|v| v.as_array()) {
                             let mut best_match: Option<(f64, f64)> = None;
                             for mode in modes {
-                                let w = mode.get("width").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
-                                let h = mode.get("height").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
-                                let refresh = mode.get("refresh").and_then(|v| v.as_f64()).unwrap_or(0.0);
-                                if w == m.resolution_width && h == m.resolution_height && refresh > 0.0 {
+                                let w =
+                                    mode.get("width").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
+                                let h =
+                                    mode.get("height").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
+                                let refresh =
+                                    mode.get("refresh").and_then(|v| v.as_f64()).unwrap_or(0.0);
+                                if w == m.resolution_width
+                                    && h == m.resolution_height
+                                    && refresh > 0.0
+                                {
                                     let diff = (refresh - m.refresh_rate).abs();
-                                    if diff < 1.0 && best_match.map_or(true, |(best_diff, _)| diff < best_diff) {
+                                    if diff < 1.0
+                                        && best_match
+                                            .map_or(true, |(best_diff, _)| diff < best_diff)
+                                    {
                                         best_match = Some((diff, refresh));
                                     }
                                 }
@@ -81,9 +90,15 @@ pub fn apply_display_configs(monitors: &[MonitorConfig]) -> CoreResult<()> {
 
         let primary_mode = exact_mode_str.unwrap_or_else(|| {
             if m.refresh_rate.fract().abs() < 0.001 {
-                format!("{}x{}@{:.0}Hz", m.resolution_width, m.resolution_height, m.refresh_rate)
+                format!(
+                    "{}x{}@{:.0}Hz",
+                    m.resolution_width, m.resolution_height, m.refresh_rate
+                )
             } else {
-                format!("{}x{}@{:.3}Hz", m.resolution_width, m.resolution_height, m.refresh_rate)
+                format!(
+                    "{}x{}@{:.3}Hz",
+                    m.resolution_width, m.resolution_height, m.refresh_rate
+                )
             }
         });
 

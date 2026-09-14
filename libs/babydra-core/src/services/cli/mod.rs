@@ -1,5 +1,5 @@
-pub use crate::models::cli::{CliAction, CliOptions, PageId};
 use crate::config::load_babydra_config;
+pub use crate::models::cli::{CliAction, CliOptions, PageId};
 use crate::models::system::PerformanceProfile;
 use crate::services::config::pages::{is_valid_page, normalize_page_name};
 use crate::services::system::battery::{apply_battery_saver, get_battery_info};
@@ -11,7 +11,13 @@ use std::io::BufRead;
 
 pub fn parse_cli_args(args: &[String]) -> (bool, CliOptions) {
     if args.len() < 2 {
-        return (false, CliOptions { page: None, action: None });
+        return (
+            false,
+            CliOptions {
+                page: None,
+                action: None,
+            },
+        );
     }
 
     let mut target_page: Option<PageId> = None;
@@ -35,7 +41,13 @@ pub fn parse_cli_args(args: &[String]) -> (bool, CliOptions) {
                     i += 1;
                 } else {
                     eprintln!("Usage: --set-power-profile <normal|balanced|performance>");
-                    return (true, CliOptions { page: None, action: None });
+                    return (
+                        true,
+                        CliOptions {
+                            page: None,
+                            action: None,
+                        },
+                    );
                 }
             }
             "--apply-all-settings" => {
@@ -52,7 +64,11 @@ pub fn parse_cli_args(args: &[String]) -> (bool, CliOptions) {
                 let stdin = std::io::stdin();
                 let _ = stdin.lock().read_line(&mut pwd);
                 let pwd_trimmed = pwd.trim();
-                let pwd_opt = if pwd_trimmed.is_empty() { None } else { Some(pwd_trimmed.to_string()) };
+                let pwd_opt = if pwd_trimmed.is_empty() {
+                    None
+                } else {
+                    Some(pwd_trimmed.to_string())
+                };
                 action = Some(CliAction::RunBackgroundUpdate(pwd_opt));
             }
             "--help" | "-h" => {
@@ -91,7 +107,13 @@ pub fn parse_cli_args(args: &[String]) -> (bool, CliOptions) {
     }
 
     let should_exit = action.is_some();
-    (should_exit, CliOptions { page: target_page, action })
+    (
+        should_exit,
+        CliOptions {
+            page: target_page,
+            action,
+        },
+    )
 }
 
 fn parse_page_name(name: &str) -> Option<PageId> {

@@ -209,8 +209,6 @@ impl ModernDialogBuilder {
         (header_box, title_lbl, subtitle_lbl)
     }
 
-    
-
     /// Get the card widget for adding custom content
     pub fn card(&self) -> &Box {
         &self.card

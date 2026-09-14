@@ -5,7 +5,12 @@ use super::shell::DialogShell;
 /// Presents a simple error/alert modal dialog with a Close/OK button.
 pub fn show_alert_dialog(title: &str, message: &str, parent: Option<&impl IsA<gtk4::Window>>) {
     let shell = DialogShell::new(title, 380, 160, 12, parent);
-    shell.add_header("info", super::shell::BadgeStyle::Primary, title, Some(message));
+    shell.add_header(
+        "info",
+        super::shell::BadgeStyle::Primary,
+        title,
+        Some(message),
+    );
     let bbox = shell.add_button_row();
     let btn_ok = shell.action_button(&bbox, &babydra_core::i18n::trans("explore.settings_close"));
 

@@ -31,7 +31,9 @@ pub fn play_test_alert_sound() {
         "/usr/share/sounds/freedesktop/stereo/message.oga",
     ];
 
-    let found_path = sound_paths.iter().find(|p| std::path::Path::new(p).exists());
+    let found_path = sound_paths
+        .iter()
+        .find(|p| std::path::Path::new(p).exists());
 
     if let Some(path) = found_path {
         // Try pw-play first, then paplay

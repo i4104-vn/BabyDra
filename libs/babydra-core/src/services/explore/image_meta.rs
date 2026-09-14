@@ -116,7 +116,8 @@ fn read_dpi_from_jpeg(bytes: &[u8]) -> Option<u32> {
         let seg_len = u16::from_be_bytes(bytes[offset + 2..offset + 4].try_into().ok()?) as usize;
         if marker == 0xE0 {
             let data_offset = offset + 4;
-            if data_offset + 10 <= bytes.len() && &bytes[data_offset..data_offset + 5] == b"JFIF\0" {
+            if data_offset + 10 <= bytes.len() && &bytes[data_offset..data_offset + 5] == b"JFIF\0"
+            {
                 let units = bytes[data_offset + 7];
                 let x_density =
                     u16::from_be_bytes(bytes[data_offset + 8..data_offset + 10].try_into().ok()?);
@@ -244,19 +245,17 @@ pub fn read_image_metadata(path: &Path) -> Option<ImageMetadata> {
 
     // 4. EXIF photography parameters
     let exif_data = crate::services::exif::read_exif(path);
-    let camera_model = exif_data.as_ref().and_then(|e| {
-        match (&e.make, &e.model) {
-            (Some(make), Some(model)) => {
-                if model.to_lowercase().starts_with(&make.to_lowercase()) {
-                    Some(model.clone())
-                } else {
-                    Some(format!("{} {}", make, model))
-                }
+    let camera_model = exif_data.as_ref().and_then(|e| match (&e.make, &e.model) {
+        (Some(make), Some(model)) => {
+            if model.to_lowercase().starts_with(&make.to_lowercase()) {
+                Some(model.clone())
+            } else {
+                Some(format!("{} {}", make, model))
             }
-            (None, Some(model)) => Some(model.clone()),
-            (Some(make), None) => Some(make.clone()),
-            (None, None) => None,
         }
+        (None, Some(model)) => Some(model.clone()),
+        (Some(make), None) => Some(make.clone()),
+        (None, None) => None,
     });
 
     let lens_model = exif_data.as_ref().and_then(|e| e.lens_model.clone());

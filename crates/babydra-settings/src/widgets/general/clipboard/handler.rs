@@ -33,7 +33,9 @@ fn show_capture_dialog(parent: &Window, combo_btn: &Button) {
     babydra_core::services::system::keymap::pause_shortcuts();
 
     let window = Window::builder()
-        .title(&babydra_core::i18n::trans("settings.general_clipboard_shortcut"))
+        .title(&babydra_core::i18n::trans(
+            "settings.general_clipboard_shortcut",
+        ))
         .transient_for(parent)
         .modal(true)
         .resizable(false)
@@ -56,7 +58,10 @@ fn show_capture_dialog(parent: &Window, combo_btn: &Button) {
         .height_request(46)
         .halign(gtk4::Align::Center)
         .valign(gtk4::Align::Center)
-        .css_classes(vec!["modern-dialog-badge".to_string(), "badge-primary".to_string()])
+        .css_classes(vec![
+            "modern-dialog-badge".to_string(),
+            "badge-primary".to_string(),
+        ])
         .build();
     let icon_badge = babydra_ui_kit::ui::icon::get_icon("paste", 22);
     icon_badge.set_pixel_size(22);

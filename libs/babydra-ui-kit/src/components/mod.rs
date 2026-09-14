@@ -17,7 +17,7 @@ pub use buttons::{
     create_accent_button, create_battery_icon, create_button, create_color_btn,
     create_colored_icon, create_fab, create_icon_btn, create_icon_button, create_sidebar_btn,
     create_sidebar_wbtn, create_square_tile, create_toggle_tile, create_vpn_icon, create_wifi_icon,
-    create_wp_thumb, update_toggle_state,
+    create_wp_thumb, create_wp_thumb_from_bytes, update_toggle_state,
 };
 pub use cards::{
     create_card, create_collapsible_card, create_css_card, create_scroll_list,

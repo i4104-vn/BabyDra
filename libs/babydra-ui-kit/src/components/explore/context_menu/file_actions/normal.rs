@@ -77,18 +77,14 @@ pub fn show_for_file_normal(
             } else {
                 trans("desktop.set_as_wallpaper")
             };
-            builder = builder.item(
-                &label,
-                "folder-pictures",
-                move || {
-                    let mode = if babydra_core::wallpaper::is_live_wallpaper_file(&path_c) {
-                        babydra_core::wallpaper::WallpaperMode::Live
-                    } else {
-                        babydra_core::wallpaper::WallpaperMode::Static
-                    };
-                    let _ = babydra_core::wallpaper::set_wallpaper_with_mode(&path_c, mode);
-                },
-            );
+            builder = builder.item(&label, "folder-pictures", move || {
+                let mode = if babydra_core::wallpaper::is_live_wallpaper_file(&path_c) {
+                    babydra_core::wallpaper::WallpaperMode::Live
+                } else {
+                    babydra_core::wallpaper::WallpaperMode::Static
+                };
+                let _ = babydra_core::wallpaper::set_wallpaper_with_mode(&path_c, mode);
+            });
         }
     }
 
@@ -108,7 +104,6 @@ pub fn show_for_file_normal(
             babydra_core::services::explore::spawn_explore_window(&path_to_open);
         },
     );
-
 
     // 4. Copy location
     let target_paths_loc = target_paths.clone();

@@ -7,6 +7,7 @@ pub mod thumbnail;
 pub mod utils;
 
 // Re-exports for backward compatibility
+pub use crate::models::theme::wallpaper::{MonitorResolution, WallpaperKind, WallpaperMode};
 pub use avatar::{get_avatar_bytes, get_avatar_path, set_avatar};
 pub use config::{
     apply_wallpaper, get_live_wallpapers, get_local_wallpapers, get_static_wallpapers,
@@ -17,8 +18,7 @@ pub use greeter::{
     set_greeter_wp, sync_shared_assets,
 };
 pub use thumbnail::{get_or_create_first_frame, get_or_create_thumbnail};
-pub use crate::models::theme::wallpaper::{MonitorResolution, WallpaperKind, WallpaperMode};
 pub use utils::{
-    get_video_duration, is_gif_file, is_gstreamer_plugin_available,
-    is_live_wallpaper_file, is_static_wallpaper_file, is_video_file,
+    get_video_duration, is_gif_file, is_gstreamer_plugin_available, is_live_wallpaper_file,
+    is_static_wallpaper_file, is_video_file,
 };

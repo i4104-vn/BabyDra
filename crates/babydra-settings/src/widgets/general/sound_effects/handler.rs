@@ -8,9 +8,11 @@ use gtk4::prelude::*;
 
 /// Connects signals for Sound Effects widgets.
 pub fn wire_events(widgets: &SoundEffectsWidgets) {
-    widgets.event_sounds_switch.connect_state_set(move |active| {
-        set_event_sounds_enabled(active);
-    });
+    widgets
+        .event_sounds_switch
+        .connect_state_set(move |active| {
+            set_event_sounds_enabled(active);
+        });
 
     widgets
         .feedback_sounds_switch

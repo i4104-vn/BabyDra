@@ -211,21 +211,13 @@ pub fn build_info_grid(parent_vbox: &Box, target_paths: &[PathBuf]) {
                 }
 
                 if let Some(ref cam) = img_meta.camera_model {
-                    let _ = create_prop_row(
-                        &image_card,
-                        "camera",
-                        &trans("explore.prop_camera"),
-                        cam,
-                    );
+                    let _ =
+                        create_prop_row(&image_card, "camera", &trans("explore.prop_camera"), cam);
                 }
 
                 if let Some(ref exp) = img_meta.exposure {
-                    let _ = create_prop_row(
-                        &image_card,
-                        "clock",
-                        &trans("explore.prop_exposure"),
-                        exp,
-                    );
+                    let _ =
+                        create_prop_row(&image_card, "clock", &trans("explore.prop_exposure"), exp);
                 }
 
                 if let Some(ref date) = img_meta.date_taken {

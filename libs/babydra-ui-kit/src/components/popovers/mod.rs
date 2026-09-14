@@ -156,11 +156,7 @@ impl TooltipPopover {
     }
 
     /// Attaches hover motion controllers to the anchor widget and popover content.
-    pub fn attach_hover(
-        &self,
-        anchor: &impl IsA<gtk4::Widget>,
-        update_fn: Option<Rc<dyn Fn()>>,
-    ) {
+    pub fn attach_hover(&self, anchor: &impl IsA<gtk4::Widget>, update_fn: Option<Rc<dyn Fn()>>) {
         let is_hovered = Rc::new(RefCell::new(false));
         let suppress_fn = self.suppress_fn.clone();
 
@@ -261,11 +257,7 @@ impl TooltipPopover {
     }
 
     /// Attaches a card tooltip where rows are automatically parsed from multi-line text.
-    pub fn attach_card_text(
-        anchor: &impl IsA<gtk4::Widget>,
-        title: &str,
-        text: &str,
-    ) -> Self {
+    pub fn attach_card_text(anchor: &impl IsA<gtk4::Widget>, title: &str, text: &str) -> Self {
         let rows = Self::parse_rows(text);
         let card = Self::build_card(title, &rows);
         let tooltip = Self::new(anchor, gtk4::PositionType::Bottom);

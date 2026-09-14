@@ -7,10 +7,7 @@ use std::process::Command;
 /// Returns a list of (app_id, window_title) pairs.
 pub fn get_running_windows() -> Vec<(String, String)> {
     let mut running_windows = Vec::new();
-    if let Ok(output) = Command::new("wlrctl")
-        .args(&["toplevel", "list"])
-        .output()
-    {
+    if let Ok(output) = Command::new("wlrctl").args(&["toplevel", "list"]).output() {
         let stdout = String::from_utf8_lossy(&output.stdout);
         for line in stdout.lines() {
             if let Some(pos) = line.find(':') {

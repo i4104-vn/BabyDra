@@ -13,7 +13,11 @@ pub fn show_rename_dialog(
     parent: Option<&impl IsA<gtk4::Window>>,
 ) {
     let is_dir = path.is_dir();
-    let initial_name = path.file_name().unwrap_or_default().to_string_lossy().into_owned();
+    let initial_name = path
+        .file_name()
+        .unwrap_or_default()
+        .to_string_lossy()
+        .into_owned();
     let initial_icon = if is_dir {
         "folder".to_string()
     } else {
@@ -27,10 +31,7 @@ pub fn show_rename_dialog(
         &trans("explore.dialog_rename_title"),
         Some(&trans("explore.dialog_rename_label")),
     );
-    let entry = shell.add_entry(
-        Some(&initial_name),
-        false,
-    );
+    let entry = shell.add_entry(Some(&initial_name), false);
     let lbl_error = shell.add_error_label();
     let bbox = shell.add_button_row();
     shell.cancel_button(&bbox);

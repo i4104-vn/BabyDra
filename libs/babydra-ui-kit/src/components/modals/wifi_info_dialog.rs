@@ -5,9 +5,7 @@ use babydra_core::models::wifi::{WifiConfig, WifiNetwork};
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Label, Orientation, ScrolledWindow};
 
-use crate::components::modals::dialog_builder::{
-    BadgeVariant, ButtonVariant, ModernDialogBuilder,
-};
+use crate::components::modals::dialog_builder::{BadgeVariant, ButtonVariant, ModernDialogBuilder};
 
 pub struct WifiInfoDialog {
     pub container: Box,

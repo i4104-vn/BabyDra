@@ -29,7 +29,9 @@ fn valid_pages() -> &'static Vec<PageId> {
 pub fn normalize_page_name(name: &str) -> String {
     match name.trim().to_lowercase().as_str() {
         "wallpaper" | "wallpapers" | "theme" | "themes" | "appearance" => "appearance".to_string(),
-        "display" | "displays" | "screen" | "screens" | "monitor" | "monitors" => "displays".to_string(),
+        "display" | "displays" | "screen" | "screens" | "monitor" | "monitors" => {
+            "displays".to_string()
+        }
         "wifi" | "wlan" | "network" | "networks" => "wifi".to_string(),
         "bluetooth" | "bt" => "bluetooth".to_string(),
         "vpn" | "shield" => "vpn".to_string(),
@@ -41,7 +43,9 @@ pub fn normalize_page_name(name: &str) -> String {
         "cert" | "certs" | "certificates" | "ssl" => "certificates".to_string(),
         "host" | "hosts" => "hosts".to_string(),
         "system_update" | "update" | "updates" => "system_update".to_string(),
-        "recovery" | "reset" | "factory-reset" | "factory_reset" | "restore" => "recovery".to_string(),
+        "recovery" | "reset" | "factory-reset" | "factory_reset" | "restore" => {
+            "recovery".to_string()
+        }
         "system" | "about" | "info" => "system".to_string(),
         "general" | "generic" => "general".to_string(),
         other => other.to_string(),

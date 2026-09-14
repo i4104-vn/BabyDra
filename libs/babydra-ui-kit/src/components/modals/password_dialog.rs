@@ -6,7 +6,7 @@ use gtk4::{Box, Button, Label, PasswordEntry};
 use std::rc::Rc;
 
 use crate::components::modals::dialog_builder::{
-    BadgeVariant, ButtonVariant, ModernDialogBuilder, create_modern_password_entry,
+    create_modern_password_entry, BadgeVariant, ButtonVariant, ModernDialogBuilder,
 };
 
 #[derive(Clone)]
