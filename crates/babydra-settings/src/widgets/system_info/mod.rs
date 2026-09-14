@@ -1,26 +1,14 @@
-//! System specifications overview and update tab.
+//! About BabyDra page - system information and donation.
 
 use babydra_core::models::SystemInfoData;
 use babydra_core::services::system::gpu::get_gpu_info;
 use sysinfo::System;
 
-mod handler;
 mod render;
 
-/// Creates a new `system widget`.
+/// Creates a new `about widget`.
 pub fn create_system_widget() -> gtk4::Widget {
-    let widgets = render::build_system_ui(
-        "BabyDra Linux",
-        "Linux",
-        "...",
-        "Loading...",
-        "Loading...",
-        "...",
-        "...",
-        "...",
-    );
-
-    handler::wire_events(&widgets);
+    let widgets = render::build_about_ui();
 
     let labels = widgets.labels.clone();
 
@@ -68,7 +56,10 @@ pub fn create_system_widget() -> gtk4::Widget {
                 "BabyDra Linux"
             };
             labels.os_label.set_text(display_host);
-            labels.host_row_lbl.set_text(display_host);
+            labels.cpu_lbl.set_text(&data.cpu_model);
+            labels.mem_lbl.set_text(&data.memory_text);
+            labels.gpu_lbl.set_text(&data.gpu_info);
+            labels.arch_lbl.set_text(&data.cpu_arch);
 
             let sub_title = format!(
                 "{} ({}) • Kernel {}",
@@ -79,11 +70,6 @@ pub fn create_system_widget() -> gtk4::Widget {
             let formatted_uptime =
                 babydra_core::i18n::trans("settings.up_time").replace("{}", &data.uptime_text);
             labels.uptime_lbl.set_text(&formatted_uptime);
-
-            labels.kernel_lbl.set_text(&data.kernel_version);
-            labels.cpu_lbl.set_text(&data.cpu_model);
-            labels.mem_lbl.set_text(&data.memory_text);
-            labels.gpu_lbl.set_text(&data.gpu_info);
 
             gtk4::glib::ControlFlow::Break
         } else {

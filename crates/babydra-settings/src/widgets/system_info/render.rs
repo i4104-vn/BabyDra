@@ -1,304 +1,176 @@
-//! System specifications UI layout generator matching reference design Image 1.
+//! About BabyDra UI layout generator.
 
-use babydra_ui_kit::components::{ChangeHostnameDialog, ChangePasswordDialog};
+use babydra_ui_kit::components::cards::create_card;
 use gtk4::prelude::*;
+use gtk4::{Align, Box as GtkBox, Label, Orientation, ScrolledWindow};
 
 #[derive(Clone)]
-pub struct SystemInfoLabels {
-    pub os_label: gtk4::Label,
-    pub sub_label: gtk4::Label,
-    pub uptime_lbl: gtk4::Label,
-    pub kernel_lbl: gtk4::Label,
-    pub cpu_lbl: gtk4::Label,
-    pub mem_lbl: gtk4::Label,
-    pub gpu_lbl: gtk4::Label,
-    pub host_row_lbl: gtk4::Label,
+pub struct AboutLabels {
+    pub os_label: Label,
+    pub sub_label: Label,
+    pub uptime_lbl: Label,
+    pub cpu_lbl: Label,
+    pub mem_lbl: Label,
+    pub gpu_lbl: Label,
+    pub arch_lbl: Label,
 }
 
-pub struct SystemInfoWidgets {
-    pub root: gtk4::Overlay,
-    pub labels: SystemInfoLabels,
-    pub edit_host_btn: gtk4::Button,
-    pub change_pwd_btn: gtk4::Button,
-    pub change_hostname_dialog: ChangeHostnameDialog,
-    pub change_password_dialog: ChangePasswordDialog,
+pub struct AboutWidgets {
+    pub root: GtkBox,
+    pub labels: AboutLabels,
 }
 
-/// Builds the system information settings page UI.
-pub fn build_system_ui(
-    hostname: &str,
-    os_name: &str,
-    kernel_version: &str,
-    cpu_model: &str,
-    gpu_info: &str,
-    memory_text: &str,
-    uptime_text: &str,
-    cpu_arch: &str,
-) -> SystemInfoWidgets {
-    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
+/// Builds the About BabyDra page UI.
+pub fn build_about_ui() -> AboutWidgets {
+    let main_box = GtkBox::new(Orientation::Vertical, 16);
     main_box.set_vexpand(true);
-    main_box.set_valign(gtk4::Align::Fill);
+    main_box.set_valign(Align::Fill);
 
     // Page Title
-    let page_title = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.about_title")));
+    let page_title = Label::new(Some(&babydra_core::i18n::trans("settings.about_title")));
     page_title.add_css_class("settings-page-title");
-    page_title.set_halign(gtk4::Align::Start);
+    page_title.set_halign(Align::Start);
     main_box.append(&page_title);
 
-    let content_box = gtk4::Box::new(gtk4::Orientation::Vertical, 14);
+    let subtitle_lbl = Label::new(Some(&babydra_core::i18n::trans("settings.about_subtitle")));
+    subtitle_lbl.add_css_class("settings-row-desc");
+    subtitle_lbl.set_halign(Align::Start);
+    main_box.append(&subtitle_lbl);
 
-    // ── Card 1: Top Hero Card (Avatar, OS Title, Uptime Badge) ──
-    let hero_card = gtk4::Box::new(gtk4::Orientation::Horizontal, 20);
+    let content_box = GtkBox::new(Orientation::Vertical, 20);
+    content_box.set_margin_top(8);
+
+    // ── Hero Card: BabyDra Logo + Version + OS Info ──
+    let hero_card = create_card(Orientation::Horizontal, 24);
     hero_card.add_css_class("glass-panel");
-    hero_card.set_margin_top(2);
-    hero_card.set_margin_bottom(4);
     hero_card.set_margin_start(4);
     hero_card.set_margin_end(4);
 
-    // Mascot / Avatar Container
-    let avatar_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
-    avatar_box.add_css_class("hero-avatar-box");
-    avatar_box.set_size_request(80, 80);
-    avatar_box.set_valign(gtk4::Align::Center);
-    avatar_box.set_hexpand(false);
-    avatar_box.set_vexpand(false);
+    // Logo
+    let logo_box = GtkBox::new(Orientation::Vertical, 0);
+    logo_box.set_valign(Align::Center);
+    logo_box.set_size_request(100, 100);
 
-    let avatar_img = babydra_ui_kit::ui::icon::get_icon("logo", 80);
-    avatar_img.set_pixel_size(80);
-    avatar_img.set_valign(gtk4::Align::Center);
-    avatar_img.set_halign(gtk4::Align::Center);
-    avatar_box.append(&avatar_img);
-    hero_card.append(&avatar_box);
+    let logo_img = babydra_ui_kit::ui::icon::get_icon("logo", 100);
+    logo_img.set_pixel_size(100);
+    logo_img.set_valign(Align::Center);
+    logo_img.set_halign(Align::Center);
+    logo_box.append(&logo_img);
+    hero_card.append(&logo_box);
 
-    // Right Side Information
-    let info_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    info_box.set_hexpand(true);
-    info_box.set_valign(gtk4::Align::Center);
+    // Version & Build Info
+    let version_box = GtkBox::new(Orientation::Vertical, 8);
+    version_box.set_valign(Align::Center);
+    version_box.set_hexpand(true);
 
-    // Left Column: Hostname + Subtitle
-    let text_column = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
-    text_column.set_hexpand(true);
-    text_column.set_valign(gtk4::Align::Center);
+    let version_title = Label::new(Some("BabyDra Linux"));
+    version_title.add_css_class("hero-hostname");
+    version_title.set_halign(Align::Start);
+    version_box.append(&version_title);
 
-    let display_host = if !hostname.is_empty() && hostname != "localhost" {
-        hostname
-    } else {
-        "BabyDra Linux"
-    };
+    let version_info = Label::new(Some(&format!(
+        "{} {} • {} {}",
+        babydra_core::i18n::trans("settings.about_version"),
+        env!("CARGO_PKG_VERSION"),
+        babydra_core::i18n::trans("settings.about_build"),
+        "Arch Linux"
+    )));
+    version_info.add_css_class("hero-subtitle");
+    version_info.set_halign(Align::Start);
+    version_box.append(&version_info);
 
-    let os_label = gtk4::Label::new(Some(display_host));
-    os_label.add_css_class("hero-hostname");
-    os_label.set_halign(gtk4::Align::Start);
-    text_column.append(&os_label);
+    // OS info placeholders (will be updated async)
+    let os_label = Label::new(Some("Loading..."));
+    os_label.add_css_class("hero-subtitle");
+    os_label.set_halign(Align::Start);
+    version_box.append(&os_label);
 
-    // Subtitle Row: OS Name (Architecture) • Kernel Version
-    let sub_title = format!("{} ({}) • Kernel {}", os_name, cpu_arch, kernel_version);
-    let sub_label = gtk4::Label::new(Some(&sub_title));
-    sub_label.add_css_class("hero-subtitle");
-    sub_label.set_halign(gtk4::Align::Start);
-    text_column.append(&sub_label);
+    let sub_label = Label::new(Some("Loading..."));
+    sub_label.add_css_class("settings-row-desc");
+    sub_label.set_halign(Align::Start);
+    version_box.append(&sub_label);
 
-    info_box.append(&text_column);
+    // Uptime Badge
+    let uptime_box = GtkBox::new(Orientation::Horizontal, 8);
+    uptime_box.add_css_class("hero-uptime-badge");
+    uptime_box.set_valign(Align::Start);
+    uptime_box.set_halign(Align::End);
+    uptime_box.set_margin_top(4);
 
-    // Right Column: Uptime Badge (Top) + EN/VN Button (Bottom, below uptime!)
-    let badge_column = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
-    badge_column.set_valign(gtk4::Align::Center);
-    badge_column.set_halign(gtk4::Align::End);
+    let clock_icon = babydra_ui_kit::ui::icon::get_icon("history", 16);
+    clock_icon.set_pixel_size(16);
+    clock_icon.set_valign(Align::Center);
+    uptime_box.append(&clock_icon);
 
-    // Sleek Uptime Badge (e.g. "Up 2h 15m")
-    let uptime_badge = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
-    uptime_badge.add_css_class("hero-uptime-badge");
-    uptime_badge.set_valign(gtk4::Align::Center);
-
-    let clock_icon = babydra_ui_kit::ui::icon::get_icon("history", 14);
-    clock_icon.set_pixel_size(14);
-    clock_icon.set_valign(gtk4::Align::Center);
-    uptime_badge.append(&clock_icon);
-
-    let formatted_uptime = babydra_core::i18n::trans("settings.up_time").replace("{}", uptime_text);
-    let uptime_lbl = gtk4::Label::new(Some(&formatted_uptime));
+    let uptime_lbl = Label::new(Some(
+        &babydra_core::i18n::trans("settings.up_time").replace("{}", "..."),
+    ));
     uptime_lbl.add_css_class("hero-uptime-label");
-    uptime_lbl.set_valign(gtk4::Align::Center);
-    uptime_badge.append(&uptime_lbl);
+    uptime_lbl.set_valign(Align::Center);
+    uptime_box.append(&uptime_lbl);
 
-    badge_column.append(&uptime_badge);
+    hero_card.append(&version_box);
+    hero_card.append(&uptime_box);
 
-    // Language Segmented Control Pill (EN / VN) below uptime
-    let lang_segmented_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 2);
-    lang_segmented_box.add_css_class("lang-segmented-control");
-    lang_segmented_box.set_halign(gtk4::Align::End);
-
-    let btn_en = gtk4::Button::with_label("EN");
-    btn_en.set_cursor_from_name(Some("pointer"));
-
-    let btn_vn = gtk4::Button::with_label("VN");
-    btn_vn.set_cursor_from_name(Some("pointer"));
-
-    let current_locale = babydra_core::i18n::get_locale();
-    if current_locale == "vi" {
-        btn_vn.add_css_class("lang-seg-active");
-        btn_en.add_css_class("lang-seg-inactive");
-    } else {
-        btn_en.add_css_class("lang-seg-active");
-        btn_vn.add_css_class("lang-seg-inactive");
-    }
-
-    let btn_en_c = btn_en.clone();
-    let btn_vn_c = btn_vn.clone();
-    btn_en.connect_clicked(move |b| {
-        babydra_core::i18n::set_locale("en");
-        babydra_core::i18n::persist_locale("en");
-        btn_en_c.remove_css_class("lang-seg-inactive");
-        btn_en_c.add_css_class("lang-seg-active");
-        btn_vn_c.remove_css_class("lang-seg-active");
-        btn_vn_c.add_css_class("lang-seg-inactive");
-        let _ = b.activate_action("win.rebuild-ui", None);
-    });
-
-    let btn_en_c2 = btn_en.clone();
-    let btn_vn_c2 = btn_vn.clone();
-    btn_vn.connect_clicked(move |b| {
-        babydra_core::i18n::set_locale("vi");
-        babydra_core::i18n::persist_locale("vi");
-        btn_vn_c2.remove_css_class("lang-seg-inactive");
-        btn_vn_c2.add_css_class("lang-seg-active");
-        btn_en_c2.remove_css_class("lang-seg-active");
-        btn_en_c2.add_css_class("lang-seg-inactive");
-        let _ = b.activate_action("win.rebuild-ui", None);
-    });
-
-    lang_segmented_box.append(&btn_en);
-    lang_segmented_box.append(&btn_vn);
-    badge_column.append(&lang_segmented_box);
-    info_box.append(&badge_column);
-
-    hero_card.append(&info_box);
     content_box.append(&hero_card);
 
-    // ── Section 1: Device & Account Settings Card ─────────────────────────────
-    let dev_acc_label = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.section_device_account")));
-    dev_acc_label.add_css_class("settings-row-desc");
-    dev_acc_label.set_halign(gtk4::Align::Start);
-    dev_acc_label.set_margin_start(8);
-    dev_acc_label.set_margin_top(8);
-    dev_acc_label.set_margin_bottom(2);
-    content_box.append(&dev_acc_label);
+    // ── Section: Donation ──
+    let donate_label = Label::new(Some(&babydra_core::i18n::trans(
+        "settings.about_donate_title",
+    )));
+    donate_label.add_css_class("settings-row-desc");
+    donate_label.set_halign(Align::Start);
+    donate_label.set_margin_start(8);
+    donate_label.set_margin_top(8);
+    donate_label.set_margin_bottom(4);
+    content_box.append(&donate_label);
 
-    let dev_acc_list = gtk4::ListBox::new();
-    dev_acc_list.set_selection_mode(gtk4::SelectionMode::None);
-    dev_acc_list.add_css_class("settings-card");
-    dev_acc_list.set_margin_start(4);
-    dev_acc_list.set_margin_end(4);
+    let donate_card = create_card(Orientation::Horizontal, 24);
+    donate_card.add_css_class("glass-panel");
+    donate_card.set_margin_start(4);
+    donate_card.set_margin_end(4);
 
-    // Row 1: Hostname
-    let host_row = gtk4::ListBoxRow::new();
-    host_row.add_css_class("settings-card-row");
-    let host_hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 14);
-    host_hbox.set_margin_top(6);
-    host_hbox.set_margin_bottom(6);
-    host_hbox.set_margin_start(6);
-    host_hbox.set_margin_end(6);
+    let qr_box = GtkBox::new(Orientation::Vertical, 8);
+    qr_box.set_valign(Align::Center);
+    qr_box.set_size_request(120, 120);
+    qr_box.add_css_class("qr-code-box");
 
-    let host_icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
-    host_icon_badge.add_css_class("blue-icon-badge-sm");
-    host_icon_badge.set_valign(gtk4::Align::Center);
-    host_icon_badge.set_halign(gtk4::Align::Start);
-    host_icon_badge.set_hexpand(false);
-    host_icon_badge.set_vexpand(false);
-    host_icon_badge.set_size_request(36, 36);
+    let qr_img = babydra_ui_kit::ui::icon::get_icon_from_svg(include_str!("qr.svg"), 100);
+    qr_img.set_pixel_size(100);
+    qr_img.set_valign(Align::Center);
+    qr_img.set_halign(Align::Center);
+    qr_img.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.about_qr_alt")));
+    qr_box.append(&qr_img);
+    donate_card.append(&qr_box);
 
-    let host_icon = babydra_ui_kit::ui::icon::get_icon("desktop", 18);
-    host_icon.set_pixel_size(18);
-    host_icon.set_valign(gtk4::Align::Center);
-    host_icon.set_halign(gtk4::Align::Center);
-    host_icon.set_vexpand(true);
-    host_icon_badge.append(&host_icon);
-    host_hbox.append(&host_icon_badge);
+    let donate_info = GtkBox::new(Orientation::Vertical, 8);
+    donate_info.set_valign(Align::Center);
+    donate_info.set_hexpand(true);
 
-    let host_text_col = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-    host_text_col.set_valign(gtk4::Align::Center);
-    host_text_col.set_halign(gtk4::Align::Start);
-    host_text_col.set_hexpand(true);
+    let donate_title = Label::new(Some(&babydra_core::i18n::trans(
+        "settings.about_donate_title",
+    )));
+    donate_title.add_css_class("hero-hostname");
+    donate_title.set_halign(Align::Start);
+    donate_info.append(&donate_title);
 
-    let host_title = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.device_hostname")));
-    host_title.add_css_class("settings-row-title");
-    host_title.set_halign(gtk4::Align::Start);
-    host_text_col.append(&host_title);
+    let donate_desc = Label::new(Some(&babydra_core::i18n::trans(
+        "settings.about_donate_desc",
+    )));
+    donate_desc.add_css_class("hero-subtitle");
+    donate_desc.set_halign(Align::Start);
+    donate_info.append(&donate_desc);
 
-    let host_row_lbl = gtk4::Label::new(Some(display_host));
-    host_row_lbl.add_css_class("settings-row-desc");
-    host_row_lbl.set_halign(gtk4::Align::Start);
-    host_text_col.append(&host_row_lbl);
-    host_hbox.append(&host_text_col);
+    donate_card.append(&donate_info);
+    content_box.append(&donate_card);
 
-    let edit_host_btn = gtk4::Button::with_label(&babydra_core::i18n::trans("settings.change_hostname"));
-    edit_host_btn.add_css_class("connect-pill-btn");
-    edit_host_btn.set_cursor_from_name(Some("pointer"));
-    edit_host_btn.set_valign(gtk4::Align::Center);
-    host_hbox.append(&edit_host_btn);
-
-    host_row.set_child(Some(&host_hbox));
-    dev_acc_list.append(&host_row);
-
-    // Row 2: Account Password
-    let pwd_row = gtk4::ListBoxRow::new();
-    pwd_row.add_css_class("settings-card-row");
-    let pwd_hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 14);
-    pwd_hbox.set_margin_top(6);
-    pwd_hbox.set_margin_bottom(6);
-    pwd_hbox.set_margin_start(6);
-    pwd_hbox.set_margin_end(6);
-
-    let pwd_icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
-    pwd_icon_badge.add_css_class("blue-icon-badge-sm");
-    pwd_icon_badge.set_valign(gtk4::Align::Center);
-    pwd_icon_badge.set_halign(gtk4::Align::Start);
-    pwd_icon_badge.set_hexpand(false);
-    pwd_icon_badge.set_vexpand(false);
-    pwd_icon_badge.set_size_request(36, 36);
-
-    let pwd_icon = babydra_ui_kit::ui::icon::get_icon("lock", 18);
-    pwd_icon.set_pixel_size(18);
-    pwd_icon.set_valign(gtk4::Align::Center);
-    pwd_icon.set_halign(gtk4::Align::Center);
-    pwd_icon.set_vexpand(true);
-    pwd_icon_badge.append(&pwd_icon);
-    pwd_hbox.append(&pwd_icon_badge);
-
-    let pwd_text_col = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-    pwd_text_col.set_valign(gtk4::Align::Center);
-    pwd_text_col.set_halign(gtk4::Align::Start);
-    pwd_text_col.set_hexpand(true);
-
-    let pwd_title = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.account_password")));
-    pwd_title.add_css_class("settings-row-title");
-    pwd_title.set_halign(gtk4::Align::Start);
-    pwd_text_col.append(&pwd_title);
-
-    let pwd_sub = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.password_protected")));
-    pwd_sub.add_css_class("settings-row-desc");
-    pwd_sub.set_halign(gtk4::Align::Start);
-    pwd_text_col.append(&pwd_sub);
-    pwd_hbox.append(&pwd_text_col);
-
-    let change_pwd_btn = gtk4::Button::with_label(&babydra_core::i18n::trans("settings.change_password"));
-    change_pwd_btn.add_css_class("connect-pill-btn");
-    change_pwd_btn.set_cursor_from_name(Some("pointer"));
-    change_pwd_btn.set_valign(gtk4::Align::Center);
-    pwd_hbox.append(&change_pwd_btn);
-
-    pwd_row.set_child(Some(&pwd_hbox));
-    dev_acc_list.append(&pwd_row);
-
-    content_box.append(&dev_acc_list);
-
-    // ── Section 2: Hardware Specifications Grid ─────────────────────────────
-    let hw_label = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.section_hardware")));
+    // ── Section: Hardware Specifications ──
+    let hw_label = Label::new(Some(&babydra_core::i18n::trans("settings.about_hardware")));
     hw_label.add_css_class("settings-row-desc");
-    hw_label.set_halign(gtk4::Align::Start);
+    hw_label.set_halign(Align::Start);
     hw_label.set_margin_start(8);
-    hw_label.set_margin_top(14);
-    hw_label.set_margin_bottom(2);
+    hw_label.set_margin_top(8);
+    hw_label.set_margin_bottom(4);
     content_box.append(&hw_label);
 
     let grid = gtk4::Grid::new();
@@ -308,65 +180,65 @@ pub fn build_system_ui(
     grid.set_margin_start(4);
     grid.set_margin_end(4);
 
-    let kernel_lbl = gtk4::Label::new(Some(kernel_version));
-    let cpu_lbl = gtk4::Label::new(Some(cpu_model));
-    let mem_lbl = gtk4::Label::new(Some(memory_text));
-    let gpu_lbl = gtk4::Label::new(Some(gpu_info));
+    let cpu_lbl = Label::new(Some("Loading..."));
+    let mem_lbl = Label::new(Some("Loading..."));
+    let gpu_lbl = Label::new(Some("Loading..."));
+    let arch_lbl = Label::new(Some("Loading..."));
 
-    let specs: Vec<(&str, String, &gtk4::Label)> = vec![
-        (
-            "cog",
-            babydra_core::i18n::trans("settings.spec_kernel"),
-            &kernel_lbl,
-        ),
+    let specs: Vec<(&str, String, &Label)> = vec![
         (
             "sliders",
-            babydra_core::i18n::trans("settings.spec_processor"),
+            babydra_core::i18n::trans("settings.about_cpu"),
             &cpu_lbl,
         ),
         (
             "history",
-            babydra_core::i18n::trans("settings.spec_memory"),
+            babydra_core::i18n::trans("settings.about_memory"),
             &mem_lbl,
         ),
         (
             "palette",
-            babydra_core::i18n::trans("settings.spec_graphics"),
+            babydra_core::i18n::trans("settings.about_gpu"),
             &gpu_lbl,
+        ),
+        (
+            "cog",
+            babydra_core::i18n::trans("settings.about_arch"),
+            &arch_lbl,
         ),
     ];
 
     for (idx, (icon_name, label, value_widget)) in specs.into_iter().enumerate() {
-        let card = gtk4::Box::new(gtk4::Orientation::Vertical, 12);
+        let card = GtkBox::new(Orientation::Vertical, 12);
         card.add_css_class("spec-card");
-        card.set_halign(gtk4::Align::Fill);
-        card.set_valign(gtk4::Align::Fill);
+        card.set_halign(Align::Fill);
+        card.set_valign(Align::Fill);
 
         // Centered Blue Icon Badge
-        let icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+        let icon_badge = GtkBox::new(Orientation::Vertical, 0);
         icon_badge.add_css_class("blue-icon-badge");
-        icon_badge.set_halign(gtk4::Align::Center);
-        icon_badge.set_valign(gtk4::Align::Center);
+        icon_badge.set_halign(Align::Center);
+        icon_badge.set_valign(Align::Center);
         icon_badge.set_size_request(44, 44);
 
         let icon_img = babydra_ui_kit::ui::icon::get_icon(icon_name, 22);
         icon_img.set_pixel_size(22);
         icon_img.set_vexpand(true);
         icon_img.set_hexpand(true);
-        icon_img.set_valign(gtk4::Align::Center);
-        icon_img.set_halign(gtk4::Align::Center);
+        icon_img.set_valign(Align::Center);
+        icon_img.set_halign(Align::Center);
         icon_badge.append(&icon_img);
         card.append(&icon_badge);
 
         // Label
-        let label_widget = gtk4::Label::new(Some(label.as_str()));
+        let label_widget = Label::new(Some(label.as_str()));
         label_widget.add_css_class("spec-label");
-        label_widget.set_halign(gtk4::Align::Center);
+        label_widget.set_halign(Align::Center);
         card.append(&label_widget);
 
         // Value
         value_widget.add_css_class("spec-value");
-        value_widget.set_halign(gtk4::Align::Center);
+        value_widget.set_halign(Align::Center);
         value_widget.set_justify(gtk4::Justification::Center);
         value_widget.set_wrap(true);
         card.append(value_widget);
@@ -378,40 +250,26 @@ pub fn build_system_ui(
 
     content_box.append(&grid);
 
-    let scroll = gtk4::ScrolledWindow::new();
+    let scroll = ScrolledWindow::new();
     scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
     scroll.set_vexpand(true);
-    scroll.set_valign(gtk4::Align::Fill);
+    scroll.set_valign(Align::Fill);
     scroll.set_child(Some(&content_box));
 
     main_box.append(&scroll);
 
-    // Modal dialogs
-    let change_hostname_dialog = ChangeHostnameDialog::new();
-    let change_password_dialog = ChangePasswordDialog::new();
-
-    let root = gtk4::Overlay::new();
-    root.set_child(Some(&main_box));
-    root.add_overlay(&change_hostname_dialog.container);
-    root.add_overlay(&change_password_dialog.container);
-
-    let labels = SystemInfoLabels {
+    let labels = AboutLabels {
         os_label,
         sub_label,
         uptime_lbl,
-        kernel_lbl,
         cpu_lbl,
         mem_lbl,
         gpu_lbl,
-        host_row_lbl,
+        arch_lbl,
     };
 
-    SystemInfoWidgets {
-        root,
+    AboutWidgets {
+        root: main_box,
         labels,
-        edit_host_btn,
-        change_pwd_btn,
-        change_hostname_dialog,
-        change_password_dialog,
     }
 }
