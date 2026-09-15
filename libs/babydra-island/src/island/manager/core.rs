@@ -35,25 +35,26 @@ impl IslandCore {
         let v = &self.views[idx];
 
         // 1. Purge expired deadlines first
-        let has_active_flag = v.state.purge_if_expired(now);
-        if !has_active_flag {
-            return false;
-        }
+        let _ = v.state.purge_if_expired(now);
 
-        // 2. If it has an active, unexpired timeout, it is alive
-        if v.state.has_active_timeout(now) {
-            return true;
-        }
-
-        // 3. If timeout has expired (or was never set), check if the feature is actively alive
-        // (e.g. popover open, media playing, active notification).
+        // 2. Check if the feature is actively alive or currently has an open popover
         let feature_alive = v
             .feature
             .as_ref()
-            .and_then(|f| f.try_borrow().ok().map(|feat| feat.is_alive()))
+            .and_then(|f| {
+                f.try_borrow()
+                    .ok()
+                    .map(|feat| feat.is_alive() || feat.is_popover_open())
+            })
             .unwrap_or(false);
 
         if feature_alive {
+            v.state.requested.set(true);
+            return true;
+        }
+
+        // 3. If it has an active, unexpired timeout, it is alive
+        if v.state.has_active_timeout(now) {
             return true;
         }
 

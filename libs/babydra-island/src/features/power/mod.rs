@@ -77,6 +77,10 @@ impl IslandFeature for PowerFeature {
     }
 
     fn is_alive(&self) -> bool {
+        self.is_popover_open()
+    }
+
+    fn is_popover_open(&self) -> bool {
         self.popover
             .borrow()
             .as_ref()

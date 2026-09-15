@@ -158,6 +158,8 @@ impl IslandViewHandle {
         self.show();
         self.state.request_seq.set(next_request_seq());
         self.state.override_active.set(true);
+        self.state.release_at.borrow_mut().take();
+        self.state.auto_hide_at.borrow_mut().take();
     }
 
     /// Forces the view to be displayed for `duration`, then automatically
@@ -405,6 +407,12 @@ pub trait IslandFeature {
     /// Ephemeral indicators return false by default (they are only alive while their timeout is unexpired).
     /// Stateful features (e.g. popover open or media playback) override this to return true when active.
     fn is_alive(&self) -> bool {
+        false
+    }
+
+    /// Whether this feature currently has an open popover or modal dialog.
+    /// When true, the island capsule must never switch away to another feature.
+    fn is_popover_open(&self) -> bool {
         false
     }
 

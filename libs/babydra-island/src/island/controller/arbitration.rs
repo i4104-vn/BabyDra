@@ -97,6 +97,19 @@ pub(crate) fn island_tick(core_rc: &Rc<RefCell<IslandCore>>) {
 pub(crate) fn select_winner(core: &IslandCore) -> Option<usize> {
     let now = Instant::now();
 
+    // 0. If any view currently has an open popover, it MUST remain displayed!
+    // Background events (like media player updates or notifications) must never
+    // hijack the capsule while the user is actively viewing or interacting with a popover.
+    for (i, v) in core.views.iter().enumerate() {
+        if let Some(f) = &v.feature {
+            if let Ok(feat) = f.try_borrow() {
+                if feat.is_popover_open() {
+                    return Some(i);
+                }
+            }
+        }
+    }
+
     // Honor explicit user scroll selection as long as the view is still alive and un-superseded
     if let Some((sel_idx, sel_seq)) = core.user_selected.get() {
         if core.is_view_alive(sel_idx, now) {

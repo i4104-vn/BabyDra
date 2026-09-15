@@ -181,13 +181,15 @@ impl IslandFeature for MediaPlayerFeature {
     }
 
     fn is_alive(&self) -> bool {
-        self.is_playing.get()
-            || self
-                .popover
-                .borrow()
-                .as_ref()
-                .map(|p| p.is_visible())
-                .unwrap_or(false)
+        self.is_playing.get() || self.is_popover_open()
+    }
+
+    fn is_popover_open(&self) -> bool {
+        self.popover
+            .borrow()
+            .as_ref()
+            .map(|p| p.is_visible())
+            .unwrap_or(false)
     }
 
     fn build_view(&mut self) -> gtk4::Widget {

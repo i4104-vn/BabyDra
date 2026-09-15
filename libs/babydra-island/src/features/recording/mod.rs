@@ -65,14 +65,17 @@ impl IslandFeature for RecordingFeature {
         true
     }
 
-    fn is_alive(&self) -> bool {
-        let is_rec = self.state.borrow().is_recording;
-        let is_pop_open = self
-            .popover
+    fn is_popover_open(&self) -> bool {
+        self.popover
             .borrow()
             .as_ref()
             .map(|p| p.is_visible())
-            .unwrap_or(false);
+            .unwrap_or(false)
+    }
+
+    fn is_alive(&self) -> bool {
+        let is_rec = self.state.borrow().is_recording;
+        let is_pop_open = self.is_popover_open();
         is_rec || is_pop_open
     }
 
@@ -87,7 +90,7 @@ impl IslandFeature for RecordingFeature {
         let popover = self.popover.clone();
         service::set_trigger_callback(move || {
             crate::island::dismiss_all_popovers();
-            handle.override_show_for(std::time::Duration::from_secs(30));
+            handle.override_show();
             crate::island::tick_default_island();
             if let Some(popover) = popover.borrow().as_ref() {
                 if popover.root().is_some() {
@@ -128,12 +131,22 @@ impl IslandFeature for RecordingFeature {
             } else {
                 popover.update_data(&self.state.borrow());
                 popover.popup();
+                if let Some(ref h) = *self.handle.borrow() {
+                    h.override_show();
+                }
             }
         }
     }
 
     fn tick(&mut self, _ctx: &IslandCtx) {
         let st = self.state.borrow().clone();
+        let is_pop_open = self.is_popover_open();
+
+        if is_pop_open {
+            if let Some(ref h) = *self.handle.borrow() {
+                h.override_show();
+            }
+        }
 
         if st.is_recording {
             if let Some(ref h) = *self.handle.borrow() {
