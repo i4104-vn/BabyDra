@@ -14,7 +14,7 @@ fn unparent_all_popovers_recursive(widget: &gtk4::Widget) {
     while let Some(c) = child {
         let next = c.next_sibling();
         unparent_all_popovers_recursive(&c);
-        if c.is::<gtk4::Popover>() {
+        if c.is::<gtk4::Popover>() && c.parent().is_some() {
             c.unparent();
         }
         child = next;

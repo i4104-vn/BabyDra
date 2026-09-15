@@ -57,7 +57,9 @@ pub fn build_workspace_popover(parent: &impl IsA<gtk4::Widget>) -> gtk4::Popover
                 old_flyout.popdown();
             }
             for fly in stored_flyouts_c.borrow_mut().drain(..) {
-                fly.unparent();
+                if fly.parent().is_some() {
+                    fly.unparent();
+                }
             }
 
             while let Some(child) = items_box.first_child() {

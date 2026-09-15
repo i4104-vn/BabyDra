@@ -17,7 +17,9 @@ pub fn close_tray_menu() {
     ACTIVE_TRAY_POPOVER.with(|p| {
         if let Some(old_popover) = p.borrow_mut().take() {
             old_popover.popdown();
-            old_popover.unparent();
+            if old_popover.parent().is_some() {
+                old_popover.unparent();
+            }
         }
     });
 }

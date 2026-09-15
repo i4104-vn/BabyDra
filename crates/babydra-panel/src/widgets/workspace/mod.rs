@@ -69,8 +69,13 @@ fn rebuild_taskbar(
     }
 
     while let Some(child) = apps_box.first_child() {
-        while let Some(pop) = child.first_child() {
-            pop.unparent();
+        let mut sub = child.first_child();
+        while let Some(c) = sub {
+            let next = c.next_sibling();
+            if c.is::<gtk4::Popover>() && c.parent().is_some() {
+                c.unparent();
+            }
+            sub = next;
         }
         apps_box.remove(&child);
     }
