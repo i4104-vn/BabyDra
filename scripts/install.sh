@@ -136,7 +136,6 @@ sudo cp "$REPO_ROOT/wallpaper.png" /var/lib/babydra/lock_wallpaper.png 2>/dev/nu
 
 sudo cp "$REPO_ROOT/libs/babydra-core/src/services/logo.png" /usr/share/babydra/babydra-preview.png
 sudo cp "$REPO_ROOT/libs/babydra-core/src/services/logo.png" /usr/share/babydra/babydra-settings.png
-sudo cp "$REPO_ROOT/libs/babydra-core/src/services/logo.png" /usr/share/babydra/babydra-recorder.png
 sudo cp "$REPO_ROOT/libs/babydra-core/src/services/logo.png" /usr/share/babydra/logo.png
 sudo cp "$REPO_ROOT/libs/babydra-core/src/services/logo.png" /var/lib/babydra/logo.png
 

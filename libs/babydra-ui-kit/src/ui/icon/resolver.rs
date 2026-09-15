@@ -75,15 +75,12 @@ pub fn ensure_embedded_logo_installed() {
         "babydra-settings.png",
         "babydra-preview.png",
         "babydra-desktop.png",
-        "babydra-recorder.png",
         "org.babydra.explore.png",
         "org.babydra.settings.png",
         "org.babydra.preview.png",
         "org.babydra.desktop.png",
-        "org.babydra.recorder.png",
         "com.babydra.settings.png",
         "com.babydra.preview.png",
-        "com.babydra.recorder.png",
     ];
 
     for dir in &dirs[..3] {

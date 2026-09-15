@@ -10,7 +10,6 @@ members = [
     "crates/babydra-panel",
     "crates/babydra-switcher",
     "crates/babydra-screenshot",
-    "crates/babydra-recorder",
     "crates/babydra-lock",
     "crates/babydra-preview",
     "crates/babydra-settings",
