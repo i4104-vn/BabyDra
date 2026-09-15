@@ -22,7 +22,8 @@ pub fn create_custom_shortcut_row(sc: &Shortcut, parent: Box) -> Box {
     set_combo_button(&combo_btn, &sc.modifiers, &sc.key);
     {
         combo_btn.connect_clicked(move |btn| {
-            let Some(parent_window) = btn.root().and_then(|root| root.downcast::<Window>().ok()) else {
+            let Some(parent_window) = btn.root().and_then(|root| root.downcast::<Window>().ok())
+            else {
                 return;
             };
             show_capture_dialog(&parent_window, btn);

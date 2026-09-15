@@ -10,7 +10,9 @@ pub mod labwc;
 pub mod service;
 
 pub use catalog::{SystemCrateDef, SYSTEM_CRATE_CATALOG};
-pub use config::{get_config_path, is_paused, pause_shortcuts, resume_shortcuts, PAUSE_TIMEOUT_SECS};
+pub use config::{
+    get_config_path, is_paused, pause_shortcuts, resume_shortcuts, PAUSE_TIMEOUT_SECS,
+};
 pub use labwc::sync_labwc_swallow;
 pub use service::{
     get_custom_shortcuts, get_shortcuts, get_system_shortcuts, save_keymap_configuration,
@@ -23,15 +25,13 @@ mod tests {
 
     #[test]
     fn test_system_crate_catalog_has_all_apps() {
-        assert_eq!(SYSTEM_CRATE_CATALOG.len(), 10);
+        assert_eq!(SYSTEM_CRATE_CATALOG.len(), 8);
         let ids: Vec<&str> = SYSTEM_CRATE_CATALOG.iter().map(|d| d.id).collect();
         assert!(ids.contains(&"launcher"));
         assert!(ids.contains(&"switcher"));
         assert!(ids.contains(&"screenshot"));
         assert!(ids.contains(&"screenshot_area"));
-        assert!(ids.contains(&"recorder_ui"));
-        assert!(ids.contains(&"recorder_toggle"));
-        assert!(ids.contains(&"recorder_area"));
+        assert!(ids.contains(&"recording_island"));
         assert!(ids.contains(&"lock"));
         assert!(ids.contains(&"settings"));
         assert!(ids.contains(&"explore"));

@@ -1,10 +1,10 @@
 //! Keymap query and mutation services.
 
-use crate::error::CoreResult;
-use crate::models::shortcut::{Shortcut, SystemShortcut};
 use super::catalog::SYSTEM_CRATE_CATALOG;
 use super::config::{get_config_path, ConfigFile};
 use super::labwc::sync_labwc_swallow;
+use crate::error::CoreResult;
+use crate::models::shortcut::{Shortcut, SystemShortcut};
 use std::collections::HashMap;
 use std::fs;
 
@@ -105,7 +105,9 @@ pub fn get_custom_shortcuts() -> Vec<Shortcut> {
     }
 
     for (combo, cmd) in file.shortcuts {
-        let is_system = system_cmds.iter().any(|&sc| sc == cmd || (!cmd.is_empty() && sc.ends_with(&cmd)));
+        let is_system = system_cmds
+            .iter()
+            .any(|&sc| sc == cmd || (!cmd.is_empty() && sc.ends_with(&cmd)));
         if !is_system && !custom_map.contains_key(&combo) {
             custom_map.insert(combo, cmd);
         }

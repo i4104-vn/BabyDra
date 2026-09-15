@@ -52,7 +52,13 @@ pub fn create_wallpaper_w() -> gtk4::Overlay {
     let active_start_time: Rc<Cell<Option<i64>>> = Rc::new(Cell::new(None));
     let ripple_origin: Rc<Cell<(f64, f64)>> = Rc::new(Cell::new((1.0, 0.0)));
     let pending_live_play: Rc<
-        RefCell<Option<(PathBuf, babydra_core::wallpaper::WallpaperMode, Option<gtk4::MediaFile>)>>,
+        RefCell<
+            Option<(
+                PathBuf,
+                babydra_core::wallpaper::WallpaperMode,
+                Option<gtk4::MediaFile>,
+            )>,
+        >,
     > = Rc::new(RefCell::new(None));
 
     // Initial wallpaper load with dynamic monitor resolution detection
@@ -233,7 +239,8 @@ pub fn create_wallpaper_w() -> gtk4::Overlay {
 
                         if let Some(new_surf) = target_surf {
                             *cur_surf_c.borrow_mut() = Some(new_surf);
-                            *pending_live_c.borrow_mut() = Some((path.clone(), new_mode, pre_rolled));
+                            *pending_live_c.borrow_mut() =
+                                Some((path.clone(), new_mode, pre_rolled));
 
                             if let Some(prev) = prev_surf {
                                 *old_surf_c.borrow_mut() = Some(prev);

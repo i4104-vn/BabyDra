@@ -96,7 +96,9 @@ fn register_icon_watcher(img: &gtk4::Image, name: &str, size: i32) {
         });
 
         ICON_WATCHERS.with(|watchers| {
-            watchers.borrow_mut().push((img.downgrade(), name.to_string(), size));
+            watchers
+                .borrow_mut()
+                .push((img.downgrade(), name.to_string(), size));
         });
     }
 }
@@ -115,8 +117,9 @@ fn get_icon_svg_pair(name: &str) -> Option<(&'static str, &'static str)> {
 
     let canonical_name = aliases.get(name).map(|s| s.as_str()).unwrap_or(name);
 
-    static ICON_MAP: std::sync::OnceLock<std::collections::HashMap<&'static str, (&'static str, &'static str)>> =
-        std::sync::OnceLock::new();
+    static ICON_MAP: std::sync::OnceLock<
+        std::collections::HashMap<&'static str, (&'static str, &'static str)>,
+    > = std::sync::OnceLock::new();
     let icon_map = ICON_MAP.get_or_init(|| {
         let mut m = std::collections::HashMap::with_capacity(85);
         m.insert("activity", (DARK_ACTIVITY_SVG, LIGHT_ACTIVITY_SVG));
@@ -148,7 +151,10 @@ fn get_icon_svg_pair(name: &str) -> Option<(&'static str, &'static str)> {
         m.insert("env", (DARK_SETTINGS_SVG, LIGHT_SETTINGS_SVG));
         m.insert("download", (DARK_DOWNLOAD_SVG, LIGHT_DOWNLOAD_SVG));
         m.insert("ethernet", (DARK_ETHERNET_SVG, LIGHT_ETHERNET_SVG));
-        m.insert("external-link", (DARK_EXTERNAL_LINK_SVG, LIGHT_EXTERNAL_LINK_SVG));
+        m.insert(
+            "external-link",
+            (DARK_EXTERNAL_LINK_SVG, LIGHT_EXTERNAL_LINK_SVG),
+        );
         m.insert("folder", (DARK_FOLDER_SVG, LIGHT_FOLDER_SVG));
         m.insert("gsconnect", (DARK_GSCONNECT_SVG, LIGHT_GSCONNECT_SVG));
         m.insert("info", (DARK_INFO_SVG, LIGHT_INFO_SVG));
@@ -194,14 +200,35 @@ fn get_icon_svg_pair(name: &str) -> Option<(&'static str, &'static str)> {
         m.insert("eye-off", (DARK_EYE_OFF_SVG, LIGHT_EYE_OFF_SVG));
         m.insert("sidebar", (DARK_SIDEBAR_SVG, LIGHT_SIDEBAR_SVG));
         m.insert("user-home", (DARK_USER_HOME_SVG, LIGHT_USER_HOME_SVG));
-        m.insert("folder-download", (DARK_FOLDER_DOWNLOAD_SVG, LIGHT_FOLDER_DOWNLOAD_SVG));
-        m.insert("folder-documents", (DARK_FOLDER_DOCUMENTS_SVG, LIGHT_FOLDER_DOCUMENTS_SVG));
-        m.insert("folder-pictures", (DARK_FOLDER_PICTURES_SVG, LIGHT_FOLDER_PICTURES_SVG));
-        m.insert("folder-music", (DARK_FOLDER_MUSIC_SVG, LIGHT_FOLDER_MUSIC_SVG));
+        m.insert(
+            "folder-download",
+            (DARK_FOLDER_DOWNLOAD_SVG, LIGHT_FOLDER_DOWNLOAD_SVG),
+        );
+        m.insert(
+            "folder-documents",
+            (DARK_FOLDER_DOCUMENTS_SVG, LIGHT_FOLDER_DOCUMENTS_SVG),
+        );
+        m.insert(
+            "folder-pictures",
+            (DARK_FOLDER_PICTURES_SVG, LIGHT_FOLDER_PICTURES_SVG),
+        );
+        m.insert(
+            "folder-music",
+            (DARK_FOLDER_MUSIC_SVG, LIGHT_FOLDER_MUSIC_SVG),
+        );
         m.insert("user-trash", (DARK_USER_TRASH_SVG, LIGHT_USER_TRASH_SVG));
-        m.insert("folder-desktop", (DARK_FOLDER_DESKTOP_SVG, LIGHT_FOLDER_DESKTOP_SVG));
-        m.insert("folder-videos", (DARK_FOLDER_VIDEOS_SVG, LIGHT_FOLDER_VIDEOS_SVG));
-        m.insert("drive-harddisk", (DARK_DRIVE_HARDDISK_SVG, LIGHT_DRIVE_HARDDISK_SVG));
+        m.insert(
+            "folder-desktop",
+            (DARK_FOLDER_DESKTOP_SVG, LIGHT_FOLDER_DESKTOP_SVG),
+        );
+        m.insert(
+            "folder-videos",
+            (DARK_FOLDER_VIDEOS_SVG, LIGHT_FOLDER_VIDEOS_SVG),
+        );
+        m.insert(
+            "drive-harddisk",
+            (DARK_DRIVE_HARDDISK_SVG, LIGHT_DRIVE_HARDDISK_SVG),
+        );
         m.insert("calendar", (DARK_CALENDAR_SVG, LIGHT_CALENDAR_SVG));
         m.insert("play", (DARK_PLAY_SVG, LIGHT_PLAY_SVG));
         m.insert("pause", (DARK_PAUSE_SVG, LIGHT_PAUSE_SVG));

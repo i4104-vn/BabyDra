@@ -144,7 +144,7 @@ pub fn create_desktop_grid(
     parent_window.connect_notify_local(Some("width"), move |_, _| {
         refresh_on_resize_w();
     });
-    
+
     let refresh_on_resize_h = refresh_pos_fn.clone();
     parent_window.connect_notify_local(Some("height"), move |_, _| {
         refresh_on_resize_h();

@@ -68,4 +68,3 @@ pub fn create_appearance() -> gtk4::Widget {
 
     main_box.into()
 }
-

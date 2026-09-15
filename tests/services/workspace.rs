@@ -1,10 +1,10 @@
 //! Integration tests: Workspace manager and models.
 
+use babydra_core::models::Workspace;
 use babydra_core::{
     get_current_workspace, get_workspaces, next_workspace, prev_workspace, switch_workspace,
     DEFAULT_WORKSPACE_COUNT,
 };
-use babydra_core::models::Workspace;
 use std::sync::Mutex;
 
 static LOCK: Mutex<()> = Mutex::new(());
@@ -156,7 +156,10 @@ fn test_core_workspace_service_parity() {
     assert_eq!(babydra_workspace::get_current_workspace(), 3);
 
     let workspaces = babydra_core::get_workspaces();
-    assert_eq!(workspaces.len(), babydra_core::DEFAULT_WORKSPACE_COUNT as usize);
+    assert_eq!(
+        workspaces.len(),
+        babydra_core::DEFAULT_WORKSPACE_COUNT as usize
+    );
     assert!(workspaces[2].is_active);
 
     babydra_core::reset_cached_workspace();

@@ -50,7 +50,8 @@ fn set_greeter_wp_and_avatar_persist_cleanly() {
     let orig_avatar = std::fs::read(&avatar_png).ok();
 
     let temp_img = std::env::temp_dir().join("babydra_test_wp_unit_test.png");
-    let pix = gtk4::gdk_pixbuf::Pixbuf::new(gtk4::gdk_pixbuf::Colorspace::Rgb, true, 8, 100, 100).unwrap();
+    let pix = gtk4::gdk_pixbuf::Pixbuf::new(gtk4::gdk_pixbuf::Colorspace::Rgb, true, 8, 100, 100)
+        .unwrap();
     pix.fill(0xff0000ff);
     let _ = pix.savev(&temp_img, "png", &[]);
 
@@ -68,25 +69,55 @@ fn set_greeter_wp_and_avatar_persist_cleanly() {
 
     // Both avatar and greeter wp should be retrievable as decoded bytes
     let av_bytes = babydra_core::get_avatar_bytes();
-    assert!(av_bytes.is_some(), "Avatar bytes must be retrievable after set_avatar");
+    assert!(
+        av_bytes.is_some(),
+        "Avatar bytes must be retrievable after set_avatar"
+    );
 
     let wp_bytes = babydra_core::get_greeter_wp_bytes();
-    assert!(wp_bytes.is_some(), "Greeter wp bytes must be retrievable after set_greeter_wp");
+    assert!(
+        wp_bytes.is_some(),
+        "Greeter wp bytes must be retrievable after set_greeter_wp"
+    );
 
     let wp_path = babydra_core::get_greeter_wp();
-    assert!(wp_path.is_some(), "Greeter wp path must be retrievable after set_greeter_wp");
-    assert!(wp_path.as_ref().unwrap().is_file(), "Greeter wp path must be a valid file");
-    assert_eq!(wp_path.as_ref().unwrap().extension().and_then(|e| e.to_str()), Some("png"));
+    assert!(
+        wp_path.is_some(),
+        "Greeter wp path must be retrievable after set_greeter_wp"
+    );
+    assert!(
+        wp_path.as_ref().unwrap().is_file(),
+        "Greeter wp path must be a valid file"
+    );
+    assert_eq!(
+        wp_path
+            .as_ref()
+            .unwrap()
+            .extension()
+            .and_then(|e| e.to_str()),
+        Some("png")
+    );
 
     let av_path = babydra_core::get_avatar_path();
-    assert!(av_path.is_some(), "Avatar path must be retrievable after set_avatar");
-    assert_eq!(av_path.as_ref().unwrap().extension().and_then(|e| e.to_str()), Some("png"));
+    assert!(
+        av_path.is_some(),
+        "Avatar path must be retrievable after set_avatar"
+    );
+    assert_eq!(
+        av_path
+            .as_ref()
+            .unwrap()
+            .extension()
+            .and_then(|e| e.to_str()),
+        Some("png")
+    );
 
     let _ = std::fs::remove_file(&temp_img);
 
     // Clean up test wallpaper from wallpaper dir if copied
     if !home.is_empty() {
-        let test_copy = std::path::PathBuf::from(&home).join(".babydra/wallpaper/babydra_test_wp_unit_test.png");
+        let test_copy = std::path::PathBuf::from(&home)
+            .join(".babydra/wallpaper/babydra_test_wp_unit_test.png");
         let _ = std::fs::remove_file(test_copy);
     }
 
@@ -103,12 +134,18 @@ fn set_greeter_wp_and_avatar_persist_cleanly() {
 fn set_greeter_wp_rejects_video_and_gif() {
     let temp_mp4 = std::env::temp_dir().join("babydra_test_lock_wp.mp4");
     std::fs::write(&temp_mp4, b"fake video").unwrap();
-    assert!(babydra_core::set_greeter_wp(&temp_mp4).is_err(), "MP4 must be rejected for lock/greeter");
+    assert!(
+        babydra_core::set_greeter_wp(&temp_mp4).is_err(),
+        "MP4 must be rejected for lock/greeter"
+    );
     let _ = std::fs::remove_file(&temp_mp4);
 
     let temp_gif = std::env::temp_dir().join("babydra_test_lock_wp.gif");
     std::fs::write(&temp_gif, b"fake gif").unwrap();
-    assert!(babydra_core::set_greeter_wp(&temp_gif).is_err(), "GIF must be rejected for lock/greeter");
+    assert!(
+        babydra_core::set_greeter_wp(&temp_gif).is_err(),
+        "GIF must be rejected for lock/greeter"
+    );
     let _ = std::fs::remove_file(&temp_gif);
 }
 
@@ -127,7 +164,8 @@ fn read_image_metadata_extracts_dimensions_and_pixels() {
 
     let jpg_path = std::path::PathBuf::from("crates/babydra-greeter/src/assets/wallpaper.jpg");
     if jpg_path.exists() {
-        let meta = babydra_core::read_image_metadata(&jpg_path).expect("Should parse wallpaper.jpg");
+        let meta =
+            babydra_core::read_image_metadata(&jpg_path).expect("Should parse wallpaper.jpg");
         assert_eq!(meta.width, 1376);
         assert_eq!(meta.height, 768);
         assert_eq!(meta.aspect_ratio, "16:9");
@@ -159,5 +197,3 @@ fn test_get_or_create_first_frame_static_and_video() {
         }
     }
 }
-
-

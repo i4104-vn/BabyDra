@@ -140,16 +140,23 @@ pub fn jump_to_app(app_name: &str, title: Option<&str>) {
 
     let running_apps = super::mru::get_running_apps();
     let current_ws = crate::services::workspace::get_current_workspace();
-    let ws_map = crate::services::workspace::windows::sync_workspace_apps(current_ws, &running_apps);
+    let ws_map =
+        crate::services::workspace::windows::sync_workspace_apps(current_ws, &running_apps);
 
     let query_lower = query.to_lowercase();
     let title_lower = title.unwrap_or("").trim().to_lowercase();
 
     if let Some(app) = running_apps.iter().find(|app| {
         app.name.to_lowercase().contains(&query_lower)
-            || app.app_id.as_deref().map_or(false, |id| id.to_lowercase().contains(&query_lower))
+            || app
+                .app_id
+                .as_deref()
+                .map_or(false, |id| id.to_lowercase().contains(&query_lower))
             || (!title_lower.is_empty()
-                && app.window_title.as_deref().map_or(false, |t| t.to_lowercase().contains(&title_lower)))
+                && app
+                    .window_title
+                    .as_deref()
+                    .map_or(false, |t| t.to_lowercase().contains(&title_lower)))
     }) {
         let ws = crate::services::workspace::windows::get_app_workspace(app, &ws_map, current_ws);
         crate::services::workspace::switch_workspace(ws);

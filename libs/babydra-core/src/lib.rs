@@ -39,7 +39,9 @@ pub use services::system::account::{
 };
 pub use services::system::auth::{self, verify_password};
 pub use services::system::backlight;
-pub use services::system::battery::{self, get_battery_info, init_battery_service, subscribe as subscribe_battery};
+pub use services::system::battery::{
+    self, get_battery_info, init_battery_service, subscribe as subscribe_battery,
+};
 pub use services::system::bluetooth::{
     self, get_bt_devices, is_bluetooth_enabled, set_bt_enabled, BtDevice,
 };
@@ -48,10 +50,12 @@ pub use services::system::display::{
     apply_display_configs, apply_saved_displays, get_displays, save_displays,
 };
 pub use services::system::monitor::{
-    self, get_app_resource_usage, get_formatted_uptime, init_monitor_service, subscribe as subscribe_monitor, AppResourceUsage, MonitorSnapshot,
+    self, get_app_resource_usage, get_formatted_uptime, init_monitor_service,
+    subscribe as subscribe_monitor, AppResourceUsage, MonitorSnapshot,
 };
 pub use services::system::network::{
-    self, get_active_network_info, get_local_ip, get_network_speed, get_net_bytes, init_network_monitor_service, subscribe as subscribe_network, format_speed, NetworkSnapshot,
+    self, format_speed, get_active_network_info, get_local_ip, get_net_bytes, get_network_speed,
+    init_network_monitor_service, subscribe as subscribe_network, NetworkSnapshot,
 };
 pub use services::system::power::{
     self, apply_saved_profile, get_current_profile, poweroff, reboot, set_perf_profile,
@@ -66,8 +70,8 @@ pub use services::system::wifi;
 // --- Window & App Management ---
 pub use services::app_lifecycle::{init_app, AppLifecycle};
 pub use services::apps::{find_desktop_apps, refresh_desktop_apps, DesktopApp};
-pub use services::cli::{parse_cli_args, execute_cli_action, CliOptions, CliAction, PageId};
-pub use services::config::pages::{normalize_page_name, is_valid_page, PageId as ConfigPageId};
+pub use services::cli::{execute_cli_action, parse_cli_args, CliAction, CliOptions, PageId};
+pub use services::config::pages::{is_valid_page, normalize_page_name, PageId as ConfigPageId};
 pub use services::window::mru::{activate_app, get_history, get_running_apps, save_history};
 pub use services::window::tracker::spawn_switcher;
 pub use services::window::{
@@ -78,11 +82,10 @@ pub use services::window::{
 pub use models::shell::workspace::Workspace;
 pub use services::workspace::{
     self, filter_apps_for_workspace, get_app_workspace, get_current_workspace, get_workspaces,
-    next_workspace, next_workspace_sync_only, prev_workspace, prev_workspace_sync_only,
-    reset_cached_workspace, set_cached_workspace, set_workspace_sync_only, switch_workspace,
-    sync_workspace_apps, DEFAULT_WORKSPACE_COUNT,
-    init_workspace_service, subscribe as subscribe_workspace, WorkspaceSnapshot,
-    run_cli as run_workspace_cli,
+    init_workspace_service, next_workspace, next_workspace_sync_only, prev_workspace,
+    prev_workspace_sync_only, reset_cached_workspace, run_cli as run_workspace_cli,
+    set_cached_workspace, set_workspace_sync_only, subscribe as subscribe_workspace,
+    switch_workspace, sync_workspace_apps, WorkspaceSnapshot, DEFAULT_WORKSPACE_COUNT,
 };
 
 // --- Shell, Media & Utilities ---
@@ -91,8 +94,8 @@ pub use services::exif::{self, read_exif, ExifData};
 pub use services::explore::{
     calc_dir_size, clean_modifiers, copy_path, delete_path, filter_entries, get_icon_name,
     get_owner_group, load_cropped_square, load_directory, matches_key, matches_shortcut, move_path,
-    parse_shortcut, read_image_metadata, rename_path, send_to_trash,
-    shortcuts, sort_entries, start_dbus_service, FileWatcher, ImageMetadata,
+    parse_shortcut, read_image_metadata, rename_path, send_to_trash, shortcuts, sort_entries,
+    start_dbus_service, FileWatcher, ImageMetadata,
 };
 pub use services::mpris::{self, decode_uri, run_playerctl};
 pub use services::notification::island::{
@@ -107,6 +110,9 @@ pub use services::screenshot::{
     capture_fullscreen, capture_screen, get_screenshot_path, trigger_save,
 };
 pub use services::search::{self, search_files};
+pub use services::system::theme::{
+    is_kitty_available, sync_kitty_theme, sync_labwc_titlebar_theme,
+};
 pub use services::tray;
 pub use services::wallpaper::{
     self, apply_greeter_wp, apply_wallpaper, get_avatar_bytes, get_avatar_path, get_greeter_wp,
@@ -116,9 +122,6 @@ pub use services::wallpaper::{
     is_gstreamer_plugin_available, is_live_wallpaper_file, is_static_wallpaper_file, is_video_file,
     read_image_bytes, set_avatar, set_greeter_wp, set_wallpaper, set_wallpaper_with_mode,
     sync_shared_assets,
-};
-pub use services::system::theme::{
-    is_kitty_available, sync_kitty_theme, sync_labwc_titlebar_theme,
 };
 
 /// Applies all saved user settings from unified babydra.conf (CPU performance profile, Display monitors resolution/refresh rates, Wallpaper, Auto Battery Saver, Labwc Titlebar, Kitty Theme).

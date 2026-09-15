@@ -48,7 +48,8 @@ pub fn create_system_shortcut_row(sc: &SystemShortcut) -> Box {
     {
         let combo_btn_c = combo_btn.clone();
         combo_btn_c.connect_clicked(move |btn| {
-            let Some(parent_window) = btn.root().and_then(|root| root.downcast::<Window>().ok()) else {
+            let Some(parent_window) = btn.root().and_then(|root| root.downcast::<Window>().ok())
+            else {
                 return;
             };
             show_capture_dialog(&parent_window, btn);

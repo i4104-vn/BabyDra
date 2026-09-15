@@ -59,7 +59,8 @@ pub fn build_info_panel_ui() -> InfoPanelWidgets {
     vbox.append(&details_frame);
 
     // Image Details Section
-    let image_details_frame = Frame::new(Some(&babydra_core::i18n::trans("explore.prop_image_info")));
+    let image_details_frame =
+        Frame::new(Some(&babydra_core::i18n::trans("explore.prop_image_info")));
     let img_box = Box::new(Orientation::Vertical, 8);
     img_box.set_margin_top(6);
     img_box.set_margin_bottom(6);
@@ -67,18 +68,24 @@ pub fn build_info_panel_ui() -> InfoPanelWidgets {
     img_box.set_margin_end(6);
     image_details_frame.set_child(Some(&img_box));
 
-    let (_, lbl_img_dimensions) =
-        create_detail_row_with_box(&img_box, &babydra_core::i18n::trans("explore.prop_dimensions"));
+    let (_, lbl_img_dimensions) = create_detail_row_with_box(
+        &img_box,
+        &babydra_core::i18n::trans("explore.prop_dimensions"),
+    );
     let (_, lbl_img_pixels) =
         create_detail_row_with_box(&img_box, &babydra_core::i18n::trans("explore.prop_pixels"));
     let (_, lbl_img_dpi) =
         create_detail_row_with_box(&img_box, &babydra_core::i18n::trans("explore.prop_dpi"));
-    let (row_img_color, lbl_img_color) =
-        create_detail_row_with_box(&img_box, &babydra_core::i18n::trans("explore.prop_color_depth"));
+    let (row_img_color, lbl_img_color) = create_detail_row_with_box(
+        &img_box,
+        &babydra_core::i18n::trans("explore.prop_color_depth"),
+    );
     let (row_img_camera, lbl_img_camera) =
         create_detail_row_with_box(&img_box, &babydra_core::i18n::trans("explore.prop_camera"));
-    let (row_img_exposure, lbl_img_exposure) =
-        create_detail_row_with_box(&img_box, &babydra_core::i18n::trans("explore.prop_exposure"));
+    let (row_img_exposure, lbl_img_exposure) = create_detail_row_with_box(
+        &img_box,
+        &babydra_core::i18n::trans("explore.prop_exposure"),
+    );
 
     image_details_frame.set_visible(false);
     vbox.append(&image_details_frame);

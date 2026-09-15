@@ -13,11 +13,15 @@ pub fn build_custom_section(custom_shortcuts: &[Shortcut]) -> (Box, Box, Button)
     let title_vbox = Box::new(Orientation::Vertical, 2);
     title_vbox.set_hexpand(true);
 
-    let title = Label::new(Some(&babydra_core::i18n::trans("settings.keybinds_custom_title")));
+    let title = Label::new(Some(&babydra_core::i18n::trans(
+        "settings.keybinds_custom_title",
+    )));
     title.add_css_class("settings-section-title");
     title.set_halign(gtk4::Align::Start);
 
-    let desc = Label::new(Some(&babydra_core::i18n::trans("settings.keybinds_custom_desc")));
+    let desc = Label::new(Some(&babydra_core::i18n::trans(
+        "settings.keybinds_custom_desc",
+    )));
     desc.add_css_class("settings-page-subtitle");
     desc.set_halign(gtk4::Align::Start);
 

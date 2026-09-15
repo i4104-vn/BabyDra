@@ -93,7 +93,7 @@ fn setup_power_buttons(top_bar: &TopBarWidget) {
 /// Sets up login flow: user dropdown, password entry, submit button, and Enter key.
 fn setup_login_flow(g: &GreeterWidgets) {
     let login_action = create_login_action(g);
-    
+
     let login_action_btn = login_action.clone();
     g.login.login_btn.connect_clicked(move |_| {
         login_action_btn();

@@ -90,7 +90,7 @@ pub fn draw_cairo_ethernet_desktop(
 
     // Bottom dot (RX) placed flush near the bottom, aligned with the monitor base foot
     let bot_dot_cy = base_y + 0.1; // ~11.6
-    // Top dot (TX) placed directly above the bottom dot
+                                   // Top dot (TX) placed directly above the bottom dot
     let top_dot_cy = bot_dot_cy - 3.4; // ~8.2
 
     let draw_led = |cx: f64, cy: f64, (r, g, b): (f64, f64, f64), is_lit: bool| {

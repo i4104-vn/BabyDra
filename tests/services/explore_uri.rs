@@ -7,7 +7,10 @@ use std::fs::File;
 #[test]
 fn test_decode_uri_ascii_and_spaces() {
     assert_eq!(decode_uri("My%20Documents"), "My Documents");
-    assert_eq!(decode_uri("/home/user/Downloads/test%20file.pdf"), "/home/user/Downloads/test file.pdf");
+    assert_eq!(
+        decode_uri("/home/user/Downloads/test%20file.pdf"),
+        "/home/user/Downloads/test file.pdf"
+    );
 }
 
 #[test]

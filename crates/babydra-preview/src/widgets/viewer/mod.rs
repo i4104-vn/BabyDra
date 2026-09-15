@@ -118,7 +118,8 @@ pub fn build_ui(app: &gtk4::Application, path: PathBuf) {
 
     // --- Helpers / Closures ---
     let state_draw = state.clone();
-    let scaled_cache: Rc<RefCell<Option<(i32, i32, gdk_pixbuf::Pixbuf)>>> = Rc::new(RefCell::new(None));
+    let scaled_cache: Rc<RefCell<Option<(i32, i32, gdk_pixbuf::Pixbuf)>>> =
+        Rc::new(RefCell::new(None));
     let scaled_cache_draw = scaled_cache.clone();
 
     drawing_area.set_draw_func(move |_area, cr, width, height| {
@@ -150,7 +151,11 @@ pub fn build_ui(app: &gtk4::Application, path: PathBuf) {
         if needs_rescale {
             if (state_ref.scale - 1.0).abs() < 0.001 {
                 *cache_borrow = Some((target_w, target_h, state_ref.pixbuf.clone()));
-            } else if let Some(scaled) = state_ref.pixbuf.scale_simple(target_w, target_h, gdk_pixbuf::InterpType::Hyper) {
+            } else if let Some(scaled) =
+                state_ref
+                    .pixbuf
+                    .scale_simple(target_w, target_h, gdk_pixbuf::InterpType::Hyper)
+            {
                 *cache_borrow = Some((target_w, target_h, scaled));
             }
         }

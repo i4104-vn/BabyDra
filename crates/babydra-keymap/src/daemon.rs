@@ -25,7 +25,10 @@ pub async fn run() {
 fn load() -> Vec<Shortcut> {
     let mut shortcuts = babydra_core::services::system::keymap::get_shortcuts();
     if let Some(clipboard_sc) = babydra_core::get_shortcut() {
-        if !shortcuts.iter().any(|s| s.command.contains("ShowClipboard") || s.command.contains("toggle-clipboard")) {
+        if !shortcuts
+            .iter()
+            .any(|s| s.command.contains("ShowClipboard") || s.command.contains("toggle-clipboard"))
+        {
             shortcuts.push(clipboard_sc);
         }
     }

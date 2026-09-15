@@ -46,7 +46,9 @@ pub struct PrimaryCard {
 /// Builds the avatar widget with circular masking or fallback icon.
 pub fn build_avatar_widget(size: i32) -> gtk4::Widget {
     if let Some(bytes) = babydra_core::get_avatar_bytes() {
-        if let Some(img) = babydra_ui_kit::ui::image::create_circle_avatar(&bytes, size, Some("lock-avatar")) {
+        if let Some(img) =
+            babydra_ui_kit::ui::image::create_circle_avatar(&bytes, size, Some("lock-avatar"))
+        {
             return img;
         }
     }
@@ -60,7 +62,8 @@ pub fn build_avatar_widget(size: i32) -> gtk4::Widget {
 
 /// Builds the primary auth card: clock, avatar, username, password entry and status label.
 pub fn build_primary_card() -> PrimaryCard {
-    let card_box = babydra_ui_kit::components::create_css_card(gtk4::Orientation::Vertical, 10, "lock-card");
+    let card_box =
+        babydra_ui_kit::components::create_css_card(gtk4::Orientation::Vertical, 10, "lock-card");
     card_box.set_valign(gtk4::Align::Center);
     card_box.set_halign(gtk4::Align::Center);
 

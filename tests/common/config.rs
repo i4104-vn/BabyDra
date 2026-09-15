@@ -81,10 +81,7 @@ fn explore_config_json_roundtrip_preserves_settings_and_sidebar() {
 
     assert_eq!(decoded.view_mode, "list");
     assert_eq!(decoded.custom_context_items.len(), 1);
-    assert_eq!(
-        decoded.custom_context_items[0].name,
-        "Open in terminal"
-    );
+    assert_eq!(decoded.custom_context_items[0].name, "Open in terminal");
 }
 
 #[test]
@@ -159,4 +156,3 @@ fn display_config_toml_roundtrip() {
     assert_eq!(decoded.display.monitors[0].resolution_height, 1080);
     assert_eq!(decoded.display.monitors[0].refresh_rate, 100.0);
 }
-

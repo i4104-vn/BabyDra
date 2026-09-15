@@ -3,7 +3,11 @@
 use gtk4::prelude::*;
 use gtk4::{Align, Box as GtkBox, Button, Label, Orientation};
 
-fn create_power_action_btn(icon_name: &str, extra_class: Option<&str>, tooltip_key: &str) -> Button {
+fn create_power_action_btn(
+    icon_name: &str,
+    extra_class: Option<&str>,
+    tooltip_key: &str,
+) -> Button {
     let btn = Button::new();
     btn.add_css_class("power-btn");
     if let Some(cls) = extra_class {
@@ -40,8 +44,10 @@ pub fn build() -> super::TopBarWidget {
     actions_box.set_hexpand(true);
     actions_box.set_valign(Align::Center);
 
-    let suspend_btn = create_power_action_btn("sleep", Some("action-btn-suspend"), "greeter.suspend");
-    let reboot_btn = create_power_action_btn("restart", Some("action-btn-reboot"), "greeter.reboot");
+    let suspend_btn =
+        create_power_action_btn("sleep", Some("action-btn-suspend"), "greeter.suspend");
+    let reboot_btn =
+        create_power_action_btn("restart", Some("action-btn-reboot"), "greeter.reboot");
     let power_btn = create_power_action_btn("power", None, "greeter.power_off");
 
     actions_box.append(&suspend_btn);

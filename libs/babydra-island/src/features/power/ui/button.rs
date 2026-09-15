@@ -16,12 +16,7 @@ pub struct PowerButtonWidget {
 }
 
 impl PowerButtonWidget {
-    pub fn new(
-        icon_name: &str,
-        key_char: &str,
-        title: &str,
-        css_action_class: &str,
-    ) -> Self {
+    pub fn new(icon_name: &str, key_char: &str, title: &str, css_action_class: &str) -> Self {
         let container = GtkBox::new(Orientation::Vertical, 0);
         container.add_css_class("power-popover-btn");
         container.add_css_class(css_action_class);

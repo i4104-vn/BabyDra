@@ -187,12 +187,8 @@ pub fn build_appearance_ui(
     gtk_lbl.set_halign(gtk4::Align::Start);
     gtk_box.append(&gtk_lbl);
 
-    let gtk_model = gtk4::StringList::new(
-        &gtk_themes
-            .iter()
-            .map(|s| s.as_str())
-            .collect::<Vec<&str>>(),
-    );
+    let gtk_model =
+        gtk4::StringList::new(&gtk_themes.iter().map(|s| s.as_str()).collect::<Vec<&str>>());
     let gtk_dropdown = gtk4::DropDown::new(Some(gtk_model), Option::<gtk4::Expression>::None);
     gtk_dropdown.add_css_class("settings-dropdown");
     gtk_dropdown.set_cursor_from_name(Some("pointer"));
@@ -292,18 +288,24 @@ pub fn build_appearance_ui(
     plugin_warning_box.set_margin_top(8);
     plugin_warning_box.set_margin_bottom(8);
 
-    let warning_title = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.missing_gst_plugin_title")));
+    let warning_title = gtk4::Label::new(Some(&babydra_core::i18n::trans(
+        "settings.missing_gst_plugin_title",
+    )));
     warning_title.add_css_class("plugin-warning-title");
     warning_title.set_halign(gtk4::Align::Start);
     plugin_warning_box.append(&warning_title);
 
-    let warning_desc = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.missing_gst_plugin_desc")));
+    let warning_desc = gtk4::Label::new(Some(&babydra_core::i18n::trans(
+        "settings.missing_gst_plugin_desc",
+    )));
     warning_desc.add_css_class("plugin-warning-desc");
     warning_desc.set_halign(gtk4::Align::Start);
     warning_desc.set_wrap(true);
     plugin_warning_box.append(&warning_desc);
 
-    let warning_cmd = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.missing_gst_plugin_cmd")));
+    let warning_cmd = gtk4::Label::new(Some(&babydra_core::i18n::trans(
+        "settings.missing_gst_plugin_cmd",
+    )));
     warning_cmd.add_css_class("plugin-warning-cmd");
     warning_cmd.set_halign(gtk4::Align::Start);
     warning_cmd.set_selectable(true);
@@ -372,4 +374,3 @@ pub fn update_wallpaper_badge(badge: &gtk4::Label, path_opt: Option<&std::path::
     }
     badge.set_visible(false);
 }
-

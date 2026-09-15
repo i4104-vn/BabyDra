@@ -35,15 +35,15 @@ pub mod prelude {
         create_footer_btn, create_group_header, create_icon_badge, create_icon_btn,
         create_icon_button, create_list_row, create_menu_for, create_menu_full, create_menu_item,
         create_menu_popover, create_menu_sens, create_menu_sep, create_menu_shortcut,
-        create_menu_text, create_placeholder, create_popover, create_rssi_icon,
-        create_scroll_list, create_sidebar_btn, create_sidebar_wbtn, create_square_tile,
-        create_submenu_item, create_subtitle, create_switch, create_switch_card,
-        create_sys_wifi_icon, create_title, create_toggle_tile, create_vpn_icon, create_wifi_icon,
-        create_wifi_net_icon, create_wp_thumb, render_wifi_svg, show_tray_menu, update_toggle_state,
+        create_menu_text, create_placeholder, create_popover, create_rssi_icon, create_scroll_list,
+        create_sidebar_btn, create_sidebar_wbtn, create_square_tile, create_submenu_item,
+        create_subtitle, create_switch, create_switch_card, create_sys_wifi_icon, create_title,
+        create_toggle_tile, create_vpn_icon, create_wifi_icon, create_wifi_net_icon,
+        create_wp_thumb, render_wifi_svg, show_tray_menu, update_toggle_state,
         ChangeHostnameDialog, ChangeNameDialog, ChangePasswordDialog, ContextMenuBuilder,
-        CustomSlider, CustomSwitch, PasswordDialog, PlaceholderState, PillSlider, ToggleRow, TooltipPopover,
-        TooltipRow, VpnConfigDialog, VpnLogDialog, WifiConfigDialog, WifiInfoDialog,
-        WifiPasswordDialog,
+        CustomSlider, CustomSwitch, PasswordDialog, PillSlider, PlaceholderState, ToggleRow,
+        TooltipPopover, TooltipRow, VpnConfigDialog, VpnLogDialog, WifiConfigDialog,
+        WifiInfoDialog, WifiPasswordDialog,
     };
     pub use crate::ui::{
         animation::{

@@ -78,7 +78,8 @@ fn zoom_icons_resolve_without_fallback() {
 
 #[test]
 fn test_ui_kit_image_cropping_and_rounding() {
-    let pix = gtk4::gdk_pixbuf::Pixbuf::new(gtk4::gdk_pixbuf::Colorspace::Rgb, true, 8, 100, 50).unwrap();
+    let pix =
+        gtk4::gdk_pixbuf::Pixbuf::new(gtk4::gdk_pixbuf::Colorspace::Rgb, true, 8, 100, 50).unwrap();
     pix.fill(0xffffffff);
     let bytes = pix.save_to_bufferv("png", &[]).unwrap();
 
@@ -105,4 +106,3 @@ fn test_ui_kit_image_cropping_and_rounding() {
     assert_eq!(c_pix.height(), 40);
     assert!(c_pix.has_alpha());
 }
-

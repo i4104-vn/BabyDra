@@ -30,7 +30,8 @@ pub fn setup_key_shortcuts(
         let clean_state = babydra_core::clean_modifiers(state);
 
         for shortcut in &shortcuts {
-            if babydra_core::matches_key(keyval, clean_state, (shortcut.keyval, shortcut.modifiers)) {
+            if babydra_core::matches_key(keyval, clean_state, (shortcut.keyval, shortcut.modifiers))
+            {
                 (shortcut.callback)();
                 return glib::Propagation::Stop;
             }

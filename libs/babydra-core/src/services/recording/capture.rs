@@ -1,8 +1,8 @@
 //! Screen recording process lifecycle management via wf-recorder.
 
+use super::path::get_new_recording_path;
 use crate::models::recording::{RecordingConfig, RecordingMode, RecordingStatus};
 use crate::services::notification::service::send_notification;
-use super::path::get_new_recording_path;
 use std::path::PathBuf;
 use std::process::{Child, Command};
 use std::sync::Mutex;
@@ -98,8 +98,7 @@ pub fn get_status() -> RecordingStatus {
                 } else {
                     Duration::ZERO
                 };
-                let active =
-                    elapsed.saturating_sub(session.total_paused_duration + current_paused);
+                let active = elapsed.saturating_sub(session.total_paused_duration + current_paused);
                 RecordingStatus::Recording {
                     pid: session.pid,
                     output_path: session.output_path.clone(),
@@ -173,7 +172,8 @@ pub fn start_recording(config: &RecordingConfig) -> Result<PathBuf, String> {
             width,
             height,
         } => {
-            cmd.arg("-g").arg(format!("{},{} {}x{}", x, y, width, height));
+            cmd.arg("-g")
+                .arg(format!("{},{} {}x{}", x, y, width, height));
         }
         RecordingMode::Window(geometry_str) => {
             if !geometry_str.trim().is_empty() {
@@ -183,9 +183,7 @@ pub fn start_recording(config: &RecordingConfig) -> Result<PathBuf, String> {
     }
 
     let child = cmd.spawn().map_err(|e| {
-        format!(
-            "Failed to launch wf-recorder: {e}. Make sure wf-recorder is installed."
-        )
+        format!("Failed to launch wf-recorder: {e}. Make sure wf-recorder is installed.")
     })?;
 
     let pid = child.id();
@@ -206,7 +204,11 @@ pub fn start_recording(config: &RecordingConfig) -> Result<PathBuf, String> {
         .unwrap_or_else(|| "Recording".to_string());
 
     let notif_title = crate::i18n::trans("recorder.title");
-    let notif_msg = format!("{} ({})", crate::i18n::trans("recorder.notif_started"), filename);
+    let notif_msg = format!(
+        "{} ({})",
+        crate::i18n::trans("recorder.notif_started"),
+        filename
+    );
     send_notification(&notif_title, &notif_msg);
 
     Ok(output_path)
@@ -314,7 +316,11 @@ pub fn stop_recording() -> Result<Option<PathBuf>, String> {
     }
 
     let notif_title = crate::i18n::trans("recorder.title");
-    let notif_msg = format!("{} {}", crate::i18n::trans("recorder.notif_saved"), session.output_path.display());
+    let notif_msg = format!(
+        "{} {}",
+        crate::i18n::trans("recorder.notif_saved"),
+        session.output_path.display()
+    );
     send_notification(&notif_title, &notif_msg);
 
     Ok(Some(session.output_path))

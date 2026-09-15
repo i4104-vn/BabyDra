@@ -9,6 +9,7 @@ pub enum IslandDbusCommand {
     ToggleClipboard,
     ShowPower,
     TogglePower,
+    ShowRecording,
 }
 
 pub struct IslandDbusService {
@@ -36,6 +37,11 @@ impl IslandDbusService {
     async fn toggle_power(&self) {
         let _ = self.tx.send(IslandDbusCommand::TogglePower);
     }
+
+    /// Opens the screen recording controls in the Dynamic Island.
+    async fn show_recording(&self) {
+        let _ = self.tx.send(IslandDbusCommand::ShowRecording);
+    }
 }
 
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -56,6 +62,9 @@ pub fn spawn_island_dbus() {
                 }
                 IslandDbusCommand::ShowPower | IslandDbusCommand::TogglePower => {
                     crate::features::power::service::fire_trigger();
+                }
+                IslandDbusCommand::ShowRecording => {
+                    crate::features::recording::service::fire_trigger();
                 }
             }
         }

@@ -65,10 +65,8 @@ pub fn create_icon_drag(
             }
         };
 
-        let gio_files: Vec<gtk4::gio::File> = targets
-            .iter()
-            .map(gtk4::gio::File::for_path)
-            .collect();
+        let gio_files: Vec<gtk4::gio::File> =
+            targets.iter().map(gtk4::gio::File::for_path).collect();
 
         let file_list = FileList::from_array(&gio_files);
         let file_provider = gtk4::gdk::ContentProvider::for_value(&file_list.to_value());
@@ -281,7 +279,9 @@ pub fn create_desktop_drop(
                     for src in external_sources {
                         if let Some(filename) = src.file_name().map(|n| n.to_os_string()) {
                             let dest = desktop_dir.join(&filename);
-                            if src != dest && babydra_core::copy_path(src, dest.clone()).await.is_ok() {
+                            if src != dest
+                                && babydra_core::copy_path(src, dest.clone()).await.is_ok()
+                            {
                                 #[cfg(unix)]
                                 {
                                     if dest.extension().is_some_and(|e| e == "desktop") {

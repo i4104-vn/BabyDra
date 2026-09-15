@@ -25,7 +25,10 @@ fn read_res(stream: &mut UnixStream) -> Result<Response, String> {
 
 fn format_greetd_err(stage: &str, res: Response) -> String {
     match res {
-        Response::Error { error_type, description } => {
+        Response::Error {
+            error_type,
+            description,
+        } => {
             let err = format!("{stage} failed: {:?}: {}", error_type, description);
             tracing::error!(target: "babydra-greeter", "{}", err);
             err
@@ -43,13 +46,17 @@ pub fn do_login(user: String, pass: String) -> Result<(), String> {
     tracing::info!(target: "babydra-greeter", "Initiating Greetd authentication session for user: {:?}", user);
 
     let socket_path = std::env::var("GREETD_SOCK").map_err(|_| {
-        let err = "GREETD_SOCK environment variable not set. Are you running under greetd?".to_string();
+        let err =
+            "GREETD_SOCK environment variable not set. Are you running under greetd?".to_string();
         tracing::error!(target: "babydra-greeter", "{}", err);
         err
     })?;
 
     let mut stream = UnixStream::connect(&socket_path).map_err(|e| {
-        let err_msg = format!("Failed to connect to greetd socket at {:?}: {}", socket_path, e);
+        let err_msg = format!(
+            "Failed to connect to greetd socket at {:?}: {}",
+            socket_path, e
+        );
         tracing::error!(target: "babydra-greeter", "{}", err_msg);
         err_msg
     })?;
@@ -60,7 +67,10 @@ pub fn do_login(user: String, pass: String) -> Result<(), String> {
     // Step 1: Wait for AuthMessage
     let res = read_res(&mut stream)?;
     let (auth_msg_type, auth_msg) = match res {
-        Response::AuthMessage { auth_message_type, auth_message } => (auth_message_type, auth_message),
+        Response::AuthMessage {
+            auth_message_type,
+            auth_message,
+        } => (auth_message_type, auth_message),
         other => return Err(format_greetd_err("CreateSession", other)),
     };
 
@@ -69,7 +79,12 @@ pub fn do_login(user: String, pass: String) -> Result<(), String> {
         "Greetd requested auth response (type={:?}, message={:?}). Sending password...",
         auth_msg_type, auth_msg
     );
-    write_req(&mut stream, &Request::PostAuthMessageResponse { response: Some(pass) })?;
+    write_req(
+        &mut stream,
+        &Request::PostAuthMessageResponse {
+            response: Some(pass),
+        },
+    )?;
 
     // Step 2: Verify password response
     let res = read_res(&mut stream)?;
@@ -80,10 +95,13 @@ pub fn do_login(user: String, pass: String) -> Result<(), String> {
 
     // Step 3: Start session
     tracing::info!(target: "babydra-greeter", "Password accepted. Sending StartSession (cmd: ['labwc'])...");
-    write_req(&mut stream, &Request::StartSession {
-        cmd: vec!["labwc".to_string()],
-        env: vec![],
-    })?;
+    write_req(
+        &mut stream,
+        &Request::StartSession {
+            cmd: vec!["labwc".to_string()],
+            env: vec![],
+        },
+    )?;
 
     let res = read_res(&mut stream)?;
     match res {

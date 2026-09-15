@@ -3,8 +3,8 @@
 pub mod canvas;
 pub mod clipboard;
 pub mod color_popover;
-pub mod shape_popover;
 mod render;
+pub mod shape_popover;
 
 pub use render::build_editor_ui;
 

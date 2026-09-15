@@ -65,7 +65,13 @@ pub fn create_lock_window(
     center_box.set_vexpand(true);
 
     if is_primary {
-        let PrimaryCard { card_box, entry, status_label, clock_label, date_label } = render::build_primary_card();
+        let PrimaryCard {
+            card_box,
+            entry,
+            status_label,
+            clock_label,
+            date_label,
+        } = render::build_primary_card();
         setup_clock_timer(&clock_label, &date_label);
         setup_auth_handler(app, &entry, &status_label, &card_box);
         setup_focus_management(&window, &entry);

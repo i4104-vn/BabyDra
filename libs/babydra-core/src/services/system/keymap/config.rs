@@ -59,9 +59,7 @@ pub const PAUSE_TIMEOUT_SECS: u64 = 300;
 /// Resolves the pause flag path `~/.babydra/keymap.pause`.
 pub fn get_pause_path() -> PathBuf {
     let home = std::env::var("HOME").unwrap_or_default();
-    PathBuf::from(home)
-        .join(".babydra")
-        .join("keymap.pause")
+    PathBuf::from(home).join(".babydra").join("keymap.pause")
 }
 
 /// Suppresses global shortcut handling while a key-capture dialog is open.

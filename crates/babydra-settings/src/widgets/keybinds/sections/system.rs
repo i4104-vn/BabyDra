@@ -10,11 +10,15 @@ pub fn build_system_section(system_shortcuts: &[SystemShortcut]) -> (Box, Box) {
     let section = Box::new(Orientation::Vertical, 8);
 
     let header_box = Box::new(Orientation::Vertical, 2);
-    let title = Label::new(Some(&babydra_core::i18n::trans("settings.keybinds_system_title")));
+    let title = Label::new(Some(&babydra_core::i18n::trans(
+        "settings.keybinds_system_title",
+    )));
     title.add_css_class("settings-section-title");
     title.set_halign(gtk4::Align::Start);
 
-    let desc = Label::new(Some(&babydra_core::i18n::trans("settings.keybinds_system_desc")));
+    let desc = Label::new(Some(&babydra_core::i18n::trans(
+        "settings.keybinds_system_desc",
+    )));
     desc.add_css_class("settings-page-subtitle");
     desc.set_halign(gtk4::Align::Start);
 

@@ -3,6 +3,7 @@
 use crate::state::DesktopState;
 use crate::widgets::icon::launch_entry;
 use crate::widgets::selection::update_icon_sel;
+use babydra_core::{clean_modifiers, matches_key, parse_shortcut};
 use babydra_ui_kit::components::explore::context_menu::clipboard::{
     paste_from_clipboard, set_clipboard_files,
 };
@@ -12,7 +13,6 @@ use gtk4::{EventControllerKey, Fixed};
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
-use babydra_core::{clean_modifiers, matches_key, parse_shortcut};
 
 pub fn wire_keyboard(
     parent_window: &gtk4::ApplicationWindow,
@@ -96,7 +96,8 @@ pub fn wire_keyboard(
                 && clean_mod == gtk4::gdk::ModifierType::CONTROL_MASK);
 
         if is_cut {
-            let selected: Vec<PathBuf> = state_key.borrow().selected_paths.iter().cloned().collect();
+            let selected: Vec<PathBuf> =
+                state_key.borrow().selected_paths.iter().cloned().collect();
             if !selected.is_empty() {
                 set_clipboard_files(&selected, true);
                 CLIPBOARD.with(|cb| cb.replace(Some((selected.clone(), true))));
@@ -113,7 +114,8 @@ pub fn wire_keyboard(
                 && clean_mod == gtk4::gdk::ModifierType::CONTROL_MASK);
 
         if is_copy {
-            let selected: Vec<PathBuf> = state_key.borrow().selected_paths.iter().cloned().collect();
+            let selected: Vec<PathBuf> =
+                state_key.borrow().selected_paths.iter().cloned().collect();
             if !selected.is_empty() {
                 set_clipboard_files(&selected, false);
                 CLIPBOARD.with(|cb| cb.replace(Some((selected.clone(), false))));

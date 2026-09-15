@@ -172,7 +172,8 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
 
     window.add_controller(key_controller);
 
-    let scroll_controller = gtk4::EventControllerScroll::new(gtk4::EventControllerScrollFlags::VERTICAL);
+    let scroll_controller =
+        gtk4::EventControllerScroll::new(gtk4::EventControllerScrollFlags::VERTICAL);
     let sel_for_scroll = update_selection.clone();
     let curr_for_scroll = current_index.clone();
     let apps_for_scroll = apps_state.clone();
@@ -291,12 +292,9 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
             window.present();
 
             let alt_check = alt_check_enabled.clone();
-            gtk4::glib::timeout_add_local_once(
-                std::time::Duration::from_millis(60),
-                move || {
-                    *alt_check.borrow_mut() = true;
-                },
-            );
+            gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(60), move || {
+                *alt_check.borrow_mut() = true;
+            });
         })
     };
 
