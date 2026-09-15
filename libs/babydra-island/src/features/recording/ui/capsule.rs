@@ -3,7 +3,7 @@
 use gtk4::prelude::*;
 use gtk4::{Align, Box as GtkBox, CenterBox, DrawingArea, Label, Orientation};
 
-/// Notch capsule layout displaying live recording timer and circular red indicator.
+/// Notch capsule layout displaying live recording timer, camera icon and circular red indicator.
 #[derive(Clone)]
 pub struct RecordingCapsuleWidget {
     pub container: GtkBox,
@@ -25,6 +25,18 @@ impl RecordingCapsuleWidget {
         let center_box = CenterBox::new();
         center_box.set_hexpand(true);
         center_box.set_valign(Align::Center);
+
+        // Left (Start): Camera / Recording icon
+        let icon_container = GtkBox::new(Orientation::Horizontal, 0);
+        icon_container.set_valign(Align::Center);
+        icon_container.set_halign(Align::Start);
+        icon_container.set_margin_start(6);
+        let icon_widget = babydra_ui_kit::ui::icon::get_icon("camera", 14);
+        icon_widget.add_css_class("recording-capsule-icon");
+        icon_widget.set_valign(Align::Center);
+        icon_widget.set_halign(Align::Start);
+        icon_container.append(&icon_widget);
+        center_box.set_start_widget(Some(&icon_container));
 
         // Center: live recording timer text
         let timer_label = Label::new(Some("00:00"));

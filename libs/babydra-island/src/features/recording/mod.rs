@@ -20,7 +20,7 @@ pub const PRIORITY: u8 = 85;
 
 /// Dynamic Island feature for screen recording indication and control.
 pub struct RecordingFeature {
-    handle: Option<IslandViewHandle>,
+    handle: Rc<RefCell<Option<IslandViewHandle>>>,
     capsule: RecordingCapsuleWidget,
     popover: Rc<RefCell<Option<RecordingPopover>>>,
     state: Rc<RefCell<IslandRecordingState>>,
@@ -33,7 +33,7 @@ impl RecordingFeature {
         let state = spawn_recording_polling();
 
         Self {
-            handle: None,
+            handle: Rc::new(RefCell::new(None)),
             capsule,
             popover: Rc::new(RefCell::new(None)),
             state,
@@ -81,11 +81,43 @@ impl IslandFeature for RecordingFeature {
     }
 
     fn init(&mut self, handle: &IslandViewHandle) {
-        self.handle = Some(handle.clone());
+        *self.handle.borrow_mut() = Some(handle.clone());
+
+        let handle = handle.clone();
+        let popover = self.popover.clone();
+        service::set_trigger_callback(move || {
+            crate::island::dismiss_all_popovers();
+            handle.override_show_for(std::time::Duration::from_secs(30));
+            crate::island::tick_default_island();
+            if let Some(popover) = popover.borrow().as_ref() {
+                if popover.root().is_some() {
+                    popover.popup();
+                }
+            }
+        });
     }
 
     fn attach(&mut self, ctx: &IslandCtx) {
         let popover = RecordingPopover::new(&ctx.capsule());
+
+        // When not recording and the popover closes, auto-dismiss the island capsule after ~3 seconds
+        let state = self.state.clone();
+        let handle_rc = self.handle.clone();
+        popover.popover.connect_closed(move |_| {
+            if !state.borrow().is_recording {
+                if let Some(h) = handle_rc.borrow().as_ref() {
+                    h.override_show_for(std::time::Duration::from_secs(3));
+                }
+                crate::island::tick_default_island();
+                gtk4::glib::timeout_add_local_once(
+                    std::time::Duration::from_millis(3100),
+                    move || {
+                        crate::island::tick_default_island();
+                    },
+                );
+            }
+        });
+
         *self.popover.borrow_mut() = Some(popover);
     }
 
@@ -104,7 +136,7 @@ impl IslandFeature for RecordingFeature {
         let st = self.state.borrow().clone();
 
         if st.is_recording {
-            if let Some(ref h) = self.handle {
+            if let Some(ref h) = *self.handle.borrow() {
                 h.show();
             }
 
@@ -121,8 +153,7 @@ impl IslandFeature for RecordingFeature {
             };
 
             if st.is_paused {
-                self.capsule
-                    .update_timer(&format!("PAUSED {}", time_str));
+                self.capsule.update_timer(&format!("PAUSED {}", time_str));
             } else {
                 self.capsule.update_timer(&time_str);
             }
@@ -140,9 +171,10 @@ impl IslandFeature for RecordingFeature {
                     popover.popdown();
                 }
             }
-            if let Some(ref h) = self.handle {
+            if let Some(ref h) = *self.handle.borrow() {
                 h.hide();
             }
+            self.capsule.update_timer("00:00");
             self.was_recording = false;
         }
     }

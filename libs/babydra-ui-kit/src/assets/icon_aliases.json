@@ -140,5 +140,9 @@
     "edit-select-all-symbolic": "rename",
     "application-x-executable": "terminal",
     "help-browser": "info",
-    "audio-volume-high": "volume"
+    "audio-volume-high": "volume",
+    "media-playback-stop": "rect",
+    "media-playback-stop-symbolic": "rect",
+    "audio-input-microphone": "microphone",
+    "audio-input-microphone-symbolic": "microphone"
 }

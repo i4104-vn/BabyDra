@@ -1,6 +1,286 @@
 /* BabyDra Screen Recorder Styles */
 
-/* ── Control Window ──────────────────────────────────────────── */
+/* ── Dynamic Island Recording Popover ────────────────────────── */
+popover.recording-popover {
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+    border: none;
+}
+
+popover.recording-popover > contents {
+    background-color: rgba(14, 14, 18, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.60);
+}
+
+.recording-popover-box {
+    min-width: 320px;
+}
+
+/* ── Header & Status ─────────────────────────────────────────── */
+.recording-popover-header {
+    margin-bottom: 6px;
+}
+
+.recording-header-icon {
+    color: #ef4444;
+    opacity: 0.90;
+}
+
+.recording-header-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.50);
+}
+
+.recording-status-badge {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    background-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.70);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.recording-status-badge.badge-ready,
+.recording-status-badge.badge-idle {
+    background-color: rgba(16, 185, 129, 0.16);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.recording-status-badge.badge-recording {
+    background-color: rgba(239, 68, 68, 0.20);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.40);
+}
+
+.recording-status-badge.badge-paused {
+    background-color: rgba(234, 179, 8, 0.20);
+    color: #eab308;
+    border: 1px solid rgba(234, 179, 8, 0.40);
+}
+
+/* ── Hero Timer ──────────────────────────────────────────────── */
+.recording-timer-container {
+    margin: 4px 0 12px 0;
+}
+
+.recording-hero-timer {
+    font-size: 32px;
+    font-weight: 800;
+    font-family: "JetBrains Mono", monospace;
+    letter-spacing: 2px;
+    color: #ffffff;
+}
+
+/* ── Settings Card ───────────────────────────────────────────── */
+.recording-settings-card {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 6px 12px;
+}
+
+.recording-setting-row {
+    min-height: 38px;
+    padding: 3px 2px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.recording-setting-row:last-child {
+    border-bottom: none;
+}
+
+.recording-setting-icon {
+    opacity: 0.65;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.recording-setting-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Dropdowns in recorder */
+.recording-settings-card dropdown {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.recording-settings-card dropdown>button {
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 9px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #ffffff;
+    box-shadow: none;
+    min-width: 130px;
+    transition: all 150ms ease;
+}
+
+.recording-settings-card dropdown>button:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+.recording-settings-card dropdown:focus-within>button,
+.recording-settings-card dropdown>button:focus {
+    border-color: #3b82f6;
+}
+
+.recording-settings-card switch {
+    margin: 2px 0;
+}
+
+.recording-area-btn {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #ffffff;
+    transition: all 150ms ease;
+}
+
+.recording-area-btn:hover {
+    background-color: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+.recording-area-label {
+    font-size: 12px;
+    opacity: 0.65;
+    font-family: monospace;
+}
+
+/* ── Action Buttons ──────────────────────────────────────────── */
+.recording-action-row {
+    margin-top: 10px;
+}
+
+button.recording-start-btn {
+    background-color: #3b82f6;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 12px;
+    min-height: 40px;
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 2px 10px rgba(59, 130, 246, 0.35);
+    transition: all 180ms ease;
+}
+
+button.recording-start-btn:hover {
+    background-color: #2563eb;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.45);
+}
+
+button.recording-start-btn:active {
+    background-color: #1d4ed8;
+}
+
+button.recording-folder-btn {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.90);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    font-weight: 600;
+    font-size: 12px;
+    min-height: 40px;
+    border-radius: 12px;
+    transition: all 180ms ease;
+}
+
+button.recording-folder-btn:hover {
+    background-color: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.20);
+    color: #ffffff;
+}
+
+button.recording-folder-btn:active {
+    background-color: rgba(255, 255, 255, 0.20);
+}
+
+/* ── Live Recording Meta Card ────────────────────────────────── */
+.recording-meta-card {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin: 10px 0;
+}
+
+.recording-meta-chip {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* ── Live Recording Controls (Popover Buttons) ───────────────── */
+.recording-popover-btn {
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 8px 4px;
+    transition: all 180ms ease;
+}
+
+.recording-popover-btn:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.18);
+}
+
+.recording-btn-icon-holder {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 9999px;
+    margin-bottom: 2px;
+}
+
+.recording-btn-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Action specific accents */
+.recording-action-stop .recording-btn-icon-holder {
+    background-color: rgba(239, 68, 68, 0.20);
+    color: #ef4444;
+}
+
+.recording-action-stop:hover {
+    background-color: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.35);
+}
+
+.recording-popover-btn.alert-active {
+    background-color: rgba(239, 68, 68, 0.16);
+    border-color: rgba(239, 68, 68, 0.40);
+}
+
+.recording-popover-btn.alert-active .recording-btn-icon-holder {
+    background-color: rgba(239, 68, 68, 0.30);
+    color: #fca5a5;
+}
+
+.recording-popover-btn.alert-active .recording-btn-title {
+    color: #fca5a5;
+}
+
+/* ── Shared controls / Window ───────────────────────────────── */
 window.recorder-window {
     border-radius: 18px;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
@@ -14,7 +294,7 @@ button.active-mode {
 }
 
 label.recorder-timer {
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 700;
     font-family: monospace;
     letter-spacing: 2px;
@@ -44,149 +324,16 @@ label.dim-label {
 }
 
 /* ── Dynamic Island Capsule ──────────────────────────────────── */
+.recording-capsule-icon {
+    color: #ef4444;
+    opacity: 0.90;
+}
+
 label.recording-capsule-timer {
     font-size: 12px;
     font-weight: 700;
     font-family: monospace;
     color: #ffffff;
     letter-spacing: 0.5px;
-    margin-left: 10px;
-}
-
-/* ── Dynamic Island Recording Popover ────────────────────────── */
-popover.recording-popover {
-    background-color: transparent;
-    padding: 0;
-    margin: 0;
-    box-shadow: none;
-    border: none;
-}
-
-popover.recording-popover > contents {
-    background-color: rgba(18, 18, 22, 0.88);
-    backdrop-filter: blur(28px);
-    -webkit-backdrop-filter: blur(28px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 22px;
-    padding: 16px;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
-}
-
-.recording-popover-box {
-    min-width: 330px;
-}
-
-.recording-popover-header {
-    margin-bottom: 8px;
-}
-
-.recording-header-title {
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 1.5px;
-    color: rgba(255, 255, 255, 0.50);
-}
-
-.recording-status-badge {
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 1px;
-    padding: 2px 8px;
-    border-radius: 9999px;
-}
-
-.recording-status-badge.badge-recording {
-    background-color: rgba(239, 68, 68, 0.20);
-    color: #ef4444;
-    border: 1px solid rgba(239, 68, 68, 0.40);
-}
-
-.recording-status-badge.badge-paused {
-    background-color: rgba(234, 179, 8, 0.20);
-    color: #eab308;
-    border: 1px solid rgba(234, 179, 8, 0.40);
-}
-
-.recording-timer-container {
-    margin: 8px 0 12px 0;
-}
-
-.recording-hero-timer {
-    font-size: 32px;
-    font-weight: 800;
-    font-family: monospace;
-    letter-spacing: 2px;
-    color: #ffffff;
-}
-
-.recording-meta-card {
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    padding: 8px 12px;
-    margin-bottom: 8px;
-}
-
-.recording-meta-label {
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    color: rgba(255, 255, 255, 0.40);
-}
-
-.recording-meta-value {
-    font-size: 12px;
-    font-weight: 700;
-    color: #f1f5f9;
-}
-
-/* ── Popover Buttons ─────────────────────────────────────────── */
-.recording-popover-btn {
-    background-color: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 14px;
-    padding: 8px 4px;
-    transition: all 180ms ease;
-}
-
-.recording-popover-btn:hover {
-    background-color: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.18);
-}
-
-.recording-btn-icon-holder {
-    background-color: rgba(255, 255, 255, 0.08);
-    border-radius: 9999px;
-    margin-bottom: 2px;
-}
-
-.recording-btn-title {
-    font-size: 10px;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.85);
-}
-
-/* Action specific accents */
-.recording-action-stop .recording-btn-icon-holder {
-    background-color: rgba(239, 68, 68, 0.20);
-    color: #ef4444;
-}
-
-.recording-action-stop:hover {
-    background-color: rgba(239, 68, 68, 0.15);
-    border-color: rgba(239, 68, 68, 0.35);
-}
-
-.recording-popover-btn.alert-active {
-    background-color: rgba(239, 68, 68, 0.16);
-    border-color: rgba(239, 68, 68, 0.40);
-}
-
-.recording-popover-btn.alert-active .recording-btn-icon-holder {
-    background-color: rgba(239, 68, 68, 0.30);
-    color: #fca5a5;
-}
-
-.recording-popover-btn.alert-active .recording-btn-title {
-    color: #fca5a5;
+    margin: 0 4px;
 }
