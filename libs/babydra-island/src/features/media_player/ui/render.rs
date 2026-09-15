@@ -7,41 +7,7 @@ use gtk4::prelude::*;
 use crate::features::media_player::service::{art, format_time};
 use crate::features::media_player::MediaPlayerFeature;
 
-/// Parsed playerctl metadata for one refresh cycle.
-#[derive(Default)]
-pub struct PlayerMeta {
-    pub playing: bool,
-    pub title: String,
-    pub artist: String,
-    pub player_name_raw: String,
-    pub art_url: String,
-    pub pos_secs: f64,
-    pub len_secs: f64,
-}
-
-/// Parses one raw `playerctl metadata --format` line.
-/// Returns `(meta, player_active)` — active when status is Playing/Paused.
-pub fn parse_metadata(line: &str) -> (PlayerMeta, bool) {
-    let mut meta = PlayerMeta::default();
-    let parts: Vec<&str> = line.split("|//|").collect();
-    if parts.len() < 5 {
-        return (meta, false);
-    }
-    let status_str = parts[0].trim();
-    meta.title = parts[1].trim().to_string();
-    meta.artist = parts[2].trim().to_string();
-    meta.player_name_raw = parts[3].trim().to_string();
-    meta.art_url = parts[4].trim().to_string();
-    if parts.len() >= 7 {
-        let pos_us = parts[5].trim().parse::<f64>().unwrap_or(0.0);
-        let len_us = parts[6].trim().parse::<f64>().unwrap_or(0.0);
-        meta.pos_secs = pos_us / 1_000_000.0;
-        meta.len_secs = len_us / 1_000_000.0;
-    }
-    meta.playing = status_str == "Playing";
-    let player_active = status_str == "Playing" || status_str == "Paused";
-    (meta, player_active)
-}
+pub use crate::features::media_player::models::{parse_metadata, PlayerMeta};
 
 impl MediaPlayerFeature {
     /// Updates labels, progress and artwork (throttled where cheap wins).

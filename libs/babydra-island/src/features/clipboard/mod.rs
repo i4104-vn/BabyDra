@@ -5,6 +5,7 @@
 //! | Thư mục / File | Trách nhiệm |
 //! | :--- | :--- |
 //! | `mod.rs` | Struct `ClipboardFeature` + `IslandFeature` impl (vòng đời + tick) |
+//! | `models/` | Định nghĩa lệnh IPC D-Bus (`IslandDbusCommand`) |
 //! | `ui/popover.rs` | Popover thả xuống bên dưới island (`ClipboardPopover`) |
 //! | `ui/row.rs` | Từng hàng phần tử trong danh sách popover (`ClipboardItemRow`) |
 //! | `ui/render.rs` | Render dữ liệu entries & thumbnail hình ảnh (`render_popover`) |
@@ -12,8 +13,11 @@
 //! | `service/` | D-Bus IPC server & watcher khởi chạy |
 
 pub mod controller;
+pub mod models;
 pub mod service;
 pub mod ui;
+
+pub use models::*;
 
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;

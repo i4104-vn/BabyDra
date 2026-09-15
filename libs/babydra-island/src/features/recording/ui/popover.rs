@@ -1,22 +1,15 @@
-//! Recording configuration and controls rendered inside the island popover.
-
 use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::Rc;
 
 use babydra_core::i18n::trans;
-use babydra_core::models::recording::{RecordingConfig, RecordingMode};
-use babydra_core::services::recording::{
-    get_recordings_dir, select_geometry_str_with_slurp, start_recording, stop_recording,
-    toggle_pause,
-};
+use babydra_core::models::recording::RecordingConfig;
 use gtk4::prelude::*;
 use gtk4::{Align, Box as GtkBox, Button, DropDown, Label, Orientation, Switch};
 
 use super::button::RecordingButtonWidget;
-use crate::features::recording::service::{
-    toggle_audio_mute, toggle_mic_mute, IslandRecordingState,
-};
+use crate::features::recording::controller::{connect_popover_actions, PopoverActionsContext};
+use crate::features::recording::service::IslandRecordingState;
 use crate::island::ui::IslandPopover;
 
 #[derive(Clone)]
@@ -186,127 +179,6 @@ impl RecordingPopover {
         settings.append(&audio_device_row);
         base.popover_box.append(&settings);
 
-        {
-            let config = config.clone();
-            let display_output_row = display_output_row.clone();
-            let area_row = area_row.clone();
-            let output_dropdown = output_dropdown.clone();
-            let output_names = output_names.clone();
-            mode_dropdown.connect_selected_notify(move |dropdown| {
-                let mut config = config.borrow_mut();
-                match dropdown.selected() {
-                    1 => {
-                        let output = output_names
-                            .get(output_dropdown.selected() as usize)
-                            .cloned()
-                            .unwrap_or_default();
-                        config.mode = RecordingMode::SingleOutput(output);
-                        display_output_row.set_visible(true);
-                        area_row.set_visible(false);
-                    }
-                    2 => {
-                        config.mode = RecordingMode::Window(String::new());
-                        display_output_row.set_visible(false);
-                        area_row.set_visible(true);
-                    }
-                    _ => {
-                        config.mode = RecordingMode::Fullscreen;
-                        display_output_row.set_visible(false);
-                        area_row.set_visible(false);
-                    }
-                }
-            });
-        }
-        {
-            let config = config.clone();
-            let output_names = output_names.clone();
-            output_dropdown.connect_selected_notify(move |dropdown| {
-                if let Some(name) = output_names.get(dropdown.selected() as usize) {
-                    config.borrow_mut().mode = RecordingMode::SingleOutput(name.clone());
-                }
-            });
-        }
-        {
-            let config = config.clone();
-            let area_label = area_label.clone();
-            area_button.connect_clicked(move |_| {
-                if let Some(geometry) = select_geometry_str_with_slurp() {
-                    area_label.set_text(&geometry);
-                    config.borrow_mut().mode = RecordingMode::Window(geometry);
-                }
-            });
-        }
-        {
-            let config = config.clone();
-            resolution.connect_selected_notify(move |dropdown| {
-                config.borrow_mut().resolution = match dropdown.selected() {
-                    1 => Some((1920, 1080)),
-                    2 => Some((1280, 720)),
-                    3 => Some((854, 480)),
-                    _ => None,
-                };
-            });
-        }
-        {
-            let config = config.clone();
-            framerate.connect_selected_notify(move |dropdown| {
-                config.borrow_mut().framerate = match dropdown.selected() {
-                    0 => 90,
-                    2 => 30,
-                    3 => 24,
-                    _ => 60,
-                };
-            });
-        }
-        {
-            let config = config.clone();
-            format.connect_selected_notify(move |dropdown| {
-                config.borrow_mut().format = match dropdown.selected() {
-                    1 => "mkv",
-                    2 => "webm",
-                    _ => "mp4",
-                }
-                .to_string();
-            });
-        }
-        {
-            let config = config.clone();
-            let audio_device_names = audio_device_names.clone();
-            let audio_device = audio_device.clone();
-            let audio_device_row = audio_device_row.clone();
-            audio.connect_active_notify(move |switch| {
-                let active = switch.is_active();
-                audio_device_row.set_visible(active);
-                audio_device.set_sensitive(active);
-                let mut config = config.borrow_mut();
-                config.audio = active;
-                config.audio_device = if active {
-                    audio_device_names.first().cloned()
-                } else {
-                    None
-                };
-            });
-        }
-        {
-            let config = config.clone();
-            let audio_device_names = audio_device_names.clone();
-            audio_device.connect_selected_notify(move |dropdown| {
-                config.borrow_mut().audio_device = audio_device_names
-                    .get(dropdown.selected() as usize)
-                    .cloned();
-            });
-        }
-        {
-            let config = config.clone();
-            codec.connect_selected_notify(move |dropdown| {
-                config.borrow_mut().codec = match dropdown.selected() {
-                    1 => Some("libx264".to_string()),
-                    2 => Some("h264_vaapi".to_string()),
-                    _ => None,
-                };
-            });
-        }
-
         let action_row = GtkBox::new(Orientation::Horizontal, 8);
         action_row.add_css_class("recording-action-row");
         action_row.set_halign(Align::End);
@@ -327,17 +199,6 @@ impl RecordingPopover {
         action_row.append(&open_folder);
         action_row.append(&start_button);
         base.popover_box.append(&action_row);
-        {
-            let config = config.clone();
-            start_button.connect_clicked(move |_| {
-                let _ = start_recording(&config.borrow());
-            });
-        }
-        open_folder.connect_clicked(|_| {
-            let _ = std::process::Command::new("xdg-open")
-                .arg(get_recordings_dir())
-                .spawn();
-        });
 
         let meta_card = GtkBox::new(Orientation::Horizontal, 12);
         meta_card.add_css_class("recording-meta-card");
@@ -379,74 +240,37 @@ impl RecordingPopover {
         }
         base.popover_box.append(&buttons_box);
 
-        btn_pause.click_gesture.connect_pressed(|_, _, _, _| {
-            let _ = toggle_pause();
+        // Connect all interactions and logic through the recording controller
+        connect_popover_actions(PopoverActionsContext {
+            config,
+            mode_combo: mode_dropdown,
+            output_dropdown,
+            display_output_row,
+            output_names,
+            area_row,
+            area_label,
+            area_button,
+            resolution,
+            framerate,
+            format,
+            audio,
+            audio_device_row,
+            audio_device,
+            audio_device_names,
+            codec,
+            start_button,
+            open_folder,
+            btn_pause: btn_pause.clone(),
+            btn_stop: btn_stop.clone(),
+            btn_mute_audio: btn_mute_audio.clone(),
+            btn_mute_mic: btn_mute_mic.clone(),
+            timer_label: timer_label.clone(),
+            settings: settings.clone(),
+            action_row: action_row.clone(),
+            meta_card: meta_card.clone(),
+            buttons_box: buttons_box.clone(),
+            status_badge: status_badge.clone(),
         });
-        {
-            let timer_label = timer_label.clone();
-            let settings = settings.clone();
-            let action_row = action_row.clone();
-            let meta_card = meta_card.clone();
-            let buttons_box = buttons_box.clone();
-            let status_badge = status_badge.clone();
-            btn_stop.click_gesture.connect_pressed(move |_, _, _, _| {
-                std::thread::spawn(|| {
-                    let _ = stop_recording();
-                });
-                timer_label.set_text("00:00:00");
-                settings.set_visible(true);
-                action_row.set_visible(true);
-                meta_card.set_visible(false);
-                buttons_box.set_visible(false);
-
-                status_badge.remove_css_class("badge-recording");
-                status_badge.remove_css_class("badge-paused");
-                status_badge.add_css_class("badge-ready");
-                status_badge.set_text(&trans("recorder.status_idle"));
-            });
-        }
-        {
-            let button = btn_mute_audio.clone();
-            btn_mute_audio
-                .click_gesture
-                .connect_pressed(move |_, _, _, _| {
-                    let muted = toggle_audio_mute();
-                    button.set_icon_and_title(
-                        if muted {
-                            "audio-volume-muted"
-                        } else {
-                            "audio-volume-high"
-                        },
-                        &trans(if muted {
-                            "recorder.audio_unmute"
-                        } else {
-                            "recorder.audio_mute"
-                        }),
-                    );
-                    button.set_alert(muted);
-                });
-        }
-        {
-            let button = btn_mute_mic.clone();
-            btn_mute_mic
-                .click_gesture
-                .connect_pressed(move |_, _, _, _| {
-                    let muted = toggle_mic_mute();
-                    button.set_icon_and_title(
-                        if muted {
-                            "microphone-disabled"
-                        } else {
-                            "audio-input-microphone"
-                        },
-                        &trans(if muted {
-                            "recorder.mic_unmute"
-                        } else {
-                            "recorder.mic_mute"
-                        }),
-                    );
-                    button.set_alert(muted);
-                });
-        }
 
         Self {
             base,

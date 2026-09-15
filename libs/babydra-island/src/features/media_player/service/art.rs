@@ -9,8 +9,7 @@ use babydra_ui_kit::ui::image::create_rounded_picture;
 use gdk_pixbuf::prelude::*;
 use gtk4::prelude::*;
 
-/// (art_url, fallback_icon_name, load_result)
-pub type ArtPayload = (String, String, Result<Vec<u8>, ()>);
+pub use crate::features::media_player::models::ArtPayload;
 
 /// Parses and scales raw image data from memory buffers to build cover art.
 /// If `crop_square` is true, delegates to `babydra_ui_kit::ui::image::create_rounded_picture`.

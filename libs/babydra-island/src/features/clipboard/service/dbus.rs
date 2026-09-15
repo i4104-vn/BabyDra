@@ -1,16 +1,10 @@
 //! D-Bus IPC server hosting `org.babydra.Island` over the user session bus.
 
+use std::sync::atomic::{AtomicBool, Ordering};
 use tokio::sync::mpsc::UnboundedSender;
 use zbus::interface;
 
-#[derive(Debug, Clone, Copy)]
-pub enum IslandDbusCommand {
-    ShowClipboard,
-    ToggleClipboard,
-    ShowPower,
-    TogglePower,
-    ShowRecording,
-}
+pub use crate::features::clipboard::models::IslandDbusCommand;
 
 pub struct IslandDbusService {
     tx: UnboundedSender<IslandDbusCommand>,
@@ -43,8 +37,6 @@ impl IslandDbusService {
         let _ = self.tx.send(IslandDbusCommand::ShowRecording);
     }
 }
-
-use std::sync::atomic::{AtomicBool, Ordering};
 
 static DBUS_SPAWNED: AtomicBool = AtomicBool::new(false);
 

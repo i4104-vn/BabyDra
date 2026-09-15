@@ -8,6 +8,7 @@
 //! | Thư mục / File | Trách nhiệm |
 //! | :--- | :--- |
 //! | `mod.rs` | Struct + constructor + `IslandFeature` impl (vòng đời + tick) |
+//! | `models/` | Mô hình dữ liệu metadata bài hát (`PlayerMeta`) & tải bìa (`ArtPayload`) |
 //! | `ui/view.rs` | Xây dựng cây widget (`PlayerWidgets::build`) |
 //! | `ui/visualizer.rs` | Thanh hiệu ứng sóng nhạc chuyển động |
 //! | `ui/popover.rs` | Popover điều khiển media player |
@@ -16,8 +17,11 @@
 //! | `service/art.rs` | Tải artwork, retry + fallback |
 //! | `service/format.rs` | Helper định dạng thời gian và icon app |
 
+pub mod models;
 pub mod service;
 pub mod ui;
+
+pub use models::{ArtPayload, PlayerMeta};
 
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;

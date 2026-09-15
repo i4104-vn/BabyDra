@@ -4,15 +4,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::time::Duration;
 
-#[derive(Clone, Debug, Default)]
-pub struct IslandRecordingState {
-    pub is_recording: bool,
-    pub is_paused: bool,
-    pub elapsed_secs: u64,
-    pub mode_name: String,
-    pub format: String,
-    pub framerate: u32,
-}
+pub use crate::features::recording::models::IslandRecordingState;
 
 /// Spawns a background thread that polls the in-process recording service.
 pub fn spawn_recording_polling() -> Rc<RefCell<IslandRecordingState>> {

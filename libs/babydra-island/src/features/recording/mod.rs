@@ -1,10 +1,24 @@
 //! Screen recording dynamic island feature.
 //!
-//! Displays the live recording elapsed timer, a red outer ring indicator with inner red dot on the right,
-//! and opens a glassmorphic popover with details and control actions (pause, stop, audio mute, mic mute).
+//! ## Cấu trúc module (chuẩn feature)
+//!
+//! | Thư mục / File | Trách nhiệm |
+//! | :--- | :--- |
+//! | `mod.rs` | Struct `RecordingFeature` + `IslandFeature` impl (vòng đời + tick) |
+//! | `models/` | Mô hình dữ liệu trạng thái (`IslandRecordingState`) và context (`PopoverActionsContext`) |
+//! | `ui/popover.rs` | Popover bảng điều khiển & cài đặt ghi hình (`RecordingPopover`) |
+//! | `ui/capsule.rs` | Widget viên nang dynamic island (`RecordingCapsuleWidget`) |
+//! | `ui/button.rs` | Widget nút bấm tương tác tròn (`RecordingButtonWidget`) |
+//! | `controller/actions.rs` | Kết nối và xử lý sự kiện hành động ghi hình (Start, Stop, Pause, Mute, Folder, Area) |
+//! | `controller/keyboard.rs` | Điều hướng phím tắt cho popover ghi hình |
+//! | `service/` | Background poller & trigger callbacks |
 
+pub mod controller;
+pub mod models;
 pub mod service;
 pub mod ui;
+
+pub use models::*;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -13,7 +27,8 @@ use gtk4::prelude::*;
 
 use crate::island::models::view::{CAPSULE_HEIGHT, CAPSULE_WIDTH};
 use crate::island::{IslandCtx, IslandFeature, IslandViewHandle};
-use service::{spawn_recording_polling, IslandRecordingState};
+use controller::create_keyboard_controller;
+use service::spawn_recording_polling;
 use ui::{RecordingCapsuleWidget, RecordingPopover};
 
 pub const PRIORITY: u8 = 85;
@@ -105,6 +120,13 @@ impl IslandFeature for RecordingFeature {
 
     fn attach(&mut self, ctx: &IslandCtx) {
         let popover = RecordingPopover::new(&ctx.capsule());
+
+        crate::island::attach_keyboard_controllers(
+            &ctx.capsule(),
+            &popover.popover,
+            &popover.popover_box,
+            || create_keyboard_controller(self.handle.clone(), self.popover.clone()),
+        );
 
         // When not recording and the popover closes, auto-dismiss the island capsule after ~3 seconds
         let state = self.state.clone();

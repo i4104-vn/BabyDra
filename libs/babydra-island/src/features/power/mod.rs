@@ -5,6 +5,7 @@
 //! | Thư mục / File | Trách nhiệm |
 //! | :--- | :--- |
 //! | `mod.rs` | Struct `PowerFeature` + `IslandFeature` impl (vòng đời + tick) |
+//! | `models/` | Định nghĩa mô hình hành động nguồn (`PowerAction`) |
 //! | `ui/popover.rs` | Popover 4 nút thả xuống bên dưới island (`PowerPopover`) |
 //! | `ui/button.rs` | Từng nút bấm trong 4 options (`PowerButtonWidget`) |
 //! | `ui/render.rs` | Render highlight và thực thi power action |
@@ -12,8 +13,11 @@
 //! | `service/` | D-Bus IPC callback registration |
 
 pub mod controller;
+pub mod models;
 pub mod service;
 pub mod ui;
+
+pub use models::*;
 
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;

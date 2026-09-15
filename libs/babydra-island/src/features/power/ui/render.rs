@@ -1,8 +1,10 @@
 //! Rendering & selection highlight logic for the Power popover.
 
-use super::popover::PowerPopover;
-use crate::island::IslandViewHandle;
 use gtk4::prelude::*;
+
+use super::popover::PowerPopover;
+use crate::features::power::models::PowerAction;
+use crate::island::IslandViewHandle;
 
 /// Updates the highlight state on the 4 buttons.
 pub fn highlight_selection(popover: &PowerPopover, selected_idx: usize) {
@@ -23,19 +25,7 @@ pub fn execute_power_action(idx: usize, popover: &PowerPopover, handle: Option<&
         h.hide();
     }
 
-    match idx {
-        0 => {
-            babydra_core::poweroff();
-        }
-        1 => {
-            babydra_core::reboot();
-        }
-        2 => {
-            babydra_core::suspend();
-        }
-        3 => {
-            babydra_core::services::actions::execute_exit_shell();
-        }
-        _ => {}
+    if let Some(action) = PowerAction::from_index(idx) {
+        action.execute();
     }
 }
