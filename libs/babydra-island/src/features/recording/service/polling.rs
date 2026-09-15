@@ -25,6 +25,7 @@ pub fn spawn_recording_polling() -> Rc<RefCell<IslandRecordingState>> {
                     babydra_core::services::recording::is_recording_audio_muted();
                 state.is_mic_muted = babydra_core::services::recording::is_recording_mic_muted();
                 if let Some(cfg) = babydra_core::services::recording::get_active_config() {
+                    state.audio_enabled = cfg.audio;
                     state.mode_name = match cfg.mode {
                         babydra_core::models::recording::RecordingMode::Fullscreen => {
                             "Fullscreen".to_string()

@@ -327,6 +327,11 @@ button.video-speed-btn {
     min-width: 380px;
 }
 
+/* The dialog's vertical Box spacing already separates the title from the grid. */
+.video-details-dialog .exif-title {
+    margin-bottom: 0;
+}
+
 .video-time-lbl {
     font-variant-numeric: tabular-nums;
     font-size: 11px;

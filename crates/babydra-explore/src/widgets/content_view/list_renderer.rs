@@ -37,7 +37,6 @@ pub async fn render_list_view(
             idx,
             entry,
             selected_paths.clone(),
-            nav_callback.clone(),
             move |widget, x, y| {
                 let mut target_paths = sel_paths.borrow().clone();
                 if !target_paths.contains(&target_entry.path) {

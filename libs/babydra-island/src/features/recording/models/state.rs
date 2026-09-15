@@ -9,6 +9,8 @@ pub struct IslandRecordingState {
     pub mode_name: String,
     pub format: String,
     pub framerate: u32,
+    /// Whether the active recording session was started with audio capture enabled.
+    pub audio_enabled: bool,
     pub is_audio_muted: bool,
     pub is_mic_muted: bool,
 }

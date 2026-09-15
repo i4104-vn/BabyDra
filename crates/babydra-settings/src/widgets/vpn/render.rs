@@ -1,4 +1,4 @@
-//! VPN UI layout generator synchronized with Wi-Fi layout & FAB button.
+//! VPN UI layout generator synchronized with Wi-Fi layout.
 
 use babydra_ui_kit::components::modals::{VpnConfigDialog, VpnLogDialog};
 use gtk4::prelude::*;
@@ -6,7 +6,6 @@ use gtk4::prelude::*;
 /// Builds the VPN settings page UI.
 pub fn build_vpn_ui() -> (
     gtk4::Box,
-    gtk4::Button,
     gtk4::Button,
     gtk4::ListBox,
     VpnConfigDialog,
@@ -56,14 +55,6 @@ pub fn build_vpn_ui() -> (
 
     overlay.set_child(Some(&scroll));
 
-    // Floating Action Button Component (import_btn)
-    let import_btn = babydra_ui_kit::components::create_fab("plus");
-    import_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.vpn_add_tooltip")));
-    import_btn.set_margin_end(24);
-    import_btn.set_margin_bottom(24);
-
-    overlay.add_overlay(&import_btn);
-
     // VpnConfigDialog & VpnLogDialog Modal Overlays
     let config_dialog = VpnConfigDialog::new();
     overlay.add_overlay(&config_dialog.container);
@@ -75,7 +66,6 @@ pub fn build_vpn_ui() -> (
 
     (
         main_box,
-        import_btn,
         add_custom_btn,
         list_box,
         config_dialog,

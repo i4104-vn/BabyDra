@@ -7,7 +7,7 @@ use std::rc::Rc;
 use std::sync::mpsc::channel;
 
 use babydra_core::services::system::vpn::{
-    delete_vpn, get_vpn_connections, import_vpn_profile, save_vpn_connection, VpnConn,
+    delete_vpn, get_vpn_connections, save_vpn_connection, VpnConn,
 };
 
 mod handler;
@@ -15,7 +15,7 @@ mod render;
 
 /// Creates a new `VPN widget`.
 pub fn create_vpn_widget() -> gtk4::Widget {
-    let (main_box, import_btn, add_custom_btn, list_box, config_dialog, log_dialog) =
+    let (main_box, add_custom_btn, list_box, config_dialog, log_dialog) =
         render::build_vpn_ui();
 
     let state = Rc::new(RefCell::new(Vec::<VpnConn>::new()));
@@ -121,39 +121,6 @@ pub fn create_vpn_widget() -> gtk4::Widget {
             let _ = delete_vpn(&name);
             trigger_cb();
         });
-    });
-
-    // Handle config file import
-    let list_box_parent = list_box.clone();
-    let trigger_on_import = trigger_refresh.clone();
-    import_btn.connect_clicked(move |_| {
-        if let Some(win) = list_box_parent
-            .root()
-            .and_then(|r| r.downcast::<gtk4::Window>().ok())
-        {
-            let file_dialog = gtk4::FileDialog::new();
-            file_dialog.set_title(&babydra_core::i18n::trans("settings.open_vpn_profile"));
-
-            let filter = gtk4::FileFilter::new();
-            filter.set_name(Some(&babydra_core::i18n::trans("settings.vpn_filter")));
-            filter.add_pattern("*.ovpn");
-            filter.add_pattern("*.conf");
-            file_dialog.set_default_filter(Some(&filter));
-
-            let trigger_cb = trigger_on_import.clone();
-            file_dialog.open(Some(&win), None::<&gio::Cancellable>, move |res| {
-                if let Ok(file) = res {
-                    if let Some(path) = file.path() {
-                        let path_str = path.to_string_lossy().to_string();
-                        let trigger_cb2 = trigger_cb.clone();
-                        std::thread::spawn(move || {
-                            let _ = import_vpn_profile(&path_str);
-                            trigger_cb2();
-                        });
-                    }
-                }
-            });
-        }
     });
 
     main_box.into()

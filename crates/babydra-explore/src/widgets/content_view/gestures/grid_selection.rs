@@ -54,42 +54,7 @@ pub fn wire_grid_ctrls(
         });
     }
 
-    // 2. Double click child activation
-    {
-        let e_ref = entries.clone();
-        let nav = nav_cb.clone();
-        flowbox.connect_child_activated(move |fb, child| {
-            let path_str = child.widget_name();
-            let path = PathBuf::from(path_str.to_string());
-            let borrowed = e_ref.borrow();
-            if let Some(entry) = borrowed.iter().find(|e| e.path == path) {
-                if matches!(entry.file_type, babydra_core::FileType::Directory) {
-                    nav(entry.path.clone());
-                } else {
-                    babydra_ui_kit::components::explore::launch_file_or_open_with(
-                        &entry.path,
-                        None::<&gtk4::Window>,
-                    );
-                }
-            } else {
-                for c in fb.selected_children() {
-                    let p = PathBuf::from(c.widget_name().to_string());
-                    if let Some(entry) = borrowed.iter().find(|e| e.path == p) {
-                        if matches!(entry.file_type, babydra_core::FileType::Directory) {
-                            nav(entry.path.clone());
-                        } else {
-                            babydra_ui_kit::components::explore::launch_file_or_open_with(
-                                &entry.path,
-                                None::<&gtk4::Window>,
-                            );
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    // 3. Keyboard shortcuts (Enter, Ctrl+X, Ctrl+C, Ctrl+V)
+    // 2. Keyboard shortcuts (Enter, Ctrl+X, Ctrl+C, Ctrl+V)
     {
         let fb_clone = flowbox.clone();
         let e_ref = entries.clone();

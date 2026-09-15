@@ -4,9 +4,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use gtk4::{Box as GtkBox, Button, DropDown, Label, Switch};
-
 use babydra_core::models::recording::RecordingConfig;
-
 use crate::features::recording::ui::RecordingButtonWidget;
 
 /// Widgets and configuration state needed to wire recording popover interactions.
@@ -36,7 +34,6 @@ pub struct PopoverActionsContext {
     pub timer_label: Label,
     pub settings: GtkBox,
     pub action_row: GtkBox,
-    pub meta_card: GtkBox,
-    pub buttons_box: GtkBox,
+    pub live_row: GtkBox,
     pub status_badge: Label,
 }

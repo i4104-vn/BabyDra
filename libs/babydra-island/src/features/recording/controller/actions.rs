@@ -237,7 +237,7 @@ pub fn connect_popover_actions(ctx: PopoverActionsContext) {
     });
 
     // Pause recording button
-    ctx.btn_pause.click_gesture.connect_pressed(|_, _, _, _| {
+    ctx.btn_pause.connect_clicked(|_| {
         toggle_pause_action();
     });
 
@@ -246,43 +246,35 @@ pub fn connect_popover_actions(ctx: PopoverActionsContext) {
         let timer_label = ctx.timer_label.clone();
         let settings = ctx.settings.clone();
         let action_row = ctx.action_row.clone();
-        let meta_card = ctx.meta_card.clone();
-        let buttons_box = ctx.buttons_box.clone();
+        let live_row = ctx.live_row.clone();
         let status_badge = ctx.status_badge.clone();
-        ctx.btn_stop
-            .click_gesture
-            .connect_pressed(move |_, _, _, _| {
-                stop_recording_action();
-                timer_label.set_text("00:00:00");
-                settings.set_visible(true);
-                action_row.set_visible(true);
-                meta_card.set_visible(false);
-                buttons_box.set_visible(false);
+        ctx.btn_stop.connect_clicked(move |_| {
+            stop_recording_action();
+            timer_label.set_text("00:00:00");
+            settings.set_visible(true);
+            action_row.set_visible(true);
+            live_row.set_visible(false);
 
-                status_badge.remove_css_class("badge-recording");
-                status_badge.remove_css_class("badge-paused");
-                status_badge.add_css_class("badge-ready");
-                status_badge.set_text(&trans("recorder.status_idle"));
-            });
+            status_badge.remove_css_class("badge-recording");
+            status_badge.remove_css_class("badge-paused");
+            status_badge.add_css_class("badge-ready");
+            status_badge.set_text(&trans("recorder.status_idle"));
+        });
     }
 
     // Mute system audio button
     {
         let button = ctx.btn_mute_audio.clone();
-        ctx.btn_mute_audio
-            .click_gesture
-            .connect_pressed(move |_, _, _, _| {
-                toggle_audio_mute_action(&button);
-            });
+        ctx.btn_mute_audio.connect_clicked(move |_| {
+            toggle_audio_mute_action(&button);
+        });
     }
 
     // Mute microphone button
     {
         let button = ctx.btn_mute_mic.clone();
-        ctx.btn_mute_mic
-            .click_gesture
-            .connect_pressed(move |_, _, _, _| {
-                toggle_mic_mute_action(&button);
-            });
+        ctx.btn_mute_mic.connect_clicked(move |_| {
+            toggle_mic_mute_action(&button);
+        });
     }
 }

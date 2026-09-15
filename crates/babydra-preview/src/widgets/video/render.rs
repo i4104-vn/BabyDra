@@ -234,6 +234,7 @@ pub fn build_video_ui(
     details_box.append(&details_title);
 
     let grid = Grid::new();
+    grid.set_hexpand(true);
     grid.set_column_spacing(24);
     grid.set_row_spacing(8);
 

@@ -11,7 +11,6 @@ pub fn create_list_row(
     idx: usize,
     entry: &FileEntry,
     selected_paths: Rc<RefCell<Vec<PathBuf>>>,
-    nav_callback: Rc<dyn Fn(PathBuf)>,
     on_right_click: impl Fn(&gtk4::Widget, f64, f64) + 'static,
 ) -> ListBoxRow {
     let item_box = render::build_list_row_ui(entry);
@@ -44,30 +43,10 @@ pub fn create_list_row(
         item_box.add_css_class("cut-item");
     }
 
-    let double_click_gesture = gtk4::GestureClick::new();
-    double_click_gesture.set_button(1);
-
-    let target_path = entry.path.clone();
-    let is_dir = matches!(entry.file_type, babydra_core::FileType::Directory);
-
-    double_click_gesture.connect_pressed(move |_, n_press, _, _| {
-        if n_press == 2 {
-            if is_dir {
-                nav_callback(target_path.clone());
-            } else {
-                crate::components::explore::dialogs::launch_file_or_open_with(
-                    &target_path,
-                    None::<&gtk4::Window>,
-                );
-            }
-        }
-    });
-
     let list_row = ListBoxRow::new();
     list_row.set_child(Some(&item_box));
     list_row.set_property("name", &format!("{}", idx));
     list_row.set_widget_name(&entry.path.to_string_lossy());
-    list_row.add_controller(double_click_gesture);
 
     let is_dragging = Rc::new(Cell::new(false));
     let path_drag = entry.path.clone();
