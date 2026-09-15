@@ -45,6 +45,7 @@ fn main() {
         fallback_window.set_title(Some(&trans("common.app_preview_title")));
         fallback_window.set_icon_name(Some("babydra-preview"));
         fallback_window.set_default_size(400, 200);
+        fallback_window.add_css_class("viewer-window");
 
         let file_dialog = gtk4::FileDialog::new();
         file_dialog.set_title(&trans("common.open_image_file"));

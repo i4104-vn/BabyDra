@@ -122,6 +122,7 @@ pub fn build_viewer_ui(
     let drawing_area = gtk4::DrawingArea::new();
     drawing_area.set_hexpand(true);
     drawing_area.set_vexpand(true);
+    drawing_area.add_css_class("viewer-drawing-area");
     overlay.set_child(Some(&drawing_area));
 
     // --- Top-Left Info Box Overlay ---

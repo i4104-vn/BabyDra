@@ -127,8 +127,12 @@ pub fn build_ui(app: &gtk4::Application, path: PathBuf) {
         let w = width as f64;
         let h = height as f64;
 
-        // Draw Dark Background
-        cr.set_source_rgb(15.0 / 255.0, 15.0 / 255.0, 15.0 / 255.0);
+        // Draw Theme-Aware Solid Background
+        if babydra_ui_kit::ui::theme::is_dark_mode() {
+            cr.set_source_rgb(14.0 / 255.0, 14.0 / 255.0, 18.0 / 255.0);
+        } else {
+            cr.set_source_rgb(245.0 / 255.0, 245.0 / 255.0, 247.0 / 255.0);
+        }
         let _ = cr.paint();
 
         // Calculate layout coordinates

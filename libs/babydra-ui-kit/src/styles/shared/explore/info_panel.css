@@ -25,3 +25,8 @@
 .explore-window .info-row-val {
     font-size: 12px;
 }
+
+.explore-window .preview-panel {
+    border-radius: 10px;
+    padding: 8px;
+}

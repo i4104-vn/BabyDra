@@ -1483,6 +1483,16 @@ button.screenshot-toolbar-btn.selected image {
 }
 
 /* === apps/preview.css === */
+window.viewer-window,
+.viewer-window {
+    background-color: #0e0e12;
+    color: #ffffff;
+}
+
+.viewer-drawing-area {
+    background-color: #0e0e12;
+}
+
 .main-preview-card {
     background-color: rgba(14, 14, 18, 0.96);
     border: 1px solid rgba(255, 255, 255, 0.14);
@@ -1585,17 +1595,18 @@ button.screenshot-toolbar-btn.selected image {
 }
 
 .info-card {
-    background-color: rgba(14, 14, 18, 0.90);
+    background-color: rgba(18, 18, 24, 0.96);
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-top: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.40);
     color: #ffffff;
 }
 
 .controls-bar {
-    background-color: rgba(14, 14, 18, 0.90);
+    background-color: rgba(18, 18, 24, 0.96);
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-top: 1px solid rgba(255, 255, 255, 0.28);
-    box-shadow: none;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.40);
 }
 
 button.control-btn {
@@ -2728,8 +2739,13 @@ button.workspace-app-flyout-item:hover .workspace-app-flyout-name {
 
 /* === explore/info_panel.css === */
 .explore-window .info-panel {
-    background-color: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background-color: rgba(20, 20, 24, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.explore-window .preview-panel {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .explore-window .info-row-key {
