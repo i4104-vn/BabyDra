@@ -12,7 +12,7 @@ window.settings-window>overlay>box {
 }
 
 .profile-user-name {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
 }
 
@@ -46,7 +46,7 @@ button.sidebar-header-btn.active-nav {
 
 entry.sidebar-search-entry {
     border-radius: 10px;
-    font-size: 12px;
+    font-size: 14px;
     padding: 0;
     min-height: 32px;
 }
@@ -62,7 +62,7 @@ entry.sidebar-search-entry>text {
 /* Shortcut combo picker button (Keybinds page) — matches the row entries */
 button.shortcut-combo-btn {
     border-radius: 10px;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 500;
     min-height: 32px;
     padding: 0 16px;
@@ -76,7 +76,7 @@ button.shortcut-combo-btn {
 }
 
 .keybind-crate-badge {
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 600;
     padding: 2px 8px;
     border-radius: 6px;
@@ -90,7 +90,7 @@ button.shortcut-combo-btn {
 }
 
 .settings-section-title {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     letter-spacing: 0.2px;
 }
@@ -102,22 +102,22 @@ button.shortcut-combo-btn {
 }
 
 .settings-breadcrumb-parent {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 500;
 }
 
 .settings-breadcrumb-arrow {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 400;
 }
 
 .settings-breadcrumb-current {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 700;
 }
 
 .settings-group-header-title {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
 }
 
@@ -128,7 +128,7 @@ button.shortcut-combo-btn {
 }
 
 .settings-section-title {
-    font-size: 11px;
+    font-size: 16px;
     font-weight: 700;
     margin-top: 20px;
     margin-bottom: 10px;
@@ -136,7 +136,7 @@ button.shortcut-combo-btn {
 }
 
 .settings-row-title {
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 500;
     letter-spacing: 0.01em;
 }
@@ -161,12 +161,12 @@ button.shortcut-combo-btn {
 }
 
 .settings-subtitle {
-    font-size: 13px;
+    font-size: 16px;
     opacity: 0.7;
 }
 
 .settings-label {
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 500;
 }
 
@@ -257,7 +257,7 @@ button.perf-profile-row-btn {
 .connect-pill-btn {
     border-radius: 9999px;
     padding: 8px 18px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     transition: background-color 200ms ease, border-color 200ms ease;
 }
@@ -268,7 +268,7 @@ button.perf-profile-row-btn {
 }
 
 .connected-text {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
 }
 
@@ -327,7 +327,7 @@ button.wallpaper-thumb-card picture {
 }
 
 .wallpaper-badge {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 700;
     padding: 3px 8px;
     border-radius: 9999px;
@@ -337,7 +337,7 @@ button.wallpaper-thumb-card picture {
 }
 
 .wallpaper-preview-badge {
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 700;
     padding: 5px 12px;
     border-radius: 9999px;
@@ -396,7 +396,7 @@ button.lang-seg-active,
 button.lang-seg-inactive {
     border-radius: 9999px;
     padding: 3px 12px;
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 600;
     border: none;
     box-shadow: none;
@@ -413,7 +413,7 @@ button.lang-seg-inactive {
 }
 
 .hero-hostname {
-    font-size: 19px;
+    font-size: 20px;
     font-weight: 700;
 }
 
@@ -447,7 +447,7 @@ progressbar.disk-progress progress {
 }
 
 .cheatsheet-title {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     padding-bottom: 8px;
     margin-bottom: 16px;
@@ -455,7 +455,7 @@ progressbar.disk-progress progress {
 
 .cheatsheet-value {
     font-family: monospace;
-    font-size: 13px;
+    font-size: 14px;
 }
 
 /* Console Log Panel */
@@ -467,7 +467,7 @@ progressbar.disk-progress progress {
 .console-header {
     padding: 12px 16px;
     font-weight: 600;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .console-log-panel scrolledwindow {
@@ -480,7 +480,7 @@ textview.hosts-editor-text,
 textview.hosts-editor-text text {
     background-color: transparent;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
+    font-size: 14px;
     padding: 12px;
 }
 
@@ -539,13 +539,13 @@ progressbar.battery-level-bar progress {
 .update-count-badge {
     border-radius: 9999px;
     padding: 4px 12px;
-    font-size: 12px;
+    font-size: 9px;
     font-weight: 600;
 }
 
 /* Wi-Fi Modals & Segmented Control */
 .wifi-info-section-title {
-    font-size: 11px;
+    font-size: 16px;
     font-weight: 700;
     letter-spacing: 0.8px;
     margin-top: 8px;
@@ -553,14 +553,14 @@ progressbar.battery-level-bar progress {
 }
 
 .wifi-info-label {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.5px;
     opacity: 0.7;
 }
 
 .wifi-info-value {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
 }
 
@@ -570,13 +570,13 @@ progressbar.battery-level-bar progress {
 }
 
 .wifi-status-text {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
 }
 
 .wifi-status-on,
 .wifi-status-off {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
 }
 
@@ -597,12 +597,12 @@ progressbar.battery-level-bar progress {
 
 .wifi-error-hint {
     color: #ef4444;
-    font-size: 12px;
+    font-size: 9px;
     font-weight: 500;
 }
 
 .input-hint-lbl {
-    font-size: 11px;
+    font-size: 9px;
     opacity: 0.6;
 }
 
@@ -614,7 +614,7 @@ progressbar.battery-level-bar progress {
 .seg-btn {
     border-radius: 8px;
     padding: 6px 12px;
-    font-size: 12px;
+    font-size: 9px;
     font-weight: 500;
     background: transparent;
     border: none;
@@ -624,7 +624,7 @@ progressbar.battery-level-bar progress {
 .seg-btn-active {
     border-radius: 8px;
     padding: 6px 12px;
-    font-size: 12px;
+    font-size: 9px;
     font-weight: 600;
     border: none;
 }
@@ -635,7 +635,7 @@ progressbar.battery-level-bar progress {
 }
 
 .settings-page-subtitle {
-    font-size: 13px;
+    font-size: 12px;
 }
 
 button.app-tab-btn {
@@ -752,7 +752,7 @@ scale.settings-scale contents>slider:hover {
 }
 
 scale.settings-scale mark label {
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 600;
     margin-top: 6px;
 }

@@ -91,24 +91,24 @@ popover.panel-notification-popover > contents {
 }
 
 .panel-notification-app {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
 }
 
 .panel-notification-title {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 700;
 }
 
 .panel-notification-body {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     line-height: 1.3;
     min-width: 0;
 }
 
 .panel-notification-more {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
 }
 
@@ -139,7 +139,7 @@ button.panel-logo-btn:hover {
 }
 
 .capsule-separator {
-    font-size: 11px;
+    font-size: 9px;
     margin: 0 2px;
 }
 
@@ -163,7 +163,7 @@ popover.tooltip-popover>contents {
 .status-popover-header,
 .tooltip-popover-header {
     font-weight: 700;
-    font-size: 13px;
+    font-size: 14px;
     margin-bottom: 4px;
 }
 

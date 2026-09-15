@@ -1,0 +1,72 @@
+{
+  "typography": {
+    "fontWeight": {
+      "regular": 400,
+      "medium": 500,
+      "semiBold": 600,
+      "bold": 700
+    },
+    "scale": {
+      "small": {
+        "fontSize": "9px",
+        "description": "Small buttons, badges, pills, and micro UI elements"
+      },
+      "caption": {
+        "fontSize": "0.75rem",
+        "lineHeight": "1rem",
+        "fontWeight": 500,
+        "letterSpacing": "0.02em",
+        "pixelEquivalent": { "fontSize": "12px", "lineHeight": "16px" }
+      },
+      "bodySmall": {
+        "fontSize": "0.875rem",
+        "lineHeight": "1.25rem",
+        "fontWeight": 400,
+        "letterSpacing": "0",
+        "pixelEquivalent": { "fontSize": "14px", "lineHeight": "20px" }
+      },
+      "body": {
+        "fontSize": "1rem",
+        "lineHeight": "1.5rem",
+        "fontWeight": 400,
+        "letterSpacing": "0",
+        "pixelEquivalent": { "fontSize": "16px", "lineHeight": "24px" }
+      },
+      "bodyMedium": {
+        "fontSize": "1rem",
+        "lineHeight": "1.5rem",
+        "fontWeight": 500,
+        "letterSpacing": "0",
+        "pixelEquivalent": { "fontSize": "16px", "lineHeight": "24px" }
+      },
+      "h3": {
+        "fontSize": "1.25rem",
+        "lineHeight": "1.75rem",
+        "fontWeight": 600,
+        "letterSpacing": "-0.005em",
+        "pixelEquivalent": { "fontSize": "20px", "lineHeight": "28px" }
+      },
+      "h2": {
+        "fontSize": "1.5rem",
+        "lineHeight": "2rem",
+        "fontWeight": 600,
+        "letterSpacing": "-0.01em",
+        "pixelEquivalent": { "fontSize": "24px", "lineHeight": "32px" }
+      },
+      "h1": {
+        "fontSize": "2rem",
+        "lineHeight": "2.5rem",
+        "fontWeight": 700,
+        "letterSpacing": "-0.015em",
+        "pixelEquivalent": { "fontSize": "32px", "lineHeight": "40px" }
+      },
+      "display": {
+        "fontSize": "3rem",
+        "lineHeight": "3.5rem",
+        "fontWeight": 700,
+        "letterSpacing": "-0.02em",
+        "pixelEquivalent": { "fontSize": "48px", "lineHeight": "56px" }
+      }
+    }
+  }
+}

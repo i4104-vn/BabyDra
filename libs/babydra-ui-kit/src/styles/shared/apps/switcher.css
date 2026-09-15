@@ -75,7 +75,7 @@ button.switcher-card.selected {
 }
 
 .switcher-meta-title {
-    font-size: 14.5px;
+    font-size: 14px;
     font-weight: 700;
     line-height: 1.2;
     letter-spacing: -0.2px;
@@ -103,7 +103,7 @@ popover.workspace-apps-flyout > contents {
 
 .workspace-popover-header-title,
 .workspace-flyout-header-title {
-    font-size: 11.5px;
+    font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.3px;
     text-transform: uppercase;
@@ -128,7 +128,7 @@ button.workspace-popover-row:focus {
 }
 
 .workspace-popover-num {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 800;
     min-width: 22px;
     min-height: 22px;
@@ -142,12 +142,12 @@ button.workspace-popover-row.active .workspace-popover-num {
 }
 
 .workspace-popover-name {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
 }
 
 .workspace-popover-count {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     padding: 1px 6px;
     border-radius: 8px;
@@ -178,7 +178,7 @@ button.workspace-app-flyout-item:hover {
 }
 
 .workspace-app-flyout-name {
-    font-size: 12.5px;
+    font-size: 14px;
     font-weight: 500;
 }
 

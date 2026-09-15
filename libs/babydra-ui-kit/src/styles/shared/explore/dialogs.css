@@ -5,7 +5,7 @@ button.suggested-action {
     color: #ffffff;
     padding: 8px 18px;
     font-weight: 600;
-    font-size: 13px;
+    font-size: 14px;
     box-shadow: none;
     transition: background-color 150ms ease;
 }
@@ -34,14 +34,14 @@ button.empty-trash-btn {
 }
 
 .settings-title-label {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     margin-bottom: 6px;
     letter-spacing: 0.01em;
 }
 
 .settings-section-title {
-    font-size: 11px;
+    font-size: 16px;
     font-weight: 700;
     margin-top: 6px;
     margin-bottom: 3px;
@@ -50,26 +50,26 @@ button.empty-trash-btn {
 }
 
 .settings-section-subtitle {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     margin-top: 5px;
     margin-bottom: 2px;
 }
 
 .settings-item-name {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
 }
 
 .settings-item-command {
-    font-size: 11px;
+    font-size: 12px;
     font-family: "JetBrains Mono", "Fira Code", monospace;
 }
 
 /* `.settings-row-title` / `.settings-row-desc` are owned by
    `apps/settings.css`; keep only dialog-specific tweaks here. */
 .explore-dialog .settings-row-desc {
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .settings-listbox {
@@ -108,27 +108,27 @@ button.empty-trash-btn {
 }
 
 button.placeholder-btn {
-    font-size: 10px;
+    font-size: 9px;
     padding: 3px 8px;
     border-radius: 9999px;
     transition: all 120ms ease;
 }
 
 .placeholder-btn-small {
-    font-size: 8px;
+    font-size: 9px;
     padding: 1px 4px;
     border: none;
     border-radius: 5px;
 }
 
 .inline-entry {
-    font-size: 12px;
+    font-size: 14px;
     padding: 5px 9px;
     border-radius: 8px;
 }
 
 .small-btn {
-    font-size: 12px;
+    font-size: 14px;
     padding: 3px 8px;
     min-height: 26px;
 }
@@ -150,7 +150,7 @@ button.destructive-action {
     color: #ffffff;
     padding: 6px 16px;
     font-weight: 600;
-    font-size: 12px;
+    font-size: 14px;
     box-shadow: none;
     transition: background-color 150ms ease;
 }
@@ -169,7 +169,7 @@ button.settings-pill {
     padding: 10px;
     min-width: 22px;
     min-height: 22px;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
     transition: background-color 180ms ease, color 180ms ease;
     transform: none;
@@ -229,7 +229,7 @@ button.settings-pill.active-pill:hover {
 }
 
 .keybind-pill {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 600;
     font-family: "JetBrains Mono", "Fira Code", monospace;
     border-radius: 6px;
@@ -259,7 +259,7 @@ entry.small-entry,
 entry.small-entry>text {
     min-height: 28px;
     padding: 2px 8px;
-    font-size: 13px;
+    font-size: 14px;
 }
 
 button.row-action-btn {
@@ -295,12 +295,12 @@ button.row-action-btn:hover {
 }
 
 .properties-title-label {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
 }
 
 .properties-subtitle-badge {
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 500;
     border-radius: 6px;
     padding: 3px 8px;
@@ -312,7 +312,7 @@ button.row-action-btn:hover {
 }
 
 .properties-section-title {
-    font-size: 10px;
+    font-size: 16px;
     font-weight: 700;
     letter-spacing: 0.6px;
     margin-bottom: 4px;
@@ -333,7 +333,7 @@ button.row-action-btn:hover {
 }
 
 .properties-perm-badge {
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 600;
     font-family: "JetBrains Mono", "Fira Code", monospace;
     border-radius: 6px;
@@ -342,14 +342,14 @@ button.row-action-btn:hover {
 }
 
 .properties-matrix-col-title {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
 }
 
 button.properties-btn-cancel {
     border-radius: 8px;
     padding: 6px 16px;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
     transition: background-color 150ms ease;
 }
@@ -384,11 +384,11 @@ button.properties-btn-cancel {
 }
 
 .app-name {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
 }
 
 .app-exec {
-    font-size: 11px;
+    font-size: 12px;
     opacity: 0.65;
 }

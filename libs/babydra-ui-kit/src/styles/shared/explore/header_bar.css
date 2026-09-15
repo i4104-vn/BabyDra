@@ -10,7 +10,7 @@
     box-shadow: none;
     border-radius: 6px 6px 0 0;
     padding: 6px 10px 6px 14px;
-    font-size: 12px;
+    font-size: 14px;
     min-width: 100px;
     margin-top: 4px;
     transition: background 0.12s ease;
@@ -90,7 +90,7 @@
     border: none;
     border-radius: 4px;
     padding: 2px 4px;
-    font-size: 13px;
+    font-size: 14px;
 }
 
 .explore-window .breadcrumb-sep {
@@ -102,13 +102,13 @@
     border: none;
     box-shadow: none;
     padding: 2px 0;
-    font-size: 13px;
+    font-size: 14px;
 }
 
 .explore-window .search-entry {
     border-radius: 6px;
     padding: 3px 8px;
-    font-size: 12px;
+    font-size: 14px;
     min-width: 80px;
     transition: border-color 0.15s ease;
 }
@@ -123,7 +123,7 @@
     border: none;
     border-radius: 6px;
     padding: 4px 8px;
-    font-size: 12px;
+    font-size: 14px;
     transition: background 0.1s ease;
 }
 

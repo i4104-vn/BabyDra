@@ -47,7 +47,7 @@
 .chip-highlight {
     border-radius: 9999px;
     padding: 4px 12px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     transition: all 200ms ease;
 }
@@ -60,7 +60,7 @@
 .chip-static {
     background: none;
     background-color: transparent;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 400;
 }
 
@@ -84,7 +84,7 @@
 .badge-pro {
     border-radius: 9999px;
     padding: 2px 8px;
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 800;
 }
 
@@ -163,7 +163,7 @@ button.control-btn {
 .info-card {
     border-radius: 12px;
     padding: 10px 14px;
-    font-size: 13px;
+    font-size: 14px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 

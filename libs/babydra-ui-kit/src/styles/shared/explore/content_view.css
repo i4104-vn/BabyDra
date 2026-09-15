@@ -14,7 +14,7 @@
 }
 
 .explore-window .section-title {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
     padding: 16px 20px 8px 20px;
 }
@@ -38,12 +38,12 @@
 }
 
 .explore-window .qa-card-name {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
 }
 
 .explore-window .qa-card-sub {
-    font-size: 11px;
+    font-size: 12px;
     margin-top: 2px;
 }
 
@@ -84,7 +84,7 @@
 }
 
 .explore-window .file-item-label {
-    font-size: 12px;
+    font-size: 14px;
 }
 
 .explore-window .list-row {
@@ -92,7 +92,7 @@
     border-radius: 6px;
     padding: 6px 12px;
     margin: 1px 6px;
-    font-size: 13px;
+    font-size: 14px;
     transition: background 0.1s ease;
 }
 

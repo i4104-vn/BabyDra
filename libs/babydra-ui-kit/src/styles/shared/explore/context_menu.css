@@ -51,7 +51,7 @@ button.context-menu-item {
     box-shadow: none;
     border-radius: 6px;
     padding: 6px 12px;
-    font-size: 13px;
+    font-size: 14px;
     min-height: 30px;
     transition: background-color 140ms ease, color 140ms ease, padding-left 140ms ease;
 }
@@ -73,7 +73,7 @@ button.context-menu-item.destructive:hover {
 }
 
 .shortcut-label {
-    font-size: 11px;
+    font-size: 12px;
     opacity: 0.55;
     margin-left: 12px;
     transition: opacity 140ms ease;
@@ -94,7 +94,7 @@ button.context-menu-item:hover .shortcut-label {
 .context-menu-header,
 .group-header-label {
     font-weight: 700;
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.8px;
     text-transform: uppercase;
     margin-top: 6px;

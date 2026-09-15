@@ -33,11 +33,11 @@ button.quick-tile:hover {
 
 .tile-title {
     font-weight: 700;
-    font-size: 12px;
+    font-size: 14px;
 }
 
 .tile-subtitle {
-    font-size: 10px;
+    font-size: 9px;
 }
 
 .tile-chevron {
@@ -264,7 +264,7 @@ button.vpn-action-toggle.active:hover {
 }
 
 .control-square-label {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 600;
     line-height: 1.2;
 }
@@ -275,13 +275,13 @@ button.vpn-action-toggle.active:hover {
 }
 
 .control-slider-title {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     margin-bottom: 4px;
 }
 
 .control-slider-value {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     color: #3b82f6;
     margin-bottom: 2px;
@@ -305,12 +305,12 @@ button.vpn-action-toggle.active:hover {
 }
 
 .control-disk-name {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
 }
 
 .control-disk-usage {
-    font-size: 10px;
+    font-size: 9px;
 }
 
 .control-disk-card progressbar trough {
@@ -325,7 +325,7 @@ button.vpn-action-toggle.active:hover {
 }
 
 .control-lang-label {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 800;
 }
 
@@ -392,7 +392,7 @@ button.audio-menu-item-btn.active label {
 }
 
 .audio-menu-item-check {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: bold;
     color: #3b82f6;
     margin-right: 4px;
@@ -455,7 +455,7 @@ button.control-tile-right-btn:active {
 }
 
 .wifi-popover-title {
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 600;
     margin-bottom: 8px;
 }
@@ -492,7 +492,7 @@ button.control-tile-right-btn:active {
 .wifi-input-field {
     border-radius: 6px;
     padding: 6px 10px;
-    font-size: 12px;
+    font-size: 14px;
     margin-bottom: 8px;
     box-shadow: none;
     outline: none;
@@ -515,7 +515,7 @@ button.control-tile-right-btn:active {
     border-radius: 6px;
     padding: 6px 12px;
     color: #ffffff;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
     box-shadow: none;
     outline: none;
@@ -536,7 +536,7 @@ button.control-tile-right-btn:active {
     border: none;
     border-radius: 6px;
     padding: 6px 12px;
-    font-size: 12px;
+    font-size: 14px;
     box-shadow: none;
     outline: none;
 }
@@ -621,7 +621,7 @@ popover.audio-popover>contents {
 }
 
 .clean-popover-percent {
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 800;
     color: #3b82f6;
     margin: 0;
@@ -641,7 +641,7 @@ popover.audio-popover>contents {
 }
 
 .clean-popover-size {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     margin: 0;
     padding: 0;

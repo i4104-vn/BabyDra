@@ -10,7 +10,7 @@ button,
 button.baby-button {
     border-radius: 10px;
     padding: 8px 16px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     background-image: none;
     box-shadow: none;
@@ -33,7 +33,7 @@ button.circular,
     min-width: 32px;
     min-height: 32px;
     padding: 0;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 500;
     box-shadow: none;
     transition: all 200ms ease;
@@ -55,7 +55,7 @@ button.suggested-action {
     background-image: none;
     border: none;
     color: #ffffff;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     padding: 8px 18px;
     box-shadow: none;
@@ -90,7 +90,7 @@ button.btn-share-pill,
 button.connect-pill-btn {
     border-radius: 9999px;
     background-image: none;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     padding: 8px 18px;
     box-shadow: none;
@@ -107,7 +107,7 @@ button.btn-upgrade-secondary {
     background-color: #1c1c1e;
     background-image: none;
     color: #ffffff;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     padding: 6px 14px;
     box-shadow: none;

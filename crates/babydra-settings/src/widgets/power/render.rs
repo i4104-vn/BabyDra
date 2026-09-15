@@ -254,7 +254,7 @@ pub fn build() -> (PowerWidget, PasswordDialog) {
                 (244, 67, 54) // Red
             };
             let css = format!(
-                ".cpu-badge {{ background-color: rgba({}, {}, {}, 0.18); border: 1px solid rgba({}, {}, {}, 0.35); color: rgb({}, {}, {}); border-radius: 9999px; padding: 3px 10px; font-size: 11px; font-weight: 600; }}",
+                ".cpu-badge {{ background-color: rgba({}, {}, {}, 0.18); border: 1px solid rgba({}, {}, {}, 0.35); color: rgb({}, {}, {}); border-radius: 9999px; padding: 3px 10px; font-size: 9px; font-weight: 600; }}",
                 r, g, b, r, g, b, r, g, b
             );
             prov.load_from_data(&css);
@@ -281,7 +281,7 @@ pub fn build() -> (PowerWidget, PasswordDialog) {
                     (244, 67, 54)
                 };
                 let css = format!(
-                    ".cpu-badge {{ background-color: rgba({}, {}, {}, 0.18); border: 1px solid rgba({}, {}, {}, 0.35); color: rgb({}, {}, {}); border-radius: 9999px; padding: 3px 10px; font-size: 11px; font-weight: 600; }}",
+                    ".cpu-badge {{ background-color: rgba({}, {}, {}, 0.18); border: 1px solid rgba({}, {}, {}, 0.35); color: rgb({}, {}, {}); border-radius: 9999px; padding: 3px 10px; font-size: 9px; font-weight: 600; }}",
                     r, g, b, r, g, b, r, g, b
                 );
                 provider_clone.load_from_data(&css);

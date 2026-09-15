@@ -197,14 +197,14 @@ popover.taskbar-popover>arrow {
 }
 
 .taskbar-popover-title {
-    font-size: 12.5px;
+    font-size: 14px;
     font-weight: 700;
     color: #ffffff;
     letter-spacing: -0.1px;
 }
 
 .taskbar-popover-count {
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.50);
 }
@@ -252,7 +252,7 @@ button.taskbar-popover-item-btn:active {
 .taskbar-popover-badge {
     background-color: rgba(255, 255, 255, 0.10);
     color: rgba(255, 255, 255, 0.85);
-    font-size: 10.5px;
+    font-size: 9px;
     font-weight: 700;
     min-width: 18px;
     min-height: 18px;
@@ -265,7 +265,7 @@ button.taskbar-popover-item-btn:active {
 }
 
 .taskbar-popover-item-label {
-    font-size: 12.5px;
+    font-size: 14px;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.90);
     margin: 0;
@@ -337,7 +337,7 @@ button.taskbar-popover-action-btn:hover {
 }
 
 .taskbar-popover-action-label {
-    font-size: 12.5px;
+    font-size: 14px;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.85);
     padding: 0 2px;
@@ -1831,7 +1831,7 @@ button.card-collapse-header:hover {
 }
 
 .spec-label {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.8px;
     color: rgba(255, 255, 255, 0.55);
@@ -1857,7 +1857,7 @@ button.card-collapse-header:hover {
 }
 
 .hero-subtitle {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.65);
 }
@@ -1918,7 +1918,7 @@ button.theme-card-option {
 }
 
 button.theme-card-option label {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
 }
 
@@ -1975,7 +1975,7 @@ button.wallpaper-action-btn:hover {
     border-radius: 12px;
     padding: 24px;
     color: #ff5f56;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
 }
 
@@ -2039,7 +2039,7 @@ button.wallpaper-thumb-card:hover picture {
 .plugin-warning-title {
     color: #ef4444;
     font-weight: 700;
-    font-size: 13px;
+    font-size: 14px;
 }
 
 .plugin-warning-desc {
@@ -2050,7 +2050,7 @@ button.wallpaper-thumb-card:hover picture {
 .plugin-warning-cmd {
     color: #60a5fa;
     font-family: monospace;
-    font-size: 11px;
+    font-size: 12px;
     background-color: rgba(0, 0, 0, 0.3);
     padding: 4px 8px;
     border-radius: 6px;
@@ -2199,13 +2199,13 @@ progressbar.console-progress progress {}
 .status-success-badge {
     color: #10b981;
     font-weight: 600;
-    font-size: 13px;
+    font-size: 9px;
 }
 
 .status-error-badge {
     color: #ef4444;
     font-weight: 600;
-    font-size: 13px;
+    font-size: 9px;
 }
 
 .wifi-info-section-title {
@@ -2266,7 +2266,7 @@ progressbar.battery-level-bar trough {
     color: #2ec27e;
     border-radius: 9999px;
     padding: 3px 10px;
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 600;
 }
 
@@ -2276,7 +2276,7 @@ progressbar.battery-level-bar trough {
     color: rgba(255, 255, 255, 0.85);
     border-radius: 9999px;
     padding: 3px 10px;
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 600;
 }
 
@@ -2909,7 +2909,7 @@ window.explore-dialog,
 
 .dialog-error-text {
     color: #f87171;
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 500;
     margin-top: 2px;
 }
