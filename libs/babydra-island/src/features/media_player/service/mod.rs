@@ -4,6 +4,6 @@ pub mod art;
 pub mod format;
 pub mod poll;
 
-pub use art::{load_album_art_from_bytes, spawn_art_receiver, ArtPayload};
+pub use art::{load_album_art_from_bytes, spawn_art_receiver, ArtPayload, ArtReceiverContext};
 pub use format::{format_time, get_player_icon_name};
 pub use poll::spawn_playerctl_polling;

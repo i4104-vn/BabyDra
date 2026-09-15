@@ -31,7 +31,7 @@ use gtk4::prelude::*;
 
 use crate::island::view::{CAPSULE_HEIGHT, PLAYER_CAPSULE_WIDTH};
 use crate::island::{IslandCtx, IslandFeature, IslandViewHandle};
-use service::{art, get_player_icon_name, poll};
+use service::{art, get_player_icon_name, poll, ArtReceiverContext};
 use ui::{render, MediaPopover, PlayerWidgets};
 
 pub const PRIORITY: u8 = 50;
@@ -218,13 +218,15 @@ impl IslandFeature for MediaPlayerFeature {
         if let Some(rx) = self.art_receiver.take() {
             art::spawn_art_receiver(
                 rx,
-                art_container,
-                popover_art,
-                last_attempted_url,
-                art_loaded,
-                fail_count,
-                request_pending,
-                next_retry_at,
+                ArtReceiverContext {
+                    art_container,
+                    popover_art,
+                    last_attempted_url,
+                    art_loaded,
+                    fail_count,
+                    request_pending,
+                    next_retry_at,
+                },
             );
         }
 

@@ -19,6 +19,19 @@ struct ActiveSession {
     total_paused_duration: Duration,
 }
 
+impl ActiveSession {
+    fn elapsed_secs(&self) -> u64 {
+        let current_paused = self
+            .paused_at
+            .map(|paused_at| paused_at.elapsed())
+            .unwrap_or_default();
+        self.start_time
+            .elapsed()
+            .saturating_sub(self.total_paused_duration + current_paused)
+            .as_secs()
+    }
+}
+
 static ACTIVE_RECORDING: Mutex<Option<ActiveSession>> = Mutex::new(None);
 
 /// Checks whether an active screen recording is currently taking place.
@@ -63,14 +76,7 @@ pub fn get_elapsed_secs() -> u64 {
     };
 
     if let Some(ref session) = *lock {
-        let elapsed = session.start_time.elapsed();
-        let current_paused = if let Some(p) = session.paused_at {
-            p.elapsed()
-        } else {
-            Duration::ZERO
-        };
-        let active = elapsed.saturating_sub(session.total_paused_duration + current_paused);
-        active.as_secs()
+        session.elapsed_secs()
     } else {
         0
     }
@@ -91,22 +97,13 @@ pub fn get_status() -> RecordingStatus {
 
     if let Some(ref mut session) = *lock {
         match session.child.try_wait() {
-            Ok(None) => {
-                let elapsed = session.start_time.elapsed();
-                let current_paused = if let Some(p) = session.paused_at {
-                    p.elapsed()
-                } else {
-                    Duration::ZERO
-                };
-                let active = elapsed.saturating_sub(session.total_paused_duration + current_paused);
-                RecordingStatus::Recording {
-                    pid: session.pid,
-                    output_path: session.output_path.clone(),
-                    elapsed_secs: active.as_secs(),
-                    config: session.config.clone(),
-                    is_paused: session.is_paused,
-                }
-            }
+            Ok(None) => RecordingStatus::Recording {
+                pid: session.pid,
+                output_path: session.output_path.clone(),
+                elapsed_secs: session.elapsed_secs(),
+                config: session.config.clone(),
+                is_paused: session.is_paused,
+            },
             _ => {
                 *lock = None;
                 RecordingStatus::Idle

@@ -139,7 +139,11 @@ impl RecordingPopover {
         area_box.append(&area_label);
 
         let mode_row = setting_row("th-large", &trans("recorder.mode_header"), &mode_dropdown);
-        let display_output_row = setting_row("display", &trans("recorder.display_output"), &output_dropdown);
+        let display_output_row = setting_row(
+            "display",
+            &trans("recorder.display_output"),
+            &output_dropdown,
+        );
         display_output_row.set_visible(false);
         let area_row = setting_row("rect", &trans("recorder.mode_area"), &area_box);
         area_row.set_visible(false);
@@ -168,14 +172,27 @@ impl RecordingPopover {
         let audio_device = DropDown::from_strings(&audio_device_refs);
         audio_device.set_sensitive(false);
 
-        let audio_device_row = setting_row("volume", &trans("recorder.audio_device"), &audio_device);
+        let audio_device_row =
+            setting_row("volume", &trans("recorder.audio_device"), &audio_device);
         audio_device_row.set_visible(false);
 
-        settings.append(&setting_row("display", &trans("recorder.resolution"), &resolution));
-        settings.append(&setting_row("activity", &trans("recorder.framerate"), &framerate));
+        settings.append(&setting_row(
+            "display",
+            &trans("recorder.resolution"),
+            &resolution,
+        ));
+        settings.append(&setting_row(
+            "activity",
+            &trans("recorder.framerate"),
+            &framerate,
+        ));
         settings.append(&setting_row("sliders", &trans("recorder.format"), &format));
         settings.append(&setting_row("cog", &trans("recorder.codec"), &codec));
-        settings.append(&setting_row("microphone", &trans("recorder.audio_toggle"), &audio));
+        settings.append(&setting_row(
+            "microphone",
+            &trans("recorder.audio_toggle"),
+            &audio,
+        ));
         settings.append(&audio_device_row);
         base.popover_box.append(&settings);
 
@@ -329,7 +346,8 @@ impl RecordingPopover {
             self.status_badge.set_text(&trans("recorder.status_paused"));
         } else {
             self.status_badge.add_css_class("badge-recording");
-            self.status_badge.set_text(&trans("recorder.status_recording"));
+            self.status_badge
+                .set_text(&trans("recorder.status_recording"));
         }
 
         if state.is_paused {

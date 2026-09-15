@@ -13,52 +13,39 @@ static IS_AUDIO_MUTED: AtomicBool = AtomicBool::new(false);
 static IS_MIC_MUTED: AtomicBool = AtomicBool::new(false);
 
 /// Retrieves PipeWire input ports owned by `wf-recorder`.
-fn get_recorder_input_ports() -> Vec<String> {
-    let out = Command::new("pw-link")
-        .arg("-i")
-        .output()
-        .ok()
-        .map(|o| String::from_utf8_lossy(&o.stdout).into_owned())
-        .unwrap_or_default();
+fn get_pw_ports(direction: &str, predicate: impl Fn(&str) -> bool) -> Vec<String> {
+    let Ok(output) = Command::new("pw-link").arg(direction).output() else {
+        return Vec::new();
+    };
 
-    out.lines()
-        .map(|l| l.trim().to_string())
-        .filter(|l| l.contains("wf-recorder") && l.contains(":input_"))
+    String::from_utf8_lossy(&output.stdout)
+        .lines()
+        .map(str::trim)
+        .filter(|port| predicate(port))
+        .map(str::to_owned)
         .collect()
+}
+
+fn get_recorder_input_ports() -> Vec<String> {
+    get_pw_ports("-i", |port| {
+        port.contains("wf-recorder") && port.contains(":input_")
+    })
 }
 
 /// Retrieves monitor ports (system desktop audio playback monitor).
 fn get_monitor_output_ports() -> Vec<String> {
-    let out = Command::new("pw-link")
-        .arg("-o")
-        .output()
-        .ok()
-        .map(|o| String::from_utf8_lossy(&o.stdout).into_owned())
-        .unwrap_or_default();
-
-    out.lines()
-        .map(|l| l.trim().to_string())
-        .filter(|l| l.contains(":monitor_") && !l.contains("wf-recorder"))
-        .collect()
+    get_pw_ports("-o", |port| {
+        port.contains(":monitor_") && !port.contains("wf-recorder")
+    })
 }
 
 /// Retrieves microphone / voice capture ports.
 fn get_mic_output_ports() -> Vec<String> {
-    let out = Command::new("pw-link")
-        .arg("-o")
-        .output()
-        .ok()
-        .map(|o| String::from_utf8_lossy(&o.stdout).into_owned())
-        .unwrap_or_default();
-
-    out.lines()
-        .map(|l| l.trim().to_string())
-        .filter(|l| {
-            (l.contains(":capture_") || l.contains("input"))
-                && !l.contains(":monitor_")
-                && !l.contains("wf-recorder")
-        })
-        .collect()
+    get_pw_ports("-o", |port| {
+        (port.contains(":capture_") || port.contains("input"))
+            && !port.contains(":monitor_")
+            && !port.contains("wf-recorder")
+    })
 }
 
 /// Links or unlinks audio port pairs between an output and recorder input ports.
@@ -102,7 +89,9 @@ fn pactl_set_recorder_mute(pid: u32, muted: bool) {
     for line in out.lines() {
         let trimmed = line.trim();
         if trimmed.starts_with("Source Output #") {
-            current_id = trimmed.strip_prefix("Source Output #").map(|s| s.to_string());
+            current_id = trimmed
+                .strip_prefix("Source Output #")
+                .map(|s| s.to_string());
         }
         if (trimmed.contains(&pid_str)
             || trimmed.contains("application.process.binary = \"wf-recorder\""))

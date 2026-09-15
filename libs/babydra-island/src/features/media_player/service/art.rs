@@ -11,6 +11,18 @@ use gtk4::prelude::*;
 
 pub use crate::features::media_player::models::ArtPayload;
 
+/// UI state shared by the asynchronous artwork receiver.
+#[derive(Clone)]
+pub struct ArtReceiverContext {
+    pub art_container: gtk4::Box,
+    pub popover_art: gtk4::Box,
+    pub last_attempted_url: Rc<RefCell<String>>,
+    pub art_loaded: Rc<Cell<bool>>,
+    pub fail_count: Rc<Cell<u32>>,
+    pub request_pending: Rc<Cell<bool>>,
+    pub next_retry_at: Rc<Cell<Option<Instant>>>,
+}
+
 /// Parses and scales raw image data from memory buffers to build cover art.
 /// If `crop_square` is true, delegates to `babydra_ui_kit::ui::image::create_rounded_picture`.
 pub fn load_album_art_from_bytes(
@@ -55,14 +67,18 @@ pub fn load_album_art_from_bytes(
 /// popover art containers (with the retry/fallback logic).
 pub fn spawn_art_receiver(
     mut rx: tokio::sync::mpsc::UnboundedReceiver<ArtPayload>,
-    art_container: gtk4::Box,
-    popover_art: gtk4::Box,
-    last_attempted_url: Rc<RefCell<String>>,
-    art_loaded: Rc<Cell<bool>>,
-    fail_count: Rc<Cell<u32>>,
-    request_pending: Rc<Cell<bool>>,
-    next_retry_at: Rc<Cell<Option<Instant>>>,
+    context: ArtReceiverContext,
 ) {
+    let ArtReceiverContext {
+        art_container,
+        popover_art,
+        last_attempted_url,
+        art_loaded,
+        fail_count,
+        request_pending,
+        next_retry_at,
+    } = context;
+
     glib::MainContext::default().spawn_local(async move {
         while let Some((url, app_icon_name, result)) = rx.recv().await {
             if url != *last_attempted_url.borrow() {

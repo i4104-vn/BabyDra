@@ -272,10 +272,8 @@ impl IslandFeature for ClipboardFeature {
             return;
         }
 
-        if ctx.is_current() {
-            if babydra_core::get_entries_revision() != self.last_entries_revision {
-                self.render_current_list();
-            }
+        if ctx.is_current() && babydra_core::get_entries_revision() != self.last_entries_revision {
+            self.render_current_list();
         }
     }
 }

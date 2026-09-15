@@ -124,11 +124,12 @@ pub fn connect_popover_actions(ctx: PopoverActionsContext) {
     {
         let config = ctx.config.clone();
         let output_names = ctx.output_names.clone();
-        ctx.output_dropdown.connect_selected_notify(move |dropdown| {
-            if let Some(name) = output_names.get(dropdown.selected() as usize) {
-                config.borrow_mut().mode = RecordingMode::SingleOutput(name.clone());
-            }
-        });
+        ctx.output_dropdown
+            .connect_selected_notify(move |dropdown| {
+                if let Some(name) = output_names.get(dropdown.selected() as usize) {
+                    config.borrow_mut().mode = RecordingMode::SingleOutput(name.clone());
+                }
+            });
     }
 
     // Area selection button
@@ -248,19 +249,21 @@ pub fn connect_popover_actions(ctx: PopoverActionsContext) {
         let meta_card = ctx.meta_card.clone();
         let buttons_box = ctx.buttons_box.clone();
         let status_badge = ctx.status_badge.clone();
-        ctx.btn_stop.click_gesture.connect_pressed(move |_, _, _, _| {
-            stop_recording_action();
-            timer_label.set_text("00:00:00");
-            settings.set_visible(true);
-            action_row.set_visible(true);
-            meta_card.set_visible(false);
-            buttons_box.set_visible(false);
+        ctx.btn_stop
+            .click_gesture
+            .connect_pressed(move |_, _, _, _| {
+                stop_recording_action();
+                timer_label.set_text("00:00:00");
+                settings.set_visible(true);
+                action_row.set_visible(true);
+                meta_card.set_visible(false);
+                buttons_box.set_visible(false);
 
-            status_badge.remove_css_class("badge-recording");
-            status_badge.remove_css_class("badge-paused");
-            status_badge.add_css_class("badge-ready");
-            status_badge.set_text(&trans("recorder.status_idle"));
-        });
+                status_badge.remove_css_class("badge-recording");
+                status_badge.remove_css_class("badge-paused");
+                status_badge.add_css_class("badge-ready");
+                status_badge.set_text(&trans("recorder.status_idle"));
+            });
     }
 
     // Mute system audio button

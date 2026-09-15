@@ -21,7 +21,8 @@ pub fn spawn_recording_polling() -> Rc<RefCell<IslandRecordingState>> {
                 state.is_recording = true;
                 state.is_paused = babydra_core::services::recording::is_paused();
                 state.elapsed_secs = babydra_core::services::recording::get_elapsed_secs();
-                state.is_audio_muted = babydra_core::services::recording::is_recording_audio_muted();
+                state.is_audio_muted =
+                    babydra_core::services::recording::is_recording_audio_muted();
                 state.is_mic_muted = babydra_core::services::recording::is_recording_mic_muted();
                 if let Some(cfg) = babydra_core::services::recording::get_active_config() {
                     state.mode_name = match cfg.mode {

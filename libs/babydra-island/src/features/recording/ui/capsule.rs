@@ -107,3 +107,9 @@ impl RecordingCapsuleWidget {
         self.timer_label.set_text(text);
     }
 }
+
+impl Default for RecordingCapsuleWidget {
+    fn default() -> Self {
+        Self::new()
+    }
+}

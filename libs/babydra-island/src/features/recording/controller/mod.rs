@@ -3,7 +3,6 @@
 pub mod actions;
 pub mod keyboard;
 
+pub use crate::features::recording::models::PopoverActionsContext;
 pub use actions::*;
 pub use keyboard::create_keyboard_controller;
-pub use crate::features::recording::models::PopoverActionsContext;
-
