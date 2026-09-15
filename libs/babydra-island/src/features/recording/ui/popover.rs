@@ -77,7 +77,10 @@ impl RecordingPopover {
             "recording-popover-box",
             360,
         );
-        let config = Rc::new(RefCell::new(RecordingConfig::default()));
+        let config = Rc::new(RefCell::new(RecordingConfig {
+            framerate: 90,
+            ..Default::default()
+        }));
 
         let header = GtkBox::new(Orientation::Horizontal, 8);
         header.add_css_class("recording-popover-header");
@@ -158,7 +161,7 @@ impl RecordingPopover {
             "720p (1280x720)",
             "480p (854x480)",
         ]);
-        let framerate = DropDown::from_strings(&["60 FPS", "90 FPS", "30 FPS", "24 FPS"]);
+        let framerate = DropDown::from_strings(&["90 FPS", "60 FPS", "30 FPS", "24 FPS"]);
         let format = DropDown::from_strings(&["MP4 (H.264)", "MKV (H.264)", "WebM (VP9)"]);
         let codec =
             DropDown::from_strings(&["Default", "H.264 (libx264)", "H.264 VA-API (h264_vaapi)"]);
@@ -248,7 +251,7 @@ impl RecordingPopover {
             let config = config.clone();
             framerate.connect_selected_notify(move |dropdown| {
                 config.borrow_mut().framerate = match dropdown.selected() {
-                    1 => 90,
+                    0 => 90,
                     2 => 30,
                     3 => 24,
                     _ => 60,

@@ -198,19 +198,6 @@ pub fn start_recording(config: &RecordingConfig) -> Result<PathBuf, String> {
         total_paused_duration: Duration::ZERO,
     });
 
-    let filename = output_path
-        .file_name()
-        .map(|n| n.to_string_lossy().to_string())
-        .unwrap_or_else(|| "Recording".to_string());
-
-    let notif_title = crate::i18n::trans("recorder.title");
-    let notif_msg = format!(
-        "{} ({})",
-        crate::i18n::trans("recorder.notif_started"),
-        filename
-    );
-    send_notification(&notif_title, &notif_msg);
-
     Ok(output_path)
 }
 

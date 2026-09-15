@@ -45,7 +45,7 @@ impl RecordingCapsuleWidget {
         timer_label.set_halign(Align::Center);
         center_box.set_center_widget(Some(&timer_label));
 
-        // Right (End): Red outer circle ring with inner red dot
+        // Right (End): Red outer circle ring with inner red stop square
         let indicator = DrawingArea::new();
         indicator.set_content_width(18);
         indicator.set_content_height(18);
@@ -60,14 +60,36 @@ impl RecordingCapsuleWidget {
             // Outer red ring
             cr.set_source_rgba(0.937, 0.267, 0.267, 0.90); // #ef4444
             cr.set_line_width(1.8);
-            cr.arc(cx, cy, 6.5, 0.0, 2.0 * std::f64::consts::PI);
+            cr.arc(cx, cy, 6.8, 0.0, 2.0 * std::f64::consts::PI);
             let _ = cr.stroke();
 
-            // Inner red dot
+            // Inner red stop square (rounded rectangle)
             cr.set_source_rgba(0.937, 0.267, 0.267, 1.0);
-            cr.arc(cx, cy, 3.5, 0.0, 2.0 * std::f64::consts::PI);
+            let sq = 6.0;
+            let x = cx - sq / 2.0;
+            let y = cy - sq / 2.0;
+            let r = 1.2;
+            let pi = std::f64::consts::PI;
+            let half_pi = std::f64::consts::FRAC_PI_2;
+            cr.new_sub_path();
+            cr.arc(x + sq - r, y + r, r, -half_pi, 0.0);
+            cr.arc(x + sq - r, y + sq - r, r, 0.0, half_pi);
+            cr.arc(x + r, y + sq - r, r, half_pi, pi);
+            cr.arc(x + r, y + r, r, pi, 3.0 * half_pi);
+            cr.close_path();
             let _ = cr.fill();
         });
+
+        // Direct click on stop icon to stop recording immediately
+        let stop_click = gtk4::GestureClick::new();
+        stop_click.connect_pressed(|gesture, _, _, _| {
+            if babydra_core::services::recording::is_recording() {
+                let _ = babydra_core::services::recording::stop_recording();
+                gesture.set_state(gtk4::EventSequenceState::Claimed);
+            }
+        });
+        indicator.add_controller(stop_click);
+        indicator.set_cursor_from_name(Some("pointer"));
 
         center_box.set_end_widget(Some(&indicator));
         container.append(&center_box);
