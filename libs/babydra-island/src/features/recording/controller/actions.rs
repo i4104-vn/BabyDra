@@ -13,7 +13,7 @@ use babydra_core::services::recording::{
     toggle_pause,
 };
 
-pub use crate::features::recording::models::PopoverActionsContext;
+use crate::features::recording::models::PopoverActionsContext;
 use crate::features::recording::service::{toggle_audio_mute, toggle_mic_mute};
 use crate::features::recording::ui::RecordingButtonWidget;
 

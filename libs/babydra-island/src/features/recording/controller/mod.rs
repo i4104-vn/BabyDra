@@ -5,3 +5,5 @@ pub mod keyboard;
 
 pub use actions::*;
 pub use keyboard::create_keyboard_controller;
+pub use crate::features::recording::models::PopoverActionsContext;
+

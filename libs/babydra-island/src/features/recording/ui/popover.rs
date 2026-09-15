@@ -344,9 +344,35 @@ impl RecordingPopover {
         }
         self.quality_label
             .set_text(&format!("{} FPS • {}", state.framerate, state.format));
-        self.btn_mute_audio
-            .set_alert(babydra_core::services::system::volume::is_muted());
-        self.btn_mute_mic
-            .set_alert(babydra_core::services::system::volume::is_microphone_muted());
+
+        let audio_muted = state.is_audio_muted;
+        self.btn_mute_audio.set_icon_and_title(
+            if audio_muted {
+                "audio-volume-muted"
+            } else {
+                "audio-volume-high"
+            },
+            &trans(if audio_muted {
+                "recorder.audio_unmute"
+            } else {
+                "recorder.audio_mute"
+            }),
+        );
+        self.btn_mute_audio.set_alert(audio_muted);
+
+        let mic_muted = state.is_mic_muted;
+        self.btn_mute_mic.set_icon_and_title(
+            if mic_muted {
+                "microphone-disabled"
+            } else {
+                "audio-input-microphone"
+            },
+            &trans(if mic_muted {
+                "recorder.mic_unmute"
+            } else {
+                "recorder.mic_mute"
+            }),
+        );
+        self.btn_mute_mic.set_alert(mic_muted);
     }
 }

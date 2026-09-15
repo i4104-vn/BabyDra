@@ -3,7 +3,7 @@
 pub mod actions;
 pub mod polling;
 
-pub use actions::{toggle_audio_mute, toggle_mic_mute};
+pub use actions::{is_audio_muted, is_mic_muted, toggle_audio_mute, toggle_mic_mute};
 pub use polling::{spawn_recording_polling, IslandRecordingState};
 
 use std::cell::RefCell;

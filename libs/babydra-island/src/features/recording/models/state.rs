@@ -9,4 +9,6 @@ pub struct IslandRecordingState {
     pub mode_name: String,
     pub format: String,
     pub framerate: u32,
+    pub is_audio_muted: bool,
+    pub is_mic_muted: bool,
 }

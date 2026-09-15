@@ -187,6 +187,7 @@ pub fn start_recording(config: &RecordingConfig) -> Result<PathBuf, String> {
     })?;
 
     let pid = child.id();
+    super::audio::init_recording_audio(pid, config.audio);
     *lock = Some(ActiveSession {
         child,
         pid,
@@ -268,6 +269,8 @@ pub fn stop_recording() -> Result<Option<PathBuf>, String> {
             .map_err(|e| format!("Failed to lock recording mutex: {e}"))?;
         lock.take()
     };
+
+    super::audio::reset_recording_audio();
 
     let Some(mut session) = session_opt else {
         crate::services::utils::pkill_signal("-SIGINT", "wf-recorder", true);
