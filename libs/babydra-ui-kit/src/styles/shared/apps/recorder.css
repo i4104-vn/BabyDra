@@ -172,51 +172,6 @@ popover.recording-popover > contents {
     margin-top: 8px;
 }
 
-button.recording-bottom-btn {
-    min-height: 32px;
-    padding: 5px 12px;
-    border-radius: 9px;
-    font-size: 12px;
-    font-weight: 600;
-    transition: all 180ms ease;
-    box-shadow: none;
-    outline: none;
-}
-
-button.recording-start-btn {
-    background-color: #3b82f6;
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.28);
-}
-
-button.recording-start-btn:hover {
-    background-color: #2563eb;
-    border-color: rgba(255, 255, 255, 0.25);
-    box-shadow: 0 3px 10px rgba(59, 130, 246, 0.38);
-}
-
-button.recording-start-btn:active {
-    background-color: #1d4ed8;
-    box-shadow: 0 1px 3px rgba(59, 130, 246, 0.25);
-}
-
-button.recording-folder-btn {
-    background-color: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.90);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-button.recording-folder-btn:hover {
-    background-color: rgba(255, 255, 255, 0.13);
-    border-color: rgba(255, 255, 255, 0.20);
-    color: #ffffff;
-}
-
-button.recording-folder-btn:active {
-    background-color: rgba(255, 255, 255, 0.18);
-}
-
 /* ── Live Recording Meta Card ────────────────────────────────── */
 .recording-meta-card {
     background-color: rgba(255, 255, 255, 0.05);

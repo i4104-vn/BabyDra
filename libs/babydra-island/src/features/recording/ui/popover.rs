@@ -303,42 +303,25 @@ impl RecordingPopover {
             });
         }
 
-        let action_row = GtkBox::new(Orientation::Horizontal, 10);
+        let action_row = GtkBox::new(Orientation::Horizontal, 8);
         action_row.add_css_class("recording-action-row");
-        action_row.set_homogeneous(true);
+        action_row.set_halign(Align::End);
+        action_row.set_margin_top(8);
 
-        let start_box = GtkBox::new(Orientation::Horizontal, 6);
-        start_box.set_halign(Align::Center);
-        start_box.set_valign(Align::Center);
-        let start_icon = babydra_ui_kit::ui::icon::get_icon("camera", 14);
-        start_icon.set_valign(Align::Center);
-        let start_label = Label::new(Some(&trans("recorder.start")));
-        start_label.set_valign(Align::Center);
-        start_box.append(&start_icon);
-        start_box.append(&start_label);
+        let open_folder = babydra_ui_kit::components::create_icon_btn(
+            "folder",
+            &trans("recorder.open_folder"),
+            "connect-pill-btn",
+        );
 
-        let start_button = Button::new();
-        start_button.set_child(Some(&start_box));
-        start_button.add_css_class("recording-bottom-btn");
-        start_button.add_css_class("recording-start-btn");
+        let start_button = babydra_ui_kit::components::create_icon_btn(
+            "camera",
+            &trans("recorder.start"),
+            "suggested-action",
+        );
 
-        let folder_box = GtkBox::new(Orientation::Horizontal, 6);
-        folder_box.set_halign(Align::Center);
-        folder_box.set_valign(Align::Center);
-        let folder_icon = babydra_ui_kit::ui::icon::get_icon("folder", 14);
-        folder_icon.set_valign(Align::Center);
-        let folder_label = Label::new(Some(&trans("recorder.open_folder")));
-        folder_label.set_valign(Align::Center);
-        folder_box.append(&folder_icon);
-        folder_box.append(&folder_label);
-
-        let open_folder = Button::new();
-        open_folder.set_child(Some(&folder_box));
-        open_folder.add_css_class("recording-bottom-btn");
-        open_folder.add_css_class("recording-folder-btn");
-
-        action_row.append(&start_button);
         action_row.append(&open_folder);
+        action_row.append(&start_button);
         base.popover_box.append(&action_row);
         {
             let config = config.clone();
