@@ -51,10 +51,24 @@ fn main() {
         file_dialog.set_title(&trans("common.open_image_file"));
 
         let filter = gtk4::FileFilter::new();
-        filter.set_name(Some(&trans("common.images_filter")));
+        filter.set_name(Some(&trans("preview.media_filter")));
         filter.add_mime_type("image/png");
         filter.add_mime_type("image/jpeg");
         filter.add_mime_type("image/webp");
+        filter.add_mime_type("video/mp4");
+        filter.add_mime_type("video/x-matroska");
+        filter.add_mime_type("video/webm");
+        filter.add_mime_type("video/quicktime");
+        filter.add_mime_type("video/x-msvideo");
+        filter.add_pattern("*.mp4");
+        filter.add_pattern("*.mkv");
+        filter.add_pattern("*.webm");
+        filter.add_pattern("*.mov");
+        filter.add_pattern("*.avi");
+        filter.add_pattern("*.png");
+        filter.add_pattern("*.jpg");
+        filter.add_pattern("*.jpeg");
+        filter.add_pattern("*.webp");
         file_dialog.set_default_filter(Some(&filter));
 
         let app_clone = app.clone();

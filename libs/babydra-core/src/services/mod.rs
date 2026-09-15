@@ -11,6 +11,7 @@ pub mod last_user;
 pub mod logger;
 pub mod mpris;
 pub mod notification;
+pub mod preview;
 pub mod recording;
 pub mod screenshot;
 pub mod search;

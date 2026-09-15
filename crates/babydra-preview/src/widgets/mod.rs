@@ -1,4 +1,22 @@
-//! UI widgets composing the image previewer interface.
+//! UI widgets composing the media previewer interface (Image & Video).
 
-pub mod viewer;
-pub use viewer::build_ui;
+pub mod image;
+pub mod playback;
+pub mod video;
+pub mod window;
+
+use babydra_core::models::preview::MediaKind;
+use gtk4::Application;
+use std::path::PathBuf;
+
+/// Application dispatcher: inspects the media file and launches either the image or video viewer.
+pub fn build_ui(app: &Application, path: PathBuf) {
+    match MediaKind::detect(&path) {
+        MediaKind::Video => {
+            video::build_ui(app, path);
+        }
+        MediaKind::Image | MediaKind::Unsupported => {
+            image::build_ui(app, path);
+        }
+    }
+}

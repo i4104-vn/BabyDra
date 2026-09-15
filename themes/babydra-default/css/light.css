@@ -1649,6 +1649,46 @@ button.control-btn:active {
     color: #1c1c1e;
 }
 
+.video-controls-bar {
+    background-color: rgba(255, 255, 255, 0.98);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.video-details-dialog {
+    background-color: rgba(255, 255, 255, 0.98);
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
+}
+
+.video-timeline-scale trough {
+    background-color: rgba(0, 0, 0, 0.12);
+}
+
+.video-volume-scale trough {
+    background-color: rgba(0, 0, 0, 0.12);
+}
+
+button.video-speed-btn {
+    background-color: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    color: rgba(0, 0, 0, 0.85);
+}
+
+button.video-speed-btn:hover {
+    background-color: rgba(0, 0, 0, 0.10);
+    color: #000000;
+}
+
+.popover-btn {
+    color: rgba(0, 0, 0, 0.85);
+}
+
+.popover-btn:hover {
+    background-color: rgba(0, 0, 0, 0.06);
+    color: #000000;
+}
+
 /* === apps/settings.css === */
 window.settings-window {
     background-color: rgba(255, 255, 255, 0.98);

@@ -252,7 +252,17 @@
   "sysmon.gpu_usage": "GPU Usage: 0%",
   "wifi.connecting": "Connecting...",
   "preview.title": "Image Preview - {}",
-  "preview.failed_load": "Failed to load image file.",
+  "preview.video_title": "Video Preview - {}",
+  "preview.failed_load": "Failed to load media file.",
   "preview.camera_info": "Camera Information",
+  "preview.video_info": "Video Details",
+  "preview.resolution": "Resolution",
+  "preview.duration": "Duration",
+  "preview.codec": "Codec",
+  "preview.frame_rate": "Frame Rate",
+  "preview.bitrate": "Bitrate",
+  "preview.audio": "Audio",
+  "preview.file_size": "File Size",
+  "preview.media_filter": "Media Files (Images & Videos)",
   "preview.no_exif": "No EXIF data available"
 }

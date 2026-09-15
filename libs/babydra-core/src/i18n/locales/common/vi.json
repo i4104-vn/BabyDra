@@ -252,7 +252,17 @@
   "sysmon.gpu_usage": "GPU Usage: 0%",
   "wifi.connecting": "Đang kết nối...",
   "preview.title": "Xem trước hình ảnh - {}",
-  "preview.failed_load": "Không thể tải tệp hình ảnh.",
+  "preview.video_title": "Xem trước video - {}",
+  "preview.failed_load": "Không thể tải tệp phương tiện.",
   "preview.camera_info": "Thông tin máy ảnh",
+  "preview.video_info": "Thông tin video",
+  "preview.resolution": "Độ phân giải",
+  "preview.duration": "Thời lượng",
+  "preview.codec": "Bộ giải mã",
+  "preview.frame_rate": "Tốc độ khung hình",
+  "preview.bitrate": "Tốc độ bit",
+  "preview.audio": "Âm thanh",
+  "preview.file_size": "Dung lượng",
+  "preview.media_filter": "Tệp phương tiện (Ảnh & Video)",
   "preview.no_exif": "Không có dữ liệu EXIF"
 }

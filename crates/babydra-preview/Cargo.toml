@@ -13,3 +13,5 @@ gdk4 = { workspace = true }
 gdk-pixbuf = { workspace = true }
 cairo-rs = { version = "0.20", features = ["use_glib"] }
 chrono = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

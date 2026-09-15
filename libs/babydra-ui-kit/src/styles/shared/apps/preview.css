@@ -219,3 +219,80 @@ button.control-btn:active {
     font-weight: 600;
 }
 
+.video-controls-bar {
+    min-width: 480px;
+    padding: 6px 14px;
+}
+
+.video-timeline-scale trough {
+    min-height: 4px;
+    border-radius: 2px;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.video-timeline-scale highlight {
+    min-height: 4px;
+    border-radius: 2px;
+    background-color: #3b82f6;
+}
+
+.video-timeline-scale slider {
+    min-width: 12px;
+    min-height: 12px;
+    border-radius: 6px;
+    background-color: #ffffff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.video-volume-scale trough {
+    min-height: 4px;
+    border-radius: 2px;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.video-volume-scale highlight {
+    min-height: 4px;
+    border-radius: 2px;
+    background-color: #3b82f6;
+}
+
+.video-volume-scale slider {
+    min-width: 10px;
+    min-height: 10px;
+    border-radius: 5px;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+button.video-speed-btn {
+    border-radius: 8px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.video-details-dialog {
+    min-width: 380px;
+}
+
+.video-time-lbl {
+    font-variant-numeric: tabular-nums;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.popover-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.popover-btn:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
