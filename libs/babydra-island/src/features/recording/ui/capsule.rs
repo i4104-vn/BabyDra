@@ -84,7 +84,9 @@ impl RecordingCapsuleWidget {
         let stop_click = gtk4::GestureClick::new();
         stop_click.connect_pressed(|gesture, _, _, _| {
             if babydra_core::services::recording::is_recording() {
-                let _ = babydra_core::services::recording::stop_recording();
+                std::thread::spawn(|| {
+                    let _ = babydra_core::services::recording::stop_recording();
+                });
                 gesture.set_state(gtk4::EventSequenceState::Claimed);
             }
         });

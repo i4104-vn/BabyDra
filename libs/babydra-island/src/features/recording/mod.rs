@@ -93,6 +93,9 @@ impl IslandFeature for RecordingFeature {
             handle.override_show();
             crate::island::tick_default_island();
             if let Some(popover) = popover.borrow().as_ref() {
+                if !babydra_core::services::recording::is_recording() {
+                    popover.reset_to_config();
+                }
                 if popover.root().is_some() {
                     popover.popup();
                 }
@@ -129,7 +132,12 @@ impl IslandFeature for RecordingFeature {
             if popover.is_visible() {
                 popover.popdown();
             } else {
-                popover.update_data(&self.state.borrow());
+                let is_rec = babydra_core::services::recording::is_recording();
+                if !is_rec {
+                    popover.reset_to_config();
+                } else {
+                    popover.update_data(&self.state.borrow());
+                }
                 popover.popup();
                 if let Some(ref h) = *self.handle.borrow() {
                     h.override_show();
@@ -139,12 +147,24 @@ impl IslandFeature for RecordingFeature {
     }
 
     fn tick(&mut self, _ctx: &IslandCtx) {
-        let st = self.state.borrow().clone();
+        let is_rec = babydra_core::services::recording::is_recording();
+        let mut st = self.state.borrow().clone();
+        if !is_rec {
+            st.is_recording = false;
+        }
+
         let is_pop_open = self.is_popover_open();
 
         if is_pop_open {
             if let Some(ref h) = *self.handle.borrow() {
                 h.override_show();
+            }
+        }
+
+        // Always keep popover in sync whenever visible
+        if let Some(ref popover) = *self.popover.borrow() {
+            if popover.is_visible() {
+                popover.update_data(&st);
             }
         }
 
@@ -171,23 +191,21 @@ impl IslandFeature for RecordingFeature {
                 self.capsule.update_timer(&time_str);
             }
 
-            if let Some(ref popover) = *self.popover.borrow() {
-                if popover.is_visible() {
-                    popover.update_data(&st);
-                }
-            }
-
             self.was_recording = true;
         } else if self.was_recording {
-            if let Some(ref popover) = *self.popover.borrow() {
-                if popover.is_visible() {
-                    popover.popdown();
-                }
-            }
-            if let Some(ref h) = *self.handle.borrow() {
-                h.hide();
-            }
             self.capsule.update_timer("00:00");
+            if let Some(ref popover) = *self.popover.borrow() {
+                popover.reset_to_config();
+                if !popover.is_visible() {
+                    if let Some(ref h) = *self.handle.borrow() {
+                        h.override_show_for(std::time::Duration::from_secs(3));
+                    }
+                    crate::island::tick_default_island();
+                }
+            } else if let Some(ref h) = *self.handle.borrow() {
+                h.override_show_for(std::time::Duration::from_secs(3));
+                crate::island::tick_default_island();
+            }
             self.was_recording = false;
         }
     }

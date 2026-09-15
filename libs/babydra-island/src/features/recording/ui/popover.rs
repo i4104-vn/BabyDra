@@ -383,10 +383,26 @@ impl RecordingPopover {
             let _ = toggle_pause();
         });
         {
-            let popover = base.popover.clone();
+            let timer_label = timer_label.clone();
+            let settings = settings.clone();
+            let action_row = action_row.clone();
+            let meta_card = meta_card.clone();
+            let buttons_box = buttons_box.clone();
+            let status_badge = status_badge.clone();
             btn_stop.click_gesture.connect_pressed(move |_, _, _, _| {
-                let _ = stop_recording();
-                popover.popdown();
+                std::thread::spawn(|| {
+                    let _ = stop_recording();
+                });
+                timer_label.set_text("00:00:00");
+                settings.set_visible(true);
+                action_row.set_visible(true);
+                meta_card.set_visible(false);
+                buttons_box.set_visible(false);
+
+                status_badge.remove_css_class("badge-recording");
+                status_badge.remove_css_class("badge-paused");
+                status_badge.add_css_class("badge-ready");
+                status_badge.set_text(&trans("recorder.status_idle"));
             });
         }
         {
@@ -449,7 +465,25 @@ impl RecordingPopover {
         }
     }
 
+    pub fn reset_to_config(&self) {
+        self.timer_label.set_text("00:00:00");
+        self.settings.set_visible(true);
+        self.action_row.set_visible(true);
+        self.meta_card.set_visible(false);
+        self.buttons_box.set_visible(false);
+
+        self.status_badge.remove_css_class("badge-recording");
+        self.status_badge.remove_css_class("badge-paused");
+        self.status_badge.add_css_class("badge-ready");
+        self.status_badge.set_text(&trans("recorder.status_idle"));
+    }
+
     pub fn update_data(&self, state: &IslandRecordingState) {
+        if !state.is_recording {
+            self.reset_to_config();
+            return;
+        }
+
         let elapsed = state.elapsed_secs;
         self.timer_label.set_text(&format!(
             "{:02}:{:02}:{:02}",
@@ -457,20 +491,16 @@ impl RecordingPopover {
             (elapsed % 3600) / 60,
             elapsed % 60
         ));
-        let recording = state.is_recording;
 
-        self.settings.set_visible(!recording);
-        self.action_row.set_visible(!recording);
-        self.meta_card.set_visible(recording);
-        self.buttons_box.set_visible(recording);
+        self.settings.set_visible(false);
+        self.action_row.set_visible(false);
+        self.meta_card.set_visible(true);
+        self.buttons_box.set_visible(true);
 
         self.status_badge.remove_css_class("badge-ready");
         self.status_badge.remove_css_class("badge-recording");
         self.status_badge.remove_css_class("badge-paused");
-        if !recording {
-            self.status_badge.add_css_class("badge-ready");
-            self.status_badge.set_text(&trans("recorder.status_idle"));
-        } else if state.is_paused {
+        if state.is_paused {
             self.status_badge.add_css_class("badge-paused");
             self.status_badge.set_text(&trans("recorder.status_paused"));
         } else {
