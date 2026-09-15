@@ -307,10 +307,10 @@ impl RecordingPopover {
         action_row.add_css_class("recording-action-row");
         action_row.set_homogeneous(true);
 
-        let start_box = GtkBox::new(Orientation::Horizontal, 8);
+        let start_box = GtkBox::new(Orientation::Horizontal, 6);
         start_box.set_halign(Align::Center);
         start_box.set_valign(Align::Center);
-        let start_icon = babydra_ui_kit::ui::icon::get_icon("camera", 15);
+        let start_icon = babydra_ui_kit::ui::icon::get_icon("camera", 14);
         start_icon.set_valign(Align::Center);
         let start_label = Label::new(Some(&trans("recorder.start")));
         start_label.set_valign(Align::Center);
@@ -319,14 +319,13 @@ impl RecordingPopover {
 
         let start_button = Button::new();
         start_button.set_child(Some(&start_box));
-        start_button.add_css_class("baby-button");
-        start_button.add_css_class("suggested-action");
+        start_button.add_css_class("recording-bottom-btn");
         start_button.add_css_class("recording-start-btn");
 
-        let folder_box = GtkBox::new(Orientation::Horizontal, 8);
+        let folder_box = GtkBox::new(Orientation::Horizontal, 6);
         folder_box.set_halign(Align::Center);
         folder_box.set_valign(Align::Center);
-        let folder_icon = babydra_ui_kit::ui::icon::get_icon("folder", 15);
+        let folder_icon = babydra_ui_kit::ui::icon::get_icon("folder", 14);
         folder_icon.set_valign(Align::Center);
         let folder_label = Label::new(Some(&trans("recorder.open_folder")));
         folder_label.set_valign(Align::Center);
@@ -335,8 +334,7 @@ impl RecordingPopover {
 
         let open_folder = Button::new();
         open_folder.set_child(Some(&folder_box));
-        open_folder.add_css_class("baby-button");
-        open_folder.add_css_class("secondary-action");
+        open_folder.add_css_class("recording-bottom-btn");
         open_folder.add_css_class("recording-folder-btn");
 
         action_row.append(&start_button);
