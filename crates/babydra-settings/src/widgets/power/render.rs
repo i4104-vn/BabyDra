@@ -241,9 +241,13 @@ pub fn build() -> (PowerWidget, PasswordDialog) {
         cpu_freq_lbl.set_margin_top(0);
 
         let provider = gtk4::CssProvider::new();
-        cpu_freq_lbl
-            .style_context()
-            .add_provider(&provider, gtk4::STYLE_PROVIDER_PRIORITY_APPLICATION);
+        if let Some(display) = gtk4::gdk::Display::default() {
+            gtk4::style_context_add_provider_for_display(
+                &display,
+                &provider,
+                gtk4::STYLE_PROVIDER_PRIORITY_APPLICATION,
+            );
+        }
 
         let update_color = |ghz: f64, prov: &gtk4::CssProvider| {
             let (r, g, b) = if ghz < 2.0 {

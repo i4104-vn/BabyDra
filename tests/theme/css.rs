@@ -58,9 +58,13 @@ fn run_scale_allocation() {
     window.add_css_class("settings-window");
     let prov = gtk4::CssProvider::new();
     prov.load_from_data("window.settings-window { background-color: #12121c; } .settings-card { background-color: #1e1e2a; }");
-    window
-        .style_context()
-        .add_provider(&prov, gtk4::STYLE_PROVIDER_PRIORITY_APPLICATION + 10);
+    if let Some(display) = gtk4::gdk::Display::default() {
+        gtk4::style_context_add_provider_for_display(
+            &display,
+            &prov,
+            gtk4::STYLE_PROVIDER_PRIORITY_APPLICATION + 10,
+        );
+    }
     window.set_default_size(500, 300);
     window.set_child(Some(&card.container));
     window.present();

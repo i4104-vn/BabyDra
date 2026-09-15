@@ -118,13 +118,9 @@ pub fn wire_events(widget: &CertificatesWidget, auth_dialog: PasswordDialog) {
     widget.add_btn.connect_clicked(move |_| {
         let parent_win = container_c.root().and_then(|r| r.downcast::<gtk4::Window>().ok());
 
-        let chooser = gtk4::FileChooserNative::new(
-            Some("Select CA Certificate File"),
-            parent_win.as_ref(),
-            gtk4::FileChooserAction::Open,
-            Some("Select"),
-            Some("Cancel"),
-        );
+        let file_dialog = gtk4::FileDialog::new();
+        file_dialog.set_title("Select CA Certificate File");
+        file_dialog.set_accept_label(Some("Select"));
 
         let filter = gtk4::FileFilter::new();
         filter.set_name(Some("Certificate Files (*.crt, *.pem, *.cer, *.der)"));
@@ -132,31 +128,30 @@ pub fn wire_events(widget: &CertificatesWidget, auth_dialog: PasswordDialog) {
         filter.add_pattern("*.pem");
         filter.add_pattern("*.cer");
         filter.add_pattern("*.der");
-        chooser.add_filter(&filter);
+
+        let filters = gtk4::gio::ListStore::new::<gtk4::FileFilter>();
+        filters.append(&filter);
+        file_dialog.set_filters(Some(&filters));
+        file_dialog.set_default_filter(Some(&filter));
 
         let auth_dialog_cb = auth_dialog_add.clone();
         let pending_file_cb = pending_file_add.clone();
 
-        chooser.connect_response(move |dialog, response| {
-            if response == gtk4::ResponseType::Accept {
-                if let Some(file) = dialog.file() {
-                    if let Some(src_path) = file.path() {
-                        let fname = src_path.file_name().and_then(|n| n.to_str()).unwrap_or("cert.crt").to_string();
-                        let src_str = src_path.to_string_lossy().to_string();
+        file_dialog.open(parent_win.as_ref(), None::<&gtk4::gio::Cancellable>, move |result| {
+            if let Ok(file) = result {
+                if let Some(src_path) = file.path() {
+                    let fname = src_path.file_name().and_then(|n| n.to_str()).unwrap_or("cert.crt").to_string();
+                    let src_str = src_path.to_string_lossy().to_string();
 
-                        *pending_file_cb.borrow_mut() = Some(("add".to_string(), format!("{}:::{}", src_str, fname)));
+                    *pending_file_cb.borrow_mut() = Some(("add".to_string(), format!("{}:::{}", src_str, fname)));
 
-                        auth_dialog_cb.show_for(
-                            "Add CA Certificate",
-                            &format!("Enter sudo password to copy '{}' to /etc/ca-certificates/trust-source/anchors/ and run update-ca-trust:", fname),
-                        );
-                    }
+                    auth_dialog_cb.show_for(
+                        "Add CA Certificate",
+                        &format!("Enter sudo password to copy '{}' to /etc/ca-certificates/trust-source/anchors/ and run update-ca-trust:", fname),
+                    );
                 }
             }
-            dialog.destroy();
         });
-
-        chooser.show();
     });
 
     // Wire PasswordDialog submit
