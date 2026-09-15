@@ -231,10 +231,11 @@ pub fn build_video_ui(
 
     let details_title = Label::new(Some(&trans("preview.video_info")));
     details_title.add_css_class("exif-title");
+    details_title.set_hexpand(false);
     details_box.append(&details_title);
 
     let grid = Grid::new();
-    grid.set_hexpand(true);
+    grid.set_hexpand(false);
     grid.set_column_spacing(24);
     grid.set_row_spacing(8);
 

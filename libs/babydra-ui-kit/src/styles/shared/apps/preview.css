@@ -203,7 +203,7 @@ button.control-btn:active {
 
 .exif-dialog {
     border-radius: 16px;
-    padding: 18px 22px;
+    padding: 18px 16px;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
     background-color: rgba(20, 20, 26, 0.98);
     border: 1px solid rgba(255, 255, 255, 0.14);
@@ -324,7 +324,7 @@ button.video-speed-btn {
 }
 
 .video-details-dialog {
-    min-width: 380px;
+    min-width: 0;
 }
 
 /* The dialog's vertical Box spacing already separates the title from the grid. */
