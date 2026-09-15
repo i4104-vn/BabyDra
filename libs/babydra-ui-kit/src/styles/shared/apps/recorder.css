@@ -9,7 +9,7 @@ popover.recording-popover {
     border: none;
 }
 
-popover.recording-popover > contents {
+popover.recording-popover>contents {
     background-color: rgba(14, 14, 18, 0.96);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-top: 1px solid rgba(255, 255, 255, 0.22);
