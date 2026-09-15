@@ -143,6 +143,7 @@ icon_asset!(
 icon_asset!(DARK_CALENDAR_SVG, LIGHT_CALENDAR_SVG, "calendar.svg");
 icon_asset!(DARK_PLAY_SVG, LIGHT_PLAY_SVG, "play.svg");
 icon_asset!(DARK_PAUSE_SVG, LIGHT_PAUSE_SVG, "pause.svg");
+icon_asset!(DARK_STOP_SVG, LIGHT_STOP_SVG, "stop.svg");
 icon_asset!(DARK_PREVIOUS_SVG, LIGHT_PREVIOUS_SVG, "previous.svg");
 icon_asset!(DARK_NEXT_SVG, LIGHT_NEXT_SVG, "next.svg");
 icon_asset!(DARK_EYE_SVG, LIGHT_EYE_SVG, "eye.svg");

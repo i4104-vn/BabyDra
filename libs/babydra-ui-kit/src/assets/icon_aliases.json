@@ -141,8 +141,8 @@
     "application-x-executable": "terminal",
     "help-browser": "info",
     "audio-volume-high": "volume",
-    "media-playback-stop": "rect",
-    "media-playback-stop-symbolic": "rect",
+    "media-playback-stop": "stop",
+    "media-playback-stop-symbolic": "stop",
     "audio-input-microphone": "microphone",
     "audio-input-microphone-symbolic": "microphone"
 }

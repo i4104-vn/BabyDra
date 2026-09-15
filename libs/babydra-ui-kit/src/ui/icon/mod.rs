@@ -232,6 +232,8 @@ fn get_icon_svg_pair(name: &str) -> Option<(&'static str, &'static str)> {
         m.insert("calendar", (DARK_CALENDAR_SVG, LIGHT_CALENDAR_SVG));
         m.insert("play", (DARK_PLAY_SVG, LIGHT_PLAY_SVG));
         m.insert("pause", (DARK_PAUSE_SVG, LIGHT_PAUSE_SVG));
+        m.insert("stop", (DARK_STOP_SVG, LIGHT_STOP_SVG));
+        m.insert("square", (DARK_STOP_SVG, LIGHT_STOP_SVG));
         m.insert("previous", (DARK_PREVIOUS_SVG, LIGHT_PREVIOUS_SVG));
         m.insert("next", (DARK_NEXT_SVG, LIGHT_NEXT_SVG));
         m.insert("eye", (DARK_EYE_SVG, LIGHT_EYE_SVG));
