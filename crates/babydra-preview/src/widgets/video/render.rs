@@ -1,15 +1,15 @@
 //! Video preview UI layout assembly and widget creation.
 
+use crate::widgets::window::{create_viewer_window, format_aspect_ratio};
 use babydra_core::i18n::trans;
 use babydra_core::models::preview::VideoMetadata;
 use babydra_core::services::preview::SPEED_PRESETS;
-use crate::widgets::window::{create_viewer_window, format_aspect_ratio};
-use std::path::PathBuf;
 use gtk4::prelude::*;
 use gtk4::{
     Align, Application, ApplicationWindow, Box, Button, ContentFit, Grid, Label,
-    MediaFile, Orientation, Overlay, Picture, Popover, Scale,
+    MediaFile, Orientation, Overlay, Picture, Popover, Scale, Separator,
 };
+use std::path::PathBuf;
 
 /// Complete UI widgets structure for video playback preview.
 pub struct VideoViewerUi {
@@ -20,6 +20,7 @@ pub struct VideoViewerUi {
     pub controls_box: Box,
     pub play_pause_btn: Button,
     pub time_lbl: Label,
+    pub total_time_lbl: Label,
     pub timeline_scale: Scale,
     pub mute_btn: Button,
     pub volume_scale: Scale,
@@ -103,81 +104,114 @@ pub fn build_video_ui(
     overlay.add_overlay(&info_box);
 
     // --- Bottom-Center Video Playback Controls Pill ---
-    let controls_box = Box::new(Orientation::Horizontal, 8);
+    let controls_box = Box::new(Orientation::Horizontal, 6);
     controls_box.add_css_class("controls-bar");
     controls_box.add_css_class("video-controls-bar");
     controls_box.set_halign(Align::Center);
     controls_box.set_valign(Align::End);
     controls_box.set_margin_bottom(16);
 
-    // Play / Pause Button
+    // 1. Play / Pause Button (Uses BabyDra UI Kit embedded icon "play")
     let play_pause_btn = babydra_ui_kit::components::create_icon_button(
-        "media-playback-start-symbolic",
+        "play",
         16,
         &["control-btn", "video-play-btn"],
-        None,
+        Some(&trans("preview.play")),
         || {},
     );
     play_pause_btn.set_cursor_from_name(Some("pointer"));
     controls_box.append(&play_pause_btn);
 
-    // Time Label: 00:00 / 00:00
-    let total_dur_str = format_duration(meta.duration_secs);
-    let time_lbl = Label::new(Some(&format!("00:00 / {}", total_dur_str)));
+    // 2. Current Time Label (00:00)
+    let time_lbl = Label::new(Some("00:00"));
     time_lbl.add_css_class("info-item");
     time_lbl.add_css_class("video-time-lbl");
     time_lbl.set_valign(Align::Center);
     time_lbl.set_margin_start(4);
-    time_lbl.set_margin_end(4);
+    time_lbl.set_margin_end(2);
     controls_box.append(&time_lbl);
 
-    // Timeline Scrubber Scale
+    // 3. Timeline Scrubber Scale
     let max_dur = meta.duration_secs.max(1.0);
     let timeline_scale = Scale::with_range(Orientation::Horizontal, 0.0, max_dur, 0.1);
     timeline_scale.set_draw_value(false);
-    timeline_scale.set_width_request(240);
+    timeline_scale.set_width_request(200);
     timeline_scale.add_css_class("video-timeline-scale");
     timeline_scale.set_valign(Align::Center);
     timeline_scale.set_cursor_from_name(Some("pointer"));
     controls_box.append(&timeline_scale);
 
-    // Volume Button (Mute / Unmute Toggle)
+    // 4. Total Duration Label
+    let total_dur_str = format_duration(meta.duration_secs);
+    let total_time_lbl = Label::new(Some(&total_dur_str));
+    total_time_lbl.add_css_class("info-item");
+    total_time_lbl.add_css_class("video-time-lbl");
+    total_time_lbl.set_valign(Align::Center);
+    total_time_lbl.set_margin_start(2);
+    total_time_lbl.set_margin_end(4);
+    controls_box.append(&total_time_lbl);
+
+    // Separator between timeline group and volume group
+    let sep1 = Separator::new(Orientation::Vertical);
+    sep1.add_css_class("control-separator");
+    sep1.set_valign(Align::Center);
+    sep1.set_size_request(1, 16);
+    controls_box.append(&sep1);
+
+    // 5. Volume Button (Mute / Unmute Toggle, uses BabyDra embedded icon "volume")
     let mute_btn = babydra_ui_kit::components::create_icon_button(
-        "audio-volume-high-symbolic",
-        15,
+        "volume",
+        16,
         &["control-btn", "video-mute-btn"],
-        None,
+        Some(&trans("preview.mute")),
         || {},
     );
     mute_btn.set_cursor_from_name(Some("pointer"));
     controls_box.append(&mute_btn);
 
-    // Compact Volume Scale
+    // 6. Compact Volume Scale
     let volume_scale = Scale::with_range(Orientation::Horizontal, 0.0, 1.0, 0.05);
     volume_scale.set_draw_value(false);
     volume_scale.set_value(1.0);
-    volume_scale.set_width_request(70);
+    volume_scale.set_width_request(58);
     volume_scale.add_css_class("video-volume-scale");
     volume_scale.set_valign(Align::Center);
     volume_scale.set_cursor_from_name(Some("pointer"));
     controls_box.append(&volume_scale);
 
-    // Speed Selection Pill Button & Popover
+    // Separator between volume group and speed group
+    let sep2 = Separator::new(Orientation::Vertical);
+    sep2.add_css_class("control-separator");
+    sep2.set_valign(Align::Center);
+    sep2.set_size_request(1, 16);
+    controls_box.append(&sep2);
+
+    // 7. Speed Selection Pill Button & Popover
     let speed_btn = Button::with_label("1.0x");
     speed_btn.add_css_class("control-btn");
     speed_btn.add_css_class("video-speed-btn");
+    speed_btn.set_tooltip_text(Some(&trans("preview.speed")));
     speed_btn.set_cursor_from_name(Some("pointer"));
 
     let speed_popover = Popover::new();
-    let speed_list_box = Box::new(Orientation::Vertical, 4);
-    speed_list_box.set_margin_top(6);
-    speed_list_box.set_margin_bottom(6);
-    speed_list_box.set_margin_start(6);
-    speed_list_box.set_margin_end(6);
+    speed_popover.add_css_class("video-speed-popover");
+    let speed_list_box = Box::new(Orientation::Vertical, 2);
+    speed_list_box.set_margin_top(4);
+    speed_list_box.set_margin_bottom(4);
+    speed_list_box.set_margin_start(4);
+    speed_list_box.set_margin_end(4);
 
     for &spd in SPEED_PRESETS {
-        let btn = Button::with_label(&format!("{:.2}x", spd).replace(".00", ".0").replace(".50", ".5").replace(".75", ".75").replace(".25", ".25"));
-        btn.add_css_class("popover-btn");
+        let label_text = format!("{:.2}x", spd)
+            .replace(".00", ".0")
+            .replace(".50", ".5")
+            .replace(".75", ".75")
+            .replace(".25", ".25");
+        let btn = Button::with_label(&label_text);
+        btn.add_css_class("video-speed-item");
+        if (spd - 1.0).abs() < f64::EPSILON {
+            btn.add_css_class("active");
+        }
         speed_list_box.append(&btn);
     }
     speed_popover.set_child(Some(&speed_list_box));
@@ -259,6 +293,7 @@ pub fn build_video_ui(
         controls_box,
         play_pause_btn,
         time_lbl,
+        total_time_lbl,
         timeline_scale,
         mute_btn,
         volume_scale,

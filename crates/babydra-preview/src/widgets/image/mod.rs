@@ -1,16 +1,14 @@
-//! Image viewer module entry point.
-
-pub mod handlers;
-pub mod render;
-
-use babydra_core::models::preview::ImageState;
 use babydra_core::i18n::trans;
+use babydra_core::models::preview::ImageState;
 use gdk_pixbuf::Pixbuf;
 use gtk4::prelude::*;
 use gtk4::{Application, ApplicationWindow, Label};
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
+
+pub mod handlers;
+pub mod render;
 
 /// Builds and presents the image viewer window for the given image path.
 pub fn build_ui(app: &Application, path: PathBuf) {

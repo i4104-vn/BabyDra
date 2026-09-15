@@ -147,14 +147,43 @@ pub fn start_recording(config: &RecordingConfig) -> Result<PathBuf, String> {
         }
     }
 
-    // Resolution scaling filter
-    if let Some((width, height)) = config.resolution {
-        cmd.arg("-F").arg(format!("scale={}:{}", width, height));
+    let is_vaapi = config
+        .codec
+        .as_deref()
+        .map(|c| c.contains("vaapi"))
+        .unwrap_or(false);
+
+    if !is_vaapi {
+        let filter_str = if let Some((width, height)) = config.resolution {
+            format!(
+                "scale={}:{}:in_range=full:out_range=full:out_color_matrix=bt709:flags=accurate_rnd+full_chroma_int,format=yuv420p",
+                width, height
+            )
+        } else {
+            "scale=in_range=full:out_range=full:out_color_matrix=bt709:flags=accurate_rnd+full_chroma_int,format=yuv420p".to_string()
+        };
+        cmd.arg("-F").arg(filter_str);
+    } else if let Some((width, height)) = config.resolution {
+        cmd.arg("-F").arg(format!("scale_vaapi=w={}:h={}:format=nv12", width, height));
     }
 
-    // Codec override
-    if let Some(ref codec) = config.codec {
-        cmd.arg("-c").arg(codec);
+    // Codec override and color metadata tagging
+    let codec = config.codec.as_deref().unwrap_or_else(|| {
+        if config.format == "webm" {
+            "libvpx-vp9"
+        } else {
+            "libx264"
+        }
+    });
+    cmd.arg("-c").arg(codec);
+
+    if codec == "libx264" || codec.contains("x264") {
+        cmd.arg("-p").arg("color_range=pc");
+        cmd.arg("-p").arg("colorspace=bt709");
+        cmd.arg("-p").arg("color_primaries=bt709");
+        cmd.arg("-p").arg("color_trc=bt709");
+        cmd.arg("-p").arg("crf=18");
+        cmd.arg("-p").arg("preset=veryfast");
     }
 
     // Capture mode specific args

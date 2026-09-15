@@ -1,7 +1,8 @@
 //! Integration tests for screen recording service and configuration.
 
 use babydra_core::services::recording::{
-    get_new_recording_path, get_recordings_dir, RecordingConfig, RecordingMode, RecordingStatus,
+    get_new_recording_path, get_recordings_dir, start_recording, stop_recording,
+    RecordingConfig, RecordingMode, RecordingStatus,
 };
 
 #[test]
@@ -85,4 +86,30 @@ fn test_recording_status_logic() {
     assert!(active.is_recording());
     assert!(!active.is_paused());
     assert_eq!(active.elapsed_secs(), 42);
+}
+
+#[test]
+fn test_live_recording_lifecycle_and_output() {
+    let config = RecordingConfig {
+        mode: RecordingMode::Area {
+            x: 0,
+            y: 0,
+            width: 320,
+            height: 240,
+        },
+        resolution: None,
+        framerate: 24,
+        audio: false,
+        audio_device: None,
+        format: "mp4".to_string(),
+        codec: None,
+    };
+
+    if let Ok(output_path) = start_recording(&config) {
+        std::thread::sleep(std::time::Duration::from_millis(1500));
+        let res = stop_recording();
+        assert!(res.is_ok());
+        assert!(output_path.exists());
+        let _ = std::fs::remove_file(&output_path);
+    }
 }

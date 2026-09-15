@@ -425,7 +425,6 @@ button.quick-tile.active .tile-chevron {
     color: rgba(255, 255, 255, 0.65);
 }
 
-scale trough,
 scale.control-slider trough,
 scale.control-slider>trough,
 scale.control-slider contents>trough {
@@ -438,7 +437,6 @@ scale.control-slider contents>trough>highlight {
     background-color: #3b82f6;
 }
 
-scale slider,
 scale.control-slider slider,
 scale.control-slider>slider,
 scale.control-slider contents>slider {
@@ -1653,6 +1651,73 @@ button.control-btn:active {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
+separator.control-separator,
+.control-separator {
+    background-color: rgba(255, 255, 255, 0.18);
+}
+
+scale.video-timeline-scale,
+scale.video-volume-scale {
+    min-height: 20px;
+    padding: 0;
+    margin: 0;
+}
+
+scale.video-timeline-scale > trough,
+scale.video-volume-scale > trough,
+scale.video-timeline-scale trough,
+scale.video-volume-scale trough {
+    min-height: 4px;
+    border-radius: 9999px;
+    border: none;
+    box-shadow: none;
+    background-color: rgba(255, 255, 255, 0.20);
+    margin: 8px 0;
+    padding: 0;
+}
+
+scale.video-timeline-scale > trough > highlight,
+scale.video-volume-scale > trough > highlight,
+scale.video-timeline-scale trough highlight,
+scale.video-volume-scale trough highlight,
+scale.video-timeline-scale highlight,
+scale.video-volume-scale highlight {
+    min-height: 4px;
+    border-radius: 9999px;
+    border: none;
+    box-shadow: none;
+    background-color: #3b82f6;
+    background-image: none;
+    margin: 0;
+    padding: 0;
+}
+
+scale.video-timeline-scale > trough > slider,
+scale.video-timeline-scale slider {
+    min-width: 12px;
+    min-height: 12px;
+    border-radius: 9999px;
+    background-color: #ffffff;
+    background-image: none;
+    border: none;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.50);
+    margin: -4px 0;
+    padding: 0;
+}
+
+scale.video-volume-scale > trough > slider,
+scale.video-volume-scale slider {
+    min-width: 10px;
+    min-height: 10px;
+    border-radius: 9999px;
+    background-color: #ffffff;
+    background-image: none;
+    border: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+    margin: -3px 0;
+    padding: 0;
+}
+
 .video-details-dialog {
     background-color: rgba(14, 14, 18, 0.96);
     border: 1px solid rgba(255, 255, 255, 0.14);
@@ -1668,6 +1733,27 @@ button.video-speed-btn {
 
 button.video-speed-btn:hover {
     background-color: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+}
+
+popover.video-speed-popover > contents {
+    background-color: rgba(18, 18, 24, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+}
+
+.video-speed-item {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.video-speed-item:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
+.video-speed-item.active {
+    background-color: #3b82f6;
     color: #ffffff;
 }
 

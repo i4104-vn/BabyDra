@@ -264,5 +264,8 @@
   "preview.audio": "Âm thanh",
   "preview.file_size": "Dung lượng",
   "preview.media_filter": "Tệp phương tiện (Ảnh & Video)",
-  "preview.no_exif": "Không có dữ liệu EXIF"
+  "preview.no_exif": "Không có dữ liệu EXIF",
+  "preview.play": "Phát / Tạm dừng (Phím cách)",
+  "preview.mute": "Bật / Tắt tiếng (M)",
+  "preview.speed": "Tốc độ phát"
 }

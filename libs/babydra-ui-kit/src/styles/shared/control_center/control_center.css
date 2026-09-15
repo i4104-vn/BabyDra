@@ -93,13 +93,11 @@ button.quick-tile.active-light .tile-chevron {
     margin: 0;
 }
 
-scale,
 scale.control-slider {
     margin: 0;
     padding: 0;
 }
 
-scale trough,
 scale.control-slider trough,
 scale.control-slider > trough,
 scale.control-slider contents > trough {
@@ -112,7 +110,6 @@ scale.control-slider contents > trough {
     box-shadow: none;
 }
 
-scale trough highlight,
 scale.control-slider trough highlight,
 scale.control-slider > trough > highlight,
 scale.control-slider contents > trough > highlight {
@@ -122,7 +119,6 @@ scale.control-slider contents > trough > highlight {
     box-shadow: none;
 }
 
-scale slider,
 scale.control-slider slider,
 scale.control-slider > slider,
 scale.control-slider contents > slider {

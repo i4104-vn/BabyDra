@@ -10,15 +10,14 @@ use std::rc::Rc;
 /// Updates the volume button icon according to the active volume and mute state.
 pub fn update_volume_icon(btn: &Button, volume: f64, is_muted: bool) {
     let icon_name = if is_muted || volume <= 0.001 {
-        "audio-volume-muted-symbolic"
-    } else if volume < 0.34 {
-        "audio-volume-low-symbolic"
-    } else if volume < 0.67 {
-        "audio-volume-medium-symbolic"
+        "volume-mute"
+    } else if volume < 0.5 {
+        "volume-low"
     } else {
-        "audio-volume-high-symbolic"
+        "volume"
     };
-    btn.set_icon_name(icon_name);
+    let icon = babydra_ui_kit::ui::icon::get_icon(icon_name, 16);
+    btn.set_child(Some(&icon));
 }
 
 /// Sets up volume slider adjustment and mute toggling.

@@ -1,8 +1,3 @@
-//! Video player module entry point.
-
-pub mod handlers;
-pub mod render;
-
 use babydra_core::models::preview::VideoState;
 use babydra_core::services::preview::probe_video;
 use gtk4::prelude::*;
@@ -10,6 +5,9 @@ use gtk4::Application;
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
+
+pub mod handlers;
+pub mod render;
 
 /// Builds and presents the video player window for the given video path.
 pub fn build_ui(app: &Application, path: PathBuf) {
@@ -30,7 +28,8 @@ pub fn build_ui(app: &Application, path: PathBuf) {
 
     // Start video playback automatically
     ui.media_file.play();
-    ui.play_pause_btn.set_icon_name("media-playback-pause-symbolic");
+    let pause_icon = babydra_ui_kit::ui::icon::get_icon("pause", 16);
+    ui.play_pause_btn.set_child(Some(&pause_icon));
 
     ui.window.present();
 }

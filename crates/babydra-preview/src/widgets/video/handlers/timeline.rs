@@ -13,12 +13,12 @@ pub fn setup_timeline_controls(
     total_secs: f64,
 ) {
     let total_str = format_duration(total_secs);
+    ui.total_time_lbl.set_text(&total_str);
 
     // Sync timeline scale and time label with media progress
     let time_lbl_clone = ui.time_lbl.clone();
     let timeline_clone = ui.timeline_scale.clone();
     let state_ts = state.clone();
-    let total_str_clone = total_str.clone();
 
     ui.media_file.connect_timestamp_notify(move |mf| {
         if state_ts.borrow().is_seeking {
@@ -31,14 +31,13 @@ pub fn setup_timeline_controls(
         timeline_clone.set_value(cur_secs);
 
         let cur_str = format_duration(cur_secs);
-        time_lbl_clone.set_text(&format!("{} / {}", cur_str, total_str_clone));
+        time_lbl_clone.set_text(&cur_str);
     });
 
     // Timeline Drag / Scrub Seeking
     let mf_seek = ui.media_file.clone();
     let time_lbl_seek = ui.time_lbl.clone();
     let state_seek = state.clone();
-    let total_str_seek = total_str;
 
     ui.timeline_scale.connect_change_value(move |_, _, val| {
         state_seek.borrow_mut().is_seeking = true;
@@ -47,7 +46,7 @@ pub fn setup_timeline_controls(
         mf_seek.seek(seek_us);
 
         let cur_str = format_duration(val);
-        time_lbl_seek.set_text(&format!("{} / {}", cur_str, total_str_seek));
+        time_lbl_seek.set_text(&cur_str);
 
         let state_reset = state_seek.clone();
         glib::timeout_add_local_once(std::time::Duration::from_millis(80), move || {

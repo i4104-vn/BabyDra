@@ -264,5 +264,8 @@
   "preview.audio": "Audio",
   "preview.file_size": "File Size",
   "preview.media_filter": "Media Files (Images & Videos)",
-  "preview.no_exif": "No EXIF data available"
+  "preview.no_exif": "No EXIF data available",
+  "preview.play": "Play / Pause (Space)",
+  "preview.mute": "Mute / Unmute (M)",
+  "preview.speed": "Playback Speed"
 }

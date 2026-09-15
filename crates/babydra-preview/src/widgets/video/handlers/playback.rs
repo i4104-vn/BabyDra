@@ -17,14 +17,16 @@ pub fn setup_playback_controls(state: &Rc<RefCell<VideoState>>, ui: &VideoViewer
         let is_playing = mf_toggle.is_playing();
         if is_playing {
             mf_toggle.pause();
-            btn_toggle.set_icon_name("media-playback-start-symbolic");
+            let icon = babydra_ui_kit::ui::icon::get_icon("play", 16);
+            btn_toggle.set_child(Some(&icon));
             state_toggle.borrow_mut().is_playing = false;
         } else {
             if mf_toggle.is_ended() {
                 mf_toggle.seek(0);
             }
             mf_toggle.play();
-            btn_toggle.set_icon_name("media-playback-pause-symbolic");
+            let icon = babydra_ui_kit::ui::icon::get_icon("pause", 16);
+            btn_toggle.set_child(Some(&icon));
             state_toggle.borrow_mut().is_playing = true;
         }
     };
@@ -45,7 +47,8 @@ pub fn setup_playback_controls(state: &Rc<RefCell<VideoState>>, ui: &VideoViewer
     let state_ended = state.clone();
     ui.media_file.connect_ended_notify(move |mf| {
         if mf.is_ended() {
-            btn_ended.set_icon_name("media-playback-start-symbolic");
+            let icon = babydra_ui_kit::ui::icon::get_icon("play", 16);
+            btn_ended.set_child(Some(&icon));
             state_ended.borrow_mut().is_playing = false;
         }
     });

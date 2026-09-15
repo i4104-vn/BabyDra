@@ -1,8 +1,6 @@
 //! Video playback rate and GStreamer pipeline speed control.
 
 use babydra_core::services::preview::set_media_file_speed_raw;
-#[allow(unused_imports)]
-pub use babydra_core::services::preview::SPEED_PRESETS;
 use glib::translate::ToGlibPtr;
 use gtk4::MediaFile;
 use std::ffi::c_void;
