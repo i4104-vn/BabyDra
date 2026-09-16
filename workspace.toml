@@ -22,11 +22,6 @@ scope = "user"
 description = "Global keyboard shortcut daemon"
 
 [[binaries]]
-name = "babydra-workspace"
-scope = "user"
-description = "Wayland workspace controller"
-
-[[binaries]]
 name = "babydra-explore"
 scope = "user"
 description = "GTK4 file manager"

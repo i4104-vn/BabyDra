@@ -29,7 +29,7 @@ pub fn handle_switch(target_str: Option<&str>) {
         }
     } else {
         eprintln!(
-            "Usage: babydra-workspace switch <1..={}>",
+            "Usage: babydra-panel switch <1..={}>",
             DEFAULT_WORKSPACE_COUNT
         );
         std::process::exit(1);
@@ -43,10 +43,7 @@ pub fn handle_set(target_str: Option<&str>) {
             return;
         }
     }
-    eprintln!(
-        "Usage: babydra-workspace set <1..={}>",
-        DEFAULT_WORKSPACE_COUNT
-    );
+    eprintln!("Usage: babydra-panel set <1..={}>", DEFAULT_WORKSPACE_COUNT);
     std::process::exit(1);
 }
 
@@ -66,8 +63,8 @@ pub fn handle_prev() {
 }
 
 pub fn print_help() {
-    println!("BabyDra Workspace Manager");
-    println!("Usage: babydra-workspace <command>");
+    println!("BabyDra Workspace Commands");
+    println!("Usage: babydra-panel <command>");
     println!();
     println!("Commands:");
     println!("  list, ls          List all workspaces and active state");

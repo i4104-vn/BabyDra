@@ -8,7 +8,6 @@ babydra-core = { workspace = true }
 babydra-island = { workspace = true }
 babydra-launcher = { workspace = true }
 babydra-ui-kit = { workspace = true }
-babydra-workspace = { workspace = true }
 
 # GUI & Layer Shell
 gtk4 = { workspace = true }
@@ -21,4 +20,3 @@ chrono = { workspace = true }
 glib = { workspace = true }
 gdk-pixbuf = { workspace = true }
 gdk4 = { workspace = true }
-

@@ -1,7 +1,9 @@
+mod popover;
 mod preview;
 mod render;
 pub mod state;
 
+pub use popover::build_workspace_popover;
 pub use state::*;
 
 use babydra_core::DesktopApp;

@@ -146,14 +146,13 @@ fn test_sync_workspace_apps_title_stability() {
 }
 
 #[test]
-fn test_core_workspace_service_parity() {
+fn test_core_workspace_service_state() {
     let _guard = init_test_env();
     babydra_core::reset_cached_workspace();
     assert_eq!(babydra_core::get_current_workspace(), 1);
 
     babydra_core::set_workspace_sync_only(3);
     assert_eq!(babydra_core::get_current_workspace(), 3);
-    assert_eq!(babydra_workspace::get_current_workspace(), 3);
 
     let workspaces = babydra_core::get_workspaces();
     assert_eq!(

@@ -10,6 +10,13 @@ use std::rc::Rc;
 
 /// Application entry point: `main`.
 fn main() {
+    // Workspace shortcuts use the panel binary as their lightweight CLI.
+    // This keeps workspace state and UI integration in one application.
+    if std::env::args().nth(1).is_some() {
+        babydra_core::run_workspace_cli();
+        return;
+    }
+
     let _lifecycle = babydra_core::services::app_lifecycle::init_app("babydra-panel");
 
     // Detect DDC/CI bus for desktop monitors on startup

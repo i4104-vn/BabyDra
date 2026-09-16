@@ -2,7 +2,7 @@ use crate::widgets::panel::create_status_icons;
 use crate::widgets::system_monitor::create_sys_monitor_w;
 use crate::widgets::tray::create_tray_widget;
 use crate::widgets::window_state::{close_window, toggle_window};
-use crate::widgets::workspace::create_workspace_sw;
+use crate::widgets::workspace::{build_workspace_popover, create_workspace_sw};
 use babydra_island::create_system_island;
 use gtk4::prelude::*;
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
@@ -61,7 +61,7 @@ pub fn rebuild_panel_window(
     let cw_clone = calendar_window.clone();
     let app_clone = app.clone();
     let logo_pop_click = logo_popover.clone();
-    let ws_popover = babydra_workspace::build_workspace_popover(&logo_btn);
+    let ws_popover = build_workspace_popover(&logo_btn);
     let ws_pop_click = ws_popover.clone();
     let ws_pop_scroll = ws_popover.clone();
 

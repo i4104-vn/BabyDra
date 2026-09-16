@@ -1,7 +1,7 @@
-use crate::{
+use babydra_core::focus_window;
+use babydra_core::{
     filter_apps_for_workspace, get_current_workspace, switch_workspace, DEFAULT_WORKSPACE_COUNT,
 };
-use babydra_core::focus_window;
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
