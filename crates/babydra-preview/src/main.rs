@@ -2,12 +2,12 @@
 //! Base Rust + GTK4 image viewer entry point.
 
 use babydra_core::i18n::trans;
-use gtk4::gdk::{DragAction, FileList};
+use gtk4::gdk::{DragAction, FileList, ModifierType};
 use gtk4::gio;
 use gtk4::prelude::*;
 use gtk4::{
-    Align, Application, ApplicationWindow, Box, Button, DropTarget, FileDialog, FileFilter,
-    GestureClick, Label, Orientation,
+    Align, Application, ApplicationWindow, Box, Button, DropTarget, EventControllerKey, FileDialog,
+    FileFilter, Label, Orientation,
 };
 use std::cell::Cell;
 use std::path::PathBuf;
@@ -71,7 +71,7 @@ fn open_file_picker(
     );
 }
 
-/// Builds the black welcome window with centered logo, "Open File" button, and drag-and-drop target.
+/// Builds the flat, centered welcome window matching the minimalist aesthetic.
 fn build_welcome_window(app: &Application) {
     let window = ApplicationWindow::new(app);
     window.set_title(Some(&trans("common.app_preview_title")));
@@ -81,76 +81,81 @@ fn build_welcome_window(app: &Application) {
 
     let is_picking = Rc::new(Cell::new(false));
 
-    let root_box = Box::new(Orientation::Vertical, 0);
-    root_box.set_hexpand(true);
-    root_box.set_vexpand(true);
-    root_box.set_halign(Align::Fill);
-    root_box.set_valign(Align::Fill);
-
-    let welcome_box = Box::new(Orientation::Vertical, 16);
-    welcome_box.add_css_class("preview-welcome-box");
-    welcome_box.set_halign(Align::Center);
-    welcome_box.set_valign(Align::Center);
+    // Outer container: centered horizontally and vertically
+    let center_box = Box::new(Orientation::Vertical, 12);
+    center_box.set_hexpand(true);
+    center_box.set_vexpand(true);
+    center_box.set_halign(Align::Center);
+    center_box.set_valign(Align::Center);
 
     // 1. Center Icon Logo
-    let icon = babydra_ui_kit::ui::icon::get_icon("babydra-preview", 72);
-    icon.add_css_class("preview-welcome-icon");
-    welcome_box.append(&icon);
+    let icon = babydra_ui_kit::ui::icon::get_icon("babydra-preview", 64);
+    icon.set_halign(Align::Center);
+    center_box.append(&icon);
 
-    // 2. "Open File" Button
-    let open_btn = Button::with_label(&trans("preview.open_file"));
-    open_btn.add_css_class("preview-open-btn");
-    open_btn.set_cursor_from_name(Some("pointer"));
-    open_btn.set_halign(Align::Center);
+    // 2. Title Label ("BabyDra Preview")
+    let title_lbl = Label::new(Some("BabyDra Preview"));
+    title_lbl.add_css_class("preview-flat-title");
+    title_lbl.set_halign(Align::Center);
+    center_box.append(&title_lbl);
+
+    // 3. Flat Action Row (Open File + Ctrl + O keycap)
+    let action_btn = Button::new();
+    action_btn.add_css_class("preview-flat-action");
+    action_btn.set_cursor_from_name(Some("pointer"));
+    action_btn.set_margin_top(28);
+    action_btn.set_halign(Align::Center);
+
+    let row = Box::new(Orientation::Horizontal, 110);
+    row.set_valign(Align::Center);
+
+    let text_lbl = Label::new(Some(&trans("preview.open_file")));
+    text_lbl.add_css_class("preview-flat-action-text");
+    text_lbl.set_halign(Align::Start);
+    text_lbl.set_hexpand(true);
+    row.append(&text_lbl);
+
+    let keycap_lbl = Label::new(Some("Ctrl + O"));
+    keycap_lbl.add_css_class("preview-keycap");
+    keycap_lbl.set_halign(Align::End);
+    row.append(&keycap_lbl);
+
+    action_btn.set_child(Some(&row));
 
     let app_btn = app.clone();
     let win_btn = window.clone();
     let pick_btn = is_picking.clone();
-    open_btn.connect_clicked(move |_| {
+    action_btn.connect_clicked(move |_| {
         open_file_picker(&win_btn, &app_btn, &pick_btn);
     });
-    welcome_box.append(&open_btn);
+    center_box.append(&action_btn);
 
-    // 3. Drag and Drop Hint
-    let hint_lbl = Label::new(Some(&trans("preview.drag_drop_hint")));
-    hint_lbl.add_css_class("preview-hint-label");
-    hint_lbl.set_halign(Align::Center);
-    welcome_box.append(&hint_lbl);
-
-    // Clicking anywhere on the welcome box also opens the file picker
-    let click_gesture = GestureClick::new();
-    let win_click = window.clone();
-    let app_click = app.clone();
-    let pick_click = is_picking.clone();
-    click_gesture.connect_pressed(move |_, _, _, _| {
-        open_file_picker(&win_click, &app_click, &pick_click);
+    // Keyboard shortcut (Ctrl + O)
+    let key_controller = EventControllerKey::new();
+    let win_key = window.clone();
+    let app_key = app.clone();
+    let pick_key = is_picking.clone();
+    key_controller.connect_key_pressed(move |_, keyval, _, state| {
+        if state.contains(ModifierType::CONTROL_MASK) {
+            if let Some("o") | Some("O") = keyval.name().as_deref() {
+                open_file_picker(&win_key, &app_key, &pick_key);
+                return gtk4::glib::Propagation::Stop;
+            }
+        }
+        gtk4::glib::Propagation::Proceed
     });
-    welcome_box.add_controller(click_gesture);
+    window.add_controller(key_controller);
 
-    // Drag and Drop target on the entire window
+    // Drag and Drop target across the window
     let drop_target = DropTarget::new(
         glib::types::Type::INVALID,
         DragAction::COPY,
     );
     drop_target.set_types(&[FileList::static_type(), gio::File::static_type()]);
 
-    let box_enter = welcome_box.clone();
-    drop_target.connect_enter(move |_, _, _| {
-        box_enter.add_css_class("drag-over");
-        DragAction::COPY
-    });
-
-    let box_leave = welcome_box.clone();
-    drop_target.connect_leave(move |_| {
-        box_leave.remove_css_class("drag-over");
-    });
-
     let app_drop = app.clone();
     let win_drop = window.clone();
-    let box_drop = welcome_box.clone();
     drop_target.connect_drop(move |_, value, _, _| {
-        box_drop.remove_css_class("drag-over");
-
         let path_opt = if let Ok(file_list) = value.get::<FileList>() {
             file_list.files().first().and_then(|f| f.path())
         } else if let Ok(file) = value.get::<gio::File>() {
@@ -170,8 +175,7 @@ fn build_welcome_window(app: &Application) {
     });
     window.add_controller(drop_target);
 
-    root_box.append(&welcome_box);
-    window.set_child(Some(&root_box));
+    window.set_child(Some(&center_box));
     window.present();
 }
 
@@ -207,7 +211,7 @@ fn main() {
             }
         }
 
-        // Show the black welcome page with logo, open file button, and drag-and-drop target
+        // Show the minimalist flat welcome page centered vertically and horizontally
         build_welcome_window(app);
     });
 

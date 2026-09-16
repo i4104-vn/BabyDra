@@ -383,57 +383,51 @@ popover.video-speed-popover>contents {
     color: #ffffff;
 }
 
-/* Empty / Drop Page Welcome View */
-.preview-welcome-box {
-    padding: 40px 56px;
-    border-radius: 28px;
-    background-color: rgba(255, 255, 255, 0.02);
-    border: 2px dashed rgba(255, 255, 255, 0.12);
-    transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.preview-welcome-box:hover {
-    background-color: rgba(255, 255, 255, 0.04);
-    border-color: rgba(255, 255, 255, 0.20);
-}
-
-.preview-welcome-box.drag-over {
-    background-color: rgba(59, 130, 246, 0.08);
-    border-color: #3b82f6;
-    border-style: solid;
-    transform: scale(1.02);
-}
-
-.preview-welcome-icon {
-    opacity: 0.95;
-    margin-bottom: 2px;
-}
-
-.preview-open-btn {
-    background-color: #3b82f6;
-    color: #ffffff;
-    font-size: 13px;
+/* Minimal flat welcome view */
+.preview-flat-title {
+    font-size: 20px;
     font-weight: 600;
-    padding: 8px 24px;
-    border-radius: 9999px;
+    color: #93c5fd;
+    letter-spacing: 0.4px;
+}
+
+button.preview-flat-action {
+    background: transparent;
     border: none;
-    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
-    transition: all 180ms ease;
+    box-shadow: none;
+    padding: 6px 14px;
+    border-radius: 8px;
+    transition: all 150ms ease;
 }
 
-.preview-open-btn:hover {
-    background-color: #2563eb;
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.48);
+button.preview-flat-action:hover {
+    background-color: rgba(255, 255, 255, 0.07);
 }
 
-.preview-open-btn:active {
-    background-color: #1d4ed8;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
-}
-
-.preview-hint-label {
-    font-size: 12px;
+.preview-flat-action-text {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.60);
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.45);
 }
+
+button.preview-flat-action:hover .preview-flat-action-text {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.preview-keycap {
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    padding: 2px 7px;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.60);
+}
+
+button.preview-flat-action:hover .preview-keycap {
+    color: rgba(255, 255, 255, 0.95);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
 
