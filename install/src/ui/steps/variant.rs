@@ -108,7 +108,7 @@ pub fn draw_variant_step(f: &mut Frame, app: &App, area: Rect) {
         .iter()
         .find(|v| v.selected)
         .map(|v| v.name.as_str())
-        .unwrap_or("default");
+        .unwrap_or("unconfigured");
 
     let prompt_box = Paragraph::new(vec![
         Line::from(vec![

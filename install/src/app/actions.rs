@@ -11,7 +11,9 @@ use super::state::{App, BranchSwitchStatus};
 impl App {
     pub fn set_step(&mut self, step: WizardStep) {
         self.current_step = step;
-        if self.current_step == WizardStep::ExecuteInstall && self.install_state == InstallState::Idle {
+        if self.current_step == WizardStep::ExecuteInstall
+            && self.install_state == InstallState::Idle
+        {
             self.show_confirm_dialog = true;
         }
     }
@@ -30,7 +32,8 @@ impl App {
 
     pub fn rescan_binaries(&mut self) {
         let source_root = self.active_source_dir();
-        let fresh_binaries = initial_binaries_list(&source_root, &self.source_binary_dir);
+        let source_binary_dir = self.active_binary_dir();
+        let fresh_binaries = initial_binaries_list(&source_root, &source_binary_dir);
         let old_selections: HashMap<String, bool> = self
             .binaries
             .iter()
@@ -47,7 +50,7 @@ impl App {
             })
             .collect();
 
-        update_binaries_status(&mut self.binaries, &self.source_binary_dir);
+        update_binaries_status(&mut self.binaries, &source_binary_dir);
         let found_count = self.binaries.iter().filter(|b| b.exists_in_source).count();
         self.add_log(
             LogLevel::Info,
@@ -98,6 +101,8 @@ impl App {
 
     pub fn rescan_after_branch_switch(&mut self) {
         let source_root = self.active_source_dir();
+        self.source_binary_dir = source_root.join("target/release");
+        self.custom_path_input = self.source_binary_dir.to_string_lossy().to_string();
         self.variant_options = initial_variant_options(&source_root);
         self.rescan_binaries();
     }

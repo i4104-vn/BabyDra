@@ -39,20 +39,22 @@ pub fn list_branches(repo: &Path) -> Vec<BranchItem> {
         .trim()
         .to_string();
 
-    // Merge local + remote into one list. `main` is excluded: it only hosts
-    // the installer + docs, so there is no source code to build from.
+    // Merge local + remote into one list, then keep only refs containing a
+    // workspace manifest. The distribution branch is not special-cased: a
+    // future branch becomes installable automatically as soon as it contains
+    // a Cargo workspace.
     let mut names: Vec<String> = local.clone();
     for r in &remote {
         if !names.contains(r) {
             names.push(r.clone());
         }
     }
-    names.retain(|n| n != "main");
+    names.retain(|name| has_workspace_manifest(repo, name));
     names.sort_by(|a, b| {
-        let a_rel = a == "release";
-        let b_rel = b == "release";
-        b_rel
-            .cmp(&a_rel)
+        let a_current = a == &current;
+        let b_current = b == &current;
+        b_current
+            .cmp(&a_current)
             .then_with(|| a.to_lowercase().cmp(&b.to_lowercase()))
     });
 
@@ -67,4 +69,8 @@ pub fn list_branches(repo: &Path) -> Vec<BranchItem> {
     }
 
     items
+}
+
+fn has_workspace_manifest(repo: &Path, branch: &str) -> bool {
+    git(repo, &["cat-file", "-e", &format!("{branch}:Cargo.toml")]).is_ok()
 }

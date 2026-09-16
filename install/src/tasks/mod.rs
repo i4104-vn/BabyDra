@@ -10,7 +10,10 @@ use std::thread;
 use std::time::Instant;
 
 use crate::models::{BinaryItem, LogLevel, LogMessage, VariantItem};
-use crate::system::{build_workspace, checkout_and_pull, stop_process, SudoSession};
+use crate::system::{
+    build_workspace, checkout_and_pull, initial_binaries_list, load_install_manifest, stop_process,
+    SudoSession,
+};
 
 pub enum InstallEvent {
     Progress {
@@ -40,6 +43,10 @@ pub struct InstallPlan {
     pub source_root: PathBuf,
     pub source_binary_dir: PathBuf,
     pub selected_binaries: Vec<BinaryItem>,
+    /// True when the user left every discovered binary selected. In that
+    /// case a branch update may add new binaries between the UI scan and the
+    /// actual build, so the worker can include them automatically.
+    pub install_all_binaries: bool,
     /// Variant selected in step 4 (theme + app list + keybinds source).
     pub variant: VariantItem,
     /// Branch to check out + pull before building (empty = skip git step).
@@ -85,7 +92,13 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
         // The full task set always runs: system packages, /var/lib staging,
         // configs/themes and the display manager are mandatory steps, so the
         // installer never asks about them — only binaries are selectable.
-        let packages = crate::system::initial_package_options();
+        let mut manifest = load_install_manifest(&plan.source_root, &plan.workspace_root);
+        let source_binary_dir = if plan.branch.is_empty() {
+            plan.source_binary_dir.clone()
+        } else {
+            plan.source_root.join("target/release")
+        };
+        let packages = crate::system::initial_package_options(&manifest);
         let varlib = crate::system::initial_varlib_options();
         let configs = crate::system::initial_configs_themes_options();
         let display_manager = crate::system::initial_display_manager_options();
@@ -139,13 +152,19 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             match checkout_and_pull(&plan.workspace_root, &plan.branch) {
                 Ok(branch_dir) => send_log(
                     LogLevel::Success,
-                    format!("Branch '{}' ready at {}.", plan.branch, branch_dir.display()),
+                    format!(
+                        "Branch '{}' ready at {}.",
+                        plan.branch,
+                        branch_dir.display()
+                    ),
                 ),
                 Err(e) => {
                     send_log(LogLevel::Error, format!("Git worktree pull failed: {e}"));
                     total_errors += 1;
                 }
             }
+
+            manifest = load_install_manifest(&plan.source_root, &plan.workspace_root);
 
             current_step += 1;
             let _ = tx.send(InstallEvent::Progress {
@@ -157,7 +176,8 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
                 LogLevel::Info,
                 format!(
                     "Building branch '{}' in release mode (cargo build --release in {})...",
-                    plan.branch, plan.source_root.display()
+                    plan.branch,
+                    plan.source_root.display()
                 ),
             );
             let (ok, tail) = build_workspace(&plan.source_root);
@@ -175,6 +195,17 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             }
         }
 
+        let selected_binaries = if plan.install_all_binaries && !plan.branch.is_empty() {
+            let discovered = initial_binaries_list(&plan.source_root, &source_binary_dir);
+            if discovered.is_empty() {
+                plan.selected_binaries.clone()
+            } else {
+                discovered
+            }
+        } else {
+            plan.selected_binaries.clone()
+        };
+
         // Phase 2: terminate old processes (always — prevents ETXTBSY when
         // overwriting running executables).
         {
@@ -183,17 +214,8 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
                 "Terminating active processes before overwrite...".into(),
             );
             // Stop all selected binaries
-            for bin in &plan.selected_binaries {
+            for bin in &selected_binaries {
                 stop_process(&bin.name);
-            }
-            // Stop any extra daemons or notification services
-            for extra in &[
-                "babydra-keymap",
-                "babydra-image-preview",
-                "fnott",
-                "xfce4-notifyd",
-            ] {
-                stop_process(extra);
             }
             thread::sleep(std::time::Duration::from_millis(250));
         }
@@ -206,13 +228,13 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
                 total: total_steps,
                 current_step_name: opt.title.clone(),
             });
-            let (c, e) = packages::execute_packages_task(opt, &sudo, &send_log);
+            let (c, e) = packages::execute_packages_task(opt, &manifest, &sudo, &send_log);
             total_copied += c;
             total_errors += e;
         }
 
         // Phase 4: Prebuilt Binaries.
-        for bin in &plan.selected_binaries {
+        for bin in &selected_binaries {
             current_step += 1;
             let _ = tx.send(InstallEvent::Progress {
                 current: current_step,
@@ -220,7 +242,7 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
                 current_step_name: format!("Installing binary: {}", bin.name),
             });
             let (c, e) =
-                binaries::execute_binary_copy_task(bin, &plan.source_binary_dir, &sudo, &send_log);
+                binaries::execute_binary_copy_task(bin, &source_binary_dir, &sudo, &send_log);
             total_copied += c;
             total_errors += e;
         }
@@ -233,8 +255,13 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
                 total: total_steps,
                 current_step_name: opt.title.clone(),
             });
-            let (c, e) =
-                varlib::execute_varlib_task(opt, &plan.source_binary_dir, &sudo, &send_log);
+            let (c, e) = varlib::execute_varlib_task(
+                opt,
+                &source_binary_dir,
+                &selected_binaries,
+                &sudo,
+                &send_log,
+            );
             total_copied += c;
             total_errors += e;
         }
@@ -268,7 +295,14 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
                 total: total_steps,
                 current_step_name: opt.title.clone(),
             });
-            let (c, e) = configs::execute_configs_task(opt, &plan.source_root, &sudo, &send_log);
+            let (c, e) = configs::execute_configs_task(
+                opt,
+                &plan.source_root,
+                &selected_binaries,
+                &manifest,
+                &sudo,
+                &send_log,
+            );
             total_copied += c;
             total_errors += e;
         }
@@ -281,7 +315,13 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
                 total: total_steps,
                 current_step_name: opt.title.clone(),
             });
-            let (c, e) = display_manager::execute_display_manager_task(opt, &sudo, &send_log);
+            let (c, e) = display_manager::execute_display_manager_task(
+                opt,
+                &plan.source_root,
+                &selected_binaries,
+                &sudo,
+                &send_log,
+            );
             total_copied += c;
             total_errors += e;
         }

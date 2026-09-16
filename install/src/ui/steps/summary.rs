@@ -64,7 +64,7 @@ pub fn draw_summary_step(f: &mut Frame, app: &App, area: Rect) {
                 Style::default().fg(THEME.text_dim),
             ),
             Span::styled(
-                "We10X icons, BabyDra GTK theme, Twilight cursors",
+                "Theme packages, icon archives and cursor archives from source",
                 Style::default().fg(THEME.purple),
             ),
         ]),

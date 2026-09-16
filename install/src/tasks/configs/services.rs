@@ -1,101 +1,106 @@
 use std::fs;
-use std::process::Command;
+use std::path::{Path, PathBuf};
 
 use crate::models::LogLevel;
-use crate::system::{get_user_home, get_user_local_bin, SudoSession};
+use crate::system::{get_user_home, SudoSession};
 
-pub fn restart_services<F>(sudo: &SudoSession, mut log: F) -> usize
+/// Installs systemd user units declared by the source branch and reloads the
+/// compositor. Unit names and executable names are intentionally not encoded
+/// in the installer; adding a daemon is a source-branch change only.
+pub fn restart_services<F>(workspace_root: &Path, sudo: &SudoSession, mut log: F) -> usize
 where
     F: FnMut(LogLevel, String),
 {
     let home = get_user_home();
-    let user_bin_dir = get_user_local_bin();
+    let systemd_dir = home.join(".config/systemd/user");
+    let mut units = Vec::new();
 
-    let labwc_running = sudo
-        .run("pgrep", &["-x", "labwc"])
-        .map(|o| o.success)
-        .unwrap_or(false);
-    if labwc_running {
-        let _ = sudo.run("labwc", &["--reconfigure"]);
-        log(
-            LogLevel::Success,
-            "Reloaded labwc compositor configuration.".into(),
-        );
+    for source in find_files(workspace_root, |path| {
+        path.extension().and_then(|ext| ext.to_str()) == Some("service")
+            && fs::read_to_string(path)
+                .map(|content| content.contains("[Unit]") && content.contains("[Service]"))
+                .unwrap_or(false)
+    }) {
+        let Some(name) = source.file_name() else {
+            continue;
+        };
+        let destination = systemd_dir.join(name);
+        if let Ok(content) = fs::read_to_string(&source) {
+            if fs::create_dir_all(&systemd_dir)
+                .and_then(|_| fs::write(&destination, content))
+                .is_ok()
+            {
+                units.push(name.to_string_lossy().to_string());
+            }
+        }
     }
 
-    // Remove stale socket and restart switcher daemon
-    let switcher_bin = user_bin_dir.join("babydra-switcher");
-    if switcher_bin.exists() {
-        let _ = fs::remove_file("/tmp/babydra-switcher.socket");
-        let _ = Command::new(&switcher_bin)
-            .arg("--daemon")
-            .stdin(std::process::Stdio::null())
-            .stdout(std::process::Stdio::null())
-            .stderr(std::process::Stdio::null())
-            .spawn();
-        log(
-            LogLevel::Success,
-            "babydra-switcher --daemon started in background.".into(),
-        );
-    }
-
-    let panel_bin = user_bin_dir.join("babydra-panel");
-    if panel_bin.exists() {
-        log(
-            LogLevel::Info,
-            "Starting babydra-panel background service...".into(),
-        );
-        let log_dir = home.join(".cache/babydra");
-        let _ = fs::create_dir_all(&log_dir);
-        let log_file = log_dir.join("panel.log");
-        let opened = fs::OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(&log_file);
-        if let Ok(f) = opened {
-            let out = f.try_clone().unwrap_or_else(|_| {
-                fs::OpenOptions::new()
-                    .create(true)
-                    .append(true)
-                    .open(&log_file)
-                    .expect("reopen panel log")
-            });
-            let _ = Command::new(&panel_bin)
-                .stdout(std::process::Stdio::from(out))
-                .stderr(std::process::Stdio::from(f))
-                .spawn();
+    if !units.is_empty() {
+        let _ = sudo.run("systemctl", &["--user", "daemon-reload"]);
+        for unit in &units {
+            let _ = sudo.run("systemctl", &["--user", "enable", "--now", unit]);
         }
         log(
             LogLevel::Success,
-            format!("babydra-panel started (logs: {}).", log_file.display()),
+            format!(
+                "Installed and activated {} source-defined user service(s).",
+                units.len()
+            ),
+        );
+    } else {
+        log(
+            LogLevel::Info,
+            "No systemd user units declared by this source branch.".into(),
         );
     }
 
-    let desktop_bin = user_bin_dir.join("babydra-desktop");
-    if desktop_bin.exists() {
-        let _ = Command::new(&desktop_bin)
-            .stdin(std::process::Stdio::null())
-            .stdout(std::process::Stdio::null())
-            .stderr(std::process::Stdio::null())
-            .spawn();
+    let labwc_running = sudo
+        .run("pgrep", &["-x", "labwc"])
+        .map(|output| output.success)
+        .unwrap_or(false);
+    if labwc_running && sudo.run("labwc", &["--reconfigure"]).is_ok() {
         log(
             LogLevel::Success,
-            "babydra-desktop started in background.".into(),
+            "Reloaded compositor configuration.".into(),
         );
     }
 
-    let keymap_bin = user_bin_dir.join("babydra-keymap");
-    if keymap_bin.exists() {
-        let _ = Command::new(&keymap_bin)
-            .stdin(std::process::Stdio::null())
-            .stdout(std::process::Stdio::null())
-            .stderr(std::process::Stdio::null())
-            .spawn();
-        log(
-            LogLevel::Success,
-            "babydra-keymap daemon started in background.".into(),
-        );
-    }
+    usize::from(!units.is_empty())
+}
 
-    1
+fn find_files<F>(root: &Path, predicate: F) -> Vec<PathBuf>
+where
+    F: Fn(&Path) -> bool + Copy,
+{
+    let mut found = Vec::new();
+    collect_files(root, &mut found, predicate);
+    found
+}
+
+fn collect_files<F>(root: &Path, found: &mut Vec<PathBuf>, predicate: F)
+where
+    F: Fn(&Path) -> bool + Copy,
+{
+    if !root.is_dir() {
+        return;
+    }
+    let Ok(entries) = fs::read_dir(root) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_dir() {
+            let skip = path
+                .file_name()
+                .and_then(|name| name.to_str())
+                .is_some_and(|name| {
+                    matches!(name, ".git" | "target" | "branches" | "node_modules")
+                });
+            if !skip {
+                collect_files(&path, found, predicate);
+            }
+        } else if predicate(&path) {
+            found.push(path);
+        }
+    }
 }

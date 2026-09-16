@@ -1,72 +1,27 @@
 use crate::models::LogLevel;
 use crate::system::{tail_lines, SudoSession};
 
-pub fn install_pacman_packages<F>(sudo: &SudoSession, mut log: F) -> (usize, usize)
+pub fn install_pacman_packages<F>(
+    sudo: &SudoSession,
+    packages: &[String],
+    mut log: F,
+) -> (usize, usize)
 where
     F: FnMut(LogLevel, String),
 {
+    if packages.is_empty() {
+        log(
+            LogLevel::Info,
+            "No pacman packages declared by the source branch; skipping.".into(),
+        );
+        return (0, 0);
+    }
     log(
         LogLevel::Info,
         "Running pacman -Syu for system dependencies...".into(),
     );
-    let pkgs = [
-        "base-devel",
-        "git",
-        "pkgconf",
-        "gtk4",
-        "gtk4-layer-shell",
-        "rust",
-        "labwc",
-        "meson",
-        "ninja",
-        "playerctl",
-        "grim",
-        "slurp",
-        "wl-clipboard",
-        "libnotify",
-        "gammastep",
-        "wlsunset",
-        "wireplumber",
-        "pipewire-pulse",
-        "pipewire-alsa",
-        "ddcutil",
-        "zip",
-        "unzip",
-        "p7zip",
-        "unrar",
-        "pacman-contrib",
-        "xdg-utils",
-        "polkit",
-        "networkmanager",
-        "networkmanager-openvpn",
-        "networkmanager-vpnc",
-        "networkmanager-pptp",
-        "networkmanager-l2tp",
-        "networkmanager-openconnect",
-        "networkmanager-strongswan",
-        "wireguard-tools",
-        "openvpn",
-        "bluez",
-        "bluez-utils",
-        "greetd",
-        "cage",
-        "chafa",
-        "imagemagick",
-        "gst-plugins-good",
-        "gst-plugins-bad",
-        "gst-plugin-va",
-        "gst-libav",
-        "ffmpeg",
-        "fcitx5",
-        "fcitx5-gtk",
-        "fcitx5-qt",
-        "fcitx5-configtool",
-        "fcitx5-unikey",
-        "fcitx5-bamboo",
-    ];
-
     let mut args: Vec<&str> = vec!["pacman", "-Syu", "--needed", "--noconfirm"];
-    args.extend_from_slice(&pkgs);
+    args.extend(packages.iter().map(String::as_str));
     let out = sudo.run_root(&args);
 
     match out {

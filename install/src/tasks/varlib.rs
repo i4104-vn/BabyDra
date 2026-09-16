@@ -1,4 +1,4 @@
-use crate::models::{GenericOptionItem, LogLevel};
+use crate::models::{BinaryItem, GenericOptionItem, LogLevel};
 use crate::system::SudoSession;
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
@@ -7,6 +7,7 @@ use std::path::{Path, PathBuf};
 pub fn execute_varlib_task<F>(
     opt: &GenericOptionItem,
     source_binary_dir: &Path,
+    binaries: &[BinaryItem],
     sudo: &SudoSession,
     mut log: F,
 ) -> (usize, usize)
@@ -26,35 +27,31 @@ where
             let _ = sudo.run_root_quiet(&["mkdir", "-p", var_lib_bin.to_str().unwrap_or("/")]);
 
             let mut staged_any = false;
-            if let Ok(entries) = fs::read_dir(source_binary_dir) {
-                for entry in entries.flatten() {
-                    let path = entry.path();
-                    if path.is_file() {
-                        let fname = path.file_name().unwrap_or_default().to_string_lossy();
-                        if fname.starts_with("babydra-") && !fname.contains('.') {
-                            let dst = var_lib_bin.join(&*fname);
-                            let out = sudo.run_root(&[
-                                "cp",
-                                path.to_str().unwrap_or(""),
-                                dst.to_str().unwrap_or(""),
-                            ]);
-                            let _ =
-                                sudo.run_root_quiet(&["chmod", "755", dst.to_str().unwrap_or("")]);
-                            if let Ok(o) = out {
-                                if o.success {
-                                    staged_any = true;
-                                    log(
-                                        LogLevel::Bundle,
-                                        format!("Staged binary -> /var/lib/babydra/bin/{fname}"),
-                                    );
-                                } else {
-                                    log(
-                                        LogLevel::Warn,
-                                        format!("Failed to stage {fname}: {}", o.stderr.trim()),
-                                    );
-                                }
-                            }
-                        }
+            for binary in binaries {
+                let path = source_binary_dir.join(&binary.source_name);
+                if !path.is_file() {
+                    continue;
+                }
+                let fname = &binary.name;
+                let dst = var_lib_bin.join(fname);
+                let out = sudo.run_root(&[
+                    "cp",
+                    path.to_str().unwrap_or(""),
+                    dst.to_str().unwrap_or(""),
+                ]);
+                let _ = sudo.run_root_quiet(&["chmod", "755", dst.to_str().unwrap_or("")]);
+                if let Ok(o) = out {
+                    if o.success {
+                        staged_any = true;
+                        log(
+                            LogLevel::Bundle,
+                            format!("Staged binary -> /var/lib/babydra/bin/{fname}"),
+                        );
+                    } else {
+                        log(
+                            LogLevel::Warn,
+                            format!("Failed to stage {fname}: {}", o.stderr.trim()),
+                        );
                     }
                 }
             }

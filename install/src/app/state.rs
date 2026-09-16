@@ -77,15 +77,17 @@ impl App {
         let source_binary_dir = default_binary_source_dir(&workspace_root);
         let branches = list_branches(&workspace_root);
 
-        // Default to "release" branch if available, otherwise first available branch
-        let mut selected_branch = String::new();
-        let mut branch_cursor = 0;
-        if let Some(pos) = branches.iter().position(|b| b.name == "release") {
-            branch_cursor = pos;
-            selected_branch = "release".to_string();
-        } else if let Some(first) = branches.first() {
-            selected_branch = first.name.clone();
-        }
+        // Prefer the current source branch; otherwise use the first
+        // installable branch discovered from git. No branch name is baked
+        // into the installer.
+        let branch_cursor = branches
+            .iter()
+            .position(|branch| branch.is_current)
+            .unwrap_or(0);
+        let selected_branch = branches
+            .get(branch_cursor)
+            .map(|branch| branch.name.clone())
+            .unwrap_or_default();
 
         let mut branches = branches;
         for (idx, b) in branches.iter_mut().enumerate() {
@@ -100,6 +102,11 @@ impl App {
 
         let binaries = initial_binaries_list(&source_root, &source_binary_dir);
         let variant_options = initial_variant_options(&source_root);
+        let selected_variant = variant_options
+            .iter()
+            .find(|variant| variant.selected)
+            .map(|variant| variant.name.clone())
+            .unwrap_or_default();
 
         let mut app = Self {
             current_step: WizardStep::Welcome,
@@ -113,7 +120,7 @@ impl App {
 
             variant_options,
             variant_cursor: 0,
-            selected_variant: "default".to_string(),
+            selected_variant,
 
             logs: Vec::new(),
             log_scroll: 0,
@@ -193,5 +200,17 @@ impl App {
         } else {
             self.workspace_root.clone()
         }
+    }
+
+    /// Uses the checked-out branch's target directory when building from
+    /// source. A custom path remains available for pre-built mode.
+    pub fn active_binary_dir(&self) -> PathBuf {
+        if self.is_build_from_source() {
+            let branch_target = self.active_source_dir().join("target/release");
+            if branch_target.exists() || !self.source_binary_dir.exists() {
+                return branch_target;
+            }
+        }
+        self.source_binary_dir.clone()
     }
 }

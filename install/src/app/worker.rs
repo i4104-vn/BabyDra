@@ -150,26 +150,26 @@ impl App {
             .iter()
             .find(|v| v.selected)
             .cloned()
-            .unwrap_or_else(|| {
-                crate::models::VariantItem {
-                    name: "default".into(),
-                    theme: "babydra-default".into(),
-                    apps: Vec::new(),
-                    selected: true,
-                }
+            .unwrap_or_else(|| crate::models::VariantItem {
+                name: "unconfigured".into(),
+                theme: String::new(),
+                apps: Vec::new(),
+                selected: true,
             });
 
         let build_from_source = self.is_build_from_source();
+        let selected_binaries: Vec<_> = self
+            .binaries
+            .iter()
+            .filter(|b| b.selected && (b.exists_in_source || build_from_source))
+            .cloned()
+            .collect();
         let plan = InstallPlan {
             workspace_root: self.workspace_root.clone(),
             source_root: self.active_source_dir(),
-            source_binary_dir: self.source_binary_dir.clone(),
-            selected_binaries: self
-                .binaries
-                .iter()
-                .filter(|b| b.selected && (b.exists_in_source || build_from_source))
-                .cloned()
-                .collect(),
+            source_binary_dir: self.active_binary_dir(),
+            install_all_binaries: selected_binaries.len() == self.binaries.len(),
+            selected_binaries,
             variant: selected_variant,
             branch: self.selected_branch.clone(),
             sudo_password: if SudoSession::is_root() {

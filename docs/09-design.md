@@ -1,159 +1,82 @@
 # 09 — Ngôn ngữ thiết kế
 
-**Phạm vi:** visual language, tokens, màu, typography, spacing, motion, states, theming.
-**Phiên bản:** 2.0.0
-**Cập nhật lần cuối:** 2026-08-17
+## Phạm vi
 
----
+Đây là quy tắc visual cho toàn bộ UI BabyDra: surface, màu, typography, spacing, motion và state. Quy tắc áp dụng cho component mới và thay đổi component hiện có.
 
-## 1. Ngôn ngữ thị giác: Glassmorphic Acrylic
+## Nguyên tắc
 
-Giao diện BabyDra là **mặt kính mờ đặt trên nền phức tạp**. Người dùng phải cảm nhận: nhẹ và hiện đại, hòa vào desktop (wallpaper hiện qua lớp mờ), sang trọng nhưng không phô.
+1. Bề mặt có phân cấp rõ ràng nhưng không tạo quá nhiều lớp nổi.
+2. Accent dùng để chỉ hành động hoặc trạng thái đang hoạt động.
+3. Dark và light phải có cùng cấu trúc, radius và hierarchy.
+4. Animation giải thích một thay đổi trạng thái; không dùng animation để trang trí.
+5. Một token được định nghĩa một lần và dùng lại ở các component.
 
-Ba nguyên lý cốt lõi:
+## Surface và elevation
 
-| Nguyên lý | Chi tiết |
-| :--- | :--- |
-| **Trong suốt có chủ đích** | Không bề mặt nào là màu đặc 100% — alpha nền chính `0.94–0.98` |
-| **Blur là linh hồn** | `-gtk-background-blur: 24` biến nền bán trong suốt thành kính thật |
-| **Viền tạo chiều sâu** | Viền cạnh trên (bevel) luôn sáng hơn 3 cạnh còn lại — giả lập ánh sáng từ trên xuống |
+Một surface có thể gồm nền, blur, border và shadow. Có hai cấp chính:
 
----
-
-## 2. Công thức surface
-
-Mỗi bề mặt nổi gồm 4 lớp, theo thứ tự:
-
-```text
-[Shadow]  →  [Nền bán trong suốt]  →  [Blur]  →  [Border mỏng]
-```
-
-| Cấp elevation | Bề mặt | Shadow |
+| Cấp | Ví dụ | Mục đích |
 | :--- | :--- | :--- |
-| Cấp 1 — bề mặt ứng dụng | Panel, sidebar, taskbar | Vừa phải |
-| Cấp 2 — bề mặt nổi | Dropdown, popover, tooltip, dialog | Lớn hơn (tách rõ khỏi cấp 1) |
+| Cấp 1 | Panel, sidebar, card | Bề mặt chính của ứng dụng. |
+| Cấp 2 | Dialog, popover, tooltip | Bề mặt tạm thời nằm trên cấp 1. |
 
-Không có cấp 3 — cần dropdown lồng dropdown thì xem lại UX, đừng thêm elevation.
+Không tạo cấp elevation mới nếu chỉ cần tăng contrast hoặc border. Bo góc tham chiếu: pill `9999px`, dialog khoảng `20px`, card/panel khoảng `16–24px`.
 
-**Bo góc theo kích thước:** càng nhỏ càng tròn — chip/badge `9999px` (pill), dialog `20px`, khung ảnh/panel `24px`, avatar `50%`.
+## Màu
 
-**Khi nào bỏ bớt lớp:** phần tử nằm bên trong surface khác (dòng menu trong dropdown) hoặc phẳng hoàn toàn (icon button trong suốt) — không cần blur/shadow riêng.
-
----
-
-## 3. Màu sắc — ít màu, nhiều biểu cảm
-
-| Màu | Giá trị | Dùng cho |
-| :--- | :--- | :--- |
-| **Accent** | `#3b82f6` (Blue-500) | Viền active, primary button, fill progress, toggle on — **màu chức năng duy nhất** |
-| Accent pressed | `#2563eb` | Nền khi nhấn giữ |
-| **Success** | `#10b981` / `#4ade80` | Chỉ báo hoàn thành, credit meter, badge thành công |
-| Còn lại | Trắng/đen + alpha | Nền, viền, text phụ, hover — không chọn tay |
-
-Quy tắc:
-
-- Nhấn mạnh → dùng accent blue, **không** dùng bold/tăng size.
-- Phân cấp thông tin → dùng alpha của `text-primary` vs `text-secondary`.
-- **Không tự thêm màu mới** (tím, cam, đỏ…) — nếu cần phải cập nhật bảng token + kiểm tra cả 2 theme.
-
----
-
-## 4. Typography — một phông, bốn cấp
-
-Duy nhất **Inter**, tối ưu cho HiDPI. Phân cấp qua **font-weight + opacity**, không qua font-size.
-
-| Cấp | size / weight | Dùng cho |
-| :--- | :--- | :--- |
-| 1 — Header | `14–15px` / `700` | Tiêu đề, tên người dùng |
-| 2 — Label | `13–14px` / `500–600` | Nhãn nút, menu, chip |
-| 3 — Subtext | `12–13px` / `400` | Mô tả phụ, placeholder |
-| 4 — Badge | `10–11px` / `700–800` | Nhãn viết hoa ngắn ("PRO") |
-
-- Viết hoa chỉ cho badge (`letter-spacing 0.3–0.5px`).
-- Nhiều dòng: `line-height 1.5–1.6`; không dùng `line-height: 1`.
-
----
-
-## 5. Spacing — ba cấp khoảng cách
-
-| Cấp | Giá trị | Ý nghĩa |
-| :--- | :--- | :--- |
-| **Micro** | `4–6px` | Trong cùng 1 phần tử (icon ↔ text) — đọc như một đơn vị |
-| **Standard** | `8–12px` | Giữa các phần tử cùng nhóm — thoải mái, rõ cùng nhóm |
-| **Section** | `16–20px` | Giữa các nhóm chức năng — tín hiệu "nhóm mới" |
-
-- Khoảng hở tối thiểu giữa 2 surface kính cạnh nhau: `8–12px` (để wallpaper lọt qua, giữ cảm giác floating).
-- Không cứng nhắc bội số 8; nhưng hạn chế < 6 giá trị spacing trong 1 component.
-
----
-
-## 6. Motion — chỉ khi cần thiết
-
-Kiểm tra: **"Bỏ animation này thì giao diện mất gì?"** — mất gì không rõ ràng thì bỏ.
-
-| Loại | Duration | Easing | Dùng cho |
+| Token | Giá trị dark | Giá trị light | Sử dụng |
 | :--- | :--- | :--- | :--- |
-| State transition | `200ms` | `ease` | Hover, active, đổi màu |
-| Enter | `200ms` | `ease-out` | Dropdown, popover (slide −8px + fade) |
-| Exit | `150ms` | `ease-in` | Dropdown, popover biến mất |
-| Genie (panel đóng/mở) | `400–450ms` | custom | Co giãn hướng về nút kích hoạt |
-| Skeleton pulse | `1.2s` | loop | Loading vùng nội dung lớn |
+| `accent` | `#3b82f6` | `#3b82f6` | Primary action, active state, progress. |
+| `accent-pressed` | `#2563eb` | `#2563eb` | Pressed state. |
+| `surface` | `rgba(14,14,18,0.96)` | `rgba(255,255,255,0.98)` | Nền chính. |
+| `border` | `rgba(255,255,255,0.14)` | `rgba(0,0,0,0.08)` | Viền. |
+| `text-primary` | `rgba(255,255,255,0.95)` | `rgba(28,28,30,0.95)` | Nội dung chính. |
+| `text-secondary` | `rgba(255,255,255,0.50)` | `rgba(28,28,30,0.50)` | Mô tả và metadata. |
+| `hover-bg` | `rgba(255,255,255,0.08)` | `rgba(0,0,0,0.05)` | Hover. |
 
-**Không có:** parallax, particle, Lottie, 3D transform, bounce, ripple.
+Không thêm màu tùy ý vào một component. Nếu trạng thái mới có ý nghĩa dùng chung, bổ sung semantic token cho cả dark và light.
 
----
+## Typography
 
-## 7. States — phản hồi qua màu, không qua hình học
+Ưu tiên font chính được khai báo trong theme package. Phân cấp bằng weight, size và opacity:
 
-| State | Phản hồi | Không làm |
+| Cấp | Kích thước tham chiếu | Sử dụng |
 | :--- | :--- | :--- |
-| Hover | Nền sáng thêm `4–8%`, `200ms` | Transform, scale |
-| Active/Pressed | Đậm hơn hover, `100ms` | inset shadow |
-| Selected/On | Viền accent hoặc nền accent mờ `rgba(59,130,246,0.15)` | Shadow to lên |
-| Disabled | Opacity `40–50%`, `pointer-events: none` | Đổi màu nền riêng |
+| Heading | `14–16px`, weight `700` | Tiêu đề vùng hoặc dialog. |
+| Label | `13–14px`, weight `500–600` | Nhãn nút và item. |
+| Body | `12–13px`, weight `400` | Nội dung và mô tả. |
+| Metadata | `10–12px`, weight `400–700` | Badge, timestamp, trạng thái phụ. |
 
----
+Không dùng chữ in hoa cho đoạn dài. Text nhiều dòng cần line-height đủ để đọc trên màn hình HiDPI.
 
-## 8. Theming — dark/light bình đẳng
+## Spacing
 
-- **Cùng ngôn ngữ, khác cảm giác**: dark chìm/tập trung, light thoáng/sạch — không phải âm bản đảo màu.
-- Dark: `rgba(14,14,18,0.96)` — **không dùng đen đặc** (cắt đứt glassmorphism).
-- Light: `rgba(255,255,255,0.98)`.
-- **Giữ nguyên giữa 2 theme:** accent `#3b82f6`, radius, spacing, font, timing.
-- **Thay đổi:** surface, text, border, hover, shadow.
-
-### CSS nằm ở đâu (2 tầng bắt buộc)
-
-```text
-libs/babydra-ui-kit/src/styles/shared/   ← cấu trúc & layout (trong binary)
-themes/<theme-id>/css/
-    dark.css   ← lớp màu dark
-    light.css  ← lớp màu light
-    theme.css  ← override nạp cuối
-```
-
-> [!WARNING]
-> Lỗi phổ biến nhất: thêm style màu vào `dark.css` mà quên `light.css` — mọi thay đổi màu phải làm cả 2 file. Luồng nạp theme: [05-themes-variants.md](./05-themes-variants.md).
-
----
-
-## 9. Bảng token nhanh
-
-| Token | Dark | Light |
+| Nhóm | Giá trị tham chiếu | Quan hệ |
 | :--- | :--- | :--- |
-| `surface` | `rgba(14,14,18,0.96)` | `rgba(255,255,255,0.98)` |
-| `border` | `rgba(255,255,255,0.14)` | `rgba(0,0,0,0.08)` |
-| `border-top-bevel` | `rgba(255,255,255,0.28)` | `rgba(0,0,0,0.06)` |
-| `text-primary` | `rgba(255,255,255,0.95)` | `rgba(28,28,30,0.95)` |
-| `text-secondary` | `rgba(255,255,255,0.50)` | `rgba(28,28,30,0.50)` |
-| `hover-bg` | `rgba(255,255,255,0.08)` | `rgba(0,0,0,0.05)` |
-| `separator` | `rgba(255,255,255,0.10)` | `rgba(0,0,0,0.06)` |
-| `shadow` | `0 10px 30px rgba(0,0,0,0.35)` | `0 10px 30px rgba(0,0,0,0.08)` |
+| Micro | `4–6px` | Icon và label trong cùng control. |
+| Standard | `8–12px` | Các item cùng nhóm. |
+| Section | `16–24px` | Hai nhóm chức năng khác nhau. |
 
-| Radius | Giá trị | Spacing | Giá trị |
-| :--- | :--- | :--- | :--- |
-| `pill` | `9999px` | `micro` | `4–6px` |
-| `xl` | `24px` | `standard` | `8–12px` |
-| `lg` | `20px` | `section` | `16–20px` |
-| `md` | `16px` | — | — |
-| `sm` | `10–12px` | — | — |
+Một component không nên dùng quá nhiều giá trị spacing độc lập. Ưu tiên token và component layout của ui-kit.
+
+## Motion
+
+| Loại | Duration | Sử dụng |
+| :--- | :--- | :--- |
+| State transition | khoảng `200ms` | Hover, active, đổi màu. |
+| Enter | khoảng `200ms` | Popover hoặc nội dung xuất hiện. |
+| Exit | khoảng `150ms` | Đóng popover hoặc ẩn status. |
+| Panel/Island transition | khoảng `400ms` | Mở rộng hoặc thu gọn surface lớn. |
+
+Animation phải có thể dừng hoặc bỏ qua mà không làm mất chức năng. Không dùng bounce, parallax hoặc transform để thay thế phản hồi trạng thái.
+
+## States và accessibility
+
+- Hover: thay đổi background hoặc border nhẹ, không scale toàn control.
+- Focus: phải có dấu hiệu nhìn thấy được, không chỉ dựa vào màu rất nhạt.
+- Active: dùng accent hoặc contrast rõ hơn hover.
+- Disabled: giảm opacity và chặn thao tác; không làm mất hoàn toàn khả năng đọc.
+- Icon-only button phải có tooltip hoặc accessible label.
+
+CSS layout đặt trong `libs/babydra-ui-kit/src/styles/shared/`; CSS màu đặt trong theme package. Mọi thay đổi màu phải kiểm tra cả dark và light.

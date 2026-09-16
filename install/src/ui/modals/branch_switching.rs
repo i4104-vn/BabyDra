@@ -17,7 +17,7 @@ pub fn draw_branch_switching_modal(f: &mut Frame, app: &App, area: Rect) {
     f.render_widget(Clear, popup_area);
 
     let branch = if app.selected_branch.is_empty() {
-        "release"
+        "selected source"
     } else {
         &app.selected_branch
     };

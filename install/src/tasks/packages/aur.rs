@@ -59,10 +59,7 @@ where
                         log(LogLevel::Info, line);
                     }
                     if bo.status.success() {
-                        log(
-                            LogLevel::Success,
-                            "yay-bin installed successfully.".into(),
-                        );
+                        log(LogLevel::Success, "yay-bin installed successfully.".into());
                         (1, 0)
                     } else {
                         log(
@@ -98,36 +95,22 @@ where
     }
 }
 
-pub fn install_aur_packages<F>(sudo: &SudoSession, mut log: F) -> (usize, usize)
+pub fn install_aur_packages<F>(
+    sudo: &SudoSession,
+    packages: &[String],
+    mut log: F,
+) -> (usize, usize)
 where
     F: FnMut(LogLevel, String),
 {
+    if packages.is_empty() {
+        log(
+            LogLevel::Info,
+            "No AUR packages declared by the source branch; skipping.".into(),
+        );
+        return (0, 0);
+    }
     log(LogLevel::Info, "Installing AUR packages via yay...".into());
-    let aur_pkgs = [
-        "github-desktop",
-        "fastfetch",
-        "neovim",
-        "ddcutil-service",
-        "kitty",
-        "ttf-segoe-ui-variable",
-        "ttf-cascadia-code-nerd",
-        "inter-font",
-        "ttf-ubuntu-font-family",
-        "ttf-jetbrains-mono-nerd",
-        "ttf-nerd-fonts-symbols",
-        "ttf-nerd-fonts-symbols-mono",
-        "otf-font-awesome",
-        "ttf-font-awesome",
-        "noto-fonts",
-        "noto-fonts-cjk",
-        "noto-fonts-emoji",
-        "noto-fonts-extra",
-        "ttf-liberation",
-        "papirus-icon-theme",
-        "kvantum-qt5",
-        "wlrctl",
-    ];
-
     if let Err(e) = sudo.preauth() {
         log(
             LogLevel::Error,
@@ -138,7 +121,7 @@ where
 
     let mut cmd = Command::new("yay");
     cmd.args(["-S", "--noconfirm", "--needed"]);
-    cmd.args(aur_pkgs);
+    cmd.args(packages);
     let out = cmd
         .stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::piped())

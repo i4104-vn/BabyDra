@@ -1,9 +1,11 @@
-use crate::models::{GenericOptionItem, LogLevel};
-use crate::system::SudoSession;
+use crate::models::{BinaryItem, GenericOptionItem, LogLevel};
+use crate::system::{binary_target_path, SudoSession};
 use std::path::Path;
 
 pub fn execute_display_manager_task<F>(
     opt: &GenericOptionItem,
+    workspace_root: &Path,
+    binaries: &[BinaryItem],
     sudo: &SudoSession,
     mut log: F,
 ) -> (usize, usize)
@@ -16,12 +18,29 @@ where
         "greetd_config" => {
             log(
                 LogLevel::Config,
-                "Configuring /etc/greetd/config.toml (cage + babydra-greeter)...".into(),
+                "Configuring /etc/greetd/config.toml from source metadata...".into(),
             );
-            let greetd_toml = "[terminal]\nvt = 1\n\n[default_session]\ncommand = \"sh -c 'clear 2>/dev/null; setterm -cursor off 2>/dev/null; exec cage -s -- /usr/bin/babydra-greeter'\"\nuser = \"greeter\"\n";
+            let greetd_toml = discover_greetd_config(workspace_root).or_else(|| {
+                let greeter = binaries
+                    .iter()
+                    .find(|binary| matches!(binary.default_dest, crate::models::BinaryLocation::SystemBin))?;
+                let path = binary_target_path(&greeter.name, &greeter.default_dest);
+                Some(format!(
+                    "[terminal]\nvt = 1\n\n[default_session]\ncommand = \"sh -c 'clear 2>/dev/null; setterm -cursor off 2>/dev/null; exec cage -s -- {}'\"\nuser = \"greeter\"\n",
+                    path.display()
+                ))
+            });
+
+            let Some(greetd_toml) = greetd_toml else {
+                log(
+                    LogLevel::Warn,
+                    "No display-manager config or system-scoped greeter declared; skipping greetd config.".into(),
+                );
+                return (0, 0);
+            };
 
             // Write via temp file + sudo cp (avoids fragile `sudo sh -c echo`).
-            match sudo.write_root_file(Path::new("/etc/greetd/config.toml"), greetd_toml) {
+            match sudo.write_root_file(Path::new("/etc/greetd/config.toml"), &greetd_toml) {
                 Ok(()) => {
                     log(
                         LogLevel::Success,
@@ -67,4 +86,13 @@ where
     }
 
     (copied, 0)
+}
+
+fn discover_greetd_config(workspace_root: &Path) -> Option<String> {
+    [
+        workspace_root.join("configs/greetd/config.toml"),
+        workspace_root.join("greetd/config.toml"),
+    ]
+    .into_iter()
+    .find_map(|path| std::fs::read_to_string(path).ok())
 }

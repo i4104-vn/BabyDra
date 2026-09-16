@@ -6,9 +6,10 @@ pub mod sudo;
 
 pub use discovery as initializers;
 pub use discovery::{
-    default_crate_description, initial_binaries_list, initial_configs_themes_options,
-    initial_display_manager_options, initial_package_options, initial_variant_options,
-    initial_varlib_options, update_binaries_status,
+    binary_target_path, default_crate_description, initial_binaries_list,
+    initial_configs_themes_options, initial_display_manager_options, initial_package_options,
+    initial_variant_options, initial_varlib_options, load_install_manifest, update_binaries_status,
+    InstallManifest,
 };
 pub use fs_ops::{copy_recursive, format_size, safe_copy_binary};
 pub use git::{branch_worktree_dir, checkout_and_pull, list_branches};

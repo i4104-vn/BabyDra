@@ -1,129 +1,102 @@
-# 02 — Kiến trúc mã nguồn
+# 02 — Kiến trúc
 
-**Phạm vi:** 4 pattern thiết kế cốt lõi, mô hình daemon-client, luồng khởi tạo chuẩn.
-**Phiên bản:** 2.0.0
-**Cập nhật lần cuối:** 2026-08-17
+## Phạm vi
 
----
+Trang này mô tả các lớp chính của BabyDra, hướng phụ thuộc và các quyết định kiến trúc ảnh hưởng đến việc phát triển.
 
-## 1. Sơ đồ tổng thể
+## Sơ đồ tổng thể
 
 ```mermaid
 flowchart LR
-    subgraph Session["Session người dùng (labwc)"]
-        Panel["babydra-panel (daemon)"]
-        Switcher["babydra-switcher (daemon)"]
-        Island["Dynamic Island (trong panel)"]
-    end
-
-    subgraph System["Hệ thống"]
-        Greetd["greetd → babydra-greeter"]
-        Services["Systemd services / D-Bus"]
-    end
-
-    subgraph Clients["Client nhanh (oneshot)"]
-        Settings
-        Explore
-        Launcher
-        Lock
-        Screenshot
-        Preview
-    end
-
-    Greetd --> Panel
-    Clients -->|"gửi tín hiệu qua socket/D-Bus"| Panel
-    Panel --> Island
-    Panel --> Services
+    Apps["Application crates"] --> Kit["babydra-ui-kit"]
+    Apps --> Core["babydra-core"]
+    Panel["Long-running daemons"] --> Core
+    Panel --> Island["babydra-island"]
+    Kit --> Theme["babydra-theme"]
+    Installer["installer trên main"] --> Source["worktree của source branch"]
+    Source --> Manifest["workspace.toml"]
+    Source --> Cargo["Cargo workspace"]
+    Installer --> Install["packages, binaries, configs, themes"]
 ```
 
----
+## Các lớp trách nhiệm
 
-## 2. Bốn pattern cốt lõi
+### Application crates
 
-### Pattern 1 — Phân tách Giao diện và Nghiệp vụ
+Mỗi thư mục trong `crates/` tạo một binary hoặc một nhóm binary có trách nhiệm gần nhau. Application giữ lifecycle GTK, event handling và orchestration của UI. Logic hệ thống dùng chung phải đi qua `babydra-core`, không sao chép vào từng crate.
 
-Mọi widget đều tách file: **`mod.rs`** (struct, state, logic) và **`render.rs`** (chỉ vẽ UI).
+### `babydra-core`
 
-```text
-widgets/
-├── mod.rs      ← struct + state + xử lý sự kiện (logic)
-└── render.rs   ← fn render(): dựng GTK widget từ state (giao diện)
-```
+Đây là lớp service không phụ thuộc GTK. Nó cung cấp client cho NetworkManager, PipeWire, D-Bus, file system, power, wallpaper, configuration và i18n. Core có thể được test mà không cần mở cửa sổ.
 
-- Logic không biết GTK; render không chứa nghiệp vụ.
-- Đổi giao diện không đụng logic, đổi logic không vỡ UI.
+### `babydra-ui-kit`
 
-### Pattern 2 — Hướng trạng thái, luồng dữ liệu một chiều
+Đây là lớp component GTK4 dùng chung. Nó quy định cách tạo button, card, list, modal, switch, slider, icon và nạp CSS. Application không tự định nghĩa một biến thể UI nếu component chung đã đáp ứng.
 
-```mermaid
-flowchart LR
-    State["State (một nơi duy nhất)"] -->|"đọc"| Render["Render"]
-    Event["Sự kiện (click, timer, channel)"] -->|"cập nhật"| State
-```
+### `babydra-island`
 
-- State là nguồn sự thật duy nhất; render chỉ là phép chiếu của state.
-- Không có widget tự sửa dữ liệu rồi tự vẽ lại — mọi thay đổi đi qua state → render.
+Island quản lý các view ngữ cảnh như media, notification, power, recording và clipboard. Panel là nơi khởi tạo island; library không phụ thuộc vào chi tiết layout của panel.
 
-### Pattern 3 — Mô hình Daemon-Client
+### `babydra-theme`
 
-**Daemon** (panel, switcher) chạy nền, giữ cửa sổ nạp sẵn. **Client** (settings, launcher…) chạy nhanh, gửi tín hiệu rồi thoát.
+Theme library đọc package theme từ đĩa, giải quyết kế thừa, hợp nhất tokens và tạo CSS runtime. CSS layout dùng chung nằm trong ui-kit; CSS màu và token thuộc theme package.
 
-```text
-Client "mở settings" ──socket/D-Bus──▶ Daemon (panel)
-                                        │ đã nạp sẵn cửa sổ
-                                        ▼
-                                     hiện cửa sổ ngay, không lag
-```
+### Installer
 
-### Pattern 4 — Module hóa Giao diện
+Installer là một crate độc lập trong `main`, không phụ thuộc GTK. Nó gồm bốn phần:
 
-UI chia theo widget độc lập, mỗi widget có API riêng (`create_*`), giao tiếp qua callback. Không widget nào import widget khác trực tiếp.
-
----
-
-## 3. Quy trình khởi tạo cửa sổ chuẩn
-
-Mọi ứng dụng GTK đều đi theo cùng một chuỗi:
-
-```mermaid
-sequenceDiagram
-    participant App as app.activate()
-    participant Theme as init_theme()
-    participant UI as build_ui()
-    participant Win as window
-
-    App->>Theme: gọi init_theme() (đồng bộ GTK/GtkSettings)
-    Theme->>Theme: resolve theme package → build CSS → GtkCssProvider
-    Theme-->>App: CSS toàn cục đã nạp
-    App->>UI: build UI từ state
-    UI->>Win: present window
-```
-
-> [!IMPORTANT]
-> `init_theme()` là **điểm duy nhất** nạp theme — mọi crate đều gọi nó, không ai tự nạp CSS riêng. Chi tiết luồng theme: [05-themes-variants.md](./05-themes-variants.md) mục 3.
-
----
-
-## 4. Các service nền của babydra-core
-
-`babydra-core` cung cấp các service không phụ thuộc GTK, dùng chung bởi mọi app:
-
-| Nhóm | Service | Chức năng |
-| :--- | :--- | :--- |
-| Hệ thống | `system::wifi`, `system::vpn`, `system::volume`, `system::brightness`, `system::battery`, `system::cpu` | Đọc/điều khiển phần cứng (NetworkManager, WirePlumber, DDC/CI…) |
-| Ứng dụng | `wallpaper`, `updates` | Đổi wallpaper, kiểm tra cập nhật |
-| Nền | `daemon`, `tray_watcher`, `notification` | Lắng nghe system tray, gửi notification |
-| Cấu hình | `config` | Đọc/ghi `~/.babydra/babydra.conf` (cache `OnceLock<RwLock>`) |
-| Ngôn ngữ | `i18n` | Tra từ điển `locales/*/en.json`, `vi.json` |
-
-**Luồng áp dụng cấu hình:** app khởi động → `load_babydra_config()` → `apply_all_saved_settings()` → các service đọc lại trạng thái đã lưu.
-
----
-
-## 5. Câu hỏi thường gặp
-
-| Câu hỏi | Trả lời |
+| Phần | Trách nhiệm |
 | :--- | :--- |
-| Vì sao panel là daemon mà settings là client? | Cửa sổ panel phải luôn sẵn sàng (không lag khi bấm), còn settings mở theo nhu cầu nên chạy oneshot. |
-| Vì sao tách `mod.rs`/`render.rs`? | Đổi giao diện không đụng logic; dễ test state thuần không cần GTK. |
-| Vì sao một nguồn theme duy nhất? | Đổi theme 1 nơi, áp dụng mọi app; tránh mỗi crate tự định nghĩa màu riêng. |
+| `models/` | State của binary, branch, variant, package và tiến trình cài đặt. |
+| `system/` | Cargo discovery, git, worktree, manifest, sudo và thao tác hệ thống. |
+| `tasks/` | Các bước copy binary, package, config, theme, service và greetd. |
+| `ui/` | Wizard Ratatui, modal, log và progress. |
+
+Installer không import crate của workspace nguồn. Ranh giới này cho phép `main` chạy trước khi source branch được checkout.
+
+## Dependency direction
+
+```text
+application
+    ├── babydra-ui-kit ─── babydra-theme
+    └── babydra-core
+
+babydra-panel ─── babydra-island ─── babydra-core
+
+installer ─── filesystem / git / cargo / system commands
+```
+
+Các thư viện không được phụ thuộc ngược vào application. Nếu một service cần dùng ở nhiều nơi, chuyển nó vào core thay vì gọi trực tiếp binary khác.
+
+## Khởi tạo ứng dụng GTK
+
+Một ứng dụng GTK tiêu chuẩn thực hiện các bước sau:
+
+```text
+process start
+    → parse arguments
+    → create GTK application
+    → initialize shared theme
+    → load persisted configuration
+    → build state and widgets
+    → connect signals and services
+    → present window or start daemon loop
+```
+
+Theme phải được khởi tạo trước khi render widget. Service nền không được chặn GTK main loop; dùng channel hoặc callback để đưa dữ liệu vào UI.
+
+## Daemon và client
+
+Daemon được khởi động cùng session và giữ state hoặc cửa sổ sẵn sàng. Client khởi động theo yêu cầu, gửi lệnh qua D-Bus hoặc socket rồi kết thúc hoặc giữ một cửa sổ ngắn hạn.
+
+Ví dụ: launcher và settings là client; panel, switcher và keymap là daemon. Việc phân loại này không phải quy tắc cứng cho installer. Nếu một branch thêm daemon mới, scope cài đặt được khai báo trong `workspace.toml`.
+
+## Quyết định về dữ liệu triển khai
+
+Installer tách discovery và policy:
+
+1. Cargo discovery tìm binary target và executable được build.
+2. `workspace.toml` cung cấp policy branch-owned: tên cài đặt, source name, scope, package và GSettings.
+3. Installer thực thi policy mà không cần biết tên project cụ thể.
+
+Do đó, thêm binary là thay đổi ở branch nguồn. Sửa installer chỉ cần khi schema hoặc hành vi cài đặt chung thay đổi.

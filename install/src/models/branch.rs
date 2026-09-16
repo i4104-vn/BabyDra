@@ -1,7 +1,7 @@
 /// A git branch selectable as the installation source.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BranchItem {
-    /// Short branch name (e.g. `release`, `develop`).
+    /// Short branch name discovered from the repository.
     pub name: String,
     /// Whether this is the currently checked-out branch.
     pub is_current: bool,

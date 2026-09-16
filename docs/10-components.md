@@ -1,159 +1,98 @@
-# 10 — Component Library
+# 10 — Component library
 
-**Phạm vi:** từng component trong `libs/babydra-ui-kit/src/components/` — API, class CSS, quy tắc.
-**Phiên bản:** 2.0.0
-**Cập nhật lần cuối:** 2026-08-17
+## Phạm vi
 
----
+Component library nằm trong `libs/babydra-ui-kit/src/components/`. Mục tiêu là cung cấp các control có cùng spacing, state, theme và accessibility.
 
-## 1. Bản đồ component
+## Bản đồ component
 
-| Component | Entry point | File nguồn |
+| Nhóm | API tiêu biểu | Thư mục |
 | :--- | :--- | :--- |
-| Button | `create_icon_button`, `.suggested-action`, `.connect-pill-btn` | `components/buttons/` |
-| Badge | `create_status_badge`, `create_icon_badge` | `components/badge/` |
-| Card | `create_card`, `create_switch_card`, `create_scrollable_list` | `components/card/` |
-| Switch | `create_switch`, `ToggleRow` | `components/switch/` |
-| Slider | `CustomSlider::new`, `new_range` | `components/slider/` |
-| Modal | `PasswordDialog`, `Wifi*Dialog`, `Vpn*Dialog` | `components/modal/` |
-| Popover | `create_popover`, `attach_hover_popover` | `components/popovers/` |
-| Navbar | `create_sidebar_row[_with_badge]` | `components/navbar/` |
-| List | `create_list_row`, `clear_list_box` | `components/list_group/` |
-| Placeholder | `create_placeholder_row(PlaceholderState)` | `components/placeholder/` |
-| Progress | `create_progress_bar`, `create_disk_progress` | `components/progress/` |
-| Spinner | `create_spinner`, `create_loading_box` | `components/spinners/` |
-| Tooltip | `set_tooltip` | `components/tooltips/` |
-| Close | `create_close_button[_with_label]` | `components/close_button/` |
-| Wi-Fi icon | `create_system_wifi_signal_icon`, `create_wifi_signal_icon_for_network` | `components/wifi/` |
+| Button | `create_icon_button`, `create_close_button` | `buttons/`, `close_button/` |
+| Badge | `create_status_badge`, `create_icon_badge` | `badge/` |
+| Card/list | `create_card`, `create_item_row`, `create_list_row`, `create_scrollable_list` | `card/`, `list_group/` |
+| Switch | `create_switch`, `ToggleRow` | `switch/` |
+| Slider | `CustomSlider::new`, `CustomSlider::new_range` | `slider/` |
+| Modal | `PasswordDialog`, `Wifi*Dialog`, `Vpn*Dialog` | `modal/` |
+| Popover | `create_popover`, `attach_hover_popover` | `popovers/` |
+| Placeholder | `create_placeholder_row` | `placeholder/` |
+| Progress | `create_progress_bar`, `create_disk_progress` | `progress/` |
+| Spinner | `create_spinner`, `create_loading_box` | `spinners/` |
+| Tooltip | `set_tooltip` | `tooltips/` |
+| Wi-Fi icon | `create_system_wifi_signal_icon` | `wifi/` |
 
-> [!NOTE]
-> Module `alerts` cũ đã gộp vào `placeholder` (T2.4) — `create_placeholder_message` đã deprecated, dùng `create_placeholder_row`.
-
----
-
-## 2. Button
-
-- **Primary** (`.suggested-action`): nền `#3b82f6`, hover `#2563eb`, active `#1d4ed8`, chữ trắng 13px/600 — hành động chính duy nhất mỗi dialog.
-- **Secondary** (`.connect-pill-btn`): nền kính mờ `rgba(255,255,255,0.08)` dark / `rgba(0,0,0,0.05)` light — hủy, đóng, phụ.
-- Hình dạng: pill `9999px` (nút hành động) / tròn `50%` (nút icon). **Không** bo vuông, **không** transform khi hover.
-- Transition: `background-color 200ms ease`.
+## Button
 
 ```rust
-let btn = create_icon_button("edit-delete", 16, &["flat", "circular"], Some("Forget Network"), || {});
+let button = create_icon_button(
+    "edit-delete",
+    16,
+    &["flat", "circular"],
+    Some("Remove item"),
+    || {},
+);
 ```
 
----
+Button hành động chính dùng class `suggested-action`; button phụ dùng style chuẩn của ui-kit. Icon-only button luôn có tooltip hoặc accessible label.
 
-## 3. Badge
-
-| Loại | API | Class |
-| :--- | :--- | :--- |
-| Status | `create_status_badge(text, is_success)` | `success-text` / `settings-desc` |
-| Icon (44px) | `create_icon_badge(icon, size, false)` | `blue-icon-badge` |
-| Icon (34px) | `create_icon_badge(icon, size, true)` | `blue-icon-badge-sm` |
+## Card và list
 
 ```rust
-let badge = create_icon_badge("wifi", 16, true);
-```
-
----
-
-## 4. Card & List
-
-```rust
-let card = create_card(Orientation::Vertical, 12);          // class settings-card
+let card = create_card(Orientation::Vertical, 12);
 card.append(&create_title("Network"));
-card.append(&create_item_row("Wi-Fi", "Connected", Some(&badge)));
+card.append(&create_item_row("Wi-Fi", "Connected", None));
 
-let (switch_card, sw) = create_switch_card("Bluetooth", "Toggle adapter");
-let (scroll, list_box) = create_scrollable_list("settings-card-list");  // cuộn dọc
-
-// Danh sách thường
-let row = create_list_row(&icon, &title, &desc, Some(&widget));
-clear_list_box(&list_box);   // refresh trước khi thêm lại
+let row = create_list_row(&icon, &title, &description, Some(&right_widget));
+list_box.append(&row);
 ```
 
-Quy tắc: mọi khối Settings nằm trong `create_card`; dòng item dùng `create_item_row`/`create_list_row` — không tự dựng `Box` tay.
+Settings section nên dùng `create_card`. Khi refresh danh sách, gọi `clear_list_box` trước khi append dữ liệu mới để tránh giữ widget cũ.
 
----
-
-## 5. Switch & Slider (vẽ Cairo)
-
-### CustomSwitch
+## Switch và slider
 
 ```rust
-let sw = create_switch(false, |active| { /* … */ });
-sw.set_active(true);   // tự chạy animation trượt 160ms ease-out cubic
+let switch = create_switch(false, |active| {
+    // apply setting
+});
+
+let slider = CustomSlider::new_range(0, 100, 5, 60, |value| {
+    // update value
+});
 ```
 
-- Kích thước chuẩn 46×24; bật → nền lerp `#3b82f6`; tắt → viền mờ.
-- `ToggleRow` = label On/Off + switch (i18n `settings.on/off`).
+Không dùng `gtk4::Switch` hoặc `gtk4::Scale` thô trong UI đã có component tương ứng. Custom control giữ animation, token màu và event semantics nhất quán.
 
-### CustomSlider
+## Modal và popover
 
-```rust
-let slider = CustomSlider::new(50, |v| set_brightness(v));
-let vol = CustomSlider::new_range(0, 100, 5, 60, |v| volume::set_volume(v));
-```
+Modal chuẩn dùng overlay/card của ui-kit thay vì tạo `gtk4::Dialog` riêng cho mỗi application. Dialog phải có:
 
-- Track 6px round cap, phần điền `#3b82f6`, knob trắng viền accent, tick marks + nhãn `%`.
+- tiêu đề và mô tả ngắn;
+- primary action rõ ràng;
+- cancel/close action;
+- vùng hiển thị lỗi;
+- focus hợp lý khi mở.
 
-> [!IMPORTANT]
-> Không dùng `gtk4::Switch` / `gtk4::Scale` thô — dùng CustomSwitch/CustomSlider cho đồng nhất.
+Popover cần xử lý cả pointer rời parent và pointer đi vào popover. Dùng helper hover của ui-kit khi hành vi phù hợp thay vì tự tạo timer ở mỗi application.
 
----
+## Placeholder và loading
 
-## 6. Modal (Dialog)
+Phân biệt ba trạng thái:
 
-Mọi dialog: class `auth-dialog-card`, ẩn sẵn, bật qua `show_for_*`, nút chính `suggested-action` + phụ `connect-pill-btn`.
-
-| Dialog | API nổi bật |
+| Trạng thái | Dùng khi |
 | :--- | :--- |
-| `PasswordDialog` | `show_for(title, sub)`, `connect_submit(Option<String>)` |
-| `WifiPasswordDialog` | `show_for(ssid, security)`, `set_error`, `connect_submit((pwd, user))` — `"8021x"` hiện ô username |
-| `WifiInfoDialog` | `show_for(net, config)`, `connect_configure`, `connect_forget` |
-| `WifiConfigDialog` | `show_for(ssid, cfg)`, segmented DHCP/Static, `connect_save` |
-| `VpnConfigDialog` | `apply_config_file(path)`, `show_for_new/edit`, `connect_save/delete` |
-| `VpnLogDialog` | `show_for_vpn(name)`, TextView log tô màu |
+| Empty | Dữ liệu đã tải xong nhưng không có item. |
+| Loading | Đang chờ service hoặc I/O. |
+| Disabled/error | Không thể thực hiện thao tác hoặc service không khả dụng. |
 
-Quy tắc: không dùng `gtk4::Dialog` riêng — dùng overlay box chuẩn.
+Dùng `create_placeholder_row(PlaceholderState)` để các trạng thái có cùng layout và i18n.
 
----
+## Quy tắc khi thêm component
 
-## 7. Popover
+1. Xác định component có thực sự dùng chung hay chỉ là layout riêng của một app.
+2. Đặt state và API tối thiểu trong module component.
+3. Dùng token theme thay vì màu literal.
+4. Cung cấp tooltip/accessible label cho control không có text.
+5. Kiểm tra dark/light, hover, focus, pressed, disabled và keyboard navigation.
+6. Cập nhật tài liệu này và thêm test logic nếu component có state hoặc animation phức tạp.
 
-```rust
-let card = build_hover_popover_card("Power", vec![
-    HoverPopoverRow::new("Battery", "78%", Some("success-text")),
-]);
-let pop = create_popover_with_content(&icon, PositionType::Top, "status-popover", &card);
-attach_hover_popover(&icon, &pop, Rc::new(|| { /* cập nhật dữ liệu */ }));
-```
-
-- Hover popover: vào → `update_fn()` + popup; rời → chờ 150ms → popdown (cho chuột kịp di vào); `set_autohide(false)`.
-
----
-
-## 8. Các component nhỏ
-
-| Component | API | Ghi chú |
-| :--- | :--- | :--- |
-| Navbar | `create_sidebar_row(label, icon)` | Row: badge 16px + label, spacing 12, class `settings-sidebar-row` |
-| Placeholder | `create_placeholder_row(Disabled/Loading/Empty)` | i18n key, icon badge 44px, margin 40px |
-| Progress | `create_progress_bar(fraction, class)` | track mờ, phần điền `#3b82f6`, radius 9999px |
-| Spinner | `create_spinner(size)` · `create_loading_box(text)` | ưu tiên skeleton cho vùng lớn (xem 09-design.md) |
-| Tooltip | `set_tooltip(widget, text)` | icon-only button **bắt buộc** có tooltip |
-| Close | `create_close_button(class)` · `_with_label(text, class)` | icon `window-close` 12px, cursor pointer |
-| Wi-Fi icon | `create_system_wifi_signal_icon(size, color)` | 0–4 vạch; tắt xám `#6B7280`, chưa kết nối `#9CA3AF`, đã kết nối `#3B82F6` |
-
----
-
-## 9. Quy tắc chung
-
-| DO | DO NOT |
-| :--- | :--- |
-| Dùng `create_*` component có sẵn | Tự dựng widget tay (Box/Button thô) |
-| Truyền i18n key vào placeholder/chuỗi | Hardcode chuỗi hiển thị |
-| Icon badge qua `create_icon_badge` | Tự vẽ hình tròn kính mờ |
-| Màu qua token (`#3b82f6`, alpha chuẩn) | Tự đặt màu mới ngoài bảng token |
-| CSS màu sửa ở cả `dark.css` + `light.css` | Chỉ sửa 1 file màu |
+Không tạo một component mới chỉ để bọc một GTK widget mà không thêm hành vi, style hoặc contract dùng chung.

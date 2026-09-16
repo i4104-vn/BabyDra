@@ -1,111 +1,114 @@
-# 04 — Cấu trúc dự án & quy chuẩn viết mã
+# 04 — Cấu trúc dự án và quy tắc phát triển
 
-**Phạm vi:** thư mục nào nằm ở đâu, vì sao; quy tắc viết code mới.
-**Phiên bản:** 2.0.0
-**Cập nhật lần cuối:** 2026-08-17
+## Phạm vi
 
----
+Trang này xác định file nào thuộc lớp nào, nơi đặt code mới và cách tránh để installer phụ thuộc vào tên riêng của một branch.
 
-## 1. Cây thư mục (nhánh `release`)
+## Cây thư mục của branch nguồn
 
 ```text
 BabyDra/
-├── Cargo.toml                ← workspace: libs/ + crates/ + install/ + tests/
-├── crates/                   ← Ứng dụng (mỗi crate 1 binary)
-│   ├── babydra-panel/        ← Island, dock, status bar (daemon)
-│   ├── babydra-desktop/      ← Desktop canvas, icons, context menu, DBus
-│   ├── babydra-switcher/     ← Alt-Tab switcher (daemon)
-│   ├── babydra-screenshot/   ← Chụp màn hình
-│   ├── babydra-lock/         ← Màn hình khóa
-│   ├── babydra-preview/      ← Xem ảnh
-│   ├── babydra-settings/     ← Control center
-│   ├── babydra-explore/      ← File explorer
-│   ├── babydra-greeter/      ← Login greeter
-│   └── babydra-launcher/     ← App grid + search
-├── libs/                     ← Thư viện dùng chung (không chạy độc lập)
-│   ├── babydra-core/         ← Services, config, i18n, models (không GTK)
-│   ├── babydra-ui-kit/       ← Widget, styles/ (CSS shared), theme init, icon
-│   ├── babydra-island/       ← Engine Dynamic Island + features/
-│   └── babydra-theme/        ← Đọc/merge theme packages
-├── install/                  ← Bộ cài đặt TUI (models/, system/, tasks/, ui/)
-├── configs/                  ← Cấu hình mẫu: labwc/, kitty/, nvim/, fastfetch/, themes/
-├── themes/                   ← Theme packages: <theme-id>/{tokens.json,fonts.json,css/}
-├── variants/                 ← <variant>/{variant.toml}
-├── scripts/                  ← install.sh, start.sh, update.sh, check.sh
-├── tests/                    ← Integration suite (crate babydra-tests)
-└── docs/                     ← Tài liệu này
+├── Cargo.toml                 Cargo workspace
+├── crates/                     Binary ứng dụng
+│   ├── babydra-panel/
+│   ├── babydra-desktop/
+│   ├── babydra-switcher/
+│   ├── babydra-keymap/
+│   ├── babydra-workspace/
+│   ├── babydra-explore/
+│   ├── babydra-settings/
+│   ├── babydra-launcher/
+│   ├── babydra-lock/
+│   ├── babydra-greeter/
+│   ├── babydra-screenshot/
+│   └── babydra-preview/
+├── libs/
+│   ├── babydra-core/
+│   ├── babydra-ui-kit/
+│   ├── babydra-island/
+│   └── babydra-theme/
+├── configs/                   Cấu hình labwc, terminal, editor, theme
+├── themes/                    Theme package runtime
+├── variants/                  Variant và variant.toml
+├── workspace.toml             Metadata cài đặt của branch
+├── tests/                     Integration tests nếu branch có
+└── docs/                      Tài liệu nếu branch duy trì cùng source
 ```
 
----
-
-## 2. Quy chuẩn đặt tên thư mục
-
-| Quy tắc | Ví dụ |
-| :--- | :--- |
-| Thư mục crate/lib dùng `kebab-case` | `babydra-panel` |
-| Module con trong source dùng `snake_case` | `widgets/status_bar/` |
-| Thư mục feature dùng tên ngắn, rõ chức năng | `features/media_player/` |
-| Mỗi crate 1 mục đích — không nhồi nhiều binary | — |
-
----
-
-## 3. Triết lý phân tách file
-
-### 3.1. Widget: `mod.rs` + `render.rs`
+## Cây thư mục của `main`
 
 ```text
-widgets/status_bar/
-├── mod.rs      ← struct StatusBar + state + handlers (logic)
-└── render.rs   ← fn render(&self) -> gtk4::Box (chỉ dựng UI)
+BabyDra/
+├── install/
+│   ├── src/app/               Wizard state và actions
+│   ├── src/models/            Model của installer
+│   ├── src/system/            Discovery, git, manifest, sudo
+│   ├── src/tasks/             Các task cài đặt
+│   ├── src/ui/                Giao diện Ratatui
+│   ├── Cargo.toml             Crate độc lập
+│   └── run.sh
+├── docs/                      Tài liệu tổng quát
+└── README.md
 ```
 
-### 3.2. Island feature: 1 folder chuẩn
+`main` không chứa `workspace.toml` của project. File đó phải được commit trên branch chứa mã nguồn để installer lấy đúng metadata theo phiên bản.
 
-```text
-features/<tên-feature>/
-├── mod.rs       ← struct + constructor + impl IslandFeature
-├── view.rs      ← state hiển thị, model dữ liệu
-├── render.rs    ← dựng widget từ view
-└── service.rs   ← (tùy chọn) luồng nền, channel, poll
-```
+## Trách nhiệm module
 
-Cấu trúc chuẩn feature + cách đăng ký: [07-dynamic-island.md](./07-dynamic-island.md).
-
-### 3.3. Quy tắc chung
-
-- File dài hơn ~300 dòng → tách module con có trách nhiệm rõ ràng.
-- Logic thuần (không GTK) tách khỏi UI để test được.
-- Helper dùng chung đặt ở nơi dùng chung, không copy-paste.
-
----
-
-## 4. Trách nhiệm từng vùng
-
-| Vùng | Trách nhiệm | Không làm |
+| Vùng | Trách nhiệm | Không đặt vào đây |
 | :--- | :--- | :--- |
-| `crates/*` | Binary GTK + daemon; gọi `init_theme()` khi khởi động | Không chứa logic dùng lại |
-| `libs/babydra-core` | Service, config, i18n, models — thuần logic | Không import GTK |
-| `libs/babydra-ui-kit` | Widget dùng chung, CSS shared, icon, animation | Không chứa nghiệp vụ app |
-| `libs/babydra-island` | Engine + features mặc định của island | Không phụ thuộc app cụ thể |
-| `libs/babydra-theme` | Resolve/merge theme packages | Không GTK, không đọc config app |
-| `install/` | Wizard cài đặt: `models/`, `system/`, `tasks/`, `ui/` | Không phụ thuộc GTK |
-| `tests/` | Integration tests theo vùng (`common/`, `theme/`, `installer/`…) | Không là code production |
-| `configs/` | Cấu hình seed cho hệ thống | Không chứa mã nguồn |
-| `themes/` + `variants/` | Theme packages & variants (dữ liệu, không code) | — |
+| `crates/*` | Lifecycle ứng dụng, event, UI riêng của binary | Service dùng chung hoặc danh sách package cài đặt |
+| `libs/babydra-core` | Service và model thuần | Widget GTK hoặc layout app |
+| `libs/babydra-ui-kit` | Component, style layout, icon, animation | Nghiệp vụ mạng hoặc package manager |
+| `libs/babydra-island` | Island controller và feature | Logic installer |
+| `libs/babydra-theme` | Resolve theme và CSS runtime | Trạng thái riêng của một app |
+| `install/src/system` | Discovery, git, manifest, system helper | Tên binary/package cố định của project |
+| `install/src/tasks` | Thực thi policy đã discovery | Logic scan chỉ phục vụ một app cụ thể |
+| `configs`, `themes`, `variants` | Dữ liệu triển khai | Logic Rust |
 
----
+## Quy tắc discovery và manifest
 
-## 5. Quy tắc khi viết mã mới
+Khi thêm binary mới:
 
-| Quy tắc | Chi tiết |
-| :--- | :--- |
-| **Đi qua tokens/config/i18n** | Không hardcode màu/font/chuỗi. Màu → theme tokens; chuỗi → `babydra_core::i18n::t` |
-| **Tách logic/UI** | State thuần + `render.rs`; logic test được không cần GTK |
-| **Một nguồn theme** | Luôn gọi `init_theme()`; không tự nạp CSS/đặt màu riêng |
-| **Component tái sử dụng** | Dùng widget trong `ui-kit` (`create_*`); không tự dựng tay |
-| **CSS đúng tầng** | Cấu trúc → `styles/shared/`; màu → `themes/<id>/css/dark.css` + `light.css` |
-| **Test kèm** | Đổi logic `core`/`ui-kit`/`theme` → thêm test trong `tests/` |
-| **Workspace manifest** | Không sửa `Cargo.toml` gốc trừ khi thêm/xóa crate |
-| **Conventional commits** | `type(scope): description` (vd `refactor(install): …`) |
+1. Thêm Cargo package hoặc `[[bin]]` trên branch nguồn.
+2. Đảm bảo target tạo ra executable trong `target/release`.
+3. Thêm entry vào `workspace.toml` nếu cần mô tả, đổi tên đích hoặc chọn `system` scope.
+4. Không thêm tên binary vào `main/install/src`.
 
-Xem thêm quy trình đóng góp: [CONTRIBUTING.md](../CONTRIBUTING.md).
+Cargo discovery là cơ chế phát hiện fallback. `workspace.toml` là nơi khai báo policy. Hai cơ chế này không nên bị trộn: discovery không đoán package AUR, còn manifest không cần lặp lại mọi thông tin Cargo nếu tên và scope mặc định đã đủ.
+
+## Quy tắc tổ chức module
+
+### UI
+
+Module UI nên tách state, event và render khi có đủ độ phức tạp:
+
+```text
+widgets/<feature>/
+├── mod.rs        State, constructor và public API
+├── render.rs     Dựng widget từ state
+├── handlers.rs   Callback và event handler nếu cần
+└── service.rs    Tác vụ nền hoặc channel nếu cần
+```
+
+Không tách file chỉ để làm ngắn dòng code. Mục tiêu là giữ dependency và trách nhiệm có thể kiểm tra.
+
+### Installer
+
+Installer nên tuân theo luồng:
+
+```text
+UI state → InstallPlan → worker → discovery/manifest → tasks → InstallEvent → UI
+```
+
+UI không chạy lệnh hệ thống trực tiếp. Task nhận dữ liệu đã được discovery, thực hiện một hành động có log và trả số lượng thành công/lỗi.
+
+## Quy tắc code
+
+- Dùng `snake_case` cho module Rust và `kebab-case` cho crate/directory.
+- Tách logic thuần khỏi GTK để test được.
+- Dùng `babydra-ui-kit` thay vì tự dựng widget tương đương.
+- Dùng theme token và i18n thay vì đặt màu hoặc chuỗi hiển thị rải rác.
+- Không thêm branch name, binary name hoặc package name vào installer trừ khi đó là fallback tổng quát có lý do rõ ràng.
+- Thay đổi schema phải có test parser và cập nhật [03-setup.md](03-setup.md).
+- Commit theo Conventional Commits.

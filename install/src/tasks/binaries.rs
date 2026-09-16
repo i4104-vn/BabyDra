@@ -17,7 +17,7 @@ where
     let mut errors = 0;
     let user_bin_dir = get_user_local_bin();
 
-    let src_file = source_binary_dir.join(&bin.name);
+    let src_file = source_binary_dir.join(&bin.source_name);
     if !src_file.exists() {
         log(
             LogLevel::Error,

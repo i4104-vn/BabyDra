@@ -60,7 +60,9 @@ mod tests {
         if !app.branches.is_empty() {
             assert_eq!(
                 app.active_source_dir(),
-                app.workspace_root.join("branches").join(&app.selected_branch)
+                app.workspace_root
+                    .join("branches")
+                    .join(&app.selected_branch)
             );
         } else {
             assert_eq!(app.active_source_dir(), app.workspace_root);
@@ -77,12 +79,11 @@ mod tests {
     }
 
     #[test]
-    fn test_default_branch_release_selection() {
+    fn test_default_branch_selection_is_discovered() {
         let app = App::new();
-        if app.branches.iter().any(|b| b.name == "release") {
-            assert_eq!(app.selected_branch, "release");
+        if !app.branches.is_empty() {
+            assert_eq!(app.selected_branch, app.branches[app.branch_cursor].name);
             assert!(app.branches[app.branch_cursor].selected);
-            assert_eq!(app.branches[app.branch_cursor].name, "release");
         }
     }
 }

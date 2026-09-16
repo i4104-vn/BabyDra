@@ -35,9 +35,17 @@ pub fn checkout_and_pull(repo: &Path, branch: &str) -> Result<PathBuf> {
         && (target_dir.join(".git").exists() || target_dir.join("Cargo.toml").exists())
     {
         let _ = git(&target_dir, &["fetch", "origin", branch]);
-        let _ = git(&target_dir, &["reset", "--hard", &format!("origin/{branch}")])
-            .or_else(|_| git(&target_dir, &["checkout", "-B", branch, &format!("origin/{branch}")]))
-            .or_else(|_| git(&target_dir, &["pull", "origin", branch]));
+        let _ = git(
+            &target_dir,
+            &["reset", "--hard", &format!("origin/{branch}")],
+        )
+        .or_else(|_| {
+            git(
+                &target_dir,
+                &["checkout", "-B", branch, &format!("origin/{branch}")],
+            )
+        })
+        .or_else(|_| git(&target_dir, &["pull", "origin", branch]));
         return Ok(target_dir);
     }
 
@@ -90,9 +98,6 @@ mod tests {
             branch_worktree_dir(repo, "release"),
             PathBuf::from("/test/repo/branches/release")
         );
-        assert_eq!(
-            branch_worktree_dir(repo, ""),
-            PathBuf::from("/test/repo")
-        );
+        assert_eq!(branch_worktree_dir(repo, ""), PathBuf::from("/test/repo"));
     }
 }

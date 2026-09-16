@@ -26,7 +26,7 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
             )),
             Line::from(""),
             Line::from(Span::styled(
-                "Could not find any installable git branches (e.g. 'release' or other branches).",
+                "Could not find any git branch containing a source workspace.",
                 Style::default().fg(THEME.text_bright),
             )),
             Line::from(Span::styled(
@@ -35,21 +35,19 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
             )),
             Line::from(""),
             Line::from(Span::styled(
-                "Hint: Check git remote connection or run `git fetch origin release`.",
+                "Hint: Check the remote connection and ensure a source branch is available.",
                 Style::default().fg(THEME.amber),
             )),
         ];
 
-        let empty_widget = Paragraph::new(empty_lines)
-            .wrap(Wrap { trim: true })
-            .block(
-                Block::default()
-                    .title(" 2. Source Branch — No Installable Releases Found ")
-                    .title_style(THEME.title_rose())
-                    .borders(Borders::ALL)
-                    .border_type(BorderType::Rounded)
-                    .border_style(Style::default().fg(THEME.rose)),
-            );
+        let empty_widget = Paragraph::new(empty_lines).wrap(Wrap { trim: true }).block(
+            Block::default()
+                .title(" 2. Source Branch — No Installable Releases Found ")
+                .title_style(THEME.title_rose())
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(THEME.rose)),
+        );
         f.render_widget(empty_widget, chunks[0]);
 
         let prompt_box = Paragraph::new(vec![
@@ -84,7 +82,7 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
     let mut items: Vec<ListItem> = Vec::with_capacity(app.branches.len());
 
     for (i, b) in app.branches.iter().enumerate() {
-        let is_recommended = b.name == "release";
+        let is_recommended = b.is_current;
         let is_selected = app.selected_branch == b.name;
         items.push(branch_row(
             i,
@@ -99,7 +97,9 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
 
     let list = List::new(items).block(
         Block::default()
-            .title(" 2. Source Branch Selection [↑/↓: Move | Space: Select | Enter: Switch Branch] ")
+            .title(
+                " 2. Source Branch Selection [↑/↓: Move | Space: Select | Enter: Switch Branch] ",
+            )
             .title_style(THEME.title_cyan())
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
@@ -112,9 +112,7 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
             Span::styled("Target Branch : ", Style::default().fg(THEME.text_dim)),
             Span::styled(
                 format!("'{}'", app.selected_branch),
-                Style::default()
-                    .fg(THEME.cyan)
-                    .add_modifier(Modifier::BOLD),
+                Style::default().fg(THEME.cyan).add_modifier(Modifier::BOLD),
             ),
             Span::styled(
                 " — Pulled into branches/ to keep main branch clean.",
@@ -124,14 +122,18 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
         Line::from(vec![
             Span::styled("Repository    : ", Style::default().fg(THEME.text_dim)),
             Span::styled(
-                format!("{} ({} branches available)", app.workspace_root.display(), app.branches.len()),
+                format!(
+                    "{} ({} branches available)",
+                    app.workspace_root.display(),
+                    app.branches.len()
+                ),
                 Style::default().fg(THEME.text_bright),
             ),
         ]),
         Line::from(vec![
-            Span::styled("Recommended   : ", Style::default().fg(THEME.text_dim)),
+            Span::styled("Recommendation: ", Style::default().fg(THEME.text_dim)),
             Span::styled(
-                "The 'release' branch is the complete, tested, and verified environment.",
+                "The current source branch is highlighted when available.",
                 Style::default().fg(THEME.amber),
             ),
         ]),
@@ -139,7 +141,10 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
             Span::styled(" [Space] ", THEME.key_badge_green()),
             Span::styled(" Select Branch    ", Style::default().fg(THEME.text_dim)),
             Span::styled(" [Enter] ", THEME.key_badge_cyan()),
-            Span::styled(" Confirm & Switch Branch    ", Style::default().fg(THEME.text_dim)),
+            Span::styled(
+                " Confirm & Switch Branch    ",
+                Style::default().fg(THEME.text_dim),
+            ),
             Span::styled(" [←] ", THEME.key_badge_amber()),
             Span::styled(" Back", Style::default().fg(THEME.text_dim)),
         ]),

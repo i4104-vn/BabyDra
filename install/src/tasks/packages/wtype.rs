@@ -63,10 +63,7 @@ where
                     let built_file = std::path::Path::new("/tmp/wtype/build/wtype");
                     if built_file.exists() {
                         if let Err(e) = std::fs::copy(built_file, &wtype_dst) {
-                            log(
-                                LogLevel::Error,
-                                format!("Failed to copy wtype binary: {e}"),
-                            );
+                            log(LogLevel::Error, format!("Failed to copy wtype binary: {e}"));
                             (0, 1)
                         } else {
                             use std::os::unix::fs::PermissionsExt;

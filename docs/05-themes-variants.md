@@ -1,102 +1,103 @@
-# 05 — Themes & Variants
+# 05 — Theme và variant
 
-**Phạm vi:** theme package, cách tạo theme/variant mới, luồng nạp CSS.
-**Phiên bản:** 2.0.0
-**Cập nhật lần cuối:** 2026-08-17
+## Phạm vi
 
----
+Trang này mô tả dữ liệu giao diện runtime và cách variant liên kết theme với cấu hình cài đặt.
 
-## 1. Khái niệm
+## Khái niệm
 
-| Thuật ngữ | Ý nghĩa |
+| Khái niệm | Định nghĩa |
 | :--- | :--- |
-| **Theme package** | Thư mục `themes/<theme-id>/` — màu sắc + font + CSS của toàn UI BabyDra |
-| **Variant** | Gói `variants/<tên>/variant.toml` — theme + danh sách app + keybinds cho 1 bản phân phối |
-| **selection** | 1 dòng trong `~/.babydra/babydra.conf` trỏ tới theme đang dùng |
+| Theme package | Một thư mục dưới `themes/<theme-id>` chứa token, font và CSS của giao diện. |
+| Variant | Một thư mục dưới `variants/<variant-id>` mô tả theme và lựa chọn ứng dụng cho một profile. |
+| Theme selection | Giá trị được ghi vào `~/.babydra/babydra.conf` để app biết theme đang dùng. |
 
----
+Theme là dữ liệu dùng chung. Variant là lớp lựa chọn. Không đặt logic Rust vào hai thư mục này.
 
-## 2. Cấu trúc theme package
+## Cấu trúc theme package
 
 ```text
-themes/babydra-default/
-├── tokens.json     ← design tokens (dark + light): surface, border, accent, font, radius
-├── fonts.json      ← font families + fallbacks
+themes/<theme-id>/
+├── tokens.json
+├── fonts.json
 └── css/
-    ├── dark.css    ← lớp màu dark-mode (~2600 dòng)
-    ├── light.css   ← lớp màu light-mode (~2700 dòng)
-    └── theme.css   ← lớp override nạp cuối (đổi accent…)
+    ├── dark.css
+    ├── light.css
+    └── theme.css
 ```
 
-`tokens.json` (schema là hợp đồng với engine `babydra-theme`):
+`tokens.json` mô tả màu, surface, border, font và radius. `fonts.json` mô tả font family và fallback. `dark.css` và `light.css` chứa lớp màu tương ứng; `theme.css` là lớp override nạp cuối nếu theme cần điều chỉnh riêng.
 
-```jsonc
+Ví dụ token tối giản:
+
+```json
 {
-  "name": "babydra-default",   // bắt buộc: khớp tên thư mục
-  "base": null,                // kế thừa theme khác (vd "babydra-default")
-  "dark":  { "surface": "rgba(14,14,18,0.96)", "border": "rgba(255,255,255,0.14)", "accent": "#3b82f6", "font": "…", "radius": { "pill": 9999, "lg": 20, "md": 16, "sm": 10 } },
-  "light": { "surface": "rgba(255,255,255,0.98)", "border": "rgba(0,0,0,0.08)", "accent": "#3b82f6", "font": "…", "radius": { … } }
+  "name": "example-dark",
+  "base": null,
+  "dark": {
+    "surface": "rgba(14,14,18,0.96)",
+    "border": "rgba(255,255,255,0.14)",
+    "accent": "#3b82f6"
+  },
+  "light": {
+    "surface": "rgba(255,255,255,0.98)",
+    "border": "rgba(0,0,0,0.08)",
+    "accent": "#3b82f6"
+  }
 }
 ```
 
----
+Tên trong `tokens.json` phải khớp `theme-id`. Nếu dùng `base`, theme con chỉ ghi phần khác biệt và engine hợp nhất nó với theme cha.
 
-## 3. Luồng nạp theme (1 nơi duy nhất)
+## Thứ tự resolve theme
 
-```mermaid
-flowchart TB
-    A["App khởi động → init_theme()"] --> B["Đọc babydra.conf → theme.selection.id"]
-    B --> C["themes_root(): $BABYDRA_THEMES_DIR → ~/.babydra/themes → /usr/share/babydra/themes → workspace/themes"]
-    C --> D["babydra-theme::resolve_theme(id)"]
-    D --> E["load_package: tokens.json + css/*.css"]
-    E --> F["Merge kế thừa `base` (nếu có) — con đè cha"]
-    F --> G["build_css() = SHARED_CSS + dark/light.css + theme.css"]
-    G --> H["GtkCssProvider toàn cục → mọi widget áp dụng ngay"]
+```text
+app start
+  → đọc theme selection
+  → tìm theme root theo thứ tự:
+      BABYDRA_THEMES_DIR
+      ~/.babydra/themes
+      /usr/share/babydra/themes
+      workspace/themes
+  → đọc tokens và CSS
+  → resolve base theme
+  → tạo CSS theo thứ tự shared → dark/light → theme.css
+  → áp dụng GtkCssProvider
 ```
 
-- **CSS cấu trúc** (`SHARED_CSS`, 30 file trong `libs/babydra-ui-kit/src/styles/shared/`) được `include_str!` nhúng vào binary — không đọc từ đĩa.
-- **CSS màu** đọc từ đĩa lúc runtime qua `babydra-theme` — đổi theme không cần rebuild.
-- Lớp sau thắng: `SHARED_CSS` → `dark/light.css` → `theme.css`.
+CSS layout dùng chung được đóng gói trong `babydra-ui-kit`; CSS màu được đọc từ theme package. Không copy CSS màu vào application crate.
 
----
+## Tạo theme mới
 
-## 4. Tạo theme mới (không cần sửa code)
+1. Copy một theme đang hoạt động thành `themes/<theme-id>`.
+2. Đổi `name` trong `tokens.json` để khớp tên thư mục.
+3. Cập nhật cả `dark.css` và `light.css` khi thay đổi màu hoặc state.
+4. Kiểm tra font trong `fonts.json` tồn tại trên hệ thống hoặc được khai báo trong package cài đặt.
+5. Build và chạy một app GTK để kiểm tra widget phổ biến, modal, popover và disabled state.
 
-1. Copy thư mục `themes/babydra-default/` → `themes/<tên-theme>/`.
-2. Sửa `tokens.json`: đổi `name` (khớp tên thư mục) + giá trị dark/light.
-3. Chỉnh `css/dark.css`, `css/light.css`, `css/theme.css` nếu cần.
-4. Chọn theme: sửa `[theme] selection = { id = "<tên-theme>" }` trong `~/.babydra/babydra.conf`.
+Không thêm màu mới chỉ vì một component cần một trạng thái. Trước tiên kiểm tra token hiện có và xác định màu đó có phải semantic token dùng chung hay không.
 
-> [!TIP]
-> Muốn theme con kế thừa theme khác: đặt `"base": "<theme-id>"` — chỉ ghi phần khác, engine tự merge và phát hiện cycle.
+## Cấu trúc variant
 
----
+```text
+variants/<variant-id>/
+└── variant.toml
+```
 
-## 5. Tạo variant mới
+Ví dụ:
 
 ```toml
-# variants/<tên-variant>/variant.toml
-name  = "blue"                    # tên variant
-theme = "babydra-blue"            # theme package được dùng
-apps  = ["babydra-settings", "babydra-explore"]   # danh sách app đi kèm
+name = "work"
+theme = "example-dark"
+apps = ["babydra-settings", "babydra-explore"]
 ```
 
-1. Copy `variants/default/` → `variants/<tên>/`.
-2. Sửa `variant.toml` (đổi theme, apps…).
-3. Installer (bước 7) liệt kê variant — chọn là deploy theme tương ứng + ghi `selection.id`.
+Installer đọc các file `variant.toml`, hiển thị variant trong wizard, deploy theme đã chọn và ghi lựa chọn vào config. Tên variant và theme được lấy từ dữ liệu; không thêm branch-specific variant vào installer.
 
----
+## Kiểm tra theme và variant
 
-## 6. Bảng token tham chiếu nhanh
-
-| Token | Dark | Light |
-| :--- | :--- | :--- |
-| `surface` | `rgba(14,14,18,0.96)` | `rgba(255,255,255,0.98)` |
-| `border` | `rgba(255,255,255,0.14)` | `rgba(0,0,0,0.08)` |
-| `border-top-bevel` | `rgba(255,255,255,0.28)` | `rgba(0,0,0,0.06)` |
-| `text-primary` | `rgba(255,255,255,0.95)` | `rgba(28,28,30,0.95)` |
-| `text-secondary` | `rgba(255,255,255,0.50)` | `rgba(28,28,30,0.50)` |
-| `hover-bg` | `rgba(255,255,255,0.08)` | `rgba(0,0,0,0.05)` |
-| `shadow` | `0 10px 30px rgba(0,0,0,0.35)` | `0 10px 30px rgba(0,0,0,0.08)` |
-
-Accent chung cả 2 theme: `#3b82f6` (pressed `#2563eb`). Chi tiết: [09-design.md](./09-design.md).
+- `name` trong token khớp thư mục.
+- Theme có đủ file cần thiết hoặc có base theme cung cấp file còn thiếu.
+- Variant trỏ tới theme tồn tại.
+- CSS dark/light không dùng class chỉ tồn tại ở một mode.
+- Installer có thể deploy theme khi branch được checkout trong worktree.

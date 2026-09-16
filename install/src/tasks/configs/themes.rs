@@ -2,7 +2,7 @@ use std::fs;
 use std::path::Path;
 
 use crate::models::LogLevel;
-use crate::system::{copy_recursive, get_user_home, SudoSession};
+use crate::system::{copy_recursive, get_user_home, InstallManifest, SudoSession};
 
 pub fn install_themes_icons_cursors<F>(
     workspace_root: &Path,
@@ -19,89 +19,52 @@ where
     let _ = fs::create_dir_all(&themes_dst);
     let _ = fs::create_dir_all(&icons_dst);
 
-    let babydra_theme = workspace_root.join("configs/themes/BabyDra");
-    if babydra_theme.exists() {
-        let _ = copy_recursive(&babydra_theme, &themes_dst.join("BabyDra"));
-        log(LogLevel::Success, "Installed BabyDra GTK theme.".into());
-    }
-
-    for (dir, label) in [
-        ("configs/themes/cursor", "cursor archive"),
-        ("configs/themes/icons", "icon theme"),
-    ] {
-        let archive_dir = workspace_root.join(dir);
-        if !archive_dir.exists() {
+    let themes_src = workspace_root.join("configs/themes");
+    for child in direct_directories(&themes_src) {
+        if contains_archive(&child) {
             continue;
         }
-        if let Ok(entries) = fs::read_dir(&archive_dir) {
-            for e in entries.flatten() {
-                let path = e.path();
-                if path.extension().and_then(|s| s.to_str()) == Some("tar") {
-                    log(
-                        LogLevel::Info,
-                        format!("Extracting {label}: {:?}", path.file_name().unwrap()),
-                    );
-                    let _ = sudo.run(
-                        "tar",
-                        &[
-                            "-xf",
-                            path.to_str().unwrap_or(""),
-                            "-C",
-                            icons_dst.to_str().unwrap_or(""),
-                        ],
-                    );
-                }
-            }
+        if let Some(name) = child.file_name() {
+            let _ = copy_recursive(&child, &themes_dst.join(name));
         }
+    }
+
+    for archive in find_archives(&themes_src) {
+        log(
+            LogLevel::Info,
+            format!(
+                "Extracting theme archive: {:?}",
+                archive.file_name().unwrap_or_default()
+            ),
+        );
+        let _ = sudo.run(
+            "tar",
+            &[
+                "-xf",
+                archive.to_str().unwrap_or(""),
+                "-C",
+                icons_dst.to_str().unwrap_or(""),
+            ],
+        );
     }
     copied += 1;
 
     copied
 }
 
-pub fn apply_gsettings_fontcache<F>(sudo: &SudoSession, mut log: F) -> usize
+pub fn apply_gsettings_fontcache<F>(
+    manifest: &InstallManifest,
+    sudo: &SudoSession,
+    mut log: F,
+) -> usize
 where
     F: FnMut(LogLevel, String),
 {
-    let font_cmds: &[&[&str]] = &[
-        &[
-            "gsettings",
-            "set",
-            "org.gnome.desktop.interface",
-            "font-name",
-            "Segoe UI Variable Static Text 13",
-        ],
-        &[
-            "gsettings",
-            "set",
-            "org.gnome.desktop.interface",
-            "document-font-name",
-            "Segoe UI Variable Static Text 13",
-        ],
-        &[
-            "gsettings",
-            "set",
-            "org.gnome.desktop.interface",
-            "monospace-font-name",
-            "CaskaydiaCove Nerd Font 11",
-        ],
-        &[
-            "gsettings",
-            "set",
-            "org.gnome.desktop.interface",
-            "icon-theme",
-            "We10X",
-        ],
-        &[
-            "gsettings",
-            "set",
-            "org.gnome.desktop.interface",
-            "cursor-theme",
-            "Twilight-cursors",
-        ],
-    ];
-    for cmd in font_cmds {
-        let _ = sudo.run(cmd[0], &cmd[1..]);
+    for (schema_and_key, value) in &manifest.gsettings {
+        let Some((schema, key)) = schema_and_key.rsplit_once('.') else {
+            continue;
+        };
+        let _ = sudo.run("gsettings", &["set", schema, key, value]);
     }
 
     log(
@@ -157,11 +120,11 @@ pub fn deploy_theme_packages<F>(
 
     let conf_path = home.join(".babydra/babydra.conf");
     let selected_id = if theme_id.is_empty() {
-        "babydra-default"
+        first_directory_name(&themes_src).unwrap_or_else(|| "default".to_owned())
     } else {
-        theme_id
+        theme_id.to_owned()
     };
-    if let Err(e) = write_theme_selection(&conf_path, selected_id) {
+    if let Err(e) = write_theme_selection(&conf_path, &selected_id) {
         log(
             LogLevel::Warn,
             format!("Could not write theme selection: {e}"),
@@ -171,6 +134,59 @@ pub fn deploy_theme_packages<F>(
             LogLevel::Info,
             format!("babydra.conf theme.selection.id = {selected_id}"),
         );
+    }
+}
+
+fn direct_directories(root: &Path) -> Vec<std::path::PathBuf> {
+    fs::read_dir(root)
+        .ok()
+        .into_iter()
+        .flatten()
+        .filter_map(Result::ok)
+        .map(|entry| entry.path())
+        .filter(|path| path.is_dir())
+        .collect()
+}
+
+fn contains_archive(root: &Path) -> bool {
+    !find_archives(root).is_empty()
+}
+
+fn find_archives(root: &Path) -> Vec<std::path::PathBuf> {
+    let mut files = Vec::new();
+    collect_files(root, &mut files, |path| {
+        path.extension().and_then(|ext| ext.to_str()) == Some("tar")
+    });
+    files
+}
+
+fn first_directory_name(root: &Path) -> Option<String> {
+    direct_directories(root)
+        .into_iter()
+        .find(|path| path.join("tokens.json").is_file() || path.join("css").is_dir())
+        .and_then(|path| {
+            path.file_name()
+                .map(|name| name.to_string_lossy().to_string())
+        })
+}
+
+fn collect_files<F>(root: &Path, files: &mut Vec<std::path::PathBuf>, predicate: F)
+where
+    F: Fn(&Path) -> bool + Copy,
+{
+    if !root.is_dir() {
+        return;
+    }
+    let Ok(entries) = fs::read_dir(root) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_dir() {
+            collect_files(&path, files, predicate);
+        } else if predicate(&path) {
+            files.push(path);
+        }
     }
 }
 

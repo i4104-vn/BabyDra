@@ -42,7 +42,7 @@ where
         "chmod 666 /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference 2>/dev/null || true",
     ]);
 
-    // Add user to input group for babydra-keymap daemon
+    // Input access is required by source-defined hardware input daemons.
     if let Ok(user) = std::env::var("USER") {
         if !user.is_empty() {
             let _ = sudo.run_root(&["usermod", "-aG", "input", &user]);

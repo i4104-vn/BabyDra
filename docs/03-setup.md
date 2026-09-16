@@ -1,136 +1,170 @@
-# 03 — Cài đặt & build
+# 03 — Cài đặt và build
 
-**Phạm vi:** yêu cầu hệ thống, cài đặt qua installer/script, build từ nguồn.
-**Phiên bản:** 2.0.0
-**Cập nhật lần cuối:** 2026-08-17
+## Phạm vi
 
----
+Trang này mô tả yêu cầu hệ thống, cách chạy installer từ `main`, cách build workspace nguồn và schema của `workspace.toml`.
 
-## 1. Yêu cầu hệ thống
+## Yêu cầu hệ thống
 
-| Yêu cầu | Giá trị |
+| Thành phần | Yêu cầu |
 | :--- | :--- |
-| Hệ điều hành | Arch Linux (hoặc bản tương thích) |
-| Trình quản lý gói | `pacman` + `yay` (hoặc trợ giúp AUR tương đương) |
-| Compositor | `labwc` (Wayland) |
-| Rust toolchain | 1.80.0 trở lên |
-| Thư viện GTK | `gtk4` + `gtk4-layer-shell` |
+| Hệ điều hành | Arch Linux hoặc hệ tương thích với `pacman`. |
+| Session | Wayland; các cấu hình hiện tại dùng labwc. |
+| Toolchain | Rust và Cargo tương thích với `Cargo.toml` của branch nguồn. |
+| Quyền | `sudo` cho package, binary system, `/var/lib` và greetd. |
+| Mạng | Cần cho `git fetch`, package repository và AUR nếu branch khai báo. |
 
----
+Các package cụ thể không được ghi trong tài liệu `main`. Chúng thuộc `workspace.toml` của branch được cài.
 
-## 2. Cài đặt qua bộ cài đặt TUI (khuyến nghị)
+## Chạy installer
 
-### Chạy
+Từ root của repository trên `main`:
 
-Tài liệu sống trên nhánh `main` — nơi bộ cài đặt là **crate độc lập** trong `install/` (không có workspace root). Chạy:
+```bash
+./install/run.sh
+```
+
+Hoặc chạy trực tiếp:
 
 ```bash
 cd install
 cargo run --release
 ```
 
-Hoặc dùng script kèm theo:
+Installer thực hiện các bước chính:
 
-```bash
-./install/run.sh
+1. Tìm repository root và liệt kê local/remote branch có `Cargo.toml`.
+2. Cho người dùng chọn branch nguồn và binary cần cài.
+3. Checkout branch vào `branches/<branch>` để không thay đổi branch hiện tại của repository chính.
+4. Đọc `branches/<branch>/workspace.toml` nếu file tồn tại.
+5. Build bằng `cargo build --release --workspace`.
+6. Cài package được manifest khai báo, copy binary và staging binary.
+7. Đồng bộ config, theme, desktop entry, D-Bus service, user service và greetd theo tài nguyên có trong source tree.
+
+Installer xác thực sudo trước khi chạy task có thay đổi hệ thống. Nếu xác thực thất bại, worker dừng trước khi thực hiện cài đặt một phần.
+
+## Đường dẫn sau khi cài
+
+| Dữ liệu | Đường dẫn mặc định |
+| :--- | :--- |
+| Binary scope `user` | `~/.local/bin/<name>` |
+| Binary scope `system` | `/usr/bin/<name>` |
+| Binary staging | `/var/lib/babydra/bin/` |
+| User config | `~/.config/` |
+| Theme runtime | `~/.babydra/themes/` và `/usr/share/babydra/themes/` |
+| Variant selection | `~/.babydra/babydra.conf` |
+| User systemd unit | `~/.config/systemd/user/` |
+| Greetd config | `/etc/greetd/config.toml` |
+
+## Schema `workspace.toml`
+
+File nằm tại root branch nguồn:
+
+```toml
+[[binaries]]
+name = "babydra-panel"       # Tên file đích sau khi cài
+source = "babydra-panel"     # Tên file trong target/release; mặc định bằng name
+scope = "user"               # user hoặc system
+description = "Desktop panel"
+
+[[binaries]]
+name = "babydra-greeter"
+scope = "system"
+
+[packages]
+pacman = ["gtk4", "labwc"]
+aur = ["fastfetch"]
+
+[gsettings]
+"org.gnome.desktop.interface.font-name" = "Inter 11"
+"org.gnome.desktop.interface.cursor-size" = "24"
 ```
 
-### Luồng wizard 10 bước
+### `[[binaries]]`
+
+| Field | Bắt buộc | Ý nghĩa |
+| :--- | :--- | :--- |
+| `name` | Có | Tên binary đích và tên được dùng khi kiểm tra process/target. |
+| `source` | Không | Tên file executable trong `target/release`. Mặc định bằng `name`. |
+| `scope` | Không | `user` hoặc `system`; mặc định là `user`. |
+| `description` | Không | Mô tả hiển thị trong TUI; nếu thiếu, installer dùng mô tả tổng quát. |
+
+Nếu Cargo target có tên khác tên cài đặt, dùng `source`. Ví dụ:
+
+```toml
+[[binaries]]
+name = "my-shell"
+source = "shell-daemon"
+scope = "user"
+```
+
+### `[packages]`
+
+`pacman` và `aur` là mảng chuỗi package. Installer dùng `--needed` để tránh cài lại package đã có. Nếu một mảng rỗng hoặc không tồn tại, task tương ứng được bỏ qua.
+
+Pacman được gọi theo dạng:
 
 ```text
- 1. Welcome & profile ─▶ 2. Chọn branch (nguồn) ─▶ 3. Packages
-        │                    │ (release/develop/nhánh đóng góp)   │
-        │                    ▼                                   ▼
- 6. Configs & Themes ◀── 5. /var/lib bundle ◀── 4. Binaries
-        │                                                      
- 7. Variant ─▶ 8. Display manager ─▶ 9. Execute ─▶ 10. Summary
-                                        │
-                                        ├─ nhập mật khẩu sudo (modal che ký tự)
-                                        ├─ checkout branch → git pull
-                                        ├─ cargo build --release
-                                        └─ copy binaries + configs + themes
+sudo pacman -Syu --needed --noconfirm <packages...>
 ```
 
-Điểm đáng chú ý:
+AUR được gọi qua `yay` theo dạng:
 
-- **Mật khẩu sudo được hỏi trước**, xác thực 1 lần trước khi thay đổi bất cứ thứ gì — sai quá 3 lần sẽ dừng để tránh khóa tài khoản.
-- Chọn **branch** ở bước 2 → installer checkout, pull, build và cài đúng mã của nhánh đó.
-- Binaries → `~/.local/bin` (riêng `babydra-greeter` → `/usr/bin`), staging → `/var/lib/babydra`, theme packages → `~/.babydra/themes`.
-
----
-
-## 3. Cài đặt qua script tự động (nhánh nguồn)
-
-Script không tương tác `scripts/install.sh` nằm ở **nhánh `release`/`develop`** (nơi có mã nguồn) — nhánh `main` chỉ có bộ cài đặt TUI.
-
-```bash
-chmod +x ./scripts/install.sh
-./scripts/install.sh
+```text
+yay -S --noconfirm --needed <packages...>
 ```
 
-Script thực hiện toàn bộ: pacman + yay (deps, fonts, AUR tools) → `cargo build --release` → kill tiến trình cũ → copy binaries → config labwc/GTK/kitty/nvim/fastfetch → greetd → .desktop entries → font cache.
+Nếu branch cần AUR nhưng máy chưa có `yay`, installer bootstrap `yay-bin` trước khi cài danh sách AUR.
 
----
+### `[gsettings]`
 
-## 4. Build từ mã nguồn (nhánh `release`/`develop`)
+Key có dạng `<schema>.<key>`, giá trị là string. Installer tách ở dấu chấm cuối cùng rồi gọi `gsettings set`. Các cấu hình không phải string hiện chưa thuộc schema này.
 
-> [!IMPORTANT]
-> Mục này yêu cầu **mã nguồn** — clone nhánh `release` (hoặc `develop`). Nhánh `main` không chứa mã nguồn.
+## Build branch nguồn
+
+Trên branch có `Cargo.toml` workspace:
 
 ```bash
-# Release (khuyến nghị — binary nhỏ, chạy nhanh)
-cargo build --release --workspace
-
-# Debug (build nhanh, phục vụ dev)
-cargo build
-
-# Chỉ build 1 crate
-cargo build -p babydra-panel
-
-# Chỉ kiểm tra compile (không sinh binary)
 cargo check --workspace
-
-# Format chuẩn
-cargo fmt
+cargo test --workspace
+cargo build --release --workspace
 ```
 
-### Chạy từng thành phần
-
-| Thành phần | Lệnh chạy |
-| :--- | :--- |
-| Panel + Island (nền) | `~/.local/bin/babydra-panel` hoặc trong autostart của labwc |
-| Settings | `cargo run -p babydra-settings` |
-| Explore | `cargo run -p babydra-explore` |
-| Switcher | `cargo run -p babydra-switcher` |
-| Screenshot | `cargo run -p babydra-screenshot` |
-| Lock | `cargo run -p babydra-lock` |
-| Launcher | `cargo run -p babydra-launcher` |
-| Preview | `cargo run -p babydra-preview <ảnh>` |
-| Greeter | `cargo run -p babydra-greeter` (chạy trong cage bởi greetd) |
-
-> [!TIP]
-> Script `scripts/start.sh` cấu hình labwc (autostart, rc.xml, theme, .desktop entries) rồi chạy `labwc` — dùng cho máy đã cài xong.
-
----
-
-## 5. Kiểm tra an toàn (dành cho developer)
+Build một package:
 
 ```bash
-./scripts/check.sh              # cargo check + fmt --check + clippy -D warnings + test
-cargo test --workspace          # toàn bộ test
-cargo test -p babydra-tests     # chỉ integration suite (tests/)
+cargo build -p babydra-panel
+cargo run -p babydra-settings
 ```
 
----
+Kiểm tra format và lint:
 
-## 6. Vị trí dữ liệu sau khi cài
+```bash
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets -- -D warnings
+```
 
-| Dữ liệu | Vị trí |
-| :--- | :--- |
-| Binaries người dùng | `~/.local/bin/` |
-| Greeter (system) | `/usr/bin/babydra-greeter` |
-| Staging hệ thống | `/var/lib/babydra/` (bin, wallpaper, logo) |
-| Theme packages | `~/.babydra/themes/` |
-| Cấu hình | `~/.babydra/babydra.conf` |
-| Config labwc | `~/.config/labwc/` |
-| Log panel | `~/.cache/babydra/panel.log` |
+Installer độc lập trên `main` được kiểm tra bằng:
+
+```bash
+cargo test --manifest-path install/Cargo.toml
+cargo check --manifest-path install/Cargo.toml
+```
+
+## Troubleshooting
+
+### Không thấy branch trong TUI
+
+Kiểm tra repository có remote `origin`, branch có `Cargo.toml` ở root và fetch có hoàn tất trong thời gian chờ. Installer lọc branch không có workspace để tránh hiển thị lựa chọn không build được.
+
+### Không thấy binary
+
+Kiểm tra `target/release/<source>` sau build. Nếu tên file khác tên cài đặt, thêm `source` vào `workspace.toml`. Nếu binary mới chưa có manifest, Cargo discovery vẫn có thể tìm `src/main.rs` hoặc `src/bin/*`.
+
+### Package không được cài
+
+Xác nhận package nằm đúng mảng `pacman` hoặc `aur` trong `workspace.toml` của branch đã chọn. Không thêm package vào `main`.
+
+### Worktree lỗi hoặc chứa mã cũ
+
+Xóa worktree branch cụ thể sau khi xác nhận không có thay đổi cần giữ, rồi chạy installer lại. Không xóa toàn bộ thư mục repository hoặc dùng thao tác reset trên branch đang làm việc.
