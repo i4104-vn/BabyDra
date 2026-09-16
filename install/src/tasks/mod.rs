@@ -98,12 +98,12 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
         } else {
             plan.source_root.join("target/release")
         };
-        let packages = crate::system::initial_package_options(&manifest);
+        let mut packages = crate::system::initial_package_options(&manifest);
         let varlib = crate::system::initial_varlib_options();
         let configs = crate::system::initial_configs_themes_options();
         let display_manager = crate::system::initial_display_manager_options();
 
-        let total_steps = packages.len()
+        let mut total_steps = packages.len()
             + plan.selected_binaries.len()
             + varlib.len()
             + configs.len()
@@ -165,6 +165,18 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             }
 
             manifest = load_install_manifest(&plan.source_root, &plan.workspace_root);
+            // The selected branch owns its package list. The initial scan is
+            // performed before the worktree exists, so rebuild the package
+            // options after checkout instead of keeping main's empty/default
+            // manifest.
+            packages = crate::system::initial_package_options(&manifest);
+            total_steps = packages.len()
+                + plan.selected_binaries.len()
+                + varlib.len()
+                + configs.len()
+                + display_manager.len()
+                + 1
+                + 2;
 
             current_step += 1;
             let _ = tx.send(InstallEvent::Progress {
