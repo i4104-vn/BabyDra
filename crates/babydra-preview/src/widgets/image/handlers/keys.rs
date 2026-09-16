@@ -1,15 +1,21 @@
 //! Keyboard shortcut controller and EXIF visibility toggling for image viewer.
 
 use crate::widgets::image::handlers::zoom::{do_zoom, fit_to_screen, update_zoom_display};
-use crate::widgets::image::render::ImageViewerUi;
+use crate::widgets::image::render::{populate_exif_dialog, show_exif_loading, ImageViewerUi};
 use babydra_core::models::preview::ImageState;
+use babydra_core::models::shell::exif::ExifData;
 use gtk4::prelude::*;
 use gtk4::EventControllerKey;
 use std::cell::RefCell;
+use std::path::PathBuf;
 use std::rc::Rc;
 
 /// Sets up keyboard shortcuts for zoom manipulation and EXIF dialog inspection.
-pub fn setup_key_controller(state: &Rc<RefCell<ImageState>>, ui: &ImageViewerUi) {
+pub fn setup_key_controller(
+    state: &Rc<RefCell<ImageState>>,
+    ui: &ImageViewerUi,
+    path: PathBuf,
+) {
     let key_controller = EventControllerKey::new();
     let state_key = state.clone();
     let area_key = ui.drawing_area.clone();
@@ -18,12 +24,55 @@ pub fn setup_key_controller(state: &Rc<RefCell<ImageState>>, ui: &ImageViewerUi)
     let info_box_clone = ui.info_box.clone();
     let controls_box_clone = ui.controls_box.clone();
 
+    // Cache for EXIF data: None = not yet loaded, Some(data) = cached
+    let exif_cache: Rc<RefCell<Option<Option<ExifData>>>> = Rc::new(RefCell::new(None));
+    let is_loading = Rc::new(RefCell::new(false));
+
+    let path_clone = path;
+    let exif_cache_pressed = exif_cache.clone();
+    let is_loading_pressed = is_loading.clone();
+    let exif_box_press = exif_box_clone.clone();
+
     key_controller.connect_key_pressed(move |_, keyval, _, _| {
         match keyval.name().as_deref() {
             Some("i") | Some("I") => {
-                exif_box_clone.set_visible(true);
+                exif_box_press.set_visible(true);
                 info_box_clone.set_visible(false);
                 controls_box_clone.set_visible(false);
+
+                // Lazy load EXIF in background thread if not already loaded or loading
+                let is_loaded = exif_cache_pressed.borrow().is_some();
+                let already_loading = *is_loading_pressed.borrow();
+
+                if !is_loaded && !already_loading {
+                    *is_loading_pressed.borrow_mut() = true;
+                    show_exif_loading(&exif_box_press);
+
+                    let (tx, rx) = std::sync::mpsc::channel::<Option<ExifData>>();
+                    let p = path_clone.clone();
+                    std::thread::spawn(move || {
+                        let data = babydra_core::read_exif(&p);
+                        let _ = tx.send(data);
+                    });
+
+                    let cache_res = exif_cache_pressed.clone();
+                    let loading_res = is_loading_pressed.clone();
+                    let box_res = exif_box_press.clone();
+
+                    let mut rx_opt = Some(rx);
+                    glib::timeout_add_local(std::time::Duration::from_millis(16), move || {
+                        if let Some(ref rx_chan) = rx_opt {
+                            if let Ok(data) = rx_chan.try_recv() {
+                                rx_opt = None;
+                                *loading_res.borrow_mut() = false;
+                                populate_exif_dialog(&box_res, data.as_ref());
+                                *cache_res.borrow_mut() = Some(data);
+                                return glib::ControlFlow::Break;
+                            }
+                        }
+                        glib::ControlFlow::Continue
+                    });
+                }
             }
             Some("plus") | Some("equal") => {
                 do_zoom(&state_key, &area_key, &lbl_key, 0.1);
