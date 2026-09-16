@@ -50,51 +50,55 @@ pub fn get_logo_png(size: i32) -> gtk4::Image {
     }
 }
 
+static LOGO_INSTALLED: OnceLock<()> = OnceLock::new();
+
 /// Ensures the embedded logo is registered into user icon cache directories at runtime.
 pub fn ensure_embedded_logo_installed() {
-    let home = glib::home_dir();
-    let dirs = [
-        home.join(".local/share/icons/hicolor/256x256/apps"),
-        home.join(".local/share/icons/hicolor/scalable/apps"),
-        home.join(".local/share/pixmaps"),
-        home.join(".babydra"),
-    ];
+    LOGO_INSTALLED.get_or_init(|| {
+        let home = glib::home_dir();
+        let dirs = [
+            home.join(".local/share/icons/hicolor/256x256/apps"),
+            home.join(".local/share/icons/hicolor/scalable/apps"),
+            home.join(".local/share/pixmaps"),
+            home.join(".babydra"),
+        ];
 
-    for dir in &dirs {
-        let _ = std::fs::create_dir_all(dir);
-    }
+        for dir in &dirs {
+            let _ = std::fs::create_dir_all(dir);
+        }
 
-    let babydra_logo = home.join(".babydra/logo.png");
-    if !babydra_logo.exists() {
-        let _ = std::fs::write(&babydra_logo, LOGO_BYTES);
-    }
+        let babydra_logo = home.join(".babydra/logo.png");
+        if !babydra_logo.exists() {
+            let _ = std::fs::write(&babydra_logo, LOGO_BYTES);
+        }
 
-    let names = [
-        "babydra.png",
-        "babydra-explore.png",
-        "babydra-settings.png",
-        "babydra-preview.png",
-        "babydra-desktop.png",
-        "org.babydra.explore.png",
-        "org.babydra.settings.png",
-        "org.babydra.preview.png",
-        "org.babydra.desktop.png",
-        "com.babydra.settings.png",
-        "com.babydra.preview.png",
-    ];
+        let names = [
+            "babydra.png",
+            "babydra-explore.png",
+            "babydra-settings.png",
+            "babydra-preview.png",
+            "babydra-desktop.png",
+            "org.babydra.explore.png",
+            "org.babydra.settings.png",
+            "org.babydra.preview.png",
+            "org.babydra.desktop.png",
+            "com.babydra.settings.png",
+            "com.babydra.preview.png",
+        ];
 
-    for dir in &dirs[..3] {
-        for name in &names {
-            let file_path = dir.join(name);
-            if !file_path.exists()
-                || std::fs::metadata(&file_path)
-                    .map(|m| m.len() == 0)
-                    .unwrap_or(true)
-            {
-                let _ = std::fs::write(&file_path, LOGO_BYTES);
+        for dir in &dirs[..3] {
+            for name in &names {
+                let file_path = dir.join(name);
+                if !file_path.exists()
+                    || std::fs::metadata(&file_path)
+                        .map(|m| m.len() == 0)
+                        .unwrap_or(true)
+                {
+                    let _ = std::fs::write(&file_path, LOGO_BYTES);
+                }
             }
         }
-    }
+    });
 }
 
 static ICON_PATH_CACHE: OnceLock<HashMap<String, PathBuf>> = OnceLock::new();

@@ -145,8 +145,6 @@ pub fn init_theme() {
         let value = gsettings.string("color-scheme");
         let is_dark = value != "prefer-light";
         settings.set_gtk_application_prefer_dark_theme(is_dark);
-        let _ = babydra_core::sync_labwc_titlebar_theme(is_dark);
-        let _ = babydra_core::sync_kitty_theme(is_dark);
 
         let user_icon_theme = gsettings.string("icon-theme");
         let user_icon_theme = user_icon_theme.trim();
