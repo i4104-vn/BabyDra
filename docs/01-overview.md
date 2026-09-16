@@ -62,7 +62,7 @@ release / develop / feature
 
 `main` có thể được clone và chạy installer dù chưa checkout branch nguồn. Khi người dùng chọn branch, installer tạo worktree tại `branches/<branch>` trong repository, build tại đó và đọc tài nguyên từ worktree.
 
-## Hướng dẫn `workspace.toml`
+## Hợp đồng `workspace.toml`
 
 File phải nằm ở root của branch nguồn. Các nhóm dữ liệu hiện được hỗ trợ:
 
