@@ -153,6 +153,10 @@ aur = [
     "wlrctl",
 ]
 
+[installer]
+# Optional system steps required by this source branch.
+features = ["wtype", "kernel_permissions", "greetd"]
+
 [gsettings]
 "org.gnome.desktop.interface.font-name" = "Segoe UI 13"
 "org.gnome.desktop.interface.document-font-name" = "Segoe UI 13"
