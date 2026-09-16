@@ -2,81 +2,123 @@
 
 ## Phạm vi
 
-Đây là quy tắc visual cho toàn bộ UI BabyDra: surface, màu, typography, spacing, motion và state. Quy tắc áp dụng cho component mới và thay đổi component hiện có.
+Trang này quy định cách tổ chức giao diện BabyDra ở cấp token, surface, typography, spacing, motion, state và accessibility. CSS cấu trúc nằm trong `babydra-ui-kit`; màu và giá trị theme nằm trong theme package.
 
-## Nguyên tắc
+## Phân lớp style
 
-1. Bề mặt có phân cấp rõ ràng nhưng không tạo quá nhiều lớp nổi.
-2. Accent dùng để chỉ hành động hoặc trạng thái đang hoạt động.
-3. Dark và light phải có cùng cấu trúc, radius và hierarchy.
-4. Animation giải thích một thay đổi trạng thái; không dùng animation để trang trí.
-5. Một token được định nghĩa một lần và dùng lại ở các component.
+```text
+libs/babydra-ui-kit/src/styles/shared/
+├── panel/                   Panel, tray, clock, taskbar, workspaces
+├── control_center/          Settings và power controls
+├── island/                  Dynamic Island
+├── launcher/                Launcher
+├── explore/                 File manager
+├── apps/                    Style riêng của app dùng chung
+└── shared/                  Button, dialog, sidebar, scrollbar
+
+themes/<theme-id>/
+├── tokens.json              Token dark/light
+├── fonts.json               Font family và fallback
+└── css/
+    ├── dark.css             Color layer dark
+    ├── light.css            Color layer light
+    └── theme.css            Override nạp sau cùng
+```
+
+CSS trong `styles/shared` được `include_str!` vào `babydra-ui-kit`, vì vậy nó định nghĩa layout và cấu trúc. Theme CSS được đọc lúc runtime. Không đặt màu theme vào shared CSS.
+
+## Thứ tự nạp CSS
+
+```text
+shared structural CSS
+  → dark.css hoặc light.css
+  → theme.css
+```
+
+Nếu theme có `base`, `babydra-theme` resolve base package trước, merge tokens, nối CSS base trước rồi mới tới CSS của theme con. Theme con có quyền ghi đè giá trị của theme cha.
 
 ## Surface và elevation
 
-Một surface có thể gồm nền, blur, border và shadow. Có hai cấp chính:
+Surface nên có phân cấp rõ ràng bằng nền, border, shadow và blur khi cần. Dùng hai cấp:
 
-| Cấp | Ví dụ | Mục đích |
+| Cấp | Ví dụ | Đặc điểm |
 | :--- | :--- | :--- |
-| Cấp 1 | Panel, sidebar, card | Bề mặt chính của ứng dụng. |
-| Cấp 2 | Dialog, popover, tooltip | Bề mặt tạm thời nằm trên cấp 1. |
+| Nền chính | Panel, sidebar, card | Ổn định, ít shadow, phục vụ đọc nội dung. |
+| Bề mặt nổi | Popover, modal, tooltip | Tách khỏi nền chính bằng shadow, border và contrast. |
 
-Không tạo cấp elevation mới nếu chỉ cần tăng contrast hoặc border. Bo góc tham chiếu: pill `9999px`, dialog khoảng `20px`, card/panel khoảng `16–24px`.
+Không lồng nhiều surface nổi nếu không có lý do tương tác. Radius tham chiếu: pill `9999px`, modal `20px`, card/panel `16–24px`, control nhỏ `10–12px`.
 
-## Màu
+## Token màu
 
-| Token | Giá trị dark | Giá trị light | Sử dụng |
+| Token | Dark | Light | Dùng cho |
 | :--- | :--- | :--- | :--- |
-| `accent` | `#3b82f6` | `#3b82f6` | Primary action, active state, progress. |
+| `accent` | `#3b82f6` | `#3b82f6` | Primary action, active, progress. |
 | `accent-pressed` | `#2563eb` | `#2563eb` | Pressed state. |
-| `surface` | `rgba(14,14,18,0.96)` | `rgba(255,255,255,0.98)` | Nền chính. |
-| `border` | `rgba(255,255,255,0.14)` | `rgba(0,0,0,0.08)` | Viền. |
-| `text-primary` | `rgba(255,255,255,0.95)` | `rgba(28,28,30,0.95)` | Nội dung chính. |
+| `surface` | `rgba(14,14,18,0.96)` | `rgba(255,255,255,0.98)` | Bề mặt chính. |
+| `border` | `rgba(255,255,255,0.14)` | `rgba(0,0,0,0.08)` | Viền control/surface. |
+| `text-primary` | `rgba(255,255,255,0.95)` | `rgba(28,28,30,0.95)` | Tiêu đề và nội dung chính. |
 | `text-secondary` | `rgba(255,255,255,0.50)` | `rgba(28,28,30,0.50)` | Mô tả và metadata. |
 | `hover-bg` | `rgba(255,255,255,0.08)` | `rgba(0,0,0,0.05)` | Hover. |
+| `separator` | `rgba(255,255,255,0.10)` | `rgba(0,0,0,0.06)` | Phân cách nội dung. |
 
-Không thêm màu tùy ý vào một component. Nếu trạng thái mới có ý nghĩa dùng chung, bổ sung semantic token cho cả dark và light.
+Accent không phải màu trang trí. Nó biểu thị hành động chính hoặc state đang được chọn. Error, warning và success chỉ thêm khi state cần phân biệt; dùng semantic token thay vì giá trị riêng của component.
 
 ## Typography
 
-Ưu tiên font chính được khai báo trong theme package. Phân cấp bằng weight, size và opacity:
+Theme package cung cấp font family và fallback trong `fonts.json`. Component dùng hierarchy sau:
 
-| Cấp | Kích thước tham chiếu | Sử dụng |
+| Cấp | Size/weight tham chiếu | Sử dụng |
 | :--- | :--- | :--- |
-| Heading | `14–16px`, weight `700` | Tiêu đề vùng hoặc dialog. |
-| Label | `13–14px`, weight `500–600` | Nhãn nút và item. |
-| Body | `12–13px`, weight `400` | Nội dung và mô tả. |
-| Metadata | `10–12px`, weight `400–700` | Badge, timestamp, trạng thái phụ. |
+| Heading | `14–16px`, `700` | Tiêu đề card, dialog, vùng nội dung. |
+| Label | `13–14px`, `500–600` | Tên setting, button, menu item. |
+| Body | `12–13px`, `400` | Mô tả, nội dung phụ. |
+| Metadata | `10–12px`, `400–700` | Timestamp, badge, trạng thái phụ. |
 
-Không dùng chữ in hoa cho đoạn dài. Text nhiều dòng cần line-height đủ để đọc trên màn hình HiDPI.
+Không dùng font-size lớn để bù cho hierarchy kém. Tăng weight hoặc contrast khi cần nhấn mạnh; giữ line-height đủ cho text nhiều dòng.
 
-## Spacing
+## Spacing và kích thước control
 
 | Nhóm | Giá trị tham chiếu | Quan hệ |
 | :--- | :--- | :--- |
-| Micro | `4–6px` | Icon và label trong cùng control. |
-| Standard | `8–12px` | Các item cùng nhóm. |
-| Section | `16–24px` | Hai nhóm chức năng khác nhau. |
+| Micro | `4–6px` | Icon với label, text với badge. |
+| Standard | `8–12px` | Item trong cùng group. |
+| Section | `16–24px` | Hai group khác nhau. |
+| Control switch | `46×24px` | Kích thước `CustomSwitch`. |
+| Slider track | `6px` | Track rounded của `CustomSlider`. |
 
-Một component không nên dùng quá nhiều giá trị spacing độc lập. Ưu tiên token và component layout của ui-kit.
+Một component nên dùng ít giá trị spacing và lấy từ layout chung. Không đặt margin rải rác trong application nếu component chung đã xử lý khoảng cách.
 
 ## Motion
 
-| Loại | Duration | Sử dụng |
+| Chuyển trạng thái | Duration tham chiếu | Dùng cho |
 | :--- | :--- | :--- |
-| State transition | khoảng `200ms` | Hover, active, đổi màu. |
-| Enter | khoảng `200ms` | Popover hoặc nội dung xuất hiện. |
-| Exit | khoảng `150ms` | Đóng popover hoặc ẩn status. |
-| Panel/Island transition | khoảng `400ms` | Mở rộng hoặc thu gọn surface lớn. |
+| Hover/active | `160–200ms` | Button, switch, màu nền. |
+| Enter | `200ms` | Popover, reveal, nội dung mới. |
+| Exit | `150ms` | Đóng popover hoặc ẩn trạng thái. |
+| Island expand | `350ms` | Capsule mở rộng. |
+| Island collapse | `500ms` | Capsule thu gọn. |
+| Collapsible card | `250ms` | `GtkRevealer` mở/đóng. |
 
-Animation phải có thể dừng hoặc bỏ qua mà không làm mất chức năng. Không dùng bounce, parallax hoặc transform để thay thế phản hồi trạng thái.
+Animation phải mô tả quan hệ nguyên nhân-kết quả. Không dùng bounce, parallax hoặc scale toàn layout khi hover. Khi widget bị dispose hoặc state đổi giữa animation, phải hủy hoặc bỏ qua callback cũ để tránh cập nhật widget đã mất.
 
-## States và accessibility
+## State và accessibility
 
-- Hover: thay đổi background hoặc border nhẹ, không scale toàn control.
-- Focus: phải có dấu hiệu nhìn thấy được, không chỉ dựa vào màu rất nhạt.
-- Active: dùng accent hoặc contrast rõ hơn hover.
-- Disabled: giảm opacity và chặn thao tác; không làm mất hoàn toàn khả năng đọc.
-- Icon-only button phải có tooltip hoặc accessible label.
+Mỗi interactive control phải kiểm tra:
 
-CSS layout đặt trong `libs/babydra-ui-kit/src/styles/shared/`; CSS màu đặt trong theme package. Mọi thay đổi màu phải kiểm tra cả dark và light.
+- default: có thể đọc và nhận biết chức năng;
+- hover: feedback nhẹ, không thay đổi kích thước layout;
+- focus: dấu hiệu nhìn thấy được và dùng được bằng bàn phím;
+- pressed/active: accent hoặc contrast rõ hơn hover;
+- disabled: không tương tác nhưng vẫn đọc được;
+- error/loading/empty: text đi qua i18n và không chỉ dựa vào màu.
+
+Icon-only button phải có tooltip hoặc accessible label. Dialog phải đặt focus vào control chính, có nút đóng/hủy và không khóa toàn bộ session ngoài phạm vi cần thiết.
+
+## Checklist khi sửa UI
+
+1. Xác định style thuộc shared CSS hay theme CSS.
+2. Kiểm tra dark và light.
+3. Kiểm tra state keyboard, hover, focus, disabled.
+4. Kiểm tra text dài và font fallback.
+5. Dùng component chung trước khi thêm CSS hoặc widget mới.
+6. Chạy app hoặc test phù hợp trên branch nguồn.

@@ -2,27 +2,27 @@
 
 ## Phạm vi
 
-Trang này là bản đồ API thực hành của các thư viện được nhiều application sử dụng. API chi tiết nhất vẫn là public item trong source Rust; khi API thay đổi, cập nhật trang này cùng commit.
+Trang này ghi lại public API thường dùng của `babydra-core`, `babydra-ui-kit`, `babydra-theme` và `babydra-island`. Khi API trong Rust thay đổi, cập nhật ví dụ và bảng bên dưới trong cùng thay đổi.
 
 ## `babydra-core`
 
-`babydra-core` không phụ thuộc GTK. Application dùng thư viện này cho service, config, model và i18n.
+`babydra-core` không phụ thuộc GTK. Application dùng thư viện này cho system service, config, notification, wallpaper, update và i18n.
 
 ### Service
 
-| Module | Trách nhiệm |
-| :--- | :--- |
-| `services::system::wifi` | Scan, connect, disconnect và quản lý network. |
-| `services::system::vpn` | Liệt kê, kết nối và ngắt VPN. |
-| `services::system::volume` | Đọc, đặt volume và mute qua PipeWire/PulseAudio. |
-| `services::system::brightness` | Đọc và đặt độ sáng qua backend được hỗ trợ. |
-| `services::system::battery` | Trạng thái pin và nguồn điện. |
-| `services::system::cpu` | Load, nhiệt độ và governor. |
-| `services::wallpaper` | Đổi và theo dõi wallpaper. |
-| `services::updates` | Kiểm tra cập nhật package. |
-| `services::notification` | Gửi notification qua D-Bus. |
+| Nhóm | Module | Phạm vi |
+| :--- | :--- | :--- |
+| Network | `services::system::wifi` | Scan, connect, disconnect, forget và trạng thái tín hiệu. |
+| VPN | `services::system::vpn` | Danh sách, connect/disconnect và log VPN. |
+| Audio | `services::system::volume` | Volume, mute và player audio. |
+| Display | `services::system::brightness` | Backlight hoặc DDC/CI tùy backend. |
+| Power | `services::system::battery` | Phần trăm pin, charging và nguồn. |
+| CPU | `services::system::cpu` | Load, temperature và governor. |
+| Desktop | `services::wallpaper` | Wallpaper và trạng thái wallpaper. |
+| Updates | `services::updates` | Kiểm tra cập nhật package. |
+| Notification | `services::notification` | D-Bus notification và active notification model. |
 
-Application không nên gọi trực tiếp command hệ thống nếu service tương ứng đã có trong core.
+Application không gọi `nmcli`, `wpctl` hoặc command hệ thống tương tự nếu core đã có service tương ứng. Điều này giữ behavior và error handling nhất quán giữa các app.
 
 ### Config
 
@@ -33,69 +33,99 @@ let config = config::load_babydra_config();
 config::apply_all_saved_settings();
 ```
 
-Config chính nằm ở `~/.babydra/babydra.conf`. Các module phải dùng model config thay vì tự parse cùng một file theo cách riêng.
+Config chính nằm ở `~/.babydra/babydra.conf`. Theme selection, app setting và giá trị đã lưu phải đi qua module config thay vì mỗi crate tự parse TOML.
 
 ### i18n
 
 ```rust
-use babydra_core::i18n::t;
+use babydra_core::i18n::trans;
 
-let title = t("settings.wifi");
+let title = trans("settings.wifi");
 ```
 
-Key dịch nằm trong locale data của project. Không hardcode câu hiển thị trong widget nếu key đã tồn tại hoặc cần hỗ trợ nhiều ngôn ngữ.
+Dùng translation key cho text hiển thị. Key mới phải được thêm vào locale data tương ứng và không được đặt string tiếng Anh trực tiếp trong widget nếu text cần dịch.
+
+## `babydra-theme`
+
+### Hàm chính
+
+| Hàm/type | Mục đích |
+| :--- | :--- |
+| `themes_root()` | Chọn theme root theo env, user directory, system directory và workspace. |
+| `load_package(id)` | Đọc một theme package thành `ThemePackage`. |
+| `resolve_theme(id)` | Resolve base theme và trả `ThemeValue` hoàn chỉnh. |
+| `ThemePackage` | Dữ liệu package trước khi merge kế thừa. |
+| `ThemeValue` | Tokens, CSS dark/light, extra CSS, font map và package path sau khi resolve. |
+| `ThemeError` | Lỗi package không tồn tại, JSON sai hoặc cycle kế thừa. |
+
+Resolution order của `themes_root()`:
+
+1. `BABYDRA_THEMES_DIR` nếu được đặt.
+2. `~/.babydra/themes` nếu tồn tại.
+3. `/usr/share/babydra/themes` nếu tồn tại.
+4. `themes/` tương đối với workspace.
+
+`load_package` đọc layout mới `css/dark.css`, `css/light.css`, `css/theme.css` và vẫn hỗ trợ layout CSS phẳng cũ như fallback. `resolve_theme` merge token base trước, child sau; CSS cũng nối base trước, child sau để rule child thắng.
 
 ## `babydra-ui-kit`
 
-### Theme initialization
+### Khởi tạo theme
 
 ```rust
-use babydra_ui_kit::ui::theme::init_theme;
+use babydra_ui_kit::prelude::init_theme;
 
 init_theme();
 ```
 
-Gọi một lần khi application khởi động, trước khi dựng UI. Theme resolver đọc selection từ config và tìm theme theo thứ tự được mô tả trong [05-themes-variants.md](05-themes-variants.md).
+`init_theme()` đăng ký `GtkCssProvider` cho display, nạp CSS cấu trúc được nhúng trong crate, resolve color layer từ `babydra-theme`, đồng bộ GTK icon theme và theo dõi thay đổi color scheme/icon theme. Gọi trước khi dựng widget.
 
-### Component factory
+### Prelude
 
-Các nhóm API chính:
+`babydra_ui_kit::prelude` re-export các builder thường dùng:
 
-| Nhóm | API tiêu biểu |
+| Nhóm | API |
 | :--- | :--- |
-| Button | `create_icon_button`, `create_close_button` |
-| Badge | `create_status_badge`, `create_icon_badge` |
-| Card/list | `create_card`, `create_item_row`, `create_list_row`, `clear_list_box` |
-| Switch/slider | `create_switch`, `ToggleRow`, `CustomSlider` |
-| Modal | `PasswordDialog`, `WifiPasswordDialog`, `WifiConfigDialog`, `VpnConfigDialog` |
-| Popover | `create_popover`, `attach_hover_popover` |
-| Progress | `create_progress_bar`, `create_disk_progress` |
-| Feedback | `create_placeholder_row`, `create_spinner`, `create_loading_box` |
-| Icon/tooltip | `get_icon`, `get_system_or_file_icon`, `set_tooltip` |
+| Button | `create_button`, `create_accent_button`, `create_fab`, `create_icon_button`, `create_icon_btn` |
+| Card | `create_card`, `create_css_card`, `create_collapsible_card`, `create_switch_card`, `create_title`, `create_subtitle` |
+| List | `create_list_row`, `clear_box`, `clear_list_box`, `create_scroll_list` |
+| Switch | `create_switch`, `CustomSwitch`, `ToggleRow` |
+| Slider | `CustomSlider`, `PillSlider`, `bind_debounced_slider` |
+| Modal | `PasswordDialog`, `WifiPasswordDialog`, `WifiInfoDialog`, `WifiConfigDialog`, `VpnConfigDialog`, `VpnLogDialog` |
+| Popover | `create_popover`, `TooltipPopover`, `TooltipRow` |
+| Placeholder | `create_placeholder`, `PlaceholderState` |
+| Icon | `get_icon`, `get_fallback_icon`, `get_resolved_icon`, `set_image_from_icon` |
+| Image/window | `create_rounded_picture`, `init_layer_window`, `setup_click_outside_dismiss` |
 
-Dùng factory chung để giữ class, spacing, accessibility và animation đồng nhất.
+### Animation và window helper
 
-## `babydra-theme`
+Animation được chia theo mục đích trong `ui::animation`:
 
-Theme API chịu trách nhiệm:
+- easing: `linear`, `ease_in_cubic`, `ease_out_cubic`, `ease_in_out_cubic`;
+- slide: `slide_in`, `slide_out`, `slide_out_cb`;
+- island: `island_animate_size`, `island_animate_width`, `island_zoom_in`, `island_zoom_out`;
+- genie: `genie_in`, `genie_out`;
+- panel startup: `topbar_startup_cascade`.
 
-- resolve theme theo id;
-- đọc `tokens.json`, `fonts.json` và CSS;
-- resolve `base` theme;
-- tạo CSS cuối cho dark/light;
-- trả lỗi hoặc fallback khi package không đầy đủ.
-
-Application không tự tìm theme bằng đường dẫn riêng. Mọi application phải đi qua theme library hoặc helper của ui-kit.
+Dùng helper hiện có để giữ duration và cancellation behavior thống nhất.
 
 ## `babydra-island`
 
-API public gồm các thành phần để tạo island, đăng ký feature, cập nhật view và gửi dữ liệu từ background service. Quy tắc vòng đời được mô tả trong [07-dynamic-island.md](07-dynamic-island.md).
+Public export chính:
 
-## Nguyên tắc sử dụng API
+```rust
+use babydra_island::{
+    build_default_island, create_system_island, Island, IslandBuilder,
+    IslandConfig, IslandFeature, IslandView, IslandViewHandle,
+};
+```
 
-- Dùng service core cho system operation.
-- Dùng component ui-kit cho widget chuẩn.
-- Gọi `init_theme()` trước khi render.
-- Gửi dữ liệu nền qua channel hoặc main-context callback.
-- Thêm test cho logic mới không cần GTK nếu có thể.
-- Nếu API chưa phù hợp, sửa abstraction dùng chung thay vì tạo bản sao trong application.
+`IslandView` phù hợp với view điều khiển bằng handle; `IslandFeature` phù hợp với stateful feature. Chi tiết arbitration và lifecycle nằm trong [07 — Dynamic Island](07-dynamic-island.md).
+
+## Quy tắc dùng API
+
+- Dùng core cho system operation.
+- Dùng ui-kit cho widget, icon, animation và theme initialization.
+- Dùng theme engine thay vì tự tìm file theme.
+- Không thao tác GTK từ thread nền.
+- Bổ sung test cho parser, state machine và helper thuần.
+- Khi API chung thiếu khả năng, sửa abstraction chung thay vì tạo implementation riêng trong từng app.
