@@ -4,32 +4,30 @@
 [[binaries]]
 name = "babydra-panel"
 scope = "user"
-description = "Desktop panel, tray, notifications and Dynamic Island"
 
 [[binaries]]
 name = "babydra-desktop"
 scope = "user"
-description = "Desktop canvas, wallpaper and file icons"
 
 [[binaries]]
 name = "babydra-switcher"
 scope = "user"
-description = "Wayland window switcher daemon"
 
 [[binaries]]
 name = "babydra-keymap"
 scope = "user"
-description = "Global keyboard shortcut daemon"
 
 [[binaries]]
 name = "babydra-explore"
 scope = "user"
 description = "GTK4 file manager"
+export_desktop = true
 
 [[binaries]]
 name = "babydra-settings"
 scope = "user"
 description = "Desktop and system settings application"
+export_desktop = true
 
 [[binaries]]
 name = "babydra-launcher"
@@ -39,22 +37,19 @@ description = "Application launcher and fuzzy search"
 [[binaries]]
 name = "babydra-lock"
 scope = "user"
-description = "Wayland screen lock and PAM authentication"
 
 [[binaries]]
 name = "babydra-greeter"
 scope = "system"
-description = "greetd login interface"
 
 [[binaries]]
 name = "babydra-screenshot"
 scope = "user"
-description = "Screenshot and OCR utility"
 
 [[binaries]]
 name = "babydra-preview"
 scope = "user"
-description = "Image and media preview application"
+export_desktop = true
 
 [packages]
 pacman = [
@@ -111,7 +106,6 @@ pacman = [
     "tesseract",
     "tesseract-data-eng",
     "tesseract-data-vie",
-    "mpv",
     "bc",
     "jq",
     "gvfs",
