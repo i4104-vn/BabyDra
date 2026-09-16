@@ -67,3 +67,29 @@ fn update_status_serde_roundtrip() {
     assert_eq!(back.name, "firefox");
     assert_eq!(back.status, UpdateStatus::Pending);
 }
+
+#[test]
+fn test_tray_parse_service_and_path() {
+    let (bus, path) =
+        babydra_core::services::tray::watcher::parse_service_and_path("/org/custom/Item", ":1.42");
+    assert_eq!(bus, ":1.42");
+    assert_eq!(path, "/org/custom/Item");
+
+    let (bus2, path2) = babydra_core::services::tray::watcher::parse_service_and_path(
+        "org.kde.StatusNotifierItem/StatusNotifierItem",
+        ":1.42",
+    );
+    assert_eq!(bus2, "org.kde.StatusNotifierItem");
+    assert_eq!(path2, "/StatusNotifierItem");
+
+    let (bus3, path3) = babydra_core::services::tray::watcher::parse_service_and_path(
+        "org.kde.StatusNotifierItem",
+        ":1.42",
+    );
+    assert_eq!(bus3, "org.kde.StatusNotifierItem");
+    assert_eq!(path3, "/StatusNotifierItem");
+
+    let items = babydra_core::tray::get_tray_items();
+    // Verify get_tray_items can be safely called without panicking
+    let _ = items.len();
+}

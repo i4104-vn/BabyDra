@@ -118,4 +118,23 @@ fn test_button_popover_unparent_lifecycle() {
     assert_eq!(remaining, 0);
 
     apps_box.remove(&btn);
+
+    // Slide animation cancellation margin preservation check
+    let anim_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    anim_box.set_margin_top(0);
+    assert_eq!(anim_box.margin_top(), 0);
+
+    let gen = std::rc::Rc::new(std::cell::Cell::new(1_u64));
+    babydra_ui_kit::ui::animation::slide_in_cancelable(
+        anim_box.upcast_ref(),
+        babydra_ui_kit::ui::animation::SlideDirection::Down,
+        14,
+        200,
+        gen.clone(),
+        1,
+    );
+    // Cancel by incrementing generation
+    gen.set(2);
+    anim_box.set_margin_top(0);
+    assert_eq!(anim_box.margin_top(), 0);
 }

@@ -14,12 +14,40 @@ pub enum SlideDirection {
     Right,
 }
 
+/// Slides a widget into view and stops cleanly with restored margins when a newer animation generation is started.
+pub fn slide_in_cancelable(
+    widget: &gtk4::Widget,
+    direction: SlideDirection,
+    distance_px: i32,
+    duration_ms: u64,
+    generation: Rc<Cell<u64>>,
+    expected_generation: u64,
+) {
+    slide_in_inner(
+        widget,
+        direction,
+        distance_px,
+        duration_ms,
+        Some((generation, expected_generation)),
+    );
+}
+
 /// Slides a widget into view from the given direction using frame-synced FrameClock timing.
 pub fn slide_in(
     widget: &gtk4::Widget,
     direction: SlideDirection,
     distance_px: i32,
     duration_ms: u64,
+) {
+    slide_in_inner(widget, direction, distance_px, duration_ms, None);
+}
+
+fn slide_in_inner(
+    widget: &gtk4::Widget,
+    direction: SlideDirection,
+    distance_px: i32,
+    duration_ms: u64,
+    cancellation: Option<(Rc<Cell<u64>>, u64)>,
 ) {
     widget.set_opacity(0.0);
     widget.set_visible(true);
@@ -42,6 +70,17 @@ pub fn slide_in(
     widget.add_tick_callback(move |w, clock| {
         if w.root().is_none() {
             return glib::ControlFlow::Break;
+        }
+        if let Some((ref generation, expected)) = cancellation {
+            if generation.get() != expected {
+                match direction {
+                    SlideDirection::Down => w.set_margin_top(original_margin_top),
+                    SlideDirection::Up => w.set_margin_bottom(original_margin_bottom),
+                    SlideDirection::Right => w.set_margin_start(original_margin_start),
+                    SlideDirection::Left => w.set_margin_end(original_margin_end),
+                }
+                return glib::ControlFlow::Break;
+            }
         }
         let now = clock.frame_time();
         if start_time.get() == 0 {
@@ -229,6 +268,12 @@ fn slide_out_cb_inner<F>(
         }
         if let Some((ref generation, expected)) = cancellation {
             if generation.get() != expected {
+                match direction {
+                    SlideDirection::Down => w.set_margin_bottom(original_margin_bottom),
+                    SlideDirection::Up => w.set_margin_top(original_margin_top),
+                    SlideDirection::Right => w.set_margin_end(original_margin_end),
+                    SlideDirection::Left => w.set_margin_start(original_margin_start),
+                }
                 return glib::ControlFlow::Break;
             }
         }

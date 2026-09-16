@@ -82,14 +82,20 @@ impl StatusNotifierWatcher {
             Err(_) => return,
         };
 
-        let proxy = match StatusNotifierItemProxy::builder(&connection)
-            .destination(bus_name)
-            .unwrap()
-            .path(object_path.clone())
-            .unwrap()
-            .build()
-            .await
-        {
+        let obj_path = match zbus::zvariant::ObjectPath::try_from(object_path.clone()) {
+            Ok(path) => path,
+            Err(_) => return,
+        };
+
+        let builder = match StatusNotifierItemProxy::builder(&connection).destination(bus_name) {
+            Ok(b) => match b.path(obj_path) {
+                Ok(b) => b,
+                Err(_) => return,
+            },
+            Err(_) => return,
+        };
+
+        let proxy = match builder.build().await {
             Ok(p) => p,
             Err(_) => return,
         };
@@ -168,13 +174,17 @@ impl StatusNotifierWatcher {
 /// Also starts a periodic health check loop to remove disconnected tray icons.
 pub fn spawn_watcher() {
     std::thread::spawn(move || {
-        let rt = tokio::runtime::Runtime::new().unwrap();
+        let rt = match tokio::runtime::Runtime::new() {
+            Ok(r) => r,
+            Err(e) => {
+                tracing::error!("Failed to create tokio runtime for StatusNotifierWatcher: {e}");
+                return;
+            }
+        };
         rt.block_on(async {
             let watcher = StatusNotifierWatcher;
 
             let conn = match zbus::connection::Builder::session()
-                .unwrap()
-                .name("org.kde.StatusNotifierWatcher")
                 .unwrap()
                 .serve_at("/StatusNotifierWatcher", watcher)
                 .unwrap()
@@ -182,11 +192,29 @@ pub fn spawn_watcher() {
                 .await
             {
                 Ok(c) => c,
-                Err(_) => return,
+                Err(e) => {
+                    tracing::error!(
+                        "Failed to initialize D-Bus session for StatusNotifierWatcher: {e}"
+                    );
+                    return;
+                }
             };
 
+            if let Err(e) = conn
+                .request_name_with_flags(
+                    "org.kde.StatusNotifierWatcher",
+                    zbus::fdo::RequestNameFlags::ReplaceExisting
+                        | zbus::fdo::RequestNameFlags::DoNotQueue,
+                )
+                .await
+            {
+                tracing::warn!("Failed to claim org.kde.StatusNotifierWatcher: {e}");
+            } else {
+                tracing::info!("org.kde.StatusNotifierWatcher claimed successfully");
+            }
+
             loop {
-                tokio::time::sleep(Duration::from_millis(500)).await;
+                tokio::time::sleep(Duration::from_secs(2)).await;
                 let registry = TRAY_ITEMS.get_or_init(|| Arc::new(Mutex::new(Vec::new())));
                 let current_items = {
                     let lock = registry.lock().unwrap();
@@ -199,108 +227,110 @@ pub fn spawn_watcher() {
                     for item in current_items {
                         let conn_clone = conn.clone();
                         let dbus_proxy_clone = dbus_proxy.clone();
+                        let item_for_handle = item.clone();
                         let handle = tokio::spawn(async move {
                             if let Ok(bus_name) =
                                 zbus::names::BusName::try_from(item.service.clone())
                             {
                                 let has_owner = tokio::time::timeout(
-                                    Duration::from_millis(200),
+                                    Duration::from_millis(500),
                                     dbus_proxy_clone.name_has_owner(bus_name.clone()),
                                 )
                                 .await;
 
-                                match has_owner {
-                                    Ok(Ok(true)) => {
-                                        let item_clone = item.clone();
-                                        let conn_clone2 = conn_clone.clone();
+                                if let Ok(Ok(false)) = has_owner {
+                                    // D-Bus explicitly confirmed owner does NOT exist anymore
+                                    return None;
+                                }
 
-                                        let query_fut = async move {
-                                            if let Ok(proxy) =
-                                                StatusNotifierItemProxy::builder(&conn_clone2)
-                                                    .destination(bus_name)
-                                                    .unwrap()
-                                                    .path(item_clone.path.clone())
-                                                    .unwrap()
-                                                    .build()
-                                                    .await
-                                            {
-                                                let icon_name = match proxy.icon_name().await {
-                                                    Ok(name) if !name.is_empty() => name,
-                                                    _ => proxy
-                                                        .attention_icon_name()
-                                                        .await
-                                                        .unwrap_or_default(),
-                                                };
-                                                let id = proxy.id().await.unwrap_or_default();
-                                                let title = proxy
-                                                    .title()
-                                                    .await
-                                                    .unwrap_or_else(|_| id.clone());
+                                let item_clone = item.clone();
+                                let conn_clone2 = conn_clone.clone();
 
-                                                let final_icon = if !icon_name.is_empty() {
-                                                    if let Ok(theme_path) =
-                                                        proxy.icon_theme_path().await
-                                                    {
-                                                        if !theme_path.is_empty() {
-                                                            let p = std::path::PathBuf::from(
-                                                                &theme_path,
-                                                            )
-                                                            .join(&icon_name);
-                                                            if p.exists() {
-                                                                p.to_string_lossy().to_string()
-                                                            } else {
-                                                                icon_name
-                                                            }
-                                                        } else {
-                                                            icon_name
-                                                        }
-                                                    } else {
-                                                        icon_name
-                                                    }
-                                                } else if !id.is_empty() {
-                                                    id
-                                                } else if !item_clone.icon_name.is_empty() {
-                                                    item_clone.icon_name.clone()
-                                                } else {
-                                                    "application-x-executable".to_string()
-                                                };
-
-                                                Some((final_icon, title))
-                                            } else {
-                                                None
-                                            }
-                                        };
-
-                                        if let Ok(Some((new_icon, new_title))) =
-                                            tokio::time::timeout(
-                                                Duration::from_millis(250),
-                                                query_fut,
-                                            )
-                                            .await
+                                let query_fut = async move {
+                                    let obj_path = match zbus::zvariant::ObjectPath::try_from(
+                                        item_clone.path.clone(),
+                                    ) {
+                                        Ok(p) => p,
+                                        Err(_) => return None,
+                                    };
+                                    let builder =
+                                        match StatusNotifierItemProxy::builder(&conn_clone2)
+                                            .destination(bus_name)
                                         {
-                                            return Some(TrayItem {
-                                                service: item.service,
-                                                path: item.path,
-                                                icon_name: new_icon,
-                                                title: new_title,
-                                            });
+                                            Ok(b) => match b.path(obj_path) {
+                                                Ok(b) => b,
+                                                Err(_) => return None,
+                                            },
+                                            Err(_) => return None,
+                                        };
+                                    let proxy = match builder.build().await {
+                                        Ok(p) => p,
+                                        Err(_) => return None,
+                                    };
+
+                                    let icon_name = match proxy.icon_name().await {
+                                        Ok(name) if !name.is_empty() => name,
+                                        _ => proxy.attention_icon_name().await.unwrap_or_default(),
+                                    };
+                                    let id = proxy.id().await.unwrap_or_default();
+                                    let title = proxy.title().await.unwrap_or_else(|_| id.clone());
+
+                                    let final_icon = if !icon_name.is_empty() {
+                                        if let Ok(theme_path) = proxy.icon_theme_path().await {
+                                            if !theme_path.is_empty() {
+                                                let p = std::path::PathBuf::from(&theme_path)
+                                                    .join(&icon_name);
+                                                if p.exists() {
+                                                    p.to_string_lossy().to_string()
+                                                } else {
+                                                    icon_name
+                                                }
+                                            } else {
+                                                icon_name
+                                            }
                                         } else {
-                                            return Some(item);
+                                            icon_name
                                         }
-                                    }
-                                    _ => {
-                                        return None;
-                                    }
+                                    } else if !id.is_empty() {
+                                        id
+                                    } else if !item_clone.icon_name.is_empty() {
+                                        item_clone.icon_name.clone()
+                                    } else {
+                                        "application-x-executable".to_string()
+                                    };
+
+                                    Some((final_icon, title))
+                                };
+
+                                if let Ok(Some((new_icon, new_title))) =
+                                    tokio::time::timeout(Duration::from_millis(500), query_fut)
+                                        .await
+                                {
+                                    return Some(TrayItem {
+                                        service: item.service,
+                                        path: item.path,
+                                        icon_name: new_icon,
+                                        title: new_title,
+                                    });
+                                } else {
+                                    return Some(item);
                                 }
                             }
                             Some(item)
                         });
-                        handles.push(handle);
+                        handles.push((item_for_handle, handle));
                     }
 
-                    for handle in handles {
-                        if let Ok(Some(updated_item)) = handle.await {
-                            active_items.push(updated_item);
+                    for (original_item, handle) in handles {
+                        match handle.await {
+                            Ok(Some(updated_item)) => active_items.push(updated_item),
+                            Ok(None) => {
+                                // Item was confirmed dead, remove it cleanly
+                            }
+                            Err(_) => {
+                                // Task panicked or canceled, retain original item
+                                active_items.push(original_item);
+                            }
                         }
                     }
                 }

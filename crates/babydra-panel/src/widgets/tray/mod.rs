@@ -36,84 +36,15 @@ pub fn create_tray_widget(window: &gtk4::ApplicationWindow) -> gtk4::Box {
                 tray_container_clone.remove(&child);
             }
 
-            for item in &current_items {
-                let btn = render::build_tray_button(&item.icon_name, &item.title);
-                let service_name = item.service.clone();
-                let path_name = item.path.clone();
-                let btn_c = btn.clone();
-                let win_c = window_clone.clone();
-
-                let gesture = gtk4::GestureClick::new();
-                gesture.set_button(0);
-                gesture.set_propagation_phase(gtk4::PropagationPhase::Bubble);
-                gesture.set_exclusive(true);
-
-                gesture.connect_pressed(move |g, _, click_x, click_y| {
-                    let button_num = g.current_button();
-                    let is_right_click = button_num == 3;
-
-                    let (root_x, root_y) = btn_c
-                        .translate_coordinates(&win_c, 0.0, 0.0)
-                        .unwrap_or((0.0, 0.0));
-                    let abs_x = (8.0 + root_x + click_x) as i32;
-                    let abs_y = (6.0 + root_y + click_y) as i32;
-
-                    if is_right_click {
-                        let (tx, rx) = std::sync::mpsc::channel();
-                        let s_name_clone = service_name.clone();
-                        let path_clone = path_name.clone();
-                        std::thread::spawn(move || {
-                            let menu_opt =
-                                babydra_core::tray::get_dbus_menu(&s_name_clone, &path_clone);
-                            let _ = tx.send(menu_opt);
-                        });
-
-                        let btn_clone = btn_c.clone();
-                        let s_name_main = service_name.clone();
-                        let path_main = path_name.clone();
-
-                        gtk4::glib::timeout_add_local(
-                            std::time::Duration::from_millis(10),
-                            move || match rx.try_recv() {
-                                Ok(menu_opt) => {
-                                    if let Some(menu) = menu_opt {
-                                        babydra_ui_kit::components::context_menu::show_tray_menu(
-                                            &btn_clone,
-                                            &s_name_main,
-                                            &menu,
-                                        );
-                                    } else {
-                                        babydra_core::tray::activate_item(
-                                            &s_name_main,
-                                            &path_main,
-                                            abs_x,
-                                            abs_y,
-                                            true,
-                                        );
-                                    }
-                                    gtk4::glib::ControlFlow::Break
-                                }
-                                Err(std::sync::mpsc::TryRecvError::Empty) => {
-                                    gtk4::glib::ControlFlow::Continue
-                                }
-                                Err(std::sync::mpsc::TryRecvError::Disconnected) => {
-                                    gtk4::glib::ControlFlow::Break
-                                }
-                            },
-                        );
-                    } else {
-                        babydra_core::tray::activate_item(
-                            &service_name,
-                            &path_name,
-                            abs_x,
-                            abs_y,
-                            false,
-                        );
-                    }
-                });
-
-                btn.add_controller(gesture);
-                tray_container_clone.append(&btn);
+            if current_items.is_empty() {
+                tray_container_clone.set_visible(false);
+            } else {
+                tray_container_clone.set_visible(true);
+                for item in &current_items {
+                    let btn = render::build_tray_button(&item.icon_name, &item.title);
+                    attach_tray_click_gesture(&btn, &item.service, &item.path, &window_clone);
+                    tray_container_clone.append(&btn);
+                }
             }
 
             *last_snapshot_clone.borrow_mut() = current_snapshot;
@@ -123,4 +54,78 @@ pub fn create_tray_widget(window: &gtk4::ApplicationWindow) -> gtk4::Box {
     });
 
     tray_container
+}
+
+/// Attaches click gesture (left click to activate, right click for context menu) to a tray icon button.
+fn attach_tray_click_gesture(
+    btn: &gtk4::Button,
+    service_name: &str,
+    path_name: &str,
+    window: &gtk4::ApplicationWindow,
+) {
+    let service_name = service_name.to_string();
+    let path_name = path_name.to_string();
+    let btn_c = btn.clone();
+    let win_c = window.clone();
+
+    let gesture = gtk4::GestureClick::new();
+    gesture.set_button(0);
+    gesture.set_propagation_phase(gtk4::PropagationPhase::Bubble);
+    gesture.set_exclusive(true);
+
+    gesture.connect_pressed(move |g, _, click_x, click_y| {
+        let button_num = g.current_button();
+        let is_right_click = button_num == 3;
+
+        let (root_x, root_y) = btn_c
+            .translate_coordinates(&win_c, 0.0, 0.0)
+            .unwrap_or((0.0, 0.0));
+        let abs_x = (8.0 + root_x + click_x) as i32;
+        let abs_y = (6.0 + root_y + click_y) as i32;
+
+        if is_right_click {
+            let (tx, rx) = std::sync::mpsc::channel();
+            let s_name_clone = service_name.clone();
+            let path_clone = path_name.clone();
+            std::thread::spawn(move || {
+                let menu_opt = babydra_core::tray::get_dbus_menu(&s_name_clone, &path_clone);
+                let _ = tx.send(menu_opt);
+            });
+
+            let btn_clone = btn_c.clone();
+            let s_name_main = service_name.clone();
+            let path_main = path_name.clone();
+
+            gtk4::glib::timeout_add_local(std::time::Duration::from_millis(10), move || {
+                match rx.try_recv() {
+                    Ok(menu_opt) => {
+                        if let Some(menu) = menu_opt {
+                            babydra_ui_kit::components::context_menu::show_tray_menu(
+                                &btn_clone,
+                                &s_name_main,
+                                &menu,
+                            );
+                        } else {
+                            babydra_core::tray::activate_item(
+                                &s_name_main,
+                                &path_main,
+                                abs_x,
+                                abs_y,
+                                true,
+                            );
+                        }
+                        gtk4::glib::ControlFlow::Break
+                    }
+                    Err(std::sync::mpsc::TryRecvError::Empty) => gtk4::glib::ControlFlow::Continue,
+                    Err(std::sync::mpsc::TryRecvError::Disconnected) => {
+                        gtk4::glib::ControlFlow::Break
+                    }
+                }
+            });
+        } else {
+            babydra_core::tray::activate_item(&service_name, &path_name, abs_x, abs_y, false);
+        }
+    });
+
+    btn.add_controller(gesture);
 }

@@ -12,7 +12,9 @@ pub fn init_app(app_name: &str) -> AppLifecycle {
     tracing::info!("App lifecycle initialized, log: {}", log_path.display());
 
     let tray_watcher = TrayWatcherHandle::default();
-    tray::spawn_watcher();
+    if app_name == "babydra-panel" {
+        tray::spawn_watcher();
+    }
 
     let app_cache = AppCacheHandle::default();
     std::thread::spawn(|| {
@@ -20,7 +22,9 @@ pub fn init_app(app_name: &str) -> AppLifecycle {
     });
 
     let switcher = SwitcherHandle::default();
-    tracker::spawn_switcher();
+    if app_name == "babydra-panel" {
+        tracker::spawn_switcher();
+    }
 
     AppLifecycle {
         tray_watcher,

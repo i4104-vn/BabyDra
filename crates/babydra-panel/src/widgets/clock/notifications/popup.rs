@@ -213,12 +213,20 @@ impl NotificationPopup {
             return;
         }
 
+        // Always reset overlay margins to 0 baseline before starting animation
+        self.overlay.set_margin_top(0);
+        self.overlay.set_margin_bottom(0);
+        self.overlay.set_margin_start(0);
+        self.overlay.set_margin_end(0);
+
         self.popover.popup();
-        babydra_ui_kit::ui::animation::slide_in(
+        babydra_ui_kit::ui::animation::slide_in_cancelable(
             self.overlay.upcast_ref(),
             babydra_ui_kit::ui::animation::SlideDirection::Down,
             14,
             SHOW_ANIMATION_MS,
+            self.generation.clone(),
+            generation,
         );
     }
 
@@ -239,11 +247,16 @@ fn dismiss_notification(overlay: &Overlay, popover: &Popover, generation: &Rc<Ce
     let popover_c = popover.clone();
     let generation_c = generation.clone();
     let overlay_widget = overlay.clone();
+    let overlay_reset = overlay.clone();
     let finish = move || {
         if generation_c.get() == next_generation {
             if popover_c.parent().is_some() && popover_c.root().is_some() {
                 popover_c.popdown();
             }
+            overlay_reset.set_margin_top(0);
+            overlay_reset.set_margin_bottom(0);
+            overlay_reset.set_margin_start(0);
+            overlay_reset.set_margin_end(0);
             babydra_core::services::notification::service::close_notif_popup();
         }
     };

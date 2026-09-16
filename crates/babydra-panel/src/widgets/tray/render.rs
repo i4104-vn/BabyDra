@@ -6,6 +6,7 @@ pub fn build_tray_container() -> gtk4::Box {
     tray_container.add_css_class("panel-tray-box");
     tray_container.set_valign(gtk4::Align::Center);
     tray_container.set_halign(gtk4::Align::Center);
+    tray_container.set_visible(false);
     tray_container
 }
 
