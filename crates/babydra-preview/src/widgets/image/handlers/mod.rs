@@ -16,11 +16,7 @@ pub use gestures::setup_gestures;
 pub use keys::setup_key_controller;
 
 /// Wires up all image handlers (gestures, keyboard shortcuts, and autohide).
-pub fn setup_image_handlers(
-    state: &Rc<RefCell<ImageState>>,
-    ui: &ImageViewerUi,
-    path: PathBuf,
-) {
+pub fn setup_image_handlers(state: &Rc<RefCell<ImageState>>, ui: &ImageViewerUi, path: PathBuf) {
     setup_gestures(state, ui);
     setup_key_controller(state, ui, path);
     setup_autohide_controls(ui);

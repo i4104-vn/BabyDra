@@ -11,11 +11,7 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 /// Sets up keyboard shortcuts for zoom manipulation and EXIF dialog inspection.
-pub fn setup_key_controller(
-    state: &Rc<RefCell<ImageState>>,
-    ui: &ImageViewerUi,
-    path: PathBuf,
-) {
+pub fn setup_key_controller(state: &Rc<RefCell<ImageState>>, ui: &ImageViewerUi, path: PathBuf) {
     let key_controller = EventControllerKey::new();
     let state_key = state.clone();
     let area_key = ui.drawing_area.clone();

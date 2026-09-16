@@ -1,7 +1,7 @@
 //! Video timeline tracking and scrubbing seeking handlers.
 
-use babydra_core::models::preview::VideoState;
 use crate::widgets::video::render::{format_duration, VideoViewerUi};
+use babydra_core::models::preview::VideoState;
 use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;

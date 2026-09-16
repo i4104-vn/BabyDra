@@ -3,7 +3,7 @@
 use crate::widgets::video::render::{
     format_duration, populate_video_details, show_video_details_loading, VideoViewerUi,
 };
-use crate::widgets::window::format_aspect_ratio;
+use crate::widgets::utils::format_dimensions;
 use babydra_core::models::preview::VideoMetadata;
 use gtk4::prelude::*;
 use gtk4::EventControllerKey;
@@ -71,17 +71,14 @@ pub fn setup_key_controller(ui: &VideoViewerUi, path: PathBuf) {
                                 populate_video_details(&box_res, &meta);
 
                                 // Update info overlay with exact resolution and container specs
-                                let res_aspect = format_aspect_ratio(meta.width, meta.height);
-                                let res_text = if !res_aspect.is_empty() {
-                                    format!("{}x{} ({})", meta.width, meta.height, res_aspect)
-                                } else {
-                                    format!("{}x{}", meta.width, meta.height)
-                                };
+                                let res_text = format_dimensions(meta.width, meta.height);
                                 let meta_text = format!(
                                     "{} • {} • {}",
                                     res_text,
                                     format_duration(meta.duration_secs),
-                                    babydra_ui_kit::components::explore::format_size(meta.file_size)
+                                    babydra_ui_kit::components::explore::format_size(
+                                        meta.file_size
+                                    )
                                 );
                                 lbl_res.set_text(&meta_text);
 

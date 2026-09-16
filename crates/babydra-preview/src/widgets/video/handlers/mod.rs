@@ -1,5 +1,5 @@
-use babydra_core::models::preview::VideoState;
 use crate::widgets::video::render::VideoViewerUi;
+use babydra_core::models::preview::VideoState;
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;

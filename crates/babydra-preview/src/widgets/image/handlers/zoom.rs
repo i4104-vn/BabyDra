@@ -34,12 +34,7 @@ pub fn fit_to_screen(state_ref: &mut ImageState, area_w: f64, area_h: f64) {
 }
 
 /// Applies a zoom delta around the current position, clamped to the allowed range.
-pub fn do_zoom(
-    state: &Rc<RefCell<ImageState>>,
-    area: &DrawingArea,
-    lbl: &Label,
-    delta: f64,
-) {
+pub fn do_zoom(state: &Rc<RefCell<ImageState>>, area: &DrawingArea, lbl: &Label, delta: f64) {
     let mut state_ref = state.borrow_mut();
     let area_w = area.width() as f64;
     let area_h = area.height() as f64;

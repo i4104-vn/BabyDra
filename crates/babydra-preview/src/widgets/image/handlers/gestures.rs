@@ -1,6 +1,8 @@
 //! Mouse gestures, viewport drag/scroll, and resize handlers for image viewer.
 
-use crate::widgets::image::handlers::zoom::{clamp_position, do_zoom, fit_to_screen, update_zoom_display};
+use crate::widgets::image::handlers::zoom::{
+    clamp_position, do_zoom, fit_to_screen, update_zoom_display,
+};
 use crate::widgets::image::render::ImageViewerUi;
 use babydra_core::models::preview::ImageState;
 use gtk4::prelude::*;

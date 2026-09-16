@@ -1,6 +1,8 @@
 //! Image viewer UI rendering and layout assembly.
 
-use crate::widgets::window::format_aspect_ratio;
+use crate::widgets::utils::{
+    append_detail_row, append_details_title, clear_box, file_size, format_dimensions,
+};
 use babydra_core::i18n::trans;
 use babydra_core::models::shell::exif::ExifData;
 use gtk4::prelude::*;
@@ -25,35 +27,10 @@ pub struct ImageViewerUi {
     pub zoom_in_btn: Button,
 }
 
-/// Creates an animated centered loading placeholder while content is being prepared in the background.
-pub fn create_loading_view() -> Box {
-    let loading_box = Box::new(Orientation::Vertical, 12);
-    loading_box.set_halign(Align::Center);
-    loading_box.set_valign(Align::Center);
-    loading_box.set_hexpand(true);
-    loading_box.set_vexpand(true);
-
-    let spinner = Spinner::new();
-    spinner.set_spinning(true);
-    spinner.set_size_request(36, 36);
-    loading_box.append(&spinner);
-
-    let label = Label::new(Some(&trans("common.pending")));
-    label.add_css_class("dim-label");
-    loading_box.append(&label);
-
-    loading_box
-}
-
 /// Fills the EXIF dialog box with an active loading indicator.
 pub fn show_exif_loading(exif_box: &Box) {
-    while let Some(child) = exif_box.first_child() {
-        exif_box.remove(&child);
-    }
-
-    let exif_title = Label::new(Some(&trans("preview.camera_info")));
-    exif_title.add_css_class("exif-title");
-    exif_box.append(&exif_title);
+    clear_box(exif_box);
+    append_details_title(exif_box, "preview.camera_info");
 
     let spinner = Spinner::new();
     spinner.set_spinning(true);
@@ -69,54 +46,41 @@ pub fn show_exif_loading(exif_box: &Box) {
 
 /// Populates the EXIF dialog box with parsed metadata.
 pub fn populate_exif_dialog(exif_box: &Box, data: Option<&ExifData>) {
-    while let Some(child) = exif_box.first_child() {
-        exif_box.remove(&child);
-    }
-
-    let exif_title = Label::new(Some(&trans("preview.camera_info")));
-    exif_title.add_css_class("exif-title");
-    exif_box.append(&exif_title);
+    clear_box(exif_box);
+    append_details_title(exif_box, "preview.camera_info");
 
     let grid = Grid::new();
     grid.set_column_spacing(24);
     grid.set_row_spacing(8);
 
     let mut row_idx = 0;
-    let mut add_exif_row = |label: &str, value: &str| {
-        let lbl = Label::new(Some(label));
-        lbl.add_css_class("exif-label");
-        lbl.set_halign(Align::Start);
-        grid.attach(&lbl, 0, row_idx, 1, 1);
-
-        let val = Label::new(Some(value));
-        val.add_css_class("exif-value");
-        val.set_halign(Align::End);
-        grid.attach(&val, 1, row_idx, 1, 1);
-
-        row_idx += 1;
-    };
 
     if let Some(data) = data {
         if let (Some(make), Some(model)) = (&data.make, &data.model) {
-            add_exif_row("Device", &format!("{} {}", make.trim(), model.trim()));
+            append_detail_row(
+                &grid,
+                &mut row_idx,
+                "Device",
+                &format!("{} {}", make.trim(), model.trim()),
+            );
         }
         if let Some(ref val) = data.aperture {
-            add_exif_row("Aperture", val);
+            append_detail_row(&grid, &mut row_idx, "Aperture", val);
         }
         if let Some(ref val) = data.exposure_time {
-            add_exif_row("Shutter Speed", val);
+            append_detail_row(&grid, &mut row_idx, "Shutter Speed", val);
         }
         if let Some(ref val) = data.iso {
-            add_exif_row("ISO Speed", val);
+            append_detail_row(&grid, &mut row_idx, "ISO Speed", val);
         }
         if let Some(ref val) = data.focal_length {
-            add_exif_row("Focal Length", val);
+            append_detail_row(&grid, &mut row_idx, "Focal Length", val);
         }
         if let Some(ref val) = data.lens_model {
-            add_exif_row("Lens Model", val);
+            append_detail_row(&grid, &mut row_idx, "Lens Model", val);
         }
         if let Some(ref val) = data.date_time {
-            add_exif_row("Date Original", val);
+            append_detail_row(&grid, &mut row_idx, "Date Original", val);
         }
     } else {
         let no_exif_lbl = Label::new(Some(&trans("preview.no_exif")));
@@ -159,13 +123,8 @@ pub fn build_image_content(
     name_lbl.set_max_width_chars(32);
     info_box.append(&name_lbl);
 
-    let res_aspect = format_aspect_ratio(img_w, img_h);
-    let res_text = if !res_aspect.is_empty() {
-        format!("{}x{} ({})", img_w, img_h, res_aspect)
-    } else {
-        format!("{}x{}", img_w, img_h)
-    };
-    let size_bytes = std::fs::metadata(path).map(|m| m.len()).unwrap_or(0);
+    let res_text = format_dimensions(img_w, img_h);
+    let size_bytes = file_size(path);
     let meta_text = format!(
         "{} • {}",
         res_text,

@@ -1,9 +1,10 @@
 //! Playback speed popover options and rate application handlers.
 
+use crate::widgets::playback::set_playback_speed;
+use crate::widgets::utils::format_speed;
+use crate::widgets::video::render::VideoViewerUi;
 use babydra_core::models::preview::VideoState;
 use babydra_core::services::preview::SPEED_PRESETS;
-use crate::widgets::playback::set_playback_speed;
-use crate::widgets::video::render::VideoViewerUi;
 use gtk4::prelude::*;
 use gtk4::Button;
 use std::cell::{Cell, RefCell};
@@ -50,13 +51,7 @@ pub fn setup_speed_controls(
                     btn.connect_clicked(move |clicked_btn| {
                         set_playback_speed(&mf_spd, target_speed);
                         state_spd.borrow_mut().speed = target_speed;
-                        spd_btn_label.set_label(
-                            &format!("{:.2}x", target_speed)
-                                .replace(".00", ".0")
-                                .replace(".50", ".5")
-                                .replace(".75", ".75")
-                                .replace(".25", ".25"),
-                        );
+                        spd_btn_label.set_label(&format_speed(target_speed));
 
                         for b in &all_buttons {
                             b.remove_css_class("active");

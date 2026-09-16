@@ -1,14 +1,15 @@
 //! Video preview UI layout assembly and widget creation.
 
-use crate::widgets::window::format_aspect_ratio;
+use crate::widgets::utils::{
+    append_detail_row, append_details_title, clear_box, file_size, format_dimensions, format_speed,
+};
 use babydra_core::i18n::trans;
 use babydra_core::models::preview::VideoMetadata;
 use babydra_core::services::preview::SPEED_PRESETS;
 use gtk4::prelude::*;
 use gtk4::{
-    Align, ApplicationWindow, Box, Button, ContentFit, Grid, Label, MediaFile,
-    Orientation, Overlay, Picture, Popover, Revealer, RevealerTransitionType, Scale, Separator,
-    Spinner,
+    Align, ApplicationWindow, Box, Button, ContentFit, Grid, Label, MediaFile, Orientation,
+    Overlay, Picture, Popover, Revealer, RevealerTransitionType, Scale, Separator, Spinner,
 };
 use std::path::PathBuf;
 
@@ -47,36 +48,10 @@ pub fn format_duration(seconds: f64) -> String {
     }
 }
 
-/// Creates an animated centered loading placeholder.
-pub fn create_loading_view() -> Box {
-    let loading_box = Box::new(Orientation::Vertical, 12);
-    loading_box.set_halign(Align::Center);
-    loading_box.set_valign(Align::Center);
-    loading_box.set_hexpand(true);
-    loading_box.set_vexpand(true);
-
-    let spinner = Spinner::new();
-    spinner.set_spinning(true);
-    spinner.set_size_request(36, 36);
-    loading_box.append(&spinner);
-
-    let label = Label::new(Some(&trans("common.pending")));
-    label.add_css_class("dim-label");
-    loading_box.append(&label);
-
-    loading_box
-}
-
 /// Fills the video details box with an active loading indicator.
 pub fn show_video_details_loading(details_box: &Box) {
-    while let Some(child) = details_box.first_child() {
-        details_box.remove(&child);
-    }
-
-    let details_title = Label::new(Some(&trans("preview.video_info")));
-    details_title.add_css_class("exif-title");
-    details_title.set_hexpand(false);
-    details_box.append(&details_title);
+    clear_box(details_box);
+    append_details_title(details_box, "preview.video_info");
 
     let spinner = Spinner::new();
     spinner.set_spinning(true);
@@ -92,14 +67,8 @@ pub fn show_video_details_loading(details_box: &Box) {
 
 /// Populates the video details box with parsed stream specs from ffprobe.
 pub fn populate_video_details(details_box: &Box, meta: &VideoMetadata) {
-    while let Some(child) = details_box.first_child() {
-        details_box.remove(&child);
-    }
-
-    let details_title = Label::new(Some(&trans("preview.video_info")));
-    details_title.add_css_class("exif-title");
-    details_title.set_hexpand(false);
-    details_box.append(&details_title);
+    clear_box(details_box);
+    append_details_title(details_box, "preview.video_info");
 
     let grid = Grid::new();
     grid.set_hexpand(false);
@@ -107,50 +76,45 @@ pub fn populate_video_details(details_box: &Box, meta: &VideoMetadata) {
     grid.set_row_spacing(8);
 
     let mut row_idx = 0;
-    let mut add_spec_row = |label: &str, value: &str| {
-        let lbl = Label::new(Some(label));
-        lbl.add_css_class("exif-label");
-        lbl.set_halign(Align::Start);
-        grid.attach(&lbl, 0, row_idx, 1, 1);
+    let res_text = format_dimensions(meta.width, meta.height);
 
-        let val = Label::new(Some(value));
-        val.add_css_class("exif-value");
-        val.set_halign(Align::End);
-        grid.attach(&val, 1, row_idx, 1, 1);
-
-        row_idx += 1;
-    };
-
-    let res_aspect = format_aspect_ratio(meta.width, meta.height);
-    let res_text = if !res_aspect.is_empty() {
-        format!("{}x{} ({})", meta.width, meta.height, res_aspect)
-    } else {
-        format!("{}x{}", meta.width, meta.height)
-    };
-
-    add_spec_row(&trans("preview.resolution"), &res_text);
-    add_spec_row(
+    append_detail_row(&grid, &mut row_idx, &trans("preview.resolution"), &res_text);
+    append_detail_row(
+        &grid,
+        &mut row_idx,
         &trans("preview.duration"),
         &format_duration(meta.duration_secs),
     );
-    add_spec_row(
+    append_detail_row(
+        &grid,
+        &mut row_idx,
         &trans("preview.file_size"),
         &babydra_ui_kit::components::explore::format_size(meta.file_size),
     );
-    add_spec_row("Container", &meta.format_long_name);
+    append_detail_row(&grid, &mut row_idx, "Container", &meta.format_long_name);
 
     if let Some(ref v) = meta.video_stream {
         let codec_disp = v.codec_long_name.as_deref().unwrap_or(&v.codec_name);
-        add_spec_row(&trans("preview.codec"), codec_disp);
+        append_detail_row(&grid, &mut row_idx, &trans("preview.codec"), codec_disp);
         if let Some(fps) = v.fps {
-            add_spec_row(&trans("preview.frame_rate"), &format!("{:.2} fps", fps));
+            append_detail_row(
+                &grid,
+                &mut row_idx,
+                &trans("preview.frame_rate"),
+                &format!("{:.2} fps", fps),
+            );
         }
         if let Some(br) = v.bit_rate.or(meta.bit_rate) {
             let mbps = br as f64 / 1_000_000.0;
-            add_spec_row(&trans("preview.bitrate"), &format!("{:.2} Mbps", mbps));
+            append_detail_row(
+                &grid,
+                &mut row_idx,
+                &trans("preview.bitrate"),
+                &format!("{:.2} Mbps", mbps),
+            );
         }
         if let Some(ref pix) = v.pix_fmt {
-            add_spec_row("Pixel Format", pix);
+            append_detail_row(&grid, &mut row_idx, "Pixel Format", pix);
         }
     }
 
@@ -161,12 +125,11 @@ pub fn populate_video_details(details_box: &Box, meta: &VideoMetadata) {
             }
             _ => a.codec_name.to_uppercase(),
         };
-        add_spec_row(&trans("preview.audio"), &audio_disp);
+        append_detail_row(&grid, &mut row_idx, &trans("preview.audio"), &audio_disp);
     }
 
     details_box.append(&grid);
 }
-
 
 /// Builds the video viewer content onto an existing window.
 pub fn build_video_content(window: &ApplicationWindow, path: &PathBuf) -> VideoViewerUi {
@@ -195,8 +158,7 @@ pub fn build_video_content(window: &ApplicationWindow, path: &PathBuf) -> VideoV
     name_lbl.set_max_width_chars(36);
     info_box.append(&name_lbl);
 
-    let size_bytes = std::fs::metadata(path).map(|m| m.len()).unwrap_or(0);
-    let size_str = babydra_ui_kit::components::explore::format_size(size_bytes);
+    let size_str = babydra_ui_kit::components::explore::format_size(file_size(path));
     let meta_lbl = Label::new(Some(&size_str));
     meta_lbl.add_css_class("info-item");
     meta_lbl.set_halign(Align::End);
@@ -307,11 +269,7 @@ pub fn build_video_content(window: &ApplicationWindow, path: &PathBuf) -> VideoV
     speed_list_box.set_margin_end(4);
 
     for &spd in SPEED_PRESETS {
-        let label_text = format!("{:.2}x", spd)
-            .replace(".00", ".0")
-            .replace(".50", ".5")
-            .replace(".75", ".75")
-            .replace(".25", ".25");
+        let label_text = format_speed(spd);
         let btn = Button::with_label(&label_text);
         btn.add_css_class("video-speed-item");
         if (spd - 1.0).abs() < f64::EPSILON {

@@ -4,6 +4,7 @@ use std::path::PathBuf;
 
 pub mod image;
 pub mod playback;
+pub mod utils;
 pub mod video;
 pub mod window;
 

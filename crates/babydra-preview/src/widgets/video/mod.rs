@@ -1,3 +1,4 @@
+use crate::widgets::utils::create_loading_view;
 use crate::widgets::window::create_viewer_window;
 use babydra_core::models::preview::VideoState;
 use gtk4::prelude::*;
@@ -15,7 +16,7 @@ pub fn build_ui(app: &Application, path: PathBuf) {
     let title = path.file_name().unwrap_or_default().to_string_lossy();
     let (window, _) = create_viewer_window(app, &title, 1280, 720);
 
-    let loading_view = render::create_loading_view();
+    let loading_view = create_loading_view();
     window.set_child(Some(&loading_view));
     window.present();
 

@@ -16,11 +16,7 @@ use std::rc::Rc;
 mod widgets;
 
 /// Launches the native GTK file picker dialog.
-fn open_file_picker(
-    window: &ApplicationWindow,
-    app: &Application,
-    is_picking: &Rc<Cell<bool>>,
-) {
+fn open_file_picker(window: &ApplicationWindow, app: &Application, is_picking: &Rc<Cell<bool>>) {
     if is_picking.get() {
         return;
     }
@@ -54,21 +50,17 @@ fn open_file_picker(
     let win_clone = window.clone();
     let picking_flag = is_picking.clone();
 
-    file_dialog.open(
-        Some(window),
-        None::<&gio::Cancellable>,
-        move |res| {
-            picking_flag.set(false);
-            if let Ok(file) = res {
-                if let Some(path) = file.path() {
-                    if path.exists() {
-                        widgets::build_ui(&app_clone, path);
-                        win_clone.close();
-                    }
+    file_dialog.open(Some(window), None::<&gio::Cancellable>, move |res| {
+        picking_flag.set(false);
+        if let Ok(file) = res {
+            if let Some(path) = file.path() {
+                if path.exists() {
+                    widgets::build_ui(&app_clone, path);
+                    win_clone.close();
                 }
             }
-        },
-    );
+        }
+    });
 }
 
 /// Builds the flat, centered welcome window matching the minimalist aesthetic.
@@ -147,10 +139,7 @@ fn build_welcome_window(app: &Application) {
     window.add_controller(key_controller);
 
     // Drag and Drop target across the window
-    let drop_target = DropTarget::new(
-        glib::types::Type::INVALID,
-        DragAction::COPY,
-    );
+    let drop_target = DropTarget::new(glib::types::Type::INVALID, DragAction::COPY);
     drop_target.set_types(&[FileList::static_type(), gio::File::static_type()]);
 
     let app_drop = app.clone();

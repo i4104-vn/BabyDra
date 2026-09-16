@@ -1,7 +1,7 @@
 //! Video playback start/pause toggles and ended state management.
 
-use babydra_core::models::preview::VideoState;
 use crate::widgets::video::render::VideoViewerUi;
+use babydra_core::models::preview::VideoState;
 use gtk4::prelude::*;
 use gtk4::GestureClick;
 use std::cell::RefCell;

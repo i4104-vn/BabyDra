@@ -159,7 +159,7 @@ window.viewer-window,
 
 .controls-bar {
     border-radius: 9999px;
-    padding: 4px 10px;
+    padding: 5px 10px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
     background-color: rgba(20, 20, 26, 0.96);
     border: 1px solid rgba(255, 255, 255, 0.14);
@@ -188,6 +188,7 @@ button.control-btn:active {
 .info-card {
     border-radius: 12px;
     padding: 10px 14px;
+    min-width: 120px;
     font-size: 14px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
     background-color: rgba(20, 20, 26, 0.96);
@@ -203,7 +204,9 @@ button.control-btn:active {
 
 .exif-dialog {
     border-radius: 16px;
-    padding: 18px 16px;
+    min-width: 280px;
+    max-width: 640px;
+    padding: 18px 20px;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
     background-color: rgba(20, 20, 26, 0.98);
     border: 1px solid rgba(255, 255, 255, 0.14);
@@ -226,8 +229,18 @@ button.control-btn:active {
 }
 
 .video-controls-bar {
-    min-width: 440px;
+    min-width: 360px;
     padding: 4px 12px;
+}
+
+.preview-loading-view {
+    padding: 24px;
+}
+
+.preview-error {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 24px;
 }
 
 separator.control-separator,
@@ -429,5 +442,4 @@ button.preview-flat-action:hover .preview-keycap {
     color: rgba(255, 255, 255, 0.95);
     border-color: rgba(255, 255, 255, 0.25);
 }
-
 
