@@ -33,6 +33,7 @@ struct BinarySpec {
     description: String,
     crate_path: String,
     default_dest: BinaryLocation,
+    export_desktop: bool,
 }
 
 /// Discovers every binary target declared by the source workspace.
@@ -51,8 +52,9 @@ pub fn initial_binaries_list(workspace_root: &Path, source_dir: &Path) -> Vec<Bi
         .map(manifest_binary_spec)
         .collect::<Vec<_>>();
 
-    // The manifest controls policy (scope/source name), while Cargo remains a
-    // safety net for a newly added binary that has not been described yet.
+    // The manifest controls policy (scope/source name/desktop export), while
+    // Cargo remains a safety net for a newly added binary that has not been
+    // described yet.
     let cargo_specs = discover_local_workspace(workspace_root);
     let known_names: HashSet<String> = discovered.iter().map(|item| item.name.clone()).collect();
     discovered.extend(
@@ -84,6 +86,7 @@ pub fn initial_binaries_list(workspace_root: &Path, source_dir: &Path) -> Vec<Bi
                     .display()
                     .to_string(),
                 default_dest: default_loc(name),
+                export_desktop: false,
             });
         }
     }
@@ -113,6 +116,7 @@ pub fn initial_binaries_list(workspace_root: &Path, source_dir: &Path) -> Vec<Bi
                 description: spec.description,
                 crate_path: spec.crate_path,
                 default_dest: spec.default_dest,
+                export_desktop: spec.export_desktop,
                 selected: true,
                 exists_in_source: exists_in_src,
                 source_size_bytes: size,
@@ -133,6 +137,7 @@ fn manifest_binary_spec(item: &BinaryManifestItem) -> BinarySpec {
         },
         crate_path: "workspace.toml [[binaries]]".to_owned(),
         default_dest: item.location,
+        export_desktop: item.export_desktop,
     }
 }
 
@@ -370,6 +375,7 @@ fn parse_manifest_targets(
             },
             name,
             crate_path: crate_path.to_owned(),
+            export_desktop: false,
         })
         .collect()
 }

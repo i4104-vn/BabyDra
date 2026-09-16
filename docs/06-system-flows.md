@@ -85,7 +85,7 @@ Task nhận manifest và source root, không tự biết danh sách app. Các ta
 | :--- | :--- |
 | Package | `[packages]` trong `workspace.toml` |
 | Binary copy | `[[binaries]]` và executable trong `target/release` |
-| Desktop entry | File `.desktop` trong source hoặc binary đã discover |
+| Desktop entry | File `.desktop` trong source hoặc binary có `export_desktop = true` |
 | Dotfile | Các thư mục trực tiếp dưới `configs/` |
 | Service | File systemd có section service hợp lệ trong source |
 | Theme | `configs/themes/` và `themes/` |

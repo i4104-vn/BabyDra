@@ -14,6 +14,9 @@ pub struct BinaryItem {
     pub description: String,
     pub crate_path: String,
     pub default_dest: BinaryLocation,
+    /// Whether the installer should generate a desktop entry when the source
+    /// branch does not provide one with the same binary name.
+    pub export_desktop: bool,
     pub selected: bool,
     pub exists_in_source: bool,
     pub source_size_bytes: Option<u64>,

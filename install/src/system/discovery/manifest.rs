@@ -22,6 +22,7 @@ pub struct BinaryManifestItem {
     pub source_name: String,
     pub description: String,
     pub location: BinaryLocation,
+    pub export_desktop: bool,
 }
 
 pub fn load_install_manifest(source_root: &Path, fallback_root: &Path) -> InstallManifest {
@@ -72,6 +73,10 @@ pub(crate) fn parse_manifest(content: &str) -> InstallManifest {
                         "system" => BinaryLocation::SystemBin,
                         _ => BinaryLocation::UserLocalBin,
                     };
+                    let export_desktop = table
+                        .get("export_desktop")
+                        .and_then(toml::Value::as_bool)
+                        .unwrap_or(false);
                     Some(BinaryManifestItem {
                         name: name.to_owned(),
                         source_name: source_name.to_owned(),
@@ -81,6 +86,7 @@ pub(crate) fn parse_manifest(content: &str) -> InstallManifest {
                             .unwrap_or_default()
                             .to_owned(),
                         location,
+                        export_desktop,
                     })
                 })
                 .collect()
@@ -146,11 +152,18 @@ mod tests {
     #[test]
     fn parses_branch_owned_dependencies_and_scopes() {
         let manifest = parse_manifest(
-            "[[binaries]]\nname = \"new-greeter\"\nscope = \"system\"\n\n[packages]\npacman = [\"gtk4\"]\naur = [\"kitty\"]\n",
+            "[[binaries]]\nname = \"new-greeter\"\nscope = \"system\"\nexport_desktop = true\n\n[packages]\npacman = [\"gtk4\"]\naur = [\"kitty\"]\n",
         );
         assert_eq!(manifest.binaries[0].location, BinaryLocation::SystemBin);
+        assert!(manifest.binaries[0].export_desktop);
         assert_eq!(manifest.pacman_packages, vec!["gtk4"]);
         assert!(manifest.aur_packages.contains(&"kitty".to_string()));
+    }
+
+    #[test]
+    fn desktop_export_defaults_to_false() {
+        let manifest = parse_manifest("[[binaries]]\nname = \"daemon\"\n");
+        assert!(!manifest.binaries[0].export_desktop);
     }
 
     #[test]

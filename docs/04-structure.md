@@ -72,7 +72,7 @@ Khi thêm binary mới:
 
 1. Thêm Cargo package hoặc `[[bin]]` trên branch nguồn.
 2. Đảm bảo target tạo ra executable trong `target/release`.
-3. Thêm entry vào `workspace.toml` nếu cần mô tả, đổi tên đích hoặc chọn `system` scope.
+3. Thêm entry vào `workspace.toml` nếu cần mô tả, đổi tên đích, chọn `system` scope hoặc bật `export_desktop`.
 4. Không thêm tên binary vào `main/install/src`.
 
 Cargo discovery là cơ chế phát hiện fallback. `workspace.toml` là nơi khai báo policy. Hai cơ chế này không nên bị trộn: discovery không đoán package AUR, còn manifest không cần lặp lại mọi thông tin Cargo nếu tên và scope mặc định đã đủ.

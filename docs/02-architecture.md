@@ -96,7 +96,7 @@ Ví dụ: launcher và settings là client; panel, switcher và keymap là daemo
 Installer tách discovery và policy:
 
 1. Cargo discovery tìm binary target và executable được build.
-2. `workspace.toml` cung cấp policy branch-owned: tên cài đặt, source name, scope, package và GSettings.
+2. `workspace.toml` cung cấp policy branch-owned: tên cài đặt, source name, scope, `export_desktop`, package và GSettings.
 3. Installer thực thi policy mà không cần biết tên project cụ thể.
 
 Do đó, thêm binary là thay đổi ở branch nguồn. Sửa installer chỉ cần khi schema hoặc hành vi cài đặt chung thay đổi.

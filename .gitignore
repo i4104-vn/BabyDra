@@ -14,6 +14,7 @@
 /*
 # ...trừ những phần thuộc về main:
 !/.gitignore
+!/install.sh
 !/.gitattributes
 !/LICENSE
 !/*.md

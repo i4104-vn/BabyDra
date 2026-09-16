@@ -68,7 +68,7 @@ File phải nằm ở root của branch nguồn. Các nhóm dữ liệu hiện �
 
 | Nhóm | Mục đích |
 | :--- | :--- |
-| `[[binaries]]` | Khai báo tên binary cài đặt, tên file nguồn tùy chọn, mô tả và scope. |
+| `[[binaries]]` | Khai báo tên binary cài đặt, tên file nguồn tùy chọn, mô tả, scope và cờ `export_desktop`. |
 | `[packages]` | Danh sách package `pacman` và `aur` của branch. |
 | `[installer]` | Bật các bước cài đặt tùy chọn mà branch thực sự yêu cầu. |
 | `[gsettings]` | Các cặp schema/key và giá trị cần áp dụng sau khi cài. |

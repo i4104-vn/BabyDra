@@ -66,10 +66,17 @@ name = "babydra-panel"       # Tên file đích sau khi cài
 source = "babydra-panel"     # Tên file trong target/release; mặc định bằng name
 scope = "user"               # user hoặc system
 description = "Desktop panel"
+export_desktop = false       # chỉ sinh .desktop khi đặt true
 
 [[binaries]]
 name = "babydra-greeter"
 scope = "system"
+export_desktop = false
+
+[[binaries]]
+name = "babydra-explore"
+scope = "user"
+export_desktop = true
 
 [packages]
 pacman = ["gtk4", "labwc"]
@@ -91,6 +98,7 @@ features = ["wtype", "kernel_permissions", "greetd"]
 | `source` | Không | Tên file executable trong `target/release`. Mặc định bằng `name`. |
 | `scope` | Không | `user` hoặc `system`; mặc định là `user`. |
 | `description` | Không | Mô tả hiển thị trong TUI; nếu thiếu, installer dùng mô tả tổng quát. |
+| `export_desktop` | Không | Boolean, mặc định `false`; sinh `<name>.desktop` cho binary khi là `true`. Nếu source đã có file cùng tên, installer dùng file source. |
 
 Nếu Cargo target có tên khác tên cài đặt, dùng `source`. Ví dụ:
 
@@ -99,7 +107,10 @@ Nếu Cargo target có tên khác tên cài đặt, dùng `source`. Ví dụ:
 name = "my-shell"
 source = "shell-daemon"
 scope = "user"
+export_desktop = true
 ```
+
+`export_desktop` chỉ áp dụng cho desktop entry được installer sinh tự động. Các file `.desktop` có sẵn trong source branch vẫn được cài đặt và giữ nguyên nội dung.
 
 ### `[packages]`
 

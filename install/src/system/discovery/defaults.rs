@@ -108,8 +108,8 @@ pub fn initial_configs_themes_options() -> Vec<GenericOptionItem> {
         GenericOptionItem {
             id: "desktop_entries".to_string(),
             title: "3. Register .desktop Entries & MIME Associations".to_string(),
-            description: "Creates desktop entries for Preview, Settings, and Explore; binds image & folder MIME types.".to_string(),
-            detail: "Runs update-desktop-database and applies MIME associations declared by source desktop files.".to_string(),
+            description: "Installs .desktop entries supplied by the source branch and binds their declared MIME types.".to_string(),
+            detail: "Generates entries only for binaries with export_desktop = true; source entries take precedence and update the desktop database.".to_string(),
             selected: true,
             requires_root: false,
         },
