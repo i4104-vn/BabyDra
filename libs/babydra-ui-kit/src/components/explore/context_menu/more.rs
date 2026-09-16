@@ -134,7 +134,6 @@ mod tests {
         let names: Vec<String> = apps.iter().map(|a| a.name().to_string()).collect();
         assert!(names.iter().any(|n| n.contains("Explore")
             || n.contains("Studio")
-            || n.contains("IDE")
-            || n.contains("Dolphin")));
+            || n.contains("IDE")));
     }
 }

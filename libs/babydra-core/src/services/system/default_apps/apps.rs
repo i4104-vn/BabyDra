@@ -39,7 +39,7 @@ pub fn get_default_file_manager() -> String {
 /// Returns list of detected installed file managers.
 pub fn get_available_file_managers() -> Vec<AppChoice> {
     const KEYWORDS: &[&str] = &[
-        "explore", "file", "nautilus", "thunar", "dolphin", "pcmanfm", "nemo", "caja",
+        "explore", "file", "nautilus", "thunar", "pcmanfm", "nemo", "caja",
     ];
     xdg::find_matching_apps(KEYWORDS, &get_default_file_manager())
 }
