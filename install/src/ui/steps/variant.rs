@@ -95,7 +95,11 @@ pub fn draw_variant_step(f: &mut Frame, app: &App, area: Rect) {
 
     let list = List::new(items).block(
         Block::default()
-            .title(" 4. Theme & Variant Selection [↑/↓: Move | Space: Select | Enter: Next] ")
+            .title(if app.discovery_in_progress {
+                " 4. Theme & Variant Selection — scanning source metadata... "
+            } else {
+                " 4. Theme & Variant Selection [↑/↓: Move | Space: Select | Enter: Next] "
+            })
             .title_style(THEME.title_purple())
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)

@@ -129,7 +129,11 @@ pub fn draw_binaries_step(f: &mut Frame, app: &App, area: Rect) {
     .header(header)
     .block(
         Block::default()
-            .title(" 3. Components Selection [Space: Toggle | a: Select All | Enter: Next] ")
+            .title(if app.discovery_in_progress {
+                " 3. Components Selection — scanning source metadata... "
+            } else {
+                " 3. Components Selection [Space: Toggle | a: Select All | Enter: Next] "
+            })
             .title_style(THEME.title_cyan())
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)

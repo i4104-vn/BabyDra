@@ -93,7 +93,7 @@ pub fn handle_key_event(app: &mut App, key: KeyEvent) {
             KeyCode::Enter => {
                 app.source_binary_dir = PathBuf::from(&app.custom_path_input);
                 app.is_editing_path = false;
-                app.rescan_binaries();
+                app.request_discovery();
             }
             KeyCode::Esc => {
                 app.custom_path_input = app.source_binary_dir.to_string_lossy().to_string();

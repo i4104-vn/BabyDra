@@ -137,10 +137,7 @@ fn manifest_binary_spec(item: &BinaryManifestItem) -> BinarySpec {
 }
 
 fn discover_local_workspace(root: &Path) -> Vec<BinarySpec> {
-    let mut manifests = Vec::new();
-    collect_files(root, &mut manifests, |path| {
-        path.file_name().and_then(|name| name.to_str()) == Some("Cargo.toml")
-    });
+    let manifests = local_workspace_manifests(root);
 
     let mut specs = Vec::new();
     for manifest in manifests {
@@ -158,6 +155,58 @@ fn discover_local_workspace(root: &Path) -> Vec<BinarySpec> {
         ));
     }
     deduplicate_specs(specs)
+}
+
+fn local_workspace_manifests(root: &Path) -> Vec<PathBuf> {
+    let root_manifest = root.join("Cargo.toml");
+    let Ok(content) = fs::read_to_string(&root_manifest) else {
+        return Vec::new();
+    };
+    let Ok(table) = content.parse::<toml::Table>() else {
+        return Vec::new();
+    };
+
+    let mut manifests = Vec::new();
+    if let Some(workspace) = table.get("workspace").and_then(toml::Value::as_table) {
+        for member in workspace
+            .get("members")
+            .and_then(toml::Value::as_array)
+            .into_iter()
+            .flatten()
+            .filter_map(toml::Value::as_str)
+        {
+            let member_root = root.join(member.trim_end_matches("/*"));
+            if member.contains('*') {
+                collect_cargo_manifests(&member_root, &mut manifests);
+            } else {
+                let manifest = member_root.join("Cargo.toml");
+                if manifest.is_file() {
+                    manifests.push(manifest);
+                }
+            }
+        }
+    }
+    if table.get("package").is_some() {
+        manifests.push(root_manifest);
+    }
+    manifests
+}
+
+fn collect_cargo_manifests(root: &Path, manifests: &mut Vec<PathBuf>) {
+    if !root.is_dir() {
+        return;
+    }
+    let Ok(entries) = fs::read_dir(root) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_dir() {
+            collect_cargo_manifests(&path, manifests);
+        } else if path.file_name().and_then(|name| name.to_str()) == Some("Cargo.toml") {
+            manifests.push(path);
+        }
+    }
 }
 
 fn discover_git_workspaces(repo: &Path) -> Vec<BinarySpec> {
@@ -183,16 +232,15 @@ fn discover_git_workspaces(repo: &Path) -> Vec<BinarySpec> {
             .map(str::to_owned)
             .collect();
 
+        let root_manifest = git_output(repo, &["show", &format!("{git_ref}:Cargo.toml")]);
+        let manifest_paths = git_workspace_manifest_paths(root_manifest.as_deref(), &tree_paths);
         let mut specs = Vec::new();
-        for manifest_path in tree_paths
-            .iter()
-            .filter(|path| path.ends_with("Cargo.toml"))
-        {
+        for manifest_path in manifest_paths {
             let Some(content) = git_output(repo, &["show", &format!("{git_ref}:{manifest_path}")])
             else {
                 continue;
             };
-            let crate_dir = Path::new(manifest_path).parent().unwrap_or(Path::new("."));
+            let crate_dir = Path::new(&manifest_path).parent().unwrap_or(Path::new("."));
             let crate_dir_string = crate_dir.to_string_lossy().to_string();
             let main_path = crate_dir.join("src/main.rs").to_string_lossy().to_string();
             let default_main = tree_paths.contains(&main_path);
@@ -224,6 +272,46 @@ fn discover_git_workspaces(repo: &Path) -> Vec<BinarySpec> {
         }
     }
     Vec::new()
+}
+
+fn git_workspace_manifest_paths(
+    root_content: Option<&str>,
+    tree_paths: &HashSet<String>,
+) -> Vec<String> {
+    let Some(root_content) = root_content else {
+        return Vec::new();
+    };
+    let Ok(table) = root_content.parse::<toml::Table>() else {
+        return Vec::new();
+    };
+    let Some(workspace) = table.get("workspace").and_then(toml::Value::as_table) else {
+        return table
+            .get("package")
+            .is_some_and(|_| tree_paths.contains("Cargo.toml"))
+            .then(|| "Cargo.toml".to_owned())
+            .into_iter()
+            .collect();
+    };
+
+    let members = workspace
+        .get("members")
+        .and_then(toml::Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(toml::Value::as_str)
+        .map(|member| member.trim_end_matches("/*").trim_end_matches('/'))
+        .collect::<Vec<_>>();
+
+    tree_paths
+        .iter()
+        .filter(|path| path.ends_with("Cargo.toml"))
+        .filter(|path| {
+            members.iter().any(|member| {
+                *path == &format!("{member}/Cargo.toml") || path.starts_with(&format!("{member}/"))
+            })
+        })
+        .cloned()
+        .collect()
 }
 
 fn git_manifest(repo: &Path, git_ref: &str) -> Option<super::manifest::InstallManifest> {
@@ -273,7 +361,7 @@ fn parse_manifest_targets(
         .into_iter()
         .filter(|name| !name.is_empty())
         .map(|name| BinarySpec {
-            default_dest: location.clone().unwrap_or_else(|| default_loc(&name)),
+            default_dest: location.unwrap_or_else(|| default_loc(&name)),
             source_name: name.clone(),
             description: if name == package_name {
                 description.clone()
@@ -354,34 +442,6 @@ fn is_executable(path: &Path) -> bool {
     #[cfg(not(unix))]
     {
         path.is_file()
-    }
-}
-
-fn collect_files<F>(root: &Path, files: &mut Vec<PathBuf>, predicate: F)
-where
-    F: Fn(&Path) -> bool + Copy,
-{
-    if !root.is_dir() {
-        return;
-    }
-    let Ok(entries) = fs::read_dir(root) else {
-        return;
-    };
-    for entry in entries.flatten() {
-        let path = entry.path();
-        if path.is_dir() {
-            let ignored = path
-                .file_name()
-                .and_then(|name| name.to_str())
-                .is_some_and(|name| {
-                    matches!(name, ".git" | "target" | "branches" | "node_modules")
-                });
-            if !ignored {
-                collect_files(&path, files, predicate);
-            }
-        } else if predicate(&path) {
-            files.push(path);
-        }
     }
 }
 
@@ -539,6 +599,25 @@ mod tests {
         assert_eq!(found[0].name, "shell-ui");
         assert_eq!(found[0].default_dest, BinaryLocation::SystemBin);
 
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn ignores_nested_cargo_projects_when_root_is_not_a_workspace() {
+        let root = std::env::temp_dir().join(format!(
+            "babydra_discovery_test_{}_nested",
+            std::process::id()
+        ));
+        let nested = root.join("install");
+        fs::create_dir_all(nested.join("src")).unwrap();
+        fs::write(
+            nested.join("Cargo.toml"),
+            "[package]\nname = \"installer\"\nversion = \"1.0.0\"\nedition = \"2021\"\n",
+        )
+        .unwrap();
+        fs::write(nested.join("src/main.rs"), "fn main() {}\n").unwrap();
+
+        assert!(discover_local_workspace(&root).is_empty());
         let _ = fs::remove_dir_all(root);
     }
 

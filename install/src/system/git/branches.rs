@@ -3,7 +3,11 @@ use std::path::Path;
 use super::git;
 use crate::models::BranchItem;
 
-/// Discovers local + remote branches in the workspace repository.
+/// Discovers local + cached remote branches in the workspace repository.
+///
+/// This function is intentionally read-only. Fetching remote refs is handled
+/// by [`refresh_branches`] so the TUI can start without waiting for a network
+/// operation.
 pub fn list_branches(repo: &Path) -> Vec<BranchItem> {
     let mut items = Vec::new();
 
@@ -15,17 +19,9 @@ pub fn list_branches(repo: &Path) -> Vec<BranchItem> {
         .filter(|l| !l.is_empty())
         .collect();
 
-    // Remote branches (`remotes/origin/*`), fetch first so the list is fresh.
-    // Bounded by a timeout so a dead network can never hang the TUI startup.
-    {
-        let (tx, rx) = std::sync::mpsc::channel::<()>();
-        let repo_owned = repo.to_path_buf();
-        std::thread::spawn(move || {
-            let _ = git(&repo_owned, &["fetch", "--prune", "origin"]);
-            let _ = tx.send(());
-        });
-        let _ = rx.recv_timeout(std::time::Duration::from_secs(8));
-    }
+    // Remote branches (`remotes/origin/*`) are read from the local git cache.
+    // A refresh is deliberately not performed here; this function is called
+    // while constructing the application state.
     let remote: Vec<String> = git(repo, &["branch", "-r", "--format=%(refname:short)"])
         .unwrap_or_default()
         .lines()
@@ -69,6 +65,20 @@ pub fn list_branches(repo: &Path) -> Vec<BranchItem> {
     }
 
     items
+}
+
+/// Refreshes remote refs in the background and returns the resulting branch
+/// list. The timeout bounds the lifetime of the fetch worker when the network
+/// or remote is unavailable.
+pub fn refresh_branches(repo: &Path) -> Vec<BranchItem> {
+    let (tx, rx) = std::sync::mpsc::channel();
+    let repo_owned = repo.to_path_buf();
+    std::thread::spawn(move || {
+        let _ = git(&repo_owned, &["fetch", "--prune", "origin"]);
+        let _ = tx.send(());
+    });
+    let _ = rx.recv_timeout(std::time::Duration::from_secs(8));
+    list_branches(repo)
 }
 
 fn has_workspace_manifest(repo: &Path, branch: &str) -> bool {

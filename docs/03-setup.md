@@ -75,6 +75,9 @@ scope = "system"
 pacman = ["gtk4", "labwc"]
 aur = ["fastfetch"]
 
+[installer]
+features = ["wtype", "kernel_permissions", "greetd"]
+
 [gsettings]
 "org.gnome.desktop.interface.font-name" = "Inter 11"
 "org.gnome.desktop.interface.cursor-size" = "24"
@@ -115,6 +118,18 @@ yay -S --noconfirm --needed <packages...>
 ```
 
 Nếu branch cần AUR nhưng máy chưa có `yay`, installer bootstrap `yay-bin` trước khi cài danh sách AUR.
+
+### `[installer]`
+
+`features` là mảng tùy chọn để branch bật các bước hệ thống không thể suy ra an toàn từ danh sách package hoặc binary. Các giá trị được hỗ trợ hiện tại là:
+
+| Giá trị | Tác dụng |
+| :--- | :--- |
+| `wtype` | Build helper Wayland `wtype` nếu hệ thống chưa có. |
+| `kernel_permissions` | Cấu hình quyền i2c, CPU và nhóm input cho phần cứng của workspace. |
+| `greetd` | Cấu hình, mask VT phụ và enable `greetd.service`. |
+
+Không thêm feature nếu branch không sử dụng chức năng tương ứng. Installer không chạy các bước này theo mặc định.
 
 ### `[gsettings]`
 

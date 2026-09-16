@@ -5,8 +5,7 @@ use crate::models::{
     BinaryItem, BranchItem, InstallState, LogLevel, LogMessage, VariantItem, WizardStep,
 };
 use crate::system::{
-    branch_worktree_dir, default_binary_source_dir, find_workspace_root, initial_binaries_list,
-    initial_variant_options, list_branches,
+    branch_worktree_dir, default_binary_source_dir, find_workspace_root, list_branches,
 };
 use crate::tasks::InstallEvent;
 
@@ -33,6 +32,8 @@ pub struct App {
     pub variant_options: Vec<VariantItem>,
     pub variant_cursor: usize,
     pub selected_variant: String,
+    pub discovery_in_progress: bool,
+    pub discovery_request_id: u64,
 
     // Logs & Progress
     pub logs: Vec<LogMessage>,
@@ -94,33 +95,21 @@ impl App {
             b.selected = idx == branch_cursor && !selected_branch.is_empty();
         }
 
-        let source_root = if !selected_branch.is_empty() {
-            branch_worktree_dir(&workspace_root, &selected_branch)
-        } else {
-            workspace_root.clone()
-        };
-
-        let binaries = initial_binaries_list(&source_root, &source_binary_dir);
-        let variant_options = initial_variant_options(&source_root);
-        let selected_variant = variant_options
-            .iter()
-            .find(|variant| variant.selected)
-            .map(|variant| variant.name.clone())
-            .unwrap_or_default();
-
         let mut app = Self {
             current_step: WizardStep::Welcome,
 
-            binaries,
+            binaries: Vec::new(),
             binary_cursor: 0,
 
             branches,
             branch_cursor,
             selected_branch,
 
-            variant_options,
+            variant_options: Vec::new(),
             variant_cursor: 0,
-            selected_variant,
+            selected_variant: String::new(),
+            discovery_in_progress: true,
+            discovery_request_id: 0,
 
             logs: Vec::new(),
             log_scroll: 0,
@@ -170,12 +159,8 @@ impl App {
                 format!("Detected {} git branch(es).", app.branches.len()),
             );
         }
-        if app.binaries.is_empty() {
-            app.add_log(
-                LogLevel::Warn,
-                "No components discovered (no crates/ in the checked-out branch and no pre-built binaries in the source directory).",
-            );
-        }
+        app.request_discovery();
+        app.start_branch_refresh();
         app
     }
 
@@ -186,10 +171,25 @@ impl App {
     }
 
     pub fn add_log(&mut self, level: LogLevel, msg: impl Into<String>) {
-        self.logs.push(LogMessage::new(level, msg));
+        self.push_log(LogMessage::new(level, msg));
+    }
+
+    pub fn push_log(&mut self, log: LogMessage) {
+        self.logs.push(log);
+        self.trim_logs();
         if self.auto_scroll_logs && self.logs.len() > 10 {
             self.log_scroll = self.logs.len().saturating_sub(10);
         }
+    }
+
+    pub(crate) fn trim_logs(&mut self) {
+        const MAX_LOG_ENTRIES: usize = 500;
+        let removed = self.logs.len().saturating_sub(MAX_LOG_ENTRIES);
+        if removed == 0 {
+            return;
+        }
+        self.logs.drain(..removed);
+        self.log_scroll = self.log_scroll.saturating_sub(removed);
     }
 
     /// Returns the active source directory: either `branches/<branch>` when

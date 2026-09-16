@@ -224,5 +224,6 @@ pub fn select_branch_at_cursor(app: &mut App) {
     if let Some(branch) = app.branches.get_mut(app.branch_cursor) {
         branch.selected = true;
         app.selected_branch = branch.name.clone();
+        app.request_discovery();
     }
 }

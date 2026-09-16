@@ -12,7 +12,7 @@ pub use discovery::{
     InstallManifest,
 };
 pub use fs_ops::{copy_recursive, format_size, safe_copy_binary};
-pub use git::{branch_worktree_dir, checkout_and_pull, list_branches};
+pub use git::{branch_worktree_dir, checkout_and_pull, list_branches, refresh_branches};
 pub use process::{is_root, stop_process};
 pub use sudo::{tail_lines, CmdOutput, SudoSession};
 

@@ -46,6 +46,15 @@ pub fn draw_welcome_step(f: &mut Frame, app: &App, area: Rect) {
     f.render_widget(banner, chunks[0]);
 
     let found_bins = app.binaries.iter().filter(|b| b.exists_in_source).count();
+    let component_summary = if app.discovery_in_progress {
+        "Scanning source metadata...".to_string()
+    } else {
+        format!(
+            "{} discovered ({} pre-built available) — all selected by default",
+            app.binaries.len(),
+            found_bins
+        )
+    };
     let sys_info = vec![
         Line::from(vec![
             Span::styled("Workspace Root:     ", Style::default().fg(THEME.text_dim)),
@@ -70,19 +79,15 @@ pub fn draw_welcome_step(f: &mut Frame, app: &App, area: Rect) {
         Line::from(vec![
             Span::styled("Components:         ", Style::default().fg(THEME.text_dim)),
             Span::styled(
-                format!(
-                    "{} discovered ({} pre-built available) — all selected by default",
-                    app.binaries.len(),
-                    found_bins
-                ),
+                component_summary,
                 Style::default()
-                    .fg(
-                        if !app.binaries.is_empty() && found_bins == app.binaries.len() {
-                            THEME.mint
-                        } else {
-                            THEME.amber
-                        },
-                    )
+                    .fg(if app.discovery_in_progress {
+                        THEME.cyan
+                    } else if !app.binaries.is_empty() && found_bins == app.binaries.len() {
+                        THEME.mint
+                    } else {
+                        THEME.amber
+                    })
                     .add_modifier(Modifier::BOLD),
             ),
         ]),

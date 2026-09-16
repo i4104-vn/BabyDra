@@ -43,24 +43,26 @@ pub fn initial_package_options(manifest: &InstallManifest) -> Vec<GenericOptionI
             requires_root: false,
         });
     }
-    options.extend([
-        GenericOptionItem {
+    if manifest.features.contains("wtype") {
+        options.push(GenericOptionItem {
             id: "build_wtype".to_string(),
             title: "Build optional Wayland input helper (if missing)".to_string(),
             description: "Builds the source-defined input helper with meson and ninja when it is not installed.".to_string(),
             detail: "git clone https://github.com/atx/wtype.git /tmp/wtype && meson setup build && ninja -C build".to_string(),
             selected: true,
             requires_root: false,
-        },
-        GenericOptionItem {
+        });
+    }
+    if manifest.features.contains("kernel_permissions") {
+        options.push(GenericOptionItem {
             id: "kernel_permissions".to_string(),
             title: "Configure hardware and input permissions".to_string(),
             description: "Loads the optional hardware module, configures CPU permissions, and updates input-group access.".to_string(),
             detail: "Configures /etc/modules-load.d/i2c.conf, /etc/tmpfiles.d/babydra-perf.conf, and runs sudo usermod -aG input $USER.".to_string(),
             selected: true,
             requires_root: true,
-        },
-    ]);
+        });
+    }
     options
 }
 
@@ -146,7 +148,10 @@ pub fn initial_configs_themes_options() -> Vec<GenericOptionItem> {
     ]
 }
 
-pub fn initial_display_manager_options() -> Vec<GenericOptionItem> {
+pub fn initial_display_manager_options(manifest: &InstallManifest) -> Vec<GenericOptionItem> {
+    if !manifest.features.contains("greetd") {
+        return Vec::new();
+    }
     vec![
         GenericOptionItem {
             id: "greetd_config".to_string(),

@@ -7,12 +7,39 @@ use super::state::{App, BranchSwitchStatus};
 
 impl App {
     pub fn on_tick(&mut self) {
+        const MAX_EVENTS_PER_TICK: usize = 128;
+
         if self.show_branch_switching_modal {
             self.branch_switch_spinner_tick = (self.branch_switch_spinner_tick + 1) % 1000;
         }
 
-        while let Ok(event) = self.rx.try_recv() {
+        for _ in 0..MAX_EVENTS_PER_TICK {
+            let Ok(event) = self.rx.try_recv() else {
+                break;
+            };
             match event {
+                InstallEvent::BranchesUpdated { branches } => {
+                    self.apply_branch_list(branches);
+                    self.add_log(
+                        LogLevel::Info,
+                        "Branch metadata refreshed in the background.",
+                    );
+                }
+                InstallEvent::DiscoveryUpdated {
+                    request_id,
+                    source_root,
+                    source_binary_dir,
+                    binaries,
+                    variants,
+                } => {
+                    self.apply_discovery(
+                        request_id,
+                        source_root,
+                        source_binary_dir,
+                        binaries,
+                        variants,
+                    );
+                }
                 InstallEvent::Progress {
                     current,
                     total,
@@ -25,10 +52,7 @@ impl App {
                     }
                 }
                 InstallEvent::Log(log_msg) => {
-                    self.logs.push(log_msg);
-                    if self.auto_scroll_logs && self.logs.len() > 14 {
-                        self.log_scroll = self.logs.len().saturating_sub(14);
-                    }
+                    self.push_log(log_msg);
                 }
                 InstallEvent::BranchSwitched { success, error_msg } => {
                     if success {

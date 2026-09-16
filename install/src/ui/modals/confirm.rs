@@ -40,18 +40,14 @@ pub fn draw_confirm_modal(f: &mut Frame, app: &App, area: Rect) {
     };
 
     let lines = vec![
-        Line::from(vec![
-            Span::styled(
-                "  Ready to Execute BabyDra Installation",
-                THEME.title_cyan(),
-            ),
-        ]),
-        Line::from(vec![
-            Span::styled(
-                "  Review your chosen configuration before starting:",
-                Style::default().fg(THEME.text_dim),
-            ),
-        ]),
+        Line::from(vec![Span::styled(
+            "  Ready to Execute BabyDra Installation",
+            THEME.title_cyan(),
+        )]),
+        Line::from(vec![Span::styled(
+            "  Review your chosen configuration before starting:",
+            Style::default().fg(THEME.text_dim),
+        )]),
         Line::from(""),
         Line::from(vec![
             Span::styled("  Source Branch : ", Style::default().fg(THEME.text_dim)),
@@ -95,14 +91,12 @@ pub fn draw_confirm_modal(f: &mut Frame, app: &App, area: Rect) {
             ),
         ]),
         Line::from(""),
-        Line::from(vec![
-            Span::styled(
-                "  Do you want to start installing BabyDra now?",
-                Style::default()
-                    .fg(THEME.amber)
-                    .add_modifier(Modifier::BOLD),
-            ),
-        ]),
+        Line::from(vec![Span::styled(
+            "  Do you want to start installing BabyDra now?",
+            Style::default()
+                .fg(THEME.amber)
+                .add_modifier(Modifier::BOLD),
+        )]),
         Line::from(""),
         Line::from(vec![
             Span::raw("  "),

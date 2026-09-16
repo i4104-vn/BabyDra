@@ -9,13 +9,45 @@ use std::sync::mpsc::Sender;
 use std::thread;
 use std::time::Instant;
 
-use crate::models::{BinaryItem, LogLevel, LogMessage, VariantItem};
+use crate::models::{BinaryItem, BranchItem, LogLevel, LogMessage, VariantItem};
 use crate::system::{
     build_workspace, checkout_and_pull, initial_binaries_list, load_install_manifest, stop_process,
     SudoSession,
 };
 
+fn total_install_steps(
+    packages: &[crate::models::GenericOptionItem],
+    binaries: usize,
+    varlib: &[crate::models::GenericOptionItem],
+    configs: &[crate::models::GenericOptionItem],
+    display_manager: &[crate::models::GenericOptionItem],
+    from_branch: bool,
+) -> usize {
+    packages.len()
+        + binaries
+        + varlib.len()
+        + configs
+            .iter()
+            .filter(|option| option.id != "terminate_processes")
+            .count()
+        + display_manager.len()
+        + 1 // theme deployment
+        + 2 * usize::from(from_branch) // checkout + build
+}
+
 pub enum InstallEvent {
+    /// Branch refs were refreshed without blocking the TUI.
+    BranchesUpdated {
+        branches: Vec<BranchItem>,
+    },
+    /// A background source discovery request completed.
+    DiscoveryUpdated {
+        request_id: u64,
+        source_root: PathBuf,
+        source_binary_dir: PathBuf,
+        binaries: Vec<BinaryItem>,
+        variants: Vec<VariantItem>,
+    },
     Progress {
         current: usize,
         total: usize,
@@ -101,15 +133,16 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
         let mut packages = crate::system::initial_package_options(&manifest);
         let varlib = crate::system::initial_varlib_options();
         let configs = crate::system::initial_configs_themes_options();
-        let display_manager = crate::system::initial_display_manager_options();
+        let mut display_manager = crate::system::initial_display_manager_options(&manifest);
 
-        let mut total_steps = packages.len()
-            + plan.selected_binaries.len()
-            + varlib.len()
-            + configs.len()
-            + display_manager.len()
-            + 1 // theme packages
-            + 2 * usize::from(!plan.branch.is_empty()); // checkout+pull, then build
+        let mut total_steps = total_install_steps(
+            &packages,
+            plan.selected_binaries.len(),
+            &varlib,
+            &configs,
+            &display_manager,
+            !plan.branch.is_empty(),
+        );
         let mut current_step = 0;
 
         send_log(
@@ -170,13 +203,15 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             // options after checkout instead of keeping main's empty/default
             // manifest.
             packages = crate::system::initial_package_options(&manifest);
-            total_steps = packages.len()
-                + plan.selected_binaries.len()
-                + varlib.len()
-                + configs.len()
-                + display_manager.len()
-                + 1
-                + 2;
+            display_manager = crate::system::initial_display_manager_options(&manifest);
+            total_steps = total_install_steps(
+                &packages,
+                plan.selected_binaries.len(),
+                &varlib,
+                &configs,
+                &display_manager,
+                true,
+            );
 
             current_step += 1;
             let _ = tx.send(InstallEvent::Progress {
@@ -217,13 +252,14 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
         } else {
             plan.selected_binaries.clone()
         };
-        total_steps = packages.len()
-            + selected_binaries.len()
-            + varlib.len()
-            + configs.len()
-            + display_manager.len()
-            + 1
-            + 2 * usize::from(!plan.branch.is_empty());
+        total_steps = total_install_steps(
+            &packages,
+            selected_binaries.len(),
+            &varlib,
+            &configs,
+            &display_manager,
+            !plan.branch.is_empty(),
+        );
 
         // Phase 2: terminate old processes (always — prevents ETXTBSY when
         // overwriting running executables).

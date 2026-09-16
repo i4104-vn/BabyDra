@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 use std::path::{Path, PathBuf};
 
 use crate::models::BinaryLocation;
@@ -13,6 +13,7 @@ pub struct InstallManifest {
     pub pacman_packages: Vec<String>,
     pub aur_packages: Vec<String>,
     pub gsettings: BTreeMap<String, String>,
+    pub features: HashSet<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -86,18 +87,21 @@ pub(crate) fn parse_manifest(content: &str) -> InstallManifest {
         })
         .unwrap_or_default();
     let strings = |key: &str| {
-        packages
+        let mut values: Vec<String> = packages
             .and_then(|table| table.get(key))
             .and_then(toml::Value::as_array)
             .map(|values| {
                 values
                     .iter()
-                    .filter_map(toml::Value::as_str)
-                    .map(str::to_owned)
+                    .filter_map(|value| value.as_str().map(str::trim))
                     .filter(|value| !value.is_empty())
+                    .map(str::to_owned)
                     .collect()
             })
-            .unwrap_or_default()
+            .unwrap_or_default();
+        let mut seen = HashSet::new();
+        values.retain(|value| seen.insert(value.clone()));
+        values
     };
 
     let gsettings = root
@@ -111,11 +115,27 @@ pub(crate) fn parse_manifest(content: &str) -> InstallManifest {
         })
         .unwrap_or_default();
 
+    let features = root
+        .get("installer")
+        .and_then(toml::Value::as_table)
+        .and_then(|table| table.get("features"))
+        .and_then(toml::Value::as_array)
+        .map(|values| {
+            values
+                .iter()
+                .filter_map(|value| value.as_str().map(str::trim))
+                .filter(|value| !value.is_empty())
+                .map(str::to_owned)
+                .collect()
+        })
+        .unwrap_or_default();
+
     InstallManifest {
         binaries,
         pacman_packages: strings("pacman"),
         aur_packages: strings("aur"),
         gsettings,
+        features,
     }
 }
 
@@ -129,8 +149,17 @@ mod tests {
             "[[binaries]]\nname = \"new-greeter\"\nscope = \"system\"\n\n[packages]\npacman = [\"gtk4\"]\naur = [\"kitty\"]\n",
         );
         assert_eq!(manifest.binaries[0].location, BinaryLocation::SystemBin);
-        assert!(manifest.pacman_packages.contains(&"gtk4".to_string()));
+        assert_eq!(manifest.pacman_packages, vec!["gtk4"]);
         assert!(manifest.aur_packages.contains(&"kitty".to_string()));
+    }
+
+    #[test]
+    fn normalizes_package_names_before_install() {
+        let manifest = parse_manifest(
+            "[packages]\npacman = [\" gtk4 \", \"gtk4\", \"\"]\naur = [\"kitty\", \" kitty \"]\n",
+        );
+        assert_eq!(manifest.pacman_packages, vec!["gtk4"]);
+        assert_eq!(manifest.aur_packages, vec!["kitty"]);
     }
 
     #[test]

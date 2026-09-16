@@ -5,7 +5,7 @@ use anyhow::{bail, Context, Result};
 use std::path::Path;
 use std::process::{Command, Stdio};
 
-pub use branches::list_branches;
+pub use branches::{list_branches, refresh_branches};
 pub use worktree::{branch_worktree_dir, checkout_and_pull};
 
 /// Runs a git command in `repo`, capturing stdout. No output reaches the TUI.

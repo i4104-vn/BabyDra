@@ -23,7 +23,7 @@ pub fn handle_global_keys(app: &mut App, key: KeyEvent) -> bool {
             true
         }
         KeyCode::Char('r') | KeyCode::Char('R') => {
-            app.rescan_binaries();
+            app.request_discovery();
             true
         }
         KeyCode::Char('i') | KeyCode::Char('I') => {

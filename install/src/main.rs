@@ -25,7 +25,6 @@ fn main() -> Result<()> {
     setup_panic_hook();
 
     let args: Vec<String> = std::env::args().collect();
-    let mut app = App::new();
 
     if args.len() > 1 {
         let arg = &args[1];
@@ -43,11 +42,14 @@ fn main() -> Result<()> {
         } else if arg == "--version" || arg == "-v" {
             println!("babydra-installer v1.0.0");
             return Ok(());
-        } else if !arg.starts_with('-') {
-            app.source_binary_dir = std::path::PathBuf::from(arg);
-            app.custom_path_input = arg.clone();
-            app.rescan_binaries();
         }
+    }
+
+    let mut app = App::new();
+    if let Some(arg) = args.get(1).filter(|arg| !arg.starts_with('-')) {
+        app.source_binary_dir = std::path::PathBuf::from(arg);
+        app.custom_path_input = arg.clone();
+        app.request_discovery();
     }
 
     enable_raw_mode()?;
@@ -73,8 +75,6 @@ fn run_app(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, app: &mut App)
     let tick_rate = Duration::from_millis(50);
 
     loop {
-        terminal.draw(|f| ui::draw(f, app))?;
-
         if event::poll(tick_rate)? {
             if let Event::Key(key) = event::read()? {
                 if key.kind == event::KeyEventKind::Press {
@@ -84,6 +84,7 @@ fn run_app(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, app: &mut App)
         }
 
         app.on_tick();
+        terminal.draw(|f| ui::draw(f, app))?;
 
         if app.should_quit {
             break;
