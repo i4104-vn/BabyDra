@@ -25,6 +25,12 @@ pub struct DesktopApp {
     /// Active window title string if this app is currently running.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub window_title: Option<String>,
+    /// Standard XDG Categories declared in desktop file.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub categories: Vec<String>,
+    /// Standard XDG MimeTypes declared in desktop file.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub mime_types: Vec<String>,
 }
 
 impl DesktopApp {

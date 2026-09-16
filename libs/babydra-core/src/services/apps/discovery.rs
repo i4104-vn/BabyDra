@@ -79,6 +79,8 @@ pub fn parse_desktop_file(path: &Path) -> Option<DesktopApp> {
     let mut icon = None;
     let mut no_display = false;
     let mut in_desktop_entry = false;
+    let mut categories = Vec::new();
+    let mut mime_types = Vec::new();
 
     for line in reader.lines().flatten() {
         let line = line.trim();
@@ -114,6 +116,20 @@ pub fn parse_desktop_file(path: &Path) -> Option<DesktopApp> {
                 icon = Some(value.to_string());
             } else if key == "NoDisplay" && value.to_lowercase() == "true" {
                 no_display = true;
+            } else if key == "Categories" {
+                categories = value
+                    .split(';')
+                    .map(|s| s.trim())
+                    .filter(|s| !s.is_empty())
+                    .map(|s| s.to_string())
+                    .collect();
+            } else if key == "MimeType" {
+                mime_types = value
+                    .split(';')
+                    .map(|s| s.trim())
+                    .filter(|s| !s.is_empty())
+                    .map(|s| s.to_string())
+                    .collect();
             }
         }
     }
@@ -133,6 +149,8 @@ pub fn parse_desktop_file(path: &Path) -> Option<DesktopApp> {
             is_dependency: false,
             app_id: None,
             window_title: None,
+            categories,
+            mime_types,
         }),
         _ => None,
     }

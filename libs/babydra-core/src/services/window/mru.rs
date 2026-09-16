@@ -119,6 +119,8 @@ pub fn get_running_apps() -> Vec<DesktopApp> {
                 is_dependency: false,
                 app_id: Some(app_id.clone()),
                 window_title: Some(title.clone()),
+                categories: Vec::new(),
+                mime_types: Vec::new(),
             });
         }
     }

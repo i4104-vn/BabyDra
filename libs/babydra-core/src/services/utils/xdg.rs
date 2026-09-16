@@ -53,6 +53,71 @@ pub fn open_path(path: impl AsRef<Path>) -> bool {
     Command::new("xdg-open").arg(path.as_ref()).spawn().is_ok()
 }
 
+/// Searches installed desktop applications matching standard XDG Categories and/or MIME types.
+/// Completely dynamic based on FreeDesktop specifications without hardcoded app names.
+pub fn find_apps_by_category_or_mime(
+    categories: &[&str],
+    mime_types: &[&str],
+    current_default: &str,
+) -> Vec<AppChoice> {
+    let mut list = Vec::new();
+    let all_apps = crate::services::apps::find_desktop_apps();
+
+    for app in &all_apps {
+        let cat_match = categories.iter().any(|&target_cat| {
+            app.categories
+                .iter()
+                .any(|c| c.eq_ignore_ascii_case(target_cat))
+        });
+        let mime_match = mime_types.iter().any(|&target_mime| {
+            app.mime_types
+                .iter()
+                .any(|m| m.eq_ignore_ascii_case(target_mime))
+        });
+        let default_match = !current_default.is_empty() && {
+            let filename = app
+                .file_path
+                .as_ref()
+                .and_then(|p| p.file_name())
+                .and_then(|n| n.to_str())
+                .unwrap_or("");
+            filename.eq_ignore_ascii_case(current_default)
+        };
+
+        if cat_match || mime_match || default_match {
+            let desktop_id = app
+                .file_path
+                .as_ref()
+                .and_then(|p| p.file_name())
+                .and_then(|n| n.to_str())
+                .unwrap_or(&app.name)
+                .to_string();
+
+            if !list.iter().any(|c: &AppChoice| c.desktop_id == desktop_id) {
+                list.push(AppChoice {
+                    desktop_id,
+                    name: app.name.clone(),
+                });
+            }
+        }
+    }
+
+    if !current_default.is_empty() && !list.iter().any(|c| c.desktop_id == current_default) {
+        let pretty_name = current_default
+            .trim_end_matches(".desktop")
+            .replace('-', " ");
+        list.insert(
+            0,
+            AppChoice {
+                desktop_id: current_default.to_string(),
+                name: pretty_name,
+            },
+        );
+    }
+
+    list
+}
+
 /// Generic helper to search installed desktop applications matching category keywords.
 /// Searches system and user desktop entries, matches against keywords, and formats `AppChoice`.
 pub fn find_matching_apps(keywords: &[&str], current_default: &str) -> Vec<AppChoice> {

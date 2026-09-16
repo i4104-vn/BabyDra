@@ -128,6 +128,8 @@ fn test_sync_workspace_apps_title_stability() {
         is_dependency: false,
         app_id: Some("browser".into()),
         window_title: Some("Tab 1".into()),
+        categories: Vec::new(),
+        mime_types: Vec::new(),
     };
 
     // First opened on workspace 1
@@ -178,6 +180,8 @@ fn test_window_stays_on_creation_workspace_when_switching_workspaces() {
         is_dependency: false,
         app_id: Some("chromium".into()),
         window_title: Some("Google".into()),
+        categories: Vec::new(),
+        mime_types: Vec::new(),
     };
 
     let apps = vec![app.clone()];
@@ -213,6 +217,8 @@ fn test_new_window_on_different_workspace() {
         is_dependency: false,
         app_id: Some("kitty".into()),
         window_title: Some("Terminal 1".into()),
+        categories: Vec::new(),
+        mime_types: Vec::new(),
     };
 
     // Terminal 1 opened on WS 1
@@ -229,6 +235,8 @@ fn test_new_window_on_different_workspace() {
         is_dependency: false,
         app_id: Some("kitty".into()),
         window_title: Some("Terminal 2".into()),
+        categories: Vec::new(),
+        mime_types: Vec::new(),
     };
 
     let both_apps = vec![app1.clone(), app2.clone()];
@@ -261,6 +269,8 @@ fn test_empty_apps_does_not_wipe_map() {
         is_dependency: false,
         app_id: Some("app".into()),
         window_title: Some("Window".into()),
+        categories: Vec::new(),
+        mime_types: Vec::new(),
     };
 
     let apps = vec![app.clone()];
