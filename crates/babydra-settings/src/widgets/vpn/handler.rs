@@ -152,11 +152,9 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
         let is_busy = connecting_vpns.borrow().contains(&vpn.name);
 
         if is_busy {
-            let spinner = gtk4::Spinner::new();
-            spinner.set_valign(gtk4::Align::Center);
-            spinner.set_visible(true);
-            spinner.start();
-            hbox.append(&spinner);
+            let loading_icon = crate::widgets::helpers::create_loading_icon(22);
+            loading_icon.set_valign(gtk4::Align::Center);
+            hbox.append(&loading_icon);
         } else if vpn.active {
             let disconnect_btn =
                 gtk4::Button::with_label(&babydra_core::i18n::trans("settings.disconnect"));

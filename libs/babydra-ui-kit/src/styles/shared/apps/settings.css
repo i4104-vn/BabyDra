@@ -185,6 +185,24 @@ button.shortcut-combo-btn {
     padding: 12px;
 }
 
+/* Custom Full Loading Card */
+.loading-card {
+    min-height: 220px;
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+}
+
+.loading-card-row {
+    background: transparent;
+    padding: 0;
+}
+
+.loading-icon {
+    opacity: 0.95;
+}
+
 /* Collapsible Settings Cards */
 .collapsible-card {
     border-radius: 14px;

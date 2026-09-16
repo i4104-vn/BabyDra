@@ -20,7 +20,7 @@ scope = "user"
 [[binaries]]
 name = "babydra-explore"
 scope = "user"
-description = "GTK4 file manager"
+description = "File manager"
 export_desktop = true
 
 [[binaries]]
@@ -32,7 +32,6 @@ export_desktop = true
 [[binaries]]
 name = "babydra-launcher"
 scope = "user"
-description = "Application launcher and fuzzy search"
 
 [[binaries]]
 name = "babydra-lock"

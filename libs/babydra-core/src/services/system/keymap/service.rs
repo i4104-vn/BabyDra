@@ -2,7 +2,6 @@
 
 use super::catalog::SYSTEM_CRATE_CATALOG;
 use super::config::{get_config_path, ConfigFile};
-use super::labwc::sync_labwc_swallow;
 use crate::error::CoreResult;
 use crate::models::shortcut::{Shortcut, SystemShortcut};
 use std::collections::HashMap;
@@ -207,28 +206,18 @@ pub fn save_keymap_configuration(
     }
 
     content.push_str("\n# Active shortcuts map for daemon\n[shortcuts]\n");
-    let mut active = Vec::new();
     for s in system_shortcuts {
         if s.enabled && !s.key.is_empty() && !s.command.trim().is_empty() {
             content.push_str(&format!("\"{}\" = \"{}\"\n", s.combo(), s.command));
-            active.push(Shortcut {
-                id: 0,
-                modifiers: s.modifiers.clone(),
-                key: s.key.clone(),
-                command: s.command.clone(),
-                enabled: true,
-            });
         }
     }
     for c in custom_shortcuts {
         if c.enabled && !c.key.is_empty() && !c.command.trim().is_empty() {
             content.push_str(&format!("\"{}\" = \"{}\"\n", c.combo(), c.command));
-            active.push(c.clone());
         }
     }
 
     fs::write(&path, content)?;
-    sync_labwc_swallow(&active);
     Ok(())
 }
 

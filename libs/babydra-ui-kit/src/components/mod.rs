@@ -4,6 +4,7 @@ pub mod cards;
 pub mod context_menu;
 pub mod explore;
 pub mod list_group;
+pub mod loading;
 pub mod modals;
 pub mod placeholder;
 pub mod popovers;
@@ -13,6 +14,9 @@ pub mod wifi;
 
 // Re-export all builders under components namespace
 pub use badge::create_icon_badge;
+pub use loading::{
+    create_loading_card, create_loading_icon, create_loading_placeholder_row, LOADING_GIF_BYTES,
+};
 pub use buttons::{
     create_accent_button, create_battery_icon, create_button, create_color_btn,
     create_colored_icon, create_fab, create_icon_btn, create_icon_button, create_sidebar_btn,

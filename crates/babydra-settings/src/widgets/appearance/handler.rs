@@ -157,12 +157,10 @@ pub fn setup_appearance(
         let currently_dark = babydra_ui_kit::ui::theme::is_dark_mode();
         let new_dark = !currently_dark;
 
-        let spinner = gtk4::Spinner::builder()
-            .spinning(true)
-            .halign(gtk4::Align::Center)
-            .valign(gtk4::Align::Center)
-            .build();
-        theme_btn_clone.set_child(Some(&spinner));
+        let loading_icon = babydra_ui_kit::components::create_loading_icon(18);
+        loading_icon.set_halign(gtk4::Align::Center);
+        loading_icon.set_valign(gtk4::Align::Center);
+        theme_btn_clone.set_child(Some(&loading_icon));
 
         babydra_ui_kit::ui::theme::set_dark_mode(new_dark);
     });
@@ -428,15 +426,13 @@ pub fn setup_appearance(
                     pic.set_size_request(130, 105);
                     pic.set_content_fit(gtk4::ContentFit::Cover);
 
-                    let spinner = gtk4::Spinner::new();
-                    spinner.set_halign(gtk4::Align::Center);
-                    spinner.set_valign(gtk4::Align::Center);
-                    spinner.set_size_request(24, 24);
-                    spinner.start();
+                    let loading_icon = babydra_ui_kit::components::create_loading_icon(28);
+                    loading_icon.set_halign(gtk4::Align::Center);
+                    loading_icon.set_valign(gtk4::Align::Center);
 
                     let pic_overlay = gtk4::Overlay::new();
                     pic_overlay.set_child(Some(&pic));
-                    pic_overlay.add_overlay(&spinner);
+                    pic_overlay.add_overlay(&loading_icon);
 
                     let wp_path_clone = wp.clone();
                     let pic_clone = pic.clone();
@@ -461,8 +457,7 @@ pub fn setup_appearance(
                                     pic_clone.set_filename(Some(&thumb_path));
                                 }
                             }
-                            spinner.stop();
-                            spinner.set_visible(false);
+                            loading_icon.set_visible(false);
                         },
                         16,
                     );

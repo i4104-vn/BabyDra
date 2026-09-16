@@ -36,11 +36,9 @@ pub fn create_update_row(pkg: &PackageUpdate) -> ListBoxRow {
             icon_box.append(&icon_img);
         }
         UpdateStatus::Updating => {
-            let row_spinner = Spinner::new();
-            row_spinner.set_size_request(20, 20);
+            let row_spinner = babydra_ui_kit::components::create_loading_icon(20);
             row_spinner.set_valign(gtk4::Align::Center);
             row_spinner.set_halign(gtk4::Align::Center);
-            row_spinner.start();
             icon_box.append(&row_spinner);
         }
         UpdateStatus::Done => {

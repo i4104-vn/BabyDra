@@ -122,11 +122,7 @@ pub fn render_network_list(
     }
 
     if state_ref.enabled && state_ref.is_loading && state_ref.networks.is_empty() {
-        container.append(&create_placeholder(
-            crate::widgets::helpers::create_placeholder(
-                crate::widgets::helpers::PlaceholderState::Loading,
-            ),
-        ));
+        container.append(&crate::widgets::helpers::create_loading_card(64));
         return;
     }
 
@@ -287,10 +283,9 @@ pub fn render_network_list(
             conn_lbl.set_margin_end(8);
             hbox.append(&conn_lbl);
 
-            let spinner = gtk4::Spinner::new();
-            spinner.start();
-            spinner.set_valign(gtk4::Align::Center);
-            hbox.append(&spinner);
+            let loading_icon = crate::widgets::helpers::create_loading_icon(22);
+            loading_icon.set_valign(gtk4::Align::Center);
+            hbox.append(&loading_icon);
         } else if net.is_connected {
             let check_icon = babydra_ui_kit::ui::icon::get_icon("check", 18);
             check_icon.set_pixel_size(18);

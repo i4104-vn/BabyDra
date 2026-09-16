@@ -112,6 +112,10 @@ name = "kits_tooltip_popover"
 path = "kits/tooltip_popover.rs"
 
 [[test]]
+name = "kits_loading"
+path = "kits/loading.rs"
+
+[[test]]
 name = "services_recording"
 path = "services/recording.rs"
 

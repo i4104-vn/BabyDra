@@ -53,16 +53,8 @@ pub fn create_placeholder(state: PlaceholderState) -> gtk4::ListBoxRow {
             placeholder_box.append(&desc);
         }
         PlaceholderState::Loading => {
-            let spinner = gtk4::Spinner::new();
-            spinner.set_size_request(32, 32);
-            spinner.set_halign(gtk4::Align::Center);
-            spinner.start();
-            placeholder_box.append(&spinner);
-
-            let lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.loading")));
-            lbl.add_css_class("settings-row-title");
-            lbl.set_halign(gtk4::Align::Center);
-            placeholder_box.append(&lbl);
+            let loading_icon = crate::components::loading::create_loading_icon(56);
+            placeholder_box.append(&loading_icon);
         }
         PlaceholderState::Empty {
             title_key,

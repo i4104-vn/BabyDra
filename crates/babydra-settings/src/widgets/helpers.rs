@@ -1,5 +1,6 @@
 pub use babydra_ui_kit::components::{
-    clear_box, clear_list_box, create_icon_badge, create_placeholder, PlaceholderState,
+    clear_box, clear_list_box, create_icon_badge, create_loading_card, create_loading_icon,
+    create_placeholder, PlaceholderState,
 };
 
 /// Spawns a background task thread and invokes the `on_done` callback on the main GTK thread upon completion.
