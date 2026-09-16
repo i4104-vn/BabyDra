@@ -217,6 +217,13 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
         } else {
             plan.selected_binaries.clone()
         };
+        total_steps = packages.len()
+            + selected_binaries.len()
+            + varlib.len()
+            + configs.len()
+            + display_manager.len()
+            + 1
+            + 2 * usize::from(!plan.branch.is_empty());
 
         // Phase 2: terminate old processes (always — prevents ETXTBSY when
         // overwriting running executables).
