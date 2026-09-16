@@ -42,7 +42,7 @@ fn get_monitor_output_ports() -> Vec<String> {
 /// Retrieves microphone / voice capture ports.
 fn get_mic_output_ports() -> Vec<String> {
     get_pw_ports("-o", |port| {
-        (port.contains(":capture_") || port.contains("input"))
+        port.contains(":capture_")
             && !port.contains(":monitor_")
             && !port.contains("wf-recorder")
     })
@@ -71,6 +71,23 @@ fn link_channel_pairs(outputs: &[String], inputs: &[String], disconnect: bool) {
                 let _ = cmd.output();
             }
         }
+    }
+}
+
+/// Connects the desktop playback monitor and the default microphone to the
+/// recorder node.  wf-recorder exposes one PipeWire input node, so both
+/// sources can be linked to it and PipeWire mixes the streams for the
+/// encoded audio track.
+fn link_recording_sources(inputs: &[String]) {
+    if inputs.is_empty() {
+        return;
+    }
+
+    if !IS_AUDIO_MUTED.load(Ordering::SeqCst) {
+        link_channel_pairs(&get_monitor_output_ports(), inputs, false);
+    }
+    if !IS_MIC_MUTED.load(Ordering::SeqCst) {
+        link_channel_pairs(&get_mic_output_ports(), inputs, false);
     }
 }
 
@@ -118,17 +135,19 @@ pub fn init_recording_audio(pid: u32, audio_enabled: bool) {
     if audio_enabled {
         // Allow wf-recorder to initialize its PipeWire node before discovering ports
         std::thread::spawn(move || {
-            std::thread::sleep(Duration::from_millis(350));
-            if ACTIVE_PID.load(Ordering::SeqCst) != pid {
-                return;
-            }
+            // The PipeWire node is created asynchronously by wf-recorder.  A
+            // single delayed lookup was racy on slower sessions and caused
+            // audio to be silently absent from otherwise valid recordings.
+            for _ in 0..12 {
+                std::thread::sleep(Duration::from_millis(250));
+                if ACTIVE_PID.load(Ordering::SeqCst) != pid {
+                    return;
+                }
 
-            let inputs = get_recorder_input_ports();
-            if !inputs.is_empty() {
-                // Auto-link microphone into the recording stream so voice is also captured
-                let mics = get_mic_output_ports();
-                if !mics.is_empty() && !IS_MIC_MUTED.load(Ordering::SeqCst) {
-                    link_channel_pairs(&mics, &inputs, false);
+                let inputs = get_recorder_input_ports();
+                if !inputs.is_empty() {
+                    link_recording_sources(&inputs);
+                    return;
                 }
             }
         });

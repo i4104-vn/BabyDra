@@ -154,11 +154,11 @@ impl RecordingPopover {
         let codec =
             DropDown::from_strings(&["Default", "H.264 (libx264)", "H.264 VA-API (h264_vaapi)"]);
         let audio = Switch::new();
-        let audio_devices = babydra_core::services::system::volume::get_audio_devices(true);
-        let audio_device_names: Vec<String> = audio_devices
-            .iter()
-            .map(|device| device.name.clone())
-            .collect();
+        // `get_audio_devices(true)` returns profile/route identifiers for
+        // the volume mixer.  They are not valid `wf-recorder -a` source
+        // names.  Recording uses the PipeWire default source and links both
+        // the microphone and the desktop monitor automatically.
+        let audio_device_names = vec!["default".to_string()];
         let audio_device_refs: Vec<&str> = audio_device_names.iter().map(String::as_str).collect();
         let audio_device = DropDown::from_strings(&audio_device_refs);
         audio_device.set_sensitive(false);

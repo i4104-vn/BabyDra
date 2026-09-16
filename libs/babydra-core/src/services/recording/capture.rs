@@ -141,10 +141,30 @@ pub fn start_recording(config: &RecordingConfig) -> Result<PathBuf, String> {
     // Audio capture
     if config.audio {
         if let Some(ref device) = config.audio_device {
-            cmd.arg(format!("-a{}", device));
+            // The volume service exposes PipeWire profile identifiers such as
+            // `profile:12:3`; those are not PulseAudio source names and make
+            // wf-recorder exit immediately.  Use the real default source for
+            // those legacy values; the PipeWire links in audio.rs add the
+            // desktop monitor as well.
+            let source = if device.trim().is_empty()
+                || device.starts_with("profile:")
+                || device.starts_with("route:")
+            {
+                "default"
+            } else {
+                device.as_str()
+            };
+            // `-a` has an optional value in wf-recorder.  Passing the value
+            // as a second argv item is parsed as an unexpected positional
+            // argument, so use the documented `--audio=<device>` form.
+            cmd.arg(format!("--audio={source}"));
         } else {
-            cmd.arg("-a");
+            cmd.arg("--audio=default");
         }
+        // The recording audio linker below operates on PipeWire ports.  Make
+        // the backend explicit instead of relying on the distro default
+        // (which may be PulseAudio and expose no wf-recorder PipeWire node).
+        cmd.arg("--audio-backend=pipewire");
     }
 
     let is_vaapi = config
