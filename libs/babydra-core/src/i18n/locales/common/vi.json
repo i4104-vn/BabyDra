@@ -267,5 +267,7 @@
   "preview.no_exif": "Không có dữ liệu EXIF",
   "preview.play": "Phát / Tạm dừng (Phím cách)",
   "preview.mute": "Bật / Tắt tiếng (M)",
-  "preview.speed": "Tốc độ phát"
+  "preview.speed": "Tốc độ phát",
+  "preview.open_file": "Mở tệp",
+  "preview.drag_drop_hint": "Kéo thả tệp vào đây hoặc nhấn để chọn"
 }

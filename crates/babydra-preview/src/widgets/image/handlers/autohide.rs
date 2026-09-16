@@ -67,8 +67,8 @@ pub fn setup_autohide_controls(ui: &ImageViewerUi) {
             return glib::ControlFlow::Continue;
         }
 
-        // Hide both simultaneously after 5s without physical mouse motion
-        if visible_check.get() && act_check.get().elapsed() >= Duration::from_secs(5) {
+        // Hide both simultaneously 
+        if visible_check.get() && act_check.get().elapsed() >= Duration::from_secs(2) {
             visible_check.set(false);
             controls_rev_check.set_reveal_child(false);
             info_rev_check.set_reveal_child(false);
