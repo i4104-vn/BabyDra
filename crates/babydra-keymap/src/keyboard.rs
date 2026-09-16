@@ -9,13 +9,15 @@
 
 use crate::daemon::SharedShortcuts;
 use crate::mapping::{Mods, ResolvedShortcut};
-use evdev::{enumerate, Device, EventType, InputEvent, Key};
+use evdev::uinput::{VirtualDevice, VirtualDeviceBuilder};
+use evdev::{enumerate, AttributeSet, Device, EventType, InputEvent, Key};
 use std::collections::HashSet;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 const RESCAN_INTERVAL: Duration = Duration::from_secs(5);
+const VIRTUAL_KEYBOARD_NAME: &str = "BabyDra Keyboard";
 
 /// Global modifier state tracked across all keyboards.
 #[derive(Default)]
@@ -67,6 +69,9 @@ fn scan_once(state: &Arc<Mutex<ModifierState>>, shortcuts: &SharedShortcuts, kno
     let devices = enumerate();
     for device_result in devices {
         let (path, device) = device_result;
+        if device.name() == Some(VIRTUAL_KEYBOARD_NAME) {
+            continue;
+        }
         if !known.lock().unwrap().insert(path.clone()) {
             continue;
         }
@@ -95,9 +100,25 @@ fn scan_once(state: &Arc<Mutex<ModifierState>>, shortcuts: &SharedShortcuts, kno
 /// True when the device exposes a typical typing keyset (excludes power
 /// buttons, joysticks and other event devices).
 fn looks_like_keyboard(device: &Device) -> bool {
+    if device.supported_relative_axes().is_some() || device.supported_absolute_axes().is_some() {
+        return false;
+    }
+
     device
         .supported_keys()
-        .map(|keys| keys.contains(Key::KEY_A) && keys.contains(Key::KEY_SPACE))
+        .map(|keys| {
+            ![
+                Key::BTN_LEFT,
+                Key::BTN_RIGHT,
+                Key::BTN_MIDDLE,
+                Key::BTN_SIDE,
+                Key::BTN_EXTRA,
+            ]
+            .iter()
+            .any(|button| keys.contains(*button))
+                && keys.contains(Key::KEY_A)
+                && keys.contains(Key::KEY_SPACE)
+        })
         .unwrap_or(false)
 }
 
@@ -109,6 +130,41 @@ async fn listen_device(
     shortcuts: SharedShortcuts,
     known: KnownDevices,
 ) {
+    let keys = device
+        .supported_keys()
+        .map(|supported| supported.iter().collect::<AttributeSet<Key>>());
+    let Some(keys) = keys else {
+        known.lock().unwrap().remove(&path);
+        return;
+    };
+
+    let mut virtual_device = match VirtualDeviceBuilder::new()
+        .and_then(|builder| builder.name(VIRTUAL_KEYBOARD_NAME).with_keys(&keys))
+        .and_then(VirtualDeviceBuilder::build)
+    {
+        Ok(device) => Some(device),
+        Err(e) => {
+            tracing::error!(
+                "cannot create virtual keyboard for {}: {}; continuing without grab",
+                path.display(),
+                e
+            );
+            None
+        }
+    };
+
+    let mut device = device;
+    if virtual_device.is_some() {
+        if let Err(e) = device.grab() {
+            tracing::error!(
+                "cannot grab keyboard {}: {}; continuing without grab",
+                path.display(),
+                e
+            );
+            virtual_device = None;
+        }
+    }
+
     let mut stream = match device.into_event_stream() {
         Ok(stream) => stream,
         Err(e) => {
@@ -118,9 +174,16 @@ async fn listen_device(
         }
     };
 
+    let mut consumed = HashSet::new();
     loop {
         match stream.next_event().await {
-            Ok(event) => handle_event(event, &state, &shortcuts),
+            Ok(event) => handle_event(
+                event,
+                &state,
+                &shortcuts,
+                virtual_device.as_mut(),
+                &mut consumed,
+            ),
             Err(e) => {
                 tracing::info!("keyboard {} disconnected: {}", path.display(), e);
                 break;
@@ -133,7 +196,13 @@ async fn listen_device(
 
 /// Processes one input event: updates modifier tracking and triggers
 /// shortcuts on matching non-modifier key presses.
-fn handle_event(event: InputEvent, state: &Arc<Mutex<ModifierState>>, shortcuts: &SharedShortcuts) {
+fn handle_event(
+    event: InputEvent,
+    state: &Arc<Mutex<ModifierState>>,
+    shortcuts: &SharedShortcuts,
+    virtual_device: Option<&mut VirtualDevice>,
+    consumed: &mut HashSet<Key>,
+) {
     if event.event_type() != EventType::KEY {
         return;
     }
@@ -143,23 +212,43 @@ fn handle_event(event: InputEvent, state: &Arc<Mutex<ModifierState>>, shortcuts:
     let repeated = event.value() == 2; // auto-repeat
 
     if state.lock().unwrap().update(key, pressed || repeated) {
+        emit_event(virtual_device, event);
+        return;
+    }
+
+    if repeated && consumed.contains(&key) {
+        return;
+    }
+
+    if pressed && try_trigger(key, state, shortcuts) {
+        consumed.insert(key);
         return;
     }
 
     if !pressed {
-        return;
+        if consumed.remove(&key) {
+            return;
+        }
     }
 
-    try_trigger(key, state, shortcuts);
+    emit_event(virtual_device, event);
+}
+
+fn emit_event(virtual_device: Option<&mut VirtualDevice>, event: InputEvent) {
+    if let Some(device) = virtual_device {
+        if let Err(e) = device.emit(&[event]) {
+            tracing::warn!("cannot replay keyboard event: {}", e);
+        }
+    }
 }
 
 /// Fires the command of the first shortcut whose modifiers exactly match the
 /// currently held ones and whose key was just pressed.
-fn try_trigger(key: Key, state: &Arc<Mutex<ModifierState>>, shortcuts: &SharedShortcuts) {
+fn try_trigger(key: Key, state: &Arc<Mutex<ModifierState>>, shortcuts: &SharedShortcuts) -> bool {
     // Global capture (e.g. the Settings key-capture dialog) suppresses all
     // shortcuts so recorded keys never fire their real commands.
     if babydra_core::services::system::keymap::is_paused() {
-        return;
+        return false;
     }
 
     let current = state.lock().unwrap().snapshot();
@@ -175,7 +264,10 @@ fn try_trigger(key: Key, state: &Arc<Mutex<ModifierState>>, shortcuts: &SharedSh
     if let Some(command) = matched {
         tracing::debug!("shortcut triggered: {:?}", command);
         tokio::spawn(run_command(command));
+        return true;
     }
+
+    false
 }
 
 /// Spawns a shortcut command via `sh -c` so shell syntax keeps working.

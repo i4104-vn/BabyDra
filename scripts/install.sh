@@ -35,6 +35,15 @@ if ! id -nG "$USER" | grep -qw input; then
     echo "Added $USER to the input group — log out and back in for it to take effect."
 fi
 
+sudo modprobe uinput
+echo "uinput" | sudo tee /etc/modules-load.d/babydra-keymap.conf > /dev/null
+echo 'KERNEL=="uinput", GROUP="input", MODE="0660"' | sudo tee /etc/udev/rules.d/99-babydra-keymap.rules > /dev/null
+echo 'SUBSYSTEM=="input", KERNEL=="event*", GROUP="input", MODE="0660"' | sudo tee -a /etc/udev/rules.d/99-babydra-keymap.rules > /dev/null
+sudo udevadm control --reload-rules
+sudo udevadm trigger --subsystem-match=misc --sysname-match=uinput
+sudo udevadm trigger --subsystem-match=input
+sudo udevadm settle
+
 # Check if yay is installed, and install it from AUR if missing
 if ! command -v yay &> /dev/null; then
     echo "yay not found, installing yay-bin from AUR..."

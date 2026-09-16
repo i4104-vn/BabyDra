@@ -222,19 +222,20 @@ pub fn build_launcher_ui(
             return gtk4::glib::Propagation::Stop;
         }
         is_animating_clone.set(true);
-        if let Ok(mut borrow) = lw_inner.try_borrow_mut() {
-            *borrow = None;
-        }
         let win_cb = win_clone_close.clone();
         let box_layout_cb = box_layout_clone_close.clone();
+        let slot_cb = lw_inner.clone();
         babydra_ui_kit::ui::animation::slide_out_cb(
             box_layout_cb.upcast_ref(),
             babydra_ui_kit::ui::animation::SlideDirection::Up,
-            40,
-            450,
+            32,
+            180,
             false,
             move || {
                 win_cb.destroy();
+                if let Ok(mut slot) = slot_cb.try_borrow_mut() {
+                    *slot = None;
+                }
             },
         );
         gtk4::glib::Propagation::Stop
@@ -388,8 +389,8 @@ pub fn build_launcher_ui(
     babydra_ui_kit::ui::animation::slide_in(
         box_layout.upcast_ref(),
         babydra_ui_kit::ui::animation::SlideDirection::Down,
-        40,
-        450,
+        32,
+        180,
     );
 
     window
