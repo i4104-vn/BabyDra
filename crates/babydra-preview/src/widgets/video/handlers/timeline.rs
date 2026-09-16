@@ -10,10 +10,27 @@ use std::rc::Rc;
 pub fn setup_timeline_controls(
     state: &Rc<RefCell<VideoState>>,
     ui: &VideoViewerUi,
-    total_secs: f64,
+    file_size_bytes: u64,
 ) {
-    let total_str = format_duration(total_secs);
-    ui.total_time_lbl.set_text(&total_str);
+    let size_str = babydra_ui_kit::components::explore::format_size(file_size_bytes);
+
+    // Sync total duration whenever GStreamer MediaFile discovers it
+    let total_lbl_init = ui.total_time_lbl.clone();
+    let timeline_scale_init = ui.timeline_scale.clone();
+    let meta_lbl_init = ui.meta_lbl.clone();
+    let state_dur = state.clone();
+
+    ui.media_file.connect_duration_notify(move |mf| {
+        let dur_us = mf.duration();
+        if dur_us > 0 {
+            state_dur.borrow_mut().duration_us = dur_us;
+            let dur_secs = (dur_us as f64) / 1_000_000.0;
+            timeline_scale_init.set_range(0.0, dur_secs);
+            let total_str = format_duration(dur_secs);
+            total_lbl_init.set_text(&total_str);
+            meta_lbl_init.set_text(&format!("{} • {}", total_str, size_str));
+        }
+    });
 
     // Sync timeline scale and time label with media progress
     let time_lbl_clone = ui.time_lbl.clone();

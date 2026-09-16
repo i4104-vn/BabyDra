@@ -6,14 +6,25 @@ use crate::widgets::playback::set_playback_speed;
 use crate::widgets::video::render::VideoViewerUi;
 use gtk4::prelude::*;
 use gtk4::Button;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 /// Sets up speed popover presentation and speed selection button listeners.
-pub fn setup_speed_controls(state: &Rc<RefCell<VideoState>>, ui: &VideoViewerUi) {
+pub fn setup_speed_controls(
+    state: &Rc<RefCell<VideoState>>,
+    ui: &VideoViewerUi,
+    is_popover_open: &Rc<Cell<bool>>,
+) {
+    let is_open_click = is_popover_open.clone();
     let popover_clone = ui.speed_popover.clone();
     ui.speed_btn.connect_clicked(move |_| {
+        is_open_click.set(true);
         popover_clone.popup();
+    });
+
+    let is_open_close = is_popover_open.clone();
+    ui.speed_popover.connect_closed(move |_| {
+        is_open_close.set(false);
     });
 
     if let Some(child) = ui.speed_popover.child() {

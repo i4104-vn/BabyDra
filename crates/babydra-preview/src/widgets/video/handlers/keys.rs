@@ -1,11 +1,18 @@
 //! Keyboard shortcut controller and metadata details inspection for video viewer.
 
-use crate::widgets::video::render::VideoViewerUi;
+use crate::widgets::video::render::{
+    format_duration, populate_video_details, show_video_details_loading, VideoViewerUi,
+};
+use crate::widgets::window::format_aspect_ratio;
+use babydra_core::models::preview::VideoMetadata;
 use gtk4::prelude::*;
 use gtk4::EventControllerKey;
+use std::cell::RefCell;
+use std::path::PathBuf;
+use std::rc::Rc;
 
-/// Sets up keyboard navigation and 'i' key handling for video preview.
-pub fn setup_key_controller(ui: &VideoViewerUi) {
+/// Sets up keyboard navigation and lazy 'i' key handling for video preview.
+pub fn setup_key_controller(ui: &VideoViewerUi, path: PathBuf) {
     let key_controller = EventControllerKey::new();
     let play_btn_key = ui.play_pause_btn.clone();
     let mf_key = ui.media_file.clone();
@@ -14,6 +21,16 @@ pub fn setup_key_controller(ui: &VideoViewerUi) {
     let info_box_clone = ui.info_box.clone();
     let controls_box_clone = ui.controls_box.clone();
     let mute_key = ui.mute_btn.clone();
+    let meta_lbl_key = ui.meta_lbl.clone();
+
+    // Cache for probe_video metadata: None = not yet loaded, Some(meta) = cached
+    let meta_cache: Rc<RefCell<Option<VideoMetadata>>> = Rc::new(RefCell::new(None));
+    let is_loading = Rc::new(RefCell::new(false));
+
+    let path_clone = path;
+    let meta_cache_pressed = meta_cache.clone();
+    let is_loading_pressed = is_loading.clone();
+    let details_box_press = details_box_clone.clone();
 
     key_controller.connect_key_pressed(move |_, keyval, _, _| {
         match keyval.name().as_deref() {
@@ -21,9 +38,60 @@ pub fn setup_key_controller(ui: &VideoViewerUi) {
                 play_btn_key.emit_clicked();
             }
             Some("i") | Some("I") => {
-                details_box_clone.set_visible(true);
+                details_box_press.set_visible(true);
                 info_box_clone.set_visible(false);
                 controls_box_clone.set_visible(false);
+
+                // Lazy load video stream metadata via ffprobe in background thread if needed
+                let is_loaded = meta_cache_pressed.borrow().is_some();
+                let already_loading = *is_loading_pressed.borrow();
+
+                if !is_loaded && !already_loading {
+                    *is_loading_pressed.borrow_mut() = true;
+                    show_video_details_loading(&details_box_press);
+
+                    let (tx, rx) = std::sync::mpsc::channel::<VideoMetadata>();
+                    let p = path_clone.clone();
+                    std::thread::spawn(move || {
+                        let meta = babydra_core::services::preview::probe_video(&p);
+                        let _ = tx.send(meta);
+                    });
+
+                    let cache_res = meta_cache_pressed.clone();
+                    let loading_res = is_loading_pressed.clone();
+                    let box_res = details_box_press.clone();
+                    let lbl_res = meta_lbl_key.clone();
+
+                    let mut rx_opt = Some(rx);
+                    glib::timeout_add_local(std::time::Duration::from_millis(16), move || {
+                        if let Some(ref rx_chan) = rx_opt {
+                            if let Ok(meta) = rx_chan.try_recv() {
+                                rx_opt = None;
+                                *loading_res.borrow_mut() = false;
+                                populate_video_details(&box_res, &meta);
+
+                                // Update info overlay with exact resolution and container specs
+                                let res_aspect = format_aspect_ratio(meta.width, meta.height);
+                                let res_text = if !res_aspect.is_empty() {
+                                    format!("{}x{} ({})", meta.width, meta.height, res_aspect)
+                                } else {
+                                    format!("{}x{}", meta.width, meta.height)
+                                };
+                                let meta_text = format!(
+                                    "{} • {} • {}",
+                                    res_text,
+                                    format_duration(meta.duration_secs),
+                                    babydra_ui_kit::components::explore::format_size(meta.file_size)
+                                );
+                                lbl_res.set_text(&meta_text);
+
+                                *cache_res.borrow_mut() = Some(meta);
+                                return glib::ControlFlow::Break;
+                            }
+                        }
+                        glib::ControlFlow::Continue
+                    });
+                }
             }
             Some("Left") => {
                 let cur = mf_key.timestamp();
