@@ -1,10 +1,8 @@
 use babydra_core::DesktopApp;
-use std::rc::Rc;
 
 pub struct PopoverState {
     pub preview_popover: gtk4::Popover,
     pub tooltip_popover: gtk4::Popover,
-    pub update_tooltip: Rc<dyn Fn()>,
 }
 
 pub struct TaskbarPreviewActions {

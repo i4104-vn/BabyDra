@@ -256,48 +256,167 @@ pub fn close_all_windows(app_id: &str) {
         .status();
 }
 
-/// Focuses a window using wlrctl.
-pub fn focus_window(app_id: &str, title: &str) {
+/// Closes a window without blocking the UI caller on compositor I/O.
+pub fn close_window_async(app_id: &str, title: &str) {
+    let app_id = app_id.to_owned();
+    let title = title.to_owned();
+    std::thread::spawn(move || close_window(&app_id, &title));
+}
+
+/// Closes all windows for an application without blocking the UI caller.
+pub fn close_all_windows_async(app_id: &str) {
+    let app_id = app_id.to_owned();
+    std::thread::spawn(move || close_all_windows(&app_id));
+}
+
+/// Minimizes a specific window instance using wlrctl.
+pub fn minimize_window(app_id: &str, title: &str) {
     let running = get_running_windows();
-    let actual_title = if !title.is_empty() {
-        if running
-            .iter()
-            .any(|(id, t)| (id == app_id || id.is_empty()) && t == title)
-        {
-            title.to_string()
-        } else {
-            running
-                .iter()
-                .find(|(id, t)| {
-                    (id == app_id || id.is_empty() || app_id.is_empty())
-                        && (t.contains(title) || title.contains(t.as_str()))
-                })
-                .map(|(_, t)| t.clone())
-                .unwrap_or_else(|| title.to_string())
+    let app_id_clean = app_id.strip_suffix(".desktop").unwrap_or(app_id);
+
+    if !title.is_empty() {
+        let clean_title = title.trim_end_matches('●').trim();
+        if let Some((_, exact_title)) = running.iter().find(|(id, t)| {
+            (id.eq_ignore_ascii_case(app_id_clean) || id.is_empty() || app_id_clean.is_empty())
+                && t.trim_end_matches('●').trim() == clean_title
+        }) {
+            if let Ok(s) = Command::new("wlrctl")
+                .args(&["toplevel", "minimize", &format!("title:{}", exact_title)])
+                .status()
+            {
+                if s.success() {
+                    return;
+                }
+            }
         }
-    } else {
-        String::new()
-    };
+    }
 
-    let target_title = if !actual_title.is_empty() {
-        &actual_title
-    } else {
-        title
-    };
-
-    if !target_title.is_empty() {
-        let status = Command::new("wlrctl")
-            .args(&["window", "focus", &format!("title:{}", target_title)])
-            .status();
-        if let Ok(s) = status {
+    if let Some((exact_id, _)) = running
+        .iter()
+        .find(|(id, _)| id.eq_ignore_ascii_case(app_id_clean))
+    {
+        if let Ok(s) = Command::new("wlrctl")
+            .args(&["toplevel", "minimize", exact_id])
+            .status()
+        {
             if s.success() {
                 return;
             }
         }
     }
+
     let _ = Command::new("wlrctl")
-        .args(&["window", "focus", app_id])
+        .args(&["toplevel", "minimize", app_id_clean])
         .status();
+}
+
+/// Focuses a window using wlrctl with case-insensitive app_id and title matching.
+pub fn focus_window(app_id: &str, title: &str) {
+    let running = get_running_windows();
+    let app_id_clean = app_id.strip_suffix(".desktop").unwrap_or(app_id);
+
+    if !title.is_empty() {
+        let clean_title = title.trim_end_matches('●').trim();
+
+        // 1. Exact match on title (ignoring unsaved markers)
+        if let Some((_, exact_title)) = running.iter().find(|(id, t)| {
+            (id.eq_ignore_ascii_case(app_id_clean) || id.is_empty() || app_id_clean.is_empty())
+                && t.trim_end_matches('●').trim() == clean_title
+        }) {
+            if let Ok(s) = Command::new("wlrctl")
+                .args(&["toplevel", "focus", &format!("title:{}", exact_title)])
+                .status()
+            {
+                if s.success() {
+                    return;
+                }
+            }
+        }
+
+        // 2. Substring match on title
+        if let Some((_, exact_title)) = running.iter().find(|(id, t)| {
+            (id.eq_ignore_ascii_case(app_id_clean) || id.is_empty() || app_id_clean.is_empty())
+                && (t.contains(clean_title) || clean_title.contains(t.as_str()))
+        }) {
+            if let Ok(s) = Command::new("wlrctl")
+                .args(&["toplevel", "focus", &format!("title:{}", exact_title)])
+                .status()
+            {
+                if s.success() {
+                    return;
+                }
+            }
+        }
+    }
+
+    // 3. Match running app_id case-insensitively
+    if let Some((exact_id, _)) = running
+        .iter()
+        .find(|(id, _)| id.eq_ignore_ascii_case(app_id_clean))
+    {
+        if let Ok(s) = Command::new("wlrctl")
+            .args(&["toplevel", "focus", exact_id])
+            .status()
+        {
+            if s.success() {
+                return;
+            }
+        }
+    }
+
+    // 4. Direct fallback
+    let _ = Command::new("wlrctl")
+        .args(&["toplevel", "focus", app_id_clean])
+        .status();
+}
+
+/// Focuses a window without making the GTK event callback wait for `wlrctl`.
+pub fn focus_window_async(app_id: &str, title: &str) {
+    let app_id = app_id.to_owned();
+    let title = title.to_owned();
+    std::thread::spawn(move || focus_window(&app_id, &title));
+}
+
+/// Toggles an application window: minimizes it if currently active, or focuses it if inactive.
+pub fn toggle_app_window(app_id: &str, title: &str) {
+    let active = get_active_window();
+    let app_id_clean = app_id.strip_suffix(".desktop").unwrap_or(app_id);
+
+    let is_currently_active = if let Some((ref active_id, ref active_title)) = active {
+        let id_matches = active_id.eq_ignore_ascii_case(app_id_clean);
+        if !title.is_empty() {
+            let clean_act = active_title.trim_end_matches('●').trim();
+            let clean_t = title.trim_end_matches('●').trim();
+            id_matches && (clean_act == clean_t || clean_act.contains(clean_t) || clean_t.contains(clean_act))
+        } else {
+            id_matches
+        }
+    } else {
+        false
+    };
+
+    if is_currently_active {
+        minimize_window(app_id_clean, title);
+    } else {
+        focus_window(app_id_clean, title);
+    }
+}
+
+/// Toggles a window asynchronously for responsive taskbar clicks.
+pub fn toggle_app_window_async(app_id: &str, title: &str) {
+    let app_id = app_id.to_owned();
+    let title = title.to_owned();
+    std::thread::spawn(move || toggle_app_window(&app_id, &title));
+}
+
+/// Switches workspace and focuses the target in one ordered background task.
+pub fn focus_window_on_workspace_async(workspace_id: u32, app_id: &str, title: &str) {
+    let app_id = app_id.to_owned();
+    let title = title.to_owned();
+    std::thread::spawn(move || {
+        crate::services::workspace::switch_workspace(workspace_id);
+        focus_window(&app_id, &title);
+    });
 }
 
 /// Minimizes all open application windows to show the desktop.
@@ -313,5 +432,38 @@ pub fn minimize_all_windows() {
                 .args(&["toplevel", "minimize", &app_id])
                 .status();
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_find_best_window_match_by_title() {
+        let windows = vec![
+            ("Opera".to_string(), "YouTube - Opera".to_string()),
+            ("antigravity-ide".to_string(), "BabyDra - IDE".to_string()),
+        ];
+
+        let res = find_best_window_match(&windows, "Opera", "opera", Some("Opera"), Some("YouTube - Opera"));
+        assert_eq!(res, Some("title:YouTube - Opera".to_string()));
+    }
+
+    #[test]
+    fn test_find_best_window_match_case_insensitive_app_id() {
+        let windows = vec![
+            ("Opera".to_string(), "Opera Browser".to_string()),
+        ];
+
+        let res = find_best_window_match(&windows, "opera", "opera", Some("opera"), None);
+        assert_eq!(res, Some("Opera".to_string()));
+    }
+
+    #[test]
+    fn test_app_id_clean_suffix() {
+        let id = "antigravity-ide.desktop";
+        let clean = id.strip_suffix(".desktop").unwrap_or(id);
+        assert_eq!(clean, "antigravity-ide");
     }
 }

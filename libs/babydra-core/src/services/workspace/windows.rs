@@ -2,6 +2,15 @@ use crate::models::DesktopApp;
 use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
+use std::sync::{Mutex, OnceLock};
+
+type WindowsMapCache = Option<(PathBuf, HashMap<String, u32>)>;
+
+static WINDOWS_MAP_CACHE: OnceLock<Mutex<WindowsMapCache>> = OnceLock::new();
+
+fn windows_map_cache() -> &'static Mutex<WindowsMapCache> {
+    WINDOWS_MAP_CACHE.get_or_init(|| Mutex::new(None))
+}
 
 pub fn get_windows_map_cache_path() -> PathBuf {
     super::cache::get_workspace_cache_dir().join("workspace_windows.json")
@@ -9,7 +18,20 @@ pub fn get_windows_map_cache_path() -> PathBuf {
 
 pub fn read_windows_map() -> HashMap<String, u32> {
     let path = get_windows_map_cache_path();
-    if let Ok(content) = fs::read_to_string(&path) {
+    let mut cache = windows_map_cache().lock().unwrap();
+    if let Some((cached_path, map)) = cache.as_ref() {
+        if cached_path == &path {
+            return map.clone();
+        }
+    }
+
+    let map = read_windows_map_from_disk(&path);
+    *cache = Some((path, map.clone()));
+    map
+}
+
+fn read_windows_map_from_disk(path: &std::path::Path) -> HashMap<String, u32> {
+    if let Ok(content) = fs::read_to_string(path) {
         if let Ok(map) = serde_json::from_str::<HashMap<String, u32>>(&content) {
             return map;
         }
@@ -25,6 +47,11 @@ pub fn write_windows_map(map: &HashMap<String, u32>) {
     if let Ok(json) = serde_json::to_string(map) {
         let _ = fs::write(path, json);
     }
+    *windows_map_cache().lock().unwrap() = Some((get_windows_map_cache_path(), map.clone()));
+}
+
+pub(crate) fn clear_windows_map_cache() {
+    *windows_map_cache().lock().unwrap() = None;
 }
 
 pub fn make_app_key(app: &DesktopApp) -> String {
@@ -79,7 +106,9 @@ pub fn sync_workspace_apps(current_ws: u32, apps: &[DesktopApp]) -> HashMap<Stri
     }
 
     map.retain(|k, _| current_keys.contains(k));
-    write_windows_map(&map);
+    if map != read_windows_map() {
+        write_windows_map(&map);
+    }
     map
 }
 

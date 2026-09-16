@@ -1,6 +1,6 @@
-use babydra_core::focus_window;
 use babydra_core::{
-    filter_apps_for_workspace, get_current_workspace, switch_workspace, DEFAULT_WORKSPACE_COUNT,
+    focus_window_on_workspace_async, get_current_workspace, latest_workspace_snapshot,
+    switch_workspace_async, DEFAULT_WORKSPACE_COUNT,
 };
 use gtk4::prelude::*;
 use std::cell::RefCell;
@@ -66,11 +66,15 @@ pub fn build_workspace_popover(parent: &impl IsA<gtk4::Widget>) -> gtk4::Popover
                 items_box.remove(&child);
             }
 
-            let running_apps = babydra_core::get_running_apps();
-            let current_ws = get_current_workspace();
+            let snapshot = latest_workspace_snapshot().unwrap_or_default();
+            let current_ws = if snapshot.current_workspace == 0 {
+                get_current_workspace()
+            } else {
+                snapshot.current_workspace
+            };
 
             for id in 1..=DEFAULT_WORKSPACE_COUNT {
-                let ws_apps = filter_apps_for_workspace(id, &running_apps, current_ws);
+                let ws_apps = snapshot.apps_for_workspace(id);
 
                 let row_btn = gtk4::Button::new();
                 row_btn.add_css_class("workspace-popover-row");
@@ -112,7 +116,7 @@ pub fn build_workspace_popover(parent: &impl IsA<gtk4::Widget>) -> gtk4::Popover
 
                 let pop_close = popover_c.clone();
                 row_btn.connect_clicked(move |_| {
-                    switch_workspace(id);
+                    switch_workspace_async(id);
                     pop_close.popdown();
                 });
 
@@ -142,7 +146,7 @@ pub fn build_workspace_popover(parent: &impl IsA<gtk4::Widget>) -> gtk4::Popover
                     empty_lbl.set_halign(gtk4::Align::Center);
                     flyout_box.append(&empty_lbl);
                 } else {
-                    for app in &ws_apps {
+                    for app in ws_apps {
                         let app_btn = gtk4::Button::new();
                         app_btn.add_css_class("workspace-app-flyout-item");
 
@@ -179,8 +183,7 @@ pub fn build_workspace_popover(parent: &impl IsA<gtk4::Widget>) -> gtk4::Popover
                         let win_title_str =
                             app.window_title.clone().unwrap_or_else(|| app.name.clone());
                         app_btn.connect_clicked(move |_| {
-                            switch_workspace(id);
-                            focus_window(&app_id_str, &win_title_str);
+                            focus_window_on_workspace_async(id, &app_id_str, &win_title_str);
                             flyout_close.popdown();
                             pop_close2.popdown();
                         });

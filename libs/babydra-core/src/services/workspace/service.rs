@@ -1,8 +1,9 @@
 pub use crate::models::desktop::workspace::{WorkspaceReceiver, WorkspaceSnapshot};
 use crate::models::DesktopApp;
-use crate::services::window::get_active_window;
-use crate::services::window::mru::get_running_apps;
-use crate::services::workspace::{filter_apps_for_workspace, get_current_workspace};
+use crate::services::window::mru::get_running_apps_with_active;
+use crate::services::workspace::{
+    get_app_workspace, get_current_workspace, sync_workspace_apps, DEFAULT_WORKSPACE_COUNT,
+};
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
@@ -12,10 +13,7 @@ static WORKSPACE_SENDERS: Mutex<Vec<std::sync::mpsc::Sender<WorkspaceSnapshot>>>
     Mutex::new(Vec::new());
 static WORKSPACE_STARTED: AtomicBool = AtomicBool::new(false);
 static LAST_SIGNATURE: Mutex<String> = Mutex::new(String::new());
-
-fn get_active_app_id() -> Option<String> {
-    get_active_window().map(|(app_id, _)| app_id)
-}
+static LATEST_SNAPSHOT: Mutex<Option<WorkspaceSnapshot>> = Mutex::new(None);
 
 pub fn get_apps_signature(ws_id: u32, running_apps: &[DesktopApp]) -> String {
     let mut counts = HashMap::new();
@@ -29,16 +27,37 @@ pub fn get_apps_signature(ws_id: u32, running_apps: &[DesktopApp]) -> String {
 }
 
 pub fn collect_workspace_snapshot() -> WorkspaceSnapshot {
-    let all_apps = get_running_apps();
-    let active_app_id = get_active_app_id();
+    let (all_apps, active_window) = get_running_apps_with_active();
     let current_ws = get_current_workspace();
-    let ws_apps = filter_apps_for_workspace(current_ws, &all_apps, current_ws);
+    let workspace_map = sync_workspace_apps(current_ws, &all_apps);
+    let workspace_apps = (1..=DEFAULT_WORKSPACE_COUNT)
+        .map(|workspace_id| {
+            all_apps
+                .iter()
+                .filter(|app| {
+                    get_app_workspace(app, &workspace_map, current_ws) == workspace_id
+                })
+                .cloned()
+                .collect()
+        })
+        .collect::<Vec<Vec<DesktopApp>>>();
+    let apps = workspace_apps
+        .get(current_ws.saturating_sub(1) as usize)
+        .cloned()
+        .unwrap_or_default();
 
     WorkspaceSnapshot {
         current_workspace: current_ws,
-        apps: ws_apps,
-        active_app_id,
+        workspace_apps,
+        apps,
+        active_app_id: active_window.as_ref().map(|(app_id, _)| app_id.clone()),
+        active_window_title: active_window.map(|(_, title)| title),
     }
+}
+
+/// Returns the most recently collected snapshot without performing I/O.
+pub fn latest_snapshot() -> Option<WorkspaceSnapshot> {
+    LATEST_SNAPSHOT.lock().unwrap().clone()
 }
 
 pub fn subscribe() -> WorkspaceReceiver {
@@ -63,8 +82,9 @@ pub fn init_workspace_service() {
             continue;
         }
 
-        std::thread::sleep(Duration::from_millis(200));
+        std::thread::sleep(Duration::from_millis(350));
         let snapshot = collect_workspace_snapshot();
+        *LATEST_SNAPSHOT.lock().unwrap() = Some(snapshot.clone());
         let sig = format!(
             "{}:{:?}:{}",
             snapshot.current_workspace,

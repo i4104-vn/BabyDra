@@ -46,4 +46,5 @@ pub fn reset_cached_workspace() {
     write_cached_workspace(1);
     let win_path = get_workspace_cache_dir().join("workspace_windows.json");
     let _ = fs::remove_file(win_path);
+    super::windows::clear_windows_map_cache();
 }

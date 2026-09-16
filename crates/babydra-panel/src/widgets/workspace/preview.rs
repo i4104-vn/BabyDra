@@ -1,5 +1,5 @@
 use super::render;
-use babydra_core::{close_window, focus_window, DesktopApp};
+use babydra_core::{close_all_windows_async, close_window_async, focus_window_async, DesktopApp};
 use gtk4::prelude::*;
 
 /// Populates a Popover widget containing a vertical list of window titles grouped by app
@@ -18,7 +18,7 @@ pub fn populate_previews(popover: &gtk4::Popover, windows: &[DesktopApp], app_id
         let app_id_str_clone = app_id_str.clone();
         let title_str_clone = title_str.clone();
         preview_btn.connect_clicked(move |_| {
-            focus_window(&app_id_str_clone, &title_str_clone);
+            focus_window_async(&app_id_str_clone, &title_str_clone);
             pop_close.popdown();
         });
 
@@ -26,7 +26,7 @@ pub fn populate_previews(popover: &gtk4::Popover, windows: &[DesktopApp], app_id
         let app_id_str_kill = app_id_str;
         let title_str_kill = title_str;
         kill_btn.connect_clicked(move |_| {
-            close_window(&app_id_str_kill, &title_str_kill);
+            close_window_async(&app_id_str_kill, &title_str_kill);
             pop_close_kill.popdown();
         });
     }
@@ -49,13 +49,8 @@ pub fn populate_previews(popover: &gtk4::Popover, windows: &[DesktopApp], app_id
         let app_id_str = app_id.to_string();
 
         close_all_btn.connect_clicked(move |_| {
-            babydra_core::close_all_windows(&app_id_str);
+            close_all_windows_async(&app_id_str);
             pop_close_all.popdown();
         });
     }
-
-    popover.connect_closed(|pop| {
-        // Clear the child on close to free widget resources
-        pop.set_child(None::<&gtk4::Widget>);
-    });
 }

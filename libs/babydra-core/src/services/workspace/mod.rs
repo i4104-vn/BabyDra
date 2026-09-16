@@ -11,7 +11,9 @@ pub use cache::{
 };
 pub use cli::run_cli;
 pub use compositor::dispatch_compositor_switch;
-pub use service::{init_workspace_service, subscribe, WorkspaceSnapshot};
+pub use service::{
+    get_apps_signature, init_workspace_service, latest_snapshot, subscribe, WorkspaceSnapshot,
+};
 pub use windows::{filter_apps_for_workspace, get_app_workspace, sync_workspace_apps};
 
 pub fn get_current_workspace() -> u32 {
@@ -41,6 +43,17 @@ pub fn switch_workspace(id: u32) -> bool {
     true
 }
 
+/// Updates local workspace state immediately and dispatches the compositor command away from
+/// the caller thread. Use this from interactive UI callbacks.
+pub fn switch_workspace_async(id: u32) -> bool {
+    if id < 1 || id > DEFAULT_WORKSPACE_COUNT {
+        return false;
+    }
+    write_cached_workspace(id);
+    std::thread::spawn(move || dispatch_compositor_switch(id));
+    true
+}
+
 pub fn set_workspace_sync_only(id: u32) -> bool {
     if id < 1 || id > DEFAULT_WORKSPACE_COUNT {
         return false;
@@ -57,6 +70,18 @@ pub fn next_workspace() -> u32 {
         current + 1
     };
     switch_workspace(next);
+    next
+}
+
+/// Advances to the next workspace without blocking an interactive caller.
+pub fn next_workspace_async() -> u32 {
+    let current = get_current_workspace();
+    let next = if current >= DEFAULT_WORKSPACE_COUNT {
+        1
+    } else {
+        current + 1
+    };
+    switch_workspace_async(next);
     next
 }
 
@@ -79,6 +104,18 @@ pub fn prev_workspace() -> u32 {
         current - 1
     };
     switch_workspace(prev);
+    prev
+}
+
+/// Moves to the previous workspace without blocking an interactive caller.
+pub fn prev_workspace_async() -> u32 {
+    let current = get_current_workspace();
+    let prev = if current <= 1 {
+        DEFAULT_WORKSPACE_COUNT
+    } else {
+        current - 1
+    };
+    switch_workspace_async(prev);
     prev
 }
 

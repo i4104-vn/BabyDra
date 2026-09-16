@@ -72,20 +72,26 @@ pub use services::app_lifecycle::{init_app, AppLifecycle};
 pub use services::apps::{find_desktop_apps, refresh_desktop_apps, DesktopApp};
 pub use services::cli::{execute_cli_action, parse_cli_args, CliAction, CliOptions, PageId};
 pub use services::config::pages::{is_valid_page, normalize_page_name, PageId as ConfigPageId};
-pub use services::window::mru::{activate_app, get_history, get_running_apps, save_history};
+pub use services::window::mru::{
+    activate_app, get_history, get_running_apps, get_running_apps_with_active, save_history,
+};
 pub use services::window::tracker::spawn_switcher;
 pub use services::window::{
-    self, close_all_windows, close_window, focus_window, get_active_window, jump_to_app,
+    self, close_all_windows, close_all_windows_async, close_window, close_window_async,
+    focus_window, focus_window_async, focus_window_on_workspace_async, get_active_window,
+    jump_to_app, minimize_window, toggle_app_window, toggle_app_window_async,
 };
 
 // --- Workspace Management ---
 pub use models::shell::workspace::Workspace;
 pub use services::workspace::{
     self, filter_apps_for_workspace, get_app_workspace, get_current_workspace, get_workspaces,
-    init_workspace_service, next_workspace, next_workspace_sync_only, prev_workspace,
+    init_workspace_service, latest_snapshot as latest_workspace_snapshot, next_workspace,
+    next_workspace_async, next_workspace_sync_only, prev_workspace, prev_workspace_async,
     prev_workspace_sync_only, reset_cached_workspace, run_cli as run_workspace_cli,
     set_cached_workspace, set_workspace_sync_only, subscribe as subscribe_workspace,
-    switch_workspace, sync_workspace_apps, WorkspaceSnapshot, DEFAULT_WORKSPACE_COUNT,
+    switch_workspace, switch_workspace_async, sync_workspace_apps, WorkspaceSnapshot,
+    DEFAULT_WORKSPACE_COUNT,
 };
 
 // --- Shell, Media & Utilities ---

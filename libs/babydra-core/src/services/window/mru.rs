@@ -32,6 +32,12 @@ pub fn save_history(active_name: &str) {
 /// Queries the Wayland compositor for running windows and matches them with local desktop entries.
 /// Returns matched windows sorted by most recently used (MRU) order.
 pub fn get_running_apps() -> Vec<DesktopApp> {
+    get_running_apps_with_active().0
+}
+
+/// Returns the running applications together with the focused window collected during the same
+/// compositor query. This prevents UI services from spawning a second focus query per refresh.
+pub fn get_running_apps_with_active() -> (Vec<DesktopApp>, Option<(String, String)>) {
     // Run desktop app scan and window list query in parallel to reduce startup latency.
     // Previously sequential: ~80ms (desktop scan) + ~30ms (wlrctl) = ~110ms
     // Now parallel: max(80ms, 30ms) = ~80ms
@@ -155,7 +161,7 @@ pub fn get_running_apps() -> Vec<DesktopApp> {
         }
     }
 
-    running
+    (running, active_window)
 }
 
 /// Commands the Wayland compositor to focus/activate a specific application window.

@@ -23,6 +23,9 @@ pub fn build_popover_box(parent: &gtk4::Button) -> gtk4::Popover {
     );
     popover.set_has_arrow(false);
     popover.set_autohide(true);
+    popover.connect_closed(|pop| {
+        pop.set_child(None::<&gtk4::Widget>);
+    });
     popover
 }
 
@@ -132,8 +135,11 @@ pub fn render_previews(
     let items_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
     items_box.add_css_class("taskbar-popover-items");
 
-    let active_win = babydra_core::get_active_window();
-    let active_title_opt = active_win.as_ref().map(|(_, t)| t.as_str());
+    // Use the workspace service cache: opening the menu must not synchronously invoke wlrctl.
+    let active_snapshot = babydra_core::latest_workspace_snapshot();
+    let active_title_opt = active_snapshot
+        .as_ref()
+        .and_then(|snapshot| snapshot.active_window_title.as_deref());
 
     let mut action_triggers = Vec::new();
 

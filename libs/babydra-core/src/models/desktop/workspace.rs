@@ -31,8 +31,23 @@ impl Workspace {
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct WorkspaceSnapshot {
     pub current_workspace: u32,
+    /// Windows grouped by workspace, ordered from workspace 1 through 4.
+    /// Keeping this in the snapshot lets UI consumers render workspace menus without
+    /// synchronously querying the compositor again.
+    pub workspace_apps: Vec<Vec<DesktopApp>>,
     pub apps: Vec<DesktopApp>,
     pub active_app_id: Option<String>,
+    pub active_window_title: Option<String>,
+}
+
+impl WorkspaceSnapshot {
+    pub fn apps_for_workspace(&self, workspace_id: u32) -> &[DesktopApp] {
+        workspace_id
+            .checked_sub(1)
+            .and_then(|index| self.workspace_apps.get(index as usize))
+            .map(Vec::as_slice)
+            .unwrap_or_default()
+    }
 }
 
 pub struct WorkspaceReceiver {

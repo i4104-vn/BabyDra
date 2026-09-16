@@ -115,9 +115,9 @@ pub fn rebuild_panel_window(
         logo_pop_scroll.popdown();
         ws_pop_scroll.popdown();
         if dy > 0.0 {
-            babydra_core::next_workspace();
+            babydra_core::next_workspace_async();
         } else if dy < 0.0 {
-            babydra_core::prev_workspace();
+            babydra_core::prev_workspace_async();
         }
         gtk4::glib::Propagation::Stop
     });
@@ -233,16 +233,13 @@ pub fn build_panel_ui(
 
     let active_notch = Rc::new(RefCell::new(None::<gtk4::Box>));
     let notch_slot = active_notch.clone();
+    let last_region_params = Rc::new(RefCell::new((0i32, 0i32, 0i32, 0i32, 0i32)));
 
     // Input region handler: Ensure transparent areas outside top bar and notch capsule pass mouse clicks to underlying windows
     window.add_tick_callback(move |win, _| {
         if let Some(surface) = win.surface() {
             let win_w = win.width();
-            let region = gtk4::cairo::Region::create();
-
-            // Top bar panel rect (height 36px)
-            let top_rect = gtk4::cairo::RectangleInt::new(0, 0, win_w, 36);
-            let _ = region.union_rectangle(&top_rect);
+            let mut notch_params = (0i32, 0i32, 0i32, 0i32);
 
             // Notch capsule rect when expanded
             if let Some(ref notch) = *notch_slot.borrow() {
@@ -251,15 +248,37 @@ pub fn build_panel_ui(
                         let nw = notch.width();
                         let nh = notch.height();
                         if nh > 36 && nw > 0 {
-                            let notch_rect =
-                                gtk4::cairo::RectangleInt::new(nx as i32, ny as i32, nw, nh);
-                            let _ = region.union_rectangle(&notch_rect);
+                            notch_params = (nx as i32, ny as i32, nw, nh);
                         }
                     }
                 }
             }
 
-            surface.set_input_region(&region);
+            let current_params = (
+                win_w,
+                notch_params.0,
+                notch_params.1,
+                notch_params.2,
+                notch_params.3,
+            );
+            if *last_region_params.borrow() != current_params {
+                *last_region_params.borrow_mut() = current_params;
+                let region = gtk4::cairo::Region::create();
+                let top_rect = gtk4::cairo::RectangleInt::new(0, 0, win_w, 36);
+                let _ = region.union_rectangle(&top_rect);
+
+                if notch_params.3 > 36 && notch_params.2 > 0 {
+                    let notch_rect = gtk4::cairo::RectangleInt::new(
+                        notch_params.0,
+                        notch_params.1,
+                        notch_params.2,
+                        notch_params.3,
+                    );
+                    let _ = region.union_rectangle(&notch_rect);
+                }
+
+                surface.set_input_region(&region);
+            }
         }
         glib::ControlFlow::Continue
     });
