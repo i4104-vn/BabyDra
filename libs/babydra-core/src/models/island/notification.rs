@@ -11,6 +11,8 @@ pub struct ActiveNotification {
     pub icon: String,
     /// Friendly name of the app sending the notification.
     pub app_name: String,
+    /// Optional command to execute when the notification is clicked.
+    pub command: Option<String>,
     /// Time instant when the notification was created.
     pub timestamp: std::time::Instant,
 }
@@ -25,6 +27,7 @@ pub enum NotificationMsg {
         icon: String,
         app_name: String,
         timeout: i32,
+        command: Option<String>,
     },
     /// Command to close the current active popup.
     Close,

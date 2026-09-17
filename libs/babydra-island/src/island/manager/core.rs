@@ -58,6 +58,11 @@ impl IslandCore {
             return true;
         }
 
+        // 4. If an override is explicitly active, it is alive
+        if v.state.override_active.get() {
+            return true;
+        }
+
         // Neither timeout nor persistent feature state is alive -> wipe from queue
         v.state.deactivate();
         false

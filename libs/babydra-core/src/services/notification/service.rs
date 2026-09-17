@@ -78,12 +78,21 @@ impl NotificationService {
             icon = app_name.to_lowercase();
         }
 
+        let command = _hints
+            .get("command")
+            .or_else(|| _hints.get("x-babydra-command"))
+            .and_then(|v| match v {
+                zbus::zvariant::Value::Str(s) => Some(s.to_string()),
+                _ => None,
+            });
+
         let _ = self.sender.send(NotificationMsg::New {
             summary: summary.to_string(),
             body: body.to_string(),
             icon,
             app_name: app_name.to_string(),
             timeout: expire_timeout,
+            command,
         });
 
         id
@@ -151,13 +160,26 @@ pub fn show_notif_popup(
     body: &str,
     icon_name: &str,
     app_name: &str,
+    timeout_ms: i32,
+) {
+    show_notif_popup_with_cmd(summary, body, icon_name, app_name, timeout_ms, None);
+}
+
+/// Registers the incoming desktop notification with an optional click command.
+pub fn show_notif_popup_with_cmd(
+    summary: &str,
+    body: &str,
+    icon_name: &str,
+    app_name: &str,
     _timeout_ms: i32,
+    command: Option<String>,
 ) {
     let notif = ActiveNotification {
         title: summary.to_string(),
         body: body.to_string(),
         icon: icon_name.to_string(),
         app_name: app_name.to_string(),
+        command,
         timestamp: std::time::Instant::now(),
     };
 
@@ -201,6 +223,11 @@ pub fn send_notification(title: &str, body: &str) {
     send_app_notif("BabyDra", title, body, "babydra");
 }
 
+/// Sends a desktop notification with an executable click command using default logo.
+pub fn send_notification_with_cmd(title: &str, body: &str, command: &str) {
+    send_app_notif_with_cmd("BabyDra", title, body, "babydra", command);
+}
+
 /// Sends a desktop notification for Settings using the logo as icon.
 pub fn send_settings_notif(title: &str, body: &str) {
     send_app_notif("Settings", title, body, "");
@@ -213,6 +240,17 @@ pub fn send_notif_icon(title: &str, body: &str, icon_name: &str) {
 
 /// Sends a desktop notification with a custom app name and icon.
 pub fn send_app_notif(app_name: &str, title: &str, body: &str, icon_name: &str) {
+    send_app_notif_with_cmd(app_name, title, body, icon_name, "");
+}
+
+/// Sends a desktop notification with a custom app name, icon, and an executable command when clicked.
+pub fn send_app_notif_with_cmd(
+    app_name: &str,
+    title: &str,
+    body: &str,
+    icon_name: &str,
+    command: &str,
+) {
     let system_logo = "/usr/share/babydra/logo.png";
 
     let logo_str = if icon_name.is_empty() {
@@ -225,6 +263,11 @@ pub fn send_app_notif(app_name: &str, title: &str, body: &str, icon_name: &str) 
         icon_name
     };
 
+    let mut hints = HashMap::new();
+    if !command.is_empty() {
+        hints.insert("command", zbus::zvariant::Value::Str(command.into()));
+    }
+
     if let Ok(conn) = zbus::blocking::Connection::session() {
         if let Ok(proxy) = NotificationsProxyBlocking::new(&conn) {
             let _ = proxy.notify(
@@ -234,13 +277,16 @@ pub fn send_app_notif(app_name: &str, title: &str, body: &str, icon_name: &str) 
                 title,
                 body,
                 vec![],
-                HashMap::new(),
+                hints,
                 -1,
             );
             return;
         }
     }
-    let _ = std::process::Command::new("notify-send")
-        .args(&["-a", app_name, "-i", logo_str, title, body])
-        .spawn();
+    let mut cmd = std::process::Command::new("notify-send");
+    cmd.args(&["-a", app_name, "-i", logo_str, title, body]);
+    if !command.is_empty() {
+        cmd.args(&["--hint", &format!("string:command:{}", command)]);
+    }
+    let _ = cmd.spawn();
 }

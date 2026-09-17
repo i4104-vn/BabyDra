@@ -141,10 +141,12 @@ fn run_gtk_css_parsing() {
         "libs/babydra-ui-kit/src/styles/shared/shared/button.css",
         "libs/babydra-ui-kit/src/styles/shared/shared/sidebar.css",
         "libs/babydra-ui-kit/src/styles/shared/apps/screenshot.css",
+        "libs/babydra-ui-kit/src/styles/shared/apps/recorder.css",
         "libs/babydra-ui-kit/src/styles/shared/apps/lock.css",
         "libs/babydra-ui-kit/src/styles/shared/apps/preview.css",
         "libs/babydra-ui-kit/src/styles/shared/apps/settings.css",
         "libs/babydra-ui-kit/src/styles/shared/apps/switcher.css",
+        "libs/babydra-ui-kit/src/styles/shared/apps/desktop.css",
         "libs/babydra-ui-kit/src/styles/shared/explore/window.css",
         "libs/babydra-ui-kit/src/styles/shared/explore/header_bar.css",
         "libs/babydra-ui-kit/src/styles/shared/explore/content_view.css",
@@ -154,6 +156,7 @@ fn run_gtk_css_parsing() {
         "libs/babydra-ui-kit/src/styles/shared/explore/dialogs.css",
         "libs/babydra-ui-kit/src/styles/shared/shared/dialog.css",
         "libs/babydra-ui-kit/src/styles/shared/shared/scrollbar.css",
+        "crates/babydra-greeter/src/assets/greeter.css",
         "themes/babydra-default/css/dark.css",
         "themes/babydra-default/css/light.css",
         "themes/babydra-default/css/theme.css",
@@ -219,7 +222,7 @@ fn run_gtk_css_parsing() {
         for (mode, color_css) in [("dark", &theme.dark_css), ("light", &theme.light_css)] {
             // Concatenate all structural files + color layer + extra layer
             let mut full_css = String::new();
-            for rel_path in &files[0..28] {
+            for rel_path in &files[0..29] {
                 let p = repo_root().join(rel_path);
                 full_css.push_str(&std::fs::read_to_string(&p).unwrap());
                 full_css.push('\n');

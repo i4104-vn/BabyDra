@@ -2,7 +2,7 @@
 
 use super::path::get_new_recording_path;
 use crate::models::recording::{RecordingConfig, RecordingMode, RecordingStatus};
-use crate::services::notification::service::send_notification;
+use crate::services::notification::service::send_app_notif_with_cmd;
 use std::path::PathBuf;
 use std::process::{Child, Command};
 use std::sync::Mutex;
@@ -357,7 +357,8 @@ pub fn stop_recording() -> Result<Option<PathBuf>, String> {
         crate::i18n::trans("recorder.notif_saved"),
         session.output_path.display()
     );
-    send_notification(&notif_title, &notif_msg);
+    let open_cmd = format!("babydra-explore \"{}\"", session.output_path.display());
+    send_app_notif_with_cmd(&notif_title, &notif_title, &notif_msg, "babydra", &open_cmd);
 
     Ok(Some(session.output_path))
 }

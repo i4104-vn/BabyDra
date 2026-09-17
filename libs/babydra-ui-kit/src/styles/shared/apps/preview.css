@@ -205,7 +205,6 @@ button.control-btn:active {
 .exif-dialog {
     border-radius: 16px;
     min-width: 280px;
-    max-width: 640px;
     padding: 18px 20px;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
     background-color: rgba(20, 20, 26, 0.98);

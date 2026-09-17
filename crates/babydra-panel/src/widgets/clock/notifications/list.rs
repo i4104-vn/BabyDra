@@ -250,8 +250,24 @@ fn render_expanded_group(
         let item_click = gtk4::GestureClick::new();
         let app_name_c = notif.app_name.clone();
         let title_c = notif.title.clone();
+        let command_c = notif.command.clone();
         let item_box_c = item_box.clone();
         item_click.connect_pressed(move |_, _, _, _| {
+            if let Some(cmd) = &command_c {
+                let trimmed = cmd.trim();
+                if !trimmed.is_empty() {
+                    let _ = std::process::Command::new("sh")
+                        .arg("-c")
+                        .arg(trimmed)
+                        .spawn();
+                    if let Some(root) = item_box_c.root() {
+                        if let Some(win) = root.downcast_ref::<gtk4::Window>() {
+                            win.close();
+                        }
+                    }
+                    return;
+                }
+            }
             babydra_core::jump_to_app(&app_name_c, Some(&title_c));
             if let Some(root) = item_box_c.root() {
                 if let Some(win) = root.downcast_ref::<gtk4::Window>() {
@@ -390,8 +406,24 @@ fn render_collapsed_group(
     } else {
         let app_name_c = latest_notif.app_name.clone();
         let title_c = latest_notif.title.clone();
+        let command_c = latest_notif.command.clone();
         let gc_clone = group_container.clone();
         click_gesture.connect_pressed(move |_, _, _, _| {
+            if let Some(cmd) = &command_c {
+                let trimmed = cmd.trim();
+                if !trimmed.is_empty() {
+                    let _ = std::process::Command::new("sh")
+                        .arg("-c")
+                        .arg(trimmed)
+                        .spawn();
+                    if let Some(root) = gc_clone.root() {
+                        if let Some(win) = root.downcast_ref::<gtk4::Window>() {
+                            win.close();
+                        }
+                    }
+                    return;
+                }
+            }
             babydra_core::jump_to_app(&app_name_c, Some(&title_c));
             if let Some(root) = gc_clone.root() {
                 if let Some(win) = root.downcast_ref::<gtk4::Window>() {

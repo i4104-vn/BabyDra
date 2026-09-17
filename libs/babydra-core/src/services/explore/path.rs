@@ -46,6 +46,7 @@ pub fn resolve_target_from_path(path: &Path) -> (PathBuf, Option<PathBuf>) {
 /// Resolves target directory and optional focus item from a URI string (e.g. `file:///home/...`).
 pub fn resolve_target_from_uri(uri: &str) -> (PathBuf, Option<PathBuf>) {
     let trimmed = uri.trim();
+    let is_uri = trimmed.starts_with("file:");
     let raw = if let Some(stripped) = trimmed.strip_prefix("file://localhost") {
         stripped
     } else if let Some(stripped) = trimmed.strip_prefix("file://") {
@@ -57,6 +58,11 @@ pub fn resolve_target_from_uri(uri: &str) -> (PathBuf, Option<PathBuf>) {
     };
 
     let decoded = crate::services::mpris::decode_uri(raw);
-    let path = PathBuf::from(decoded);
+    let mut path = PathBuf::from(decoded);
+    if !is_uri && path.is_relative() {
+        if let Ok(cwd) = std::env::current_dir() {
+            path = cwd.join(path);
+        }
+    }
     resolve_target_from_path(&path)
 }

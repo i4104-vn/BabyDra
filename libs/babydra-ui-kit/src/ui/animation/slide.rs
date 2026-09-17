@@ -58,10 +58,14 @@ fn slide_in_inner(
     let original_margin_end = widget.margin_end();
 
     match direction {
-        SlideDirection::Down => widget.set_margin_top(original_margin_top - distance_px),
-        SlideDirection::Up => widget.set_margin_bottom(original_margin_bottom - distance_px),
-        SlideDirection::Right => widget.set_margin_start(original_margin_start - distance_px),
-        SlideDirection::Left => widget.set_margin_end(original_margin_end - distance_px),
+        SlideDirection::Down => widget.set_margin_top((original_margin_top - distance_px).max(0)),
+        SlideDirection::Up => {
+            widget.set_margin_bottom((original_margin_bottom - distance_px).max(0))
+        }
+        SlideDirection::Right => {
+            widget.set_margin_start((original_margin_start - distance_px).max(0))
+        }
+        SlideDirection::Left => widget.set_margin_end((original_margin_end - distance_px).max(0)),
     }
 
     let start_time = std::cell::Cell::new(0i64);
@@ -105,22 +109,22 @@ fn slide_in_inner(
         match direction {
             SlideDirection::Down => {
                 let offset = original_margin_top - distance_px;
-                let current = offset + (distance_px as f64 * eased) as i32;
+                let current = (offset + (distance_px as f64 * eased) as i32).max(0);
                 w.set_margin_top(current);
             }
             SlideDirection::Up => {
                 let offset = original_margin_bottom - distance_px;
-                let current = offset + (distance_px as f64 * eased) as i32;
+                let current = (offset + (distance_px as f64 * eased) as i32).max(0);
                 w.set_margin_bottom(current);
             }
             SlideDirection::Right => {
                 let offset = original_margin_start - distance_px;
-                let current = offset + (distance_px as f64 * eased) as i32;
+                let current = (offset + (distance_px as f64 * eased) as i32).max(0);
                 w.set_margin_start(current);
             }
             SlideDirection::Left => {
                 let offset = original_margin_end - distance_px;
-                let current = offset + (distance_px as f64 * eased) as i32;
+                let current = (offset + (distance_px as f64 * eased) as i32).max(0);
                 w.set_margin_end(current);
             }
         }
@@ -174,19 +178,19 @@ pub fn slide_out(
         w.set_opacity((start_opacity * (1.0 - eased)).min(1.0).max(0.0));
         match direction {
             SlideDirection::Down => {
-                let current = original_margin_bottom - (distance_px as f64 * eased) as i32;
+                let current = (original_margin_bottom - (distance_px as f64 * eased) as i32).max(0);
                 w.set_margin_bottom(current);
             }
             SlideDirection::Up => {
-                let current = original_margin_top - (distance_px as f64 * eased) as i32;
+                let current = (original_margin_top - (distance_px as f64 * eased) as i32).max(0);
                 w.set_margin_top(current);
             }
             SlideDirection::Right => {
-                let current = original_margin_end - (distance_px as f64 * eased) as i32;
+                let current = (original_margin_end - (distance_px as f64 * eased) as i32).max(0);
                 w.set_margin_end(current);
             }
             SlideDirection::Left => {
-                let current = original_margin_start - (distance_px as f64 * eased) as i32;
+                let current = (original_margin_start - (distance_px as f64 * eased) as i32).max(0);
                 w.set_margin_start(current);
             }
         }
@@ -305,19 +309,19 @@ fn slide_out_cb_inner<F>(
         w.set_opacity((start_opacity * (1.0 - eased)).min(1.0).max(0.0));
         match direction {
             SlideDirection::Down => {
-                let current = original_margin_bottom - (distance_px as f64 * eased) as i32;
+                let current = (original_margin_bottom - (distance_px as f64 * eased) as i32).max(0);
                 w.set_margin_bottom(current);
             }
             SlideDirection::Up => {
-                let current = original_margin_top - (distance_px as f64 * eased) as i32;
+                let current = (original_margin_top - (distance_px as f64 * eased) as i32).max(0);
                 w.set_margin_top(current);
             }
             SlideDirection::Right => {
-                let current = original_margin_end - (distance_px as f64 * eased) as i32;
+                let current = (original_margin_end - (distance_px as f64 * eased) as i32).max(0);
                 w.set_margin_end(current);
             }
             SlideDirection::Left => {
-                let current = original_margin_start - (distance_px as f64 * eased) as i32;
+                let current = (original_margin_start - (distance_px as f64 * eased) as i32).max(0);
                 w.set_margin_start(current);
             }
         }

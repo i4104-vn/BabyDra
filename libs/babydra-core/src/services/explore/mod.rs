@@ -23,7 +23,7 @@ pub use fs_ops::{
     load_directory, move_path, rename_path, restore_from_trash, send_to_trash,
 };
 pub use image_meta::{read_image_metadata, ImageMetadata};
-pub use launcher::spawn_explore_window;
+pub use launcher::{show_in_file_manager, spawn_explore_window, try_open_in_running_instance};
 pub use path::{resolve_target_from_path, resolve_target_from_uri, sanitize_path};
 pub use preview::load_cropped_square;
 pub use shortcuts::{clean_modifiers, matches_key, matches_shortcut, parse_shortcut};

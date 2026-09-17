@@ -101,15 +101,16 @@ pub use services::explore::{
     calc_dir_size, clean_modifiers, copy_path, delete_path, filter_entries, get_icon_name,
     get_owner_group, load_cropped_square, load_directory, matches_key, matches_shortcut, move_path,
     parse_shortcut, read_image_metadata, rename_path, send_to_trash, shortcuts, sort_entries,
-    start_dbus_service, FileWatcher, ImageMetadata,
+    spawn_explore_window, start_dbus_service, FileWatcher, ImageMetadata,
 };
 pub use services::mpris::{self, decode_uri, run_playerctl};
 pub use services::notification::island::{
     self, clear_island_state, get_island_path, update_island_state, IslandState,
 };
 pub use services::notification::service::{
-    send_app_notif, send_notif_icon, send_notification, send_settings_notif, ActiveNotification,
-    NotificationMsg,
+    send_app_notif, send_app_notif_with_cmd, send_notif_icon, send_notification,
+    send_notification_with_cmd, send_settings_notif, show_notif_popup, show_notif_popup_with_cmd,
+    ActiveNotification, NotificationMsg,
 };
 pub use services::recording;
 pub use services::screenshot::{

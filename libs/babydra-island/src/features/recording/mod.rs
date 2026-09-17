@@ -32,6 +32,7 @@ use service::spawn_recording_polling;
 use ui::{RecordingCapsuleWidget, RecordingPopover};
 
 pub const PRIORITY: u8 = 85;
+pub const POPUP_DURATION: std::time::Duration = std::time::Duration::from_secs(30);
 
 /// Dynamic Island feature for screen recording indication and control.
 pub struct RecordingFeature {
@@ -105,7 +106,7 @@ impl IslandFeature for RecordingFeature {
         let popover = self.popover.clone();
         service::set_trigger_callback(move || {
             crate::island::dismiss_all_popovers();
-            handle.override_show();
+            handle.override_show_for(POPUP_DURATION);
             crate::island::tick_default_island();
             if let Some(popover) = popover.borrow().as_ref() {
                 if !babydra_core::services::recording::is_recording() {
@@ -128,21 +129,16 @@ impl IslandFeature for RecordingFeature {
             || create_keyboard_controller(self.handle.clone(), self.popover.clone()),
         );
 
-        // When not recording and the popover closes, auto-dismiss the island capsule after ~3 seconds
+        // When not recording and the popover closes, dismiss the island capsule immediately
         let state = self.state.clone();
         let handle_rc = self.handle.clone();
         popover.popover.connect_closed(move |_| {
-            if !state.borrow().is_recording {
+            if !state.borrow().is_recording && !babydra_core::services::recording::is_recording() {
                 if let Some(h) = handle_rc.borrow().as_ref() {
-                    h.override_show_for(std::time::Duration::from_secs(3));
+                    h.release_override();
+                    h.hide();
                 }
                 crate::island::tick_default_island();
-                gtk4::glib::timeout_add_local_once(
-                    std::time::Duration::from_millis(3100),
-                    move || {
-                        crate::island::tick_default_island();
-                    },
-                );
             }
         });
 
@@ -162,7 +158,7 @@ impl IslandFeature for RecordingFeature {
                 }
                 popover.popup();
                 if let Some(ref h) = *self.handle.borrow() {
-                    h.override_show();
+                    h.override_show_for(POPUP_DURATION);
                 }
             }
         }
@@ -179,7 +175,7 @@ impl IslandFeature for RecordingFeature {
 
         if is_pop_open {
             if let Some(ref h) = *self.handle.borrow() {
-                h.override_show();
+                h.override_show_for(POPUP_DURATION);
             }
         }
 

@@ -27,7 +27,7 @@ pub struct NotificationPopup {
     body_label: Label,
     more_label: Label,
     overlay: Overlay,
-    app_target: Rc<std::cell::RefCell<(String, String)>>,
+    app_target: Rc<std::cell::RefCell<(String, String, Option<String>)>>,
     generation: Rc<Cell<u64>>,
     hovered: Rc<Cell<bool>>,
 }
@@ -43,7 +43,11 @@ impl NotificationPopup {
         popover.set_parent(anchor);
         let generation = Rc::new(Cell::new(0_u64));
         let hovered = Rc::new(Cell::new(false));
-        let app_target = Rc::new(std::cell::RefCell::new((String::new(), String::new())));
+        let app_target = Rc::new(std::cell::RefCell::new((
+            String::new(),
+            String::new(),
+            None::<String>,
+        )));
 
         let overlay = Overlay::new();
         let card = GtkBox::new(Orientation::Vertical, 6);
@@ -114,7 +118,18 @@ impl NotificationPopup {
         let popover_click = popover.clone();
         let generation_click = generation.clone();
         click.connect_pressed(move |_, _, _, _| {
-            let (app, title) = app_target_c.borrow().clone();
+            let (app, title, cmd) = app_target_c.borrow().clone();
+            if let Some(c) = cmd {
+                let trimmed = c.trim();
+                if !trimmed.is_empty() {
+                    let _ = std::process::Command::new("sh")
+                        .arg("-c")
+                        .arg(trimmed)
+                        .spawn();
+                    dismiss_notification(&overlay_click, &popover_click, &generation_click);
+                    return;
+                }
+            }
             babydra_core::jump_to_app(&app, Some(&title));
             dismiss_notification(&overlay_click, &popover_click, &generation_click);
         });
@@ -168,7 +183,11 @@ impl NotificationPopup {
         } else {
             notification.app_name.clone()
         };
-        *self.app_target.borrow_mut() = (notification.app_name.clone(), notification.title.clone());
+        *self.app_target.borrow_mut() = (
+            notification.app_name.clone(),
+            notification.title.clone(),
+            notification.command.clone(),
+        );
 
         self.app_label.set_text(&truncate(&app_name, MAX_APP_CHARS));
         self.title_label

@@ -2,7 +2,7 @@
 
 use crate::models::NotificationMsg;
 use crate::services::notification::service::{
-    close_notif_popup, show_notif_popup, spawn_dbus_listener,
+    close_notif_popup, show_notif_popup_with_cmd, spawn_dbus_listener,
 };
 use std::sync::atomic::{AtomicBool, Ordering};
 
@@ -26,7 +26,8 @@ pub fn spawn_notif_dbus() {
                     icon,
                     app_name,
                     timeout,
-                } => show_notif_popup(&summary, &body, &icon, &app_name, timeout),
+                    command,
+                } => show_notif_popup_with_cmd(&summary, &body, &icon, &app_name, timeout, command),
                 NotificationMsg::Close => close_notif_popup(),
             }
         }

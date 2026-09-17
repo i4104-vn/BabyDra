@@ -86,9 +86,9 @@ impl IslandPopover {
         }
     }
 
-    /// Whether the popover is currently visible.
+    /// Whether the popover is currently visible or open.
     pub fn is_visible(&self) -> bool {
-        self.popover.is_visible()
+        self.popover.is_visible() || self.popover.property::<bool>("visible")
     }
 
     /// Returns the root window if the popover is currently attached to one.
