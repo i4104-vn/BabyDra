@@ -15,6 +15,7 @@ fn test_default_recording_config() {
     assert!(config.resolution.is_none());
     assert!(config.audio_device.is_none());
     assert!(config.codec.is_none());
+    assert!(!config.hdr);
 }
 
 #[test]
@@ -32,6 +33,7 @@ fn test_recording_config_serde_roundtrip() {
         audio_device: Some("default_sink.monitor".to_string()),
         format: "mkv".to_string(),
         codec: Some("libx264".to_string()),
+        hdr: true,
     };
 
     let serialized = serde_json::to_string(&original).expect("Serialization failed");
@@ -39,6 +41,7 @@ fn test_recording_config_serde_roundtrip() {
         serde_json::from_str(&serialized).expect("Deserialization failed");
 
     assert_eq!(original, deserialized);
+    assert!(deserialized.hdr);
 }
 
 #[test]
@@ -103,6 +106,35 @@ fn test_live_recording_lifecycle_and_output() {
         audio_device: None,
         format: "mp4".to_string(),
         codec: None,
+        hdr: false,
+    };
+
+    if let Ok(output_path) = start_recording(&config) {
+        std::thread::sleep(std::time::Duration::from_millis(1500));
+        let res = stop_recording();
+        assert!(res.is_ok());
+        if output_path.exists() {
+            let _ = std::fs::remove_file(&output_path);
+        }
+    }
+}
+
+#[test]
+fn test_live_hdr_recording_lifecycle() {
+    let config = RecordingConfig {
+        mode: RecordingMode::Area {
+            x: 0,
+            y: 0,
+            width: 320,
+            height: 240,
+        },
+        resolution: None,
+        framerate: 24,
+        audio: false,
+        audio_device: None,
+        format: "mp4".to_string(),
+        codec: None,
+        hdr: true,
     };
 
     if let Ok(output_path) = start_recording(&config) {

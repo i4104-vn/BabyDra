@@ -16,6 +16,8 @@
   "recorder.framerate": "Framerate",
   "recorder.format": "Format",
   "recorder.codec": "Video Codec",
+  "recorder.hdr_toggle": "HDR Mode",
+  "recorder.hdr_active": "HDR10",
   "recorder.audio_toggle": "System Audio",
   "recorder.audio_device": "Audio Device",
   "recorder.start": "Start Recording",

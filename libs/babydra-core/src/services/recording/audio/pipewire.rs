@@ -1,19 +1,16 @@
-//! Isolated audio and microphone stream management for screen recording sessions.
-//!
-//! Controls PipeWire / PulseAudio links and streams specifically attached to `wf-recorder`
-//! without touching master system volume or master microphone input.
+//! PipeWire port discovery and channel linking for wf-recorder streams.
 
 use std::process::Command;
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 use std::time::Duration;
 
-static ACTIVE_PID: AtomicU32 = AtomicU32::new(0);
-static AUDIO_ENABLED: AtomicBool = AtomicBool::new(false);
-static IS_AUDIO_MUTED: AtomicBool = AtomicBool::new(false);
-static IS_MIC_MUTED: AtomicBool = AtomicBool::new(false);
+pub(crate) static ACTIVE_PID: AtomicU32 = AtomicU32::new(0);
+pub(crate) static AUDIO_ENABLED: AtomicBool = AtomicBool::new(false);
+pub(crate) static IS_AUDIO_MUTED: AtomicBool = AtomicBool::new(false);
+pub(crate) static IS_MIC_MUTED: AtomicBool = AtomicBool::new(false);
 
 /// Retrieves PipeWire input ports owned by `wf-recorder`.
-fn get_pw_ports(direction: &str, predicate: impl Fn(&str) -> bool) -> Vec<String> {
+pub(crate) fn get_pw_ports(direction: &str, predicate: impl Fn(&str) -> bool) -> Vec<String> {
     let Ok(output) = Command::new("pw-link").arg(direction).output() else {
         return Vec::new();
     };
@@ -26,21 +23,21 @@ fn get_pw_ports(direction: &str, predicate: impl Fn(&str) -> bool) -> Vec<String
         .collect()
 }
 
-fn get_recorder_input_ports() -> Vec<String> {
+pub(crate) fn get_recorder_input_ports() -> Vec<String> {
     get_pw_ports("-i", |port| {
         port.contains("wf-recorder") && port.contains(":input_")
     })
 }
 
 /// Retrieves monitor ports (system desktop audio playback monitor).
-fn get_monitor_output_ports() -> Vec<String> {
+pub(crate) fn get_monitor_output_ports() -> Vec<String> {
     get_pw_ports("-o", |port| {
         port.contains(":monitor_") && !port.contains("wf-recorder")
     })
 }
 
 /// Retrieves microphone / voice capture ports.
-fn get_mic_output_ports() -> Vec<String> {
+pub(crate) fn get_mic_output_ports() -> Vec<String> {
     get_pw_ports("-o", |port| {
         port.contains(":capture_")
             && !port.contains(":monitor_")
@@ -49,7 +46,7 @@ fn get_mic_output_ports() -> Vec<String> {
 }
 
 /// Links or unlinks audio port pairs between an output and recorder input ports.
-fn link_channel_pairs(outputs: &[String], inputs: &[String], disconnect: bool) {
+pub(crate) fn link_channel_pairs(outputs: &[String], inputs: &[String], disconnect: bool) {
     if outputs.is_empty() || inputs.is_empty() {
         return;
     }
@@ -74,11 +71,8 @@ fn link_channel_pairs(outputs: &[String], inputs: &[String], disconnect: bool) {
     }
 }
 
-/// Connects the desktop playback monitor and the default microphone to the
-/// recorder node.  wf-recorder exposes one PipeWire input node, so both
-/// sources can be linked to it and PipeWire mixes the streams for the
-/// encoded audio track.
-fn link_recording_sources(inputs: &[String]) {
+/// Connects the desktop playback monitor and the default microphone to the recorder node.
+pub(crate) fn link_recording_sources(inputs: &[String]) {
     if inputs.is_empty() {
         return;
     }
@@ -92,7 +86,7 @@ fn link_recording_sources(inputs: &[String]) {
 }
 
 /// Fallback mechanism: toggles mute on wf-recorder source-output via `pactl`.
-fn pactl_set_recorder_mute(pid: u32, muted: bool) {
+pub(crate) fn pactl_set_recorder_mute(pid: u32, muted: bool) {
     let out = Command::new("pactl")
         .args(["list", "source-outputs"])
         .output()
@@ -133,11 +127,7 @@ pub fn init_recording_audio(pid: u32, audio_enabled: bool) {
     IS_MIC_MUTED.store(false, Ordering::SeqCst);
 
     if audio_enabled {
-        // Allow wf-recorder to initialize its PipeWire node before discovering ports
         std::thread::spawn(move || {
-            // The PipeWire node is created asynchronously by wf-recorder.  A
-            // single delayed lookup was racy on slower sessions and caused
-            // audio to be silently absent from otherwise valid recordings.
             for _ in 0..12 {
                 std::thread::sleep(Duration::from_millis(250));
                 if ACTIVE_PID.load(Ordering::SeqCst) != pid {
@@ -160,67 +150,4 @@ pub fn reset_recording_audio() {
     AUDIO_ENABLED.store(false, Ordering::SeqCst);
     IS_AUDIO_MUTED.store(false, Ordering::SeqCst);
     IS_MIC_MUTED.store(false, Ordering::SeqCst);
-}
-
-/// Checks whether the recorded video audio stream is muted.
-/// Returns the actual stored mute state regardless of whether audio is enabled.
-pub fn is_recording_audio_muted() -> bool {
-    IS_AUDIO_MUTED.load(Ordering::SeqCst)
-}
-
-/// Checks whether the recorded video microphone stream is muted.
-/// Returns the actual stored mute state regardless of whether audio is enabled.
-pub fn is_recording_mic_muted() -> bool {
-    IS_MIC_MUTED.load(Ordering::SeqCst)
-}
-
-/// Sets whether system desktop audio is recorded in the current video.
-/// The atomic mute state is always updated; PipeWire operations are only
-/// attempted when the recording session has audio enabled.
-pub fn set_recording_audio_muted(muted: bool) -> bool {
-    if AUDIO_ENABLED.load(Ordering::SeqCst) {
-        let inputs = get_recorder_input_ports();
-        let monitors = get_monitor_output_ports();
-
-        if !inputs.is_empty() && !monitors.is_empty() {
-            link_channel_pairs(&monitors, &inputs, muted);
-        } else {
-            let pid = ACTIVE_PID.load(Ordering::SeqCst);
-            if pid > 0 {
-                pactl_set_recorder_mute(pid, muted);
-            }
-        }
-    }
-
-    IS_AUDIO_MUTED.store(muted, Ordering::SeqCst);
-    muted
-}
-
-/// Sets whether microphone voice is recorded in the current video.
-/// The atomic mute state is always updated; PipeWire operations are only
-/// attempted when the recording session has audio enabled.
-pub fn set_recording_mic_muted(muted: bool) -> bool {
-    if AUDIO_ENABLED.load(Ordering::SeqCst) {
-        let inputs = get_recorder_input_ports();
-        let mics = get_mic_output_ports();
-
-        if !inputs.is_empty() && !mics.is_empty() {
-            link_channel_pairs(&mics, &inputs, muted);
-        }
-    }
-
-    IS_MIC_MUTED.store(muted, Ordering::SeqCst);
-    muted
-}
-
-/// Toggles system desktop audio recording for the active video.
-pub fn toggle_recording_audio_mute() -> bool {
-    let curr = is_recording_audio_muted();
-    set_recording_audio_muted(!curr)
-}
-
-/// Toggles microphone recording for the active video.
-pub fn toggle_recording_mic_mute() -> bool {
-    let curr = is_recording_mic_muted();
-    set_recording_mic_muted(!curr)
 }

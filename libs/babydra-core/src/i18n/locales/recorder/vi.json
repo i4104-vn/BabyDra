@@ -16,6 +16,8 @@
   "recorder.framerate": "Tốc độ khung hình",
   "recorder.format": "Định dạng",
   "recorder.codec": "Bộ giải mã",
+  "recorder.hdr_toggle": "Chế độ HDR",
+  "recorder.hdr_active": "HDR10",
   "recorder.audio_toggle": "Âm thanh hệ thống",
   "recorder.audio_device": "Thiết bị âm thanh",
   "recorder.start": "Bắt đầu quay",

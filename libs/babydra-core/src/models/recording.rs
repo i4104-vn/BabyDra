@@ -44,6 +44,8 @@ pub struct RecordingConfig {
     pub format: String,
     /// Codec override (e.g. "libx264", "h264_vaapi"), None for default.
     pub codec: Option<String>,
+    /// Whether to capture in HDR10 (10-bit Rec.2020 PQ).
+    pub hdr: bool,
 }
 
 impl Default for RecordingConfig {
@@ -56,6 +58,7 @@ impl Default for RecordingConfig {
             audio_device: None,
             format: "mp4".to_string(),
             codec: None,
+            hdr: false,
         }
     }
 }
