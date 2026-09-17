@@ -67,21 +67,21 @@ pub fn build_wf_recorder_command(config: &RecordingConfig, output_path: &Path) -
         cmd.arg("-c").arg(codec);
 
         if codec == "libx264" || codec.contains("x264") {
-            cmd.arg("-p").arg("color_range=pc");
+            cmd.arg("-p").arg("color_range=tv");
             cmd.arg("-p").arg("colorspace=bt709");
             cmd.arg("-p").arg("color_primaries=bt709");
             cmd.arg("-p").arg("color_trc=bt709");
             cmd.arg("-p").arg("crf=16");
             cmd.arg("-p").arg("preset=veryfast");
         } else if codec == "libx265" || codec.contains("x265") || codec.contains("hevc") {
-            cmd.arg("-p").arg("color_range=pc");
+            cmd.arg("-p").arg("color_range=tv");
             cmd.arg("-p").arg("colorspace=bt709");
             cmd.arg("-p").arg("color_primaries=bt709");
             cmd.arg("-p").arg("color_trc=bt709");
             cmd.arg("-p").arg("crf=16");
             cmd.arg("-p").arg("preset=superfast");
         } else if codec.contains("vaapi") {
-            cmd.arg("-p").arg("color_range=pc");
+            cmd.arg("-p").arg("color_range=tv");
         } else if codec.contains("vp9") {
             cmd.arg("-p").arg("crf=16");
             cmd.arg("-p").arg("profile=2");
@@ -109,7 +109,7 @@ pub fn build_wf_recorder_command(config: &RecordingConfig, output_path: &Path) -
         cmd.arg("-c").arg(codec);
 
         if codec == "libx264" || codec.contains("x264") {
-            cmd.arg("-p").arg("color_range=pc");
+            cmd.arg("-p").arg("color_range=tv");
             cmd.arg("-p").arg("colorspace=bt709");
             cmd.arg("-p").arg("color_primaries=bt709");
             cmd.arg("-p").arg("color_trc=bt709");
