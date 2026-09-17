@@ -6,9 +6,11 @@ use std::rc::Rc;
 use gtk4::{Box as GtkBox, Button, DropDown, Label, Switch};
 use babydra_core::models::recording::RecordingConfig;
 use crate::features::recording::ui::RecordingButtonWidget;
+use crate::island::ui::IslandPopover;
 
 /// Widgets and configuration state needed to wire recording popover interactions.
 pub struct PopoverActionsContext {
+    pub popover: IslandPopover,
     pub config: Rc<RefCell<RecordingConfig>>,
     pub mode_combo: DropDown,
     pub output_dropdown: DropDown,
@@ -20,6 +22,7 @@ pub struct PopoverActionsContext {
     pub resolution: DropDown,
     pub framerate: DropDown,
     pub format: DropDown,
+    pub hdr: Switch,
     pub audio: Switch,
     pub audio_device_row: GtkBox,
     pub audio_device: DropDown,

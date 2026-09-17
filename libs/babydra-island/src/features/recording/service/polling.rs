@@ -42,6 +42,7 @@ pub fn spawn_recording_polling() -> Rc<RefCell<IslandRecordingState>> {
                     };
                     state.format = cfg.format.to_uppercase();
                     state.framerate = cfg.framerate;
+                    state.hdr = cfg.hdr;
                 }
             }
 

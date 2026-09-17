@@ -1,89 +1,14 @@
-//! Action handlers and event wiring for the recording feature.
-
-use std::cell::RefCell;
-use std::rc::Rc;
-
-use gtk4::prelude::*;
-use gtk4::Label;
+//! UI event binding and signal wiring for recording popover.
 
 use babydra_core::i18n::trans;
-use babydra_core::models::recording::{RecordingConfig, RecordingMode};
-use babydra_core::services::recording::{
-    get_recordings_dir, select_geometry_str_with_slurp, start_recording, stop_recording,
-    toggle_pause,
+use babydra_core::models::recording::RecordingMode;
+use gtk4::prelude::*;
+
+use super::actions::{
+    open_recordings_dir_action, select_recording_area_action, start_recording_action,
+    stop_recording_action, toggle_audio_mute_action, toggle_mic_mute_action, toggle_pause_action,
 };
-
 use crate::features::recording::models::PopoverActionsContext;
-use crate::features::recording::service::{toggle_audio_mute, toggle_mic_mute};
-use crate::features::recording::ui::RecordingButtonWidget;
-
-/// Dispatches starting screen recording.
-pub fn start_recording_action(config: &RecordingConfig) {
-    let _ = start_recording(config);
-}
-
-/// Dispatches stopping screen recording cleanly on a background worker thread.
-pub fn stop_recording_action() {
-    std::thread::spawn(|| {
-        let _ = stop_recording();
-    });
-}
-
-/// Dispatches pause / resume toggling.
-pub fn toggle_pause_action() {
-    let _ = toggle_pause();
-}
-
-/// Toggles audio mute state and updates the button visual.
-pub fn toggle_audio_mute_action(button: &RecordingButtonWidget) {
-    let muted = toggle_audio_mute();
-    button.set_icon_and_title(
-        if muted {
-            "audio-volume-muted"
-        } else {
-            "audio-volume-high"
-        },
-        &trans(if muted {
-            "recorder.audio_unmute"
-        } else {
-            "recorder.audio_mute"
-        }),
-    );
-    button.set_alert(muted);
-}
-
-/// Toggles microphone mute state and updates the button visual.
-pub fn toggle_mic_mute_action(button: &RecordingButtonWidget) {
-    let muted = toggle_mic_mute();
-    button.set_icon_and_title(
-        if muted {
-            "microphone-disabled"
-        } else {
-            "audio-input-microphone"
-        },
-        &trans(if muted {
-            "recorder.mic_unmute"
-        } else {
-            "recorder.mic_mute"
-        }),
-    );
-    button.set_alert(muted);
-}
-
-/// Opens the recordings directory in the system file manager.
-pub fn open_recordings_dir_action() {
-    let _ = std::process::Command::new("xdg-open")
-        .arg(get_recordings_dir())
-        .spawn();
-}
-
-/// Triggers slurp area selection and updates configuration.
-pub fn select_recording_area_action(area_label: &Label, config: &Rc<RefCell<RecordingConfig>>) {
-    if let Some(geometry) = select_geometry_str_with_slurp() {
-        area_label.set_text(&geometry);
-        config.borrow_mut().mode = RecordingMode::Window(geometry);
-    }
-}
 
 /// Connects all UI events, dropdowns, and button actions to the recording controller.
 pub fn connect_popover_actions(ctx: PopoverActionsContext) {
@@ -94,25 +19,29 @@ pub fn connect_popover_actions(ctx: PopoverActionsContext) {
         let area_row = ctx.area_row.clone();
         let output_dropdown = ctx.output_dropdown.clone();
         let output_names = ctx.output_names.clone();
+        let popover = ctx.popover.clone();
+        let area_label = ctx.area_label.clone();
         ctx.mode_combo.connect_selected_notify(move |dropdown| {
-            let mut config = config.borrow_mut();
+            let mut cfg = config.borrow_mut();
             match dropdown.selected() {
                 1 => {
                     let output = output_names
                         .get(output_dropdown.selected() as usize)
                         .cloned()
                         .unwrap_or_default();
-                    config.mode = RecordingMode::SingleOutput(output);
+                    cfg.mode = RecordingMode::SingleOutput(output);
                     display_output_row.set_visible(true);
                     area_row.set_visible(false);
                 }
                 2 => {
-                    config.mode = RecordingMode::Window(String::new());
+                    cfg.mode = RecordingMode::Window(String::new());
                     display_output_row.set_visible(false);
                     area_row.set_visible(true);
+                    drop(cfg);
+                    select_recording_area_action(&popover, &area_label, &config);
                 }
                 _ => {
-                    config.mode = RecordingMode::Fullscreen;
+                    cfg.mode = RecordingMode::Fullscreen;
                     display_output_row.set_visible(false);
                     area_row.set_visible(false);
                 }
@@ -136,8 +65,9 @@ pub fn connect_popover_actions(ctx: PopoverActionsContext) {
     {
         let config = ctx.config.clone();
         let area_label = ctx.area_label.clone();
+        let popover = ctx.popover.clone();
         ctx.area_button.connect_clicked(move |_| {
-            select_recording_area_action(&area_label, &config);
+            select_recording_area_action(&popover, &area_label, &config);
         });
     }
 
@@ -177,6 +107,14 @@ pub fn connect_popover_actions(ctx: PopoverActionsContext) {
                 _ => "mp4",
             }
             .to_string();
+        });
+    }
+
+    // HDR switch
+    {
+        let config = ctx.config.clone();
+        ctx.hdr.connect_active_notify(move |switch| {
+            config.borrow_mut().hdr = switch.is_active();
         });
     }
 
