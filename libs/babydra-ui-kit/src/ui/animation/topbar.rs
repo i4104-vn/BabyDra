@@ -39,18 +39,18 @@ pub fn topbar_startup_cascade(
         child = w.next_sibling();
     }
 
-    // Wide sweeping start offsets
+    // Initial soft offset
     notch_capsule.set_opacity(0.0);
-    notch_capsule.set_margin_start(-400);
+    notch_capsule.set_margin_start(16);
 
     tray_widget.set_opacity(0.0);
-    tray_widget.set_margin_start(-300);
+    tray_widget.set_margin_start(16);
 
     system_monitor.set_opacity(0.0);
-    system_monitor.set_margin_start(-400);
+    system_monitor.set_margin_start(16);
 
     status_indicators.set_opacity(0.0);
-    status_indicators.set_margin_start(-600);
+    status_indicators.set_margin_start(16);
 
     let start_time = Rc::new(Cell::new(0i64));
     let total_duration_us = 1_600_000i64; // 1.6s total cinematic duration
@@ -122,7 +122,7 @@ pub fn topbar_startup_cascade(
             let t2 = ((elapsed_ms - 350.0) / 600.0).clamp(0.0, 1.0);
             let eased2 = easing::ease_out_quart(t2);
             notch_clone.set_opacity(eased2.min(1.0));
-            let offset = (-400.0 * (1.0 - eased2)) as i32;
+            let offset = (16.0 * (1.0 - eased2)).max(0.0) as i32;
             notch_clone.set_margin_start(offset);
         }
 
@@ -131,7 +131,7 @@ pub fn topbar_startup_cascade(
             let t3 = ((elapsed_ms - 650.0) / 550.0).clamp(0.0, 1.0);
             let eased3 = easing::ease_out_quart(t3);
             tray_clone.set_opacity(eased3.min(1.0));
-            let offset = (-300.0 * (1.0 - eased3)) as i32;
+            let offset = (16.0 * (1.0 - eased3)).max(0.0) as i32;
             tray_clone.set_margin_start(offset);
         }
 
@@ -140,7 +140,7 @@ pub fn topbar_startup_cascade(
             let t4 = ((elapsed_ms - 750.0) / 550.0).clamp(0.0, 1.0);
             let eased4 = easing::ease_out_quart(t4);
             sysmon_clone.set_opacity(eased4.min(1.0));
-            let offset = (-400.0 * (1.0 - eased4)) as i32;
+            let offset = (16.0 * (1.0 - eased4)).max(0.0) as i32;
             sysmon_clone.set_margin_start(offset);
         }
 
@@ -149,7 +149,7 @@ pub fn topbar_startup_cascade(
             let t5 = ((elapsed_ms - 950.0) / 650.0).clamp(0.0, 1.0);
             let eased5 = easing::ease_out_quart(t5);
             status_clone.set_opacity(eased5.min(1.0));
-            let offset = (-600.0 * (1.0 - eased5)) as i32;
+            let offset = (16.0 * (1.0 - eased5)).max(0.0) as i32;
             status_clone.set_margin_start(offset);
         }
 
