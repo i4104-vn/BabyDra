@@ -104,7 +104,7 @@ impl MediaPlayerFeature {
                 .as_deref()
                 .map(render::parse_metadata)
                 .unwrap_or_default();
-            self.cached_meta = meta;
+            self.cached_meta = models::merge_transient_metadata(&self.cached_meta, meta);
             self.cached_player_active = player_active;
 
             let song_key = format!(

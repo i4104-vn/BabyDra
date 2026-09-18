@@ -47,8 +47,6 @@ impl MediaPlayerFeature {
             let label_text = if meta.title.is_empty() {
                 if !meta.artist.is_empty() {
                     meta.artist.clone()
-                } else if !meta.player_name_raw.is_empty() {
-                    meta.player_name_raw.clone()
                 } else {
                     babydra_core::i18n::trans("island.music_player")
                 }

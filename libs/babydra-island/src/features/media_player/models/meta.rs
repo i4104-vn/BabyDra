@@ -36,3 +36,53 @@ pub fn parse_metadata(line: &str) -> (PlayerMeta, bool) {
     meta.playing = is_playing;
     (meta, is_playing || is_paused)
 }
+
+/// Preserves track identity across a transiently incomplete MPRIS update.
+pub fn merge_transient_metadata(previous: &PlayerMeta, mut incoming: PlayerMeta) -> PlayerMeta {
+    if previous.title.is_empty() && previous.artist.is_empty() {
+        return incoming;
+    }
+
+    let same_player = !previous.player_name_raw.is_empty()
+        && !incoming.player_name_raw.is_empty()
+        && previous.player_name_raw.eq_ignore_ascii_case(&incoming.player_name_raw);
+    if !same_player {
+        return incoming;
+    }
+
+    if incoming.title.is_empty() {
+        incoming.title = previous.title.clone();
+        incoming.artist = previous.artist.clone();
+        incoming.art_url = previous.art_url.clone();
+    } else if incoming.title == previous.title {
+        if incoming.artist.is_empty() {
+            incoming.artist = previous.artist.clone();
+        }
+        if incoming.art_url.is_empty() {
+            incoming.art_url = previous.art_url.clone();
+        }
+    }
+
+    incoming
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{merge_transient_metadata, parse_metadata};
+
+    #[test]
+    fn keeps_track_when_browser_temporarily_loses_metadata() {
+        let (previous, _) = parse_metadata(
+            "Playing|//|Hhn Anime 4L|//|Artist|//|chromium|//|file:///cover.png|//|1000000|//|2000000",
+        );
+        let (incoming, _) = parse_metadata(
+            "Playing|//||//||//|chromium|//||//|1200000|//|2000000",
+        );
+
+        let merged = merge_transient_metadata(&previous, incoming);
+        assert_eq!(merged.title, "Hhn Anime 4L");
+        assert_eq!(merged.artist, "Artist");
+        assert_eq!(merged.art_url, "file:///cover.png");
+        assert_eq!(merged.pos_secs, 1.2);
+    }
+}
