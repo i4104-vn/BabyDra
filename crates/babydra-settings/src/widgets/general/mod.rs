@@ -6,11 +6,13 @@ pub mod default_apps;
 pub mod device_account;
 pub mod input;
 pub mod output;
+pub mod recovery;
 pub mod sound_effects;
+pub mod system_update;
 
 use babydra_core::i18n::trans;
 use gtk4::prelude::*;
-use gtk4::{Align, Box as GtkBox, Label, Orientation, ScrolledWindow, Widget};
+use gtk4::{Align, Box as GtkBox, Label, Orientation, Overlay, ScrolledWindow, Widget};
 
 fn category(title_key: &str, cards: Vec<GtkBox>) -> GtkBox {
     let section = GtkBox::new(Orientation::Vertical, 8);
@@ -33,6 +35,10 @@ fn category(title_key: &str, cards: Vec<GtkBox>) -> GtkBox {
 
 /// Creates the Generic Settings (Cài đặt chung) widget page.
 pub fn create_general_widget() -> Widget {
+    let overlay = Overlay::new();
+    overlay.set_vexpand(true);
+    overlay.set_hexpand(true);
+
     let scrolled = ScrolledWindow::new();
     scrolled.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
     scrolled.set_vexpand(true);
@@ -60,7 +66,7 @@ pub fn create_general_widget() -> Widget {
     header_box.append(&desc_lbl);
     container.append(&header_box);
 
-    // Keep every category and card collapsed until the user opens it.
+    // 1. Devices & Applications
     container.append(&category(
         "settings.general_category_devices",
         vec![
@@ -68,6 +74,8 @@ pub fn create_general_widget() -> Widget {
             default_apps::build_default_apps_card(),
         ],
     ));
+
+    // 2. Audio
     container.append(&category(
         "settings.general_category_audio",
         vec![
@@ -76,14 +84,19 @@ pub fn create_general_widget() -> Widget {
             sound_effects::build_sound_effects_card(),
         ],
     ));
+
+    // 3. System & Maintenance
     container.append(&category(
         "settings.general_category_system",
         vec![
             clipboard::build_clipboard_card(),
             datetime::build_datetime_card(),
+            system_update::build_system_update_card(&overlay),
+            recovery::build_recovery_card(&overlay),
         ],
     ));
 
     scrolled.set_child(Some(&container));
-    scrolled.into()
+    overlay.set_child(Some(&scrolled));
+    overlay.into()
 }

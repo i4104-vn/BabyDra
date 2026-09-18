@@ -8,8 +8,9 @@ pub fn create_list_row(
     right_widget: Option<&impl IsA<gtk4::Widget>>,
 ) -> gtk4::Box {
     let row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
-    row.set_margin_top(8);
-    row.set_margin_bottom(8);
+    row.add_css_class("settings-card-row");
+    row.set_margin_top(6);
+    row.set_margin_bottom(6);
     row.set_margin_start(8);
     row.set_margin_end(8);
 

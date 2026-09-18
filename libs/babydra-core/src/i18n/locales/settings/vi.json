@@ -298,6 +298,7 @@
   "settings.general_title": "Cài đặt chung",
   "settings.general_subtitle": "Âm thanh, micrô, hiệu ứng hệ thống và ứng dụng mặc định",
   "settings.general_category_devices": "Thiết bị & Ứng dụng",
+  "settings.device_account_subtitle": "Tên thiết bị và mật khẩu tài khoản người dùng",
   "settings.general_category_audio": "Âm thanh",
   "settings.general_category_system": "Hệ thống",
   "settings.general_audio_output": "Âm lượng đầu ra",

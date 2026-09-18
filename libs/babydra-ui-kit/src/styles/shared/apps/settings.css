@@ -249,6 +249,7 @@ button.card-collapse-header:hover .card-collapse-arrow {
 .settings-card row,
 .settings-card-row {
     background: transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     transition: background-color 200ms ease;
 }
 

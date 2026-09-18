@@ -96,16 +96,6 @@ const NAV_CATEGORIES: &[NavCategory] = &[
                 icon: "cog",
                 i18n_key: "settings.nav_keybinds",
             },
-            NavItem {
-                id: "system_update",
-                icon: "history",
-                i18n_key: "settings.nav_system_update",
-            },
-            NavItem {
-                id: "recovery",
-                icon: "history",
-                i18n_key: "settings.nav_recovery",
-            },
         ],
     },
 ];
@@ -131,10 +121,8 @@ fn create_widget_page(name: &str) -> gtk4::Widget {
         "apps" => widgets::apps::create_apps_widget(),
         "startup" => widgets::startup::create_startup(),
         "certificates" => widgets::certificates::create_cert_widget(),
-        "system_update" => widgets::system_update::create_update_widget(),
-        "recovery" => widgets::recovery::create_recovery_widget(),
         "system" => widgets::system_info::create_system_widget(),
-        "general" => widgets::general::create_general_widget(),
+        "general" | "system_update" | "recovery" => widgets::general::create_general_widget(),
         _ => gtk4::Box::new(gtk4::Orientation::Vertical, 0).upcast(),
     }
 }
@@ -162,7 +150,12 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     let target_page_id = if is_first {
         "system".to_string() // About page
     } else {
-        initial_page.unwrap_or("system").to_string()
+        let initial = initial_page.unwrap_or("system");
+        if initial == "system_update" || initial == "recovery" {
+            "general".to_string()
+        } else {
+            initial.to_string()
+        }
     };
 
     let overlay = gtk4::Overlay::new();

@@ -304,6 +304,7 @@
   "settings.general_title": "Generic Settings",
   "settings.general_subtitle": "Sound, microphone, system effects, and default applications",
   "settings.general_category_devices": "Devices & Applications",
+  "settings.device_account_subtitle": "Device hostname and user account password",
   "settings.general_category_audio": "Audio",
   "settings.general_category_system": "System",
   "settings.general_audio_output": "Audio Output",
