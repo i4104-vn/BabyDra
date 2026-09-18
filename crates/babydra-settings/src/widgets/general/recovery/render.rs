@@ -75,24 +75,35 @@ pub fn render_recovery_card() -> RecoveryCardWidgets {
     for (i, (icon_name, text_key)) in scope_items.iter().enumerate() {
         let hbox = Box::new(Orientation::Horizontal, 14);
         hbox.add_css_class("recovery-scope-row");
+        hbox.set_valign(Align::Center);
+        hbox.set_baseline_position(gtk4::BaselinePosition::Center);
         if i == scope_items.len() - 1 {
             hbox.add_css_class("no-border");
         }
+
+        let icon_box = Box::new(Orientation::Vertical, 0);
+        icon_box.set_valign(Align::Center);
+        icon_box.set_halign(Align::Center);
 
         let icon_badge = Box::new(Orientation::Vertical, 0);
         icon_badge.add_css_class("blue-icon-badge-sm");
         icon_badge.set_valign(Align::Center);
         icon_badge.set_halign(Align::Center);
-        icon_badge.set_size_request(32, 32);
+        icon_badge.set_size_request(34, 34);
 
         let icon = babydra_ui_kit::ui::icon::get_icon(icon_name, 16);
         icon.set_pixel_size(16);
         icon.set_valign(Align::Center);
         icon.set_halign(Align::Center);
-        icon.set_vexpand(false);
+        icon.set_vexpand(true);
         icon.set_hexpand(false);
         icon_badge.append(&icon);
-        hbox.append(&icon_badge);
+        icon_box.append(&icon_badge);
+        hbox.append(&icon_box);
+
+        let text_box = Box::new(Orientation::Vertical, 0);
+        text_box.set_valign(Align::Center);
+        text_box.set_hexpand(true);
 
         let item_lbl = Label::new(Some(&trans(text_key)));
         item_lbl.add_css_class("settings-row-title");
@@ -102,7 +113,9 @@ pub fn render_recovery_card() -> RecoveryCardWidgets {
         item_lbl.set_justify(gtk4::Justification::Left);
         item_lbl.set_hexpand(true);
         item_lbl.set_wrap(true);
-        hbox.append(&item_lbl);
+        text_box.append(&item_lbl);
+
+        hbox.append(&text_box);
 
         scope_card.append(&hbox);
     }
