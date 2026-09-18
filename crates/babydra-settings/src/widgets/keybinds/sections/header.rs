@@ -1,12 +1,12 @@
-//! Page header with title, search box, add button, refresh button, and save changes button.
+//! Page header with title, add button, refresh button, and save changes button.
 
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Entry, Label, Orientation};
+use gtk4::{Box, Button, Label, Orientation};
 
-/// Builds the top header bar matching Wi-Fi layout:
-/// Title on Left, Search + Add + Refresh + Save on Right.
-pub fn build_page_header() -> (Box, Entry, Button, Button, Button) {
-    let header_box = Box::new(Orientation::Horizontal, 12);
+/// Builds the top header bar:
+/// Title on Left, Add (circular icon) + Refresh (circular icon) + Save on Right.
+pub fn build_page_header() -> (Box, Button, Button, Button) {
+    let header_box = Box::new(Orientation::Horizontal, 10);
     header_box.set_margin_bottom(4);
 
     let title_label = Label::new(Some(&babydra_core::i18n::trans(
@@ -17,17 +17,14 @@ pub fn build_page_header() -> (Box, Entry, Button, Button, Button) {
     title_label.set_halign(gtk4::Align::Start);
     header_box.append(&title_label);
 
-    let search_entry = Entry::new();
-    search_entry.set_placeholder_text(Some(&babydra_core::i18n::trans(
-        "settings.keybinds_search_placeholder",
-    )));
-    search_entry.add_css_class("sidebar-search-entry");
-    search_entry.set_width_request(200);
-    header_box.append(&search_entry);
-
-    let add_btn = Button::with_label(&babydra_core::i18n::trans("settings.startup_add_new"));
-    add_btn.add_css_class("connect-pill-btn");
-    add_btn.set_valign(gtk4::Align::Center);
+    let add_btn = Button::new();
+    add_btn.add_css_class("icon-btn");
+    add_btn.add_css_class("circular");
+    add_btn.set_cursor_from_name(Some("pointer"));
+    let add_icon = babydra_ui_kit::ui::icon::get_icon("plus", 16);
+    add_icon.set_pixel_size(16);
+    add_btn.set_child(Some(&add_icon));
+    add_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.startup_add_new")));
     header_box.append(&add_btn);
 
     let refresh_btn = Button::new();
@@ -45,5 +42,5 @@ pub fn build_page_header() -> (Box, Entry, Button, Button, Button) {
     save_btn.set_valign(gtk4::Align::Center);
     header_box.append(&save_btn);
 
-    (header_box, search_entry, add_btn, refresh_btn, save_btn)
+    (header_box, add_btn, refresh_btn, save_btn)
 }

@@ -23,12 +23,11 @@ mod tests {
 
     #[test]
     fn test_system_crate_catalog_has_all_apps() {
-        assert_eq!(SYSTEM_CRATE_CATALOG.len(), 8);
+        assert_eq!(SYSTEM_CRATE_CATALOG.len(), 7);
         let ids: Vec<&str> = SYSTEM_CRATE_CATALOG.iter().map(|d| d.id).collect();
         assert!(ids.contains(&"launcher"));
         assert!(ids.contains(&"switcher"));
         assert!(ids.contains(&"screenshot"));
-        assert!(ids.contains(&"screenshot_area"));
         assert!(ids.contains(&"recording_island"));
         assert!(ids.contains(&"lock"));
         assert!(ids.contains(&"settings"));
