@@ -115,6 +115,8 @@
   "settings.apps_downgrade_success": "Package '{}' downgraded successfully.",
   "settings.apps_downgrade_failed": "Failed to downgrade '{}'.",
   "settings.apps_downgrade_not_found": "No cached older version found for '{}' in /var/cache/pacman/pkg/",
+  "settings.apps_no_apps": "No installed applications found",
+  "settings.apps_no_packages": "No installed packages found",
   "settings.startup_title": "Startup Applications",
   "settings.startup_add": "Add App",
   "settings.update_title": "System Update",

@@ -115,6 +115,8 @@
   "settings.apps_downgrade_success": "Đã hạ cấp gói '{}' thành công.",
   "settings.apps_downgrade_failed": "Hạ cấp gói '{}' thất bại.",
   "settings.apps_downgrade_not_found": "Không tìm thấy bản cũ lưu trong cache cho '{}'",
+  "settings.apps_no_apps": "Không tìm thấy ứng dụng đã cài đặt",
+  "settings.apps_no_packages": "Không tìm thấy gói phần mềm đã cài đặt",
   "settings.startup_title": "Ứng dụng tự khởi chạy",
   "settings.startup_add": "Thêm ứng dụng",
   "settings.update_title": "Cập nhật hệ thống",

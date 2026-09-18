@@ -1,3 +1,4 @@
+use super::render::{self, AppItemData, PkgItemData};
 use crate::widgets::state::AppsWidget;
 use babydra_core::models::settings::AppActionType;
 use babydra_ui_kit::components::modals::PasswordDialog;
@@ -13,8 +14,8 @@ pub struct PendingAction {
     pub parent_list: gtk4::ListBox,
 }
 
-/// Filter list box.
-fn filter_list_box(list_box: &gtk4::ListBox, query: &str) {
+/// Filter list box based on search query.
+pub fn filter_list_box(list_box: &gtk4::ListBox, query: &str) {
     let query_lower = query.to_lowercase();
     let mut child = list_box.first_child();
     while let Some(c) = child {
@@ -49,11 +50,106 @@ fn filter_list_box(list_box: &gtk4::ListBox, query: &str) {
     }
 }
 
-/// Wire main events.
+/// Asynchronously fetches installed applications and pacman packages in a background thread
+/// and updates the GTK UI with loading states.
+pub fn fetch_apps_and_pkgs_async(
+    widget: &AppsWidget,
+    auth_dialog_rc: &Rc<PasswordDialog>,
+    pending_action: Rc<RefCell<Option<PendingAction>>>,
+    apps_data: Rc<RefCell<Vec<AppItemData>>>,
+    pkgs_data: Rc<RefCell<Vec<PkgItemData>>>,
+    is_loading: Rc<RefCell<bool>>,
+) {
+    let (tx, rx) = std::sync::mpsc::channel::<(Vec<AppItemData>, Vec<PkgItemData>)>();
+
+    std::thread::spawn(move || {
+        // Fast index of cached pacman packages to detect downgrade availability (0 main-thread I/O)
+        let cache_dir = std::path::Path::new("/var/cache/pacman/pkg");
+        let mut cached_names = std::collections::HashSet::new();
+        if let Ok(entries) = std::fs::read_dir(cache_dir) {
+            for entry in entries.flatten() {
+                let fname = entry.file_name().to_string_lossy().to_string();
+                if fname.ends_with(".pkg.tar.zst") {
+                    let without_ext = fname.trim_end_matches(".pkg.tar.zst");
+                    let parts: Vec<&str> = without_ext.rsplitn(4, '-').collect();
+                    if parts.len() == 4 {
+                        cached_names.insert(parts[3].to_string());
+                    }
+                }
+            }
+        }
+
+        let installed_apps = babydra_core::services::apps::discovery::scan_desktop_apps();
+        let apps_list: Vec<AppItemData> = installed_apps
+            .into_iter()
+            .map(|app| {
+                let pkg_name = app.name.to_lowercase().replace(' ', "-");
+                let can_downgrade = cached_names.contains(&pkg_name);
+                AppItemData {
+                    name: app.name,
+                    description: app.exec,
+                    icon: app.icon,
+                    pkg_name,
+                    can_downgrade,
+                }
+            })
+            .collect();
+
+        let pkgs = babydra_core::services::apps::pacman::get_installed_pkgs();
+        let pkgs_list: Vec<PkgItemData> = pkgs
+            .into_iter()
+            .take(250)
+            .map(|p| {
+                let can_downgrade = cached_names.contains(&p.name);
+                PkgItemData {
+                    name: p.name,
+                    version: p.version,
+                    can_downgrade,
+                }
+            })
+            .collect();
+
+        let _ = tx.send((apps_list, pkgs_list));
+    });
+
+    let apps_list_box = widget.apps_list_box.clone();
+    let pkgs_list_box = widget.pkgs_list_box.clone();
+    let search_entry = widget.search_entry.clone();
+    let refresh_btn = widget.refresh_btn.clone();
+    let auth_dlg = auth_dialog_rc.clone();
+    let act = pending_action.clone();
+
+    gtk4::glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
+        if let Ok((apps, pkgs)) = rx.try_recv() {
+            *is_loading.borrow_mut() = false;
+            *apps_data.borrow_mut() = apps.clone();
+            *pkgs_data.borrow_mut() = pkgs.clone();
+
+            render::render_apps_list(&apps_list_box, &apps, false, &auth_dlg, act.clone());
+            render::render_pkgs_list(&pkgs_list_box, &pkgs, false, &auth_dlg, act.clone());
+
+            let query = search_entry.text();
+            if !query.is_empty() {
+                filter_list_box(&apps_list_box, &query);
+                filter_list_box(&pkgs_list_box, &query);
+            }
+
+            refresh_btn.set_sensitive(true);
+            gtk4::glib::ControlFlow::Break
+        } else {
+            gtk4::glib::ControlFlow::Continue
+        }
+    });
+}
+
+/// Wire main events on the apps widget.
 pub fn wire_main_events(
     widget: &AppsWidget,
     auth_dialog_rc: &Rc<PasswordDialog>,
     pending_action: Rc<RefCell<Option<PendingAction>>>,
+    apps_data: Rc<RefCell<Vec<AppItemData>>>,
+    pkgs_data: Rc<RefCell<Vec<PkgItemData>>>,
+    is_loading: Rc<RefCell<bool>>,
 ) {
     let tab_apps_btn_copy = widget.tab_apps_btn.clone();
     let tab_packages_btn_copy = widget.tab_packages_btn.clone();
@@ -81,73 +177,41 @@ pub fn wire_main_events(
         filter_list_box(&pkgs_list, &query);
     });
 
-    let refresh_btn = widget.refresh_btn.clone();
-    let apps_list_box = widget.apps_list_box.clone();
-    let pkgs_list_box = widget.pkgs_list_box.clone();
-    let search_entry = widget.search_entry.clone();
-    let auth_dialog_rc_ref = auth_dialog_rc.clone();
-    let pending_action_ref = pending_action.clone();
+    let widget_ref = widget.clone();
+    let auth_dlg_ref = auth_dialog_rc.clone();
+    let act_ref = pending_action.clone();
+    let apps_data_ref = apps_data.clone();
+    let pkgs_data_ref = pkgs_data.clone();
+    let is_loading_ref = is_loading.clone();
 
-    widget.refresh_btn.connect_clicked(move |_| {
-        refresh_btn.set_sensitive(false);
+    widget.refresh_btn.connect_clicked(move |btn| {
+        btn.set_sensitive(false);
+        *is_loading_ref.borrow_mut() = true;
 
-        let (tx, rx) = std::sync::mpsc::channel::<super::AppsData>();
-        std::thread::spawn(move || {
-            let installed_apps = babydra_core::services::apps::discovery::scan_desktop_apps();
-            let apps_data: Vec<babydra_core::models::app_info::InstalledApp> = installed_apps
-                .into_iter()
-                .map(|app| babydra_core::models::app_info::InstalledApp {
-                    name: app.name,
-                    description: app.exec,
-                    desktop_file: "".to_string(),
-                    icon: app.icon,
-                })
-                .collect();
+        // Show loading placeholder cards on both tabs while refreshing
+        render::render_apps_list(
+            &widget_ref.apps_list_box,
+            &[],
+            true,
+            &auth_dlg_ref,
+            act_ref.clone(),
+        );
+        render::render_pkgs_list(
+            &widget_ref.pkgs_list_box,
+            &[],
+            true,
+            &auth_dlg_ref,
+            act_ref.clone(),
+        );
 
-            let pkgs = babydra_core::services::apps::pacman::get_installed_pkgs();
-
-            let _ = tx.send(super::AppsData { apps_data, pkgs });
-        });
-
-        let apps_list_box = apps_list_box.clone();
-        let pkgs_list_box = pkgs_list_box.clone();
-        let search_entry = search_entry.clone();
-        let refresh_btn = refresh_btn.clone();
-        let auth_dialog_rc = auth_dialog_rc_ref.clone();
-        let pending_action = pending_action_ref.clone();
-
-        gtk4::glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
-            if let Ok(data) = rx.try_recv() {
-                while let Some(child) = apps_list_box.first_child() {
-                    apps_list_box.remove(&child);
-                }
-                while let Some(child) = pkgs_list_box.first_child() {
-                    pkgs_list_box.remove(&child);
-                }
-
-                let (new_w, _new_auth_dlg, action_items) =
-                    super::render::build(&data.apps_data, &data.pkgs);
-                wire_uninstall_items(&auth_dialog_rc, pending_action.clone(), action_items);
-
-                while let Some(child) = new_w.apps_list_box.first_child() {
-                    new_w.apps_list_box.remove(&child);
-                    apps_list_box.append(&child);
-                }
-                while let Some(child) = new_w.pkgs_list_box.first_child() {
-                    new_w.pkgs_list_box.remove(&child);
-                    pkgs_list_box.append(&child);
-                }
-
-                let query = search_entry.text();
-                filter_list_box(&apps_list_box, &query);
-                filter_list_box(&pkgs_list_box, &query);
-
-                refresh_btn.set_sensitive(true);
-                gtk4::glib::ControlFlow::Break
-            } else {
-                gtk4::glib::ControlFlow::Continue
-            }
-        });
+        fetch_apps_and_pkgs_async(
+            &widget_ref,
+            &auth_dlg_ref,
+            act_ref.clone(),
+            apps_data_ref.clone(),
+            pkgs_data_ref.clone(),
+            is_loading_ref.clone(),
+        );
     });
 
     // Handle Console Close Button
@@ -223,6 +287,7 @@ pub fn wire_main_events(
                     let _ = tx.send(format!("\n{}", success_msg));
                 }
             });
+
             let text_buffer_c = text_buffer.clone();
             let console_scroll_c = console_scroll.clone();
             let progress_bar_c = progress_bar.clone();
@@ -283,60 +348,4 @@ pub fn wire_main_events(
             });
         }
     });
-}
-
-/// Wire uninstall items.
-pub fn wire_uninstall_items(
-    auth_dialog_rc: &Rc<PasswordDialog>,
-    pending_action: Rc<RefCell<Option<PendingAction>>>,
-    action_items: Vec<super::render::AppRowActionItem>,
-) {
-    for item in action_items {
-        let auth_dialog_c = auth_dialog_rc.clone();
-        let pending_c = pending_action.clone();
-        let pkg_name = item.pkg_name;
-        let action_type = match item.action_type {
-            AppActionType::Uninstall => AppActionType::Uninstall,
-            AppActionType::Downgrade => AppActionType::Downgrade,
-        };
-        let row_box = item.row_box;
-        let parent_list = item.parent_list;
-
-        item.button.connect_clicked(move |_| {
-            if action_type == AppActionType::Downgrade {
-                if babydra_core::services::apps::pacman::find_cached_pkg(&pkg_name).is_none() {
-                    let msg = babydra_core::i18n::trans("settings.apps_downgrade_not_found")
-                        .replace("{}", &pkg_name);
-                    babydra_core::send_settings_notif(
-                        &babydra_core::i18n::trans("settings.apps_downgrade_log_title"),
-                        &msg,
-                    );
-                    return;
-                }
-            }
-
-            *pending_c.borrow_mut() = Some(PendingAction {
-                action_type: action_type.clone(),
-                pkg_name: pkg_name.clone(),
-                row_box: row_box.clone(),
-                parent_list: parent_list.clone(),
-            });
-
-            let (title, prompt) = match action_type {
-                AppActionType::Uninstall => (
-                    "Uninstall Authentication",
-                    format!("Enter sudo password to uninstall '{}':", pkg_name),
-                ),
-                AppActionType::Downgrade => (
-                    "Downgrade Authentication",
-                    format!(
-                        "Enter sudo password to downgrade '{}' to cached version:",
-                        pkg_name
-                    ),
-                ),
-            };
-
-            auth_dialog_c.show_for(title, &prompt);
-        });
-    }
 }
