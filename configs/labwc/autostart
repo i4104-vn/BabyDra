@@ -5,12 +5,10 @@
 export PATH="$HOME/.local/bin:$PATH"
 dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=labwc || true
 babydra-switcher --daemon &
-~/.local/bin/babydra-keymap &
-
+babydra-keymap &
 fcitx5 -d &
-~/.local/bin/babydra-panel &
-~/.local/bin/babydra-desktop &
-~/.local/bin/babydra-settings --apply-all-settings &
-~/.local/bin/babydra-settings &
+babydra-panel &
+babydra-desktop &
+babydra-settings --apply-all-settings &
+babydra-settings &
 $HOME/.config/labwc/scripts/bat_saver.sh &
-

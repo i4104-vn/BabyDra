@@ -24,8 +24,8 @@ fn test_custom_loading_components_and_gif() {
 
     let anim = anim_res.unwrap();
     assert!(!anim.is_static_image(), "Loading GIF must be an animated multi-frame sequence");
-    assert_eq!(anim.width(), 128);
-    assert_eq!(anim.height(), 128);
+    assert_eq!(anim.width(), 256);
+    assert_eq!(anim.height(), 256);
 
     // 2. Verify loading icon widget
     let icon = create_loading_icon(64);

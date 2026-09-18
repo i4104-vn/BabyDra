@@ -30,8 +30,8 @@ mkdir -p "$HOME/.babydra"
 [ -f "$HOME/.babydra/wallpaper.png" ] || cp "$REPO_ROOT/wallpaper.png" "$HOME/.babydra/wallpaper.png" 2>/dev/null || true
 
 # Setup default autostart and rc.xml by copying them from configs/labwc/
-cp "$REPO_ROOT/configs/labwc/autostart" "$AUTOSTART_FILE"
-chmod +x "$AUTOSTART_FILE"
+[ -f "$AUTOSTART_FILE" ] || cp "$REPO_ROOT/configs/labwc/autostart" "$AUTOSTART_FILE"
+chmod +x "$AUTOSTART_FILE" 2>/dev/null || true
 echo "Configured labwc autostart at $AUTOSTART_FILE"
 
 cp "$REPO_ROOT/configs/labwc/rc.xml" "$RC_FILE"

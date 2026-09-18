@@ -2,7 +2,7 @@ pub mod render;
 
 use babydra_core::models::startup_command::StartupCommand;
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Entry, Orientation, Widget};
+use gtk4::{Box, Entry, Widget};
 
 /// Creates a new `startup widget`.
 pub fn create_startup() -> Widget {
@@ -10,38 +10,15 @@ pub fn create_startup() -> Widget {
     let widget = render::build(&commands);
 
     let list_card = widget.list_box.clone();
+    let save_btn_for_add = widget.save_btn.clone();
     widget.add_btn.connect_clicked(move |_| {
-        let row = Box::new(Orientation::Horizontal, 12);
-        row.add_css_class("settings-card-row");
-
-        let entry = Entry::new();
-        entry.set_placeholder_text(Some(&babydra_core::i18n::trans(
-            "settings.startup_command_placeholder",
-        )));
-        entry.set_hexpand(true);
-        entry.add_css_class("sidebar-search-entry");
-
-        let delete_btn = Button::new();
-        delete_btn.add_css_class("icon-btn");
-        delete_btn.add_css_class("circular");
-        delete_btn.add_css_class("delete-btn");
-        delete_btn.set_valign(gtk4::Align::Center);
-        let del_icon = babydra_ui_kit::ui::icon::get_icon("edit-delete", 16);
-        del_icon.set_pixel_size(16);
-        delete_btn.set_child(Some(&del_icon));
-
-        let row_copy = row.clone();
-        let list_card_copy = list_card.clone();
-        delete_btn.connect_clicked(move |_| {
-            list_card_copy.remove(&row_copy);
-        });
-
-        row.append(&entry);
-        row.append(&delete_btn);
+        let (row, entry) = render::create_row("", &list_card, &save_btn_for_add);
         list_card.append(&row);
+        entry.grab_focus();
     });
 
     let list_card_save = widget.list_box.clone();
+    let save_btn_c = widget.save_btn.clone();
     widget.save_btn.connect_clicked(move |_| {
         let mut cmds = Vec::new();
         let mut id = 1;
@@ -52,8 +29,12 @@ pub fn create_startup() -> Widget {
                 while let Some(it) = item {
                     if let Some(entry) = it.downcast_ref::<Entry>() {
                         let text = entry.text().to_string();
-                        if !text.trim().is_empty() {
-                            cmds.push(StartupCommand { id, command: text });
+                        let trimmed = text.trim();
+                        if !trimmed.is_empty() {
+                            cmds.push(StartupCommand {
+                                id,
+                                command: trimmed.to_string(),
+                            });
                             id += 1;
                         }
                         break;
@@ -63,7 +44,33 @@ pub fn create_startup() -> Widget {
             }
             row_child = c.next_sibling();
         }
-        let _ = babydra_core::services::system::startup::save_startup_cmds(&cmds);
+
+        match babydra_core::services::system::startup::save_startup_cmds(&cmds) {
+            Ok(_) => {
+                let title = babydra_core::i18n::trans("settings.notif_startup_saved_title");
+                let msg = babydra_core::i18n::trans("settings.notif_startup_saved_msg")
+                    .replace("{}", &cmds.len().to_string());
+                babydra_core::send_settings_notif(&title, &msg);
+
+                // Button visual feedback
+                let orig_label = babydra_core::i18n::trans("settings.save_changes");
+                let saved_label = format!("✓ {}", babydra_core::i18n::trans("settings.save"));
+                save_btn_c.set_label(&saved_label);
+                let btn_restore = save_btn_c.clone();
+                glib::timeout_add_local_once(std::time::Duration::from_millis(1500), move || {
+                    btn_restore.set_label(&orig_label);
+                });
+            }
+            Err(e) => {
+                let title = babydra_core::i18n::trans("settings.notif_startup_failed_title");
+                let msg = format!(
+                    "{}: {}",
+                    babydra_core::i18n::trans("settings.notif_startup_failed_msg"),
+                    e
+                );
+                babydra_core::send_settings_notif(&title, &msg);
+            }
+        }
     });
 
     widget.container.into()

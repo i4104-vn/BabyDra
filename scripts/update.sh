@@ -141,7 +141,13 @@ sudo cp "$REPO_DIR/wallpaper.png" /usr/share/babydra/wallpaper.png 2>/dev/null |
 
 # 6.2 Sync labwc configuration
 mkdir -p "$DEST_DIR"
-cp -r "$CONFIG_SOURCE"/* "$DEST_DIR"/
+for item in "$CONFIG_SOURCE"/*; do
+    base_item="$(basename "$item")"
+    if [ "$base_item" = "autostart" ] && [ -f "$DEST_DIR/autostart" ]; then
+        continue
+    fi
+    cp -r "$item" "$DEST_DIR"/
+done
 chmod +x "$DEST_DIR"/autostart 2>/dev/null || true
 chmod +x "$DEST_DIR"/scripts/* 2>/dev/null || true
 

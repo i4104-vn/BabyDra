@@ -3,7 +3,49 @@ use babydra_core::models::startup_command::StartupCommand;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Entry, Label, Orientation};
 
-/// Build.
+/// Creates a single startup command row.
+pub fn create_row(cmd_text: &str, list_card: &Box, save_btn: &Button) -> (Box, Entry) {
+    let row = Box::new(Orientation::Horizontal, 12);
+    row.add_css_class("settings-card-row");
+
+    let entry = Entry::new();
+    if !cmd_text.is_empty() {
+        entry.set_text(cmd_text);
+    } else {
+        entry.set_placeholder_text(Some(&babydra_core::i18n::trans(
+            "settings.startup_command_placeholder",
+        )));
+    }
+    entry.set_hexpand(true);
+    entry.add_css_class("sidebar-search-entry");
+
+    // Pressing Enter saves changes immediately
+    let save_btn_c = save_btn.clone();
+    entry.connect_activate(move |_| {
+        save_btn_c.emit_clicked();
+    });
+
+    let delete_btn = Button::new();
+    delete_btn.add_css_class("icon-btn");
+    delete_btn.add_css_class("circular");
+    delete_btn.add_css_class("delete-btn");
+    delete_btn.set_valign(gtk4::Align::Center);
+    let del_icon = babydra_ui_kit::ui::icon::get_icon("edit-delete", 16);
+    del_icon.set_pixel_size(16);
+    delete_btn.set_child(Some(&del_icon));
+
+    let row_copy = row.clone();
+    let list_card_copy = list_card.clone();
+    delete_btn.connect_clicked(move |_| {
+        list_card_copy.remove(&row_copy);
+    });
+
+    row.append(&entry);
+    row.append(&delete_btn);
+    (row, entry)
+}
+
+/// Build startup widget.
 pub fn build(commands: &[StartupCommand]) -> StartupWidget {
     let container = Box::new(Orientation::Vertical, 16);
     container.set_vexpand(true);
@@ -38,33 +80,8 @@ pub fn build(commands: &[StartupCommand]) -> StartupWidget {
     let mut entries = Vec::new();
 
     for cmd in commands {
-        let row = Box::new(Orientation::Horizontal, 12);
-        row.add_css_class("settings-card-row");
-
-        let entry = Entry::new();
-        entry.set_text(&cmd.command);
-        entry.set_hexpand(true);
-        entry.add_css_class("sidebar-search-entry");
-
-        let delete_btn = Button::new();
-        delete_btn.add_css_class("icon-btn");
-        delete_btn.add_css_class("circular");
-        delete_btn.add_css_class("delete-btn");
-        delete_btn.set_valign(gtk4::Align::Center);
-        let del_icon = babydra_ui_kit::ui::icon::get_icon("edit-delete", 16);
-        del_icon.set_pixel_size(16);
-        delete_btn.set_child(Some(&del_icon));
-
-        let row_copy = row.clone();
-        let list_card_copy = list_card.clone();
-        delete_btn.connect_clicked(move |_| {
-            list_card_copy.remove(&row_copy);
-        });
-
-        row.append(&entry);
-        row.append(&delete_btn);
+        let (row, entry) = create_row(&cmd.command, &list_card, &save_btn);
         list_card.append(&row);
-
         entries.push(entry);
     }
 
