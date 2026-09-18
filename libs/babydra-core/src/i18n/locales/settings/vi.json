@@ -66,6 +66,7 @@
   "settings.env_title": "Biến môi trường",
   "settings.env_subtitle": "Quản lý biến môi trường cho Labwc compositor (~/.config/labwc/environment)",
   "settings.keybinds_title_page": "Phím tắt hệ thống",
+  "settings.keybinds_search_placeholder": "Tìm kiếm phím tắt...",
   "settings.cert_title": "Chứng chỉ CA",
   "settings.cert_subtitle": "Quản lý các chứng chỉ CA tin cậy trong /etc/ca-certificates/trust-source/anchors/",
   "settings.cert_add_btn": "Thêm chứng chỉ",

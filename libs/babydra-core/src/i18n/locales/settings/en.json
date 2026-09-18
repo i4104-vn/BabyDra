@@ -66,6 +66,7 @@
   "settings.env_title": "Environment Variables",
   "settings.env_subtitle": "Manage environment variables (~/.config/labwc/environment)",
   "settings.keybinds_title_page": "Keybindings",
+  "settings.keybinds_search_placeholder": "Search shortcuts...",
   "settings.cert_title": "CA Certificates",
   "settings.cert_subtitle": "Manage trusted CA certificates in /etc/ca-certificates/trust-source/anchors/",
   "settings.cert_add_btn": "Add Certificate",

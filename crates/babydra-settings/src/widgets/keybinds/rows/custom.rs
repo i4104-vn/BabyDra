@@ -14,6 +14,10 @@ pub fn create_custom_shortcut_row(sc: &Shortcut, parent: Box) -> Box {
     let row = Box::new(Orientation::Horizontal, 12);
     row.add_css_class("settings-card-row");
     row.add_css_class(DATA_ROW_CSS_CLASS);
+    row.set_margin_top(8);
+    row.set_margin_bottom(8);
+    row.set_margin_start(8);
+    row.set_margin_end(8);
 
     let combo_btn = Button::new();
     combo_btn.set_width_request(160);

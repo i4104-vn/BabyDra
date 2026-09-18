@@ -17,18 +17,22 @@ pub fn create_system_shortcut_row(sc: &SystemShortcut) -> Box {
     row.add_css_class("settings-card-row");
     row.add_css_class(SYSTEM_ROW_CSS_CLASS);
     row.set_widget_name(&sc.id);
+    row.set_margin_top(8);
+    row.set_margin_bottom(8);
+    row.set_margin_start(8);
+    row.set_margin_end(8);
 
     // Left info column: Title + Description (no tag/badge)
-    let info_box = Box::new(Orientation::Vertical, 3);
+    let info_box = Box::new(Orientation::Vertical, 4);
     info_box.set_hexpand(true);
     info_box.set_valign(gtk4::Align::Center);
 
     let title_lbl = Label::new(Some(&babydra_core::i18n::trans(&sc.name_key)));
-    title_lbl.add_css_class("settings-item-title");
+    title_lbl.add_css_class("settings-row-title");
     title_lbl.set_halign(gtk4::Align::Start);
 
     let desc_lbl = Label::new(Some(&babydra_core::i18n::trans(&sc.description_key)));
-    desc_lbl.add_css_class("settings-item-description");
+    desc_lbl.add_css_class("settings-row-desc");
     desc_lbl.set_halign(gtk4::Align::Start);
 
     info_box.append(&title_lbl);

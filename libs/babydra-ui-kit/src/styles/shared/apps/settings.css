@@ -70,8 +70,13 @@ button.shortcut-combo-btn {
     background-image: none;
 }
 
-/* Keybinds table: no row separators, cards float like the inputs */
+/* Keybinds table: rows have separators and comfortable padding */
 .keybinds-table .settings-card-row {
+    padding: 6px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.keybinds-table .settings-card-row:last-child {
     border-bottom: none;
 }
 
