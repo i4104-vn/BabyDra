@@ -56,6 +56,8 @@ pub fn build() -> (AppsWidget, PasswordDialog) {
     refresh_btn.add_css_class("icon-btn");
     refresh_btn.add_css_class("circular");
     refresh_btn.set_cursor_from_name(Some("pointer"));
+    refresh_btn.set_valign(gtk4::Align::Center);
+    refresh_btn.set_size_request(34, 34);
     let refresh_icon = babydra_ui_kit::ui::icon::get_icon("refresh", 16);
     refresh_icon.set_pixel_size(16);
     refresh_btn.set_child(Some(&refresh_icon));

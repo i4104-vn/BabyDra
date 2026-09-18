@@ -21,6 +21,8 @@ pub fn build_page_header() -> (Box, Button, Button, Button) {
     add_btn.add_css_class("icon-btn");
     add_btn.add_css_class("circular");
     add_btn.set_cursor_from_name(Some("pointer"));
+    add_btn.set_valign(gtk4::Align::Center);
+    add_btn.set_size_request(34, 34);
     let add_icon = babydra_ui_kit::ui::icon::get_icon("plus", 16);
     add_icon.set_pixel_size(16);
     add_btn.set_child(Some(&add_icon));
@@ -31,6 +33,8 @@ pub fn build_page_header() -> (Box, Button, Button, Button) {
     refresh_btn.add_css_class("icon-btn");
     refresh_btn.add_css_class("circular");
     refresh_btn.set_cursor_from_name(Some("pointer"));
+    refresh_btn.set_valign(gtk4::Align::Center);
+    refresh_btn.set_size_request(34, 34);
     let refresh_icon = babydra_ui_kit::ui::icon::get_icon("refresh", 16);
     refresh_icon.set_pixel_size(16);
     refresh_btn.set_child(Some(&refresh_icon));
