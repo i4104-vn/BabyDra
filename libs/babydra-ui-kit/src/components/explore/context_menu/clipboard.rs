@@ -255,6 +255,7 @@ fn perform_execute_paste(
             glib::timeout_future(std::time::Duration::from_millis(5)).await;
         }
 
+        let completed_count = actual_sources.len();
         if all_success && (!destinations.is_empty()) {
             UNDO_STACK.with(|stack| {
                 stack.borrow_mut().push(UndoOperation {
@@ -272,6 +273,16 @@ fn perform_execute_paste(
                 .clipboard()
                 .set_content(None::<&gtk4::gdk::ContentProvider>);
             apply_cut_everywhere(&[]);
+        }
+
+        if all_success && completed_count > 0 {
+            let title = if is_cut {
+                trans("explore.moving_title")
+            } else {
+                trans("explore.copying_title")
+            };
+            let body = format!("{} {}", completed_count, trans("explore.items"));
+            babydra_core::send_notification(&title, &body);
         }
 
         dialog_c.close();
@@ -363,6 +374,7 @@ pub fn paste_from_clipboard(
 pub fn execute_undo(nav_callback: Rc<dyn Fn(PathBuf)>, current_path: PathBuf) {
     let op = UNDO_STACK.with(|stack| stack.borrow_mut().pop());
     if let Some(op) = op {
+        let item_count = op.destinations.len();
         glib::spawn_future_local(async move {
             if op.is_cut {
                 // Move destinations back to sources
@@ -379,6 +391,10 @@ pub fn execute_undo(nav_callback: Rc<dyn Fn(PathBuf)>, current_path: PathBuf) {
                     }
                 }
             }
+            babydra_core::send_notification(
+                &trans("explore.shortcut_undo"),
+                &format!("{} {}", item_count, trans("explore.items")),
+            );
             nav_callback(current_path);
         });
     }
