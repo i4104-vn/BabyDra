@@ -5,7 +5,7 @@
 
 /* === panel/panel.css === */
 popover>contents {
-    background-color: rgba(255, 255, 255, 0.98);
+    background-color: rgba(255, 255, 255, 0.95);
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
@@ -28,7 +28,7 @@ button.panel-logo-btn:hover {
 
 popover.status-popover>contents,
 popover.tooltip-popover>contents {
-    background-color: rgba(255, 255, 255, 0.96);
+    background-color: rgba(255, 255, 255, 0.95);
     border: 1px solid rgba(0, 0, 0, 0.10);
     box-shadow: none;
 }
@@ -620,7 +620,7 @@ popover.control-popover>contents,
 popover.wifi-popover>contents,
 popover.volume-popover>contents,
 popover.audio-popover>contents {
-    background-color: rgba(255, 255, 255, 0.94);
+    background-color: rgba(255, 255, 255, 0.95);
     border: 1px solid rgba(0, 0, 0, 0.08);
     box-shadow: none;
 }
@@ -755,7 +755,7 @@ popover>arrow {
 popover.media-popover>contents,
 popover.clipboard-popover>contents,
 popover.power-popover>contents {
-    background-color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.95);
     border-top: 1px solid rgba(255, 255, 255, 1.0);
     border-left: 1px solid rgba(255, 255, 255, 0.90);
     border-bottom: 1px solid rgba(0, 0, 0, 0.10);
@@ -1119,7 +1119,7 @@ entry.launcher-search>text>placeholder {
 
 /* === calendar/calendar.css === */
 .calendar-box {
-    background-color: rgba(255, 255, 255, 0.98);
+    background-color: rgba(255, 255, 255, 0.95);
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-top: 1px solid rgba(0, 0, 0, 0.06);
     color: rgba(28, 28, 30, 0.95);
@@ -1497,7 +1497,7 @@ window.viewer-window,
 }
 
 .main-preview-card {
-    background-color: rgba(255, 255, 255, 0.98);
+    background-color: rgba(255, 255, 255, 0.95);
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-top: 1px solid rgba(0, 0, 0, 0.06);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
@@ -1768,10 +1768,15 @@ popover.video-speed-popover > contents {
 
 /* === apps/settings.css === */
 window.settings-window {
-    background-color: rgba(255, 255, 255, 0.98);
+    background-color: rgba(255, 255, 255, 0.95);
     color: #1c1c1e;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.settings-surface-tint {
+    background-color: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .profile-avatar {
@@ -2562,7 +2567,7 @@ scale.settings-scale:disabled mark label {
 }
 
 .switcher-deck-container {
-    background-color: rgba(248, 249, 252, 0.92);
+    background-color: rgba(248, 249, 252, 0.95);
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-top: 1px solid rgba(255, 255, 255, 0.80);
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.20), 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -2605,7 +2610,7 @@ button.switcher-card.selected {
 /* === Workspace Switcher Popover & Flyout === */
 popover.workspace-switcher-popover>contents,
 popover.workspace-apps-flyout>contents {
-    background-color: rgba(255, 255, 255, 0.96);
+    background-color: rgba(255, 255, 255, 0.95);
     border: 1px solid rgba(0, 0, 0, 0.10);
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
     color: rgba(15, 23, 42, 0.95);
@@ -2662,12 +2667,12 @@ button.workspace-app-flyout-item:hover .workspace-app-flyout-name {
 /* === explore/window.css === */
 
 .explore-window {
-    background-color: #f5f5f7;
+    background-color: rgba(245, 245, 247, 0.95);
     border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
 .explore-window-box {
-    background-color: #f5f5f7;
+    background-color: rgba(245, 245, 247, 0.95);
     background-image: repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.015) 0px, rgba(0, 0, 0, 0.015) 1px, transparent 1px, transparent 2px),
         linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(0, 0, 0, 0.05) 100%);
     border-bottom: 1px solid rgba(0, 0, 0, 0.12);
@@ -3337,7 +3342,7 @@ button.row-action-btn.delete-btn:hover {
 }
 
 .explore-dialog.properties-dialog {
-    background-color: rgba(255, 255, 255, 0.98);
+    background-color: rgba(255, 255, 255, 0.95);
     border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
@@ -3678,7 +3683,7 @@ popover.context-menu>contents,
 .launcher-box,
 .control-center-box {
     border-radius: 24px;
-    background-color: rgba(255, 255, 255, 0.98);
+    background-color: rgba(255, 255, 255, 0.95);
     background-image: none;
     border-top: 1px solid rgba(255, 255, 255, 1.0);
     border-left: 1px solid rgba(255, 255, 255, 1.0);

@@ -137,10 +137,12 @@ pub fn build() -> (PowerWidget, PasswordDialog) {
     // Render the UI instantly with placeholder values (0ms main-thread
     // blocking) so the window appears before background battery queries finish.
     let overlay = Overlay::new();
+    overlay.set_hexpand(true);
     overlay.set_vexpand(true);
     overlay.set_valign(gtk4::Align::Fill);
 
     let main_box = Box::new(Orientation::Vertical, 12);
+    main_box.set_hexpand(true);
     main_box.set_vexpand(true);
     main_box.set_valign(gtk4::Align::Fill);
 
@@ -157,14 +159,17 @@ pub fn build() -> (PowerWidget, PasswordDialog) {
     let desc_lbl = Label::new(Some(&babydra_core::i18n::trans("settings.power_desc")));
 
     let content_box = Box::new(Orientation::Vertical, 12);
+    content_box.set_hexpand(true);
 
     let battery_card = Box::new(Orientation::Vertical, 8);
     battery_card.add_css_class("glass-panel");
+    battery_card.set_hexpand(true);
     content_box.append(&battery_card);
 
     // ── BATTERY SAVER MANAGEMENT SECTION ──
     let saver_section = Box::new(Orientation::Vertical, 10);
     saver_section.add_css_class("glass-panel");
+    saver_section.set_hexpand(true);
     saver_section.set_vexpand(false);
 
     let saver_title = Label::new(Some(&babydra_core::i18n::trans(
@@ -189,6 +194,7 @@ pub fn build() -> (PowerWidget, PasswordDialog) {
     // ── CHARGE LIMIT MANAGEMENT SECTION (80% - 100%) ──
     let charge_section = Box::new(Orientation::Vertical, 6);
     charge_section.add_css_class("glass-panel");
+    charge_section.set_hexpand(true);
     charge_section.set_vexpand(false);
     charge_section.set_visible(babydra_core::services::system::battery::has_charge_limit());
 
@@ -214,6 +220,7 @@ pub fn build() -> (PowerWidget, PasswordDialog) {
     // ── PERFORMANCE PROFILE SECTION ──
     let perf_section = Box::new(Orientation::Vertical, 8);
     perf_section.add_css_class("glass-panel");
+    perf_section.set_hexpand(true);
     perf_section.set_vexpand(false);
 
     let perf_title = Label::new(Some(&babydra_core::i18n::trans(
@@ -327,6 +334,7 @@ pub fn build() -> (PowerWidget, PasswordDialog) {
     content_box.append(&perf_section);
 
     let scroll = ScrolledWindow::new();
+    scroll.set_hexpand(true);
     scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
     scroll.set_vexpand(true);
     scroll.set_valign(gtk4::Align::Fill);

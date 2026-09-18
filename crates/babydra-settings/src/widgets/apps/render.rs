@@ -31,8 +31,10 @@ pub struct PkgItemData {
 /// Builds the base UI structure of the Apps page (empty list boxes initially).
 pub fn build() -> (AppsWidget, PasswordDialog) {
     let root = Overlay::new();
+    root.set_hexpand(true);
 
     let container = Box::new(Orientation::Vertical, 16);
+    container.set_hexpand(true);
     container.set_vexpand(true);
     container.set_valign(gtk4::Align::Fill);
 
@@ -87,6 +89,7 @@ pub fn build() -> (AppsWidget, PasswordDialog) {
 
     // Stack for Apps vs Packages view
     let stack = Stack::new();
+    stack.set_hexpand(true);
     stack.set_transition_type(gtk4::StackTransitionType::Crossfade);
     stack.set_vexpand(true);
     stack.set_valign(gtk4::Align::Fill);
@@ -94,10 +97,12 @@ pub fn build() -> (AppsWidget, PasswordDialog) {
     // 1. Apps List (Glass Panel List Box)
     let apps_glass_card = Box::new(Orientation::Vertical, 0);
     apps_glass_card.add_css_class("glass-panel");
+    apps_glass_card.set_hexpand(true);
     apps_glass_card.set_vexpand(true);
     apps_glass_card.set_valign(gtk4::Align::Fill);
 
     let apps_scrolled = ScrolledWindow::new();
+    apps_scrolled.set_hexpand(true);
     apps_scrolled.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
     apps_scrolled.set_vexpand(true);
     apps_scrolled.set_valign(gtk4::Align::Fill);
@@ -112,10 +117,12 @@ pub fn build() -> (AppsWidget, PasswordDialog) {
     // 2. Packages List
     let pkgs_glass_card = Box::new(Orientation::Vertical, 0);
     pkgs_glass_card.add_css_class("glass-panel");
+    pkgs_glass_card.set_hexpand(true);
     pkgs_glass_card.set_vexpand(true);
     pkgs_glass_card.set_valign(gtk4::Align::Fill);
 
     let pkgs_scrolled = ScrolledWindow::new();
+    pkgs_scrolled.set_hexpand(true);
     pkgs_scrolled.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
     pkgs_scrolled.set_vexpand(true);
     pkgs_scrolled.set_valign(gtk4::Align::Fill);

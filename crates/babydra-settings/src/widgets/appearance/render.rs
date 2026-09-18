@@ -29,6 +29,7 @@ pub fn build_appearance_ui(
     gtk4::Button,
 ) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
+    main_box.set_hexpand(true);
     main_box.set_vexpand(true);
     main_box.set_valign(gtk4::Align::Fill);
 
@@ -49,17 +50,20 @@ pub fn build_appearance_ui(
     // Dashboard Main Glass Panel
     let dashboard_panel = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
     dashboard_panel.add_css_class("glass-panel");
+    dashboard_panel.set_hexpand(true);
     dashboard_panel.set_vexpand(true);
     dashboard_panel.set_valign(gtk4::Align::Fill);
 
     // Top 2-Column Configuration Grid
     let top_grid = gtk4::Grid::new();
+    top_grid.set_hexpand(true);
     top_grid.set_column_spacing(20);
     top_grid.set_row_spacing(16);
     top_grid.set_column_homogeneous(true);
 
     // Column 0 (Left): Narrowed Wallpaper Preview Overlay with Floating Controls
     let preview_overlay = gtk4::Overlay::new();
+    preview_overlay.set_hexpand(true);
     preview_overlay.add_css_class("wallpaper-preview-overlay");
     preview_overlay.set_size_request(-1, 160);
 
@@ -172,6 +176,7 @@ pub fn build_appearance_ui(
     top_grid.attach(&preview_overlay, 0, 0, 1, 1);
     // Column 1 (Right): System Themes Configuration Dropdowns (2x2 Grid)
     let theme_grid = gtk4::Grid::new();
+    theme_grid.set_hexpand(true);
     theme_grid.set_column_spacing(16);
     theme_grid.set_row_spacing(28);
     theme_grid.set_column_homogeneous(true);
@@ -316,6 +321,7 @@ pub fn build_appearance_ui(
     quick_select_box.set_margin_end(4);
 
     let scroll = gtk4::ScrolledWindow::new();
+    scroll.set_hexpand(true);
     scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
     scroll.set_vexpand(true);
     scroll.set_valign(gtk4::Align::Fill);

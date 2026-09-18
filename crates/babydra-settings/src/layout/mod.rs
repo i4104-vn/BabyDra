@@ -130,7 +130,13 @@ fn create_widget_page(name: &str) -> gtk4::Widget {
 /// Ensures that a widget page is constructed and added to the content stack.
 fn ensure_page_loaded(stack: &gtk4::Stack, name: &str) {
     if stack.child_by_name(name).is_none() {
-        stack.add_named(&create_widget_page(name), Some(name));
+        let page = create_widget_page(name);
+        page.set_hexpand(true);
+        page.set_vexpand(true);
+        page.set_halign(gtk4::Align::Fill);
+        page.set_valign(gtk4::Align::Fill);
+        page.set_size_request(0, 0);
+        stack.add_named(&page, Some(name));
     }
 }
 
@@ -160,6 +166,14 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
 
     let overlay = gtk4::Overlay::new();
     let main_layout = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    main_layout.set_size_request(0, 0);
+    main_layout.set_overflow(gtk4::Overflow::Hidden);
+
+    let backdrop = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    backdrop.set_hexpand(true);
+    backdrop.set_vexpand(true);
+    backdrop.set_can_target(false);
+    backdrop.add_css_class("settings-surface-tint");
 
     // ── Left: Sidebar Navigation Container ─────────────────────
     let sidebar_box = gtk4::Box::new(gtk4::Orientation::Vertical, 10);
@@ -289,6 +303,8 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     content_stack.set_transition_duration(200);
     content_stack.set_hexpand(true);
     content_stack.set_vexpand(true);
+    content_stack.set_size_request(0, 0);
+    content_stack.set_overflow(gtk4::Overflow::Hidden);
     content_stack.add_css_class("settings-content");
 
     // Eagerly load target initial page
@@ -298,14 +314,22 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     let right_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     right_box.set_hexpand(true);
     right_box.set_vexpand(true);
+    right_box.set_size_request(0, 0);
+    right_box.set_overflow(gtk4::Overflow::Hidden);
     right_box.set_margin_top(8);
     right_box.set_margin_bottom(8);
     right_box.set_margin_start(8);
     right_box.set_margin_end(8);
-    right_box.append(&content_stack);
+    let content_viewport = gtk4::ScrolledWindow::new();
+    content_viewport.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Never);
+    content_viewport.set_hexpand(true);
+    content_viewport.set_vexpand(true);
+    content_viewport.set_child(Some(&content_stack));
+    right_box.append(&content_viewport);
 
     main_layout.append(&right_box);
-    overlay.set_child(Some(&main_layout));
+    overlay.set_child(Some(&backdrop));
+    overlay.add_overlay(&main_layout);
 
     // ── Global Loading Overlay ───────────────────────────────
     let loading_card = babydra_ui_kit::components::create_loading_card(72);
@@ -411,7 +435,7 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
                     while let Some(child) = stack.first_child() {
                         stack.remove(&child);
                     }
-                    stack.add_named(&create_widget_page(&current_name), Some(&current_name));
+                    ensure_page_loaded(&stack, &current_name);
                     stack.set_visible_child_name(&current_name);
                 }
             });
