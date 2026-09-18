@@ -35,6 +35,10 @@ pub fn get_startup_commands() -> Vec<StartupCommand> {
             if trim.is_empty() || trim.starts_with('#') {
                 continue;
             }
+            // Skip internal cache / workspace setup commands that are handled natively in code
+            if trim.contains(".cache/babydra") {
+                continue;
+            }
             if trim.starts_with("exec-once") {
                 if let Some((_, cmd)) = trim.split_once('=') {
                     commands.push(StartupCommand {

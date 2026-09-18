@@ -19,6 +19,9 @@ fn main() {
 
     let _lifecycle = babydra_core::services::app_lifecycle::init_app("babydra-panel");
 
+    // Initialize/reset workspace cache directly in code on startup
+    babydra_core::reset_cached_workspace();
+
     // Detect DDC/CI bus for desktop monitors on startup
     widgets::panel::detect_ddc_bus();
 
