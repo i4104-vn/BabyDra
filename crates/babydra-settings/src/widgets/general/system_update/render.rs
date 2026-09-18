@@ -180,7 +180,7 @@ pub fn render_system_update_card() -> SystemUpdateCardWidgets {
         &babydra_core::i18n::trans("settings.update_title"),
         Some(&babydra_core::i18n::trans("settings.update_subtitle")),
         Some("history"),
-        true,
+        false,
     );
 
     // Tag badge placed right next to the card title in the header
