@@ -132,38 +132,40 @@ pub fn create_uptodate_row() -> ListBoxRow {
     row.set_selectable(false);
     row.set_activatable(false);
 
-    let row_box = Box::new(Orientation::Horizontal, 12);
-    row_box.add_css_class("settings-card-row");
+    let row_box = Box::new(Orientation::Vertical, 10);
     row_box.set_valign(gtk4::Align::Center);
-    row_box.set_margin_top(12);
-    row_box.set_margin_bottom(12);
-    row_box.set_margin_start(8);
-    row_box.set_margin_end(8);
+    row_box.set_halign(gtk4::Align::Center);
+    row_box.set_margin_top(28);
+    row_box.set_margin_bottom(28);
+    row_box.set_margin_start(16);
+    row_box.set_margin_end(16);
 
     let icon_badge = Box::new(Orientation::Vertical, 0);
     icon_badge.add_css_class("green-icon-badge-sm");
     icon_badge.set_valign(gtk4::Align::Center);
-    icon_badge.set_halign(gtk4::Align::Start);
-    icon_badge.set_size_request(32, 32);
+    icon_badge.set_halign(gtk4::Align::Center);
+    icon_badge.set_size_request(42, 42);
 
-    let icon_img = babydra_ui_kit::ui::icon::get_icon("check", 18);
-    icon_img.set_pixel_size(18);
+    let icon_img = babydra_ui_kit::ui::icon::get_icon("check", 22);
+    icon_img.set_pixel_size(22);
     icon_img.set_valign(gtk4::Align::Center);
     icon_img.set_halign(gtk4::Align::Center);
     icon_img.set_vexpand(true);
     icon_badge.append(&icon_img);
     row_box.append(&icon_badge);
 
-    let text_box = Box::new(Orientation::Vertical, 2);
-    text_box.set_hexpand(true);
-    text_box.set_valign(gtk4::Align::Center);
-
     let text_lbl = Label::new(Some(&babydra_core::i18n::trans("settings.up_to_date")));
     text_lbl.add_css_class("settings-row-title");
-    text_lbl.set_halign(gtk4::Align::Start);
-    text_box.append(&text_lbl);
+    text_lbl.set_halign(gtk4::Align::Center);
+    row_box.append(&text_lbl);
 
-    row_box.append(&text_box);
+    let desc_lbl = Label::new(Some(&babydra_core::i18n::trans(
+        "settings.update_uptodate_desc",
+    )));
+    desc_lbl.add_css_class("settings-row-desc");
+    desc_lbl.set_halign(gtk4::Align::Center);
+    row_box.append(&desc_lbl);
+
     row.set_child(Some(&row_box));
     row
 }
@@ -172,18 +174,18 @@ pub fn create_uptodate_row() -> ListBoxRow {
 pub fn render_system_update_card() -> SystemUpdateCardWidgets {
     let card = create_collapsible_card(
         &babydra_core::i18n::trans("settings.update_title"),
-        Some(&babydra_core::i18n::trans("settings.general_subtitle")),
+        Some(&babydra_core::i18n::trans("settings.update_subtitle")),
         Some("history"),
-        false,
+        true,
     );
 
     let content = card.content;
 
     // Header Controls Row: Status badge on Left, Action buttons & spinner on Right
-    let controls_row = Box::new(Orientation::Horizontal, 10);
+    let controls_row = Box::new(Orientation::Horizontal, 12);
     controls_row.add_css_class("settings-card-row");
-    controls_row.set_margin_top(4);
-    controls_row.set_margin_bottom(4);
+    controls_row.set_margin_top(6);
+    controls_row.set_margin_bottom(10);
     controls_row.set_margin_start(8);
     controls_row.set_margin_end(8);
 
@@ -191,10 +193,12 @@ pub fn render_system_update_card() -> SystemUpdateCardWidgets {
     count_badge.add_css_class("update-count-badge");
     count_badge.set_hexpand(true);
     count_badge.set_halign(gtk4::Align::Start);
+    count_badge.set_valign(gtk4::Align::Center);
     controls_row.append(&count_badge);
 
     let spinner = Spinner::new();
     spinner.set_visible(false);
+    spinner.set_valign(gtk4::Align::Center);
     controls_row.append(&spinner);
 
     let refresh_btn = Button::with_label(&babydra_core::i18n::trans("settings.update_check"));
@@ -239,7 +243,8 @@ pub fn render_system_update_card() -> SystemUpdateCardWidgets {
 
     let scroll = ScrolledWindow::new();
     scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
-    scroll.set_max_content_height(240);
+    scroll.set_min_content_height(160);
+    scroll.set_max_content_height(340);
     scroll.set_propagate_natural_height(true);
     scroll.set_child(Some(&list_box));
 

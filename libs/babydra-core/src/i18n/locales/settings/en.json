@@ -128,6 +128,8 @@
   "settings.startup_title": "Startup Applications",
   "settings.startup_add": "Add App",
   "settings.update_title": "System Update",
+  "settings.update_subtitle": "Check and install system, software, and core updates",
+  "settings.update_uptodate_desc": "All software packages and system components are up to date.",
   "settings.hosts_title": "Hosts File",
   "settings.updates_available": "Updates Available",
   "settings.update_all": "Update All",

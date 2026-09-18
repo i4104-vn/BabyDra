@@ -122,6 +122,8 @@
   "settings.startup_title": "Ứng dụng tự khởi chạy",
   "settings.startup_add": "Thêm ứng dụng",
   "settings.update_title": "Cập nhật hệ thống",
+  "settings.update_subtitle": "Kiểm tra và cài đặt bản cập nhật hệ thống, phần mềm",
+  "settings.update_uptodate_desc": "Tất cả các gói phần mềm và thành phần hệ thống đều ở phiên bản mới nhất.",
   "settings.hosts_title": "Tệp Hosts",
   "settings.updates_available": "Bản cập nhật có sẵn",
   "settings.update_all": "Cập nhật tất cả",
