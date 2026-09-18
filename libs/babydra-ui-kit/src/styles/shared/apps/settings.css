@@ -215,7 +215,8 @@ button.shortcut-combo-btn {
     margin-bottom: 8px;
 }
 
-button.card-collapse-header {
+button.card-collapse-header,
+.card-collapse-header {
     background: transparent;
     background-color: transparent;
     border: none;
@@ -225,7 +226,8 @@ button.card-collapse-header {
     transition: background-color 150ms ease;
 }
 
-button.card-collapse-header:hover {
+button.card-collapse-header:hover,
+.card-collapse-header:hover {
     background-color: rgba(255, 255, 255, 0.05);
 }
 
@@ -238,7 +240,8 @@ button.card-collapse-header:hover {
     transition: opacity 150ms ease;
 }
 
-button.card-collapse-header:hover .card-collapse-arrow {
+button.card-collapse-header:hover .card-collapse-arrow,
+.card-collapse-header:hover .card-collapse-arrow {
     opacity: 1.0;
 }
 

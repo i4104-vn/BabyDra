@@ -179,42 +179,32 @@ pub fn render_system_update_card() -> SystemUpdateCardWidgets {
         true,
     );
 
-    let content = card.content;
-
-    // Header Controls Row: Status badge on Left, Action buttons & spinner on Right
-    let controls_row = Box::new(Orientation::Horizontal, 12);
-    controls_row.add_css_class("settings-card-row");
-    controls_row.set_margin_top(6);
-    controls_row.set_margin_bottom(10);
-    controls_row.set_margin_start(8);
-    controls_row.set_margin_end(8);
-
+    // Tag badge placed right next to the card title in the header
     let count_badge = Label::new(Some(&babydra_core::i18n::trans("settings.up_to_date")));
     count_badge.add_css_class("update-count-badge");
-    count_badge.set_hexpand(true);
-    count_badge.set_halign(gtk4::Align::Start);
     count_badge.set_valign(gtk4::Align::Center);
-    controls_row.append(&count_badge);
+    card.title_box.append(&count_badge);
 
+    // Action buttons & spinner placed on the far right of the header row
     let spinner = Spinner::new();
     spinner.set_visible(false);
     spinner.set_valign(gtk4::Align::Center);
-    controls_row.append(&spinner);
+    card.action_box.append(&spinner);
 
     let refresh_btn = Button::with_label(&babydra_core::i18n::trans("settings.update_check"));
     refresh_btn.add_css_class("connect-pill-btn");
     refresh_btn.set_cursor_from_name(Some("pointer"));
     refresh_btn.set_valign(gtk4::Align::Center);
-    controls_row.append(&refresh_btn);
+    card.action_box.append(&refresh_btn);
 
     let update_all_btn = Button::with_label(&babydra_core::i18n::trans("settings.update_all"));
     update_all_btn.add_css_class("suggested-action");
     update_all_btn.set_cursor_from_name(Some("pointer"));
     update_all_btn.set_valign(gtk4::Align::Center);
     update_all_btn.set_visible(false);
-    controls_row.append(&update_all_btn);
+    card.action_box.append(&update_all_btn);
 
-    content.append(&controls_row);
+    let content = card.content;
 
     // Progress bar panel
     let progress_box = Box::new(Orientation::Vertical, 6);

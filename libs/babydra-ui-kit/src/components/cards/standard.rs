@@ -58,6 +58,8 @@ pub struct CollapsibleCard {
     pub title_label: gtk4::Label,
     pub subtitle_label: Option<gtk4::Label>,
     pub header_button: gtk4::Button,
+    pub title_box: gtk4::Box,
+    pub action_box: gtk4::Box,
 }
 
 /// Creates a collapsible settings card with a clickable header and smooth slide revealer.
@@ -71,28 +73,37 @@ pub fn create_collapsible_card(
     container.add_css_class("settings-card");
     container.add_css_class("collapsible-card");
 
-    let header_button = gtk4::Button::new();
-    header_button.add_css_class("card-collapse-header");
-    header_button.set_cursor_from_name(Some("pointer"));
-
     let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+    header_box.add_css_class("card-collapse-header");
     header_box.set_valign(gtk4::Align::Center);
+
+    // Left clickable toggle area
+    let toggle_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+    toggle_box.set_valign(gtk4::Align::Center);
+    toggle_box.set_hexpand(true);
+    toggle_box.set_cursor_from_name(Some("pointer"));
 
     if let Some(icon) = icon_name {
         let icon_w = crate::ui::icon::get_icon(icon, 20);
         icon_w.set_pixel_size(20);
         icon_w.set_valign(gtk4::Align::Center);
-        header_box.append(&icon_w);
+        toggle_box.append(&icon_w);
     }
 
     let text_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
     text_box.set_hexpand(true);
     text_box.set_valign(gtk4::Align::Center);
 
+    // Title row (holds title_label + any extra badges like count_badge)
+    let title_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+    title_box.set_valign(gtk4::Align::Center);
+
     let title_label = gtk4::Label::new(Some(title));
     title_label.add_css_class("settings-row-title");
     title_label.set_halign(gtk4::Align::Start);
-    text_box.append(&title_label);
+    title_box.append(&title_label);
+
+    text_box.append(&title_box);
 
     let subtitle_label = if let Some(sub) = subtitle {
         let sub_lbl = gtk4::Label::new(Some(sub));
@@ -104,8 +115,15 @@ pub fn create_collapsible_card(
         None
     };
 
-    header_box.append(&text_box);
+    toggle_box.append(&text_box);
+    header_box.append(&toggle_box);
 
+    // Right action widgets container (before the collapse arrow)
+    let action_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+    action_box.set_valign(gtk4::Align::Center);
+    header_box.append(&action_box);
+
+    // Right collapse arrow
     let arrow_icon = crate::ui::icon::get_icon(
         if initially_expanded {
             "down"
@@ -117,10 +135,10 @@ pub fn create_collapsible_card(
     arrow_icon.add_css_class("card-collapse-arrow");
     arrow_icon.set_pixel_size(14);
     arrow_icon.set_valign(gtk4::Align::Center);
+    arrow_icon.set_cursor_from_name(Some("pointer"));
     header_box.append(&arrow_icon);
 
-    header_button.set_child(Some(&header_box));
-    container.append(&header_button);
+    container.append(&header_box);
 
     let revealer = gtk4::Revealer::new();
     revealer.set_transition_type(gtk4::RevealerTransitionType::SlideDown);
@@ -134,7 +152,7 @@ pub fn create_collapsible_card(
 
     let rev_c = revealer.clone();
     let arrow_c = arrow_icon.clone();
-    header_button.connect_clicked(move |_| {
+    let toggle_fn = std::rc::Rc::new(move || {
         let next_state = !rev_c.reveals_child();
         rev_c.set_reveal_child(next_state);
         crate::ui::icon::set_image_from_icon(
@@ -144,6 +162,18 @@ pub fn create_collapsible_card(
         );
     });
 
+    let toggle_fn_1 = toggle_fn.clone();
+    let g1 = gtk4::GestureClick::new();
+    g1.connect_pressed(move |_, _, _, _| toggle_fn_1());
+    toggle_box.add_controller(g1);
+
+    let toggle_fn_2 = toggle_fn;
+    let g2 = gtk4::GestureClick::new();
+    g2.connect_pressed(move |_, _, _, _| toggle_fn_2());
+    arrow_icon.add_controller(g2);
+
+    let header_button = gtk4::Button::new();
+
     CollapsibleCard {
         container,
         content,
@@ -151,5 +181,7 @@ pub fn create_collapsible_card(
         title_label,
         subtitle_label,
         header_button,
+        title_box,
+        action_box,
     }
 }
