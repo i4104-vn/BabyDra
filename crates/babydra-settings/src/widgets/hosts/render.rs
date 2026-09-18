@@ -13,6 +13,7 @@ pub fn build() -> (HostsWidget, PasswordDialog) {
 
     // Header Row with Title, Status Badge & Action Buttons
     let header_box = Box::new(Orientation::Horizontal, 12);
+    header_box.set_margin_bottom(4);
 
     let title_label = Label::new(Some(&babydra_core::i18n::trans("settings.hosts_title")));
     title_label.add_css_class("settings-page-title");
@@ -22,14 +23,23 @@ pub fn build() -> (HostsWidget, PasswordDialog) {
     status_badge.add_css_class("update-count-badge");
     status_badge.set_hexpand(true);
     status_badge.set_halign(gtk4::Align::Start);
+    status_badge.set_valign(gtk4::Align::Center);
 
-    let reload_btn = Button::with_label(&babydra_core::i18n::trans("settings.refresh"));
-    reload_btn.add_css_class("connect-pill-btn");
+    let reload_btn = Button::new();
+    reload_btn.add_css_class("icon-btn");
+    reload_btn.add_css_class("circular");
     reload_btn.set_cursor_from_name(Some("pointer"));
+    reload_btn.set_valign(gtk4::Align::Center);
+    reload_btn.set_size_request(34, 34);
+    let reload_icon = babydra_ui_kit::ui::icon::get_icon("refresh", 16);
+    reload_icon.set_pixel_size(16);
+    reload_btn.set_child(Some(&reload_icon));
+    reload_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.refresh")));
 
     let save_btn = Button::with_label(&babydra_core::i18n::trans("settings.save_changes"));
     save_btn.add_css_class("suggested-action");
     save_btn.set_cursor_from_name(Some("pointer"));
+    save_btn.set_valign(gtk4::Align::Center);
 
     header_box.append(&title_label);
     header_box.append(&status_badge);

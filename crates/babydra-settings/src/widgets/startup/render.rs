@@ -53,16 +53,27 @@ pub fn build(commands: &[StartupCommand]) -> StartupWidget {
 
     // Header
     let header_box = Box::new(Orientation::Horizontal, 12);
+    header_box.set_margin_bottom(4);
+
     let title_label = Label::new(Some(&babydra_core::i18n::trans("settings.startup_title")));
     title_label.add_css_class("settings-page-title");
     title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);
 
-    let add_btn = Button::with_label(&babydra_core::i18n::trans("settings.startup_add_new"));
-    add_btn.add_css_class("connect-pill-btn");
+    let add_btn = Button::new();
+    add_btn.add_css_class("icon-btn");
+    add_btn.add_css_class("circular");
+    add_btn.set_cursor_from_name(Some("pointer"));
+    add_btn.set_valign(gtk4::Align::Center);
+    add_btn.set_size_request(34, 34);
+    let add_icon = babydra_ui_kit::ui::icon::get_icon("plus", 16);
+    add_icon.set_pixel_size(16);
+    add_btn.set_child(Some(&add_icon));
+    add_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.startup_add_new")));
 
     let save_btn = Button::with_label(&babydra_core::i18n::trans("settings.save_changes"));
     save_btn.add_css_class("suggested-action");
+    save_btn.set_valign(gtk4::Align::Center);
 
     header_box.append(&title_label);
     header_box.append(&add_btn);

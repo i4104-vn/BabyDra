@@ -11,26 +11,30 @@ pub fn build_vpn_ui() -> (
     VpnConfigDialog,
     VpnLogDialog,
 ) {
-    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 20);
+    let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
+    main_box.set_vexpand(true);
+    main_box.set_valign(gtk4::Align::Fill);
 
-    // Header Row (VPN Title, Add Custom Button)
+    // Header Row: Title on Left, Add Button on Right
     let header_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
     header_row.set_margin_bottom(4);
 
     let title_lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.vpn_title")));
     title_lbl.add_css_class("settings-page-title");
     title_lbl.set_halign(gtk4::Align::Start);
+    title_lbl.set_hexpand(true);
     header_row.append(&title_lbl);
 
-    let spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    spacer.set_hexpand(true);
-    header_row.append(&spacer);
-
-    let add_custom_btn =
-        gtk4::Button::with_label(&babydra_core::i18n::trans("settings.vpn_add_profile"));
-    add_custom_btn.add_css_class("connect-pill-btn");
+    let add_custom_btn = gtk4::Button::new();
+    add_custom_btn.add_css_class("icon-btn");
+    add_custom_btn.add_css_class("circular");
     add_custom_btn.set_cursor_from_name(Some("pointer"));
     add_custom_btn.set_valign(gtk4::Align::Center);
+    add_custom_btn.set_size_request(34, 34);
+    let add_icon = babydra_ui_kit::ui::icon::get_icon("plus", 16);
+    add_icon.set_pixel_size(16);
+    add_custom_btn.set_child(Some(&add_icon));
+    add_custom_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.vpn_add_profile")));
     header_row.append(&add_custom_btn);
 
     main_box.append(&header_row);

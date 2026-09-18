@@ -6,7 +6,7 @@ use gtk4::{Box, Button, Label, Orientation};
 /// Builds the top header bar:
 /// Title on Left, Add (circular icon) + Refresh (circular icon) + Save on Right.
 pub fn build_page_header() -> (Box, Button, Button, Button) {
-    let header_box = Box::new(Orientation::Horizontal, 10);
+    let header_box = Box::new(Orientation::Horizontal, 12);
     header_box.set_margin_bottom(4);
 
     let title_label = Label::new(Some(&babydra_core::i18n::trans(

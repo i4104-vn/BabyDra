@@ -4,23 +4,32 @@ use babydra_ui_kit::components::ToggleRow;
 use gtk4::prelude::*;
 
 /// Builds the Bluetooth settings page UI.
-pub fn build_bluetooth_ui() -> (gtk4::Box, ToggleRow, gtk4::ListBox) {
+pub fn build_bluetooth_ui() -> (gtk4::Box, ToggleRow, gtk4::ListBox, gtk4::Button) {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
     main_box.set_vexpand(true);
     main_box.set_valign(gtk4::Align::Fill);
 
-    // Header Row (Bluetooth Title + On Switcher)
+    // Header Row: Title on Left, Refresh + On/Off Switch on Right (matching Wi-Fi)
     let header_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
     header_row.set_margin_bottom(4);
 
     let title_lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.bt_title")));
     title_lbl.add_css_class("settings-page-title");
     title_lbl.set_halign(gtk4::Align::Start);
+    title_lbl.set_hexpand(true);
     header_row.append(&title_lbl);
 
-    let spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    spacer.set_hexpand(true);
-    header_row.append(&spacer);
+    let refresh_btn = gtk4::Button::new();
+    refresh_btn.add_css_class("icon-btn");
+    refresh_btn.add_css_class("circular");
+    refresh_btn.set_cursor_from_name(Some("pointer"));
+    refresh_btn.set_valign(gtk4::Align::Center);
+    refresh_btn.set_size_request(34, 34);
+    let refresh_icon = babydra_ui_kit::ui::icon::get_icon("refresh", 16);
+    refresh_icon.set_pixel_size(16);
+    refresh_btn.set_child(Some(&refresh_icon));
+    refresh_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.refresh")));
+    header_row.append(&refresh_btn);
 
     // Toggle Switch (On)
     let toggle_row = ToggleRow::new(true);
@@ -46,5 +55,5 @@ pub fn build_bluetooth_ui() -> (gtk4::Box, ToggleRow, gtk4::ListBox) {
     glass_card.append(&scroll);
     main_box.append(&glass_card);
 
-    (main_box, toggle_row, list_box)
+    (main_box, toggle_row, list_box, refresh_btn)
 }

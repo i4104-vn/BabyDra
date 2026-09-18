@@ -41,11 +41,8 @@ pub fn build_appearance_ui(
     )));
     page_title.add_css_class("settings-page-title");
     page_title.set_halign(gtk4::Align::Start);
+    page_title.set_hexpand(true);
     header_box.append(&page_title);
-
-    let spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    spacer.set_hexpand(true);
-    header_box.append(&spacer);
 
     main_box.append(&header_box);
 

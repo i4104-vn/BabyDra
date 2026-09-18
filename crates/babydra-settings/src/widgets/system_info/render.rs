@@ -26,15 +26,19 @@ pub fn build_about_ui() -> AboutWidgets {
     main_box.set_vexpand(true);
     main_box.set_valign(Align::Fill);
 
-    // Page Title
+    // Header Row
+    let header_box = GtkBox::new(Orientation::Horizontal, 12);
+    header_box.set_margin_bottom(4);
+
     let page_title = Label::new(Some(&babydra_core::i18n::trans("settings.about_title")));
     page_title.add_css_class("settings-page-title");
     page_title.set_halign(Align::Start);
-    main_box.append(&page_title);
+    page_title.set_hexpand(true);
+    header_box.append(&page_title);
+    main_box.append(&header_box);
 
     let content_box = GtkBox::new(Orientation::Vertical, 20);
     content_box.set_valign(Align::Start);
-    content_box.set_margin_top(8);
 
     // ── Hero Card: BabyDra Logo + Version + OS Info ──
     let hero_card = create_card(Orientation::Horizontal, 24);

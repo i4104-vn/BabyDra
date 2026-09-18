@@ -14,7 +14,7 @@ mod render;
 
 /// Creates a new `bluetooth widget`.
 pub fn create_bt_widget() -> gtk4::Widget {
-    let (main_box, toggle_row, list_box) = render::build_bluetooth_ui();
+    let (main_box, toggle_row, list_box, refresh_btn) = render::build_bluetooth_ui();
 
     let state = Rc::new(RefCell::new(BluetoothState {
         enabled: false,
@@ -93,6 +93,11 @@ pub fn create_bt_widget() -> gtk4::Widget {
             }
         }
     };
+
+    let trigger_refresh_btn = trigger_refresh.clone();
+    refresh_btn.connect_clicked(move |_| {
+        trigger_refresh_btn();
+    });
 
     let state_c_rx = state.clone();
     let render_c_rx = render_devices.clone();

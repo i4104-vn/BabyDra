@@ -14,6 +14,7 @@ pub fn build_certificates() -> (CertificatesWidget, PasswordDialog) {
 
     // ── Header Row ──────────────────────────────────────────────
     let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
+    header_box.set_margin_bottom(4);
 
     let title_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
     let title_lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.cert_title")));
@@ -29,10 +30,16 @@ pub fn build_certificates() -> (CertificatesWidget, PasswordDialog) {
     title_box.set_hexpand(true);
     header_box.append(&title_box);
 
-    let add_btn = gtk4::Button::with_label(&babydra_core::i18n::trans("settings.cert_add_btn"));
-    add_btn.add_css_class("connect-pill-btn");
-    add_btn.set_valign(gtk4::Align::Center);
+    let add_btn = gtk4::Button::new();
+    add_btn.add_css_class("icon-btn");
+    add_btn.add_css_class("circular");
     add_btn.set_cursor_from_name(Some("pointer"));
+    add_btn.set_valign(gtk4::Align::Center);
+    add_btn.set_size_request(34, 34);
+    let add_icon = babydra_ui_kit::ui::icon::get_icon("plus", 16);
+    add_icon.set_pixel_size(16);
+    add_btn.set_child(Some(&add_icon));
+    add_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.cert_add_btn")));
     header_box.append(&add_btn);
 
     container.append(&header_box);

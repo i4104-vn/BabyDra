@@ -51,6 +51,7 @@ pub fn build() -> (AppsWidget, PasswordDialog) {
     )));
     search_entry.add_css_class("sidebar-search-entry");
     search_entry.set_width_request(220);
+    search_entry.set_valign(gtk4::Align::Center);
 
     let refresh_btn = Button::new();
     refresh_btn.add_css_class("icon-btn");

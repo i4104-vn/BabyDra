@@ -144,8 +144,12 @@ pub fn build() -> (PowerWidget, PasswordDialog) {
     main_box.set_vexpand(true);
     main_box.set_valign(gtk4::Align::Fill);
 
-    let header_box = Box::new(Orientation::Vertical, 2);
+    let header_box = Box::new(Orientation::Horizontal, 12);
     header_box.set_margin_bottom(4);
+
+    let title_box = Box::new(Orientation::Vertical, 2);
+    title_box.set_hexpand(true);
+    title_box.set_halign(gtk4::Align::Start);
 
     let title_lbl = Label::new(Some(&babydra_core::i18n::trans("settings.power_title")));
     title_lbl.add_css_class("settings-page-title");
@@ -155,8 +159,9 @@ pub fn build() -> (PowerWidget, PasswordDialog) {
     desc_lbl.add_css_class("settings-page-subtitle");
     desc_lbl.set_halign(gtk4::Align::Start);
 
-    header_box.append(&title_lbl);
-    header_box.append(&desc_lbl);
+    title_box.append(&title_lbl);
+    title_box.append(&desc_lbl);
+    header_box.append(&title_box);
     main_box.append(&header_box);
 
     let content_box = Box::new(Orientation::Vertical, 12);

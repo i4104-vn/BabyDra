@@ -52,10 +52,10 @@ pub fn create_general_widget() -> Widget {
 
     // Page Header
     let header_box = GtkBox::new(Orientation::Vertical, 4);
-    header_box.set_margin_bottom(8);
+    header_box.set_margin_bottom(4);
 
     let title_lbl = Label::new(Some(&trans("settings.general_title")));
-    title_lbl.add_css_class("settings-title-label");
+    title_lbl.add_css_class("settings-page-title");
     title_lbl.set_halign(Align::Start);
 
     let desc_lbl = Label::new(Some(&trans("settings.general_subtitle")));

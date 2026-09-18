@@ -6,17 +6,27 @@ use gtk4::{Box, Button, DropDown, Label, Orientation, StringList};
 /// Builds the header row containing title and action buttons (Refresh, Save)
 fn build_header() -> (Box, Button, Button) {
     let header_box = Box::new(Orientation::Horizontal, 12);
+    header_box.set_margin_bottom(4);
 
     let title_label = Label::new(Some(&babydra_core::i18n::trans("settings.displays_title")));
     title_label.add_css_class("settings-page-title");
     title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);
 
-    let refresh_btn = Button::with_label(&babydra_core::i18n::trans("settings.refresh"));
-    refresh_btn.add_css_class("connect-pill-btn");
+    let refresh_btn = Button::new();
+    refresh_btn.add_css_class("icon-btn");
+    refresh_btn.add_css_class("circular");
+    refresh_btn.set_cursor_from_name(Some("pointer"));
+    refresh_btn.set_valign(gtk4::Align::Center);
+    refresh_btn.set_size_request(34, 34);
+    let refresh_icon = babydra_ui_kit::ui::icon::get_icon("refresh", 16);
+    refresh_icon.set_pixel_size(16);
+    refresh_btn.set_child(Some(&refresh_icon));
+    refresh_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.refresh")));
 
     let save_btn = Button::with_label(&babydra_core::i18n::trans("settings.save"));
     save_btn.add_css_class("suggested-action");
+    save_btn.set_valign(gtk4::Align::Center);
 
     header_box.append(&title_label);
     header_box.append(&refresh_btn);
