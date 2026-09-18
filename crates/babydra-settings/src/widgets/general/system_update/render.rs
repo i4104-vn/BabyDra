@@ -131,12 +131,16 @@ pub fn create_uptodate_row() -> ListBoxRow {
     let row = ListBoxRow::new();
     row.set_selectable(false);
     row.set_activatable(false);
+    row.set_vexpand(true);
+    row.set_valign(gtk4::Align::Fill);
 
-    let row_box = Box::new(Orientation::Vertical, 10);
+    let row_box = Box::new(Orientation::Vertical, 12);
     row_box.set_valign(gtk4::Align::Center);
     row_box.set_halign(gtk4::Align::Center);
-    row_box.set_margin_top(28);
-    row_box.set_margin_bottom(28);
+    row_box.set_vexpand(true);
+    row_box.set_hexpand(true);
+    row_box.set_margin_top(40);
+    row_box.set_margin_bottom(40);
     row_box.set_margin_start(16);
     row_box.set_margin_end(16);
 
@@ -144,10 +148,10 @@ pub fn create_uptodate_row() -> ListBoxRow {
     icon_badge.add_css_class("green-icon-badge-sm");
     icon_badge.set_valign(gtk4::Align::Center);
     icon_badge.set_halign(gtk4::Align::Center);
-    icon_badge.set_size_request(42, 42);
+    icon_badge.set_size_request(48, 48);
 
-    let icon_img = babydra_ui_kit::ui::icon::get_icon("check", 22);
-    icon_img.set_pixel_size(22);
+    let icon_img = babydra_ui_kit::ui::icon::get_icon("check", 24);
+    icon_img.set_pixel_size(24);
     icon_img.set_valign(gtk4::Align::Center);
     icon_img.set_halign(gtk4::Align::Center);
     icon_img.set_vexpand(true);
@@ -233,8 +237,8 @@ pub fn render_system_update_card() -> SystemUpdateCardWidgets {
 
     let scroll = ScrolledWindow::new();
     scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
-    scroll.set_min_content_height(160);
-    scroll.set_max_content_height(340);
+    scroll.set_min_content_height(360);
+    scroll.set_max_content_height(520);
     scroll.set_propagate_natural_height(true);
     scroll.set_child(Some(&list_box));
 
