@@ -15,7 +15,7 @@ pub fn wire_events(widgets: &RecoveryCardWidgets) {
     let confirm_btn_show = widgets.confirm_btn.clone();
     let error_lbl_show = widgets.error_lbl.clone();
     let warn_all_apps_box_show = widgets.warn_all_apps_box.clone();
-    let remove_all_apps_show = widgets.remove_all_apps_switch.clone();
+    let remove_all_apps_show = widgets.remove_all_apps_check.clone();
 
     widgets.start_btn.connect_clicked(move |_| {
         pwd_entry_show.set_text("");
@@ -27,16 +27,17 @@ pub fn wire_events(widgets: &RecoveryCardWidgets) {
         pwd_entry_show.grab_focus();
     });
 
-    // 1.1 Toggle "Remove all apps" switch -> sync warning callout and shell packages switch
+    // 1.1 Toggle "Remove all apps" checkbox -> sync warning callout and shell packages checkbox
     let warn_all_apps_box_toggle = widgets.warn_all_apps_box.clone();
-    let remove_pkgs_toggle = widgets.remove_pkgs_switch.clone();
-    widgets.remove_all_apps_switch.connect_state_set(move |is_all| {
+    let remove_pkgs_toggle = widgets.remove_pkgs_check.clone();
+    widgets.remove_all_apps_check.connect_toggled(move |btn| {
+        let is_all = btn.is_active();
         warn_all_apps_box_toggle.set_visible(is_all);
         if is_all {
             remove_pkgs_toggle.set_active(true);
-            remove_pkgs_toggle.container.set_sensitive(false);
+            remove_pkgs_toggle.set_sensitive(false);
         } else {
-            remove_pkgs_toggle.container.set_sensitive(true);
+            remove_pkgs_toggle.set_sensitive(true);
         }
     });
 
@@ -73,8 +74,8 @@ pub fn wire_events(widgets: &RecoveryCardWidgets) {
     let pwd_entry_proc = widgets.pwd_entry.clone();
     let error_lbl_proc = widgets.error_lbl.clone();
     let confirm_btn_proc = widgets.confirm_btn.clone();
-    let remove_pkgs_proc = widgets.remove_pkgs_switch.clone();
-    let remove_all_apps_proc = widgets.remove_all_apps_switch.clone();
+    let remove_pkgs_proc = widgets.remove_pkgs_check.clone();
+    let remove_all_apps_proc = widgets.remove_all_apps_check.clone();
 
     let text_view_proc = widgets.text_view.clone();
     let progress_bar_proc = widgets.progress_bar.clone();

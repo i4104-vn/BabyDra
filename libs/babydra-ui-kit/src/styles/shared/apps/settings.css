@@ -570,6 +570,35 @@ progressbar.battery-level-bar progress {
     font-weight: 600;
 }
 
+/* Recovery Scope & Options - eliminate unwanted hover background */
+.recovery-scope-card {
+    border-radius: 14px;
+    padding: 6px 12px;
+}
+
+.recovery-scope-row {
+    padding: 10px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: transparent;
+    transition: none;
+}
+
+.recovery-scope-row.no-border,
+.recovery-scope-row:last-child {
+    border-bottom: none;
+}
+
+.recovery-scope-row:hover {
+    background-color: transparent;
+    background: transparent;
+}
+
+.recovery-options-container,
+.recovery-options-container:hover {
+    background-color: transparent;
+    background: transparent;
+}
+
 /* Wi-Fi Modals & Segmented Control */
 .wifi-info-section-title {
     font-size: 16px;

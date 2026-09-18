@@ -2,13 +2,11 @@
 
 use babydra_core::i18n::trans;
 use babydra_ui_kit::components::cards::create_collapsible_card;
-use babydra_ui_kit::components::create_list_row;
 use babydra_ui_kit::components::modals::{
     create_ack_card, create_error_label, create_form_label, create_modern_password_entry,
     create_terminal_console, create_warning_banner, BadgeVariant, ButtonVariant,
     ModernDialogBuilder,
 };
-use babydra_ui_kit::components::CustomSwitch;
 use gtk4::prelude::*;
 use gtk4::{
     Align, Box, Button, CheckButton, Label, Orientation, PasswordEntry, ProgressBar, TextView,
@@ -17,8 +15,8 @@ use gtk4::{
 #[allow(dead_code)]
 pub struct RecoveryCardWidgets {
     pub container: Box,
-    pub remove_pkgs_switch: CustomSwitch,
-    pub remove_all_apps_switch: CustomSwitch,
+    pub remove_pkgs_check: CheckButton,
+    pub remove_all_apps_check: CheckButton,
     pub start_btn: Button,
     // Auth modal
     pub auth_modal_overlay: Box,
@@ -41,7 +39,7 @@ pub struct RecoveryCardWidgets {
 }
 
 pub fn render_recovery_card() -> RecoveryCardWidgets {
-    // 1. Standard collapsible settings card matching the rest of the application
+    // 1. Collapsible card matching settings standard
     let card = create_collapsible_card(
         &trans("settings.recovery_title"),
         Some(&trans("settings.recovery_desc")),
@@ -51,44 +49,99 @@ pub fn render_recovery_card() -> RecoveryCardWidgets {
 
     let content = card.content;
 
-    // ── Row 1: Remove GUI Shell Packages ──
-    let remove_pkgs_switch = CustomSwitch::new(true);
-    remove_pkgs_switch.container.set_valign(Align::Center);
-    let row_remove_pkgs = create_list_row(
-        "",
-        &trans("settings.recovery_remove_pkgs_opt"),
-        &trans("settings.recovery_scope_1"),
-        Some(&remove_pkgs_switch.container),
-    );
-    content.append(&row_remove_pkgs);
+    // 2. Recovery Scope Section Header
+    let scope_label = Label::new(Some(&trans("settings.recovery_scope_title")));
+    scope_label.add_css_class("settings-row-desc");
+    scope_label.set_halign(Align::Start);
+    scope_label.set_margin_start(8);
+    scope_label.set_margin_top(4);
+    scope_label.set_margin_bottom(4);
+    content.append(&scope_label);
 
-    // ── Row 2: Remove All User Applications ──
-    let remove_all_apps_switch = CustomSwitch::new(false);
-    remove_all_apps_switch.container.set_valign(Align::Center);
-    let row_remove_all_apps = create_list_row(
-        "",
-        &trans("settings.recovery_remove_all_apps_opt"),
-        &trans("settings.recovery_remove_all_apps_desc"),
-        Some(&remove_all_apps_switch.container),
-    );
-    content.append(&row_remove_all_apps);
+    // 3. Recovery Scope Card Box (Static GtkBox instead of ListBox to eliminate row hover highlight)
+    let scope_card = Box::new(Orientation::Vertical, 0);
+    scope_card.add_css_class("settings-card");
+    scope_card.add_css_class("recovery-scope-card");
+    scope_card.set_margin_start(4);
+    scope_card.set_margin_end(4);
 
-    // ── Row 3: Factory Reset Action Row ──
+    let scope_items = [
+        ("close", "settings.recovery_scope_1"),
+        ("desktop", "settings.recovery_scope_2"),
+        ("folder", "settings.recovery_scope_3"),
+        ("palette", "settings.recovery_scope_4"),
+    ];
+
+    for (i, (icon_name, text_key)) in scope_items.iter().enumerate() {
+        let hbox = Box::new(Orientation::Horizontal, 14);
+        hbox.add_css_class("recovery-scope-row");
+        if i == scope_items.len() - 1 {
+            hbox.add_css_class("no-border");
+        }
+
+        let icon_badge = Box::new(Orientation::Vertical, 0);
+        icon_badge.add_css_class("blue-icon-badge-sm");
+        icon_badge.set_valign(Align::Center);
+        icon_badge.set_halign(Align::Center);
+        icon_badge.set_size_request(32, 32);
+
+        let icon = babydra_ui_kit::ui::icon::get_icon(icon_name, 16);
+        icon.set_pixel_size(16);
+        icon.set_valign(Align::Center);
+        icon.set_halign(Align::Center);
+        icon.set_vexpand(false);
+        icon.set_hexpand(false);
+        icon_badge.append(&icon);
+        hbox.append(&icon_badge);
+
+        let item_lbl = Label::new(Some(&trans(text_key)));
+        item_lbl.add_css_class("settings-row-title");
+        item_lbl.set_halign(Align::Start);
+        item_lbl.set_valign(Align::Center);
+        item_lbl.set_xalign(0.0);
+        item_lbl.set_justify(gtk4::Justification::Left);
+        item_lbl.set_hexpand(true);
+        item_lbl.set_wrap(true);
+        hbox.append(&item_lbl);
+
+        scope_card.append(&hbox);
+    }
+    content.append(&scope_card);
+
+    // 4. Options Container (No hover background effect)
+    let options_box = Box::new(Orientation::Vertical, 10);
+    options_box.add_css_class("recovery-options-container");
+    options_box.set_margin_top(12);
+    options_box.set_margin_start(8);
+    options_box.set_margin_end(8);
+    options_box.set_margin_bottom(4);
+
+    let remove_pkgs_check = CheckButton::with_label(&trans("settings.recovery_remove_pkgs_opt"));
+    remove_pkgs_check.set_active(true);
+    remove_pkgs_check.set_cursor_from_name(Some("pointer"));
+    options_box.append(&remove_pkgs_check);
+
+    let remove_all_apps_check =
+        CheckButton::with_label(&trans("settings.recovery_remove_all_apps_opt"));
+    remove_all_apps_check.set_active(false);
+    remove_all_apps_check.set_cursor_from_name(Some("pointer"));
+    options_box.append(&remove_all_apps_check);
+
+    let action_row = Box::new(Orientation::Horizontal, 12);
+    action_row.set_halign(Align::End);
+    action_row.set_margin_top(8);
+
     let start_btn = Button::with_label(&trans("settings.recovery_start_btn"));
     start_btn.add_css_class("connect-pill-btn");
     start_btn.add_css_class("destructive-action");
     start_btn.set_cursor_from_name(Some("pointer"));
     start_btn.set_valign(Align::Center);
+    action_row.append(&start_btn);
+    options_box.append(&action_row);
 
-    let row_action = create_list_row(
-        "",
-        &trans("settings.recovery_danger_title"),
-        &trans("settings.recovery_danger_desc"),
-        Some(&start_btn),
-    );
-    content.append(&row_action);
+    content.append(&options_box);
 
-    // ── Modal 1: Confirmation & Sudo Password Dialog ──
+    // ── Modal 1: Confirmation & Sudo Password Dialog (Unified Modern Dialog) ──
     let auth_dialog = ModernDialogBuilder::new(440)
         .with_badge("alert", BadgeVariant::Danger)
         .with_title(&trans("settings.recovery_dialog_title"))
@@ -98,13 +151,13 @@ pub fn render_recovery_card() -> RecoveryCardWidgets {
     let auth_modal_overlay = auth_dialog.container().clone();
     let auth_card = auth_dialog.card().clone();
 
-    // Callout warning banner if "remove all apps" is selected
+    // Callout box for removing all apps warning
     let warn_all_apps_box =
-        create_warning_banner("alert", &trans("settings.recovery_remove_all_apps_warn"));
+        create_warning_banner("alert", &trans("settings.recovery_warn_all_apps"));
     warn_all_apps_box.set_visible(false);
     auth_dialog.add_child(&warn_all_apps_box);
 
-    // Acknowledgment Checkbox Card
+    // Acknowledgment Checkbox Card (Clean modern layout)
     let (ack_card, understand_check) =
         create_ack_card(&trans("settings.recovery_confirm_understand"));
     auth_dialog.add_child(&ack_card);
@@ -113,7 +166,7 @@ pub fn render_recovery_card() -> RecoveryCardWidgets {
     let pwd_lbl = create_form_label(&trans("settings.sudo_password_placeholder"));
     auth_dialog.add_child(&pwd_lbl);
 
-    let pwd_entry = create_modern_password_entry(&trans("settings.recovery_pwd_placeholder"));
+    let pwd_entry = create_modern_password_entry(&trans("settings.sudo_password_placeholder"));
     auth_dialog.add_child(&pwd_entry);
 
     let error_lbl = create_error_label();
@@ -218,8 +271,8 @@ pub fn render_recovery_card() -> RecoveryCardWidgets {
 
     RecoveryCardWidgets {
         container: card.container,
-        remove_pkgs_switch,
-        remove_all_apps_switch,
+        remove_pkgs_check,
+        remove_all_apps_check,
         start_btn,
         auth_modal_overlay,
         auth_card,
