@@ -256,6 +256,12 @@ button.card-collapse-header:hover .card-collapse-arrow,
     transition: background-color 200ms ease;
 }
 
+.settings-card-row,
+.settings-card-row:hover {
+    background-color: transparent;
+    background-image: none;
+}
+
 .settings-card row:first-child,
 .settings-card-row:first-child {
     border-radius: 10px 10px 0 0;

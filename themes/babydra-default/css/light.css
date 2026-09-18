@@ -1952,9 +1952,14 @@ button.card-collapse-header:hover {
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-.settings-card row:hover,
-.settings-card-row:hover {
+.settings-card row:hover {
     background-color: rgba(0, 0, 0, 0.04);
+}
+
+.settings-card-row,
+.settings-card-row:hover {
+    background-color: transparent;
+    background: transparent;
 }
 
 button.perf-profile-row-btn {
@@ -3291,7 +3296,6 @@ button.settings-pill.active-pill:hover {
     border-bottom: 1px solid #f3f4f6;
 }
 
-.explore-dialog .settings-card-row:hover,
 .settings-custom-item-row:hover {
     background-color: rgba(0, 0, 0, 0.015);
 }

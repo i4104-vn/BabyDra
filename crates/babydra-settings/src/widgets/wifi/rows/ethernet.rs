@@ -7,6 +7,8 @@ use gtk4::prelude::*;
 /// Creates an active Ethernet status card row.
 pub fn create_ethernet_row(active_net: &ActiveNetworkInfo) -> gtk4::ListBoxRow {
     let row = gtk4::ListBoxRow::new();
+    row.set_selectable(false);
+    row.set_activatable(false);
     row.add_css_class("settings-card-row");
 
     let hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 14);
