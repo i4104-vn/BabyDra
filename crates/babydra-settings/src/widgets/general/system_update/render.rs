@@ -237,8 +237,8 @@ pub fn render_system_update_card() -> SystemUpdateCardWidgets {
 
     let scroll = ScrolledWindow::new();
     scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
-    scroll.set_min_content_height(360);
-    scroll.set_max_content_height(520);
+    scroll.set_min_content_height(400);
+    scroll.set_max_content_height(620);
     scroll.set_propagate_natural_height(true);
     scroll.set_child(Some(&list_box));
 
