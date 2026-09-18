@@ -16,19 +16,11 @@ pub fn build_certificates() -> (CertificatesWidget, PasswordDialog) {
     let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 12);
     header_box.set_margin_bottom(4);
 
-    let title_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
     let title_lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.cert_title")));
     title_lbl.add_css_class("settings-page-title");
     title_lbl.set_halign(gtk4::Align::Start);
-
-    let desc_lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.cert_subtitle")));
-    desc_lbl.add_css_class("settings-row-desc");
-    desc_lbl.set_halign(gtk4::Align::Start);
-
-    title_box.append(&title_lbl);
-    title_box.append(&desc_lbl);
-    title_box.set_hexpand(true);
-    header_box.append(&title_box);
+    title_lbl.set_hexpand(true);
+    header_box.append(&title_lbl);
 
     let add_btn = gtk4::Button::new();
     add_btn.add_css_class("icon-btn");

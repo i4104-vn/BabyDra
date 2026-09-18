@@ -147,22 +147,14 @@ pub fn build() -> (PowerWidget, PasswordDialog) {
     let header_box = Box::new(Orientation::Horizontal, 12);
     header_box.set_margin_bottom(4);
 
-    let title_box = Box::new(Orientation::Vertical, 2);
-    title_box.set_hexpand(true);
-    title_box.set_halign(gtk4::Align::Start);
-
     let title_lbl = Label::new(Some(&babydra_core::i18n::trans("settings.power_title")));
     title_lbl.add_css_class("settings-page-title");
     title_lbl.set_halign(gtk4::Align::Start);
+    title_lbl.set_hexpand(true);
+    header_box.append(&title_lbl);
+    main_box.append(&header_box);
 
     let desc_lbl = Label::new(Some(&babydra_core::i18n::trans("settings.power_desc")));
-    desc_lbl.add_css_class("settings-page-subtitle");
-    desc_lbl.set_halign(gtk4::Align::Start);
-
-    title_box.append(&title_lbl);
-    title_box.append(&desc_lbl);
-    header_box.append(&title_box);
-    main_box.append(&header_box);
 
     let content_box = Box::new(Orientation::Vertical, 12);
 

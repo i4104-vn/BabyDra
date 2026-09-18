@@ -13,20 +13,10 @@ pub fn build(vars: &[EnvVar]) -> EnvWidget {
     let header_box = Box::new(Orientation::Horizontal, 12);
     header_box.set_margin_bottom(4);
 
-    let title_box = Box::new(Orientation::Vertical, 2);
-    title_box.set_hexpand(true);
-    title_box.set_halign(gtk4::Align::Start);
-
     let title_label = Label::new(Some(&babydra_core::i18n::trans("settings.env_title")));
     title_label.add_css_class("settings-page-title");
     title_label.set_halign(gtk4::Align::Start);
-
-    let subtitle_label = Label::new(Some(&babydra_core::i18n::trans("settings.env_subtitle")));
-    subtitle_label.add_css_class("settings-page-subtitle");
-    subtitle_label.set_halign(gtk4::Align::Start);
-
-    title_box.append(&title_label);
-    title_box.append(&subtitle_label);
+    title_label.set_hexpand(true);
 
     let add_btn = Button::new();
     add_btn.add_css_class("icon-btn");
@@ -43,7 +33,7 @@ pub fn build(vars: &[EnvVar]) -> EnvWidget {
     save_btn.add_css_class("suggested-action");
     save_btn.set_valign(gtk4::Align::Center);
 
-    header_box.append(&title_box);
+    header_box.append(&title_label);
     header_box.append(&add_btn);
     header_box.append(&save_btn);
     container.append(&header_box);

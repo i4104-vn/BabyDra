@@ -51,19 +51,15 @@ pub fn create_general_widget() -> Widget {
     container.set_margin_end(20);
 
     // Page Header
-    let header_box = GtkBox::new(Orientation::Vertical, 4);
+    let header_box = GtkBox::new(Orientation::Horizontal, 12);
     header_box.set_margin_bottom(4);
 
     let title_lbl = Label::new(Some(&trans("settings.general_title")));
     title_lbl.add_css_class("settings-page-title");
     title_lbl.set_halign(Align::Start);
-
-    let desc_lbl = Label::new(Some(&trans("settings.general_subtitle")));
-    desc_lbl.add_css_class("settings-row-desc");
-    desc_lbl.set_halign(Align::Start);
+    title_lbl.set_hexpand(true);
 
     header_box.append(&title_lbl);
-    header_box.append(&desc_lbl);
     container.append(&header_box);
 
     // 1. Devices & Applications
