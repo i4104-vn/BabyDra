@@ -1,4 +1,4 @@
-use crate::widgets::render::build_apps_list;
+use crate::widgets::render::{build_apps_list, ITEM_PITCH};
 use babydra_core::DesktopApp;
 use babydra_core::{activate_app, save_history};
 use babydra_ui_kit::ui::overlay::OverlayWindowComponents;
@@ -18,6 +18,7 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
         window,
         deck_container,
         cards_row: list_container,
+        scrolled,
         meta_title,
         meta_subtitle,
         ..
@@ -31,12 +32,19 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
     let last_cycle_time: Rc<RefCell<std::time::Instant>> =
         Rc::new(RefCell::new(std::time::Instant::now()));
 
+    let anim_target: Rc<RefCell<f64>> = Rc::new(RefCell::new(0.0));
+    let anim_running: Rc<RefCell<bool>> = Rc::new(RefCell::new(false));
+
     let update_selection = {
         let current_index = current_index.clone();
         let buttons_state = buttons_state.clone();
         let apps_state = apps_state.clone();
         let meta_title_c = meta_title.clone();
         let meta_subtitle_c = meta_subtitle.clone();
+        let scrolled_c = scrolled.clone();
+        let anim_target_c = anim_target.clone();
+        let anim_running_c = anim_running.clone();
+
         Rc::new(move |new_idx: usize| {
             let buttons = buttons_state.borrow();
             let apps = apps_state.borrow();
@@ -49,7 +57,6 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
             for (i, btn) in buttons.iter().enumerate() {
                 if i == idx {
                     btn.add_css_class("selected");
-                    btn.grab_focus();
                 } else {
                     btn.remove_css_class("selected");
                 }
@@ -68,6 +75,33 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
                         meta_subtitle_c.set_visible(false);
                     }
                 }
+            }
+
+            // Target scroll offset so focused icon is always centered in the dock
+            let target = (idx as f64) * ITEM_PITCH;
+            *anim_target_c.borrow_mut() = target;
+
+            if !*anim_running_c.borrow() {
+                *anim_running_c.borrow_mut() = true;
+                let vadj = scrolled_c.vadjustment();
+                let anim_target = anim_target_c.clone();
+                let anim_running = anim_running_c.clone();
+
+                gtk4::glib::timeout_add_local(std::time::Duration::from_millis(16), move || {
+                    let target = *anim_target.borrow();
+                    let current = vadj.value();
+                    let diff = target - current;
+
+                    if diff.abs() < 1.0 {
+                        vadj.set_value(target);
+                        *anim_running.borrow_mut() = false;
+                        gtk4::glib::ControlFlow::Break
+                    } else {
+                        // Smooth ease-out glide
+                        vadj.set_value(current + diff * 0.45);
+                        gtk4::glib::ControlFlow::Continue
+                    }
+                });
             }
         })
     };
@@ -240,6 +274,8 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
         let closed = closed.clone();
         let alt_check_enabled = alt_check_enabled.clone();
         let last_cycle_show = last_cycle_time.clone();
+        let scrolled_show = scrolled.clone();
+        let anim_target_show = anim_target.clone();
 
         Box::new(move || {
             *closed.borrow_mut() = false;
@@ -284,12 +320,28 @@ pub fn build_switcher_ui(app: &gtk4::Application) -> SwitcherController {
             *apps_state.borrow_mut() = apps.clone();
             *buttons_state.borrow_mut() = item_buttons;
 
+            // Reload theme on each open so any theme/mode switch is applied immediately
+            babydra_ui_kit::ui::theme::init_theme();
+
             let initial_idx = if apps.len() > 1 { 1 } else { 0 };
             *current_index.borrow_mut() = initial_idx;
-            update_selection(initial_idx);
+            let initial_target = (initial_idx as f64) * ITEM_PITCH;
+            *anim_target_show.borrow_mut() = initial_target;
 
             window.set_visible(true);
             window.present();
+
+            // Set scroll immediately and over early frames to guarantee snapping after layout pass
+            let vadj = scrolled_show.vadjustment();
+            vadj.set_value(initial_target);
+            for ms in [15, 35, 60] {
+                let vadj_tick = vadj.clone();
+                gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(ms), move || {
+                    vadj_tick.set_value(initial_target);
+                });
+            }
+
+            update_selection(initial_idx);
 
             let alt_check = alt_check_enabled.clone();
             gtk4::glib::timeout_add_local_once(std::time::Duration::from_millis(60), move || {

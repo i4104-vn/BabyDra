@@ -2563,14 +2563,15 @@ scale.settings-scale:disabled mark label {
 
 /* === apps/switcher.css === */
 .switcher-window {
-    background-color: rgba(0, 0, 0, 0.30);
+    background: transparent;
+    background-color: transparent;
 }
 
 .switcher-deck-container {
-    background-color: rgba(248, 249, 252, 0.95);
+    background-color: #ffffff;
     border: 1px solid rgba(0, 0, 0, 0.08);
-    border-top: 1px solid rgba(255, 255, 255, 0.80);
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.20), 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-right: none;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.18), -2px 0 8px rgba(0, 0, 0, 0.08);
 }
 
 .switcher-deck-header {
@@ -2578,8 +2579,9 @@ scale.settings-scale:disabled mark label {
 }
 
 .switcher-meta-bar {
-    background-color: transparent;
-    border: none;
+    background-color: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .switcher-meta-title {
@@ -2591,19 +2593,17 @@ scale.settings-scale:disabled mark label {
 }
 
 button.switcher-card {
-    background-color: transparent;
-    border: 1.5px solid transparent;
+    background-color: #e5f3ed;
 }
 
 button.switcher-card:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-    border-color: rgba(0, 0, 0, 0.10);
+    background-color: #d6ece2;
 }
 
-button.switcher-card.selected {
-    background-color: rgba(99, 102, 241, 0.08);
-    border: 1.5px solid #6366f1;
-    box-shadow: none;
+.switcher-focus-ring {
+    border: 2px solid #3b82f6;
+    background-color: rgba(59, 130, 246, 0.14);
+    box-shadow: 0 0 16px rgba(59, 130, 246, 0.28);
 }
 
 

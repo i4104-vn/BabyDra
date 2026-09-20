@@ -173,3 +173,10 @@ dropdown>popover>contents listview>row:selected {
     background-color: rgba(244, 63, 94, 0.15);
     color: #fb7185;
 }
+
+/* Switcher focus ring accent */
+.switcher-focus-ring {
+    border-color: #f43f5e;
+    background-color: rgba(244, 63, 94, 0.18);
+    box-shadow: 0 0 16px rgba(244, 63, 94, 0.40);
+}

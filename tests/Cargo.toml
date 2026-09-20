@@ -116,6 +116,10 @@ name = "kits_loading"
 path = "kits/loading.rs"
 
 [[test]]
+name = "kits_overlay"
+path = "kits/overlay.rs"
+
+[[test]]
 name = "services_recording"
 path = "services/recording.rs"
 
