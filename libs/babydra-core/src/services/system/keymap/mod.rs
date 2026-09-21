@@ -6,12 +6,14 @@
 
 pub mod catalog;
 pub mod config;
+pub mod labwc;
 pub mod service;
 
 pub use catalog::{SystemCrateDef, SYSTEM_CRATE_CATALOG};
 pub use config::{
     get_config_path, is_paused, pause_shortcuts, resume_shortcuts, PAUSE_TIMEOUT_SECS,
 };
+pub use labwc::sync_labwc_swallow;
 pub use service::{
     get_custom_shortcuts, get_shortcuts, get_system_shortcuts, save_keymap_configuration,
     save_shortcuts,

@@ -15,6 +15,54 @@ use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
+pub const MAX_TITLE_LEN: usize = 25;
+
+/// Formats a window title for display in the tooltip popover, truncating with "..."
+/// if its character count exceeds `max_len`.
+pub fn format_display_title(title: &str, max_len: usize) -> String {
+    let trimmed = title.trim();
+    if trimmed.chars().count() > max_len {
+        let truncated: String = trimmed.chars().take(max_len.saturating_sub(3)).collect();
+        let cleaned = truncated.trim_end_matches(|c: char| c.is_whitespace() || c == '-' || c == '_' || c == ':');
+        format!("{}...", cleaned)
+    } else {
+        trimmed.to_string()
+    }
+}
+
+/// Resolves the most appropriate title for an app:
+/// Uses the active window's title if present, otherwise the first non-empty window title,
+/// falling back to the app's friendly name.
+pub fn resolve_app_display_title(
+    apps_shared: &Arc<Mutex<Vec<DesktopApp>>>,
+    app_id: &str,
+    fallback_name: &str,
+    max_len: usize,
+) -> String {
+    let windows = get_windows_for_app(apps_shared, app_id);
+    let active_title = babydra_core::services::workspace::latest_snapshot()
+        .and_then(|s| s.active_window_title);
+
+    let title_opt = if let Some(ref at) = active_title {
+        windows
+            .iter()
+            .find(|w| w.window_title.as_deref() == Some(at.as_str()))
+            .and_then(|w| w.window_title.as_deref())
+    } else {
+        None
+    };
+
+    let title = title_opt
+        .or_else(|| {
+            windows
+                .iter()
+                .find_map(|w| w.window_title.as_deref().filter(|t| !t.trim().is_empty()))
+        })
+        .unwrap_or(fallback_name);
+
+    format_display_title(title, max_len)
+}
+
 fn build_resource_card(
     app_name: &str,
     usage: Option<&babydra_core::AppResourceUsage>,
@@ -81,7 +129,6 @@ fn rebuild_taskbar(
     popovers: &Rc<RefCell<Vec<PopoverState>>>,
     running_apps_shared: Arc<Mutex<Vec<DesktopApp>>>,
 ) {
-    // 1. Safely popdown and unparent tracked popovers
     for state in popovers.borrow_mut().drain(..) {
         if state.preview_popover.is_visible() {
             state.preview_popover.popdown();
@@ -97,7 +144,6 @@ fn rebuild_taskbar(
         }
     }
 
-    // 2. Remove all child buttons and safely unparent any internal popovers
     while let Some(child) = apps_box.first_child() {
         let mut sub = child.first_child();
         while let Some(c) = sub {
@@ -164,15 +210,24 @@ fn rebuild_taskbar(
         let app_name_clone = app_name.clone();
         let cached_usage: Rc<RefCell<Option<babydra_core::AppResourceUsage>>> =
             Rc::new(RefCell::new(None));
+        let apps_for_title = running_apps_shared.clone();
+        let app_id_for_title = app_id.clone();
+        let fallback_name = app_name.clone();
 
         let update_fn: Rc<dyn Fn()> = Rc::new(move || {
+            let display_title = resolve_app_display_title(
+                &apps_for_title,
+                &app_id_for_title,
+                &fallback_name,
+                MAX_TITLE_LEN,
+            );
             let cached_opt = cached_usage.borrow().clone();
-            let card = build_resource_card(&app_name_clone, cached_opt.as_ref());
+            let card = build_resource_card(&display_title, cached_opt.as_ref());
             tt_pop.set_child(Some(&card));
 
             // Fetch fresh CPU & RAM in background thread to avoid blocking the UI.
             let tt_pop_async = tt_pop.clone();
-            let app_name_async = app_name_clone.clone();
+            let title_async = display_title.clone();
             let cache_async = cached_usage.clone();
             let (tx, rx) = std::sync::mpsc::channel::<babydra_core::AppResourceUsage>();
 
@@ -183,7 +238,7 @@ fn rebuild_taskbar(
                         && tt_pop_async.root().is_some()
                         && tt_pop_async.is_visible()
                     {
-                        let card = build_resource_card(&app_name_async, Some(&usage));
+                        let card = build_resource_card(&title_async, Some(&usage));
                         tt_pop_async.set_child(Some(&card));
                     }
                     return glib::ControlFlow::Break;
@@ -345,4 +400,35 @@ pub fn create_workspace_sw() -> gtk4::Box {
     });
 
     parent_box
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_format_display_title_short() {
+        assert_eq!(format_display_title("Short Title", 25), "Short Title");
+    }
+
+    #[test]
+    fn test_format_display_title_exact_limit() {
+        let title = "1234567890123456789012345";
+        assert_eq!(format_display_title(title, 25), title);
+    }
+
+    #[test]
+    fn test_format_display_title_long_truncated() {
+        let title = "service.rs - BabyDra - Antigravity IDE";
+        let formatted = format_display_title(title, 25);
+        assert!(formatted.ends_with("..."));
+        assert!(formatted.chars().count() <= 25);
+        assert_eq!(formatted, "service.rs - BabyDra...");
+    }
+
+    #[test]
+    fn test_format_display_title_trimmed() {
+        let title = "   Antigravity IDE   ";
+        assert_eq!(format_display_title(title, 25), "Antigravity IDE");
+    }
 }

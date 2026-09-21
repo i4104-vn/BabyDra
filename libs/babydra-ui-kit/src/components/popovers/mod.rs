@@ -94,6 +94,7 @@ impl TooltipPopover {
             title_lbl.add_css_class("status-popover-header");
             title_lbl.add_css_class("tooltip-popover-header");
             title_lbl.set_halign(gtk4::Align::Start);
+            title_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
             card.append(&title_lbl);
 
             if !rows.is_empty() {
