@@ -87,12 +87,10 @@ Ví dụ tối thiểu:
 name = "babydra-panel"
 scope = "user"
 description = "Desktop panel and background services"
-export_desktop = false
 
 [[binaries]]
 name = "babydra-greeter"
 scope = "system"
-export_desktop = false
 
 [packages]
 pacman = ["gtk4", "labwc"]
@@ -100,9 +98,12 @@ aur = ["fastfetch"]
 
 [gsettings]
 "org.gnome.desktop.interface.font-name" = "Inter 11"
+
+[mime]
+"text/plain" = "babydra-notepad.desktop"
 ```
 
-`scope = "user"` cài binary vào `~/.local/bin`; `scope = "system"` cài vào `/usr/bin`. Có thể đặt `source = "tên-binary-build-ra"` khi tên file build khác tên binary cài đặt. Đặt `export_desktop = true` chỉ cho các binary cần installer sinh file `.desktop`; mặc định là `false`.
+`scope = "user"` cài binary vào `~/.local/bin`; `scope = "system"` cài vào `/usr/bin`. Có thể đặt `source = "tên-binary-build-ra"` khi tên file build khác tên binary cài đặt. Các file `.desktop` được đặt trực tiếp trong thư mục `desktops/`, installer sẽ tự động cài đặt và đăng ký các MIME associations được khai báo trong file desktop hoặc bảng `[mime]`.
 
 Xem hướng dẫn đầy đủ trong [docs/03-setup.md](docs/03-setup.md).
 

@@ -1,16 +1,17 @@
 pub mod actions;
-pub mod handlers;
+pub mod input;
 pub mod state;
 pub mod worker;
 
-use crossterm::event::KeyEvent;
-
-pub use handlers::handle_key_event;
+pub use input as handlers;
+pub use input::handle_key_event;
 pub use state::{App, BranchSwitchStatus};
+
+use crossterm::event::KeyEvent;
 
 impl App {
     pub fn handle_key(&mut self, key: KeyEvent) {
-        handlers::handle_key_event(self, key);
+        input::handle_key_event(self, key);
     }
 }
 

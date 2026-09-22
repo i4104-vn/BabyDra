@@ -1,20 +1,4 @@
 //! Safe command execution for the TUI installer.
-//!
-//! # Why this exists
-//!
-//! The TUI runs in raw mode + alternate screen. Child processes that inherit
-//! the terminal (via `Command::status()`) dump their output straight onto the
-//! form and steal stdin — this breaks the TUI and makes the sudo password
-//! prompt unreadable, which after repeated failures can lock the account.
-//!
-//! This module fixes that by:
-//!
-//! 1. **Pre-authenticating sudo once** with the password the user typed into
-//!    a TUI modal (`sudo -S -v`), before any task runs.
-//! 2. Running every sudo command with `sudo -S -p ''` and the password fed
-//!    through a piped stdin — never a TTY prompt.
-//! 3. **Redirecting stdout/stderr** of every child process (captured and
-//!    returned, or dropped) so nothing leaks onto the alternate screen.
 
 use std::io::Write;
 use std::path::Path;
@@ -50,9 +34,6 @@ impl CmdOutput {
     }
 }
 
-/// Spawns `cmd`, best-effort writes `stdin_data` to its piped stdin (sudo may
-/// skip reading stdin with cached credentials — a BrokenPipe is harmless),
-/// waits and captures the output. Nothing ever reaches the TUI.
 fn spawn_and_wait(mut cmd: Command, stdin_data: &[u8], what: &str) -> Result<CmdOutput> {
     let mut child = cmd
         .spawn()
@@ -74,14 +55,10 @@ impl SudoSession {
 
     /// Whether we are running as root (no sudo needed).
     pub fn is_root() -> bool {
-        crate::system::is_root()
+        crate::runtime::is_root()
     }
 
     /// Validates the stored password via `sudo -S -v`.
-    ///
-    /// Runs before any installation task so the password is verified exactly
-    /// once — a wrong password shows a clear error in the TUI instead of
-    /// failing halfway through the install.
     pub fn preauth(&self) -> Result<()> {
         let Some(pwd) = &self.password else {
             return Ok(()); // root
@@ -102,9 +79,6 @@ impl SudoSession {
 
     /// Runs a command, feeding a newline through piped stdin when elevated,
     /// and captures stdout/stderr.
-    ///
-    /// This is the safe replacement for `Command::status()` everywhere in the
-    /// installer: no output reaches the TUI, no TTY prompt is shown.
     pub fn run(&self, program: &str, args: &[&str]) -> Result<CmdOutput> {
         let mut cmd = Command::new(program);
         cmd.args(args);
@@ -176,8 +150,7 @@ impl SudoSession {
     }
 }
 
-/// Trims captured output to the last `max_lines` non-empty lines — used when
-/// surfacing command output into the TUI log without flooding it.
+/// Trims captured output to the last `max_lines` non-empty lines.
 pub fn tail_lines(s: &str, max_lines: usize) -> Vec<String> {
     s.lines()
         .filter(|l| !l.trim().is_empty())

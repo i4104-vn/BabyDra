@@ -1,17 +1,20 @@
+use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
 
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 
-use crate::models::{BinaryItem, LogLevel};
-use crate::system::{get_user_home, SudoSession};
+use crate::core::manifest::InstallManifest;
+use crate::models::LogLevel;
+use crate::runtime::{get_user_home, SudoSession};
 
-/// Installs desktop entries located in the branch `desktops/` folder
-/// and configures their declared MIME associations.
+/// Installs desktop entries located in the branch `desktops/` folder,
+/// installs custom MIME XML definition packages,
+/// and configures declared MIME associations.
 pub fn register_desktop_entries<F>(
     workspace_root: &Path,
-    _binaries: &[BinaryItem],
+    manifest: &InstallManifest,
     sudo: &SudoSession,
     mut log: F,
 ) -> usize
@@ -24,13 +27,19 @@ where
     let mut desktop_entries_installed = 0;
     let mut mime_associations = Vec::new();
 
-    let desktops_dir = workspace_root.join("desktops");
+    // 1. Install desktop entries from desktops/ directory
+    let desktops_dir = manifest
+        .desktop
+        .entries_dir
+        .as_deref()
+        .map(|d| workspace_root.join(d))
+        .unwrap_or_else(|| workspace_root.join("desktops"));
+
     let desktop_files = if desktops_dir.is_dir() {
         find_files(&desktops_dir, |path| {
             path.extension().and_then(|ext| ext.to_str()) == Some("desktop")
         })
     } else {
-        // Fallback for older branches without a dedicated desktops/ folder
         find_files(workspace_root, |path| {
             path.extension().and_then(|ext| ext.to_str()) == Some("desktop")
         })
@@ -69,36 +78,88 @@ where
         );
     }
 
-    // D-Bus activation files are source-owned too. This handles any service
-    // name (not only FileManager1) and keeps desktop integration extensible.
-    let dbus_dir = home.join(".local/share/dbus-1/services");
-    for source in find_files(workspace_root, |path| {
-        path.extension().and_then(|ext| ext.to_str()) == Some("service")
-            && fs::read_to_string(path)
-                .map(|content| content.contains("[D-BUS Service]"))
-                .unwrap_or(false)
-    }) {
-        let Some(file_name) = source.file_name() else {
+    // 2. Install any custom MIME XML packages
+    let mime_packages_dir = home.join(".local/share/mime/packages");
+    let mut custom_mime_installed = 0;
+    for rel_dir in &manifest.desktop.mime_packages {
+        let candidate_dir = workspace_root.join(rel_dir);
+        if !candidate_dir.is_dir() {
             continue;
-        };
-        if let Ok(content) = fs::read_to_string(&source) {
-            let destination = dbus_dir.join(file_name);
-            let _ = fs::create_dir_all(&dbus_dir);
-            if fs::write(destination, content).is_ok() {
+        }
+        for xml_file in find_files(&candidate_dir, |path| {
+            path.extension().and_then(|ext| ext.to_str()) == Some("xml")
+        }) {
+            let Some(file_name) = xml_file.file_name() else {
+                continue;
+            };
+            let destination = mime_packages_dir.join(file_name);
+            let Ok(content) = fs::read_to_string(&xml_file) else {
+                continue;
+            };
+            let _ = fs::create_dir_all(&mime_packages_dir);
+            if fs::write(&destination, content).is_ok() {
                 installed += 1;
+                custom_mime_installed += 1;
+            }
+        }
+    }
+    if custom_mime_installed > 0 {
+        let mime_root = home.join(".local/share/mime");
+        let _ = sudo.run(
+            "update-mime-database",
+            &[mime_root.to_str().unwrap_or_default()],
+        );
+        log(
+            LogLevel::Info,
+            format!("Installed {custom_mime_installed} custom MIME definition package(s)."),
+        );
+    }
+
+    // 3. Include manifest-declared MIME associations from workspace.toml
+    for (mime_type, desktop_id) in &manifest.mime {
+        mime_associations.push((desktop_id.clone(), vec![mime_type.clone()]));
+    }
+    for (desktop_id, mime_types) in &manifest.mime_associations {
+        mime_associations.push((desktop_id.clone(), mime_types.clone()));
+    }
+
+    // 4. D-Bus activation files
+    if manifest.desktop.dbus_services {
+        let dbus_dir = home.join(".local/share/dbus-1/services");
+        for source in find_files(workspace_root, |path| {
+            path.extension().and_then(|ext| ext.to_str()) == Some("service")
+                && fs::read_to_string(path)
+                    .map(|content| content.contains("[D-BUS Service]"))
+                    .unwrap_or(false)
+        }) {
+            let Some(file_name) = source.file_name() else {
+                continue;
+            };
+            if let Ok(content) = fs::read_to_string(&source) {
+                let destination = dbus_dir.join(file_name);
+                let _ = fs::create_dir_all(&dbus_dir);
+                if fs::write(destination, content).is_ok() {
+                    installed += 1;
+                }
             }
         }
     }
 
+    // 5. Update desktop database
     if desktop_entries_installed > 0 {
         let _ = sudo.run(
             "update-desktop-database",
             &[apps_dir.to_str().unwrap_or_default()],
         );
     }
+
+    // 6. Bind default MIME associations
+    let mut bound = HashSet::new();
     for (desktop_id, mime_types) in mime_associations {
         for mime in mime_types {
-            let _ = sudo.run("xdg-mime", &["default", &desktop_id, &mime]);
+            if bound.insert((desktop_id.clone(), mime.clone())) {
+                let _ = sudo.run("xdg-mime", &["default", &desktop_id, &mime]);
+            }
         }
     }
 
@@ -106,7 +167,7 @@ where
         log(
             LogLevel::Success,
             format!(
-                "Registered {installed} desktop/DBus integration file(s) and MIME associations."
+                "Registered {installed} desktop/MIME/DBus integration file(s) and associations."
             ),
         );
     } else {
@@ -160,14 +221,11 @@ where
     found
 }
 
-fn collect_files<F>(root: &Path, found: &mut Vec<PathBuf>, predicate: F)
+fn collect_files<F>(dir: &Path, found: &mut Vec<PathBuf>, predicate: F)
 where
     F: Fn(&Path) -> bool + Copy,
 {
-    if !root.is_dir() {
-        return;
-    }
-    let Ok(entries) = fs::read_dir(root) else {
+    let Ok(entries) = fs::read_dir(dir) else {
         return;
     };
     for entry in entries.flatten() {
@@ -189,7 +247,7 @@ where
 }
 
 #[cfg(test)]
-mod tests {
+pub mod tests {
     use super::*;
 
     #[test]
@@ -206,9 +264,10 @@ mod tests {
         )
         .unwrap();
 
+        let manifest = InstallManifest::default();
         let sudo = SudoSession::new(None);
         let mut messages = Vec::new();
-        let registered = register_desktop_entries(&root, &[], &sudo, |_, message| {
+        let registered = register_desktop_entries(&root, &manifest, &sudo, |_, message| {
             messages.push(message);
         });
 
@@ -221,6 +280,40 @@ mod tests {
     }
 
     #[test]
+    fn installs_custom_mime_packages_and_manifest_associations() {
+        let root = std::env::temp_dir().join(format!(
+            "babydra_desktop_entries_test_{}_custom_mime",
+            std::process::id()
+        ));
+        let mime_dir = root.join("desktops/mime");
+        fs::create_dir_all(&mime_dir).unwrap();
+        fs::write(
+            mime_dir.join("x-babydra.xml"),
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?><mime-info></mime-info>",
+        )
+        .unwrap();
+
+        let mut manifest = InstallManifest::default();
+        manifest.mime.insert(
+            "application/x-babydra".to_string(),
+            "babydra-notepad.desktop".to_string(),
+        );
+
+        let sudo = SudoSession::new(None);
+        let mut messages = Vec::new();
+        let registered = register_desktop_entries(&root, &manifest, &sudo, |_, message| {
+            messages.push(message);
+        });
+
+        assert_eq!(registered, 1);
+        assert!(messages
+            .iter()
+            .any(|m| m.contains("custom MIME definition package")));
+
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
     fn does_not_register_anything_when_source_has_no_desktop_entry() {
         let root = std::env::temp_dir().join(format!(
             "babydra_desktop_entries_test_{}_empty",
@@ -228,9 +321,10 @@ mod tests {
         ));
         fs::create_dir_all(&root).unwrap();
 
+        let manifest = InstallManifest::default();
         let sudo = SudoSession::new(None);
         let mut messages = Vec::new();
-        let registered = register_desktop_entries(&root, &[], &sudo, |_, message| {
+        let registered = register_desktop_entries(&root, &manifest, &sudo, |_, message| {
             messages.push(message);
         });
 

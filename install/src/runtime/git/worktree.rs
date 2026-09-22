@@ -13,9 +13,7 @@ pub fn branch_worktree_dir(repo: &Path, branch: &str) -> PathBuf {
     }
 }
 
-/// Pulls and checks out `branch` into a dedicated folder `branches/<branch>`
-/// using git worktree. This leaves the main repository's current branch completely
-/// untouched, preventing branch disruption if installation is canceled.
+/// Pulls and checks out `branch` into a dedicated folder `branches/<branch>` using git worktree.
 pub fn checkout_and_pull(repo: &Path, branch: &str) -> Result<PathBuf> {
     if branch.is_empty() {
         return Ok(repo.to_path_buf());
@@ -88,7 +86,7 @@ pub fn checkout_and_pull(repo: &Path, branch: &str) -> Result<PathBuf> {
 }
 
 #[cfg(test)]
-mod tests {
+pub mod tests {
     use super::*;
 
     #[test]

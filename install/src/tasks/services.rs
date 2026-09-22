@@ -2,7 +2,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use crate::models::LogLevel;
-use crate::system::{get_user_home, SudoSession};
+use crate::runtime::{get_user_home, SudoSession};
 
 /// Installs systemd user units declared by the source branch and reloads the
 /// compositor. Unit names and executable names are intentionally not encoded

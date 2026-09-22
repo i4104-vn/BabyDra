@@ -1,8 +1,8 @@
-use crate::models::{BinaryItem, BinaryLocation, LogLevel};
-use crate::system::{format_size, get_user_local_bin, safe_copy_binary, SudoSession};
 use std::fs;
-use std::path::Path;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+
+use crate::models::{BinaryItem, BinaryLocation, LogLevel};
+use crate::runtime::{format_size, get_user_local_bin, safe_copy_binary, SudoSession};
 
 pub fn execute_binary_copy_task<F>(
     bin: &BinaryItem,
@@ -64,8 +64,6 @@ where
                 format!("Copying system binary '{}' -> {:?}", bin.name, dst_file),
             );
 
-            // Use the pre-authenticated sudo session (piped password) instead
-            // of a fresh `sudo cp` which would prompt on the TTY.
             let out = sudo.run_root(&[
                 "cp",
                 src_file.to_str().unwrap_or(""),
@@ -81,8 +79,6 @@ where
                     copied += 1;
                 }
                 other => {
-                    // Sudo copy failed or sudo unavailable — fall back to the
-                    // user's local bin so the component is still usable.
                     let reason = match other {
                         Ok(o) => o.stderr.trim().to_string(),
                         Err(e) => e.to_string(),

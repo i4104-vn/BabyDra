@@ -1,11 +1,13 @@
 use std::fs;
 use std::path::Path;
 
+use crate::core::manifest::InstallManifest;
 use crate::models::LogLevel;
-use crate::system::{copy_recursive, get_user_home, InstallManifest, SudoSession};
+use crate::runtime::{copy_recursive, expand_path, get_user_home, SudoSession};
 
 pub fn install_themes_icons_cursors<F>(
     workspace_root: &Path,
+    manifest: &InstallManifest,
     sudo: &SudoSession,
     mut log: F,
 ) -> usize
@@ -19,7 +21,12 @@ where
     let _ = fs::create_dir_all(&themes_dst);
     let _ = fs::create_dir_all(&icons_dst);
 
-    let themes_src = workspace_root.join("configs/themes");
+    let archives_rel = manifest
+        .themes
+        .archives
+        .as_deref()
+        .unwrap_or("configs/themes");
+    let themes_src = workspace_root.join(archives_rel);
     for child in direct_directories(&themes_src) {
         if contains_archive(&child) {
             continue;
@@ -81,18 +88,20 @@ where
     1
 }
 
-/// Deploys the theme packages tree (`themes/`) to `~/.babydra/themes` and `/usr/share/babydra/themes`
-/// and writes the selected variant's theme id into `~/.babydra/babydra.conf`.
+/// Deploys the theme packages tree to user and system theme directories
+/// and writes the selected variant's theme id into the config path.
 pub fn deploy_theme_packages<F>(
     workspace_root: &Path,
     theme_id: &str,
+    manifest: &InstallManifest,
     sudo: &SudoSession,
     mut log: F,
 ) where
     F: FnMut(LogLevel, String),
 {
     let home = get_user_home();
-    let themes_src = workspace_root.join("themes");
+    let pkg_rel = manifest.themes.packages.as_deref().unwrap_or("themes");
+    let themes_src = workspace_root.join(pkg_rel);
     let themes_dst = home.join(".babydra/themes");
 
     if themes_src.is_dir() {
@@ -114,11 +123,17 @@ pub fn deploy_theme_packages<F>(
     } else {
         log(
             LogLevel::Warn,
-            "themes/ not found in workspace — skipping theme packages deploy.".into(),
+            format!("{pkg_rel}/ not found in workspace — skipping theme packages deploy."),
         );
     }
 
-    let conf_path = home.join(".babydra/babydra.conf");
+    let conf_path = manifest
+        .themes
+        .conf_path
+        .as_deref()
+        .map(expand_path)
+        .unwrap_or_else(|| home.join(".babydra/babydra.conf"));
+
     let selected_id = if theme_id.is_empty() {
         first_directory_name(&themes_src).unwrap_or_else(|| "default".to_owned())
     } else {
@@ -227,12 +242,12 @@ pub fn write_theme_selection(conf_path: &Path, theme_id: &str) -> Result<(), Str
 }
 
 #[cfg(test)]
-mod tests {
+pub mod tests {
     use super::*;
 
     #[test]
     fn test_write_theme_selection() {
-        let temp_dir = std::env::temp_dir().join(format!("babydra_test_{}", std::process::id()));
+        let temp_dir = std::env::temp_dir().join(format!("babydra_test_themes_{}", std::process::id()));
         let _ = fs::create_dir_all(&temp_dir);
         let conf_file = temp_dir.join("babydra.conf");
 

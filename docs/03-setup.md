@@ -66,17 +66,14 @@ name = "babydra-panel"       # Tên file đích sau khi cài
 source = "babydra-panel"     # Tên file trong target/release; mặc định bằng name
 scope = "user"               # user hoặc system
 description = "Desktop panel"
-export_desktop = false       # chỉ sinh .desktop khi đặt true
 
 [[binaries]]
 name = "babydra-greeter"
 scope = "system"
-export_desktop = false
 
 [[binaries]]
 name = "babydra-explore"
 scope = "user"
-export_desktop = true
 
 [packages]
 pacman = ["gtk4", "labwc"]
@@ -88,6 +85,10 @@ features = ["wtype", "kernel_permissions", "greetd"]
 [gsettings]
 "org.gnome.desktop.interface.font-name" = "Inter 11"
 "org.gnome.desktop.interface.cursor-size" = "24"
+
+[mime]
+"inode/directory" = "babydra-explore.desktop"
+"text/plain" = "babydra-notepad.desktop"
 ```
 
 ### `[[binaries]]`
@@ -98,7 +99,6 @@ features = ["wtype", "kernel_permissions", "greetd"]
 | `source` | Không | Tên file executable trong `target/release`. Mặc định bằng `name`. |
 | `scope` | Không | `user` hoặc `system`; mặc định là `user`. |
 | `description` | Không | Mô tả hiển thị trong TUI; nếu thiếu, installer dùng mô tả tổng quát. |
-| `export_desktop` | Không | Boolean, mặc định `false`; sinh `<name>.desktop` cho binary khi là `true`. Nếu source đã có file cùng tên, installer dùng file source. |
 
 Nếu Cargo target có tên khác tên cài đặt, dùng `source`. Ví dụ:
 
@@ -107,10 +107,15 @@ Nếu Cargo target có tên khác tên cài đặt, dùng `source`. Ví dụ:
 name = "my-shell"
 source = "shell-daemon"
 scope = "user"
-export_desktop = true
 ```
 
-`export_desktop` chỉ áp dụng cho desktop entry được installer sinh tự động. Các file `.desktop` có sẵn trong source branch vẫn được cài đặt và giữ nguyên nội dung.
+### Desktop Entries & MIME Registration
+
+Các file `.desktop` được đặt trực tiếp trong thư mục `desktops/` ở thư mục gốc (ví dụ `desktops/babydra-explore.desktop`, `desktops/babydra-notepad.desktop`). Installer sẽ tự động:
+1. Sao chép các file `.desktop` vào `~/.local/share/applications/` và cập nhật desktop database.
+2. Tự động trích xuất các MIME types được khai báo trong dòng `MimeType=` của file `.desktop` để liên kết mặc định bằng `xdg-mime default`.
+3. Cho phép khai báo thêm hoặc ghi đè MIME associations qua bảng `[mime]` trong `workspace.toml`.
+4. Cài đặt các gói định nghĩa MIME tùy biến dạng XML (nếu có) từ thư mục `desktops/mime/` hoặc `mime/` vào `~/.local/share/mime/packages/`.
 
 ### `[packages]`
 

@@ -39,8 +39,7 @@ pub fn handle_key_event(app: &mut App, key: KeyEvent) {
         return;
     }
 
-    // 2. Sudo Password Modal (masked input). Ctrl+C still quits — it must
-    // not be captured as a password character.
+    // 2. Sudo Password Modal
     if app.show_sudo_modal {
         match key.code {
             KeyCode::Enter => app.submit_sudo(),

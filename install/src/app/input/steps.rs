@@ -9,7 +9,7 @@ pub enum ListAction {
     None,
     /// Space on the cursor row.
     Toggle,
-    /// 'a' — the argument is the new "all selected" state.
+    /// 'a' — toggle all.
     ToggleAll,
     Enter,
 }

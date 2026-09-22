@@ -1,390 +1,95 @@
 pub mod binaries;
+pub mod build_deps;
 pub mod configs;
+pub mod desktop;
 pub mod display_manager;
 pub mod packages;
-pub mod varlib;
+pub mod permissions;
+pub mod services;
+pub mod staging;
+pub mod themes;
 
-use std::path::PathBuf;
 use std::sync::mpsc::Sender;
 use std::thread;
 use std::time::Instant;
 
-use crate::models::{BinaryItem, BranchItem, LogLevel, LogMessage, VariantItem};
-use crate::system::{
-    build_workspace, checkout_and_pull, initial_binaries_list, load_install_manifest, stop_process,
-    SudoSession,
-};
+pub use crate::core::event::{InstallEvent, InstallPlan};
+use crate::core::pipeline::{build_pipeline, TaskStep};
+use crate::core::context::TaskContext;
+use crate::discovery::initial_binaries_list;
+use crate::models::LogLevel;
+use crate::runtime::{build_workspace, checkout_and_pull, stop_process};
 
-fn total_install_steps(
-    packages: &[crate::models::GenericOptionItem],
-    binaries: usize,
-    varlib: &[crate::models::GenericOptionItem],
-    configs: &[crate::models::GenericOptionItem],
-    display_manager: &[crate::models::GenericOptionItem],
-    from_branch: bool,
-) -> usize {
-    packages.len()
-        + binaries
-        + varlib.len()
-        + configs
-            .iter()
-            .filter(|option| option.id != "terminate_processes")
-            .count()
-        + display_manager.len()
-        + 1 // theme deployment
-        + 2 * usize::from(from_branch) // checkout + build
-}
-
-pub enum InstallEvent {
-    /// Branch refs were refreshed without blocking the TUI.
-    BranchesUpdated {
-        branches: Vec<BranchItem>,
-    },
-    /// A background source discovery request completed.
-    DiscoveryUpdated {
-        request_id: u64,
-        source_root: PathBuf,
-        source_binary_dir: PathBuf,
-        binaries: Vec<BinaryItem>,
-        variants: Vec<VariantItem>,
-    },
-    Progress {
-        current: usize,
-        total: usize,
-        current_step_name: String,
-    },
-    Log(LogMessage),
-    /// Sudo pre-authentication failed. The TUI re-opens the password modal
-    /// with the error message instead of aborting the whole install.
-    SudoFailed(String),
-    /// Background branch checkout & pull completed.
-    BranchSwitched {
-        success: bool,
-        error_msg: Option<String>,
-    },
-    Completed {
-        success: bool,
-        total_copied: usize,
-        total_errors: usize,
-        duration_secs: f64,
-    },
-}
-
-pub struct InstallPlan {
-    pub workspace_root: PathBuf,
-    pub source_root: PathBuf,
-    pub source_binary_dir: PathBuf,
-    pub selected_binaries: Vec<BinaryItem>,
-    /// True when the user left every discovered binary selected. In that
-    /// case a branch update may add new binaries between the UI scan and the
-    /// actual build, so the worker can include them automatically.
-    pub install_all_binaries: bool,
-    /// Variant selected in step 4 (theme + app list + keybinds source).
-    pub variant: VariantItem,
-    /// Branch to check out + pull before building (empty = skip git step).
-    pub branch: String,
-    /// Sudo password provided by the user (None when running as root).
-    pub sudo_password: Option<String>,
-}
-
+/// Spawns the background installation worker thread.
 pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
     thread::spawn(move || {
         let start_time = Instant::now();
+        let mut ctx = TaskContext::new(plan, tx);
+
+        ctx.send_log(
+            LogLevel::Info,
+            "Starting BabyDra Installation Worker...",
+        );
+
+        // Pre-authenticate sudo credentials before starting
+        if let Err(e) = ctx.preauth() {
+            ctx.send_log(
+                LogLevel::Error,
+                format!("Sudo pre-authentication failed: {e}"),
+            );
+            let _ = ctx.tx.send(InstallEvent::SudoFailed(e));
+            return;
+        }
+
         let mut total_copied = 0;
         let mut total_errors = 0;
 
-        // Sudo session created BEFORE any task: pre-auth runs here, safely
-        // (password via piped stdin — no TTY prompt, no TUI breakage).
-        let sudo = SudoSession::new(plan.sudo_password.clone());
+        // Build pipeline steps
+        let mut steps = build_pipeline(
+            &ctx.manifest,
+            &ctx.selected_binaries,
+            ctx.from_branch(),
+            &ctx.branch,
+        );
 
-        let send_log = |lvl: LogLevel, msg: String| {
-            let _ = tx.send(InstallEvent::Log(LogMessage::new(lvl, msg)));
-        };
+        let mut i = 0;
+        while i < steps.len() {
+            let step = &steps[i];
+            ctx.send_progress(i + 1, steps.len(), &step.title);
 
-        // Phase 0: pre-auth sudo (verifies the password exactly once).
-        if !SudoSession::is_root() {
-            send_log(
-                LogLevel::Info,
-                "Validating sudo credentials before starting...".into(),
-            );
-            match sudo.preauth() {
-                Ok(()) => {
-                    send_log(LogLevel::Success, "Sudo credentials validated.".into());
+            let (copied, errors) = dispatch_step(&mut ctx, step);
+            total_copied += copied;
+            total_errors += errors;
+
+            // If we just checked out and built the branch, refresh the manifest and binaries
+            if step.id == "git_checkout" {
+                ctx.reload_manifest();
+                if ctx.install_all_binaries {
+                    let discovered = initial_binaries_list(&ctx.source_root, &ctx.source_binary_dir);
+                    if !discovered.is_empty() {
+                        ctx.selected_binaries = discovered;
+                    }
                 }
-                Err(e) => {
-                    send_log(LogLevel::Error, format!("Sudo validation failed: {e}"));
-                    // Tell the TUI to re-prompt for the password. Never fall
-                    // through to partial installation.
-                    let _ = tx.send(InstallEvent::SudoFailed(e.to_string()));
-                    return;
-                }
-            }
-        }
-
-        // The full task set always runs: system packages, /var/lib staging,
-        // configs/themes and the display manager are mandatory steps, so the
-        // installer never asks about them — only binaries are selectable.
-        let mut manifest = load_install_manifest(&plan.source_root, &plan.workspace_root);
-        let source_binary_dir = if plan.branch.is_empty() {
-            plan.source_binary_dir.clone()
-        } else {
-            plan.source_root.join("target/release")
-        };
-        let mut packages = crate::system::initial_package_options(&manifest);
-        let varlib = crate::system::initial_varlib_options();
-        let configs = crate::system::initial_configs_themes_options();
-        let mut display_manager = crate::system::initial_display_manager_options(&manifest);
-
-        let mut total_steps = total_install_steps(
-            &packages,
-            plan.selected_binaries.len(),
-            &varlib,
-            &configs,
-            &display_manager,
-            !plan.branch.is_empty(),
-        );
-        let mut current_step = 0;
-
-        send_log(
-            LogLevel::Info,
-            "Starting BabyDra Installation Worker...".into(),
-        );
-        send_log(
-            LogLevel::Info,
-            format!("Binary Source: {:?}", plan.source_binary_dir),
-        );
-        send_log(
-            LogLevel::Info,
-            format!(
-                "Variant: {} (theme: {})",
-                plan.variant.name, plan.variant.theme
-            ),
-        );
-        if !plan.branch.is_empty() {
-            send_log(
-                LogLevel::Info,
-                format!("Install source branch: {}", plan.branch),
-            );
-        }
-
-        // Phase 1: pull branch into branches/<branch> + build source (branch-based installs).
-        if !plan.branch.is_empty() {
-            current_step += 1;
-            let _ = tx.send(InstallEvent::Progress {
-                current: current_step,
-                total: total_steps,
-                current_step_name: format!("Pull latest code for branch '{}'", plan.branch),
-            });
-            send_log(
-                LogLevel::Info,
-                format!(
-                    "Syncing branch '{}' in branches/{}...",
-                    plan.branch, plan.branch
-                ),
-            );
-            match checkout_and_pull(&plan.workspace_root, &plan.branch) {
-                Ok(branch_dir) => send_log(
-                    LogLevel::Success,
-                    format!(
-                        "Branch '{}' ready at {}.",
-                        plan.branch,
-                        branch_dir.display()
-                    ),
-                ),
-                Err(e) => {
-                    send_log(LogLevel::Error, format!("Git worktree pull failed: {e}"));
-                    total_errors += 1;
-                }
-            }
-
-            manifest = load_install_manifest(&plan.source_root, &plan.workspace_root);
-            // The selected branch owns its package list. The initial scan is
-            // performed before the worktree exists, so rebuild the package
-            // options after checkout instead of keeping main's empty/default
-            // manifest.
-            packages = crate::system::initial_package_options(&manifest);
-            display_manager = crate::system::initial_display_manager_options(&manifest);
-            total_steps = total_install_steps(
-                &packages,
-                plan.selected_binaries.len(),
-                &varlib,
-                &configs,
-                &display_manager,
-                true,
-            );
-
-            current_step += 1;
-            let _ = tx.send(InstallEvent::Progress {
-                current: current_step,
-                total: total_steps,
-                current_step_name: "Build workspace (cargo build --release)".to_string(),
-            });
-            send_log(
-                LogLevel::Info,
-                format!(
-                    "Building branch '{}' in release mode (cargo build --release in {})...",
-                    plan.branch,
-                    plan.source_root.display()
-                ),
-            );
-            let (ok, tail) = build_workspace(&plan.source_root);
-            for line in tail {
-                send_log(LogLevel::Info, line);
-            }
-            if ok {
-                send_log(LogLevel::Success, "Release build completed.".into());
-            } else {
-                send_log(
-                    LogLevel::Error,
-                    "Release build failed — binaries may be missing.".into(),
+                // Rebuild pipeline so newly pulled branch manifest changes take effect
+                let new_steps = build_pipeline(
+                    &ctx.manifest,
+                    &ctx.selected_binaries,
+                    false, // git is already done
+                    &ctx.branch,
                 );
-                total_errors += 1;
+                // Retain already executed steps up to current index + append remaining new steps
+                let mut rebuilt = steps[..=i].to_vec();
+                rebuilt.extend(new_steps.into_iter().filter(|s| s.id != "git_checkout"));
+                steps = rebuilt;
             }
-        }
 
-        let selected_binaries = if plan.install_all_binaries && !plan.branch.is_empty() {
-            let discovered = initial_binaries_list(&plan.source_root, &source_binary_dir);
-            if discovered.is_empty() {
-                plan.selected_binaries.clone()
-            } else {
-                discovered
-            }
-        } else {
-            plan.selected_binaries.clone()
-        };
-        total_steps = total_install_steps(
-            &packages,
-            selected_binaries.len(),
-            &varlib,
-            &configs,
-            &display_manager,
-            !plan.branch.is_empty(),
-        );
-
-        // Phase 2: terminate old processes (always — prevents ETXTBSY when
-        // overwriting running executables).
-        {
-            send_log(
-                LogLevel::Warn,
-                "Terminating active processes before overwrite...".into(),
-            );
-            // Stop all selected binaries
-            for bin in &selected_binaries {
-                stop_process(&bin.name);
-            }
-            thread::sleep(std::time::Duration::from_millis(250));
-        }
-
-        // Phase 3: Packages (mandatory).
-        for opt in &packages {
-            current_step += 1;
-            let _ = tx.send(InstallEvent::Progress {
-                current: current_step,
-                total: total_steps,
-                current_step_name: opt.title.clone(),
-            });
-            let (c, e) = packages::execute_packages_task(opt, &manifest, &sudo, &send_log);
-            total_copied += c;
-            total_errors += e;
-        }
-
-        // Phase 4: Prebuilt Binaries.
-        for bin in &selected_binaries {
-            current_step += 1;
-            let _ = tx.send(InstallEvent::Progress {
-                current: current_step,
-                total: total_steps,
-                current_step_name: format!("Installing binary: {}", bin.name),
-            });
-            let (c, e) =
-                binaries::execute_binary_copy_task(bin, &source_binary_dir, &sudo, &send_log);
-            total_copied += c;
-            total_errors += e;
-        }
-
-        // Phase 5: /var/lib Staging (mandatory).
-        for opt in &varlib {
-            current_step += 1;
-            let _ = tx.send(InstallEvent::Progress {
-                current: current_step,
-                total: total_steps,
-                current_step_name: opt.title.clone(),
-            });
-            let (c, e) = varlib::execute_varlib_task(
-                opt,
-                &source_binary_dir,
-                &selected_binaries,
-                &sudo,
-                &send_log,
-            );
-            total_copied += c;
-            total_errors += e;
-        }
-
-        // Phase 6: Theme packages — deploy themes/ to ~/.babydra/themes & /usr/share/babydra/themes + persist variant theme selection
-        {
-            current_step += 1;
-            let _ = tx.send(InstallEvent::Progress {
-                current: current_step,
-                total: total_steps,
-                current_step_name: "Deploy theme packages".to_string(),
-            });
-            configs::deploy_theme_packages(
-                &plan.source_root,
-                &plan.variant.theme,
-                &sudo,
-                &send_log,
-            );
-            total_copied += 1;
-        }
-
-        // Phase 7: Configs & Desktop Environment Setup (including restarting panel service).
-        // `terminate_processes` is handled unconditionally in Phase 2.
-        for opt in &configs {
-            if opt.id == "terminate_processes" {
-                continue;
-            }
-            current_step += 1;
-            let _ = tx.send(InstallEvent::Progress {
-                current: current_step,
-                total: total_steps,
-                current_step_name: opt.title.clone(),
-            });
-            let (c, e) = configs::execute_configs_task(
-                opt,
-                &plan.source_root,
-                &selected_binaries,
-                &manifest,
-                &sudo,
-                &send_log,
-            );
-            total_copied += c;
-            total_errors += e;
-        }
-
-        // Phase 8: Display Manager (mandatory).
-        for opt in &display_manager {
-            current_step += 1;
-            let _ = tx.send(InstallEvent::Progress {
-                current: current_step,
-                total: total_steps,
-                current_step_name: opt.title.clone(),
-            });
-            let (c, e) = display_manager::execute_display_manager_task(
-                opt,
-                &plan.source_root,
-                &selected_binaries,
-                &sudo,
-                &send_log,
-            );
-            total_copied += c;
-            total_errors += e;
+            i += 1;
         }
 
         let duration = start_time.elapsed().as_secs_f64();
         let success = total_errors == 0;
 
-        send_log(
+        ctx.send_log(
             if success {
                 LogLevel::Success
             } else {
@@ -396,11 +101,183 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             ),
         );
 
-        let _ = tx.send(InstallEvent::Completed {
+        let _ = ctx.tx.send(InstallEvent::Completed {
             success,
             total_copied,
             total_errors,
             duration_secs: duration,
         });
     });
+}
+
+fn dispatch_step(ctx: &mut TaskContext, step: &TaskStep) -> (usize, usize) {
+    let tx = ctx.tx.clone();
+    let send_log = move |level: LogLevel, msg: String| {
+        let _ = tx.send(InstallEvent::Log(crate::models::LogMessage::new(level, msg)));
+    };
+
+    let prefix = step.id.split(':').next().unwrap_or(&step.id);
+
+    match prefix {
+        "git_checkout" => {
+            send_log(
+                LogLevel::Info,
+                format!("Syncing branch '{}' in branches/{}...", ctx.branch, ctx.branch),
+            );
+            match checkout_and_pull(&ctx.workspace_root, &ctx.branch) {
+                Ok(branch_dir) => {
+                    send_log(
+                        LogLevel::Success,
+                        format!("Branch '{}' ready at {}.", ctx.branch, branch_dir.display()),
+                    );
+                    (1, 0)
+                }
+                Err(e) => {
+                    send_log(LogLevel::Error, format!("Git worktree pull failed: {e}"));
+                    (0, 1)
+                }
+            }
+        }
+        "cargo_build" => {
+            send_log(
+                LogLevel::Info,
+                format!(
+                    "Building branch '{}' in release mode (cargo build --release in {})...",
+                    ctx.branch,
+                    ctx.source_root.display()
+                ),
+            );
+            let (ok, tail) = build_workspace(&ctx.source_root);
+            for line in tail {
+                send_log(LogLevel::Info, line);
+            }
+            if ok {
+                send_log(LogLevel::Success, "Release build completed.".into());
+                (1, 0)
+            } else {
+                send_log(
+                    LogLevel::Error,
+                    "Release build failed — binaries may be missing.".into(),
+                );
+                (0, 1)
+            }
+        }
+        "terminate" => {
+            send_log(
+                LogLevel::Warn,
+                "Terminating active processes before overwrite...".into(),
+            );
+            for bin in &ctx.selected_binaries {
+                stop_process(&bin.name);
+            }
+            thread::sleep(std::time::Duration::from_millis(250));
+            (1, 0)
+        }
+        "pacman" => packages::install_pacman_packages(&ctx.sudo, &ctx.manifest.pacman_packages, send_log),
+        "aur_helper" => packages::ensure_yay_installed(&ctx.sudo, send_log),
+        "aur_packages" => packages::install_aur_packages(&ctx.sudo, &ctx.manifest.aur_packages, send_log),
+        "build_dep" => {
+            let dep_name = step.id.strip_prefix("build_dep:").unwrap_or("");
+            if let Some(dep) = ctx.manifest.build_deps.iter().find(|d| d.name == dep_name) {
+                build_deps::build_dependency(dep, send_log)
+            } else {
+                (0, 0)
+            }
+        }
+        "permissions" => {
+            if let Some(cfg) = &ctx.manifest.permissions {
+                permissions::configure_permissions(&ctx.sudo, cfg, send_log)
+            } else {
+                (0, 0)
+            }
+        }
+        "binary" => {
+            let bin_name = step.id.strip_prefix("binary:").unwrap_or("");
+            if let Some(bin) = ctx.selected_binaries.iter().find(|b| b.name == bin_name) {
+                binaries::execute_binary_copy_task(bin, &ctx.source_binary_dir, &ctx.sudo, send_log)
+            } else {
+                (0, 0)
+            }
+        }
+        "staging_binaries" => {
+            staging::stage_binaries(
+                &ctx.manifest.staging,
+                &ctx.source_binary_dir,
+                &ctx.selected_binaries,
+                &ctx.sudo,
+                send_log,
+            )
+        }
+        "staging_permissions" => {
+            staging::set_staging_permissions(&ctx.manifest.staging, &ctx.sudo, send_log)
+        }
+        "themes_deploy" => {
+            themes::deploy_theme_packages(
+                &ctx.source_root,
+                &ctx.variant.theme,
+                &ctx.manifest,
+                &ctx.sudo,
+                send_log,
+            );
+            (1, 0)
+        }
+        "config" => {
+            let config_key = step.id.strip_prefix("config:").unwrap_or("");
+            match config_key {
+                "labwc" => (configs::sync_labwc_fallback(&ctx.source_root, send_log), 0),
+                "dotfiles" => (configs::sync_dotfiles_fallback(&ctx.source_root, send_log), 0),
+                source_rel => {
+                    if let Some(rule) = ctx.manifest.configs.iter().find(|r| r.source == source_rel) {
+                        configs::sync_config_rule(&ctx.source_root, rule, send_log)
+                    } else {
+                        (0, 0)
+                    }
+                }
+            }
+        }
+        "themes_icons" => {
+            let count = themes::install_themes_icons_cursors(&ctx.source_root, &ctx.manifest, &ctx.sudo, send_log);
+            (count, 0)
+        }
+        "desktop" => {
+            let count = desktop::register_desktop_entries(&ctx.source_root, &ctx.manifest, &ctx.sudo, send_log);
+            (count, 0)
+        }
+        "gsettings" => {
+            let count = themes::apply_gsettings_fontcache(&ctx.manifest, &ctx.sudo, send_log);
+            (count, 0)
+        }
+        "services" => {
+            let count = services::restart_services(&ctx.source_root, &ctx.sudo, send_log);
+            (count, 0)
+        }
+        "greetd_config" => {
+            if let Some(greetd) = &ctx.manifest.greetd {
+                display_manager::configure_greetd_session(
+                    &ctx.source_root,
+                    greetd,
+                    &ctx.selected_binaries,
+                    &ctx.sudo,
+                    send_log,
+                )
+            } else {
+                (0, 0)
+            }
+        }
+        "mask_gettys" => {
+            if let Some(greetd) = &ctx.manifest.greetd {
+                display_manager::mask_secondary_gettys(greetd, &ctx.sudo, send_log)
+            } else {
+                (0, 0)
+            }
+        }
+        "enable_greetd" => {
+            if let Some(greetd) = &ctx.manifest.greetd {
+                display_manager::enable_greetd_service(greetd, &ctx.sudo, send_log)
+            } else {
+                (0, 0)
+            }
+        }
+        _ => (0, 0),
+    }
 }

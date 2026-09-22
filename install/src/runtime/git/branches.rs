@@ -4,10 +4,6 @@ use super::git;
 use crate::models::BranchItem;
 
 /// Discovers local + cached remote branches in the workspace repository.
-///
-/// This function is intentionally read-only. Fetching remote refs is handled
-/// by [`refresh_branches`] so the TUI can start without waiting for a network
-/// operation.
 pub fn list_branches(repo: &Path) -> Vec<BranchItem> {
     let mut items = Vec::new();
 
@@ -20,8 +16,6 @@ pub fn list_branches(repo: &Path) -> Vec<BranchItem> {
         .collect();
 
     // Remote branches (`remotes/origin/*`) are read from the local git cache.
-    // A refresh is deliberately not performed here; this function is called
-    // while constructing the application state.
     let remote: Vec<String> = git(repo, &["branch", "-r", "--format=%(refname:short)"])
         .unwrap_or_default()
         .lines()
@@ -35,10 +29,6 @@ pub fn list_branches(repo: &Path) -> Vec<BranchItem> {
         .trim()
         .to_string();
 
-    // Merge local + remote into one list, then keep only refs containing a
-    // workspace manifest. The distribution branch is not special-cased: a
-    // future branch becomes installable automatically as soon as it contains
-    // a Cargo workspace.
     let mut names: Vec<String> = local.clone();
     for r in &remote {
         if !names.contains(r) {
@@ -67,9 +57,7 @@ pub fn list_branches(repo: &Path) -> Vec<BranchItem> {
     items
 }
 
-/// Refreshes remote refs in the background and returns the resulting branch
-/// list. The timeout bounds the lifetime of the fetch worker when the network
-/// or remote is unavailable.
+/// Refreshes remote refs in the background and returns the resulting branch list.
 pub fn refresh_branches(repo: &Path) -> Vec<BranchItem> {
     let (tx, rx) = std::sync::mpsc::channel();
     let repo_owned = repo.to_path_buf();

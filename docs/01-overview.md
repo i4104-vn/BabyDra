@@ -68,10 +68,11 @@ File phải nằm ở root của branch nguồn. Các nhóm dữ liệu hiện �
 
 | Nhóm | Mục đích |
 | :--- | :--- |
-| `[[binaries]]` | Khai báo tên binary cài đặt, tên file nguồn tùy chọn, mô tả, scope và cờ `export_desktop`. |
+| `[[binaries]]` | Khai báo tên binary cài đặt, tên file nguồn tùy chọn, mô tả và scope. |
 | `[packages]` | Danh sách package `pacman` và `aur` của branch. |
 | `[installer]` | Bật các bước cài đặt tùy chọn mà branch thực sự yêu cầu. |
 | `[gsettings]` | Các cặp schema/key và giá trị cần áp dụng sau khi cài. |
+| `[mime]` | Khai báo các MIME type associations cho ứng dụng. |
 
 Installer ưu tiên file `workspace.toml` của worktree. Nếu file không tồn tại, installer vẫn thử Cargo discovery để branch cũ hoặc branch thử nghiệm có thể được build; các package và GSettings không được tự suy đoán.
 
