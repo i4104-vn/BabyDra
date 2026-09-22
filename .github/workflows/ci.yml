@@ -50,7 +50,9 @@ jobs:
             -Dexamples=false \
             -Ddocs=false \
             -Dtests=false \
-            -Dintrospection=disabled
+            -Dsmoke-tests=false \
+            -Dintrospection=false \
+            -Dvapi=false
           sudo ninja -C /tmp/gtk4-layer-shell/build install
           sudo ldconfig
           pkg-config --modversion gtk4-layer-shell-0
