@@ -40,12 +40,18 @@ pub fn setup_gutter_drawing(
             return;
         }
 
+        let settings = babydra_core::models::notepad::load_notepad_cfg();
+        // Settings font_size is in points; Cairo set_font_size uses pixels.
+        // Convert: px = pt × (screen_dpi / 72).  Assume 96 dpi → factor ≈ 1.333.
+        let pt_to_px = 96.0 / 72.0;
+        let font_size_px = (settings.font_size as f64 * pt_to_px).max(10.0).min(28.0);
+
         cr.select_font_face(
-            "JetBrains Mono",
+            &settings.font_family,
             cairo::FontSlant::Normal,
             cairo::FontWeight::Normal,
         );
-        cr.set_font_size(11.0);
+        cr.set_font_size(font_size_px);
 
         let vadj = match tv.vadjustment() {
             Some(a) => a,
@@ -58,20 +64,39 @@ pub fn setup_gutter_drawing(
 
         let (mut iter, _) = tv.line_at_y(scroll_y as i32);
         let top_margin = tv.top_margin() as f64;
+        // `hosts-editor-text` has 12px CSS padding.  line_yrange() is
+        // relative to the TextView content, while the gutter starts at the
+        // outer widget edge, so account for that padding here as well.
+        let text_view_padding = 12.0;
 
         while iter.line() < total_lines {
             let line_idx = iter.line();
             let (line_y, line_h) = tv.line_yrange(&iter);
-            let draw_y = (line_y as f64) - scroll_y + top_margin;
 
+            // Convert buffer coordinates to visible (widget-relative) coordinates
+            let draw_y = (line_y as f64) - scroll_y + top_margin + text_view_padding;
+            let draw_h = line_h as f64;
+
+            // Skip lines that are below the visible area
             if draw_y > height as f64 {
                 break;
             }
 
+            // Skip lines that are above the visible area
+            if draw_y + draw_h < 0.0 {
+                if !iter.forward_line() {
+                    break;
+                }
+                continue;
+            }
+
             let num_str = format!("{}", line_idx + 1);
             if let Ok(extents) = cr.text_extents(&num_str) {
-                let x = (width as f64) - extents.width() - 10.0;
-                let y = draw_y + (line_h as f64 + extents.height()) / 2.0;
+                let x = (width as f64) - extents.width() - 14.0;
+                // Center the glyph vertically within the line height:
+                // baseline = line_center - glyph_visual_center_offset + nudge
+                let line_center = draw_y + draw_h / 2.0;
+                let y = line_center - extents.y_bearing() - extents.height() / 2.0 + 1.0;
 
                 cr.move_to(x, y);
                 if line_idx == current_line {
@@ -105,8 +130,12 @@ pub fn setup_gutter_drawing(
     let ln = line_numbers.clone();
     let tb_clone = text_buffer.clone();
     text_buffer.connect_changed(move |_| {
+        let settings = babydra_core::models::notepad::load_notepad_cfg();
+        let pt_to_px = 96.0 / 72.0;
+        let font_size_px = (settings.font_size as f64 * pt_to_px).max(10.0).min(28.0);
         let digits = format!("{}", tb_clone.line_count()).len();
-        let gutter_width = (digits as i32 * 8 + 24).max(44);
+        let char_width = font_size_px * 0.62;
+        let gutter_width = ((digits as f64 * char_width) + 28.0).max(48.0) as i32;
         ln.set_size_request(gutter_width, -1);
         ln.queue_draw();
     });

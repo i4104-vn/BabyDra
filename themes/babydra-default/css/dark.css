@@ -3216,8 +3216,41 @@ button.settings-pill.active-pill:hover {
     color: #93c5fd;
 }
 
-/* Dialog-specific card colors (dark); base `.settings-card` lives in
+/* Dialog-specific card & sidebar colors (dark); base `.settings-card` lives in
    `apps/settings.css` — only override what the compact dialog needs. */
+.explore-dialog .sidebar {
+    background-color: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.explore-dialog .sidebar-item {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.explore-dialog .sidebar-item:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+}
+
+.explore-dialog .sidebar-item.active-nav {
+    background-color: rgba(59, 130, 246, 0.16);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.22);
+}
+
+.explore-dialog .sidebar-item.active-nav:hover {
+    background-color: rgba(59, 130, 246, 0.24);
+    color: #93c5fd;
+}
+
+.explore-dialog .sidebar-item.active-nav label {
+    color: #60a5fa;
+}
+
+.explore-dialog .sidebar-item.active-nav:hover label {
+    color: #93c5fd;
+}
+
 .explore-dialog .settings-card {
     background-color: rgba(255, 255, 255, 0.035);
     border: 1px solid rgba(255, 255, 255, 0.07);
@@ -3229,8 +3262,76 @@ button.settings-pill.active-pill:hover {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+.explore-dialog .settings-card-row:hover,
 .settings-custom-item-row:hover {
     background-color: rgba(255, 255, 255, 0.035);
+}
+
+.explore-dialog dropdown>button,
+.explore-dialog .settings-dropdown>button {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f1f5f9;
+}
+
+.explore-dialog dropdown>button:hover,
+.explore-dialog .settings-dropdown>button:hover {
+    background-color: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 255, 255, 0.20);
+    color: #ffffff;
+}
+
+.explore-dialog dropdown:focus-within>button,
+.explore-dialog .settings-dropdown:focus-within>button {
+    border-color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.10);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.20);
+}
+
+.explore-dialog spinbutton,
+.explore-dialog .settings-spin {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f1f5f9;
+}
+
+.explore-dialog spinbutton:focus-within,
+.explore-dialog .settings-spin:focus-within {
+    border-color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.10);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.20);
+}
+
+.explore-dialog spinbutton text,
+.explore-dialog .settings-spin text {
+    color: #f1f5f9;
+}
+
+.explore-dialog spinbutton button,
+.explore-dialog .settings-spin button {
+    color: rgba(255, 255, 255, 0.70);
+}
+
+.explore-dialog spinbutton button:hover,
+.explore-dialog .settings-spin button:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
+.explore-dialog .action-btn.active {
+    background-image: linear-gradient(135deg, #3b82f6, #2563eb);
+    border: none;
+    border-radius: 9999px;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 20px;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+}
+
+.explore-dialog .action-btn.active:hover {
+    background-image: linear-gradient(135deg, #60a5fa, #3b82f6);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.50);
 }
 
 .keybind-pill {

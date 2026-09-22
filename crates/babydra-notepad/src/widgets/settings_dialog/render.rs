@@ -17,19 +17,17 @@ pub fn show_settings_dialog(
     let changed: Rc<dyn Fn(NotepadSettings)> = Rc::new(on_change_callback);
     let window = Window::builder()
         .title(trans("notepad.settings"))
+        .icon_name("babydra-notepad")
         .transient_for(parent.as_ref())
         .modal(true)
         .resizable(false)
-        .default_width(650)
+        .default_width(680)
         .default_height(480)
         .css_classes(vec!["explore-dialog".to_string()])
         .build();
 
-    let root = Box::new(Orientation::Vertical, 0);
-    root.add_css_class("explore-dialog-box");
-    let content = Box::new(Orientation::Horizontal, 0);
-    content.set_hexpand(true);
-    content.set_vexpand(true);
+    let main_hbox = Box::new(Orientation::Horizontal, 0);
+    main_hbox.add_css_class("explore-dialog-box");
 
     let stack = Stack::new();
     stack.set_transition_type(gtk4::StackTransitionType::Crossfade);
@@ -40,31 +38,32 @@ pub fn show_settings_dialog(
     stack.add_named(&build_editor_page(&state, &changed), Some("editor"));
     stack.add_named(&build_saving_page(&state, &changed), Some("saving"));
 
-    content.append(&build_navigation(&stack));
-    let stack_container = Box::new(Orientation::Vertical, 0);
-    stack_container.set_margin_top(12);
-    stack_container.set_margin_start(16);
-    stack_container.set_margin_end(16);
-    stack_container.set_margin_bottom(12);
-    stack_container.set_hexpand(true);
-    stack_container.set_vexpand(true);
-    stack_container.append(&stack);
-    content.append(&stack_container);
-    root.append(&content);
+    main_hbox.append(&build_navigation(&stack));
+
+    let right_vbox = Box::new(Orientation::Vertical, 0);
+    right_vbox.set_margin_top(14);
+    right_vbox.set_margin_start(16);
+    right_vbox.set_margin_end(16);
+    right_vbox.set_margin_bottom(14);
+    right_vbox.set_hexpand(true);
+    right_vbox.set_vexpand(true);
+    right_vbox.append(&stack);
 
     let footer = Box::new(Orientation::Horizontal, 8);
     footer.set_halign(gtk4::Align::End);
-    footer.set_margin_end(16);
-    footer.set_margin_bottom(12);
+    footer.set_margin_top(10);
     let close = Button::builder()
         .label(trans("notepad.settings_save_btn"))
         .css_classes(vec!["action-btn".to_string(), "active".to_string()])
         .build();
+    close.set_cursor_from_name(Some("pointer"));
     let window_c = window.clone();
     close.connect_clicked(move |_| window_c.close());
     footer.append(&close);
-    root.append(&footer);
-    window.set_child(Some(&root));
+    right_vbox.append(&footer);
+
+    main_hbox.append(&right_vbox);
+    window.set_child(Some(&main_hbox));
     window.present();
 }
 
@@ -72,7 +71,7 @@ fn build_navigation(stack: &Stack) -> ScrolledWindow {
     let sidebar = ScrolledWindow::new();
     sidebar.set_hscrollbar_policy(gtk4::PolicyType::Never);
     sidebar.add_css_class("sidebar");
-    sidebar.set_width_request(185);
+    sidebar.set_width_request(190);
     sidebar.set_hexpand(false);
     sidebar.set_vexpand(true);
     sidebar.set_margin_top(8);
@@ -98,7 +97,7 @@ fn build_navigation(stack: &Stack) -> ScrolledWindow {
         ),
         create_sidebar_btn(
             &trans("notepad.settings_formatting"),
-            "save",
+            "download",
             "sidebar-item",
             || {},
         ),

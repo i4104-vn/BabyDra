@@ -18,8 +18,8 @@ pub fn add_switch_row(
     row.add_css_class("settings-card-row");
 
     let hbox = Box::new(Orientation::Horizontal, 12);
-    hbox.set_margin_top(10);
-    hbox.set_margin_bottom(10);
+    hbox.set_margin_top(12);
+    hbox.set_margin_bottom(12);
     hbox.set_margin_start(16);
     hbox.set_margin_end(16);
 
@@ -75,8 +75,8 @@ pub fn add_spin_row(
     row.add_css_class("settings-card-row");
 
     let hbox = Box::new(Orientation::Horizontal, 12);
-    hbox.set_margin_top(10);
-    hbox.set_margin_bottom(10);
+    hbox.set_margin_top(12);
+    hbox.set_margin_bottom(12);
     hbox.set_margin_start(16);
     hbox.set_margin_end(16);
 
@@ -132,8 +132,8 @@ pub fn add_dropdown_row(
     row.add_css_class("settings-card-row");
 
     let hbox = Box::new(Orientation::Horizontal, 12);
-    hbox.set_margin_top(10);
-    hbox.set_margin_bottom(10);
+    hbox.set_margin_top(12);
+    hbox.set_margin_bottom(12);
     hbox.set_margin_start(16);
     hbox.set_margin_end(16);
 

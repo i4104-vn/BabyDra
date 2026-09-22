@@ -144,5 +144,17 @@
     "media-playback-stop": "stop",
     "media-playback-stop-symbolic": "stop",
     "audio-input-microphone": "microphone",
-    "audio-input-microphone-symbolic": "microphone"
+    "audio-input-microphone-symbolic": "microphone",
+    "save": "download",
+    "type": "text",
+    "font": "text",
+    "list": "view-list",
+    "align-left": "text",
+    "code": "terminal",
+    "corner-down-right": "forward",
+    "moon": "dark-mode",
+    "sun": "brightness",
+    "delete": "broom",
+    "check-circle": "check",
+    "sliders": "settings"
 }

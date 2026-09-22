@@ -5,7 +5,7 @@ use babydra_core::i18n::trans;
 use babydra_core::models::notepad::{save_notepad_cfg, NotepadSettings};
 use babydra_core::services::syntax::list_available_themes;
 use gtk4::prelude::*;
-use gtk4::{Box, ListBox, Orientation};
+use gtk4::{Box, ListBox, Orientation, ScrolledWindow};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -23,13 +23,22 @@ const TAB_SIZES: &[&str] = &["2 Spaces", "4 Spaces", "8 Spaces"];
 type SettingsState = Rc<RefCell<NotepadSettings>>;
 type SettingsChanged = Rc<dyn Fn(NotepadSettings)>;
 
-fn page() -> (Box, ListBox) {
+fn page() -> (ScrolledWindow, ListBox) {
+    let scroll = ScrolledWindow::builder()
+        .hscrollbar_policy(gtk4::PolicyType::Never)
+        .vscrollbar_policy(gtk4::PolicyType::Automatic)
+        .hexpand(true)
+        .vexpand(true)
+        .build();
     let container = Box::new(Orientation::Vertical, 10);
+    container.set_hexpand(true);
+    container.set_vexpand(true);
     let list = ListBox::new();
     list.set_selection_mode(gtk4::SelectionMode::None);
     list.add_css_class("settings-card");
     container.append(&list);
-    (container, list)
+    scroll.set_child(Some(&container));
+    (scroll, list)
 }
 
 fn save_change<T>(
@@ -44,7 +53,7 @@ fn save_change<T>(
     changed(settings.clone());
 }
 
-pub fn build_font_page(state: &SettingsState, changed: &SettingsChanged) -> Box {
+pub fn build_font_page(state: &SettingsState, changed: &SettingsChanged) -> ScrolledWindow {
     let (page, list) = page();
     let cfg = state.borrow().clone();
     let font_idx = FONT_FAMILIES
@@ -55,7 +64,7 @@ pub fn build_font_page(state: &SettingsState, changed: &SettingsChanged) -> Box 
     let changed_c = changed.clone();
     add_dropdown_row(
         &list,
-        "type",
+        "text",
         &trans("notepad.settings_font_family"),
         &trans("notepad.settings_font_family_desc"),
         FONT_FAMILIES,
@@ -84,7 +93,7 @@ pub fn build_font_page(state: &SettingsState, changed: &SettingsChanged) -> Box 
         &list,
         state,
         changed,
-        "list",
+        "view-list",
         "show_line_numbers",
         cfg.show_line_numbers,
         |s, v| s.show_line_numbers = v,
@@ -93,7 +102,7 @@ pub fn build_font_page(state: &SettingsState, changed: &SettingsChanged) -> Box 
         &list,
         state,
         changed,
-        "align-left",
+        "text",
         "word_wrap",
         cfg.word_wrap,
         |s, v| s.word_wrap = v,
@@ -101,7 +110,7 @@ pub fn build_font_page(state: &SettingsState, changed: &SettingsChanged) -> Box 
     page
 }
 
-pub fn build_editor_page(state: &SettingsState, changed: &SettingsChanged) -> Box {
+pub fn build_editor_page(state: &SettingsState, changed: &SettingsChanged) -> ScrolledWindow {
     let (page, list) = page();
     let cfg = state.borrow().clone();
     let tab_idx = match cfg.tab_size {
@@ -135,7 +144,7 @@ pub fn build_editor_page(state: &SettingsState, changed: &SettingsChanged) -> Bo
         &list,
         state,
         changed,
-        "code",
+        "terminal",
         "indent_spaces",
         cfg.indent_with_spaces,
         |s, v| s.indent_with_spaces = v,
@@ -144,7 +153,7 @@ pub fn build_editor_page(state: &SettingsState, changed: &SettingsChanged) -> Bo
         &list,
         state,
         changed,
-        "corner-down-right",
+        "forward",
         "auto_indent",
         cfg.auto_indent,
         |s, v| s.auto_indent = v,
@@ -156,7 +165,7 @@ pub fn build_editor_page(state: &SettingsState, changed: &SettingsChanged) -> Bo
     page
 }
 
-pub fn build_saving_page(state: &SettingsState, changed: &SettingsChanged) -> Box {
+pub fn build_saving_page(state: &SettingsState, changed: &SettingsChanged) -> ScrolledWindow {
     let (page, list) = page();
     let cfg = state.borrow().clone();
     add_switch_setting(
@@ -189,7 +198,7 @@ pub fn build_saving_page(state: &SettingsState, changed: &SettingsChanged) -> Bo
         &list,
         state,
         changed,
-        "delete",
+        "broom",
         "trim_whitespace",
         cfg.trim_trailing_whitespace,
         |s, v| s.trim_trailing_whitespace = v,
@@ -198,7 +207,7 @@ pub fn build_saving_page(state: &SettingsState, changed: &SettingsChanged) -> Bo
         &list,
         state,
         changed,
-        "check-circle",
+        "check",
         "insert_newline",
         cfg.insert_final_newline,
         |s, v| s.insert_final_newline = v,
@@ -237,7 +246,7 @@ fn add_theme_setting(
     dark: bool,
 ) {
     let key = if dark { "dark_theme" } else { "light_theme" };
-    let icon = if dark { "moon" } else { "sun" };
+    let icon = if dark { "dark-mode" } else { "brightness" };
     let selected = theme_refs
         .iter()
         .position(|theme| {

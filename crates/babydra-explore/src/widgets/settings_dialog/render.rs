@@ -18,7 +18,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         .modal(true)
         .resizable(false)
         .default_width(680)
-        .default_height(460)
+        .default_height(480)
         .css_classes(vec!["explore-dialog".to_string()])
         .build();
 
@@ -154,7 +154,7 @@ pub fn show_settings_dialog(parent: &gtk4::Window, on_change_callback: impl Fn()
         babydra_ui_kit::ui::animation::genie_out(
             hbox_cancel.upcast_ref(),
             680,
-            460,
+            480,
             300,
             move || {
                 win_cb.destroy();
