@@ -15,6 +15,7 @@ pub mod preview;
 pub mod recording;
 pub mod screenshot;
 pub mod search;
+pub mod syntax;
 pub mod system;
 pub mod tray;
 pub mod utils;
