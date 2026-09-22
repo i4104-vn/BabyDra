@@ -7,6 +7,7 @@ pub mod desktop;
 pub mod explore;
 pub mod island;
 pub mod network;
+pub mod notepad;
 pub mod preview;
 pub mod recording;
 pub mod screenshot;
@@ -58,13 +59,13 @@ pub use desktop::{
 };
 pub use explore::{FileEntry, FileType, SessionState, TabState};
 pub use island::{ActiveNotification, IslandState, NotificationMsg};
-pub use preview::{
-    AudioStreamInfo, FfprobeFormat, FfprobeOutput, FfprobeStream, ImageState, MediaKind,
-    VideoMetadata, VideoState, VideoStreamInfo,
-};
 pub use network::{
     ActiveNetworkInfo, ActiveNetworkType, EthernetActivityState, NetSpeed, NetStats,
     NetworkReceiver, NetworkSnapshot,
+};
+pub use preview::{
+    AudioStreamInfo, FfprobeFormat, FfprobeOutput, FfprobeStream, ImageState, MediaKind,
+    VideoMetadata, VideoState, VideoStreamInfo,
 };
 pub use recording::{RecordingConfig, RecordingMode, RecordingStatus};
 pub use screenshot::{Drawing, EditorState, Tool, STROKE_WIDTHS};

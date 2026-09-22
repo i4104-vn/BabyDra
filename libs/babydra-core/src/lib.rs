@@ -27,6 +27,9 @@ pub use services::clipboard::{
 pub use models::explore::{
     get_group_name, ActivePane, FileEntry, FileType, SessionState, TabState,
 };
+pub use models::notepad::{
+    load_notepad_cfg, save_notepad_cfg, CursorPosition, DocumentInfo, EditorState, NotepadSettings,
+};
 pub use models::shell::battery::BatteryInfo;
 pub use models::shell::power::PerformanceProfile;
 
