@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=BabyDra Preview
+Comment=Viewer for images
+Exec=babydra-preview %f
+Icon=/usr/share/babydra/babydra-preview.png
+Terminal=false
+Categories=Graphics;Viewer;GTK;
+MimeType=image/png;image/jpeg;image/gif;image/webp;image/bmp;
+NoDisplay=false

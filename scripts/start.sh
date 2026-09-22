@@ -43,41 +43,19 @@ chmod +x "$HOME/.config/labwc/scripts/"*
 cp -r "$REPO_ROOT/configs/themes/BabyDra" "$HOME/.local/share/themes/"
 echo "Configured labwc theme BabyDra"
 
-# Register default image handler in ~/.local/share/applications
-echo "Registering default image handler..."
+# Register desktop entries from desktops/
+echo "Installing desktop application entries from desktops/..."
 mkdir -p "$HOME/.local/share/applications"
-cat << EOF > "$HOME/.local/share/applications/babydra-preview.desktop"
-[Desktop Entry]
-Type=Application
-Name=BabyDra Preview
-Comment=Viewer for images
-Exec=$LOCAL_BIN/babydra-preview %f
-Icon=/usr/share/babydra/babydra-preview.png
-Terminal=false
-Categories=Graphics;Viewer;GTK;
-MimeType=image/png;image/jpeg;image/gif;image/webp;image/bmp;
-NoDisplay=false
-EOF
+if [ -d "$REPO_ROOT/desktops" ]; then
+    cp "$REPO_ROOT/desktops/"*.desktop "$HOME/.local/share/applications/"
+    chmod +x "$HOME/.local/share/applications/"*.desktop 2>/dev/null || true
+    update-desktop-database "$HOME/.local/share/applications" || true
+fi
 
-chmod +x "$HOME/.local/share/applications/babydra-preview.desktop"
-update-desktop-database "$HOME/.local/share/applications" || true
+# Configure default application MIME associations
 xdg-mime default babydra-preview.desktop image/png image/jpeg image/gif image/webp image/bmp || true
-
-# Register Settings application entry
-echo "Registering settings manager entry..."
-cat << EOF > "$HOME/.local/share/applications/babydra-settings.desktop"
-[Desktop Entry]
-Type=Application
-Name=BabyDra Settings
-Comment=Configure system settings
-Exec=$LOCAL_BIN/babydra-settings
-Icon=/usr/share/babydra/babydra-settings.png
-Terminal=false
-Categories=Settings;HardwareSettings;GTK;
-NoDisplay=false
-EOF
-chmod +x "$HOME/.local/share/applications/babydra-settings.desktop"
-update-desktop-database "$HOME/.local/share/applications" || true
+xdg-mime default babydra-explore.desktop inode/directory || true
+xdg-mime default babydra-notepad.desktop text/plain || true
 
 
 # Commented out software rendering to allow GPU hardware acceleration for 120 FPS.

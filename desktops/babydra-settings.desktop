@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=BabyDra Settings
+Comment=Configure system settings
+Exec=babydra-settings
+Icon=/usr/share/babydra/babydra-settings.png
+Terminal=false
+Categories=Settings;HardwareSettings;GTK;
+NoDisplay=false
