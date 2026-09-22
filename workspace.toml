@@ -50,6 +50,12 @@ name = "babydra-preview"
 scope = "user"
 export_desktop = true
 
+[[binaries]]
+name = "babydra-notepad"
+scope = "user"
+description = "Text editor with syntax highlighting"
+export_desktop = true
+
 [packages]
 pacman = [
     "base-devel",

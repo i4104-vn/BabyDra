@@ -18,6 +18,7 @@ members = [
     "crates/babydra-launcher",
     "crates/babydra-keymap",
     "crates/babydra-desktop",
+    "crates/babydra-notepad",
     "tests",
 ]
 exclude = [
