@@ -91,6 +91,7 @@ pub fn build_editor_layout(
     update_window_title(window, &file_name, false);
     window.add_css_class("viewer-window");
     window.add_css_class("explore-window");
+    window.add_css_class("notepad-window");
     window.set_default_size(960, 640);
 
     // Root vertical container: main editor area + bottom status bar

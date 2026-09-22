@@ -21,9 +21,13 @@
 }
 
 window.viewer-window,
-.viewer-window {
+.viewer-window,
+window.notepad-window,
+.notepad-window {
     background-color: #0e0e12;
     color: #ffffff;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
 }
 
 .viewer-drawing-area {

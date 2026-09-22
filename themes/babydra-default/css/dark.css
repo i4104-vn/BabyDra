@@ -1482,9 +1482,13 @@ button.screenshot-toolbar-btn.selected image {
 
 /* === apps/preview.css === */
 window.viewer-window,
-.viewer-window {
+.viewer-window,
+window.notepad-window,
+.notepad-window {
     background-color: #0e0e12;
     color: #ffffff;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
 }
 
 .viewer-drawing-area {
@@ -2586,6 +2590,16 @@ button.workspace-app-flyout-item:hover .workspace-app-flyout-name {
 .explore-window {
     background-color: rgba(20, 20, 22, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+}
+
+window.viewer-window,
+.viewer-window,
+window.notepad-window,
+.notepad-window {
+    border-top: none;
+    border-radius: 0 0 12px 12px;
 }
 
 .explore-window-box {
