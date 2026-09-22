@@ -1,12 +1,8 @@
+use super::AVAILABLE_ICONS;
 use babydra_core::config::settings::CustomContextItem;
 use babydra_core::i18n::trans;
 use gtk4::prelude::*;
 use gtk4::{Align, Box, Entry, Grid, Label, ListBox, ListBoxRow, Orientation};
-
-const AVAILABLE_ICONS: &[&str] = &[
-    "settings", "terminal", "folder", "text", "camera", "music", "user", "activity", "lock",
-    "wifi", "refresh", "power", "search", "logo",
-];
 
 /// Renders a custom context menu item list row with inline editing and delete capabilities.
 pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {

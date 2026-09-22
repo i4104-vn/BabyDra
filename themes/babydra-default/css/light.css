@@ -3291,52 +3291,53 @@ button.settings-pill.active-pill:hover {
 /* Dialog-specific card & sidebar colors (light); base `.settings-card` lives in
    `apps/settings.css` — only override what the compact dialog needs. */
 .explore-dialog .sidebar {
-    background-color: rgba(0, 0, 0, 0.02);
-    border: 1px solid rgba(0, 0, 0, 0.06);
+    background-color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .explore-dialog .sidebar-item {
-    color: rgba(0, 0, 0, 0.65);
+    color: rgba(28, 28, 30, 0.65);
 }
 
 .explore-dialog .sidebar-item:hover {
     background-color: rgba(0, 0, 0, 0.05);
-    color: #1e293b;
+    color: #1c1c1e;
 }
 
 .explore-dialog .sidebar-item.active-nav {
-    background-color: rgba(37, 99, 235, 0.10);
-    color: #2563eb;
-    border: 1px solid rgba(37, 99, 235, 0.20);
+    background-color: rgba(59, 130, 246, 0.12);
+    color: #3b82f6;
+    border: none;
 }
 
 .explore-dialog .sidebar-item.active-nav:hover {
-    background-color: rgba(37, 99, 235, 0.16);
-    color: #1d4ed8;
-}
-
-.explore-dialog .sidebar-item.active-nav label {
+    background-color: rgba(59, 130, 246, 0.18);
     color: #2563eb;
 }
 
+.explore-dialog .sidebar-item.active-nav label {
+    color: #3b82f6;
+}
+
 .explore-dialog .sidebar-item.active-nav:hover label {
-    color: #1d4ed8;
+    color: #2563eb;
 }
 
 .explore-dialog .settings-card {
     background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-top: 1px solid #f1f5f9;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
 }
 
 .explore-dialog .settings-card-row,
 .settings-custom-item-row {
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .explore-dialog .settings-card-row:hover,
 .settings-custom-item-row:hover {
-    background-color: rgba(0, 0, 0, 0.02);
+    background-color: rgba(0, 0, 0, 0.04);
 }
 
 .explore-dialog dropdown>button,
@@ -3535,6 +3536,8 @@ window.explore-dialog,
 
 window.explore-dialog,
 .explore-dialog {
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-top: none;
     border-radius: 0 0 16px 16px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);

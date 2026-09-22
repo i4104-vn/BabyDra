@@ -66,12 +66,6 @@ button.empty-trash-btn {
     font-family: "JetBrains Mono", "Fira Code", monospace;
 }
 
-/* `.settings-row-title` / `.settings-row-desc` are owned by
-   `apps/settings.css`; keep only dialog-specific tweaks here. */
-.explore-dialog .settings-row-desc {
-    font-size: 12px;
-}
-
 .settings-listbox {
     border-radius: 12px;
 }
@@ -216,12 +210,23 @@ button.settings-pill.active-pill:hover {
 
 .explore-dialog .settings-card {
     border-radius: 14px;
-    padding: 2px;
+    padding: 4px;
+}
+
+.explore-dialog stack scrolledwindow,
+.explore-dialog overlay scrolledwindow {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
 }
 
 .explore-dialog .settings-card-row {
-    border-radius: 13px 13px 0 0;
+    border-radius: 0;
     transition: background-color 150ms ease;
+}
+
+.explore-dialog .settings-card-row:first-child {
+    border-radius: 10px 10px 0 0;
 }
 
 .explore-dialog .settings-card-row:last-child {
@@ -292,7 +297,6 @@ button.settings-pill.active-pill:hover {
 
 .settings-custom-item-row {
     background: transparent;
-    background-color: transparent;
     border-radius: 0;
     transition: background-color 120ms ease;
 }
