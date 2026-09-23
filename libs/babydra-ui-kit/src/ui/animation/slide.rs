@@ -105,7 +105,7 @@ fn slide_in_inner(
         let t = elapsed_us as f64 / dur_us as f64;
         let eased = easing::ease_out_cubic(t);
 
-        w.set_opacity(eased.min(1.0).max(0.0));
+        w.set_opacity(eased.clamp(0.0, 1.0));
         match direction {
             SlideDirection::Down => {
                 let offset = original_margin_top - distance_px;
@@ -175,7 +175,7 @@ pub fn slide_out(
         let t = elapsed_us as f64 / dur_us as f64;
         let eased = easing::ease_out_cubic(t);
 
-        w.set_opacity((start_opacity * (1.0 - eased)).min(1.0).max(0.0));
+        w.set_opacity((start_opacity * (1.0 - eased)).clamp(0.0, 1.0));
         match direction {
             SlideDirection::Down => {
                 let current = (original_margin_bottom - (distance_px as f64 * eased) as i32).max(0);
@@ -221,6 +221,7 @@ pub fn slide_out_cb<F>(
 }
 
 /// Slides out a widget and stops cleanly when a newer animation generation is started.
+#[allow(clippy::too_many_arguments)]
 pub fn slide_out_cb_cancelable<F>(
     widget: &gtk4::Widget,
     direction: SlideDirection,
@@ -306,7 +307,7 @@ fn slide_out_cb_inner<F>(
         let t = elapsed_us as f64 / dur_us as f64;
         let eased = easing::ease_out_cubic(t);
 
-        w.set_opacity((start_opacity * (1.0 - eased)).min(1.0).max(0.0));
+        w.set_opacity((start_opacity * (1.0 - eased)).clamp(0.0, 1.0));
         match direction {
             SlideDirection::Down => {
                 let current = (original_margin_bottom - (distance_px as f64 * eased) as i32).max(0);

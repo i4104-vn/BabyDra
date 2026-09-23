@@ -19,7 +19,7 @@ pub fn show_capture_dialog(parent: &Window, combo_btn: &Button) {
     babydra_core::services::system::keymap::pause_shortcuts();
 
     let window = Window::builder()
-        .title(&babydra_core::i18n::trans("settings.keybinds_title_page"))
+        .title(babydra_core::i18n::trans("settings.keybinds_title_page"))
         .transient_for(parent)
         .modal(true)
         .resizable(false)
@@ -57,7 +57,7 @@ pub fn show_capture_dialog(parent: &Window, combo_btn: &Button) {
     vbox.append(&badge);
 
     let lbl_desc = Label::builder()
-        .label(&babydra_core::i18n::trans("settings.keybind_press"))
+        .label(babydra_core::i18n::trans("settings.keybind_press"))
         .halign(gtk4::Align::Center)
         .justify(gtk4::Justification::Center)
         .build();

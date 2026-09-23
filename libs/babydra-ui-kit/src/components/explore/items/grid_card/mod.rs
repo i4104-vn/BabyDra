@@ -58,7 +58,7 @@ pub fn create_grid_file(
     flow_child.set_halign(gtk4::Align::Center);
     flow_child.set_valign(gtk4::Align::Center);
     flow_child.set_child(Some(&item_box));
-    flow_child.set_property("name", &format!("{}", idx));
+    flow_child.set_property("name", format!("{}", idx));
     flow_child.set_widget_name(&entry.path.to_string_lossy());
 
     flow_child.add_controller(drag_source);

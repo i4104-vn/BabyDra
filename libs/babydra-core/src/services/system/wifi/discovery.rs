@@ -70,11 +70,11 @@ pub fn scan_networks() -> Vec<WifiNetwork> {
 
     // Request rescan
     let _ = Command::new("nmcli")
-        .args(&["device", "wifi", "rescan"])
+        .args(["device", "wifi", "rescan"])
         .output();
 
     if let Ok(output) = Command::new("nmcli")
-        .args(&[
+        .args([
             "-t",
             "-f",
             "SSID,SECURITY,SIGNAL,ACTIVE",

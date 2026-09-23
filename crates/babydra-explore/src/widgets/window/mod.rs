@@ -97,27 +97,25 @@ pub fn create_explore_win(
 
     let status_bar_widgets = crate::widgets::status_bar::create_status_bar();
     ui.vbox.append(&status_bar_widgets.container);
-    let status_bar_lbl_rc = Rc::new(status_bar_widgets.lbl_status.clone());
     status_bar_widgets_cell.replace(Some(status_bar_widgets.clone()));
 
     // Setup navigation closures
     let rebuild_tabs_cell = Rc::new(RefCell::new(None::<Rc<dyn Fn()>>));
     let focus_item_cell = Rc::new(RefCell::new(focus_item));
-    let (navigate_pane_ref, navigate_pane_no_watch_ref, _watchers) = handlers::setup_navigation(
-        session.clone(),
-        active_pane.clone(),
-        left_content_handle.clone(),
-        right_content_handle.clone(),
-        left_scroll_cell.clone(),
-        right_scroll_cell.clone(),
-        status_bar_widgets_cell.clone(),
-        tab_bar_box.clone(),
-        status_bar_lbl_rc.clone(),
-        rebuild_tabs_cell.clone(),
-        focus_item_cell.clone(),
-        watch_tx.clone(),
-        left_rx,
-    );
+    let (navigate_pane_ref, navigate_pane_no_watch_ref, _watchers) =
+        handlers::setup_navigation(handlers::NavigationSetupArgs {
+            session: session.clone(),
+            active_pane: active_pane.clone(),
+            left_content_handle: left_content_handle.clone(),
+            right_content_handle: right_content_handle.clone(),
+            left_scroll_cell: left_scroll_cell.clone(),
+            right_scroll_cell: right_scroll_cell.clone(),
+            status_bar_widgets_cell: status_bar_widgets_cell.clone(),
+            rebuild_tabs_cell: rebuild_tabs_cell.clone(),
+            focus_item_cell: focus_item_cell.clone(),
+            watch_tx: watch_tx.clone(),
+            left_rx,
+        });
 
     // Toggle hidden files closure
     let toggle_hidden = {
@@ -227,18 +225,18 @@ pub fn create_explore_win(
     );
 
     // Wire status bar buttons click
-    handlers::events::setup_status_wiring(
-        status_bar_widgets_cell.clone(),
-        toggle_preview_rc.clone(),
-        view_mode_callback_rc.clone(),
-        sort_callback_rc.clone(),
-        ui.window.clone().upcast::<gtk4::Window>(),
-        rebuild_shortcuts_cell.clone(),
-        session.clone(),
-        navigate_pane_ref.clone(),
-        active_pane.clone(),
-        preview_visible.clone(),
-    );
+    handlers::events::setup_status_wiring(handlers::StatusWiringArgs {
+        status_bar_widgets_cell: status_bar_widgets_cell.clone(),
+        toggle_preview_rc: toggle_preview_rc.clone(),
+        view_mode_callback_rc: view_mode_callback_rc.clone(),
+        sort_callback_rc: sort_callback_rc.clone(),
+        parent_win: ui.window.clone().upcast::<gtk4::Window>(),
+        rebuild_shortcuts_cell: rebuild_shortcuts_cell.clone(),
+        session: session.clone(),
+        nav_c: navigate_pane_ref.clone(),
+        act_c: active_pane.clone(),
+        preview_vc: preview_visible.clone(),
+    });
 
     let _rebuild_tabs_rc = crate::widgets::tab_bar::setup_tab_bar(
         &ui.vbox,
@@ -256,18 +254,18 @@ pub fn create_explore_win(
     ui.main_paned.prepend(&sidebar);
 
     // Active split toggling handler
-    let toggle_split_view_rc = layout::setup_split_view(
-        ui.split_paned.clone(),
-        is_split.clone(),
-        right_scroll_cell.clone(),
-        right_content_handle.clone(),
-        session.clone(),
-        active_pane.clone(),
-        navigate_pane_ref.clone(),
-        info_widgets_rc.clone(),
-        left_content_scroll.clone(),
-        left_content_handle.clone(),
-    );
+    let toggle_split_view_rc = layout::setup_split_view(layout::SplitViewArgs {
+        split_paned: ui.split_paned.clone(),
+        is_split: is_split.clone(),
+        right_scroll_cell: right_scroll_cell.clone(),
+        right_content_handle: right_content_handle.clone(),
+        session: session.clone(),
+        active_pane: active_pane.clone(),
+        navigate_pane_ref: navigate_pane_ref.clone(),
+        info_widgets: info_widgets_rc.clone(),
+        left_content_scroll: left_content_scroll.clone(),
+        left_content_handle: left_content_handle.clone(),
+    });
 
     // Clipboard and undo callbacks
     let clip_cbs = handlers::create_clipboard_callbacks(
@@ -329,19 +327,21 @@ pub fn create_explore_win(
     // Install keyboard shortcuts
     handlers::events::setup_shortcuts(
         &ui.window,
-        toggle_split_view_rc.clone(),
-        toggle_preview_rc.clone(),
-        toggle_hidden_rc.clone(),
-        clip_cbs.cut,
-        clip_cbs.copy,
-        clip_cbs.paste,
-        clip_cbs.undo,
-        clip_cbs.delete,
-        clip_cbs.permanent_delete,
-        clip_cbs.select_all,
-        new_tab_rc,
-        close_tab_rc,
-        rebuild_shortcuts_cell.clone(),
+        handlers::ShortcutCallbacks {
+            toggle_split_view_rc: toggle_split_view_rc.clone(),
+            toggle_preview_rc: toggle_preview_rc.clone(),
+            toggle_hidden_rc: toggle_hidden_rc.clone(),
+            cut_cb_rc: clip_cbs.cut,
+            copy_cb_rc: clip_cbs.copy,
+            paste_cb_rc: clip_cbs.paste,
+            undo_cb_rc: clip_cbs.undo,
+            delete_cb_rc: clip_cbs.delete,
+            permanent_delete_cb_rc: clip_cbs.permanent_delete,
+            select_all_cb_rc: clip_cbs.select_all,
+            new_tab_cb_rc: new_tab_rc,
+            close_tab_cb_rc: close_tab_rc,
+            rebuild_shortcuts_cell: rebuild_shortcuts_cell.clone(),
+        },
     );
 
     handlers::setup_resize_handler(

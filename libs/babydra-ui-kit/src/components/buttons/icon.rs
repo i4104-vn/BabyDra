@@ -171,12 +171,10 @@ pub fn create_vpn_icon(size: i32) -> gtk4::Widget {
         let overlay = gtk4::Overlay::new();
         overlay.set_child(Some(&main_img));
 
-        let lock_svg = format!(
-            r##"<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="#10B981" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        let lock_svg = r##"<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="#10B981" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>"##
-        );
+            </svg>"##.to_string();
         let lock_img = crate::ui::icon::get_icon_from_svg(&lock_svg, 10);
         lock_img.set_halign(gtk4::Align::End);
         lock_img.set_valign(gtk4::Align::End);

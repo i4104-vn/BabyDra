@@ -78,11 +78,10 @@ pub fn get_audio_devices(is_source: bool) -> Vec<AudioDevice> {
                             let prof_index =
                                 prof.get("index").and_then(|idx| idx.as_i64()).unwrap_or(-1);
 
-                            if prof_name != "off" && prof_available != "no" && prof_index != -1 {
-                                if !prof_name.contains("surround") && !prof_name.contains("extra") {
+                            if prof_name != "off" && prof_available != "no" && prof_index != -1
+                                && !prof_name.contains("surround") && !prof_name.contains("extra") {
                                     valid_profiles.push(prof);
                                 }
-                            }
                         }
                     }
 

@@ -20,7 +20,7 @@ pub fn create_status_bar() -> StatusBarWidgets {
     container.set_css_classes(&["status-bar"]);
 
     let lbl_status = Label::builder()
-        .label(&format!("0 {}", trans("explore.items")))
+        .label(format!("0 {}", trans("explore.items")))
         .halign(Align::Start)
         .hexpand(true)
         .build();

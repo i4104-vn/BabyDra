@@ -71,7 +71,7 @@ pub fn parse_layout_item(item: &LayoutItem) -> MenuItem {
 
     let mut children = Vec::new();
     for child_val in children_vals {
-        if let Some(child_menu) = parse_zval(&**child_val) {
+        if let Some(child_menu) = parse_zval(child_val) {
             children.push(child_menu);
         }
     }

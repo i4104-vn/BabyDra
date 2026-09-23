@@ -48,7 +48,7 @@ pub fn get_apps_for_path(path: &Path) -> Vec<gtk4::gio::AppInfo> {
 
         let supported = app.supported_types();
         let matches_type = supported.iter().any(|st| {
-            st.as_str() == &content_type
+            st.as_str() == content_type
                 || gtk4::gio::content_type_is_a(&content_type, st)
                 || gtk4::gio::content_type_is_a(st, &content_type)
         });
@@ -63,7 +63,7 @@ pub fn get_apps_for_path(path: &Path) -> Vec<gtk4::gio::AppInfo> {
         }
     }
 
-    result.sort_by(|a, b| a.name().to_lowercase().cmp(&b.name().to_lowercase()));
+    result.sort_by_key(|a| a.name().to_lowercase());
     result
 }
 

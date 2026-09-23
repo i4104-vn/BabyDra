@@ -10,6 +10,7 @@ use std::rc::Rc;
 use std::sync::mpsc::Sender;
 
 /// Renders the connected section containing active Ethernet and active Wi-Fi networks.
+#[allow(clippy::too_many_arguments)]
 pub fn render_connected_section(
     list_box: &gtk4::ListBox,
     is_ethernet_active: bool,

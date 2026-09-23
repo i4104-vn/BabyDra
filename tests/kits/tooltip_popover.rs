@@ -46,8 +46,8 @@ fn test_gtk_tooltip_popover_suite() {
     assert_eq!(tooltip.position(), gtk4::PositionType::Bottom);
     assert!(tooltip.has_css_class("status-popover"));
     assert!(tooltip.has_css_class("tooltip-popover"));
-    assert_eq!(tooltip.is_autohide(), false);
-    assert_eq!(tooltip.popover.has_css_class("status-popover"), true);
+    assert!(!tooltip.is_autohide());
+    assert!(tooltip.popover.has_css_class("status-popover"));
 
     let btn2 = gtk4::Button::new();
     let tooltip2 = TooltipPopover::attach_card_text(&btn2, "Title", "Text");

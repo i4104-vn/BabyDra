@@ -170,7 +170,7 @@ pub fn init_theme() {
 
     CSS_PROVIDER.with(|provider| {
         thread_local! {
-            static REGISTERED: std::cell::Cell<bool> = std::cell::Cell::new(false);
+            static REGISTERED: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
         }
 
         let is_registered = REGISTERED.with(|r| r.get());

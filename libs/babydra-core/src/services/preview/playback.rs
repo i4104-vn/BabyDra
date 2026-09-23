@@ -24,11 +24,12 @@ pub fn get_gst_play_from_media_file_raw(raw_ptr: *mut c_void) -> *mut c_void {
 }
 
 /// Sets playback speed on a GstPlay pipeline pointer.
-pub fn set_gst_play_rate(play_ptr: *mut c_void, rate: f64) {
+///
+/// # Safety
+/// The caller must ensure that `play_ptr` is either null or points to a valid `GstPlay` instance.
+pub unsafe fn set_gst_play_rate(play_ptr: *mut c_void, rate: f64) {
     if !play_ptr.is_null() {
-        unsafe {
-            gst_play_set_rate(play_ptr, rate);
-        }
+        gst_play_set_rate(play_ptr, rate);
     }
 }
 

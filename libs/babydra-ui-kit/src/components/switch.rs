@@ -56,7 +56,8 @@ pub struct CustomSwitch {
 impl CustomSwitch {
     pub fn new(initial_active: bool) -> Self {
         let active = Rc::new(Cell::new(initial_active));
-        let progress = Rc::new(Cell::new(if initial_active { 1.0 } else { 0.0 }));
+        let progress: Rc<Cell<f64>> =
+            Rc::new(Cell::new(if initial_active { 1.0 } else { 0.0 }));
         let animating = Rc::new(Cell::new(false));
         let listeners: Rc<RefCell<Vec<Callback>>> = Rc::new(RefCell::new(Vec::new()));
 
@@ -71,7 +72,7 @@ impl CustomSwitch {
         area.set_draw_func(move |_area, cr, width_i, height_i| {
             let width = width_i as f64;
             let height = height_i as f64;
-            let prog = (progress_draw.get() as f64).clamp(0.0, 1.0);
+            let prog: f64 = progress_draw.get().clamp(0.0, 1.0);
 
             let r = height / 2.0;
 

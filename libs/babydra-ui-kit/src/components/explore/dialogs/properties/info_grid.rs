@@ -60,7 +60,7 @@ pub fn build_info_grid(parent_vbox: &Box, target_paths: &[PathBuf]) {
         };
 
         let lbl_subtitle = Label::builder()
-            .label(&format!("{} • {}", file_type_desc, location))
+            .label(format!("{} • {}", file_type_desc, location))
             .halign(Align::Start)
             .ellipsize(gtk4::pango::EllipsizeMode::End)
             .selectable(false)
@@ -76,7 +76,7 @@ pub fn build_info_grid(parent_vbox: &Box, target_paths: &[PathBuf]) {
         general_card.set_css_classes(&["properties-card"]);
 
         let lbl_section_title = Label::builder()
-            .label(&trans("explore.prop_general_info"))
+            .label(trans("explore.prop_general_info"))
             .halign(Align::Start)
             .build();
         lbl_section_title.set_css_classes(&["properties-section-title"]);
@@ -174,7 +174,7 @@ pub fn build_info_grid(parent_vbox: &Box, target_paths: &[PathBuf]) {
                 image_card.set_css_classes(&["properties-card"]);
 
                 let lbl_img_title = Label::builder()
-                    .label(&trans("explore.prop_image_info"))
+                    .label(trans("explore.prop_image_info"))
                     .halign(Align::Start)
                     .build();
                 lbl_img_title.set_css_classes(&["properties-section-title"]);
@@ -280,7 +280,7 @@ pub fn build_info_grid(parent_vbox: &Box, target_paths: &[PathBuf]) {
         general_card.set_css_classes(&["properties-card"]);
 
         let lbl_section_title = Label::builder()
-            .label(&trans("explore.prop_selection_details"))
+            .label(trans("explore.prop_selection_details"))
             .halign(Align::Start)
             .build();
         lbl_section_title.set_css_classes(&["properties-section-title"]);

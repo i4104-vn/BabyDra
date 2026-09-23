@@ -9,8 +9,11 @@ struct SendPixbuf(pub Pixbuf);
 unsafe impl Send for SendPixbuf {}
 unsafe impl Sync for SendPixbuf {}
 
+type ThumbnailKey = (PathBuf, i32);
+type ThumbnailVal = (SendPixbuf, Option<SystemTime>);
+
 lazy_static::lazy_static! {
-    static ref THUMBNAIL_CACHE: RwLock<FxHashMap<(PathBuf, i32), (SendPixbuf, Option<SystemTime>)>> =
+    static ref THUMBNAIL_CACHE: RwLock<FxHashMap<ThumbnailKey, ThumbnailVal>> =
         RwLock::new(FxHashMap::default());
 }
 

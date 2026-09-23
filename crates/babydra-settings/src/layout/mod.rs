@@ -135,7 +135,6 @@ fn ensure_page_loaded(stack: &gtk4::Stack, name: &str) {
         page.set_vexpand(true);
         page.set_halign(gtk4::Align::Fill);
         page.set_valign(gtk4::Align::Fill);
-        page.set_size_request(0, 0);
         stack.add_named(&page, Some(name));
     }
 }
@@ -166,8 +165,13 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
 
     let overlay = gtk4::Overlay::new();
     let main_layout = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    main_layout.set_size_request(0, 0);
-    main_layout.set_overflow(gtk4::Overflow::Hidden);
+    // `main_layout` is an overlay child.  Overlay children otherwise keep
+    // their natural size on some GTK backends, which can collapse Settings
+    // to an empty/partially visible surface when the window is resized.
+    main_layout.set_hexpand(true);
+    main_layout.set_vexpand(true);
+    main_layout.set_halign(gtk4::Align::Fill);
+    main_layout.set_valign(gtk4::Align::Fill);
 
     let backdrop = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     backdrop.set_hexpand(true);
@@ -235,8 +239,8 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
 
     let category_labels: Rc<RefCell<Vec<(gtk4::Label, &'static str)>>> =
         Rc::new(RefCell::new(Vec::new()));
-    let nav_buttons: Rc<RefCell<Vec<(&'static str, gtk4::Button, &'static str, &'static str)>>> =
-        Rc::new(RefCell::new(Vec::new()));
+    type NavButtonItem = (&'static str, gtk4::Button, &'static str, &'static str);
+    let nav_buttons: Rc<RefCell<Vec<NavButtonItem>>> = Rc::new(RefCell::new(Vec::new()));
     let sidebar_status = Rc::new(RefCell::new(sidebar::SidebarStatus::default()));
 
     for cat in NAV_CATEGORIES {
@@ -303,8 +307,8 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     content_stack.set_transition_duration(200);
     content_stack.set_hexpand(true);
     content_stack.set_vexpand(true);
-    content_stack.set_size_request(0, 0);
-    content_stack.set_overflow(gtk4::Overflow::Hidden);
+    content_stack.set_halign(gtk4::Align::Fill);
+    content_stack.set_valign(gtk4::Align::Fill);
     content_stack.add_css_class("settings-content");
 
     // Eagerly load target initial page
@@ -314,18 +318,16 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     let right_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     right_box.set_hexpand(true);
     right_box.set_vexpand(true);
-    right_box.set_size_request(0, 0);
-    right_box.set_overflow(gtk4::Overflow::Hidden);
+    right_box.set_halign(gtk4::Align::Fill);
+    right_box.set_valign(gtk4::Align::Fill);
     right_box.set_margin_top(8);
     right_box.set_margin_bottom(8);
     right_box.set_margin_start(8);
     right_box.set_margin_end(8);
-    let content_viewport = gtk4::ScrolledWindow::new();
-    content_viewport.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Never);
-    content_viewport.set_hexpand(true);
-    content_viewport.set_vexpand(true);
-    content_viewport.set_child(Some(&content_stack));
-    right_box.append(&content_viewport);
+    // Every settings page owns its scrolling viewport.  Adding a second
+    // non-scrollable ScrolledWindow here makes the Stack measure at zero on
+    // GTK4 versions that use the viewport's minimum size during allocation.
+    right_box.append(&content_stack);
 
     main_layout.append(&right_box);
     overlay.set_child(Some(&backdrop));

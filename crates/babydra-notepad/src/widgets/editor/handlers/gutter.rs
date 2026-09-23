@@ -44,7 +44,7 @@ pub fn setup_gutter_drawing(
         // Settings font_size is in points; Cairo set_font_size uses pixels.
         // Convert: px = pt × (screen_dpi / 72).  Assume 96 dpi → factor ≈ 1.333.
         let pt_to_px = 96.0 / 72.0;
-        let font_size_px = (settings.font_size as f64 * pt_to_px).max(10.0).min(28.0);
+        let font_size_px = (settings.font_size as f64 * pt_to_px).clamp(10.0, 28.0);
 
         cr.select_font_face(
             &settings.font_family,
@@ -132,7 +132,7 @@ pub fn setup_gutter_drawing(
     text_buffer.connect_changed(move |_| {
         let settings = babydra_core::models::notepad::load_notepad_cfg();
         let pt_to_px = 96.0 / 72.0;
-        let font_size_px = (settings.font_size as f64 * pt_to_px).max(10.0).min(28.0);
+        let font_size_px = (settings.font_size as f64 * pt_to_px).clamp(10.0, 28.0);
         let digits = format!("{}", tb_clone.line_count()).len();
         let char_width = font_size_px * 0.62;
         let gutter_width = ((digits as f64 * char_width) + 28.0).max(48.0) as i32;

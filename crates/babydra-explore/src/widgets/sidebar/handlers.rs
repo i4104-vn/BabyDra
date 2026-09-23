@@ -7,16 +7,29 @@ use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
 
-pub fn add_sidebar_item(
-    container: &Box,
-    name: &str,
-    icon_name: &str,
-    path: PathBuf,
-    session: &Rc<RefCell<SessionState>>,
-    nav_callback: &Rc<dyn Fn(PathBuf)>,
-    item_id: String,
-    rebuild_cb: Rc<dyn Fn()>,
-) {
+pub struct SidebarItemArgs<'a> {
+    pub container: &'a Box,
+    pub name: &'a str,
+    pub icon_name: &'a str,
+    pub path: PathBuf,
+    pub session: &'a Rc<RefCell<SessionState>>,
+    pub nav_callback: &'a Rc<dyn Fn(PathBuf)>,
+    pub item_id: String,
+    pub rebuild_cb: Rc<dyn Fn()>,
+}
+
+pub fn add_sidebar_item(args: SidebarItemArgs<'_>) {
+    let SidebarItemArgs {
+        container,
+        name,
+        icon_name,
+        path,
+        session,
+        nav_callback,
+        item_id,
+        rebuild_cb,
+    } = args;
+
     let nav_cb = nav_callback.clone();
     let session_clone = session.clone();
     let target_path = path.clone();

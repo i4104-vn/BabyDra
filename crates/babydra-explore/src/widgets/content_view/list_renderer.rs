@@ -2,19 +2,36 @@ use crate::widgets::state::ContentViewHandle;
 use babydra_core::FileEntry;
 use gtk4::prelude::*;
 use gtk4::{Align, Box, Label, Orientation};
+use std::cell::RefCell;
+use std::path::{Path, PathBuf};
+use std::rc::Rc;
+
+pub struct ListRenderArgs<'a> {
+    pub handle_c: &'a ContentViewHandle,
+    pub widgets: &'a crate::widgets::state::ContentViewWidgets,
+    pub entries: &'a [FileEntry],
+    pub current_path: &'a Path,
+    pub start_path: &'a Path,
+    pub gen: u64,
+    pub sort_mode: &'a str,
+    pub nav_callback: &'a Rc<dyn Fn(PathBuf)>,
+    pub selected_paths: Rc<RefCell<Vec<PathBuf>>>,
+}
 
 /// Renders entries as list rows in the ListBox.
-pub async fn render_list_view(
-    handle_c: &ContentViewHandle,
-    widgets: &crate::widgets::state::ContentViewWidgets,
-    entries: &[FileEntry],
-    current_path: &std::path::PathBuf,
-    start_path: &std::path::PathBuf,
-    gen: u64,
-    sort_mode: &str,
-    nav_callback: &std::rc::Rc<dyn Fn(std::path::PathBuf)>,
-    selected_paths: std::rc::Rc<std::cell::RefCell<Vec<std::path::PathBuf>>>,
-) {
+pub async fn render_list_view(args: ListRenderArgs<'_>) {
+    let ListRenderArgs {
+        handle_c,
+        widgets,
+        entries,
+        current_path,
+        start_path,
+        gen,
+        sort_mode,
+        nav_callback,
+        selected_paths,
+    } = args;
+
     let mut counter = 0;
     for (idx, entry) in entries.iter().enumerate() {
         if handle_c.tab.borrow().current_path != *start_path
@@ -30,7 +47,7 @@ pub async fn render_list_view(
         };
 
         let target_entry = entry.clone();
-        let cp = current_path.clone();
+        let cp = current_path.to_path_buf();
         let nav = nav_callback.clone();
         let sel_paths = selected_paths.clone();
         let list_row = babydra_ui_kit::components::explore::create_list_row(

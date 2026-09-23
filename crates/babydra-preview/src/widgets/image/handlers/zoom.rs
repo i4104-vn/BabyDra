@@ -27,7 +27,7 @@ pub fn update_zoom_display(state_ref: &ImageState, lbl: &Label) {
 pub fn fit_to_screen(state_ref: &mut ImageState, area_w: f64, area_h: f64) {
     let scale_x = area_w / state_ref.img_w;
     let scale_y = area_h / state_ref.img_h;
-    state_ref.min_scale = scale_x.min(scale_y).min(1.0).max(0.05);
+    state_ref.min_scale = scale_x.min(scale_y).clamp(0.05, 1.0);
     state_ref.scale = state_ref.min_scale;
     state_ref.offset_x = 0.0;
     state_ref.offset_y = 0.0;
@@ -46,7 +46,7 @@ pub fn do_zoom(state: &Rc<RefCell<ImageState>>, area: &DrawingArea, lbl: &Label,
         state_ref.offset_x = 0.0;
         state_ref.offset_y = 0.0;
     } else {
-        clamp_position(&mut *state_ref, area_w, area_h);
+        clamp_position(&mut state_ref, area_w, area_h);
     }
 
     update_zoom_display(&state_ref, lbl);

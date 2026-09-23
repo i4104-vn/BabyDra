@@ -1,4 +1,5 @@
 use crate::widgets::state::ContentViewHandle;
+use crate::widgets::state::PaneNavigationCell;
 use babydra_core::{ActivePane, SessionState};
 use gtk4::prelude::*;
 use std::cell::{Cell, RefCell};
@@ -15,18 +16,33 @@ fn update_pane_nav(handle: &ContentViewHandle, is_split: bool) {
 }
 
 /// Configures split pane layout toggling, creating the right pane content view and sync callbacks dynamically.
-pub fn setup_split_view(
-    split_paned: gtk4::Paned,
-    is_split: Rc<Cell<bool>>,
-    right_scroll_cell: Rc<RefCell<Option<gtk4::Box>>>,
-    right_content_handle: Rc<RefCell<Option<Rc<ContentViewHandle>>>>,
-    session: Rc<RefCell<SessionState>>,
-    active_pane: Rc<Cell<ActivePane>>,
-    navigate_pane_ref: Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>,
-    info_widgets: Rc<crate::widgets::info_panel::InfoPanelWidgets>,
-    left_content_scroll: gtk4::Box,
-    left_content_handle: Rc<ContentViewHandle>,
-) -> Rc<dyn Fn()> {
+pub struct SplitViewArgs {
+    pub split_paned: gtk4::Paned,
+    pub is_split: Rc<Cell<bool>>,
+    pub right_scroll_cell: Rc<RefCell<Option<gtk4::Box>>>,
+    pub right_content_handle: Rc<RefCell<Option<Rc<ContentViewHandle>>>>,
+    pub session: Rc<RefCell<SessionState>>,
+    pub active_pane: Rc<Cell<ActivePane>>,
+    pub navigate_pane_ref: PaneNavigationCell,
+    pub info_widgets: Rc<crate::widgets::info_panel::InfoPanelWidgets>,
+    pub left_content_scroll: gtk4::Box,
+    pub left_content_handle: Rc<ContentViewHandle>,
+}
+
+pub fn setup_split_view(args: SplitViewArgs) -> Rc<dyn Fn()> {
+    let SplitViewArgs {
+        split_paned,
+        is_split,
+        right_scroll_cell,
+        right_content_handle,
+        session,
+        active_pane,
+        navigate_pane_ref,
+        info_widgets,
+        left_content_scroll,
+        left_content_handle,
+    } = args;
+
     let split_paned_c = split_paned.clone();
     let is_split_c = is_split.clone();
     let right_scroll_c = right_scroll_cell.clone();

@@ -71,11 +71,10 @@ pub fn push_entry(entry: ClipboardEntry) {
             (
                 ClipboardEntry::Image { png_bytes: b1, .. },
                 ClipboardEntry::Image { png_bytes: b2, .. },
-            ) => {
-                if b1 == b2 {
+            )
+                if b1 == b2 => {
                     return;
                 }
-            }
             _ => {}
         }
     }

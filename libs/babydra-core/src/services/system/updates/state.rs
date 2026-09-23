@@ -71,12 +71,11 @@ pub fn start_bg_update_tx(
 
 /// Clean pacman lock.
 pub fn clean_pacman_lock(password: Option<&str>, sender: std::sync::mpsc::Sender<String>) {
-    if std::path::Path::new("/var/lib/pacman/db.lck").exists() {
-        if !is_pacman_running() {
+    if std::path::Path::new("/var/lib/pacman/db.lck").exists()
+        && !is_pacman_running() {
             let _ = sender.send(":: Detected stale pacman lock file (/var/lib/pacman/db.lck). Cleaning lock file...".to_string());
             let _ = exec_cmd_stream(&["rm", "-f", "/var/lib/pacman/db.lck"], password, sender);
         }
-    }
 }
 
 /// Triggers system update streaming output via sender channel.

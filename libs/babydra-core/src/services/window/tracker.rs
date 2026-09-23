@@ -72,19 +72,17 @@ pub fn spawn_switcher() {
                         running_hashes.insert(crate::services::apps::get_window_hash(&id, &title));
                         running_app_ids.insert(id);
                     }
-                    for entry in entries {
-                        if let Ok(entry) = entry {
-                            let path = entry.path();
-                            if path.is_file() {
-                                if let Some(file_name) = path.file_name() {
-                                    let name_str = file_name.to_string_lossy().to_string();
-                                    if name_str != "temp_active.png" && name_str.ends_with(".png") {
-                                        let key = name_str.trim_end_matches(".png").to_string();
-                                        if !running_hashes.contains(&key)
-                                            && !running_app_ids.contains(&key)
-                                        {
-                                            let _ = fs::remove_file(&path);
-                                        }
+                    for entry in entries.flatten() {
+                        let path = entry.path();
+                        if path.is_file() {
+                            if let Some(file_name) = path.file_name() {
+                                let name_str = file_name.to_string_lossy().to_string();
+                                if name_str != "temp_active.png" && name_str.ends_with(".png") {
+                                    let key = name_str.trim_end_matches(".png").to_string();
+                                    if !running_hashes.contains(&key)
+                                        && !running_app_ids.contains(&key)
+                                    {
+                                        let _ = fs::remove_file(&path);
                                     }
                                 }
                             }

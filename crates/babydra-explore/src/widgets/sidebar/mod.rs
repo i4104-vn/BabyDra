@@ -1,3 +1,4 @@
+use crate::widgets::state::CallbackCell;
 use babydra_core::i18n::trans;
 use babydra_core::SessionState;
 use gtk4::gdk::FileList;
@@ -10,7 +11,7 @@ use std::rc::Rc;
 mod handlers;
 mod render;
 
-use handlers::add_sidebar_item;
+use handlers::{add_sidebar_item, SidebarItemArgs};
 
 /// Creates a sidebar scrolled container, populates it with quick access and PC directories, and wires navigation actions.
 pub fn create_sidebar(
@@ -25,7 +26,7 @@ pub fn create_sidebar(
     let session_c = session.clone();
     let nav_cb_c = nav_cb.clone();
 
-    let rebuild_sidebar: Rc<RefCell<Option<Rc<dyn Fn()>>>> = Rc::new(RefCell::new(None));
+    let rebuild_sidebar: CallbackCell = Rc::new(RefCell::new(None));
     let rebuild_sidebar_c = rebuild_sidebar.clone();
 
     let rebuild_fn = move || {
@@ -57,16 +58,16 @@ pub fn create_sidebar(
                 item.name.clone()
             };
 
-            add_sidebar_item(
-                &vbox_c,
-                &name,
-                &item.icon,
-                item.path.clone(),
-                &session_c,
-                &nav_cb_c,
-                item.id.clone(),
-                rc_cb.clone(),
-            );
+            add_sidebar_item(SidebarItemArgs {
+                container: &vbox_c,
+                name: &name,
+                icon_name: &item.icon,
+                path: item.path.clone(),
+                session: &session_c,
+                nav_callback: &nav_cb_c,
+                item_id: item.id.clone(),
+                rebuild_cb: rc_cb.clone(),
+            });
         }
     };
 

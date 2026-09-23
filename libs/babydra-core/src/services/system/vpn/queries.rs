@@ -132,7 +132,7 @@ pub fn get_vpn_details(name: &str) -> VpnConnDetails {
                         }
                     }
                     "vpn.service-type" => {
-                        if let Some(last) = val.split('.').last() {
+                        if let Some(last) = val.split('.').next_back() {
                             details.vpn_type = last.to_string();
                         }
                     }

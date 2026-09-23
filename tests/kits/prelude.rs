@@ -9,6 +9,25 @@
 use babydra_ui_kit::components::explore as explore_prelude;
 use babydra_ui_kit::prelude as ui_prelude;
 
+type IconButtonBuilder = fn(&str, i32, &[&str], Option<&str>, fn()) -> gtk4::Button;
+type FolderDialog = fn(
+    std::path::PathBuf,
+    std::rc::Rc<dyn Fn(std::path::PathBuf)>,
+    Option<&gtk4::ApplicationWindow>,
+);
+type RenameDialog = fn(
+    &std::path::Path,
+    std::path::PathBuf,
+    std::rc::Rc<dyn Fn(std::path::PathBuf)>,
+    Option<&gtk4::ApplicationWindow>,
+);
+type GridFileBuilder = fn(
+    usize,
+    &babydra_core::FileEntry,
+    std::rc::Rc<std::cell::RefCell<Vec<std::path::PathBuf>>>,
+    fn(&gtk4::Widget, f64, f64),
+) -> gtk4::FlowBoxChild;
+
 /// Asserts the ui-kit prelude exposes the core builders & helpers.
 ///
 /// Concrete fn pointers pin the exact signatures for stable API; items with
@@ -23,8 +42,7 @@ fn ui_kit_prelude_exposes_components_and_helpers() {
     let _: fn(&str) -> gtk4::Label = ui_prelude::create_title;
 
     // impl-Trait builders — instantiated with concrete callable types.
-    let _: fn(&str, i32, &[&str], Option<&str>, fn()) -> gtk4::Button =
-        ui_prelude::create_icon_button;
+    let _: IconButtonBuilder = ui_prelude::create_icon_button;
     let _: fn(&gtk4::Box, &str, &str) -> ui_prelude::TooltipPopover =
         ui_prelude::TooltipPopover::attach_card_text;
     let _: fn(&str, &str) -> (gtk4::Box, ui_prelude::CustomSwitch) = ui_prelude::create_switch_card;
@@ -59,18 +77,9 @@ fn ui_kit_prelude_exposes_components_and_helpers() {
 #[test]
 fn explore_prelude_exposes_features() {
     // Dialogs — `impl IsA<gtk4::Window>` instantiates to ApplicationWindow.
-    let _: fn(
-        std::path::PathBuf,
-        std::rc::Rc<dyn Fn(std::path::PathBuf)>,
-        Option<&gtk4::ApplicationWindow>,
-    ) = explore_prelude::show_folder_dialog;
+    let _: FolderDialog = explore_prelude::show_folder_dialog;
     let _: fn(&str, &str, Option<&gtk4::ApplicationWindow>) = explore_prelude::show_alert_dialog;
-    let _: fn(
-        &std::path::Path,
-        std::path::PathBuf,
-        std::rc::Rc<dyn Fn(std::path::PathBuf)>,
-        Option<&gtk4::ApplicationWindow>,
-    ) = explore_prelude::show_rename_dialog;
+    let _: RenameDialog = explore_prelude::show_rename_dialog;
     let _: fn(std::vec::Vec<std::path::PathBuf>, Option<&gtk4::ApplicationWindow>) =
         explore_prelude::show_properties;
 
@@ -78,12 +87,7 @@ fn explore_prelude_exposes_features() {
     let _: fn(std::path::PathBuf) -> gtk4::DropTarget = explore_prelude::create_drop_target;
     let _: fn(&gtk4::Widget, gtk4::Box, gtk4::Fixed, gtk4::Box) =
         explore_prelude::wire_rubberband_grid;
-    let _: fn(
-        usize,
-        &babydra_core::FileEntry,
-        std::rc::Rc<std::cell::RefCell<Vec<std::path::PathBuf>>>,
-        fn(&gtk4::Widget, f64, f64),
-    ) -> gtk4::FlowBoxChild = explore_prelude::create_grid_file;
+    let _: GridFileBuilder = explore_prelude::create_grid_file;
 
     // Helpers.
     let _: fn(u64) -> String = explore_prelude::format_size;

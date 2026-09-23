@@ -7,6 +7,7 @@ use std::rc::Rc;
 use super::render::update_wallpaper_badge;
 
 /// Sets up `appearance handlers`.
+#[allow(clippy::too_many_arguments)]
 pub fn setup_appearance(
     main_box: &gtk4::Box,
     preview_pic: &gtk4::Picture,

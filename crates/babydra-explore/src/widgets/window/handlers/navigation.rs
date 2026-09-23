@@ -1,4 +1,5 @@
 use crate::widgets::state::ContentViewHandle;
+use crate::widgets::state::{CallbackCell, PaneNavigationCell};
 use crate::widgets::status_bar::StatusBarWidgets;
 use babydra_core::{ActivePane, FileWatcher, SessionState};
 use gtk4::prelude::*;
@@ -6,33 +7,47 @@ use std::cell::{Cell, RefCell};
 use std::path::PathBuf;
 use std::rc::Rc;
 
+pub type WatcherCell = Rc<RefCell<Option<FileWatcher>>>;
+pub type NavigationSetupResult = (
+    PaneNavigationCell,
+    PaneNavigationCell,
+    (WatcherCell, WatcherCell),
+);
+
+pub struct NavigationSetupArgs {
+    pub session: Rc<RefCell<SessionState>>,
+    pub active_pane: Rc<Cell<ActivePane>>,
+    pub left_content_handle: Rc<ContentViewHandle>,
+    pub right_content_handle: Rc<RefCell<Option<Rc<ContentViewHandle>>>>,
+    pub left_scroll_cell: Rc<RefCell<Option<gtk4::Box>>>,
+    pub right_scroll_cell: Rc<RefCell<Option<gtk4::Box>>>,
+    pub status_bar_widgets_cell: Rc<RefCell<Option<StatusBarWidgets>>>,
+    pub rebuild_tabs_cell: CallbackCell,
+    pub focus_item_cell: Rc<RefCell<Option<PathBuf>>>,
+    pub watch_tx: tokio::sync::mpsc::UnboundedSender<PathBuf>,
+    pub left_rx: tokio::sync::mpsc::UnboundedReceiver<PathBuf>,
+}
+
 /// Sets up the primary navigation closures (`navigate_pane` and `navigate_pane_no_watch`) and registers the left-pane channel watcher.
-pub fn setup_navigation(
-    session: Rc<RefCell<SessionState>>,
-    active_pane: Rc<Cell<ActivePane>>,
-    left_content_handle: Rc<ContentViewHandle>,
-    right_content_handle: Rc<RefCell<Option<Rc<ContentViewHandle>>>>,
-    left_scroll_cell: Rc<RefCell<Option<gtk4::Box>>>,
-    right_scroll_cell: Rc<RefCell<Option<gtk4::Box>>>,
-    status_bar_widgets_cell: Rc<RefCell<Option<StatusBarWidgets>>>,
-    _tab_bar_box: Rc<RefCell<Option<gtk4::Box>>>,
-    _status_bar_lbl: Rc<gtk4::Label>,
-    rebuild_tabs_cell: Rc<RefCell<Option<Rc<dyn Fn()>>>>,
-    focus_item_cell: Rc<RefCell<Option<PathBuf>>>,
-    watch_tx: tokio::sync::mpsc::UnboundedSender<PathBuf>,
-    mut left_rx: tokio::sync::mpsc::UnboundedReceiver<PathBuf>,
-) -> (
-    Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>, // navigate_pane_ref
-    Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>, // navigate_pane_no_watch_ref
-    (
-        Rc<RefCell<Option<FileWatcher>>>,
-        Rc<RefCell<Option<FileWatcher>>>,
-    ),
-) {
-    let navigate_pane_ref = Rc::new(RefCell::new(None::<Rc<dyn Fn(ActivePane, PathBuf)>>));
-    let navigate_pane_no_watch_ref = Rc::new(RefCell::new(None::<Rc<dyn Fn(ActivePane, PathBuf)>>));
-    let left_watcher = Rc::new(RefCell::new(None::<FileWatcher>));
-    let right_watcher = Rc::new(RefCell::new(None::<FileWatcher>));
+pub fn setup_navigation(args: NavigationSetupArgs) -> NavigationSetupResult {
+    let NavigationSetupArgs {
+        session,
+        active_pane,
+        left_content_handle,
+        right_content_handle,
+        left_scroll_cell,
+        right_scroll_cell,
+        status_bar_widgets_cell,
+        rebuild_tabs_cell,
+        focus_item_cell,
+        watch_tx,
+        mut left_rx,
+    } = args;
+
+    let navigate_pane_ref: PaneNavigationCell = Rc::new(RefCell::new(None));
+    let navigate_pane_no_watch_ref: PaneNavigationCell = Rc::new(RefCell::new(None));
+    let left_watcher: WatcherCell = Rc::new(RefCell::new(None));
+    let right_watcher: WatcherCell = Rc::new(RefCell::new(None));
 
     // Define navigate_pane_no_watch closure
     {

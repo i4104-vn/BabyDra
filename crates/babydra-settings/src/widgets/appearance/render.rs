@@ -2,16 +2,7 @@
 
 use gtk4::prelude::*;
 
-/// Builds the appearance settings page UI.
-pub fn build_appearance_ui(
-    current_wallpaper_path: &str,
-    _current_greeter_path: &str,
-    is_dark: bool,
-    gtk_themes: &[String],
-    icon_themes: &[String],
-    cursor_themes: &[String],
-    cursor_sizes: &[u32],
-) -> (
+pub type AppearanceUiWidgets = (
     gtk4::Box,
     gtk4::Picture,
     gtk4::Label,
@@ -27,7 +18,18 @@ pub fn build_appearance_ui(
     gtk4::Box,
     gtk4::Picture,
     gtk4::Button,
-) {
+);
+
+/// Builds the appearance settings page UI.
+pub fn build_appearance_ui(
+    current_wallpaper_path: &str,
+    _current_greeter_path: &str,
+    is_dark: bool,
+    gtk_themes: &[String],
+    icon_themes: &[String],
+    cursor_themes: &[String],
+    cursor_sizes: &[u32],
+) -> AppearanceUiWidgets {
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 16);
     main_box.set_hexpand(true);
     main_box.set_vexpand(true);

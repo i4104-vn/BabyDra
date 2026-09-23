@@ -9,7 +9,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 thread_local! {
-    static ACTIVE_TRAY_POPOVER: RefCell<Option<gtk4::Popover>> = RefCell::new(None);
+    static ACTIVE_TRAY_POPOVER: RefCell<Option<gtk4::Popover>> = const { RefCell::new(None) };
 }
 
 /// Closes and unparents the currently active tray context menu popover if one exists.

@@ -38,10 +38,13 @@ impl TooltipRow {
     }
 }
 
+type SuppressCallback = Rc<dyn Fn() -> bool>;
+type SuppressFnCell = Rc<RefCell<Option<SuppressCallback>>>;
+
 #[derive(Clone)]
 pub struct TooltipPopover {
     pub popover: gtk4::Popover,
-    suppress_fn: Rc<RefCell<Option<Rc<dyn Fn() -> bool>>>>,
+    suppress_fn: SuppressFnCell,
 }
 
 impl Deref for TooltipPopover {

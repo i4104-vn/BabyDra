@@ -60,7 +60,7 @@ pub fn scan_desktop_apps() -> Vec<DesktopApp> {
         }
     }
 
-    apps.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+    apps.sort_by_key(|a| a.name.to_lowercase());
     apps.dedup_by(|a, b| a.name.to_lowercase() == b.name.to_lowercase());
 
     apps
@@ -82,14 +82,10 @@ pub fn parse_desktop_file(path: &Path) -> Option<DesktopApp> {
     let mut categories = Vec::new();
     let mut mime_types = Vec::new();
 
-    for line in reader.lines().flatten() {
+    for line in reader.lines().map_while(Result::ok) {
         let line = line.trim();
         if line.starts_with('[') && line.ends_with(']') {
-            if line == "[Desktop Entry]" {
-                in_desktop_entry = true;
-            } else {
-                in_desktop_entry = false;
-            }
+            in_desktop_entry = line == "[Desktop Entry]";
             continue;
         }
 

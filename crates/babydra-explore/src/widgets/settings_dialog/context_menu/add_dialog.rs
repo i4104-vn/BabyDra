@@ -9,7 +9,7 @@ use std::rc::Rc;
 /// Displays the modal form used to add a custom context-menu option.
 pub(super) fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
     let dialog = Window::builder()
-        .title(&trans("explore.settings_add_option"))
+        .title(trans("explore.settings_add_option"))
         .transient_for(parent)
         .modal(true)
         .resizable(false)
@@ -27,7 +27,7 @@ pub(super) fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
     dialog.set_child(Some(&form));
 
     let title = Label::builder()
-        .label(&trans("explore.settings_add_option"))
+        .label(trans("explore.settings_add_option"))
         .halign(Align::Start)
         .build();
     title.add_css_class("settings-row-title");
@@ -40,7 +40,7 @@ pub(super) fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
 
     let name_label = field_label("explore.settings_option_name");
     let name_entry = Entry::builder()
-        .placeholder_text(&trans("explore.settings_placeholder_name"))
+        .placeholder_text(trans("explore.settings_placeholder_name"))
         .hexpand(true)
         .css_classes(vec![
             "small-entry".to_string(),
@@ -55,7 +55,7 @@ pub(super) fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
 
     let command_label = field_label("explore.settings_option_command");
     let command_entry = Entry::builder()
-        .placeholder_text(&trans("explore.settings_placeholder_command"))
+        .placeholder_text(trans("explore.settings_placeholder_command"))
         .hexpand(true)
         .css_classes(vec![
             "small-entry".to_string(),
@@ -95,7 +95,7 @@ pub(super) fn show_add_option_dialog(parent: &Window, listbox: &ListBox) {
 
         let dialog = dialog_to_close.clone();
         babydra_ui_kit::ui::animation::genie_out(
-            &form_to_close.upcast_ref(),
+            form_to_close.upcast_ref(),
             420,
             280,
             200,

@@ -1,5 +1,6 @@
 //! Tab bar widget and its window integration (build, rebuild, navigation wiring).
 
+use crate::widgets::state::{CallbackCell, PaneNavigationCell};
 use babydra_core::{ActivePane, SessionState};
 use gtk4::prelude::*;
 use gtk4::{Align, Box, Label, Orientation};
@@ -116,9 +117,9 @@ pub fn rebuild_tab_bar(
 pub fn setup_tab_bar(
     vbox: &gtk4::Box,
     session: Rc<RefCell<SessionState>>,
-    nav: Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>,
+    nav: PaneNavigationCell,
     tab_bar_box: Rc<RefCell<Option<gtk4::Box>>>,
-    rebuild_tabs_cell: Rc<RefCell<Option<Rc<dyn Fn()>>>>,
+    rebuild_tabs_cell: CallbackCell,
 ) -> Rc<dyn Fn()> {
     let session_c = session.clone();
     let nav_c = nav.clone();

@@ -2,19 +2,19 @@ use babydra_core::FileEntry;
 use gtk4::prelude::*;
 use gtk4::FlowBoxChild;
 use std::cell::RefCell;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 /// Creates an explore-specific flowbox child grid cell representing a single file/folder.
 pub fn create_flow_child(
     idx: usize,
     entry: &FileEntry,
-    current_path: &PathBuf,
+    current_path: &Path,
     nav_callback: &Rc<dyn Fn(PathBuf)>,
     selected_paths: Rc<RefCell<Vec<PathBuf>>>,
 ) -> FlowBoxChild {
     let target_entry = entry.clone();
-    let cp = current_path.clone();
+    let cp = current_path.to_path_buf();
     let nav = nav_callback.clone();
 
     let sel_paths = selected_paths.clone();

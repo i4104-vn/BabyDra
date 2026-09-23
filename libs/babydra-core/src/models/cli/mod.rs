@@ -44,6 +44,7 @@ impl PageId {
         }
     }
 
+    #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Self {
         match s {
             "wifi" => PageId::Wifi,
@@ -64,6 +65,14 @@ impl PageId {
             "general" => PageId::General,
             _ => PageId::General,
         }
+    }
+}
+
+impl std::str::FromStr for PageId {
+    type Err = std::convert::Infallible;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Self::from_str(s))
     }
 }
 

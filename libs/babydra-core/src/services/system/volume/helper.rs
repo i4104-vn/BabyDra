@@ -26,13 +26,10 @@ pub fn check_default_node(node_id: i64, is_source: bool) -> bool {
 
             if in_target_section {
                 let clean_line = line
-                    .replace('│', "")
-                    .replace('├', "")
-                    .replace('└', "")
-                    .replace('─', "");
+                    .replace(['│', '├', '└', '─'], "");
                 let clean_trimmed = clean_line.trim();
-                if clean_trimmed.starts_with('*') {
-                    let parts: Vec<&str> = clean_trimmed[1..].trim().split('.').collect();
+                if let Some(stripped) = clean_trimmed.strip_prefix('*') {
+                    let parts: Vec<&str> = stripped.trim().split('.').collect();
                     if !parts.is_empty() {
                         if let Ok(id) = parts[0].trim().parse::<i64>() {
                             if id == node_id {
@@ -88,10 +85,7 @@ pub fn get_wpctl_devices(is_source: bool) -> Vec<AudioDevice> {
             }
 
             let clean_line = line
-                .replace('│', "")
-                .replace('├', "")
-                .replace('└', "")
-                .replace('─', "");
+                .replace(['│', '├', '└', '─'], "");
             let mut clean_trimmed = clean_line.trim().to_string();
             if clean_trimmed.is_empty() {
                 continue;

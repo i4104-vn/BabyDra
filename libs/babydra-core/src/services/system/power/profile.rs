@@ -35,11 +35,10 @@ pub fn set_perf_profile(profile: PerformanceProfile) -> CoreResult<()> {
         for entry in entries.flatten() {
             let path = entry.path();
             let gov_path = path.join("cpufreq/scaling_governor");
-            if gov_path.exists() {
-                if std::fs::write(&gov_path, governor).is_ok() {
+            if gov_path.exists()
+                && std::fs::write(&gov_path, governor).is_ok() {
                     writen_count += 1;
                 }
-            }
 
             let epp_path = path.join("cpufreq/energy_performance_preference");
             if epp_path.exists() {

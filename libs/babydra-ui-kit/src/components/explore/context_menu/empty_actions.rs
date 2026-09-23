@@ -68,7 +68,7 @@ pub fn show_for_empty(
     let clipboard_data = CLIPBOARD.with(|cb| cb.borrow().clone());
     let has_paste_items = clipboard_data
         .as_ref()
-        .map_or(false, |(sources, _)| !sources.is_empty());
+        .is_some_and(|(sources, _)| !sources.is_empty());
 
     if has_paste_items {
         let dest_dir = current_path.clone();

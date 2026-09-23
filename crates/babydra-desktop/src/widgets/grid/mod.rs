@@ -71,10 +71,12 @@ fn make_refresh_positions_cb(
     })
 }
 
+pub type DesktopGridComponents = (Fixed, Rc<RefCell<DesktopState>>, Rc<dyn Fn()>);
+
 /// Builds the desktop grid fixed layout, attaching gestures, keyboard shortcuts, and file watching.
 pub fn create_desktop_grid(
     parent_window: &gtk4::ApplicationWindow,
-) -> (Fixed, Rc<RefCell<DesktopState>>, Rc<dyn Fn()>) {
+) -> DesktopGridComponents {
     let fixed = Fixed::new();
     fixed.set_hexpand(true);
     fixed.set_vexpand(true);

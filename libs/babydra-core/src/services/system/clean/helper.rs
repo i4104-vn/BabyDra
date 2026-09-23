@@ -17,10 +17,8 @@ pub fn get_dir_size_native<P: AsRef<Path>>(path: P) -> u64 {
         let file_type = metadata.file_type();
         if file_type.is_dir() {
             if let Ok(entries) = fs::read_dir(&path) {
-                for entry in entries {
-                    if let Ok(entry) = entry {
-                        total += get_dir_size_native(entry.path());
-                    }
+                for entry in entries.flatten() {
+                    total += get_dir_size_native(entry.path());
                 }
             }
         } else if file_type.is_file() {
@@ -71,16 +69,14 @@ pub fn get_cleanable_size_recursive<P: AsRef<Path>>(path: P) -> u64 {
     if path_ref.is_dir() {
         if is_dir_writable(path_ref) {
             if let Ok(entries) = fs::read_dir(path_ref) {
-                for entry in entries {
-                    if let Ok(entry) = entry {
-                        let sub_path = entry.path();
-                        if sub_path.is_file() {
-                            if let Ok(meta) = sub_path.metadata() {
-                                size += meta.len();
-                            }
-                        } else if sub_path.is_dir() {
-                            size += get_cleanable_size_recursive(&sub_path);
+                for entry in entries.flatten() {
+                    let sub_path = entry.path();
+                    if sub_path.is_file() {
+                        if let Ok(meta) = sub_path.metadata() {
+                            size += meta.len();
                         }
+                    } else if sub_path.is_dir() {
+                        size += get_cleanable_size_recursive(&sub_path);
                     }
                 }
             }
@@ -108,24 +104,22 @@ pub fn clean_path_recursive<P: AsRef<Path>>(path: P) -> u64 {
         if is_dir_writable(path_ref) {
             let mut all_sub_deleted = true;
             if let Ok(entries) = fs::read_dir(path_ref) {
-                for entry in entries {
-                    if let Ok(entry) = entry {
-                        let sub_path = entry.path();
-                        if sub_path.is_file() {
-                            if let Ok(meta) = sub_path.metadata() {
-                                let len = meta.len();
-                                if fs::remove_file(&sub_path).is_ok() {
-                                    freed += len;
-                                } else {
-                                    all_sub_deleted = false;
-                                }
-                            }
-                        } else if sub_path.is_dir() {
-                            let sub_freed = clean_path_recursive(&sub_path);
-                            freed += sub_freed;
-                            if sub_path.exists() {
+                for entry in entries.flatten() {
+                    let sub_path = entry.path();
+                    if sub_path.is_file() {
+                        if let Ok(meta) = sub_path.metadata() {
+                            let len = meta.len();
+                            if fs::remove_file(&sub_path).is_ok() {
+                                freed += len;
+                            } else {
                                 all_sub_deleted = false;
                             }
+                        }
+                    } else if sub_path.is_dir() {
+                        let sub_freed = clean_path_recursive(&sub_path);
+                        freed += sub_freed;
+                        if sub_path.exists() {
+                            all_sub_deleted = false;
                         }
                     }
                 }

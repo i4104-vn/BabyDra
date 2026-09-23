@@ -7,9 +7,8 @@ use std::time::Duration;
 static BATTERY_SENDER: Mutex<Option<mpsc::Sender<BatteryInfo>>> = Mutex::new(None);
 
 fn collect_battery_snapshot() -> Option<BatteryInfo> {
-    get_battery_info().map(|info| {
-        apply_battery_saver(&info);
-        info
+    get_battery_info().inspect(|info| {
+        apply_battery_saver(info);
     })
 }
 

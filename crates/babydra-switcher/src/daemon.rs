@@ -19,16 +19,14 @@ pub fn spawn_socket(socket_path: &str, tx: Sender<DaemonMessage>) {
 
             match UnixListener::bind(&socket_path) {
                 Ok(listener) => {
-                    for stream in listener.incoming() {
-                        if let Ok(mut stream) = stream {
-                            let mut buf = [0u8; 8];
-                            if let Ok(n) = stream.read(&mut buf) {
-                                let msg = &buf[..n];
-                                if msg == b"show" || msg == b"next" {
-                                    let _ = tx.send(DaemonMessage::ShowOrNext);
-                                } else if msg == b"hide" {
-                                    let _ = tx.send(DaemonMessage::Hide);
-                                }
+                    for mut stream in listener.incoming().flatten() {
+                        let mut buf = [0u8; 8];
+                        if let Ok(n) = stream.read(&mut buf) {
+                            let msg = &buf[..n];
+                            if msg == b"show" || msg == b"next" {
+                                let _ = tx.send(DaemonMessage::ShowOrNext);
+                            } else if msg == b"hide" {
+                                let _ = tx.send(DaemonMessage::Hide);
                             }
                         }
                     }

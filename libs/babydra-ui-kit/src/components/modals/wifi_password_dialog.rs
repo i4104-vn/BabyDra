@@ -22,12 +22,18 @@ pub struct WifiPasswordDialog {
     pub connect_btn: Button,
 }
 
+impl Default for WifiPasswordDialog {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl WifiPasswordDialog {
     pub fn new() -> Self {
         let builder = ModernDialogBuilder::new(420)
             .with_badge("wifi", BadgeVariant::Primary)
-            .with_title(&trans("wifi.connect_to").replace("{}", "Wi-Fi"))
-            .with_subtitle(&trans("wifi.requires_password"))
+            .with_title(trans("wifi.connect_to").replace("{}", "Wi-Fi"))
+            .with_subtitle(trans("wifi.requires_password"))
             .with_card_spacing(16);
 
         let dialog = builder.build();

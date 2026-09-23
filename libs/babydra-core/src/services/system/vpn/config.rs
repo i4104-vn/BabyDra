@@ -21,8 +21,10 @@ pub fn copy_vpn_config(src_path: &str) -> CoreResult<String> {
 
 /// Parses `VPN config file`.
 pub fn parse_vpn_config(path: &str) -> VpnConnDetails {
-    let mut details = VpnConnDetails::default();
-    details.config_file = Some(path.to_string());
+    let mut details = VpnConnDetails {
+        config_file: Some(path.to_string()),
+        ..Default::default()
+    };
 
     let path_obj = std::path::Path::new(path);
     if let Some(stem) = path_obj.file_stem().and_then(|s| s.to_str()) {
@@ -66,14 +68,13 @@ pub fn parse_vpn_config(path: &str) -> VpnConnDetails {
             }
         }
 
-        if details.vpn_type == "wireguard" {
-            if trimmed.to_lowercase().starts_with("endpoint") {
+        if details.vpn_type == "wireguard"
+            && trimmed.to_lowercase().starts_with("endpoint") {
                 let parts: Vec<&str> = trimmed.split('=').map(|s| s.trim()).collect();
                 if parts.len() >= 2 {
                     details.gateway = parts[1].to_string();
                 }
             }
-        }
     }
 
     details
@@ -99,11 +100,7 @@ pub fn import_vpn_profile(path: &str) -> bool {
         path,
     ]) {
         true
-    } else if run_cmd_bool(&["nmcli", "connection", "import", "file", path]) {
-        true
-    } else {
-        false
-    };
+    } else { run_cmd_bool(&["nmcli", "connection", "import", "file", path]) };
 
     if imported && vpn_type == "openvpn" {
         if let Some(filename) = std::path::Path::new(path)

@@ -225,11 +225,10 @@ fn handle_event(
         return;
     }
 
-    if !pressed {
-        if consumed.remove(&key) {
+    if !pressed
+        && consumed.remove(&key) {
             return;
         }
-    }
 
     emit_event(virtual_device, event);
 }

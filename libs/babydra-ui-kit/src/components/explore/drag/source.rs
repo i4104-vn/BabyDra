@@ -2,14 +2,14 @@ use babydra_core::load_cropped_square;
 use gtk4::gdk::FileList;
 use gtk4::prelude::*;
 use std::cell::Cell;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 /// Creates a DragSource. `get_targets` is a closure called at drag-begin time to
 /// collect the paths that should be dragged. Using a closure lets callers snapshot
 /// selection state before GTK4's FlowBox/ListBox automatically deselects items.
 pub fn create_drag_source(
-    preview_path: &PathBuf,
+    preview_path: &Path,
     icon_name: &str,
     is_dragging: Rc<Cell<bool>>,
     get_targets: impl Fn() -> Vec<PathBuf> + 'static,
@@ -38,7 +38,7 @@ pub fn create_drag_source(
 
         let gio_files: Vec<gtk4::gio::File> = targets
             .iter()
-            .map(|p| gtk4::gio::File::for_path(p))
+            .map(gtk4::gio::File::for_path)
             .collect();
 
         // 1. GdkFileList provider for GTK4 apps

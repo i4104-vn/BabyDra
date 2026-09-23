@@ -42,7 +42,7 @@ static EN_MAP: OnceLock<HashMap<String, String>> = OnceLock::new();
 static VI_MAP: OnceLock<HashMap<String, String>> = OnceLock::new();
 
 thread_local! {
-    static LOCALE_MONITOR: std::cell::RefCell<Option<gio::FileMonitor>> = std::cell::RefCell::new(None);
+    static LOCALE_MONITOR: std::cell::RefCell<Option<gio::FileMonitor>> = const { std::cell::RefCell::new(None) };
 }
 
 /// Retrieves the current active system locale ("vi" or "en").

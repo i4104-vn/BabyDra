@@ -54,7 +54,7 @@ pub fn build_footer_layout() -> (
 
     let uptime = babydra_core::get_formatted_uptime();
     let uptime_label = gtk4::Label::builder()
-        .label(&format!("Up: {}", uptime))
+        .label(format!("Up: {}", uptime))
         .halign(gtk4::Align::Start)
         .ellipsize(gtk4::pango::EllipsizeMode::End)
         .max_width_chars(14)

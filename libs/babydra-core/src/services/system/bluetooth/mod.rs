@@ -5,6 +5,10 @@ use std::process::Command;
 use zbus::blocking::Connection;
 use zbus::zvariant::{OwnedObjectPath, OwnedValue, Value};
 
+type PropertyMap = HashMap<String, OwnedValue>;
+type InterfaceMap = HashMap<String, PropertyMap>;
+type ManagedObjectsMap = HashMap<OwnedObjectPath, InterfaceMap>;
+
 #[zbus::proxy(
     gen_blocking = true,
     default_service = "org.bluez",
@@ -14,7 +18,7 @@ use zbus::zvariant::{OwnedObjectPath, OwnedValue, Value};
 trait BluezObjectManager {
     fn get_managed_objects(
         &self,
-    ) -> zbus::Result<HashMap<OwnedObjectPath, HashMap<String, HashMap<String, OwnedValue>>>>;
+    ) -> zbus::Result<ManagedObjectsMap>;
 }
 
 /// Represents a connected Bluetooth device with optional battery percentage.
@@ -116,7 +120,7 @@ pub fn set_bt_enabled(enabled: bool) {
     let bt_arg = if enabled { "power on" } else { "power off" };
     let _ = Command::new("sh")
         .arg("-c")
-        .arg(&format!("bluetoothctl --timeout 1 {}", bt_arg))
+        .arg(format!("bluetoothctl --timeout 1 {}", bt_arg))
         .spawn();
 }
 

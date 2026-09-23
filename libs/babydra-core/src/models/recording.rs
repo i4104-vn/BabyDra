@@ -5,8 +5,10 @@ use std::path::PathBuf;
 
 /// Recording capture mode.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Default)]
 pub enum RecordingMode {
     /// Captures the default / active screen entirely.
+    #[default]
     Fullscreen,
     /// Captures a specific display output by name (e.g. "HDMI-A-1").
     SingleOutput(String),
@@ -21,11 +23,6 @@ pub enum RecordingMode {
     Window(String),
 }
 
-impl Default for RecordingMode {
-    fn default() -> Self {
-        Self::Fullscreen
-    }
-}
 
 /// Screen recording configuration parameters.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

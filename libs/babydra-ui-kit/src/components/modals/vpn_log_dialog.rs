@@ -20,11 +20,17 @@ pub struct VpnLogDialog {
     cleared_at: Rc<RefCell<Option<String>>>,
 }
 
+impl Default for VpnLogDialog {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl VpnLogDialog {
     pub fn new() -> Self {
         let builder = ModernDialogBuilder::new(560)
             .with_badge("terminal", BadgeVariant::Primary)
-            .with_title(&trans("vpn.logs_title"))
+            .with_title(trans("vpn.logs_title"))
             .with_card_spacing(16);
 
         let dialog = builder.build();
@@ -175,18 +181,18 @@ impl VpnLogDialog {
                     let rest = &line[idx..];
                     buffer.insert_with_tags_by_name(&mut iter, time_part, &["log_time"]);
 
-                    if rest.starts_with(" [WARN]") {
+                    if let Some(msg) = rest.strip_prefix(" [WARN]") {
                         buffer.insert_with_tags_by_name(&mut iter, " [WARN]", &["log_warn"]);
-                        buffer.insert(&mut iter, &rest[7..]);
-                    } else if rest.starts_with(" [ERROR]") {
+                        buffer.insert(&mut iter, msg);
+                    } else if let Some(msg) = rest.strip_prefix(" [ERROR]") {
                         buffer.insert_with_tags_by_name(&mut iter, " [ERROR]", &["log_error"]);
-                        buffer.insert_with_tags_by_name(&mut iter, &rest[8..], &["log_error"]);
-                    } else if rest.starts_with(" [INFO]") {
+                        buffer.insert_with_tags_by_name(&mut iter, msg, &["log_error"]);
+                    } else if let Some(msg) = rest.strip_prefix(" [INFO]") {
                         buffer.insert_with_tags_by_name(&mut iter, " [INFO]", &["log_info"]);
-                        buffer.insert(&mut iter, &rest[7..]);
-                    } else if rest.starts_with(" [LOG]") {
+                        buffer.insert(&mut iter, msg);
+                    } else if let Some(msg) = rest.strip_prefix(" [LOG]") {
                         buffer.insert_with_tags_by_name(&mut iter, " [LOG]", &["log_normal"]);
-                        buffer.insert(&mut iter, &rest[6..]);
+                        buffer.insert(&mut iter, msg);
                     } else {
                         buffer.insert(&mut iter, rest);
                     }

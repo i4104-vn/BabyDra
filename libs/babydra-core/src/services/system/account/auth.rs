@@ -57,6 +57,10 @@ extern "C" {
 }
 
 /// C-compatible callback conversation handler that supplies the user's password to PAM prompts.
+///
+/// # Safety
+/// The caller must ensure `msg`, `resp`, and `appdata_ptr` point to valid memory according
+/// to the PAM conversation function specification, and `appdata_ptr` is a valid null-terminated C string.
 pub unsafe extern "C" fn pam_conversation_fn(
     num_msg: c_int,
     msg: *mut *mut pam_message,

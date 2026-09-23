@@ -25,7 +25,7 @@ pub fn get_group_name(entry: &FileEntry, sort_mode: &str) -> String {
                 )
             } else {
                 let diff = (now_naive - date_naive).num_days();
-                if diff >= 2 && diff <= 7 {
+                if (2..=7).contains(&diff) {
                     let weekday = match datetime.format("%A").to_string().as_str() {
                         "Monday" => trans("weekday.mon"),
                         "Tuesday" => trans("weekday.tue"),

@@ -1,3 +1,4 @@
+use crate::widgets::state::{Callback, CallbackCell, PaneNavigationCell};
 use crate::widgets::status_bar::StatusBarWidgets;
 use babydra_core::{ActivePane, SessionState};
 use gtk4::prelude::*;
@@ -47,7 +48,7 @@ pub fn setup_resize_handler(
 /// Only panes whose current directory is affected by the changed path are reloaded.
 pub fn setup_file_watcher(
     session: Rc<RefCell<SessionState>>,
-    _navigate_pane_no_watch_ref: Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>,
+    _navigate_pane_no_watch_ref: PaneNavigationCell,
     _active_pane: Rc<Cell<ActivePane>>,
     left_content_handle: Rc<crate::widgets::state::ContentViewHandle>,
     right_content_handle: Rc<RefCell<Option<Rc<crate::widgets::state::ContentViewHandle>>>>,
@@ -136,7 +137,7 @@ pub fn setup_file_watcher(
 
 /// Connects the D-Bus navigation receiver loop and spawns the DBus listener service.
 pub fn setup_dbus_receiver(
-    navigate_pane_no_watch_ref: Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>,
+    navigate_pane_no_watch_ref: PaneNavigationCell,
     active_pane: Rc<Cell<ActivePane>>,
     focus_item_cell: Rc<RefCell<Option<PathBuf>>>,
     window: gtk4::ApplicationWindow,
@@ -162,19 +163,34 @@ pub fn setup_dbus_receiver(
     });
 }
 
+pub struct StatusWiringArgs {
+    pub status_bar_widgets_cell: Rc<RefCell<Option<StatusBarWidgets>>>,
+    pub toggle_preview_rc: Callback,
+    pub view_mode_callback_rc: Rc<dyn Fn(String)>,
+    pub sort_callback_rc: Rc<dyn Fn(String)>,
+    pub parent_win: gtk4::Window,
+    pub rebuild_shortcuts_cell: CallbackCell,
+    pub session: Rc<RefCell<SessionState>>,
+    pub nav_c: PaneNavigationCell,
+    pub act_c: Rc<Cell<ActivePane>>,
+    pub preview_vc: Rc<Cell<bool>>,
+}
+
 /// Connects status bar button signals (view modes, sort dropdown, toggle preview, settings dialog).
-pub fn setup_status_wiring(
-    status_bar_widgets_cell: Rc<RefCell<Option<StatusBarWidgets>>>,
-    toggle_preview_rc: Rc<dyn Fn()>,
-    view_mode_callback_rc: Rc<dyn Fn(String)>,
-    sort_callback_rc: Rc<dyn Fn(String)>,
-    parent_win: gtk4::Window,
-    rebuild_shortcuts_cell: Rc<RefCell<Option<Rc<dyn Fn()>>>>,
-    session: Rc<RefCell<SessionState>>,
-    nav_c: Rc<RefCell<Option<Rc<dyn Fn(ActivePane, PathBuf)>>>>,
-    act_c: Rc<Cell<ActivePane>>,
-    preview_vc: Rc<Cell<bool>>,
-) {
+pub fn setup_status_wiring(args: StatusWiringArgs) {
+    let StatusWiringArgs {
+        status_bar_widgets_cell,
+        toggle_preview_rc,
+        view_mode_callback_rc,
+        sort_callback_rc,
+        parent_win,
+        rebuild_shortcuts_cell,
+        session,
+        nav_c,
+        act_c,
+        preview_vc,
+    } = args;
+
     if let Some(ref sw) = *status_bar_widgets_cell.borrow() {
         let toggle_p = toggle_preview_rc.clone();
         sw.btn_toggle_preview.connect_clicked(move |_| {
@@ -270,26 +286,43 @@ pub fn setup_status_wiring(
             sw.btn_view_icons.add_css_class("status-bar-btn-active");
             sw.btn_view_list.remove_css_class("status-bar-btn-active");
         }
-    }
+    };
+}
+
+pub struct ShortcutCallbacks {
+    pub toggle_split_view_rc: Callback,
+    pub toggle_preview_rc: Callback,
+    pub toggle_hidden_rc: Callback,
+    pub cut_cb_rc: Callback,
+    pub copy_cb_rc: Callback,
+    pub paste_cb_rc: Callback,
+    pub undo_cb_rc: Callback,
+    pub delete_cb_rc: Callback,
+    pub permanent_delete_cb_rc: Callback,
+    pub select_all_cb_rc: Callback,
+    pub new_tab_cb_rc: Callback,
+    pub close_tab_cb_rc: Callback,
+    pub rebuild_shortcuts_cell: CallbackCell,
 }
 
 /// Connects global application key shortcuts and returns a rebuild callback.
-pub fn setup_shortcuts(
-    window: &gtk4::ApplicationWindow,
-    toggle_split_view_rc: Rc<dyn Fn()>,
-    toggle_preview_rc: Rc<dyn Fn()>,
-    toggle_hidden_rc: Rc<dyn Fn()>,
-    cut_cb_rc: Rc<dyn Fn()>,
-    copy_cb_rc: Rc<dyn Fn()>,
-    paste_cb_rc: Rc<dyn Fn()>,
-    undo_cb_rc: Rc<dyn Fn()>,
-    delete_cb_rc: Rc<dyn Fn()>,
-    permanent_delete_cb_rc: Rc<dyn Fn()>,
-    select_all_cb_rc: Rc<dyn Fn()>,
-    new_tab_cb_rc: Rc<dyn Fn()>,
-    close_tab_cb_rc: Rc<dyn Fn()>,
-    rebuild_shortcuts_cell: Rc<RefCell<Option<Rc<dyn Fn()>>>>,
-) -> Rc<dyn Fn()> {
+pub fn setup_shortcuts(window: &gtk4::ApplicationWindow, callbacks: ShortcutCallbacks) -> Callback {
+    let ShortcutCallbacks {
+        toggle_split_view_rc,
+        toggle_preview_rc,
+        toggle_hidden_rc,
+        cut_cb_rc,
+        copy_cb_rc,
+        paste_cb_rc,
+        undo_cb_rc,
+        delete_cb_rc,
+        permanent_delete_cb_rc,
+        select_all_cb_rc,
+        new_tab_cb_rc,
+        close_tab_cb_rc,
+        rebuild_shortcuts_cell,
+    } = callbacks;
+
     let window = window.clone();
     let current_key_controller = Rc::new(RefCell::new(None::<gtk4::EventControllerKey>));
     let current_controller = current_key_controller.clone();
@@ -306,7 +339,7 @@ pub fn setup_shortcuts(
             let shortcut_str = settings.get_keybind(action);
             if let Some((keyval, modifiers)) = parse_shortcut(&shortcut_str) {
                 shortcuts.push(KeyShortcut {
-                    keyval: keyval.clone(),
+                    keyval,
                     modifiers,
                     callback: cb.clone(),
                 });

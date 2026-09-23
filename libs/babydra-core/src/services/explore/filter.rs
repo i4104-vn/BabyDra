@@ -16,16 +16,12 @@ pub fn filter_entries(entries: &[FileEntry], query: &str) -> Vec<FileEntry> {
         .to_vec()
         .into_par_iter()
         .filter_map(|entry| {
-            if let Some(score) = matcher.fuzzy_match(&entry.display_name, query) {
-                Some((score, entry))
-            } else {
-                None
-            }
+            matcher.fuzzy_match(&entry.display_name, query).map(|score| (score, entry))
         })
         .collect();
 
     // Sort by score descending (highest score first)
-    scored_entries.sort_by(|a, b| b.0.cmp(&a.0));
+    scored_entries.sort_by_key(|a| std::cmp::Reverse(a.0));
 
     scored_entries.into_iter().map(|(_, e)| e).collect()
 }

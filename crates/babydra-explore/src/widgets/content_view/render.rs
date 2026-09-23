@@ -157,7 +157,7 @@ pub fn build_content_view() -> ContentViewWidgets {
     pane_nav_row.append(&address_wrap);
 
     let search = Entry::builder()
-        .placeholder_text(&trans("explore.search_placeholder"))
+        .placeholder_text(trans("explore.search_placeholder"))
         .primary_icon_name("system-search-symbolic")
         .css_classes(vec!["search-entry".to_string()])
         .build();
@@ -273,43 +273,44 @@ fn update_content_internal(handle: &ContentViewHandle, silent: bool) {
     glib::spawn_future_local(async move {
         if current_mode == "icons" {
             if sort_mode == "auto" {
-                super::grid_renderer::render_flat_grid(
-                    &handle_c,
-                    &widgets,
-                    &entries,
-                    &current_path,
-                    &start_path,
+                super::grid_renderer::render_flat_grid(super::grid_renderer::GridRenderArgs {
+                    handle_c: &handle_c,
+                    widgets: &widgets,
+                    entries: &entries,
+                    current_path: &current_path,
+                    start_path: &start_path,
                     gen,
-                    &nav_callback,
+                    sort_mode: &sort_mode,
+                    nav_callback: &nav_callback,
                     selected_paths,
-                )
+                })
                 .await;
             } else {
-                super::grid_renderer::render_grouped_grid(
-                    &handle_c,
-                    &widgets,
-                    &entries,
-                    &current_path,
-                    &start_path,
+                super::grid_renderer::render_grouped_grid(super::grid_renderer::GridRenderArgs {
+                    handle_c: &handle_c,
+                    widgets: &widgets,
+                    entries: &entries,
+                    current_path: &current_path,
+                    start_path: &start_path,
                     gen,
-                    &sort_mode,
-                    &nav_callback,
+                    sort_mode: &sort_mode,
+                    nav_callback: &nav_callback,
                     selected_paths,
-                )
+                })
                 .await;
             }
         } else {
-            super::list_renderer::render_list_view(
-                &handle_c,
-                &widgets,
-                &entries,
-                &current_path,
-                &start_path,
+            super::list_renderer::render_list_view(super::list_renderer::ListRenderArgs {
+                handle_c: &handle_c,
+                widgets: &widgets,
+                entries: &entries,
+                current_path: &current_path,
+                start_path: &start_path,
                 gen,
-                &sort_mode,
-                &nav_callback,
+                sort_mode: &sort_mode,
+                nav_callback: &nav_callback,
                 selected_paths,
-            )
+            })
             .await;
         }
 

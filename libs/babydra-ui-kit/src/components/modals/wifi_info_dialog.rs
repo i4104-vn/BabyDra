@@ -18,11 +18,17 @@ pub struct WifiInfoDialog {
     pub forget_btn: Button,
 }
 
+impl Default for WifiInfoDialog {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl WifiInfoDialog {
     pub fn new() -> Self {
         let builder = ModernDialogBuilder::new(440)
             .with_badge("wifi", BadgeVariant::Primary)
-            .with_title(&trans("wifi.details"))
+            .with_title(trans("wifi.details"))
             .with_card_spacing(16);
 
         // Custom header with status badge

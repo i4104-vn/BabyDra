@@ -158,10 +158,12 @@ mod tests {
 
     #[test]
     fn test_notepad_settings_serialization() {
-        let mut def = NotepadSettings::default();
-        def.font_size = 18;
-        def.auto_save = true;
-        def.font_family = "JetBrains Mono".to_string();
+        let def = NotepadSettings {
+            font_size: 18,
+            auto_save: true,
+            font_family: "JetBrains Mono".to_string(),
+            ..Default::default()
+        };
 
         let json = serde_json::to_string(&def).expect("serialization must succeed");
         let parsed: NotepadSettings =

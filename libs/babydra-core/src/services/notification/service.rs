@@ -10,9 +10,9 @@ pub use crate::models::{ActiveNotification, NotificationMsg};
 
 thread_local! {
     /// Holds reference to the active single dynamic popup notification.
-    pub static SHARED_NOTIFICATION: RefCell<Option<ActiveNotification>> = RefCell::new(None);
+    pub static SHARED_NOTIFICATION: RefCell<Option<ActiveNotification>> = const { RefCell::new(None) };
     /// Holds rolling history of past system notifications.
-    pub static HISTORICAL_NOTIFICATIONS: RefCell<std::collections::VecDeque<ActiveNotification>> = RefCell::new(std::collections::VecDeque::new());
+    pub static HISTORICAL_NOTIFICATIONS: RefCell<std::collections::VecDeque<ActiveNotification>> = const { RefCell::new(std::collections::VecDeque::new()) };
 }
 
 /// Checks if DND mode is active.
@@ -45,6 +45,7 @@ impl NotificationService {
 
 #[interface(name = "org.freedesktop.Notifications")]
 impl NotificationService {
+    #[allow(clippy::too_many_arguments)]
     async fn notify(
         &self,
         app_name: &str,
@@ -129,19 +130,16 @@ pub fn spawn_dbus_listener(tx: tokio::sync::mpsc::UnboundedSender<NotificationMs
                 .build()
                 .await;
 
-            match conn_result {
-                Ok(conn) => {
-                    let _ = conn
-                        .request_name_with_flags(
-                            "org.freedesktop.Notifications",
-                            RequestNameFlags::ReplaceExisting | RequestNameFlags::DoNotQueue,
-                        )
-                        .await;
-                    loop {
-                        tokio::time::sleep(tokio::time::Duration::from_secs(3600)).await;
-                    }
+            if let Ok(conn) = conn_result {
+                let _ = conn
+                    .request_name_with_flags(
+                        "org.freedesktop.Notifications",
+                        RequestNameFlags::ReplaceExisting | RequestNameFlags::DoNotQueue,
+                    )
+                    .await;
+                loop {
+                    tokio::time::sleep(tokio::time::Duration::from_secs(3600)).await;
                 }
-                Err(_) => {}
             }
         });
     });
@@ -198,6 +196,7 @@ pub fn show_notif_popup_with_cmd(
     });
 }
 
+#[allow(clippy::too_many_arguments)]
 #[zbus::proxy(
     gen_blocking = true,
     interface = "org.freedesktop.Notifications",
@@ -205,6 +204,7 @@ pub fn show_notif_popup_with_cmd(
     default_path = "/org/freedesktop/Notifications"
 )]
 trait Notifications {
+    #[allow(clippy::too_many_arguments)]
     fn notify(
         &self,
         app_name: &str,
@@ -284,9 +284,9 @@ pub fn send_app_notif_with_cmd(
         }
     }
     let mut cmd = std::process::Command::new("notify-send");
-    cmd.args(&["-a", app_name, "-i", logo_str, title, body]);
+    cmd.args(["-a", app_name, "-i", logo_str, title, body]);
     if !command.is_empty() {
-        cmd.args(&["--hint", &format!("string:command:{}", command)]);
+        cmd.args(["--hint", &format!("string:command:{}", command)]);
     }
     let _ = cmd.spawn();
 }

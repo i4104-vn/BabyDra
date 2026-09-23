@@ -31,11 +31,10 @@ pub fn activate_item(service: &str, path: &str, x: i32, y: i32, is_right_click: 
             };
 
             if is_right_click {
-                if proxy.context_menu(x, y).await.is_err() {
-                    if proxy.secondary_activate(x, y).await.is_err() {
+                if proxy.context_menu(x, y).await.is_err()
+                    && proxy.secondary_activate(x, y).await.is_err() {
                         let _ = proxy.activate(x, y).await;
                     }
-                }
             } else {
                 let _ = proxy.activate(x, y).await;
             }

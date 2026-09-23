@@ -5,16 +5,13 @@ use serde::{Deserialize, Serialize};
 /// Wallpaper mode: static image or live (video/GIF).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
+#[derive(Default)]
 pub enum WallpaperMode {
+    #[default]
     Static,
     Live,
 }
 
-impl Default for WallpaperMode {
-    fn default() -> Self {
-        WallpaperMode::Static
-    }
-}
 
 impl std::str::FromStr for WallpaperMode {
     type Err = ();

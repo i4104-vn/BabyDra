@@ -8,7 +8,7 @@ use std::path::Path;
 pub fn get_explicit_pkgs() -> std::collections::HashSet<String> {
     let mut set = std::collections::HashSet::new();
     if let Ok(output) = std::process::Command::new("pacman")
-        .args(&["-Qqe"])
+        .args(["-Qqe"])
         .output()
     {
         if output.status.success() {
@@ -23,7 +23,7 @@ pub fn get_explicit_pkgs() -> std::collections::HashSet<String> {
 /// Returns the current `installed packages list`.
 pub fn get_installed_pkgs() -> Vec<InstalledPackage> {
     let mut pkgs = Vec::new();
-    if let Ok(output) = std::process::Command::new("pacman").args(&["-Qe"]).output() {
+    if let Ok(output) = std::process::Command::new("pacman").args(["-Qe"]).output() {
         if output.status.success() {
             for line in String::from_utf8_lossy(&output.stdout).lines() {
                 let parts: Vec<&str> = line.split_whitespace().collect();
@@ -42,7 +42,7 @@ pub fn get_installed_pkgs() -> Vec<InstalledPackage> {
 /// Returns the current `package owner`.
 pub fn get_package_owner(path: &Path) -> Option<String> {
     let output = std::process::Command::new("pacman")
-        .args(&["-Qqo", path.to_str()?])
+        .args(["-Qqo", path.to_str()?])
         .output()
         .ok()?;
     if output.status.success() {
@@ -147,7 +147,7 @@ pub fn find_cached_pkg(pkg_name: &str) -> Option<std::path::PathBuf> {
     }
 
     let current_ver = std::process::Command::new("pacman")
-        .args(&["-Q", pkg_name])
+        .args(["-Q", pkg_name])
         .output()
         .ok()
         .and_then(|o| {

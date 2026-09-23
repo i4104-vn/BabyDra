@@ -14,7 +14,7 @@ pub fn wire_events(widgets: &ClipboardWidgets) {
     widgets.enabled_switch.connect_state_set(move |active| {
         let mut conf = babydra_core::config::load_babydra_config();
         conf.clipboard.enabled = active;
-        let _ = babydra_core::config::save_babydra_config(&conf);
+        babydra_core::config::save_babydra_config(&conf);
         shortcut_btn_clone.set_sensitive(active);
     });
 
@@ -33,7 +33,7 @@ fn show_capture_dialog(parent: &Window, combo_btn: &Button) {
     babydra_core::services::system::keymap::pause_shortcuts();
 
     let window = Window::builder()
-        .title(&babydra_core::i18n::trans(
+        .title(babydra_core::i18n::trans(
             "settings.general_clipboard_shortcut",
         ))
         .transient_for(parent)
@@ -73,7 +73,7 @@ fn show_capture_dialog(parent: &Window, combo_btn: &Button) {
     vbox.append(&badge);
 
     let lbl_desc = Label::builder()
-        .label(&babydra_core::i18n::trans("settings.keybind_press"))
+        .label(babydra_core::i18n::trans("settings.keybind_press"))
         .halign(gtk4::Align::Center)
         .justify(gtk4::Justification::Center)
         .build();
@@ -170,7 +170,7 @@ fn show_capture_dialog(parent: &Window, combo_btn: &Button) {
                 let mut conf = babydra_core::config::load_babydra_config();
                 conf.clipboard.shortcut_modifiers = modifiers.clone();
                 conf.clipboard.shortcut_key = key.clone();
-                let _ = babydra_core::config::save_babydra_config(&conf);
+                babydra_core::config::save_babydra_config(&conf);
 
                 combo_btn.set_label(&pretty_combo(&modifiers, &key));
             }

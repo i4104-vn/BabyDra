@@ -242,8 +242,8 @@ fn wire_action_btn(
     let parent_list_c = parent_list.clone();
 
     btn.connect_clicked(move |_| {
-        if action_type == AppActionType::Downgrade {
-            if babydra_core::services::apps::pacman::find_cached_pkg(&pkg_name).is_none() {
+        if action_type == AppActionType::Downgrade
+            && babydra_core::services::apps::pacman::find_cached_pkg(&pkg_name).is_none() {
                 let msg = babydra_core::i18n::trans("settings.apps_downgrade_not_found")
                     .replace("{}", &pkg_name);
                 babydra_core::send_settings_notif(
@@ -252,7 +252,6 @@ fn wire_action_btn(
                 );
                 return;
             }
-        }
 
         *pending_c.borrow_mut() = Some(PendingAction {
             action_type: action_type.clone(),

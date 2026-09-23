@@ -27,12 +27,18 @@ pub struct WifiConfigDialog {
     pub current_ssid: Rc<RefCell<String>>,
 }
 
+impl Default for WifiConfigDialog {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl WifiConfigDialog {
     pub fn new() -> Self {
         let builder = ModernDialogBuilder::new(420)
             .with_badge("wifi", BadgeVariant::Primary)
-            .with_title(&trans("wifi.configure_title"))
-            .with_subtitle(&trans("wifi.network_settings"))
+            .with_title(trans("wifi.configure_title"))
+            .with_subtitle(trans("wifi.network_settings"))
             .with_card_spacing(16);
 
         let dialog = builder.build();

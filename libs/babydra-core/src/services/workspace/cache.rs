@@ -23,7 +23,7 @@ pub fn read_cached_workspace() -> Option<u32> {
     let path = get_workspace_cache_path();
     if let Ok(content) = fs::read_to_string(&path) {
         if let Ok(id) = content.trim().parse::<u32>() {
-            if id >= 1 && id <= DEFAULT_WORKSPACE_COUNT {
+            if (1..=DEFAULT_WORKSPACE_COUNT).contains(&id) {
                 return Some(id);
             }
         }
@@ -32,7 +32,7 @@ pub fn read_cached_workspace() -> Option<u32> {
 }
 
 pub fn write_cached_workspace(id: u32) {
-    if id < 1 || id > DEFAULT_WORKSPACE_COUNT {
+    if !(1..=DEFAULT_WORKSPACE_COUNT).contains(&id) {
         return;
     }
     let path = get_workspace_cache_path();

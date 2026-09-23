@@ -42,8 +42,8 @@ pub fn get_running_apps_with_active() -> (Vec<DesktopApp>, Option<(String, Strin
     // Previously sequential: ~80ms (desktop scan) + ~30ms (wlrctl) = ~110ms
     // Now parallel: max(80ms, 30ms) = ~80ms
     let (desktop_apps, running_windows) = std::thread::scope(|s| {
-        let apps_handle = s.spawn(|| crate::services::apps::find_desktop_apps());
-        let windows_handle = s.spawn(|| super::get_running_windows());
+        let apps_handle = s.spawn(crate::services::apps::find_desktop_apps);
+        let windows_handle = s.spawn(super::get_running_windows);
         let desktop_apps = apps_handle.join().unwrap_or_default();
         let running_windows = windows_handle.join().unwrap_or_default();
         (desktop_apps, running_windows)

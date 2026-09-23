@@ -70,7 +70,7 @@ pub fn island_zoom_in(
 
         if let Some(ref child) = w.first_child() {
             let child_t = (t - 0.5) * 2.0;
-            let child_opacity = child_t.max(0.0).min(1.0);
+            let child_opacity = child_t.clamp(0.0, 1.0);
             child.set_opacity(child_opacity);
         }
 
@@ -119,7 +119,7 @@ pub fn island_zoom_out(
         }
 
         let t = elapsed_us as f64 / dur_us as f64;
-        let capsule_opacity = (1.0 - (t - 0.5) * 2.0).max(0.0).min(1.0);
+        let capsule_opacity = (1.0 - (t - 0.5) * 2.0).clamp(0.0, 1.0);
         w.set_opacity(capsule_opacity);
 
         let eased_w = easing::ease_out_cubic(t);
@@ -127,7 +127,7 @@ pub fn island_zoom_out(
         w.set_size_request(current_w, start_h);
 
         if let Some(ref child) = w.first_child() {
-            let child_opacity = (1.0 - t * 2.0).max(0.0).min(1.0);
+            let child_opacity = (1.0 - t * 2.0).clamp(0.0, 1.0);
             child.set_opacity(child_opacity);
         }
 
@@ -236,7 +236,7 @@ pub fn island_animate_size<F>(
         w.set_size_request(current_w.max(0), current_h.max(0));
 
         if target_width == 0 || target_height == 0 {
-            let opacity = (1.0 - eased).max(0.0).min(1.0);
+            let opacity = (1.0 - eased).clamp(0.0, 1.0);
             w.set_opacity(opacity);
         } else {
             w.set_opacity(1.0);

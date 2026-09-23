@@ -11,7 +11,7 @@ pub fn show_capture_dialog(
     on_capture: impl Fn(String) + 'static,
 ) {
     let window = Window::builder()
-        .title(&trans("explore.settings_capture_title"))
+        .title(trans("explore.settings_capture_title"))
         .transient_for(parent)
         .modal(true)
         .resizable(false)
@@ -46,7 +46,7 @@ pub fn show_capture_dialog(
     vbox.append(&badge);
 
     let lbl_desc = Label::builder()
-        .label(&trans("explore.settings_press_for").replace("{}", action_desc))
+        .label(trans("explore.settings_press_for").replace("{}", action_desc))
         .halign(Align::Center)
         .justify(gtk4::Justification::Center)
         .build();
@@ -54,7 +54,7 @@ pub fn show_capture_dialog(
     vbox.append(&lbl_desc);
 
     let lbl_shortcut = Label::builder()
-        .label(&trans("explore.settings_press_any"))
+        .label(trans("explore.settings_press_any"))
         .halign(Align::Center)
         .build();
     lbl_shortcut.add_css_class("keybind-pill");
@@ -96,13 +96,13 @@ pub fn show_capture_dialog(
     vbox.append(&bbox);
 
     let btn_cancel = Button::builder()
-        .label(&trans("explore.settings_cancel"))
+        .label(trans("explore.settings_cancel"))
         .build();
     btn_cancel.add_css_class("modern-dialog-cancel-btn");
     btn_cancel.set_cursor_from_name(Some("pointer"));
 
     let btn_save = Button::builder()
-        .label(&trans("explore.settings_save"))
+        .label(trans("explore.settings_save"))
         .build();
     btn_save.add_css_class("modern-dialog-primary-btn");
     btn_save.set_cursor_from_name(Some("pointer"));

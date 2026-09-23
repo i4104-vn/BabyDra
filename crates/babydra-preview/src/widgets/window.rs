@@ -17,8 +17,8 @@ pub fn calculate_gcd(a: u32, b: u32) -> u32 {
 /// Formats an aspect ratio as `W:H`.
 pub fn format_aspect_ratio(w: u32, h: u32) -> String {
     let divisor = calculate_gcd(w, h);
-    if divisor > 0 {
-        format!("{}:{}", w / divisor, h / divisor)
+    if let (Some(dw), Some(dh)) = (w.checked_div(divisor), h.checked_div(divisor)) {
+        format!("{}:{}", dw, dh)
     } else {
         String::new()
     }

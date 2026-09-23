@@ -19,9 +19,9 @@ pub fn get_conf_path() -> PathBuf {
         .join("babydra.conf")
 }
 
-static CONFIG_CACHE: std::sync::OnceLock<
-    std::sync::RwLock<Option<(Option<std::time::SystemTime>, BabyDraConfig)>>,
-> = std::sync::OnceLock::new();
+type CachedConfig = Option<(Option<std::time::SystemTime>, BabyDraConfig)>;
+static CONFIG_CACHE: std::sync::OnceLock<std::sync::RwLock<CachedConfig>> =
+    std::sync::OnceLock::new();
 
 fn conf_mtime() -> Option<std::time::SystemTime> {
     std::fs::metadata(get_conf_path())
@@ -138,15 +138,17 @@ fn load_explore_cfg_from_disk() -> ExploreSettings {
         } else if let Ok(items) =
             serde_json::from_str::<Vec<crate::models::config::SidebarItem>>(&content)
         {
-            let mut s = ExploreSettings::default();
-            s.sidebar_items = items;
-            return s;
+            return ExploreSettings {
+                sidebar_items: items,
+                ..Default::default()
+            };
         }
     }
 
-    let mut s = ExploreSettings::default();
-    s.sidebar_items = crate::config::sidebar_layout::default_sidebar_items();
-    s
+    ExploreSettings {
+        sidebar_items: crate::config::sidebar_layout::default_sidebar_items(),
+        ..Default::default()
+    }
 }
 
 /// Loads `explore settings` from `~/.babydra/configs/explore.json` (cached in memory).

@@ -157,8 +157,8 @@ pub fn render_recovery_card() -> RecoveryCardWidgets {
     // ── Modal 1: Confirmation & Sudo Password Dialog (Unified Modern Dialog) ──
     let auth_dialog = ModernDialogBuilder::new(440)
         .with_badge("alert", BadgeVariant::Danger)
-        .with_title(&trans("settings.recovery_dialog_title"))
-        .with_subtitle(&trans("settings.recovery_dialog_sub"))
+        .with_title(trans("settings.recovery_dialog_title"))
+        .with_subtitle(trans("settings.recovery_dialog_sub"))
         .build();
 
     let auth_modal_overlay = auth_dialog.container().clone();

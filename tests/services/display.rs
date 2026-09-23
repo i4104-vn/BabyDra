@@ -40,7 +40,7 @@ fn test_save_and_load_display_config() {
     let prev_conf = babydra_core::config::load_babydra_config();
 
     // Save test monitor
-    let res = save_displays(&[test_monitor.clone()]);
+    let res = save_displays(std::slice::from_ref(&test_monitor));
     assert!(res.is_ok(), "save_displays should succeed");
 
     let loaded = babydra_core::config::load_babydra_config();

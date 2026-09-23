@@ -182,7 +182,7 @@ pub fn show_for_file_normal(
     let clipboard_data = CLIPBOARD.with(|cb| cb.borrow().clone());
     let has_paste_items = clipboard_data
         .as_ref()
-        .map_or(false, |(sources, _)| !sources.is_empty());
+        .is_some_and(|(sources, _)| !sources.is_empty());
 
     let dest_dir = if target_paths.len() == 1 && target_paths[0].is_dir() {
         target_paths[0].clone()

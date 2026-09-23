@@ -59,7 +59,7 @@ pub fn build_header_bar_ui() -> HeaderBarWidgets {
 
     // Search entry
     let search = Entry::builder()
-        .placeholder_text(&trans("explore.search_placeholder"))
+        .placeholder_text(trans("explore.search_placeholder"))
         .primary_icon_name("system-search-symbolic")
         .css_classes(vec!["search-entry".to_string()])
         .build();

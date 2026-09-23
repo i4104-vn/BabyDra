@@ -26,7 +26,7 @@ fn get_dir_mtime(path: &Path) -> u64 {
         .and_then(|m| m.modified())
         .and_then(|t| {
             t.duration_since(std::time::SystemTime::UNIX_EPOCH)
-                .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))
+                .map_err(std::io::Error::other)
         })
         .map(|d| d.as_secs())
         .unwrap_or(0)

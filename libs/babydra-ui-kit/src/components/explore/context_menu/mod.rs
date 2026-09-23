@@ -13,7 +13,7 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 thread_local! {
-    pub static CLIPBOARD: std::cell::RefCell<Option<(Vec<PathBuf>, bool)>> = std::cell::RefCell::new(None); // (paths, is_cut)
+    pub static CLIPBOARD: std::cell::RefCell<Option<(Vec<PathBuf>, bool)>> = const { std::cell::RefCell::new(None) }; // (paths, is_cut)
 }
 
 /// Routes context menu presentation for file entries, delegating to trash-specific or standard file menus.

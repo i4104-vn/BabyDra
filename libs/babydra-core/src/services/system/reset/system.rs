@@ -36,7 +36,7 @@ pub fn run_sudo_cmd(
     let out_th = std::thread::spawn(move || {
         if let Some(out) = stdout {
             let reader = BufReader::new(out);
-            for line in reader.lines().flatten() {
+            for line in reader.lines().map_while(Result::ok) {
                 if !line.trim().is_empty() {
                     let _ = sender_out.send(format!("  {}", line));
                 }
@@ -48,7 +48,7 @@ pub fn run_sudo_cmd(
     let err_th = std::thread::spawn(move || {
         if let Some(err) = stderr {
             let reader = BufReader::new(err);
-            for line in reader.lines().flatten() {
+            for line in reader.lines().map_while(Result::ok) {
                 if !line.contains("[sudo] password") && !line.trim().is_empty() {
                     let _ = sender_err.send(format!("  {}", line));
                 }

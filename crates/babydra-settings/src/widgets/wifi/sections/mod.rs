@@ -29,7 +29,7 @@ pub fn render_all_sections(
 
     // Sort networks by signal strength descending
     let mut sorted_nets = state_ref.networks.clone();
-    sorted_nets.sort_by(|a, b| b.signal.cmp(&a.signal));
+    sorted_nets.sort_by_key(|a| std::cmp::Reverse(a.signal));
 
     for net in sorted_nets {
         if net.is_connected || state_ref.connecting_ssid.as_ref() == Some(&net.ssid) {

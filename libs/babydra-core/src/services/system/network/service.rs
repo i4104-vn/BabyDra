@@ -20,7 +20,7 @@ pub fn get_net_bytes() -> NetStats {
 
     if let Ok(file) = std::fs::File::open("/proc/net/dev") {
         let reader = std::io::BufReader::new(file);
-        for line in std::io::BufRead::lines(reader).flatten() {
+        for line in std::io::BufRead::lines(reader).map_while(Result::ok) {
             let parts: Vec<&str> = line.split_whitespace().collect();
             if parts.len() >= 10 {
                 let iface = parts[0].trim_end_matches(':');

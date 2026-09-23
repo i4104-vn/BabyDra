@@ -37,18 +37,16 @@ pub fn create_drop_nav(
                             refresh_path = src.parent().map(|p| p.to_path_buf());
                         }
                         if is_trash {
-                            if let Ok(_) = babydra_core::send_to_trash(src.clone()).await {
+                            if babydra_core::send_to_trash(src.clone()).await.is_ok() {
                                 actual_sources.push(src);
                             }
                         } else if let Some(filename) = src.file_name() {
                             let dest = dest_dir.join(filename);
-                            if src != dest && !dest_dir.starts_with(&src) {
-                                if let Ok(_) =
-                                    babydra_core::move_path(src.clone(), dest.clone()).await
-                                {
-                                    destinations.push(dest);
-                                    actual_sources.push(src);
-                                }
+                            if src != dest && !dest_dir.starts_with(&src)
+                                && babydra_core::move_path(src.clone(), dest.clone()).await.is_ok()
+                            {
+                                destinations.push(dest);
+                                actual_sources.push(src);
                             }
                         }
                     }
@@ -97,13 +95,11 @@ pub fn create_bg_drop(tab: Rc<RefCell<babydra_core::TabState>>) -> gtk4::DropTar
                     for src in sources {
                         if let Some(filename) = src.file_name() {
                             let dest = dest_dir.join(filename);
-                            if src != dest && !dest_dir.starts_with(&src) {
-                                if let Ok(_) =
-                                    babydra_core::move_path(src.clone(), dest.clone()).await
-                                {
-                                    destinations.push(dest);
-                                    actual_sources.push(src);
-                                }
+                            if src != dest && !dest_dir.starts_with(&src)
+                                && babydra_core::move_path(src.clone(), dest.clone()).await.is_ok()
+                            {
+                                destinations.push(dest);
+                                actual_sources.push(src);
                             }
                         }
                     }

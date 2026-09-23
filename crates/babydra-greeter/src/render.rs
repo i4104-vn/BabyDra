@@ -29,7 +29,7 @@ pub fn build_greeter_ui(app: &gtk4::Application) -> GreeterWidgets {
 
     let window = ApplicationWindow::builder()
         .application(app)
-        .title(&trans("common.app_greeter_title"))
+        .title(trans("common.app_greeter_title"))
         .decorated(false)
         .build();
 

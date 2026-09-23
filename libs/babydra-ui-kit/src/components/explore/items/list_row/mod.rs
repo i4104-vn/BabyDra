@@ -45,7 +45,7 @@ pub fn create_list_row(
 
     let list_row = ListBoxRow::new();
     list_row.set_child(Some(&item_box));
-    list_row.set_property("name", &format!("{}", idx));
+    list_row.set_property("name", format!("{}", idx));
     list_row.set_widget_name(&entry.path.to_string_lossy());
 
     let is_dragging = Rc::new(Cell::new(false));

@@ -43,7 +43,7 @@ fn legacy_config_without_new_fields_still_loads() {
         parsed.power.charge_limit, 80,
         "missing field falls back to default"
     );
-    assert!(parsed.explore.show_hidden == false);
+    assert!(!parsed.explore.show_hidden);
 }
 
 #[test]
@@ -66,8 +66,10 @@ fn config_roundtrip_preserves_nested_sections() {
 
 #[test]
 fn explore_config_json_roundtrip_preserves_settings_and_sidebar() {
-    let mut settings = ExploreSettings::default();
-    settings.view_mode = "list".to_string();
+    let mut settings = ExploreSettings {
+        view_mode: "list".to_string(),
+        ..ExploreSettings::default()
+    };
     settings
         .custom_context_items
         .push(babydra_core::config::settings::CustomContextItem {
@@ -101,8 +103,10 @@ fn get_keybind_returns_empty_for_unknown_action() {
 
 #[test]
 fn explore_settings_serde_roundtrip() {
-    let mut original = ExploreSettings::default();
-    original.view_mode = "list".to_string();
+    let mut original = ExploreSettings {
+        view_mode: "list".to_string(),
+        ..ExploreSettings::default()
+    };
     original.custom_context_items.push(CustomContextItem {
         name: "Open terminal here".to_string(),
         command: "kitty".to_string(),

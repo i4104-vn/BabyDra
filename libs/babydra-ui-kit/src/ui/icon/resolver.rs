@@ -136,10 +136,10 @@ fn get_theme_dirs(theme_name: &str) -> Vec<PathBuf> {
             if index_path.exists() {
                 if let Ok(file) = std::fs::File::open(index_path) {
                     let reader = BufReader::new(file);
-                    for line in reader.lines().flatten() {
+                    for line in reader.lines().map_while(Result::ok) {
                         let line = line.trim();
-                        if line.starts_with("Inherits=") {
-                            let inherits_str = line["Inherits=".len()..].trim();
+                        if let Some(inherits_str) = line.strip_prefix("Inherits=") {
+                            let inherits_str = inherits_str.trim();
                             for inherited in inherits_str.split(',') {
                                 let inherited = inherited.trim().to_string();
                                 if !inherited.is_empty() && !visited.contains(&inherited) {
@@ -212,12 +212,11 @@ pub fn set_fallback_icon(img: &gtk4::Image, icon_path_or_name: &str, default_fal
         return;
     }
 
-    if icon_path_or_name.starts_with('/') {
-        if std::path::Path::new(icon_path_or_name).is_file() {
+    if icon_path_or_name.starts_with('/')
+        && std::path::Path::new(icon_path_or_name).is_file() {
             img.set_from_file(Some(icon_path_or_name));
             return;
         }
-    }
 
     let mut clean_name = icon_path_or_name.to_string();
     for ext in &[".png", ".svg", ".xpm", ".jpg", ".jpeg", ".gif"] {

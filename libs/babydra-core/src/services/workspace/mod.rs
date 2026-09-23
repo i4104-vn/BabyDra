@@ -35,7 +35,7 @@ pub fn get_workspaces() -> Vec<Workspace> {
 }
 
 pub fn switch_workspace(id: u32) -> bool {
-    if id < 1 || id > DEFAULT_WORKSPACE_COUNT {
+    if !(1..=DEFAULT_WORKSPACE_COUNT).contains(&id) {
         return false;
     }
     write_cached_workspace(id);
@@ -46,7 +46,7 @@ pub fn switch_workspace(id: u32) -> bool {
 /// Updates local workspace state immediately and dispatches the compositor command away from
 /// the caller thread. Use this from interactive UI callbacks.
 pub fn switch_workspace_async(id: u32) -> bool {
-    if id < 1 || id > DEFAULT_WORKSPACE_COUNT {
+    if !(1..=DEFAULT_WORKSPACE_COUNT).contains(&id) {
         return false;
     }
     write_cached_workspace(id);
@@ -55,7 +55,7 @@ pub fn switch_workspace_async(id: u32) -> bool {
 }
 
 pub fn set_workspace_sync_only(id: u32) -> bool {
-    if id < 1 || id > DEFAULT_WORKSPACE_COUNT {
+    if !(1..=DEFAULT_WORKSPACE_COUNT).contains(&id) {
         return false;
     }
     write_cached_workspace(id);

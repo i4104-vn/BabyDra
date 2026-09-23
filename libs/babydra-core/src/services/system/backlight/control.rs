@@ -5,6 +5,8 @@ extern "C" {
     fn getuid() -> u32;
 }
 
+pub type LogindSessionEntry = (String, u32, String, String, zbus::zvariant::OwnedObjectPath);
+
 #[zbus::proxy(
     gen_blocking = true,
     interface = "org.freedesktop.login1.Manager",
@@ -15,7 +17,7 @@ pub trait LogindManager {
     fn get_session_by_pid(&self, pid: u32) -> zbus::Result<zbus::zvariant::OwnedObjectPath>;
     fn list_sessions(
         &self,
-    ) -> zbus::Result<Vec<(String, u32, String, String, zbus::zvariant::OwnedObjectPath)>>;
+    ) -> zbus::Result<Vec<LogindSessionEntry>>;
 }
 
 #[zbus::proxy(

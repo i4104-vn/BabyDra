@@ -6,11 +6,16 @@
 
 use babydra_core::models::explore::file_entry::FileEntry;
 use babydra_core::services::explore::FileWatcher;
-use babydra_core::TabState;
+use babydra_core::{ActivePane, TabState};
 use gtk4::{ApplicationWindow, Box, Button, Entry, Image, Label, Paned, ScrolledWindow, Stack};
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
+
+pub type Callback = Rc<dyn Fn()>;
+pub type CallbackCell = Rc<RefCell<Option<Callback>>>;
+pub type PaneNavigationCallback = Rc<dyn Fn(ActivePane, PathBuf)>;
+pub type PaneNavigationCell = Rc<RefCell<Option<PaneNavigationCallback>>>;
 
 pub struct MainWindowWidgets {
     pub window: ApplicationWindow,

@@ -61,7 +61,7 @@ pub fn build_grid_card_ui(entry: &FileEntry) -> Box {
             let sem = THUMBNAIL_SEMAPHORE.get_or_init(|| tokio::sync::Semaphore::new(4));
             let permit = sem.acquire().await;
             let res = tokio::task::spawn_blocking(move || {
-                load_cropped_square(&path_clone, 68).map(|pb| SendWrapper(pb))
+                load_cropped_square(&path_clone, 68).map(SendWrapper)
             })
             .await;
             drop(permit);

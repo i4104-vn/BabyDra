@@ -43,7 +43,7 @@ pub fn setup_click_outside_dismiss<W: IsA<gtk4::Widget>, C: IsA<gtk4::Widget>>(
             .map(|w| w.is_ancestor(&container_c) || w == container_c)
             .unwrap_or(false);
         if !inside {
-            if let Some(win) = window_c.clone().dynamic_cast::<gtk4::Window>().ok() {
+            if let Ok(win) = window_c.clone().dynamic_cast::<gtk4::Window>() {
                 win.close();
             }
         }

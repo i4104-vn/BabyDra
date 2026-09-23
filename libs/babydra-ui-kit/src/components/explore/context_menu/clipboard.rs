@@ -12,7 +12,7 @@ pub struct UndoOperation {
 }
 
 thread_local! {
-    pub static UNDO_STACK: RefCell<Vec<UndoOperation>> = RefCell::new(Vec::new());
+    pub static UNDO_STACK: RefCell<Vec<UndoOperation>> = const { RefCell::new(Vec::new()) };
 }
 
 /// Sets the files on the system clipboard using FileList and x-special/gnome-copied-files.
@@ -21,7 +21,7 @@ pub fn set_clipboard_files(paths: &[PathBuf], is_cut: bool) {
     let clipboard = display.clipboard();
 
     let gio_files: Vec<gtk4::gio::File> =
-        paths.iter().map(|p| gtk4::gio::File::for_path(p)).collect();
+        paths.iter().map(gtk4::gio::File::for_path).collect();
     let file_list = FileList::from_array(&gio_files);
     let file_provider = gtk4::gdk::ContentProvider::for_value(&file_list.to_value());
 
@@ -29,7 +29,7 @@ pub fn set_clipboard_files(paths: &[PathBuf], is_cut: bool) {
     let mut gnome_content = action_str.to_string();
     for p in paths {
         let uri = gtk4::gio::File::for_path(p).uri().to_string();
-        gnome_content.push_str("\n");
+        gnome_content.push('\n');
         gnome_content.push_str(&uri);
     }
     let bytes = glib::Bytes::from(gnome_content.as_bytes());
@@ -378,7 +378,7 @@ pub fn execute_undo(nav_callback: Rc<dyn Fn(PathBuf)>, current_path: PathBuf) {
         glib::spawn_future_local(async move {
             if op.is_cut {
                 // Move destinations back to sources
-                for (src, dest) in op.sources.into_iter().zip(op.destinations.into_iter()) {
+                for (src, dest) in op.sources.into_iter().zip(op.destinations) {
                     if let Err(e) = babydra_core::move_path(dest, src).await {
                         eprintln!("Undo failed to move path back: {}", e);
                     }

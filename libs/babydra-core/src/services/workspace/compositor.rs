@@ -8,7 +8,7 @@ pub fn dispatch_compositor_switch(id: u32) {
     let wtype_paths = [local_wtype.as_str(), "wtype"];
     for bin in &wtype_paths {
         if let Ok(status) = Command::new(bin)
-            .args(&["-M", "logo", "-k", &key_str, "-m", "logo"])
+            .args(["-M", "logo", "-k", &key_str, "-m", "logo"])
             .status()
         {
             if status.success() {
@@ -18,6 +18,6 @@ pub fn dispatch_compositor_switch(id: u32) {
     }
 
     let _ = Command::new("wlrctl")
-        .args(&["keyboard", "type", &key_str, "SUPER"])
+        .args(["keyboard", "type", &key_str, "SUPER"])
         .status();
 }

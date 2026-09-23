@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::process::Stdio;
 
 /// Properly quote a string for use in a shell single-quoted argument.
@@ -93,7 +93,7 @@ pub fn spawn_decompress(
 }
 
 /// Asynchronously checks if a ZIP file is encrypted using system unzip command.
-pub async fn is_zip_encrypted(archive_path: &PathBuf) -> bool {
+pub async fn is_zip_encrypted(archive_path: &Path) -> bool {
     let parent_dir = match archive_path.parent() {
         Some(p) => p.to_path_buf(),
         None => return false,
@@ -134,7 +134,7 @@ pub async fn is_zip_encrypted(archive_path: &PathBuf) -> bool {
 }
 
 /// Asynchronously checks if the password provided for a ZIP archive is correct.
-pub async fn check_zip_password(archive_path: &PathBuf, password: &str) -> bool {
+pub async fn check_zip_password(archive_path: &Path, password: &str) -> bool {
     let parent_dir = match archive_path.parent() {
         Some(p) => p.to_path_buf(),
         None => return false,

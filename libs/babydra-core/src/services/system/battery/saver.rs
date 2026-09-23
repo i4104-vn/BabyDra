@@ -27,8 +27,8 @@ pub fn apply_battery_saver(battery_info: &BatteryInfo) {
     }
     if battery_info.percentage <= conf.power.saver_threshold {
         let cur_profile = crate::services::system::power::profile::get_current_profile();
-        if cur_profile != crate::PerformanceProfile::Normal {
-            if crate::services::system::power::profile::set_perf_profile(
+        if cur_profile != crate::PerformanceProfile::Normal
+            && crate::services::system::power::profile::set_perf_profile(
                 crate::PerformanceProfile::Normal,
             )
             .is_ok()
@@ -43,6 +43,5 @@ pub fn apply_battery_saver(battery_info: &BatteryInfo) {
                 let target_b = (cur_b * 0.5).max(10.0);
                 crate::services::system::backlight::set_brightness(target_b);
             }
-        }
     }
 }

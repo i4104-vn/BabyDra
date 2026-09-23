@@ -34,12 +34,18 @@ pub struct VpnConfigDialog {
     pub selected_config_path: Rc<RefCell<Option<String>>>,
 }
 
+impl Default for VpnConfigDialog {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl VpnConfigDialog {
     pub fn new() -> Self {
         let builder = ModernDialogBuilder::new(440)
             .with_badge("shield", BadgeVariant::Primary)
-            .with_title(&trans("vpn.configure_title"))
-            .with_subtitle(&trans("vpn.nm_settings"));
+            .with_title(trans("vpn.configure_title"))
+            .with_subtitle(trans("vpn.nm_settings"));
 
         let dialog = builder.build();
 
@@ -256,15 +262,13 @@ impl VpnConfigDialog {
             self.ca_entry.set_text(&parsed.ca_cert);
         }
 
-        let vpn_types = vec![
-            "openvpn",
+        let vpn_types = ["openvpn",
             "wireguard",
             "l2tp",
             "pptp",
             "openconnect",
             "fortisslvpn",
-            "strongswan",
-        ];
+            "strongswan"];
         if let Some(idx) = vpn_types
             .iter()
             .position(|&t| parsed.vpn_type.to_lowercase().contains(t))
@@ -301,15 +305,13 @@ impl VpnConfigDialog {
         self.password_entry.set_text(&details.password);
         self.ca_entry.set_text(&details.ca_cert);
 
-        let vpn_types = vec![
-            "openvpn",
+        let vpn_types = ["openvpn",
             "wireguard",
             "l2tp",
             "pptp",
             "openconnect",
             "fortisslvpn",
-            "strongswan",
-        ];
+            "strongswan"];
         if let Some(idx) = vpn_types
             .iter()
             .position(|&t| details.vpn_type.to_lowercase().contains(t))
@@ -342,15 +344,13 @@ impl VpnConfigDialog {
         self.save_btn.connect_clicked(move |_| {
             let orig = original_name.borrow().clone();
             let cfg_file = selected_config_path.borrow().clone();
-            let vpn_types = vec![
-                "openvpn",
+            let vpn_types = ["openvpn",
                 "wireguard",
                 "l2tp",
                 "pptp",
                 "openconnect",
                 "fortisslvpn",
-                "strongswan",
-            ];
+                "strongswan"];
             let idx = type_dropdown.selected() as usize;
             let vpn_type = vpn_types.get(idx).copied().unwrap_or("openvpn").to_string();
 

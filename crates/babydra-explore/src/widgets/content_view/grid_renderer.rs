@@ -1,21 +1,38 @@
-use crate::widgets::state::ContentViewHandle;
 use babydra_core::FileEntry;
 use gtk4::prelude::*;
 use gtk4::{Align, Label};
+use std::path::{Path, PathBuf};
+use std::{cell::RefCell, rc::Rc};
 
 use crate::widgets::content_view::grid_item::create_flow_child;
+use crate::widgets::state::{ContentViewHandle, ContentViewWidgets};
+
+pub struct GridRenderArgs<'a> {
+    pub handle_c: &'a ContentViewHandle,
+    pub widgets: &'a ContentViewWidgets,
+    pub entries: &'a [FileEntry],
+    pub current_path: &'a Path,
+    pub start_path: &'a Path,
+    pub gen: u64,
+    pub sort_mode: &'a str,
+    pub nav_callback: &'a Rc<dyn Fn(PathBuf)>,
+    pub selected_paths: Rc<RefCell<Vec<PathBuf>>>,
+}
 
 /// Renders entries as a flat icon grid (no grouping headers).
-pub async fn render_flat_grid(
-    handle_c: &ContentViewHandle,
-    widgets: &crate::widgets::state::ContentViewWidgets,
-    entries: &[FileEntry],
-    current_path: &std::path::PathBuf,
-    start_path: &std::path::PathBuf,
-    gen: u64,
-    nav_callback: &std::rc::Rc<dyn Fn(std::path::PathBuf)>,
-    selected_paths: std::rc::Rc<std::cell::RefCell<Vec<std::path::PathBuf>>>,
-) {
+pub async fn render_flat_grid(args: GridRenderArgs<'_>) {
+    let GridRenderArgs {
+        handle_c,
+        widgets,
+        entries,
+        current_path,
+        start_path,
+        gen,
+        nav_callback,
+        selected_paths,
+        ..
+    } = args;
+
     let flowbox = crate::widgets::content_view::create_grid_flowbox(
         handle_c.entries.clone(),
         handle_c.nav_callback.clone(),
@@ -65,17 +82,19 @@ pub async fn render_flat_grid(
 }
 
 /// Renders entries as a grouped icon grid with category headers.
-pub async fn render_grouped_grid(
-    handle_c: &ContentViewHandle,
-    widgets: &crate::widgets::state::ContentViewWidgets,
-    entries: &[FileEntry],
-    current_path: &std::path::PathBuf,
-    start_path: &std::path::PathBuf,
-    gen: u64,
-    sort_mode: &str,
-    nav_callback: &std::rc::Rc<dyn Fn(std::path::PathBuf)>,
-    selected_paths: std::rc::Rc<std::cell::RefCell<Vec<std::path::PathBuf>>>,
-) {
+pub async fn render_grouped_grid(args: GridRenderArgs<'_>) {
+    let GridRenderArgs {
+        handle_c,
+        widgets,
+        entries,
+        current_path,
+        start_path,
+        gen,
+        sort_mode,
+        nav_callback,
+        selected_paths,
+    } = args;
+
     let get_group_name =
         |entry: &FileEntry| -> String { babydra_core::get_group_name(entry, sort_mode) };
 

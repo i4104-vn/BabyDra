@@ -39,7 +39,7 @@ impl ClipboardEntry {
         match self {
             Self::Text { content, .. } => {
                 let trimmed = content
-                    .trim_start_matches(|c| c == '\r' || c == '\n')
+                    .trim_start_matches(['\r', '\n'])
                     .trim_end();
                 if trimmed.trim().is_empty() {
                     return (String::new(), 0);

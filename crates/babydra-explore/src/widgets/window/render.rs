@@ -7,7 +7,7 @@ use gtk4::{ApplicationWindow, Box, Orientation, Paned};
 pub fn build_window_ui(app: &gtk4::Application) -> MainWindowWidgets {
     let window = ApplicationWindow::builder()
         .application(app)
-        .title(&trans("common.app_explore_title"))
+        .title(trans("common.app_explore_title"))
         .icon_name("babydra-explore")
         .default_width(1000)
         .default_height(700)

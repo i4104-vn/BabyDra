@@ -17,7 +17,7 @@ pub fn show_properties(target_paths: Vec<PathBuf>, parent: Option<&impl IsA<gtk4
     let dialog_height = count_dialog_height(&target_paths);
 
     let window = Window::builder()
-        .title(&trans("explore.dialog_properties_title"))
+        .title(trans("explore.dialog_properties_title"))
         .icon_name("babydra")
         .modal(true)
         .resizable(false)
@@ -71,7 +71,7 @@ pub fn show_properties(target_paths: Vec<PathBuf>, parent: Option<&impl IsA<gtk4
 
     if target_paths.len() == 1 {
         let btn_save = Button::builder()
-            .label(&trans("explore.settings_save"))
+            .label(trans("explore.settings_save"))
             .css_classes(vec![
                 "suggested-action".to_string(),
                 "modern-dialog-primary-btn".to_string(),

@@ -47,6 +47,7 @@ pub fn update_highlight(list_box: &gtk4::Box, selected_idx: Option<usize>) {
 }
 
 /// Re-populates the unified results list box dynamically.
+#[allow(clippy::too_many_arguments)]
 pub fn repopulate_results(
     list_box: &gtk4::Box,
     query: &str,
@@ -121,7 +122,7 @@ pub fn repopulate_results(
         web_title.set_halign(gtk4::Align::Start);
         list_box.append(&web_title);
 
-        let (browser_btn, _) = build_search_button(&query);
+        let (browser_btn, _) = build_search_button(query);
         let q_for_browser = query.to_string();
         let win_to_close = window.clone();
         browser_btn.connect_clicked(move |_| {

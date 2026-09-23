@@ -10,7 +10,7 @@ use gtk4::{
     Align, ApplicationWindow, Box, Button, DrawingArea, Grid, Label, Orientation, Overlay,
     Revealer, RevealerTransitionType, Spinner,
 };
-use std::path::PathBuf;
+use std::path::Path;
 
 /// The full set of widgets built for the image viewer window.
 pub struct ImageViewerUi {
@@ -94,7 +94,7 @@ pub fn populate_exif_dialog(exif_box: &Box, data: Option<&ExifData>) {
 /// Builds the viewer content overlay for static images onto an existing window.
 pub fn build_image_content(
     window: &ApplicationWindow,
-    path: &PathBuf,
+    path: &Path,
     img_w: u32,
     img_h: u32,
 ) -> ImageViewerUi {

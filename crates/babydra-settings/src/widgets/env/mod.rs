@@ -22,7 +22,7 @@ fn load_labwc_env_vars() -> Vec<EnvVar> {
     if let Ok(file) = fs::File::open(&path) {
         let reader = BufReader::new(file);
         let mut id = 1;
-        for line in reader.lines().flatten() {
+        for line in reader.lines().map_while(Result::ok) {
             let trimmed = line.trim();
             if trimmed.is_empty() || trimmed.starts_with('#') {
                 continue;

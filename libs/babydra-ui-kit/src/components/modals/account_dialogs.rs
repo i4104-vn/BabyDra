@@ -21,12 +21,18 @@ pub struct ChangeNameDialog {
     pub confirm_btn: Button,
 }
 
+impl Default for ChangeNameDialog {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ChangeNameDialog {
     pub fn new() -> Self {
         let builder = ModernDialogBuilder::new(420)
             .with_badge("user", BadgeVariant::Primary)
-            .with_title(&trans("settings.dialog_change_name_title"))
-            .with_subtitle(&trans("settings.dialog_change_name_sub"));
+            .with_title(trans("settings.dialog_change_name_title"))
+            .with_subtitle(trans("settings.dialog_change_name_sub"));
 
         let dialog = builder.build();
 
@@ -131,12 +137,18 @@ pub struct ChangeHostnameDialog {
     pub confirm_btn: Button,
 }
 
+impl Default for ChangeHostnameDialog {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ChangeHostnameDialog {
     pub fn new() -> Self {
         let builder = ModernDialogBuilder::new(420)
             .with_badge("desktop", BadgeVariant::Primary)
-            .with_title(&trans("settings.dialog_change_hostname_title"))
-            .with_subtitle(&trans("settings.dialog_change_hostname_sub"));
+            .with_title(trans("settings.dialog_change_hostname_title"))
+            .with_subtitle(trans("settings.dialog_change_hostname_sub"));
 
         let dialog = builder.build();
 
@@ -242,12 +254,18 @@ pub struct ChangePasswordDialog {
     pub confirm_btn: Button,
 }
 
+impl Default for ChangePasswordDialog {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ChangePasswordDialog {
     pub fn new() -> Self {
         let builder = ModernDialogBuilder::new(420)
             .with_badge("lock", BadgeVariant::Primary)
-            .with_title(&trans("settings.dialog_change_password_title"))
-            .with_subtitle(&trans("settings.dialog_change_password_sub"));
+            .with_title(trans("settings.dialog_change_password_title"))
+            .with_subtitle(trans("settings.dialog_change_password_sub"));
 
         let dialog = builder.build();
 

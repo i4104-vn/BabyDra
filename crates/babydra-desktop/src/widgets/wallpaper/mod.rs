@@ -51,15 +51,12 @@ pub fn create_wallpaper_w() -> gtk4::Overlay {
     let is_animating: Rc<Cell<bool>> = Rc::new(Cell::new(false));
     let active_start_time: Rc<Cell<Option<i64>>> = Rc::new(Cell::new(None));
     let ripple_origin: Rc<Cell<(f64, f64)>> = Rc::new(Cell::new((1.0, 0.0)));
-    let pending_live_play: Rc<
-        RefCell<
-            Option<(
-                PathBuf,
-                babydra_core::wallpaper::WallpaperMode,
-                Option<gtk4::MediaFile>,
-            )>,
-        >,
-    > = Rc::new(RefCell::new(None));
+    type PendingLivePlay = (
+        PathBuf,
+        babydra_core::wallpaper::WallpaperMode,
+        Option<gtk4::MediaFile>,
+    );
+    let pending_live_play: Rc<RefCell<Option<PendingLivePlay>>> = Rc::new(RefCell::new(None));
 
     // Initial wallpaper load with dynamic monitor resolution detection
     let (init_w, init_h) = get_monitor_res(&drawing_area);

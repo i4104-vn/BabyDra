@@ -19,7 +19,7 @@ pub fn sort_entries(entries: &mut [FileEntry], sort_mode: &str) {
                         1
                     } else {
                         let diff = (now_naive - date_naive).num_days();
-                        if diff >= 2 && diff <= 7 {
+                        if (2..=7).contains(&diff) {
                             diff as u32
                         } else if diff > 7 {
                             8

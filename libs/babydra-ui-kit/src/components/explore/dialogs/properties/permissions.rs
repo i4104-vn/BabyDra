@@ -25,7 +25,7 @@ pub fn build_perm_matrix(parent_vbox: &Box, mode: u32) -> PermissionCheckboxes {
     let top_hbox = Box::new(Orientation::Horizontal, 8);
 
     let lbl_title = Label::builder()
-        .label(&trans("explore.perm_access"))
+        .label(trans("explore.perm_access"))
         .halign(Align::Start)
         .valign(Align::Center)
         .build();
@@ -57,15 +57,15 @@ pub fn build_perm_matrix(parent_vbox: &Box, mode: u32) -> PermissionCheckboxes {
 
     // Column Headers
     let lbl_owner = Label::builder()
-        .label(&trans("explore.perm_owner"))
+        .label(trans("explore.perm_owner"))
         .halign(Align::Center)
         .build();
     let lbl_group = Label::builder()
-        .label(&trans("explore.perm_group"))
+        .label(trans("explore.perm_group"))
         .halign(Align::Center)
         .build();
     let lbl_others = Label::builder()
-        .label(&trans("explore.perm_others"))
+        .label(trans("explore.perm_others"))
         .halign(Align::Center)
         .build();
     lbl_owner.set_css_classes(&["properties-matrix-col-title"]);
@@ -78,15 +78,15 @@ pub fn build_perm_matrix(parent_vbox: &Box, mode: u32) -> PermissionCheckboxes {
 
     // Row Titles
     let lbl_read = Label::builder()
-        .label(&trans("explore.perm_read"))
+        .label(trans("explore.perm_read"))
         .halign(Align::Start)
         .build();
     let lbl_write = Label::builder()
-        .label(&trans("explore.perm_write"))
+        .label(trans("explore.perm_write"))
         .halign(Align::Start)
         .build();
     let lbl_exec = Label::builder()
-        .label(&trans("explore.perm_execute"))
+        .label(trans("explore.perm_execute"))
         .halign(Align::Start)
         .build();
     lbl_read.set_css_classes(&["properties-key-label"]);

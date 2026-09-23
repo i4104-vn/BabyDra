@@ -7,7 +7,7 @@ use std::process::Command;
 /// Returns a list of (app_id, window_title) pairs.
 pub fn get_running_windows() -> Vec<(String, String)> {
     let mut running_windows = Vec::new();
-    if let Ok(output) = Command::new("wlrctl").args(&["toplevel", "list"]).output() {
+    if let Ok(output) = Command::new("wlrctl").args(["toplevel", "list"]).output() {
         let stdout = String::from_utf8_lossy(&output.stdout);
         for line in stdout.lines() {
             if let Some(pos) = line.find(':') {
@@ -26,7 +26,7 @@ pub fn get_running_windows() -> Vec<(String, String)> {
 /// Returns Some((app_id, window_title)) or None.
 pub fn get_active_window() -> Option<(String, String)> {
     let output = Command::new("wlrctl")
-        .args(&["window", "list", "state:focused"])
+        .args(["window", "list", "state:focused"])
         .output();
 
     if let Ok(out) = output {
@@ -120,7 +120,7 @@ pub fn focus_app(name: &str, exec: &str, app_id: Option<&str>, window_title: Opt
 
     if let Some(identifier) = find_best_window_match(&running, name, exec, app_id, window_title) {
         let _ = Command::new("wlrctl")
-            .args(&["window", "focus", &identifier])
+            .args(["window", "focus", &identifier])
             .status();
     } else if !exec.is_empty() {
         let exec_parts: Vec<&str> = exec.split_whitespace().collect();
@@ -151,12 +151,12 @@ pub fn jump_to_app(app_name: &str, title: Option<&str>) {
             || app
                 .app_id
                 .as_deref()
-                .map_or(false, |id| id.to_lowercase().contains(&query_lower))
+                .is_some_and(|id| id.to_lowercase().contains(&query_lower))
             || (!title_lower.is_empty()
                 && app
                     .window_title
                     .as_deref()
-                    .map_or(false, |t| t.to_lowercase().contains(&title_lower)))
+                    .is_some_and(|t| t.to_lowercase().contains(&title_lower)))
     }) {
         let ws = crate::services::workspace::windows::get_app_workspace(app, &ws_map, current_ws);
         crate::services::workspace::switch_workspace(ws);
@@ -207,14 +207,14 @@ pub fn close_window(app_id: &str, title: &str) {
 
     if same_title_count > 1 && !target_title.is_empty() {
         let _ = Command::new("wlrctl")
-            .args(&["window", "focus", &format!("title:{}", target_title)])
+            .args(["window", "focus", &format!("title:{}", target_title)])
             .status();
 
         let mut confirmed_active = false;
         for _ in 0..12 {
             std::thread::sleep(std::time::Duration::from_millis(25));
             let is_active = Command::new("wlrctl")
-                .args(&[
+                .args([
                     "window",
                     "find",
                     &format!("title:{}", target_title),
@@ -231,7 +231,7 @@ pub fn close_window(app_id: &str, title: &str) {
 
         if confirmed_active {
             let _ = Command::new("wlrctl")
-                .args(&[
+                .args([
                     "window",
                     "close",
                     &format!("title:{}", target_title),
@@ -244,7 +244,7 @@ pub fn close_window(app_id: &str, title: &str) {
 
     if !target_title.is_empty() {
         let _ = Command::new("wlrctl")
-            .args(&["window", "close", &format!("title:{}", target_title)])
+            .args(["window", "close", &format!("title:{}", target_title)])
             .status();
     }
 }
@@ -252,7 +252,7 @@ pub fn close_window(app_id: &str, title: &str) {
 /// Closes all windows matching an application ID.
 pub fn close_all_windows(app_id: &str) {
     let _ = Command::new("wlrctl")
-        .args(&["window", "close", app_id])
+        .args(["window", "close", app_id])
         .status();
 }
 
@@ -281,7 +281,7 @@ pub fn minimize_window(app_id: &str, title: &str) {
                 && t.trim_end_matches('●').trim() == clean_title
         }) {
             if let Ok(s) = Command::new("wlrctl")
-                .args(&["toplevel", "minimize", &format!("title:{}", exact_title)])
+                .args(["toplevel", "minimize", &format!("title:{}", exact_title)])
                 .status()
             {
                 if s.success() {
@@ -296,7 +296,7 @@ pub fn minimize_window(app_id: &str, title: &str) {
         .find(|(id, _)| id.eq_ignore_ascii_case(app_id_clean))
     {
         if let Ok(s) = Command::new("wlrctl")
-            .args(&["toplevel", "minimize", exact_id])
+            .args(["toplevel", "minimize", exact_id])
             .status()
         {
             if s.success() {
@@ -306,7 +306,7 @@ pub fn minimize_window(app_id: &str, title: &str) {
     }
 
     let _ = Command::new("wlrctl")
-        .args(&["toplevel", "minimize", app_id_clean])
+        .args(["toplevel", "minimize", app_id_clean])
         .status();
 }
 
@@ -324,7 +324,7 @@ pub fn focus_window(app_id: &str, title: &str) {
                 && t.trim_end_matches('●').trim() == clean_title
         }) {
             if let Ok(s) = Command::new("wlrctl")
-                .args(&["toplevel", "focus", &format!("title:{}", exact_title)])
+                .args(["toplevel", "focus", &format!("title:{}", exact_title)])
                 .status()
             {
                 if s.success() {
@@ -339,7 +339,7 @@ pub fn focus_window(app_id: &str, title: &str) {
                 && (t.contains(clean_title) || clean_title.contains(t.as_str()))
         }) {
             if let Ok(s) = Command::new("wlrctl")
-                .args(&["toplevel", "focus", &format!("title:{}", exact_title)])
+                .args(["toplevel", "focus", &format!("title:{}", exact_title)])
                 .status()
             {
                 if s.success() {
@@ -355,7 +355,7 @@ pub fn focus_window(app_id: &str, title: &str) {
         .find(|(id, _)| id.eq_ignore_ascii_case(app_id_clean))
     {
         if let Ok(s) = Command::new("wlrctl")
-            .args(&["toplevel", "focus", exact_id])
+            .args(["toplevel", "focus", exact_id])
             .status()
         {
             if s.success() {
@@ -366,7 +366,7 @@ pub fn focus_window(app_id: &str, title: &str) {
 
     // 4. Direct fallback
     let _ = Command::new("wlrctl")
-        .args(&["toplevel", "focus", app_id_clean])
+        .args(["toplevel", "focus", app_id_clean])
         .status();
 }
 
@@ -425,11 +425,11 @@ pub fn minimize_all_windows() {
     for (app_id, title) in running {
         if !title.is_empty() {
             let _ = Command::new("wlrctl")
-                .args(&["toplevel", "minimize", &format!("title:{}", title)])
+                .args(["toplevel", "minimize", &format!("title:{}", title)])
                 .status();
         } else if !app_id.is_empty() {
             let _ = Command::new("wlrctl")
-                .args(&["toplevel", "minimize", &app_id])
+                .args(["toplevel", "minimize", &app_id])
                 .status();
         }
     }

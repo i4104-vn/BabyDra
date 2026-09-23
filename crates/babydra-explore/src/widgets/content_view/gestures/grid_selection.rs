@@ -20,16 +20,15 @@ pub fn wire_grid_ctrls(
         let grid_c = grid_container.clone();
         let fb_weak = flowbox.downgrade();
         flowbox.connect_selected_children_changed(move |fb| {
-            if fb.selected_children().len() > 0 {
+            if !fb.selected_children().is_empty() {
                 // Deselect all items in other flowboxes
                 let mut sibling = grid_c.first_child();
                 while let Some(child) = sibling {
                     if let Some(other_fb) = child.downcast_ref::<gtk4::FlowBox>() {
-                        if fb_weak.upgrade().as_ref() != Some(other_fb) {
-                            if other_fb.selected_children().len() > 0 {
+                        if fb_weak.upgrade().as_ref() != Some(other_fb)
+                            && !other_fb.selected_children().is_empty() {
                                 other_fb.unselect_all();
                             }
-                        }
                     }
                     sibling = child.next_sibling();
                 }

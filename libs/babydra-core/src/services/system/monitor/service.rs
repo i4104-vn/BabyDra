@@ -16,7 +16,7 @@ pub fn get_app_resource_usage(app_id: &str, exec: &str, name: &str) -> AppResour
         .to_lowercase();
     if !id_clean.is_empty() {
         tokens.push(id_clean.clone());
-        if let Some(last) = id_clean.split('.').last() {
+        if let Some(last) = id_clean.split('.').next_back() {
             if last.len() >= 3 && last != id_clean {
                 tokens.push(last.to_string());
             }
@@ -141,7 +141,7 @@ pub fn get_ram_usage() -> Option<(f64, f64, f64)> {
     let mut mem_total = 0.0;
     let mut mem_avail = 0.0;
 
-    for line in std::io::BufRead::lines(reader).flatten() {
+    for line in std::io::BufRead::lines(reader).map_while(Result::ok) {
         let parts: Vec<&str> = line.split_whitespace().collect();
         if parts.len() >= 2 {
             if parts[0] == "MemTotal:" {

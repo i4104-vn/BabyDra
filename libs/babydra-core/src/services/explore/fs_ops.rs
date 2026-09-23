@@ -10,8 +10,10 @@ use std::sync::Mutex;
 
 /// uid/gid -> name caches. Directory scans hit the same handful of users, so
 /// resolving them once avoids a libc passwd/group lookup per file entry.
-static OWNER_CACHE: Mutex<Option<(FxHashMap<u32, String>, FxHashMap<u32, String>)>> =
-    Mutex::new(None);
+type IdNameMap = FxHashMap<u32, String>;
+type OwnerGroupCache = Option<(IdNameMap, IdNameMap)>;
+
+static OWNER_CACHE: Mutex<OwnerGroupCache> = Mutex::new(None);
 
 fn cached_owner_group(uid: u32, gid: u32) -> (String, String) {
     let mut guard = match OWNER_CACHE.lock() {
@@ -77,8 +79,6 @@ pub fn get_icon_name(path: &Path, is_dir: bool, mime: &str) -> String {
         "video-x-generic".to_string()
     } else if mime.starts_with("audio/") {
         "audio-x-generic".to_string()
-    } else if mime.starts_with("text/") {
-        "text-x-generic".to_string()
     } else {
         "text-x-generic".to_string()
     }
@@ -183,8 +183,7 @@ pub async fn load_directory(
     })
     .await
     .unwrap_or_else(|e| {
-        Err(std::io::Error::new(
-            std::io::ErrorKind::Other,
+        Err(std::io::Error::other(
             e.to_string(),
         ))
     })
@@ -247,8 +246,7 @@ pub async fn copy_path(src: PathBuf, dest: PathBuf) -> Result<(), std::io::Error
     })
     .await
     .unwrap_or_else(|e| {
-        Err(std::io::Error::new(
-            std::io::ErrorKind::Other,
+        Err(std::io::Error::other(
             e.to_string(),
         ))
     })
@@ -274,8 +272,7 @@ pub async fn move_path(src: PathBuf, dest: PathBuf) -> Result<(), std::io::Error
     })
     .await
     .unwrap_or_else(|e| {
-        Err(std::io::Error::new(
-            std::io::ErrorKind::Other,
+        Err(std::io::Error::other(
             e.to_string(),
         ))
     })
@@ -322,8 +319,7 @@ pub async fn create_empty_file(path: PathBuf) -> Result<(), std::io::Error> {
     tokio::task::spawn_blocking(move || fs::write(&path, b""))
         .await
         .unwrap_or_else(|e| {
-            Err(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            Err(std::io::Error::other(
                 e.to_string(),
             ))
         })
@@ -334,8 +330,7 @@ pub async fn create_dir(path: PathBuf) -> Result<(), std::io::Error> {
     tokio::task::spawn_blocking(move || fs::create_dir_all(&path))
         .await
         .unwrap_or_else(|e| {
-            Err(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            Err(std::io::Error::other(
                 e.to_string(),
             ))
         })
@@ -368,8 +363,7 @@ pub async fn restore_from_trash(trash_file_path: PathBuf) -> CoreResult<()> {
     })
     .await
     .unwrap_or_else(|e| {
-        Err(std::io::Error::new(
-            std::io::ErrorKind::Other,
+        Err(std::io::Error::other(
             e.to_string(),
         ))
     })?;
@@ -396,8 +390,7 @@ pub async fn restore_from_trash(trash_file_path: PathBuf) -> CoreResult<()> {
     let _ = tokio::task::spawn_blocking(move || fs::remove_file(&info_path))
         .await
         .unwrap_or_else(|e| {
-            Err(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            Err(std::io::Error::other(
                 e.to_string(),
             ))
         });

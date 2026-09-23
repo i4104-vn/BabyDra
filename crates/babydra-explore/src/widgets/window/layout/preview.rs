@@ -13,8 +13,6 @@ pub fn setup_preview_toggle(
 ) -> Rc<dyn Fn()> {
     let layout_paned = layout_paned.clone();
     let revealer_c = revealer.clone();
-    let preview_visible = preview_visible;
-    let user_wants_preview = user_wants_preview;
     let status_widgets_c = status_bar_widgets_cell;
 
     let toggle_preview = move || {

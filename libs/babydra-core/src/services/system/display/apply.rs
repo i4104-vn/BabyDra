@@ -70,7 +70,7 @@ pub fn apply_display_configs(monitors: &[MonitorConfig]) -> CoreResult<()> {
                                     let diff = (refresh - m.refresh_rate).abs();
                                     if diff < 1.0
                                         && best_match
-                                            .map_or(true, |(best_diff, _)| diff < best_diff)
+                                            .is_none_or(|(best_diff, _)| diff < best_diff)
                                     {
                                         best_match = Some((diff, refresh));
                                     }

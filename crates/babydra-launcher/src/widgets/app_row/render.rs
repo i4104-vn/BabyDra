@@ -99,7 +99,7 @@ pub fn build_list_app_ui(app: &DesktopApp) -> (gtk4::Button, gtk4::Box, gtk4::La
         .next()
         .unwrap_or("")
         .split('/')
-        .last()
+        .next_back()
         .unwrap_or("");
     let desc_text = if is_flatpak {
         format!("Flatpak App • {}", exec_bin)

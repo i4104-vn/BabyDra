@@ -134,7 +134,7 @@ mod tests {
 
     #[test]
     fn check_alpha_sane() {
-        assert!(ACCENT_ALPHA <= 1.0);
-        assert!(ACCENT_DIM_ALPHA <= ACCENT_ALPHA);
+        const { assert!(ACCENT_ALPHA <= 1.0) };
+        const { assert!(ACCENT_DIM_ALPHA <= ACCENT_ALPHA) };
     }
 }
