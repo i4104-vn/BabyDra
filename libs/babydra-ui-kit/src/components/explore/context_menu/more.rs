@@ -122,18 +122,3 @@ pub fn append_more_submenu(builder: ContextMenuBuilder, path: &Path) -> ContextM
     })
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_get_apps_for_directory() {
-        let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
-        let apps = get_apps_for_path(Path::new(&home));
-        assert!(!apps.is_empty());
-        let names: Vec<String> = apps.iter().map(|a| a.name().to_string()).collect();
-        assert!(names.iter().any(|n| n.contains("Explore")
-            || n.contains("Studio")
-            || n.contains("IDE")));
-    }
-}

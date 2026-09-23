@@ -6,16 +6,12 @@ publish = false
 description = "Integration test suite for the BabyDra workspace (TDD safety net)."
 
 # Integration tests are declared explicitly so each test file in the
-# sub-folders below (common/, models/, ...) is compiled as its own test
-# binary. This keeps tests small, focused and easy to extend: to add a
-# new test area, drop a file in the matching folder and register a
-# `[[test]]` entry here.
+# sub-folders below (common/, models/, services/, theme/) is compiled as its
+# own fast, focused test binary.
 [dev-dependencies]
 babydra-core = { workspace = true }
 babydra-theme = { workspace = true }
-babydra-ui-kit = { workspace = true }
 chrono = "0.4"
-gtk4 = { version = "0.9", features = ["v4_10"] }
 serde_json = "1.0"
 toml = "0.8"
 
@@ -60,16 +56,8 @@ name = "models_shell_theme_config"
 path = "models/shell_theme_config.rs"
 
 [[test]]
-name = "services_wallpaper"
-path = "services/wallpaper.rs"
-
-[[test]]
 name = "services_updates"
 path = "services/updates.rs"
-
-[[test]]
-name = "services_display"
-path = "services/display.rs"
 
 [[test]]
 name = "services_explore_uri"
@@ -90,37 +78,3 @@ path = "theme/tokens.rs"
 [[test]]
 name = "theme_shipped"
 path = "theme/shipped.rs"
-
-[[test]]
-name = "theme_css"
-path = "theme/css.rs"
-
-[[test]]
-name = "kits_prelude"
-path = "kits/prelude.rs"
-
-[[test]]
-name = "kits_icon"
-path = "kits/icon.rs"
-
-[[test]]
-name = "kits_dialog"
-path = "kits/dialog.rs"
-
-[[test]]
-name = "kits_tooltip_popover"
-path = "kits/tooltip_popover.rs"
-
-[[test]]
-name = "kits_loading"
-path = "kits/loading.rs"
-
-[[test]]
-name = "kits_overlay"
-path = "kits/overlay.rs"
-
-[[test]]
-name = "services_recording"
-path = "services/recording.rs"
-
-

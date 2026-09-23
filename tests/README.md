@@ -20,7 +20,7 @@ Current areas:
 |----------------|--------------------------------------|-------------------------|
 | `common/`      | babydra-core pure logic              | `babydra-core`          |
 | `models/`      | shell theme config, explore grouping | `babydra-core`          |
-| `services/`    | wallpaper avatar cropping            | `babydra-core`, `gtk4`  |
+| `services/`    | URI decoding, kitty theme, updates, workspace | `babydra-core`          |
 | `theme/`       | theme package engine + tokens        | `babydra-theme`         |
 All test binaries are declared explicitly in `tests/Cargo.toml` (`[[test]]`
 entries) so each file compiles as its own small, focused binary.
