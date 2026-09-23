@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
+use gtk4_layer_shell::{Edge, KeyboardMode, Layer};
 
 pub struct OverlayWindowComponents {
     pub window: gtk4::ApplicationWindow,
@@ -33,10 +33,6 @@ pub fn create_overlay_window(app: &gtk4::Application) -> OverlayWindowComponents
         0,
         None,
     );
-    window.set_margin(Edge::Top, 0);
-    window.set_margin(Edge::Bottom, 0);
-    window.set_margin(Edge::Left, 0);
-    window.set_margin(Edge::Right, 0);
     window.add_css_class("switcher-window");
 
     let overlay_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);

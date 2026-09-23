@@ -222,10 +222,13 @@ pub fn build_panel_ui(
         None,
     );
 
-    // Float topbar flush against top edge
-    window.set_margin(Edge::Top, 8);
-    window.set_margin(Edge::Left, 1);
-    window.set_margin(Edge::Right, 1);
+    // Float topbar flush against top edge. Layer-shell margins are not valid
+    // on the X11 fallback used by headless CI.
+    if gtk4_layer_shell::is_supported() {
+        window.set_margin(Edge::Top, 8);
+        window.set_margin(Edge::Left, 1);
+        window.set_margin(Edge::Right, 1);
+    }
 
     window.set_default_size(0, 36);
 

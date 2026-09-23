@@ -14,6 +14,10 @@ pub fn init_layer_window(
     margin_bottom: i32,
     namespace: Option<&str>,
 ) {
+    if !gtk4_layer_shell::is_supported() {
+        return;
+    }
+
     window.init_layer_shell();
     if let Some(ns) = namespace {
         window.set_namespace(ns);

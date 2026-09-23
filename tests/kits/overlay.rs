@@ -60,14 +60,11 @@ fn test_overlay_window_right_aligned_layout() {
     assert_eq!(children.len(), 2);
     assert_eq!(children[0], comp.meta_bar.clone().upcast::<gtk4::Widget>());
     assert_eq!(children[1], comp.deck_container.clone().upcast::<gtk4::Widget>());
+
+    assert_scrolled_window_adjustment();
 }
 
-#[test]
-fn test_scrolled_window_adjustment() {
-    if gtk4::init().is_err() {
-        return;
-    }
-
+fn assert_scrolled_window_adjustment() {
     let scrolled = gtk4::ScrolledWindow::new();
     scrolled.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::External);
     scrolled.set_size_request(54, 302);
@@ -101,4 +98,3 @@ fn test_scrolled_window_adjustment() {
     vadj.set_value(62.0);
     println!("AFTER SET 62: value={}", vadj.value());
 }
-
