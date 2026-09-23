@@ -3,35 +3,61 @@ name: CI
 on:
   push:
     branches:
+      - main
       - release
       - develop
       - 'refactor/**'
+      - 'feature/**'
   pull_request:
+    branches:
+      - main
+      - release
+      - develop
+
+env:
+  CARGO_TERM_COLOR: always
+  GDK_BACKEND: x11
 
 jobs:
   check:
     name: Safety-net checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Install system dependencies (GTK4 + layer shell)
+      - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
             libgtk-4-dev \
-            libgtk-4-layer-shell-dev \
-            libgdk-pixbuf-2.0-dev \
-            libcairo2-dev \
-            pkg-config
+            libwayland-dev \
+            wayland-protocols \
+            meson \
+            ninja-build \
+            pkg-config \
+            xvfb
+
+      - name: Build and install gtk4-layer-shell
+        run: |
+          git clone --depth 1 https://github.com/wmww/gtk4-layer-shell.git /tmp/gtk4-layer-shell
+          meson setup /tmp/gtk4-layer-shell/build /tmp/gtk4-layer-shell --prefix=/usr -Dintrospection=false -Dvapi=false
+          sudo ninja -C /tmp/gtk4-layer-shell/build install
+          sudo ldconfig
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
-          components: rustfmt, clippy
+          components: clippy
 
-      - name: Cache cargo registry
+      - name: Cache cargo registry & target
         uses: Swatinem/rust-cache@v2
 
-      - name: Run safety-net checks
-        run: ./scripts/check.sh
+      - name: Type-check workspace (cargo check)
+        run: cargo check --workspace --all-targets
+
+      - name: Lint with Clippy (cargo clippy)
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: Run test suite (cargo test)
+        run: xvfb-run -a cargo test --workspace
