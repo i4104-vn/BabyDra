@@ -1,8 +1,9 @@
 use crate::actions::runner::CommandRunner;
+use crate::actions::update::desktop::install_desktop_integrations;
 use crate::config::UpdaterConfig;
 use crate::utils::fs::{copy_dir_all, mkdir_p, set_executable};
 use crate::utils::process::{command_exists, kill_processes};
-use crate::utils::system::get_home_dir;
+use crate::utils::system::{get_babydra_dir, get_home_dir};
 use std::fs;
 use std::path::Path;
 use std::process::Command;
@@ -21,7 +22,16 @@ pub fn execute_start(
     runner.step("Stopping stale shell processes...");
     kill_processes(&config.binaries.kill_processes);
 
-    // 2. Setup labwc autostart & rc.xml
+    // 2. Ensure wallpaper is present in ~/.babydra
+    let babydra_dir = get_babydra_dir();
+    mkdir_p(&babydra_dir)?;
+    let wallpaper_src = repo_root.join("wallpaper.png");
+    let wallpaper_dest = babydra_dir.join("wallpaper.png");
+    if wallpaper_src.exists() && !wallpaper_dest.exists() {
+        let _ = fs::copy(&wallpaper_src, &wallpaper_dest);
+    }
+
+    // 3. Setup labwc autostart & rc.xml
     mkdir_p(&labwc_config)?;
 
     let autostart_dest = labwc_config.join("autostart");
@@ -62,7 +72,10 @@ pub fn execute_start(
         }
     }
 
-    // 3. Verify ddcutil
+    // 4. Ensure desktop entries & MIME associations are configured
+    let _ = install_desktop_integrations(runner, repo_root, &config.mime_defaults);
+
+    // 5. Verify ddcutil
     if !command_exists("ddcutil") {
         runner.log("Warning: 'ddcutil' is not installed. Brightness controls for external monitors will not be available.");
     }

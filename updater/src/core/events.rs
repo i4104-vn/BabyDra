@@ -53,7 +53,17 @@ pub fn handle_key_event(app: &mut App, code: KeyCode, tx: &Sender<LogMessage>) {
                     app.sudo_error_message = None;
 
                     if let Some(action) = app.pending_sudo_action.take() {
-                        spawn_action(app, action, tx.clone());
+                        if action == ActionId::FactoryReset {
+                            let mode = match app.reset_mode_selected {
+                                0 => ResetMode::KeepPackages,
+                                1 => ResetMode::RemoveShellPackages,
+                                2 => ResetMode::DryRun,
+                                _ => ResetMode::RemoveAllApps,
+                            };
+                            spawn_reset(app, mode, tx.clone());
+                        } else {
+                            spawn_action(app, action, tx.clone());
+                        }
                     } else {
                         app.view_state = ViewState::Menu;
                     }

@@ -1,5 +1,5 @@
 use crate::core::app::App;
-use crate::ui::layout::centered_rect;
+use crate::ui::layout::centered_rect_fixed;
 use crate::ui::theme::*;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::style::{Modifier, Style};
@@ -8,7 +8,7 @@ use ratatui::widgets::{Block, BorderType, Borders, Clear, Paragraph};
 use ratatui::Frame;
 
 pub fn render_sudo_modal(frame: &mut Frame, area: Rect, app: &App) {
-    let popup_area = centered_rect(50, 32, area);
+    let popup_area = centered_rect_fixed(56, 12, area);
     frame.render_widget(Clear, popup_area);
 
     let chunks = Layout::default()
