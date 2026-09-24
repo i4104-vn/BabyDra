@@ -25,6 +25,7 @@ exclude = [
     ".old_project",
     ".old_project/*",
     ".old_project/I4ArchSettings/src-tauri",
+    "updater",
 ]
 
 [workspace.package]
