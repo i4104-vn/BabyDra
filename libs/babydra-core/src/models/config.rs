@@ -334,21 +334,3 @@ impl Default for ClipboardConfig {
         }
     }
 }
-
-/// Parsed `variant.toml`.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct Variant {
-    #[serde(default)]
-    pub name: String,
-    /// Theme package id to use (see `themes/`).
-    pub theme: String,
-    /// List of apps this variant installs / runs.
-    #[serde(default)]
-    pub apps: Vec<String>,
-    /// Keybind map (action → target).
-    #[serde(default)]
-    pub keybinds: std::collections::HashMap<String, String>,
-    /// Config overrides (dotted path → value).
-    #[serde(default)]
-    pub config_overrides: std::collections::HashMap<String, toml::Value>,
-}

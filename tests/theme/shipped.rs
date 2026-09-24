@@ -1,11 +1,8 @@
-//! Integration tests: shipped themes & variants stay in sync.
+//! Integration tests: shipped themes.
 //!
-//! Verifies every theme package in `themes/` resolves, and every variant in
-//! `variants/` points to an existing theme. Uses its own test binary so it
-//! can point `BABYDRA_THEMES_DIR` / `BABYDRA_VARIANTS_DIR` at the repo
-//! without racing the other theme tests that use a temp dir.
+//! Verifies every theme package in `assets/themes/` resolves, and that documented
+//! accent colors match tokens and CSS layers.
 
-use babydra_core::config::variant::{list_variants, load_variant};
 use babydra_theme::resolve_theme;
 use std::path::PathBuf;
 
@@ -20,16 +17,6 @@ fn shipped_themes_dir() -> PathBuf {
         assets
     } else {
         root.join("themes")
-    }
-}
-
-fn shipped_variants_dir() -> PathBuf {
-    let root = repo_root();
-    let assets = root.join("assets").join("variants");
-    if assets.is_dir() {
-        assets
-    } else {
-        root.join("variants")
     }
 }
 
@@ -49,9 +36,6 @@ const SHIPPED_ACCENTS: [(&str, &str); 4] = [
     ("babydra-green", "10b981"),
     ("babydra-rose", "f43f5e"),
 ];
-
-// `list_variants()` returns names sorted alphabetically.
-const SHIPPED_VARIANTS: [&str; 5] = ["blue", "default", "green", "purple", "rose"];
 
 #[test]
 fn all_shipped_themes_resolve() {
@@ -76,27 +60,6 @@ fn all_shipped_themes_resolve() {
         assert!(
             theme.css_layer.contains(&format!("#{accent}")),
             "theme {id} css/theme.css missing accent #{accent}"
-        );
-    }
-}
-
-#[test]
-fn shipped_variants_match_shipped_themes() {
-    std::env::set_var("BABYDRA_THEMES_DIR", shipped_themes_dir());
-    std::env::set_var("BABYDRA_VARIANTS_DIR", shipped_variants_dir());
-
-    let variants = list_variants();
-    assert_eq!(
-        variants, SHIPPED_VARIANTS,
-        "variants/ must stay in sync with the theme set"
-    );
-
-    for name in SHIPPED_VARIANTS {
-        let v = load_variant(name).unwrap_or_else(|e| panic!("variant {name} failed: {e}"));
-        assert!(
-            resolve_theme(&v.theme).is_ok(),
-            "variant {name} points to missing theme {}",
-            v.theme
         );
     }
 }

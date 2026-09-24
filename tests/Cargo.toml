@@ -32,10 +32,6 @@ name = "common_storage"
 path = "common/storage.rs"
 
 [[test]]
-name = "common_variant"
-path = "common/variant.rs"
-
-[[test]]
 name = "common_vpn"
 path = "common/vpn.rs"
 
