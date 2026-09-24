@@ -50,3 +50,10 @@ pub fn remove_dir_all_if_exists(path: &Path) {
         let _ = fs::remove_dir_all(path);
     }
 }
+
+/// Converts a path reference to a UTF-8 string argument, or returns an error
+pub fn path_arg(path: &Path) -> Result<String, String> {
+    path.to_str()
+        .map(str::to_owned)
+        .ok_or_else(|| format!("Path is not valid UTF-8: {}", path.display()))
+}

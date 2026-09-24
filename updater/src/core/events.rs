@@ -190,6 +190,12 @@ pub fn spawn_action(app: &mut App, action_id: ActionId, tx: Sender<LogMessage>) 
     app.active_action_name = Some(app.selected_action().title.to_string());
     app.status_message = format!("Running: {}...", app.selected_action().title);
 
+    match action_id {
+        ActionId::FullInstall => app.start_file_logging("install", "Full System Install"),
+        ActionId::UpdateReload => app.start_file_logging("update", "Hot Update & Reload"),
+        _ => {}
+    }
+
     let repo_root = app.repo_root.clone();
     let config = app.config.clone();
 

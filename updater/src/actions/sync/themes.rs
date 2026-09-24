@@ -1,5 +1,5 @@
 use crate::actions::runner::CommandRunner;
-use crate::utils::fs::{copy_dir_all, mkdir_p};
+use crate::utils::fs::{copy_dir_all, mkdir_p, path_arg};
 use crate::utils::system::{get_babydra_dir, get_home_dir};
 use std::fs;
 use std::path::Path;
@@ -64,10 +64,4 @@ pub fn sync_themes(runner: &CommandRunner, repo_root: &Path) -> Result<(), Strin
     }
 
     Ok(())
-}
-
-fn path_arg(path: &Path) -> Result<String, String> {
-    path.to_str()
-        .map(str::to_owned)
-        .ok_or_else(|| format!("Path is not valid UTF-8: {}", path.display()))
 }

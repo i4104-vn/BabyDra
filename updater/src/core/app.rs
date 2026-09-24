@@ -2,6 +2,7 @@ use crate::actions::runner::LogMessage;
 use crate::config::{load_config, UpdaterConfig};
 use crate::core::repo::find_repo_root;
 use crate::core::state::*;
+use crate::utils::logger::FileLogger;
 use std::path::PathBuf;
 
 pub struct App {
@@ -28,6 +29,9 @@ pub struct App {
     // Modal selection states
     pub reset_mode_selected: usize,
     pub component_selected: usize,
+
+    // File logging
+    pub file_logger: Option<FileLogger>,
 }
 
 const MAX_LOG_LINES: usize = 10_000;
@@ -132,6 +136,7 @@ impl App {
             pending_sudo_action: None,
             reset_mode_selected: 0,
             component_selected: 0,
+            file_logger: None,
         }
     }
 
@@ -204,16 +209,56 @@ impl App {
         self.autoscroll = true;
     }
 
+    pub fn start_file_logging(&mut self, prefix: &str, title: &str) {
+        match FileLogger::start(&self.repo_root, prefix, title) {
+            Ok(logger) => {
+                if let Some(filename) = logger.path().file_name() {
+                    self.append_log(format!("📄 Logging output to logs/{}", filename.to_string_lossy()));
+                }
+                self.file_logger = Some(logger);
+            }
+            Err(e) => {
+                self.append_log(format!("⚠️ Failed to initialize log file: {}", e));
+            }
+        }
+    }
+
     pub fn handle_log_message(&mut self, message: LogMessage) {
         match message {
-            LogMessage::Line(line) => self.append_log(line),
-            LogMessage::Step(message)
-            | LogMessage::Success(message)
-            | LogMessage::Error(message) => {
-                self.status_message = message.clone();
-                self.append_log(message);
+            LogMessage::Line(line) => {
+                if let Some(logger) = &mut self.file_logger {
+                    logger.write_line(&line);
+                }
+                self.append_log(line);
+            }
+            LogMessage::Step(msg) => {
+                if let Some(logger) = &mut self.file_logger {
+                    logger.write_step(&msg);
+                }
+                self.status_message = msg.clone();
+                self.append_log(msg);
+            }
+            LogMessage::Success(msg) => {
+                if let Some(logger) = &mut self.file_logger {
+                    logger.write_success(&msg);
+                }
+                self.status_message = msg.clone();
+                self.append_log(msg);
+            }
+            LogMessage::Error(msg) => {
+                if let Some(logger) = &mut self.file_logger {
+                    logger.write_error(&msg);
+                }
+                self.status_message = msg.clone();
+                self.append_log(msg);
             }
             LogMessage::Done(code) => {
+                if let Some(mut logger) = self.file_logger.take() {
+                    let log_path = logger.finish(code);
+                    if let Some(name) = log_path.file_name() {
+                        self.append_log(format!("✔ Log file saved to logs/{}", name.to_string_lossy()));
+                    }
+                }
                 self.last_exit_code = Some(code);
                 self.view_state = ViewState::Finished;
                 self.status_message = if code == 0 {

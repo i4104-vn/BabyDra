@@ -41,35 +41,64 @@ pub fn clean_packages(
         }
         ResetMode::RemoveAllApps => {
             runner.log("Scanning non-base packages to revert to pure Arch baseline...");
-            let output = Command::new("pacman")
-                .args(["-Qdtq"])
-                .output()
-                .map_err(|e| format!("Failed to query orphan packages: {}", e));
+            const PROTECTED: &[&str] = &[
+                "base", "base-devel", "linux", "linux-lts", "linux-zen", "linux-hardened",
+                "linux-firmware", "intel-ucode", "amd-ucode", "btrfs-progs", "e2fsprogs",
+                "dosfstools", "efibootmgr", "grub", "systemd", "systemd-sysvcompat",
+                "sudo", "networkmanager", "iwd", "dhcpcd", "iproute2", "git", "bash",
+                "zsh", "coreutils", "util-linux", "pacman", "archlinux-keyring",
+            ];
 
-            match output {
-                Ok(output) if output.status.success() => {
-                    let package_list = String::from_utf8_lossy(&output.stdout);
-                    let packages: Vec<&str> = package_list
+            let explicit_output = Command::new("pacman")
+                .args(["-Qeq"])
+                .output()
+                .map_err(|e| format!("Failed to query explicit packages: {}", e))?;
+
+            if explicit_output.status.success() {
+                let package_list = String::from_utf8_lossy(&explicit_output.stdout);
+                let pkgs_to_remove: Vec<&str> = package_list
+                    .lines()
+                    .map(str::trim)
+                    .filter(|p| !p.is_empty() && !PROTECTED.contains(p))
+                    .collect();
+
+                if !pkgs_to_remove.is_empty() {
+                    runner.log(format!(
+                        "Uninstalling user packages ({} packages)...",
+                        pkgs_to_remove.len()
+                    ));
+                    let mut args = vec!["-Rns", "--noconfirm"];
+                    args.extend_from_slice(&pkgs_to_remove);
+                    if runner.run_sudo("pacman", &args, None).is_err() {
+                        runner.log("Retrying with -R --noconfirm...");
+                        let mut fallback_args = vec!["-R", "--noconfirm"];
+                        fallback_args.extend_from_slice(&pkgs_to_remove);
+                        let _ = runner.run_sudo("pacman", &fallback_args, None);
+                    }
+                } else {
+                    runner.log("No user packages to remove; system already at baseline.");
+                }
+            }
+
+            runner.log("Cleaning orphan packages...");
+            let orphan_output = Command::new("pacman").args(["-Qdtq"]).output();
+            if let Ok(output) = orphan_output {
+                if output.status.success() {
+                    let orphans = String::from_utf8_lossy(&output.stdout);
+                    let orphan_list: Vec<&str> = orphans
                         .lines()
                         .map(str::trim)
-                        .filter(|package| !package.is_empty())
+                        .filter(|p| !p.is_empty())
                         .collect();
 
-                    if packages.is_empty() {
-                        runner.log("No orphan packages found.");
-                    } else {
+                    if !orphan_list.is_empty() {
                         let mut args = vec!["-Rns", "--noconfirm"];
-                        args.extend(packages);
-                        runner.run_sudo("pacman", &args, None)?;
+                        args.extend(orphan_list);
+                        let _ = runner.run_sudo("pacman", &args, None);
+                    } else {
+                        runner.log("No orphan packages found.");
                     }
                 }
-                Ok(output) => {
-                    return Err(format!(
-                        "Failed to query orphan packages (exit code {}).",
-                        output.status.code().unwrap_or(-1)
-                    ));
-                }
-                Err(error) => return Err(error),
             }
         }
         _ => {

@@ -19,6 +19,7 @@ Cargo.lock
 
 # Safety-net artifacts
 *.log
+logs/
 screenshot-baseline/
 
 # --- Phần riêng của nhánh `main` — không tồn tại trên release/develop ---

@@ -34,6 +34,8 @@ pub fn execute_install(
     tools::ensure_wtype_installed(runner)?;
 
     // 4. Compile workspace
+    runner.step("Cleaning old build artifacts (cargo clean)...");
+    runner.run_cmd("cargo", &["clean"], Some(repo_root))?;
     build::build_release(runner, repo_root)?;
 
     // 5. Stop old processes & install binaries

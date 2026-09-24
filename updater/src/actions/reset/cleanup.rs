@@ -60,6 +60,14 @@ pub fn clean_system_and_user_files(runner: &CommandRunner, is_dry_run: bool) -> 
             &home.join(".local/share/dbus-1/services/org.freedesktop.FileManager1.service"),
         );
 
+        // Remove configs installed during install
+        remove_file_if_exists(&home.join(".config/gtk-3.0/settings.ini"));
+        remove_file_if_exists(&home.join(".config/gtk-4.0/settings.ini"));
+        remove_file_if_exists(&home.join(".config/fontconfig/fonts.conf"));
+        remove_dir_all_if_exists(&home.join(".config/fastfetch"));
+        remove_dir_all_if_exists(&home.join(".config/kitty"));
+        remove_dir_all_if_exists(&home.join(".config/nvim"));
+
         if let Ok(entries) = fs::read_dir(&apps_dir) {
             for entry in entries.flatten() {
                 let name = entry.file_name().to_string_lossy().to_string();
