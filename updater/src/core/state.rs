@@ -13,7 +13,6 @@ pub enum ViewState {
 pub struct ActionItem {
     pub id: ActionId,
     pub title: &'static str,
-    pub icon: &'static str,
     pub tag: &'static str,
     pub description: &'static str,
     pub requires_sudo: bool,
@@ -24,7 +23,6 @@ pub enum ActionId {
     UpdateReload,
     SafetyCheck,
     StartDesktop,
-    FullInstall,
     ComponentRestart,
     SyncConfigs,
     CleanWorkspace,

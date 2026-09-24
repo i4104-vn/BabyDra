@@ -32,11 +32,11 @@ impl CommandRunner {
     }
 
     pub fn success(&self, msg: impl Into<String>) {
-        self.send(LogMessage::Success(format!("✔ {}", msg.into())));
+        self.send(LogMessage::Success(format!("[OK] {}", msg.into())));
     }
 
     pub fn error(&self, msg: impl Into<String>) {
-        self.send(LogMessage::Error(format!("✘ {}", msg.into())));
+        self.send(LogMessage::Error(format!("[ERROR] {}", msg.into())));
     }
 
     pub fn done(&self, code: i32) {
@@ -138,6 +138,7 @@ impl CommandRunner {
     }
 
     /// Run a command with sudo and provide data through its stdin.
+    #[allow(dead_code)]
     pub fn run_sudo_with_input(
         &self,
         prog: &str,

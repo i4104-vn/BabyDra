@@ -28,20 +28,20 @@ pub fn execute_update(
 
     // 2. Stop running processes
     runner.step("Stopping active shell and desktop processes...");
-    kill_processes(&config.binaries.kill_processes);
+    kill_processes(&config.kill_processes());
     runner.success("Active processes stopped.");
 
-    // 3. Install new binaries
-    binaries::install_binaries(runner, repo_root, &config.binaries)?;
+    // 3. Install new binaries from workspace.toml
+    binaries::install_binaries(runner, repo_root, &config.workspace_binaries)?;
 
     // 4. Register desktop application entries & MIME
     desktop::install_desktop_integrations(runner, repo_root, &config.mime_defaults)?;
 
-    // 5. Sync configurations & themes
+    // 5. Sync configurations, themes, and gsettings
     sync_all_configs(runner, repo_root, config)?;
 
     // 6. Start background shell components
-    daemons::start_shell_daemons(runner, &config.binaries.shell_daemons)?;
+    daemons::start_shell_daemons(runner, &config.shell_daemons)?;
 
     runner.success("Hot Update & Reload completed successfully!");
     Ok(())

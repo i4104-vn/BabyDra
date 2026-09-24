@@ -32,6 +32,9 @@ pub struct App {
 
     // File logging
     pub file_logger: Option<FileLogger>,
+
+    // Auto-return timer to menu after success
+    pub return_to_menu_at: Option<std::time::Instant>,
 }
 
 const MAX_LOG_LINES: usize = 10_000;
@@ -45,7 +48,6 @@ impl App {
             ActionItem {
                 id: ActionId::UpdateReload,
                 title: "Hot Update & Reload",
-                icon: "⚡",
                 tag: "CORE",
                 description: "Build release, install binaries, sync configs & restart running shell daemons.",
                 requires_sudo: true,
@@ -53,7 +55,6 @@ impl App {
             ActionItem {
                 id: ActionId::SafetyCheck,
                 title: "Run Safety Checks",
-                icon: "🧪",
                 tag: "LINT",
                 description: "Run cargo check, cargo clippy (-D warnings), and test suite.",
                 requires_sudo: false,
@@ -61,23 +62,13 @@ impl App {
             ActionItem {
                 id: ActionId::StartDesktop,
                 title: "Start Desktop Shell",
-                icon: "🚀",
                 tag: "EXEC",
                 description: "Prepare environment, sync configs, and start labwc compositor.",
                 requires_sudo: false,
             },
             ActionItem {
-                id: ActionId::FullInstall,
-                title: "Full System Install",
-                icon: "📦",
-                tag: "SETUP",
-                description: "Install pacman & yay packages, configure udev/i2c/greetd, build and deploy all.",
-                requires_sudo: true,
-            },
-            ActionItem {
                 id: ActionId::ComponentRestart,
                 title: "Restart Component",
-                icon: "🔄",
                 tag: "DAEMON",
                 description: "Select and restart an individual component (Panel, Desktop, Switcher, etc.).",
                 requires_sudo: false,
@@ -85,7 +76,6 @@ impl App {
             ActionItem {
                 id: ActionId::SyncConfigs,
                 title: "Sync Configs & Themes",
-                icon: "🎨",
                 tag: "SYNC",
                 description: "Instantly copy configs (labwc, GTK, kitty, fastfetch, themes) without compiling code.",
                 requires_sudo: true,
@@ -93,7 +83,6 @@ impl App {
             ActionItem {
                 id: ActionId::CleanWorkspace,
                 title: "Clean Workspace",
-                icon: "🧹",
                 tag: "CLEAN",
                 description: "Run cargo clean to free build disk space in target/ directory.",
                 requires_sudo: false,
@@ -101,17 +90,15 @@ impl App {
             ActionItem {
                 id: ActionId::FactoryReset,
                 title: "Factory Reset Arch Linux",
-                icon: "⚠️ ",
                 tag: "RESET",
                 description: "Restore system back to vanilla Arch Linux CLI / TTY login state.",
                 requires_sudo: true,
             },
             ActionItem {
                 id: ActionId::Quit,
-                title: "Exit Updater",
-                icon: "🚪",
-                tag: "EXIT",
-                description: "Quit the BabyDra Updater TUI.",
+                title: "Quit",
+                tag: "QUIT",
+                description: "Quit the BabyDra Updater and return to shell.",
                 requires_sudo: false,
             },
         ];
@@ -137,6 +124,7 @@ impl App {
             reset_mode_selected: 0,
             component_selected: 0,
             file_logger: None,
+            return_to_menu_at: None,
         }
     }
 
@@ -213,12 +201,12 @@ impl App {
         match FileLogger::start(&self.repo_root, prefix, title) {
             Ok(logger) => {
                 if let Some(filename) = logger.path().file_name() {
-                    self.append_log(format!("📄 Logging output to logs/{}", filename.to_string_lossy()));
+                    self.append_log(format!("Logging output to logs/{}", filename.to_string_lossy()));
                 }
                 self.file_logger = Some(logger);
             }
             Err(e) => {
-                self.append_log(format!("⚠️ Failed to initialize log file: {}", e));
+                self.append_log(format!("[WARN] Failed to initialize log file: {}", e));
             }
         }
     }
@@ -256,16 +244,18 @@ impl App {
                 if let Some(mut logger) = self.file_logger.take() {
                     let log_path = logger.finish(code);
                     if let Some(name) = log_path.file_name() {
-                        self.append_log(format!("✔ Log file saved to logs/{}", name.to_string_lossy()));
+                        self.append_log(format!("Log file saved to logs/{}", name.to_string_lossy()));
                     }
                 }
                 self.last_exit_code = Some(code);
                 self.view_state = ViewState::Finished;
-                self.status_message = if code == 0 {
-                    "Operation finished successfully.".to_string()
+                if code == 0 {
+                    self.status_message = "Operation finished successfully. Returning to menu...".to_string();
+                    self.return_to_menu_at = Some(std::time::Instant::now() + std::time::Duration::from_millis(1500));
                 } else {
-                    format!("Operation failed with exit code {}.", code)
-                };
+                    self.status_message = format!("Operation failed with exit code {}.", code);
+                    self.return_to_menu_at = None;
+                }
             }
         }
     }

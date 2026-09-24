@@ -16,10 +16,6 @@ pub fn render_action_details(frame: &mut Frame, area: Rect, app: &App) {
     // Title & Tag
     lines.push(Line::from(vec![
         Span::styled(
-            format!(" {} ", item.icon),
-            Style::default().fg(COLOR_ORANGE),
-        ),
-        Span::styled(
             item.title,
             Style::default()
                 .fg(COLOR_TEXT_WHITE)
@@ -44,7 +40,7 @@ pub fn render_action_details(frame: &mut Frame, area: Rect, app: &App) {
     if item.requires_sudo {
         lines.push(Line::from(vec![
             Span::styled(
-                " 🔒 ROOT PRIVILEGES: ",
+                " ROOT PRIVILEGES: ",
                 Style::default()
                     .fg(COLOR_ORANGE)
                     .add_modifier(Modifier::BOLD),
@@ -97,27 +93,6 @@ pub fn render_action_details(frame: &mut Frame, area: Rect, app: &App) {
             lines.push(Line::from("  3. Check external display controls (ddcutil)"));
             lines.push(Line::from("  4. Launch labwc Wayland compositor"));
         }
-        ActionId::FullInstall => {
-            lines.push(Line::from(format!(
-                "  1. Install {} official Arch Linux packages via pacman",
-                app.config.packages.pacman.len()
-            )));
-            lines.push(Line::from(
-                "  2. Configure kernel module (i2c-dev) and CPU governor",
-            ));
-            lines.push(Line::from("  3. Configure user input group and udev rules"));
-            lines.push(Line::from(format!(
-                "  4. Install {} AUR packages via yay",
-                app.config.packages.yay.len()
-            )));
-            lines.push(Line::from("  5. Build wtype from source if missing"));
-            lines.push(Line::from(
-                "  6. Build and deploy all BabyDra binaries & configs",
-            ));
-            lines.push(Line::from(
-                "  7. Setup greetd display manager (cage -- babydra-greeter)",
-            ));
-        }
         ActionId::ComponentRestart => {
             lines.push(Line::from(
                 "  Select a single component to restart without a full reload:",
@@ -165,51 +140,57 @@ pub fn render_action_details(frame: &mut Frame, area: Rect, app: &App) {
             ));
         }
         ActionId::Quit => {
-            lines.push(Line::from("  Exits the updater terminal interface."));
+            lines.push(Line::from(vec![
+                Span::styled(
+                    "  Exit BabyDra Updater",
+                    Style::default().fg(COLOR_RED).add_modifier(Modifier::BOLD),
+                ),
+            ]));
+            lines.push(Line::from(""));
+            lines.push(Line::from("  • Returns cleanly to your terminal shell."));
+            lines.push(Line::from("  • All background daemons and crates will keep running."));
+            lines.push(Line::from("  • Press [Enter] or [q] anytime to exit."));
         }
     }
 
     lines.push(Line::from(""));
     lines.push(Line::from(Span::styled(
-        "Configuration Overview (updater.toml):",
+        "Deployment Overview (workspace.toml):",
         Style::default().fg(COLOR_CYAN).add_modifier(Modifier::BOLD),
     )));
     lines.push(Line::from(vec![
+        Span::styled("  • User Binaries: ", Style::default().fg(COLOR_TEXT_MUTED)),
         Span::styled(
-            "  • Pacman Packages: ",
-            Style::default().fg(COLOR_TEXT_MUTED),
+            format!("{} binaries", app.config.user_binaries().len()),
+            Style::default().fg(COLOR_TEXT_WHITE),
         ),
+        Span::styled("   • System Binaries: ", Style::default().fg(COLOR_TEXT_MUTED)),
         Span::styled(
-            format!("{} items", app.config.packages.pacman.len()),
+            format!("{} binaries", app.config.system_binaries().len()),
+            Style::default().fg(COLOR_TEXT_WHITE),
+        ),
+    ]));
+    lines.push(Line::from(vec![
+        Span::styled("  • Shell Daemons: ", Style::default().fg(COLOR_TEXT_MUTED)),
+        Span::styled(
+            format!("{} services", app.config.shell_daemons.len()),
+            Style::default().fg(COLOR_TEXT_WHITE),
+        ),
+        Span::styled("   • GSettings: ", Style::default().fg(COLOR_TEXT_MUTED)),
+        Span::styled(
+            format!("{} keys", app.config.gsettings.len()),
+            Style::default().fg(COLOR_TEXT_WHITE),
+        ),
+    ]));
+    lines.push(Line::from(vec![
+        Span::styled("  • Pacman Packages: ", Style::default().fg(COLOR_TEXT_MUTED)),
+        Span::styled(
+            format!("{} items", app.config.pacman_count),
             Style::default().fg(COLOR_TEXT_WHITE),
         ),
         Span::styled("   • AUR Packages: ", Style::default().fg(COLOR_TEXT_MUTED)),
         Span::styled(
-            format!("{} items", app.config.packages.yay.len()),
-            Style::default().fg(COLOR_TEXT_WHITE),
-        ),
-    ]));
-    lines.push(Line::from(vec![
-        Span::styled("  • User Binaries: ", Style::default().fg(COLOR_TEXT_MUTED)),
-        Span::styled(
-            format!("{} binaries", app.config.binaries.user_binaries.len()),
-            Style::default().fg(COLOR_TEXT_WHITE),
-        ),
-        Span::styled("   • Daemons: ", Style::default().fg(COLOR_TEXT_MUTED)),
-        Span::styled(
-            format!("{} services", app.config.binaries.shell_daemons.len()),
-            Style::default().fg(COLOR_TEXT_WHITE),
-        ),
-    ]));
-    lines.push(Line::from(vec![
-        Span::styled("  • UI Font: ", Style::default().fg(COLOR_TEXT_MUTED)),
-        Span::styled(
-            &app.config.gsettings.font_name,
-            Style::default().fg(COLOR_TEXT_WHITE),
-        ),
-        Span::styled("   • Icon Theme: ", Style::default().fg(COLOR_TEXT_MUTED)),
-        Span::styled(
-            &app.config.gsettings.icon_theme,
+            format!("{} items", app.config.aur_count),
             Style::default().fg(COLOR_TEXT_WHITE),
         ),
     ]));
@@ -218,7 +199,7 @@ pub fn render_action_details(frame: &mut Frame, area: Rect, app: &App) {
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
         .border_style(Style::default().fg(COLOR_BORDER))
-        .title(" ℹ️ Details & Configuration ")
+        .title(" Details & Configuration ")
         .title_style(Style::default().fg(COLOR_CYAN).add_modifier(Modifier::BOLD));
 
     let paragraph = Paragraph::new(lines).block(block);

@@ -24,7 +24,7 @@ pub fn render_reset_modal(frame: &mut Frame, area: Rect, app: &App) {
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
         .border_style(Style::default().fg(COLOR_RED))
-        .title(" ⚠️  FACTORY RESET SELECTION ")
+        .title(" FACTORY RESET SELECTION ")
         .title_style(Style::default().fg(COLOR_RED).add_modifier(Modifier::BOLD));
 
     let title_para = Paragraph::new(vec![Line::from(vec![

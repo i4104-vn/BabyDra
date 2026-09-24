@@ -60,6 +60,18 @@ fn main() -> Result<()> {
             app.tick_spinner();
         }
 
+        // Check auto-return to menu timer
+        if let Some(deadline) = app.return_to_menu_at {
+            if std::time::Instant::now() >= deadline {
+                app.return_to_menu_at = None;
+                app.view_state = crate::core::state::ViewState::Menu;
+                app.status_message = format!(
+                    "{} completed successfully. Crates running in background.",
+                    app.active_action_name.as_deref().unwrap_or("Operation")
+                );
+            }
+        }
+
         // Handle user input
         if event::poll(tick_rate)? {
             if let Event::Key(key) = event::read()? {

@@ -20,7 +20,7 @@ pub fn execute_start(
 
     // 1. Stop old shell processes
     runner.step("Stopping stale shell processes...");
-    kill_processes(&config.binaries.kill_processes);
+    kill_processes(&config.kill_processes());
 
     let configs_root = if repo_root.join("assets/configs").is_dir() {
         repo_root.join("assets/configs")

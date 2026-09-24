@@ -25,7 +25,6 @@ pub fn render_sudo_modal(frame: &mut Frame, area: Rect, app: &App) {
         .pending_sudo_action
         .map(|a| match a {
             crate::core::state::ActionId::UpdateReload => "Hot Update & Reload",
-            crate::core::state::ActionId::FullInstall => "Full System Install",
             crate::core::state::ActionId::SyncConfigs => "Sync Configs & Themes",
             crate::core::state::ActionId::FactoryReset => "Factory Reset Arch Linux",
             _ => "Privileged Action",
@@ -37,7 +36,7 @@ pub fn render_sudo_modal(frame: &mut Frame, area: Rect, app: &App) {
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
         .border_style(Style::default().fg(COLOR_ORANGE))
-        .title(" 🔒 ROOT AUTHENTICATION REQUIRED ")
+        .title(" ROOT AUTHENTICATION REQUIRED ")
         .title_style(
             Style::default()
                 .fg(COLOR_ORANGE)
@@ -84,7 +83,7 @@ pub fn render_sudo_modal(frame: &mut Frame, area: Rect, app: &App) {
     // Error Message
     let error_line = if let Some(err) = &app.sudo_error_message {
         Line::from(vec![Span::styled(
-            format!("  ✘ {} ", err),
+            format!("  [ERROR] {} ", err),
             Style::default().fg(COLOR_RED).add_modifier(Modifier::BOLD),
         )])
     } else {

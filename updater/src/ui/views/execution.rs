@@ -42,13 +42,7 @@ pub fn render_execution(frame: &mut Frame, area: Rect, app: &App) {
         match app.last_exit_code {
             Some(0) => Line::from(vec![
                 Span::styled(
-                    " ",
-                    Style::default()
-                        .fg(COLOR_EMERALD)
-                        .add_modifier(Modifier::BOLD),
-                ),
-                Span::styled(
-                    "SUCCESS: ",
+                    " [SUCCESS] ",
                     Style::default()
                         .fg(COLOR_EMERALD)
                         .add_modifier(Modifier::BOLD),
@@ -60,17 +54,13 @@ pub fn render_execution(frame: &mut Frame, area: Rect, app: &App) {
                         .add_modifier(Modifier::BOLD),
                 ),
                 Span::styled(
-                    " completed successfully! Press [Enter] or [Esc] to return.",
+                    " completed successfully! Returning to menu... [Enter/Esc to return now]",
                     Style::default().fg(COLOR_EMERALD),
                 ),
             ]),
             Some(code) => Line::from(vec![
                 Span::styled(
-                    " ✘ ",
-                    Style::default().fg(COLOR_RED).add_modifier(Modifier::BOLD),
-                ),
-                Span::styled(
-                    format!("FAILED (code {}): ", code),
+                    format!(" [FAILED (code {})] ", code),
                     Style::default().fg(COLOR_RED).add_modifier(Modifier::BOLD),
                 ),
                 Span::styled(
@@ -80,7 +70,7 @@ pub fn render_execution(frame: &mut Frame, area: Rect, app: &App) {
                         .add_modifier(Modifier::BOLD),
                 ),
                 Span::styled(
-                    " — Press [Enter] or [Esc] to return.",
+                    " - Press [Enter] or [Esc] to return.",
                     Style::default().fg(COLOR_RED),
                 ),
             ]),
@@ -130,14 +120,14 @@ pub fn render_execution(frame: &mut Frame, area: Rect, app: &App) {
                     line,
                     Style::default().fg(COLOR_CYAN).add_modifier(Modifier::BOLD),
                 ))
-            } else if line.starts_with("✔") {
+            } else if line.starts_with("[OK]") || line.starts_with("[SUCCESS]") || line.starts_with("✔") {
                 Line::from(Span::styled(
                     line,
                     Style::default()
                         .fg(COLOR_EMERALD)
                         .add_modifier(Modifier::BOLD),
                 ))
-            } else if line.starts_with("✘") {
+            } else if line.starts_with("[ERROR]") || line.starts_with("[FAIL]") || line.starts_with("✘") {
                 Line::from(Span::styled(
                     line,
                     Style::default().fg(COLOR_RED).add_modifier(Modifier::BOLD),
@@ -156,7 +146,7 @@ pub fn render_execution(frame: &mut Frame, area: Rect, app: &App) {
         "[Auto-scroll: OFF]"
     };
     let log_title = format!(
-        " 📜 Terminal Output ({} lines) {} ",
+        " Terminal Output ({} lines) {} ",
         total_logs, autoscroll_tag
     );
 

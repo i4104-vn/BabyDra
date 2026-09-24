@@ -21,13 +21,11 @@ scope = "user"
 name = "babydra-explore"
 scope = "user"
 description = "File manager"
-export_desktop = true
 
 [[binaries]]
 name = "babydra-settings"
 scope = "user"
 description = "Desktop and system settings application"
-export_desktop = true
 
 [[binaries]]
 name = "babydra-launcher"
@@ -48,13 +46,11 @@ scope = "user"
 [[binaries]]
 name = "babydra-preview"
 scope = "user"
-export_desktop = true
 
 [[binaries]]
 name = "babydra-notepad"
 scope = "user"
 description = "Text editor with syntax highlighting"
-export_desktop = true
 
 [packages]
 pacman = [

@@ -2,10 +2,9 @@ use crate::actions::runner::CommandRunner;
 use crate::config::UpdaterConfig;
 use crate::core::state::ComponentTarget;
 use crate::utils::fs::remove_file_if_exists;
-use crate::utils::process::kill_process;
-use crate::utils::system::{get_local_bin_dir, gsettings_set, refresh_fc_cache};
+use crate::utils::process::{kill_process, spawn_daemon};
+use crate::utils::system::get_local_bin_dir;
 use std::path::Path;
-use std::process::Command;
 
 pub fn execute_component_restart(
     runner: &CommandRunner,
@@ -66,18 +65,7 @@ pub fn execute_component_restart(
             runner.success("labwc reloaded.");
         }
         ComponentTarget::RefreshGtkFonts => {
-            runner.step("Re-applying GTK gsettings and font caches...");
-            let g = &config.gsettings;
-            gsettings_set("org.gnome.desktop.interface", "font-name", &g.font_name);
-            gsettings_set("org.gnome.desktop.interface", "icon-theme", &g.icon_theme);
-            gsettings_set(
-                "org.gnome.desktop.interface",
-                "cursor-theme",
-                &g.cursor_theme,
-            );
-            let cursor_size = g.cursor_size.to_string();
-            gsettings_set("org.gnome.desktop.interface", "cursor-size", &cursor_size);
-            refresh_fc_cache();
+            crate::actions::sync::gsettings::apply_desktop_gsettings(runner, &config.gsettings)?;
             runner.success("GTK theme and font cache refreshed.");
         }
     }
@@ -94,15 +82,14 @@ fn restart_binary(
     missing_message: &str,
 ) -> Result<(), String> {
     kill_process(name);
+    std::thread::sleep(std::time::Duration::from_millis(150));
     let binary = local_bin.join(name);
     if !binary.is_file() {
         runner.error(missing_message);
         return Err(missing_message.to_string());
     }
 
-    Command::new(&binary)
-        .args(args)
-        .spawn()
+    spawn_daemon(&binary, args, name)
         .map_err(|e| format!("Failed to spawn {}: {}", name, e))?;
     runner.success(success_message);
     Ok(())

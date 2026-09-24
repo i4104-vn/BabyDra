@@ -77,9 +77,17 @@ pub fn handle_key_event(app: &mut App, code: KeyCode, tx: &Sender<LogMessage>) {
         },
         ViewState::Running => handle_log_navigation(app, code),
         ViewState::Finished => match code {
-            KeyCode::Enter | KeyCode::Esc | KeyCode::Char('q') => {
+            KeyCode::Enter | KeyCode::Esc | KeyCode::Char('q') | KeyCode::Char(' ') => {
+                app.return_to_menu_at = None;
                 app.view_state = ViewState::Menu;
-                app.status_message = "Ready. Select an action.".to_string();
+                app.status_message = if app.last_exit_code == Some(0) {
+                    format!(
+                        "{} completed successfully. Crates running in background.",
+                        app.active_action_name.as_deref().unwrap_or("Operation")
+                    )
+                } else {
+                    "Ready. Select an action.".to_string()
+                };
             }
             _ => handle_log_navigation(app, code),
         },
@@ -190,10 +198,8 @@ pub fn spawn_action(app: &mut App, action_id: ActionId, tx: Sender<LogMessage>) 
     app.active_action_name = Some(app.selected_action().title.to_string());
     app.status_message = format!("Running: {}...", app.selected_action().title);
 
-    match action_id {
-        ActionId::FullInstall => app.start_file_logging("install", "Full System Install"),
-        ActionId::UpdateReload => app.start_file_logging("update", "Hot Update & Reload"),
-        _ => {}
+    if action_id == ActionId::UpdateReload {
+        app.start_file_logging("update", "Hot Update & Reload");
     }
 
     let repo_root = app.repo_root.clone();
@@ -205,7 +211,6 @@ pub fn spawn_action(app: &mut App, action_id: ActionId, tx: Sender<LogMessage>) 
             ActionId::UpdateReload => execute_update(&runner, &repo_root, &config),
             ActionId::SafetyCheck => execute_check(&runner, &repo_root),
             ActionId::StartDesktop => execute_start(&runner, &repo_root, &config),
-            ActionId::FullInstall => execute_install(&runner, &repo_root, &config),
             ActionId::SyncConfigs => sync_all_configs(&runner, &repo_root, &config),
             ActionId::CleanWorkspace => {
                 runner.step("Cleaning workspace build artifacts (cargo clean)...");

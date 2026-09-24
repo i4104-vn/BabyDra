@@ -24,7 +24,7 @@ pub fn render_component_modal(frame: &mut Frame, area: Rect, app: &App) {
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
         .border_style(Style::default().fg(COLOR_CYAN))
-        .title(" 🔄 RESTART INDIVIDUAL COMPONENT ")
+        .title(" RESTART INDIVIDUAL COMPONENT ")
         .title_style(Style::default().fg(COLOR_CYAN).add_modifier(Modifier::BOLD));
 
     let title_para = Paragraph::new(vec![Line::from(vec![Span::styled(
