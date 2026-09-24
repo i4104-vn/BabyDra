@@ -33,10 +33,6 @@ pub fn render_execution(frame: &mut Frame, area: Rect, app: &App) {
                     .fg(COLOR_TEXT_WHITE)
                     .add_modifier(Modifier::BOLD),
             ),
-            Span::styled(
-                "  (Live output streaming below...)",
-                Style::default().fg(COLOR_TEXT_MUTED),
-            ),
         ])
     } else {
         match app.last_exit_code {
