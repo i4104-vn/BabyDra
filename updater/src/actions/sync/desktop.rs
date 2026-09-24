@@ -7,9 +7,15 @@ use std::path::Path;
 pub fn sync_desktop_configs(runner: &CommandRunner, repo_root: &Path) -> Result<(), String> {
     let home = get_home_dir();
 
+    let configs_root = if repo_root.join("assets/configs").is_dir() {
+        repo_root.join("assets/configs")
+    } else {
+        repo_root.join("configs")
+    };
+
     runner.step("Syncing labwc compositor configurations...");
     let labwc_dest = home.join(".config/labwc");
-    let labwc_src = repo_root.join("configs/labwc");
+    let labwc_src = configs_root.join("labwc");
     mkdir_p(&labwc_dest)?;
 
     if labwc_src.exists() {
@@ -76,17 +82,17 @@ pub fn sync_desktop_configs(runner: &CommandRunner, repo_root: &Path) -> Result<
             .map_err(|e| format!("Failed to install fontconfig settings: {}", e))?;
     }
 
-    let kitty_src = repo_root.join("configs/kitty");
+    let kitty_src = configs_root.join("kitty");
     if kitty_src.exists() {
         copy_dir_all(&kitty_src, &home.join(".config/kitty"))
             .map_err(|e| format!("Failed to sync Kitty config: {}", e))?;
     }
-    let nvim_src = repo_root.join("configs/nvim");
+    let nvim_src = configs_root.join("nvim");
     if nvim_src.exists() {
         copy_dir_all(&nvim_src, &home.join(".config/nvim"))
             .map_err(|e| format!("Failed to sync Neovim config: {}", e))?;
     }
-    let fastfetch_src = repo_root.join("configs/fastfetch");
+    let fastfetch_src = configs_root.join("fastfetch");
     if fastfetch_src.exists() {
         copy_dir_all(&fastfetch_src, &home.join(".config/fastfetch"))
             .map_err(|e| format!("Failed to sync Fastfetch config: {}", e))?;

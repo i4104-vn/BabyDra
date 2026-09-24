@@ -16,7 +16,13 @@ pub fn install_desktop_integrations(
     let apps_dir = get_applications_dir();
     mkdir_p(&apps_dir)?;
 
-    let desktops_src = repo_root.join("desktops");
+    let desktops_src = if repo_root.join("assets/desktop").is_dir() {
+        repo_root.join("assets/desktop")
+    } else if repo_root.join("assets/desktops").is_dir() {
+        repo_root.join("assets/desktops")
+    } else {
+        repo_root.join("desktops")
+    };
     if desktops_src.exists() {
         for entry in fs::read_dir(&desktops_src)
             .map_err(|e| format!("Failed to read {}: {}", desktops_src.display(), e))?

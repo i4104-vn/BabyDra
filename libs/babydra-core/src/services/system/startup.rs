@@ -15,6 +15,10 @@ fn get_autostart_path() -> PathBuf {
     }
 
     // Check project workspace fallback
+    let assets_config = Path::new("assets/configs/labwc/autostart");
+    if assets_config.exists() {
+        return assets_config.to_path_buf();
+    }
     let local_config = Path::new("configs/labwc/autostart");
     if local_config.exists() {
         return local_config.to_path_buf();

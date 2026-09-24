@@ -22,10 +22,20 @@ pub fn execute_start(
     runner.step("Stopping stale shell processes...");
     kill_processes(&config.binaries.kill_processes);
 
+    let configs_root = if repo_root.join("assets/configs").is_dir() {
+        repo_root.join("assets/configs")
+    } else {
+        repo_root.join("configs")
+    };
+
     // 2. Ensure wallpaper is present in ~/.babydra
     let babydra_dir = get_babydra_dir();
     mkdir_p(&babydra_dir)?;
-    let wallpaper_src = repo_root.join("wallpaper.png");
+    let wallpaper_src = if repo_root.join("assets/wallpaper.png").is_file() {
+        repo_root.join("assets/wallpaper.png")
+    } else {
+        repo_root.join("wallpaper.png")
+    };
     let wallpaper_dest = babydra_dir.join("wallpaper.png");
     if wallpaper_src.exists() && !wallpaper_dest.exists() {
         let _ = fs::copy(&wallpaper_src, &wallpaper_dest);
@@ -35,7 +45,7 @@ pub fn execute_start(
     mkdir_p(&labwc_config)?;
 
     let autostart_dest = labwc_config.join("autostart");
-    let autostart_src = repo_root.join("configs/labwc/autostart");
+    let autostart_src = configs_root.join("labwc/autostart");
     if autostart_src.exists() && !autostart_dest.exists() {
         fs::copy(&autostart_src, &autostart_dest)
             .map_err(|e| format!("Failed to install labwc autostart: {}", e))?;
@@ -44,14 +54,14 @@ pub fn execute_start(
     }
 
     let rc_dest = labwc_config.join("rc.xml");
-    let rc_src = repo_root.join("configs/labwc/rc.xml");
+    let rc_src = configs_root.join("labwc/rc.xml");
     if rc_src.exists() {
         fs::copy(&rc_src, &rc_dest)
             .map_err(|e| format!("Failed to install labwc rc.xml: {}", e))?;
     }
 
     let scripts_dest = labwc_config.join("scripts");
-    let scripts_src = repo_root.join("configs/labwc/scripts");
+    let scripts_src = configs_root.join("labwc/scripts");
     if scripts_src.exists() {
         mkdir_p(&scripts_dest)?;
         for entry in fs::read_dir(&scripts_src)

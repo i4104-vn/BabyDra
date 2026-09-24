@@ -16,7 +16,17 @@ pub fn sync_themes(runner: &CommandRunner, repo_root: &Path) -> Result<(), Strin
 
     runner.step("Syncing themes, cursors, and icons...");
 
-    let themes_src = repo_root.join("themes");
+    let themes_src = if repo_root.join("assets/themes").is_dir() {
+        repo_root.join("assets/themes")
+    } else {
+        repo_root.join("themes")
+    };
+    let configs_root = if repo_root.join("assets/configs").is_dir() {
+        repo_root.join("assets/configs")
+    } else {
+        repo_root.join("configs")
+    };
+
     if themes_src.exists() {
         copy_dir_all(&themes_src, &babydra_themes_dest)
             .map_err(|e| format!("Failed to sync BabyDra themes: {}", e))?;
@@ -25,13 +35,13 @@ pub fn sync_themes(runner: &CommandRunner, repo_root: &Path) -> Result<(), Strin
         runner.run_sudo("cp", &["-r", &source, "/usr/share/babydra/"], None)?;
     }
 
-    let babydra_theme_src = repo_root.join("configs/themes/BabyDra");
+    let babydra_theme_src = configs_root.join("themes/BabyDra");
     if babydra_theme_src.exists() {
         copy_dir_all(&babydra_theme_src, &themes_dest.join("BabyDra"))
             .map_err(|e| format!("Failed to sync GTK theme: {}", e))?;
     }
 
-    let cursor_src = repo_root.join("configs/themes/cursor");
+    let cursor_src = configs_root.join("themes/cursor");
     if cursor_src.exists() {
         let destination = path_arg(&icons_dest)?;
         for entry in fs::read_dir(&cursor_src)
@@ -47,7 +57,7 @@ pub fn sync_themes(runner: &CommandRunner, repo_root: &Path) -> Result<(), Strin
         }
     }
 
-    let icons_theme_src = repo_root.join("configs/themes/icons");
+    let icons_theme_src = configs_root.join("themes/icons");
     if icons_theme_src.exists() {
         let destination = path_arg(&icons_dest)?;
         for entry in fs::read_dir(&icons_theme_src)

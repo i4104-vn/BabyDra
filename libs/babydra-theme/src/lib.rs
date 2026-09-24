@@ -87,14 +87,21 @@ pub fn themes_root() -> PathBuf {
         return system_dir;
     }
 
-    // Default: workspace-relative `themes/` folder.
+    // Default: workspace-relative `assets/themes/` (or `themes/`) folder.
     let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
     // During tests we live under libs/babydra-theme — themes/ is two levels up.
     manifest_dir
         .ancestors()
         .nth(2)
-        .map(|p| p.join("themes"))
-        .unwrap_or_else(|| PathBuf::from("themes"))
+        .map(|p| {
+            let assets_themes = p.join("assets").join("themes");
+            if assets_themes.is_dir() {
+                assets_themes
+            } else {
+                p.join("themes")
+            }
+        })
+        .unwrap_or_else(|| PathBuf::from("assets/themes"))
 }
 
 /// Loads a theme package folder (`themes/<id>/`) from disk.

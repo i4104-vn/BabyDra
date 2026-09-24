@@ -13,6 +13,26 @@ fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..")
 }
 
+fn shipped_themes_dir() -> PathBuf {
+    let root = repo_root();
+    let assets = root.join("assets").join("themes");
+    if assets.is_dir() {
+        assets
+    } else {
+        root.join("themes")
+    }
+}
+
+fn shipped_variants_dir() -> PathBuf {
+    let root = repo_root();
+    let assets = root.join("assets").join("variants");
+    if assets.is_dir() {
+        assets
+    } else {
+        root.join("variants")
+    }
+}
+
 const SHIPPED_THEMES: [&str; 5] = [
     "babydra-default",
     "babydra-blue",
@@ -35,7 +55,7 @@ const SHIPPED_VARIANTS: [&str; 5] = ["blue", "default", "green", "purple", "rose
 
 #[test]
 fn all_shipped_themes_resolve() {
-    std::env::set_var("BABYDRA_THEMES_DIR", repo_root().join("themes"));
+    std::env::set_var("BABYDRA_THEMES_DIR", shipped_themes_dir());
     for id in SHIPPED_THEMES {
         let theme = resolve_theme(id).unwrap_or_else(|e| panic!("theme {id} failed: {e}"));
         assert!(
@@ -62,8 +82,8 @@ fn all_shipped_themes_resolve() {
 
 #[test]
 fn shipped_variants_match_shipped_themes() {
-    std::env::set_var("BABYDRA_THEMES_DIR", repo_root().join("themes"));
-    std::env::set_var("BABYDRA_VARIANTS_DIR", repo_root().join("variants"));
+    std::env::set_var("BABYDRA_THEMES_DIR", shipped_themes_dir());
+    std::env::set_var("BABYDRA_VARIANTS_DIR", shipped_variants_dir());
 
     let variants = list_variants();
     assert_eq!(

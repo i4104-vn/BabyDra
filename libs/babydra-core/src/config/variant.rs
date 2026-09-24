@@ -24,8 +24,15 @@ pub fn variants_root() -> PathBuf {
     manifest_dir
         .ancestors()
         .nth(2)
-        .map(|p| p.join("variants"))
-        .unwrap_or_else(|| PathBuf::from("variants"))
+        .map(|p| {
+            let assets_variants = p.join("assets").join("variants");
+            if assets_variants.is_dir() {
+                assets_variants
+            } else {
+                p.join("variants")
+            }
+        })
+        .unwrap_or_else(|| PathBuf::from("assets/variants"))
 }
 
 /// Lists all available variant names from `variants/*/variant.toml`.

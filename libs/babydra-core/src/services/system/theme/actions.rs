@@ -47,6 +47,7 @@ pub fn apply_appearance(
     // 1. Update settings.ini files (affects GTK apps)
     let ini_paths = vec![
         Path::new(&home).join(".config/labwc/settings.ini"),
+        Path::new(&home).join("BabyDra/assets/configs/labwc/settings.ini"),
         Path::new(&home).join("BabyDra/configs/labwc/settings.ini"),
     ];
     for path in &ini_paths {
