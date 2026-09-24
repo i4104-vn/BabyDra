@@ -69,7 +69,6 @@ fn draw_content(f: &mut Frame, app: &App, area: Rect) {
         WizardStep::Welcome => steps::draw_welcome_step(f, app, area),
         WizardStep::SourceBranch => steps::draw_branch_step(f, app, area),
         WizardStep::Binaries => steps::draw_binaries_step(f, app, area),
-        WizardStep::VariantSelection => steps::draw_variant_step(f, app, area),
         WizardStep::ExecuteInstall => steps::draw_execute_install_step(f, app, area),
         WizardStep::Summary => steps::draw_summary_step(f, app, area),
     }

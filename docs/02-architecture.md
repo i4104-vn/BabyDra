@@ -47,7 +47,7 @@ Installer là một crate độc lập trong `main`, không phụ thuộc GTK. N
 
 | Phần | Trách nhiệm |
 | :--- | :--- |
-| `models/` | State của binary, branch, variant, package và tiến trình cài đặt. |
+| `models/` | State của binary, branch, package và tiến trình cài đặt. |
 | `system/` | Cargo discovery, git, worktree, manifest, sudo và thao tác hệ thống. |
 | `tasks/` | Các bước copy binary, package, config, theme, service và greetd. |
 | `ui/` | Wizard Ratatui, modal, log và progress. |

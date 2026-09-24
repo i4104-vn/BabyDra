@@ -3,7 +3,7 @@ use std::sync::mpsc::Sender;
 
 use crate::core::event::{InstallEvent, InstallPlan};
 use crate::core::manifest::{load_install_manifest, InstallManifest};
-use crate::models::{BinaryItem, LogLevel, LogMessage, VariantItem};
+use crate::models::{BinaryItem, LogLevel, LogMessage};
 use crate::runtime::SudoSession;
 
 /// Shared execution context passed to all task executors.
@@ -14,7 +14,6 @@ pub struct TaskContext {
     pub source_binary_dir: PathBuf,
     pub selected_binaries: Vec<BinaryItem>,
     pub install_all_binaries: bool,
-    pub variant: VariantItem,
     pub branch: String,
     pub manifest: InstallManifest,
     pub tx: Sender<InstallEvent>,
@@ -36,7 +35,6 @@ impl TaskContext {
             source_binary_dir,
             selected_binaries: plan.selected_binaries,
             install_all_binaries: plan.install_all_binaries,
-            variant: plan.variant,
             branch: plan.branch,
             manifest,
             tx,

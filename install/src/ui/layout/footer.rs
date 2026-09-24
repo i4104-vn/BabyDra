@@ -44,15 +44,6 @@ pub fn draw_footer_shortcuts(f: &mut Frame, app: &App, area: Rect) {
             ],
             " Shortcuts (Binaries) ",
         ),
-        WizardStep::VariantSelection => (
-            vec![
-                ("Space", "Select", THEME.mint),
-                ("Enter / →", "Apply & Next", THEME.cyan),
-                ("↑ / ↓", "Move", THEME.blue),
-                ("←", "Back", THEME.amber),
-            ],
-            " Shortcuts (Themes) ",
-        ),
         WizardStep::ExecuteInstall => (
             if app.show_confirm_dialog {
                 vec![

@@ -33,7 +33,14 @@ where
         .entries_dir
         .as_deref()
         .map(|d| workspace_root.join(d))
-        .unwrap_or_else(|| workspace_root.join("desktops"));
+        .unwrap_or_else(|| {
+            let assets_desktop = workspace_root.join("assets").join("desktop");
+            if assets_desktop.is_dir() {
+                assets_desktop
+            } else {
+                workspace_root.join("desktops")
+            }
+        });
 
     let desktop_files = if desktops_dir.is_dir() {
         find_files(&desktops_dir, |path| {

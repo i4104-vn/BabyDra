@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use crate::models::{BinaryItem, BranchItem, LogMessage, VariantItem};
+use crate::models::{BinaryItem, BranchItem, LogMessage};
 
 /// Events sent between the installer worker/background tasks and the TUI event loop.
 #[derive(Debug, Clone)]
@@ -15,7 +15,6 @@ pub enum InstallEvent {
         source_root: PathBuf,
         source_binary_dir: PathBuf,
         binaries: Vec<BinaryItem>,
-        variants: Vec<VariantItem>,
     },
     Progress {
         current: usize,
@@ -50,8 +49,6 @@ pub struct InstallPlan {
     /// case a branch update may add new binaries between the UI scan and the
     /// actual build, so the worker can include them automatically.
     pub install_all_binaries: bool,
-    /// Variant selected in step 4 (theme + app list + keybinds source).
-    pub variant: VariantItem,
     /// Branch to check out + pull before building (empty = skip git step).
     pub branch: String,
     /// Sudo password provided by the user (None when running as root).

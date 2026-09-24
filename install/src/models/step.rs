@@ -3,17 +3,15 @@ pub enum WizardStep {
     Welcome,
     SourceBranch,
     Binaries,
-    VariantSelection,
     ExecuteInstall,
     Summary,
 }
 
 impl WizardStep {
-    pub const ALL: [WizardStep; 6] = [
+    pub const ALL: [WizardStep; 5] = [
         WizardStep::Welcome,
         WizardStep::SourceBranch,
         WizardStep::Binaries,
-        WizardStep::VariantSelection,
         WizardStep::ExecuteInstall,
         WizardStep::Summary,
     ];
@@ -23,9 +21,8 @@ impl WizardStep {
             WizardStep::Welcome => "1. Welcome & Overview",
             WizardStep::SourceBranch => "2. Source Branch & Build",
             WizardStep::Binaries => "3. BabyDra Binaries",
-            WizardStep::VariantSelection => "4. Variant Selection",
-            WizardStep::ExecuteInstall => "5. Execute Installation",
-            WizardStep::Summary => "6. Summary & Launch",
+            WizardStep::ExecuteInstall => "4. Execute Installation",
+            WizardStep::Summary => "5. Summary & Launch",
         }
     }
 
@@ -34,7 +31,6 @@ impl WizardStep {
             WizardStep::Welcome => "Welcome",
             WizardStep::SourceBranch => "Branch",
             WizardStep::Binaries => "Binaries",
-            WizardStep::VariantSelection => "Variant",
             WizardStep::ExecuteInstall => "Install Progress",
             WizardStep::Summary => "Summary",
         }

@@ -27,9 +27,11 @@ BabyDra/
 │   ├── babydra-ui-kit/
 │   ├── babydra-island/
 │   └── babydra-theme/
-├── configs/                   Cấu hình labwc, terminal, editor, theme
-├── themes/                    Theme package runtime
-├── variants/                  Variant và variant.toml
+├── assets/                    Tài nguyên triển khai hệ thống
+│   ├── configs/               Cấu hình labwc, terminal, editor, theme
+│   ├── desktop/               Desktop entries và MIME
+│   └── themes/                Theme package runtime
+├── updater/                   Công cụ cập nhật hệ thống độc lập
 ├── workspace.toml             Metadata cài đặt của branch
 ├── tests/                     Integration tests nếu branch có
 └── docs/                      Tài liệu nếu branch duy trì cùng source
@@ -39,15 +41,17 @@ BabyDra/
 
 ```text
 BabyDra/
-├── install/
+├── install/                   Bộ cài đặt TUI
 │   ├── src/app/               Wizard state và actions
 │   ├── src/models/            Model của installer
-│   ├── src/system/            Discovery, git, manifest, sudo
-│   ├── src/tasks/             Các task cài đặt
+│   ├── src/discovery/         Discovery git, Cargo, manifest
+│   ├── src/tasks/             Các task cài đặt streaming
 │   ├── src/ui/                Giao diện Ratatui
-│   ├── Cargo.toml             Crate độc lập
-│   └── run.sh
-├── docs/                      Tài liệu tổng quát
+│   └── Cargo.toml             Crate độc lập
+├── updater/                   Công cụ cập nhật CLI độc lập
+├── install.sh                 Script khởi chạy nhanh installer
+├── logs/                      Nhật ký cài đặt và cập nhật (gitignored)
+├── docs/                      Tài liệu kiến trúc và hướng dẫn
 └── README.md
 ```
 
@@ -62,9 +66,9 @@ BabyDra/
 | `libs/babydra-ui-kit` | Component, style layout, icon, animation | Nghiệp vụ mạng hoặc package manager |
 | `libs/babydra-island` | Island controller và feature | Logic installer |
 | `libs/babydra-theme` | Resolve theme và CSS runtime | Trạng thái riêng của một app |
-| `install/src/system` | Discovery, git, manifest, system helper | Tên binary/package cố định của project |
-| `install/src/tasks` | Thực thi policy đã discovery | Logic scan chỉ phục vụ một app cụ thể |
-| `configs`, `themes`, `variants` | Dữ liệu triển khai | Logic Rust |
+| `install/src/discovery` | Quét ref, Cargo, manifest, system helper | Tên binary/package cố định của project |
+| `install/src/tasks` | Thực thi policy đã discovery với output streaming | Logic scan chỉ phục vụ một app cụ thể |
+| `assets/` | Dữ liệu triển khai (cấu hình, theme, desktop) | Logic Rust |
 
 ## Quy tắc discovery và manifest
 

@@ -18,7 +18,7 @@ use crate::core::pipeline::{build_pipeline, TaskStep};
 use crate::core::context::TaskContext;
 use crate::discovery::initial_binaries_list;
 use crate::models::LogLevel;
-use crate::runtime::{build_workspace, checkout_and_pull, stop_process};
+use crate::runtime::{build_workspace_streaming, checkout_and_pull, stop_process};
 
 /// Spawns the background installation worker thread.
 pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
@@ -147,12 +147,10 @@ fn dispatch_step(ctx: &mut TaskContext, step: &TaskStep) -> (usize, usize) {
                     ctx.source_root.display()
                 ),
             );
-            let (ok, tail) = build_workspace(&ctx.source_root);
-            for line in tail {
-                send_log(LogLevel::Info, line);
-            }
+            let send_log_cb = send_log.clone();
+            let ok = build_workspace_streaming(&ctx.source_root, send_log_cb);
             if ok {
-                send_log(LogLevel::Success, "Release build completed.".into());
+                send_log(LogLevel::Success, "Release build completed successfully.".into());
                 (1, 0)
             } else {
                 send_log(
@@ -214,7 +212,7 @@ fn dispatch_step(ctx: &mut TaskContext, step: &TaskStep) -> (usize, usize) {
         "themes_deploy" => {
             themes::deploy_theme_packages(
                 &ctx.source_root,
-                &ctx.variant.theme,
+                "babydra-default",
                 &ctx.manifest,
                 &ctx.sudo,
                 send_log,

@@ -7,7 +7,7 @@ use super::state::{App, BranchSwitchStatus};
 
 impl App {
     pub fn on_tick(&mut self) {
-        const MAX_EVENTS_PER_TICK: usize = 128;
+        const MAX_EVENTS_PER_TICK: usize = 1024;
 
         if self.show_branch_switching_modal {
             self.branch_switch_spinner_tick = (self.branch_switch_spinner_tick + 1) % 1000;
@@ -30,14 +30,12 @@ impl App {
                     source_root,
                     source_binary_dir,
                     binaries,
-                    variants,
                 } => {
                     self.apply_discovery(
                         request_id,
                         source_root,
                         source_binary_dir,
                         binaries,
-                        variants,
                     );
                 }
                 InstallEvent::Progress {
@@ -169,18 +167,6 @@ impl App {
             "Installation worker launched with active configuration.",
         );
 
-        let selected_variant = self
-            .variant_options
-            .iter()
-            .find(|v| v.selected)
-            .cloned()
-            .unwrap_or_else(|| crate::models::VariantItem {
-                name: "unconfigured".into(),
-                theme: String::new(),
-                apps: Vec::new(),
-                selected: true,
-            });
-
         let build_from_source = self.is_build_from_source();
         let selected_binaries: Vec<_> = self
             .binaries
@@ -194,7 +180,6 @@ impl App {
             source_binary_dir: self.active_binary_dir(),
             install_all_binaries: selected_binaries.len() == self.binaries.len(),
             selected_binaries,
-            variant: selected_variant,
             branch: self.selected_branch.clone(),
             sudo_password: if SudoSession::is_root() {
                 None

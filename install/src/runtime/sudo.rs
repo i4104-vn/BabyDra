@@ -1,8 +1,10 @@
 //! Safe command execution for the TUI installer.
 
-use std::io::Write;
+use std::io::{BufRead, BufReader, Write};
 use std::path::Path;
 use std::process::{Command, Output, Stdio};
+use std::sync::mpsc::channel;
+use std::thread;
 
 use anyhow::{bail, Context, Result};
 
@@ -45,6 +47,78 @@ fn spawn_and_wait(mut cmd: Command, stdin_data: &[u8], what: &str) -> Result<Cmd
         .wait_with_output()
         .with_context(|| format!("failed to wait for {what}"))?;
     Ok(CmdOutput::from_output(output))
+}
+
+/// Spawns a process, streams its stdout and stderr line-by-line via the provided closure,
+/// and returns whether the process exited successfully.
+pub fn spawn_and_stream<F>(
+    mut cmd: Command,
+    stdin_data: Option<&[u8]>,
+    mut on_line: F,
+) -> Result<bool>
+where
+    F: FnMut(bool, String),
+{
+    cmd.stdin(Stdio::piped());
+    cmd.stdout(Stdio::piped());
+    cmd.stderr(Stdio::piped());
+
+    let mut child = cmd.spawn().context("failed to spawn child process")?;
+
+    if let Some(data) = stdin_data {
+        if let Some(mut stdin) = child.stdin.take() {
+            let _ = stdin.write_all(data);
+            let _ = stdin.flush();
+        }
+    } else {
+        drop(child.stdin.take());
+    }
+
+    let stdout = child.stdout.take();
+    let stderr = child.stderr.take();
+
+    let (tx, rx) = channel();
+
+    let t_out = {
+        let tx = tx.clone();
+        thread::spawn(move || {
+            if let Some(out) = stdout {
+                let reader = BufReader::new(out);
+                for line in reader.lines().map_while(Result::ok) {
+                    let trimmed = line.trim_end();
+                    if !trimmed.is_empty() {
+                        let _ = tx.send((false, trimmed.to_string()));
+                    }
+                }
+            }
+        })
+    };
+
+    let t_err = {
+        let tx = tx.clone();
+        thread::spawn(move || {
+            if let Some(err) = stderr {
+                let reader = BufReader::new(err);
+                for line in reader.lines().map_while(Result::ok) {
+                    let trimmed = line.trim_end();
+                    if !trimmed.is_empty() {
+                        let _ = tx.send((true, trimmed.to_string()));
+                    }
+                }
+            }
+        })
+    };
+    drop(tx);
+
+    for (is_err, line) in rx {
+        on_line(is_err, line);
+    }
+
+    let _ = t_out.join();
+    let _ = t_err.join();
+
+    let status = child.wait().context("failed to wait for child process")?;
+    Ok(status.success())
 }
 
 impl SudoSession {
@@ -108,6 +182,40 @@ impl SudoSession {
         cmd.stderr(Stdio::piped());
 
         spawn_and_wait(cmd, format!("{pwd}\n").as_bytes(), "sudo command")
+    }
+
+    /// Runs a command as root (via `sudo -S` when not root), streaming each line
+    /// to the provided closure in real time.
+    pub fn run_root_streaming<F>(&self, args: &[&str], on_line: F) -> Result<bool>
+    where
+        F: FnMut(bool, String),
+    {
+        if args.is_empty() {
+            bail!("run_root_streaming called with no arguments");
+        }
+        if Self::is_root() {
+            let mut cmd = Command::new(args[0]);
+            cmd.args(&args[1..]);
+            return spawn_and_stream(cmd, None, on_line);
+        }
+        let Some(pwd) = &self.password else {
+            bail!("sudo password is required but was not provided");
+        };
+
+        let mut cmd = self.sudo_base();
+        cmd.args(args);
+        let pwd_bytes = format!("{pwd}\n").into_bytes();
+        spawn_and_stream(cmd, Some(&pwd_bytes), on_line)
+    }
+
+    /// Runs a user command, streaming each line of output directly in real time.
+    pub fn run_streaming<F>(&self, program: &str, args: &[&str], on_line: F) -> Result<bool>
+    where
+        F: FnMut(bool, String),
+    {
+        let mut cmd = Command::new(program);
+        cmd.args(args);
+        spawn_and_stream(cmd, None, on_line)
     }
 
     /// Runs a root command, discarding all output (safe for silent ops).

@@ -21,12 +21,6 @@ pub fn draw_confirm_modal(f: &mut Frame, app: &App, area: Rect) {
         .filter(|b| b.selected && (b.exists_in_source || app.is_build_from_source()))
         .count();
 
-    let variant_display = if app.selected_variant.is_empty() {
-        "Default".to_string()
-    } else {
-        app.selected_variant.clone()
-    };
-
     let source_display = if app.is_build_from_source() {
         format!("Branch '{}'", app.selected_branch)
     } else {
@@ -54,13 +48,6 @@ pub fn draw_confirm_modal(f: &mut Frame, app: &App, area: Rect) {
             Span::styled(
                 source_display,
                 Style::default().fg(THEME.cyan).add_modifier(Modifier::BOLD),
-            ),
-        ]),
-        Line::from(vec![
-            Span::styled("  Theme Variant : ", Style::default().fg(THEME.text_dim)),
-            Span::styled(
-                variant_display,
-                Style::default().fg(THEME.mint).add_modifier(Modifier::BOLD),
             ),
         ]),
         Line::from(vec![

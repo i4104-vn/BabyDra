@@ -89,7 +89,7 @@ where
 }
 
 /// Deploys the theme packages tree to user and system theme directories
-/// and writes the selected variant's theme id into the config path.
+/// and writes the default theme id into the config path.
 pub fn deploy_theme_packages<F>(
     workspace_root: &Path,
     theme_id: &str,
@@ -101,7 +101,14 @@ pub fn deploy_theme_packages<F>(
 {
     let home = get_user_home();
     let pkg_rel = manifest.themes.packages.as_deref().unwrap_or("themes");
-    let themes_src = workspace_root.join(pkg_rel);
+    let themes_src = {
+        let assets_themes = workspace_root.join("assets").join("themes");
+        if assets_themes.is_dir() {
+            assets_themes
+        } else {
+            workspace_root.join(pkg_rel)
+        }
+    };
     let themes_dst = home.join(".babydra/themes");
 
     if themes_src.is_dir() {

@@ -85,12 +85,12 @@ Task nhận manifest và source root, không tự biết danh sách app. Các ta
 | :--- | :--- |
 | Package | `[packages]` trong `workspace.toml` |
 | Binary copy | `[[binaries]]` và executable trong `target/release` |
-| Desktop entry | File `.desktop` trong source hoặc binary có `export_desktop = true` |
-| Dotfile | Các thư mục trực tiếp dưới `configs/` |
+| Desktop entry | File `.desktop` trong `assets/desktop/` hoặc `desktops/` |
+| Dotfile | Các thư mục trực tiếp dưới `assets/configs/` hoặc `configs/` |
 | Service | File systemd có section service hợp lệ trong source |
-| Theme | `configs/themes/` và `themes/` |
+| Theme | `assets/themes/` hoặc `themes/` |
 | GSettings | `[gsettings]` |
-| Greetd | `configs/greetd/config.toml` hoặc system binary scope `system` |
+| Greetd | `assets/configs/greetd/config.toml` hoặc binary scope `system` |
 
 ## Luồng Dynamic Island
 

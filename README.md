@@ -7,7 +7,7 @@ Kho lưu trữ được tổ chức thành hai loại branch:
 | Branch | Nội dung | Mục đích |
 | :--- | :--- | :--- |
 | `main` | `install/` và tài liệu | Phân phối bộ cài đặt. Branch này không chứa danh sách binary hoặc package của một phiên bản cụ thể. |
-| `release` và các branch nguồn | Workspace Rust, cấu hình, theme, variant và `workspace.toml` | Nguồn mã được bộ cài đặt checkout, build và triển khai. |
+| `release` và các branch nguồn | Workspace Rust, tài nguyên assets (cấu hình, theme, desktop) và `workspace.toml` | Nguồn mã được bộ cài đặt checkout, build và triển khai. |
 
 ## Thành phần chính
 
@@ -115,7 +115,7 @@ Xem hướng dẫn đầy đủ trong [docs/03-setup.md](docs/03-setup.md).
 | [Kiến trúc](docs/02-architecture.md) | Ranh giới module, daemon-client và installer. |
 | [Cài đặt và build](docs/03-setup.md) | Cài đặt, build, `workspace.toml` và troubleshooting. |
 | [Cấu trúc dự án](docs/04-structure.md) | Cây thư mục và quy tắc đặt code. |
-| [Theme và variant](docs/05-themes-variants.md) | Cấu trúc và quy trình thêm theme/variant. |
+| [Theme](docs/05-themes.md) | Cấu trúc theme package và quy trình thêm theme. |
 | [Luồng hệ thống](docs/06-system-flows.md) | Luồng khởi động và trao đổi giữa các thành phần. |
 | [Dynamic Island](docs/07-dynamic-island.md) | Runtime, arbitration và cách thêm feature. |
 | [API](docs/08-apis.md) | API của các thư viện lõi. |

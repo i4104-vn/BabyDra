@@ -61,7 +61,7 @@ pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
 
     let steps_list = List::new(items).block(
         Block::default()
-            .title(" Navigation [1-6] ")
+            .title(" Navigation [1-5] ")
             .title_style(THEME.title_cyan())
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
@@ -76,12 +76,6 @@ pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
         .filter(|b| b.selected && (b.exists_in_source || build_from_source))
         .count();
     let total_bins = app.binaries.len();
-    let selected_variant = app
-        .variant_options
-        .iter()
-        .find(|v| v.selected)
-        .map(|v| v.name.as_str())
-        .unwrap_or("unconfigured");
 
     let summary_lines = vec![
         Line::from(vec![
@@ -91,13 +85,6 @@ pub fn draw_sidebar(f: &mut Frame, app: &App, area: Rect) {
                 Style::default()
                     .fg(THEME.text_bright)
                     .add_modifier(Modifier::BOLD),
-            ),
-        ]),
-        Line::from(vec![
-            Span::styled("◆ Variant:    ", Style::default().fg(THEME.text_dim)),
-            Span::styled(
-                selected_variant,
-                Style::default().fg(THEME.pink).add_modifier(Modifier::BOLD),
             ),
         ]),
         Line::from(vec![

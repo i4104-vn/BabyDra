@@ -77,7 +77,7 @@ pub fn draw_branch_switching_modal(f: &mut Frame, app: &App, area: Rect) {
                 ]),
                 Line::from(""),
                 Line::from(Span::styled(
-                    "Branch components and variants have been loaded.",
+                    "Branch components have been loaded.",
                     Style::default().fg(THEME.text_bright),
                 )),
                 Line::from(Span::styled(

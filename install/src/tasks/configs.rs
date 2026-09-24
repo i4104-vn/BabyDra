@@ -79,7 +79,14 @@ where
 {
     let mut copied = 0;
     let home = get_user_home();
-    let labwc_src = workspace_root.join("configs/labwc");
+    let labwc_src = {
+        let assets_labwc = workspace_root.join("assets").join("configs").join("labwc");
+        if assets_labwc.exists() {
+            assets_labwc
+        } else {
+            workspace_root.join("configs/labwc")
+        }
+    };
     let labwc_dst = home.join(".config/labwc");
 
     if labwc_src.exists() {
@@ -122,7 +129,14 @@ where
 {
     let mut copied = 0;
     let home = get_user_home();
-    let configs_src = workspace_root.join("configs");
+    let configs_src = {
+        let assets_configs = workspace_root.join("assets").join("configs");
+        if assets_configs.exists() {
+            assets_configs
+        } else {
+            workspace_root.join("configs")
+        }
+    };
     let mut synced = Vec::new();
     if let Ok(entries) = fs::read_dir(&configs_src) {
         for entry in entries.flatten() {

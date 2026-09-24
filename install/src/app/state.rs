@@ -2,7 +2,7 @@ use std::path::PathBuf;
 use std::sync::mpsc::{channel, Receiver, Sender};
 
 use crate::models::{
-    BinaryItem, BranchItem, InstallState, LogLevel, LogMessage, VariantItem, WizardStep,
+    BinaryItem, BranchItem, InstallState, LogLevel, LogMessage, WizardStep,
 };
 use crate::system::{
     branch_worktree_dir, default_binary_source_dir, find_workspace_root, list_branches,
@@ -29,9 +29,6 @@ pub struct App {
     /// pull and rebuild from source.
     pub selected_branch: String,
 
-    pub variant_options: Vec<VariantItem>,
-    pub variant_cursor: usize,
-    pub selected_variant: String,
     pub discovery_in_progress: bool,
     pub discovery_request_id: u64,
 
@@ -39,6 +36,8 @@ pub struct App {
     pub logs: Vec<LogMessage>,
     pub log_scroll: usize,
     pub auto_scroll_logs: bool,
+    pub log_file_path: Option<PathBuf>,
+    pub latest_log_path: Option<PathBuf>,
 
     // Path & Environment
     pub workspace_root: PathBuf,
@@ -95,6 +94,27 @@ impl App {
             b.selected = idx == branch_cursor && !selected_branch.is_empty();
         }
 
+        let now = chrono::Local::now();
+        let log_filename = format!("install_{}.log", now.format("%Y-%m-%d_%H-%M-%S"));
+        let logs_dir = workspace_root.join("logs");
+        let _ = std::fs::create_dir_all(&logs_dir);
+        let log_file_path = logs_dir.join(log_filename);
+        let latest_log_path = logs_dir.join("install_latest.log");
+
+        let header = format!(
+            "================================================================================\n\
+             BabyDra Installer\n\
+             Started at: {}\n\
+             Repo root:  {}\n\
+             Log file:   {}\n\
+             ================================================================================\n\n",
+            now.format("%Y-%m-%d %H:%M:%S"),
+            workspace_root.display(),
+            log_file_path.display()
+        );
+        let _ = std::fs::write(&log_file_path, &header);
+        let _ = std::fs::write(&latest_log_path, &header);
+
         let mut app = Self {
             current_step: WizardStep::Welcome,
 
@@ -105,15 +125,14 @@ impl App {
             branch_cursor,
             selected_branch,
 
-            variant_options: Vec::new(),
-            variant_cursor: 0,
-            selected_variant: String::new(),
             discovery_in_progress: true,
             discovery_request_id: 0,
 
             logs: Vec::new(),
             log_scroll: 0,
             auto_scroll_logs: true,
+            log_file_path: Some(log_file_path),
+            latest_log_path: Some(latest_log_path),
 
             workspace_root,
             source_binary_dir: source_binary_dir.clone(),
@@ -175,15 +194,26 @@ impl App {
     }
 
     pub fn push_log(&mut self, log: LogMessage) {
+        if let (Some(path), Some(latest)) = (&self.log_file_path, &self.latest_log_path) {
+            use std::io::Write;
+            let line = format!("[{}] [{:?}] {}\n", log.timestamp, log.level, log.message);
+            if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(path) {
+                let _ = f.write_all(line.as_bytes());
+            }
+            if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(latest) {
+                let _ = f.write_all(line.as_bytes());
+            }
+        }
+
         self.logs.push(log);
         self.trim_logs();
-        if self.auto_scroll_logs && self.logs.len() > 10 {
-            self.log_scroll = self.logs.len().saturating_sub(10);
+        if self.auto_scroll_logs {
+            self.log_scroll = self.logs.len();
         }
     }
 
     pub(crate) fn trim_logs(&mut self) {
-        const MAX_LOG_ENTRIES: usize = 500;
+        const MAX_LOG_ENTRIES: usize = 20_000;
         let removed = self.logs.len().saturating_sub(MAX_LOG_ENTRIES);
         if removed == 0 {
             return;

@@ -70,16 +70,6 @@ pub fn draw_summary_step(f: &mut Frame, app: &App, area: Rect) {
         ]),
         Line::from(vec![
             Span::styled(
-                "◆ Selected Variant:      ",
-                Style::default().fg(THEME.text_dim),
-            ),
-            Span::styled(
-                &app.selected_variant,
-                Style::default().fg(THEME.pink).add_modifier(Modifier::BOLD),
-            ),
-        ]),
-        Line::from(vec![
-            Span::styled(
                 "◆ Installation Source:   ",
                 Style::default().fg(THEME.text_dim),
             ),
@@ -144,7 +134,7 @@ pub fn draw_summary_step(f: &mut Frame, app: &App, area: Rect) {
 
     let summary_widget = Paragraph::new(summary_lines).block(
         Block::default()
-            .title(" 6. Summary & Launch Instructions ")
+            .title(" 5. Summary & Launch Instructions ")
             .title_style(
                 Style::default()
                     .fg(status_color)

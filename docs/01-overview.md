@@ -54,9 +54,11 @@ release / develop / feature
 ├── Cargo.toml               Cargo workspace
 ├── crates/                  Binary ứng dụng
 ├── libs/                    Thư viện dùng chung
-├── configs/                 Cấu hình hệ thống
-├── themes/                  Theme package runtime
-├── variants/                Variant cài đặt
+├── assets/                  Tài nguyên triển khai
+│   ├── configs/             Cấu hình hệ thống và dotfiles
+│   ├── desktop/             Desktop entries và MIME
+│   └── themes/              Theme package runtime
+├── updater/                 Crate cập nhật hệ thống
 └── workspace.toml           Metadata dành cho installer
 ```
 

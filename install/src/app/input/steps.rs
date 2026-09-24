@@ -134,20 +134,6 @@ pub fn handle_step_interaction(app: &mut App, key: KeyEvent) {
             }
         }
 
-        WizardStep::VariantSelection => {
-            let len = app.variant_options.len();
-            match list_action(key, len, &mut app.variant_cursor) {
-                ListAction::Toggle => {
-                    select_variant_at_cursor(app);
-                }
-                ListAction::Enter => {
-                    select_variant_at_cursor(app);
-                    app.next_step();
-                }
-                _ => {}
-            }
-        }
-
         WizardStep::ExecuteInstall => match key.code {
             KeyCode::Up | KeyCode::Char('k') => {
                 app.auto_scroll_logs = false;
@@ -201,17 +187,6 @@ pub fn handle_step_interaction(app: &mut App, key: KeyEvent) {
     }
 }
 
-pub fn select_variant_at_cursor(app: &mut App) {
-    if app.variant_cursor < app.variant_options.len() {
-        for v in &mut app.variant_options {
-            v.selected = false;
-        }
-        if let Some(selected) = app.variant_options.get_mut(app.variant_cursor) {
-            selected.selected = true;
-            app.selected_variant = selected.name.clone();
-        }
-    }
-}
 
 pub fn select_branch_at_cursor(app: &mut App) {
     if app.branches.is_empty() {

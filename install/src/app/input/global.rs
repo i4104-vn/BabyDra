@@ -47,14 +47,10 @@ pub fn handle_global_keys(app: &mut App, key: KeyEvent) -> bool {
             true
         }
         KeyCode::Char('4') => {
-            app.set_step(WizardStep::VariantSelection);
-            true
-        }
-        KeyCode::Char('5') => {
             app.set_step(WizardStep::ExecuteInstall);
             true
         }
-        KeyCode::Char('6') | KeyCode::Char('0') => {
+        KeyCode::Char('5') | KeyCode::Char('0') => {
             app.set_step(WizardStep::Summary);
             true
         }

@@ -74,6 +74,46 @@ pub fn build_workspace(workspace_root: &Path) -> (bool, Vec<String>) {
     }
 }
 
+/// Runs `cargo clean` and `cargo build --release --workspace`, streaming each output line
+/// live in real time to the provided logger callback.
+pub fn build_workspace_streaming<F>(workspace_root: &Path, mut log: F) -> bool
+where
+    F: FnMut(crate::models::LogLevel, String),
+{
+    log(crate::models::LogLevel::Info, "Executing cargo clean...".into());
+    let _ = Command::new("cargo")
+        .current_dir(workspace_root)
+        .args(["clean"])
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .status();
+
+    log(
+        crate::models::LogLevel::Info,
+        format!(
+            "Running cargo build --release --workspace in {}...",
+            workspace_root.display()
+        ),
+    );
+
+    let mut cmd = Command::new("cargo");
+    cmd.current_dir(workspace_root);
+    cmd.args(["build", "--release", "--workspace"]);
+
+    let res = super::sudo::spawn_and_stream(cmd, None, move |is_err, line| {
+        if line.contains("error:") || (is_err && line.starts_with("error[")) {
+            log(crate::models::LogLevel::Error, line);
+        } else if line.contains("warning:") {
+            log(crate::models::LogLevel::Warn, line);
+        } else {
+            log(crate::models::LogLevel::Info, line);
+        }
+    });
+
+    res.unwrap_or(false)
+}
+
 pub fn default_binary_source_dir(workspace_root: &Path) -> PathBuf {
     let release_dir = workspace_root.join("target").join("release");
     if release_dir.exists() {

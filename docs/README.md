@@ -10,7 +10,7 @@
 | Hiểu cách các module giao tiếp | [02 — Kiến trúc](02-architecture.md) và [06 — Luồng hệ thống](06-system-flows.md) |
 | Cài đặt hoặc build từ nguồn | [03 — Cài đặt và build](03-setup.md) |
 | Tìm đúng vị trí để sửa code | [04 — Cấu trúc dự án](04-structure.md) |
-| Thêm theme hoặc variant | [05 — Theme và variant](05-themes-variants.md) |
+| Thêm theme mới | [05 — Theme](05-themes.md) |
 | Thêm feature cho Dynamic Island | [07 — Dynamic Island](07-dynamic-island.md) |
 | Tra cứu service hoặc widget | [08 — API](08-apis.md) và [10 — Component library](10-components.md) |
 | Thiết kế giao diện | [09 — Ngôn ngữ thiết kế](09-design.md) |
@@ -24,7 +24,7 @@ docs/
 ├── 02-architecture.md        Ranh giới module và dependency direction
 ├── 03-setup.md               Cài đặt, build và workspace.toml
 ├── 04-structure.md           Cây thư mục và quy tắc phát triển
-├── 05-themes-variants.md     Theme package và variant
+├── 05-themes.md              Theme package và cấu hình giao diện
 ├── 06-system-flows.md        Luồng khởi động, runtime và installer
 ├── 07-dynamic-island.md      Runtime Dynamic Island
 ├── 08-apis.md                API các thư viện dùng chung

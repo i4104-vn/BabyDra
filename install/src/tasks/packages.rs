@@ -1,7 +1,7 @@
 use std::process::Command;
 
 use crate::models::LogLevel;
-use crate::runtime::{tail_lines, SudoSession};
+use crate::runtime::{spawn_and_stream, SudoSession};
 
 pub fn install_pacman_packages<F>(
     sudo: &SudoSession,
@@ -20,30 +20,28 @@ where
     }
     log(
         LogLevel::Info,
-        "Running pacman -Syu for system dependencies...".into(),
+        format!("Running pacman -Syu for {} package(s)...", packages.len()),
     );
     let mut args: Vec<&str> = vec!["pacman", "-Syu", "--needed", "--noconfirm"];
     args.extend(packages.iter().map(String::as_str));
-    let out = sudo.run_root(&args);
 
-    match out {
-        Ok(o) => {
-            for line in tail_lines(&o.stdout, 5) {
-                log(LogLevel::Info, line);
-            }
-            if o.success {
-                log(
-                    LogLevel::Success,
-                    "Arch Linux pacman packages installed/updated.".into(),
-                );
-                (1, 0)
-            } else {
-                log(
-                    LogLevel::Error,
-                    format!("Pacman exited with error: {}", o.stderr.trim()),
-                );
-                (0, 1)
-            }
+    match sudo.run_root_streaming(&args, |is_err, line| {
+        if is_err && line.to_lowercase().contains("error:") {
+            log(LogLevel::Error, line);
+        } else {
+            log(LogLevel::Info, line);
+        }
+    }) {
+        Ok(true) => {
+            log(
+                LogLevel::Success,
+                "Arch Linux pacman packages installed/updated successfully.".into(),
+            );
+            (1, 0)
+        }
+        Ok(false) => {
+            log(LogLevel::Error, "Pacman exited with error.".into());
+            (0, 1)
         }
         Err(e) => {
             log(LogLevel::Error, format!("Failed to run pacman: {e}"));
@@ -78,67 +76,49 @@ where
         "yay not found, building yay-bin from AUR (/tmp/yay-bin)...".into(),
     );
     let _ = std::fs::remove_dir_all("/tmp/yay-bin");
-    let clone_res = Command::new("git")
-        .args([
-            "clone",
-            "https://aur.archlinux.org/yay-bin.git",
-            "/tmp/yay-bin",
-        ])
-        .stdin(std::process::Stdio::null())
-        .stdout(std::process::Stdio::piped())
-        .stderr(std::process::Stdio::piped())
-        .output();
 
-    match clone_res {
-        Ok(o) if o.status.success() => {
-            let _ = sudo.preauth();
-            let build_res = Command::new("makepkg")
-                .args(["-si", "--noconfirm"])
-                .current_dir("/tmp/yay-bin")
-                .stdin(std::process::Stdio::null())
-                .stdout(std::process::Stdio::piped())
-                .stderr(std::process::Stdio::piped())
-                .output();
+    let mut git_cmd = Command::new("git");
+    git_cmd.args([
+        "clone",
+        "https://aur.archlinux.org/yay-bin.git",
+        "/tmp/yay-bin",
+    ]);
 
-            match build_res {
-                Ok(bo) => {
-                    let stdout = String::from_utf8_lossy(&bo.stdout);
-                    let stderr = String::from_utf8_lossy(&bo.stderr);
-                    for line in tail_lines(&stdout, 5) {
-                        log(LogLevel::Info, line);
-                    }
-                    if bo.status.success() {
-                        log(LogLevel::Success, "yay-bin installed successfully.".into());
-                        (1, 0)
-                    } else {
-                        log(
-                            LogLevel::Error,
-                            format!("makepkg failed for yay-bin: {}", stderr.trim()),
-                        );
-                        (0, 1)
-                    }
-                }
-                Err(e) => {
-                    log(
-                        LogLevel::Error,
-                        format!("Failed to run makepkg for yay-bin: {e}"),
-                    );
-                    (0, 1)
-                }
-            }
+    let clone_ok = spawn_and_stream(git_cmd, None, |_, line| {
+        log(LogLevel::Info, line);
+    })
+    .unwrap_or(false);
+
+    if !clone_ok {
+        log(LogLevel::Error, "Failed to clone yay-bin repo.".into());
+        return (0, 1);
+    }
+
+    let _ = sudo.preauth();
+    let mut makepkg_cmd = Command::new("makepkg");
+    makepkg_cmd.args(["-si", "--noconfirm"]);
+    makepkg_cmd.current_dir("/tmp/yay-bin");
+
+    match spawn_and_stream(makepkg_cmd, None, |is_err, line| {
+        if is_err && line.to_lowercase().contains("error:") {
+            log(LogLevel::Error, line);
+        } else {
+            log(LogLevel::Info, line);
         }
-        Ok(o) => {
-            log(
-                LogLevel::Error,
-                format!(
-                    "Failed to clone yay-bin repo: {}",
-                    String::from_utf8_lossy(&o.stderr).trim()
-                ),
-            );
+    }) {
+        Ok(true) => {
+            log(LogLevel::Success, "yay-bin installed successfully.".into());
+            (1, 0)
+        }
+        Ok(false) => {
+            log(LogLevel::Error, "makepkg failed for yay-bin.".into());
             (0, 1)
         }
         Err(e) => {
-            log(LogLevel::Error, format!("git clone error for yay-bin: {e}"));
+            log(
+                LogLevel::Error,
+                format!("Failed to run makepkg for yay-bin: {e}"),
+            );
             (0, 1)
         }
     }
@@ -159,7 +139,10 @@ where
         );
         return (0, 0);
     }
-    log(LogLevel::Info, "Installing AUR packages via yay...".into());
+    log(
+        LogLevel::Info,
+        format!("Installing {} AUR package(s) via yay...", packages.len()),
+    );
     if let Err(e) = sudo.preauth() {
         log(
             LogLevel::Error,
@@ -171,32 +154,27 @@ where
     let mut cmd = Command::new("yay");
     cmd.args(["-S", "--noconfirm", "--needed"]);
     cmd.args(packages);
-    let out = cmd
-        .stdin(std::process::Stdio::null())
-        .stdout(std::process::Stdio::piped())
-        .stderr(std::process::Stdio::piped())
-        .output();
 
-    match out {
-        Ok(o) => {
-            let stdout = String::from_utf8_lossy(&o.stdout);
-            let stderr = String::from_utf8_lossy(&o.stderr);
-            for line in tail_lines(&stdout, 5) {
-                log(LogLevel::Info, line);
-            }
-            if o.status.success() {
-                log(
-                    LogLevel::Success,
-                    "AUR packages installed successfully.".into(),
-                );
-                (1, 0)
-            } else {
-                log(
-                    LogLevel::Warn,
-                    format!("yay completed with errors: {}", stderr.trim()),
-                );
-                (0, 1)
-            }
+    match spawn_and_stream(cmd, None, |is_err, line| {
+        if is_err && line.to_lowercase().contains("error:") {
+            log(LogLevel::Error, line);
+        } else {
+            log(LogLevel::Info, line);
+        }
+    }) {
+        Ok(true) => {
+            log(
+                LogLevel::Success,
+                "AUR packages installed successfully.".into(),
+            );
+            (1, 0)
+        }
+        Ok(false) => {
+            log(
+                LogLevel::Warn,
+                "yay completed with warnings or errors.".into(),
+            );
+            (0, 1)
         }
         Err(e) => {
             log(

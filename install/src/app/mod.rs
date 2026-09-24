@@ -36,12 +36,12 @@ mod tests {
             "Modal should auto-open on ExecuteInstall step"
         );
 
-        // Cancel modal with 'Esc' -> returns to VariantSelection
+        // Cancel modal with 'Esc' -> returns to Binaries
         app.handle_key(KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE));
         assert!(!app.show_confirm_dialog, "Modal should dismiss on Esc");
-        assert_eq!(app.current_step, WizardStep::VariantSelection);
+        assert_eq!(app.current_step, WizardStep::Binaries);
 
-        // Navigate forward from VariantSelection to ExecuteInstall
+        // Navigate forward from Binaries to ExecuteInstall
         app.next_step();
         assert_eq!(app.current_step, WizardStep::ExecuteInstall);
         assert!(
@@ -49,10 +49,10 @@ mod tests {
             "Modal should auto-open when navigating forward into ExecuteInstall"
         );
 
-        // Cancel modal with 'Left' / 'b' -> also returns to VariantSelection
+        // Cancel modal with 'Left' / 'b' -> also returns to Binaries
         app.handle_key(KeyEvent::new(KeyCode::Left, KeyModifiers::NONE));
         assert!(!app.show_confirm_dialog);
-        assert_eq!(app.current_step, WizardStep::VariantSelection);
+        assert_eq!(app.current_step, WizardStep::Binaries);
     }
 
     #[test]

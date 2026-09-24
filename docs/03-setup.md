@@ -52,7 +52,7 @@ Installer xác thực sudo trước khi chạy task có thay đổi hệ thống
 | Binary staging | `/var/lib/babydra/bin/` |
 | User config | `~/.config/` |
 | Theme runtime | `~/.babydra/themes/` và `/usr/share/babydra/themes/` |
-| Variant selection | `~/.babydra/babydra.conf` |
+| Theme selection | `~/.babydra/babydra.conf` |
 | User systemd unit | `~/.config/systemd/user/` |
 | Greetd config | `/etc/greetd/config.toml` |
 
@@ -111,11 +111,11 @@ scope = "user"
 
 ### Desktop Entries & MIME Registration
 
-Các file `.desktop` được đặt trực tiếp trong thư mục `desktops/` ở thư mục gốc (ví dụ `desktops/babydra-explore.desktop`, `desktops/babydra-notepad.desktop`). Installer sẽ tự động:
+Các file `.desktop` được đặt trong thư mục `assets/desktop/` (hoặc `desktops/` ở thư mục gốc, ví dụ `assets/desktop/babydra-explore.desktop`). Installer sẽ tự động:
 1. Sao chép các file `.desktop` vào `~/.local/share/applications/` và cập nhật desktop database.
 2. Tự động trích xuất các MIME types được khai báo trong dòng `MimeType=` của file `.desktop` để liên kết mặc định bằng `xdg-mime default`.
 3. Cho phép khai báo thêm hoặc ghi đè MIME associations qua bảng `[mime]` trong `workspace.toml`.
-4. Cài đặt các gói định nghĩa MIME tùy biến dạng XML (nếu có) từ thư mục `desktops/mime/` hoặc `mime/` vào `~/.local/share/mime/packages/`.
+4. Cài đặt các gói định nghĩa MIME tùy biến dạng XML (nếu có) từ thư mục `assets/desktop/mime/` hoặc `mime/` vào `~/.local/share/mime/packages/`.
 
 ### `[packages]`
 
