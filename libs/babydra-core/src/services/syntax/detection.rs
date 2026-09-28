@@ -18,6 +18,25 @@ pub fn detect_syntax(path: Option<&Path>, first_line: Option<&str>) -> &'static 
         if let Ok(Some(syntax)) = ps.find_syntax_for_file(p) {
             return syntax;
         }
+        // Handle common dotfiles and extensionless text/script files
+        if let Some(name) = p.file_name().and_then(|n| n.to_str()) {
+            let lower = name.to_lowercase();
+            if lower.ends_with("rc") || lower.starts_with(".env") || lower == ".profile" {
+                if let Some(syntax) = ps.find_syntax_by_extension("sh") {
+                    return syntax;
+                }
+            }
+            if lower == "makefile" || lower.ends_with(".mk") {
+                if let Some(syntax) = ps.find_syntax_by_name("Makefile") {
+                    return syntax;
+                }
+            }
+            if lower == "dockerfile" {
+                if let Some(syntax) = ps.find_syntax_by_name("Bourne Again Shell (bash)") {
+                    return syntax;
+                }
+            }
+        }
     }
     if let Some(line) = first_line {
         if let Some(syntax) = ps.find_syntax_by_first_line(line) {
@@ -71,6 +90,18 @@ mod tests {
 
         let json_syntax = detect_syntax(Some(Path::new("package.json")), None);
         assert_eq!(language_name(json_syntax), "JSON");
+
+        let zsh_syntax = detect_syntax(Some(Path::new(".zshrc")), None);
+        assert_eq!(language_name(zsh_syntax), "Bourne Again Shell (bash)");
+
+        let bash_syntax = detect_syntax(Some(Path::new(".bashrc")), None);
+        assert_eq!(language_name(bash_syntax), "Bourne Again Shell (bash)");
+
+        let env_syntax = detect_syntax(Some(Path::new(".env")), None);
+        assert_eq!(language_name(env_syntax), "Bourne Again Shell (bash)");
+
+        let make_syntax = detect_syntax(Some(Path::new("Makefile")), None);
+        assert_eq!(language_name(make_syntax), "Makefile");
 
         let unknown_syntax = detect_syntax(Some(Path::new("unknown.xyz123")), None);
         assert_eq!(language_name(unknown_syntax), "Plain Text");

@@ -32,6 +32,12 @@ fn open_file_picker(window: &ApplicationWindow, app: &Application, is_picking: &
     filter.add_mime_type("application/json");
     filter.add_mime_type("application/xml");
     filter.add_mime_type("application/javascript");
+    filter.add_mime_type("application/x-shellscript");
+    filter.add_mime_type("text/x-shellscript");
+    filter.add_mime_type("text/x-zsh");
+    filter.add_mime_type("application/toml");
+    filter.add_mime_type("application/yaml");
+    filter.add_mime_type("application/x-yaml");
     filter.add_pattern("*.txt");
     filter.add_pattern("*.rs");
     filter.add_pattern("*.py");
@@ -46,8 +52,22 @@ fn open_file_picker(window: &ApplicationWindow, app: &Application, is_picking: &
     filter.add_pattern("*.cpp");
     filter.add_pattern("*.h");
     filter.add_pattern("*.sh");
+    filter.add_pattern("*.bash");
+    filter.add_pattern("*.zsh");
+    filter.add_pattern("*.fish");
     filter.add_pattern("*.css");
     filter.add_pattern("*.html");
+    filter.add_pattern("*.conf");
+    filter.add_pattern("*.ini");
+    filter.add_pattern("*.cfg");
+    filter.add_pattern("*.log");
+    filter.add_pattern(".*rc");
+    filter.add_pattern(".env*");
+    filter.add_pattern(".*profile");
+    filter.add_pattern("Dockerfile*");
+    filter.add_pattern("Makefile*");
+    filter.add_pattern("CMakeLists.txt");
+
 
     let all_filter = FileFilter::new();
     all_filter.set_name(Some(&trans("notepad.all_files")));
