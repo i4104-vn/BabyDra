@@ -49,25 +49,47 @@ pub fn pixbuf_to_surface(pixbuf: &Pixbuf) -> Option<cairo::ImageSurface> {
     Some(surface)
 }
 
-/// Converts a GDK Texture to a Cairo ImageSurface via fast TextureDownloader.
+/// Converts a GDK Texture to a Cairo ImageSurface via fast and memory-safe copy.
 pub fn texture_to_surface(texture: &gdk4::Texture) -> Option<cairo::ImageSurface> {
-    let mut downloader = gdk4::TextureDownloader::new(texture);
-    downloader.set_format(gdk4::MemoryFormat::B8g8r8a8Premultiplied);
-    let (bytes, stride) = downloader.download_bytes();
     let width = texture.width();
     let height = texture.height();
-    cairo::ImageSurface::create_for_data(
-        bytes.to_vec(),
-        cairo::Format::ARgb32,
-        width,
-        height,
-        stride as i32,
-    )
-    .ok()
+    if width <= 0 || height <= 0 {
+        return None;
+    }
+
+    let mut downloader = gdk4::TextureDownloader::new(texture);
+    downloader.set_format(gdk4::MemoryFormat::B8g8r8a8Premultiplied);
+    let (bytes, src_stride) = downloader.download_bytes();
+    if bytes.is_empty() || src_stride == 0 {
+        return None;
+    }
+
+    let mut surface = cairo::ImageSurface::create(cairo::Format::ARgb32, width, height).ok()?;
+    let dst_stride = surface.stride() as usize;
+    let row_len = ((width as usize) * 4).min(src_stride).min(dst_stride);
+
+    {
+        let mut surf_data = surface.data().ok()?;
+        let src_bytes = &bytes[..];
+        for y in 0..height as usize {
+            let src_start = y * src_stride;
+            let dst_start = y * dst_stride;
+            if src_start + row_len <= src_bytes.len() && dst_start + row_len <= surf_data.len() {
+                surf_data[dst_start..dst_start + row_len]
+                    .copy_from_slice(&src_bytes[src_start..src_start + row_len]);
+            }
+        }
+    }
+
+    surface.mark_dirty();
+    Some(surface)
 }
 
 /// Captures the current visible frame from the live wallpaper Picture widget.
 pub fn capture_live_picture_surface(live_picture: &gtk4::Picture) -> Option<cairo::ImageSurface> {
+    if !live_picture.is_visible() {
+        return None;
+    }
     if let Some(paintable) = live_picture.paintable() {
         let current_image = paintable.current_image();
         if let Ok(texture) = current_image.downcast::<gdk4::Texture>() {
@@ -80,10 +102,13 @@ pub fn capture_live_picture_surface(live_picture: &gtk4::Picture) -> Option<cair
 /// Loads and pre-scales an image to the exact monitor dimensions (with 3% margin for subtle zoom)
 /// so that Cairo rendering during animation does zero heavy resampling and renders in < 0.2ms.
 pub fn load_and_prescale(path: &Path, target_w: i32, target_h: i32) -> Option<cairo::ImageSurface> {
+    if !path.exists() {
+        return None;
+    }
     let pixbuf = Pixbuf::from_file(path).ok()?;
     let orig_w = pixbuf.width() as f64;
     let orig_h = pixbuf.height() as f64;
-    if orig_w <= 0.0 || orig_h <= 0.0 {
+    if orig_w <= 0.0 || orig_h <= 0.0 || target_w <= 0 || target_h <= 0 {
         return None;
     }
 
@@ -130,7 +155,7 @@ pub fn draw_surface_aspect_fill(
     alpha: f64,
     zoom: f64,
 ) {
-    if alpha <= 0.001 {
+    if alpha <= 0.001 || surface.status().is_err() {
         return;
     }
 

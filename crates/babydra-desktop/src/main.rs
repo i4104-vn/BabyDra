@@ -9,6 +9,8 @@ use gtk4::Application;
 
 /// Application entry point: `main`.
 fn main() {
+    // Force GStreamer GstPlay to use stable playbin instead of playbin3.
+    std::env::set_var("GST_PLAY_USE_PLAYBIN3", "0");
     babydra_core::services::logger::init_logger("babydra-desktop", "babydra-desktop.log");
 
     let rt = tokio::runtime::Runtime::new().expect("Failed to initialize Tokio runtime");
