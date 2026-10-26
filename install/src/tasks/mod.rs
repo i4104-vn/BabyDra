@@ -266,7 +266,7 @@ fn dispatch_step(ctx: &mut TaskContext, step: &TaskStep) -> (usize, usize) {
             (count, 0)
         }
         "services" => {
-            let count = services::restart_services(&ctx.source_root, &ctx.sudo, send_log);
+            let count = services::restart_services(&ctx.source_root, &ctx.manifest, &ctx.sudo, send_log);
             (count, 0)
         }
         "greetd_config" => {

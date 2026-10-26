@@ -1,13 +1,18 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use crate::models::LogLevel;
+use crate::core::manifest::InstallManifest;
+use crate::models::{BinaryLocation, LogLevel};
 use crate::runtime::{get_user_home, SudoSession};
 
-/// Installs systemd user units declared by the source branch and reloads the
-/// compositor. Unit names and executable names are intentionally not encoded
-/// in the installer; adding a daemon is a source-branch change only.
-pub fn restart_services<F>(workspace_root: &Path, sudo: &SudoSession, mut log: F) -> usize
+/// Installs systemd user units declared by the source branch or auto-generated
+/// from binaries with autorestart = true, and reloads the compositor.
+pub fn restart_services<F>(
+    workspace_root: &Path,
+    manifest: &InstallManifest,
+    sudo: &SudoSession,
+    mut log: F,
+) -> usize
 where
     F: FnMut(LogLevel, String),
 {
@@ -15,6 +20,54 @@ where
     let systemd_dir = home.join(".config/systemd/user");
     let mut units = Vec::new();
 
+    // 1. Auto-generate systemd user services for binaries with autorestart = true
+    for binary in &manifest.binaries {
+        if binary.autorestart {
+            let unit_name = format!("{}.service", binary.name);
+            let destination = systemd_dir.join(&unit_name);
+            let bin_cmd = match binary.location {
+                BinaryLocation::SystemBin => format!("/usr/bin/{}", binary.name),
+                BinaryLocation::UserLocalBin => format!(
+                    "/bin/sh -c 'if [ -x \"$HOME/.local/bin/{0}\" ]; then exec \"$HOME/.local/bin/{0}\"; elif command -v {0} >/dev/null 2>&1; then exec {0}; else exec /usr/bin/{0}; fi'",
+                    binary.name
+                ),
+            };
+
+            let content = format!(
+                r#"[Unit]
+Description=BabyDra {} (auto-restart daemon)
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart={}
+Restart=always
+RestartSec=1s
+
+[Install]
+WantedBy=default.target
+"#,
+                binary.name, bin_cmd
+            );
+
+            if fs::create_dir_all(&systemd_dir)
+                .and_then(|_| fs::write(&destination, content))
+                .is_ok()
+            {
+                log(
+                    LogLevel::Info,
+                    format!(
+                        "Generated systemd user unit for '{}' (autorestart enabled).",
+                        binary.name
+                    ),
+                );
+                units.push(unit_name);
+            }
+        }
+    }
+
+    // 2. Discover any additional source-defined .service files in workspace_root
     for source in find_files(workspace_root, |path| {
         path.extension().and_then(|ext| ext.to_str()) == Some("service")
             && fs::read_to_string(path)
@@ -24,13 +77,17 @@ where
         let Some(name) = source.file_name() else {
             continue;
         };
+        let unit_str = name.to_string_lossy().to_string();
+        if units.contains(&unit_str) {
+            continue;
+        }
         let destination = systemd_dir.join(name);
         if let Ok(content) = fs::read_to_string(&source) {
             if fs::create_dir_all(&systemd_dir)
                 .and_then(|_| fs::write(&destination, content))
                 .is_ok()
             {
-                units.push(name.to_string_lossy().to_string());
+                units.push(unit_str);
             }
         }
     }
@@ -43,14 +100,14 @@ where
         log(
             LogLevel::Success,
             format!(
-                "Installed and activated {} source-defined user service(s).",
+                "Installed and activated {} user service(s).",
                 units.len()
             ),
         );
     } else {
         log(
             LogLevel::Info,
-            "No systemd user units declared by this source branch.".into(),
+            "No systemd user units declared or configured for auto-restart.".into(),
         );
     }
 
@@ -102,5 +159,46 @@ where
         } else if predicate(&path) {
             found.push(path);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::core::manifest::BinaryManifestItem;
+
+    #[test]
+    fn test_generate_unit_content() {
+        let binary = BinaryManifestItem {
+            name: "babydra-desktop".to_string(),
+            source_name: "babydra-desktop".to_string(),
+            description: "Desktop shell".to_string(),
+            location: BinaryLocation::UserLocalBin,
+            autorestart: true,
+        };
+        let bin_cmd = format!(
+            "/bin/sh -c 'if [ -x \"$HOME/.local/bin/{0}\" ]; then exec \"$HOME/.local/bin/{0}\"; elif command -v {0} >/dev/null 2>&1; then exec {0}; else exec /usr/bin/{0}; fi'",
+            binary.name
+        );
+        let content = format!(
+            r#"[Unit]
+Description=BabyDra {} (auto-restart daemon)
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart={}
+Restart=always
+RestartSec=1s
+
+[Install]
+WantedBy=default.target
+"#,
+            binary.name, bin_cmd
+        );
+        assert!(content.contains("Description=BabyDra babydra-desktop (auto-restart daemon)"));
+        assert!(content.contains("Restart=always"));
+        assert!(content.contains("RestartSec=1s"));
     }
 }

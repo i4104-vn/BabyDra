@@ -165,6 +165,7 @@ pub struct BinaryManifestItem {
     pub source_name: String,
     pub description: String,
     pub location: BinaryLocation,
+    pub autorestart: bool,
 }
 
 pub fn load_install_manifest(source_root: &Path, fallback_root: &Path) -> InstallManifest {
@@ -215,6 +216,11 @@ pub fn parse_manifest(content: &str) -> InstallManifest {
                         "system" => BinaryLocation::SystemBin,
                         _ => BinaryLocation::UserLocalBin,
                     };
+                    let autorestart = table
+                        .get("autorestart")
+                        .or_else(|| table.get("auto_restart"))
+                        .and_then(toml::Value::as_bool)
+                        .unwrap_or(false);
                     Some(BinaryManifestItem {
                         name: name.to_owned(),
                         source_name: source_name.to_owned(),
@@ -224,6 +230,7 @@ pub fn parse_manifest(content: &str) -> InstallManifest {
                             .unwrap_or_default()
                             .to_owned(),
                         location,
+                        autorestart,
                     })
                 })
                 .collect()
@@ -563,6 +570,17 @@ pub mod tests {
         assert_eq!(manifest.binaries[0].location, BinaryLocation::SystemBin);
         assert_eq!(manifest.pacman_packages, vec!["gtk4"]);
         assert!(manifest.aur_packages.contains(&"kitty".to_string()));
+    }
+
+    #[test]
+    fn parses_binary_autorestart_option() {
+        let manifest = parse_manifest(
+            "[[binaries]]\nname = \"babydra-desktop\"\nscope = \"user\"\nautorestart = true\n\n[[binaries]]\nname = \"babydra-panel\"\nscope = \"user\"\nauto_restart = false\n",
+        );
+        assert_eq!(manifest.binaries[0].name, "babydra-desktop");
+        assert!(manifest.binaries[0].autorestart);
+        assert_eq!(manifest.binaries[1].name, "babydra-panel");
+        assert!(!manifest.binaries[1].autorestart);
     }
 
     #[test]

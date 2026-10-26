@@ -66,6 +66,12 @@ name = "babydra-panel"       # Tên file đích sau khi cài
 source = "babydra-panel"     # Tên file trong target/release; mặc định bằng name
 scope = "user"               # user hoặc system
 description = "Desktop panel"
+autorestart = false          # true: tự động tạo systemd user service với Restart=always
+
+[[binaries]]
+name = "babydra-desktop"
+scope = "user"
+autorestart = true           # Tự động khởi động lại nếu tiến trình gặp sự cố/crash
 
 [[binaries]]
 name = "babydra-greeter"
