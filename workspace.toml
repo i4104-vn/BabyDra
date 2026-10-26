@@ -8,6 +8,7 @@ scope = "user"
 [[binaries]]
 name = "babydra-desktop"
 scope = "user"
+autorestart = true
 
 [[binaries]]
 name = "babydra-switcher"
