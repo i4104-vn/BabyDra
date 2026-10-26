@@ -4,10 +4,12 @@
 
 use crate::widgets;
 use gtk4::prelude::*;
+use std::cell::{Cell, RefCell};
 use std::fs::OpenOptions;
 use std::os::unix::fs::OpenOptionsExt;
 use std::path::PathBuf;
 use std::process::Command;
+use std::rc::Rc;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 /// Captures one private transition image per monitor.
@@ -40,6 +42,8 @@ pub fn build_lock_ui(
     app: &gtk4::Application,
     custom_wallpaper: Option<&str>,
     transition_images: &[Option<PathBuf>],
+    transition_stacks: Rc<RefCell<Vec<widgets::LockTransition>>>,
+    on_unlock: Rc<dyn Fn()>,
 ) {
     let display = gtk4::gdk::Display::default().expect("Failed to get default GDK display");
     let monitors = display.monitors();
@@ -52,6 +56,8 @@ pub fn build_lock_ui(
             true,
             custom_wallpaper,
             transition_images.first().and_then(|image| image.as_deref()),
+            transition_stacks,
+            on_unlock,
         );
     } else {
         for i in 0..num_monitors {
@@ -68,9 +74,35 @@ pub fn build_lock_ui(
                     transition_images
                         .get(i as usize)
                         .and_then(|image| image.as_deref()),
+                    transition_stacks.clone(),
+                    on_unlock.clone(),
                 );
             }
         }
+    }
+}
+
+/// Reverses the blur on every monitor before the lock application exits.
+pub fn reverse_lock_transition(stacks: Vec<widgets::LockTransition>, on_complete: Rc<dyn Fn()>) {
+    if stacks.is_empty() {
+        on_complete();
+        return;
+    }
+
+    let remaining = Rc::new(Cell::new(stacks.len()));
+    for stack in stacks {
+        let remaining = remaining.clone();
+        let on_complete = on_complete.clone();
+        widgets::reverse_lock_transition(
+            stack,
+            Rc::new(move || {
+                let count = remaining.get().saturating_sub(1);
+                remaining.set(count);
+                if count == 0 {
+                    on_complete();
+                }
+            }),
+        );
     }
 }
 

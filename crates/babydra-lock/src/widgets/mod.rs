@@ -5,10 +5,20 @@ mod render;
 use babydra_core::verify_password;
 use gtk4::prelude::*;
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
+use std::cell::{Cell, RefCell};
 use std::path::{Path, PathBuf};
+use std::rc::Rc;
 use std::time::{Duration, Instant};
 
 use crate::widgets::render::PrimaryCard;
+
+#[derive(Clone)]
+pub struct LockTransition {
+    stack: gtk4::Stack,
+    window: gtk4::ApplicationWindow,
+    cancelled: Rc<Cell<bool>>,
+    last_blur_frame: Rc<Cell<usize>>,
+}
 
 /// Spawns a lock window assigned to a specific monitor.
 pub fn create_lock_window(
@@ -17,6 +27,8 @@ pub fn create_lock_window(
     is_primary: bool,
     custom_wallpaper: Option<&str>,
     transition_image: Option<&Path>,
+    transition_stacks: Rc<RefCell<Vec<LockTransition>>>,
+    on_unlock: Rc<dyn Fn()>,
 ) {
     let window = gtk4::ApplicationWindow::new(app);
     babydra_ui_kit::ui::theme::apply_theme_class(&window);
@@ -76,7 +88,7 @@ pub fn create_lock_window(
             date_label,
         } = render::build_primary_card();
         setup_clock_timer(&clock_label, &date_label);
-        setup_auth_handler(app, &entry, &status_label, &card_box);
+        setup_auth_handler(on_unlock, &entry, &status_label, &card_box);
         setup_focus_management(&window, &entry);
         center_box.append(&card_box);
     } else {
@@ -103,27 +115,81 @@ pub fn create_lock_window(
         picture.set_vexpand(true);
         stack.add_named(&picture, Some("blur-0"));
         overlay.add_overlay(&stack);
-        (stack, path.to_path_buf())
+        let transition = LockTransition {
+            stack,
+            window: window.clone(),
+            cancelled: Rc::new(Cell::new(false)),
+            last_blur_frame: Rc::new(Cell::new(0)),
+        };
+        (transition, path.to_path_buf())
     });
+    if let Some((transition, _)) = transition.as_ref() {
+        transition_stacks.borrow_mut().push(transition.clone());
+    }
 
     window.set_child(Some(&overlay));
     window.present();
 
-    if let Some((stack, image_path)) = transition {
+    if let Some((transition, image_path)) = transition {
         // Start the first blur as soon as the initial screenshot has been
         // presented, then add only three quick, progressively softer frames.
-        schedule_blur_transition(stack, image_path);
+        schedule_blur_transition(transition, image_path);
     }
 }
 
-fn schedule_blur_transition(stack: gtk4::Stack, image_path: PathBuf) {
+/// Reveals progressively clearer desktop frames after successful authentication.
+pub fn reverse_lock_transition(transition: LockTransition, on_complete: Rc<dyn Fn()>) {
+    transition.cancelled.set(true);
+    transition.window.set_opacity(1.0);
+    transition.stack.set_opacity(1.0);
+    transition.stack.set_visible(true);
+    transition
+        .stack
+        .set_visible_child_name(&format!("blur-{}", transition.last_blur_frame.get()));
+    schedule_reverse_blur_step(transition, on_complete);
+}
+
+fn schedule_reverse_blur_step(transition: LockTransition, on_complete: Rc<dyn Fn()>) {
+    glib::timeout_add_local_once(Duration::from_millis(70), move || {
+        let step = transition.last_blur_frame.get();
+        if step > 0 {
+            transition.last_blur_frame.set(step - 1);
+            transition
+                .stack
+                .set_visible_child_name(&format!("blur-{}", step - 1));
+            schedule_reverse_blur_step(transition, on_complete);
+        } else {
+            glib::timeout_add_local_once(Duration::from_millis(70), move || {
+                let started = Instant::now();
+                glib::timeout_add_local(Duration::from_millis(16), move || {
+                    let progress = (started.elapsed().as_secs_f64() / 0.16).clamp(0.0, 1.0);
+                    transition.window.set_opacity(1.0 - progress);
+
+                    if progress >= 1.0 {
+                        transition.window.set_opacity(0.0);
+                        on_complete();
+                        glib::ControlFlow::Break
+                    } else {
+                        glib::ControlFlow::Continue
+                    }
+                });
+            });
+        }
+    });
+}
+
+fn schedule_blur_transition(transition: LockTransition, image_path: PathBuf) {
     glib::timeout_add_local_once(Duration::from_millis(20), move || {
+        if transition.cancelled.get() {
+            return;
+        }
+
         let Some(source) = load_transition_source(&image_path) else {
             tracing::warn!("Could not load the screen image for the lock transition");
-            fade_out_transition(stack);
+            fade_out_transition(transition);
             return;
         };
-        schedule_blur_step(stack, source, 0);
+        schedule_blur_step(transition, source, 0);
     });
 }
 
@@ -145,11 +211,15 @@ fn load_transition_source(path: &Path) -> Option<gtk4::gdk_pixbuf::Pixbuf> {
     )
 }
 
-fn schedule_blur_step(stack: gtk4::Stack, source: gtk4::gdk_pixbuf::Pixbuf, step: usize) {
+fn schedule_blur_step(transition: LockTransition, source: gtk4::gdk_pixbuf::Pixbuf, step: usize) {
     const BLUR_DIVISORS: [i32; 3] = [2, 3, 5];
     let delay = if step == 0 { 10 } else { 70 };
 
     glib::timeout_add_local_once(Duration::from_millis(delay), move || {
+        if transition.cancelled.get() {
+            return;
+        }
+
         let divisor = BLUR_DIVISORS[step];
         if let Some(frame) = blur_transition_frame(&source, divisor) {
             let texture = gtk4::gdk::Texture::for_pixbuf(&frame);
@@ -159,17 +229,22 @@ fn schedule_blur_step(stack: gtk4::Stack, source: gtk4::gdk_pixbuf::Pixbuf, step
             picture.set_content_fit(gtk4::ContentFit::Cover);
             picture.set_hexpand(true);
             picture.set_vexpand(true);
-            stack.add_named(&picture, Some(&format!("blur-{}", step + 1)));
-            stack.set_visible_child_name(&format!("blur-{}", step + 1));
+            transition
+                .stack
+                .add_named(&picture, Some(&format!("blur-{}", step + 1)));
+            transition
+                .stack
+                .set_visible_child_name(&format!("blur-{}", step + 1));
+            transition.last_blur_frame.set(step + 1);
         } else {
             tracing::warn!("Could not create a lock transition blur frame");
         }
 
         if step + 1 < BLUR_DIVISORS.len() {
-            schedule_blur_step(stack, source, step + 1);
+            schedule_blur_step(transition, source, step + 1);
         } else {
             glib::timeout_add_local_once(Duration::from_millis(70), move || {
-                fade_out_transition(stack);
+                fade_out_transition(transition);
             });
         }
     });
@@ -189,14 +264,18 @@ fn blur_transition_frame(
     reduced.scale_simple(width, height, gtk4::gdk_pixbuf::InterpType::Bilinear)
 }
 
-fn fade_out_transition(stack: gtk4::Stack) {
+fn fade_out_transition(transition: LockTransition) {
     let started = Instant::now();
     glib::timeout_add_local(Duration::from_millis(16), move || {
+        if transition.cancelled.get() {
+            return glib::ControlFlow::Break;
+        }
+
         let progress = (started.elapsed().as_secs_f64() / 0.16).clamp(0.0, 1.0);
-        stack.set_opacity(1.0 - progress);
+        transition.stack.set_opacity(1.0 - progress);
 
         if progress >= 1.0 {
-            stack.set_visible(false);
+            transition.stack.set_visible(false);
             glib::ControlFlow::Break
         } else {
             glib::ControlFlow::Continue
@@ -222,7 +301,7 @@ fn setup_clock_timer(clock_label: &gtk4::Label, date_label: &gtk4::Label) {
 
 /// Wires up password verification and shake animation on enter press.
 fn setup_auth_handler(
-    app: &gtk4::Application,
+    on_unlock: Rc<dyn Fn()>,
     entry: &gtk4::PasswordEntry,
     status_label: &gtk4::Label,
     card_box: &gtk4::Box,
@@ -231,7 +310,6 @@ fn setup_auth_handler(
     let entry_clone = entry.clone();
     let status_label_clone = status_label.clone();
     let card_clone = card_box.clone();
-    let app_clone = app.clone();
 
     entry.connect_activate(move |_| {
         let password = entry_clone.text().to_string();
@@ -239,7 +317,7 @@ fn setup_auth_handler(
 
         if verify_password(&username, &password) {
             babydra_core::save_last_user(&username);
-            app_clone.quit();
+            on_unlock();
         } else {
             status_label_clone.set_text(&babydra_core::i18n::trans("lock.status_incorrect"));
             status_label_clone.add_css_class("error");

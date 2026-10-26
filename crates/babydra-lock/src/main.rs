@@ -42,11 +42,16 @@ fn main() {
     let desktop_executable_on_activate = desktop_executable.clone();
     let transition_paths = Rc::new(RefCell::new(Vec::new()));
     let transition_paths_on_activate = transition_paths.clone();
+    let transition_stacks = Rc::new(RefCell::new(Vec::new()));
+    let transition_stacks_on_activate = transition_stacks.clone();
+    let unlock_started = Rc::new(Cell::new(false));
 
     application.connect_activate(move |app| {
         babydra_ui_kit::ui::theme::init_theme();
 
         *desktop_executable_on_activate.borrow_mut() = find_running_desktop_executable();
+        transition_stacks_on_activate.borrow_mut().clear();
+        unlock_started.set(false);
 
         // Keep the captured desktop above the lock UI during the short blur
         // transition, then freeze the desktop shell without exiting it.
@@ -55,12 +60,45 @@ fn main() {
             .iter()
             .filter_map(|image| image.clone())
             .collect();
-        render::build_lock_ui(app, custom_image.as_deref(), &transition_images);
+
+        let app_on_unlock = app.clone();
+        let stacks_on_unlock = transition_stacks_on_activate.clone();
+        let desktop_executable_on_unlock = desktop_executable_on_activate.borrow().clone();
+        let desktop_frozen_on_unlock = desktop_frozen_on_activate.clone();
+        let unlock_started_on_unlock = unlock_started.clone();
+        let on_unlock = Rc::new(move || {
+            if unlock_started_on_unlock.replace(true) {
+                return;
+            }
+
+            if desktop_frozen_on_unlock.get()
+                && set_desktop_mode(desktop_executable_on_unlock.as_deref(), "--resume")
+            {
+                desktop_frozen_on_unlock.set(false);
+            }
+
+            let app = app_on_unlock.clone();
+            render::reverse_lock_transition(
+                stacks_on_unlock.borrow().clone(),
+                Rc::new(move || app.quit()),
+            );
+        });
+
+        render::build_lock_ui(
+            app,
+            custom_image.as_deref(),
+            &transition_images,
+            transition_stacks_on_activate.clone(),
+            on_unlock,
+        );
 
         let desktop_executable = desktop_executable_on_activate.borrow().clone();
         let desktop_frozen = desktop_frozen_on_activate.clone();
+        let unlock_started = unlock_started.clone();
         gtk4::glib::timeout_add_local_once(Duration::from_millis(100), move || {
-            desktop_frozen.set(set_desktop_mode(desktop_executable.as_deref(), "--frozen"));
+            if !unlock_started.get() {
+                desktop_frozen.set(set_desktop_mode(desktop_executable.as_deref(), "--frozen"));
+            }
         });
     });
 
