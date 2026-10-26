@@ -8,6 +8,7 @@ babydra-core = { workspace = true }
 babydra-ui-kit = { workspace = true }
 gtk4.workspace = true
 gtk4-layer-shell = { workspace = true }
+libc = "0.2"
 
 # Async & utilities
 tokio = { workspace = true }

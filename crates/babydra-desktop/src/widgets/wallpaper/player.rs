@@ -43,6 +43,7 @@ fn attach_error_handler(
     live_pic: gtk4::Picture,
     da: gtk4::DrawingArea,
     active_mf: Rc<RefCell<Option<gtk4::MediaFile>>>,
+    is_frozen: Rc<Cell<bool>>,
     gif_src: Rc<RefCell<Option<glib::SourceId>>>,
     recycle_src: Rc<RefCell<Option<glib::SourceId>>>,
     consecutive_errors: Rc<Cell<u32>>,
@@ -109,6 +110,7 @@ fn attach_error_handler(
             let act_retry = active_mf_err.clone();
             let gif_retry = gif_src.clone();
             let rec_retry = recycle_src_err.clone();
+            let frozen_retry = is_frozen.clone();
             let err_cnt_retry = consecutive_errors.clone();
             let last_err_retry = last_error_time.clone();
 
@@ -120,6 +122,7 @@ fn attach_error_handler(
                     &pic_retry,
                     &da_retry,
                     &act_retry,
+                    &frozen_retry,
                     &gif_retry,
                     &rec_retry,
                     None,
@@ -138,6 +141,7 @@ pub fn start_live_media(
     live_pic: &gtk4::Picture,
     da: &gtk4::DrawingArea,
     active_mf: &Rc<RefCell<Option<gtk4::MediaFile>>>,
+    is_frozen: &Rc<Cell<bool>>,
     gif_src: &Rc<RefCell<Option<glib::SourceId>>>,
     recycle_src: &Rc<RefCell<Option<glib::SourceId>>>,
     pre_rolled_mf: Option<gtk4::MediaFile>,
@@ -150,6 +154,7 @@ pub fn start_live_media(
         live_pic,
         da,
         active_mf,
+        is_frozen,
         gif_src,
         recycle_src,
         pre_rolled_mf,
@@ -164,12 +169,17 @@ fn start_live_media_internal(
     live_pic: &gtk4::Picture,
     da: &gtk4::DrawingArea,
     active_mf: &Rc<RefCell<Option<gtk4::MediaFile>>>,
+    is_frozen: &Rc<Cell<bool>>,
     gif_src: &Rc<RefCell<Option<glib::SourceId>>>,
     recycle_src: &Rc<RefCell<Option<glib::SourceId>>>,
     pre_rolled_mf: Option<gtk4::MediaFile>,
     consecutive_errors: Rc<Cell<u32>>,
     last_error_time: Rc<Cell<Option<Instant>>>,
 ) {
+    if is_frozen.get() {
+        return;
+    }
+
     if *live_mode == babydra_core::wallpaper::WallpaperMode::Live {
         if babydra_core::wallpaper::is_video_file(live_path) {
             if babydra_core::wallpaper::is_gstreamer_plugin_available() {
@@ -192,6 +202,7 @@ fn start_live_media_internal(
                     live_pic.clone(),
                     da.clone(),
                     active_mf.clone(),
+                    is_frozen.clone(),
                     gif_src.clone(),
                     recycle_src.clone(),
                     consecutive_errors.clone(),
@@ -227,12 +238,16 @@ fn start_live_media_internal(
                 let act_rec = active_mf.clone();
                 let gif_rec = gif_src.clone();
                 let rec_rec = recycle_src.clone();
+                let frozen_rec = is_frozen.clone();
                 let err_rec = consecutive_errors.clone();
                 let last_rec = last_error_time.clone();
 
                 let timer_id = glib::timeout_add_local(
                     Duration::from_secs(PIPELINE_RECYCLE_INTERVAL_SECS),
                     move || {
+                        if frozen_rec.get() {
+                            return glib::ControlFlow::Continue;
+                        }
                         tracing::debug!("Performing seamless proactive live wallpaper recycle");
                         recycle_live_video(
                             &path_rec,
@@ -240,6 +255,7 @@ fn start_live_media_internal(
                             &pic_rec,
                             &da_rec,
                             &act_rec,
+                            &frozen_rec,
                             &gif_rec,
                             &rec_rec,
                             err_rec.clone(),
@@ -277,11 +293,15 @@ fn start_live_media_internal(
                     da.set_visible(false);
 
                     let pic_inner = live_pic.clone();
+                    let frozen_gif = is_frozen.clone();
                     let delay = iter
                         .delay_time()
                         .unwrap_or(Duration::from_millis(100))
                         .max(Duration::from_millis(20));
                     let s_id = glib::timeout_add_local(delay, move || {
+                        if frozen_gif.get() {
+                            return glib::ControlFlow::Continue;
+                        }
                         iter.advance(std::time::SystemTime::now());
                         let pb = iter.pixbuf();
                         let tex = gtk4::gdk::Texture::for_pixbuf(&pb);
@@ -303,6 +323,7 @@ fn recycle_live_video(
     live_pic: &gtk4::Picture,
     da: &gtk4::DrawingArea,
     active_mf: &Rc<RefCell<Option<gtk4::MediaFile>>>,
+    is_frozen: &Rc<Cell<bool>>,
     gif_src: &Rc<RefCell<Option<glib::SourceId>>>,
     recycle_src: &Rc<RefCell<Option<glib::SourceId>>>,
     consecutive_errors: Rc<Cell<u32>>,
@@ -347,6 +368,7 @@ fn recycle_live_video(
         live_pic.clone(),
         da.clone(),
         active_mf.clone(),
+        is_frozen.clone(),
         gif_src.clone(),
         recycle_src.clone(),
         consecutive_errors,

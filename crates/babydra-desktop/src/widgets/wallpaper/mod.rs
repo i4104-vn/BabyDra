@@ -18,10 +18,11 @@ pub use transition::*;
 pub use watcher::*;
 
 use gtk4::prelude::*;
+use std::rc::Rc;
 
 /// Creates a fullscreen wallpaper widget with GPU acceleration for live wallpaper (Video & GIF)
 /// and water-drop ripple transition for all transitions (static <-> video <-> static).
-pub fn create_wallpaper_w() -> gtk4::Overlay {
+pub fn create_wallpaper_w() -> (gtk4::Overlay, Rc<dyn Fn(bool)>) {
     let container = gtk4::Overlay::new();
     container.set_hexpand(true);
     container.set_vexpand(true);
@@ -62,6 +63,7 @@ pub fn create_wallpaper_w() -> gtk4::Overlay {
                 &live_picture,
                 &drawing_area,
                 &state.active_media_file,
+                &state.is_frozen,
                 &state.gif_source_id,
                 &state.recycle_source_id,
                 None,
@@ -89,7 +91,63 @@ pub fn create_wallpaper_w() -> gtk4::Overlay {
 
     // Wire transition trigger and filesystem watchers
     let trigger_transition = create_transition_trigger(&drawing_area, &live_picture, &state);
-    start_wallpaper_watcher(trigger_transition);
+    start_wallpaper_watcher(trigger_transition.clone());
 
-    container
+    let frozen = state.is_frozen.clone();
+    let active_media = state.active_media_file.clone();
+    let pending_live_play = state.pending_live_play.clone();
+    let current_path = state.current_wp_path.clone();
+    let current_mode = state.current_wp_mode.clone();
+    let live_picture_for_freeze = live_picture.clone();
+    let drawing_area_for_freeze = drawing_area.clone();
+    let gif_source = state.gif_source_id.clone();
+    let recycle_source = state.recycle_source_id.clone();
+    let frozen_for_media = state.is_frozen.clone();
+    let refresh_after_resume = trigger_transition;
+    let set_frozen = Rc::new(move |should_freeze| {
+        if frozen.replace(should_freeze) == should_freeze {
+            return;
+        }
+
+        if let Some(media) = active_media.borrow().as_ref() {
+            if should_freeze {
+                safely_pause_media_file(media);
+            } else if media.error().is_none() {
+                media.play();
+            }
+        }
+
+        if !should_freeze {
+            let has_pending_play = pending_live_play.borrow().is_some();
+            let video_path = current_path
+                .borrow()
+                .clone()
+                .filter(|path| babydra_core::wallpaper::is_video_file(path));
+            let media_needs_restart = match active_media.borrow().as_ref() {
+                Some(media) => media.error().is_some(),
+                None => true,
+            };
+            if *current_mode.borrow() == babydra_core::wallpaper::WallpaperMode::Live
+                && !has_pending_play
+                && media_needs_restart
+            {
+                if let Some(path) = video_path {
+                    start_live_media(
+                        &path,
+                        &current_mode.borrow(),
+                        &live_picture_for_freeze,
+                        &drawing_area_for_freeze,
+                        &active_media,
+                        &frozen_for_media,
+                        &gif_source,
+                        &recycle_source,
+                        None,
+                    );
+                }
+            }
+            refresh_after_resume();
+        }
+    });
+
+    (container, set_frozen)
 }

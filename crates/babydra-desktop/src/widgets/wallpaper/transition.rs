@@ -20,6 +20,10 @@ pub fn create_transition_trigger(
     let state_c = state.clone();
 
     Rc::new(move || {
+        if state_c.is_frozen.get() {
+            return;
+        }
+
         let new_path = babydra_core::wallpaper::get_wallpaper();
         let new_mode = babydra_core::wallpaper::get_wallpaper_mode();
         let path_changed = match (&new_path, &*state_c.current_wp_path.borrow()) {
@@ -82,8 +86,7 @@ fn execute_transition(
 
             if let Some(new_surf) = target_surf {
                 *state.current_surface.borrow_mut() = Some(new_surf);
-                *state.pending_live_play.borrow_mut() =
-                    Some((path.clone(), new_mode, pre_rolled));
+                *state.pending_live_play.borrow_mut() = Some((path.clone(), new_mode, pre_rolled));
 
                 if let Some(prev) = prev_surf {
                     *state.old_surface.borrow_mut() = Some(prev);
@@ -100,6 +103,7 @@ fn execute_transition(
                             live_pic,
                             da,
                             &state.active_media_file,
+                            &state.is_frozen,
                             &state.gif_source_id,
                             &state.recycle_source_id,
                             pre_rolled_mf,
@@ -151,6 +155,10 @@ fn start_transition_animation(
     let state_tick = state.clone();
 
     da.add_tick_callback(move |_, clock| {
+        if state_tick.is_frozen.get() {
+            return glib::ControlFlow::Continue;
+        }
+
         let now = clock.frame_time();
         if state_tick.active_start_time.get().is_none() {
             state_tick.active_start_time.set(Some(now));
@@ -176,6 +184,7 @@ fn start_transition_animation(
                     &live_pic_tick,
                     &da_tick,
                     &state_tick.active_media_file,
+                    &state_tick.is_frozen,
                     &state_tick.gif_source_id,
                     &state_tick.recycle_source_id,
                     pre_rolled_mf,
