@@ -95,6 +95,8 @@ fn attach_tray_click_gesture(
             let btn_clone = btn_c.clone();
             let s_name_main = service_name.clone();
             let path_main = path_name.clone();
+            let c_x = click_x;
+            let c_y = click_y;
 
             gtk4::glib::timeout_add_local(std::time::Duration::from_millis(10), move || {
                 match rx.try_recv() {
@@ -104,6 +106,8 @@ fn attach_tray_click_gesture(
                                 &btn_clone,
                                 &s_name_main,
                                 &menu,
+                                c_x,
+                                c_y,
                             );
                         } else {
                             babydra_core::tray::activate_item(

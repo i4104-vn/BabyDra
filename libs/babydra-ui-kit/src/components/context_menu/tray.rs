@@ -25,15 +25,31 @@ pub fn close_tray_menu() {
 }
 
 /// Displays a context menu for a system tray item based on DBus menu items using hierarchical Popovers.
-pub fn show_tray_menu(btn: &gtk4::Button, service: &str, items: &[babydra_core::tray::MenuItem]) {
+/// Anchors the menu below the clicked position and offsets it so the cursor is at the top-left of the menu.
+pub fn show_tray_menu(
+    btn: &gtk4::Button,
+    service: &str,
+    items: &[babydra_core::tray::MenuItem],
+    click_x: f64,
+    click_y: f64,
+) {
     close_tray_menu();
 
     let (popover, _) =
         create_menu_for(btn.upcast_ref::<gtk4::Widget>(), gtk4::PositionType::Bottom);
 
+    let rect = gtk4::gdk::Rectangle::new(click_x as i32, click_y as i32, 1, 1);
+    popover.set_pointing_to(Some(&rect));
+
     let active_sub_popover = Rc::new(RefCell::new(None::<gtk4::Popover>));
     let vbox = build_tray_menu_box(items, service, &popover, active_sub_popover);
     popover.set_child(Some(&vbox));
+
+    let (_, natural_width, _, _) = vbox.measure(gtk4::Orientation::Horizontal, -1);
+    let menu_width = natural_width.max(190);
+    // Align top-left corner of the popover with cursor (click_x, click_y):
+    // Since GTK centers PositionType::Bottom on pointing_to, shift by +menu_width / 2
+    popover.set_offset(menu_width / 2, 4);
 
     popover.popup();
 

@@ -3772,12 +3772,10 @@ button.modern-dialog-danger-btn:disabled,
 .panel-notch.active-music,
 .island-badge {
     border-radius: 9999px;
-    background-color: rgba(255, 255, 255, 0.98);
+    background-color: #ffffff;
     background-image: none;
-    border-top: 1px solid rgba(255, 255, 255, 1.0);
-    border-left: 1px solid rgba(255, 255, 255, 1.0);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    opacity: 1.0;
+    border: 1px solid rgba(0, 0, 0, 0.08);
     box-shadow: none;
 }
 
@@ -3843,14 +3841,14 @@ popover>contents .tooltip-popover-card {
 .status-indicators-box,
 .taskbar-box,
 .tray-box,
-.clock-box {
+.panel-tray-box,
+.clock-box,
+.sys-monitor-box {
     border-radius: 9999px;
-    background-color: rgba(255, 255, 255, 0.98);
+    background-color: #ffffff;
     background-image: none;
-    border-top: 1px solid rgba(255, 255, 255, 1.0);
-    border-left: 1px solid rgba(255, 255, 255, 1.0);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    opacity: 1.0;
+    border: 1px solid rgba(0, 0, 0, 0.08);
     box-shadow: none;
 }
 
@@ -3986,8 +3984,14 @@ popover.panel-notification-popover>contents,
 popover.workspace-overview-popover>contents,
 popover.status-popover>contents,
 popover.tooltip-popover>contents,
+popover.wifi-popover>contents,
+popover.volume-popover>contents,
+popover.audio-popover>contents,
+popover.control-popover>contents,
 .status-popover-card,
-.tooltip-popover-card {
+.tooltip-popover-card,
+.recording-settings-card,
+.recording-meta-card {
     background-color: #ffffff;
     background-image: none;
     opacity: 1.0;
