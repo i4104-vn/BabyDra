@@ -20,7 +20,16 @@ pub fn list_branches(repo: &Path) -> Vec<BranchItem> {
         .unwrap_or_default()
         .lines()
         .map(|l| l.trim().to_string())
-        .filter_map(|l| l.strip_prefix("origin/").map(|s| s.to_string()))
+        .filter_map(|l| {
+            if let Some((_, branch)) = l.split_once('/') {
+                if branch != "HEAD" && !branch.is_empty() {
+                    return Some(branch.to_string());
+                }
+            } else if l.starts_with("origin/") {
+                return l.strip_prefix("origin/").map(|s| s.to_string());
+            }
+            None
+        })
         .filter(|l| !l.is_empty() && l != "HEAD")
         .collect();
 
@@ -35,7 +44,11 @@ pub fn list_branches(repo: &Path) -> Vec<BranchItem> {
             names.push(r.clone());
         }
     }
+
+    // Keep branches that contain a valid workspace manifest (Cargo.toml or workspace.toml),
+    // checking both local and remote refs.
     names.retain(|name| has_workspace_manifest(repo, name));
+
     names.sort_by(|a, b| {
         let a_current = a == &current;
         let b_current = b == &current;
@@ -62,7 +75,16 @@ pub fn refresh_branches(repo: &Path) -> Vec<BranchItem> {
     let (tx, rx) = std::sync::mpsc::channel();
     let repo_owned = repo.to_path_buf();
     std::thread::spawn(move || {
-        let _ = git(&repo_owned, &["fetch", "--prune", "origin"]);
+        let _ = git(
+            &repo_owned,
+            &[
+                "config",
+                "--add",
+                "remote.origin.fetch",
+                "+refs/heads/*:refs/remotes/origin/*",
+            ],
+        );
+        let _ = git(&repo_owned, &["fetch", "--all", "--prune"]);
         let _ = tx.send(());
     });
     let _ = rx.recv_timeout(std::time::Duration::from_secs(8));
@@ -70,5 +92,15 @@ pub fn refresh_branches(repo: &Path) -> Vec<BranchItem> {
 }
 
 fn has_workspace_manifest(repo: &Path, branch: &str) -> bool {
-    git(repo, &["cat-file", "-e", &format!("{branch}:Cargo.toml")]).is_ok()
+    let candidates = [
+        format!("{branch}:Cargo.toml"),
+        format!("origin/{branch}:Cargo.toml"),
+        format!("refs/remotes/origin/{branch}:Cargo.toml"),
+        format!("{branch}:workspace.toml"),
+        format!("origin/{branch}:workspace.toml"),
+        format!("refs/remotes/origin/{branch}:workspace.toml"),
+    ];
+    candidates
+        .iter()
+        .any(|target| git(repo, &["cat-file", "-e", target]).is_ok())
 }

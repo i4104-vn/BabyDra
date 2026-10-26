@@ -61,6 +61,26 @@ pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
             total_copied += copied;
             total_errors += errors;
 
+            // Abort immediately on critical failures (checkout or release build) to prevent
+            // configuring broken system services or deploying missing binaries.
+            if errors > 0 && (step.id == "git_checkout" || step.id == "cargo_build") {
+                let duration = start_time.elapsed().as_secs_f64();
+                ctx.send_log(
+                    LogLevel::Error,
+                    format!(
+                        "Installation aborted due to critical failure in '{}'.",
+                        step.title
+                    ),
+                );
+                let _ = ctx.tx.send(InstallEvent::Completed {
+                    success: false,
+                    total_copied,
+                    total_errors,
+                    duration_secs: duration,
+                });
+                return;
+            }
+
             // If we just checked out and built the branch, refresh the manifest and binaries
             if step.id == "git_checkout" {
                 ctx.reload_manifest();

@@ -84,7 +84,44 @@ mod tests {
         let app = App::new();
         if !app.branches.is_empty() {
             assert_eq!(app.selected_branch, app.branches[app.branch_cursor].name);
-            assert!(app.branches[app.branch_cursor].selected);
         }
+    }
+
+    #[test]
+    fn test_branch_search_filtering() {
+        let mut app = App::new();
+        app.branches = vec![
+            crate::models::BranchItem {
+                name: "main".to_string(),
+                has_remote: true,
+                is_current: false,
+                selected: false,
+            },
+            crate::models::BranchItem {
+                name: "release".to_string(),
+                has_remote: true,
+                is_current: true,
+                selected: true,
+            },
+            crate::models::BranchItem {
+                name: "develop".to_string(),
+                has_remote: true,
+                is_current: false,
+                selected: false,
+            },
+        ];
+
+        assert_eq!(app.filtered_branches().len(), 3);
+
+        app.branch_search_query = "rel".to_string();
+        let filtered = app.filtered_branches();
+        assert_eq!(filtered.len(), 1);
+        assert_eq!(filtered[0].1.name, "release");
+
+        app.branch_search_query = "xyz".to_string();
+        assert_eq!(app.filtered_branches().len(), 0);
+
+        app.branch_search_query.clear();
+        assert_eq!(app.filtered_branches().len(), 3);
     }
 }

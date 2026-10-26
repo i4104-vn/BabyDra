@@ -29,6 +29,48 @@ where
                 .iter()
                 .find(|binary| matches!(binary.default_dest, crate::models::BinaryLocation::SystemBin))?;
             let path = binary_target_path(&greeter.name, &greeter.default_dest);
+
+            // Verify binary existence: check /usr/bin/<name> or try to copy from staging / release dir
+            if !path.exists() {
+                let candidates = [
+                    workspace_root.join("target/release").join(&greeter.name),
+                    workspace_root.join("branches").join("release").join("target/release").join(&greeter.name),
+                    workspace_root.join("branches").join("develop").join("target/release").join(&greeter.name),
+                    std::path::PathBuf::from("/var/lib/babydra/bin").join(&greeter.name),
+                    crate::runtime::get_user_local_bin().join(&greeter.name),
+                ];
+                let mut recovered = false;
+                for candidate in &candidates {
+                    if candidate.is_file() {
+                        let _ = sudo.run_root(&[
+                            "cp",
+                            candidate.to_str().unwrap_or(""),
+                            path.to_str().unwrap_or(""),
+                        ]);
+                        let _ = sudo.run_root_quiet(&["chmod", "755", path.to_str().unwrap_or("")]);
+                        if path.exists() {
+                            log(
+                                LogLevel::Info,
+                                format!("Recovered missing system greeter from {:?}", candidate),
+                            );
+                            recovered = true;
+                            break;
+                        }
+                    }
+                }
+
+                if !recovered {
+                    log(
+                        LogLevel::Error,
+                        format!(
+                            "Greeter binary '{}' does not exist at {:?}. Skipping greetd config to avoid boot crash.",
+                            greeter.name, path
+                        ),
+                    );
+                    return None;
+                }
+            }
+
             Some(format!(
                 "[terminal]\nvt = 1\n\n[default_session]\ncommand = \"sh -c 'clear 2>/dev/null; setterm -cursor off 2>/dev/null; exec cage -s -- {}'\"\nuser = \"greeter\"\n",
                 path.display()
@@ -39,7 +81,7 @@ where
     let Some(greetd_toml) = greetd_toml else {
         log(
             LogLevel::Warn,
-            "No display-manager config or system-scoped greeter declared; skipping greetd config.".into(),
+            "No valid display-manager config or verified greeter executable; skipping greetd config.".into(),
         );
         return (0, 0);
     };
@@ -97,6 +139,23 @@ pub fn enable_greetd_service<F>(
 where
     F: FnMut(LogLevel, String),
 {
+    // Ensure both config and greeter executable exist before enabling greetd.service
+    if !Path::new("/etc/greetd/config.toml").exists() {
+        log(
+            LogLevel::Error,
+            "Cannot enable greetd.service: /etc/greetd/config.toml does not exist.".into(),
+        );
+        return (0, 1);
+    }
+
+    if !Path::new("/usr/bin/babydra-greeter").exists() {
+        log(
+            LogLevel::Error,
+            "Cannot enable greetd.service: /usr/bin/babydra-greeter does not exist. Skipping to prevent boot crash.".into(),
+        );
+        return (0, 1);
+    }
+
     log(
         LogLevel::Config,
         format!("Enabling {} on boot...", config.enable_service),
@@ -111,6 +170,7 @@ where
 
 fn discover_greetd_config(workspace_root: &Path) -> Option<String> {
     [
+        workspace_root.join("assets/configs/greetd/config.toml"),
         workspace_root.join("configs/greetd/config.toml"),
         workspace_root.join("greetd/config.toml"),
     ]

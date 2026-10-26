@@ -28,6 +28,8 @@ pub struct App {
     /// Empty string = pre-built only; otherwise the branch to check out,
     /// pull and rebuild from source.
     pub selected_branch: String,
+    pub branch_search_query: String,
+    pub branch_search_active: bool,
 
     pub discovery_in_progress: bool,
     pub discovery_request_id: u64,
@@ -75,7 +77,20 @@ impl App {
         let (tx, rx) = channel();
         let workspace_root = find_workspace_root();
         let source_binary_dir = default_binary_source_dir(&workspace_root);
-        let branches = list_branches(&workspace_root);
+        let mut branches = list_branches(&workspace_root);
+        if branches.is_empty() {
+            let _ = crate::runtime::git(
+                &workspace_root,
+                &[
+                    "config",
+                    "--add",
+                    "remote.origin.fetch",
+                    "+refs/heads/*:refs/remotes/origin/*",
+                ],
+            );
+            let _ = crate::runtime::git(&workspace_root, &["fetch", "--all", "--prune"]);
+            branches = list_branches(&workspace_root);
+        }
 
         // Prefer the current source branch; otherwise use the first
         // installable branch discovered from git. No branch name is baked
@@ -124,6 +139,8 @@ impl App {
             branches,
             branch_cursor,
             selected_branch,
+            branch_search_query: String::new(),
+            branch_search_active: false,
 
             discovery_in_progress: true,
             discovery_request_id: 0,
@@ -242,5 +259,19 @@ impl App {
             }
         }
         self.source_binary_dir.clone()
+    }
+
+    /// Returns branches filtered by the active search query.
+    pub fn filtered_branches(&self) -> Vec<(usize, &BranchItem)> {
+        let q = self.branch_search_query.trim().to_lowercase();
+        if q.is_empty() {
+            self.branches.iter().enumerate().collect()
+        } else {
+            self.branches
+                .iter()
+                .enumerate()
+                .filter(|(_, b)| b.name.to_lowercase().contains(&q))
+                .collect()
+        }
     }
 }

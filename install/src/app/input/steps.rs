@@ -66,11 +66,63 @@ pub fn handle_step_interaction(app: &mut App, key: KeyEvent) {
         }
 
         WizardStep::SourceBranch => {
+            let filtered_len = app.filtered_branches().len();
+            let max_idx = filtered_len.saturating_sub(1);
+
+            if app.branch_search_active {
+                match key.code {
+                    KeyCode::Esc => {
+                        if !app.branch_search_query.is_empty() {
+                            app.branch_search_query.clear();
+                            app.branch_cursor = 0;
+                        } else {
+                            app.branch_search_active = false;
+                        }
+                    }
+                    KeyCode::Enter => {
+                        app.branch_search_active = false;
+                        if filtered_len > 0 {
+                            select_branch_at_cursor(app);
+                            if app.is_build_from_source() {
+                                app.start_branch_switch();
+                            } else {
+                                app.next_step();
+                            }
+                        }
+                    }
+                    KeyCode::Backspace => {
+                        app.branch_search_query.pop();
+                        let new_len = app.filtered_branches().len();
+                        app.branch_cursor = app.branch_cursor.min(new_len.saturating_sub(1));
+                    }
+                    KeyCode::Up => {
+                        if app.branch_cursor > 0 {
+                            app.branch_cursor -= 1;
+                        }
+                    }
+                    KeyCode::Down => {
+                        if app.branch_cursor < max_idx {
+                            app.branch_cursor += 1;
+                        }
+                    }
+                    KeyCode::Char(c) => {
+                        app.branch_search_query.push(c);
+                        let new_len = app.filtered_branches().len();
+                        app.branch_cursor = app.branch_cursor.min(new_len.saturating_sub(1));
+                    }
+                    _ => {}
+                }
+                return;
+            }
+
             if app.branches.is_empty() {
                 return;
             }
-            let max_idx = app.branches.len().saturating_sub(1);
+
             match key.code {
+                KeyCode::Char('/') | KeyCode::Char('f') => {
+                    app.branch_search_active = true;
+                }
                 KeyCode::Up | KeyCode::Char('k') => {
                     if app.branch_cursor > 0 {
                         app.branch_cursor -= 1;
@@ -189,16 +241,19 @@ pub fn handle_step_interaction(app: &mut App, key: KeyEvent) {
 
 
 pub fn select_branch_at_cursor(app: &mut App) {
-    if app.branches.is_empty() {
+    let filtered = app.filtered_branches();
+    if filtered.is_empty() {
         app.selected_branch.clear();
         return;
     }
-    for b in &mut app.branches {
-        b.selected = false;
+    let target_orig_idx = filtered.get(app.branch_cursor).map(|(idx, _)| *idx);
+    for (i, b) in app.branches.iter_mut().enumerate() {
+        b.selected = Some(i) == target_orig_idx;
     }
-    if let Some(branch) = app.branches.get_mut(app.branch_cursor) {
-        branch.selected = true;
-        app.selected_branch = branch.name.clone();
-        app.request_discovery();
+    if let Some(idx) = target_orig_idx {
+        if let Some(branch) = app.branches.get(idx) {
+            app.selected_branch = branch.name.clone();
+            app.request_discovery();
+        }
     }
 }

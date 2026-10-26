@@ -109,11 +109,17 @@ pub fn handle_key_event(app: &mut App, key: KeyEvent) {
         return;
     }
 
-    // 5. Global Navigation Keys
+    // 5. Branch Search Mode in SourceBranch step: route directly to step interaction
+    if app.current_step == crate::models::WizardStep::SourceBranch && app.branch_search_active {
+        steps::handle_step_interaction(app, key);
+        return;
+    }
+
+    // 6. Global Navigation Keys
     if global::handle_global_keys(app, key) {
         return;
     }
 
-    // 6. Step-Specific Interaction
+    // 7. Step-Specific Interaction
     steps::handle_step_interaction(app, key);
 }

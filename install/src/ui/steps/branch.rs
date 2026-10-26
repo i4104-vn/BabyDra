@@ -13,8 +13,72 @@ use crate::ui::THEME;
 pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([Constraint::Min(8), Constraint::Length(8)])
+        .constraints([
+            Constraint::Length(3),
+            Constraint::Min(6),
+            Constraint::Length(8),
+        ])
         .split(area);
+
+    let (search_border_color, search_title, search_content) = if app.branch_search_active {
+        (
+            THEME.mint,
+            " 🔍 Search Branch (ACTIVE) — Type to filter | [Esc] Exit search ",
+            Line::from(vec![
+                Span::styled(
+                    " Filter: ",
+                    Style::default().fg(THEME.mint).add_modifier(Modifier::BOLD),
+                ),
+                Span::styled(
+                    &app.branch_search_query,
+                    Style::default().fg(THEME.text_bright).add_modifier(Modifier::BOLD),
+                ),
+                Span::styled("█", Style::default().fg(THEME.mint)),
+            ]),
+        )
+    } else if !app.branch_search_query.is_empty() {
+        (
+            THEME.cyan,
+            " 🔍 Search Branch — Press [/] to edit search | [Esc] Clear ",
+            Line::from(vec![
+                Span::styled(" Filter: ", Style::default().fg(THEME.cyan)),
+                Span::styled(
+                    &app.branch_search_query,
+                    Style::default().fg(THEME.text_bright),
+                ),
+                Span::styled("  [Press Esc to clear filter]", Style::default().fg(THEME.text_dim)),
+            ]),
+        )
+    } else {
+        (
+            THEME.border_normal,
+            " 🔍 Search Branch — Press [/] or [f] to search ",
+            Line::from(vec![
+                Span::styled(" Press ", Style::default().fg(THEME.text_dim)),
+                Span::styled(" [/] ", THEME.key_badge_cyan()),
+                Span::styled(" or ", Style::default().fg(THEME.text_dim)),
+                Span::styled(" [f] ", THEME.key_badge_cyan()),
+                Span::styled(
+                    " to search and filter branches by name...",
+                    Style::default().fg(THEME.text_dim),
+                ),
+            ]),
+        )
+    };
+
+    let search_widget = Paragraph::new(search_content).block(
+        Block::default()
+            .title(search_title)
+            .title_style(
+                Style::default()
+                    .fg(search_border_color)
+                    .add_modifier(Modifier::BOLD),
+            )
+            .borders(Borders::ALL)
+            .border_type(BorderType::Rounded)
+            .border_style(Style::default().fg(search_border_color)),
+    );
+    f.render_widget(search_widget, chunks[0]);
 
     if app.branches.is_empty() {
         // Empty state when no branches exist
@@ -48,7 +112,7 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
                 .border_type(BorderType::Rounded)
                 .border_style(Style::default().fg(THEME.rose)),
         );
-        f.render_widget(empty_widget, chunks[0]);
+        f.render_widget(empty_widget, chunks[1]);
 
         let prompt_box = Paragraph::new(vec![
             Line::from(Span::styled(
@@ -75,37 +139,72 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
                 .border_type(BorderType::Rounded)
                 .border_style(Style::default().fg(THEME.rose)),
         );
-        f.render_widget(prompt_box, chunks[1]);
+        f.render_widget(prompt_box, chunks[2]);
         return;
     }
 
-    let mut items: Vec<ListItem> = Vec::with_capacity(app.branches.len());
+    let filtered = app.filtered_branches();
+    if filtered.is_empty() {
+        let no_match = Paragraph::new(vec![
+            Line::from(""),
+            Line::from(Span::styled(
+                format!("  No branches match filter: '{}'  ", app.branch_search_query),
+                Style::default().fg(THEME.amber).add_modifier(Modifier::BOLD),
+            )),
+            Line::from(""),
+            Line::from(Span::styled(
+                "Press [Esc] or [Backspace] to clear or adjust your search filter.",
+                Style::default().fg(THEME.text_dim),
+            )),
+        ])
+        .block(
+            Block::default()
+                .title(" 2. Source Branch Selection ")
+                .title_style(THEME.title_cyan())
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(THEME.amber)),
+        );
+        f.render_widget(no_match, chunks[1]);
+    } else {
+        let items: Vec<ListItem> = filtered
+            .iter()
+            .enumerate()
+            .map(|(display_idx, (_orig_idx, b))| {
+                let is_recommended = b.is_current;
+                let is_selected = app.selected_branch == b.name;
+                branch_row(
+                    display_idx,
+                    &app.branch_cursor,
+                    &b.name,
+                    b.is_current,
+                    b.has_remote,
+                    is_recommended,
+                    is_selected,
+                )
+            })
+            .collect();
 
-    for (i, b) in app.branches.iter().enumerate() {
-        let is_recommended = b.is_current;
-        let is_selected = app.selected_branch == b.name;
-        items.push(branch_row(
-            i,
-            &app.branch_cursor,
-            &b.name,
-            b.is_current,
-            b.has_remote,
-            is_recommended,
-            is_selected,
-        ));
+        let count_info = if app.branch_search_query.is_empty() {
+            format!("{} available", app.branches.len())
+        } else {
+            format!("{}/{} matches", filtered.len(), app.branches.len())
+        };
+
+        let list_title = format!(
+            " 2. Source Branch Selection ({count_info}) [↑/↓: Move | Space: Select | Enter: Switch Branch] "
+        );
+
+        let list = List::new(items).block(
+            Block::default()
+                .title(list_title)
+                .title_style(THEME.title_cyan())
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(THEME.cyan)),
+        );
+        f.render_widget(list, chunks[1]);
     }
-
-    let list = List::new(items).block(
-        Block::default()
-            .title(
-                " 2. Source Branch Selection [↑/↓: Move | Space: Select | Enter: Switch Branch] ",
-            )
-            .title_style(THEME.title_cyan())
-            .borders(Borders::ALL)
-            .border_type(BorderType::Rounded)
-            .border_style(Style::default().fg(THEME.cyan)),
-    );
-    f.render_widget(list, chunks[0]);
 
     let prompt_box = Paragraph::new(vec![
         Line::from(vec![
@@ -138,8 +237,10 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
             ),
         ]),
         Line::from(vec![
+            Span::styled(" [/] ", THEME.key_badge_cyan()),
+            Span::styled(" Search    ", Style::default().fg(THEME.text_dim)),
             Span::styled(" [Space] ", THEME.key_badge_green()),
-            Span::styled(" Select Branch    ", Style::default().fg(THEME.text_dim)),
+            Span::styled(" Select    ", Style::default().fg(THEME.text_dim)),
             Span::styled(" [Enter] ", THEME.key_badge_cyan()),
             Span::styled(
                 " Confirm & Switch Branch    ",
@@ -157,7 +258,7 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
             .border_type(BorderType::Rounded)
             .border_style(Style::default().fg(THEME.border_normal)),
     );
-    f.render_widget(prompt_box, chunks[1]);
+    f.render_widget(prompt_box, chunks[2]);
 }
 
 fn branch_row<'a>(

@@ -9,7 +9,7 @@ pub use branches::{list_branches, refresh_branches};
 pub use worktree::{branch_worktree_dir, checkout_and_pull};
 
 /// Runs a git command in `repo`, capturing stdout. No output reaches the TUI.
-pub(crate) fn git(repo: &Path, args: &[&str]) -> Result<String> {
+pub fn git(repo: &Path, args: &[&str]) -> Result<String> {
     let output = Command::new("git")
         .current_dir(repo)
         .args(args)

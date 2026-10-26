@@ -85,11 +85,14 @@ where
                     };
                     let fallback = user_bin_dir.join(&bin.name);
                     log(
-                        LogLevel::Warn,
-                        format!("Sudo copy failed ({reason}). Installing fallback to {fallback:?}"),
+                        LogLevel::Error,
+                        format!(
+                            "Sudo copy of system binary to /usr/bin/{} failed ({reason}). Fallback copied to {fallback:?}",
+                            bin.name
+                        ),
                     );
                     let _ = safe_copy_binary(&src_file, &fallback);
-                    copied += 1;
+                    errors += 1;
                 }
             }
         }
