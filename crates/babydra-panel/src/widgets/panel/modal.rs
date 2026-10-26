@@ -71,13 +71,15 @@ fn build_control_center(app: &gtk4::Application) -> (gtk4::ApplicationWindow, gt
 
     let main_box = gtk4::Box::new(gtk4::Orientation::Vertical, 14);
     main_box.add_css_class("control-center-box");
-    main_box.set_halign(gtk4::Align::End);
-    main_box.set_valign(gtk4::Align::Start);
-    main_box.set_size_request(360, 480);
-    main_box.set_margin_top(6);
-    main_box.set_margin_end(12);
+    let blur_host = babydra_ui_kit::ui::blur::with_blurred_backdrop(&main_box);
+    blur_host.add_css_class("control-center-blur-host");
+    blur_host.set_halign(gtk4::Align::End);
+    blur_host.set_valign(gtk4::Align::Start);
+    blur_host.set_size_request(360, 480);
+    blur_host.set_margin_top(6);
+    blur_host.set_margin_end(12);
 
-    q_win.set_child(Some(&main_box));
+    q_win.set_child(Some(&blur_host));
 
     (q_win, main_box)
 }

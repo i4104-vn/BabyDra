@@ -41,6 +41,10 @@
     margin: 0;
     padding: 0;
     margin-right: 0;
+    background: transparent;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
 }
 
 .switcher-deck-container {

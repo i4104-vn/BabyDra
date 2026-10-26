@@ -2,7 +2,7 @@
 .viewer-window,
 .notepad-window {
     background-image: none;
-    background-color: transparent;
+    background-color: #18191f;
     box-shadow: none;
     border-radius: 0 0 12px 12px;
     border-top: none;
@@ -10,6 +10,7 @@
 }
 
 .explore-window-box {
+    background-color: #18191f;
     border: none;
     border-radius: 0 0 12px 12px;
     box-shadow: none;

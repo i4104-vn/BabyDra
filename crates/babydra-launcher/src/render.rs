@@ -36,11 +36,14 @@ pub fn build_launcher_ui(
 
     let box_layout = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     box_layout.add_css_class("launcher-box");
-    box_layout.set_halign(gtk4::Align::Start);
-    box_layout.set_valign(gtk4::Align::Start);
-    box_layout.set_size_request(420, 600);
-    box_layout.set_margin_top(50);
-    box_layout.set_margin_start(16);
+
+    let blur_host = babydra_ui_kit::ui::blur::with_blurred_backdrop(&box_layout);
+    blur_host.add_css_class("launcher-blur-host");
+    blur_host.set_halign(gtk4::Align::Start);
+    blur_host.set_valign(gtk4::Align::Start);
+    blur_host.set_size_request(420, 600);
+    blur_host.set_margin_top(50);
+    blur_host.set_margin_start(16);
 
     // --- Header ---
     let header_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
@@ -99,7 +102,7 @@ pub fn build_launcher_ui(
     footer.set_margin_bottom(14);
     box_layout.append(&footer);
 
-    window.set_child(Some(&box_layout));
+    window.set_child(Some(&blur_host));
 
     // Apps list
     let apps = find_desktop_apps();

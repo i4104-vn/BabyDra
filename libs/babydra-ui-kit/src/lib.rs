@@ -58,6 +58,10 @@ pub mod prelude {
             topbar::topbar_startup_cascade,
         },
         battery::{create_battery_area, draw_cairo_battery, get_battery_hex, get_battery_rgb},
+        blur::{
+            capture_blurred_widget, capture_screen_region, enable_popover_blur,
+            refresh_blurred_backdrop, with_blurred_backdrop,
+        },
         icon::resolver::get_resolved_icon,
         icon::{
             get_fallback_icon, get_icon, get_icon_colored, get_icon_from_svg, get_logo_png,

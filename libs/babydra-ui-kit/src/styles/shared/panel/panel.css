@@ -31,11 +31,70 @@ popover>contents {
     transition: all 200ms ease;
 }
 
+picture.blur-backdrop-image {
+    background-image: none;
+    border-radius: 18px;
+}
+
+overlay.blur-backdrop-host {
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+overlay.launcher-blur-host,
+overlay.launcher-blur-host picture.blur-backdrop-image,
+overlay.control-center-blur-host,
+overlay.control-center-blur-host picture.blur-backdrop-image,
+overlay.calendar-blur-host,
+overlay.calendar-blur-host picture.blur-backdrop-image {
+    border-radius: 24px;
+    overflow: hidden;
+}
+
+overlay.island-blur-host,
+overlay.island-blur-host picture.blur-backdrop-image {
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+popover.blur-backdrop-popover overlay.blur-backdrop-host,
+popover.blur-backdrop-popover picture.blur-backdrop-image {
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+popover.context-menu-popover overlay.blur-backdrop-host,
+popover.context-menu-popover picture.blur-backdrop-image {
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+
+popover.status-popover>contents,
+popover.tooltip-popover>contents,
+.status-popover-card,
+.tooltip-popover-card {
+    background-color: rgb(24, 25, 31);
+    background-image: none;
+    opacity: 1.0;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+}
+
+.switcher-main-row {
+    background: transparent;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+}
+
 window,
 window.background,
 window.panel-window,
 window.control-center-window,
+window.calendar-window,
 window.launcher-window,
+window.switcher-window,
 window.notification-card {
     background-color: transparent;
     background-image: none;

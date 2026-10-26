@@ -371,9 +371,9 @@ button.taskbar-popover-action-btn.destructive:hover .taskbar-popover-action-labe
 
 /* === control_center/control_center.css === */
 .control-center-box {
-    background-color: rgba(255, 255, 255, 0.98);
+    background-color: #ffffff;
+    opacity: 1.0;
     border: 1px solid rgba(0, 0, 0, 0.08);
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
     color: rgba(28, 28, 30, 0.95);
 }
 
@@ -3800,12 +3800,10 @@ popover.context-menu>contents,
 .launcher-box,
 .control-center-box {
     border-radius: 24px;
-    background-color: rgba(255, 255, 255, 0.95);
+    background-color: #ffffff;
     background-image: none;
-    border-top: 1px solid rgba(255, 255, 255, 1.0);
-    border-left: 1px solid rgba(255, 255, 255, 1.0);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    opacity: 1.0;
+    border: 1px solid rgba(0, 0, 0, 0.08);
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.14);
 }
 
@@ -3864,7 +3862,7 @@ button.panel-clock-btn {
     box-shadow: none;
 }
 
-/* 5. Cards & containers in apps */
+/* 5. Cards & containers in apps (light): solid, smooth and refined */
 .settings-card,
 .collapsible-card,
 .settings-group,
@@ -3874,15 +3872,17 @@ button.panel-clock-btn {
 .info-panel-card,
 .preview-card,
 .screenshot-card,
-.switcher-card,
-.battery-card {
+.battery-card,
+.recovery-scope-card,
+.about-donate-card {
     border-radius: 16px;
+    background-color: #ffffff;
     background-image: none;
-    border-top: 1px solid rgba(255, 255, 255, 1.0);
-    border-left: 1px solid rgba(255, 255, 255, 1.0);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-    border-right: 1px solid rgba(0, 0, 0, 0.06);
-    box-shadow: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    border-left: 1px solid rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    border-right: 1px solid rgba(0, 0, 0, 0.04);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 }
 
 .settings-card:hover,
@@ -3892,7 +3892,7 @@ button.panel-clock-btn {
     border-right: 1px solid rgba(0, 0, 0, 0.10);
 }
 
-/* 6. Dialogs & modal window containers */
+/* 6. Dialogs & modal window containers: solid, smooth, no translucency */
 .dialog-box,
 .dialog-content,
 .modal-dialog,
@@ -3904,12 +3904,94 @@ button.panel-clock-btn {
 .vpn-dialog,
 .password-dialog,
 .account-dialog,
-.explore-dialog {
+.explore-dialog,
+.auth-dialog-card {
     border-radius: 24px;
+    background-color: #ffffff;
     background-image: none;
-    border-top: 1px solid rgba(255, 255, 255, 1.0);
-    border-left: 1px solid rgba(255, 255, 255, 1.0);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid rgba(0, 0, 0, 0.10);
+    border-left: 1px solid rgba(0, 0, 0, 0.10);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    border-right: 1px solid rgba(0, 0, 0, 0.06);
     box-shadow: 0 24px 64px rgba(0, 0, 0, 0.16);
+}
+
+/* 7. Opaque, smooth app surfaces: solid, smooth, no blur, no opacity */
+window.settings-window,
+window.explore-window,
+window.viewer-window,
+window.notepad-window,
+window.recorder-window,
+window.greeter-window {
+    background-color: rgb(247, 248, 251);
+    background-image: none;
+    opacity: 1.0;
+}
+
+window.settings-window>overlay>box,
+.settings-content,
+window.explore-window>box,
+.explore-window-box,
+.explore-window .content-view,
+window.viewer-window>box,
+.viewer-drawing-area,
+window.notepad-window>box,
+window.recorder-window>box {
+    background-color: rgb(247, 248, 251);
+    background-image: none;
+    opacity: 1.0;
+}
+
+.explore-window .sidebar,
+.explore-window .info-panel,
+.explore-window .status-bar,
+.explore-window .tab-bar,
+.sidebar {
+    background-color: rgb(238, 239, 244);
+    background-image: none;
+    opacity: 1.0;
+}
+
+/* 8. Shell components & popovers: Solid, smooth, and opaque */
+.launcher-box,
+.control-center-box,
+.calendar-box,
+.media-popover-box,
+.clipboard-popover-box,
+.power-popover-box,
+.recording-popover-box,
+.context-menu-box,
+.panel-notification-card,
+.switcher-deck-container,
+.switcher-meta-bar {
+    background-color: #ffffff;
+    background-image: none;
+    opacity: 1.0;
+}
+
+.switcher-main-row {
+    background: transparent;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+popover>contents,
+popover.media-popover>contents,
+popover.context-menu-popover>contents,
+popover.clipboard-popover>contents,
+popover.power-popover>contents,
+popover.recording-popover>contents,
+popover.panel-notification-popover>contents,
+popover.workspace-overview-popover>contents,
+popover.status-popover>contents,
+popover.tooltip-popover>contents,
+.status-popover-card,
+.tooltip-popover-card {
+    background-color: #ffffff;
+    background-image: none;
+    opacity: 1.0;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    border-radius: 18px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
 }

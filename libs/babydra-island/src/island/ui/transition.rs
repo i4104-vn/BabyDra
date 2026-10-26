@@ -136,9 +136,13 @@ pub(crate) fn animate_expand(
             }
             if let Ok(core) = rc2.try_borrow_mut() {
                 core.animating.set(false);
+                if let Some(overlay) = core.capsule.parent().and_then(|p| p.downcast::<gtk4::Overlay>().ok()) {
+                    babydra_ui_kit::ui::blur::refresh_blurred_backdrop(&overlay);
+                }
             }
         });
     } else {
+        let capsule_c = capsule.clone();
         babydra_ui_kit::ui::animation::island_animate_size(
             capsule.upcast_ref(),
             cur_w,
@@ -149,6 +153,9 @@ pub(crate) fn animate_expand(
             move || {
                 if let Ok(core) = rc2.try_borrow_mut() {
                     core.animating.set(false);
+                }
+                if let Some(overlay) = capsule_c.parent().and_then(|p| p.downcast::<gtk4::Overlay>().ok()) {
+                    babydra_ui_kit::ui::blur::refresh_blurred_backdrop(&overlay);
                 }
             },
         );

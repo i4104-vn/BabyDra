@@ -10,6 +10,7 @@ const MENU_ROW_SPACING: i32 = 8;
 /// Creates a new context menu popover positioned at specific `(x, y)` coordinates.
 pub fn create_menu_popover(parent: &gtk4::Widget, x: f64, y: f64) -> (Popover, Box) {
     let popover = Popover::builder().has_arrow(false).autohide(true).build();
+    crate::ui::blur::enable_popover_blur(&popover);
     popover.set_parent(parent);
     popover.add_css_class("context-menu-popover");
     popover.add_css_class("explore-popover");
@@ -30,6 +31,7 @@ pub fn create_menu_for(parent: &gtk4::Widget, position: PositionType) -> (Popove
         .autohide(true)
         .position(position)
         .build();
+    crate::ui::blur::enable_popover_blur(&popover);
     popover.set_parent(parent);
     popover.add_css_class("context-menu-popover");
     popover.add_css_class("tray-context-menu");
@@ -57,6 +59,7 @@ pub(super) fn create_submenu_popover(
         .autohide(false)
         .position(PositionType::Right)
         .build();
+    crate::ui::blur::enable_popover_blur(&sub_popover);
     sub_popover.set_parent(parent);
     sub_popover.add_css_class("context-menu-popover");
     sub_popover.add_css_class(extra_class);

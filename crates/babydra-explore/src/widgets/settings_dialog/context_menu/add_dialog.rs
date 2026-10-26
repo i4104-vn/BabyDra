@@ -146,6 +146,7 @@ fn icon_entry(entry: Entry, selected_icon: Rc<RefCell<String>>, initial_icon: &s
         .has_arrow(true)
         .autohide(true)
         .build();
+    babydra_ui_kit::ui::blur::enable_popover_blur(&popover);
     let popover_to_open = popover.clone();
     let select_button = babydra_ui_kit::components::create_icon_button(
         initial_icon,

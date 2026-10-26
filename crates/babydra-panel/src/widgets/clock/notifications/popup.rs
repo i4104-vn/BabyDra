@@ -35,6 +35,7 @@ pub struct NotificationPopup {
 impl NotificationPopup {
     pub fn new(anchor: &gtk4::Button) -> Self {
         let popover = Popover::new();
+        babydra_ui_kit::ui::blur::enable_popover_blur(&popover);
         popover.add_css_class("panel-notification-popover");
         popover.set_has_arrow(false);
         popover.set_autohide(false);

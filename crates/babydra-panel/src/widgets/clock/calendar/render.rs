@@ -39,11 +39,8 @@ pub fn build_calendar(
     main_box.add_css_class("calendar-box");
     main_box.set_vexpand(true);
     main_box.set_valign(gtk4::Align::Fill);
-    main_box.set_halign(gtk4::Align::End);
+    main_box.set_halign(gtk4::Align::Fill);
     main_box.set_width_request(360);
-    main_box.set_margin_top(6);
-    main_box.set_margin_bottom(10);
-    main_box.set_margin_end(12);
 
     // 1. Header: Date on left
     let top_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
@@ -97,7 +94,16 @@ pub fn build_calendar(
     scrolled_win.set_child(Some(&notif_stack));
     main_box.append(&scrolled_win);
 
-    c_win.set_child(Some(&main_box));
+    let blur_host = babydra_ui_kit::ui::blur::with_blurred_backdrop(&main_box);
+    blur_host.add_css_class("calendar-blur-host");
+    blur_host.set_halign(gtk4::Align::End);
+    blur_host.set_valign(gtk4::Align::Fill);
+    blur_host.set_width_request(360);
+    blur_host.set_vexpand(true);
+    blur_host.set_margin_top(6);
+    blur_host.set_margin_bottom(10);
+    blur_host.set_margin_end(12);
+    c_win.set_child(Some(&blur_host));
 
     (
         c_win,

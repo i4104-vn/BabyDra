@@ -362,9 +362,10 @@ button.taskbar-popover-action-btn.destructive:hover .taskbar-popover-action-labe
 
 /* === control_center/control_center.css === */
 .control-center-box {
-    background-color: rgba(14, 14, 18, 0.96);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-top: 1px solid rgba(255, 255, 255, 0.28);
+    background-color: rgb(24, 25, 31);
+    opacity: 1.0;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.20);
     color: rgba(255, 255, 255, 0.95);
 }
 
@@ -1873,14 +1874,14 @@ button.sidebar-item.active-nav:hover label {
     color: rgba(255, 255, 255, 0.4);
 }
 
-/* Glass Panels & Cards */
+/* Solid, smooth cards & panels */
 .settings-card,
 .glass-panel {
-    background-color: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    background-color: rgb(32, 33, 40);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
     padding: 16px 20px;
 }
 
@@ -3497,12 +3498,10 @@ popover.context-menu>contents,
 .launcher-box,
 .control-center-box {
     border-radius: 24px;
-    background-color: rgba(14, 14, 18, 0.95);
+    background-color: rgb(24, 25, 31);
     background-image: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.25);
-    border-left: 1px solid rgba(255, 255, 255, 0.25);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    opacity: 1.0;
+    border: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.50);
 }
 
@@ -3561,7 +3560,7 @@ button.panel-clock-btn {
     box-shadow: none;
 }
 
-/* 5. Cards & containers in apps */
+/* 5. Cards & containers in apps: completely solid, smooth and refined */
 .settings-card,
 .collapsible-card,
 .settings-group,
@@ -3571,27 +3570,29 @@ button.panel-clock-btn {
 .info-panel-card,
 .preview-card,
 .screenshot-card,
-.switcher-card,
-.battery-card {
+.battery-card,
+.recovery-scope-card,
+.about-donate-card {
     border-radius: 16px;
+    background-color: rgb(32, 33, 40);
     background-image: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.20);
-    border-left: 1px solid rgba(255, 255, 255, 0.20);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
 .settings-card:hover,
 .collapsible-card:hover,
 .standard-card:hover {
-    border-top: 1px solid rgba(255, 255, 255, 0.28);
-    border-left: 1px solid rgba(255, 255, 255, 0.28);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    border-left: 1px solid rgba(255, 255, 255, 0.18);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* 6. Dialogs & modal window containers */
+/* 6. Dialogs & modal window containers: solid, smooth, no translucency */
 .dialog-box,
 .dialog-content,
 .modal-dialog,
@@ -3603,12 +3604,94 @@ button.panel-clock-btn {
 .vpn-dialog,
 .password-dialog,
 .account-dialog,
-.explore-dialog {
+.explore-dialog,
+.auth-dialog-card {
     border-radius: 24px;
+    background-color: rgb(28, 29, 36);
     background-image: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.25);
-    border-left: 1px solid rgba(255, 255, 255, 0.25);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    border-left: 1px solid rgba(255, 255, 255, 0.18);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 24px 64px rgba(0, 0, 0, 0.60);
+}
+
+/* 7. Opaque, smooth app surfaces: solid, smooth, no blur, no opacity */
+window.settings-window,
+window.explore-window,
+window.viewer-window,
+window.notepad-window,
+window.recorder-window,
+window.greeter-window {
+    background-color: rgb(24, 25, 31);
+    background-image: none;
+    opacity: 1.0;
+}
+
+window.settings-window>overlay>box,
+.settings-content,
+window.explore-window>box,
+.explore-window-box,
+.explore-window .content-view,
+window.viewer-window>box,
+.viewer-drawing-area,
+window.notepad-window>box,
+window.recorder-window>box {
+    background-color: rgb(24, 25, 31);
+    background-image: none;
+    opacity: 1.0;
+}
+
+.explore-window .sidebar,
+.explore-window .info-panel,
+.explore-window .status-bar,
+.explore-window .tab-bar,
+.sidebar {
+    background-color: rgb(19, 20, 25);
+    background-image: none;
+    opacity: 1.0;
+}
+
+/* 8. Shell components & popovers: Solid, smooth, and opaque */
+.launcher-box,
+.control-center-box,
+.calendar-box,
+.media-popover-box,
+.clipboard-popover-box,
+.power-popover-box,
+.recording-popover-box,
+.context-menu-box,
+.panel-notification-card,
+.switcher-deck-container,
+.switcher-meta-bar {
+    background-color: rgb(24, 25, 31);
+    background-image: none;
+    opacity: 1.0;
+}
+
+.switcher-main-row {
+    background: transparent;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+popover>contents,
+popover.media-popover>contents,
+popover.context-menu-popover>contents,
+popover.clipboard-popover>contents,
+popover.power-popover>contents,
+popover.recording-popover>contents,
+popover.panel-notification-popover>contents,
+popover.workspace-overview-popover>contents,
+popover.status-popover>contents,
+popover.tooltip-popover>contents,
+.status-popover-card,
+.tooltip-popover-card {
+    background-color: rgb(24, 25, 31);
+    background-image: none;
+    opacity: 1.0;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 18px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.50);
 }

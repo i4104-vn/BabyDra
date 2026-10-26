@@ -4,7 +4,7 @@ window.settings-window {
 }
 
 window.settings-window>overlay>box {
-    background-color: transparent;
+    background-color: #18191f;
 }
 
 .profile-avatar {

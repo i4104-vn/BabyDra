@@ -45,8 +45,6 @@ pub fn create_overlay_window(app: &gtk4::Application) -> OverlayWindowComponents
     switcher_wrapper.add_css_class("switcher-main-row");
     switcher_wrapper.set_halign(gtk4::Align::End);
     switcher_wrapper.set_valign(gtk4::Align::Center);
-    switcher_wrapper.set_hexpand(true);
-    switcher_wrapper.set_vexpand(true);
     switcher_wrapper.set_margin_end(0);
 
     let meta_bar = gtk4::Box::new(gtk4::Orientation::Vertical, 3);
@@ -115,6 +113,8 @@ pub fn create_overlay_window(app: &gtk4::Application) -> OverlayWindowComponents
 
     switcher_wrapper.append(&meta_bar);
     switcher_wrapper.append(&deck_container);
+    switcher_wrapper.set_halign(gtk4::Align::End);
+    switcher_wrapper.set_valign(gtk4::Align::Center);
     overlay_box.append(&switcher_wrapper);
     window.set_child(Some(&overlay_box));
 

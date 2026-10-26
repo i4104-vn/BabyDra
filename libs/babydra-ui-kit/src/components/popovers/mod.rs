@@ -17,6 +17,14 @@ pub fn create_popover(
             popover.add_css_class(cls);
         }
     }
+    if css_class.split_whitespace().any(|c| {
+        c == "blur-popover"
+            || c == "media-popover"
+            || c == "context-menu"
+            || c == "island-popover"
+    }) {
+        crate::ui::blur::enable_popover_blur(&popover);
+    }
     popover
 }
 

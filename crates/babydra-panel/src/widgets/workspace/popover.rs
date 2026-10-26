@@ -8,6 +8,7 @@ use std::rc::Rc;
 
 pub fn build_workspace_popover(parent: &impl IsA<gtk4::Widget>) -> gtk4::Popover {
     let popover = gtk4::Popover::new();
+    babydra_ui_kit::ui::blur::enable_popover_blur(&popover);
     popover.set_parent(parent);
     popover.set_position(gtk4::PositionType::Bottom);
     popover.add_css_class("workspace-switcher-popover");
@@ -122,6 +123,7 @@ pub fn build_workspace_popover(parent: &impl IsA<gtk4::Widget>) -> gtk4::Popover
 
                 // Flyout for apps in this workspace
                 let flyout = gtk4::Popover::new();
+                babydra_ui_kit::ui::blur::enable_popover_blur(&flyout);
                 flyout.set_parent(&row_btn);
                 flyout.set_position(gtk4::PositionType::Right);
                 flyout.add_css_class("workspace-apps-flyout");

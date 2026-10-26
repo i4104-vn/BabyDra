@@ -110,7 +110,9 @@ pub(crate) fn build_island(builder: IslandBuilder) -> Island {
     right_bracket.set_visible(false);
 
     root.append(&left_bracket);
-    root.append(&capsule);
+    let capsule_blur = babydra_ui_kit::ui::blur::with_blurred_backdrop(&capsule);
+    capsule_blur.add_css_class("island-blur-host");
+    root.append(&capsule_blur);
     root.append(&right_bracket);
 
     if let Some(idle) = &builder.idle {

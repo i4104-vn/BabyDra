@@ -91,6 +91,7 @@ pub fn render_option_row(listbox: &ListBox, item: CustomContextItem) {
         .has_arrow(true)
         .autohide(true)
         .build();
+    babydra_ui_kit::ui::blur::enable_popover_blur(&popover_edit_icon);
 
     let popover_edit_icon_c = popover_edit_icon.clone();
     let btn_edit_icon = babydra_ui_kit::components::create_icon_button(

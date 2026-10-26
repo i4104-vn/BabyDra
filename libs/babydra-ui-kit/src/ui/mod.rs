@@ -1,5 +1,6 @@
 pub mod animation;
 pub mod battery;
+pub mod blur;
 pub mod ethernet;
 pub mod icon;
 pub mod image;

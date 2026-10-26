@@ -23,6 +23,7 @@ impl ContextMenuBuilder {
         popover.add_css_class("context-menu-popover");
         popover.add_css_class("explore-popover");
         popover.add_css_class("desktop-context-menu");
+        crate::ui::blur::enable_popover_blur(&popover);
 
         let vbox = create_menu_box(200);
         popover.set_child(Some(&vbox));
