@@ -21,25 +21,25 @@ pub fn render_clipboard_card() -> ClipboardWidgets {
         &trans("settings.general_clipboard"),
         Some(&trans("settings.general_clipboard_desc")),
         Some("paste"),
-        false,
+        true,
     );
 
     // 1. Enable / Disable Toggle Switch
     let enabled_switch = CustomSwitch::new(conf.clipboard.enabled);
     enabled_switch.container.set_valign(Align::Center);
     let switch_row = create_list_row(
-        "",
+        "paste",
         &trans("settings.general_clipboard_enable"),
         &trans("settings.general_clipboard_enable_desc"),
         Some(&enabled_switch.container),
     );
     card.content.append(&switch_row);
 
-    // 2. Shortcut Pill Button
     let shortcut_btn = Button::new();
     shortcut_btn.add_css_class("connect-pill-btn");
     shortcut_btn.set_cursor_from_name(Some("pointer"));
     shortcut_btn.set_valign(Align::Center);
+    shortcut_btn.set_halign(Align::End);
 
     let combo_label = crate::widgets::keybinds::render::pretty_combo(
         &conf.clipboard.shortcut_modifiers,
@@ -53,7 +53,7 @@ pub fn render_clipboard_card() -> ClipboardWidgets {
     shortcut_btn.set_sensitive(conf.clipboard.enabled);
 
     let shortcut_row = create_list_row(
-        "",
+        "sliders",
         &trans("settings.general_clipboard_shortcut"),
         &trans("settings.general_clipboard_shortcut_desc"),
         Some(&shortcut_btn),

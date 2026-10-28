@@ -34,22 +34,28 @@ pub fn build() -> ManualDateTimeControls {
     container.set_margin_bottom(4);
 
     let date_entry = Entry::new();
+    date_entry.add_css_class("settings-entry");
     date_entry.set_placeholder_text(Some(&trans("settings.datetime_date_placeholder")));
     date_entry.set_width_chars(12);
+    date_entry.set_halign(gtk4::Align::End);
+    date_entry.set_valign(gtk4::Align::Center);
     date_entry.set_text(&Local::now().format("%Y-%m-%d").to_string());
     let date_row = create_list_row(
-        "",
+        "calendar",
         &trans("settings.datetime_manual_date"),
         &trans("settings.datetime_date_placeholder"),
         Some(&date_entry),
     );
 
     let time_entry = Entry::new();
+    time_entry.add_css_class("settings-entry");
     time_entry.set_placeholder_text(Some(&trans("settings.datetime_time_placeholder")));
     time_entry.set_width_chars(10);
+    time_entry.set_halign(gtk4::Align::End);
+    time_entry.set_valign(gtk4::Align::Center);
     time_entry.set_text(&Local::now().format("%H:%M:%S").to_string());
     let time_row = create_list_row(
-        "",
+        "clock",
         &trans("settings.datetime_manual_time"),
         &trans("settings.datetime_time_placeholder"),
         Some(&time_entry),
@@ -57,8 +63,12 @@ pub fn build() -> ManualDateTimeControls {
 
     let apply_button = Button::with_label(&trans("settings.datetime_apply"));
     apply_button.add_css_class("connect-pill-btn");
+    apply_button.add_css_class("suggested-action");
     apply_button.set_cursor_from_name(Some("pointer"));
     apply_button.set_halign(gtk4::Align::End);
+    apply_button.set_margin_top(6);
+    apply_button.set_margin_end(8);
+    apply_button.set_margin_bottom(6);
 
     let time_box = GtkBox::new(Orientation::Vertical, 4);
     time_box.append(&date_row);
@@ -72,11 +82,15 @@ pub fn build() -> ManualDateTimeControls {
         Some(timezone_names.clone()),
         Option::<gtk4::Expression>::None,
     );
+    timezone_dropdown.add_css_class("settings-dropdown");
     timezone_dropdown.set_hexpand(false);
+    timezone_dropdown.set_halign(gtk4::Align::End);
+    timezone_dropdown.set_valign(gtk4::Align::Center);
+    timezone_dropdown.set_cursor_from_name(Some("pointer"));
     timezone_dropdown.set_selected(current_timezone_index());
 
     let timezone_row = create_list_row(
-        "",
+        "map-pin",
         &trans("settings.datetime_manual_timezone"),
         "",
         Some(&timezone_dropdown),

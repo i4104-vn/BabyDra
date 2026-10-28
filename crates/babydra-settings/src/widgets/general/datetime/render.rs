@@ -26,7 +26,7 @@ pub fn render_datetime_card() -> DateTimeWidgets {
         &trans("settings.general_datetime"),
         Some(&trans("settings.general_datetime_desc")),
         Some("history"),
-        false,
+        true,
     );
 
     let content = card.content.clone();
@@ -35,7 +35,7 @@ pub fn render_datetime_card() -> DateTimeWidgets {
     let auto_time_switch = CustomSwitch::new(true);
     auto_time_switch.container.set_valign(Align::Center);
     let auto_time_row = create_list_row(
-        "",
+        "clock",
         &trans("settings.datetime_auto_time"),
         &trans("settings.datetime_auto_time_desc"),
         Some(&auto_time_switch.container),
@@ -46,7 +46,7 @@ pub fn render_datetime_card() -> DateTimeWidgets {
     let auto_timezone_switch = CustomSwitch::new(true);
     auto_timezone_switch.container.set_valign(Align::Center);
     let auto_timezone_row = create_list_row(
-        "",
+        "map-pin",
         &trans("settings.datetime_auto_timezone"),
         &trans("settings.datetime_auto_timezone_desc"),
         Some(&auto_timezone_switch.container),
@@ -58,10 +58,13 @@ pub fn render_datetime_card() -> DateTimeWidgets {
         &trans("settings.datetime_24h"),
         &trans("settings.datetime_12h"),
     ]);
+    time_format_combo.add_css_class("settings-dropdown");
     time_format_combo.set_selected(0);
     time_format_combo.set_valign(Align::Center);
+    time_format_combo.set_halign(Align::End);
+    time_format_combo.set_cursor_from_name(Some("pointer"));
     let time_format_row = create_list_row(
-        "",
+        "history",
         &trans("settings.datetime_time_format"),
         &trans("settings.datetime_time_format_desc"),
         Some(&time_format_combo),

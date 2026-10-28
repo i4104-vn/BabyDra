@@ -28,7 +28,10 @@ fn create_app_dropdown(choices: &[AppChoice], current_default: &str) -> DropDown
         Some(StringList::new(&names)),
         Option::<gtk4::Expression>::None,
     );
+    dropdown.add_css_class("settings-dropdown");
     dropdown.set_valign(Align::Center);
+    dropdown.set_halign(Align::End);
+    dropdown.set_cursor_from_name(Some("pointer"));
     if let Some(pos) = choices.iter().position(|c| c.desktop_id == current_default) {
         dropdown.set_selected(pos as u32);
     }
@@ -46,7 +49,7 @@ pub fn render_default_apps_card() -> (
         &trans("settings.general_default_apps"),
         Some(&trans("settings.general_default_apps_desc")),
         Some("th-large"),
-        false,
+        true,
     );
 
     // 1. Web Browser
@@ -54,7 +57,7 @@ pub fn render_default_apps_card() -> (
     let cur_browser = get_default_browser();
     let browser_dropdown = create_app_dropdown(&browsers, &cur_browser);
     let browser_row = create_list_row(
-        "",
+        "desktop",
         &trans("settings.general_default_browser"),
         "",
         Some(&browser_dropdown),
@@ -66,7 +69,7 @@ pub fn render_default_apps_card() -> (
     let cur_fm = get_default_file_manager();
     let file_manager_dropdown = create_app_dropdown(&file_managers, &cur_fm);
     let fm_row = create_list_row(
-        "",
+        "folder",
         &trans("settings.general_default_file_manager"),
         "",
         Some(&file_manager_dropdown),
@@ -78,7 +81,7 @@ pub fn render_default_apps_card() -> (
     let cur_term = get_default_terminal();
     let terminal_dropdown = create_app_dropdown(&terminals, &cur_term);
     let term_row = create_list_row(
-        "",
+        "terminal",
         &trans("settings.general_default_terminal"),
         "",
         Some(&terminal_dropdown),

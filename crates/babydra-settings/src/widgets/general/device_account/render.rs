@@ -22,7 +22,7 @@ pub fn render_device_account_card() -> DeviceAccountWidgets {
         &trans("settings.section_device_account"),
         Some(&trans("settings.device_account_subtitle")),
         Some("user"),
-        false,
+        true,
     );
 
     let content = card.content;
@@ -36,26 +36,36 @@ pub fn render_device_account_card() -> DeviceAccountWidgets {
     };
 
     // Row 1: Hostname
-    let host_row = GtkBox::new(gtk4::Orientation::Horizontal, 12);
+    let host_row = GtkBox::new(gtk4::Orientation::Horizontal, 14);
     host_row.add_css_class("settings-card-row");
-    host_row.set_margin_top(6);
-    host_row.set_margin_bottom(6);
+    host_row.set_margin_top(4);
+    host_row.set_margin_bottom(4);
     host_row.set_margin_start(8);
     host_row.set_margin_end(8);
 
-    let host_icon = babydra_ui_kit::ui::icon::get_icon("desktop", 20);
-    host_icon.set_pixel_size(20);
+    let host_badge = GtkBox::new(gtk4::Orientation::Vertical, 0);
+    host_badge.add_css_class("blue-icon-badge-sm");
+    host_badge.set_valign(Align::Center);
+    host_badge.set_halign(Align::Start);
+    let host_icon = babydra_ui_kit::ui::icon::get_icon("desktop", 18);
+    host_icon.set_pixel_size(18);
     host_icon.set_valign(Align::Center);
-    host_row.append(&host_icon);
+    host_icon.set_halign(Align::Center);
+    host_icon.set_vexpand(true);
+    host_badge.append(&host_icon);
+    host_row.append(&host_badge);
 
     let host_text_col = GtkBox::new(gtk4::Orientation::Vertical, 2);
     host_text_col.set_valign(Align::Center);
+    host_text_col.set_hexpand(true);
     let host_title = Label::new(Some(&trans("settings.device_hostname")));
+    host_title.add_css_class("settings-row-title");
     host_title.add_css_class("settings-label");
     host_title.set_halign(Align::Start);
     host_text_col.append(&host_title);
 
     let host_row_lbl = Label::new(Some(display_host));
+    host_row_lbl.add_css_class("settings-row-desc");
     host_row_lbl.add_css_class("settings-desc");
     host_row_lbl.set_halign(Align::Start);
     host_text_col.append(&host_row_lbl);
@@ -69,31 +79,42 @@ pub fn render_device_account_card() -> DeviceAccountWidgets {
     edit_host_btn.add_css_class("connect-pill-btn");
     edit_host_btn.set_cursor_from_name(Some("pointer"));
     edit_host_btn.set_valign(Align::Center);
+    edit_host_btn.set_halign(Align::End);
     host_row.append(&edit_host_btn);
 
     content.append(&host_row);
 
     // Row 2: Account Password
-    let pwd_row = GtkBox::new(gtk4::Orientation::Horizontal, 12);
+    let pwd_row = GtkBox::new(gtk4::Orientation::Horizontal, 14);
     pwd_row.add_css_class("settings-card-row");
-    pwd_row.set_margin_top(6);
-    pwd_row.set_margin_bottom(6);
+    pwd_row.set_margin_top(4);
+    pwd_row.set_margin_bottom(4);
     pwd_row.set_margin_start(8);
     pwd_row.set_margin_end(8);
 
-    let pwd_icon = babydra_ui_kit::ui::icon::get_icon("lock", 20);
-    pwd_icon.set_pixel_size(20);
+    let pwd_badge = GtkBox::new(gtk4::Orientation::Vertical, 0);
+    pwd_badge.add_css_class("blue-icon-badge-sm");
+    pwd_badge.set_valign(Align::Center);
+    pwd_badge.set_halign(Align::Start);
+    let pwd_icon = babydra_ui_kit::ui::icon::get_icon("lock", 18);
+    pwd_icon.set_pixel_size(18);
     pwd_icon.set_valign(Align::Center);
-    pwd_row.append(&pwd_icon);
+    pwd_icon.set_halign(Align::Center);
+    pwd_icon.set_vexpand(true);
+    pwd_badge.append(&pwd_icon);
+    pwd_row.append(&pwd_badge);
 
     let pwd_text_col = GtkBox::new(gtk4::Orientation::Vertical, 2);
     pwd_text_col.set_valign(Align::Center);
+    pwd_text_col.set_hexpand(true);
     let pwd_title = Label::new(Some(&trans("settings.account_password")));
+    pwd_title.add_css_class("settings-row-title");
     pwd_title.add_css_class("settings-label");
     pwd_title.set_halign(Align::Start);
     pwd_text_col.append(&pwd_title);
 
     let pwd_sub = Label::new(Some(&trans("settings.password_protected")));
+    pwd_sub.add_css_class("settings-row-desc");
     pwd_sub.add_css_class("settings-desc");
     pwd_sub.set_halign(Align::Start);
     pwd_text_col.append(&pwd_sub);
@@ -107,6 +128,7 @@ pub fn render_device_account_card() -> DeviceAccountWidgets {
     change_pwd_btn.add_css_class("connect-pill-btn");
     change_pwd_btn.set_cursor_from_name(Some("pointer"));
     change_pwd_btn.set_valign(Align::Center);
+    change_pwd_btn.set_halign(Align::End);
     pwd_row.append(&change_pwd_btn);
 
     content.append(&pwd_row);

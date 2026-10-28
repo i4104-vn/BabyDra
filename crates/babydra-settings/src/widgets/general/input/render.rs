@@ -27,7 +27,7 @@ pub fn render_input_card() -> (InputWidgets, Vec<AudioDevice>) {
         &trans("settings.general_audio_input"),
         Some(&trans("settings.general_audio_input_desc")),
         Some("microphone"),
-        false,
+        true,
     );
 
     // 1. Input Device Selection
@@ -41,12 +41,15 @@ pub fn render_input_card() -> (InputWidgets, Vec<AudioDevice>) {
         Some(StringList::new(&dev_names)),
         Option::<gtk4::Expression>::None,
     );
+    dropdown.add_css_class("settings-dropdown");
     dropdown.set_valign(gtk4::Align::Center);
+    dropdown.set_halign(gtk4::Align::End);
+    dropdown.set_cursor_from_name(Some("pointer"));
     if let Some(pos) = devices.iter().position(|d| d.is_default) {
         dropdown.set_selected(pos as u32);
     }
     let dev_row = create_list_row(
-        "",
+        "microphone",
         &trans("settings.general_input_device"),
         "",
         Some(&dropdown),
@@ -102,7 +105,7 @@ pub fn render_input_card() -> (InputWidgets, Vec<AudioDevice>) {
     let mute_switch = CustomSwitch::new(is_microphone_muted());
     mute_switch.container.set_valign(gtk4::Align::Center);
     let mute_row = create_list_row(
-        "",
+        "volume-mute",
         &trans("settings.general_input_mute"),
         "",
         Some(&mute_switch.container),

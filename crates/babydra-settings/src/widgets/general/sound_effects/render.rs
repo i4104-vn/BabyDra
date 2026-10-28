@@ -23,14 +23,14 @@ pub fn render_sound_effects_card() -> SoundEffectsWidgets {
         &trans("settings.general_sound_effects"),
         Some(&trans("settings.general_sound_effects_desc")),
         Some("bell"),
-        false,
+        true,
     );
 
     // 1. Event Sounds Switch
     let event_sounds_switch = CustomSwitch::new(get_event_sounds_enabled());
     event_sounds_switch.container.set_valign(Align::Center);
     let ev_row = create_list_row(
-        "",
+        "bell",
         &trans("settings.general_event_sounds"),
         &trans("settings.general_event_sounds_desc"),
         Some(&event_sounds_switch.container),
@@ -41,18 +41,18 @@ pub fn render_sound_effects_card() -> SoundEffectsWidgets {
     let feedback_sounds_switch = CustomSwitch::new(get_input_feedback_sounds_enabled());
     feedback_sounds_switch.container.set_valign(Align::Center);
     let fb_row = create_list_row(
-        "",
+        "sliders",
         &trans("settings.general_feedback_sounds"),
         &trans("settings.general_feedback_sounds_desc"),
         Some(&feedback_sounds_switch.container),
     );
     card.content.append(&fb_row);
 
-    // 3. Test Alert Sound Button
     let test_sound_btn = Button::new();
     test_sound_btn.add_css_class("connect-pill-btn");
     test_sound_btn.set_cursor_from_name(Some("pointer"));
     test_sound_btn.set_valign(Align::Center);
+    test_sound_btn.set_halign(Align::End);
     let btn_box = GtkBox::new(Orientation::Horizontal, 6);
     btn_box.set_valign(Align::Center);
     let icon = babydra_ui_kit::ui::icon::get_icon("volume", 16);
@@ -63,7 +63,7 @@ pub fn render_sound_effects_card() -> SoundEffectsWidgets {
     test_sound_btn.set_child(Some(&btn_box));
 
     let test_row = create_list_row(
-        "",
+        "volume",
         &trans("settings.general_test_sound"),
         &trans("settings.general_test_sound_desc"),
         Some(&test_sound_btn),
