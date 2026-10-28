@@ -1,39 +1,42 @@
 use gtk4::prelude::*;
-use gtk4::{Align, Box, Label, Orientation, ScrolledWindow, Separator};
+use gtk4::{Align, Box, Orientation, ScrolledWindow, Separator};
 
-/// Builds the scroll container and layout box for the sidebar.
-pub fn build_sidebar_ui() -> (ScrolledWindow, Box) {
-    let container = ScrolledWindow::new();
-    container.set_hscrollbar_policy(gtk4::PolicyType::Never);
-    container.set_css_classes(&["sidebar", "explore-sidebar"]);
-    container.set_width_request(200);
-    container.set_hexpand(false);
-    container.set_vexpand(true);
-    container.set_margin_top(8);
-    container.set_margin_bottom(8);
-    container.set_margin_start(8);
-    container.set_margin_end(4);
+/// Builds the dock layout container for the sidebar matching Settings window dock style.
+pub fn build_sidebar_ui() -> (Box, ScrolledWindow, Box, Box) {
+    let sidebar_box = Box::new(Orientation::Vertical, 6);
+    sidebar_box.add_css_class("sidebar");
+    sidebar_box.add_css_class("explore-sidebar");
+    sidebar_box.set_width_request(68);
+    sidebar_box.set_hexpand(false);
+    sidebar_box.set_vexpand(true);
+    sidebar_box.set_margin_top(12);
+    sidebar_box.set_margin_bottom(12);
+    sidebar_box.set_margin_start(10);
+    sidebar_box.set_margin_end(2);
+    sidebar_box.set_halign(Align::Center);
 
-    let vbox = Box::new(Orientation::Vertical, 0);
-    container.set_child(Some(&vbox));
+    let scroll = ScrolledWindow::new();
+    scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
+    scroll.set_vexpand(true);
+    scroll.set_halign(Align::Center);
 
-    (container, vbox)
+    let nav_container = Box::new(Orientation::Vertical, 4);
+    nav_container.set_halign(Align::Center);
+    scroll.set_child(Some(&nav_container));
+
+    let footer_box = Box::new(Orientation::Vertical, 4);
+    footer_box.set_halign(Align::Center);
+    footer_box.set_margin_bottom(6);
+
+    sidebar_box.append(&scroll);
+    sidebar_box.append(&footer_box);
+
+    (sidebar_box, scroll, nav_container, footer_box)
 }
 
-/// Helper function to create standard section titles.
-pub fn create_section_title(label: &str) -> Label {
-    let title = Label::new(Some(label));
-    title.set_css_classes(&["sidebar-section-label"]);
-    title.set_halign(Align::Start);
-    title
-}
-
-/// Helper to build a horizontal separator.
+/// Helper to build a horizontal separator matching Settings sidebar.
 pub fn create_sidebar_sep() -> Separator {
     let sep = Separator::new(Orientation::Horizontal);
-    sep.set_margin_top(8);
-    sep.set_margin_bottom(4);
-    sep.set_margin_start(12);
-    sep.set_margin_end(12);
+    sep.add_css_class("sidebar-nav-separator");
     sep
 }

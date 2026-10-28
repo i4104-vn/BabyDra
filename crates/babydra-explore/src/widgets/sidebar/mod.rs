@@ -3,7 +3,6 @@ use babydra_core::i18n::trans;
 use babydra_core::SessionState;
 use gtk4::gdk::FileList;
 use gtk4::prelude::*;
-use gtk4::ScrolledWindow;
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -13,61 +12,131 @@ mod render;
 
 use handlers::{add_sidebar_item, SidebarItemArgs};
 
-/// Creates a sidebar scrolled container, populates it with quick access and PC directories, and wires navigation actions.
+/// Creates a dock-style sidebar container matching Settings layout, populates it with quick access and PC directories, and wires navigation actions.
 pub fn create_sidebar(
     session: Rc<RefCell<SessionState>>,
     nav_callback: impl Fn(PathBuf) + 'static,
-) -> ScrolledWindow {
-    let (container, vbox) = render::build_sidebar_ui();
+) -> gtk4::Box {
+    let (sidebar_box, scroll, nav_container, footer_box) = render::build_sidebar_ui();
     let nav_cb = Rc::new(nav_callback) as Rc<dyn Fn(PathBuf)>;
 
-    let container_c = container.clone();
-    let vbox_c = vbox.clone();
+    let nav_container_c = nav_container.clone();
+    let footer_box_c = footer_box.clone();
     let session_c = session.clone();
     let nav_cb_c = nav_cb.clone();
+
+    let active_popover: Rc<RefCell<Option<gtk4::Popover>>> = Rc::new(RefCell::new(None));
+    let all_buttons: Rc<RefCell<Vec<(PathBuf, gtk4::Button)>>> = Rc::new(RefCell::new(Vec::new()));
+
+    // ── Top App Header Button (navigates to Home) ───────────────────
+    let logo_btn = gtk4::Button::new();
+    logo_btn.add_css_class("sidebar-header-btn");
+    logo_btn.add_css_class("flat");
+    logo_btn.set_cursor_from_name(Some("pointer"));
+    logo_btn.set_halign(gtk4::Align::Center);
+    logo_btn.set_valign(gtk4::Align::Center);
+    logo_btn.set_size_request(44, 44);
+
+    let logo_img = babydra_ui_kit::ui::icon::get_icon("babydra-explore", 26);
+    logo_img.set_pixel_size(26);
+    logo_img.set_valign(gtk4::Align::Center);
+    logo_img.set_halign(gtk4::Align::Center);
+    logo_btn.set_child(Some(&logo_img));
+
+    let (_pop, _) = babydra_ui_kit::components::attach_sidebar_popover(
+        &logo_btn,
+        &trans("explore.home"),
+        &active_popover,
+    );
+
+    {
+        let home_path = glib::home_dir();
+        let session_c = session.clone();
+        let nav_cb_c = nav_cb.clone();
+        let all_btns = all_buttons.clone();
+        let act_pop = active_popover.clone();
+        logo_btn.connect_clicked(move |_| {
+            if let Some(p) = act_pop.borrow_mut().take() {
+                p.popdown();
+            }
+            for (_, b) in all_btns.borrow().iter() {
+                b.remove_css_class("active-nav");
+            }
+            {
+                let mut s = session_c.borrow_mut();
+                s.active_tab_mut().navigate_to(home_path.clone());
+            }
+            nav_cb_c(home_path.clone());
+        });
+    }
+
+    let profile_sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
+    profile_sep.add_css_class("profile-separator");
+
+    let top_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    top_box.set_halign(gtk4::Align::Center);
+    top_box.append(&logo_btn);
+    top_box.append(&profile_sep);
+    sidebar_box.prepend(&top_box);
 
     let rebuild_sidebar: CallbackCell = Rc::new(RefCell::new(None));
     let rebuild_sidebar_c = rebuild_sidebar.clone();
 
     let rebuild_fn = move || {
-        while let Some(child) = vbox_c.first_child() {
-            vbox_c.remove(&child);
+        while let Some(child) = nav_container_c.first_child() {
+            nav_container_c.remove(&child);
         }
-
-        let places_lbl = render::create_section_title(&trans("explore.places"));
-        vbox_c.append(&places_lbl);
+        while let Some(child) = footer_box_c.first_child() {
+            footer_box_c.remove(&child);
+        }
+        all_buttons.borrow_mut().clear();
 
         let items = babydra_core::config::sidebar_layout::load_sidebar_layout();
         let mut has_sep = false;
-
         let rc_cb = rebuild_sidebar_c.borrow().as_ref().unwrap().clone();
 
         for item in items {
-            if item.is_bookmark && !has_sep {
-                vbox_c.append(&render::create_sidebar_sep());
-                let bk_lbl = render::create_section_title(&trans("explore.bookmarks"));
-                vbox_c.append(&bk_lbl);
-                has_sep = true;
-            } else if item.id == "trash" && !has_sep {
-                vbox_c.append(&render::create_sidebar_sep());
-            }
-
             let name = if item.name.starts_with("explore.") {
                 trans(&item.name)
             } else {
                 item.name.clone()
             };
 
-            add_sidebar_item(SidebarItemArgs {
-                container: &vbox_c,
-                name: &name,
-                icon_name: &item.icon,
-                path: item.path.clone(),
-                session: &session_c,
-                nav_callback: &nav_cb_c,
-                item_id: item.id.clone(),
-                rebuild_cb: rc_cb.clone(),
-            });
+            if item.id == "trash" {
+                // Pin Trash to footer dock
+                let sep = render::create_sidebar_sep();
+                footer_box_c.append(&sep);
+                add_sidebar_item(SidebarItemArgs {
+                    container: &footer_box_c,
+                    name: &name,
+                    icon_name: &item.icon,
+                    path: item.path.clone(),
+                    session: &session_c,
+                    nav_callback: &nav_cb_c,
+                    item_id: item.id.clone(),
+                    rebuild_cb: rc_cb.clone(),
+                    active_popover: &active_popover,
+                    all_buttons: &all_buttons,
+                });
+            } else {
+                if item.is_bookmark && !has_sep {
+                    nav_container_c.append(&render::create_sidebar_sep());
+                    has_sep = true;
+                }
+
+                add_sidebar_item(SidebarItemArgs {
+                    container: &nav_container_c,
+                    name: &name,
+                    icon_name: &item.icon,
+                    path: item.path.clone(),
+                    session: &session_c,
+                    nav_callback: &nav_cb_c,
+                    item_id: item.id.clone(),
+                    rebuild_cb: rc_cb.clone(),
+                    active_popover: &active_popover,
+                    all_buttons: &all_buttons,
+                });
+            }
         }
     };
 
@@ -112,7 +181,7 @@ pub fn create_sidebar(
         }
         false
     });
-    container_c.add_controller(drop_target);
+    scroll.add_controller(drop_target);
 
-    container_c
+    sidebar_box
 }

@@ -16,6 +16,8 @@ pub struct SidebarItemArgs<'a> {
     pub nav_callback: &'a Rc<dyn Fn(PathBuf)>,
     pub item_id: String,
     pub rebuild_cb: Rc<dyn Fn()>,
+    pub active_popover: &'a Rc<RefCell<Option<gtk4::Popover>>>,
+    pub all_buttons: &'a Rc<RefCell<Vec<(PathBuf, gtk4::Button)>>>,
 }
 
 pub fn add_sidebar_item(args: SidebarItemArgs<'_>) {
@@ -28,28 +30,49 @@ pub fn add_sidebar_item(args: SidebarItemArgs<'_>) {
         nav_callback,
         item_id,
         rebuild_cb,
+        active_popover,
+        all_buttons,
     } = args;
 
     let nav_cb = nav_callback.clone();
     let session_clone = session.clone();
     let target_path = path.clone();
+    let is_active = session.borrow().active_tab().current_path == path;
 
-    let btn = babydra_ui_kit::components::create_sidebar_btn(
+    let icon_w = babydra_ui_kit::ui::icon::get_icon(icon_name, 20);
+    icon_w.set_pixel_size(20);
+
+    let (btn, _) = babydra_ui_kit::components::create_sidebar_dock_btn(
+        &icon_w,
         name,
-        icon_name,
-        "sidebar-item",
-        move || {
-            {
-                let mut s = session_clone.borrow_mut();
-                s.active_tab_mut().navigate_to(target_path.clone());
-            }
-            nav_cb(target_path.clone());
-        },
+        is_active,
+        active_popover,
     );
+
+    let btn_click = btn.clone();
+    let all_btns = all_buttons.clone();
+    let act_pop = active_popover.clone();
+    btn.connect_clicked(move |_| {
+        if let Some(p) = act_pop.borrow_mut().take() {
+            p.popdown();
+        }
+        for (_, b) in all_btns.borrow().iter() {
+            b.remove_css_class("active-nav");
+        }
+        btn_click.add_css_class("active-nav");
+
+        {
+            let mut s = session_clone.borrow_mut();
+            s.active_tab_mut().navigate_to(target_path.clone());
+        }
+        nav_cb(target_path.clone());
+    });
+
+    all_buttons.borrow_mut().push((path.clone(), btn.clone()));
 
     // 1. Drop target: move files into this folder
     let drop_target = babydra_ui_kit::components::explore::create_drop_nav(
-        path.clone(),
+        path,
         Some(nav_callback.clone()),
     );
     btn.add_controller(drop_target);
@@ -89,8 +112,8 @@ pub fn add_sidebar_item(args: SidebarItemArgs<'_>) {
     // 4. Right click: remove bookmark
     let right_click = gtk4::GestureClick::new();
     right_click.set_button(3);
-    let rc_rebuild = rebuild_cb.clone();
-    let item_id_rc = item_id.clone();
+    let rc_rebuild = rebuild_cb;
+    let item_id_rc = item_id;
     right_click.connect_pressed(move |gesture, _, _, _| {
         let mut items = babydra_core::config::sidebar_layout::load_sidebar_layout();
         if let Some(idx) = items.iter().position(|i| i.id == item_id_rc) {
