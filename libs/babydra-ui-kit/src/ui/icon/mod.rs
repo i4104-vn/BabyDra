@@ -304,3 +304,52 @@ pub fn get_icon(name: &str, size: i32) -> gtk4::Image {
     register_icon_watcher(&img, name, size);
     img
 }
+
+/// Retrieves an icon by name, prioritizing the active system icon theme (GtkIconTheme).
+/// If the theme does not have the icon, falls back to the embedded SVG icon.
+pub fn get_theme_or_svg_icon(name: &str, size: i32) -> gtk4::Image {
+    let path = std::path::Path::new(name);
+    if path.is_absolute() && path.exists() {
+        let img = gtk4::Image::from_file(path);
+        img.set_pixel_size(size);
+        return img;
+    }
+
+    let display = gdk4::Display::default();
+    if let Some(ref disp) = display {
+        let theme = gtk4::IconTheme::for_display(disp);
+
+        if theme.has_icon(name) {
+            let img = gtk4::Image::from_icon_name(name);
+            img.set_pixel_size(size);
+            return img;
+        }
+
+        let alias = if name == "babydra-explore" && theme.has_icon("system-file-manager") {
+            Some("system-file-manager")
+        } else if name == "trash" && theme.has_icon("user-trash") {
+            Some("user-trash")
+        } else if name == "user-trash" && theme.has_icon("trash") {
+            Some("trash")
+        } else if name == "drive-removable-media" && theme.has_icon("media-removable") {
+            Some("media-removable")
+        } else if let Some(base) = name.strip_suffix("-symbolic") {
+            if theme.has_icon(base) {
+                Some(base)
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+
+        if let Some(resolved) = alias {
+            let img = gtk4::Image::from_icon_name(resolved);
+            img.set_pixel_size(size);
+            return img;
+        }
+    }
+
+    get_icon(name, size)
+}
+

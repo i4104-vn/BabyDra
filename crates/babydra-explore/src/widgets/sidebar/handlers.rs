@@ -49,8 +49,8 @@ pub fn add_sidebar_item(args: SidebarItemArgs<'_>) {
     let target_path = path.clone();
     let is_active = session.borrow().active_tab().current_path == path;
 
-    let icon_w = babydra_ui_kit::ui::icon::get_icon(icon_name, 20);
-    icon_w.set_pixel_size(20);
+    let icon_w = babydra_ui_kit::ui::icon::get_theme_or_svg_icon(icon_name, 22);
+    icon_w.set_pixel_size(22);
 
     let (btn, _) = babydra_ui_kit::components::create_sidebar_dock_btn(
         &icon_w,

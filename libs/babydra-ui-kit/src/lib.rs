@@ -66,7 +66,7 @@ pub mod prelude {
         icon::resolver::get_resolved_icon,
         icon::{
             get_fallback_icon, get_icon, get_icon_colored, get_icon_from_svg, get_logo_png,
-            set_fallback_icon, set_image_from_icon,
+            get_theme_or_svg_icon, set_fallback_icon, set_image_from_icon,
         },
         image::{
             apply_circular_mask, apply_rounded_mask, create_circle_avatar, create_rounded_picture,

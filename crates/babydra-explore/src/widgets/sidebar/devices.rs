@@ -31,10 +31,15 @@ pub fn get_mounted_devices() -> Vec<DeviceItem> {
             if mount.can_unmount() || is_media {
                 let name = mount.name().to_string();
                 let id = format!("device_{}", path_str.replace('/', "_"));
+                let icon = if let Some(themed) = mount.icon().downcast_ref::<gio::ThemedIcon>() {
+                    themed.names().first().map(|s| s.to_string()).unwrap_or_else(|| "drive-removable-media".to_string())
+                } else {
+                    "drive-removable-media".to_string()
+                };
                 devices.push(DeviceItem {
                     id,
                     name,
-                    icon: "drive-harddisk".to_string(),
+                    icon,
                     path,
                     mount: Some(mount),
                 });
@@ -67,7 +72,7 @@ pub fn get_mounted_devices() -> Vec<DeviceItem> {
                             devices.push(DeviceItem {
                                 id,
                                 name,
-                                icon: "drive-harddisk".to_string(),
+                                icon: "drive-removable-media".to_string(),
                                 path,
                                 mount: None,
                             });

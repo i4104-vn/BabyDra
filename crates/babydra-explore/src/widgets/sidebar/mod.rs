@@ -39,7 +39,7 @@ pub fn create_sidebar(
     logo_btn.set_valign(gtk4::Align::Center);
     logo_btn.set_size_request(44, 44);
 
-    let logo_img = babydra_ui_kit::ui::icon::get_icon("babydra-explore", 26);
+    let logo_img = babydra_ui_kit::ui::icon::get_theme_or_svg_icon("babydra-explore", 26);
     logo_img.set_pixel_size(26);
     logo_img.set_valign(gtk4::Align::Center);
     logo_img.set_halign(gtk4::Align::Center);
@@ -307,6 +307,17 @@ pub fn create_sidebar(
             rb();
         }
     });
+
+    // Rebuild sidebar when icon theme changes
+    if let Some(display) = gtk4::gdk::Display::default() {
+        let theme = gtk4::IconTheme::for_display(&display);
+        let rb_theme = rebuild_sidebar.clone();
+        theme.connect_changed(move |_| {
+            if let Some(ref rb) = *rb_theme.borrow() {
+                rb();
+            }
+        });
+    }
 
     // Drop target on the entire sidebar to add new bookmarks
     let rb_cb = rebuild_sidebar.borrow().as_ref().unwrap().clone();
