@@ -8,7 +8,7 @@ use gtk4::prelude::*;
 pub fn build_vpn_ui() -> (
     gtk4::Box,
     gtk4::Button,
-    gtk4::FlowBox,
+    crate::widgets::helpers::ResponsiveCardGrid,
     gtk4::Stack,
     VpnConfigDialog,
     VpnLogDialog,
@@ -52,22 +52,8 @@ pub fn build_vpn_ui() -> (
     stack.set_transition_type(gtk4::StackTransitionType::Crossfade);
 
     // 1. Grid of smart cards
-    let flow_box = gtk4::FlowBox::new();
-    flow_box.add_css_class("settings-card-flow");
-    flow_box.set_selection_mode(gtk4::SelectionMode::None);
-    flow_box.set_valign(gtk4::Align::Start);
-    flow_box.set_halign(gtk4::Align::Start);
-    flow_box.set_column_spacing(16);
-    flow_box.set_row_spacing(16);
-    flow_box.set_min_children_per_line(1);
-    flow_box.set_max_children_per_line(10);
-
-    let scroll = gtk4::ScrolledWindow::new();
-    scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
-    scroll.set_vexpand(true);
-    scroll.set_valign(gtk4::Align::Fill);
-    scroll.set_child(Some(&flow_box));
-    stack.add_named(&scroll, Some("cards"));
+    let card_grid = crate::widgets::helpers::ResponsiveCardGrid::new();
+    stack.add_named(&card_grid.scrolled_win, Some("cards"));
 
     // 2. Loading state
     let loading_box = create_placeholder_box(PlaceholderState::Loading);
@@ -96,7 +82,7 @@ pub fn build_vpn_ui() -> (
     (
         main_box,
         add_custom_btn,
-        flow_box,
+        card_grid,
         stack,
         config_dialog,
         log_dialog,

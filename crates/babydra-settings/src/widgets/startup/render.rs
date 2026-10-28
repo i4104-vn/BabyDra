@@ -6,7 +6,7 @@ use crate::widgets::state::StartupWidget;
 use crate::widgets::startup::modal::StartupAddDialog;
 use babydra_core::models::startup_command::StartupCommand;
 use gtk4::prelude::*;
-use gtk4::{Align, Box, Button, FlowBox, Label, Orientation, Overlay, ScrolledWindow, Stack, StackTransitionType};
+use gtk4::{Align, Box, Button, Label, Orientation, Overlay, Stack, StackTransitionType};
 
 /// Extracts a friendly display title from a startup command.
 pub fn extract_command_title(cmd: &StartupCommand) -> String {
@@ -64,9 +64,9 @@ pub fn create_card<F: Fn() + 'static>(cmd: &StartupCommand, on_delete: F) -> Box
     card.add_css_class("settings-card");
     card.add_css_class("device-card");
     card.add_css_class("startup-card");
-    card.set_size_request(240, 130);
-    card.set_halign(Align::Start);
-    card.set_valign(Align::Start);
+    card.set_hexpand(true);
+    card.set_halign(Align::Fill);
+    card.set_size_request(-1, 130);
 
     // ── Top Row: Left icon badge, Right delete action button ──
     let top_row = Box::new(Orientation::Horizontal, 8);
@@ -131,6 +131,7 @@ pub fn create_card<F: Fn() + 'static>(cmd: &StartupCommand, on_delete: F) -> Box
     name_lbl.set_halign(Align::Start);
     name_lbl.set_tooltip_text(Some(&title_text));
     name_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
+    name_lbl.set_width_chars(1);
     text_box.append(&name_lbl);
 
     let cmd_text = &cmd.command;
@@ -140,6 +141,7 @@ pub fn create_card<F: Fn() + 'static>(cmd: &StartupCommand, on_delete: F) -> Box
     desc_lbl.set_halign(Align::Start);
     desc_lbl.set_tooltip_text(Some(cmd_text));
     desc_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
+    desc_lbl.set_width_chars(1);
     text_box.append(&desc_lbl);
 
     bottom_row.append(&text_box);
@@ -197,28 +199,14 @@ pub fn build_startup_ui() -> (StartupWidget, StartupAddDialog) {
 
     container.append(&header_box);
 
-    // ── Stack with FlowBox Grid and Empty State ──────────────────
+    // ── Stack with ResponsiveCardGrid and Empty State ────────────
     let stack = Stack::new();
     stack.set_vexpand(true);
     stack.set_hexpand(true);
     stack.set_transition_type(StackTransitionType::Crossfade);
 
-    let flow_box = FlowBox::new();
-    flow_box.add_css_class("settings-card-flow");
-    flow_box.set_selection_mode(gtk4::SelectionMode::None);
-    flow_box.set_valign(Align::Start);
-    flow_box.set_halign(Align::Start);
-    flow_box.set_column_spacing(16);
-    flow_box.set_row_spacing(16);
-    flow_box.set_min_children_per_line(1);
-    flow_box.set_max_children_per_line(10);
-
-    let scrolled_win = ScrolledWindow::new();
-    scrolled_win.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
-    scrolled_win.set_vexpand(true);
-    scrolled_win.set_valign(Align::Fill);
-    scrolled_win.set_child(Some(&flow_box));
-    stack.add_named(&scrolled_win, Some("cards"));
+    let card_grid = crate::widgets::helpers::ResponsiveCardGrid::new();
+    stack.add_named(&card_grid.scrolled_win, Some("cards"));
 
     let empty_box = create_placeholder_box(PlaceholderState::Empty {
         title_key: "settings.startup_no_items",
@@ -238,7 +226,7 @@ pub fn build_startup_ui() -> (StartupWidget, StartupAddDialog) {
         root,
         container,
         add_btn,
-        flow_box,
+        card_grid,
         stack,
     };
 

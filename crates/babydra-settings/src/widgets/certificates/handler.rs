@@ -10,12 +10,12 @@ type PendingFileCell = Rc<RefCell<Option<(String, String)>>>;
 
 /// Reload cert list into responsive card grid.
 pub fn reload_cert_list(
-    flow_box: &gtk4::FlowBox,
+    card_grid: &crate::widgets::helpers::ResponsiveCardGrid,
     stack: &gtk4::Stack,
     auth_dialog: &Rc<PasswordDialog>,
     pending_file: &PendingFileCell,
 ) {
-    crate::widgets::helpers::clear_flow_box(flow_box);
+    card_grid.clear();
 
     let certs = certificates::list_ca_certificates();
 
@@ -31,9 +31,9 @@ pub fn reload_cert_list(
         card.add_css_class("settings-card");
         card.add_css_class("device-card");
         card.add_css_class("cert-card");
-        card.set_size_request(240, 130);
-        card.set_halign(gtk4::Align::Start);
-        card.set_valign(gtk4::Align::Start);
+        card.set_hexpand(true);
+        card.set_halign(gtk4::Align::Fill);
+        card.set_size_request(-1, 130);
 
         // ── Top Row: Left icon badge, Right delete action button ──
         let top_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
@@ -108,6 +108,7 @@ pub fn reload_cert_list(
         name_lbl.set_halign(gtk4::Align::Start);
         name_lbl.set_tooltip_text(Some(&cert.filename));
         name_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
+        name_lbl.set_width_chars(1);
         text_box.append(&name_lbl);
 
         let path_lbl = gtk4::Label::new(Some(&cert.path));
@@ -116,6 +117,7 @@ pub fn reload_cert_list(
         path_lbl.set_halign(gtk4::Align::Start);
         path_lbl.set_tooltip_text(Some(&cert.path));
         path_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
+        path_lbl.set_width_chars(1);
         text_box.append(&path_lbl);
 
         bottom_row.append(&text_box);
@@ -126,7 +128,7 @@ pub fn reload_cert_list(
         bottom_row.append(&status_lbl);
 
         card.append(&bottom_row);
-        flow_box.append(&card);
+        card_grid.append(&card);
     }
 }
 
@@ -136,7 +138,7 @@ pub fn wire_events(widget: &CertificatesWidget, auth_dialog: PasswordDialog) {
     let pending_file = Rc::new(RefCell::new(None::<(String, String)>));
 
     reload_cert_list(
-        &widget.flow_box,
+        &widget.card_grid,
         &widget.stack,
         &auth_dialog_rc,
         &pending_file,
@@ -200,7 +202,7 @@ pub fn wire_events(widget: &CertificatesWidget, auth_dialog: PasswordDialog) {
     });
 
     // Wire PasswordDialog submit
-    let flow_box_sub = widget.flow_box.clone();
+    let card_grid_sub = widget.card_grid.clone();
     let stack_sub = widget.stack.clone();
     let auth_dialog_sub = auth_dialog_rc.clone();
     let pending_file_sub = pending_file.clone();
@@ -234,7 +236,7 @@ pub fn wire_events(widget: &CertificatesWidget, auth_dialog: PasswordDialog) {
             let _ = tx.send(res);
         });
 
-        let fb_ref = flow_box_sub.clone();
+        let fb_ref = card_grid_sub.clone();
         let st_ref = stack_sub.clone();
         let auth_ref = auth_dialog_sub.clone();
         let pending_ref = pending_file_sub.clone();

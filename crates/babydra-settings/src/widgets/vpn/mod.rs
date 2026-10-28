@@ -15,7 +15,7 @@ mod render;
 
 /// Creates a new `VPN widget`.
 pub fn create_vpn_widget() -> gtk4::Widget {
-    let (main_box, add_custom_btn, flow_box, stack, config_dialog, log_dialog) =
+    let (main_box, add_custom_btn, card_grid, stack, config_dialog, log_dialog) =
         render::build_vpn_ui();
 
     let state = Rc::new(RefCell::new(Vec::<VpnConn>::new()));
@@ -39,7 +39,7 @@ pub fn create_vpn_widget() -> gtk4::Widget {
     let state_c = state.clone();
     let connecting_vpns_c = connecting_vpns.clone();
     let is_loading_c = is_loading.clone();
-    let flow_box_c = flow_box.clone();
+    let card_grid_c = card_grid.clone();
     let stack_c = stack.clone();
     let config_dialog_c = config_dialog.clone();
     let log_dialog_c = log_dialog.clone();
@@ -67,7 +67,7 @@ pub fn create_vpn_widget() -> gtk4::Widget {
                 let _ = root.activate_action("win.refresh-sidebar", None);
             }
             handler::render_vpn_list(
-                &flow_box_c,
+                &card_grid_c,
                 &stack_c,
                 &state_c.borrow(),
                 *is_loading_c.borrow(),

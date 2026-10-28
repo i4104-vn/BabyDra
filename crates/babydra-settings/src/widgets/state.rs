@@ -7,7 +7,7 @@
 #![allow(dead_code)]
 
 use gtk4::{
-    Box, Button, DropDown, Entry, FlowBox, Label, ListBox, Overlay, ProgressBar, ScrolledWindow,
+    Box, Button, DropDown, Entry, Label, ListBox, Overlay, ProgressBar, ScrolledWindow,
     Spinner, Stack, TextBuffer, TextView,
 };
 
@@ -36,7 +36,7 @@ pub struct CertificatesWidget {
     pub root: Overlay,
     pub container: Box,
     pub add_btn: Button,
-    pub flow_box: FlowBox,
+    pub card_grid: crate::widgets::helpers::ResponsiveCardGrid,
     pub stack: Stack,
 }
 
@@ -90,7 +90,7 @@ pub struct StartupWidget {
     pub root: Overlay,
     pub container: Box,
     pub add_btn: Button,
-    pub flow_box: FlowBox,
+    pub card_grid: crate::widgets::helpers::ResponsiveCardGrid,
     pub stack: Stack,
 }
 

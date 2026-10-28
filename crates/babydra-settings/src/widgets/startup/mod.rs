@@ -9,13 +9,13 @@ use gtk4::Widget;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-/// Refreshes the FlowBox card grid with current autostart commands.
+/// Refreshes the card grid with current autostart commands.
 fn refresh_cards(
-    flow_box: &gtk4::FlowBox,
+    grid: &crate::widgets::helpers::ResponsiveCardGrid,
     stack: &gtk4::Stack,
     trigger_refresh: Rc<dyn Fn()>,
 ) {
-    crate::widgets::helpers::clear_flow_box(flow_box);
+    grid.clear();
     let cmds = get_startup_commands();
 
     if cmds.is_empty() {
@@ -47,7 +47,7 @@ fn refresh_cards(
                 }
             }
         });
-        flow_box.append(&card);
+        grid.append(&card);
     }
 }
 
@@ -55,19 +55,19 @@ fn refresh_cards(
 pub fn create_startup() -> Widget {
     let (widget, add_dialog) = render::build_startup_ui();
 
-    let flow_box = widget.flow_box.clone();
+    let card_grid = widget.card_grid.clone();
     let stack = widget.stack.clone();
 
     // Self-referential closure pattern for refresh triggers
     let refresh_slot: Rc<RefCell<Option<Rc<dyn Fn()>>>> = Rc::new(RefCell::new(None));
 
-    let flow_box_c = flow_box.clone();
+    let card_grid_c = card_grid.clone();
     let stack_c = stack.clone();
     let refresh_slot_c = refresh_slot.clone();
 
     let do_refresh = Rc::new(move || {
         let trigger = refresh_slot_c.borrow().as_ref().unwrap().clone();
-        refresh_cards(&flow_box_c, &stack_c, trigger);
+        refresh_cards(&card_grid_c, &stack_c, trigger);
     });
 
     *refresh_slot.borrow_mut() = Some(do_refresh.clone());

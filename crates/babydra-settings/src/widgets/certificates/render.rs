@@ -37,28 +37,14 @@ pub fn build_certificates() -> (CertificatesWidget, PasswordDialog) {
 
     container.append(&header_box);
 
-    // ── Stack with FlowBox Grid and Empty State ──────────────────
+    // ── Stack with ResponsiveCardGrid and Empty State ────────────
     let stack = gtk4::Stack::new();
     stack.set_vexpand(true);
     stack.set_hexpand(true);
     stack.set_transition_type(gtk4::StackTransitionType::Crossfade);
 
-    let flow_box = gtk4::FlowBox::new();
-    flow_box.add_css_class("settings-card-flow");
-    flow_box.set_selection_mode(gtk4::SelectionMode::None);
-    flow_box.set_valign(gtk4::Align::Start);
-    flow_box.set_halign(gtk4::Align::Start);
-    flow_box.set_column_spacing(16);
-    flow_box.set_row_spacing(16);
-    flow_box.set_min_children_per_line(1);
-    flow_box.set_max_children_per_line(10);
-
-    let scrolled_win = gtk4::ScrolledWindow::new();
-    scrolled_win.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
-    scrolled_win.set_vexpand(true);
-    scrolled_win.set_valign(gtk4::Align::Fill);
-    scrolled_win.set_child(Some(&flow_box));
-    stack.add_named(&scrolled_win, Some("cards"));
+    let card_grid = crate::widgets::helpers::ResponsiveCardGrid::new();
+    stack.add_named(&card_grid.scrolled_win, Some("cards"));
 
     let empty_box = create_placeholder_box(PlaceholderState::Empty {
         title_key: "settings.cert_no_items",
@@ -81,7 +67,7 @@ pub fn build_certificates() -> (CertificatesWidget, PasswordDialog) {
         root,
         container,
         add_btn,
-        flow_box,
+        card_grid,
         stack,
     };
 

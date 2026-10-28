@@ -12,7 +12,7 @@ use babydra_ui_kit::components::switch::CustomSwitch;
 
 #[allow(clippy::too_many_arguments)]
 pub fn render_vpn_list<F: Fn() + Clone + 'static>(
-    flow_box: &gtk4::FlowBox,
+    card_grid: &crate::widgets::helpers::ResponsiveCardGrid,
     stack: &gtk4::Stack,
     vpns: &[VpnConn],
     is_loading: bool,
@@ -22,7 +22,7 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
     log_dialog: &VpnLogDialog,
     _trigger_refresh: F,
 ) {
-    crate::widgets::helpers::clear_flow_box(flow_box);
+    card_grid.clear();
 
     if is_loading && vpns.is_empty() {
         stack.set_visible_child_name("loading");
@@ -41,9 +41,9 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
         card.add_css_class("settings-card");
         card.add_css_class("device-card");
         card.add_css_class("vpn-card");
-        card.set_size_request(240, 130);
-        card.set_halign(gtk4::Align::Start);
-        card.set_valign(gtk4::Align::Start);
+        card.set_hexpand(true);
+        card.set_halign(gtk4::Align::Fill);
+        card.set_size_request(-1, 130);
 
         // ── Top Row: Left icon badge, Right control buttons + switch ──
         let top_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
@@ -185,6 +185,7 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
         name_lbl.set_halign(gtk4::Align::Start);
         name_lbl.set_tooltip_text(Some(&vpn.name));
         name_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
+        name_lbl.set_width_chars(1);
         text_box.append(&name_lbl);
 
         let sub_text = if vpn.active {
@@ -202,6 +203,7 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
         desc_lbl.add_css_class("device-card-subtitle");
         desc_lbl.set_halign(gtk4::Align::Start);
         desc_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
+        desc_lbl.set_width_chars(1);
         text_box.append(&desc_lbl);
 
         bottom_row.append(&text_box);
@@ -216,6 +218,6 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
         bottom_row.append(&status_lbl);
 
         card.append(&bottom_row);
-        flow_box.append(&card);
+        card_grid.append(&card);
     }
 }
