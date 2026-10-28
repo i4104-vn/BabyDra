@@ -1,3 +1,4 @@
+use crate::widgets::helpers::{create_placeholder_box, PlaceholderState};
 use crate::widgets::state::CertificatesWidget;
 use babydra_ui_kit::components::modals::PasswordDialog;
 use gtk4::prelude::*;
@@ -36,21 +37,37 @@ pub fn build_certificates() -> (CertificatesWidget, PasswordDialog) {
 
     container.append(&header_box);
 
-    // ── Scrolled Glass Panel List ───────────────────────────────
+    // ── Stack with FlowBox Grid and Empty State ──────────────────
+    let stack = gtk4::Stack::new();
+    stack.set_vexpand(true);
+    stack.set_hexpand(true);
+    stack.set_transition_type(gtk4::StackTransitionType::Crossfade);
+
+    let flow_box = gtk4::FlowBox::new();
+    flow_box.add_css_class("settings-card-flow");
+    flow_box.set_selection_mode(gtk4::SelectionMode::None);
+    flow_box.set_valign(gtk4::Align::Start);
+    flow_box.set_halign(gtk4::Align::Start);
+    flow_box.set_column_spacing(16);
+    flow_box.set_row_spacing(16);
+    flow_box.set_min_children_per_line(1);
+    flow_box.set_max_children_per_line(10);
+
     let scrolled_win = gtk4::ScrolledWindow::new();
     scrolled_win.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
     scrolled_win.set_vexpand(true);
     scrolled_win.set_valign(gtk4::Align::Fill);
+    scrolled_win.set_child(Some(&flow_box));
+    stack.add_named(&scrolled_win, Some("cards"));
 
-    let list_box = gtk4::ListBox::new();
-    list_box.add_css_class("glass-panel");
-    list_box.set_selection_mode(gtk4::SelectionMode::None);
-    list_box.set_vexpand(true);
-    list_box.set_valign(gtk4::Align::Fill);
+    let empty_box = create_placeholder_box(PlaceholderState::Empty {
+        title_key: "settings.cert_no_items",
+        desc_key: None,
+        icon_name: "key",
+    });
+    stack.add_named(&empty_box, Some("empty"));
 
-    scrolled_win.set_child(Some(&list_box));
-    container.append(&scrolled_win);
-
+    container.append(&stack);
     root.set_child(Some(&container));
 
     // Password Dialog Modal Overlay
@@ -64,7 +81,8 @@ pub fn build_certificates() -> (CertificatesWidget, PasswordDialog) {
         root,
         container,
         add_btn,
-        list_box,
+        flow_box,
+        stack,
     };
 
     (widget, auth_dialog)

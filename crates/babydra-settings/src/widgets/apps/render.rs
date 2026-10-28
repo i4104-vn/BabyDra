@@ -72,7 +72,10 @@ pub fn build() -> (AppsWidget, PasswordDialog) {
     container.append(&header_box);
 
     // Tabs Bar Row
-    let tabs_box = Box::new(Orientation::Horizontal, 12);
+    let tabs_box = Box::new(Orientation::Horizontal, 4);
+    tabs_box.add_css_class("settings-tab-bar");
+    tabs_box.set_halign(gtk4::Align::Start);
+    tabs_box.set_margin_bottom(8);
     let tab_apps_btn = Button::with_label(&babydra_core::i18n::trans("settings.apps_tab_apps"));
     tab_apps_btn.add_css_class("app-tab-btn");
     tab_apps_btn.add_css_class("active");

@@ -1,4 +1,4 @@
-//! VPN list renderer and event handlers.
+//! VPN card grid renderer and event handlers.
 
 use gtk4::prelude::*;
 use std::cell::RefCell;
@@ -8,10 +8,12 @@ use std::sync::mpsc::Sender;
 
 use babydra_core::services::system::vpn::{connect_vpn, disconnect_vpn, get_vpn_details, VpnConn};
 use babydra_ui_kit::components::modals::{VpnConfigDialog, VpnLogDialog};
+use babydra_ui_kit::components::switch::CustomSwitch;
 
 #[allow(clippy::too_many_arguments)]
 pub fn render_vpn_list<F: Fn() + Clone + 'static>(
-    list_box: &gtk4::ListBox,
+    flow_box: &gtk4::FlowBox,
+    stack: &gtk4::Stack,
     vpns: &[VpnConn],
     is_loading: bool,
     connecting_vpns: &Rc<RefCell<HashSet<String>>>,
@@ -20,35 +22,32 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
     log_dialog: &VpnLogDialog,
     _trigger_refresh: F,
 ) {
-    crate::widgets::helpers::clear_list_box(list_box);
+    crate::widgets::helpers::clear_flow_box(flow_box);
 
     if is_loading && vpns.is_empty() {
-        list_box.append(&crate::widgets::helpers::create_placeholder(
-            crate::widgets::helpers::PlaceholderState::Loading,
-        ));
+        stack.set_visible_child_name("loading");
         return;
     }
 
     if vpns.is_empty() {
-        list_box.append(&crate::widgets::helpers::create_placeholder(
-            crate::widgets::helpers::PlaceholderState::Empty {
-                title_key: "settings.vpn_no_profiles",
-                desc_key: Some("settings.vpn_no_profiles_sub"),
-                icon_name: "shield",
-            },
-        ));
+        stack.set_visible_child_name("empty");
         return;
     }
 
-    for vpn in vpns.iter() {
-        let row = gtk4::ListBoxRow::new();
-        row.add_css_class("settings-card-row");
+    stack.set_visible_child_name("cards");
 
-        let hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 14);
-        hbox.set_margin_top(4);
-        hbox.set_margin_bottom(4);
-        hbox.set_margin_start(8);
-        hbox.set_margin_end(8);
+    for vpn in vpns.iter() {
+        let card = gtk4::Box::new(gtk4::Orientation::Vertical, 10);
+        card.add_css_class("settings-card");
+        card.add_css_class("device-card");
+        card.add_css_class("vpn-card");
+        card.set_size_request(290, 136);
+        card.set_halign(gtk4::Align::Start);
+        card.set_valign(gtk4::Align::Start);
+
+        // ── Top Row: Left icon badge, Right control buttons + switch ──
+        let top_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+        top_row.set_valign(gtk4::Align::Center);
 
         let icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
         icon_badge.add_css_class("blue-icon-badge-sm");
@@ -61,48 +60,11 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
         shield_icon.set_halign(gtk4::Align::Center);
         shield_icon.set_vexpand(true);
         icon_badge.append(&shield_icon);
-        hbox.append(&icon_badge);
+        top_row.append(&icon_badge);
 
-        let text_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-        text_box.set_valign(gtk4::Align::Center);
-        text_box.set_halign(gtk4::Align::Start);
-        text_box.set_hexpand(true);
-
-        let display_name = if vpn.name.chars().count() > 30 {
-            let truncated: String = vpn.name.chars().take(30).collect();
-            format!("{}...", truncated)
-        } else {
-            vpn.name.clone()
-        };
-        let name_lbl = gtk4::Label::new(Some(&display_name));
-        name_lbl.add_css_class("settings-row-title");
-        name_lbl.set_halign(gtk4::Align::Start);
-        text_box.append(&name_lbl);
-
-        let sub_text = if vpn.active {
-            let mut info_parts = vec![format!(
-                "{}: {}",
-                babydra_core::i18n::trans("settings.vpn_type"),
-                vpn.conn_type.to_uppercase()
-            )];
-            if !vpn.ip_address.is_empty() {
-                info_parts.push(format!("IP: {}", vpn.ip_address));
-            }
-            info_parts.join(" • ")
-        } else {
-            format!(
-                "{}: {}",
-                babydra_core::i18n::trans("settings.vpn_type"),
-                vpn.conn_type.to_uppercase()
-            )
-        };
-
-        let desc_lbl = gtk4::Label::new(Some(&sub_text));
-        desc_lbl.add_css_class("settings-row-desc");
-        desc_lbl.set_halign(gtk4::Align::Start);
-        text_box.append(&desc_lbl);
-
-        hbox.append(&text_box);
+        let spacer_top = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+        spacer_top.set_hexpand(true);
+        top_row.append(&spacer_top);
 
         // View Logs Button
         let log_btn = gtk4::Button::new();
@@ -121,7 +83,7 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
         log_btn.connect_clicked(move |_| {
             log_dialog_c.show_for_vpn(&name_log);
         });
-        hbox.append(&log_btn);
+        top_row.append(&log_btn);
 
         // Edit / Customize Button
         let edit_btn = gtk4::Button::new();
@@ -148,70 +110,116 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
                 30,
             );
         });
-        hbox.append(&edit_btn);
+        top_row.append(&edit_btn);
 
         let is_busy = connecting_vpns.borrow().contains(&vpn.name);
 
         if is_busy {
             let loading_icon = crate::widgets::helpers::create_loading_icon(22);
             loading_icon.set_valign(gtk4::Align::Center);
-            hbox.append(&loading_icon);
-        } else if vpn.active {
-            let disconnect_btn =
-                gtk4::Button::with_label(&babydra_core::i18n::trans("settings.disconnect"));
-            disconnect_btn.set_valign(gtk4::Align::Center);
-            disconnect_btn.add_css_class("connect-pill-btn");
-            disconnect_btn.add_css_class("delete-btn");
-
-            let name_clone = vpn.name.clone();
-            let tx_action_c = tx_action.clone();
-
-            disconnect_btn.connect_clicked(move |_| {
-                let _ = tx_action_c.send((name_clone.clone(), true));
-                let name = name_clone.clone();
-                let tx = tx_action_c.clone();
-                std::thread::spawn(move || {
-                    let _ = disconnect_vpn(&name);
-                    let _ = tx.send((name, false));
-                });
-            });
-            hbox.append(&disconnect_btn);
+            top_row.append(&loading_icon);
         } else {
-            let connect_btn =
-                gtk4::Button::with_label(&babydra_core::i18n::trans("settings.connect"));
-            connect_btn.set_valign(gtk4::Align::Center);
-            connect_btn.add_css_class("suggested-action");
-
-            let name_clone = vpn.name.clone();
+            let switch = CustomSwitch::new(vpn.active);
+            let name_switch = vpn.name.clone();
             let tx_action_c = tx_action.clone();
             let config_dialog_c = config_dialog.clone();
+            let sw_clone = switch.clone();
 
-            connect_btn.connect_clicked(move |_| {
-                let name = name_clone.clone();
+            switch.connect_state_set(move |new_state| {
+                let name = name_switch.clone();
                 let tx_action_sub = tx_action_c.clone();
                 let config_dialog_sub = config_dialog_c.clone();
-                crate::widgets::helpers::spawn_async_task(
-                    move || (get_vpn_details(&name), name),
-                    move |(details, name)| {
-                        if details.username.is_empty() || details.password.is_empty() {
-                            config_dialog_sub.show_for_edit(&details);
-                            return;
-                        }
+                let sw = sw_clone.clone();
 
-                        let _ = tx_action_sub.send((name.clone(), true));
-                        let tx = tx_action_sub.clone();
-                        std::thread::spawn(move || {
-                            let _ = connect_vpn(&name);
-                            let _ = tx.send((name, false));
-                        });
-                    },
-                    30,
-                );
+                if new_state {
+                    crate::widgets::helpers::spawn_async_task(
+                        move || (get_vpn_details(&name), name),
+                        move |(details, name)| {
+                            if details.username.is_empty() || details.password.is_empty() {
+                                config_dialog_sub.show_for_edit(&details);
+                                sw.set_active(false);
+                                return;
+                            }
+
+                            let _ = tx_action_sub.send((name.clone(), true));
+                            let tx = tx_action_sub.clone();
+                            std::thread::spawn(move || {
+                                let _ = connect_vpn(&name);
+                                let _ = tx.send((name, false));
+                            });
+                        },
+                        30,
+                    );
+                } else {
+                    let _ = tx_action_sub.send((name.clone(), true));
+                    let tx = tx_action_sub.clone();
+                    std::thread::spawn(move || {
+                        let _ = disconnect_vpn(&name);
+                        let _ = tx.send((name, false));
+                    });
+                }
             });
-            hbox.append(&connect_btn);
+
+            top_row.append(&switch.container);
         }
 
-        row.set_child(Some(&hbox));
-        list_box.append(&row);
+        card.append(&top_row);
+
+        // Spacer to push footer to bottom
+        let mid_spacer = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+        mid_spacer.set_vexpand(true);
+        card.append(&mid_spacer);
+
+        // ── Bottom Row: Title + Subtitle on Left, Status Pill on Right ──
+        let bottom_row = gtk4::Box::new(gtk4::Orientation::Horizontal, 8);
+        bottom_row.set_valign(gtk4::Align::End);
+
+        let text_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
+        text_box.set_valign(gtk4::Align::End);
+        text_box.set_halign(gtk4::Align::Start);
+        text_box.set_hexpand(true);
+
+        let display_name = if vpn.name.chars().count() > 24 {
+            let truncated: String = vpn.name.chars().take(24).collect();
+            format!("{}...", truncated)
+        } else {
+            vpn.name.clone()
+        };
+        let name_lbl = gtk4::Label::new(Some(&display_name));
+        name_lbl.add_css_class("settings-row-title");
+        name_lbl.add_css_class("device-card-title");
+        name_lbl.set_halign(gtk4::Align::Start);
+        name_lbl.set_tooltip_text(Some(&vpn.name));
+        text_box.append(&name_lbl);
+
+        let sub_text = if vpn.active {
+            if !vpn.ip_address.is_empty() {
+                format!("{} • {}", vpn.conn_type.to_uppercase(), vpn.ip_address)
+            } else {
+                format!("{} • Connected", vpn.conn_type.to_uppercase())
+            }
+        } else {
+            format!("{} • Inactive", vpn.conn_type.to_uppercase())
+        };
+
+        let desc_lbl = gtk4::Label::new(Some(&sub_text));
+        desc_lbl.add_css_class("settings-row-desc");
+        desc_lbl.add_css_class("device-card-subtitle");
+        desc_lbl.set_halign(gtk4::Align::Start);
+        text_box.append(&desc_lbl);
+
+        bottom_row.append(&text_box);
+
+        let status_lbl = gtk4::Label::new(Some(if vpn.active { "ON" } else { "OFF" }));
+        if vpn.active {
+            status_lbl.add_css_class("device-card-status-on");
+        } else {
+            status_lbl.add_css_class("device-card-status-off");
+        }
+        status_lbl.set_valign(gtk4::Align::End);
+        bottom_row.append(&status_lbl);
+
+        card.append(&bottom_row);
+        flow_box.append(&card);
     }
 }

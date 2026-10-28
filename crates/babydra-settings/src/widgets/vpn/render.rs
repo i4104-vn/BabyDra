@@ -1,13 +1,15 @@
-//! VPN UI layout generator synchronized with Wi-Fi layout.
+//! VPN UI layout generator with smart card grid layout.
 
 use babydra_ui_kit::components::modals::{VpnConfigDialog, VpnLogDialog};
+use crate::widgets::helpers::{create_placeholder_box, PlaceholderState};
 use gtk4::prelude::*;
 
-/// Builds the VPN settings page UI.
+/// Builds the VPN settings page UI with a responsive card grid.
 pub fn build_vpn_ui() -> (
     gtk4::Box,
     gtk4::Button,
-    gtk4::ListBox,
+    gtk4::FlowBox,
+    gtk4::Stack,
     VpnConfigDialog,
     VpnLogDialog,
 ) {
@@ -39,25 +41,48 @@ pub fn build_vpn_ui() -> (
 
     main_box.append(&header_row);
 
-    // Overlay to place Floating Action Button (FAB) at bottom-right and Config Dialog
+    // Overlay to host Stack and Dialog Modals
     let overlay = gtk4::Overlay::new();
     overlay.set_vexpand(true);
     overlay.set_hexpand(true);
 
-    // Glass Panel List Container (Fills Full Height)
-    let list_box = gtk4::ListBox::new();
-    list_box.add_css_class("glass-panel");
-    list_box.set_selection_mode(gtk4::SelectionMode::None);
-    list_box.set_vexpand(true);
-    list_box.set_valign(gtk4::Align::Fill);
+    let stack = gtk4::Stack::new();
+    stack.set_vexpand(true);
+    stack.set_hexpand(true);
+    stack.set_transition_type(gtk4::StackTransitionType::Crossfade);
+
+    // 1. Grid of smart cards
+    let flow_box = gtk4::FlowBox::new();
+    flow_box.add_css_class("settings-card-flow");
+    flow_box.set_selection_mode(gtk4::SelectionMode::None);
+    flow_box.set_valign(gtk4::Align::Start);
+    flow_box.set_halign(gtk4::Align::Start);
+    flow_box.set_column_spacing(16);
+    flow_box.set_row_spacing(16);
+    flow_box.set_min_children_per_line(1);
+    flow_box.set_max_children_per_line(10);
 
     let scroll = gtk4::ScrolledWindow::new();
     scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
     scroll.set_vexpand(true);
     scroll.set_valign(gtk4::Align::Fill);
-    scroll.set_child(Some(&list_box));
+    scroll.set_child(Some(&flow_box));
+    stack.add_named(&scroll, Some("cards"));
 
-    overlay.set_child(Some(&scroll));
+    // 2. Loading state
+    let loading_box = create_placeholder_box(PlaceholderState::Loading);
+    stack.add_named(&loading_box, Some("loading"));
+
+    // 3. Empty state
+    let empty_box = create_placeholder_box(PlaceholderState::Empty {
+        title_key: "settings.vpn_no_profiles",
+        desc_key: Some("settings.vpn_no_profiles_sub"),
+        icon_name: "shield",
+    });
+    stack.add_named(&empty_box, Some("empty"));
+
+    stack.set_visible_child_name("loading");
+    overlay.set_child(Some(&stack));
 
     // VpnConfigDialog & VpnLogDialog Modal Overlays
     let config_dialog = VpnConfigDialog::new();
@@ -71,7 +96,8 @@ pub fn build_vpn_ui() -> (
     (
         main_box,
         add_custom_btn,
-        list_box,
+        flow_box,
+        stack,
         config_dialog,
         log_dialog,
     )

@@ -35,27 +35,83 @@ fn build_header() -> (Box, Button, Button) {
     (header_box, refresh_btn, save_btn)
 }
 
-/// Builds a configuration card row for a single monitor
+/// Builds a configuration card for a single monitor in smart-card style
 fn build_monitor_card(mon: &MonitorConfig) -> DisplayCardRow {
-    let card = Box::new(Orientation::Horizontal, 12);
-    card.add_css_class("glass-panel");
-    card.add_css_class("settings-card-row");
-    card.set_valign(gtk4::Align::Center);
+    let card = Box::new(Orientation::Vertical, 10);
+    card.add_css_class("settings-card");
+    card.add_css_class("device-card");
+    card.add_css_class("display-grid-card");
+    card.set_size_request(360, 240);
+    card.set_halign(gtk4::Align::Start);
+    card.set_valign(gtk4::Align::Start);
 
-    // 1. Monitor Title
-    let display_title = if !mon.description.is_empty() && mon.description != mon.name {
-        format!("{} ({})", mon.name, mon.description)
-    } else {
-        mon.name.clone()
-    };
-    let name_lbl = Label::new(Some(&display_title));
+    // ── Header Row: Monitor Icon + Name/Desc on left, Active Badge on right ──
+    let header_row = Box::new(Orientation::Horizontal, 10);
+    header_row.set_valign(gtk4::Align::Center);
+
+    let icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    icon_badge.add_css_class("blue-icon-badge-sm");
+    icon_badge.set_valign(gtk4::Align::Center);
+    icon_badge.set_halign(gtk4::Align::Start);
+
+    let mon_icon = babydra_ui_kit::ui::icon::get_icon("video-display", 18);
+    mon_icon.set_pixel_size(18);
+    mon_icon.set_valign(gtk4::Align::Center);
+    mon_icon.set_halign(gtk4::Align::Center);
+    mon_icon.set_vexpand(true);
+    icon_badge.append(&mon_icon);
+    header_row.append(&icon_badge);
+
+    let title_box = Box::new(Orientation::Vertical, 2);
+    title_box.set_valign(gtk4::Align::Center);
+    title_box.set_halign(gtk4::Align::Start);
+    title_box.set_hexpand(true);
+
+    let name_lbl = Label::new(Some(&mon.name));
     name_lbl.add_css_class("settings-row-title");
-    name_lbl.set_hexpand(true);
+    name_lbl.add_css_class("device-card-title");
     name_lbl.set_halign(gtk4::Align::Start);
-    name_lbl.set_valign(gtk4::Align::Center);
-    card.append(&name_lbl);
+    title_box.append(&name_lbl);
 
-    // 2. Resolution Dropdown
+    let desc_text = if !mon.description.is_empty() && mon.description != mon.name {
+        mon.description.clone()
+    } else {
+        format!("{}x{} @ {:.0}Hz", mon.resolution_width, mon.resolution_height, mon.refresh_rate)
+    };
+    let desc_lbl = Label::new(Some(&desc_text));
+    desc_lbl.add_css_class("settings-row-desc");
+    desc_lbl.add_css_class("device-card-subtitle");
+    desc_lbl.set_halign(gtk4::Align::Start);
+    title_box.append(&desc_lbl);
+
+    header_row.append(&title_box);
+
+    let active_badge = Label::new(Some("Connected"));
+    active_badge.add_css_class("device-card-status-on");
+    active_badge.set_valign(gtk4::Align::Center);
+    header_row.append(&active_badge);
+
+    card.append(&header_row);
+
+    // Separator line
+    let sep = gtk4::Separator::new(Orientation::Horizontal);
+    sep.add_css_class("settings-card-separator");
+    card.append(&sep);
+
+    // ── Controls Body: Resolution, Rate, Orientation ──
+    let body_box = Box::new(Orientation::Vertical, 8);
+    body_box.set_valign(gtk4::Align::Fill);
+    body_box.set_vexpand(true);
+
+    // Resolution Row
+    let res_row = Box::new(Orientation::Horizontal, 8);
+    res_row.set_valign(gtk4::Align::Center);
+    let res_lbl = Label::new(Some(&babydra_core::i18n::trans("settings.display_resolution")));
+    res_lbl.add_css_class("display-prop-label");
+    res_lbl.set_halign(gtk4::Align::Start);
+    res_lbl.set_hexpand(true);
+    res_row.append(&res_lbl);
+
     let res_strs: Vec<&str> = mon
         .available_resolutions
         .iter()
@@ -66,6 +122,7 @@ fn build_monitor_card(mon: &MonitorConfig) -> DisplayCardRow {
         Option::<gtk4::Expression>::None,
     );
     resolution_dropdown.set_valign(gtk4::Align::Center);
+    resolution_dropdown.set_halign(gtk4::Align::End);
 
     let cur_res_str = format!("{}x{}", mon.resolution_width, mon.resolution_height);
     if let Some(idx) = mon
@@ -75,9 +132,18 @@ fn build_monitor_card(mon: &MonitorConfig) -> DisplayCardRow {
     {
         resolution_dropdown.set_selected(idx as u32);
     }
-    card.append(&resolution_dropdown);
+    res_row.append(&resolution_dropdown);
+    body_box.append(&res_row);
 
-    // 3. Refresh Rate Dropdown
+    // Refresh Rate Row
+    let rate_row = Box::new(Orientation::Horizontal, 8);
+    rate_row.set_valign(gtk4::Align::Center);
+    let rate_lbl = Label::new(Some(&babydra_core::i18n::trans("settings.display_refresh_rate")));
+    rate_lbl.add_css_class("display-prop-label");
+    rate_lbl.set_halign(gtk4::Align::Start);
+    rate_lbl.set_hexpand(true);
+    rate_row.append(&rate_lbl);
+
     let rate_strs: Vec<String> = mon
         .available_rates
         .iter()
@@ -89,6 +155,7 @@ fn build_monitor_card(mon: &MonitorConfig) -> DisplayCardRow {
         Option::<gtk4::Expression>::None,
     );
     rate_dropdown.set_valign(gtk4::Align::Center);
+    rate_dropdown.set_halign(gtk4::Align::End);
 
     if let Some(idx) = mon
         .available_rates
@@ -97,9 +164,18 @@ fn build_monitor_card(mon: &MonitorConfig) -> DisplayCardRow {
     {
         rate_dropdown.set_selected(idx as u32);
     }
-    card.append(&rate_dropdown);
+    rate_row.append(&rate_dropdown);
+    body_box.append(&rate_row);
 
-    // 4. Orientation Dropdown
+    // Orientation Row
+    let orient_row = Box::new(Orientation::Horizontal, 8);
+    orient_row.set_valign(gtk4::Align::Center);
+    let orient_lbl = Label::new(Some(&babydra_core::i18n::trans("settings.display_orientation")));
+    orient_lbl.add_css_class("display-prop-label");
+    orient_lbl.set_halign(gtk4::Align::Start);
+    orient_lbl.set_hexpand(true);
+    orient_row.append(&orient_lbl);
+
     let orient_items_owned = [
         babydra_core::i18n::trans("settings.orientation_normal"),
         babydra_core::i18n::trans("settings.orientation_left"),
@@ -112,6 +188,7 @@ fn build_monitor_card(mon: &MonitorConfig) -> DisplayCardRow {
         Option::<gtk4::Expression>::None,
     );
     orientation_dropdown.set_valign(gtk4::Align::Center);
+    orientation_dropdown.set_halign(gtk4::Align::End);
 
     let orient_idx = match mon.orientation.as_str() {
         "left" | "90" => 1,
@@ -120,7 +197,10 @@ fn build_monitor_card(mon: &MonitorConfig) -> DisplayCardRow {
         _ => 0,
     };
     orientation_dropdown.set_selected(orient_idx);
-    card.append(&orientation_dropdown);
+    orient_row.append(&orientation_dropdown);
+    body_box.append(&orient_row);
+
+    card.append(&body_box);
 
     DisplayCardRow {
         container: card,
@@ -139,14 +219,20 @@ pub fn build(monitors: &[MonitorConfig]) -> DisplaysWidget {
     let (header_box, refresh_btn, save_btn) = build_header();
     container.append(&header_box);
 
-    let cards_box = Box::new(Orientation::Vertical, 12);
-    cards_box.set_vexpand(true);
-    cards_box.set_valign(gtk4::Align::Fill);
+    let flow_box = gtk4::FlowBox::new();
+    flow_box.add_css_class("settings-card-flow");
+    flow_box.set_selection_mode(gtk4::SelectionMode::None);
+    flow_box.set_valign(gtk4::Align::Start);
+    flow_box.set_halign(gtk4::Align::Start);
+    flow_box.set_column_spacing(16);
+    flow_box.set_row_spacing(16);
+    flow_box.set_min_children_per_line(1);
+    flow_box.set_max_children_per_line(10);
 
     let mut card_rows = Vec::with_capacity(monitors.len());
     for mon in monitors {
         let row = build_monitor_card(mon);
-        cards_box.append(&row.container);
+        flow_box.append(&row.container);
         card_rows.push(row);
     }
 
@@ -154,7 +240,7 @@ pub fn build(monitors: &[MonitorConfig]) -> DisplaysWidget {
     scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
     scroll.set_vexpand(true);
     scroll.set_valign(gtk4::Align::Fill);
-    scroll.set_child(Some(&cards_box));
+    scroll.set_child(Some(&flow_box));
 
     container.append(&scroll);
 
