@@ -3637,15 +3637,22 @@ button.placeholder-btn:hover {
 }
 
 button.destructive-action {
-    background-color: rgba(220, 38, 38, 0.85);
+    background-color: rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    color: #1C1C1E;
 }
 
-button.destructive-action:hover {
-    background-color: rgba(239, 68, 68, 0.90);
+button.destructive-action:hover,
+button.destructive-action:focus {
+    background-color: #dc2626;
+    border-color: #dc2626;
+    color: #ffffff;
 }
 
 button.destructive-action:active {
     background-color: #991b1b;
+    border-color: #991b1b;
+    color: #ffffff;
 }
 
 .settings-capsule-nav-vertical {
@@ -3928,30 +3935,18 @@ window.explore-dialog,
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
+.modern-dialog-badge,
 .modern-dialog-badge.badge-primary,
-.modern-dialog-badge.badge-blue {
-    background: rgba(59, 130, 246, 0.10);
-    border: 1px solid rgba(59, 130, 246, 0.20);
-    box-shadow: none;
-}
-
+.modern-dialog-badge.badge-blue,
 .modern-dialog-badge.badge-danger,
+.modern-dialog-badge.badge-success,
+.modern-dialog-badge.badge-warning,
 .recovery-danger-badge {
-    background: rgba(239, 68, 68, 0.10);
-    border: 1px solid rgba(239, 68, 68, 0.20);
+    background: rgba(0, 0, 0, 0.06);
+    background-color: rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.10);
     box-shadow: none;
-}
-
-.modern-dialog-badge.badge-success {
-    background: rgba(16, 185, 129, 0.10);
-    border: 1px solid rgba(16, 185, 129, 0.20);
-    box-shadow: none;
-}
-
-.modern-dialog-badge.badge-warning {
-    background: rgba(245, 158, 11, 0.10);
-    border: 1px solid rgba(245, 158, 11, 0.20);
-    box-shadow: none;
+    color: #1C1C1E;
 }
 
 .modern-dialog-title,
@@ -4073,17 +4068,25 @@ button.modern-dialog-primary-btn:disabled,
 
 button.modern-dialog-danger-btn,
 .explore-dialog button.destructive-action {
-    background-color: #dc2626;
+    background-color: rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    color: #1C1C1E;
 }
 
 button.modern-dialog-danger-btn:hover,
-.explore-dialog button.destructive-action:hover {
-    background-color: #b91c1c;
+button.modern-dialog-danger-btn:focus,
+.explore-dialog button.destructive-action:hover,
+.explore-dialog button.destructive-action:focus {
+    background-color: #dc2626;
+    border-color: #dc2626;
+    color: #ffffff;
 }
 
 button.modern-dialog-danger-btn:active,
 .explore-dialog button.destructive-action:active {
     background-color: #991b1b;
+    border-color: #991b1b;
+    color: #ffffff;
 }
 
 button.modern-dialog-danger-btn:disabled,

@@ -35,38 +35,30 @@ window.explore-dialog,
 
 /* ── 3. Squircle Icon Badges ── */
 .modern-dialog-badge,
+.modern-dialog-badge.badge-primary,
+.modern-dialog-badge.badge-blue,
+.modern-dialog-badge.badge-danger,
+.modern-dialog-badge.badge-success,
+.modern-dialog-badge.badge-warning,
 .recovery-danger-badge {
     min-width: 42px;
     min-height: 42px;
     border-radius: 12px;
     padding: 0;
     margin: 0;
+    background: rgba(255, 255, 255, 0.08);
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: none;
+    color: #ffffff;
 }
 
-.modern-dialog-badge.badge-primary,
-.modern-dialog-badge.badge-blue {
-    background: rgba(59, 130, 246, 0.15);
-    border: 1px solid rgba(59, 130, 246, 0.30);
-    box-shadow: none;
-}
-
-.modern-dialog-badge.badge-danger,
-.recovery-danger-badge {
-    background: rgba(239, 68, 68, 0.15);
-    border: 1px solid rgba(239, 68, 68, 0.30);
-    box-shadow: none;
-}
-
-.modern-dialog-badge.badge-success {
-    background: rgba(16, 185, 129, 0.15);
-    border: 1px solid rgba(16, 185, 129, 0.30);
-    box-shadow: none;
-}
-
-.modern-dialog-badge.badge-warning {
-    background: rgba(245, 158, 11, 0.15);
-    border: 1px solid rgba(245, 158, 11, 0.30);
-    box-shadow: none;
+.modern-dialog-badge image,
+.modern-dialog-badge picture,
+.modern-dialog-badge-icon,
+.recovery-danger-badge image {
+    color: #ffffff;
+    -gtk-icon-palette: error #ffffff, success #ffffff, warning #ffffff;
 }
 
 /* ── 4. Dialog Typography ── */
@@ -199,25 +191,28 @@ button.modern-dialog-cancel-btn,
 .explore-dialog button.properties-btn-cancel {
     min-height: 28px;
     min-width: 64px;
-    padding: 5px 14px;
+    padding: 5px 16px;
     border-radius: 9999px;
     font-size: 14px;
     font-weight: 500;
     background-color: rgba(255, 255, 255, 0.08);
     background-image: none;
     border: 1px solid rgba(255, 255, 255, 0.14);
-    border-top: 1px solid rgba(255, 255, 255, 0.26);
+    border-top: 1px solid rgba(255, 255, 255, 0.24);
     color: rgba(255, 255, 255, 0.90);
     box-shadow: none;
     outline: none;
-    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
 }
 
 button.modern-dialog-cancel-btn:hover,
+button.modern-dialog-cancel-btn:focus,
 .explore-dialog button.connect-pill-btn:hover,
-.explore-dialog button.properties-btn-cancel:hover {
-    background-color: rgba(255, 255, 255, 0.14);
-    border-color: rgba(255, 255, 255, 0.22);
+.explore-dialog button.connect-pill-btn:focus,
+.explore-dialog button.properties-btn-cancel:hover,
+.explore-dialog button.properties-btn-cancel:focus {
+    background-color: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.25);
     color: #ffffff;
     box-shadow: none;
 }
@@ -225,7 +220,7 @@ button.modern-dialog-cancel-btn:hover,
 button.modern-dialog-cancel-btn:active,
 .explore-dialog button.connect-pill-btn:active,
 .explore-dialog button.properties-btn-cancel:active {
-    background-color: rgba(255, 255, 255, 0.18);
+    background-color: rgba(255, 255, 255, 0.22);
     box-shadow: none;
 }
 
@@ -233,37 +228,43 @@ button.modern-dialog-primary-btn,
 .explore-dialog button.suggested-action {
     min-height: 28px;
     min-width: 64px;
-    padding: 5px 14px;
+    padding: 5px 16px;
     border-radius: 9999px;
     font-size: 14px;
     font-weight: 600;
-    background-color: #3b82f6;
+    background-color: rgba(255, 255, 255, 0.08);
     background-image: none;
-    border: none;
-    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.24);
+    color: rgba(255, 255, 255, 0.90);
     box-shadow: none;
     outline: none;
-    transition: background-color 150ms ease;
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
 }
 
 button.modern-dialog-primary-btn:hover,
-.explore-dialog button.suggested-action:hover {
-    background-color: #2563eb;
-    background-image: none;
-    box-shadow: none;
+button.modern-dialog-primary-btn:focus,
+.explore-dialog button.suggested-action:hover,
+.explore-dialog button.suggested-action:focus {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    color: #ffffff;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.35);
 }
 
 button.modern-dialog-primary-btn:active,
 .explore-dialog button.suggested-action:active {
-    background-color: #1d4ed8;
-    background-image: none;
+    background-color: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
     box-shadow: none;
 }
 
 button.modern-dialog-primary-btn:disabled,
 .explore-dialog button.suggested-action:disabled {
-    background-color: rgba(59, 130, 246, 0.30);
-    color: rgba(255, 255, 255, 0.40);
+    background-color: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.30);
     opacity: 0.5;
     box-shadow: none;
 }
@@ -272,37 +273,43 @@ button.modern-dialog-danger-btn,
 .explore-dialog button.destructive-action {
     min-height: 28px;
     min-width: 64px;
-    padding: 5px 14px;
+    padding: 5px 16px;
     border-radius: 9999px;
     font-size: 14px;
     font-weight: 600;
-    background-color: #ef4444;
+    background-color: rgba(255, 255, 255, 0.08);
     background-image: none;
-    border: none;
-    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.24);
+    color: rgba(255, 255, 255, 0.90);
     box-shadow: none;
     outline: none;
-    transition: background-color 150ms ease;
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
 }
 
 button.modern-dialog-danger-btn:hover,
-.explore-dialog button.destructive-action:hover {
-    background-color: #dc2626;
-    background-image: none;
-    box-shadow: none;
+button.modern-dialog-danger-btn:focus,
+.explore-dialog button.destructive-action:hover,
+.explore-dialog button.destructive-action:focus {
+    background-color: #ef4444;
+    border-color: #ef4444;
+    color: #ffffff;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.35);
 }
 
 button.modern-dialog-danger-btn:active,
 .explore-dialog button.destructive-action:active {
-    background-color: #b91c1c;
-    background-image: none;
+    background-color: #dc2626;
+    border-color: #dc2626;
+    color: #ffffff;
     box-shadow: none;
 }
 
 button.modern-dialog-danger-btn:disabled,
 .explore-dialog button.destructive-action:disabled {
-    background-color: rgba(239, 68, 68, 0.30);
-    color: rgba(255, 255, 255, 0.40);
+    background-color: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.30);
     opacity: 0.5;
     box-shadow: none;
 }

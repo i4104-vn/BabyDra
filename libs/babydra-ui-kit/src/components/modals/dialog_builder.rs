@@ -174,7 +174,26 @@ impl ModernDialogBuilder {
             badge.set_halign(Align::Start);
             badge.set_valign(Align::Center);
 
-            let icon = get_icon(icon_name, 22);
+            let resolved_name = if icon_name == "trash" || icon_name == "user-trash" {
+                "trash-symbolic".to_string()
+            } else if !icon_name.ends_with("-symbolic") {
+                let sym = format!("{}-symbolic", icon_name);
+                let display = gtk4::gdk::Display::default();
+                if display
+                    .as_ref()
+                    .map(|d| gtk4::IconTheme::for_display(d).has_icon(&sym))
+                    .unwrap_or(false)
+                {
+                    sym
+                } else {
+                    icon_name.to_string()
+                }
+            } else {
+                icon_name.to_string()
+            };
+
+            let icon = get_icon(&resolved_name, 22);
+            icon.add_css_class("modern-dialog-badge-icon");
             icon.set_pixel_size(22);
             icon.set_vexpand(true);
             icon.set_hexpand(true);

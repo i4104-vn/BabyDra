@@ -11,7 +11,7 @@ pub fn show_delete_confirm(
 ) {
     let shell = DialogShell::new(title, 380, 160, 12, parent);
     shell.add_header(
-        "trash",
+        "trash-symbolic",
         super::shell::BadgeStyle::Danger,
         title,
         Some(message),
