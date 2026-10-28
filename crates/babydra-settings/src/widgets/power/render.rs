@@ -4,6 +4,8 @@ use babydra_ui_kit::components::CustomSlider;
 use gtk4::prelude::*;
 use gtk4::{Box, Button, Label, Orientation, Overlay, ScrolledWindow};
 
+pub use super::battery_card::update_battery_card;
+
 #[derive(Clone)]
 #[allow(dead_code)]
 pub struct PowerWidget {
@@ -129,8 +131,6 @@ pub fn update_power_labels(widget: &PowerWidget) {
         .profile_high_desc
         .set_text(&babydra_core::i18n::trans("settings.power_high_desc"));
 }
-
-pub use super::battery_card::update_battery_card;
 
 /// Builds the power settings page and its password dialog.
 pub fn build() -> (PowerWidget, PasswordDialog) {

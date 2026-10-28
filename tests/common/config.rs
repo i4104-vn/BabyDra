@@ -3,7 +3,7 @@
 //! These exercise the public config API end-to-end, including TOML
 //! round-trips and backward-compatible defaults for legacy config files.
 
-use babydra_core::config::settings::CustomContextItem;
+use babydra_core::config::settings::{CustomContextItem, DisplayMonitorSetting};
 use babydra_core::config::{BabyDraConfig, ExploreSettings, PowerConfig};
 
 #[test]
@@ -136,7 +136,6 @@ fn babydra_config_toml_roundtrip() {
 
 #[test]
 fn display_config_toml_roundtrip() {
-    use babydra_core::config::settings::DisplayMonitorSetting;
     let mut original = BabyDraConfig::default();
     original.display.monitors.push(DisplayMonitorSetting {
         name: "HDMI-A-1".to_string(),

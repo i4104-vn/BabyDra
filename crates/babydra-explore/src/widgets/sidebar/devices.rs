@@ -22,7 +22,7 @@ pub fn get_mounted_devices() -> Vec<DeviceItem> {
     for mount in vm.mounts() {
         if let Some(path) = mount.root().path() {
             // Exclude root "/" and user home
-            if path == PathBuf::from("/") || path == glib::home_dir() {
+            if path.as_os_str() == "/" || path == glib::home_dir() {
                 continue;
             }
 
@@ -62,21 +62,22 @@ pub fn get_mounted_devices() -> Vec<DeviceItem> {
             if let Ok(entries) = std::fs::read_dir(&p) {
                 for entry in entries.flatten() {
                     let path = entry.path();
-                    if path.is_dir() && path != glib::home_dir() {
-                        if !devices.iter().any(|d| d.path == path) {
-                            let name = path
-                                .file_name()
-                                .map(|n| n.to_string_lossy().to_string())
-                                .unwrap_or_else(|| "USB Drive".to_string());
-                            let id = format!("device_{}", path.to_string_lossy().replace('/', "_"));
-                            devices.push(DeviceItem {
-                                id,
-                                name,
-                                icon: "drive-removable-media".to_string(),
-                                path,
-                                mount: None,
-                            });
-                        }
+                    if path.is_dir()
+                        && path != glib::home_dir()
+                        && !devices.iter().any(|d| d.path == path)
+                    {
+                        let name = path
+                            .file_name()
+                            .map(|n| n.to_string_lossy().to_string())
+                            .unwrap_or_else(|| "USB Drive".to_string());
+                        let id = format!("device_{}", path.to_string_lossy().replace('/', "_"));
+                        devices.push(DeviceItem {
+                            id,
+                            name,
+                            icon: "drive-removable-media".to_string(),
+                            path,
+                            mount: None,
+                        });
                     }
                 }
             }

@@ -1,8 +1,15 @@
-use super::helpers::snap_to_step;
-use gtk4::prelude::*;
-use gtk4::{DrawingArea, GestureClick, GestureDrag};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+
+use gtk4::prelude::*;
+use gtk4::{DrawingArea, GestureClick, GestureDrag};
+
+use crate::ui::theme::colors::{
+    slider_text_rgba, slider_tick_rgba, slider_track_rgba, ACCENT_ALPHA, ACCENT_DIM_ALPHA,
+    ACCENT_RGB, KNOB_FILL_RGBA, SLIDER_KNOB_SHADOW_RGBA,
+};
+
+use super::helpers::snap_to_step;
 
 type Callback = Box<dyn Fn(u32) + 'static>;
 
@@ -53,10 +60,6 @@ impl CustomSlider {
             let track_w = (width - 2.0 * margin_x).max(10.0);
 
             let is_dark = crate::ui::theme::is_dark_mode();
-            use crate::ui::theme::colors::{
-                slider_text_rgba, slider_tick_rgba, slider_track_rgba, ACCENT_ALPHA,
-                ACCENT_DIM_ALPHA, ACCENT_RGB, KNOB_FILL_RGBA, SLIDER_KNOB_SHADOW_RGBA,
-            };
             let (acc_r, acc_g, acc_b) = ACCENT_RGB;
 
             // 1. Draw Background Track (Pill)

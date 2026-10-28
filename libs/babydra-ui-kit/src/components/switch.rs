@@ -1,7 +1,12 @@
-use gtk4::prelude::*;
-use gtk4::{DrawingArea, GestureClick};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+
+use gtk4::prelude::*;
+use gtk4::{DrawingArea, GestureClick};
+
+use crate::ui::theme::colors::{
+    track_border_rgba, track_rgba, ACCENT_RGB, KNOB_FILL_RGBA, KNOB_SHADOW_RGBA,
+};
 
 type Callback = Box<dyn Fn(bool) + 'static>;
 
@@ -95,9 +100,6 @@ impl CustomSwitch {
             cr.close_path();
 
             let is_dark = crate::ui::theme::is_dark_mode();
-            use crate::ui::theme::colors::{
-                track_border_rgba, track_rgba, ACCENT_RGB, KNOB_FILL_RGBA, KNOB_SHADOW_RGBA,
-            };
 
             // Color lerp: Inactive gray -> Active blue (tokenized from colors.rs)
             let (in_r, in_g, in_b, in_a) = track_rgba(is_dark);

@@ -1,3 +1,5 @@
+use std::hash::{Hash, Hasher};
+
 use crate::widgets::state::ContentViewWidgets;
 use babydra_core::i18n::trans;
 use gtk4::prelude::*;
@@ -227,7 +229,6 @@ fn update_content_internal(handle: &ContentViewHandle, silent: bool) {
     // Skip the expensive full rebuild when the rendered view state is unchanged
     // (e.g. watcher events that do not alter the listing)
     {
-        use std::hash::{Hash, Hasher};
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
         current_path.hash(&mut hasher);
         current_mode.hash(&mut hasher);

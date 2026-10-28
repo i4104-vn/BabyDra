@@ -4,6 +4,8 @@ use babydra_core::DesktopApp;
 use gtk4::prelude::*;
 use std::path::PathBuf;
 use std::process::Command;
+#[cfg(unix)]
+use std::os::unix::fs::PermissionsExt;
 
 mod render;
 
@@ -117,7 +119,6 @@ pub fn pin_app_to_desktop(app: &DesktopApp) {
             let _ = std::fs::copy(&src_path, &dest_path);
             #[cfg(unix)]
             {
-                use std::os::unix::fs::PermissionsExt;
                 if let Ok(metadata) = std::fs::metadata(&dest_path) {
                     let mut perms = metadata.permissions();
                     perms.set_mode(perms.mode() | 0o755);
@@ -140,7 +141,6 @@ pub fn pin_app_to_desktop(app: &DesktopApp) {
         let _ = std::fs::write(&dest_path, content);
         #[cfg(unix)]
         {
-            use std::os::unix::fs::PermissionsExt;
             if let Ok(metadata) = std::fs::metadata(&dest_path) {
                 let mut perms = metadata.permissions();
                 perms.set_mode(perms.mode() | 0o755);

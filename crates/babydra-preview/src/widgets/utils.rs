@@ -1,10 +1,13 @@
 //! Shared building blocks used by the image and video previewers.
 
-use crate::widgets::window::format_aspect_ratio;
+use std::path::Path;
+
 use babydra_core::i18n::trans;
+pub use babydra_ui_kit::components::clear_box;
 use gtk4::prelude::*;
 use gtk4::{Align, ApplicationWindow, Box, Grid, Label, Orientation, Spinner};
-use std::path::Path;
+
+use crate::widgets::window::format_aspect_ratio;
 
 /// Creates the common loading state shown while media is being prepared.
 pub fn create_loading_view() -> Box {
@@ -24,13 +27,6 @@ pub fn create_loading_view() -> Box {
     label.add_css_class("dim-label");
     loading_box.append(&label);
     loading_box
-}
-
-/// Removes all children from a GTK container.
-pub fn clear_box(container: &Box) {
-    while let Some(child) = container.first_child() {
-        container.remove(&child);
-    }
 }
 
 /// Adds a consistent two-column metadata row to a details grid.

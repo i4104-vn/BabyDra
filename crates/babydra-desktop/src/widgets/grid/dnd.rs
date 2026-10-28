@@ -7,6 +7,8 @@ use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
+#[cfg(unix)]
+use std::os::unix::fs::PermissionsExt;
 
 thread_local! {
     static IS_DRAGGING: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
@@ -285,7 +287,6 @@ pub fn create_desktop_drop(
                                 #[cfg(unix)]
                                 {
                                     if dest.extension().is_some_and(|e| e == "desktop") {
-                                        use std::os::unix::fs::PermissionsExt;
                                         if let Ok(metadata) = std::fs::metadata(&dest) {
                                             let mut perms = metadata.permissions();
                                             perms.set_mode(perms.mode() | 0o755);

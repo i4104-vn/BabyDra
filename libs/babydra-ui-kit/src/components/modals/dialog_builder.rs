@@ -454,8 +454,6 @@ pub fn create_info_banner(icon_name: &str, text: &str) -> Box {
 
 /// Helper to create an acknowledgment checkbox card
 pub fn create_ack_card(text: &str) -> (Box, CheckButton) {
-    use gtk4::CheckButton;
-
     let card = Box::new(Orientation::Horizontal, 10);
     card.add_css_class("modern-dialog-ack-card");
     card.set_valign(Align::Center);

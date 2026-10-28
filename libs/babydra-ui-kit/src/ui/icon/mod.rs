@@ -333,14 +333,9 @@ pub fn get_theme_or_svg_icon(name: &str, size: i32) -> gtk4::Image {
             Some("trash")
         } else if name == "drive-removable-media" && theme.has_icon("media-removable") {
             Some("media-removable")
-        } else if let Some(base) = name.strip_suffix("-symbolic") {
-            if theme.has_icon(base) {
-                Some(base)
-            } else {
-                None
-            }
         } else {
-            None
+            name.strip_suffix("-symbolic")
+                .filter(|base| theme.has_icon(base))
         };
 
         if let Some(resolved) = alias {

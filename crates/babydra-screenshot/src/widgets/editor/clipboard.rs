@@ -3,6 +3,8 @@
 //! This is GTK-dependent (window + clipboard + texture), so it lives in the
 //! screenshot crate instead of `babydra-core` (which stays GTK-free).
 
+use std::io::Write;
+
 use gtk4::prelude::*;
 
 use babydra_core::models::EditorState;
@@ -24,7 +26,6 @@ pub fn copy_to_clipboard(state: &EditorState, window: &gtk4::ApplicationWindow) 
                 .spawn();
 
             if let Ok(mut c) = child {
-                use std::io::Write;
                 if let Some(mut stdin) = c.stdin.take() {
                     let _ = stdin.write_all(&png_bytes);
                 }

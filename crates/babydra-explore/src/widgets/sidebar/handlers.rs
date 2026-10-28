@@ -201,7 +201,7 @@ pub fn add_sidebar_item(args: SidebarItemArgs<'_>) {
             vbox.set_margin_end(4);
 
             let eject_btn = gtk4::Button::builder()
-                .label(&trans("explore.eject_drive"))
+                .label(trans("explore.eject_drive"))
                 .css_classes(vec!["menu-item".to_string(), "flat".to_string()])
                 .build();
             eject_btn.set_cursor_from_name(Some("pointer"));

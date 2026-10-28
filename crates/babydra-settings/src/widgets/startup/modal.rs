@@ -94,7 +94,7 @@ impl StartupAddDialog {
         // Fetch desktop apps and sort alphabetically
         let mut raw_apps = find_desktop_apps();
         raw_apps.retain(|a| !a.is_dependency && !a.name.trim().is_empty() && !a.exec.trim().is_empty());
-        raw_apps.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+        raw_apps.sort_by_key(|a| a.name.to_lowercase());
         raw_apps.dedup_by(|a, b| a.name == b.name);
 
         let app_names: Vec<String> = raw_apps.iter().map(|a| a.name.clone()).collect();

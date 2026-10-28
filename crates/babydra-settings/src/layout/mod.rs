@@ -8,6 +8,9 @@ use std::rc::Rc;
 use crate::widgets;
 use babydra_core::models::settings::nav::{NavCategory, NavItem};
 
+pub mod sidebar;
+pub use sidebar::*;
+
 /// Returns whether the first-login page still needs to be shown.
 fn is_first_login() -> bool {
     !babydra_core::load_babydra_config().first_login
@@ -139,10 +142,6 @@ fn ensure_page_loaded(stack: &gtk4::Stack, name: &str) {
         stack.add_named(&page, Some(name));
     }
 }
-
-/// Creates a new `sidebar icon for item`.
-pub mod sidebar;
-pub use sidebar::*;
 
 fn attach_sidebar_popover(
     btn: &gtk4::Button,

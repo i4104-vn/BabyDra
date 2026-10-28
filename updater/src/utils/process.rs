@@ -2,6 +2,8 @@ use crate::utils::system::get_home_dir;
 use std::path::Path;
 use std::process::{Command, Stdio};
 use std::time::Duration;
+#[cfg(unix)]
+use std::os::unix::process::CommandExt;
 
 /// Spawns a background daemon detached from the terminal session and process group.
 /// Standard input is closed (/dev/null).
@@ -41,7 +43,6 @@ pub fn spawn_daemon(
 
     #[cfg(unix)]
     {
-        use std::os::unix::process::CommandExt;
         unsafe {
             cmd.pre_exec(|| {
                 // Detach from controlling terminal into its own session and process group

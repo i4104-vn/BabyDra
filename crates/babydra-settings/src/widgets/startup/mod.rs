@@ -9,11 +9,13 @@ use gtk4::Widget;
 use std::cell::RefCell;
 use std::rc::Rc;
 
+type RefreshCallback = Rc<dyn Fn()>;
+
 /// Refreshes the card grid with current autostart commands.
 fn refresh_cards(
     grid: &crate::widgets::helpers::ResponsiveCardGrid,
     stack: &gtk4::Stack,
-    trigger_refresh: Rc<dyn Fn()>,
+    trigger_refresh: RefreshCallback,
 ) {
     grid.clear();
     let cmds = get_startup_commands();
@@ -59,7 +61,7 @@ pub fn create_startup() -> Widget {
     let stack = widget.stack.clone();
 
     // Self-referential closure pattern for refresh triggers
-    let refresh_slot: Rc<RefCell<Option<Rc<dyn Fn()>>>> = Rc::new(RefCell::new(None));
+    let refresh_slot: Rc<RefCell<Option<RefreshCallback>>> = Rc::new(RefCell::new(None));
 
     let card_grid_c = card_grid.clone();
     let stack_c = stack.clone();

@@ -1,8 +1,10 @@
-use babydra_core::i18n::trans;
-use babydra_core::services::explore::is_zip_encrypted;
-use gtk4::prelude::*;
 use std::path::PathBuf;
 use std::rc::Rc;
+
+use gtk4::prelude::*;
+
+use babydra_core::i18n::trans;
+use babydra_core::services::explore::{check_zip_password as check_password_correct, is_zip_encrypted};
 
 use super::job_log::{show_job_log, JobStrings};
 use super::shell::DialogShell;
@@ -76,8 +78,6 @@ fn show_password_dialog(
     nav_callback: Rc<dyn Fn(PathBuf)>,
     parent: Option<&gtk4::Window>,
 ) {
-    use babydra_core::services::explore::check_zip_password as check_password_correct;
-
     let shell = DialogShell::new(
         &trans("explore.dialog_password_title"),
         380,

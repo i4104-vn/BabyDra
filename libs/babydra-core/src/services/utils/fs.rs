@@ -2,7 +2,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 #[cfg(unix)]
-use std::os::unix::fs::PermissionsExt;
+use std::os::unix::fs::{MetadataExt, PermissionsExt};
 
 /// Returns the user's home directory as a `PathBuf`.
 pub fn get_home_path() -> PathBuf {
@@ -31,7 +31,6 @@ pub fn ensure_dir_exists(path: &Path) -> std::io::Result<()> {
 #[cfg(unix)]
 pub fn set_unix_mode(path: &Path, mode: u32) -> std::io::Result<()> {
     if let Ok(metadata) = fs::metadata(path) {
-        use std::os::unix::fs::MetadataExt;
         let final_mode = (metadata.mode() & !0o777) | mode;
         let mut perms = metadata.permissions();
         perms.set_mode(final_mode);

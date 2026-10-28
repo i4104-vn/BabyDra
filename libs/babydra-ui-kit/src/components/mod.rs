@@ -1,5 +1,6 @@
 pub mod badge;
 pub mod buttons;
+pub mod card_grid;
 pub mod cards;
 pub mod context_menu;
 pub mod explore;
@@ -11,6 +12,8 @@ pub mod popovers;
 pub mod slider;
 pub mod switch;
 pub mod wifi;
+
+pub use card_grid::ResponsiveCardGrid;
 
 // Re-export all builders under components namespace
 pub use badge::create_icon_badge;
