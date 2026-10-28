@@ -3042,10 +3042,10 @@ button.workspace-app-flyout-item:hover .workspace-app-flyout-name {
 /* === explore/window.css === */
 
 .explore-window {
-    background-color: rgba(245, 245, 247, 0.95);
-    border: 1px solid rgba(0, 0, 0, 0.12);
+    background-color: #F2F2F7;
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-top: none;
-    border-radius: 0 0 12px 12px;
+    border-radius: 0 0 16px 16px;
 }
 
 window.viewer-window,
@@ -3057,17 +3057,16 @@ window.notepad-window,
 }
 
 .explore-window-box {
-    background-color: rgba(245, 245, 247, 0.95);
-    background-image: repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.015) 0px, rgba(0, 0, 0, 0.015) 1px, transparent 1px, transparent 2px),
-        linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(0, 0, 0, 0.05) 100%);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-    color: #1a1a1a;
+    background-color: #F2F2F7;
+    background-image: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    color: #1C1C1E;
 }
 
 /* === explore/header_bar.css === */
 .explore-window .tab-bar {
-    background-color: rgba(255, 255, 255, 0.25);
-    border-bottom: 1px solid #d0d0d0;
+    background-color: #F2F2F7;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .explore-window .tab-item label {
@@ -3230,7 +3229,7 @@ window.notepad-window,
 
 /* === explore/content_view.css === */
 .explore-window .content-view {
-    background-color: rgba(255, 255, 255, 0.4);
+    background-color: #FFFFFF;
     border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
@@ -3324,15 +3323,15 @@ window.notepad-window,
 
 
 .explore-window .info-panel {
-    background-color: #ffffff;
+    background-color: #FFFFFF;
     border-left: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 
 /* === explore/info_panel.css === */
 .explore-window .info-panel {
-    background-color: rgba(255, 255, 255, 0.96);
-    border: 1px solid rgba(0, 0, 0, 0.10);
+    background-color: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .explore-window .preview-panel {
@@ -3350,8 +3349,8 @@ window.notepad-window,
 
 /* === explore/status_bar.css === */
 .explore-window .status-bar {
-    background-color: rgba(255, 255, 255, 0.25);
-    border-top: 1px solid #d0d0d0;
+    background-color: #F2F2F7;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
     color: #666;
 }
 
@@ -4394,28 +4393,37 @@ window.viewer-window,
 window.notepad-window,
 window.recorder-window,
 window.greeter-window {
-    background-color: rgb(247, 248, 251);
+    background-color: #F2F2F7;
     background-image: none;
     opacity: 1.0;
 }
 
 window.explore-window>box,
 .explore-window-box,
-.explore-window .content-view,
 window.viewer-window>box,
 .viewer-drawing-area,
 window.notepad-window>box,
 window.recorder-window>box {
-    background-color: rgb(247, 248, 251);
+    background-color: #F2F2F7;
     background-image: none;
     opacity: 1.0;
 }
 
-.explore-window .sidebar,
-.explore-window .info-panel,
+.explore-window .sidebar {
+    background-color: transparent;
+    border: none;
+    margin: 0;
+}
+
+.explore-window .content-view,
+.explore-window .info-panel {
+    background-color: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
 .explore-window .status-bar,
 .explore-window .tab-bar {
-    background-color: rgb(238, 239, 244);
+    background-color: #F2F2F7;
     background-image: none;
     opacity: 1.0;
 }

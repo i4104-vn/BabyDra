@@ -2,17 +2,17 @@
 .viewer-window,
 .notepad-window {
     background-image: none;
-    background-color: #18191f;
+    background-color: #121214;
     box-shadow: none;
-    border-radius: 0 0 12px 12px;
+    border-radius: 0 0 16px 16px;
     border-top: none;
     font-family: 'Quicksand', 'Segoe UI Variable Static Text', 'Segoe UI', 'Inter', system-ui, sans-serif;
 }
 
 .explore-window-box {
-    background-color: #18191f;
+    background-color: #121214;
     border: none;
-    border-radius: 0 0 12px 12px;
+    border-radius: 0 0 16px 16px;
     box-shadow: none;
     font-family: 'Quicksand', 'Segoe UI Variable Static Text', 'Segoe UI', 'Inter', system-ui, sans-serif;
     font-size: 12px;
