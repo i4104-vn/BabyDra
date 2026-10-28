@@ -3,19 +3,47 @@
 use babydra_core::i18n::trans;
 use babydra_ui_kit::components::create_switch_row;
 use gtk4::prelude::*;
-use gtk4::{Box, ListBox, ListBoxRow, Orientation};
+use gtk4::{Align, Box, Label, ListBox, ListBoxRow, Orientation, ScrolledWindow};
 
 /// Builds the general settings page, mounting various toggles for file exploration features.
-pub fn build_general_page() -> Box {
+pub fn build_general_page() -> ScrolledWindow {
     let settings = babydra_core::load_explore_cfg();
-    let tab_general = Box::new(Orientation::Vertical, 10);
-    tab_general.set_margin_top(8);
-    tab_general.set_margin_bottom(8);
+
+    let scroll = ScrolledWindow::builder()
+        .hscrollbar_policy(gtk4::PolicyType::Never)
+        .vscrollbar_policy(gtk4::PolicyType::Automatic)
+        .vexpand(true)
+        .hexpand(true)
+        .build();
+
+    let content_box = Box::new(Orientation::Vertical, 12);
+    content_box.set_margin_top(20);
+    content_box.set_margin_bottom(20);
+    content_box.set_margin_start(24);
+    content_box.set_margin_end(24);
+    content_box.set_vexpand(true);
+    content_box.set_hexpand(true);
+
+    // Page Header matching standard settings layout
+    let header_box = Box::new(Orientation::Vertical, 4);
+    header_box.set_margin_bottom(6);
+
+    let title_lbl = Label::new(Some(&trans("explore.settings_general")));
+    title_lbl.add_css_class("settings-page-title");
+    title_lbl.set_halign(Align::Start);
+    header_box.append(&title_lbl);
+
+    let subtitle_lbl = Label::new(Some(&trans("explore.settings_behavior")));
+    subtitle_lbl.add_css_class("settings-page-subtitle");
+    subtitle_lbl.set_halign(Align::Start);
+    header_box.append(&subtitle_lbl);
+
+    content_box.append(&header_box);
 
     let listbox = ListBox::new();
     listbox.set_selection_mode(gtk4::SelectionMode::None);
     listbox.add_css_class("settings-card");
-    tab_general.append(&listbox);
+    content_box.append(&listbox);
 
     let append_toggle = |list: &ListBox, icon: &str, title: &str, desc: &str, initial: bool, on_change: fn(bool)| {
         let row_widget = ListBoxRow::new();
@@ -98,5 +126,6 @@ pub fn build_general_page() -> Box {
         },
     );
 
-    tab_general
+    scroll.set_child(Some(&content_box));
+    scroll
 }

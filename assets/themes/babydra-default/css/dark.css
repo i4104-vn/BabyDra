@@ -3496,9 +3496,9 @@ button.suggested-action:active {
 
 window.explore-dialog,
 .explore-dialog {
-    background-color: rgba(12, 12, 20, 0.95);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    background-color: #121214;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.40);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-top: none;
     border-radius: 0 0 16px 16px;
 }
@@ -3711,8 +3711,8 @@ button.settings-pill.active-pill:hover {
 /* Dialog-specific card & sidebar colors (dark); base `.settings-card` lives in
    `apps/settings.css` — only override what the compact dialog needs. */
 .explore-dialog .sidebar {
-    background-color: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    background-color: transparent;
+    border: none;
 }
 
 .explore-dialog .sidebar-item {
@@ -3724,31 +3724,24 @@ button.settings-pill.active-pill:hover {
     color: rgba(255, 255, 255, 0.95);
 }
 
-.explore-dialog .sidebar-item.active-nav {
-    background-color: rgba(59, 130, 246, 0.15);
-    color: #60a5fa;
-    border: none;
+.explore-dialog .explore-dialog-content-card {
+    background-color: #1C1C1F;
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.explore-dialog .sidebar-item.active-nav:hover {
-    background-color: rgba(59, 130, 246, 0.22);
-    color: #93c5fd;
+.explore-dialog .settings-page-title {
+    color: #FFFFFF;
 }
 
-.explore-dialog .sidebar-item.active-nav label {
-    color: #60a5fa;
-}
-
-.explore-dialog .sidebar-item.active-nav:hover label {
-    color: #93c5fd;
+.explore-dialog .settings-page-subtitle {
+    color: rgba(255, 255, 255, 0.55);
 }
 
 .explore-dialog .settings-card {
-    background-color: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    border-top: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    box-shadow: none;
 }
 
 .explore-dialog .settings-card-row,

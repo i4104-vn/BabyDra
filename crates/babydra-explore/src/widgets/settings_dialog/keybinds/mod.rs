@@ -2,29 +2,49 @@ mod render;
 
 use babydra_core::i18n::trans;
 use gtk4::prelude::*;
-use gtk4::{Align, Box, Label, ListBox, ListBoxRow, Orientation};
+use gtk4::{Align, Box, Label, ListBox, ListBoxRow, Orientation, ScrolledWindow};
 use std::rc::Rc;
 
 /// Builds the keyboard shortcuts list page inside the Settings Dialog.
 pub fn build_keybinds_page(
     parent_win: &gtk4::Window,
     on_keybinds_changed: impl Fn() + 'static,
-) -> Box {
-    let page = Box::new(Orientation::Vertical, 10);
-    page.set_margin_top(8);
-    page.set_margin_bottom(8);
-
-    let scroll = gtk4::ScrolledWindow::builder()
+) -> ScrolledWindow {
+    let scroll = ScrolledWindow::builder()
         .hscrollbar_policy(gtk4::PolicyType::Never)
         .vscrollbar_policy(gtk4::PolicyType::Automatic)
         .vexpand(true)
+        .hexpand(true)
         .build();
-    page.append(&scroll);
+
+    let content_box = Box::new(Orientation::Vertical, 12);
+    content_box.set_margin_top(20);
+    content_box.set_margin_bottom(20);
+    content_box.set_margin_start(24);
+    content_box.set_margin_end(24);
+    content_box.set_vexpand(true);
+    content_box.set_hexpand(true);
+
+    // Header matching standard settings layout
+    let header_box = Box::new(Orientation::Vertical, 4);
+    header_box.set_margin_bottom(6);
+
+    let title_lbl = Label::new(Some(&trans("explore.settings_keybinds")));
+    title_lbl.add_css_class("settings-page-title");
+    title_lbl.set_halign(Align::Start);
+    header_box.append(&title_lbl);
+
+    let subtitle_lbl = Label::new(Some(&trans("explore.keybinds_title")));
+    subtitle_lbl.add_css_class("settings-page-subtitle");
+    subtitle_lbl.set_halign(Align::Start);
+    header_box.append(&subtitle_lbl);
+
+    content_box.append(&header_box);
 
     let listbox = ListBox::new();
     listbox.set_selection_mode(gtk4::SelectionMode::None);
     listbox.add_css_class("settings-card");
-    scroll.set_child(Some(&listbox));
+    content_box.append(&listbox);
 
     // Load settings to fetch the currently active shortcuts
     let settings = babydra_core::load_explore_cfg();
@@ -121,5 +141,6 @@ pub fn build_keybinds_page(
     add_keybind_row("plus", "new_tab", &trans("explore.shortcut_new_tab"));
     add_keybind_row("close", "close_tab", &trans("explore.shortcut_close_tab"));
 
-    page
+    scroll.set_child(Some(&content_box));
+    scroll
 }

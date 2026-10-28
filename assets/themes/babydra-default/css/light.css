@@ -3481,9 +3481,9 @@ button.suggested-action:active {
 
 window.explore-dialog,
 .explore-dialog {
-    background-color: #ffffff;
+    background-color: #F2F2F7;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e5e7eb;
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-top: none;
     border-radius: 0 0 16px 16px;
 }
@@ -3683,8 +3683,8 @@ button.settings-pill.active-pill:hover {
 /* Dialog-specific card & sidebar colors (light); base `.settings-card` lives in
    `apps/settings.css` — only override what the compact dialog needs. */
 .explore-dialog .sidebar {
-    background-color: rgba(255, 255, 255, 0.6);
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    background-color: transparent;
+    border: none;
 }
 
 .explore-dialog .sidebar-item {
@@ -3696,30 +3696,24 @@ button.settings-pill.active-pill:hover {
     color: #1c1c1e;
 }
 
-.explore-dialog .sidebar-item.active-nav {
-    background-color: rgba(59, 130, 246, 0.12);
-    color: #3b82f6;
-    border: none;
+.explore-dialog .explore-dialog-content-card {
+    background-color: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-.explore-dialog .sidebar-item.active-nav:hover {
-    background-color: rgba(59, 130, 246, 0.18);
-    color: #2563eb;
+.explore-dialog .settings-page-title {
+    color: #111827;
 }
 
-.explore-dialog .sidebar-item.active-nav label {
-    color: #3b82f6;
-}
-
-.explore-dialog .sidebar-item.active-nav:hover label {
-    color: #2563eb;
+.explore-dialog .settings-page-subtitle {
+    color: rgba(0, 0, 0, 0.55);
 }
 
 .explore-dialog .settings-card {
-    background-color: #ffffff;
+    background-color: #F8F9FA;
     border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    border-radius: 12px;
+    box-shadow: none;
 }
 
 .explore-dialog .settings-card-row,

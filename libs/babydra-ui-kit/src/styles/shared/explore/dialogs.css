@@ -193,32 +193,44 @@ button.settings-pill.active-pill:hover {
 /* `.settings-card` is owned by `apps/settings.css`; dialogs are more
    compact, so scope the tighter padding/radius under the dialog root. */
 .explore-dialog .sidebar {
-    border-radius: 14px;
-    margin: 8px 4px 8px 8px;
-    min-width: 190px;
+    min-width: 68px;
+    width: 68px;
+    background-color: transparent;
+    border: none;
     box-shadow: none;
+    margin: 0;
+    padding: 0;
 }
 
 .explore-dialog .sidebar-item {
     border: none;
-    border-radius: 10px;
-    padding: 8px 12px;
-    font-size: 13px;
-    font-weight: 600;
-    margin: 2px 6px;
+    border-radius: 12px;
     transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.explore-dialog .sidebar-item label {
-    font-weight: 600;
-    font-size: 13px;
+.explore-dialog .explore-dialog-content-card {
+    border-radius: 14px;
+    box-shadow: none;
+    overflow: hidden;
 }
 
-.explore-dialog stack scrolledwindow,
-.explore-dialog overlay scrolledwindow {
+.explore-dialog .explore-dialog-content-card stack,
+.explore-dialog .explore-dialog-content-card stack scrolledwindow,
+.explore-dialog .explore-dialog-content-card overlay,
+.explore-dialog .explore-dialog-content-card overlay scrolledwindow {
     background-color: transparent;
     border: none;
     box-shadow: none;
+}
+
+.explore-dialog .settings-page-title {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.explore-dialog .settings-page-subtitle {
+    font-size: 13px;
+    font-weight: 400;
 }
 
 .settings-custom-item-row {
