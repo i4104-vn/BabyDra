@@ -151,10 +151,10 @@ window.explore-dialog,
 /* ── 6. Form Inputs & Text Fields ── */
 .modern-dialog-entry,
 .explore-dialog entry {
-    min-height: 42px;
-    border-radius: 12px;
-    padding: 0 14px;
-    font-size: 14px;
+    min-height: 28px;
+    border-radius: 8px;
+    padding: 3px 10px;
+    font-size: 13px;
     border: 1px solid rgba(255, 255, 255, 0.12);
     background-color: rgba(255, 255, 255, 0.05);
     color: #ffffff;
@@ -162,6 +162,21 @@ window.explore-dialog,
     outline: none;
     box-shadow: none;
     transition: all 180ms ease;
+}
+
+.modern-dialog-entry>text,
+.explore-dialog entry>text {
+    padding: 2px 2px;
+    min-height: 18px;
+}
+
+.modern-modal-card dropdown>button,
+.modern-dialog dropdown>button,
+.vpn-type-dropdown>button {
+    min-height: 28px;
+    padding: 3px 10px;
+    font-size: 12px;
+    border-radius: 8px;
 }
 
 .modern-dialog-entry:focus,

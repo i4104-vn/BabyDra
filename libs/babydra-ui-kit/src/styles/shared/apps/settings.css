@@ -1,10 +1,11 @@
 window.settings-window {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-image: none;
     border-radius: 0 0 16px 16px;
 }
 
 window.settings-window>overlay>box {
-    background-color: #18191f;
+    background-color: transparent;
 }
 
 .profile-avatar {
@@ -16,47 +17,88 @@ window.settings-window>overlay>box {
     font-weight: 700;
 }
 
-.profile-separator {
-    margin: 4px 8px 8px 8px;
+.sidebar {
+    min-width: 68px;
+    width: 68px;
 }
 
-/* Sidebar Header Navigation Button */
+.profile-separator {
+    min-width: 28px;
+    width: 28px;
+    margin: 4px auto 6px auto;
+}
+
+.sidebar-nav-separator {
+    min-width: 28px;
+    width: 28px;
+    margin: 6px auto;
+}
+
+/* Sidebar Header Navigation Button (Logo) */
 button.sidebar-header-btn {
     background: transparent;
     background-color: transparent;
     border: none;
     box-shadow: none;
     border-radius: 12px;
-    padding: 6px;
-    margin: 4px 6px 2px 6px;
+    padding: 0;
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+    margin: 2px auto;
     transition: background-color 150ms ease;
 }
 
-button.sidebar-header-btn label {
-    font-weight: 700;
+/* Sidebar Dock Icon Buttons */
+button.sidebar-icon-btn {
+    background: transparent;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 12px;
+    padding: 0;
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+    margin: 2px auto;
+    transition: background-color 150ms ease, box-shadow 150ms ease;
 }
 
-button.sidebar-header-btn:hover {
-    background-color: rgba(255, 255, 255, 0.06);
+/* Popover Tooltip for Sidebar Dock */
+popover.sidebar-item-popover {
+    background: transparent;
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
 }
 
-button.sidebar-header-btn.active-nav {
-    background-color: rgba(255, 255, 255, 0.12);
+popover.sidebar-item-popover>contents {
+    border-radius: 8px;
+    padding: 6px 12px;
+    min-height: 20px;
+}
+
+.sidebar-item-popover-label {
+    font-size: 13px;
+    font-weight: 500;
 }
 
 entry.sidebar-search-entry {
-    border-radius: 10px;
-    font-size: 14px;
+    border-radius: 8px;
+    font-size: 13px;
     padding: 0;
-    min-height: 32px;
+    min-height: 28px;
 }
 
 entry.sidebar-search-entry>text {
     background-color: transparent;
     border: none;
     box-shadow: none;
-    padding: 6px 12px;
-    border-radius: 10px;
+    padding: 3px 10px;
+    border-radius: 8px;
+    min-height: 18px;
 }
 
 /* Shortcut combo picker button (Keybinds page) — matches the row entries */
@@ -101,9 +143,22 @@ button.shortcut-combo-btn {
 }
 
 
+.settings-content-card {
+    border-radius: 20px;
+    overflow: hidden;
+}
+
 .settings-content {
     background-color: transparent;
-    padding: 28px 36px;
+    padding: 24px 30px;
+}
+
+.settings-content scrolledwindow,
+.settings-content viewport,
+.settings-content-card scrolledwindow,
+.settings-content-card viewport {
+    background: transparent;
+    background-color: transparent;
 }
 
 .settings-breadcrumb-parent {
@@ -118,7 +173,7 @@ button.shortcut-combo-btn {
 
 .settings-breadcrumb-current {
     font-size: 24px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .settings-group-header-title {
@@ -134,20 +189,20 @@ button.shortcut-combo-btn {
 
 .settings-section-title {
     font-size: 16px;
-    font-weight: 700;
-    margin-top: 20px;
-    margin-bottom: 10px;
-    letter-spacing: 0.6px;
+    font-weight: 600;
+    margin-top: 16px;
+    margin-bottom: 8px;
+    letter-spacing: 0.2px;
 }
 
 .settings-row-title {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 500;
     letter-spacing: 0.01em;
 }
 
 .settings-row-desc {
-    font-size: 12px;
+    font-size: 13px;
 }
 
 /* ── Component token classes (shared structure; colors live in theme layer) ── */
@@ -156,7 +211,7 @@ button.shortcut-combo-btn {
 }
 
 .settings-desc {
-    font-size: 12px;
+    font-size: 13px;
     opacity: 0.75;
 }
 
@@ -166,12 +221,12 @@ button.shortcut-combo-btn {
 }
 
 .settings-subtitle {
-    font-size: 16px;
+    font-size: 14px;
     opacity: 0.7;
 }
 
 .settings-label {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 500;
 }
 
@@ -188,6 +243,86 @@ button.shortcut-combo-btn {
 .settings-card {
     border-radius: 14px;
     padding: 12px;
+}
+
+/* Card Flow Grid (VPN, CA Cert, Displays) */
+flowbox.settings-card-flow {
+    background: transparent;
+    border: none;
+    padding: 2px 4px;
+}
+
+flowbox.settings-card-flow > flowboxchild {
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+}
+
+flowbox.settings-card-flow > flowboxchild:selected,
+flowbox.settings-card-flow > flowboxchild:focus,
+flowbox.settings-card-flow > flowboxchild:hover {
+    background: transparent;
+    outline: none;
+    box-shadow: none;
+}
+
+/* Smart Device Cards (VPN, CA Cert, Displays) */
+.device-card {
+    border-radius: 18px;
+    padding: 16px 18px;
+    transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.device-card-title {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+}
+
+.device-card-subtitle {
+    font-size: 12px;
+    font-weight: 400;
+    opacity: 0.65;
+}
+
+.device-card-status-on {
+    font-size: 11px;
+    font-weight: 600;
+    color: #34C759;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    background: rgba(52, 199, 89, 0.14);
+}
+
+.device-card-status-off {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 9999px;
+}
+
+.display-grid-card {
+    padding: 18px 20px;
+}
+
+.display-grid-card .display-prop-label {
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0.75;
+}
+
+.display-grid-card dropdown>button {
+    min-width: 150px;
+    font-size: 12px;
+}
+
+.settings-card-separator {
+    opacity: 0.12;
+    margin-top: 4px;
+    margin-bottom: 4px;
 }
 
 /* Custom Full Loading Card */
@@ -323,8 +458,12 @@ button.wallpaper-pick-overlay-vertical-btn,
 button.wallpaper-pick-overlay-inside-btn,
 button.wallpaper-action-btn {
     border-radius: 9999px;
+    width: 38px;
+    height: 38px;
     min-width: 38px;
     min-height: 38px;
+    max-width: 38px;
+    max-height: 38px;
     padding: 0;
     box-shadow: none;
     transition: all 200ms ease;
@@ -406,10 +545,43 @@ dropdown {
 
 dropdown>button {
     background-image: none;
-    border-radius: 10px;
-    padding: 6px 14px;
+    border-radius: 8px;
+    padding: 3px 10px;
+    min-height: 28px;
     box-shadow: none;
     transition: background-color 200ms ease, border-color 200ms ease;
+}
+
+.settings-window dropdown,
+.settings-window .settings-dropdown {
+    min-width: 140px;
+}
+
+.settings-window dropdown>button,
+.settings-window .settings-dropdown>button {
+    border-radius: 8px;
+    padding: 3px 10px;
+    min-height: 28px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* Settings Unified Text Inputs (Forms & Controls) */
+.settings-window entry,
+.settings-window passwordentry,
+.settings-window .settings-entry {
+    border-radius: 8px;
+    padding: 3px 10px;
+    min-height: 28px;
+    font-size: 12px;
+    box-shadow: none;
+    transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.settings-window entry>text,
+.settings-window passwordentry>text {
+    padding: 2px 2px;
+    min-height: 18px;
 }
 
 .os-logo {
@@ -680,6 +852,18 @@ progressbar.battery-level-bar progress {
     text-transform: uppercase;
 }
 
+.wifi-lock-emblem {
+    background-color: rgba(24, 24, 27, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 9999px;
+    min-width: 14px;
+    min-height: 14px;
+    padding: 1px;
+    margin-end: -2px;
+    margin-bottom: -2px;
+    color: #e2e8f0;
+}
+
 .wifi-info-btn {
     background: transparent;
     border: none;
@@ -740,11 +924,18 @@ progressbar.battery-level-bar progress {
 
 .settings-page-title {
     font-size: 24px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .settings-page-subtitle {
-    font-size: 12px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Category Tab Bar & Capsule Bar - matching Image 5 */
+.settings-tab-bar {
+    border-radius: 9999px;
+    padding: 4px;
 }
 
 button.app-tab-btn {
@@ -752,11 +943,14 @@ button.app-tab-btn {
     border: none;
     font-size: 14px;
     font-weight: 500;
-    padding: 4px 12px;
+    padding: 6px 18px;
+    border-radius: 9999px;
+    transition: all 150ms ease;
 }
 
 button.app-tab-btn.active {
-    font-weight: 700;
+    font-weight: 600;
+    border-radius: 9999px;
 }
 
 .global-loading-blocker {

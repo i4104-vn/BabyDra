@@ -25,11 +25,16 @@ pub fn create_wifi_row(
     hbox.set_margin_start(8);
     hbox.set_margin_end(8);
 
-    // Left icon badge with Wi-Fi signal
+    // Left icon badge with Wi-Fi signal & security lock emblem
+    let badge_overlay = gtk4::Overlay::new();
+    badge_overlay.set_valign(gtk4::Align::Center);
+    badge_overlay.set_halign(gtk4::Align::Start);
+    badge_overlay.set_hexpand(false);
+
     let icon_badge = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     icon_badge.add_css_class("blue-icon-badge-sm");
     icon_badge.set_valign(gtk4::Align::Center);
-    icon_badge.set_halign(gtk4::Align::Start);
+    icon_badge.set_halign(gtk4::Align::Center);
     icon_badge.set_hexpand(false);
 
     let wifi_icon = babydra_ui_kit::components::create_wifi_net_icon(
@@ -42,6 +47,25 @@ pub fn create_wifi_row(
     wifi_icon.set_halign(gtk4::Align::Center);
     wifi_icon.set_vexpand(true);
     icon_badge.append(&wifi_icon);
+    badge_overlay.set_child(Some(&icon_badge));
+
+    // Security lock emblem positioned at bottom-right corner of Wi-Fi icon
+    if net.security != "open" {
+        let lock_emblem = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+        lock_emblem.add_css_class("wifi-lock-emblem");
+        lock_emblem.set_valign(gtk4::Align::End);
+        lock_emblem.set_halign(gtk4::Align::End);
+
+        let lock_icon = babydra_ui_kit::ui::icon::get_icon("lock", 10);
+        lock_icon.set_pixel_size(10);
+        lock_icon.set_valign(gtk4::Align::Center);
+        lock_icon.set_halign(gtk4::Align::Center);
+        lock_emblem.append(&lock_icon);
+        lock_emblem.set_tooltip_text(Some(&net.security.to_uppercase()));
+
+        badge_overlay.add_overlay(&lock_emblem);
+        badge_overlay.set_clip_overlay(&lock_emblem, false);
+    }
 
     // Text details (SSID & subtitle info)
     let text_col = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
@@ -76,19 +100,9 @@ pub fn create_wifi_row(
     let click_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 14);
     click_box.set_hexpand(true);
     click_box.set_cursor_from_name(Some("pointer"));
-    click_box.append(&icon_badge);
+    click_box.append(&badge_overlay);
     click_box.append(&text_col);
     hbox.append(&click_box);
-
-    // Security lock icon if protected
-    if net.security != "open" {
-        let lock_icon = babydra_ui_kit::ui::icon::get_icon("lock", 14);
-        lock_icon.set_pixel_size(14);
-        lock_icon.add_css_class("settings-row-desc");
-        lock_icon.set_valign(gtk4::Align::Center);
-        lock_icon.set_tooltip_text(Some(&net.security.to_uppercase()));
-        hbox.append(&lock_icon);
-    }
 
     // Status indicator (loading spinner if connecting)
     if is_connecting_this {

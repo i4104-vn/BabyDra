@@ -33,12 +33,12 @@ pub use context_menu::{
     create_menu_popover, create_menu_sens, create_menu_sep, create_menu_shortcut, create_menu_text,
     create_submenu_item, show_tray_menu, ContextMenuBuilder,
 };
-pub use list_group::{clear_box, clear_list_box, create_list_row};
+pub use list_group::{clear_box, clear_flow_box, clear_list_box, create_list_row};
 pub use modals::{
     ChangeHostnameDialog, ChangeNameDialog, ChangePasswordDialog, PasswordDialog, VpnConfigDialog,
     VpnLogDialog, WifiConfigDialog, WifiInfoDialog, WifiPasswordDialog,
 };
-pub use placeholder::{create_placeholder, PlaceholderState};
+pub use placeholder::{create_placeholder, create_placeholder_box, PlaceholderState};
 pub use popovers::{create_popover, TooltipPopover, TooltipRow};
 pub use slider::{bind_debounced_slider, CustomSlider, PillSlider};
 pub use switch::{create_switch, CustomSwitch, ToggleRow};
