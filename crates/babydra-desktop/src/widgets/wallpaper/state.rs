@@ -26,6 +26,7 @@ pub struct WallpaperState {
     pub active_start_time: Rc<Cell<Option<i64>>>,
     pub ripple_origin: Rc<Cell<(f64, f64)>>,
     pub pending_live_play: Rc<RefCell<Option<PendingLivePlay>>>,
+    pub active_tick_id: Rc<RefCell<Option<gtk4::TickCallbackId>>>,
 }
 
 impl WallpaperState {
@@ -44,10 +45,11 @@ impl WallpaperState {
             active_start_time: Rc::new(Cell::new(None)),
             ripple_origin: Rc::new(Cell::new((1.0, 0.0))),
             pending_live_play: Rc::new(RefCell::new(None)),
+            active_tick_id: Rc::new(RefCell::new(None)),
         }
     }
 
-    /// Stops any active live video or GIF playback safely.
+    /// Stops any active live video or GIF playback safely and releases pipeline resources.
     pub fn stop_active_media(&self) {
         if let Some(id) = self.gif_source_id.borrow_mut().take() {
             id.remove();
@@ -56,10 +58,19 @@ impl WallpaperState {
             id.remove();
         }
         if let Some(mf) = self.active_media_file.borrow_mut().take() {
-            super::player::safely_pause_media_file(&mf);
+            super::player::safely_stop_media_file(&mf);
         }
         if let Some((_, _, Some(mf))) = self.pending_live_play.borrow_mut().take() {
-            super::player::safely_pause_media_file(&mf);
+            super::player::safely_stop_media_file(&mf);
         }
+    }
+
+    /// Cancels any active transition animation tick callback on drawing_area.
+    pub fn cancel_animation(&self) {
+        if let Some(id) = self.active_tick_id.borrow_mut().take() {
+            id.remove();
+        }
+        self.is_animating.set(false);
+        self.active_start_time.set(None);
     }
 }

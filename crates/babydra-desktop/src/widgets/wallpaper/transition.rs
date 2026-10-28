@@ -3,9 +3,7 @@
 use super::animation::{pick_random_ripple_origin, TRANSITION_DURATION_US};
 use super::player::{prepare_live_video, start_live_media};
 use super::state::WallpaperState;
-use super::surface::{
-    capture_live_picture_surface, get_monitor_res, load_and_prescale, load_first_frame_surface,
-};
+use super::surface::{get_monitor_res, load_and_prescale, load_first_frame_surface};
 use gtk4::prelude::*;
 use std::rc::Rc;
 
@@ -49,29 +47,30 @@ fn execute_transition(
     new_mode: babydra_core::wallpaper::WallpaperMode,
 ) {
     let prev_path = state.current_wp_path.borrow().clone();
-    let prev_mode = *state.current_wp_mode.borrow();
+    let _prev_mode = *state.current_wp_mode.borrow();
     *state.current_wp_mode.borrow_mut() = new_mode;
 
     let (mon_w, mon_h) = get_monitor_res(da);
 
-    // 1. Determine the previous visible surface (old_surface) for the transition effect
-    let prev_surf = if prev_mode == babydra_core::wallpaper::WallpaperMode::Live {
-        capture_live_picture_surface(live_pic)
-            .or_else(|| {
-                prev_path
-                    .as_ref()
-                    .and_then(|p| load_first_frame_surface(p, mon_w, mon_h))
-            })
-            .or_else(|| state.current_surface.borrow().clone())
-    } else {
-        state.current_surface.borrow().clone()
-    };
+    // 1. Determine the previous visible surface (old_surface) for the transition effect.
+    // Use the already cached/pre-scaled Cairo surface directly without querying the GPU texture,
+    // which avoids hardware DMA-BUF/OpenGL driver crashes and GStreamer deadlocks.
+    let prev_surf = state
+        .current_surface
+        .borrow()
+        .clone()
+        .or_else(|| {
+            prev_path
+                .as_ref()
+                .and_then(|p| load_first_frame_surface(p, mon_w, mon_h))
+        });
 
     // 2. Stop and clear any active live playback
     state.stop_active_media();
     live_pic.set_paintable(None::<&gtk4::gdk::Paintable>);
     live_pic.set_visible(false);
     da.set_visible(true);
+    da.queue_draw();
 
     // 3. Pick a random origin for the expanding circular water-drop ripple
     state.ripple_origin.set(pick_random_ripple_origin());
@@ -114,7 +113,8 @@ fn execute_transition(
         } else {
             // Static wallpaper target
             *state.pending_live_play.borrow_mut() = None;
-            if let Some(new_surf) = load_and_prescale(path, mon_w, mon_h) {
+            let target_surf = load_and_prescale(path, mon_w, mon_h);
+            if let Some(new_surf) = target_surf {
                 *state.current_surface.borrow_mut() = Some(new_surf);
 
                 if let Some(prev) = prev_surf {
@@ -124,6 +124,10 @@ fn execute_transition(
                     state.transition_progress.set(1.0);
                     da.queue_draw();
                 }
+            } else {
+                tracing::warn!("Failed to load static wallpaper image: {:?}", path);
+                state.transition_progress.set(1.0);
+                da.queue_draw();
             }
         }
     } else {
@@ -131,6 +135,7 @@ fn execute_transition(
         *state.current_surface.borrow_mut() = None;
         *state.current_wp_path.borrow_mut() = None;
         *state.pending_live_play.borrow_mut() = None;
+        state.cancel_animation();
         state.transition_progress.set(1.0);
         da.queue_draw();
     }
@@ -142,19 +147,16 @@ fn start_transition_animation(
     live_pic: &gtk4::Picture,
     state: &WallpaperState,
 ) {
+    state.cancel_animation();
     state.transition_progress.set(0.0);
     state.active_start_time.set(None);
-
-    if state.is_animating.get() {
-        return;
-    }
     state.is_animating.set(true);
 
     let da_tick = da.clone();
     let live_pic_tick = live_pic.clone();
     let state_tick = state.clone();
 
-    da.add_tick_callback(move |_, clock| {
+    let tick_id = da.add_tick_callback(move |_, clock| {
         if state_tick.is_frozen.get() {
             return glib::ControlFlow::Continue;
         }
@@ -173,6 +175,7 @@ fn start_transition_animation(
         if progress >= 1.0 {
             *state_tick.old_surface.borrow_mut() = None;
             state_tick.is_animating.set(false);
+            *state_tick.active_tick_id.borrow_mut() = None;
 
             // After ripple completes: seamlessly start live video/GIF playback
             if let Some((live_path, live_mode, pre_rolled_mf)) =
@@ -196,4 +199,7 @@ fn start_transition_animation(
             glib::ControlFlow::Continue
         }
     });
+
+    *state.active_tick_id.borrow_mut() = Some(tick_id);
+    da.queue_draw();
 }

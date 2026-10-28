@@ -35,6 +35,15 @@ pub fn safely_pause_media_file(mf: &gtk4::MediaFile) {
     }
 }
 
+/// Helper function to safely stop and release a MediaFile and its GStreamer pipeline.
+pub fn safely_stop_media_file(mf: &gtk4::MediaFile) {
+    if mf.is_playing() {
+        mf.pause();
+    }
+    mf.clear();
+}
+
+
 /// Attaches error handling and self-healing recovery to a MediaFile instance.
 fn attach_error_handler(
     mf: &gtk4::MediaFile,
@@ -59,10 +68,10 @@ fn attach_error_handler(
             tracing::warn!("Live wallpaper playback error: {}", err);
 
             // 1. Immediately pause and release the failed pipeline to free resources
-            safely_pause_media_file(f);
+            safely_stop_media_file(f);
             if let Some(active) = active_mf_err.borrow_mut().take() {
                 if active != *f {
-                    safely_pause_media_file(&active);
+                    safely_stop_media_file(&active);
                 }
             }
 
@@ -213,9 +222,7 @@ fn start_live_media_internal(
                 live_pic.set_visible(true);
                 mf.play();
 
-                // Keep da visible until the first frame is actually decoded and painted by GStreamer.
-                // This completely eliminates any black screen flash during pipeline startup.
-                let da_hide = da.clone();
+                // When the first frame is decoded and painted, reset error counter
                 let first_frame_rendered = Rc::new(Cell::new(false));
                 let first_frame_c = first_frame_rendered.clone();
                 let err_cnt_reset = consecutive_errors.clone();
@@ -223,7 +230,6 @@ fn start_live_media_internal(
                     if !first_frame_c.get() {
                         first_frame_c.set(true);
                         err_cnt_reset.set(0); // Successfully playing: reset error counter
-                        da_hide.set_visible(false);
                     }
                 });
 
@@ -282,7 +288,6 @@ fn start_live_media_internal(
                     if let Ok(texture) = gtk4::gdk::Texture::from_file(&file) {
                         live_pic.set_paintable(Some(&texture));
                         live_pic.set_visible(true);
-                        da.set_visible(false);
                     }
                 } else {
                     let iter = anim.iter(None);
@@ -290,7 +295,6 @@ fn start_live_media_internal(
                     let texture = gtk4::gdk::Texture::for_pixbuf(&pixbuf);
                     live_pic.set_paintable(Some(&texture));
                     live_pic.set_visible(true);
-                    da.set_visible(false);
 
                     let pic_inner = live_pic.clone();
                     let frozen_gif = is_frozen.clone();
@@ -355,7 +359,7 @@ fn recycle_live_video(
 
             // Safely stop and drop the old media pipeline
             if let Some(old_mf) = old_mf_opt.as_ref() {
-                safely_pause_media_file(old_mf);
+                safely_stop_media_file(old_mf);
             }
             tracing::debug!("Seamless live wallpaper pipeline recycle successful");
         }
