@@ -23,6 +23,7 @@ pub struct SidebarItemArgs<'a> {
     pub is_reorderable: bool,
     pub current_drag_id: &'a Rc<RefCell<Option<String>>>,
     pub mount: Option<gio::Mount>,
+    pub all_drop_bars: &'a Rc<RefCell<Vec<gtk4::Box>>>,
 }
 
 pub fn add_sidebar_item(args: SidebarItemArgs<'_>) {
@@ -40,6 +41,7 @@ pub fn add_sidebar_item(args: SidebarItemArgs<'_>) {
         is_reorderable,
         current_drag_id,
         mount,
+        all_drop_bars,
     } = args;
 
     let nav_cb = nav_callback.clone();
@@ -85,6 +87,19 @@ pub fn add_sidebar_item(args: SidebarItemArgs<'_>) {
     );
     btn.add_controller(drop_target);
 
+    // Wrapper container for button and indicator bar underneath
+    let item_wrap = Box::new(gtk4::Orientation::Vertical, 0);
+    item_wrap.set_halign(gtk4::Align::Center);
+    item_wrap.append(&btn);
+
+    let drop_bar = Box::new(gtk4::Orientation::Horizontal, 0);
+    drop_bar.add_css_class("sidebar-drop-indicator-bar");
+    drop_bar.set_halign(gtk4::Align::Center);
+    drop_bar.set_visible(false);
+    item_wrap.append(&drop_bar);
+
+    all_drop_bars.borrow_mut().push(drop_bar.clone());
+
     // 2. Drag & Drop reordering (for upper places & bookmarks)
     if is_reorderable {
         let drag_source = gtk4::DragSource::new();
@@ -101,43 +116,43 @@ pub fn add_sidebar_item(args: SidebarItemArgs<'_>) {
         });
 
         let cur_drag_end = current_drag_id.clone();
-        let all_btns_drag = all_buttons.clone();
+        let all_bars_drag = all_drop_bars.clone();
         drag_source.connect_drag_end(move |_, _, _| {
             cur_drag_end.replace(None);
-            for (_, b) in all_btns_drag.borrow().iter() {
-                b.remove_css_class("drop-indicator-bottom");
+            for bar in all_bars_drag.borrow().iter() {
+                bar.set_visible(false);
             }
         });
 
         btn.add_controller(drag_source);
 
-        // Drop target: sidebar item reorder with visual horizontal line indicator
+        // Drop target: sidebar item reorder with visual horizontal line indicator below icon
         let reorder_drop = gtk4::DropTarget::new(String::static_type(), gtk4::gdk::DragAction::MOVE);
         let target_id = item_id.clone();
         let rebuild_cb_c = rebuild_cb.clone();
         let cur_drag_enter = current_drag_id.clone();
-        let btn_enter = btn.clone();
         let target_id_enter = target_id.clone();
+        let drop_bar_enter = drop_bar.clone();
 
         reorder_drop.connect_enter(move |_, _, _| {
             if let Some(ref src_id) = *cur_drag_enter.borrow() {
                 if src_id != &target_id_enter {
-                    btn_enter.add_css_class("drop-indicator-bottom");
+                    drop_bar_enter.set_visible(true);
                     return gtk4::gdk::DragAction::MOVE;
                 }
             }
             gtk4::gdk::DragAction::empty()
         });
 
-        let btn_leave = btn.clone();
+        let drop_bar_leave = drop_bar.clone();
         reorder_drop.connect_leave(move |_| {
-            btn_leave.remove_css_class("drop-indicator-bottom");
+            drop_bar_leave.set_visible(false);
         });
 
-        let btn_drop = btn.clone();
+        let drop_bar_drop = drop_bar.clone();
         let cur_drag_drop = current_drag_id.clone();
         reorder_drop.connect_drop(move |_, value, _, _| {
-            btn_drop.remove_css_class("drop-indicator-bottom");
+            drop_bar_drop.set_visible(false);
             cur_drag_drop.replace(None);
 
             if let Ok(source_id) = value.get::<String>() {
@@ -162,7 +177,7 @@ pub fn add_sidebar_item(args: SidebarItemArgs<'_>) {
             }
             false
         });
-        btn.add_controller(reorder_drop);
+        item_wrap.add_controller(reorder_drop);
     }
 
     // 3. Right click for removable device (Unmount / Eject)
@@ -235,6 +250,6 @@ pub fn add_sidebar_item(args: SidebarItemArgs<'_>) {
         btn.add_controller(right_click);
     }
 
-    container.append(&btn);
+    container.append(&item_wrap);
 }
 

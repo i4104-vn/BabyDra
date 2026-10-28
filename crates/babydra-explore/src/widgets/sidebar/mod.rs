@@ -75,28 +75,37 @@ pub fn create_sidebar(
     let rebuild_sidebar: CallbackCell = Rc::new(RefCell::new(None));
     let rebuild_sidebar_c = rebuild_sidebar.clone();
 
+    let all_drop_bars: Rc<RefCell<Vec<gtk4::Box>>> = Rc::new(RefCell::new(Vec::new()));
+    let all_drop_bars_c = all_drop_bars.clone();
+
+    // Top Header indicator bar
+    let top_drop_bar = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    top_drop_bar.add_css_class("sidebar-drop-indicator-bar");
+    top_drop_bar.set_halign(gtk4::Align::Center);
+    top_drop_bar.set_visible(false);
+
     // Top Header drop target: moving an item to the very top (index 0)
     let top_drop = gtk4::DropTarget::new(String::static_type(), gtk4::gdk::DragAction::MOVE);
     let cur_drag_top = current_drag_id.clone();
-    let logo_btn_enter = logo_btn.clone();
+    let top_bar_enter = top_drop_bar.clone();
     top_drop.connect_enter(move |_, _, _| {
         if cur_drag_top.borrow().is_some() {
-            logo_btn_enter.add_css_class("drop-indicator-bottom");
+            top_bar_enter.set_visible(true);
             return gtk4::gdk::DragAction::MOVE;
         }
         gtk4::gdk::DragAction::empty()
     });
 
-    let logo_btn_leave = logo_btn.clone();
+    let top_bar_leave = top_drop_bar.clone();
     top_drop.connect_leave(move |_| {
-        logo_btn_leave.remove_css_class("drop-indicator-bottom");
+        top_bar_leave.set_visible(false);
     });
 
-    let logo_btn_drop = logo_btn.clone();
+    let top_bar_drop = top_drop_bar.clone();
     let cur_drag_top_drop = current_drag_id.clone();
     let rebuild_top = rebuild_sidebar.clone();
     top_drop.connect_drop(move |_, value, _, _| {
-        logo_btn_drop.remove_css_class("drop-indicator-bottom");
+        top_bar_drop.set_visible(false);
         cur_drag_top_drop.replace(None);
 
         if let Ok(source_id) = value.get::<String>() {
@@ -121,10 +130,12 @@ pub fn create_sidebar(
     let top_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     top_box.set_halign(gtk4::Align::Center);
     top_box.append(&logo_btn);
+    top_box.append(&top_drop_bar);
     top_box.append(&profile_sep);
     sidebar_box.prepend(&top_box);
 
     let current_drag_id_c = current_drag_id.clone();
+    let top_drop_bar_c = top_drop_bar.clone();
 
     let rebuild_fn = move || {
         while let Some(child) = nav_container_c.first_child() {
@@ -134,6 +145,8 @@ pub fn create_sidebar(
             footer_box_c.remove(&child);
         }
         all_buttons.borrow_mut().clear();
+        all_drop_bars_c.borrow_mut().clear();
+        all_drop_bars_c.borrow_mut().push(top_drop_bar_c.clone());
 
         let items = babydra_core::config::sidebar_layout::load_sidebar_layout();
         let mut has_sep = false;
@@ -171,6 +184,7 @@ pub fn create_sidebar(
                 is_reorderable: true,
                 current_drag_id: &current_drag_id_c,
                 mount: None,
+                all_drop_bars: &all_drop_bars_c,
             });
         }
 
@@ -211,6 +225,7 @@ pub fn create_sidebar(
             is_reorderable: false,
             current_drag_id: &current_drag_id_c,
             mount: None,
+            all_drop_bars: &all_drop_bars_c,
         });
 
         // Removable devices (USB flash drives, external storage)
@@ -230,6 +245,7 @@ pub fn create_sidebar(
                 is_reorderable: false,
                 current_drag_id: &current_drag_id_c,
                 mount: dev.mount,
+                all_drop_bars: &all_drop_bars_c,
             });
         }
 
@@ -269,6 +285,7 @@ pub fn create_sidebar(
             is_reorderable: false,
             current_drag_id: &current_drag_id_c,
             mount: None,
+            all_drop_bars: &all_drop_bars_c,
         });
     };
 
