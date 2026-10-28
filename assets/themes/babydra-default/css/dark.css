@@ -1757,216 +1757,428 @@ popover.video-speed-popover > contents {
 
 /* === apps/settings.css === */
 window.settings-window {
-    background-color: rgba(12, 12, 20, 0.95);
-    color: rgba(255, 255, 255, 0.95);
+    background-color: #121214;
+    color: #F5F7FA;
     box-shadow: none;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+window.settings-window>overlay>box {
+    background-color: #121214;
 }
 
 .settings-surface-tint {
-    background-color: rgba(255, 255, 255, 0.025);
-    border: 1px solid rgba(255, 255, 255, 0.035);
+    background-color: transparent;
+    border: none;
 }
 
 /* Sidebar navigation */
+.sidebar,
+window.settings-window .sidebar {
+    background-color: transparent;
+    border: none;
+    margin: 0;
+}
+
 .profile-avatar {
-    background-color: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    background-color: #1C1C1E;
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .profile-user-name {
-    color: rgba(255, 255, 255, 0.95);
+    color: #FFFFFF;
+    font-size: 15px;
+    font-weight: 700;
 }
 
-.profile-separator {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+.profile-separator,
+.sidebar-nav-separator {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin: 6px auto;
+}
+
+button.sidebar-header-btn {
+    border-radius: 12px;
+    padding: 0;
+    margin: 2px auto;
+    background-color: transparent;
+    color: #FFFFFF;
+    transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+
+button.sidebar-header-btn:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+button.sidebar-header-btn.active-nav {
+    background-color: #242428;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.sidebar-section-label {
+    color: #707076;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 12px 14px 4px 14px;
+}
+
+button.sidebar-icon-btn,
+button.sidebar-item {
+    background-color: transparent;
+    color: #8E8E93;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 0;
+    margin: 2px auto;
+    transition: background-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+
+button.sidebar-icon-btn label,
+button.sidebar-item label {
+    font-weight: 500;
+    color: #8E8E93;
+}
+
+button.sidebar-icon-btn:hover,
+button.sidebar-item:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #FFFFFF;
+}
+
+button.sidebar-icon-btn:hover label,
+button.sidebar-item:hover label {
+    color: #FFFFFF;
+}
+
+/* Active navigation item - Smooth dark-grey capsule matching reference image */
+button.sidebar-icon-btn.active-nav,
+button.sidebar-item.active-nav,
+.sidebar-item.active-nav,
+.sidebar-item.active-pill {
+    background-color: #242428;
+    color: #FFFFFF;
+    font-weight: 600;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+button.sidebar-icon-btn.active-nav label,
+button.sidebar-item.active-nav label,
+.sidebar-item.active-nav label {
+    color: #FFFFFF;
+    font-weight: 600;
+}
+
+button.sidebar-icon-btn.active-nav image,
+button.sidebar-item.active-nav image,
+.sidebar-item.active-nav image {
+    color: #FFFFFF;
+}
+
+button.sidebar-icon-btn.active-nav:hover,
+button.sidebar-item.active-nav:hover,
+.sidebar-item.active-nav:hover {
+    background-color: #2C2C30;
+    color: #FFFFFF;
+}
+
+button.sidebar-icon-btn.active-nav:hover label,
+button.sidebar-item.active-nav:hover label,
+.sidebar-item.active-nav:hover label {
+    color: #FFFFFF;
+    font-weight: 600;
+}
+
+/* Sidebar Popover in Dark Theme */
+popover.sidebar-item-popover {
+    background: transparent;
+    background-color: transparent;
+}
+
+popover.sidebar-item-popover>contents {
+    background-color: #242428;
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 6px 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+popover.sidebar-item-popover>arrow {
+    background-color: #242428;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.sidebar-item-popover-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #FFFFFF;
 }
 
 entry.sidebar-search-entry {
-    background-color: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: #ffffff;
+    background-color: #1C1C1E;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #FFFFFF;
+    border-radius: 8px;
+    font-size: 13px;
     box-shadow: none;
+    min-height: 34px;
 }
 
 entry.sidebar-search-entry:focus-within {
-    background-color: rgba(59, 130, 246, 0.08);
-    border-color: #3b82f6;
+    background-color: #222226;
+    border-color: #1D68BD;
 }
 
 entry.sidebar-search-entry>text {
     background-color: transparent;
     border: none;
     box-shadow: none;
-    color: #ffffff;
+    color: #FFFFFF;
 }
 
 button.shortcut-combo-btn {
-    background-color: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: #ffffff;
+    background-color: #1C1C1E;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #FFFFFF;
+    border-radius: 8px;
     box-shadow: none;
 }
 
 button.shortcut-combo-btn:hover {
-    background-color: rgba(59, 130, 246, 0.08);
-    border-color: #3b82f6;
-    color: #60a5fa;
+    background-color: #222226;
+    border-color: #1D68BD;
+    color: #60A5FA;
 }
 
 button.shortcut-combo-btn:active {
-    background-color: rgba(59, 130, 246, 0.15);
-    border-color: #3b82f6;
-    color: #60a5fa;
-}
-
-/* Active navigation item */
-button.sidebar-item.active-nav {
-    background-color: rgba(59, 130, 246, 0.15);
-    color: #60a5fa;
-    border-radius: 10px;
-    font-weight: 700;
-}
-
-button.sidebar-item.active-nav label {
-    color: #60a5fa;
-    font-weight: 700;
-}
-
-button.sidebar-item.active-nav:hover {
-    background-color: rgba(59, 130, 246, 0.22);
-    color: #93c5fd;
-}
-
-button.sidebar-item.active-nav:hover label {
-    color: #93c5fd;
-    font-weight: 700;
+    background-color: rgba(29, 104, 189, 0.15);
+    border-color: #1D68BD;
+    color: #60A5FA;
 }
 
 .sidebar-wallpaper-thumb {
     border-radius: 9999px;
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.10);
     box-shadow: none;
 }
 
+/* Content Area - Floating Inset Rounded Card matching reference layout */
+.settings-content-card {
+    background-color: #1C1C1F;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 22px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.40);
+    overflow: hidden;
+}
 
-/* Content Area */
+.settings-content {
+    background-color: transparent;
+    border: none;
+    border-radius: 22px;
+    padding: 24px 30px;
+}
+
+.settings-content scrolledwindow,
+.settings-content viewport,
+.settings-content-card scrolledwindow,
+.settings-content-card viewport {
+    background: transparent;
+    background-color: transparent;
+}
+
 .settings-page-title {
-    color: #ffffff;
+    color: #FFFFFF;
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
 }
 
 .settings-page-subtitle {
-    color: rgba(255, 255, 255, 0.55);
+    color: #8E8E93;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.settings-breadcrumb-parent {
+    color: #8E8E93;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.settings-breadcrumb-arrow {
+    color: #55555A;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.settings-breadcrumb-current {
+    color: #FFFFFF;
+    font-size: 24px;
+    font-weight: 600;
 }
 
 .toggle-status-on {
-    color: rgba(255, 255, 255, 0.9);
+    color: #FFFFFF;
 }
 
 .toggle-status-off {
-    color: rgba(255, 255, 255, 0.4);
+    color: #8E8E93;
 }
 
-/* Solid, smooth cards & panels */
+/* Solid, smooth cards & panels - Charcoal Surface #242428 matching reference */
 .settings-card,
-.glass-panel {
-    background-color: rgb(20, 20, 24);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+.glass-panel,
+.collapsible-card,
+.about-donate-card,
+.settings-group,
+.settings-section {
+    background-color: #242428;
+    background-image: none;
+    border: 1px solid rgba(255, 255, 255, 0.07);
     border-radius: 16px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
     padding: 16px 20px;
 }
 
-button.sidebar-header-btn:hover {
-    background-color: rgba(255, 255, 255, 0.06);
+.collapsible-card {
+    padding: 4px;
+    margin-bottom: 8px;
 }
 
-button.sidebar-header-btn.active-nav {
-    background-color: rgba(255, 255, 255, 0.12);
+button.card-collapse-header {
+    border-radius: 10px;
+    padding: 10px 14px;
+    transition: background-color 150ms ease;
 }
 
 button.card-collapse-header:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: rgba(255, 255, 255, 0.04);
 }
 
-/* Component token colors (dark) */
-.success-text {
-    color: #4ade80;
+.card-collapse-content {
+    padding: 6px 14px 14px 14px;
 }
 
+.card-collapse-arrow {
+    color: #8E8E93;
+}
+
+button.card-collapse-header:hover .card-collapse-arrow {
+    color: #FFFFFF;
+}
+
+/* Component text tokens */
 .settings-title,
+.settings-title-label {
+    color: #FFFFFF;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.settings-section-title,
+.settings-group-header-title {
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.settings-row-title,
 .settings-label {
-    color: rgba(255, 255, 255, 0.95);
+    color: #E5E5EA;
+    font-size: 15px;
+    font-weight: 500;
 }
 
-.settings-subtitle,
+.settings-subtitle {
+    color: #8E8E93;
+    font-size: 14px;
+}
+
+.settings-row-desc,
 .settings-desc {
-    color: rgba(255, 255, 255, 0.55);
+    color: #8E8E93;
+    font-size: 13px;
+    font-weight: 400;
 }
 
+.settings-card row,
+.settings-card-row,
 .settings-item-row {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: transparent;
+    padding: 12px 6px;
+}
+
+.settings-card row:last-child,
+.settings-card-row:last-child,
+.settings-item-row:last-child {
+    border-bottom: none;
+}
+
+.settings-card row:hover {
+    background-color: rgba(255, 255, 255, 0.03);
 }
 
 .sidebar-icon-badge {
-    background-color: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-top: 1px solid rgba(255, 255, 255, 0.24);
+    background-color: #1C1C1E;
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .badge-slate {
     background-color: rgba(100, 116, 139, 0.20);
-    color: #94a3b8;
+    color: #8E8E93;
 }
 
-/* Glassmorphism Circular Icon Badge (Matching circle button style) */
+/* Circular Icon Badges */
 .blue-icon-badge {
-    background-color: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-top: 1px solid rgba(255, 255, 255, 0.22);
-    color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(29, 104, 189, 0.15);
+    border: 1px solid rgba(29, 104, 189, 0.30);
+    color: #60A5FA;
     border-radius: 9999px;
     min-width: 44px;
     min-height: 44px;
 }
 
 .blue-icon-badge-sm {
-    background-color: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-top: 1px solid rgba(255, 255, 255, 0.22);
-    color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(29, 104, 189, 0.15);
+    border: 1px solid rgba(29, 104, 189, 0.30);
+    color: #60A5FA;
     border-radius: 9999px;
     min-width: 34px;
     min-height: 34px;
 }
 
-/* Spec Card Grid (2x2) */
+/* Spec Card Grid (About System) */
 .spec-card {
-    background-color: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    border-radius: 16px;
-    padding: 24px 20px;
-    transition: transform 200ms ease, background-color 200ms ease;
+    background-color: #2A2A2E;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 20px;
+    transition: background-color 150ms ease, border-color 150ms ease;
 }
 
 .spec-card:hover {
-    background-color: rgba(255, 255, 255, 0.07);
-    border-color: rgba(255, 255, 255, 0.18);
+    background-color: #323238;
+    border-color: rgba(255, 255, 255, 0.14);
 }
 
 .spec-label {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.8px;
-    color: rgba(255, 255, 255, 0.55);
+    color: #8E8E93;
     text-transform: uppercase;
 }
 
 .spec-value {
     font-size: 14px;
     font-weight: 600;
-    color: #ffffff;
+    color: #FFFFFF;
 }
 
 /* Hero Section (About System) */
@@ -1978,18 +2190,20 @@ button.card-collapse-header:hover {
 }
 
 .hero-hostname {
-    color: #ffffff;
+    color: #FFFFFF;
+    font-size: 20px;
+    font-weight: 700;
 }
 
 .hero-subtitle {
     font-size: 14px;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.65);
+    color: #8E8E93;
 }
 
 .hero-uptime-badge {
-    background-color: rgba(59, 130, 246, 0.15);
-    border: 1px solid rgba(59, 130, 246, 0.30);
+    background-color: rgba(29, 104, 189, 0.15);
+    border: 1px solid rgba(29, 104, 189, 0.30);
     border-radius: 20px;
     padding: 4px 12px;
 }
@@ -1997,10 +2211,13 @@ button.card-collapse-header:hover {
 .hero-uptime-label {
     font-size: 12px;
     font-weight: 600;
-    color: #60a5fa;
+    color: #60A5FA;
 }
 
 .about-donate-card {
+    background-color: #242428;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 14px;
     padding: 16px 20px;
 }
 
@@ -2011,62 +2228,129 @@ button.card-collapse-header:hover {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.30);
 }
 
+/* Segmented Control - Pill capsule matching reference image */
+.segmented-control,
 .lang-segmented-control {
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background-color: #18181A;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 9999px;
+    padding: 3px;
 }
 
+.seg-btn,
+button.lang-seg-inactive {
+    color: #8E8E93;
+    border-radius: 9999px;
+    padding: 4px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    transition: all 150ms ease;
+}
+
+.seg-btn:hover,
+button.lang-seg-inactive:hover {
+    color: #FFFFFF;
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.seg-btn-active,
 button.lang-seg-active {
-    background-color: #3b82f6;
-    color: #ffffff;
+    background-color: #1D68BD;
+    color: #FFFFFF;
+    border-radius: 9999px;
+    padding: 4px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    border: none;
+    box-shadow: 0 2px 8px rgba(29, 104, 189, 0.35);
+}
+
+/* Category Tab Bar & Capsule Bar - matching reference image "Content / Feeds" */
+.settings-tab-bar {
+    background-color: #18181A;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 9999px;
+    padding: 4px;
     box-shadow: none;
 }
 
-button.lang-seg-inactive {
-    color: rgba(255, 255, 255, 0.55);
+button.app-tab-btn {
+    background-color: transparent;
+    background: transparent;
+    border: none;
+    border-radius: 9999px;
+    color: #8E8E93;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 6px 18px;
+    box-shadow: none;
+    transition: all 150ms ease;
 }
 
-button.lang-seg-inactive:hover {
-    color: #ffffff;
-    background-color: rgba(255, 255, 255, 0.08);
+button.app-tab-btn:hover {
+    color: #FFFFFF;
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+button.app-tab-btn.active {
+    background-color: #1D68BD;
+    color: #FFFFFF;
+    font-weight: 600;
+    border-radius: 9999px;
+    box-shadow: 0 2px 8px rgba(29, 104, 189, 0.35);
+}
+
+button.app-tab-btn.active:hover {
+    background-color: #17549C;
+    color: #FFFFFF;
+}
+
+button.app-tab-btn.active label {
+    color: #FFFFFF;
+    font-weight: 600;
 }
 
 /* Theme Option Cards */
 button.theme-card-option {
-    background-color: rgba(255, 255, 255, 0.035);
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    background-color: #2A2A2E;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 14px;
-    color: rgba(255, 255, 255, 0.70);
+    color: #8E8E93;
     padding: 24px 20px;
     min-height: 120px;
-    transition: all 200ms ease;
+    transition: all 150ms ease;
 }
 
 button.theme-card-option label {
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 15px;
+    font-weight: 600;
 }
 
 button.theme-card-option:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-    color: #ffffff;
+    background-color: #323238;
+    border-color: rgba(255, 255, 255, 0.14);
+    color: #FFFFFF;
 }
 
-button.theme-card-option.active-dark {
-    background-color: rgba(59, 130, 246, 0.20);
-    color: #60a5fa;
-    border-color: #3b82f6;
+button.theme-card-option.active-dark,
+button.theme-card-option.active {
+    background-color: rgba(29, 104, 189, 0.16);
+    color: #60A5FA;
+    border: 1px solid #1D68BD;
     font-weight: 700;
     box-shadow: none;
 }
 
 button.theme-card-option.active-dark label,
 button.theme-card-option.active-dark image {
-    color: #60a5fa;
+    color: #60A5FA;
 }
 
 .wallpaper-preview-overlay {
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 button.wallpaper-pick-overlay-vertical-btn,
@@ -2074,142 +2358,251 @@ button.wallpaper-pick-overlay-inside-btn,
 button.wallpaper-action-btn,
 dropdown.wallpaper-target-dropdown,
 .wallpaper-badge {
-    background-color: rgba(0, 0, 0, 0.60);
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    background-color: rgba(24, 24, 28, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow: none;
 }
 
 dropdown.wallpaper-target-dropdown button,
 .wallpaper-badge {
-    color: #ffffff;
+    color: #FFFFFF;
 }
 
 button.wallpaper-pick-overlay-vertical-btn:hover,
 button.wallpaper-pick-overlay-inside-btn:hover,
 button.wallpaper-action-btn:hover {
-    background-color: rgba(59, 130, 246, 0.85);
-    border-color: #3b82f6;
-    color: #ffffff;
+    background-color: #1D68BD;
+    border-color: #1D68BD;
+    color: #FFFFFF;
     box-shadow: none;
 }
 
 /* Warning alert container */
 .warning-alert-card {
-    background-color: rgba(255, 95, 86, 0.05);
-    border: 1px dashed rgba(255, 95, 86, 0.25);
+    background-color: rgba(255, 186, 47, 0.08);
+    border: 1px solid rgba(255, 186, 47, 0.30);
     border-radius: 12px;
-    padding: 24px;
-    color: #ff5f56;
-    font-size: 12px;
+    padding: 16px 20px;
+    color: #FFBA2F;
+    font-size: 13px;
     font-weight: 500;
 }
 
-
-
-/* App Manager Tabs */
-button.app-tab-btn {
-    color: rgba(255, 255, 255, 0.55);
+/* Primary Action Buttons */
+button.connect-pill-btn,
+.connect-pill-btn,
+button.suggested-action,
+.suggested-action {
+    background-color: #1D68BD;
+    background-image: none;
+    border: none;
+    color: #FFFFFF;
+    border-radius: 9999px;
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(29, 104, 189, 0.35);
+    transition: background-color 150ms ease, transform 100ms ease;
 }
 
-button.app-tab-btn.active {
-    color: #3b82f6;
-    border-bottom: 2px solid #3b82f6;
+button.connect-pill-btn:hover,
+.connect-pill-btn:hover,
+button.suggested-action:hover,
+.suggested-action:hover {
+    background-color: #17549C;
+    color: #FFFFFF;
+    box-shadow: 0 2px 10px rgba(29, 104, 189, 0.45);
 }
 
-/* Wi-Fi & App Rows */
-.settings-card row,
-.settings-card-row {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+button.connect-pill-btn:active,
+.connect-pill-btn:active,
+button.suggested-action:active,
+.suggested-action:active {
+    background-color: #12437D;
+    color: #FFFFFF;
 }
 
-.settings-card row:hover {
-    background-color: rgba(255, 255, 255, 0.06);
+button.connect-pill-btn:disabled,
+.connect-pill-btn:disabled,
+button.connect-pill-btn.disabled,
+.connect-pill-btn.disabled {
+    background-color: #2A2A2E;
+    color: #636366;
+    border: none;
+    box-shadow: none;
 }
 
-.settings-card-row,
-.settings-card-row:hover {
+/* Outline Buttons */
+button.btn-outline,
+.btn-outline {
     background-color: transparent;
     background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #E5E5EA;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: none;
+    transition: all 150ms ease;
 }
 
-button.perf-profile-row-btn {
-    background-color: rgba(255, 255, 255, 0.035);
+button.btn-outline:hover,
+.btn-outline:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #FFFFFF;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+button.btn-outline:disabled,
+.btn-outline:disabled {
+    border-color: rgba(255, 255, 255, 0.06);
+    color: #55555A;
+}
+
+/* Danger / Delete button */
+button.connect-pill-btn.delete-btn,
+.connect-pill-btn.delete-btn {
+    background-color: rgba(244, 67, 54, 0.15);
+    border: 1px solid rgba(244, 67, 54, 0.35);
+    color: #F44336;
+}
+
+button.connect-pill-btn.delete-btn:hover,
+.connect-pill-btn.delete-btn:hover {
+    background-color: #F44336;
+    border-color: #F44336;
+    color: #FFFFFF;
+}
+
+/* Circular icon action buttons */
+button.icon-btn,
+button.circular {
+    background-color: #2A2A2E;
     border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #E5E5EA;
+    border-radius: 9999px;
+    transition: all 150ms ease;
+}
+
+button.icon-btn:hover,
+button.circular:hover {
+    background-color: #35353B;
+    border-color: rgba(255, 255, 255, 0.16);
+    color: #FFFFFF;
+}
+
+/* Performance Profiles */
+button.perf-profile-row-btn {
+    background-color: #2A2A2E;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    transition: all 150ms ease;
 }
 
 button.perf-profile-row-btn:hover {
-    background-color: rgba(255, 255, 255, 0.07);
-    border-color: rgba(255, 255, 255, 0.16);
+    background-color: #323238;
+    border-color: rgba(255, 255, 255, 0.14);
 }
 
 button.perf-profile-row-btn.active {
-    background-color: rgba(59, 130, 246, 0.15);
-    border-color: #3b82f6;
+    background-color: rgba(29, 104, 189, 0.16);
+    border: 1px solid #1D68BD;
 }
 
 /* Wallpaper Thumbnail Card */
 button.wallpaper-thumb-card picture {
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 button.wallpaper-thumb-card:hover picture {
-    border-color: #3b82f6;
+    border-color: #1D68BD;
     box-shadow: none;
 }
 
-
 /* Missing GStreamer Plugin Warning Banner */
 .missing-plugin-banner {
-    background-color: rgba(239, 68, 68, 0.12);
-    border: 1px solid rgba(239, 68, 68, 0.35);
+    background-color: rgba(244, 67, 54, 0.12);
+    border: 1px solid rgba(244, 67, 54, 0.35);
     border-radius: 10px;
     padding: 12px 16px;
 }
 
 .plugin-warning-title {
-    color: #ef4444;
+    color: #F44336;
     font-weight: 700;
     font-size: 14px;
 }
 
 .plugin-warning-desc {
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 12px;
+    color: #E5E5EA;
+    font-size: 13px;
 }
 
 .plugin-warning-cmd {
-    color: #60a5fa;
+    color: #60A5FA;
     font-family: monospace;
     font-size: 12px;
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: #1C1C1E;
     padding: 4px 8px;
     border-radius: 6px;
     margin-top: 4px;
 }
 
+/* Form Fields & Inputs */
+entry,
+passwordentry {
+    background-color: #222226;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 8px;
+    color: #FFFFFF;
+    font-size: 14px;
+    padding: 6px 12px;
+    box-shadow: none;
+    transition: border-color 150ms ease, background-color 150ms ease;
+}
 
-/* Dropdown Select Controls (Matching Search Input Style) */
-dropdown {}
+entry:focus-within,
+passwordentry:focus-within,
+entry:focus,
+passwordentry:focus {
+    background-color: #26262B;
+    border-color: #1D68BD;
+    box-shadow: none;
+}
 
+entry>text,
+passwordentry>text {
+    color: #FFFFFF;
+    background-color: transparent;
+}
+
+entry placeholder,
+passwordentry placeholder {
+    color: #636366;
+}
+
+/* Dropdown Select Controls */
 dropdown>button {
-    background-color: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 10px;
+    background-color: #222226;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 8px;
     padding: 8px 14px;
-    color: #ffffff;
-    transition: all 200ms ease;
+    color: #FFFFFF;
+    font-size: 14px;
+    transition: all 150ms ease;
     box-shadow: none;
 }
 
 dropdown>button:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.20);
+    background-color: #28282D;
+    border-color: rgba(255, 255, 255, 0.16);
 }
 
 dropdown:focus-within>button,
 dropdown>button:focus {
-    border-color: #3b82f6;
-    background-color: rgba(59, 130, 246, 0.08);
+    border-color: #1D68BD;
+    background-color: #26262B;
 }
 
 dropdown>popover,
@@ -2222,10 +2615,10 @@ popover.menu {
 
 dropdown>popover>contents,
 popover.menu>contents {
-    background-color: rgba(20, 20, 28, 0.96);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    background-color: #242428;
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 12px;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
     padding: 6px;
 }
 
@@ -2240,34 +2633,103 @@ dropdown>popover>contents listview>row {
     background-color: transparent;
     border-radius: 8px;
     padding: 8px 12px;
-    color: rgba(255, 255, 255, 0.90);
-    transition: background-color 150ms ease;
+    color: #E5E5EA;
+    transition: background-color 150ms ease, color 150ms ease;
 }
 
 dropdown>popover>contents row:hover,
 dropdown>popover>contents listview>row:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-    color: #ffffff;
+    background-color: #1D68BD;
+    color: #FFFFFF;
 }
 
 dropdown>popover>contents row:selected,
 dropdown>popover>contents listview>row:selected {
-    background-color: rgba(59, 130, 246, 0.15);
-    color: #60a5fa;
+    background-color: #1D68BD;
+    color: #FFFFFF;
     font-weight: 600;
+}
+
+/* GTK Switch-toggle */
+switch {
+    background-color: #3A3A3E;
+    border-radius: 9999px;
+    border: none;
+    box-shadow: none;
+    padding: 2px;
+    min-width: 44px;
+    min-height: 24px;
+    transition: background-color 150ms ease;
+}
+
+switch:checked {
+    background-color: #1D68BD;
+}
+
+switch slider {
+    background-color: #FFFFFF;
+    border-radius: 9999px;
+    min-width: 20px;
+    min-height: 20px;
+    border: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+switch:checked slider {
+    background-color: #FFFFFF;
+}
+
+/* Checkbox & Radio - matching reference image blue checkmark */
+checkbutton check {
+    border-radius: 4px;
+    border: 1.5px solid #48484A;
+    background-color: transparent;
+    min-width: 18px;
+    min-height: 18px;
+    box-shadow: none;
+    transition: all 150ms ease;
+}
+
+checkbutton check:hover {
+    border-color: #707076;
+}
+
+checkbutton check:checked {
+    background-color: #1D68BD;
+    border-color: #1D68BD;
+    color: #FFFFFF;
+}
+
+checkbutton radio {
+    border-radius: 9999px;
+    border: 1.5px solid #48484A;
+    background-color: transparent;
+    min-width: 18px;
+    min-height: 18px;
+    box-shadow: none;
+    transition: all 150ms ease;
+}
+
+checkbutton radio:hover {
+    border-color: #707076;
+}
+
+checkbutton radio:checked {
+    border-color: #1D68BD;
+    background-color: #242428;
+    color: #1D68BD;
 }
 
 /* Dark Theme Console Log Panel */
 .console-log-panel {
-    background-color: rgba(8, 8, 14, 0.96);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    background-color: #18181A;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
 }
 
 .console-header {
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    background-color: rgba(255, 255, 255, 0.02);
+    background-color: #1C1C1E;
 }
 
 .console-log-panel scrolledwindow {
@@ -2279,199 +2741,208 @@ textview.console-log-text text,
 textview.hosts-editor-text,
 textview.hosts-editor-text text {
     background-color: transparent;
-    color: rgba(255, 255, 255, 0.85);
+    color: #E5E5EA;
 }
 
-progressbar.console-progress {}
-
-progressbar.console-progress trough {}
-
-progressbar.console-progress progress {}
-
 /* Dark Theme Auth Dialog Overlay */
-.auth-dialog-card {
-    background-color: rgba(18, 18, 28, 0.98);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-top: 1px solid rgba(255, 255, 255, 0.22);
+.auth-dialog-card,
+.modern-modal-card {
+    background-color: #242428;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 16px;
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
 }
 
 .update-count-badge {
-    background-color: rgba(59, 130, 246, 0.15);
-    border: 1px solid rgba(59, 130, 246, 0.30);
-    color: #60a5fa;
+    background-color: rgba(29, 104, 189, 0.15);
+    border: 1px solid rgba(29, 104, 189, 0.30);
+    color: #60A5FA;
 }
 
 .update-progress-bar trough {
     min-height: 8px;
     border-radius: 9999px;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: #3A3A3E;
 }
 
 .update-progress-bar progress {
     min-height: 8px;
     border-radius: 9999px;
-    background-color: #3b82f6;
+    background-color: #1D68BD;
 }
 
+/* Status Badges */
 .green-icon-badge-sm {
-    background-color: rgba(16, 185, 129, 0.15);
+    background-color: rgba(34, 197, 94, 0.15);
+    color: #4ADE80;
     border-radius: 8px;
     padding: 6px;
 }
 
 .red-icon-badge-sm {
     background-color: rgba(239, 68, 68, 0.15);
+    color: #F87171;
     border-radius: 8px;
     padding: 6px;
 }
 
-.status-success-badge {
-    color: #10b981;
+.status-success-badge,
+.success-text {
+    color: #4ADE80;
     font-weight: 600;
-    font-size: 9px;
 }
 
 .status-error-badge {
-    color: #ef4444;
+    color: #F87171;
     font-weight: 600;
-    font-size: 9px;
+}
+
+.status-warning-badge {
+    color: #FBBF24;
+    font-weight: 600;
+}
+
+.connected-pill {
+    background-color: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    border-radius: 9999px;
+    padding: 4px 12px;
+}
+
+.connected-text {
+    color: #4ADE80;
+    font-size: 12px;
+    font-weight: 600;
 }
 
 .wifi-info-section-title {
-    color: #60a5fa;
+    color: #60A5FA;
 }
 
 .wifi-info-label {
-    color: rgba(255, 255, 255, 0.6);
+    color: #8E8E93;
 }
 
 .wifi-info-value {
-    color: #ffffff;
+    color: #FFFFFF;
 }
 
 .wifi-status-badge {
-    background-color: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.wifi-status-text {
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.wifi-status-on {
-    color: rgba(255, 255, 255, 0.90);
-}
-
-.wifi-status-off {
-    color: rgba(255, 255, 255, 0.45);
-}
-
-
-.segmented-control {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: #1C1C1E;
     border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.seg-btn {
-    color: rgba(255, 255, 255, 0.6);
+.wifi-status-text {
+    color: #E5E5EA;
 }
 
-.seg-btn:hover {
-    color: #ffffff;
+.wifi-status-on {
+    color: #FFFFFF;
 }
 
-.seg-btn-active {
-    background-color: rgba(255, 255, 255, 0.12);
-    color: #ffffff;
+.wifi-status-off {
+    color: #8E8E93;
 }
 
 progressbar.battery-level-bar trough {
-    background-color: rgba(255, 255, 255, 0.10);
+    background-color: #3A3A3E;
 }
 
 .battery-badge-charging {
-    background-color: rgba(46, 194, 126, 0.18);
-    border: 1px solid rgba(46, 194, 126, 0.35);
-    color: #2ec27e;
+    background-color: rgba(34, 197, 94, 0.18);
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    color: #4ADE80;
     border-radius: 9999px;
     padding: 3px 10px;
-    font-size: 9px;
+    font-size: 11px;
     font-weight: 600;
 }
 
 .battery-badge-discharging {
-    background-color: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    color: rgba(255, 255, 255, 0.85);
+    background-color: #2A2A2E;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #E5E5EA;
     border-radius: 9999px;
     padding: 3px 10px;
-    font-size: 9px;
+    font-size: 11px;
     font-weight: 600;
 }
 
-.perf-profile-row-btn {
-    background-color: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.perf-profile-row-btn:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.16);
-}
-
-.perf-profile-row-btn.active {
-    background-color: rgba(59, 130, 246, 0.16);
-    border: 1px solid rgba(59, 130, 246, 0.45);
-}
-
-/* Settings Scale Slider Colors (Dark) */
+/* Sliders */
 scale.settings-scale trough,
 scale.settings-scale>trough,
-scale.settings-scale contents>trough {
-    background-color: rgba(255, 255, 255, 0.20);
+scale.settings-scale contents>trough,
+scale.control-slider trough,
+scale.control-slider>trough,
+scale.control-slider contents>trough {
+    background-color: #3A3A3E;
+    min-height: 6px;
+    border-radius: 9999px;
+    border: none;
 }
 
 scale.settings-scale trough highlight,
 scale.settings-scale>trough>highlight,
-scale.settings-scale contents>trough>highlight {
-    background-color: #3b82f6;
+scale.settings-scale contents>trough>highlight,
+scale.control-slider trough highlight,
+scale.control-slider>trough>highlight,
+scale.control-slider contents>trough>highlight {
+    background-color: #1D68BD;
+    min-height: 6px;
+    border-radius: 9999px;
 }
 
 scale.settings-scale slider,
 scale.settings-scale>slider,
-scale.settings-scale contents>slider {
-    background-color: #ffffff;
-    box-shadow: none;
+scale.settings-scale contents>slider,
+scale.control-slider slider,
+scale.control-slider>slider,
+scale.control-slider contents>slider {
+    background-color: #FFFFFF;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
     -gtk-icon-shadow: none;
     border: none;
+    min-width: 18px;
+    min-height: 18px;
+    border-radius: 9999px;
+    transition: transform 150ms ease;
+}
+
+scale.settings-scale slider:hover,
+scale.settings-scale>slider:hover,
+scale.settings-scale contents>slider:hover,
+scale.control-slider slider:hover,
+scale.control-slider>slider:hover,
+scale.control-slider contents>slider:hover {
+    transform: scale(1.15);
 }
 
 scale.settings-scale mark label {
-    color: rgba(255, 255, 255, 0.55);
+    color: #6E7686;
+    font-size: 11px;
 }
 
 scale.settings-scale:disabled trough,
 scale.settings-scale:disabled>trough,
 scale.settings-scale:disabled contents>trough {
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: #292D36;
 }
 
 scale.settings-scale:disabled trough highlight,
 scale.settings-scale:disabled>trough>highlight,
 scale.settings-scale:disabled contents>trough>highlight {
-    background-color: rgba(255, 255, 255, 0.25);
+    background-color: #373C48;
 }
 
 scale.settings-scale:disabled slider,
 scale.settings-scale:disabled>slider,
 scale.settings-scale:disabled contents>slider {
-    background-color: rgba(255, 255, 255, 0.45);
+    background-color: #575E6A;
     box-shadow: none;
 }
 
 scale.settings-scale:disabled mark label {
-    color: rgba(255, 255, 255, 0.25);
+    color: #575E6A;
 }
 
 /* === apps/switcher.css === */
@@ -3031,14 +3502,15 @@ window.explore-dialog,
     color: #e2e8f0;
 }
 
+.modern-dialog-entry,
 .explore-dialog entry {
     background-color: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 12px;
+    border-radius: 8px;
     color: #ffffff;
     caret-color: #3b82f6;
-    min-height: 42px;
-    padding: 0 14px;
+    min-height: 28px;
+    padding: 3px 10px;
 }
 
 .explore-dialog entry:focus {
@@ -3552,18 +4024,13 @@ button.panel-clock-btn {
 }
 
 /* 5. Cards & containers in apps: completely solid, smooth and refined */
-.settings-card,
-.collapsible-card,
-.settings-group,
-.settings-section,
 .standard-card,
 .card,
 .info-panel-card,
 .preview-card,
 .screenshot-card,
 .battery-card,
-.recovery-scope-card,
-.about-donate-card {
+.recovery-scope-card {
     border-radius: 16px;
     background-color: rgb(20, 20, 24);
     background-image: none;
@@ -3574,13 +4041,119 @@ button.panel-clock-btn {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
-.settings-card:hover,
-.collapsible-card:hover,
 .standard-card:hover {
     border-top: 1px solid rgba(255, 255, 255, 0.18);
     border-left: 1px solid rgba(255, 255, 255, 0.18);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Settings window cards - Unified modern charcoal #242428 across all pages */
+.settings-window .settings-card,
+.settings-window .glass-panel,
+.settings-window .collapsible-card,
+.settings-window .about-donate-card,
+.settings-window .settings-group,
+.settings-window .settings-section {
+    border-radius: 16px;
+    background-color: #242428;
+    background-image: none;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.settings-window .settings-card:hover,
+.settings-window .glass-panel:hover,
+.settings-window .collapsible-card:hover,
+.settings-window .about-donate-card:hover {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Device Smart Cards (VPN, CA Cert, Displays) - Charcoal #242428 */
+.settings-window .device-card {
+    background-color: #242428;
+    background-image: none;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    border-radius: 18px;
+}
+
+.settings-window .device-card:hover {
+    border-color: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.settings-window .device-card-status-off {
+    color: rgba(255, 255, 255, 0.60);
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Settings Window - Dropdown Select Controls */
+.settings-window dropdown>button,
+.settings-window .settings-dropdown>button {
+    background-color: #2E2E33;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 6px 14px;
+    color: #FFFFFF;
+    font-size: 13px;
+    font-weight: 500;
+    min-height: 36px;
+    min-width: 170px;
+    transition: all 150ms ease;
+    box-shadow: none;
+}
+
+.settings-window dropdown>button:hover,
+.settings-window .settings-dropdown>button:hover {
+    background-color: #38383F;
+    border-color: rgba(255, 255, 255, 0.20);
+}
+
+.settings-window dropdown:focus-within>button,
+.settings-window .settings-dropdown:focus-within>button,
+.settings-window dropdown>button:focus,
+.settings-window .settings-dropdown>button:focus {
+    border-color: #3b82f6;
+    background-color: #2E2E33;
+}
+
+/* Settings Window - Input & Form Controls */
+.settings-window entry,
+.settings-window passwordentry,
+.settings-window .settings-entry {
+    background-color: #2E2E33;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    color: #FFFFFF;
+    font-size: 13px;
+    padding: 6px 14px;
+    min-height: 36px;
+    box-shadow: none;
+    transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.settings-window entry:focus-within,
+.settings-window passwordentry:focus-within,
+.settings-window .settings-entry:focus-within,
+.settings-window entry:focus,
+.settings-window passwordentry:focus,
+.settings-window .settings-entry:focus {
+    background-color: #34343B;
+    border-color: #3b82f6;
+    box-shadow: none;
+}
+
+.settings-window entry>text,
+.settings-window passwordentry>text,
+.settings-window .settings-entry>text {
+    color: #FFFFFF;
+    background-color: transparent;
+}
+
+.settings-window entry placeholder,
+.settings-window passwordentry placeholder {
+    color: rgba(255, 255, 255, 0.45);
 }
 
 /* 6. Dialogs & modal window containers: solid, smooth, no translucency */
@@ -3619,8 +4192,6 @@ window.greeter-window {
     opacity: 1.0;
 }
 
-window.settings-window>overlay>box,
-.settings-content,
 window.explore-window>box,
 .explore-window-box,
 .explore-window .content-view,
@@ -3636,8 +4207,7 @@ window.recorder-window>box {
 .explore-window .sidebar,
 .explore-window .info-panel,
 .explore-window .status-bar,
-.explore-window .tab-bar,
-.sidebar {
+.explore-window .tab-bar {
     background-color: rgb(18, 18, 22);
     background-image: none;
     opacity: 1.0;

@@ -80,6 +80,8 @@ pub fn build_appearance_ui(
     let top_left_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     top_left_box.set_valign(gtk4::Align::Start);
     top_left_box.set_halign(gtk4::Align::Start);
+    top_left_box.set_hexpand(false);
+    top_left_box.set_vexpand(false);
     top_left_box.set_margin_start(10);
     top_left_box.set_margin_top(10);
 
@@ -92,6 +94,8 @@ pub fn build_appearance_ui(
     let target_dropdown = gtk4::DropDown::new(Some(target_model), Option::<gtk4::Expression>::None);
     target_dropdown.add_css_class("wallpaper-target-dropdown");
     target_dropdown.set_cursor_from_name(Some("pointer"));
+    target_dropdown.set_hexpand(false);
+    target_dropdown.set_vexpand(false);
 
     top_left_box.append(&target_dropdown);
     preview_overlay.add_overlay(&top_left_box);
@@ -118,6 +122,8 @@ pub fn build_appearance_ui(
     let actions_box = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
     actions_box.set_valign(gtk4::Align::End);
     actions_box.set_halign(gtk4::Align::End);
+    actions_box.set_hexpand(false);
+    actions_box.set_vexpand(false);
     actions_box.set_margin_end(10);
     actions_box.set_margin_bottom(10);
 
@@ -125,6 +131,10 @@ pub fn build_appearance_ui(
     pick_btn.add_css_class("wallpaper-action-btn");
     pick_btn.set_cursor_from_name(Some("pointer"));
     pick_btn.set_size_request(38, 38);
+    pick_btn.set_halign(gtk4::Align::Center);
+    pick_btn.set_valign(gtk4::Align::Center);
+    pick_btn.set_hexpand(false);
+    pick_btn.set_vexpand(false);
 
     let plus_icon = babydra_ui_kit::ui::icon::get_icon("plus", 18);
     plus_icon.set_pixel_size(18);
@@ -137,6 +147,10 @@ pub fn build_appearance_ui(
     theme_toggle_btn.add_css_class("wallpaper-action-btn");
     theme_toggle_btn.set_cursor_from_name(Some("pointer"));
     theme_toggle_btn.set_size_request(38, 38);
+    theme_toggle_btn.set_halign(gtk4::Align::Center);
+    theme_toggle_btn.set_valign(gtk4::Align::Center);
+    theme_toggle_btn.set_hexpand(false);
+    theme_toggle_btn.set_vexpand(false);
 
     let initial_theme_icon = if is_dark { "dark-mode" } else { "brightness" };
     let theme_icon = babydra_ui_kit::ui::icon::get_icon(initial_theme_icon, 18);
@@ -152,6 +166,8 @@ pub fn build_appearance_ui(
     let top_right_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     top_right_box.set_valign(gtk4::Align::Start);
     top_right_box.set_halign(gtk4::Align::End);
+    top_right_box.set_hexpand(false);
+    top_right_box.set_vexpand(false);
     top_right_box.set_margin_end(10);
     top_right_box.set_margin_top(10);
 
@@ -169,6 +185,8 @@ pub fn build_appearance_ui(
     avatar_btn.set_size_request(42, 42);
     avatar_btn.set_valign(gtk4::Align::Center);
     avatar_btn.set_halign(gtk4::Align::Center);
+    avatar_btn.set_hexpand(false);
+    avatar_btn.set_vexpand(false);
     avatar_btn.add_css_class("avatar-action-btn");
     avatar_btn.set_cursor_from_name(Some("pointer"));
 

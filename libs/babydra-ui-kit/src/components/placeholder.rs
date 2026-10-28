@@ -16,15 +16,8 @@ pub enum PlaceholderState<'a> {
     },
 }
 
-/// Constructs a unified ListBoxRow placeholder for disabled, loading, or empty states.
-pub fn create_placeholder(state: PlaceholderState) -> gtk4::ListBoxRow {
-    let row = gtk4::ListBoxRow::new();
-    row.add_css_class("settings-card-row");
-    row.set_selectable(false);
-    row.set_activatable(false);
-    row.set_vexpand(true);
-    row.set_valign(gtk4::Align::Fill);
-
+/// Constructs a unified Box placeholder for disabled, loading, or empty states.
+pub fn create_placeholder_box(state: PlaceholderState) -> gtk4::Box {
     let placeholder_box = gtk4::Box::new(gtk4::Orientation::Vertical, 12);
     placeholder_box.set_valign(gtk4::Align::Center);
     placeholder_box.set_halign(gtk4::Align::Center);
@@ -78,6 +71,19 @@ pub fn create_placeholder(state: PlaceholderState) -> gtk4::ListBoxRow {
         }
     }
 
+    placeholder_box
+}
+
+/// Constructs a unified ListBoxRow placeholder for disabled, loading, or empty states.
+pub fn create_placeholder(state: PlaceholderState) -> gtk4::ListBoxRow {
+    let row = gtk4::ListBoxRow::new();
+    row.add_css_class("settings-card-row");
+    row.set_selectable(false);
+    row.set_activatable(false);
+    row.set_vexpand(true);
+    row.set_valign(gtk4::Align::Fill);
+
+    let placeholder_box = create_placeholder_box(state);
     row.set_child(Some(&placeholder_box));
     row
 }

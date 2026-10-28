@@ -158,10 +158,12 @@ pub fn setup_appearance(
         let currently_dark = babydra_ui_kit::ui::theme::is_dark_mode();
         let new_dark = !currently_dark;
 
-        let loading_icon = babydra_ui_kit::components::create_loading_icon(18);
-        loading_icon.set_halign(gtk4::Align::Center);
-        loading_icon.set_valign(gtk4::Align::Center);
-        theme_btn_clone.set_child(Some(&loading_icon));
+        let new_icon_name = if new_dark { "dark-mode" } else { "brightness" };
+        let new_icon = babydra_ui_kit::ui::icon::get_icon(new_icon_name, 18);
+        new_icon.set_pixel_size(18);
+        new_icon.set_valign(gtk4::Align::Center);
+        new_icon.set_halign(gtk4::Align::Center);
+        theme_btn_clone.set_child(Some(&new_icon));
 
         babydra_ui_kit::ui::theme::set_dark_mode(new_dark);
     });

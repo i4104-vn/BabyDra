@@ -14,20 +14,20 @@ pub const ACCENT_DIM_ALPHA: f64 = 0.9;
 /// Knob shadow under the thumb (shared by switch & slider).
 pub const KNOB_SHADOW_RGBA: (f64, f64, f64, f64) = (0.0, 0.0, 0.0, 0.30);
 
-/// Inactive track fill — dark theme.
-pub const TRACK_DARK_RGBA: (f64, f64, f64, f64) = (1.0, 1.0, 1.0, 0.16);
+/// Inactive track fill — dark theme (Grey 600 #373c48).
+pub const TRACK_DARK_RGBA: (f64, f64, f64, f64) = (0.216, 0.235, 0.282, 1.0);
 
 /// Inactive track fill — light theme.
-pub const TRACK_LIGHT_RGBA: (f64, f64, f64, f64) = (0.0, 0.0, 0.0, 0.14);
+pub const TRACK_LIGHT_RGBA: (f64, f64, f64, f64) = (0.831, 0.867, 0.918, 1.0);
 
-/// Border around the inactive track — dark theme.
-pub const TRACK_BORDER_DARK_RGBA: (f64, f64, f64, f64) = (1.0, 1.0, 1.0, 0.20);
+/// Border around the inactive track — dark theme (Grey 700 #292d36).
+pub const TRACK_BORDER_DARK_RGBA: (f64, f64, f64, f64) = (0.161, 0.176, 0.212, 1.0);
 
 /// Border around the inactive track — light theme.
-pub const TRACK_BORDER_LIGHT_RGBA: (f64, f64, f64, f64) = (0.0, 0.0, 0.0, 0.16);
+pub const TRACK_BORDER_LIGHT_RGBA: (f64, f64, f64, f64) = (0.651, 0.694, 0.761, 1.0);
 
-/// Slider track (unfilled) — dark theme.
-pub const SLIDER_TRACK_DARK_RGBA: (f64, f64, f64, f64) = (1.0, 1.0, 1.0, 0.15);
+/// Slider track (unfilled) — dark theme (Grey 600 #373c48).
+pub const SLIDER_TRACK_DARK_RGBA: (f64, f64, f64, f64) = (0.216, 0.235, 0.282, 1.0);
 
 /// Slider track (unfilled) — light theme.
 pub const SLIDER_TRACK_LIGHT_RGBA: (f64, f64, f64, f64) = (0.0, 0.0, 0.0, 0.12);

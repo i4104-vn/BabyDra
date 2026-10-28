@@ -143,6 +143,96 @@ fn ensure_page_loaded(stack: &gtk4::Stack, name: &str) {
 pub mod sidebar;
 pub use sidebar::*;
 
+fn attach_sidebar_popover(
+    btn: &gtk4::Button,
+    title_key: &'static str,
+    popover_labels: &Rc<RefCell<Vec<(gtk4::Label, &'static str)>>>,
+    active_popover: &Rc<RefCell<Option<gtk4::Popover>>>,
+) -> gtk4::Popover {
+    let popover = gtk4::Popover::new();
+    popover.set_parent(btn);
+    popover.set_position(gtk4::PositionType::Right);
+    popover.set_has_arrow(true);
+    popover.set_autohide(false);
+    popover.set_can_target(false);
+    popover.add_css_class("sidebar-item-popover");
+
+    let lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans(title_key)));
+    lbl.add_css_class("sidebar-item-popover-label");
+    lbl.set_halign(gtk4::Align::Center);
+    lbl.set_valign(gtk4::Align::Center);
+    popover.set_child(Some(&lbl));
+    popover_labels.borrow_mut().push((lbl, title_key));
+
+    let motion = gtk4::EventControllerMotion::new();
+    {
+        let p_enter = popover.clone();
+        let active_pop_c = active_popover.clone();
+        motion.connect_enter(move |_, _, _| {
+            if let Some(prev) = active_pop_c.borrow_mut().take() {
+                prev.popdown();
+            }
+            *active_pop_c.borrow_mut() = Some(p_enter.clone());
+            p_enter.popup();
+        });
+    }
+    {
+        let p_leave = popover.clone();
+        let active_pop_c = active_popover.clone();
+        motion.connect_leave(move |_| {
+            p_leave.popdown();
+            let mut cur = active_pop_c.borrow_mut();
+            if let Some(ref c) = *cur {
+                if c == &p_leave {
+                    *cur = None;
+                }
+            }
+        });
+    }
+    btn.add_controller(motion);
+
+    popover
+}
+
+fn create_sidebar_item_btn(
+    id: &'static str,
+    icon_widget: &gtk4::Widget,
+    i18n_key: &'static str,
+    target_page_id: &str,
+    popover_labels: &Rc<RefCell<Vec<(gtk4::Label, &'static str)>>>,
+    active_popover: &Rc<RefCell<Option<gtk4::Popover>>>,
+) -> gtk4::Button {
+    let btn = gtk4::Button::new();
+    btn.add_css_class("sidebar-item");
+    btn.add_css_class("sidebar-icon-btn");
+    btn.add_css_class("flat");
+    btn.set_cursor_from_name(Some("pointer"));
+    btn.set_halign(gtk4::Align::Center);
+    btn.set_valign(gtk4::Align::Center);
+    btn.set_size_request(44, 44);
+
+    let hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    hbox.set_halign(gtk4::Align::Center);
+    hbox.set_valign(gtk4::Align::Center);
+    icon_widget.set_valign(gtk4::Align::Center);
+    icon_widget.set_halign(gtk4::Align::Center);
+    hbox.append(icon_widget);
+
+    let hidden_lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans(i18n_key)));
+    hidden_lbl.set_visible(false);
+    hbox.append(&hidden_lbl);
+
+    btn.set_child(Some(&hbox));
+
+    if id == target_page_id {
+        btn.add_css_class("active-nav");
+    }
+
+    attach_sidebar_popover(&btn, i18n_key, popover_labels, active_popover);
+
+    btn
+}
+
 pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     let window = gtk4::ApplicationWindow::new(app);
     window.set_title(Some("Settings"));
@@ -179,51 +269,46 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     backdrop.set_can_target(false);
     backdrop.add_css_class("settings-surface-tint");
 
-    // ── Left: Sidebar Navigation Container ─────────────────────
-    let sidebar_box = gtk4::Box::new(gtk4::Orientation::Vertical, 10);
+    // ── Left: Slim Sidebar Navigation Dock ─────────────────────
+    let sidebar_box = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
     sidebar_box.add_css_class("sidebar");
-    sidebar_box.set_width_request(240);
+    sidebar_box.set_width_request(68);
     sidebar_box.set_hexpand(false);
     sidebar_box.set_vexpand(true);
-    sidebar_box.set_margin_top(8);
-    sidebar_box.set_margin_bottom(8);
-    sidebar_box.set_margin_start(8);
+    sidebar_box.set_margin_top(12);
+    sidebar_box.set_margin_bottom(12);
+    sidebar_box.set_margin_start(10);
+    sidebar_box.set_margin_end(2);
+    sidebar_box.set_halign(gtk4::Align::Center);
+
+    let active_popover: Rc<RefCell<Option<gtk4::Popover>>> = Rc::new(RefCell::new(None));
+    let popover_labels: Rc<RefCell<Vec<(gtk4::Label, &'static str)>>> =
+        Rc::new(RefCell::new(Vec::new()));
 
     // App Header Button (navigates to Generic Settings)
     let profile_btn = gtk4::Button::new();
     profile_btn.add_css_class("sidebar-header-btn");
+    profile_btn.add_css_class("flat");
     profile_btn.set_cursor_from_name(Some("pointer"));
+    profile_btn.set_halign(gtk4::Align::Center);
+    profile_btn.set_valign(gtk4::Align::Center);
+    profile_btn.set_size_request(44, 44);
     if target_page_id == "general" {
         profile_btn.add_css_class("active-nav");
     }
 
-    let profile_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 10);
-    profile_box.set_margin_top(6);
-    profile_box.set_margin_bottom(6);
-    profile_box.set_margin_start(8);
-    profile_box.set_margin_end(8);
-
-    let logo_img = babydra_ui_kit::ui::icon::get_icon("logo", 28);
-    logo_img.set_pixel_size(28);
+    let logo_img = babydra_ui_kit::ui::icon::get_icon("logo", 26);
+    logo_img.set_pixel_size(26);
     logo_img.set_valign(gtk4::Align::Center);
-    profile_box.append(&logo_img);
+    logo_img.set_halign(gtk4::Align::Center);
+    profile_btn.set_child(Some(&logo_img));
 
-    let title_info_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
-    title_info_box.set_valign(gtk4::Align::Center);
-    title_info_box.set_hexpand(true);
-
-    let app_title_lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.title")));
-    app_title_lbl.add_css_class("profile-user-name");
-    app_title_lbl.set_halign(gtk4::Align::Start);
-
-    let app_sub_lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans("settings.subtitle")));
-    app_sub_lbl.add_css_class("settings-row-desc");
-    app_sub_lbl.set_halign(gtk4::Align::Start);
-
-    title_info_box.append(&app_title_lbl);
-    title_info_box.append(&app_sub_lbl);
-    profile_box.append(&title_info_box);
-    profile_btn.set_child(Some(&profile_box));
+    attach_sidebar_popover(
+        &profile_btn,
+        "settings.title",
+        &popover_labels,
+        &active_popover,
+    );
     sidebar_box.append(&profile_btn);
 
     let profile_sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
@@ -234,32 +319,32 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     let sidebar_scroll = gtk4::ScrolledWindow::new();
     sidebar_scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
     sidebar_scroll.set_vexpand(true);
+    sidebar_scroll.set_halign(gtk4::Align::Center);
 
     let nav_container = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
+    nav_container.set_halign(gtk4::Align::Center);
 
-    let category_labels: Rc<RefCell<Vec<(gtk4::Label, &'static str)>>> =
-        Rc::new(RefCell::new(Vec::new()));
     type NavButtonItem = (&'static str, gtk4::Button, &'static str, &'static str);
     let nav_buttons: Rc<RefCell<Vec<NavButtonItem>>> = Rc::new(RefCell::new(Vec::new()));
     let sidebar_status = Rc::new(RefCell::new(sidebar::SidebarStatus::default()));
 
-    for cat in NAV_CATEGORIES {
-        let hdr = sidebar::create_sidebar_cat(cat.title_key);
-        nav_container.append(&hdr);
-        category_labels.borrow_mut().push((hdr, cat.title_key));
+    for (cat_idx, cat) in NAV_CATEGORIES.iter().enumerate() {
+        if cat_idx > 0 {
+            let sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
+            sep.add_css_class("sidebar-nav-separator");
+            nav_container.append(&sep);
+        }
 
         for item in cat.items {
             let icon_w = sidebar::create_sidebar_icon(item.id, item.icon);
-            let btn = babydra_ui_kit::components::create_sidebar_wbtn(
-                &babydra_core::i18n::trans(item.i18n_key),
+            let btn = create_sidebar_item_btn(
+                item.id,
                 &icon_w,
-                "sidebar-item",
-                || {},
+                item.i18n_key,
+                &target_page_id,
+                &popover_labels,
+                &active_popover,
             );
-            btn.set_cursor_from_name(Some("pointer"));
-            if item.id == target_page_id {
-                btn.add_css_class("active-nav");
-            }
             nav_container.append(&btn);
             nav_buttons
                 .borrow_mut()
@@ -269,16 +354,14 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
 
     // Pinned Footer Item (About System)
     let sys_icon_w = sidebar::create_sidebar_icon(FOOTER_ITEM.id, FOOTER_ITEM.icon);
-    let btn_sys = babydra_ui_kit::components::create_sidebar_wbtn(
-        &babydra_core::i18n::trans(FOOTER_ITEM.i18n_key),
+    let btn_sys = create_sidebar_item_btn(
+        FOOTER_ITEM.id,
         &sys_icon_w,
-        "sidebar-item",
-        || {},
+        FOOTER_ITEM.i18n_key,
+        &target_page_id,
+        &popover_labels,
+        &active_popover,
     );
-    if FOOTER_ITEM.id == target_page_id {
-        btn_sys.add_css_class("active-nav");
-    }
-    btn_sys.set_cursor_from_name(Some("pointer"));
     nav_buttons.borrow_mut().push((
         FOOTER_ITEM.id,
         btn_sys.clone(),
@@ -287,12 +370,11 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     ));
 
     let footer_sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
-    footer_sep.add_css_class("profile-separator");
+    footer_sep.add_css_class("sidebar-nav-separator");
 
-    let footer_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
-    footer_box.set_margin_start(4);
-    footer_box.set_margin_end(4);
-    footer_box.set_margin_bottom(8);
+    let footer_box = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
+    footer_box.set_halign(gtk4::Align::Center);
+    footer_box.set_margin_bottom(6);
     footer_box.append(&footer_sep);
     footer_box.append(&btn_sys);
 
@@ -316,14 +398,15 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     content_stack.set_visible_child_name(&target_page_id);
 
     let right_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    right_box.add_css_class("settings-content-card");
     right_box.set_hexpand(true);
     right_box.set_vexpand(true);
     right_box.set_halign(gtk4::Align::Fill);
     right_box.set_valign(gtk4::Align::Fill);
-    right_box.set_margin_top(8);
-    right_box.set_margin_bottom(8);
-    right_box.set_margin_start(8);
-    right_box.set_margin_end(8);
+    right_box.set_margin_top(12);
+    right_box.set_margin_bottom(12);
+    right_box.set_margin_start(6);
+    right_box.set_margin_end(12);
     // Every settings page owns its scrolling viewport.  Adding a second
     // non-scrollable ScrolledWindow here makes the Stack measure at zero on
     // GTK4 versions that use the viewport's minimum size during allocation.
@@ -360,7 +443,11 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
         let stack_c = content_stack.clone();
         let nav_buttons_c = nav_buttons.clone();
         let profile_btn_c = profile_btn.clone();
+        let active_pop_c = active_popover.clone();
         profile_btn.connect_clicked(move |_| {
+            if let Some(p) = active_pop_c.borrow_mut().take() {
+                p.popdown();
+            }
             for (_, b, _, _) in nav_buttons_c.borrow().iter() {
                 b.remove_css_class("active-nav");
             }
@@ -377,8 +464,12 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
         let nav_buttons_c = nav_buttons.clone();
         let button_c = button.clone();
         let profile_btn_c = profile_btn.clone();
+        let active_pop_c = active_popover.clone();
 
         button.connect_clicked(move |_| {
+            if let Some(p) = active_pop_c.borrow_mut().take() {
+                p.popdown();
+            }
             profile_btn_c.remove_css_class("active-nav");
             for (_, b, _, _) in nav_buttons_c.borrow().iter() {
                 b.remove_css_class("active-nav");
@@ -407,32 +498,24 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     let rebuild_action = gio::SimpleAction::new("rebuild-ui", None);
     {
         let content_stack_c = content_stack.clone();
-        let app_title_lbl_c = app_title_lbl.clone();
-        let app_sub_lbl_c = app_sub_lbl.clone();
-        let category_labels_c = category_labels.clone();
         let nav_buttons_c = nav_buttons.clone();
+        let popover_labels_c = popover_labels.clone();
 
         rebuild_action.connect_activate(move |_, _| {
             let stack = content_stack_c.clone();
-            let title = app_title_lbl_c.clone();
-            let sub = app_sub_lbl_c.clone();
-            let cat_labels = category_labels_c.clone();
             let buttons = nav_buttons_c.clone();
+            let pop_labels = popover_labels_c.clone();
 
             gtk4::glib::idle_add_local_once(move || {
-                // 1. Update category header labels
-                for (lbl, key) in cat_labels.borrow().iter() {
+                // 1. Update popover tooltip labels
+                for (lbl, key) in pop_labels.borrow().iter() {
                     lbl.set_text(&babydra_core::i18n::trans(key));
                 }
 
                 // 2. Update sidebar item icons and labels
                 refresh_sidebar(&buttons);
 
-                // 3. Update main header labels
-                title.set_text(&babydra_core::i18n::trans("settings.title"));
-                sub.set_text(&babydra_core::i18n::trans("settings.subtitle"));
-
-                // 4. Clear unvisited cached pages and rebuild current active page
+                // 3. Clear unvisited cached pages and rebuild current active page
                 if let Some(current_name) = stack.visible_child_name().map(|s| s.to_string()) {
                     while let Some(child) = stack.first_child() {
                         stack.remove(&child);

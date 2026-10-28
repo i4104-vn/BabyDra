@@ -262,6 +262,7 @@ pub(crate) fn start_status_updates(
 }
 
 /// Creates a new `sidebar category header`.
+#[allow(dead_code)]
 pub(crate) fn create_sidebar_cat(key: &str) -> gtk4::Label {
     let lbl = gtk4::Label::new(Some(&babydra_core::i18n::trans(key)));
     lbl.add_css_class("sidebar-section-label");
