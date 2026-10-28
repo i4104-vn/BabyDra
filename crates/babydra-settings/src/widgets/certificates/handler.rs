@@ -31,7 +31,7 @@ pub fn reload_cert_list(
         card.add_css_class("settings-card");
         card.add_css_class("device-card");
         card.add_css_class("cert-card");
-        card.set_size_request(290, 136);
+        card.set_size_request(240, 130);
         card.set_halign(gtk4::Align::Start);
         card.set_valign(gtk4::Align::Start);
 
@@ -102,30 +102,20 @@ pub fn reload_cert_list(
         text_box.set_halign(gtk4::Align::Start);
         text_box.set_hexpand(true);
 
-        let display_name = if cert.filename.chars().count() > 22 {
-            let truncated: String = cert.filename.chars().take(22).collect();
-            format!("{}...", truncated)
-        } else {
-            cert.filename.clone()
-        };
-        let name_lbl = gtk4::Label::new(Some(&display_name));
+        let name_lbl = gtk4::Label::new(Some(&cert.filename));
         name_lbl.add_css_class("settings-row-title");
         name_lbl.add_css_class("device-card-title");
         name_lbl.set_halign(gtk4::Align::Start);
         name_lbl.set_tooltip_text(Some(&cert.filename));
+        name_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
         text_box.append(&name_lbl);
 
-        let display_path = if cert.path.chars().count() > 28 {
-            let truncated: String = cert.path.chars().take(28).collect();
-            format!("{}...", truncated)
-        } else {
-            cert.path.clone()
-        };
-        let path_lbl = gtk4::Label::new(Some(&display_path));
+        let path_lbl = gtk4::Label::new(Some(&cert.path));
         path_lbl.add_css_class("settings-row-desc");
         path_lbl.add_css_class("device-card-subtitle");
         path_lbl.set_halign(gtk4::Align::Start);
         path_lbl.set_tooltip_text(Some(&cert.path));
+        path_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
         text_box.append(&path_lbl);
 
         bottom_row.append(&text_box);

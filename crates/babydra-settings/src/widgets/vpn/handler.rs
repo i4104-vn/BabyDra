@@ -41,7 +41,7 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
         card.add_css_class("settings-card");
         card.add_css_class("device-card");
         card.add_css_class("vpn-card");
-        card.set_size_request(290, 136);
+        card.set_size_request(240, 130);
         card.set_halign(gtk4::Align::Start);
         card.set_valign(gtk4::Align::Start);
 
@@ -179,17 +179,12 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
         text_box.set_halign(gtk4::Align::Start);
         text_box.set_hexpand(true);
 
-        let display_name = if vpn.name.chars().count() > 24 {
-            let truncated: String = vpn.name.chars().take(24).collect();
-            format!("{}...", truncated)
-        } else {
-            vpn.name.clone()
-        };
-        let name_lbl = gtk4::Label::new(Some(&display_name));
+        let name_lbl = gtk4::Label::new(Some(&vpn.name));
         name_lbl.add_css_class("settings-row-title");
         name_lbl.add_css_class("device-card-title");
         name_lbl.set_halign(gtk4::Align::Start);
         name_lbl.set_tooltip_text(Some(&vpn.name));
+        name_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
         text_box.append(&name_lbl);
 
         let sub_text = if vpn.active {
@@ -206,6 +201,7 @@ pub fn render_vpn_list<F: Fn() + Clone + 'static>(
         desc_lbl.add_css_class("settings-row-desc");
         desc_lbl.add_css_class("device-card-subtitle");
         desc_lbl.set_halign(gtk4::Align::Start);
+        desc_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
         text_box.append(&desc_lbl);
 
         bottom_row.append(&text_box);

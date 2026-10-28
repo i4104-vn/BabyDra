@@ -64,7 +64,7 @@ pub fn create_card<F: Fn() + 'static>(cmd: &StartupCommand, on_delete: F) -> Box
     card.add_css_class("settings-card");
     card.add_css_class("device-card");
     card.add_css_class("startup-card");
-    card.set_size_request(290, 136);
+    card.set_size_request(240, 130);
     card.set_halign(Align::Start);
     card.set_valign(Align::Start);
 
@@ -125,31 +125,21 @@ pub fn create_card<F: Fn() + 'static>(cmd: &StartupCommand, on_delete: F) -> Box
     text_box.set_hexpand(true);
 
     let title_text = extract_command_title(cmd);
-    let display_title = if title_text.chars().count() > 22 {
-        let truncated: String = title_text.chars().take(22).collect();
-        format!("{}...", truncated)
-    } else {
-        title_text.clone()
-    };
-    let name_lbl = Label::new(Some(&display_title));
+    let name_lbl = Label::new(Some(&title_text));
     name_lbl.add_css_class("settings-row-title");
     name_lbl.add_css_class("device-card-title");
     name_lbl.set_halign(Align::Start);
     name_lbl.set_tooltip_text(Some(&title_text));
+    name_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
     text_box.append(&name_lbl);
 
     let cmd_text = &cmd.command;
-    let display_cmd = if cmd_text.chars().count() > 26 {
-        let truncated: String = cmd_text.chars().take(26).collect();
-        format!("{}...", truncated)
-    } else {
-        cmd_text.clone()
-    };
-    let desc_lbl = Label::new(Some(&display_cmd));
+    let desc_lbl = Label::new(Some(cmd_text));
     desc_lbl.add_css_class("settings-row-desc");
     desc_lbl.add_css_class("device-card-subtitle");
     desc_lbl.set_halign(Align::Start);
     desc_lbl.set_tooltip_text(Some(cmd_text));
+    desc_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
     text_box.append(&desc_lbl);
 
     bottom_row.append(&text_box);

@@ -286,8 +286,8 @@ flowbox.settings-card-flow > flowboxchild:hover {
 
 /* Smart Device Cards (VPN, CA Cert, Displays) */
 .device-card {
-    border-radius: 18px;
-    padding: 16px 18px;
+    border-radius: 16px;
+    padding: 14px 16px;
     transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
 }
 
