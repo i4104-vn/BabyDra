@@ -7,6 +7,7 @@ use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
 
+mod devices;
 mod handlers;
 mod render;
 
@@ -27,6 +28,7 @@ pub fn create_sidebar(
 
     let active_popover: Rc<RefCell<Option<gtk4::Popover>>> = Rc::new(RefCell::new(None));
     let all_buttons: Rc<RefCell<Vec<(PathBuf, gtk4::Button)>>> = Rc::new(RefCell::new(Vec::new()));
+    let current_drag_id: Rc<RefCell<Option<String>>> = Rc::new(RefCell::new(None));
 
     // ── Top App Header Button (navigates to Home) ───────────────────
     let logo_btn = gtk4::Button::new();
@@ -70,6 +72,49 @@ pub fn create_sidebar(
         });
     }
 
+    let rebuild_sidebar: CallbackCell = Rc::new(RefCell::new(None));
+    let rebuild_sidebar_c = rebuild_sidebar.clone();
+
+    // Top Header drop target: moving an item to the very top (index 0)
+    let top_drop = gtk4::DropTarget::new(String::static_type(), gtk4::gdk::DragAction::MOVE);
+    let cur_drag_top = current_drag_id.clone();
+    let logo_btn_enter = logo_btn.clone();
+    top_drop.connect_enter(move |_, _, _| {
+        if cur_drag_top.borrow().is_some() {
+            logo_btn_enter.add_css_class("drop-indicator-bottom");
+            return gtk4::gdk::DragAction::MOVE;
+        }
+        gtk4::gdk::DragAction::empty()
+    });
+
+    let logo_btn_leave = logo_btn.clone();
+    top_drop.connect_leave(move |_| {
+        logo_btn_leave.remove_css_class("drop-indicator-bottom");
+    });
+
+    let logo_btn_drop = logo_btn.clone();
+    let cur_drag_top_drop = current_drag_id.clone();
+    let rebuild_top = rebuild_sidebar.clone();
+    top_drop.connect_drop(move |_, value, _, _| {
+        logo_btn_drop.remove_css_class("drop-indicator-bottom");
+        cur_drag_top_drop.replace(None);
+
+        if let Ok(source_id) = value.get::<String>() {
+            let mut items = babydra_core::config::sidebar_layout::load_sidebar_layout();
+            if let Some(src_idx) = items.iter().position(|i| i.id == source_id) {
+                let item = items.remove(src_idx);
+                items.insert(0, item);
+                babydra_core::config::sidebar_layout::save_sidebar_layout(&items);
+                if let Some(ref rb) = *rebuild_top.borrow() {
+                    rb();
+                }
+                return true;
+            }
+        }
+        false
+    });
+    logo_btn.add_controller(top_drop);
+
     let profile_sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);
     profile_sep.add_css_class("profile-separator");
 
@@ -79,8 +124,7 @@ pub fn create_sidebar(
     top_box.append(&profile_sep);
     sidebar_box.prepend(&top_box);
 
-    let rebuild_sidebar: CallbackCell = Rc::new(RefCell::new(None));
-    let rebuild_sidebar_c = rebuild_sidebar.clone();
+    let current_drag_id_c = current_drag_id.clone();
 
     let rebuild_fn = move || {
         while let Some(child) = nav_container_c.first_child() {
@@ -95,53 +139,157 @@ pub fn create_sidebar(
         let mut has_sep = false;
         let rc_cb = rebuild_sidebar_c.borrow().as_ref().unwrap().clone();
 
-        for item in items {
+        // ── 1. Upper Nav Container (Places & Bookmarks only) ─────────
+        for item in &items {
             let name = if item.name.starts_with("explore.") {
                 trans(&item.name)
             } else {
                 item.name.clone()
             };
 
-            if item.id == "trash" {
-                // Pin Trash to footer dock
-                let sep = render::create_sidebar_sep();
-                footer_box_c.append(&sep);
-                add_sidebar_item(SidebarItemArgs {
-                    container: &footer_box_c,
-                    name: &name,
-                    icon_name: &item.icon,
-                    path: item.path.clone(),
-                    session: &session_c,
-                    nav_callback: &nav_cb_c,
-                    item_id: item.id.clone(),
-                    rebuild_cb: rc_cb.clone(),
-                    active_popover: &active_popover,
-                    all_buttons: &all_buttons,
-                });
-            } else {
-                if item.is_bookmark && !has_sep {
-                    nav_container_c.append(&render::create_sidebar_sep());
-                    has_sep = true;
-                }
-
-                add_sidebar_item(SidebarItemArgs {
-                    container: &nav_container_c,
-                    name: &name,
-                    icon_name: &item.icon,
-                    path: item.path.clone(),
-                    session: &session_c,
-                    nav_callback: &nav_cb_c,
-                    item_id: item.id.clone(),
-                    rebuild_cb: rc_cb.clone(),
-                    active_popover: &active_popover,
-                    all_buttons: &all_buttons,
-                });
+            // Local disk and trash are pinned to footer dock
+            if item.id == "trash" || item.id == "this_pc" {
+                continue;
             }
+
+            if item.is_bookmark && !has_sep {
+                nav_container_c.append(&render::create_sidebar_sep());
+                has_sep = true;
+            }
+
+            add_sidebar_item(SidebarItemArgs {
+                container: &nav_container_c,
+                name: &name,
+                icon_name: &item.icon,
+                path: item.path.clone(),
+                session: &session_c,
+                nav_callback: &nav_cb_c,
+                item_id: item.id.clone(),
+                rebuild_cb: rc_cb.clone(),
+                active_popover: &active_popover,
+                all_buttons: &all_buttons,
+                is_reorderable: true,
+                current_drag_id: &current_drag_id_c,
+                mount: None,
+            });
         }
+
+        // ── 2. Footer Dock: Separator, Local Disk, USB Devices, Trash ──
+        let sep = render::create_sidebar_sep();
+        footer_box_c.append(&sep);
+
+        // Local Disk (above Trash)
+        let local_disk_item = items
+            .iter()
+            .find(|i| i.id == "this_pc")
+            .cloned()
+            .unwrap_or_else(|| babydra_core::config::sidebar_layout::SidebarItem {
+                id: "this_pc".to_string(),
+                name: "explore.local_disk".to_string(),
+                icon: "drive-harddisk".to_string(),
+                path: PathBuf::from("/"),
+                is_bookmark: false,
+            });
+
+        let local_disk_name = if local_disk_item.name.starts_with("explore.") {
+            trans(&local_disk_item.name)
+        } else {
+            local_disk_item.name.clone()
+        };
+
+        add_sidebar_item(SidebarItemArgs {
+            container: &footer_box_c,
+            name: &local_disk_name,
+            icon_name: &local_disk_item.icon,
+            path: local_disk_item.path.clone(),
+            session: &session_c,
+            nav_callback: &nav_cb_c,
+            item_id: local_disk_item.id.clone(),
+            rebuild_cb: rc_cb.clone(),
+            active_popover: &active_popover,
+            all_buttons: &all_buttons,
+            is_reorderable: false,
+            current_drag_id: &current_drag_id_c,
+            mount: None,
+        });
+
+        // Removable devices (USB flash drives, external storage)
+        let mounted_devices = devices::get_mounted_devices();
+        for dev in mounted_devices {
+            add_sidebar_item(SidebarItemArgs {
+                container: &footer_box_c,
+                name: &dev.name,
+                icon_name: &dev.icon,
+                path: dev.path.clone(),
+                session: &session_c,
+                nav_callback: &nav_cb_c,
+                item_id: dev.id.clone(),
+                rebuild_cb: rc_cb.clone(),
+                active_popover: &active_popover,
+                all_buttons: &all_buttons,
+                is_reorderable: false,
+                current_drag_id: &current_drag_id_c,
+                mount: dev.mount,
+            });
+        }
+
+        // Trash (at the very bottom)
+        let trash_item = items
+            .iter()
+            .find(|i| i.id == "trash")
+            .cloned()
+            .unwrap_or_else(|| {
+                let trash_path = glib::user_data_dir().join("Trash/files");
+                babydra_core::config::sidebar_layout::SidebarItem {
+                    id: "trash".to_string(),
+                    name: "explore.trash".to_string(),
+                    icon: "user-trash".to_string(),
+                    path: trash_path,
+                    is_bookmark: false,
+                }
+            });
+
+        let trash_name = if trash_item.name.starts_with("explore.") {
+            trans(&trash_item.name)
+        } else {
+            trash_item.name.clone()
+        };
+
+        add_sidebar_item(SidebarItemArgs {
+            container: &footer_box_c,
+            name: &trash_name,
+            icon_name: &trash_item.icon,
+            path: trash_item.path.clone(),
+            session: &session_c,
+            nav_callback: &nav_cb_c,
+            item_id: trash_item.id.clone(),
+            rebuild_cb: rc_cb.clone(),
+            active_popover: &active_popover,
+            all_buttons: &all_buttons,
+            is_reorderable: false,
+            current_drag_id: &current_drag_id_c,
+            mount: None,
+        });
     };
 
     *rebuild_sidebar.borrow_mut() = Some(Rc::new(rebuild_fn));
     rebuild_sidebar.borrow().as_ref().unwrap()();
+
+    // Device monitoring: automatically re-render when USB drives are plugged in or unplugged
+    let rb_dev = rebuild_sidebar.clone();
+    devices::setup_device_monitor(move || {
+        if let Some(ref rb) = *rb_dev.borrow() {
+            rb();
+        }
+    });
+
+    // Auto-mount any unmounted volumes
+    let rb_init = rebuild_sidebar.clone();
+    devices::auto_mount_volumes(move || {
+        if let Some(ref rb) = *rb_init.borrow() {
+            rb();
+        }
+    });
 
     // Drop target on the entire sidebar to add new bookmarks
     let rb_cb = rebuild_sidebar.borrow().as_ref().unwrap().clone();

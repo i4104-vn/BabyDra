@@ -1,6 +1,8 @@
 //! Sidebar item action handlers: navigation, drag & drop, reorder and right-click.
 
+use babydra_core::i18n::trans;
 use babydra_core::SessionState;
+use gio::prelude::*;
 use gtk4::prelude::*;
 use gtk4::Box;
 use std::cell::RefCell;
@@ -18,6 +20,9 @@ pub struct SidebarItemArgs<'a> {
     pub rebuild_cb: Rc<dyn Fn()>,
     pub active_popover: &'a Rc<RefCell<Option<gtk4::Popover>>>,
     pub all_buttons: &'a Rc<RefCell<Vec<(PathBuf, gtk4::Button)>>>,
+    pub is_reorderable: bool,
+    pub current_drag_id: &'a Rc<RefCell<Option<String>>>,
+    pub mount: Option<gio::Mount>,
 }
 
 pub fn add_sidebar_item(args: SidebarItemArgs<'_>) {
@@ -32,6 +37,9 @@ pub fn add_sidebar_item(args: SidebarItemArgs<'_>) {
         rebuild_cb,
         active_popover,
         all_buttons,
+        is_reorderable,
+        current_drag_id,
+        mount,
     } = args;
 
     let nav_cb = nav_callback.clone();
@@ -70,62 +78,163 @@ pub fn add_sidebar_item(args: SidebarItemArgs<'_>) {
 
     all_buttons.borrow_mut().push((path.clone(), btn.clone()));
 
-    // 1. Drop target: move files into this folder
+    // 1. Drop target: move files into this folder/drive
     let drop_target = babydra_ui_kit::components::explore::create_drop_nav(
         path,
         Some(nav_callback.clone()),
     );
     btn.add_controller(drop_target);
 
-    // 2. Drag source: sidebar item reorder
-    let drag_source = gtk4::DragSource::new();
-    drag_source.set_actions(gtk4::gdk::DragAction::MOVE);
-    let id_clone = item_id.clone();
-    drag_source.connect_prepare(move |_, _, _| {
-        Some(gtk4::gdk::ContentProvider::for_value(&id_clone.to_value()))
-    });
-    btn.add_controller(drag_source);
+    // 2. Drag & Drop reordering (for upper places & bookmarks)
+    if is_reorderable {
+        let drag_source = gtk4::DragSource::new();
+        drag_source.set_actions(gtk4::gdk::DragAction::MOVE);
+        let id_clone = item_id.clone();
+        drag_source.connect_prepare(move |_, _, _| {
+            Some(gtk4::gdk::ContentProvider::for_value(&id_clone.to_value()))
+        });
 
-    // 3. Drop target: sidebar item reorder
-    let reorder_drop = gtk4::DropTarget::new(String::static_type(), gtk4::gdk::DragAction::MOVE);
-    let target_id = item_id.clone();
-    let rebuild_cb_c = rebuild_cb.clone();
-    reorder_drop.connect_drop(move |_, value, _, _| {
-        if let Ok(source_id) = value.get::<String>() {
-            if source_id != target_id {
-                let mut items = babydra_core::config::sidebar_layout::load_sidebar_layout();
-                if let Some(src_idx) = items.iter().position(|i| i.id == source_id) {
-                    if let Some(dst_idx) = items.iter().position(|i| i.id == target_id) {
-                        let item = items.remove(src_idx);
-                        items.insert(dst_idx, item);
-                        babydra_core::config::sidebar_layout::save_sidebar_layout(&items);
-                        rebuild_cb_c();
-                        return true;
+        let cur_drag_start = current_drag_id.clone();
+        let id_start = item_id.clone();
+        drag_source.connect_drag_begin(move |_, _| {
+            cur_drag_start.replace(Some(id_start.clone()));
+        });
+
+        let cur_drag_end = current_drag_id.clone();
+        let all_btns_drag = all_buttons.clone();
+        drag_source.connect_drag_end(move |_, _, _| {
+            cur_drag_end.replace(None);
+            for (_, b) in all_btns_drag.borrow().iter() {
+                b.remove_css_class("drop-indicator-bottom");
+            }
+        });
+
+        btn.add_controller(drag_source);
+
+        // Drop target: sidebar item reorder with visual horizontal line indicator
+        let reorder_drop = gtk4::DropTarget::new(String::static_type(), gtk4::gdk::DragAction::MOVE);
+        let target_id = item_id.clone();
+        let rebuild_cb_c = rebuild_cb.clone();
+        let cur_drag_enter = current_drag_id.clone();
+        let btn_enter = btn.clone();
+        let target_id_enter = target_id.clone();
+
+        reorder_drop.connect_enter(move |_, _, _| {
+            if let Some(ref src_id) = *cur_drag_enter.borrow() {
+                if src_id != &target_id_enter {
+                    btn_enter.add_css_class("drop-indicator-bottom");
+                    return gtk4::gdk::DragAction::MOVE;
+                }
+            }
+            gtk4::gdk::DragAction::empty()
+        });
+
+        let btn_leave = btn.clone();
+        reorder_drop.connect_leave(move |_| {
+            btn_leave.remove_css_class("drop-indicator-bottom");
+        });
+
+        let btn_drop = btn.clone();
+        let cur_drag_drop = current_drag_id.clone();
+        reorder_drop.connect_drop(move |_, value, _, _| {
+            btn_drop.remove_css_class("drop-indicator-bottom");
+            cur_drag_drop.replace(None);
+
+            if let Ok(source_id) = value.get::<String>() {
+                if source_id != target_id {
+                    let mut items = babydra_core::config::sidebar_layout::load_sidebar_layout();
+                    if let Some(src_idx) = items.iter().position(|i| i.id == source_id) {
+                        if let Some(dst_idx) = items.iter().position(|i| i.id == target_id) {
+                            let item = items.remove(src_idx);
+                            let insert_idx = if src_idx < dst_idx {
+                                dst_idx
+                            } else {
+                                dst_idx + 1
+                            };
+                            let clamped_idx = insert_idx.min(items.len());
+                            items.insert(clamped_idx, item);
+                            babydra_core::config::sidebar_layout::save_sidebar_layout(&items);
+                            rebuild_cb_c();
+                            return true;
+                        }
                     }
                 }
             }
-        }
-        false
-    });
-    btn.add_controller(reorder_drop);
+            false
+        });
+        btn.add_controller(reorder_drop);
+    }
 
-    // 4. Right click: remove bookmark
-    let right_click = gtk4::GestureClick::new();
-    right_click.set_button(3);
-    let rc_rebuild = rebuild_cb;
-    let item_id_rc = item_id;
-    right_click.connect_pressed(move |gesture, _, _, _| {
-        let mut items = babydra_core::config::sidebar_layout::load_sidebar_layout();
-        if let Some(idx) = items.iter().position(|i| i.id == item_id_rc) {
-            if items[idx].is_bookmark {
-                items.remove(idx);
-                babydra_core::config::sidebar_layout::save_sidebar_layout(&items);
-                rc_rebuild();
+    // 3. Right click for removable device (Unmount / Eject)
+    if let Some(mount) = mount {
+        let right_click_dev = gtk4::GestureClick::new();
+        right_click_dev.set_button(3);
+        let btn_mount = btn.clone();
+        let rebuild_dev = rebuild_cb.clone();
+        right_click_dev.connect_pressed(move |gesture, _, _, _| {
+            let popover = gtk4::Popover::builder()
+                .has_arrow(true)
+                .autohide(true)
+                .build();
+            popover.set_parent(&btn_mount);
+            babydra_ui_kit::ui::blur::enable_popover_blur(&popover);
+
+            let vbox = Box::new(gtk4::Orientation::Vertical, 2);
+            vbox.set_margin_top(4);
+            vbox.set_margin_bottom(4);
+            vbox.set_margin_start(4);
+            vbox.set_margin_end(4);
+
+            let eject_btn = gtk4::Button::builder()
+                .label(&trans("explore.eject_drive"))
+                .css_classes(vec!["menu-item".to_string(), "flat".to_string()])
+                .build();
+            eject_btn.set_cursor_from_name(Some("pointer"));
+
+            let pop_c = popover.clone();
+            let mount_c = mount.clone();
+            let rb_c = rebuild_dev.clone();
+            eject_btn.connect_clicked(move |_| {
+                pop_c.popdown();
+                let rb_inner = rb_c.clone();
+                mount_c.unmount_with_operation(
+                    gio::MountUnmountFlags::NONE,
+                    Option::<&gio::MountOperation>::None,
+                    gio::Cancellable::NONE,
+                    move |res| {
+                        if res.is_ok() {
+                            rb_inner();
+                        }
+                    },
+                );
+            });
+
+            vbox.append(&eject_btn);
+            popover.set_child(Some(&vbox));
+            popover.popup();
+            gesture.set_state(gtk4::EventSequenceState::Claimed);
+        });
+        btn.add_controller(right_click_dev);
+    } else {
+        // Right click: remove bookmark
+        let right_click = gtk4::GestureClick::new();
+        right_click.set_button(3);
+        let rc_rebuild = rebuild_cb;
+        let item_id_rc = item_id;
+        right_click.connect_pressed(move |gesture, _, _, _| {
+            let mut items = babydra_core::config::sidebar_layout::load_sidebar_layout();
+            if let Some(idx) = items.iter().position(|i| i.id == item_id_rc) {
+                if items[idx].is_bookmark {
+                    items.remove(idx);
+                    babydra_core::config::sidebar_layout::save_sidebar_layout(&items);
+                    rc_rebuild();
+                }
             }
-        }
-        gesture.set_state(gtk4::EventSequenceState::Claimed);
-    });
-    btn.add_controller(right_click);
+            gesture.set_state(gtk4::EventSequenceState::Claimed);
+        });
+        btn.add_controller(right_click);
+    }
 
     container.append(&btn);
 }
+

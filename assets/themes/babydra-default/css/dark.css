@@ -1893,6 +1893,16 @@ button.sidebar-item.active-nav:hover label,
     font-weight: 600;
 }
 
+/* Sidebar drag & drop insertion indicator line (dark) */
+button.sidebar-icon-btn.drop-indicator-bottom,
+button.sidebar-header-btn.drop-indicator-bottom,
+button.sidebar-item.drop-indicator-bottom {
+    border-bottom: 3px solid #60cdff;
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+    box-shadow: 0 4px 12px rgba(96, 205, 255, 0.45);
+}
+
 /* Sidebar Popover in Dark Theme */
 popover.sidebar-item-popover {
     background: transparent;

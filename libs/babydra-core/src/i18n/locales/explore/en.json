@@ -27,6 +27,7 @@
   "explore.desktop": "Desktop",
   "explore.trash": "Trash",
   "explore.local_disk": "Local Disk (/)",
+  "explore.eject_drive": "Eject",
   "explore.toggle_hidden": "Toggle Hidden Files (Ctrl+H)",
   "explore.toggle_preview": "Toggle Preview (F4)",
   "explore.preview_no_selection": "Select a file to preview",

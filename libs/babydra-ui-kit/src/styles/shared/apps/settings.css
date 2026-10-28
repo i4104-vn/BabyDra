@@ -67,6 +67,16 @@ button.sidebar-icon-btn {
     transition: background-color 150ms ease, box-shadow 150ms ease;
 }
 
+/* Sidebar drag & drop reorder drop indicator line */
+button.sidebar-icon-btn.drop-indicator-bottom,
+button.sidebar-header-btn.drop-indicator-bottom,
+button.sidebar-item.drop-indicator-bottom {
+    border-bottom: 3px solid #60cdff !important;
+    border-bottom-left-radius: 2px !important;
+    border-bottom-right-radius: 2px !important;
+    box-shadow: 0 4px 10px rgba(96, 205, 255, 0.45) !important;
+}
+
 /* Popover Tooltip for Sidebar Dock */
 popover.sidebar-item-popover {
     background: transparent;

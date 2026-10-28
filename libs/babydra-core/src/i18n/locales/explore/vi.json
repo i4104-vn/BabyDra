@@ -27,6 +27,7 @@
   "explore.desktop": "Màn hình chính",
   "explore.trash": "Thùng rác",
   "explore.local_disk": "Ổ đĩa cục bộ (/)",
+  "explore.eject_drive": "Ngắt kết nối (Eject)",
   "explore.toggle_hidden": "Ẩn/Hiện tệp ẩn (Ctrl+H)",
   "explore.toggle_preview": "Bật/Tắt xem trước (F4)",
   "explore.preview_no_selection": "Chọn một tệp để xem trước",
