@@ -397,12 +397,8 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     ensure_page_loaded(&content_stack, &target_page_id);
     content_stack.set_visible_child_name(&target_page_id);
 
-    let right_box = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    let right_box = babydra_ui_kit::components::cards::create_content_card();
     right_box.add_css_class("settings-content-card");
-    right_box.set_hexpand(true);
-    right_box.set_vexpand(true);
-    right_box.set_halign(gtk4::Align::Fill);
-    right_box.set_valign(gtk4::Align::Fill);
     right_box.set_margin_top(12);
     right_box.set_margin_bottom(12);
     right_box.set_margin_start(6);

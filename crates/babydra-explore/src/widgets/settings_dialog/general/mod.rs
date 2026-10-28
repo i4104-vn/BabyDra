@@ -1,8 +1,9 @@
-use babydra_core::i18n::trans;
-use gtk4::prelude::*;
-use gtk4::{Box, ListBox, Orientation};
+//! General settings tab builder for file explorer options.
 
-pub mod row;
+use babydra_core::i18n::trans;
+use babydra_ui_kit::components::create_switch_row;
+use gtk4::prelude::*;
+use gtk4::{Box, ListBox, ListBoxRow, Orientation};
 
 /// Builds the general settings page, mounting various toggles for file exploration features.
 pub fn build_general_page() -> Box {
@@ -16,74 +17,85 @@ pub fn build_general_page() -> Box {
     listbox.add_css_class("settings-card");
     tab_general.append(&listbox);
 
+    let append_toggle = |list: &ListBox, icon: &str, title: &str, desc: &str, initial: bool, on_change: fn(bool)| {
+        let row_widget = ListBoxRow::new();
+        row_widget.add_css_class("settings-card-row");
+        let (row, switch) = create_switch_row(icon, title, desc, initial);
+        switch.connect_state_set(move |state| {
+            on_change(state);
+        });
+        row_widget.set_child(Some(&row));
+        list.append(&row_widget);
+    };
+
     // 1. Show hidden files
-    row::add_switch_row(
+    append_toggle(
         &listbox,
         "eye-off",
         &trans("explore.toggle_hidden"),
         &trans("explore.settings_toggle_hidden_desc"),
         settings.show_hidden,
-        std::boxed::Box::new(|state| {
+        |state| {
             let mut s = babydra_core::load_explore_cfg();
             s.show_hidden = state;
             babydra_core::save_explore_cfg(&s);
-        }),
+        },
     );
 
     // 2. Preview Visible
-    row::add_switch_row(
+    append_toggle(
         &listbox,
         "sidebar",
         &trans("explore.toggle_preview"),
         &trans("explore.settings_toggle_preview_desc"),
         settings.preview_visible,
-        std::boxed::Box::new(|state| {
+        |state| {
             let mut s = babydra_core::load_explore_cfg();
             s.preview_visible = state;
             babydra_core::save_explore_cfg(&s);
-        }),
+        },
     );
 
     // 3. Double click to open
-    row::add_switch_row(
+    append_toggle(
         &listbox,
         "activity",
         &trans("explore.settings_double_click"),
         &trans("explore.settings_double_click_desc"),
         settings.double_click_to_open,
-        std::boxed::Box::new(|state| {
+        |state| {
             let mut s = babydra_core::load_explore_cfg();
             s.double_click_to_open = state;
             babydra_core::save_explore_cfg(&s);
-        }),
+        },
     );
 
     // 4. Permanent delete
-    row::add_switch_row(
+    append_toggle(
         &listbox,
         "trash",
         &trans("explore.settings_permanent_delete"),
         &trans("explore.settings_permanent_delete_desc"),
         settings.permanent_delete,
-        std::boxed::Box::new(|state| {
+        |state| {
             let mut s = babydra_core::load_explore_cfg();
             s.permanent_delete = state;
             babydra_core::save_explore_cfg(&s);
-        }),
+        },
     );
 
     // 5. Calculate folder sizes
-    row::add_switch_row(
+    append_toggle(
         &listbox,
         "info",
         &trans("explore.settings_calculate_size"),
         &trans("explore.settings_calculate_size_desc"),
         settings.calculate_dir_size,
-        std::boxed::Box::new(|state| {
+        |state| {
             let mut s = babydra_core::load_explore_cfg();
             s.calculate_dir_size = state;
             babydra_core::save_explore_cfg(&s);
-        }),
+        },
     );
 
     tab_general

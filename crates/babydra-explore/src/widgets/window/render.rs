@@ -31,10 +31,13 @@ pub fn build_window_ui(app: &gtk4::Application) -> MainWindowWidgets {
     main_paned.set_vexpand(true);
     vbox.append(&main_paned);
 
-    // Content Area VBox (contains SplitPaned + InfoPanel side-by-side)
-    let content_vbox = Box::new(Orientation::Vertical, 0);
-    content_vbox.set_hexpand(true);
-    content_vbox.set_vexpand(true);
+    // Content Area VBox (contains SplitPaned + InfoPanel side-by-side in floating rounded card)
+    let content_vbox = babydra_ui_kit::components::cards::create_content_card();
+    content_vbox.add_css_class("explore-content-card");
+    content_vbox.set_margin_top(8);
+    content_vbox.set_margin_bottom(8);
+    content_vbox.set_margin_start(4);
+    content_vbox.set_margin_end(10);
     main_paned.append(&content_vbox);
 
     // Horizontal Paned to show InfoPanel resizable next to split view

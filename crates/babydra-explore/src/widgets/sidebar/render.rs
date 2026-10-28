@@ -5,10 +5,14 @@ use gtk4::{Align, Box, Label, Orientation, ScrolledWindow, Separator};
 pub fn build_sidebar_ui() -> (ScrolledWindow, Box) {
     let container = ScrolledWindow::new();
     container.set_hscrollbar_policy(gtk4::PolicyType::Never);
-    container.set_css_classes(&["sidebar"]);
+    container.set_css_classes(&["sidebar", "explore-sidebar"]);
     container.set_width_request(200);
     container.set_hexpand(false);
     container.set_vexpand(true);
+    container.set_margin_top(8);
+    container.set_margin_bottom(8);
+    container.set_margin_start(8);
+    container.set_margin_end(4);
 
     let vbox = Box::new(Orientation::Vertical, 0);
     container.set_child(Some(&vbox));
