@@ -41,10 +41,20 @@ pub fn create_overlay_window(app: &gtk4::Application) -> OverlayWindowComponents
     overlay_box.set_hexpand(true);
     overlay_box.set_vexpand(true);
 
+    let top_spacer = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    top_spacer.set_vexpand(true);
+    top_spacer.set_can_target(false);
+
+    let bottom_spacer = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    bottom_spacer.set_vexpand(true);
+    bottom_spacer.set_can_target(false);
+
     let switcher_wrapper = gtk4::Box::new(gtk4::Orientation::Horizontal, 16);
     switcher_wrapper.add_css_class("switcher-main-row");
     switcher_wrapper.set_halign(gtk4::Align::End);
     switcher_wrapper.set_valign(gtk4::Align::Center);
+    switcher_wrapper.set_vexpand(false);
+    switcher_wrapper.set_hexpand(false);
     switcher_wrapper.set_margin_end(0);
 
     let meta_bar = gtk4::Box::new(gtk4::Orientation::Vertical, 3);
@@ -113,9 +123,9 @@ pub fn create_overlay_window(app: &gtk4::Application) -> OverlayWindowComponents
 
     switcher_wrapper.append(&meta_bar);
     switcher_wrapper.append(&deck_container);
-    switcher_wrapper.set_halign(gtk4::Align::End);
-    switcher_wrapper.set_valign(gtk4::Align::Center);
+    overlay_box.append(&top_spacer);
     overlay_box.append(&switcher_wrapper);
+    overlay_box.append(&bottom_spacer);
     window.set_child(Some(&overlay_box));
 
     attach_dismiss_click(&overlay_box, &switcher_wrapper, &window);
@@ -142,17 +152,25 @@ pub fn attach_dismiss_click(
     let click_gesture = gtk4::GestureClick::new();
     let window_hide = window.clone();
     let wrapper_ref = wrapper.clone();
+    let overlay_ref = overlay_box.clone();
     click_gesture.connect_pressed(move |gesture, _, x, y| {
+        let picked = overlay_ref.pick(x, y, gtk4::PickFlags::DEFAULT);
+        let inside_picked = picked
+            .as_ref()
+            .map(|w| w.is_ancestor(&wrapper_ref) || w == &wrapper_ref)
+            .unwrap_or(false);
+
         let (wrap_w, wrap_h) = (wrapper_ref.allocated_width(), wrapper_ref.allocated_height());
         let (alloc_x, alloc_y) = (
             wrapper_ref.allocation().x() as f64,
             wrapper_ref.allocation().y() as f64,
         );
-        let inside = x >= alloc_x
+        let inside_bounds = x >= alloc_x
             && x <= alloc_x + wrap_w as f64
             && y >= alloc_y
             && y <= alloc_y + wrap_h as f64;
-        if !inside {
+
+        if !inside_picked && !inside_bounds {
             gesture.set_state(gtk4::EventSequenceState::Claimed);
             window_hide.set_visible(false);
         }
