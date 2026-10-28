@@ -79,6 +79,7 @@ pub fn create_wifi_row(
     let ssid_lbl = gtk4::Label::new(Some(&net.ssid));
     ssid_lbl.add_css_class("settings-row-title");
     ssid_lbl.set_halign(gtk4::Align::Start);
+    ssid_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
     title_row.append(&ssid_lbl);
 
     if net.is_connected {

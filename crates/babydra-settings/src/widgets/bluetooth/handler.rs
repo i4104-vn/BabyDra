@@ -58,11 +58,13 @@ pub fn render_device_list(list_box: &gtk4::ListBox, state_ref: &BluetoothState) 
         let name_lbl = gtk4::Label::new(Some(&dev.name));
         name_lbl.add_css_class("settings-row-title");
         name_lbl.set_halign(gtk4::Align::Start);
+        name_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
         text_box.append(&name_lbl);
 
         let mac_lbl = gtk4::Label::new(Some(&dev.mac));
         mac_lbl.add_css_class("settings-row-desc");
         mac_lbl.set_halign(gtk4::Align::Start);
+        mac_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
         text_box.append(&mac_lbl);
 
         hbox.append(&text_box);

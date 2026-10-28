@@ -135,6 +135,7 @@ fn ensure_page_loaded(stack: &gtk4::Stack, name: &str) {
         page.set_vexpand(true);
         page.set_halign(gtk4::Align::Fill);
         page.set_valign(gtk4::Align::Fill);
+        page.set_size_request(0, 0);
         stack.add_named(&page, Some(name));
     }
 }
@@ -255,19 +256,10 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
 
     let overlay = gtk4::Overlay::new();
     let main_layout = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
-    // `main_layout` is an overlay child.  Overlay children otherwise keep
-    // their natural size on some GTK backends, which can collapse Settings
-    // to an empty/partially visible surface when the window is resized.
     main_layout.set_hexpand(true);
     main_layout.set_vexpand(true);
     main_layout.set_halign(gtk4::Align::Fill);
     main_layout.set_valign(gtk4::Align::Fill);
-
-    let backdrop = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
-    backdrop.set_hexpand(true);
-    backdrop.set_vexpand(true);
-    backdrop.set_can_target(false);
-    backdrop.add_css_class("settings-surface-tint");
 
     // ── Left: Slim Sidebar Navigation Dock ─────────────────────
     let sidebar_box = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
@@ -391,6 +383,7 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     content_stack.set_vexpand(true);
     content_stack.set_halign(gtk4::Align::Fill);
     content_stack.set_valign(gtk4::Align::Fill);
+    content_stack.set_size_request(0, 0);
     content_stack.add_css_class("settings-content");
 
     // Eagerly load target initial page
@@ -399,6 +392,11 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
 
     let right_box = babydra_ui_kit::components::cards::create_content_card();
     right_box.add_css_class("settings-content-card");
+    right_box.set_hexpand(true);
+    right_box.set_vexpand(true);
+    right_box.set_halign(gtk4::Align::Fill);
+    right_box.set_valign(gtk4::Align::Fill);
+    right_box.set_size_request(0, 0);
     right_box.set_margin_top(12);
     right_box.set_margin_bottom(12);
     right_box.set_margin_start(6);
@@ -409,8 +407,7 @@ pub fn build_main_window(app: &gtk4::Application, initial_page: Option<&str>) {
     right_box.append(&content_stack);
 
     main_layout.append(&right_box);
-    overlay.set_child(Some(&backdrop));
-    overlay.add_overlay(&main_layout);
+    overlay.set_child(Some(&main_layout));
 
     // ── Global Loading Overlay ───────────────────────────────
     let loading_card = babydra_ui_kit::components::create_loading_card(72);

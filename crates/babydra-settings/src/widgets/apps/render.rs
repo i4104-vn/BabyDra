@@ -46,13 +46,14 @@ pub fn build() -> (AppsWidget, PasswordDialog) {
     title_label.add_css_class("settings-page-title");
     title_label.set_hexpand(true);
     title_label.set_halign(gtk4::Align::Start);
+    title_label.set_ellipsize(gtk4::pango::EllipsizeMode::End);
 
     let search_entry = Entry::new();
     search_entry.set_placeholder_text(Some(&babydra_core::i18n::trans(
         "settings.apps_search_placeholder",
     )));
     search_entry.add_css_class("sidebar-search-entry");
-    search_entry.set_width_request(220);
+    search_entry.set_width_request(260);
     search_entry.set_valign(gtk4::Align::Center);
 
     let refresh_btn = Button::new();
@@ -345,11 +346,13 @@ pub fn render_apps_list(
         let name_lbl = Label::new(Some(&app.name));
         name_lbl.add_css_class("settings-row-title");
         name_lbl.set_halign(gtk4::Align::Start);
+        name_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
         text_box.append(&name_lbl);
 
         let desc_lbl = Label::new(Some(&app.description));
         desc_lbl.add_css_class("settings-row-desc");
         desc_lbl.set_halign(gtk4::Align::Start);
+        desc_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
         text_box.append(&desc_lbl);
 
         row_box.append(&text_box);
@@ -467,11 +470,13 @@ pub fn render_pkgs_list(
         let name_lbl = Label::new(Some(&pkg.name));
         name_lbl.add_css_class("settings-row-title");
         name_lbl.set_halign(gtk4::Align::Start);
+        name_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
         text_box.append(&name_lbl);
 
         let ver_lbl = Label::new(Some(&pkg.version));
         ver_lbl.add_css_class("settings-row-desc");
         ver_lbl.set_halign(gtk4::Align::Start);
+        ver_lbl.set_ellipsize(gtk4::pango::EllipsizeMode::End);
         text_box.append(&ver_lbl);
 
         row_box.append(&text_box);
