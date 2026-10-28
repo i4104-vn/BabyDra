@@ -1,18 +1,3 @@
-button.suggested-action {
-    background-image: none;
-    border: none;
-    border-radius: 9999px;
-    color: #ffffff;
-    padding: 8px 18px;
-    font-weight: 600;
-    font-size: 14px;
-    box-shadow: none;
-    transition: background-color 150ms ease;
-}
-
-button.suggested-action:hover {
-    box-shadow: none;
-}
 
 .explore-dialog {
     background-image: none;
@@ -208,91 +193,11 @@ button.settings-pill.active-pill:hover {
     font-size: 13px;
 }
 
-.explore-dialog .settings-card {
-    border-radius: 14px;
-    padding: 4px;
-}
-
 .explore-dialog stack scrolledwindow,
 .explore-dialog overlay scrolledwindow {
     background-color: transparent;
     border: none;
     box-shadow: none;
-}
-
-.explore-dialog .settings-card-row {
-    border-radius: 0;
-    transition: background-color 150ms ease;
-}
-
-.explore-dialog .settings-card-row:first-child {
-    border-radius: 10px 10px 0 0;
-}
-
-.explore-dialog .settings-card-row:last-child {
-    border-radius: 0 0 13px 13px;
-    border-bottom: none;
-}
-
-.explore-dialog .settings-card-row:only-child {
-    border-radius: 13px;
-    border-bottom: none;
-}
-
-.explore-dialog .settings-row-title {
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.explore-dialog .settings-row-desc {
-    font-size: 12px;
-}
-
-/* Settings DropDown Styling inside Explore/Notepad Dialogs */
-.explore-dialog dropdown,
-.explore-dialog .settings-dropdown {
-    min-width: 130px;
-}
-
-.explore-dialog dropdown>button,
-.explore-dialog .settings-dropdown>button {
-    border-radius: 10px;
-    padding: 6px 14px;
-    font-size: 13px;
-    font-weight: 500;
-    min-height: 34px;
-    transition: all 180ms ease;
-    box-shadow: none;
-}
-
-/* Settings SpinButton Styling inside Explore/Notepad Dialogs */
-.explore-dialog spinbutton,
-.explore-dialog .settings-spin {
-    border-radius: 10px;
-    padding: 2px 4px;
-    min-height: 34px;
-    transition: all 180ms ease;
-    box-shadow: none;
-}
-
-.explore-dialog spinbutton text,
-.explore-dialog .settings-spin text {
-    background: transparent;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 4px 8px;
-    min-width: 32px;
-}
-
-.explore-dialog spinbutton button,
-.explore-dialog .settings-spin button {
-    background: transparent;
-    border: none;
-    border-radius: 6px;
-    min-width: 24px;
-    min-height: 24px;
-    padding: 2px;
-    transition: all 150ms ease;
 }
 
 .settings-custom-item-row {

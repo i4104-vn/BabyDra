@@ -7,6 +7,17 @@ pub fn create_card(orientation: gtk4::Orientation, spacing: i32) -> gtk4::Box {
     card
 }
 
+/// Creates a standard floating content area card with rounded corners matching settings and explore styling.
+pub fn create_content_card() -> gtk4::Box {
+    let card = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    card.add_css_class("app-content-card");
+    card.set_hexpand(true);
+    card.set_vexpand(true);
+    card.set_halign(gtk4::Align::Fill);
+    card.set_valign(gtk4::Align::Fill);
+    card
+}
+
 /// Creates a box container styled as a card with a custom CSS class.
 pub fn create_css_card(orientation: gtk4::Orientation, spacing: i32, css_class: &str) -> gtk4::Box {
     let card = gtk4::Box::new(orientation, spacing);

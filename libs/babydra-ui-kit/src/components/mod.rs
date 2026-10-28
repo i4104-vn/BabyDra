@@ -24,7 +24,7 @@ pub use buttons::{
     create_wp_thumb, create_wp_thumb_from_bytes, update_toggle_state,
 };
 pub use cards::{
-    create_card, create_collapsible_card, create_css_card, create_scroll_list,
+    create_card, create_collapsible_card, create_content_card, create_css_card, create_scroll_list,
     create_slider_header, create_subtitle, create_switch_card, create_title, CollapsibleCard,
 };
 pub use context_menu::{
@@ -33,7 +33,7 @@ pub use context_menu::{
     create_menu_popover, create_menu_sens, create_menu_sep, create_menu_shortcut, create_menu_text,
     create_submenu_item, show_tray_menu, ContextMenuBuilder,
 };
-pub use list_group::{clear_box, clear_flow_box, clear_list_box, create_list_row};
+pub use list_group::{clear_box, clear_flow_box, clear_list_box, create_list_row, create_switch_row};
 pub use modals::{
     ChangeHostnameDialog, ChangeNameDialog, ChangePasswordDialog, PasswordDialog, VpnConfigDialog,
     VpnLogDialog, WifiConfigDialog, WifiInfoDialog, WifiPasswordDialog,

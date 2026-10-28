@@ -1968,7 +1968,9 @@ button.shortcut-combo-btn:active {
 }
 
 /* Content Area - Floating Inset Rounded Card matching reference layout */
-.settings-content-card {
+.app-content-card,
+.settings-content-card,
+.explore-content-card {
     background-color: #1C1C1F;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 22px;
@@ -1985,6 +1987,10 @@ button.shortcut-combo-btn:active {
 
 .settings-content scrolledwindow,
 .settings-content viewport,
+.app-content-card scrolledwindow,
+.app-content-card viewport,
+.explore-content-card scrolledwindow,
+.explore-content-card viewport,
 .settings-content-card scrolledwindow,
 .settings-content-card viewport {
     background: transparent;

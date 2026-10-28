@@ -1,6 +1,8 @@
 .explore-window .content-view {
-    border-radius: 14px;
-    margin: 8px 8px 8px 4px;
+    border-radius: 0;
+    margin: 0;
+    background: transparent;
+    background-color: transparent;
     box-shadow: none;
 }
 

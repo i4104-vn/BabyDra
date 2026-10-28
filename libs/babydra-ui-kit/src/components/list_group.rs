@@ -62,6 +62,19 @@ pub fn create_list_row(
     row
 }
 
+/// Creates a standard row with an icon badge, title, subtitle, and an interactive CustomSwitch.
+pub fn create_switch_row(
+    icon_name: &str,
+    title: &str,
+    subtitle: &str,
+    active: bool,
+) -> (gtk4::Box, crate::components::switch::CustomSwitch) {
+    let switch = crate::components::switch::CustomSwitch::new(active);
+    switch.container.set_valign(gtk4::Align::Center);
+    let row = create_list_row(icon_name, title, subtitle, Some(&switch.container));
+    (row, switch)
+}
+
 /// Removes all children from a ListBox.
 pub fn clear_list_box(list_box: &gtk4::ListBox) {
     while let Some(child) = list_box.first_child() {

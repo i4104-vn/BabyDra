@@ -1,0 +1,81 @@
+/* ── Shared Card Styles: Content Cards & Structured List Cards ── */
+
+/* 1. App Content Card (Floating inset rounded panel) */
+.app-content-card,
+.settings-content-card,
+.explore-content-card {
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.app-content-card scrolledwindow,
+.app-content-card viewport,
+.settings-content-card scrolledwindow,
+.settings-content-card viewport,
+.explore-content-card scrolledwindow,
+.explore-content-card viewport {
+    background: transparent;
+    background-color: transparent;
+}
+
+/* 2. Structured Settings & App Cards */
+.settings-card,
+.app-card,
+.device-card {
+    border-radius: 14px;
+    box-shadow: none;
+    transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+/* 3. Card Rows within Lists */
+.settings-card list,
+.app-card list {
+    background: transparent;
+    background-color: transparent;
+}
+
+.settings-card row,
+.settings-card-row,
+.device-card-row {
+    border-radius: 0;
+    margin: 0;
+    transition: background-color 150ms ease;
+}
+
+.settings-card row:first-child,
+.settings-card-row:first-child,
+.device-card-row:first-child {
+    border-radius: 12px 12px 0 0;
+}
+
+.settings-card row:last-child,
+.settings-card-row:last-child,
+.device-card-row:last-child {
+    border-radius: 0 0 12px 12px;
+    border-bottom: none;
+}
+
+.settings-card row:only-child,
+.settings-card-row:only-child,
+.device-card-row:only-child {
+    border-radius: 12px;
+    border-bottom: none;
+}
+
+/* 4. Collapsible Card Layout */
+.collapsible-card {
+    border-radius: 14px;
+}
+
+.card-collapse-header {
+    padding: 10px 14px;
+    transition: background-color 150ms ease;
+}
+
+.card-collapse-content {
+    padding: 12px 14px;
+}
+
+.card-collapse-arrow {
+    transition: transform 200ms ease;
+}
