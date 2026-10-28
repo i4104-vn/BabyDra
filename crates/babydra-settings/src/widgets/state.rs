@@ -7,8 +7,8 @@
 #![allow(dead_code)]
 
 use gtk4::{
-    Box, Button, DropDown, Entry, Label, ListBox, Overlay, ProgressBar, ScrolledWindow, Spinner,
-    Stack, TextBuffer, TextView,
+    Box, Button, DropDown, Entry, FlowBox, Label, ListBox, Overlay, ProgressBar, ScrolledWindow,
+    Spinner, Stack, TextBuffer, TextView,
 };
 
 #[derive(Clone)]
@@ -36,7 +36,8 @@ pub struct CertificatesWidget {
     pub root: Overlay,
     pub container: Box,
     pub add_btn: Button,
-    pub list_box: ListBox,
+    pub flow_box: FlowBox,
+    pub stack: Stack,
 }
 
 pub struct DisplayCardRow {
@@ -86,11 +87,11 @@ pub struct KeybindsWidget {
 
 #[derive(Clone)]
 pub struct StartupWidget {
+    pub root: Overlay,
     pub container: Box,
-    pub list_box: Box,
     pub add_btn: Button,
-    pub save_btn: Button,
-    pub entries: Vec<Entry>,
+    pub flow_box: FlowBox,
+    pub stack: Stack,
 }
 
 #[derive(Clone)]

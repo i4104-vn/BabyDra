@@ -34,15 +34,32 @@ pub fn get_startup_commands() -> Vec<StartupCommand> {
 
     if let Ok(content) = fs::read_to_string(&config_path) {
         let mut id_counter = 1;
+        let mut pending_name: Option<String> = None;
         for line in content.lines() {
             let trim = line.trim();
-            if trim.is_empty() || trim.starts_with('#') {
+            if trim.is_empty() {
                 continue;
             }
+            if let Some(comment) = trim.strip_prefix('#') {
+                let c_trim = comment.trim();
+                if let Some(n) = c_trim.strip_prefix("name:") {
+                    pending_name = Some(n.trim().to_string());
+                } else if !c_trim.starts_with('!')
+                    && !c_trim.to_lowercase().contains("autostart configuration")
+                    && !c_trim.to_lowercase().contains("auto-generated")
+                    && !c_trim.is_empty()
+                {
+                    pending_name = Some(c_trim.to_string());
+                }
+                continue;
+            }
+
+            let name = pending_name.take();
             if trim.starts_with("exec-once") {
                 if let Some((_, cmd)) = trim.split_once('=') {
                     commands.push(StartupCommand {
                         id: id_counter,
+                        name,
                         command: cmd.trim().to_string(),
                     });
                     id_counter += 1;
@@ -50,6 +67,7 @@ pub fn get_startup_commands() -> Vec<StartupCommand> {
             } else {
                 commands.push(StartupCommand {
                     id: id_counter,
+                    name,
                     command: trim.to_string(),
                 });
                 id_counter += 1;
@@ -75,6 +93,12 @@ pub fn save_startup_cmds(commands: &[StartupCommand]) -> CoreResult<()> {
     for cmd in commands {
         let trimmed = cmd.command.trim();
         if !trimmed.is_empty() {
+            if let Some(ref name) = cmd.name {
+                let name_trim = name.trim();
+                if !name_trim.is_empty() {
+                    content.push_str(&format!("# name: {}\n", name_trim));
+                }
+            }
             content.push_str(&format!("{}\n", trimmed));
         }
     }
@@ -83,4 +107,23 @@ pub fn save_startup_cmds(commands: &[StartupCommand]) -> CoreResult<()> {
     let _ = set_unix_mode(&user_config, 0o755);
 
     Ok(())
+}
+
+/// Adds a new startup command with optional mnemonic name.
+pub fn add_startup_cmd(name: Option<String>, command: &str) -> CoreResult<()> {
+    let mut cmds = get_startup_commands();
+    let next_id = cmds.iter().map(|c| c.id).max().unwrap_or(0) + 1;
+    cmds.push(StartupCommand {
+        id: next_id,
+        name,
+        command: command.trim().to_string(),
+    });
+    save_startup_cmds(&cmds)
+}
+
+/// Deletes a startup command by its ID.
+pub fn delete_startup_cmd(id: u32) -> CoreResult<()> {
+    let mut cmds = get_startup_commands();
+    cmds.retain(|c| c.id != id);
+    save_startup_cmds(&cmds)
 }

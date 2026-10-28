@@ -1,115 +1,256 @@
+//! Startup settings page renderer.
+//! Builds the card grid, responsive FlowBox layout, and individual cards.
+
+use crate::widgets::helpers::{create_placeholder_box, PlaceholderState};
 use crate::widgets::state::StartupWidget;
+use crate::widgets::startup::modal::StartupAddDialog;
 use babydra_core::models::startup_command::StartupCommand;
 use gtk4::prelude::*;
-use gtk4::{Box, Button, Entry, Label, Orientation};
+use gtk4::{Align, Box, Button, FlowBox, Label, Orientation, Overlay, ScrolledWindow, Stack, StackTransitionType};
 
-/// Creates a single startup command row.
-pub fn create_row(cmd_text: &str, list_card: &Box, save_btn: &Button) -> (Box, Entry) {
-    let row = Box::new(Orientation::Horizontal, 12);
-    row.add_css_class("settings-card-row");
-
-    let entry = Entry::new();
-    if !cmd_text.is_empty() {
-        entry.set_text(cmd_text);
-    } else {
-        entry.set_placeholder_text(Some(&babydra_core::i18n::trans(
-            "settings.startup_command_placeholder",
-        )));
+/// Extracts a friendly display title from a startup command.
+pub fn extract_command_title(cmd: &StartupCommand) -> String {
+    if let Some(ref name) = cmd.name {
+        let name_trim = name.trim();
+        if !name_trim.is_empty() {
+            return name_trim.to_string();
+        }
     }
-    entry.set_hexpand(true);
-    entry.add_css_class("sidebar-search-entry");
-
-    // Pressing Enter saves changes immediately
-    let save_btn_c = save_btn.clone();
-    entry.connect_activate(move |_| {
-        save_btn_c.emit_clicked();
-    });
-
-    let delete_btn = Button::new();
-    delete_btn.add_css_class("icon-btn");
-    delete_btn.add_css_class("circular");
-    delete_btn.add_css_class("delete-btn");
-    delete_btn.set_valign(gtk4::Align::Center);
-    let del_icon = babydra_ui_kit::ui::icon::get_icon("edit-delete", 16);
-    del_icon.set_pixel_size(16);
-    delete_btn.set_child(Some(&del_icon));
-
-    let row_copy = row.clone();
-    let list_card_copy = list_card.clone();
-    delete_btn.connect_clicked(move |_| {
-        list_card_copy.remove(&row_copy);
-    });
-
-    row.append(&entry);
-    row.append(&delete_btn);
-    (row, entry)
+    let clean = cmd.command.trim();
+    if clean.is_empty() {
+        return "Command".to_string();
+    }
+    if let Some(rest) = clean.strip_prefix("export ") {
+        if let Some((var, _)) = rest.split_once('=') {
+            return format!("export {}", var.trim());
+        }
+        return "export".to_string();
+    }
+    let first_token = clean.split_whitespace().next().unwrap_or(clean);
+    let bin_name = first_token
+        .rsplit('/')
+        .next()
+        .unwrap_or(first_token)
+        .trim_end_matches('&')
+        .trim();
+    if bin_name.is_empty() {
+        clean.to_string()
+    } else {
+        bin_name.to_string()
+    }
 }
 
-/// Build startup widget.
-pub fn build(commands: &[StartupCommand]) -> StartupWidget {
+/// Chooses an appropriate icon for the startup item card.
+pub fn get_command_icon(cmd: &StartupCommand) -> &'static str {
+    if cmd.name.is_some() {
+        return "rocket";
+    }
+    let lower = cmd.command.to_lowercase();
+    if lower.starts_with("export")
+        || lower.starts_with("dbus")
+        || lower.contains("systemd")
+        || lower.starts_with("sh ")
+        || lower.starts_with("bash ")
+    {
+        "terminal"
+    } else {
+        "rocket"
+    }
+}
+
+/// Creates a single startup application card.
+pub fn create_card<F: Fn() + 'static>(cmd: &StartupCommand, on_delete: F) -> Box {
+    let card = Box::new(Orientation::Vertical, 10);
+    card.add_css_class("settings-card");
+    card.add_css_class("device-card");
+    card.add_css_class("startup-card");
+    card.set_size_request(290, 136);
+    card.set_halign(Align::Start);
+    card.set_valign(Align::Start);
+
+    // ── Top Row: Left icon badge, Right delete action button ──
+    let top_row = Box::new(Orientation::Horizontal, 8);
+    top_row.set_valign(Align::Center);
+
+    let icon_badge = Box::new(Orientation::Vertical, 0);
+    icon_badge.add_css_class("blue-icon-badge-sm");
+    icon_badge.set_valign(Align::Center);
+    icon_badge.set_halign(Align::Start);
+
+    let icon_name = get_command_icon(cmd);
+    let icon = babydra_ui_kit::ui::icon::get_icon(icon_name, 18);
+    icon.set_pixel_size(18);
+    icon.set_valign(Align::Center);
+    icon.set_halign(Align::Center);
+    icon.set_vexpand(true);
+    icon_badge.append(&icon);
+    top_row.append(&icon_badge);
+
+    let spacer_top = Box::new(Orientation::Horizontal, 0);
+    spacer_top.set_hexpand(true);
+    top_row.append(&spacer_top);
+
+    // Delete Button
+    let del_btn = Button::new();
+    del_btn.add_css_class("icon-btn");
+    del_btn.add_css_class("circular");
+    del_btn.add_css_class("delete-btn");
+    del_btn.set_valign(Align::Center);
+    del_btn.set_cursor_from_name(Some("pointer"));
+
+    let del_icon = babydra_ui_kit::ui::icon::get_icon("edit-delete", 16);
+    del_icon.set_pixel_size(16);
+    del_btn.set_child(Some(&del_icon));
+    del_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.startup_remove")));
+
+    del_btn.connect_clicked(move |_| {
+        on_delete();
+    });
+    top_row.append(&del_btn);
+
+    card.append(&top_row);
+
+    // Spacer to push bottom info
+    let mid_spacer = Box::new(Orientation::Vertical, 0);
+    mid_spacer.set_vexpand(true);
+    card.append(&mid_spacer);
+
+    // ── Bottom Row: Title + Command Subtitle on Left, Status Badge on Right ──
+    let bottom_row = Box::new(Orientation::Horizontal, 8);
+    bottom_row.set_valign(Align::End);
+
+    let text_box = Box::new(Orientation::Vertical, 2);
+    text_box.set_valign(Align::End);
+    text_box.set_halign(Align::Start);
+    text_box.set_hexpand(true);
+
+    let title_text = extract_command_title(cmd);
+    let display_title = if title_text.chars().count() > 22 {
+        let truncated: String = title_text.chars().take(22).collect();
+        format!("{}...", truncated)
+    } else {
+        title_text.clone()
+    };
+    let name_lbl = Label::new(Some(&display_title));
+    name_lbl.add_css_class("settings-row-title");
+    name_lbl.add_css_class("device-card-title");
+    name_lbl.set_halign(Align::Start);
+    name_lbl.set_tooltip_text(Some(&title_text));
+    text_box.append(&name_lbl);
+
+    let cmd_text = &cmd.command;
+    let display_cmd = if cmd_text.chars().count() > 26 {
+        let truncated: String = cmd_text.chars().take(26).collect();
+        format!("{}...", truncated)
+    } else {
+        cmd_text.clone()
+    };
+    let desc_lbl = Label::new(Some(&display_cmd));
+    desc_lbl.add_css_class("settings-row-desc");
+    desc_lbl.add_css_class("device-card-subtitle");
+    desc_lbl.set_halign(Align::Start);
+    desc_lbl.set_tooltip_text(Some(cmd_text));
+    text_box.append(&desc_lbl);
+
+    bottom_row.append(&text_box);
+
+    let is_app = cmd.name.is_some();
+    let badge_label = if is_app {
+        babydra_core::i18n::trans("settings.startup_badge_app")
+    } else {
+        babydra_core::i18n::trans("settings.startup_badge_cmd")
+    };
+    let status_lbl = Label::new(Some(&badge_label));
+    if is_app {
+        status_lbl.add_css_class("device-card-status-on");
+    } else {
+        status_lbl.add_css_class("device-card-status-off");
+    }
+    status_lbl.set_valign(Align::End);
+    bottom_row.append(&status_lbl);
+
+    card.append(&bottom_row);
+    card
+}
+
+/// Builds the startup application page UI with card grid and modal overlay.
+pub fn build_startup_ui() -> (StartupWidget, StartupAddDialog) {
+    let root = Overlay::new();
+    root.set_vexpand(true);
+    root.set_hexpand(true);
+
     let container = Box::new(Orientation::Vertical, 16);
     container.set_vexpand(true);
-    container.set_valign(gtk4::Align::Fill);
+    container.set_valign(Align::Fill);
 
-    // Header
+    // ── Header Row ──────────────────────────────────────────────
     let header_box = Box::new(Orientation::Horizontal, 12);
     header_box.set_margin_bottom(4);
 
-    let title_label = Label::new(Some(&babydra_core::i18n::trans("settings.startup_title")));
-    title_label.add_css_class("settings-page-title");
-    title_label.set_hexpand(true);
-    title_label.set_halign(gtk4::Align::Start);
+    let title_lbl = Label::new(Some(&babydra_core::i18n::trans("settings.startup_title")));
+    title_lbl.add_css_class("settings-page-title");
+    title_lbl.set_halign(Align::Start);
+    title_lbl.set_hexpand(true);
+    header_box.append(&title_lbl);
 
     let add_btn = Button::new();
     add_btn.add_css_class("icon-btn");
     add_btn.add_css_class("circular");
     add_btn.set_cursor_from_name(Some("pointer"));
-    add_btn.set_valign(gtk4::Align::Center);
+    add_btn.set_valign(Align::Center);
     add_btn.set_size_request(34, 34);
     let add_icon = babydra_ui_kit::ui::icon::get_icon("plus", 16);
     add_icon.set_pixel_size(16);
     add_btn.set_child(Some(&add_icon));
     add_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.startup_add_new")));
-
-    let save_btn = Button::with_label(&babydra_core::i18n::trans("settings.save_changes"));
-    save_btn.add_css_class("suggested-action");
-    save_btn.set_valign(gtk4::Align::Center);
-
-    header_box.append(&title_label);
     header_box.append(&add_btn);
-    header_box.append(&save_btn);
+
     container.append(&header_box);
 
-    // List container glass card
-    let glass_card = Box::new(Orientation::Vertical, 0);
-    glass_card.add_css_class("glass-panel");
-    glass_card.set_vexpand(true);
-    glass_card.set_valign(gtk4::Align::Fill);
+    // ── Stack with FlowBox Grid and Empty State ──────────────────
+    let stack = Stack::new();
+    stack.set_vexpand(true);
+    stack.set_hexpand(true);
+    stack.set_transition_type(StackTransitionType::Crossfade);
 
-    let list_card = Box::new(Orientation::Vertical, 8);
+    let flow_box = FlowBox::new();
+    flow_box.add_css_class("settings-card-flow");
+    flow_box.set_selection_mode(gtk4::SelectionMode::None);
+    flow_box.set_valign(Align::Start);
+    flow_box.set_halign(Align::Start);
+    flow_box.set_column_spacing(16);
+    flow_box.set_row_spacing(16);
+    flow_box.set_min_children_per_line(1);
+    flow_box.set_max_children_per_line(10);
 
-    let mut entries = Vec::new();
+    let scrolled_win = ScrolledWindow::new();
+    scrolled_win.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
+    scrolled_win.set_vexpand(true);
+    scrolled_win.set_valign(Align::Fill);
+    scrolled_win.set_child(Some(&flow_box));
+    stack.add_named(&scrolled_win, Some("cards"));
 
-    for cmd in commands {
-        let (row, entry) = create_row(&cmd.command, &list_card, &save_btn);
-        list_card.append(&row);
-        entries.push(entry);
-    }
+    let empty_box = create_placeholder_box(PlaceholderState::Empty {
+        title_key: "settings.startup_no_items",
+        desc_key: Some("settings.startup_no_items_sub"),
+        icon_name: "rocket",
+    });
+    stack.add_named(&empty_box, Some("empty"));
 
-    let scroll = gtk4::ScrolledWindow::new();
-    scroll.set_policy(gtk4::PolicyType::Never, gtk4::PolicyType::Automatic);
-    scroll.set_vexpand(true);
-    scroll.set_valign(gtk4::Align::Fill);
-    scroll.set_child(Some(&list_card));
+    container.append(&stack);
+    root.set_child(Some(&container));
 
-    glass_card.append(&scroll);
-    container.append(&glass_card);
+    // Modal dialog overlay
+    let add_dialog = StartupAddDialog::new();
+    root.add_overlay(&add_dialog.container);
 
-    StartupWidget {
+    let widget = StartupWidget {
+        root,
         container,
-        list_box: list_card,
         add_btn,
-        save_btn,
-        entries,
-    }
+        flow_box,
+        stack,
+    };
+
+    (widget, add_dialog)
 }
