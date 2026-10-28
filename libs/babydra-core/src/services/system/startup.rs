@@ -127,3 +127,16 @@ pub fn delete_startup_cmd(id: u32) -> CoreResult<()> {
     cmds.retain(|c| c.id != id);
     save_startup_cmds(&cmds)
 }
+
+/// Updates an existing startup command by its ID.
+pub fn update_startup_cmd(id: u32, name: Option<String>, command: &str) -> CoreResult<()> {
+    let mut cmds = get_startup_commands();
+    if let Some(cmd) = cmds.iter_mut().find(|c| c.id == id) {
+        cmd.name = name;
+        cmd.command = command.trim().to_string();
+        save_startup_cmds(&cmds)
+    } else {
+        Err(format!("Startup command with ID {} not found", id).into())
+    }
+}
+

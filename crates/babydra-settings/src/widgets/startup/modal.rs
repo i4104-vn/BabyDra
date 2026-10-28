@@ -6,13 +6,14 @@ use std::rc::Rc;
 
 use babydra_core::i18n::trans;
 use babydra_core::models::desktop::app::DesktopApp;
+use babydra_core::models::startup_command::StartupCommand;
 use babydra_core::services::apps::find_desktop_apps;
 use babydra_ui_kit::components::modals::dialog_builder::{
     create_form_label, create_modern_entry, BadgeVariant, ButtonVariant,
     ModernDialogBuilder,
 };
 use gtk4::prelude::*;
-use gtk4::{Box, Button, DropDown, Entry, Orientation, StringList};
+use gtk4::{Box, Button, DropDown, Entry, Label, Orientation, StringList};
 
 /// Cleans an application exec string for startup scripts.
 pub fn clean_app_exec(exec: &str) -> String {
@@ -30,11 +31,13 @@ pub fn clean_app_exec(exec: &str) -> String {
     }
 }
 
-/// Modal dialog for adding a startup app or shell command.
+/// Modal dialog for adding or editing a startup app or shell command.
 #[derive(Clone)]
 #[allow(dead_code)]
 pub struct StartupAddDialog {
     pub container: Box,
+    pub title_lbl: Label,
+    pub subtitle_lbl: Option<Label>,
     pub name_entry: Entry,
     pub type_dropdown: DropDown,
     pub app_box: Box,
@@ -43,6 +46,7 @@ pub struct StartupAddDialog {
     pub cmd_entry: Entry,
     pub cancel_btn: Button,
     pub add_btn: Button,
+    pub editing_id: Rc<RefCell<Option<u32>>>,
     apps: Rc<RefCell<Vec<DesktopApp>>>,
     user_edited_name: Rc<RefCell<bool>>,
 }
@@ -62,6 +66,8 @@ impl StartupAddDialog {
             .with_subtitle(trans("settings.startup_modal_sub"));
 
         let dialog = builder.build();
+        let title_lbl = dialog.title_label().clone();
+        let subtitle_lbl = dialog.subtitle_label().cloned();
 
         // ── 1. Mnemonic Name (Tên gợi nhớ) ───────────────────────────
         let name_grp = Box::new(Orientation::Vertical, 4);
@@ -185,6 +191,8 @@ impl StartupAddDialog {
 
         Self {
             container: dialog.container().clone(),
+            title_lbl,
+            subtitle_lbl,
             name_entry,
             type_dropdown,
             app_box,
@@ -193,13 +201,21 @@ impl StartupAddDialog {
             cmd_entry,
             cancel_btn,
             add_btn,
+            editing_id: Rc::new(RefCell::new(None)),
             apps: apps_rc,
             user_edited_name,
         }
     }
 
-    /// Shows the modal and resets input fields.
-    pub fn show(&self) {
+    /// Shows the modal in Add mode and resets input fields.
+    pub fn show_add(&self) {
+        *self.editing_id.borrow_mut() = None;
+        self.title_lbl.set_text(&trans("settings.startup_modal_title"));
+        if let Some(ref sub) = self.subtitle_lbl {
+            sub.set_text(&trans("settings.startup_modal_sub"));
+        }
+        self.add_btn.set_label(&trans("settings.startup_add"));
+
         *self.user_edited_name.borrow_mut() = false;
         self.cmd_entry.set_text("");
         self.type_dropdown.set_selected(0);
@@ -218,20 +234,68 @@ impl StartupAddDialog {
         self.container.set_visible(true);
     }
 
+    /// Shows the modal in Edit mode, pre-filling data from existing command.
+    pub fn show_edit(&self, cmd: &StartupCommand) {
+        *self.editing_id.borrow_mut() = Some(cmd.id);
+        self.title_lbl.set_text(&trans("settings.startup_edit_modal_title"));
+        if let Some(ref sub) = self.subtitle_lbl {
+            sub.set_text(&trans("settings.startup_edit_modal_sub"));
+        }
+        self.add_btn.set_label(&trans("settings.startup_save"));
+
+        *self.user_edited_name.borrow_mut() = true;
+
+        if let Some(ref name) = cmd.name {
+            self.name_entry.set_text(name);
+        } else {
+            self.name_entry.set_text("");
+        }
+
+        let clean_cmd = cmd.command.trim();
+        let apps_borrow = self.apps.borrow();
+        let matched_idx = apps_borrow.iter().position(|a| {
+            let app_exec = clean_app_exec(&a.exec);
+            app_exec == clean_cmd
+                || a.exec.trim() == clean_cmd
+                || clean_cmd.starts_with(a.exec.trim())
+                || clean_cmd.split_whitespace().next() == a.exec.split_whitespace().next()
+        });
+
+        if let Some(idx) = matched_idx {
+            self.type_dropdown.set_selected(0);
+            self.app_dropdown.set_selected(idx as u32);
+            self.app_box.set_visible(true);
+            self.cmd_box.set_visible(false);
+            if self.name_entry.text().is_empty() {
+                if let Some(app) = apps_borrow.get(idx) {
+                    self.name_entry.set_text(&app.name);
+                }
+            }
+        } else {
+            self.type_dropdown.set_selected(1);
+            self.cmd_entry.set_text(clean_cmd);
+            self.app_box.set_visible(false);
+            self.cmd_box.set_visible(true);
+        }
+
+        self.container.set_visible(true);
+    }
+
     /// Hides the modal.
     #[allow(dead_code)]
     pub fn hide(&self) {
         self.container.set_visible(false);
     }
 
-    /// Connects the add button callback.
-    pub fn connect_add<F: Fn(Option<String>, String) + 'static>(&self, callback: F) {
+    /// Connects submission callback (passes editing ID if any, optional name, and command).
+    pub fn connect_submit<F: Fn(Option<u32>, Option<String>, String) + 'static>(&self, callback: F) {
         let name_entry = self.name_entry.clone();
         let type_dropdown = self.type_dropdown.clone();
         let app_dropdown = self.app_dropdown.clone();
         let cmd_entry = self.cmd_entry.clone();
         let apps = self.apps.clone();
         let container = self.container.clone();
+        let editing_id = self.editing_id.clone();
 
         self.add_btn.connect_clicked(move |_| {
             let is_app = type_dropdown.selected() == 0;
@@ -264,8 +328,9 @@ impl StartupAddDialog {
                 (name, cmd)
             };
 
+            let id_opt = *editing_id.borrow();
             container.set_visible(false);
-            callback(name_opt, command_str);
+            callback(id_opt, name_opt, command_str);
         });
     }
 }

@@ -1,12 +1,18 @@
 //! Startup settings page renderer.
 //! Builds the card grid, responsive FlowBox layout, and individual cards.
 
+use std::rc::Rc;
+
+use gtk4::prelude::*;
+use gtk4::{
+    Align, Box, Button, GestureClick, Label, Orientation, Overlay, Stack, StackTransitionType,
+};
+
+use babydra_core::models::startup_command::StartupCommand;
+
 use crate::widgets::helpers::{create_placeholder_box, PlaceholderState};
 use crate::widgets::state::StartupWidget;
 use crate::widgets::startup::modal::StartupAddDialog;
-use babydra_core::models::startup_command::StartupCommand;
-use gtk4::prelude::*;
-use gtk4::{Align, Box, Button, Label, Orientation, Overlay, Stack, StackTransitionType};
 
 /// Extracts a friendly display title from a startup command.
 pub fn extract_command_title(cmd: &StartupCommand) -> String {
@@ -58,8 +64,12 @@ pub fn get_command_icon(cmd: &StartupCommand) -> &'static str {
     }
 }
 
-/// Creates a single startup application card.
-pub fn create_card<F: Fn() + 'static>(cmd: &StartupCommand, on_delete: F) -> Box {
+/// Creates a single startup application card with edit and delete capabilities.
+pub fn create_card<F: Fn() + 'static, E: Fn() + 'static>(
+    cmd: &StartupCommand,
+    on_delete: F,
+    on_edit: E,
+) -> Box {
     let card = Box::new(Orientation::Vertical, 10);
     card.add_css_class("settings-card");
     card.add_css_class("device-card");
@@ -68,7 +78,9 @@ pub fn create_card<F: Fn() + 'static>(cmd: &StartupCommand, on_delete: F) -> Box
     card.set_halign(Align::Fill);
     card.set_size_request(-1, 130);
 
-    // ── Top Row: Left icon badge, Right delete action button ──
+    let on_edit_rc = Rc::new(on_edit);
+
+    // ── Top Row: Left icon badge, Right edit & delete action buttons ──
     let top_row = Box::new(Orientation::Horizontal, 8);
     top_row.set_valign(Align::Center);
 
@@ -90,6 +102,27 @@ pub fn create_card<F: Fn() + 'static>(cmd: &StartupCommand, on_delete: F) -> Box
     spacer_top.set_hexpand(true);
     top_row.append(&spacer_top);
 
+    let actions_box = Box::new(Orientation::Horizontal, 6);
+    actions_box.set_valign(Align::Center);
+
+    // Edit Button
+    let edit_btn = Button::new();
+    edit_btn.add_css_class("icon-btn");
+    edit_btn.add_css_class("circular");
+    edit_btn.set_valign(Align::Center);
+    edit_btn.set_cursor_from_name(Some("pointer"));
+
+    let edit_icon = babydra_ui_kit::ui::icon::get_icon("edit", 16);
+    edit_icon.set_pixel_size(16);
+    edit_btn.set_child(Some(&edit_icon));
+    edit_btn.set_tooltip_text(Some(&babydra_core::i18n::trans("settings.startup_edit")));
+
+    let on_edit_click = on_edit_rc.clone();
+    edit_btn.connect_clicked(move |_| {
+        on_edit_click();
+    });
+    actions_box.append(&edit_btn);
+
     // Delete Button
     let del_btn = Button::new();
     del_btn.add_css_class("icon-btn");
@@ -106,9 +139,19 @@ pub fn create_card<F: Fn() + 'static>(cmd: &StartupCommand, on_delete: F) -> Box
     del_btn.connect_clicked(move |_| {
         on_delete();
     });
-    top_row.append(&del_btn);
+    actions_box.append(&del_btn);
 
+    top_row.append(&actions_box);
     card.append(&top_row);
+
+    // Click on card body opens edit as well
+    let card_click = GestureClick::new();
+    let on_edit_body = on_edit_rc;
+    card_click.connect_released(move |_, _, _, _| {
+        on_edit_body();
+    });
+    card.add_controller(card_click);
+    card.set_cursor_from_name(Some("pointer"));
 
     // Spacer to push bottom info
     let mid_spacer = Box::new(Orientation::Vertical, 0);
