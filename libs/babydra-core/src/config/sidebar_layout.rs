@@ -8,15 +8,6 @@ pub fn get_sidebar_layout_path() -> PathBuf {
 pub fn default_sidebar_items() -> Vec<SidebarItem> {
     let mut default_items = Vec::new();
 
-    // Places
-    default_items.push(SidebarItem {
-        id: "home".to_string(),
-        name: "explore.home".to_string(),
-        icon: "user-home".to_string(),
-        path: glib::home_dir(),
-        is_bookmark: false,
-    });
-
     // Add default folders
     let folders = [
         (
@@ -96,11 +87,13 @@ pub fn default_sidebar_items() -> Vec<SidebarItem> {
 
 pub fn load_sidebar_layout() -> Vec<SidebarItem> {
     let cfg = crate::config::load_explore_cfg();
-    if cfg.sidebar_items.is_empty() {
+    let mut items = if cfg.sidebar_items.is_empty() {
         default_sidebar_items()
     } else {
         cfg.sidebar_items
-    }
+    };
+    items.retain(|i| i.id != "home");
+    items
 }
 
 pub fn save_sidebar_layout(items: &[SidebarItem]) {

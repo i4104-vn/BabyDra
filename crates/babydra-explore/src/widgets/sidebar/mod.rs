@@ -57,6 +57,7 @@ pub fn create_sidebar(
         let nav_cb_c = nav_cb.clone();
         let all_btns = all_buttons.clone();
         let act_pop = active_popover.clone();
+        let logo_btn_click = logo_btn.clone();
         logo_btn.connect_clicked(move |_| {
             if let Some(p) = act_pop.borrow_mut().take() {
                 p.popdown();
@@ -64,6 +65,7 @@ pub fn create_sidebar(
             for (_, b) in all_btns.borrow().iter() {
                 b.remove_css_class("active-nav");
             }
+            logo_btn_click.add_css_class("active-nav");
             {
                 let mut s = session_c.borrow_mut();
                 s.active_tab_mut().navigate_to(home_path.clone());
@@ -136,6 +138,7 @@ pub fn create_sidebar(
 
     let current_drag_id_c = current_drag_id.clone();
     let top_drop_bar_c = top_drop_bar.clone();
+    let logo_btn_c = logo_btn.clone();
 
     let rebuild_fn = move || {
         while let Some(child) = nav_container_c.first_child() {
@@ -147,6 +150,14 @@ pub fn create_sidebar(
         all_buttons.borrow_mut().clear();
         all_drop_bars_c.borrow_mut().clear();
         all_drop_bars_c.borrow_mut().push(top_drop_bar_c.clone());
+
+        let is_home = session_c.borrow().active_tab().current_path == glib::home_dir();
+        if is_home {
+            logo_btn_c.add_css_class("active-nav");
+        } else {
+            logo_btn_c.remove_css_class("active-nav");
+        }
+        all_buttons.borrow_mut().push((glib::home_dir(), logo_btn_c.clone()));
 
         let items = babydra_core::config::sidebar_layout::load_sidebar_layout();
         let mut has_sep = false;
@@ -160,8 +171,8 @@ pub fn create_sidebar(
                 item.name.clone()
             };
 
-            // Local disk and trash are pinned to footer dock
-            if item.id == "trash" || item.id == "this_pc" {
+            // Local disk and trash are pinned to footer dock, and Home is at top header
+            if item.id == "trash" || item.id == "this_pc" || item.id == "home" {
                 continue;
             }
 
