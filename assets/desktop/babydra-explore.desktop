@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=BabyDra Explore
+Comment=Explore files and folders
+Exec=babydra-explore %u
+Icon=/usr/share/babydra/logo.png
+Terminal=false
+Categories=System;FileTools;FileManager;GTK;
+MimeType=inode/directory;
+NoDisplay=false

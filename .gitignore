@@ -1,24 +1,11 @@
-# ============================================================
-# BabyDra — nhánh `main`
-#
-# Nhánh main CHỈ chứa:
-#   - bộ cài đặt      → install/
-#   - tài liệu        → docs/ + các file .md ở root
-#   - logo + giấy phép
-#
-# Mọi thứ khác bị ignore để không thể đẩy nhầm mã nguồn lên
-# main (mã nguồn sống ở nhánh `release` / `develop`).
-# ============================================================
+# Rust build artifacts
+target/
+**/target/
+*.log
 
-# Ignore mọi thứ ở root...
-/*
-# ...trừ những phần thuộc về main:
-!/.gitignore
-!/install.sh
-!/.gitattributes
-!/LICENSE
-!/*.md
-!/logo.png
-!/docs/
-!/install/
-install/target/
+# Temporary and editor files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~

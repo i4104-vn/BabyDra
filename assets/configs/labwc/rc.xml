@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<labwc_config>
+  <core>
+    <!-- Gap between windows -->
+    <gap>16</gap>
+  </core>
+
+  <!-- Outer margins reserved on screen edges so windows have an equal 16px gap on all 4 sides (top=58px to account for 42px panel + 16px gap) -->
+  <margin top="0" bottom="5" left="5" right="5" />
+
+  <!-- Default placement policy for newly spawned windows -->
+  <placement>
+    <policy>center</policy>
+  </placement>
+
+  <!-- Workspaces configuration -->
+  <desktops number="4">
+    <names>
+      <name>Workspace 1</name>
+      <name>Workspace 2</name>
+      <name>Workspace 3</name>
+      <name>Workspace 4</name>
+    </names>
+    <popupTime>0</popupTime>
+  </desktops>
+
+  <keyboard>
+    <default />
+    <!-- BABYDRA_SWALLOW_START -->
+    <!-- Global shortcuts are handled by babydra-keymap; labwc only swallows
+         the combos here so default compositor actions do not fire and client
+         windows do not receive the keystrokes. -->
+    <keybind key="A-Tab">
+      <action name="Execute" command="true" />
+    </keybind>
+    <keybind key="A-S-Tab">
+      <action name="Execute" command="true" />
+    </keybind>
+    <keybind key="W-q">
+      <action name="Execute" command="true" />
+    </keybind>
+    <keybind key="W-S-s">
+      <action name="Execute" command="true" />
+    </keybind>
+    <keybind key="W-r">
+      <action name="Execute" command="true" />
+    </keybind>
+    <keybind key="W-l">
+      <action name="Execute" command="true" />
+    </keybind>
+    <keybind key="W-i">
+      <action name="Execute" command="true" />
+    </keybind>
+    <keybind key="W-e">
+      <action name="Execute" command="true" />
+    </keybind>
+    <keybind key="W-F12">
+      <action name="Execute" command="true" />
+    </keybind>
+    <keybind key="Print">
+      <action name="Execute" command="true" />
+    </keybind>
+    <!-- BABYDRA_SWALLOW_END -->
+
+    <!-- Workspace switching keybinds -->
+    <keybind key="W-1">
+      <action name="GoToDesktop" to="1" />
+      <action name="Execute" command="~/.local/bin/babydra-panel set 1" />
+    </keybind>
+    <keybind key="W-2">
+      <action name="GoToDesktop" to="2" />
+      <action name="Execute" command="~/.local/bin/babydra-panel set 2" />
+    </keybind>
+    <keybind key="W-3">
+      <action name="GoToDesktop" to="3" />
+      <action name="Execute" command="~/.local/bin/babydra-panel set 3" />
+    </keybind>
+    <keybind key="W-4">
+      <action name="GoToDesktop" to="4" />
+      <action name="Execute" command="~/.local/bin/babydra-panel set 4" />
+    </keybind>
+    <keybind key="W-Left">
+      <action name="GoToDesktop" to="left" wrap="yes" />
+      <action name="Execute" command="~/.local/bin/babydra-panel prev-sync" />
+    </keybind>
+    <keybind key="W-Right">
+      <action name="GoToDesktop" to="right" wrap="yes" />
+      <action name="Execute" command="~/.local/bin/babydra-panel next-sync" />
+    </keybind>
+  </keyboard>
+
+  <mouse>
+    <default />
+    <!-- Custom context menu for desktop right-click -->
+    <context name="Root">
+      <mousebind button="Right" action="Press">
+        <action name="Execute" command="~/.local/bin/babydra-menu" />
+      </mousebind>
+      <mousebind button="Up" action="Press">
+        <action name="GoToDesktop" to="left" wrap="yes" />
+        <action name="Execute" command="~/.local/bin/babydra-panel prev-sync" />
+      </mousebind>
+      <mousebind button="Down" action="Press">
+        <action name="GoToDesktop" to="right" wrap="yes" />
+        <action name="Execute" command="~/.local/bin/babydra-panel next-sync" />
+      </mousebind>
+    </context>
+  </mouse>
+
+  <theme>
+    <name>BabyDra</name>
+    <cornerRadius>12</cornerRadius>
+    <keepBorder>no</keepBorder>
+    <dropShadows>no</dropShadows>
+    <titlebar>
+      <layout>iconify,max,close</layout>
+      <showTitle>yes</showTitle>
+    </titlebar>
+    <font place="ActiveWindow">
+      <name>Segoe UI Variable Static Display</name>
+      <size>13</size>
+      <weight>bold</weight>
+    </font>
+    <font place="InactiveWindow">
+      <name>Segoe UI Variable Static Display</name>
+      <size>13</size>
+      <weight>normal</weight>
+    </font>
+    <font place="MenuItem">
+      <name>Segoe UI Variable Static Text</name>
+      <size>13</size>
+      <weight>normal</weight>
+    </font>
+    <font place="OnScreenDisplay">
+      <name>Segoe UI Variable Static Display</name>
+      <size>13</size>
+    </font>
+  </theme>
+
+  <!-- Window snapping behavior -->
+  <snapping>
+    <range>16</range>
+    <topMaximize>yes</topMaximize>
+  </snapping>
+
+  <!-- Window edge resistance -->
+  <resistance>
+    <screenEdgeStrength>20</screenEdgeStrength>
+    <windowEdgeStrength>10</windowEdgeStrength>
+  </resistance>
+</labwc_config>
