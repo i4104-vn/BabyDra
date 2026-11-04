@@ -61,7 +61,7 @@ pub fn handle_global_keys(app: &mut App, key: KeyEvent) -> bool {
                 if app.branches.is_empty() {
                     app.add_log(
                         LogLevel::Error,
-                        "No installation releases available to continue.",
+                        "No installation branches available to continue.",
                     );
                 } else if app.is_build_from_source() {
                     app.start_branch_switch();

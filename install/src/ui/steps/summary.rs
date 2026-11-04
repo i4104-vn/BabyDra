@@ -76,7 +76,7 @@ pub fn draw_summary_step(f: &mut Frame, app: &App, area: Rect) {
             Span::styled(
                 if app.is_build_from_source() {
                     format!(
-                        "Branch '{}' (compiled with cargo --release)",
+                        "Branch '{}' (cloned and compiled with cargo --release)",
                         app.selected_branch
                     )
                 } else {

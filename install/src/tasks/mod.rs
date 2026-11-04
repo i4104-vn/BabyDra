@@ -18,7 +18,10 @@ use crate::core::pipeline::{build_pipeline, TaskStep};
 use crate::core::context::TaskContext;
 use crate::discovery::initial_binaries_list;
 use crate::models::LogLevel;
-use crate::runtime::{build_workspace_streaming, checkout_and_pull, stop_process};
+use crate::runtime::{
+    build_app_streaming, build_workspace_streaming, checkout_and_pull, clone_or_sync_app,
+    stop_process,
+};
 
 /// Spawns the background installation worker thread.
 pub fn spawn_installation_worker(plan: InstallPlan, tx: Sender<InstallEvent>) {
@@ -142,42 +145,130 @@ fn dispatch_step(ctx: &mut TaskContext, step: &TaskStep) -> (usize, usize) {
         "git_checkout" => {
             send_log(
                 LogLevel::Info,
-                format!("Syncing branch '{}' in branches/{}...", ctx.branch, ctx.branch),
+                format!("Syncing applications for branch '{}'...", ctx.branch),
             );
-            match checkout_and_pull(&ctx.workspace_root, &ctx.branch) {
-                Ok(branch_dir) => {
-                    send_log(
-                        LogLevel::Success,
-                        format!("Branch '{}' ready at {}.", ctx.branch, branch_dir.display()),
-                    );
-                    (1, 0)
+            if let Err(e) = checkout_and_pull(&ctx.workspace_root, &ctx.branch) {
+                send_log(LogLevel::Error, format!("Failed to prepare branch directory: {e}"));
+                return (0, 1);
+            }
+
+            let git_base = ctx.manifest.git_base.as_deref().unwrap_or("https://github.com/i4104-vn");
+            let mut clone_errors = 0;
+            let mut clone_success = 0;
+
+            for bin in &ctx.selected_binaries {
+                let git_url = ctx
+                    .manifest
+                    .binaries
+                    .iter()
+                    .find(|b| b.name == bin.name)
+                    .and_then(|b| b.git.clone())
+                    .unwrap_or_else(|| format!("{}/{}.git", git_base, bin.name));
+
+                let app_dir = ctx.source_root.join(&bin.name);
+                send_log(
+                    LogLevel::Info,
+                    format!(
+                        "Syncing {} from {} (branch: '{}')...",
+                        bin.name, git_url, ctx.branch
+                    ),
+                );
+
+                match clone_or_sync_app(&bin.name, &git_url, &ctx.branch, &app_dir) {
+                    Ok(path) => {
+                        send_log(
+                            LogLevel::Success,
+                            format!("{} synced at {}.", bin.name, path.display()),
+                        );
+                        clone_success += 1;
+                    }
+                    Err(e) => {
+                        send_log(LogLevel::Error, format!("Failed to clone {}: {e}", bin.name));
+                        clone_errors += 1;
+                    }
                 }
-                Err(e) => {
-                    send_log(LogLevel::Error, format!("Git worktree pull failed: {e}"));
-                    (0, 1)
-                }
+            }
+
+            if clone_errors > 0 {
+                (clone_success, clone_errors)
+            } else {
+                (1, 0)
             }
         }
         "cargo_build" => {
             send_log(
                 LogLevel::Info,
                 format!(
-                    "Building branch '{}' in release mode (cargo build --release in {})...",
-                    ctx.branch,
-                    ctx.source_root.display()
+                    "Building selected applications in release mode for branch '{}'...",
+                    ctx.branch
                 ),
             );
-            let send_log_cb = send_log.clone();
-            let ok = build_workspace_streaming(&ctx.source_root, send_log_cb);
-            if ok {
-                send_log(LogLevel::Success, "Release build completed successfully.".into());
-                (1, 0)
+            let _ = std::fs::create_dir_all(&ctx.source_binary_dir);
+
+            let mut build_errors = 0;
+            let mut build_success = 0;
+
+            for bin in &ctx.selected_binaries {
+                let app_dir = ctx.source_root.join(&bin.name);
+                if app_dir.join("Cargo.toml").exists() {
+                    let send_log_cb = send_log.clone();
+                    let ok = build_app_streaming(&app_dir, send_log_cb);
+                    if ok {
+                        let built_bin = app_dir.join("target").join("release").join(&bin.source_name);
+                        let dest_bin = ctx.source_binary_dir.join(&bin.name);
+                        if built_bin.exists() {
+                            let _ = std::fs::copy(&built_bin, &dest_bin);
+                            send_log(
+                                LogLevel::Success,
+                                format!("Compiled and staged binary: {}", bin.name),
+                            );
+                            build_success += 1;
+                        } else {
+                            send_log(
+                                LogLevel::Error,
+                                format!("Compiled binary not found at {:?}", built_bin),
+                            );
+                            build_errors += 1;
+                        }
+                    } else {
+                        send_log(
+                            LogLevel::Error,
+                            format!("Release build failed for {}", bin.name),
+                        );
+                        build_errors += 1;
+                    }
+                } else if ctx.source_root.join("Cargo.toml").exists() {
+                    // Fallback to workspace build if source_root is a cargo workspace
+                    let send_log_cb = send_log.clone();
+                    let ok = build_workspace_streaming(&ctx.source_root, send_log_cb);
+                    if ok {
+                        build_success += 1;
+                    } else {
+                        build_errors += 1;
+                    }
+                    break;
+                } else {
+                    let existing_bin = ctx.source_binary_dir.join(&bin.name);
+                    if existing_bin.exists() {
+                        send_log(
+                            LogLevel::Info,
+                            format!("Using existing pre-built binary for {}", bin.name),
+                        );
+                        build_success += 1;
+                    } else {
+                        send_log(
+                            LogLevel::Error,
+                            format!("No source Cargo.toml or pre-built binary found for {}", bin.name),
+                        );
+                        build_errors += 1;
+                    }
+                }
+            }
+
+            if build_errors > 0 {
+                (build_success, build_errors)
             } else {
-                send_log(
-                    LogLevel::Error,
-                    "Release build failed — binaries may be missing.".into(),
-                );
-                (0, 1)
+                (1, 0)
             }
         }
         "terminate" => {

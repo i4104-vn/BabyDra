@@ -85,28 +85,28 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
         let empty_lines = vec![
             Line::from(""),
             Line::from(Span::styled(
-                "  No installation releases available in repository!  ",
+                "  No installation branches available in repository!  ",
                 THEME.title_rose(),
             )),
             Line::from(""),
             Line::from(Span::styled(
-                "Could not find any git branch containing a source workspace.",
+                "Could not find any git branch containing installation metadata.",
                 Style::default().fg(THEME.text_bright),
             )),
             Line::from(Span::styled(
-                "Branch 'main' only hosts installer tools and documentation, with no desktop source code.",
+                "Branch 'main' is the recommended branch to clone and build application repositories.",
                 Style::default().fg(THEME.text_dim),
             )),
             Line::from(""),
             Line::from(Span::styled(
-                "Hint: Check the remote connection and ensure a source branch is available.",
+                "Hint: Check the remote connection and ensure git origin branches are fetched.",
                 Style::default().fg(THEME.amber),
             )),
         ];
 
         let empty_widget = Paragraph::new(empty_lines).wrap(Wrap { trim: true }).block(
             Block::default()
-                .title(" 2. Source Branch — No Installable Releases Found ")
+                .title(" 2. Source Branch — No Installable Branches Found ")
                 .title_style(THEME.title_rose())
                 .borders(Borders::ALL)
                 .border_type(BorderType::Rounded)
@@ -214,7 +214,7 @@ pub fn draw_branch_step(f: &mut Frame, app: &App, area: Rect) {
                 Style::default().fg(THEME.cyan).add_modifier(Modifier::BOLD),
             ),
             Span::styled(
-                " — Pulled into branches/ to keep main branch clean.",
+                " — Cloned from git repositories to build application binaries.",
                 Style::default().fg(THEME.mint),
             ),
         ]),

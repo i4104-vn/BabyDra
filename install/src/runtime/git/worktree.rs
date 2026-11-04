@@ -1,7 +1,6 @@
-use anyhow::{Context, Result};
+use anyhow::{bail, Context, Result};
 use std::path::{Path, PathBuf};
-
-use super::git;
+use std::process::{Command, Stdio};
 
 /// Returns the dedicated directory for checking out and building a branch
 /// (e.g. `repo/branches/<branch>`).
@@ -13,76 +12,96 @@ pub fn branch_worktree_dir(repo: &Path, branch: &str) -> PathBuf {
     }
 }
 
-/// Pulls and checks out `branch` into a dedicated folder `branches/<branch>` using git worktree.
+/// Prepares the dedicated container directory for building applications from the chosen branch.
+/// Sets up the target/release directory and synchronizes distribution metadata.
 pub fn checkout_and_pull(repo: &Path, branch: &str) -> Result<PathBuf> {
     if branch.is_empty() {
         return Ok(repo.to_path_buf());
     }
 
-    let branches_dir = repo.join("branches");
-    std::fs::create_dir_all(&branches_dir)
-        .with_context(|| format!("failed to create directory: {:?}", branches_dir))?;
+    let target_dir = branch_worktree_dir(repo, branch);
+    std::fs::create_dir_all(&target_dir)
+        .with_context(|| format!("failed to create directory: {:?}", target_dir))?;
 
-    let target_dir = branches_dir.join(branch);
+    let target_release = target_dir.join("target").join("release");
+    let _ = std::fs::create_dir_all(&target_release);
 
-    // 1. Fetch the remote branch in the root repo
-    let _ = git(repo, &["fetch", "origin", branch]);
-
-    // 2. If target directory already exists and has a git reference, update it
-    if target_dir.exists()
-        && (target_dir.join(".git").exists() || target_dir.join("Cargo.toml").exists())
-    {
-        let _ = git(&target_dir, &["fetch", "origin", branch]);
-        let _ = git(
-            &target_dir,
-            &["reset", "--hard", &format!("origin/{branch}")],
-        )
-        .or_else(|_| {
-            git(
-                &target_dir,
-                &["checkout", "-B", branch, &format!("origin/{branch}")],
-            )
-        })
-        .or_else(|_| git(&target_dir, &["pull", "origin", branch]));
-        return Ok(target_dir);
+    // Sync workspace.toml to target_dir so manifest loader can find it
+    let src_workspace_toml = repo.join("workspace.toml");
+    if src_workspace_toml.exists() {
+        let dst_workspace_toml = target_dir.join("workspace.toml");
+        let _ = std::fs::copy(&src_workspace_toml, &dst_workspace_toml);
     }
 
-    // If a stale or empty directory exists, clean it up first
-    if target_dir.exists() {
-        let _ = std::fs::remove_dir_all(&target_dir);
+    // Sync assets if present
+    let src_assets = repo.join("assets");
+    if src_assets.exists() {
+        let dst_assets = target_dir.join("assets");
+        if !dst_assets.exists() {
+            let _ = crate::runtime::copy_recursive(&src_assets, &dst_assets);
+        }
     }
-    let _ = git(repo, &["worktree", "prune"]);
-
-    let target_str = target_dir
-        .to_str()
-        .context("Invalid target directory path")?;
-
-    // Create fresh worktree for this branch
-    let add_res = git(
-        repo,
-        &[
-            "worktree",
-            "add",
-            "-f",
-            "-B",
-            branch,
-            target_str,
-            &format!("origin/{branch}"),
-        ],
-    )
-    .or_else(|_| git(repo, &["worktree", "add", "-f", target_str, branch]));
-
-    add_res.with_context(|| {
-        format!(
-            "failed to create worktree for branch '{}' in {:?}",
-            branch, target_dir
-        )
-    })?;
-
-    // Pull or fast-forward inside the worktree
-    let _ = git(&target_dir, &["pull", "origin", branch]);
 
     Ok(target_dir)
+}
+
+/// Clones or updates an individual application git repository for the specified branch.
+pub fn clone_or_sync_app(
+    app_name: &str,
+    git_url: &str,
+    branch: &str,
+    target_dir: &Path,
+) -> Result<PathBuf> {
+    let branch_to_use = if branch.is_empty() { "main" } else { branch };
+
+    if target_dir.join(".git").exists() {
+        // Already cloned: fetch and checkout
+        let _ = super::git(target_dir, &["fetch", "origin", branch_to_use]);
+        let checkout_res = super::git(target_dir, &["checkout", branch_to_use])
+            .or_else(|_| super::git(target_dir, &["checkout", "-B", branch_to_use, &format!("origin/{branch_to_use}")]));
+        if checkout_res.is_ok() {
+            let _ = super::git(target_dir, &["pull", "--ff-only", "origin", branch_to_use]);
+        }
+        return Ok(target_dir.to_path_buf());
+    }
+
+    if target_dir.exists() {
+        let _ = std::fs::remove_dir_all(target_dir);
+    }
+
+    if let Some(parent) = target_dir.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+
+    // Try cloning specific branch
+    let clone_res = Command::new("git")
+        .args(["clone", "--depth", "1", "-b", branch_to_use, git_url, target_dir.to_str().unwrap()])
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .output();
+
+    match clone_res {
+        Ok(out) if out.status.success() => Ok(target_dir.to_path_buf()),
+        _ => {
+            // Fallback: clone default branch (e.g. main)
+            let fb_res = Command::new("git")
+                .args(["clone", "--depth", "1", git_url, target_dir.to_str().unwrap()])
+                .stdin(Stdio::null())
+                .stdout(Stdio::piped())
+                .stderr(Stdio::piped())
+                .output()?;
+            if !fb_res.status.success() {
+                bail!(
+                    "Failed to clone {} from {}: {}",
+                    app_name,
+                    git_url,
+                    String::from_utf8_lossy(&fb_res.stderr).trim()
+                );
+            }
+            Ok(target_dir.to_path_buf())
+        }
+    }
 }
 
 #[cfg(test)]

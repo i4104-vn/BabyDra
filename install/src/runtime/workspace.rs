@@ -114,6 +114,39 @@ where
     res.unwrap_or(false)
 }
 
+/// Runs `cargo build --release` in an individual application directory, streaming each output line
+/// live in real time to the provided logger callback.
+pub fn build_app_streaming<F>(app_dir: &Path, mut log: F) -> bool
+where
+    F: FnMut(crate::models::LogLevel, String),
+{
+    let app_name = app_dir.file_name().and_then(|s| s.to_str()).unwrap_or("app");
+    log(
+        crate::models::LogLevel::Info,
+        format!(
+            "Running cargo build --release for {} in {}...",
+            app_name,
+            app_dir.display()
+        ),
+    );
+
+    let mut cmd = Command::new("cargo");
+    cmd.current_dir(app_dir);
+    cmd.args(["build", "--release"]);
+
+    let res = super::sudo::spawn_and_stream(cmd, None, move |is_err, line| {
+        if line.contains("error:") || (is_err && line.starts_with("error[")) {
+            log(crate::models::LogLevel::Error, line);
+        } else if line.contains("warning:") {
+            log(crate::models::LogLevel::Warn, line);
+        } else {
+            log(crate::models::LogLevel::Info, line);
+        }
+    });
+
+    res.unwrap_or(false)
+}
+
 pub fn default_binary_source_dir(workspace_root: &Path) -> PathBuf {
     let release_dir = workspace_root.join("target").join("release");
     if release_dir.exists() {

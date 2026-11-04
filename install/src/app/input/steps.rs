@@ -152,7 +152,7 @@ pub fn handle_step_interaction(app: &mut App, key: KeyEvent) {
                     if app.branches.is_empty() {
                         app.add_log(
                             LogLevel::Error,
-                            "No installation releases available to continue.",
+                            "No installation branches available to continue.",
                         );
                         return;
                     }

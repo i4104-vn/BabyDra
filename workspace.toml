@@ -1,5 +1,9 @@
 # Deployment metadata owned by this source branch.
-# The installer on main reads this file after checking out the branch.
+# The installer reads this file to discover packages, configs, and application repositories.
+
+[repository]
+git_base = "https://github.com/i4104-vn"
+default_branch = "main"
 
 [[binaries]]
 name = "babydra-panel"

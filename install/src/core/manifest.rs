@@ -142,6 +142,7 @@ pub struct BuildDepConfig {
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct InstallManifest {
     pub binaries: Vec<BinaryManifestItem>,
+    pub git_base: Option<String>,
     pub pacman_packages: Vec<String>,
     pub aur_packages: Vec<String>,
     pub gsettings: BTreeMap<String, String>,
@@ -166,6 +167,7 @@ pub struct BinaryManifestItem {
     pub description: String,
     pub location: BinaryLocation,
     pub autorestart: bool,
+    pub git: Option<String>,
 }
 
 pub fn load_install_manifest(source_root: &Path, fallback_root: &Path) -> InstallManifest {
@@ -221,6 +223,10 @@ pub fn parse_manifest(content: &str) -> InstallManifest {
                         .or_else(|| table.get("auto_restart"))
                         .and_then(toml::Value::as_bool)
                         .unwrap_or(false);
+                    let git = table
+                        .get("git")
+                        .and_then(toml::Value::as_str)
+                        .map(str::to_owned);
                     Some(BinaryManifestItem {
                         name: name.to_owned(),
                         source_name: source_name.to_owned(),
@@ -231,6 +237,7 @@ pub fn parse_manifest(content: &str) -> InstallManifest {
                             .to_owned(),
                         location,
                         autorestart,
+                        git,
                     })
                 })
                 .collect()
@@ -540,8 +547,16 @@ pub fn parse_manifest(content: &str) -> InstallManifest {
         });
     }
 
+    let git_base = root
+        .get("repository")
+        .and_then(toml::Value::as_table)
+        .and_then(|t| t.get("git_base"))
+        .and_then(toml::Value::as_str)
+        .map(str::to_owned);
+
     InstallManifest {
         binaries,
+        git_base,
         pacman_packages: strings("pacman"),
         aur_packages: strings("aur"),
         gsettings,

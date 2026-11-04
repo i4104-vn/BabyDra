@@ -175,6 +175,7 @@ mod tests {
             description: "Desktop shell".to_string(),
             location: BinaryLocation::UserLocalBin,
             autorestart: true,
+            git: None,
         };
         let bin_cmd = format!(
             "/bin/sh -c 'if [ -x \"$HOME/.local/bin/{0}\" ]; then exec \"$HOME/.local/bin/{0}\"; elif command -v {0} >/dev/null 2>&1; then exec {0}; else exec /usr/bin/{0}; fi'",

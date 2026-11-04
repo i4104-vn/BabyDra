@@ -19,18 +19,18 @@ pub fn build_pipeline(
 ) -> Vec<TaskStep> {
     let mut steps = Vec::new();
 
-    // Phase 1: Git checkout & workspace build
+    // Phase 1: Git clone & application build
     if from_branch {
         steps.push(TaskStep {
             id: "git_checkout".to_string(),
-            title: format!("Pull latest code for branch '{branch_name}'"),
-            description: format!("Syncing branch '{branch_name}' in branches/{branch_name}"),
+            title: format!("Clone and sync application repositories (branch '{branch_name}')"),
+            description: format!("Cloning selected apps into branches/{branch_name}/"),
             requires_root: false,
         });
         steps.push(TaskStep {
             id: "cargo_build".to_string(),
-            title: "Build workspace (cargo build --release)".to_string(),
-            description: "Builds the workspace executables in release mode".to_string(),
+            title: "Build selected applications (cargo build --release)".to_string(),
+            description: "Builds each application executable in release mode".to_string(),
             requires_root: false,
         });
     }

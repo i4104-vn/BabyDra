@@ -6,7 +6,7 @@ use std::path::Path;
 use std::process::{Command, Stdio};
 
 pub use branches::{list_branches, refresh_branches};
-pub use worktree::{branch_worktree_dir, checkout_and_pull};
+pub use worktree::{branch_worktree_dir, checkout_and_pull, clone_or_sync_app};
 
 /// Runs a git command in `repo`, capturing stdout. No output reaches the TUI.
 pub fn git(repo: &Path, args: &[&str]) -> Result<String> {
