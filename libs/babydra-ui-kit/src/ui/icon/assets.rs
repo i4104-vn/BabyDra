@@ -35,6 +35,7 @@ icon_asset!(
 icon_asset!(DARK_CAFFEINE_SVG, LIGHT_CAFFEINE_SVG, "caffeine.svg");
 icon_asset!(DARK_CAMERA_SVG, LIGHT_CAMERA_SVG, "camera.svg");
 icon_asset!(DARK_BROOM_SVG, LIGHT_BROOM_SVG, "broom.svg");
+icon_asset!(DARK_ERASER_SVG, LIGHT_ERASER_SVG, "eraser.svg");
 icon_asset!(DARK_CLOCK_SVG, LIGHT_CLOCK_SVG, "clock.svg");
 icon_asset!(DARK_DARK_MODE_SVG, LIGHT_DARK_MODE_SVG, "dark-mode.svg");
 icon_asset!(DARK_DISPLAY_SVG, LIGHT_DISPLAY_SVG, "display.svg");

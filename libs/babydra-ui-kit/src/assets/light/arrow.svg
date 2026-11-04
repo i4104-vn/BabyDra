@@ -1,3 +1,21 @@
-<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M4 20L20 4M20 4H10.5M20 4V13.5" stroke="#18181b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<!--
+tags: [direction, northeast, diagonal, external-link, open-in-new, trend, pointer, navigation, arrow, right]
+category: Arrows
+version: "1.0"
+unicode: "ea24"
+-->
+<!-- Adapted from Tabler Icons outline/arrow-up-right.svg; MIT License in ../TABLER-LICENSE.txt. -->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="#1c1c1e"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M17 7l-10 10" />
+  <path d="M8 7l9 0l0 9" />
 </svg>

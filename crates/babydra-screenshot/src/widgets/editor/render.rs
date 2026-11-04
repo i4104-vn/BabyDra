@@ -114,7 +114,7 @@ pub fn build_editor_ui(app: &gtk4::Application, temp_path: &str) -> gtk4::Applic
         &babydra_core::i18n::trans("screenshot.blur_tooltip"),
     );
     let btn_eraser = toolbar_button(
-        "broom",
+        "eraser",
         &babydra_core::i18n::trans("screenshot.eraser_tooltip"),
     );
 

@@ -178,6 +178,7 @@ fn get_icon_svg_pair(name: &str) -> Option<(&'static str, &'static str)> {
         m.insert("text", (DARK_TEXT_SVG, LIGHT_TEXT_SVG));
         m.insert("trash", (DARK_TRASH_SVG, LIGHT_TRASH_SVG));
         m.insert("broom", (DARK_BROOM_SVG, LIGHT_BROOM_SVG));
+        m.insert("eraser", (DARK_ERASER_SVG, LIGHT_ERASER_SVG));
         m.insert("unlock", (DARK_UNLOCK_SVG, LIGHT_UNLOCK_SVG));
         m.insert("user", (DARK_USER_SVG, LIGHT_USER_SVG));
         m.insert("avatar-default", (DARK_USER_SVG, LIGHT_USER_SVG));

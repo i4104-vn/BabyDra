@@ -1,3 +1,20 @@
-<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<circle cx="12" cy="12" r="8.25" stroke="#ffffff" stroke-width="1.5"/>
+<!--
+tags: [ellipse, shape, oval-horizontal, egg, geometry, figure, elliptical, round, outline, oval]
+category: Shapes
+version: "1.55"
+unicode: "f02e"
+-->
+<!-- Adapted from Tabler Icons outline/oval.svg; MIT License in ../TABLER-LICENSE.txt. -->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="#ffffff"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M6 12a6 9 0 1 0 12 0a6 9 0 1 0 -12 0" />
 </svg>

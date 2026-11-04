@@ -1,5 +1,23 @@
-<svg width="24" height="24" viewBox="2.5 2.5 19.0 19.0" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M12 19.5C12.8284 19.5 13.5 18.8284 13.5 18C13.5 17.1716 12.8284 16.5 12 16.5C11.1716 16.5 10.5 17.1716 10.5 18C10.5 18.8284 11.1716 19.5 12 19.5Z" fill="#1c1c1e" />
-  <path d="M7.05029 13.0503C9.78396 10.3166 14.2161 10.3166 16.9497 13.0503" stroke="#1c1c1e" stroke-width="1.5" stroke-linecap="round" />
-  <path d="M4.22183 10.2218C8.51759 5.92607 15.4824 5.92607 19.7782 10.2218" stroke="#1c1c1e" stroke-width="1.5" stroke-linecap="round" />
+<!--
+tags: [wifi, wi-fi, wireless, internet, network, signal, connection, hotspot]
+category: Devices
+version: "1.0"
+unicode: "eb52"
+-->
+<!-- Adapted from Tabler Icons outline/wifi.svg; MIT License in ../TABLER-LICENSE.txt. -->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="#1c1c1e"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M12 18l.01 0" />
+  <path d="M9.172 15.172a4 4 0 0 1 5.656 0" />
+  <path d="M6.343 12.343a8 8 0 0 1 11.314 0" />
+  <path d="M3.515 9.515c4.686 -4.687 12.284 -4.687 17 0" />
 </svg>
