@@ -34,8 +34,7 @@ where
             if !path.exists() {
                 let candidates = [
                     workspace_root.join("target/release").join(&greeter.name),
-                    workspace_root.join("branches").join("release").join("target/release").join(&greeter.name),
-                    workspace_root.join("branches").join("develop").join("target/release").join(&greeter.name),
+                    workspace_root.join("branches").join("main").join("target/release").join(&greeter.name),
                     std::path::PathBuf::from("/var/lib/babydra/bin").join(&greeter.name),
                     crate::runtime::get_user_local_bin().join(&greeter.name),
                 ];

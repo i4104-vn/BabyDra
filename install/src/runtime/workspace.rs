@@ -1,8 +1,6 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use super::sudo::tail_lines;
-
 pub fn find_workspace_root() -> PathBuf {
     // 1. Try git rev-parse --show-toplevel
     if let Ok(out) = Command::new("git")
@@ -43,35 +41,6 @@ pub fn find_workspace_root() -> PathBuf {
     }
 
     cur
-}
-
-/// Runs `cargo clean` and `cargo build --release --workspace` in the workspace root.
-pub fn build_workspace(workspace_root: &Path) -> (bool, Vec<String>) {
-    let _ = Command::new("cargo")
-        .current_dir(workspace_root)
-        .args(["clean"])
-        .stdin(std::process::Stdio::null())
-        .stdout(std::process::Stdio::null())
-        .stderr(std::process::Stdio::null())
-        .output();
-
-    let output = Command::new("cargo")
-        .current_dir(workspace_root)
-        .args(["build", "--release", "--workspace"])
-        .stdin(std::process::Stdio::null())
-        .stdout(std::process::Stdio::piped())
-        .stderr(std::process::Stdio::piped())
-        .output();
-
-    match output {
-        Ok(out) => {
-            let stderr = String::from_utf8_lossy(&out.stderr).into_owned();
-            let stdout = String::from_utf8_lossy(&out.stdout).into_owned();
-            let tail = tail_lines(&format!("{stdout}\n{stderr}"), 15);
-            (out.status.success(), tail)
-        }
-        Err(e) => (false, vec![format!("cargo failed to start: {e}")]),
-    }
 }
 
 /// Runs `cargo clean` and `cargo build --release --workspace`, streaming each output line

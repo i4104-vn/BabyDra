@@ -9,6 +9,6 @@ pub use git::{branch_worktree_dir, checkout_and_pull, clone_or_sync_app, git, li
 pub use process::{is_root, stop_process};
 pub use sudo::{spawn_and_stream, tail_lines, CmdOutput, SudoSession, MAX_PASSWORD_ATTEMPTS};
 pub use workspace::{
-    build_app_streaming, build_workspace, build_workspace_streaming, default_binary_source_dir, expand_path,
+    build_app_streaming, build_workspace_streaming, default_binary_source_dir, expand_path,
     find_workspace_root, get_user_home, get_user_local_bin,
 };

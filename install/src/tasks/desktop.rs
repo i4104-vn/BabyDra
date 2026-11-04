@@ -16,12 +16,24 @@ pub fn register_desktop_entries<F>(
     workspace_root: &Path,
     manifest: &InstallManifest,
     sudo: &SudoSession,
+    log: F,
+) -> usize
+where
+    F: FnMut(LogLevel, String),
+{
+    register_desktop_entries_at(workspace_root, &get_user_home(), manifest, sudo, log)
+}
+
+pub fn register_desktop_entries_at<F>(
+    workspace_root: &Path,
+    home: &Path,
+    manifest: &InstallManifest,
+    sudo: &SudoSession,
     mut log: F,
 ) -> usize
 where
     F: FnMut(LogLevel, String),
 {
-    let home = get_user_home();
     let apps_dir = home.join(".local/share/applications");
     let mut installed = 0;
     let mut desktop_entries_installed = 0;
@@ -274,7 +286,7 @@ pub mod tests {
         let manifest = InstallManifest::default();
         let sudo = SudoSession::new(None);
         let mut messages = Vec::new();
-        let registered = register_desktop_entries(&root, &manifest, &sudo, |_, message| {
+        let registered = register_desktop_entries_at(&root, &root, &manifest, &sudo, |_, message| {
             messages.push(message);
         });
 
@@ -308,7 +320,7 @@ pub mod tests {
 
         let sudo = SudoSession::new(None);
         let mut messages = Vec::new();
-        let registered = register_desktop_entries(&root, &manifest, &sudo, |_, message| {
+        let registered = register_desktop_entries_at(&root, &root, &manifest, &sudo, |_, message| {
             messages.push(message);
         });
 
@@ -331,7 +343,7 @@ pub mod tests {
         let manifest = InstallManifest::default();
         let sudo = SudoSession::new(None);
         let mut messages = Vec::new();
-        let registered = register_desktop_entries(&root, &manifest, &sudo, |_, message| {
+        let registered = register_desktop_entries_at(&root, &root, &manifest, &sudo, |_, message| {
             messages.push(message);
         });
 

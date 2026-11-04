@@ -104,7 +104,6 @@ impl App {
             .map(|branch| branch.name.clone())
             .unwrap_or_default();
 
-        let mut branches = branches;
         for (idx, b) in branches.iter_mut().enumerate() {
             b.selected = idx == branch_cursor && !selected_branch.is_empty();
         }

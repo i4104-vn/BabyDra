@@ -1,7 +1,6 @@
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio};
 
 use crate::core::manifest::{load_install_manifest, BinaryManifestItem};
 use crate::models::{BinaryItem, BinaryLocation};
@@ -50,10 +49,6 @@ pub fn initial_binaries_list(workspace_root: &Path, source_dir: &Path) -> Vec<Bi
             .into_iter()
             .filter(|item| !known_names.contains(&item.name)),
     );
-
-    if discovered.is_empty() {
-        discovered = discover_git_workspaces(&repository_root);
-    }
 
     let mut seen_names: HashSet<String> = discovered.iter().map(|item| item.name.clone()).collect();
     for path in executable_files(source_dir) {
@@ -166,65 +161,6 @@ fn discover_local_workspace(root: &Path) -> Vec<BinarySpec> {
     specs
 }
 
-fn discover_git_workspaces(repo_root: &Path) -> Vec<BinarySpec> {
-    let mut specs = Vec::new();
-    let mut visited = HashSet::new();
-
-    for branch in available_branches(repo_root) {
-        for spec in discover_git_workspace_ref(repo_root, &branch) {
-            if visited.insert(spec.name.clone()) {
-                specs.push(spec);
-            }
-        }
-        if !specs.is_empty() {
-            break;
-        }
-    }
-
-    specs
-}
-
-fn discover_git_workspace_ref(repo_root: &Path, git_ref: &str) -> Vec<BinarySpec> {
-    let Ok(root_cargo) = git_show(repo_root, git_ref, "Cargo.toml") else {
-        return Vec::new();
-    };
-    let Ok(table) = root_cargo.parse::<toml::Table>() else {
-        return Vec::new();
-    };
-
-    let member_globs = workspace_member_globs(&table);
-    if member_globs.is_empty() {
-        return parse_cargo_manifest(&root_cargo, repo_root, repo_root);
-    }
-
-    let mut specs = Vec::new();
-    let mut visited = HashSet::new();
-
-    for file_path in git_manifest_paths(repo_root, git_ref) {
-        let member_dir = Path::new(&file_path)
-            .parent()
-            .unwrap_or_else(|| Path::new(""));
-        let member_dir_str = member_dir.to_string_lossy();
-        if !member_globs
-            .iter()
-            .any(|glob| member_matches_glob(&member_dir_str, glob))
-        {
-            continue;
-        }
-
-        let Ok(content) = git_show(repo_root, git_ref, &file_path) else {
-            continue;
-        };
-        for spec in parse_cargo_manifest(&content, member_dir, Path::new("")) {
-            if visited.insert(spec.name.clone()) {
-                specs.push(spec);
-            }
-        }
-    }
-
-    specs
-}
-
 fn workspace_member_globs(table: &toml::Table) -> Vec<String> {
     table
         .get("workspace")
@@ -268,18 +204,6 @@ fn resolve_member_paths(root: &Path, member_globs: &[String]) -> Vec<PathBuf> {
     }
 
     member_paths
-}
-
-fn member_matches_glob(member_dir: &str, glob: &str) -> bool {
-    if glob.ends_with("/*") {
-        let prefix = glob.trim_end_matches("/*");
-        member_dir
-            .strip_prefix(prefix)
-            .map(|rest| rest.trim_start_matches('/').chars().all(|c| c != '/'))
-            .unwrap_or(false)
-    } else {
-        member_dir == glob
-    }
 }
 
 fn parse_cargo_manifest(content: &str, member_dir: &Path, workspace_root: &Path) -> Vec<BinarySpec> {
@@ -445,70 +369,6 @@ fn repository_root_for(root: &Path) -> PathBuf {
         }
     }
     root.to_path_buf()
-}
-
-fn git_show(repo_root: &Path, git_ref: &str, file_path: &str) -> Result<String, ()> {
-    let output = Command::new("git")
-        .current_dir(repo_root)
-        .args(["show", &format!("{git_ref}:{file_path}")])
-        .stdin(Stdio::null())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null())
-        .output()
-        .map_err(|_| ())?;
-
-    if output.status.success() {
-        String::from_utf8(output.stdout).map_err(|_| ())
-    } else {
-        Err(())
-    }
-}
-
-fn git_manifest_paths(repo_root: &Path, git_ref: &str) -> Vec<String> {
-    let output = Command::new("git")
-        .current_dir(repo_root)
-        .args(["ls-tree", "-r", "--name-only", git_ref])
-        .stdin(Stdio::null())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null())
-        .output();
-
-    let Ok(output) = output else {
-        return Vec::new();
-    };
-    if !output.status.success() {
-        return Vec::new();
-    }
-
-    String::from_utf8_lossy(&output.stdout)
-        .lines()
-        .filter(|line| line.ends_with("Cargo.toml"))
-        .map(str::to_owned)
-        .collect()
-}
-
-fn available_branches(repo_root: &Path) -> Vec<String> {
-    let output = Command::new("git")
-        .current_dir(repo_root)
-        .args(["branch", "-a", "--format=%(refname:short)"])
-        .stdin(Stdio::null())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null())
-        .output();
-
-    let Ok(output) = output else {
-        return Vec::new();
-    };
-    if !output.status.success() {
-        return Vec::new();
-    }
-
-    String::from_utf8_lossy(&output.stdout)
-        .lines()
-        .map(str::trim)
-        .filter(|line| !line.is_empty())
-        .map(str::to_owned)
-        .collect()
 }
 
 #[cfg(test)]
