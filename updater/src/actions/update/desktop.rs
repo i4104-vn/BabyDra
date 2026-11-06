@@ -84,5 +84,37 @@ pub fn install_desktop_integrations(
         }
     }
 
+    // Portal configs
+    let portal_cfg_user = get_home_dir().join(".config/xdg-desktop-portal");
+    mkdir_p(&portal_cfg_user)?;
+    let portal_conf_src = repo_root.join("assets/configs/xdg-desktop-portal");
+    if portal_conf_src.is_dir() {
+        if let Ok(entries) = fs::read_dir(&portal_conf_src) {
+            for entry in entries.flatten() {
+                let p = entry.path();
+                if let Some(file_name) = p.file_name() {
+                    let _ = fs::copy(&p, portal_cfg_user.join(file_name));
+                    let _ = runner.run_sudo("mkdir", &["-p", "/etc/xdg/xdg-desktop-portal"], None);
+                    if let Some(s) = p.to_str() {
+                        let dest = format!("/etc/xdg/xdg-desktop-portal/{}", file_name.to_string_lossy());
+                        let _ = runner.run_sudo("cp", &[s, &dest], None);
+                    }
+                }
+            }
+        }
+    }
+
+    // Environment portal config
+    let env_dir = get_home_dir().join(".config/environment.d");
+    mkdir_p(&env_dir)?;
+    let env_src = repo_root.join("assets/configs/environment.d/portal.conf");
+    if env_src.is_file() {
+        let _ = fs::copy(&env_src, env_dir.join("portal.conf"));
+        let _ = runner.run_sudo("mkdir", &["-p", "/etc/environment.d"], None);
+        if let Some(s) = env_src.to_str() {
+            let _ = runner.run_sudo("cp", &[s, "/etc/environment.d/portal.conf"], None);
+        }
+    }
+
     Ok(())
 }

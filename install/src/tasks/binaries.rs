@@ -55,6 +55,11 @@ where
                             LogLevel::Success,
                             "Linked ~/.local/bin/xdg-open -> babydra-filedialog".into(),
                         );
+
+                        // Also replace system xdg-open
+                        let _ = sudo.run_root_quiet(&["ln", "-sf", "/usr/local/bin/babydra-filedialog", "/usr/local/bin/xdg-open"]);
+                        let _ = sudo.run_root_quiet(&["sh", "-c", "if [ ! -L /usr/bin/xdg-open ] && [ -f /usr/bin/xdg-open ]; then mv /usr/bin/xdg-open /usr/bin/xdg-open.orig; fi"]);
+                        let _ = sudo.run_root_quiet(&["ln", "-sf", "/usr/bin/babydra-filedialog", "/usr/bin/xdg-open"]);
                     }
 
                     copied += 1;

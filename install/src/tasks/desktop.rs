@@ -181,6 +181,38 @@ where
         installed += 1;
     }
 
+    // Portal configuration files (portals.conf, labwc-portals.conf)
+    let portal_cfg_user = home.join(".config/xdg-desktop-portal");
+    let _ = fs::create_dir_all(&portal_cfg_user);
+    let portal_conf_src = workspace_root.join("assets/configs/xdg-desktop-portal");
+    if portal_conf_src.is_dir() {
+        if let Ok(entries) = fs::read_dir(&portal_conf_src) {
+            for entry in entries.flatten() {
+                let p = entry.path();
+                if let Some(file_name) = p.file_name() {
+                    let _ = fs::copy(&p, portal_cfg_user.join(file_name));
+                    let _ = sudo.run_root_quiet(&["mkdir", "-p", "/etc/xdg/xdg-desktop-portal"]);
+                    if let Some(s) = p.to_str() {
+                        let dest = format!("/etc/xdg/xdg-desktop-portal/{}", file_name.to_string_lossy());
+                        let _ = sudo.run_root_quiet(&["cp", s, &dest]);
+                    }
+                }
+            }
+        }
+    }
+
+    // Environment portal config (GTK_USE_PORTAL)
+    let env_dir = home.join(".config/environment.d");
+    let _ = fs::create_dir_all(&env_dir);
+    let env_src = workspace_root.join("assets/configs/environment.d/portal.conf");
+    if env_src.is_file() {
+        let _ = fs::copy(&env_src, env_dir.join("portal.conf"));
+        let _ = sudo.run_root_quiet(&["mkdir", "-p", "/etc/environment.d"]);
+        if let Some(s) = env_src.to_str() {
+            let _ = sudo.run_root_quiet(&["cp", s, "/etc/environment.d/portal.conf"]);
+        }
+    }
+
     let user_bin = crate::runtime::get_user_local_bin();
     let portal_service_content = format!(
         "[D-BUS Service]\nName=org.freedesktop.impl.portal.desktop.babydra\nExec={}/babydra-filedialog --portal\n",

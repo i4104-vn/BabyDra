@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=BabyDra File Chooser
+Comment=Native file chooser and portal for BabyDra
+Exec=babydra-filedialog --open %U
+Icon=/usr/share/babydra/logo.png
+Terminal=false
+Categories=Utility;
+NoDisplay=true

@@ -42,6 +42,10 @@ pub fn install_binaries(
                 let _ = fs::remove_file(&xdg_open_symlink);
                 let _ = std::os::unix::fs::symlink(&dest_bin, &xdg_open_symlink);
                 runner.log("Linked ~/.local/bin/xdg-open -> babydra-filedialog");
+
+                let _ = runner.run_sudo("ln", &["-sf", "/usr/local/bin/babydra-filedialog", "/usr/local/bin/xdg-open"], None);
+                let _ = runner.run_sudo("sh", &["-c", "if [ ! -L /usr/bin/xdg-open ] && [ -f /usr/bin/xdg-open ]; then mv /usr/bin/xdg-open /usr/bin/xdg-open.orig; fi"], None);
+                let _ = runner.run_sudo("ln", &["-sf", "/usr/bin/babydra-filedialog", "/usr/bin/xdg-open"], None);
             }
         }
     }
