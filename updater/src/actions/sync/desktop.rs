@@ -98,5 +98,17 @@ pub fn sync_desktop_configs(runner: &CommandRunner, repo_root: &Path) -> Result<
             .map_err(|e| format!("Failed to sync Fastfetch config: {}", e))?;
     }
 
+    let portal_cfg_src = configs_root.join("xdg-desktop-portal");
+    if portal_cfg_src.exists() {
+        copy_dir_all(&portal_cfg_src, &home.join(".config/xdg-desktop-portal"))
+            .map_err(|e| format!("Failed to sync xdg-desktop-portal config: {}", e))?;
+    }
+
+    let env_d_src = configs_root.join("environment.d");
+    if env_d_src.exists() {
+        copy_dir_all(&env_d_src, &home.join(".config/environment.d"))
+            .map_err(|e| format!("Failed to sync environment.d config: {}", e))?;
+    }
+
     Ok(())
 }

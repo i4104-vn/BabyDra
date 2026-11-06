@@ -57,6 +57,11 @@ name = "babydra-notepad"
 scope = "user"
 description = "Text editor with syntax highlighting"
 
+[[binaries]]
+name = "babydra-filedialog"
+scope = "user"
+description = "Native file chooser dialog, XDG Desktop Portal FileChooser service, and xdg-open replacement"
+
 [packages]
 pacman = [
     "base-devel",
@@ -66,6 +71,7 @@ pacman = [
     "gtk4-layer-shell",
     "rust",
     "labwc",
+    "xdg-desktop-portal",
     "meson",
     "ninja",
     "playerctl",

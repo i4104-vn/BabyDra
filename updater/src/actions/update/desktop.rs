@@ -65,5 +65,24 @@ pub fn install_desktop_integrations(
         )
     })?;
 
+    runner.step("Registering DBus service and Portal for BabyDra FileDialog...");
+    let portal_file = dbus_services.join("org.freedesktop.impl.portal.desktop.babydra.service");
+    let portal_content = format!(
+        "[D-BUS Service]\nName=org.freedesktop.impl.portal.desktop.babydra\nExec={}/babydra-filedialog --portal\n",
+        get_local_bin_dir().display()
+    );
+    let _ = fs::write(&portal_file, portal_content);
+
+    let portal_def_dir = get_home_dir().join(".local/share/xdg-desktop-portal/portals");
+    mkdir_p(&portal_def_dir)?;
+    let portal_src = repo_root.join("assets/configs/portals/babydra.portal");
+    if portal_src.is_file() {
+        let _ = fs::copy(&portal_src, portal_def_dir.join("babydra.portal"));
+        let _ = runner.run_sudo("mkdir", &["-p", "/usr/share/xdg-desktop-portal/portals"], None);
+        if let Some(src_str) = portal_src.to_str() {
+            let _ = runner.run_sudo("cp", &[src_str, "/usr/share/xdg-desktop-portal/portals/babydra.portal"], None);
+        }
+    }
+
     Ok(())
 }

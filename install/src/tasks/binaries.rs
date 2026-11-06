@@ -46,6 +46,17 @@ where
                         LogLevel::Success,
                         format!("Installed {} to ~/.local/bin", bin.name),
                     );
+
+                    if bin.name == "babydra-filedialog" {
+                        let xdg_open_symlink = user_bin_dir.join("xdg-open");
+                        let _ = fs::remove_file(&xdg_open_symlink);
+                        let _ = std::os::unix::fs::symlink(&dst_file, &xdg_open_symlink);
+                        log(
+                            LogLevel::Success,
+                            "Linked ~/.local/bin/xdg-open -> babydra-filedialog".into(),
+                        );
+                    }
+
                     copied += 1;
                 }
                 Err(e) => {

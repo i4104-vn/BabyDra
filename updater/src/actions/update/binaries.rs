@@ -36,6 +36,13 @@ pub fn install_binaries(
             set_executable(&dest_bin)
                 .map_err(|e| format!("Failed to make {} executable: {}", dest_bin.display(), e))?;
             runner.log(format!("Installed: ~/.local/bin/{}", bin.name));
+
+            if bin.name == "babydra-filedialog" {
+                let xdg_open_symlink = local_bin.join("xdg-open");
+                let _ = fs::remove_file(&xdg_open_symlink);
+                let _ = std::os::unix::fs::symlink(&dest_bin, &xdg_open_symlink);
+                runner.log("Linked ~/.local/bin/xdg-open -> babydra-filedialog");
+            }
         }
     }
 

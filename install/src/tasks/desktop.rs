@@ -164,6 +164,34 @@ where
         }
     }
 
+    // 4b. Install BabyDra XDG Desktop Portal configs & service
+    let portal_dir = home.join(".local/share/xdg-desktop-portal/portals");
+    let _ = fs::create_dir_all(&portal_dir);
+    let portal_src = workspace_root.join("assets/configs/portals/babydra.portal");
+    if portal_src.is_file() {
+        let _ = fs::copy(&portal_src, portal_dir.join("babydra.portal"));
+        let _ = sudo.run_root_quiet(&["mkdir", "-p", "/usr/share/xdg-desktop-portal/portals"]);
+        if let Some(s) = portal_src.to_str() {
+            let _ = sudo.run_root_quiet(&["cp", s, "/usr/share/xdg-desktop-portal/portals/babydra.portal"]);
+        }
+        log(
+            LogLevel::Success,
+            "Installed babydra.portal definition".into(),
+        );
+        installed += 1;
+    }
+
+    let user_bin = crate::runtime::get_user_local_bin();
+    let portal_service_content = format!(
+        "[D-BUS Service]\nName=org.freedesktop.impl.portal.desktop.babydra\nExec={}/babydra-filedialog --portal\n",
+        user_bin.display()
+    );
+    let dbus_dir = home.join(".local/share/dbus-1/services");
+    let _ = fs::create_dir_all(&dbus_dir);
+    if fs::write(dbus_dir.join("org.freedesktop.impl.portal.desktop.babydra.service"), &portal_service_content).is_ok() {
+        installed += 1;
+    }
+
     // 5. Update desktop database
     if desktop_entries_installed > 0 {
         let _ = sudo.run(
