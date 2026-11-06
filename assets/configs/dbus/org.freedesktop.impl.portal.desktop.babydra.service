@@ -1,3 +1,4 @@
 [D-BUS Service]
 Name=org.freedesktop.impl.portal.desktop.babydra
 Exec=@LOCAL_BIN@/babydra-filedialog --portal
+

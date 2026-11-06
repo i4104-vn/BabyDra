@@ -2,3 +2,4 @@
 DBusName=org.freedesktop.impl.portal.desktop.babydra
 Interfaces=org.freedesktop.impl.portal.FileChooser;
 UseIn=labwc;wlroots;babydra;generic;
+
